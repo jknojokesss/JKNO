@@ -65,7 +65,7 @@ export default function Landing() {
         <meta name="description" content="AI-powered bookkeeping with custom client portals. No QuickBooks. Real-time financials built for your business." />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <link rel="preconnect" href="https://fonts.googleapis.com" />
-        <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&family=DM+Mono:wght@400;500&family=Playfair+Display:wght@700&display=swap" rel="stylesheet" />
+        <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600;700&family=DM+Sans:wght@300;400;500&family=DM+Mono:wght@400;500&family=Playfair+Display:wght@700&display=swap" rel="stylesheet" />
       </Head>
 
       <style>{`
@@ -252,10 +252,10 @@ export default function Landing() {
             — BOOKKEEPING. REIMAGINED.
           </div>
 
-          <h1 className="hero-title" style={{ fontFamily: 'Syne, sans-serif',
-            fontSize: 'clamp(36px, 5.5vw, 72px)',
-            fontWeight: '600', lineHeight: 1.1,
-            letterSpacing: '-1px', marginBottom: '32px' }}>
+          <h1 className="hero-title" style={{ fontFamily: 'Cormorant Garamond, serif',
+            fontSize: 'clamp(40px, 6vw, 80px)',
+            fontWeight: '600', lineHeight: 1.05,
+            letterSpacing: '-0.5px', marginBottom: '32px' }}>
             Your books.<br />
             <span style={{ color: '#C9A84C' }}>No jokes.</span><br />
             No QuickBooks.
@@ -296,8 +296,8 @@ export default function Landing() {
             letterSpacing: '3px', color: '#C9A84C', marginBottom: '16px' }}>
             — WHAT YOU GET
           </div>
-          <h2 style={{ fontFamily: 'Syne, sans-serif', fontSize: 'clamp(32px, 4vw, 52px)',
-            fontWeight: '800', letterSpacing: '-1px', lineHeight: 1.1, color: '#1A1A2E' }}>
+          <h2 style={{ fontFamily: 'Cormorant Garamond, serif', fontSize: 'clamp(32px, 4vw, 52px)',
+            fontWeight: '600', letterSpacing: '-1px', lineHeight: 1.1, color: '#1A1A2E' }}>
             Bookkeeping built for<br />the modern business.
           </h2>
         </div>
@@ -312,8 +312,8 @@ export default function Landing() {
           {features.map((f, i) => (
             <div key={i} className="feature-card">
               <div style={{ fontSize: '24px', color: '#C9A84C', marginBottom: '20px' }}>{f.icon}</div>
-              <h3 style={{ fontFamily: 'Syne, sans-serif', fontSize: '18px',
-                fontWeight: '700', marginBottom: '12px', letterSpacing: '-0.3px' }}>
+              <h3 style={{ fontFamily: 'DM Sans, sans-serif', fontSize: '15px',
+                fontWeight: '600', marginBottom: '12px', letterSpacing: '0' }}>
                 {f.title}
               </h3>
               <p style={{ fontSize: '14px', color: '#5A6070', lineHeight: 1.7 }}>{f.desc}</p>
@@ -334,8 +334,8 @@ export default function Landing() {
               letterSpacing: '3px', color: '#C9A84C', marginBottom: '16px' }}>
               — WHO WE ARE
             </div>
-            <h2 style={{ fontFamily: 'Syne, sans-serif', fontSize: 'clamp(28px, 3.5vw, 44px)',
-              fontWeight: '800', letterSpacing: '-1px', lineHeight: 1.15, marginBottom: '24px' }}>
+            <h2 style={{ fontFamily: 'Cormorant Garamond, serif', fontSize: 'clamp(28px, 3.5vw, 44px)',
+              fontWeight: '600', letterSpacing: '-1px', lineHeight: 1.15, marginBottom: '24px' }}>
               Not your average bookkeeper.
             </h2>
             <p style={{ fontSize: '15px', color: '#5A6070', lineHeight: 1.8, marginBottom: '20px' }}>
@@ -360,8 +360,8 @@ export default function Landing() {
               { number: '0', label: 'QuickBooks' },
             ].map((stat, i) => (
               <div key={i} style={{ background: '#E8E4DC', padding: '36px 28px' }}>
-                <div style={{ fontFamily: 'Syne, sans-serif', fontSize: '40px',
-                  fontWeight: '800', color: '#C9A84C', lineHeight: 1, marginBottom: '8px' }}>
+                <div style={{ fontFamily: 'Cormorant Garamond, serif', fontSize: '40px',
+                  fontWeight: '600', color: '#C9A84C', lineHeight: 1, marginBottom: '8px' }}>
                   {stat.number}
                 </div>
                 <div style={{ fontSize: '13px', color: '#5A6070', fontFamily: 'DM Mono, monospace',
@@ -381,8 +381,8 @@ export default function Landing() {
             letterSpacing: '3px', color: '#C9A84C', marginBottom: '16px' }}>
             — GET IN TOUCH
           </div>
-          <h2 style={{ fontFamily: 'Syne, sans-serif', fontSize: 'clamp(28px, 4vw, 48px)',
-            fontWeight: '800', letterSpacing: '-1px', lineHeight: 1.1, marginBottom: '16px' }}>
+          <h2 style={{ fontFamily: 'Cormorant Garamond, serif', fontSize: 'clamp(28px, 4vw, 48px)',
+            fontWeight: '600', letterSpacing: '-1px', lineHeight: 1.1, marginBottom: '16px' }}>
             Ready to see your books differently?
           </h2>
           <p style={{ color: '#5A6070', fontSize: '15px', lineHeight: 1.7 }}>
@@ -394,7 +394,7 @@ export default function Landing() {
           <div style={{ textAlign: 'center', padding: '64px 32px',
             border: '1px solid #C9A84C', background: '#E8E4DC' }}>
             <div style={{ fontSize: '32px', marginBottom: '16px' }}>◈</div>
-            <div style={{ fontFamily: 'Syne, sans-serif', fontSize: '24px',
+            <div style={{ fontFamily: 'Cormorant Garamond, serif', fontSize: '24px',
               fontWeight: '700', marginBottom: '12px' }}>We'll be in touch.</div>
             <div style={{ color: '#5A6070', fontSize: '14px' }}>
               Thanks for reaching out. Expect to hear from us within 24 hours.
