@@ -9,11 +9,19 @@ export default function Landing() {
   const [submitted, setSubmitted] = useState(false)
   const [submitting, setSubmitting] = useState(false)
   const [menuOpen, setMenuOpen] = useState(false)
+  const [isMobile, setIsMobile] = useState(false)
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 40)
     window.addEventListener('scroll', onScroll)
     return () => window.removeEventListener('scroll', onScroll)
+  }, [])
+
+  useEffect(() => {
+    const checkMobile = () => setIsMobile(window.innerWidth < 768)
+    checkMobile()
+    window.addEventListener('resize', checkMobile)
+    return () => window.removeEventListener('resize', checkMobile)
   }, [])
 
   const handleSubmit = async () => {
@@ -170,8 +178,6 @@ export default function Landing() {
           .features-grid { grid-template-columns: 1fr !important; }
           .hero-title-text { font-size: 48px !important; }
           .split-section { grid-template-columns: 1fr !important; }
-          .nav-links { display: none; }
-          .mobile-menu-btn { display: block !important; }
         }
       `}</style>
 
@@ -189,7 +195,7 @@ export default function Landing() {
           fontWeight: '700', letterSpacing: '2px' }}>
           JK<span style={{ color: '#C9A84C' }}>.</span>
         </div>
-        <div className="nav-links" style={{ display: 'flex', gap: '36px', alignItems: 'center' }}>
+        {!isMobile && <div style={{ display: 'flex', gap: '36px', alignItems: 'center' }}>
           <button className="nav-link" onClick={() => document.getElementById('features')?.scrollIntoView({ behavior: 'smooth' })}>Features</button>
           <button className="nav-link" onClick={() => document.getElementById('about')?.scrollIntoView({ behavior: 'smooth' })}>About</button>
           <button className="nav-link" onClick={() => document.getElementById('contact')?.scrollIntoView({ behavior: 'smooth' })}>Contact</button>
@@ -197,12 +203,12 @@ export default function Landing() {
             onClick={() => router.push('/login')}>
             Client Login
           </button>
-        </div>
-        <button className="mobile-menu-btn" style={{ display: 'none', background: 'none',
-          border: 'none', color: '#fff', fontSize: '20px', cursor: 'pointer' }}
+        </div>}
+        {isMobile && <button style={{ background: 'none',
+          border: 'none', color: '#1A1A2E', fontSize: '24px', cursor: 'pointer', padding: '4px', lineHeight: 1 }}
           onClick={() => setMenuOpen(!menuOpen)}>
           {menuOpen ? '✕' : '☰'}
-        </button>
+        </button>}
       </nav>
 
       {/* Mobile menu */}
@@ -211,7 +217,7 @@ export default function Landing() {
           background: '#EEEAE2', borderBottom: '1px solid #DDD8CE', padding: '20px' }}>
           {['Features', 'About', 'Contact'].map(item => (
             <button key={item} className="nav-link" style={{ display: 'block', padding: '12px 0',
-              width: '100%', textAlign: 'left', fontSize: '14px' }}
+              width: '100%', textAlign: 'left', fontSize: '14px', color: '#1A1A2E' }}
               onClick={() => { document.getElementById(item.toLowerCase())?.scrollIntoView({ behavior: 'smooth' }); setMenuOpen(false) }}>
               {item}
             </button>
