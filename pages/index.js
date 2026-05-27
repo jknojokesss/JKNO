@@ -27,9 +27,20 @@ export default function Landing() {
   const handleSubmit = async () => {
     if (!form.name || !form.email || !form.business) return
     setSubmitting(true)
-    // Store in Supabase or just show success for now
-    await new Promise(r => setTimeout(r, 800))
-    setSubmitted(true)
+    try {
+      const res = await fetch('/api/contact', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(form),
+      })
+      if (res.ok) {
+        setSubmitted(true)
+      } else {
+        alert('Something went wrong. Please email jk@jknojokes.com directly.')
+      }
+    } catch (err) {
+      alert('Something went wrong. Please email jk@jknojokes.com directly.')
+    }
     setSubmitting(false)
   }
 
