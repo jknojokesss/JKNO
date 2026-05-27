@@ -5,7 +5,10 @@ import Head from 'next/head'
 
 export default function Login() {
   const router = useRouter()
+  const [email, setEmail] = useState('')
+  const [password, setPassword] = useState('')
   const [loading, setLoading] = useState(false)
+  const [error, setError] = useState('')
   const [checking, setChecking] = useState(true)
 
   useEffect(() => {
@@ -15,21 +18,20 @@ export default function Login() {
     })
   }, [])
 
-  const handleGoogleLogin = async () => {
+  const handleLogin = async () => {
     setLoading(true)
-    const { error } = await supabase.auth.signInWithOAuth({
-      provider: 'google',
-      options: {
-        redirectTo: `${window.location.origin}/auth/callback`,
-        queryParams: {
-          prompt: 'select_account',
-        },
-      },
-    })
+    setError('')
+    const { error } = await supabase.auth.signInWithPassword({ email, password })
     if (error) {
-      alert('Login failed: ' + error.message)
+      setError('Incorrect email or password. Please try again.')
       setLoading(false)
+    } else {
+      router.push('/dashboard')
     }
+  }
+
+  const handleKeyDown = (e) => {
+    if (e.key === 'Enter') handleLogin()
   }
 
   if (checking) return null
@@ -51,7 +53,7 @@ export default function Login() {
         overflow: 'hidden',
       }}>
 
-        {/* Background texture */}
+        {/* Background */}
         <div style={{
           position: 'absolute', inset: 0,
           backgroundImage: `radial-gradient(circle at 20% 80%, rgba(201,168,76,0.08) 0%, transparent 50%),
@@ -59,16 +61,10 @@ export default function Login() {
         }} />
 
         {/* Decorative lines */}
-        <div style={{
-          position: 'absolute', top: 0, left: '50%',
-          width: '1px', height: '80px',
-          background: 'linear-gradient(to bottom, transparent, #C9A84C)',
-        }} />
-        <div style={{
-          position: 'absolute', bottom: 0, left: '50%',
-          width: '1px', height: '80px',
-          background: 'linear-gradient(to top, transparent, #C9A84C)',
-        }} />
+        <div style={{ position: 'absolute', top: 0, left: '50%', width: '1px', height: '80px',
+          background: 'linear-gradient(to bottom, transparent, #C9A84C)' }} />
+        <div style={{ position: 'absolute', bottom: 0, left: '50%', width: '1px', height: '80px',
+          background: 'linear-gradient(to top, transparent, #C9A84C)' }} />
 
         {/* Card */}
         <div className="fade-up" style={{
@@ -92,116 +88,127 @@ export default function Login() {
           <div style={{ position:'absolute', bottom:0, right:0, width:24, height:24,
             borderBottom:'2px solid #C9A84C', borderRight:'2px solid #C9A84C' }} />
 
-          {/* Logo area */}
+          {/* Logo */}
           <div style={{ textAlign: 'center', marginBottom: '40px' }}>
-            <div style={{
-              fontFamily: 'Playfair Display, serif',
-              fontSize: '28px',
-              fontWeight: '700',
-              color: '#0D0D0D',
-              letterSpacing: '-0.5px',
-              lineHeight: 1,
-            }}>
+            <div style={{ fontFamily: 'Playfair Display, serif', fontSize: '28px',
+              fontWeight: '700', color: '#0D0D0D', letterSpacing: '-0.5px', lineHeight: 1 }}>
               JK
             </div>
-            <div style={{
-              fontFamily: 'DM Mono, monospace',
-              fontSize: '10px',
-              letterSpacing: '3px',
-              color: '#C9A84C',
-              textTransform: 'uppercase',
-              marginTop: '6px',
-            }}>
+            <div style={{ fontFamily: 'DM Mono, monospace', fontSize: '10px',
+              letterSpacing: '3px', color: '#C9A84C', textTransform: 'uppercase', marginTop: '6px' }}>
               No Jokes Bookkeeping
             </div>
-            <div style={{
-              width: '40px', height: '1px',
-              background: '#C9A84C',
-              margin: '16px auto 0',
-            }} />
+            <div style={{ width: '40px', height: '1px', background: '#C9A84C', margin: '16px auto 0' }} />
           </div>
 
-          {/* Welcome text */}
-          <div style={{ textAlign: 'center', marginBottom: '36px' }}>
-            <h1 style={{
-              fontFamily: 'Playfair Display, serif',
-              fontSize: '22px',
-              fontWeight: '600',
-              color: '#0D0D0D',
-              margin: 0,
-              marginBottom: '8px',
-            }}>
+          {/* Title */}
+          <div style={{ textAlign: 'center', marginBottom: '32px' }}>
+            <h1 style={{ fontFamily: 'Playfair Display, serif', fontSize: '22px',
+              fontWeight: '600', color: '#0D0D0D', margin: 0, marginBottom: '8px' }}>
               Client Portal
             </h1>
-            <p style={{
-              fontSize: '14px',
-              color: '#718096',
-              margin: 0,
-              lineHeight: 1.6,
-            }}>
+            <p style={{ fontSize: '14px', color: '#718096', margin: 0, lineHeight: 1.6 }}>
               Sign in to view your financials,<br />reports, and business insights.
             </p>
           </div>
 
-          {/* Google Sign In Button */}
+          {/* Email field */}
+          <div style={{ marginBottom: '14px' }}>
+            <label style={{ display: 'block', fontFamily: 'DM Mono, monospace',
+              fontSize: '10px', letterSpacing: '2px', color: '#A0AEC0',
+              marginBottom: '8px', textTransform: 'uppercase' }}>
+              Email
+            </label>
+            <input
+              type="email"
+              value={email}
+              onChange={e => setEmail(e.target.value)}
+              onKeyDown={handleKeyDown}
+              placeholder="you@company.com"
+              style={{
+                width: '100%', padding: '12px 14px',
+                border: '1px solid #E2E8F0',
+                borderRadius: '2px', fontSize: '14px',
+                fontFamily: 'DM Sans, sans-serif',
+                color: '#0D0D0D', background: '#fff',
+                outline: 'none', boxSizing: 'border-box',
+                transition: 'border-color 0.15s',
+              }}
+              onFocus={e => e.target.style.borderColor = '#C9A84C'}
+              onBlur={e => e.target.style.borderColor = '#E2E8F0'}
+            />
+          </div>
+
+          {/* Password field */}
+          <div style={{ marginBottom: '24px' }}>
+            <label style={{ display: 'block', fontFamily: 'DM Mono, monospace',
+              fontSize: '10px', letterSpacing: '2px', color: '#A0AEC0',
+              marginBottom: '8px', textTransform: 'uppercase' }}>
+              Password
+            </label>
+            <input
+              type="password"
+              value={password}
+              onChange={e => setPassword(e.target.value)}
+              onKeyDown={handleKeyDown}
+              placeholder="••••••••"
+              style={{
+                width: '100%', padding: '12px 14px',
+                border: '1px solid #E2E8F0',
+                borderRadius: '2px', fontSize: '14px',
+                fontFamily: 'DM Sans, sans-serif',
+                color: '#0D0D0D', background: '#fff',
+                outline: 'none', boxSizing: 'border-box',
+                transition: 'border-color 0.15s',
+              }}
+              onFocus={e => e.target.style.borderColor = '#C9A84C'}
+              onBlur={e => e.target.style.borderColor = '#E2E8F0'}
+            />
+          </div>
+
+          {/* Error message */}
+          {error && (
+            <div style={{ marginBottom: '16px', padding: '10px 14px',
+              background: '#FFF5F5', border: '1px solid #F1948A',
+              borderRadius: '2px', fontSize: '13px', color: '#C0392B',
+              fontFamily: 'DM Sans, sans-serif' }}>
+              {error}
+            </div>
+          )}
+
+          {/* Sign in button */}
           <button
-            onClick={handleGoogleLogin}
-            disabled={loading}
+            onClick={handleLogin}
+            disabled={loading || !email || !password}
             style={{
-              width: '100%',
-              padding: '14px 20px',
-              background: loading ? '#f5f5f5' : '#0D0D0D',
-              color: loading ? '#999' : '#fff',
-              border: 'none',
-              borderRadius: '2px',
-              fontSize: '14px',
-              fontFamily: 'DM Sans, sans-serif',
-              fontWeight: '500',
-              letterSpacing: '0.5px',
-              cursor: loading ? 'not-allowed' : 'pointer',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              gap: '12px',
+              width: '100%', padding: '14px 20px',
+              background: loading || !email || !password ? '#f5f5f5' : '#0D0D0D',
+              color: loading || !email || !password ? '#999' : '#fff',
+              border: 'none', borderRadius: '2px',
+              fontSize: '13px', fontFamily: 'DM Mono, monospace',
+              fontWeight: '500', letterSpacing: '2px',
+              cursor: loading || !email || !password ? 'not-allowed' : 'pointer',
               transition: 'all 0.2s ease',
+              textTransform: 'uppercase',
             }}
-            onMouseEnter={e => { if (!loading) e.target.style.background = '#2C3E50' }}
-            onMouseLeave={e => { if (!loading) e.target.style.background = '#0D0D0D' }}
+            onMouseEnter={e => { if (!loading && email && password) e.target.style.background = '#2C3E50' }}
+            onMouseLeave={e => { if (!loading && email && password) e.target.style.background = '#0D0D0D' }}
           >
-            {!loading && (
-              <svg width="18" height="18" viewBox="0 0 18 18">
-                <path fill="#4285F4" d="M17.64 9.2c0-.637-.057-1.251-.164-1.84H9v3.481h4.844c-.209 1.125-.843 2.078-1.796 2.717v2.258h2.908c1.702-1.567 2.684-3.875 2.684-6.615z"/>
-                <path fill="#34A853" d="M9 18c2.43 0 4.467-.806 5.956-2.184l-2.908-2.258c-.806.54-1.837.86-3.048.86-2.344 0-4.328-1.584-5.036-3.711H.957v2.332A8.997 8.997 0 0 0 9 18z"/>
-                <path fill="#FBBC05" d="M3.964 10.707A5.41 5.41 0 0 1 3.682 9c0-.593.102-1.17.282-1.707V4.961H.957A8.996 8.996 0 0 0 0 9c0 1.452.348 2.827.957 4.039l3.007-2.332z"/>
-                <path fill="#EA4335" d="M9 3.58c1.321 0 2.508.454 3.44 1.345l2.582-2.58C13.463.891 11.426 0 9 0A8.997 8.997 0 0 0 .957 4.961L3.964 7.293C4.672 5.163 6.656 3.58 9 3.58z"/>
-              </svg>
-            )}
-            {loading ? 'Signing in...' : 'Continue with Google'}
+            {loading ? 'Signing in...' : 'Sign In'}
           </button>
 
-          {/* Footer note */}
-          <p style={{
-            textAlign: 'center',
-            fontSize: '12px',
-            color: '#A0AEC0',
-            marginTop: '24px',
-            marginBottom: 0,
-            lineHeight: 1.6,
-          }}>
+          {/* Footer */}
+          <p style={{ textAlign: 'center', fontSize: '12px', color: '#A0AEC0',
+            marginTop: '24px', marginBottom: 0, lineHeight: 1.6 }}>
             Access is restricted to invited clients only.<br />
             Contact <span style={{ color: '#C9A84C' }}>jk@jknojokes.com</span> for access.
           </p>
         </div>
 
         {/* Bottom branding */}
-        <div style={{
-          position: 'absolute', bottom: '24px',
-          fontFamily: 'DM Mono, monospace',
-          fontSize: '10px',
-          letterSpacing: '2px',
-          color: '#CBD5E0',
-          textTransform: 'uppercase',
-        }}>
+        <div style={{ position: 'absolute', bottom: '24px',
+          fontFamily: 'DM Mono, monospace', fontSize: '10px',
+          letterSpacing: '2px', color: '#CBD5E0', textTransform: 'uppercase' }}>
           Powered by JK No Jokes © {new Date().getFullYear()}
         </div>
       </div>
