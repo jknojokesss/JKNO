@@ -8,11 +8,9 @@ import {
   ResponsiveContainer
 } from 'recharts'
 
-// ── Helpers ──────────────────────────────────────────────────────────────────
 const fmt = (n) => new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }).format(n)
 const pct = (n) => `${n > 0 ? '+' : ''}${n.toFixed(1)}%`
 
-// ── Demo data (replaced with real Supabase data once DB is set up) ────────────
 const DEMO_MONTHLY = [
   { month: 'Jan', revenue: 42000, expenses: 31000, profit: 11000 },
   { month: 'Feb', revenue: 38000, expenses: 29000, profit: 9000 },
@@ -23,24 +21,56 @@ const DEMO_MONTHLY = [
 ]
 
 const DEMO_EXPENSES = [
-  { category: 'Payroll', amount: 18000 },
-  { category: 'Rent', amount: 5500 },
-  { category: 'Marketing', amount: 4200 },
-  { category: 'Supplies', amount: 2800 },
-  { category: 'Utilities', amount: 1800 },
-  { category: 'Other', amount: 3700 },
+  { category: 'Inventory', amount: 22000 },
+  { category: 'Payroll', amount: 9000 },
+  { category: 'Rent', amount: 3500 },
+  { category: 'Marketing', amount: 1800 },
+  { category: 'Utilities', amount: 900 },
+  { category: 'Other', amount: 800 },
 ]
 
-// ── Custom Tooltip ────────────────────────────────────────────────────────────
-const CustomTooltip = ({ active, payload, label }) => {
+// ── Theme system — pulled from client profile ─────────────────────────────────
+const THEMES = {
+  default: {
+    sidebarBg: '#0D0D0D',
+    sidebarBorder: '#1a1a1a',
+    accent: '#C9A84C',
+    accentLight: '#E8D5A3',
+    activeNav: '#1a1a1a',
+    pageBg: '#F7F4EF',
+    cardBg: '#fff',
+    chartColor: '#C9A84C',
+    positiveColor: '#2D6A4F',
+    negativeColor: '#C0392B',
+  },
+  reydel: {
+    sidebarBg: '#1A1A1A',
+    sidebarBorder: '#2A2A2A',
+    accent: '#CC2222',
+    accentLight: '#FF6B6B',
+    activeNav: '#2A2A2A',
+    pageBg: '#F5F5F5',
+    cardBg: '#fff',
+    chartColor: '#CC2222',
+    positiveColor: '#2D6A4F',
+    negativeColor: '#CC2222',
+    tirePattern: true,
+  },
+}
+
+const getTheme = (clientName) => {
+  if (!clientName) return THEMES.default
+  const name = clientName.toLowerCase()
+  if (name.includes('reydel') || name.includes('tire')) return THEMES.reydel
+  return THEMES.default
+}
+
+const CustomTooltip = ({ active, payload, label, theme }) => {
   if (!active || !payload?.length) return null
   return (
-    <div style={{
-      background: '#fff', border: '1px solid #E8D5A3',
-      borderRadius: '2px', padding: '10px 14px',
-      fontSize: '12px', fontFamily: 'DM Mono, monospace',
-      boxShadow: '0 4px 16px rgba(0,0,0,0.08)',
-    }}>
+    <div style={{ background: '#fff', border: `1px solid ${theme?.accent || '#C9A84C'}`,
+      borderRadius: '2px', padding: '10px 14px', fontSize: '12px',
+      fontFamily: 'DM Mono, monospace', boxShadow: '0 4px 16px rgba(0,0,0,0.08)' }}>
       <div style={{ color: '#718096', marginBottom: '6px' }}>{label}</div>
       {payload.map((p, i) => (
         <div key={i} style={{ color: p.color, marginBottom: '2px' }}>
@@ -51,162 +81,68 @@ const CustomTooltip = ({ active, payload, label }) => {
   )
 }
 
-// ── Sidebar ───────────────────────────────────────────────────────────────────
-function Sidebar({ active, clientName, clientLogo, onSignOut }) {
-  const router = useRouter()
-  const navItems = [
-    { id: 'dashboard', label: 'Dashboard', icon: '▦', href: '/dashboard' },
-    { id: 'financials', label: 'Financials', icon: '≡', href: '/financials' },
-    { id: 'transactions', label: 'Transactions', icon: '↕', href: '/transactions' },
-    { id: 'documents', label: 'Documents', icon: '◻', href: '/documents' },
-  ]
-
+// ── Tire tread SVG pattern ────────────────────────────────────────────────────
+function TirePattern() {
   return (
-    <div style={{
-      width: '220px', minHeight: '100vh',
-      background: '#0D0D0D',
-      display: 'flex', flexDirection: 'column',
-      position: 'fixed', left: 0, top: 0,
-      borderRight: '1px solid #1a1a1a',
-    }}>
-      {/* Logo */}
-      <div style={{ padding: '32px 24px 24px', borderBottom: '1px solid #1a1a1a' }}>
-        {clientLogo
-          ? <img src={clientLogo} alt="logo" style={{ height: '36px', objectFit: 'contain' }} />
-          : (
-            <div>
-              <div style={{
-                fontFamily: 'Playfair Display, serif',
-                fontSize: '22px', fontWeight: '700', color: '#fff',
-              }}>{clientName || 'Your Business'}</div>
-              <div style={{
-                fontFamily: 'DM Mono, monospace', fontSize: '9px',
-                letterSpacing: '2px', color: '#C9A84C', marginTop: '4px',
-              }}>FINANCIALS</div>
-            </div>
-          )
-        }
-      </div>
-
-      {/* Nav */}
-      <nav style={{ padding: '16px 0', flex: 1 }}>
-        {navItems.map(item => (
-          <button key={item.id}
-            onClick={() => router.push(item.href)}
-            style={{
-              width: '100%', textAlign: 'left',
-              padding: '11px 24px',
-              background: active === item.id ? '#1a1a1a' : 'transparent',
-              border: 'none',
-              borderLeft: active === item.id ? '2px solid #C9A84C' : '2px solid transparent',
-              color: active === item.id ? '#fff' : '#718096',
-              fontSize: '13px', fontFamily: 'DM Sans, sans-serif',
-              fontWeight: active === item.id ? '500' : '400',
-              cursor: 'pointer',
-              display: 'flex', alignItems: 'center', gap: '12px',
-              transition: 'all 0.15s ease',
-            }}
-          >
-            <span style={{ fontSize: '16px', opacity: 0.8 }}>{item.icon}</span>
-            {item.label}
-          </button>
-        ))}
-      </nav>
-
-      {/* JK Branding at bottom */}
-      <div style={{ padding: '20px 24px', borderTop: '1px solid #1a1a1a' }}>
-        <div style={{ fontSize: '11px', color: '#4A5568', marginBottom: '12px',
-          fontFamily: 'DM Mono, monospace', letterSpacing: '1px' }}>
-          POWERED BY
-        </div>
-        <div style={{ fontFamily: 'Playfair Display, serif', color: '#C9A84C', fontSize: '14px' }}>
-          JK No Jokes
-        </div>
-        <button onClick={onSignOut} style={{
-          marginTop: '16px', width: '100%', padding: '8px',
-          background: 'transparent', border: '1px solid #2a2a2a',
-          borderRadius: '2px', color: '#4A5568', fontSize: '11px',
-          fontFamily: 'DM Mono, monospace', letterSpacing: '1px',
-          cursor: 'pointer', transition: 'all 0.15s',
-        }}
-          onMouseEnter={e => e.target.style.borderColor = '#C9A84C'}
-          onMouseLeave={e => e.target.style.borderColor = '#2a2a2a'}
-        >
-          SIGN OUT
-        </button>
-      </div>
-    </div>
-  )
-}
-
-// ── KPI Card ──────────────────────────────────────────────────────────────────
-function KPICard({ label, value, change, positive, delay }) {
-  return (
-    <div className={`fade-up-delay-${delay}`} style={{
-      background: '#fff', border: '1px solid #EDF2F7',
-      borderRadius: '2px', padding: '24px 28px',
-      boxShadow: '0 1px 8px rgba(0,0,0,0.04)',
-    }}>
-      <div style={{ fontSize: '11px', fontFamily: 'DM Mono, monospace',
-        letterSpacing: '2px', color: '#A0AEC0', textTransform: 'uppercase',
-        marginBottom: '10px' }}>
-        {label}
-      </div>
-      <div style={{ fontFamily: 'Playfair Display, serif',
-        fontSize: '28px', fontWeight: '600', color: '#0D0D0D', lineHeight: 1 }}>
-        {value}
-      </div>
-      {change !== undefined && (
-        <div style={{
-          marginTop: '8px', fontSize: '12px',
-          color: positive ? '#2D6A4F' : '#C0392B',
-          fontFamily: 'DM Mono, monospace',
-        }}>
-          {pct(change)} vs last month
-        </div>
+    <svg style={{ position: 'absolute', top: 0, right: 0, opacity: 0.04,
+      pointerEvents: 'none', width: '300px', height: '300px' }}
+      viewBox="0 0 200 200">
+      {[0,1,2,3,4,5,6,7].map(row =>
+        [0,1,2,3,4,5,6,7].map(col => (
+          <rect key={`${row}-${col}`}
+            x={col * 26 + (row % 2) * 13}
+            y={row * 14}
+            width="18" height="8"
+            rx="2"
+            fill="#CC2222"
+          />
+        ))
       )}
-    </div>
+    </svg>
   )
 }
 
-// ── Main Dashboard ────────────────────────────────────────────────────────────
 export default function Dashboard() {
   const router = useRouter()
   const [user, setUser] = useState(null)
   const [clientData, setClientData] = useState(null)
   const [loading, setLoading] = useState(true)
+  const [menuOpen, setMenuOpen] = useState(false)
+  const [isMobile, setIsMobile] = useState(false)
+
+  useEffect(() => {
+    const checkMobile = () => setIsMobile(window.innerWidth < 768)
+    checkMobile()
+    window.addEventListener('resize', checkMobile)
+    return () => window.removeEventListener('resize', checkMobile)
+  }, [])
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
-      if (!session) { router.push('/'); return }
+      if (!session) { router.push('/login'); return }
       setUser(session.user)
       loadClientData(session.user.email)
     })
   }, [])
 
   const loadClientData = async (email) => {
-    // Try to load real client data; fall back to demo
-    const { data } = await supabase
-      .from('clients')
-      .select('*')
-      .eq('email', email)
-      .single()
-    setClientData(data || { name: 'Demo Company', email })
+    const { data } = await supabase.from('clients').select('*').eq('email', email).single()
+    setClientData(data || { name: 'Reydel Tire', email })
     setLoading(false)
   }
 
-  const handleSignOut = async () => {
-    await supabase.auth.signOut()
-    router.push('/')
-  }
+  const handleSignOut = async () => { await supabase.auth.signOut(); router.push('/login') }
 
   if (loading) return (
-    <div style={{ minHeight: '100vh', background: '#F7F4EF',
+    <div style={{ minHeight: '100vh', background: '#1A1A1A',
       display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
       <div style={{ fontFamily: 'DM Mono, monospace', fontSize: '11px',
-        letterSpacing: '3px', color: '#C9A84C' }}>LOADING...</div>
+        letterSpacing: '3px', color: '#CC2222' }}>LOADING...</div>
     </div>
   )
+
+  const theme = getTheme(clientData?.name)
+  const isReydel = theme === THEMES.reydel
 
   const latest = DEMO_MONTHLY[DEMO_MONTHLY.length - 1]
   const prev = DEMO_MONTHLY[DEMO_MONTHLY.length - 2]
@@ -215,193 +151,344 @@ export default function Dashboard() {
   const profitChange = ((latest.profit - prev.profit) / prev.profit) * 100
   const margin = (latest.profit / latest.revenue) * 100
 
+  const navItems = [
+    { id: 'dashboard', label: 'Dashboard', icon: '▦', href: '/dashboard' },
+    { id: 'financials', label: 'Financials', icon: '≡', href: '/financials' },
+    { id: 'transactions', label: 'Transactions', icon: '↕', href: '/transactions' },
+    { id: 'documents', label: 'Documents', icon: '◻', href: '/documents' },
+  ]
+
   return (
     <>
-      <Head><title>{clientData?.name || 'Dashboard'} — JK No Jokes</title></Head>
+      <Head>
+        <title>{clientData?.name || 'Dashboard'} — JK No Jokes</title>
+        <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500&family=DM+Mono:wght@400;500&family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet" />
+      </Head>
 
-      <div style={{ display: 'flex', minHeight: '100vh', background: '#F7F4EF' }}>
-        <Sidebar
-          active="dashboard"
-          clientName={clientData?.name}
-          clientLogo={clientData?.logo_url}
-          onSignOut={handleSignOut}
-        />
+      <div style={{ minHeight: '100vh', background: theme.pageBg }}>
 
-        {/* Main content */}
-        <div style={{ marginLeft: '220px', flex: 1, padding: '40px 48px' }}>
-
-          {/* Header */}
-          <div className="fade-up" style={{ marginBottom: '40px', display: 'flex',
-            justifyContent: 'space-between', alignItems: 'flex-start' }}>
+        {/* Mobile top bar */}
+        {isMobile && (
+          <div style={{ background: theme.sidebarBg, padding: '16px 20px',
+            display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+            position: 'sticky', top: 0, zIndex: 100,
+            borderBottom: `2px solid ${theme.accent}` }}>
             <div>
-              <div style={{ fontFamily: 'DM Mono, monospace', fontSize: '10px',
-                letterSpacing: '3px', color: '#C9A84C', marginBottom: '6px' }}>
-                DASHBOARD
+              {isReydel ? (
+                <div style={{ fontFamily: 'Bebas Neue, sans-serif', fontSize: '22px',
+                  color: '#fff', letterSpacing: '2px', lineHeight: 1 }}>
+                  REYDEL <span style={{ color: theme.accent }}>TIRE</span>
+                </div>
+              ) : (
+                <div style={{ fontFamily: 'Playfair Display, serif', fontSize: '18px',
+                  fontWeight: '700', color: '#fff' }}>{clientData?.name}</div>
+              )}
+            </div>
+            <button onClick={() => setMenuOpen(!menuOpen)} style={{
+              background: 'none', border: 'none', color: '#fff',
+              fontSize: '22px', cursor: 'pointer' }}>
+              {menuOpen ? '✕' : '☰'}
+            </button>
+          </div>
+        )}
+
+        {/* Mobile dropdown */}
+        {isMobile && menuOpen && (
+          <div style={{ background: theme.sidebarBg, borderBottom: `1px solid ${theme.sidebarBorder}`,
+            position: 'sticky', top: '57px', zIndex: 99 }}>
+            {navItems.map(item => (
+              <button key={item.id} onClick={() => { router.push(item.href); setMenuOpen(false) }}
+                style={{ width: '100%', textAlign: 'left', padding: '14px 20px',
+                  background: item.id === 'dashboard' ? theme.activeNav : 'transparent',
+                  border: 'none',
+                  borderLeft: item.id === 'dashboard' ? `2px solid ${theme.accent}` : '2px solid transparent',
+                  color: item.id === 'dashboard' ? '#fff' : '#718096',
+                  fontSize: '14px', fontFamily: 'DM Sans, sans-serif', cursor: 'pointer',
+                  display: 'flex', alignItems: 'center', gap: '12px' }}>
+                <span>{item.icon}</span>{item.label}
+              </button>
+            ))}
+            <button onClick={handleSignOut} style={{ width: '100%', textAlign: 'left',
+              padding: '14px 20px', background: 'transparent', border: 'none',
+              borderTop: `1px solid ${theme.sidebarBorder}`, color: '#4A5568',
+              fontSize: '12px', fontFamily: 'DM Mono, monospace', letterSpacing: '1px',
+              cursor: 'pointer' }}>SIGN OUT</button>
+          </div>
+        )}
+
+        <div style={{ display: 'flex' }}>
+          {/* Desktop Sidebar */}
+          {!isMobile && (
+            <div style={{ width: '220px', minHeight: '100vh', background: theme.sidebarBg,
+              position: 'fixed', left: 0, top: 0, display: 'flex', flexDirection: 'column',
+              borderRight: `1px solid ${theme.sidebarBorder}`, overflow: 'hidden' }}>
+
+              {/* Tire pattern decoration */}
+              {isReydel && <TirePattern />}
+
+              {/* Logo */}
+              <div style={{ padding: '28px 24px 24px',
+                borderBottom: `1px solid ${theme.sidebarBorder}`,
+                position: 'relative' }}>
+                {isReydel ? (
+                  <div>
+                    <div style={{ fontFamily: 'Bebas Neue, sans-serif', fontSize: '26px',
+                      color: '#fff', letterSpacing: '3px', lineHeight: 1 }}>
+                      REYDEL
+                    </div>
+                    <div style={{ fontFamily: 'Bebas Neue, sans-serif', fontSize: '20px',
+                      color: theme.accent, letterSpacing: '4px', lineHeight: 1 }}>
+                      TIRE
+                    </div>
+                    <div style={{ fontFamily: 'DM Mono, monospace', fontSize: '8px',
+                      letterSpacing: '2px', color: '#444', marginTop: '6px' }}>
+                      FINANCIAL PORTAL
+                    </div>
+                  </div>
+                ) : (
+                  <div>
+                    <div style={{ fontFamily: 'Playfair Display, serif', fontSize: '20px',
+                      fontWeight: '700', color: '#fff' }}>{clientData?.name}</div>
+                    <div style={{ fontFamily: 'DM Mono, monospace', fontSize: '9px',
+                      letterSpacing: '2px', color: theme.accent, marginTop: '4px' }}>FINANCIALS</div>
+                  </div>
+                )}
               </div>
-              <h1 style={{ fontFamily: 'Playfair Display, serif', fontSize: '32px',
-                fontWeight: '600', color: '#0D0D0D', margin: 0 }}>
-                {clientData?.name || 'Your Business'}
-              </h1>
-              <p style={{ color: '#718096', fontSize: '14px', margin: '6px 0 0',
-                fontFamily: 'DM Sans, sans-serif' }}>
+
+              {/* Nav */}
+              <nav style={{ padding: '16px 0', flex: 1 }}>
+                {navItems.map(item => (
+                  <button key={item.id} onClick={() => router.push(item.href)} style={{
+                    width: '100%', textAlign: 'left', padding: '11px 24px',
+                    background: item.id === 'dashboard' ? theme.activeNav : 'transparent',
+                    border: 'none',
+                    borderLeft: item.id === 'dashboard' ? `2px solid ${theme.accent}` : '2px solid transparent',
+                    color: item.id === 'dashboard' ? '#fff' : '#718096',
+                    fontSize: '13px', fontFamily: 'DM Sans, sans-serif',
+                    cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '12px',
+                    transition: 'all 0.15s' }}>
+                    <span style={{ fontSize: '16px', opacity: 0.8 }}>{item.icon}</span>
+                    {item.label}
+                  </button>
+                ))}
+              </nav>
+
+              {/* Bottom branding */}
+              <div style={{ padding: '20px 24px', borderTop: `1px solid ${theme.sidebarBorder}` }}>
+                <div style={{ fontFamily: 'Playfair Display, serif',
+                  color: theme.accent, fontSize: '13px' }}>JK No Jokes</div>
+                <button onClick={handleSignOut} style={{ marginTop: '12px', width: '100%',
+                  padding: '8px', background: 'transparent',
+                  border: `1px solid ${theme.sidebarBorder}`, borderRadius: '2px',
+                  color: '#4A5568', fontSize: '11px', fontFamily: 'DM Mono, monospace',
+                  letterSpacing: '1px', cursor: 'pointer' }}>SIGN OUT</button>
+              </div>
+            </div>
+          )}
+
+          {/* Main content */}
+          <div style={{ marginLeft: isMobile ? '0' : '220px', flex: 1,
+            padding: isMobile ? '24px 16px' : '40px 48px' }}>
+
+            {/* Header */}
+            <div style={{ marginBottom: '28px' }}>
+              {!isMobile && (
+                <div style={{ fontFamily: 'DM Mono, monospace', fontSize: '10px',
+                  letterSpacing: '3px', color: theme.accent, marginBottom: '6px' }}>
+                  DASHBOARD
+                </div>
+              )}
+              {isReydel ? (
+                <h1 style={{ fontFamily: 'Bebas Neue, sans-serif',
+                  fontSize: isMobile ? '32px' : '42px',
+                  color: '#1A1A1A', margin: 0, letterSpacing: '2px' }}>
+                  REYDEL <span style={{ color: theme.accent }}>TIRE</span>
+                </h1>
+              ) : (
+                <h1 style={{ fontFamily: 'Playfair Display, serif',
+                  fontSize: isMobile ? '24px' : '32px',
+                  fontWeight: '600', color: '#0D0D0D', margin: 0 }}>
+                  {clientData?.name}
+                </h1>
+              )}
+              <p style={{ color: '#718096', fontSize: '13px', margin: '6px 0 0' }}>
                 Financial overview — {new Date().toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}
               </p>
+              {/* Red accent bar for Reydel */}
+              {isReydel && (
+                <div style={{ width: '48px', height: '3px',
+                  background: theme.accent, marginTop: '10px' }} />
+              )}
             </div>
-            <div style={{ textAlign: 'right' }}>
-              <div style={{ fontSize: '12px', color: '#A0AEC0',
-                fontFamily: 'DM Mono, monospace', letterSpacing: '1px' }}>
-                {user?.email}
+
+            {/* KPI Cards */}
+            <div style={{ display: 'grid',
+              gridTemplateColumns: isMobile ? 'repeat(2,1fr)' : 'repeat(4,1fr)',
+              gap: '12px', marginBottom: '20px' }}>
+              {[
+                { label: 'Revenue', value: fmt(latest.revenue), change: revenueChange, positive: revenueChange >= 0 },
+                { label: 'Expenses', value: fmt(latest.expenses), change: expenseChange, positive: expenseChange <= 0 },
+                { label: 'Net Profit', value: fmt(latest.profit), change: profitChange, positive: profitChange >= 0 },
+                { label: 'Profit Margin', value: `${margin.toFixed(1)}%` },
+              ].map((card, i) => (
+                <div key={i} style={{ background: theme.cardBg,
+                  border: isReydel ? `1px solid #E0E0E0` : '1px solid #EDF2F7',
+                  borderRadius: '2px',
+                  borderTop: isReydel ? `3px solid ${theme.accent}` : 'none',
+                  padding: isMobile ? '16px' : '22px 24px',
+                  boxShadow: '0 1px 8px rgba(0,0,0,0.04)' }}>
+                  <div style={{ fontSize: '10px', fontFamily: 'DM Mono, monospace',
+                    letterSpacing: '1.5px', color: '#A0AEC0', marginBottom: '8px' }}>
+                    {card.label.toUpperCase()}
+                  </div>
+                  <div style={{ fontFamily: isReydel ? 'Bebas Neue, sans-serif' : 'Playfair Display, serif',
+                    fontSize: isMobile ? '22px' : '26px',
+                    color: '#1A1A1A', lineHeight: 1,
+                    letterSpacing: isReydel ? '1px' : '0' }}>
+                    {card.value}
+                  </div>
+                  {card.change !== undefined && (
+                    <div style={{ marginTop: '6px', fontSize: '11px',
+                      color: card.positive ? theme.positiveColor : theme.negativeColor,
+                      fontFamily: 'DM Mono, monospace' }}>
+                      {pct(card.change)} vs last mo
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
+
+            {/* Charts */}
+            <div style={{ display: 'grid',
+              gridTemplateColumns: isMobile ? '1fr' : '3fr 2fr',
+              gap: '16px', marginBottom: '16px' }}>
+
+              {/* Revenue vs Expenses */}
+              <div style={{ background: theme.cardBg,
+                border: isReydel ? '1px solid #E0E0E0' : '1px solid #EDF2F7',
+                borderRadius: '2px', padding: isMobile ? '20px 16px' : '24px',
+                boxShadow: '0 1px 8px rgba(0,0,0,0.04)' }}>
+                <div style={{ marginBottom: '16px' }}>
+                  <div style={{ fontFamily: 'DM Mono, monospace', fontSize: '10px',
+                    letterSpacing: '2px', color: '#A0AEC0', marginBottom: '4px' }}>6-MONTH TREND</div>
+                  <div style={{ fontFamily: isReydel ? 'Bebas Neue, sans-serif' : 'Playfair Display, serif',
+                    fontSize: isReydel ? '20px' : '16px',
+                    letterSpacing: isReydel ? '1px' : '0',
+                    fontWeight: '600', color: '#1A1A1A' }}>
+                    Revenue vs Expenses
+                  </div>
+                </div>
+                <ResponsiveContainer width="100%" height={isMobile ? 160 : 200}>
+                  <AreaChart data={DEMO_MONTHLY}>
+                    <defs>
+                      <linearGradient id="revGrad" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="5%" stopColor={theme.positiveColor} stopOpacity={0.15}/>
+                        <stop offset="95%" stopColor={theme.positiveColor} stopOpacity={0}/>
+                      </linearGradient>
+                      <linearGradient id="expGrad" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="5%" stopColor={theme.accent} stopOpacity={0.15}/>
+                        <stop offset="95%" stopColor={theme.accent} stopOpacity={0}/>
+                      </linearGradient>
+                    </defs>
+                    <CartesianGrid strokeDasharray="3 3" stroke="#F0F0F0" vertical={false} />
+                    <XAxis dataKey="month" tick={{ fontSize: 10, fontFamily: 'DM Mono, monospace', fill: '#A0AEC0' }}
+                      axisLine={false} tickLine={false} />
+                    <YAxis tick={{ fontSize: 10, fontFamily: 'DM Mono, monospace', fill: '#A0AEC0' }}
+                      axisLine={false} tickLine={false}
+                      tickFormatter={(v) => `$${(v/1000).toFixed(0)}k`} width={36} />
+                    <Tooltip content={<CustomTooltip theme={theme} />} />
+                    <Area type="monotone" dataKey="revenue" name="Revenue"
+                      stroke={theme.positiveColor} strokeWidth={2} fill="url(#revGrad)" />
+                    <Area type="monotone" dataKey="expenses" name="Expenses"
+                      stroke={theme.accent} strokeWidth={2} fill="url(#expGrad)" />
+                  </AreaChart>
+                </ResponsiveContainer>
+              </div>
+
+              {/* Expense Breakdown */}
+              <div style={{ background: theme.cardBg,
+                border: isReydel ? '1px solid #E0E0E0' : '1px solid #EDF2F7',
+                borderRadius: '2px', padding: isMobile ? '20px 16px' : '24px',
+                boxShadow: '0 1px 8px rgba(0,0,0,0.04)' }}>
+                <div style={{ marginBottom: '16px' }}>
+                  <div style={{ fontFamily: 'DM Mono, monospace', fontSize: '10px',
+                    letterSpacing: '2px', color: '#A0AEC0', marginBottom: '4px' }}>THIS MONTH</div>
+                  <div style={{ fontFamily: isReydel ? 'Bebas Neue, sans-serif' : 'Playfair Display, serif',
+                    fontSize: isReydel ? '20px' : '16px',
+                    letterSpacing: isReydel ? '1px' : '0',
+                    fontWeight: '600', color: '#1A1A1A' }}>
+                    Expense Breakdown
+                  </div>
+                </div>
+                <ResponsiveContainer width="100%" height={isMobile ? 160 : 200}>
+                  <BarChart data={DEMO_EXPENSES} layout="vertical" margin={{ left: 0 }}>
+                    <CartesianGrid strokeDasharray="3 3" stroke="#F0F0F0" horizontal={false} />
+                    <XAxis type="number" tick={{ fontSize: 9, fontFamily: 'DM Mono, monospace', fill: '#A0AEC0' }}
+                      axisLine={false} tickLine={false}
+                      tickFormatter={(v) => `$${(v/1000).toFixed(0)}k`} />
+                    <YAxis type="category" dataKey="category"
+                      tick={{ fontSize: 10, fill: '#4A5568' }}
+                      axisLine={false} tickLine={false} width={60} />
+                    <Tooltip content={<CustomTooltip theme={theme} />} />
+                    <Bar dataKey="amount" name="Amount" fill={theme.accent} radius={[0, 2, 2, 0]} />
+                  </BarChart>
+                </ResponsiveContainer>
               </div>
             </div>
-          </div>
 
-          {/* KPI Cards */}
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)',
-            gap: '16px', marginBottom: '32px' }}>
-            <KPICard label="Revenue" value={fmt(latest.revenue)}
-              change={revenueChange} positive={revenueChange >= 0} delay={1} />
-            <KPICard label="Expenses" value={fmt(latest.expenses)}
-              change={expenseChange} positive={expenseChange <= 0} delay={2} />
-            <KPICard label="Net Profit" value={fmt(latest.profit)}
-              change={profitChange} positive={profitChange >= 0} delay={3} />
-            <KPICard label="Profit Margin" value={`${margin.toFixed(1)}%`}
-              delay={4} />
-          </div>
-
-          {/* Charts row */}
-          <div style={{ display: 'grid', gridTemplateColumns: '3fr 2fr',
-            gap: '20px', marginBottom: '20px' }}>
-
-            {/* Revenue vs Expenses area chart */}
-            <div className="fade-up-delay-2" style={{
-              background: '#fff', border: '1px solid #EDF2F7',
-              borderRadius: '2px', padding: '28px',
-              boxShadow: '0 1px 8px rgba(0,0,0,0.04)',
-            }}>
-              <div style={{ marginBottom: '24px' }}>
-                <div style={{ fontFamily: 'DM Mono, monospace', fontSize: '10px',
-                  letterSpacing: '2px', color: '#A0AEC0', marginBottom: '4px' }}>
-                  6-MONTH TREND
+            {/* Bottom dark chart */}
+            <div style={{ background: isReydel ? '#1A1A1A' : '#0D0D0D',
+              border: `1px solid ${isReydel ? '#2A2A2A' : '#1a1a1a'}`,
+              borderRadius: '2px', padding: isMobile ? '20px 16px' : '28px',
+              boxShadow: '0 1px 8px rgba(0,0,0,0.08)', position: 'relative',
+              overflow: 'hidden' }}>
+              {isReydel && <TirePattern />}
+              <div style={{ marginBottom: '20px', display: 'flex',
+                justifyContent: 'space-between', alignItems: 'center',
+                flexWrap: 'wrap', gap: '12px', position: 'relative' }}>
+                <div>
+                  <div style={{ fontFamily: 'DM Mono, monospace', fontSize: '10px',
+                    letterSpacing: '2px', color: '#4A5568', marginBottom: '4px' }}>6-MONTH TREND</div>
+                  <div style={{ fontFamily: isReydel ? 'Bebas Neue, sans-serif' : 'Playfair Display, serif',
+                    fontSize: isReydel ? '22px' : '18px',
+                    letterSpacing: isReydel ? '2px' : '0',
+                    fontWeight: '600', color: '#fff' }}>
+                    NET PROFIT
+                  </div>
                 </div>
-                <div style={{ fontFamily: 'Playfair Display, serif',
-                  fontSize: '18px', fontWeight: '600', color: '#0D0D0D' }}>
-                  Revenue vs Expenses
-                </div>
+                <button onClick={() => router.push('/financials')} style={{
+                  padding: '8px 16px', background: 'transparent',
+                  border: `1px solid ${theme.accent}`, borderRadius: '2px',
+                  color: theme.accent, fontSize: '11px',
+                  fontFamily: 'DM Mono, monospace', letterSpacing: '1px', cursor: 'pointer',
+                  transition: 'all 0.15s' }}
+                  onMouseEnter={e => { e.target.style.background = theme.accent; e.target.style.color = '#fff' }}
+                  onMouseLeave={e => { e.target.style.background = 'transparent'; e.target.style.color = theme.accent }}>
+                  VIEW FINANCIALS →
+                </button>
               </div>
-              <ResponsiveContainer width="100%" height={220}>
+              <ResponsiveContainer width="100%" height={isMobile ? 130 : 150}>
                 <AreaChart data={DEMO_MONTHLY}>
                   <defs>
-                    <linearGradient id="revGrad" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="5%" stopColor="#2D6A4F" stopOpacity={0.15}/>
-                      <stop offset="95%" stopColor="#2D6A4F" stopOpacity={0}/>
-                    </linearGradient>
-                    <linearGradient id="expGrad" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="5%" stopColor="#C0392B" stopOpacity={0.12}/>
-                      <stop offset="95%" stopColor="#C0392B" stopOpacity={0}/>
+                    <linearGradient id="profitGrad" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="5%" stopColor={theme.accent} stopOpacity={0.3}/>
+                      <stop offset="95%" stopColor={theme.accent} stopOpacity={0}/>
                     </linearGradient>
                   </defs>
-                  <CartesianGrid strokeDasharray="3 3" stroke="#F0F0F0" vertical={false} />
-                  <XAxis dataKey="month" tick={{ fontSize: 11, fontFamily: 'DM Mono, monospace', fill: '#A0AEC0' }}
+                  <CartesianGrid strokeDasharray="3 3" stroke="#2A2A2A" vertical={false} />
+                  <XAxis dataKey="month" tick={{ fontSize: 10, fontFamily: 'DM Mono, monospace', fill: '#4A5568' }}
                     axisLine={false} tickLine={false} />
-                  <YAxis tick={{ fontSize: 11, fontFamily: 'DM Mono, monospace', fill: '#A0AEC0' }}
+                  <YAxis tick={{ fontSize: 10, fontFamily: 'DM Mono, monospace', fill: '#4A5568' }}
                     axisLine={false} tickLine={false}
-                    tickFormatter={(v) => `$${(v/1000).toFixed(0)}k`} />
-                  <Tooltip content={<CustomTooltip />} />
-                  <Area type="monotone" dataKey="revenue" name="Revenue"
-                    stroke="#2D6A4F" strokeWidth={2} fill="url(#revGrad)" />
-                  <Area type="monotone" dataKey="expenses" name="Expenses"
-                    stroke="#C0392B" strokeWidth={2} fill="url(#expGrad)" />
+                    tickFormatter={(v) => `$${(v/1000).toFixed(0)}k`} width={36} />
+                  <Tooltip content={<CustomTooltip theme={theme} />} />
+                  <Area type="monotone" dataKey="profit" name="Net Profit"
+                    stroke={theme.accent} strokeWidth={2.5} fill="url(#profitGrad)" />
                 </AreaChart>
               </ResponsiveContainer>
             </div>
 
-            {/* Expense breakdown bar chart */}
-            <div className="fade-up-delay-3" style={{
-              background: '#fff', border: '1px solid #EDF2F7',
-              borderRadius: '2px', padding: '28px',
-              boxShadow: '0 1px 8px rgba(0,0,0,0.04)',
-            }}>
-              <div style={{ marginBottom: '24px' }}>
-                <div style={{ fontFamily: 'DM Mono, monospace', fontSize: '10px',
-                  letterSpacing: '2px', color: '#A0AEC0', marginBottom: '4px' }}>
-                  THIS MONTH
-                </div>
-                <div style={{ fontFamily: 'Playfair Display, serif',
-                  fontSize: '18px', fontWeight: '600', color: '#0D0D0D' }}>
-                  Expense Breakdown
-                </div>
-              </div>
-              <ResponsiveContainer width="100%" height={220}>
-                <BarChart data={DEMO_EXPENSES} layout="vertical" margin={{ left: 8 }}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="#F0F0F0" horizontal={false} />
-                  <XAxis type="number" tick={{ fontSize: 10, fontFamily: 'DM Mono, monospace', fill: '#A0AEC0' }}
-                    axisLine={false} tickLine={false}
-                    tickFormatter={(v) => `$${(v/1000).toFixed(0)}k`} />
-                  <YAxis type="category" dataKey="category"
-                    tick={{ fontSize: 11, fontFamily: 'DM Sans, monospace', fill: '#4A5568' }}
-                    axisLine={false} tickLine={false} width={64} />
-                  <Tooltip content={<CustomTooltip />} />
-                  <Bar dataKey="amount" name="Amount" fill="#C9A84C"
-                    radius={[0, 2, 2, 0]} />
-                </BarChart>
-              </ResponsiveContainer>
-            </div>
           </div>
-
-          {/* Profit trend */}
-          <div className="fade-up-delay-4" style={{
-            background: '#0D0D0D', border: '1px solid #1a1a1a',
-            borderRadius: '2px', padding: '28px',
-            boxShadow: '0 1px 8px rgba(0,0,0,0.08)',
-          }}>
-            <div style={{ marginBottom: '24px', display: 'flex',
-              justifyContent: 'space-between', alignItems: 'center' }}>
-              <div>
-                <div style={{ fontFamily: 'DM Mono, monospace', fontSize: '10px',
-                  letterSpacing: '2px', color: '#4A5568', marginBottom: '4px' }}>
-                  6-MONTH TREND
-                </div>
-                <div style={{ fontFamily: 'Playfair Display, serif',
-                  fontSize: '18px', fontWeight: '600', color: '#fff' }}>
-                  Net Profit
-                </div>
-              </div>
-              <button
-                onClick={() => router.push('/financials')}
-                style={{
-                  padding: '8px 20px', background: 'transparent',
-                  border: '1px solid #C9A84C', borderRadius: '2px',
-                  color: '#C9A84C', fontSize: '11px',
-                  fontFamily: 'DM Mono, monospace', letterSpacing: '1px',
-                  cursor: 'pointer', transition: 'all 0.15s',
-                }}
-                onMouseEnter={e => { e.target.style.background = '#C9A84C'; e.target.style.color = '#000' }}
-                onMouseLeave={e => { e.target.style.background = 'transparent'; e.target.style.color = '#C9A84C' }}
-              >
-                VIEW FINANCIALS →
-              </button>
-            </div>
-            <ResponsiveContainer width="100%" height={160}>
-              <AreaChart data={DEMO_MONTHLY}>
-                <defs>
-                  <linearGradient id="profitGrad" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor="#C9A84C" stopOpacity={0.3}/>
-                    <stop offset="95%" stopColor="#C9A84C" stopOpacity={0}/>
-                  </linearGradient>
-                </defs>
-                <CartesianGrid strokeDasharray="3 3" stroke="#1a1a1a" vertical={false} />
-                <XAxis dataKey="month" tick={{ fontSize: 11, fontFamily: 'DM Mono, monospace', fill: '#4A5568' }}
-                  axisLine={false} tickLine={false} />
-                <YAxis tick={{ fontSize: 11, fontFamily: 'DM Mono, monospace', fill: '#4A5568' }}
-                  axisLine={false} tickLine={false}
-                  tickFormatter={(v) => `$${(v/1000).toFixed(0)}k`} />
-                <Tooltip content={<CustomTooltip />} />
-                <Area type="monotone" dataKey="profit" name="Net Profit"
-                  stroke="#C9A84C" strokeWidth={2} fill="url(#profitGrad)" />
-              </AreaChart>
-            </ResponsiveContainer>
-          </div>
-
         </div>
       </div>
     </>
