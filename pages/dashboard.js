@@ -175,10 +175,20 @@ export default function Dashboard() {
             borderBottom: `2px solid ${theme.accent}` }}>
             <div>
               {isReydel ? (
-                <div style={{ fontFamily: 'Bebas Neue, sans-serif', fontSize: '22px',
-                  color: '#fff', letterSpacing: '2px', lineHeight: 1 }}>
-                  REYDEL <span style={{ color: theme.accent }}>TIRE</span>
-                </div>
+                <svg viewBox="0 0 180 60" width="130" height="43" xmlns="http://www.w3.org/2000/svg">
+                  <text x="0" y="32" fontFamily="Arial Black, sans-serif" fontSize="28"
+                    fontWeight="900" fill="#ffffff" letterSpacing="2">REYDEL</text>
+                  <rect x="0" y="36" width="120" height="3" fill="#CC2222" rx="1"/>
+                  <text x="2" y="52" fontFamily="Arial, sans-serif" fontSize="14"
+                    fontWeight="700" fill="#CC2222" letterSpacing="6">TIRE</text>
+                  <circle cx="158" cy="36" r="18" fill="none" stroke="#CC2222" strokeWidth="3"/>
+                  <circle cx="158" cy="36" r="10" fill="none" stroke="#CC2222" strokeWidth="2"/>
+                  <circle cx="158" cy="36" r="4" fill="#CC2222"/>
+                  <rect x="155" y="15" width="6" height="4" rx="1" fill="#CC2222"/>
+                  <rect x="155" y="53" width="6" height="4" rx="1" fill="#CC2222"/>
+                  <rect x="137" y="33" width="4" height="6" rx="1" fill="#CC2222"/>
+                  <rect x="175" y="33" width="4" height="6" rx="1" fill="#CC2222"/>
+                </svg>
               ) : (
                 <div style={{ fontFamily: 'Playfair Display, serif', fontSize: '18px',
                   fontWeight: '700', color: '#fff' }}>{clientData?.name}</div>
@@ -232,16 +242,31 @@ export default function Dashboard() {
                 position: 'relative' }}>
                 {isReydel ? (
                   <div>
-                    <div style={{ fontFamily: 'Bebas Neue, sans-serif', fontSize: '26px',
-                      color: '#fff', letterSpacing: '3px', lineHeight: 1 }}>
-                      REYDEL
-                    </div>
-                    <div style={{ fontFamily: 'Bebas Neue, sans-serif', fontSize: '20px',
-                      color: theme.accent, letterSpacing: '4px', lineHeight: 1 }}>
-                      TIRE
-                    </div>
+                    <svg viewBox="0 0 180 60" width="160" height="53" xmlns="http://www.w3.org/2000/svg">
+                      {/* REYDEL text */}
+                      <text x="0" y="32" fontFamily="Arial Black, sans-serif" fontSize="28"
+                        fontWeight="900" fill="#ffffff" letterSpacing="2">REYDEL</text>
+                      {/* Red underline */}
+                      <rect x="0" y="36" width="120" height="3" fill="#CC2222" rx="1"/>
+                      {/* TIRE text */}
+                      <text x="2" y="52" fontFamily="Arial, sans-serif" fontSize="14"
+                        fontWeight="700" fill="#CC2222" letterSpacing="6">TIRE</text>
+                      {/* Tire icon - circle with treads */}
+                      <circle cx="158" cy="36" r="18" fill="none" stroke="#CC2222" strokeWidth="3"/>
+                      <circle cx="158" cy="36" r="10" fill="none" stroke="#CC2222" strokeWidth="2"/>
+                      <circle cx="158" cy="36" r="4" fill="#CC2222"/>
+                      {/* Tire tread marks */}
+                      <rect x="155" y="15" width="6" height="4" rx="1" fill="#CC2222"/>
+                      <rect x="155" y="53" width="6" height="4" rx="1" fill="#CC2222"/>
+                      <rect x="137" y="33" width="4" height="6" rx="1" fill="#CC2222"/>
+                      <rect x="175" y="33" width="4" height="6" rx="1" fill="#CC2222"/>
+                      <rect x="141" y="20" width="4" height="4" rx="1" fill="#CC2222" transform="rotate(45 143 22)"/>
+                      <rect x="169" y="20" width="4" height="4" rx="1" fill="#CC2222" transform="rotate(45 171 22)"/>
+                      <rect x="141" y="48" width="4" height="4" rx="1" fill="#CC2222" transform="rotate(45 143 50)"/>
+                      <rect x="169" y="48" width="4" height="4" rx="1" fill="#CC2222" transform="rotate(45 171 50)"/>
+                    </svg>
                     <div style={{ fontFamily: 'DM Mono, monospace', fontSize: '8px',
-                      letterSpacing: '2px', color: '#444', marginTop: '6px' }}>
+                      letterSpacing: '2px', color: '#444', marginTop: '4px' }}>
                       FINANCIAL PORTAL
                     </div>
                   </div>
@@ -299,11 +324,22 @@ export default function Dashboard() {
                 </div>
               )}
               {isReydel ? (
-                <h1 style={{ fontFamily: 'Bebas Neue, sans-serif',
-                  fontSize: isMobile ? '32px' : '42px',
-                  color: '#1A1A1A', margin: 0, letterSpacing: '2px' }}>
-                  REYDEL <span style={{ color: theme.accent }}>TIRE</span>
-                </h1>
+                <div style={{ marginBottom: '4px' }}>
+                  <svg viewBox="0 0 220 60" width={isMobile ? '160px' : '200px'} height={isMobile ? '43px' : '54px'} xmlns="http://www.w3.org/2000/svg">
+                    <text x="0" y="32" fontFamily="Arial Black, sans-serif" fontSize="28"
+                      fontWeight="900" fill="#1A1A1A" letterSpacing="2">REYDEL</text>
+                    <rect x="0" y="36" width="120" height="3" fill="#CC2222" rx="1"/>
+                    <text x="2" y="52" fontFamily="Arial, sans-serif" fontSize="14"
+                      fontWeight="700" fill="#CC2222" letterSpacing="6">TIRE</text>
+                    <circle cx="158" cy="36" r="18" fill="none" stroke="#CC2222" strokeWidth="3"/>
+                    <circle cx="158" cy="36" r="10" fill="none" stroke="#CC2222" strokeWidth="2"/>
+                    <circle cx="158" cy="36" r="4" fill="#CC2222"/>
+                    <rect x="155" y="15" width="6" height="4" rx="1" fill="#CC2222"/>
+                    <rect x="155" y="53" width="6" height="4" rx="1" fill="#CC2222"/>
+                    <rect x="137" y="33" width="4" height="6" rx="1" fill="#CC2222"/>
+                    <rect x="175" y="33" width="4" height="6" rx="1" fill="#CC2222"/>
+                  </svg>
+                </div>
               ) : (
                 <h1 style={{ fontFamily: 'Playfair Display, serif',
                   fontSize: isMobile ? '24px' : '32px',
