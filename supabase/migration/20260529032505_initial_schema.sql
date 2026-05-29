@@ -7,7 +7,7 @@
 -- GL transactions (imported from QuickBooks)
 CREATE TABLE IF NOT EXISTS gl_transactions (
   id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
-  client_id UUID REFERENCES clients(id) ON DELETE CASCADE,
+  client_id UUID ON DELETE CASCADE,
   date DATE NOT NULL,
   account TEXT NOT NULL,
   type TEXT,
@@ -21,7 +21,7 @@ CREATE TABLE IF NOT EXISTS gl_transactions (
 -- Clover POS line items
 CREATE TABLE IF NOT EXISTS clover_line_items (
   id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
-  client_id UUID REFERENCES clients(id) ON DELETE CASCADE,
+  client_id UUID ON DELETE CASCADE,
   date DATE NOT NULL,
   order_id TEXT NOT NULL,
   item_name TEXT NOT NULL,
@@ -33,7 +33,7 @@ CREATE TABLE IF NOT EXISTS clover_line_items (
 -- Monthly P&L summary (pre-computed for fast dashboard loads)
 CREATE TABLE IF NOT EXISTS monthly_summary (
   id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
-  client_id UUID REFERENCES clients(id) ON DELETE CASCADE,
+  client_id UUID ON DELETE CASCADE,
   month TEXT NOT NULL,  -- YYYY-MM
   revenue DECIMAL(12,2) DEFAULT 0,
   expenses DECIMAL(12,2) DEFAULT 0,
