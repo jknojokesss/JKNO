@@ -97,9 +97,10 @@ export default function Orders() {
           const sale = Number(r.revenue)
           const qty  = Number(r.quantity || 1)
           const normalized = normalizeSize(r.item_name)
+          const isService  = !normalized
           const weldonCost = normalized ? costMap[normalized] : null
-          const costPerUnit = weldonCost ?? sale * FALLBACK_RATIO
-          const isEstimated = !weldonCost
+          const costPerUnit = isService ? 0 : (weldonCost ?? sale * FALLBACK_RATIO)
+          const isEstimated = !isService && !weldonCost
           const cost   = costPerUnit * qty
           const profit = sale - cost
           const margin = sale > 0 ? (profit / sale) * 100 : 0
