@@ -84,7 +84,17 @@ export default function Orders() {
   useEffect(() => {
     async function load() {
       const [{ data: lineItems }, { data: costs }] = await Promise.all([
-        supabase.from('clover_line_items').select('date, item_name, revenue, quantity, order_id').order('date', { ascending: false }).limit(5000),
+        (async () => {
+          let all = [], from = 0
+          while (true) {
+            const { data } = await supabase.from('clover_line_items').select('date, item_name, revenue, quantity, order_id').order('date', { ascending: false }).range(from, from + 999)
+            if (!data || data.length === 0) break
+            all = [...all, ...data]
+            if (data.length < 1000) break
+            from += 1000
+          }
+          return { data: all }
+        })(),
         supabase.from('weldon_costs').select('tire_size, cost'),
       ])
 
