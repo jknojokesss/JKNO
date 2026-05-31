@@ -178,6 +178,7 @@ export default function Financials() {
   const plExpenses     = plTotals.expense.reduce((s, r) => s + r.amount, 0)
   const plOtherExp     = plTotals.other_expense.reduce((s, r) => s + r.amount, 0)
   const plGrossProfit  = plIncome - plCogs
+  const plNetIncome    = plIncome - plCogs - plExpenses - plOtherExp
 
   const PL_ROWS = [
     { section: 'INCOME', rows: plTotals.income.map(r => ({ label: r.label, amount: r.amount, account: r.label })) },
@@ -231,10 +232,10 @@ export default function Financials() {
                 {/* KPI row */}
                 <div style={{ display: 'flex', gap: '12px', marginBottom: '20px' }}>
                   {[
-                    { label: 'TOTAL REVENUE', value: fmt(totals.revenue), sub: 'All sources', sc: '#22c55e' },
-                    { label: 'GROSS PROFIT', value: fmt(totals.revenue - totals.cogs), sub: pct((totals.revenue - totals.cogs)/totals.revenue*100) + ' gross margin', sc: '#22c55e' },
-                    { label: 'TOTAL EXPENSES', value: fmt(totals.expenses), sub: 'Operations', sc: '#CC2222' },
-                    { label: 'NET PROFIT', value: fmt(totals.profit), sub: pct(totals.profit/totals.revenue*100) + ' net margin', sc: '#22c55e' },
+                    { label: 'TOTAL REVENUE',   value: fmt(plIncome),      sub: 'All sources',                                              sc: '#22c55e' },
+                    { label: 'GROSS PROFIT',    value: fmt(plGrossProfit), sub: pct(plGrossProfit / plIncome * 100) + ' gross margin',       sc: '#22c55e' },
+                    { label: 'TOTAL EXPENSES',  value: fmt(plExpenses),    sub: 'Operating expenses',                                        sc: '#CC2222' },
+                    { label: 'NET INCOME',       value: fmt(plNetIncome),   sub: pct(plNetIncome / plIncome * 100) + ' net margin',           sc: '#22c55e' },
                   ].map(k => (
                     <div key={k.label} style={{ flex: 1, background: '#1a1a1a', border: '1px solid #2a2a2a', borderRadius: '6px', padding: '14px 16px' }}>
                       <div style={{ fontSize: '9px', color: '#4a4a4a', letterSpacing: '0.15em', marginBottom: '6px', fontFamily: 'DM Mono, monospace' }}>{k.label}</div>
@@ -311,8 +312,8 @@ export default function Financials() {
                     })}
                     {/* Net profit */}
                     <div style={{ background: '#141a14', border: '1px solid #1e2e1e', borderRadius: '6px', padding: '16px 20px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                      <div style={{ fontSize: '13px', color: '#22c55e', fontWeight: '600', fontFamily: 'DM Mono, monospace', letterSpacing: '0.1em' }}>NET PROFIT</div>
-                      <div style={{ fontSize: '22px', color: '#22c55e', fontWeight: '700', fontFamily: 'DM Mono, monospace' }}>{fmt(totals.profit)}</div>
+                      <div style={{ fontSize: '13px', color: '#22c55e', fontWeight: '600', fontFamily: 'DM Mono, monospace', letterSpacing: '0.1em' }}>NET INCOME</div>
+                      <div style={{ fontSize: '22px', color: '#22c55e', fontWeight: '700', fontFamily: 'DM Mono, monospace' }}>{fmt(plNetIncome)}</div>
                     </div>
                     <div style={{ fontSize: '9px', color: '#444', fontFamily: 'DM Mono, monospace' }}>
                       * May COGS estimated: $1,313 QB actual + $13,896 Weldon purchases pending QB entry
