@@ -39,6 +39,14 @@ function normalizeSize(name) {
   return null
 }
 
+// Detect premium brand in item name (matches weldon_brand_costs.brand values)
+const BRANDS = ['continental','michelin','pirelli','bridgestone','goodyear','cooper','kumho','hankook','falken','firestone','toyo']
+function detectBrand(name) {
+  if (!name) return null
+  const n = name.toLowerCase().replace('bridge stone', 'bridgestone')
+  return BRANDS.find(b => n.includes(b)) || null
+}
+
 function Sidebar({ active }) {
   const router = useRouter()
   return (
@@ -83,7 +91,7 @@ export default function Orders() {
 
   useEffect(() => {
     async function load() {
-      const [{ data: lineItems }, { data: costs }] = await Promise.all([
+      const [{ data: lineItems }, { data: costs }, { data: brandCosts }] = await Promise.all([
         (async () => {
           let all = [], from = 0
           while (true) {
@@ -96,19 +104,28 @@ export default function Orders() {
           return { data: all }
         })(),
         supabase.from('weldon_costs').select('tire_size, cost'),
+        supabase.from('weldon_brand_costs').select('brand, tire_size, cost'),
       ])
 
-      // Build size → cost lookup
+      // Build size → cost lookup (budget / no-brand)
       const costMap = {}
       costs?.forEach(r => { costMap[r.tire_size] = Number(r.cost) })
+
+      // Build brand+size → cost lookup (premium brands)
+      const brandCostMap = {}
+      brandCosts?.forEach(r => { brandCostMap[`${r.brand}|${r.tire_size}`] = Number(r.cost) })
 
       if (lineItems) {
         setRows(lineItems.map(r => {
           const sale = Number(r.revenue)
           const qty  = Number(r.quantity || 1)
           const normalized = normalizeSize(r.item_name)
+          const brand = detectBrand(r.item_name)
           const isService  = !normalized
-          const weldonCost = normalized ? costMap[normalized] : null
+          // Match priority: brand+size → size-only → ratio estimate
+          const brandCost = (brand && normalized) ? brandCostMap[`${brand}|${normalized}`] : null
+          const sizeCost  = normalized ? costMap[normalized] : null
+          const weldonCost = brandCost ?? sizeCost
           const costPerUnit = isService ? 0 : (weldonCost ?? sale * FALLBACK_RATIO)
           const isEstimated = !isService && !weldonCost
           const cost   = costPerUnit * qty
