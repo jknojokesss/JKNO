@@ -231,7 +231,7 @@ export default function Financials() {
                 <div style={{ display: 'flex', gap: '12px', marginBottom: '20px' }}>
                   {[
                     { label: 'TOTAL REVENUE', value: fmt(totals.revenue), sub: 'All sources', sc: '#22c55e' },
-                    { label: 'GROSS PROFIT', value: fmt(totals.gross_profit), sub: pct(totals.gross_profit/totals.revenue*100) + ' gross margin', sc: '#22c55e' },
+                    { label: 'GROSS PROFIT', value: fmt(totals.revenue - totals.cogs), sub: pct((totals.revenue - totals.cogs)/totals.revenue*100) + ' gross margin', sc: '#22c55e' },
                     { label: 'TOTAL EXPENSES', value: fmt(totals.expenses), sub: 'Operations', sc: '#CC2222' },
                     { label: 'NET PROFIT', value: fmt(totals.profit), sub: pct(totals.profit/totals.revenue*100) + ' net margin', sc: '#22c55e' },
                   ].map(k => (
@@ -335,7 +335,7 @@ export default function Financials() {
                             </td>
                             <td style={cell('right')}>{fmt(m.revenue)}</td>
                             <td style={cell('right', { color: '#CC2222' })}>{fmt(m.cogs)}</td>
-                            <td style={cell('right', { color: '#22c55e' })}>{fmt(m.gross_profit)}</td>
+                            <td style={cell('right', { color: '#22c55e' })}>{fmt(m.revenue - m.cogs)}</td>
                             <td style={cell('right', { color: '#CC2222' })}>{fmt(m.expenses)}</td>
                             <td style={cell('right', { color: '#22c55e', fontWeight: '600' })}>{fmt(m.profit)}</td>
                             <td style={cell('right')}>
@@ -350,7 +350,7 @@ export default function Financials() {
                             { v: 'TOTAL', a: 'left', c: '#fff', w: '600' },
                             { v: fmt(totals.revenue), a: 'right', c: '#fff', w: '600' },
                             { v: fmt(totals.cogs), a: 'right', c: '#CC2222', w: '600' },
-                            { v: fmt(totals.gross_profit), a: 'right', c: '#22c55e', w: '600' },
+                            { v: fmt(totals.revenue - totals.cogs), a: 'right', c: '#22c55e', w: '600' },
                             { v: fmt(totals.expenses), a: 'right', c: '#CC2222', w: '600' },
                             { v: fmt(totals.profit), a: 'right', c: '#22c55e', w: '600' },
                             { v: pct(totals.profit/totals.revenue*100), a: 'right', c: '#22c55e', w: '600' },
