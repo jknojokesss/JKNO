@@ -91,7 +91,7 @@ export default function Orders() {
 
   useEffect(() => {
     async function load() {
-      const [{ data: lineItems }, { data: costs }, { data: brandCosts }] = await Promise.all([
+      const [{ data: lineItems }, { data: costs }, { data: brandCosts }, { data: itemCosts }] = await Promise.all([
         (async () => {
           let all = [], from = 0
           while (true) {
@@ -103,8 +103,10 @@ export default function Orders() {
           }
           return { data: all }
         })(),
+        // weldon fallback tables below
         supabase.from('weldon_costs').select('tire_size, cost'),
         supabase.from('weldon_brand_costs').select('brand, tire_size, cost'),
+        supabase.from('clover_item_costs').select('item_label, cost'),
       ])
 
       // Build size → cost lookup (budget / no-brand)
@@ -115,6 +117,10 @@ export default function Orders() {
       const brandCostMap = {}
       brandCosts?.forEach(r => { brandCostMap[`${r.brand}|${r.tire_size}`] = Number(r.cost) })
 
+      // Build exact-label → cost lookup (authoritative, from 4/15 inventory spreadsheet)
+      const exactMap = {}
+      itemCosts?.forEach(r => { exactMap[r.item_label.trim().toLowerCase()] = Number(r.cost) })
+
       if (lineItems) {
         setRows(lineItems.map(r => {
           const sale = Number(r.revenue)
@@ -122,12 +128,14 @@ export default function Orders() {
           const normalized = normalizeSize(r.item_name)
           const brand = detectBrand(r.item_name)
           const isService  = !normalized
-          // Match priority: brand+size → size-only → ratio estimate
+          // Match priority: exact label → brand+size → size-only → ratio estimate
+          const exactCost = exactMap[(r.item_name || '').trim().toLowerCase()]
           const brandCost = (brand && normalized) ? brandCostMap[`${brand}|${normalized}`] : null
           const sizeCost  = normalized ? costMap[normalized] : null
-          const weldonCost = brandCost ?? sizeCost
+          const weldonCost = exactCost ?? brandCost ?? sizeCost
           const costPerUnit = isService ? 0 : (weldonCost ?? sale * FALLBACK_RATIO)
-          const isEstimated = !isService && !weldonCost
+          const isEstimated = !isService && weldonCost == null
+          const isExact = exactCost != null
           const cost   = costPerUnit * qty
           const profit = sale - cost
           const margin = sale > 0 ? (profit / sale) * 100 : 0
@@ -141,6 +149,7 @@ export default function Orders() {
             profit,
             margin,
             isEstimated,
+            isExact,
             normalizedSize: normalized,
             orderId: r.order_id,
           }
