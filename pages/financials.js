@@ -75,7 +75,7 @@ function DrillModal({ account, onClose }) {
       .select('date, description, amount, type')
       .eq('account', account)
       .order('date', { ascending: false })
-      .limit(50)
+      .limit(500)
       .then(({ data }) => {
         setTxns(data || [])
         setLoading(false)
@@ -126,7 +126,7 @@ function DrillModal({ account, onClose }) {
             </table>
           )}
         </div>
-        {txns.length === 50 && (
+        {txns.length === 500 && (
           <div style={{ padding: '10px 20px', borderTop: '1px solid #2a2a2a', fontSize: '9px', color: '#444', fontFamily: 'DM Mono, monospace' }}>
             Showing most recent 50 transactions
           </div>
