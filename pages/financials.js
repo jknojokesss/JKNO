@@ -137,22 +137,30 @@ function DrillModal({ account, onClose }) {
 }
 
 export default function Financials() {
-  const [monthly, setMonthly] = useState([])
-  const [loading, setLoading] = useState(true)
+  const [monthly,   setMonthly]   = useState([])
+  const [plTotals,  setPlTotals]  = useState({ income: [], cogs: [], expense: [], other_expense: [] })
+  const [loading,   setLoading]   = useState(true)
   const [activeTab, setActiveTab] = useState('pl')
   const [drillAccount, setDrillAccount] = useState(null)
 
   useEffect(() => {
-    supabase.from('monthly_summary').select('*').order('month').then(({ data }) => {
-      if (data) setMonthly(data.map(r => ({
+    Promise.all([
+      supabase.from('monthly_summary').select('*').order('month'),
+      supabase.from('pl_totals').select('label, amount, category'),
+    ]).then(([{ data: mData }, { data: pData }]) => {
+      if (mData) setMonthly(mData.map(r => ({
         label: new Date(r.month + '-01').toLocaleString('default', { month: 'short' }).toUpperCase() + ' ' + r.month.slice(0,4),
         revenue: parseFloat(r.revenue),
         expenses: parseFloat(r.expenses),
         profit: parseFloat(r.profit),
         cogs: parseFloat(r.cogs),
-        gross_profit: parseFloat(r.gross_profit),
         notes: r.notes || null,
       })))
+      if (pData) {
+        const grouped = { income: [], cogs: [], expense: [], other_expense: [] }
+        pData.forEach(row => { if (grouped[row.category]) grouped[row.category].push({ label: row.label, amount: Number(row.amount) }) })
+        setPlTotals(grouped)
+      }
       setLoading(false)
     })
   }, [])
@@ -165,24 +173,17 @@ export default function Financials() {
     gross_profit: s.gross_profit + r.gross_profit,
   }), { revenue: 0, expenses: 0, profit: 0, cogs: 0, gross_profit: 0 })
 
+  const plIncome       = plTotals.income.reduce((s, r) => s + r.amount, 0)
+  const plCogs         = plTotals.cogs.reduce((s, r) => s + r.amount, 0)
+  const plExpenses     = plTotals.expense.reduce((s, r) => s + r.amount, 0)
+  const plOtherExp     = plTotals.other_expense.reduce((s, r) => s + r.amount, 0)
+  const plGrossProfit  = plIncome - plCogs
+
   const PL_ROWS = [
-    { section: 'INCOME', rows: [
-      { label: 'Clover Sales', amount: 173218, txns: 111, account: 'Clover Sales' },
-      { label: 'Sales Income', amount: 25385, txns: 70, account: 'Sales Income' },
-    ]},
-    { section: 'COST OF GOODS SOLD', rows: [
-      { label: 'MAVISX / Weldon Tire Purchases', amount: -55966, txns: 382, account: 'Cost of Goods Sold' },
-    ]},
-    { section: 'OPERATING EXPENSES', rows: [
-      { label: 'Personal Draws', amount: -44334, txns: 774, account: 'Personal' },
-      { label: 'Payroll / Employees', amount: -24000, txns: null, account: null, note: 'Ask Accountant' },
-      { label: 'Hart', amount: -6400, txns: 31, account: 'Hart' },
-      { label: 'Bank Service Charges', amount: -2808, txns: 84, account: 'Bank Service Charge' },
-      { label: 'Car', amount: -2090, txns: 27, account: 'Car' },
-      { label: 'Repairs & Maintenance', amount: -1842, txns: 36, account: 'Repairs & Maintenance' },
-      { label: 'Charity / Tzedaka', amount: -1363, txns: 76, account: 'Charity' },
-      { label: 'Computer', amount: -828, txns: 23, account: 'Computer' },
-    ]},
+    { section: 'INCOME', rows: plTotals.income.map(r => ({ label: r.label, amount: r.amount, account: r.label })) },
+    { section: 'COST OF GOODS SOLD', rows: plTotals.cogs.map(r => ({ label: r.label, amount: -r.amount, account: 'Cost of Goods Sold' })) },
+    { section: 'OPERATING EXPENSES', rows: plTotals.expense.map(r => ({ label: r.label, amount: -r.amount, account: r.label })) },
+    { section: 'OTHER EXPENSES', rows: plTotals.other_expense.map(r => ({ label: r.label, amount: -r.amount, account: r.label })) },
   ]
 
   const tabs = [
@@ -294,8 +295,13 @@ export default function Financials() {
                               ))}
                               <tr>
                                 <td colSpan={4} style={{ padding: '8px 10px', borderTop: '1px solid #333', fontFamily: 'DM Mono, monospace', fontSize: '11px', color: '#fff', fontWeight: '600', textAlign: 'right' }}>
-                                  {section.section === 'INCOME' ? 'Total Income: ' : section.section === 'COST OF GOODS SOLD' ? 'Gross Profit: ' : 'Total Expenses: '}
-                                  <span style={{ color: sectionTotal >= 0 ? '#22c55e' : '#CC2222' }}>{fmt(sectionTotal)}</span>
+                                  {section.section === 'INCOME' ? 'Total Income: ' :
+                                   section.section === 'COST OF GOODS SOLD' ? 'Gross Profit: ' :
+                                   section.section === 'OPERATING EXPENSES' ? 'Total Operating Expenses: ' :
+                                   'Total Other Expenses: '}
+                                  <span style={{ color: section.section === 'COST OF GOODS SOLD' ? '#22c55e' : sectionTotal >= 0 ? '#22c55e' : '#CC2222' }}>
+                                    {section.section === 'COST OF GOODS SOLD' ? fmt(plGrossProfit) : fmt(sectionTotal)}
+                                  </span>
                                 </td>
                               </tr>
                             </tbody>
@@ -368,27 +374,31 @@ export default function Financials() {
 
                 {/* Expense Breakdown Tab */}
                 {activeTab === 'expenses' && (
-                  <div style={{ background: '#1a1a1a', border: '1px solid #2a2a2a', borderRadius: '6px', padding: '16px' }}>
-                    <div style={{ fontSize: '9px', color: '#4a4a4a', letterSpacing: '0.15em', marginBottom: '14px', fontFamily: 'DM Mono, monospace' }}>EXPENSE BREAKDOWN</div>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
                     {[
-                      { n: 'Personal draws', v: 44334 },
-                      { n: 'Payroll / Employees', v: 24000 },
-                      { n: 'Hart', v: 6400 },
-                      { n: 'Katz Chase CC', v: 5693 },
-                      { n: 'Bank charges', v: 2808 },
-                      { n: 'Car', v: 2090 },
-                      { n: 'Repairs & Maint.', v: 1842 },
-                      { n: 'Charity', v: 1363 },
-                      { n: 'Computer', v: 828 },
-                    ].map(e => (
-                      <div key={e.n} style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '7px 0', borderBottom: '1px solid #1c1c1c' }}>
-                        <div style={{ width: '160px', fontSize: '10px', color: '#aaa', flexShrink: 0, fontFamily: 'DM Mono, monospace' }}>{e.n}</div>
-                        <div style={{ flex: 1, height: '5px', background: '#222', borderRadius: '3px' }}>
-                          <div style={{ height: '5px', background: '#CC2222', borderRadius: '3px', width: `${Math.round(e.v / 44334 * 100)}%` }}></div>
+                      { heading: 'OPERATING EXPENSES', rows: plTotals.expense },
+                      { heading: 'OTHER EXPENSES', rows: plTotals.other_expense },
+                    ].map(group => {
+                      const maxV = Math.max(...group.rows.map(r => r.amount), 1)
+                      const groupTotal = group.rows.reduce((s, r) => s + r.amount, 0)
+                      return (
+                        <div key={group.heading} style={{ background: '#1a1a1a', border: '1px solid #2a2a2a', borderRadius: '6px', padding: '16px' }}>
+                          <div style={{ fontSize: '9px', color: '#4a4a4a', letterSpacing: '0.15em', marginBottom: '14px', fontFamily: 'DM Mono, monospace' }}>{group.heading}</div>
+                          {[...group.rows].sort((a, b) => b.amount - a.amount).map(e => (
+                            <div key={e.label} style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '7px 0', borderBottom: '1px solid #1c1c1c' }}>
+                              <div style={{ width: '180px', fontSize: '10px', color: '#aaa', flexShrink: 0, fontFamily: 'DM Mono, monospace' }}>{e.label}</div>
+                              <div style={{ flex: 1, height: '5px', background: '#222', borderRadius: '3px' }}>
+                                <div style={{ height: '5px', background: '#CC2222', borderRadius: '3px', width: `${Math.round(e.amount / maxV * 100)}%` }} />
+                              </div>
+                              <div style={{ width: '70px', textAlign: 'right', fontSize: '10px', color: '#CC2222', fontFamily: 'DM Mono, monospace' }}>{fmt(e.amount)}</div>
+                            </div>
+                          ))}
+                          <div style={{ display: 'flex', justifyContent: 'flex-end', paddingTop: '8px', borderTop: '1px solid #333', marginTop: '4px' }}>
+                            <span style={{ fontSize: '10px', color: '#fff', fontFamily: 'DM Mono, monospace', fontWeight: '600' }}>Total: {fmt(groupTotal)}</span>
+                          </div>
                         </div>
-                        <div style={{ width: '70px', textAlign: 'right', fontSize: '10px', color: '#CC2222', fontFamily: 'DM Mono, monospace' }}>{fmt(e.v)}</div>
-                      </div>
-                    ))}
+                      )
+                    })}
                   </div>
                 )}
 
