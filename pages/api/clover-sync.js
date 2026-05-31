@@ -1,7 +1,7 @@
 import { supabaseAdmin } from '../../lib/supabaseAdmin'
 
 // Reydel's client_id in Supabase
-const CLIENT_ID = 'a1b2c3d4-0000-0000-0000-000000000001'
+const CLIENT_ID = 'dc442b88-5ed1-44be-a908-dcbc945827b3'
 const CLOVER_BASE = 'https://api.clover.com/v3'
 
 const cents = (n) => Math.round(Number(n || 0)) / 100
