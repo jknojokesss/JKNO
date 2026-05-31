@@ -656,21 +656,26 @@ export default function Landing() {
       </section>
 
       {/* FOOTER */}
-      <footer style={{ borderTop: '1px solid #DDD8CE', padding: '40px 48px',
-        display: 'flex', justifyContent: 'space-between', alignItems: 'center',
-        flexWrap: 'wrap', gap: '16px' }}>
-        <div style={{ fontFamily: 'Playfair Display, serif', fontSize: '20px',
-          fontWeight: '700', letterSpacing: '2px' }}>
-          JK<span style={{ color: '#C9A84C' }}>.</span>
+      <footer style={{ borderTop: '1px solid #DDD8CE', padding: '32px 48px',
+        display: 'flex', flexDirection: 'column', gap: '16px' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '16px' }}>
+          <div style={{ fontFamily: 'Playfair Display, serif', fontSize: '20px',
+            fontWeight: '700', letterSpacing: '2px' }}>
+            JK<span style={{ color: '#C9A84C' }}>.</span>
+          </div>
+          <div style={{ fontFamily: 'DM Mono, monospace', fontSize: '11px',
+            color: '#5A6070', letterSpacing: '1px' }}>
+            © {new Date().getFullYear()} JK NO JOKES BOOKKEEPING
+          </div>
+          <button className="ghost-btn" style={{ padding: '10px 20px', fontSize: '11px' }}
+            onClick={() => router.push('/login')}>
+            CLIENT LOGIN →
+          </button>
         </div>
-        <div style={{ fontFamily: 'DM Mono, monospace', fontSize: '11px',
-          color: '#5A6070', letterSpacing: '1px' }}>
-          © {new Date().getFullYear()} JK NO JOKES BOOKKEEPING
+        <div style={{ display: 'flex', gap: '24px', justifyContent: 'center', paddingTop: '8px', borderTop: '1px solid #EEE9E0' }}>
+          <button onClick={() => router.push('/privacy')} style={{ background: 'none', border: 'none', cursor: 'pointer', fontFamily: 'DM Mono, monospace', fontSize: '10px', color: '#5A6070', letterSpacing: '1px' }}>PRIVACY POLICY</button>
+          <button onClick={() => router.push('/terms')} style={{ background: 'none', border: 'none', cursor: 'pointer', fontFamily: 'DM Mono, monospace', fontSize: '10px', color: '#5A6070', letterSpacing: '1px' }}>TERMS OF SERVICE</button>
         </div>
-        <button className="ghost-btn" style={{ padding: '10px 20px', fontSize: '11px' }}
-          onClick={() => router.push('/login')}>
-          CLIENT LOGIN →
-        </button>
       </footer>
     </>
   )
