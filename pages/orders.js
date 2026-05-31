@@ -135,7 +135,11 @@ export default function Orders() {
     if (!showEst) r = r.filter(r => !r.isEstimated)
     return [...r].sort((a, b) => {
       const mul = sortDir === 'desc' ? -1 : 1
-      if (sort === 'date')   return mul * a.date.localeCompare(b.date)
+      if (sort === 'date') {
+        const dateCmp = mul * a.date.localeCompare(b.date)
+        if (dateCmp !== 0) return dateCmp
+        return a.orderId.localeCompare(b.orderId) // group same-order rows together
+      }
       if (sort === 'profit') return mul * (a.profit - b.profit)
       if (sort === 'margin') return mul * (a.margin - b.margin)
       if (sort === 'sale')   return mul * (a.sale - b.sale)
