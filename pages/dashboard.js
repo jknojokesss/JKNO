@@ -10,6 +10,15 @@ const pct  = (n) => `${parseFloat(n).toFixed(1)}%`
 
 const MONTHS = { '01':'JAN','02':'FEB','03':'MAR','04':'APR','05':'MAY','06':'JUN','07':'JUL','08':'AUG','09':'SEP','10':'OCT','11':'NOV','12':'DEC' }
 
+// Canonicalize tire-size format so "235/60R17" and "235/60/17" group as one item.
+function normalizeItemName(name) {
+  if (!name) return 'Unknown'
+  return name
+    .replace(/(\d{3})[\s\/\-]?(\d{2})[\s\/\-]?R(\d{2})/gi, '$1/$2/$3')
+    .replace(/(\d{3})\s(\d{2})\s(\d{2})/g, '$1/$2/$3')
+    .trim()
+}
+
 const THEME = { sidebarBg: '#1A1A1A', sidebarBorder: '#2A2A2A', accent: '#CC2222' }
 
 const NAV = [
@@ -135,7 +144,7 @@ export default function Dashboard() {
     fetchAllClover().then(rows => {
       const map = {}
       rows.forEach(r => {
-        const k = r.item_name || 'Unknown'
+        const k = normalizeItemName(r.item_name)
         if (!map[k]) map[k] = { name: k, orders: 0, revenue: 0 }
         map[k].orders++
         map[k].revenue += Number(r.revenue)

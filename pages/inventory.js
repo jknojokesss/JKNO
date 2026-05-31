@@ -6,6 +6,16 @@ import { supabase } from '../lib/supabase'
 const fmt  = (n) => new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }).format(Math.abs(n))
 const fmtD = (n) => new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(Math.abs(n))
 
+// Canonicalize tire-size format in item names so "235/60R17" and "235/60/17"
+// group as one item. Preserves brand/other text (e.g. "235/60/17 Arroyo").
+function normalizeItemName(name) {
+  if (!name) return 'Unknown'
+  return name
+    .replace(/(\d{3})[\s\/\-]?(\d{2})[\s\/\-]?R(\d{2})/gi, '$1/$2/$3') // 235/60R17 → 235/60/17
+    .replace(/(\d{3})\s(\d{2})\s(\d{2})/g, '$1/$2/$3')                 // 235 60 17 → 235/60/17
+    .trim()
+}
+
 const THEME = { sidebarBg: '#1A1A1A', sidebarBorder: '#2A2A2A', accent: '#CC2222' }
 
 const NAV = [
@@ -83,7 +93,7 @@ export default function Inventory() {
       if (lineItems.length) {
         const map = {}
         lineItems.forEach(row => {
-          const k = row.item_name || 'Unknown'
+          const k = normalizeItemName(row.item_name)
           if (!map[k]) map[k] = { name: k, orders: 0, revenue: 0, qty: 0 }
           map[k].orders++
           map[k].revenue += Number(row.revenue)
