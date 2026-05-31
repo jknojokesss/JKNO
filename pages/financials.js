@@ -144,25 +144,28 @@ export default function Financials() {
   const [drillAccount, setDrillAccount] = useState(null)
 
   useEffect(() => {
-    Promise.all([
-      supabase.from('monthly_summary').select('*').order('month'),
-      supabase.from('pl_totals').select('label, amount, category'),
-    ]).then(([{ data: mData }, { data: pData }]) => {
+    const MONTHS = { '01':'JAN','02':'FEB','03':'MAR','04':'APR','05':'MAY','06':'JUN','07':'JUL','08':'AUG','09':'SEP','10':'OCT','11':'NOV','12':'DEC' }
+    async function load() {
+      const { data: mData } = await supabase.from('monthly_summary').select('*').order('month')
       if (mData) setMonthly(mData.map(r => ({
-        label: { '01':'JAN','02':'FEB','03':'MAR','04':'APR','05':'MAY','06':'JUN','07':'JUL','08':'AUG','09':'SEP','10':'OCT','11':'NOV','12':'DEC' }[r.month.slice(5)] + ' ' + r.month.slice(0,4),
+        label: MONTHS[r.month.slice(5)] + ' ' + r.month.slice(0, 4),
         revenue: parseFloat(r.revenue),
         expenses: parseFloat(r.expenses),
         profit: parseFloat(r.profit),
         cogs: parseFloat(r.cogs),
         notes: r.notes || null,
       })))
+
+      const { data: pData } = await supabase.from('pl_totals').select('label, amount, category')
       if (pData) {
         const grouped = { income: [], cogs: [], expense: [], other_expense: [] }
         pData.forEach(row => { if (grouped[row.category]) grouped[row.category].push({ label: row.label, amount: Number(row.amount) }) })
         setPlTotals(grouped)
       }
+
       setLoading(false)
-    })
+    }
+    load()
   }, [])
 
   const totals = monthly.reduce((s, r) => ({
