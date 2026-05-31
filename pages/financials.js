@@ -4,453 +4,425 @@ import Head from 'next/head'
 import { supabase } from '../lib/supabase'
 
 const fmt = (n) => new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }).format(Math.abs(n))
+const pct = (n) => `${parseFloat(n).toFixed(1)}%`
 
-// ── Demo P&L Data ─────────────────────────────────────────────────────────────
-const PL_DATA = {
-  income: {
-    label: 'Income',
-    accounts: [
-      { id: 'rev-sales', name: 'Sales Revenue', amount: 61000, transactions: [
-        { date: '06/03', desc: 'Invoice #1042 — Acme Corp', amount: 12000 },
-        { date: '06/08', desc: 'Invoice #1043 — Baker LLC', amount: 8500 },
-        { date: '06/12', desc: 'Invoice #1044 — Coastal Co', amount: 15000 },
-        { date: '06/19', desc: 'Invoice #1045 — DeltaTech', amount: 11000 },
-        { date: '06/25', desc: 'Invoice #1046 — Eagle Inc', amount: 14500 },
-      ]},
-      { id: 'rev-other', name: 'Other Income', amount: 3200, transactions: [
-        { date: '06/15', desc: 'Interest income', amount: 800 },
-        { date: '06/30', desc: 'Misc income', amount: 2400 },
-      ]},
-    ]
-  },
-  expenses: {
-    label: 'Expenses',
-    accounts: [
-      { id: 'exp-payroll', name: 'Payroll', amount: 18000, transactions: [
-        { date: '06/15', desc: 'Payroll run — bi-weekly', amount: 9000 },
-        { date: '06/30', desc: 'Payroll run — bi-weekly', amount: 9000 },
-      ]},
-      { id: 'exp-rent', name: 'Rent', amount: 5500, transactions: [
-        { date: '06/01', desc: 'Office rent — June', amount: 5500 },
-      ]},
-      { id: 'exp-marketing', name: 'Marketing', amount: 4200, transactions: [
-        { date: '06/05', desc: 'Google Ads', amount: 2000 },
-        { date: '06/12', desc: 'Social media ads', amount: 1200 },
-        { date: '06/20', desc: 'Printed materials', amount: 1000 },
-      ]},
-      { id: 'exp-supplies', name: 'Supplies', amount: 2800, transactions: [
-        { date: '06/08', desc: 'Office supplies — Staples', amount: 1400 },
-        { date: '06/22', desc: 'Office supplies — Amazon', amount: 1400 },
-      ]},
-      { id: 'exp-utilities', name: 'Utilities', amount: 1800, transactions: [
-        { date: '06/02', desc: 'Electric bill', amount: 900 },
-        { date: '06/05', desc: 'Internet + phone', amount: 900 },
-      ]},
-      { id: 'exp-other', name: 'Other Expenses', amount: 3700, transactions: [
-        { date: '06/10', desc: 'Insurance premium', amount: 2200 },
-        { date: '06/18', desc: 'Software subscriptions', amount: 800 },
-        { date: '06/28', desc: 'Miscellaneous', amount: 700 },
-      ]},
-    ]
-  }
+const THEME = {
+  sidebarBg: '#1A1A1A', sidebarBorder: '#2A2A2A', accent: '#CC2222',
 }
 
-const BALANCE_DATA = {
-  assets: {
-    label: 'Assets',
-    sections: [
-      { label: 'Current Assets', accounts: [
-        { name: 'Cash & Cash Equivalents', amount: 84200 },
-        { name: 'Accounts Receivable', amount: 31500 },
-        { name: 'Inventory', amount: 18400 },
-        { name: 'Prepaid Expenses', amount: 4800 },
-      ]},
-      { label: 'Fixed Assets', accounts: [
-        { name: 'Equipment', amount: 45000 },
-        { name: 'Less: Accumulated Depreciation', amount: -12000 },
-        { name: 'Leasehold Improvements', amount: 22000 },
-      ]},
-    ]
-  },
-  liabilities: {
-    label: 'Liabilities',
-    sections: [
-      { label: 'Current Liabilities', accounts: [
-        { name: 'Accounts Payable', amount: 14200 },
-        { name: 'Accrued Expenses', amount: 6800 },
-        { name: 'Short-Term Loans', amount: 10000 },
-      ]},
-      { label: 'Long-Term Liabilities', accounts: [
-        { name: 'Long-Term Debt', amount: 35000 },
-      ]},
-    ]
-  },
-  equity: {
-    label: "Owner's Equity",
-    sections: [
-      { label: "Owner's Equity", accounts: [
-        { name: "Owner's Capital", amount: 100000 },
-        { name: 'Retained Earnings', amount: 27900 },
-      ]},
-    ]
-  }
-}
+const NAV = [
+  { id: 'dashboard', label: 'Dashboard', href: '/dashboard' },
+  { id: 'financials', label: 'Financials', href: '/financials' },
+  { id: 'inventory', label: 'Sales & Items', href: '/inventory' },
+  { id: 'accounts', label: 'Accounts', href: '/accounts' },
+  { id: 'ai', label: '✦ Ask AI', href: '/ai' },
+]
 
-// ── Drill-down Modal ──────────────────────────────────────────────────────────
-function DrillModal({ account, onClose }) {
-  if (!account) return null
-  const total = account.transactions.reduce((s, t) => s + t.amount, 0)
+const cell = (align='left', extra={}) => ({
+  padding: '8px 10px', borderBottom: '1px solid #1c1c1c',
+  color: '#bbb', fontSize: '11px', fontFamily: 'DM Mono, monospace',
+  textAlign: align, ...extra
+})
+const hcell = (align='left') => ({
+  padding: '6px 10px', fontSize: '9px', color: '#4a4a4a',
+  fontWeight: '400', letterSpacing: '0.1em', borderBottom: '1px solid #222',
+  fontFamily: 'DM Mono, monospace', textAlign: align
+})
+
+function Sidebar({ active }) {
+  const router = useRouter()
   return (
     <div style={{
-      position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.5)',
-      zIndex: 1000, display: 'flex', alignItems: 'center', justifyContent: 'center',
-    }} onClick={onClose}>
-      <div style={{
-        background: '#fff', borderRadius: '2px',
-        width: '100%', maxWidth: '520px',
-        boxShadow: '0 20px 60px rgba(0,0,0,0.2)',
-        border: '1px solid #E8D5A3',
-        maxHeight: '80vh', overflow: 'hidden',
-        display: 'flex', flexDirection: 'column',
-      }} onClick={e => e.stopPropagation()}>
-
-        {/* Modal header */}
-        <div style={{ padding: '24px 28px', borderBottom: '1px solid #EDF2F7',
-          display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-          <div>
-            <div style={{ fontFamily: 'DM Mono, monospace', fontSize: '10px',
-              letterSpacing: '2px', color: '#C9A84C', marginBottom: '4px' }}>
-              DRILL DOWN
-            </div>
-            <div style={{ fontFamily: 'Playfair Display, serif', fontSize: '20px',
-              fontWeight: '600', color: '#0D0D0D' }}>
-              {account.name}
-            </div>
-          </div>
-          <button onClick={onClose} style={{
-            background: 'none', border: 'none', fontSize: '20px',
-            color: '#A0AEC0', cursor: 'pointer', padding: '4px',
-          }}>×</button>
-        </div>
-
-        {/* Transactions */}
-        <div style={{ overflowY: 'auto', flex: 1 }}>
-          {account.transactions.map((t, i) => (
-            <div key={i} style={{
-              padding: '14px 28px',
-              borderBottom: '1px solid #F7F7F7',
-              display: 'flex', justifyContent: 'space-between', alignItems: 'center',
-            }}>
-              <div style={{ display: 'flex', gap: '16px', alignItems: 'center' }}>
-                <span style={{ fontFamily: 'DM Mono, monospace', fontSize: '11px',
-                  color: '#A0AEC0', minWidth: '40px' }}>{t.date}</span>
-                <span style={{ fontSize: '14px', color: '#2D3748' }}>{t.desc}</span>
-              </div>
-              <span style={{ fontFamily: 'DM Mono, monospace', fontSize: '13px',
-                fontWeight: '500', color: '#0D0D0D' }}>
-                {fmt(t.amount)}
-              </span>
-            </div>
-          ))}
-        </div>
-
-        {/* Total */}
-        <div style={{ padding: '16px 28px', borderTop: '2px solid #0D0D0D',
-          display: 'flex', justifyContent: 'space-between',
-          background: '#F7F4EF' }}>
-          <span style={{ fontFamily: 'DM Mono, monospace', fontSize: '11px',
-            letterSpacing: '2px', color: '#4A5568' }}>TOTAL</span>
-          <span style={{ fontFamily: 'Playfair Display, serif', fontSize: '18px',
-            fontWeight: '600', color: '#0D0D0D' }}>{fmt(total)}</span>
-        </div>
+      width: '220px', minHeight: '100vh', background: THEME.sidebarBg,
+      display: 'flex', flexDirection: 'column', position: 'fixed', left: 0, top: 0,
+      borderRight: `1px solid ${THEME.sidebarBorder}`, zIndex: 100
+    }}>
+      <div style={{ padding: '24px 20px', borderBottom: `1px solid ${THEME.sidebarBorder}` }}>
+        <div style={{ fontSize: '18px', fontWeight: '700', color: '#fff', letterSpacing: '0.1em', fontFamily: 'DM Mono, monospace' }}>REYDEL</div>
+        <div style={{ fontSize: '10px', color: THEME.accent, letterSpacing: '0.2em', marginTop: '2px', fontFamily: 'DM Mono, monospace' }}>TIRE & AUTO</div>
       </div>
-    </div>
-  )
-}
-
-// ── P&L View ──────────────────────────────────────────────────────────────────
-function PLView({ onDrill }) {
-  const totalIncome = PL_DATA.income.accounts.reduce((s, a) => s + a.amount, 0)
-  const totalExpenses = PL_DATA.expenses.accounts.reduce((s, a) => s + a.amount, 0)
-  const netProfit = totalIncome - totalExpenses
-
-  return (
-    <div>
-      {/* Income */}
-      <SectionBlock label="INCOME" accounts={PL_DATA.income.accounts}
-        total={totalIncome} totalLabel="Total Income" positive onDrill={onDrill} />
-      {/* Expenses */}
-      <SectionBlock label="EXPENSES" accounts={PL_DATA.expenses.accounts}
-        total={totalExpenses} totalLabel="Total Expenses" onDrill={onDrill} />
-      {/* Net */}
-      <div style={{ marginTop: '24px', padding: '20px 24px',
-        background: '#0D0D0D', borderRadius: '2px',
-        display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-        <span style={{ fontFamily: 'DM Mono, monospace', fontSize: '12px',
-          letterSpacing: '2px', color: '#fff' }}>NET PROFIT</span>
-        <span style={{ fontFamily: 'Playfair Display, serif', fontSize: '24px',
-          fontWeight: '600', color: netProfit >= 0 ? '#74C69D' : '#F1948A' }}>
-          {netProfit >= 0 ? '' : '-'}{fmt(netProfit)}
-        </span>
-      </div>
-    </div>
-  )
-}
-
-function SectionBlock({ label, accounts, total, totalLabel, positive, onDrill }) {
-  return (
-    <div style={{ marginBottom: '24px' }}>
-      <div style={{ fontFamily: 'DM Mono, monospace', fontSize: '10px',
-        letterSpacing: '3px', color: '#C9A84C', marginBottom: '12px' }}>
-        {label}
-      </div>
-      <div style={{ border: '1px solid #EDF2F7', borderRadius: '2px', overflow: 'hidden' }}>
-        {accounts.map((acc, i) => (
-          <div key={acc.id}
-            onClick={() => acc.transactions && onDrill(acc)}
-            style={{
-              padding: '14px 20px',
-              borderBottom: i < accounts.length - 1 ? '1px solid #F7F7F7' : 'none',
-              display: 'flex', justifyContent: 'space-between', alignItems: 'center',
-              cursor: acc.transactions ? 'pointer' : 'default',
-              background: '#fff',
-              transition: 'background 0.1s',
-            }}
-            onMouseEnter={e => { if (acc.transactions) e.currentTarget.style.background = '#FAFAFA' }}
-            onMouseLeave={e => { e.currentTarget.style.background = '#fff' }}
-          >
-            <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-              <span style={{ fontSize: '14px', color: '#2D3748' }}>{acc.name}</span>
-              {acc.transactions && (
-                <span style={{ fontSize: '10px', fontFamily: 'DM Mono, monospace',
-                  color: '#C9A84C', letterSpacing: '1px' }}>DETAIL ↗</span>
-              )}
-            </div>
-            <span style={{ fontFamily: 'DM Mono, monospace', fontSize: '13px',
-              fontWeight: '500', color: '#0D0D0D' }}>
-              {fmt(acc.amount)}
-            </span>
-          </div>
+      <nav style={{ flex: 1, padding: '16px 0' }}>
+        {NAV.map(item => (
+          <button key={item.id} onClick={() => router.push(item.href)} style={{
+            display: 'flex', alignItems: 'center', gap: '10px',
+            width: '100%', padding: '10px 20px', textAlign: 'left',
+            background: active === item.id ? '#2A2A2A' : 'transparent',
+            color: active === item.id ? '#fff' : '#666',
+            border: 'none', cursor: 'pointer', fontSize: '12px',
+            fontFamily: 'DM Mono, monospace', letterSpacing: '0.06em',
+            borderLeft: active === item.id ? `2px solid ${THEME.accent}` : '2px solid transparent',
+          }}>
+            {item.label}
+          </button>
         ))}
-        <div style={{ padding: '14px 20px', background: '#F7F4EF',
-          borderTop: '2px solid #0D0D0D',
-          display: 'flex', justifyContent: 'space-between' }}>
-          <span style={{ fontFamily: 'DM Mono, monospace', fontSize: '11px',
-            letterSpacing: '1px', color: '#4A5568', fontWeight: '500' }}>
-            {totalLabel}
-          </span>
-          <span style={{ fontFamily: 'Playfair Display, serif', fontSize: '18px',
-            fontWeight: '600', color: '#0D0D0D' }}>{fmt(total)}</span>
-        </div>
+      </nav>
+      <div style={{ padding: '12px 20px', borderTop: `1px solid ${THEME.sidebarBorder}`, fontSize: '10px', color: '#3a3a3a', fontFamily: 'DM Mono, monospace' }}>
+        JAN – MAY 2026
       </div>
     </div>
   )
 }
 
-// ── Balance Sheet View ────────────────────────────────────────────────────────
-function BalanceView() {
-  const calcSection = (section) => section.accounts.reduce((s, a) => s + a.amount, 0)
-  const calcCategory = (cat) => cat.sections.reduce((s, sec) => s + calcSection(sec), 0)
+function DrillModal({ account, onClose }) {
+  const [txns, setTxns] = useState([])
+  const [loading, setLoading] = useState(false)
+
+  useEffect(() => {
+    if (!account) return
+    setLoading(true)
+    supabase
+      .from('gl_transactions')
+      .select('date, description, amount, type')
+      .eq('account', account)
+      .order('date', { ascending: false })
+      .limit(50)
+      .then(({ data }) => {
+        setTxns(data || [])
+        setLoading(false)
+      })
+  }, [account])
+
+  if (!account) return null
 
   return (
-    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '24px' }}>
-      {/* Left: Assets */}
-      <div>
-        <BalanceCategory category={BALANCE_DATA.assets} />
-      </div>
-      {/* Right: Liabilities + Equity */}
-      <div>
-        <BalanceCategory category={BALANCE_DATA.liabilities} />
-        <BalanceCategory category={BALANCE_DATA.equity} />
-      </div>
-    </div>
-  )
-}
-
-function BalanceCategory({ category }) {
-  return (
-    <div style={{ marginBottom: '24px' }}>
-      <div style={{ fontFamily: 'DM Mono, monospace', fontSize: '10px',
-        letterSpacing: '3px', color: '#C9A84C', marginBottom: '12px' }}>
-        {category.label.toUpperCase()}
-      </div>
-      {category.sections.map((section, si) => (
-        <div key={si} style={{ marginBottom: '12px',
-          border: '1px solid #EDF2F7', borderRadius: '2px', overflow: 'hidden' }}>
-          <div style={{ padding: '10px 16px', background: '#F7F4EF',
-            fontSize: '11px', fontFamily: 'DM Mono, monospace',
-            letterSpacing: '1px', color: '#718096' }}>
-            {section.label}
-          </div>
-          {section.accounts.map((acc, i) => (
-            <div key={i} style={{
-              padding: '11px 16px',
-              borderBottom: i < section.accounts.length - 1 ? '1px solid #F7F7F7' : 'none',
-              display: 'flex', justifyContent: 'space-between',
-              background: '#fff',
-            }}>
-              <span style={{ fontSize: '13px', color: acc.amount < 0 ? '#718096' : '#2D3748' }}>
-                {acc.name}
-              </span>
-              <span style={{ fontFamily: 'DM Mono, monospace', fontSize: '12px',
-                color: acc.amount < 0 ? '#C0392B' : '#0D0D0D' }}>
-                {acc.amount < 0 ? `(${fmt(acc.amount)})` : fmt(acc.amount)}
-              </span>
-            </div>
-          ))}
-          <div style={{ padding: '11px 16px', background: '#F7F4EF',
-            borderTop: '1px solid #E2E8F0',
-            display: 'flex', justifyContent: 'space-between' }}>
-            <span style={{ fontSize: '12px', fontFamily: 'DM Mono, monospace',
-              color: '#4A5568', letterSpacing: '1px' }}>
-              Total {section.label}
-            </span>
-            <span style={{ fontFamily: 'DM Mono, monospace', fontSize: '13px',
-              fontWeight: '500', color: '#0D0D0D' }}>
-              {fmt(section.accounts.reduce((s, a) => s + a.amount, 0))}
-            </span>
-          </div>
+    <div onClick={onClose} style={{
+      position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.75)',
+      display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 200
+    }}>
+      <div onClick={e => e.stopPropagation()} style={{
+        background: '#1a1a1a', border: '1px solid #333', borderRadius: '8px',
+        width: '600px', maxHeight: '500px', display: 'flex', flexDirection: 'column'
+      }}>
+        <div style={{ padding: '16px 20px', borderBottom: '1px solid #2a2a2a', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+          <div style={{ fontSize: '12px', color: '#fff', fontFamily: 'DM Mono, monospace', letterSpacing: '0.1em' }}>{account}</div>
+          <button onClick={onClose} style={{ background: 'none', border: 'none', color: '#666', cursor: 'pointer', fontSize: '20px', lineHeight: 1 }}>×</button>
         </div>
-      ))}
+        <div style={{ overflowY: 'auto', flex: 1 }}>
+          {loading ? (
+            <div style={{ padding: '20px', color: '#555', fontFamily: 'DM Mono, monospace', fontSize: '11px' }}>Loading transactions...</div>
+          ) : (
+            <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+              <thead>
+                <tr>
+                  <th style={hcell('left')}>DATE</th>
+                  <th style={hcell('left')}>DESCRIPTION</th>
+                  <th style={hcell('left')}>TYPE</th>
+                  <th style={hcell('right')}>AMOUNT</th>
+                </tr>
+              </thead>
+              <tbody>
+                {txns.map((t, i) => (
+                  <tr key={i} onMouseEnter={e => e.currentTarget.style.background='#1f1f1f'} onMouseLeave={e => e.currentTarget.style.background='transparent'}>
+                    <td style={cell('left')}>{t.date}</td>
+                    <td style={{ ...cell('left'), color: '#888', maxWidth: '260px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{t.description}</td>
+                    <td style={{ ...cell('left'), color: '#555' }}>{t.type}</td>
+                    <td style={{ ...cell('right'), color: parseFloat(t.amount) >= 0 ? '#22c55e' : '#CC2222' }}>{fmt(parseFloat(t.amount))}</td>
+                  </tr>
+                ))}
+                {txns.length === 0 && (
+                  <tr><td colSpan={4} style={{ padding: '20px', color: '#555', fontFamily: 'DM Mono, monospace', fontSize: '11px', textAlign: 'center' }}>No transactions found</td></tr>
+                )}
+              </tbody>
+            </table>
+          )}
+        </div>
+        {txns.length === 50 && (
+          <div style={{ padding: '10px 20px', borderTop: '1px solid #2a2a2a', fontSize: '9px', color: '#444', fontFamily: 'DM Mono, monospace' }}>
+            Showing most recent 50 transactions
+          </div>
+        )}
+      </div>
     </div>
   )
 }
 
-// ── Main Financials Page ──────────────────────────────────────────────────────
 export default function Financials() {
-  const router = useRouter()
-  const [user, setUser] = useState(null)
-  const [clientData, setClientData] = useState(null)
+  const [monthly, setMonthly] = useState([])
   const [loading, setLoading] = useState(true)
   const [activeTab, setActiveTab] = useState('pl')
   const [drillAccount, setDrillAccount] = useState(null)
 
   useEffect(() => {
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      if (!session) { router.push('/'); return }
-      setUser(session.user)
-      supabase.from('clients').select('*').eq('email', session.user.email).single()
-        .then(({ data }) => { setClientData(data || { name: 'Demo Company' }); setLoading(false) })
+    supabase.from('monthly_summary').select('*').order('month').then(({ data }) => {
+      if (data) setMonthly(data.map(r => ({
+        label: new Date(r.month + '-01').toLocaleString('default', { month: 'short' }).toUpperCase() + ' ' + r.month.slice(0,4),
+        revenue: parseFloat(r.revenue),
+        expenses: parseFloat(r.expenses),
+        profit: parseFloat(r.profit),
+        cogs: parseFloat(r.cogs),
+        gross_profit: parseFloat(r.gross_profit),
+        notes: r.notes || null,
+      })))
+      setLoading(false)
     })
   }, [])
 
-  const handleSignOut = async () => { await supabase.auth.signOut(); router.push('/') }
+  const totals = monthly.reduce((s, r) => ({
+    revenue: s.revenue + r.revenue,
+    expenses: s.expenses + r.expenses,
+    profit: s.profit + r.profit,
+    cogs: s.cogs + r.cogs,
+    gross_profit: s.gross_profit + r.gross_profit,
+  }), { revenue: 0, expenses: 0, profit: 0, cogs: 0, gross_profit: 0 })
 
-  if (loading) return (
-    <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center',
-      justifyContent: 'center', background: '#F7F4EF' }}>
-      <div style={{ fontFamily: 'DM Mono, monospace', fontSize: '11px',
-        letterSpacing: '3px', color: '#C9A84C' }}>LOADING...</div>
-    </div>
-  )
-
-  // Sidebar import inline to avoid circular deps
-  const navItems = [
-    { id: 'dashboard', label: 'Dashboard', icon: '▦', href: '/dashboard' },
-    { id: 'financials', label: 'Financials', icon: '≡', href: '/financials' },
-    { id: 'transactions', label: 'Transactions', icon: '↕', href: '/transactions' },
-    { id: 'documents', label: 'Documents', icon: '◻', href: '/documents' },
+  const PL_ROWS = [
+    { section: 'INCOME', rows: [
+      { label: 'Clover Sales', amount: 173218, txns: 111, account: 'Clover Sales' },
+      { label: 'Sales Income', amount: 25385, txns: 70, account: 'Sales Income' },
+    ]},
+    { section: 'COST OF GOODS SOLD', rows: [
+      { label: 'MAVISX / Weldon Tire Purchases', amount: -55966, txns: 382, account: 'Cost of Goods Sold' },
+    ]},
+    { section: 'OPERATING EXPENSES', rows: [
+      { label: 'Personal Draws', amount: -44334, txns: 774, account: 'Personal' },
+      { label: 'Payroll / Employees', amount: -24000, txns: null, account: null, note: 'Ask Accountant' },
+      { label: 'Hart', amount: -6400, txns: 31, account: 'Hart' },
+      { label: 'Bank Service Charges', amount: -2808, txns: 84, account: 'Bank Service Charge' },
+      { label: 'Car', amount: -2090, txns: 27, account: 'Car' },
+      { label: 'Repairs & Maintenance', amount: -1842, txns: 36, account: 'Repairs & Maintenance' },
+      { label: 'Charity / Tzedaka', amount: -1363, txns: 76, account: 'Charity' },
+      { label: 'Computer', amount: -828, txns: 23, account: 'Computer' },
+    ]},
   ]
 
   const tabs = [
     { id: 'pl', label: 'Profit & Loss' },
-    { id: 'bs', label: 'Balance Sheet' },
-    { id: 'cf', label: 'Cash Flow' },
+    { id: 'monthly', label: 'Monthly Table' },
+    { id: 'expenses', label: 'Expense Breakdown' },
+    { id: 'accounts', label: 'Accounts' },
+  ]
+
+  const KEY_ACCOUNTS = [
+    { name: 'Clover Clearing Account', sub: 'Sales deposits cleared through Clover', txns: 779 },
+    { name: 'TOTAL CHECKING (8059) - 1', sub: 'Primary operating checking account', txns: 881 },
+    { name: 'BUS COMPLETE CHK (5998) - 1', sub: 'Business checking account', txns: 621 },
+    { name: 'Bank of America 7875', sub: 'Secondary bank account', txns: 201 },
+    { name: 'Cost of Goods Sold', sub: 'MAVISX / Weldon tire COGS', txns: 382 },
+    { name: 'Clover Sales', sub: 'Journal entries from Clover POS', txns: 111 },
+    { name: 'Personal', sub: 'Owner draws & personal expenses', txns: 774 },
+    { name: 'Hart', sub: 'Vendor payments', txns: 31 },
+    { name: 'Katz Chase', sub: 'Credit card expenses', txns: 40 },
+    { name: 'Short Term Loans', sub: 'Short term loan activity', txns: 22 },
   ]
 
   return (
     <>
-      <Head><title>Financials — JK No Jokes</title></Head>
+      <Head><title>Reydel Tire — Financials</title></Head>
+      <div style={{ display: 'flex', minHeight: '100vh', background: '#111' }}>
+        <Sidebar active="financials" />
+        <DrillModal account={drillAccount} onClose={() => setDrillAccount(null)} />
+        <div style={{ marginLeft: '220px', flex: 1 }}>
 
-      <div style={{ display: 'flex', minHeight: '100vh', background: '#F7F4EF' }}>
-        {/* Sidebar */}
-        <div style={{ width: '220px', minHeight: '100vh', background: '#0D0D0D',
-          position: 'fixed', left: 0, top: 0, borderRight: '1px solid #1a1a1a',
-          display: 'flex', flexDirection: 'column' }}>
-          <div style={{ padding: '32px 24px 24px', borderBottom: '1px solid #1a1a1a' }}>
-            <div style={{ fontFamily: 'Playfair Display, serif', fontSize: '22px',
-              fontWeight: '700', color: '#fff' }}>{clientData?.name || 'Your Business'}</div>
-            <div style={{ fontFamily: 'DM Mono, monospace', fontSize: '9px',
-              letterSpacing: '2px', color: '#C9A84C', marginTop: '4px' }}>FINANCIALS</div>
-          </div>
-          <nav style={{ padding: '16px 0', flex: 1 }}>
-            {navItems.map(item => (
-              <button key={item.id} onClick={() => router.push(item.href)} style={{
-                width: '100%', textAlign: 'left', padding: '11px 24px',
-                background: item.id === 'financials' ? '#1a1a1a' : 'transparent', border: 'none',
-                borderLeft: item.id === 'financials' ? '2px solid #C9A84C' : '2px solid transparent',
-                color: item.id === 'financials' ? '#fff' : '#718096',
-                fontSize: '13px', fontFamily: 'DM Sans, sans-serif',
-                fontWeight: item.id === 'financials' ? '500' : '400',
-                cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '12px',
-              }}>
-                <span style={{ fontSize: '16px', opacity: 0.8 }}>{item.icon}</span>
-                {item.label}
-              </button>
-            ))}
-          </nav>
-          <div style={{ padding: '20px 24px', borderTop: '1px solid #1a1a1a' }}>
-            <div style={{ fontFamily: 'Playfair Display, serif', color: '#C9A84C', fontSize: '14px' }}>
-              JK No Jokes
+          {/* Topbar */}
+          <div style={{ background: '#1a1a1a', borderBottom: '1px solid #2a2a2a', padding: '14px 28px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+            <div style={{ fontSize: '11px', color: '#fff', letterSpacing: '0.15em', fontFamily: 'DM Mono, monospace' }}>FINANCIALS</div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <div style={{ width: '6px', height: '6px', background: '#22c55e', borderRadius: '50%' }}></div>
+              <div style={{ fontSize: '10px', color: '#444', fontFamily: 'DM Mono, monospace' }}>Live · Supabase</div>
             </div>
-            <button onClick={handleSignOut} style={{
-              marginTop: '12px', width: '100%', padding: '8px',
-              background: 'transparent', border: '1px solid #2a2a2a', borderRadius: '2px',
-              color: '#4A5568', fontSize: '11px', fontFamily: 'DM Mono, monospace',
-              letterSpacing: '1px', cursor: 'pointer',
-            }}>SIGN OUT</button>
-          </div>
-        </div>
-
-        {/* Main */}
-        <div style={{ marginLeft: '220px', flex: 1, padding: '40px 48px' }}>
-          <div className="fade-up" style={{ marginBottom: '32px' }}>
-            <div style={{ fontFamily: 'DM Mono, monospace', fontSize: '10px',
-              letterSpacing: '3px', color: '#C9A84C', marginBottom: '6px' }}>FINANCIALS</div>
-            <h1 style={{ fontFamily: 'Playfair Display, serif', fontSize: '32px',
-              fontWeight: '600', color: '#0D0D0D', margin: 0 }}>Financial Reports</h1>
-            <p style={{ color: '#718096', fontSize: '14px', margin: '6px 0 0' }}>
-              Period: June 2025 &nbsp;·&nbsp; Click any line item to drill into transactions
-            </p>
           </div>
 
-          {/* Tabs */}
-          <div style={{ display: 'flex', gap: '0', marginBottom: '32px',
-            border: '1px solid #EDF2F7', borderRadius: '2px', overflow: 'hidden',
-            background: '#fff', width: 'fit-content' }}>
-            {tabs.map(tab => (
-              <button key={tab.id} onClick={() => setActiveTab(tab.id)} style={{
-                padding: '12px 28px',
-                background: activeTab === tab.id ? '#0D0D0D' : '#fff',
-                color: activeTab === tab.id ? '#fff' : '#718096',
-                border: 'none', borderRight: '1px solid #EDF2F7',
-                fontSize: '13px', fontFamily: 'DM Sans, sans-serif',
-                fontWeight: '500', cursor: 'pointer',
-                transition: 'all 0.15s',
-              }}>
-                {tab.label}
-              </button>
-            ))}
-          </div>
+          <div style={{ padding: '24px 28px' }}>
+            {loading ? (
+              <div style={{ color: '#555', fontFamily: 'DM Mono, monospace', fontSize: '12px' }}>Loading...</div>
+            ) : (
+              <>
+                {/* KPI row */}
+                <div style={{ display: 'flex', gap: '12px', marginBottom: '20px' }}>
+                  {[
+                    { label: 'TOTAL REVENUE', value: fmt(totals.revenue), sub: 'All sources', sc: '#22c55e' },
+                    { label: 'GROSS PROFIT', value: fmt(totals.gross_profit), sub: pct(totals.gross_profit/totals.revenue*100) + ' gross margin', sc: '#22c55e' },
+                    { label: 'TOTAL EXPENSES', value: fmt(totals.expenses), sub: 'Operations', sc: '#CC2222' },
+                    { label: 'NET PROFIT', value: fmt(totals.profit), sub: pct(totals.profit/totals.revenue*100) + ' net margin', sc: '#22c55e' },
+                  ].map(k => (
+                    <div key={k.label} style={{ flex: 1, background: '#1a1a1a', border: '1px solid #2a2a2a', borderRadius: '6px', padding: '14px 16px' }}>
+                      <div style={{ fontSize: '9px', color: '#4a4a4a', letterSpacing: '0.15em', marginBottom: '6px', fontFamily: 'DM Mono, monospace' }}>{k.label}</div>
+                      <div style={{ fontSize: '20px', color: '#fff', fontWeight: '600', fontFamily: 'DM Mono, monospace' }}>{k.value}</div>
+                      <div style={{ fontSize: '10px', color: k.sc, marginTop: '4px', fontFamily: 'DM Mono, monospace' }}>{k.sub}</div>
+                    </div>
+                  ))}
+                </div>
 
-          {/* Content */}
-          <div className="fade-up">
-            {activeTab === 'pl' && <PLView onDrill={setDrillAccount} />}
-            {activeTab === 'bs' && <BalanceView />}
-            {activeTab === 'cf' && (
-              <div style={{ padding: '48px', textAlign: 'center',
-                background: '#fff', border: '1px solid #EDF2F7', borderRadius: '2px' }}>
-                <div style={{ fontFamily: 'Playfair Display, serif', fontSize: '22px',
-                  color: '#0D0D0D', marginBottom: '8px' }}>Cash Flow Statement</div>
-                <div style={{ color: '#A0AEC0', fontSize: '14px' }}>Coming in the next build</div>
-              </div>
+                {/* Tabs */}
+                <div style={{ display: 'flex', gap: '2px', borderBottom: '1px solid #2a2a2a', marginBottom: '20px' }}>
+                  {tabs.map(t => (
+                    <button key={t.id} onClick={() => setActiveTab(t.id)} style={{
+                      padding: '8px 16px', fontSize: '10px', fontFamily: 'DM Mono, monospace',
+                      letterSpacing: '0.08em', background: 'none', border: 'none', cursor: 'pointer',
+                      color: activeTab === t.id ? '#fff' : '#555',
+                      borderBottom: activeTab === t.id ? `2px solid ${THEME.accent}` : '2px solid transparent',
+                      marginBottom: '-1px',
+                    }}>{t.label}</button>
+                  ))}
+                </div>
+
+                {/* P&L Tab */}
+                {activeTab === 'pl' && (
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
+                    {PL_ROWS.map(section => {
+                      const sectionTotal = section.rows.reduce((s, r) => s + r.amount, 0)
+                      return (
+                        <div key={section.section} style={{ background: '#1a1a1a', border: '1px solid #2a2a2a', borderRadius: '6px', padding: '16px' }}>
+                          <div style={{ fontSize: '9px', color: '#4a4a4a', letterSpacing: '0.15em', marginBottom: '12px', paddingBottom: '8px', borderBottom: '1px solid #222', fontFamily: 'DM Mono, monospace' }}>{section.section}</div>
+                          <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+                            <thead>
+                              <tr>
+                                <th style={hcell('left')}>ACCOUNT</th>
+                                <th style={hcell('right')}>AMOUNT</th>
+                                <th style={hcell('right')}>TXNS</th>
+                                <th style={hcell('right')}>ACTION</th>
+                              </tr>
+                            </thead>
+                            <tbody>
+                              {section.rows.map(row => (
+                                <tr key={row.label} onMouseEnter={e => e.currentTarget.style.background='#1f1f1f'} onMouseLeave={e => e.currentTarget.style.background='transparent'}>
+                                  <td style={cell('left', { color: '#ddd' })}>{row.label}</td>
+                                  <td style={cell('right', { color: row.amount >= 0 ? '#22c55e' : '#CC2222' })}>{fmt(row.amount)}</td>
+                                  <td style={cell('right', { color: '#555' })}>{row.txns || '—'}</td>
+                                  <td style={cell('right')}>
+                                    {row.note ? (
+                                      <span style={{ fontSize: '9px', background: '#2a1a0a', color: '#f59e0b', padding: '2px 6px', borderRadius: '3px' }}>{row.note}</span>
+                                    ) : row.account ? (
+                                      <button onClick={() => setDrillAccount(row.account)} style={{
+                                        fontSize: '9px', background: '#1f1f1f', color: THEME.accent,
+                                        border: `1px solid #2a2a2a`, padding: '2px 8px', borderRadius: '3px',
+                                        cursor: 'pointer', fontFamily: 'DM Mono, monospace'
+                                      }}>DRILL →</button>
+                                    ) : null}
+                                  </td>
+                                </tr>
+                              ))}
+                              <tr>
+                                <td colSpan={4} style={{ padding: '8px 10px', borderTop: '1px solid #333', fontFamily: 'DM Mono, monospace', fontSize: '11px', color: '#fff', fontWeight: '600', textAlign: 'right' }}>
+                                  {section.section === 'INCOME' ? 'Total Income: ' : section.section === 'COST OF GOODS SOLD' ? 'Gross Profit: ' : 'Total Expenses: '}
+                                  <span style={{ color: sectionTotal >= 0 ? '#22c55e' : '#CC2222' }}>{fmt(sectionTotal)}</span>
+                                </td>
+                              </tr>
+                            </tbody>
+                          </table>
+                        </div>
+                      )
+                    })}
+                    {/* Net profit */}
+                    <div style={{ background: '#141a14', border: '1px solid #1e2e1e', borderRadius: '6px', padding: '16px 20px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                      <div style={{ fontSize: '13px', color: '#22c55e', fontWeight: '600', fontFamily: 'DM Mono, monospace', letterSpacing: '0.1em' }}>NET PROFIT</div>
+                      <div style={{ fontSize: '22px', color: '#22c55e', fontWeight: '700', fontFamily: 'DM Mono, monospace' }}>{fmt(totals.profit)}</div>
+                    </div>
+                    <div style={{ fontSize: '9px', color: '#444', fontFamily: 'DM Mono, monospace' }}>
+                      * May COGS estimated: $1,313 QB actual + $13,896 Weldon purchases pending QB entry
+                    </div>
+                  </div>
+                )}
+
+                {/* Monthly Table Tab */}
+                {activeTab === 'monthly' && (
+                  <div style={{ background: '#1a1a1a', border: '1px solid #2a2a2a', borderRadius: '6px', padding: '16px' }}>
+                    <div style={{ fontSize: '9px', color: '#4a4a4a', letterSpacing: '0.15em', marginBottom: '12px', fontFamily: 'DM Mono, monospace' }}>MONTHLY P&L — FROM QUICKBOOKS</div>
+                    <table style={{ width: '100%', borderCollapse: 'collapse', fontFamily: 'DM Mono, monospace' }}>
+                      <thead>
+                        <tr>
+                          {['Month','Revenue','COGS','Gross Profit','Expenses','Net Profit','Margin'].map(h => (
+                            <th key={h} style={hcell(h === 'Month' ? 'left' : 'right')}>{h}</th>
+                          ))}
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {monthly.map((m, i) => (
+                          <tr key={i} onMouseEnter={e => e.currentTarget.style.background='#1f1f1f'} onMouseLeave={e => e.currentTarget.style.background='transparent'}>
+                            <td style={cell('left', { color: '#fff' })}>
+                              {m.label}
+                              {m.notes && <span style={{ marginLeft: '6px', fontSize: '8px', color: '#f59e0b' }}>*est</span>}
+                            </td>
+                            <td style={cell('right')}>{fmt(m.revenue)}</td>
+                            <td style={cell('right', { color: '#CC2222' })}>{fmt(m.cogs)}</td>
+                            <td style={cell('right', { color: '#22c55e' })}>{fmt(m.gross_profit)}</td>
+                            <td style={cell('right', { color: '#CC2222' })}>{fmt(m.expenses)}</td>
+                            <td style={cell('right', { color: '#22c55e', fontWeight: '600' })}>{fmt(m.profit)}</td>
+                            <td style={cell('right')}>
+                              <span style={{ background: '#142014', color: '#22c55e', padding: '1px 6px', borderRadius: '3px', fontSize: '9px' }}>
+                                {m.revenue > 0 ? pct(m.profit / m.revenue * 100) : '—'}
+                              </span>
+                            </td>
+                          </tr>
+                        ))}
+                        <tr>
+                          {[
+                            { v: 'TOTAL', a: 'left', c: '#fff', w: '600' },
+                            { v: fmt(totals.revenue), a: 'right', c: '#fff', w: '600' },
+                            { v: fmt(totals.cogs), a: 'right', c: '#CC2222', w: '600' },
+                            { v: fmt(totals.gross_profit), a: 'right', c: '#22c55e', w: '600' },
+                            { v: fmt(totals.expenses), a: 'right', c: '#CC2222', w: '600' },
+                            { v: fmt(totals.profit), a: 'right', c: '#22c55e', w: '600' },
+                            { v: pct(totals.profit/totals.revenue*100), a: 'right', c: '#22c55e', w: '600' },
+                          ].map((col, i) => (
+                            <td key={i} style={{ padding: '9px 10px', borderTop: '1px solid #333', color: col.c, fontSize: '11px', fontWeight: col.w, fontFamily: 'DM Mono, monospace', textAlign: col.a }}>{col.v}</td>
+                          ))}
+                        </tr>
+                      </tbody>
+                    </table>
+                    <div style={{ marginTop: '10px', fontSize: '9px', color: '#444', fontFamily: 'DM Mono, monospace' }}>
+                      * May COGS estimated — Weldon $13,896 pending QB entry
+                    </div>
+                  </div>
+                )}
+
+                {/* Expense Breakdown Tab */}
+                {activeTab === 'expenses' && (
+                  <div style={{ background: '#1a1a1a', border: '1px solid #2a2a2a', borderRadius: '6px', padding: '16px' }}>
+                    <div style={{ fontSize: '9px', color: '#4a4a4a', letterSpacing: '0.15em', marginBottom: '14px', fontFamily: 'DM Mono, monospace' }}>EXPENSE BREAKDOWN</div>
+                    {[
+                      { n: 'Personal draws', v: 44334 },
+                      { n: 'Payroll / Employees', v: 24000 },
+                      { n: 'Hart', v: 6400 },
+                      { n: 'Katz Chase CC', v: 5693 },
+                      { n: 'Bank charges', v: 2808 },
+                      { n: 'Car', v: 2090 },
+                      { n: 'Repairs & Maint.', v: 1842 },
+                      { n: 'Charity', v: 1363 },
+                      { n: 'Computer', v: 828 },
+                    ].map(e => (
+                      <div key={e.n} style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '7px 0', borderBottom: '1px solid #1c1c1c' }}>
+                        <div style={{ width: '160px', fontSize: '10px', color: '#aaa', flexShrink: 0, fontFamily: 'DM Mono, monospace' }}>{e.n}</div>
+                        <div style={{ flex: 1, height: '5px', background: '#222', borderRadius: '3px' }}>
+                          <div style={{ height: '5px', background: '#CC2222', borderRadius: '3px', width: `${Math.round(e.v / 44334 * 100)}%` }}></div>
+                        </div>
+                        <div style={{ width: '70px', textAlign: 'right', fontSize: '10px', color: '#CC2222', fontFamily: 'DM Mono, monospace' }}>{fmt(e.v)}</div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+
+                {/* Accounts Tab */}
+                {activeTab === 'accounts' && (
+                  <div style={{ background: '#1a1a1a', border: '1px solid #2a2a2a', borderRadius: '6px', padding: '16px' }}>
+                    <div style={{ fontSize: '9px', color: '#4a4a4a', letterSpacing: '0.15em', marginBottom: '12px', fontFamily: 'DM Mono, monospace' }}>KEY ACCOUNTS — CLICK TO DRILL DOWN</div>
+                    {KEY_ACCOUNTS.map(a => (
+                      <div key={a.name} onClick={() => setDrillAccount(a.name)} style={{
+                        display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+                        padding: '10px 12px', borderBottom: '1px solid #1c1c1c', cursor: 'pointer',
+                        borderRadius: '4px', transition: 'background 0.1s'
+                      }}
+                        onMouseEnter={e => e.currentTarget.style.background='#1f1f1f'}
+                        onMouseLeave={e => e.currentTarget.style.background='transparent'}
+                      >
+                        <div>
+                          <div style={{ fontSize: '11px', color: '#ddd', fontFamily: 'DM Mono, monospace' }}>{a.name}</div>
+                          <div style={{ fontSize: '9px', color: '#555', marginTop: '2px', fontFamily: 'DM Mono, monospace' }}>{a.sub}</div>
+                        </div>
+                        <div style={{ textAlign: 'right' }}>
+                          <div style={{ fontSize: '10px', color: '#666', fontFamily: 'DM Mono, monospace' }}>{a.txns} txns</div>
+                          <div style={{ fontSize: '9px', color: THEME.accent, marginTop: '2px', fontFamily: 'DM Mono, monospace' }}>DRILL →</div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+
+              </>
             )}
           </div>
         </div>
       </div>
-
-      {/* Drill Modal */}
-      <DrillModal account={drillAccount} onClose={() => setDrillAccount(null)} />
     </>
   )
 }
