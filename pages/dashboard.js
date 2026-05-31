@@ -2,25 +2,22 @@ import { useEffect, useState } from 'react'
 import { useRouter } from 'next/router'
 import Head from 'next/head'
 import { supabase } from '../lib/supabase'
-import { AreaChart, Area, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts'
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts'
 
 const fmt = (n) => new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }).format(Math.abs(n))
 const pct = (n) => `${parseFloat(n).toFixed(1)}%`
 
-const THEME = {
-  sidebarBg: '#1A1A1A',
-  sidebarBorder: '#2A2A2A',
-  accent: '#CC2222',
-  pageBg: '#F5F5F5',
-  cardBg: '#fff',
-}
+const MONTHS = { '01':'JAN','02':'FEB','03':'MAR','04':'APR','05':'MAY','06':'JUN','07':'JUL','08':'AUG','09':'SEP','10':'OCT','11':'NOV','12':'DEC' }
+
+const THEME = { sidebarBg: '#1A1A1A', sidebarBorder: '#2A2A2A', accent: '#CC2222' }
 
 const NAV = [
-  { id: 'dashboard', label: 'Dashboard', href: '/dashboard' },
-  { id: 'financials', label: 'Financials', href: '/financials' },
-  { id: 'inventory', label: 'Sales & Items', href: '/inventory' },
-  { id: 'accounts', label: 'Accounts', href: '/accounts' },
-  { id: 'ai', label: '✦ Ask AI', href: '/ai' },
+  { id: 'dashboard',  label: 'Dashboard',    href: '/dashboard' },
+  { id: 'financials', label: 'Financials',   href: '/financials' },
+  { id: 'inventory',  label: 'Sales & Items',href: '/inventory' },
+  { id: 'orders',     label: 'Orders',       href: '/orders' },
+  { id: 'accounts',   label: 'Accounts',     href: '/accounts' },
+  { id: 'ai',         label: '✦ Ask AI',     href: '/ai' },
 ]
 
 const TOP_TIRES = [
@@ -39,7 +36,7 @@ function Sidebar({ active }) {
     <div style={{
       width: '220px', minHeight: '100vh', background: THEME.sidebarBg,
       display: 'flex', flexDirection: 'column', position: 'fixed', left: 0, top: 0,
-      borderRight: `1px solid ${THEME.sidebarBorder}`, zIndex: 100
+      borderRight: `1px solid ${THEME.sidebarBorder}`, zIndex: 100,
     }}>
       <div style={{ padding: '24px 20px', borderBottom: `1px solid ${THEME.sidebarBorder}` }}>
         <div style={{ fontSize: '18px', fontWeight: '700', color: '#fff', letterSpacing: '0.1em', fontFamily: 'DM Mono, monospace' }}>REYDEL</div>
@@ -70,13 +67,10 @@ function Sidebar({ active }) {
 
 function KPICard({ label, value, sub, subColor }) {
   return (
-    <div style={{
-      background: '#1a1a1a', border: '1px solid #2a2a2a', borderRadius: '6px',
-      padding: '14px 16px', flex: 1
-    }}>
-      <div style={{ fontSize: '9px', color: '#4a4a4a', letterSpacing: '0.15em', marginBottom: '6px', fontFamily: 'DM Mono, monospace' }}>{label}</div>
-      <div style={{ fontSize: '20px', color: '#fff', fontWeight: '600', fontFamily: 'DM Mono, monospace' }}>{value}</div>
-      {sub && <div style={{ fontSize: '10px', color: subColor || '#666', marginTop: '4px', fontFamily: 'DM Mono, monospace' }}>{sub}</div>}
+    <div style={{ background: '#fff', border: '1px solid #E5E5E5', borderRadius: '6px', padding: '14px 16px', flex: 1 }}>
+      <div style={{ fontSize: '9px', color: '#888', letterSpacing: '0.15em', marginBottom: '6px', fontFamily: 'DM Mono, monospace' }}>{label}</div>
+      <div style={{ fontSize: '20px', color: '#1a1a1a', fontWeight: '600', fontFamily: 'DM Mono, monospace' }}>{value}</div>
+      {sub && <div style={{ fontSize: '10px', color: subColor || '#888', marginTop: '4px', fontFamily: 'DM Mono, monospace' }}>{sub}</div>}
     </div>
   )
 }
@@ -84,10 +78,10 @@ function KPICard({ label, value, sub, subColor }) {
 const CustomTooltip = ({ active, payload, label }) => {
   if (!active || !payload?.length) return null
   return (
-    <div style={{ background: '#1a1a1a', border: '1px solid #333', borderRadius: '4px', padding: '10px 14px' }}>
+    <div style={{ background: '#fff', border: '1px solid #E5E5E5', borderRadius: '4px', padding: '10px 14px', boxShadow: '0 4px 12px rgba(0,0,0,0.08)' }}>
       <div style={{ fontSize: '11px', color: '#888', marginBottom: '6px', fontFamily: 'DM Mono, monospace' }}>{label}</div>
       {payload.map(p => (
-        <div key={p.name} style={{ fontSize: '12px', color: p.color, fontFamily: 'DM Mono, monospace' }}>
+        <div key={p.name} style={{ fontSize: '12px', color: p.color === '#E5E5E5' ? '#888' : p.color, fontFamily: 'DM Mono, monospace' }}>
           {p.name}: {fmt(p.value)}
         </div>
       ))}
@@ -102,19 +96,15 @@ export default function Dashboard() {
 
   useEffect(() => {
     async function load() {
-      const { data } = await supabase
-        .from('monthly_summary')
-        .select('*')
-        .order('month')
+      const { data } = await supabase.from('monthly_summary').select('*').order('month')
       if (data) {
         setMonthly(data.map(r => ({
           month: r.month.slice(0, 7),
-          label: new Date(r.month + '-01').toLocaleString('default', { month: 'short' }).toUpperCase(),
+          label: MONTHS[r.month.slice(5, 7)] || r.month.slice(5, 7),
           revenue: parseFloat(r.revenue),
           expenses: parseFloat(r.expenses),
           profit: parseFloat(r.profit),
           cogs: parseFloat(r.cogs),
-          gross_profit: parseFloat(r.gross_profit),
           notes: r.notes || null,
         })))
       }
@@ -124,132 +114,129 @@ export default function Dashboard() {
   }, [])
 
   const totalRevenue = monthly.reduce((s, r) => s + r.revenue, 0)
-  const totalProfit = monthly.reduce((s, r) => s + r.profit, 0)
-  const totalCogs = monthly.reduce((s, r) => s + r.cogs, 0)
-  const avgMargin = totalRevenue > 0 ? (totalProfit / totalRevenue * 100).toFixed(1) : 0
+  const totalProfit  = monthly.reduce((s, r) => s + r.profit, 0)
+  const totalCogs    = monthly.reduce((s, r) => s + r.cogs, 0)
+  const avgMargin    = totalRevenue > 0 ? (totalProfit / totalRevenue * 100).toFixed(1) : 0
 
   return (
     <>
       <Head><title>Reydel Tire — Dashboard</title></Head>
-      <div style={{ display: 'flex', minHeight: '100vh', background: '#111' }}>
+      <div style={{ display: 'flex', minHeight: '100vh', background: '#F8F8F8' }}>
         <Sidebar active="dashboard" />
         <div style={{ marginLeft: '220px', flex: 1, display: 'flex', flexDirection: 'column' }}>
 
           {/* Topbar */}
-          <div style={{
-            background: '#1a1a1a', borderBottom: '1px solid #2a2a2a',
-            padding: '14px 28px', display: 'flex', alignItems: 'center', justifyContent: 'space-between'
-          }}>
-            <div style={{ fontSize: '11px', color: '#fff', letterSpacing: '0.15em', fontFamily: 'DM Mono, monospace' }}>DASHBOARD</div>
+          <div style={{ background: '#fff', borderBottom: '1px solid #E5E5E5', padding: '14px 28px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+            <div style={{ fontSize: '11px', color: '#1a1a1a', letterSpacing: '0.15em', fontFamily: 'DM Mono, monospace' }}>DASHBOARD</div>
             <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-              <div style={{ width: '6px', height: '6px', background: '#22c55e', borderRadius: '50%' }}></div>
-              <div style={{ fontSize: '10px', color: '#444', fontFamily: 'DM Mono, monospace' }}>Live · Supabase</div>
+              <div style={{ width: '6px', height: '6px', background: '#22c55e', borderRadius: '50%' }} />
+              <div style={{ fontSize: '10px', color: '#888', fontFamily: 'DM Mono, monospace' }}>Live · Supabase</div>
             </div>
           </div>
 
           <div style={{ padding: '24px 28px' }}>
             {loading ? (
-              <div style={{ color: '#555', fontFamily: 'DM Mono, monospace', fontSize: '12px' }}>Loading...</div>
+              <div style={{ color: '#888', fontFamily: 'DM Mono, monospace', fontSize: '12px' }}>Loading...</div>
             ) : (
               <>
                 {/* KPIs */}
                 <div style={{ display: 'flex', gap: '12px', marginBottom: '20px' }}>
-                  <KPICard label="TOTAL REVENUE" value={fmt(totalRevenue)} sub="Jan–May 2026" subColor="#22c55e" />
-                  <KPICard label="NET PROFIT" value={fmt(totalProfit)} sub={`${avgMargin}% margin`} subColor="#22c55e" />
-                  <KPICard label="TOTAL COGS" value={fmt(totalCogs)} sub="QB + Weldon matched" subColor="#888" />
-                  <KPICard label="GL TRANSACTIONS" value="5,187" sub="99.7% matched" subColor="#22c55e" />
+                  <KPICard label="TOTAL REVENUE"    value={fmt(totalRevenue)} sub="Jan–May 2026"        subColor="#16a34a" />
+                  <KPICard label="NET PROFIT"       value={fmt(totalProfit)}  sub={`${avgMargin}% margin`} subColor="#16a34a" />
+                  <KPICard label="TOTAL COGS"       value={fmt(totalCogs)}    sub="QB + Weldon matched" subColor="#888" />
+                  <KPICard label="GL TRANSACTIONS"  value="5,187"             sub="99.7% matched"       subColor="#16a34a" />
                 </div>
 
                 {/* Charts row */}
                 <div style={{ display: 'grid', gridTemplateColumns: '1.6fr 1fr', gap: '16px', marginBottom: '20px' }}>
 
                   {/* Monthly chart */}
-                  <div style={{ background: '#1a1a1a', border: '1px solid #2a2a2a', borderRadius: '6px', padding: '16px' }}>
-                    <div style={{ fontSize: '9px', color: '#4a4a4a', letterSpacing: '0.15em', marginBottom: '12px', fontFamily: 'DM Mono, monospace' }}>MONTHLY REVENUE / EXPENSES / PROFIT</div>
+                  <div style={{ background: '#fff', border: '1px solid #E5E5E5', borderRadius: '6px', padding: '16px' }}>
+                    <div style={{ fontSize: '9px', color: '#888', letterSpacing: '0.15em', marginBottom: '12px', fontFamily: 'DM Mono, monospace' }}>MONTHLY REVENUE / EXPENSES / PROFIT</div>
                     <div style={{ display: 'flex', gap: '12px', marginBottom: '10px' }}>
-                      {[['#CC2222','Revenue'],['#333','Expenses'],['#22c55e','Profit']].map(([c,l]) => (
-                        <span key={l} style={{ display: 'flex', alignItems: 'center', gap: '4px', fontSize: '9px', color: '#666', fontFamily: 'DM Mono, monospace' }}>
-                          <span style={{ width: '8px', height: '8px', background: c, borderRadius: '1px', display: 'inline-block' }}></span>{l}
+                      {[['#CC2222','Revenue'],['#D0D0D0','Expenses'],['#16a34a','Profit']].map(([c, l]) => (
+                        <span key={l} style={{ display: 'flex', alignItems: 'center', gap: '4px', fontSize: '9px', color: '#888', fontFamily: 'DM Mono, monospace' }}>
+                          <span style={{ width: '8px', height: '8px', background: c, borderRadius: '1px', display: 'inline-block' }} />{l}
                         </span>
                       ))}
                     </div>
                     <ResponsiveContainer width="100%" height={160}>
                       <BarChart data={monthly} barGap={2} barCategoryGap="25%">
-                        <CartesianGrid strokeDasharray="3 3" stroke="#222" vertical={false} />
-                        <XAxis dataKey="label" tick={{ fontSize: 10, fill: '#555', fontFamily: 'DM Mono, monospace' }} axisLine={false} tickLine={false} />
-                        <YAxis tick={{ fontSize: 10, fill: '#555', fontFamily: 'DM Mono, monospace' }} axisLine={false} tickLine={false} tickFormatter={v => `$${(v/1000).toFixed(0)}k`} />
+                        <CartesianGrid strokeDasharray="3 3" stroke="#F0F0F0" vertical={false} />
+                        <XAxis dataKey="label" tick={{ fontSize: 10, fill: '#888', fontFamily: 'DM Mono, monospace' }} axisLine={false} tickLine={false} />
+                        <YAxis tick={{ fontSize: 10, fill: '#888', fontFamily: 'DM Mono, monospace' }} axisLine={false} tickLine={false} tickFormatter={v => `$${(v / 1000).toFixed(0)}k`} />
                         <Tooltip content={<CustomTooltip />} />
-                        <Bar dataKey="revenue" name="Revenue" fill="#CC2222" radius={[2,2,0,0]} />
-                        <Bar dataKey="expenses" name="Expenses" fill="#2a2a2a" radius={[2,2,0,0]} />
-                        <Bar dataKey="profit" name="Profit" fill="#22c55e" radius={[2,2,0,0]} />
+                        <Bar dataKey="revenue"  name="Revenue"  fill="#CC2222" radius={[2,2,0,0]} />
+                        <Bar dataKey="expenses" name="Expenses" fill="#D0D0D0" radius={[2,2,0,0]} />
+                        <Bar dataKey="profit"   name="Profit"   fill="#16a34a" radius={[2,2,0,0]} />
                       </BarChart>
                     </ResponsiveContainer>
                   </div>
 
                   {/* Monthly profit table */}
-                  <div style={{ background: '#1a1a1a', border: '1px solid #2a2a2a', borderRadius: '6px', padding: '16px' }}>
-                    <div style={{ fontSize: '9px', color: '#4a4a4a', letterSpacing: '0.15em', marginBottom: '12px', fontFamily: 'DM Mono, monospace' }}>PROFIT BY MONTH</div>
+                  <div style={{ background: '#fff', border: '1px solid #E5E5E5', borderRadius: '6px', padding: '16px' }}>
+                    <div style={{ fontSize: '9px', color: '#888', letterSpacing: '0.15em', marginBottom: '12px', fontFamily: 'DM Mono, monospace' }}>PROFIT BY MONTH</div>
                     <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '11px', fontFamily: 'DM Mono, monospace' }}>
                       <thead>
                         <tr>
                           {['Month','Profit','Margin'].map(h => (
-                            <th key={h} style={{ padding: '5px 8px', fontSize: '9px', color: '#4a4a4a', fontWeight: '400', letterSpacing: '0.08em', borderBottom: '1px solid #222', textAlign: h === 'Month' ? 'left' : 'right' }}>{h}</th>
+                            <th key={h} style={{ padding: '5px 8px', fontSize: '9px', color: '#888', fontWeight: '400', letterSpacing: '0.08em', borderBottom: '1px solid #E5E5E5', textAlign: h === 'Month' ? 'left' : 'right', background: '#FAFAFA' }}>{h}</th>
                           ))}
                         </tr>
                       </thead>
                       <tbody>
                         {monthly.map(m => (
-                          <tr key={m.month}>
-                            <td style={{ padding: '7px 8px', borderBottom: '1px solid #1c1c1c', color: '#bbb' }}>
-                              {m.label} {m.notes && <span style={{ fontSize: '8px', color: '#CC2222' }}>*est</span>}
+                          <tr key={m.month} onMouseEnter={e => e.currentTarget.style.background = '#F8F8F8'} onMouseLeave={e => e.currentTarget.style.background = 'transparent'}>
+                            <td style={{ padding: '7px 8px', borderBottom: '1px solid #F0F0F0', color: '#333' }}>
+                              {m.label}{m.notes && <span style={{ fontSize: '8px', color: THEME.accent, marginLeft: '4px' }}>*est</span>}
                             </td>
-                            <td style={{ padding: '7px 8px', borderBottom: '1px solid #1c1c1c', color: '#22c55e', textAlign: 'right' }}>{fmt(m.profit)}</td>
-                            <td style={{ padding: '7px 8px', borderBottom: '1px solid #1c1c1c', textAlign: 'right' }}>
-                              <span style={{ background: '#142014', color: '#22c55e', padding: '1px 6px', borderRadius: '3px', fontSize: '9px' }}>
+                            <td style={{ padding: '7px 8px', borderBottom: '1px solid #F0F0F0', color: '#16a34a', textAlign: 'right' }}>{fmt(m.profit)}</td>
+                            <td style={{ padding: '7px 8px', borderBottom: '1px solid #F0F0F0', textAlign: 'right' }}>
+                              <span style={{ background: '#dcfce7', color: '#16a34a', padding: '1px 6px', borderRadius: '3px', fontSize: '9px' }}>
                                 {m.revenue > 0 ? pct(m.profit / m.revenue * 100) : '—'}
                               </span>
                             </td>
                           </tr>
                         ))}
                         <tr>
-                          <td style={{ padding: '8px 8px', color: '#fff', fontWeight: '600', borderTop: '1px solid #333' }}>TOTAL</td>
-                          <td style={{ padding: '8px 8px', color: '#22c55e', fontWeight: '600', textAlign: 'right', borderTop: '1px solid #333' }}>{fmt(totalProfit)}</td>
-                          <td style={{ padding: '8px 8px', textAlign: 'right', borderTop: '1px solid #333' }}>
-                            <span style={{ background: '#142014', color: '#22c55e', padding: '1px 6px', borderRadius: '3px', fontSize: '9px' }}>{avgMargin}%</span>
+                          <td style={{ padding: '8px 8px', color: '#1a1a1a', fontWeight: '700', borderTop: '2px solid #E5E5E5', background: '#FAFAFA' }}>TOTAL</td>
+                          <td style={{ padding: '8px 8px', color: '#16a34a', fontWeight: '700', textAlign: 'right', borderTop: '2px solid #E5E5E5', background: '#FAFAFA' }}>{fmt(totalProfit)}</td>
+                          <td style={{ padding: '8px 8px', textAlign: 'right', borderTop: '2px solid #E5E5E5', background: '#FAFAFA' }}>
+                            <span style={{ background: '#dcfce7', color: '#16a34a', padding: '1px 6px', borderRadius: '3px', fontSize: '9px' }}>{avgMargin}%</span>
                           </td>
                         </tr>
                       </tbody>
                     </table>
-                    <div style={{ marginTop: '10px', fontSize: '9px', color: '#444', fontFamily: 'DM Mono, monospace' }}>* May COGS estimated — Weldon pending QB entry</div>
+                    <div style={{ marginTop: '10px', fontSize: '9px', color: '#888', fontFamily: 'DM Mono, monospace' }}>* May COGS estimated — Weldon pending QB entry</div>
                   </div>
                 </div>
 
                 {/* Top tires */}
-                <div style={{ background: '#1a1a1a', border: '1px solid #2a2a2a', borderRadius: '6px', padding: '16px' }}>
+                <div style={{ background: '#fff', border: '1px solid #E5E5E5', borderRadius: '6px', padding: '16px' }}>
                   <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '12px' }}>
-                    <div style={{ fontSize: '9px', color: '#4a4a4a', letterSpacing: '0.15em', fontFamily: 'DM Mono, monospace' }}>TOP TIRE SIZES — GROSS PROFIT</div>
+                    <div style={{ fontSize: '9px', color: '#888', letterSpacing: '0.15em', fontFamily: 'DM Mono, monospace' }}>TOP TIRE SIZES — GROSS PROFIT</div>
                     <button onClick={() => router.push('/inventory')} style={{ fontSize: '10px', color: THEME.accent, background: 'none', border: 'none', cursor: 'pointer', fontFamily: 'DM Mono, monospace' }}>VIEW ALL →</button>
                   </div>
                   <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '11px', fontFamily: 'DM Mono, monospace' }}>
                     <thead>
                       <tr>
                         {['Size','Units','Revenue','COGS','Profit','Margin'].map(h => (
-                          <th key={h} style={{ padding: '5px 8px', fontSize: '9px', color: '#4a4a4a', fontWeight: '400', letterSpacing: '0.08em', borderBottom: '1px solid #222', textAlign: h === 'Size' ? 'left' : 'right' }}>{h}</th>
+                          <th key={h} style={{ padding: '5px 8px', fontSize: '9px', color: '#888', fontWeight: '400', letterSpacing: '0.08em', borderBottom: '1px solid #E5E5E5', textAlign: h === 'Size' ? 'left' : 'right', background: '#FAFAFA' }}>{h}</th>
                         ))}
                       </tr>
                     </thead>
                     <tbody>
-                      {TOP_TIRES.map((t, i) => (
-                        <tr key={t.size} style={{ cursor: 'pointer' }} onMouseEnter={e => e.currentTarget.style.background='#1f1f1f'} onMouseLeave={e => e.currentTarget.style.background='transparent'}>
-                          <td style={{ padding: '7px 8px', borderBottom: '1px solid #1c1c1c', color: '#fff' }}>{t.size}</td>
-                          <td style={{ padding: '7px 8px', borderBottom: '1px solid #1c1c1c', color: '#aaa', textAlign: 'right' }}>{t.units}</td>
-                          <td style={{ padding: '7px 8px', borderBottom: '1px solid #1c1c1c', color: '#aaa', textAlign: 'right' }}>{fmt(t.revenue)}</td>
-                          <td style={{ padding: '7px 8px', borderBottom: '1px solid #1c1c1c', color: '#aaa', textAlign: 'right' }}>{fmt(t.cogs)}</td>
-                          <td style={{ padding: '7px 8px', borderBottom: '1px solid #1c1c1c', color: '#22c55e', textAlign: 'right' }}>{fmt(t.profit)}</td>
-                          <td style={{ padding: '7px 8px', borderBottom: '1px solid #1c1c1c', textAlign: 'right' }}>
+                      {TOP_TIRES.map((t) => (
+                        <tr key={t.size} onMouseEnter={e => e.currentTarget.style.background = '#F8F8F8'} onMouseLeave={e => e.currentTarget.style.background = 'transparent'}>
+                          <td style={{ padding: '7px 8px', borderBottom: '1px solid #F0F0F0', color: '#1a1a1a', fontWeight: '500' }}>{t.size}</td>
+                          <td style={{ padding: '7px 8px', borderBottom: '1px solid #F0F0F0', color: '#888', textAlign: 'right' }}>{t.units}</td>
+                          <td style={{ padding: '7px 8px', borderBottom: '1px solid #F0F0F0', color: '#333', textAlign: 'right' }}>{fmt(t.revenue)}</td>
+                          <td style={{ padding: '7px 8px', borderBottom: '1px solid #F0F0F0', color: '#888', textAlign: 'right' }}>{fmt(t.cogs)}</td>
+                          <td style={{ padding: '7px 8px', borderBottom: '1px solid #F0F0F0', color: '#16a34a', textAlign: 'right', fontWeight: '600' }}>{fmt(t.profit)}</td>
+                          <td style={{ padding: '7px 8px', borderBottom: '1px solid #F0F0F0', textAlign: 'right' }}>
                             <div style={{ display: 'flex', alignItems: 'center', gap: '6px', justifyContent: 'flex-end' }}>
-                              <div style={{ width: '50px', height: '3px', background: '#2a2a2a', borderRadius: '2px' }}>
-                                <div style={{ height: '3px', background: '#CC2222', borderRadius: '2px', width: `${Math.round(t.profit / 8471 * 100)}%` }}></div>
+                              <div style={{ width: '50px', height: '3px', background: '#E5E5E5', borderRadius: '2px' }}>
+                                <div style={{ height: '3px', background: THEME.accent, borderRadius: '2px', width: `${Math.round(t.profit / 8471 * 100)}%` }} />
                               </div>
                               <span style={{ fontSize: '9px', color: '#888', minWidth: '32px' }}>{t.margin}%</span>
                             </div>
