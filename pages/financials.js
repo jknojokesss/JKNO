@@ -149,7 +149,7 @@ export default function Financials() {
       supabase.from('pl_totals').select('label, amount, category'),
     ]).then(([{ data: mData }, { data: pData }]) => {
       if (mData) setMonthly(mData.map(r => ({
-        label: new Date(r.month + '-01').toLocaleString('default', { month: 'short' }).toUpperCase() + ' ' + r.month.slice(0,4),
+        label: { '01':'JAN','02':'FEB','03':'MAR','04':'APR','05':'MAY','06':'JUN','07':'JUL','08':'AUG','09':'SEP','10':'OCT','11':'NOV','12':'DEC' }[r.month.slice(5)] + ' ' + r.month.slice(0,4),
         revenue: parseFloat(r.revenue),
         expenses: parseFloat(r.expenses),
         profit: parseFloat(r.profit),
@@ -327,7 +327,7 @@ export default function Financials() {
                     <table style={{ width: '100%', borderCollapse: 'collapse', fontFamily: 'DM Mono, monospace' }}>
                       <thead>
                         <tr>
-                          {['Month','Revenue','COGS','Gross Profit','Expenses','Net Profit','Margin'].map(h => (
+                          {['Month','Revenue','COGS','Gross Profit','Net Profit','Margin'].map(h => (
                             <th key={h} style={hcell(h === 'Month' ? 'left' : 'right')}>{h}</th>
                           ))}
                         </tr>
@@ -342,7 +342,6 @@ export default function Financials() {
                             <td style={cell('right')}>{fmt(m.revenue)}</td>
                             <td style={cell('right', { color: '#CC2222' })}>{fmt(m.cogs)}</td>
                             <td style={cell('right', { color: '#22c55e' })}>{fmt(m.revenue - m.cogs)}</td>
-                            <td style={cell('right', { color: '#CC2222' })}>{fmt(m.expenses)}</td>
                             <td style={cell('right', { color: '#22c55e', fontWeight: '600' })}>{fmt(m.profit)}</td>
                             <td style={cell('right')}>
                               <span style={{ background: '#142014', color: '#22c55e', padding: '1px 6px', borderRadius: '3px', fontSize: '9px' }}>
@@ -357,7 +356,6 @@ export default function Financials() {
                             { v: fmt(totals.revenue), a: 'right', c: '#fff', w: '600' },
                             { v: fmt(totals.cogs), a: 'right', c: '#CC2222', w: '600' },
                             { v: fmt(totals.revenue - totals.cogs), a: 'right', c: '#22c55e', w: '600' },
-                            { v: fmt(totals.expenses), a: 'right', c: '#CC2222', w: '600' },
                             { v: fmt(totals.profit), a: 'right', c: '#22c55e', w: '600' },
                             { v: pct(totals.profit/totals.revenue*100), a: 'right', c: '#22c55e', w: '600' },
                           ].map((col, i) => (
