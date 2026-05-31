@@ -72,7 +72,7 @@ export default function Inventory() {
 
   useEffect(() => {
     async function load() {
-      const { data: lineItems } = await supabase.from('clover_line_items').select('item_name, revenue, quantity, date')
+      const { data: lineItems } = await supabase.from('clover_line_items').select('item_name, revenue, quantity, date').limit(5000)
       if (lineItems) {
         const map = {}
         lineItems.forEach(row => {
