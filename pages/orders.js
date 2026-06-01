@@ -140,6 +140,7 @@ export default function Orders() {
             : (weldonCost ?? sale * FALLBACK_RATIO)
           const isEstimated = exactCost == null && !isService && weldonCost == null
           const isExact = exactCost != null
+          const isUsed = /used/i.test(r.item_name || '')
           const cost   = costPerUnit * qty
           const profit = sale - cost
           const margin = sale > 0 ? (profit / sale) * 100 : 0
@@ -154,6 +155,7 @@ export default function Orders() {
             margin,
             isEstimated,
             isExact,
+            isUsed,
             normalizedSize: normalized,
             orderId: r.order_id,
           }
