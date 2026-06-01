@@ -134,8 +134,11 @@ export default function Orders() {
           const brandCost = (brand && normalized) ? brandCostMap[`${brand}|${normalized}`] : null
           const sizeCost  = normalized ? costMap[normalized] : null
           const weldonCost = exactCost ?? brandCost ?? sizeCost
-          const costPerUnit = isService ? 0 : (weldonCost ?? sale * FALLBACK_RATIO)
-          const isEstimated = !isService && weldonCost == null
+          // Exact-label cost (incl. used tires @ $18) wins even when the name has no parseable size.
+          const costPerUnit = exactCost != null ? exactCost
+            : isService ? 0
+            : (weldonCost ?? sale * FALLBACK_RATIO)
+          const isEstimated = exactCost == null && !isService && weldonCost == null
           const isExact = exactCost != null
           const cost   = costPerUnit * qty
           const profit = sale - cost
