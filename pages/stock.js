@@ -88,8 +88,11 @@ export default function Stock() {
 
   useEffect(() => {
     async function load() {
-      const [{ data: purchases }, sales] = await Promise.all([
+      const [{ data: purchases }, { data: reorders }, sales] = await Promise.all([
+        // Opening stock = the 4/15 bulk buy
         supabase.from('stock_purchases').select('item_label, qty_purchased, unit_cost'),
+        // Reorders since 4/15 (from the full Weldon ledger; >4/15 avoids double-counting the opening buy)
+        supabase.from('weldon_purchases').select('tire_size, qty, wholesale_unit').gt('order_date', '2026-04-15'),
         fetchAllSales(),
       ])
 
@@ -101,6 +104,15 @@ export default function Stock() {
         if (!bought[s]) bought[s] = { size: s, qty: 0, costSum: 0 }
         bought[s].qty += p.qty_purchased
         bought[s].costSum += p.qty_purchased * Number(p.unit_cost)
+      })
+
+      // Add post-4/15 reorders to the bought side
+      reorders?.forEach(p => {
+        const s = p.tire_size
+        if (!s) return
+        if (!bought[s]) bought[s] = { size: s, qty: 0, costSum: 0 }
+        bought[s].qty += p.qty
+        bought[s].costSum += p.qty * Number(p.wholesale_unit)
       })
 
       // Count sales by bare size (4/15 onward)
