@@ -195,11 +195,11 @@ export default function Orders() {
   const avgProfit   = filtered.length > 0 ? totalProfit / filtered.length : 0
   const avgMargin   = totalRev > 0 ? (totalProfit / totalRev) * 100 : 0
 
-  // Best margin size (matched only, minimum 3 sales)
+  // Best margin size — NEW tires only (exclude used), matched, minimum 3 sales
   const bySize = {}
   matched.forEach(r => {
     const k = r.normalizedSize
-    if (!k) return
+    if (!k || r.isUsed) return
     if (!bySize[k]) bySize[k] = { size: k, totalProfit: 0, totalRev: 0, count: 0 }
     bySize[k].totalProfit += r.profit
     bySize[k].totalRev    += r.sale
