@@ -88,15 +88,15 @@ export default function Stock() {
 
   useEffect(() => {
     async function load() {
-      const [{ data: purchases }, { data: reorders }, sales] = await Promise.all([
+      const [{ data: purchases }, { data: weldon }, sales] = await Promise.all([
         // Opening stock = the 4/15 bulk buy
         supabase.from('stock_purchases').select('item_label, qty_purchased, unit_cost'),
-        // Reorders since 4/15 (from the full Weldon ledger; >4/15 avoids double-counting the opening buy)
-        supabase.from('weldon_purchases').select('tire_size, qty, wholesale_unit').gt('order_date', '2026-04-15'),
+        // Full Weldon purchase ledger — used to detect special-order passthroughs
+        supabase.from('weldon_purchases').select('tire_size, order_date'),
         fetchAllSales(),
       ])
 
-      // Roll purchases up by bare size (sum qty, weighted-avg cost)
+      // Opening shelf stock, by bare size (sum qty, weighted-avg cost)
       const bought = {}
       purchases?.forEach(p => {
         const s = sizeOf(p.item_label)
@@ -106,35 +106,45 @@ export default function Stock() {
         bought[s].costSum += p.qty_purchased * Number(p.unit_cost)
       })
 
-      // Add post-4/15 reorders to the bought side
-      reorders?.forEach(p => {
-        const s = p.tire_size
-        if (!s) return
-        if (!bought[s]) bought[s] = { size: s, qty: 0, costSum: 0 }
-        bought[s].qty += p.qty
-        bought[s].costSum += p.qty * Number(p.wholesale_unit)
+      // Index Weldon purchases by size → sorted list of purchase dates (ms)
+      const purchDates = {}
+      weldon?.forEach(p => {
+        if (!p.tire_size) return
+        ;(purchDates[p.tire_size] ||= []).push(new Date(p.order_date).getTime())
       })
+      const DAY = 864e5
+      const hasNearbyPurchase = (size, saleMs) => {
+        const dates = purchDates[size]
+        if (!dates) return false
+        return dates.some(d => Math.abs(d - saleMs) <= 2 * DAY) // ±2 days = special order
+      }
 
-      // Count sales by bare size (4/15 onward)
-      const sold = {}
+      // Split sales: passthrough (special-order) vs shelf (sold from 4/15 stock)
+      const soldFromShelf = {}, specialOrders = {}
       sales.forEach(r => {
         const s = sizeOf(r.item_name)
-        if (!s) return
-        sold[s] = (sold[s] || 0) + 1
+        if (!s || /used/i.test(r.item_name || '')) return
+        const saleMs = new Date(r.date).getTime()
+        if (hasNearbyPurchase(s, saleMs)) {
+          specialOrders[s] = (specialOrders[s] || 0) + 1   // bought-to-order, not from shelf
+        } else {
+          soldFromShelf[s] = (soldFromShelf[s] || 0) + 1
+        }
       })
 
       const merged = Object.values(bought).map(b => {
-        const soldQty = sold[b.size] || 0
-        const onHand  = b.qty - soldQty
-        const avgCost = b.qty > 0 ? b.costSum / b.qty : 0
+        const shelfSold = soldFromShelf[b.size] || 0
+        const onHand    = Math.max(b.qty - shelfSold, 0) // shelf can't go below 0
+        const avgCost   = b.qty > 0 ? b.costSum / b.qty : 0
         return {
           size: b.size,
           bought: b.qty,
-          sold: soldQty,
+          sold: shelfSold,
+          special: specialOrders[b.size] || 0,
           onHand,
           avgCost,
-          value: Math.max(onHand, 0) * avgCost,
-          reordered: onHand < 0,
+          value: onHand * avgCost,
+          reordered: false,
         }
       }).sort((a, b) => a.onHand - b.onHand)
 
@@ -148,13 +158,14 @@ export default function Stock() {
     let r = rows
     if (search) r = r.filter(x => x.size.includes(search))
     if (filter === 'onhand') r = r.filter(x => x.onHand > 0)
-    if (filter === 'reordered') r = r.filter(x => x.reordered)
+    if (filter === 'sold') r = r.filter(x => x.onHand === 0)
     return r
   }, [rows, search, filter])
 
-  const totalOnHand   = rows.filter(r => r.onHand > 0).reduce((s, r) => s + r.onHand, 0)
+  const totalOnHand   = rows.reduce((s, r) => s + r.onHand, 0)
   const totalValue    = rows.reduce((s, r) => s + r.value, 0)
-  const reorderedCount = rows.filter(r => r.reordered).length
+  const totalSpecial  = rows.reduce((s, r) => s + r.special, 0)
+  const soldOutCount  = rows.filter(r => r.onHand === 0).length
 
   return (
     <>
@@ -176,17 +187,18 @@ export default function Stock() {
               <>
                 {/* Explainer */}
                 <div style={{ background: '#FFF8E6', border: '1px solid #F0E0A0', borderRadius: '6px', padding: '12px 16px', marginBottom: '20px', fontSize: '11px', color: '#7a5c00', fontFamily: 'DM Mono, monospace', lineHeight: 1.6 }}>
-                  Expected on hand = 4/15 stock purchase − tires sold since 4/15. Compare against a physical count.
-                  A <strong>negative</strong> number means more sold than the opening stock — those were reordered from Weldon (purchases not yet logged), so that size's value isn't counted here.
+                  Tracks only the <strong>4/15 opening stock</strong>. A sale counts against the shelf only if NO Weldon
+                  purchase of that size happened within ±2 days — otherwise it was a <strong>special order</strong> (bought to
+                  fill that sale, never on the shelf) and is excluded. On hand = 4/15 stock − shelf sales. Compare to a physical count.
                 </div>
 
                 {/* KPI cards */}
                 <div style={{ display: 'flex', gap: '12px', marginBottom: '20px' }}>
                   {[
-                    { label: 'EXPECTED ON HAND', value: totalOnHand.toLocaleString() + ' tires', sub: 'positive balances only', sc: '#16a34a' },
-                    { label: 'STOCK VALUE',      value: fmt(totalValue),                          sub: 'at wholesale cost',     sc: '#1a1a1a' },
-                    { label: 'SIZES REORDERED',  value: reorderedCount.toString(),                sub: 'need Weldon purchases logged', sc: THEME.accent },
-                    { label: 'SIZES TRACKED',    value: rows.length.toString(),                   sub: 'from 4/15 buy',         sc: '#888' },
+                    { label: 'ON HAND (SHELF)',   value: totalOnHand.toLocaleString() + ' tires', sub: 'left from 4/15 buy',        sc: '#16a34a' },
+                    { label: 'SHELF VALUE',       value: fmt(totalValue),                         sub: 'at wholesale cost',        sc: '#1a1a1a' },
+                    { label: 'SPECIAL ORDERS',    value: totalSpecial.toLocaleString(),           sub: 'buy-to-order passthrough', sc: '#888' },
+                    { label: 'SIZES SOLD OUT',    value: soldOutCount.toString(),                 sub: 'shelf depleted',           sc: THEME.accent },
                   ].map(k => (
                     <div key={k.label} style={{ flex: 1, background: '#fff', border: '1px solid #E5E5E5', borderRadius: '6px', padding: '14px 16px' }}>
                       <div style={{ fontSize: '9px', color: '#888', letterSpacing: '0.15em', marginBottom: '6px', fontFamily: 'DM Mono, monospace' }}>{k.label}</div>
@@ -203,7 +215,7 @@ export default function Stock() {
                     style={{ flex: 1, minWidth: '180px', padding: '8px 12px', border: '1px solid #E5E5E5', borderRadius: '4px',
                       fontSize: '11px', fontFamily: 'DM Mono, monospace', outline: 'none', background: '#fff', color: '#1a1a1a' }}
                   />
-                  {[{ k: 'all', l: 'ALL' }, { k: 'onhand', l: 'IN STOCK' }, { k: 'reordered', l: 'REORDERED' }].map(f => (
+                  {[{ k: 'all', l: 'ALL' }, { k: 'onhand', l: 'IN STOCK' }, { k: 'sold', l: 'SOLD OUT' }].map(f => (
                     <button key={f.k} onClick={() => setFilter(f.k)} style={{
                       padding: '7px 12px', fontSize: '9px', fontFamily: 'DM Mono, monospace', letterSpacing: '0.08em',
                       border: 'none', borderRadius: '4px', cursor: 'pointer',
@@ -219,11 +231,12 @@ export default function Stock() {
                     <thead>
                       <tr>
                         <th style={hcell('left')}>SIZE</th>
-                        <th style={hcell('right')}>BOUGHT (4/15)</th>
-                        <th style={hcell('right')}>SOLD SINCE</th>
-                        <th style={hcell('right')}>EXPECTED ON HAND</th>
+                        <th style={hcell('right')}>STOCKED (4/15)</th>
+                        <th style={hcell('right')}>SOLD FROM SHELF</th>
+                        <th style={hcell('right')}>SPECIAL ORDER</th>
+                        <th style={hcell('right')}>ON HAND</th>
                         <th style={hcell('right')}>UNIT COST</th>
-                        <th style={hcell('right')}>STOCK VALUE</th>
+                        <th style={hcell('right')}>SHELF VALUE</th>
                       </tr>
                     </thead>
                     <tbody>
@@ -235,10 +248,11 @@ export default function Stock() {
                           <td style={cell('left', { color: '#1a1a1a', fontWeight: '600' })}>{r.size}</td>
                           <td style={cell('right', { color: '#888' })}>{r.bought}</td>
                           <td style={cell('right', { color: '#888' })}>{r.sold}</td>
+                          <td style={cell('right', { color: '#888' })}>{r.special || '—'}</td>
                           <td style={cell('right', { fontWeight: '700',
-                            color: r.onHand < 0 ? THEME.accent : r.onHand === 0 ? '#888' : '#16a34a' })}>
-                            {r.onHand < 0 ? r.onHand : r.onHand}
-                            {r.reordered && <span style={{ marginLeft: '6px', fontSize: '8px', background: '#fee2e2', color: THEME.accent, padding: '1px 5px', borderRadius: '3px' }}>REORDERED</span>}
+                            color: r.onHand === 0 ? THEME.accent : '#16a34a' })}>
+                            {r.onHand}
+                            {r.onHand === 0 && <span style={{ marginLeft: '6px', fontSize: '8px', background: '#fee2e2', color: THEME.accent, padding: '1px 5px', borderRadius: '3px' }}>SOLD OUT</span>}
                           </td>
                           <td style={cell('right', { color: '#888' })}>{fmt(r.avgCost)}</td>
                           <td style={cell('right', { color: r.onHand > 0 ? '#1a1a1a' : '#ccc' })}>
