@@ -21,14 +21,15 @@ function normalizeItemName(name) {
 
 const THEME = { sidebarBg: '#1A1A1A', sidebarBorder: '#2A2A2A', accent: '#CC2222' }
 
-const NAV = [
-  { id: 'dashboard',  label: 'Dashboard',    href: '/dashboard' },
-  { id: 'financials', label: 'Financials',   href: '/financials' },
-  { id: 'inventory',  label: 'Sales & Items',href: '/inventory' },
-  { id: 'orders',     label: 'Orders',       href: '/orders' },
-  { id: 'stock',      label: 'Stock',        href: '/stock' },
-  { id: 'accounts',   label: 'Accounts',     href: '/accounts' },
-  { id: 'ai',         label: '✦ Ask AI',     href: '/ai' },
+// Dashboard is the home/launcher — these buttons replace the sidebar here.
+// (Inner pages keep their sidebar, whose Dashboard link returns here.)
+const NAV_BUTTONS = [
+  { id: 'financials', label: 'Financials',   href: '/financials', icon: '▣', desc: 'P&L, revenue & expenses' },
+  { id: 'inventory',  label: 'Sales & Items', href: '/inventory',  icon: '◧', desc: 'Top items by revenue' },
+  { id: 'orders',     label: 'Orders',        href: '/orders',     icon: '▤', desc: 'Order history' },
+  { id: 'stock',      label: 'Stock',         href: '/stock',      icon: '⬡', desc: 'Tires on hand' },
+  { id: 'accounts',   label: 'Accounts',      href: '/accounts',   icon: '◈', desc: 'Balances & transactions' },
+  { id: 'ai',         label: 'Ask AI',        href: '/ai',         icon: '✦', desc: 'Plain-English answers' },
 ]
 
 const TOP_TIRES = [
@@ -40,40 +41,6 @@ const TOP_TIRES = [
   { size: '255/45R19', units: 28, revenue: 6345,  cogs: 3323, profit: 3022, margin: 47.6 },
   { size: '245/50R20', units: 27, revenue: 5552,  cogs: 2729, profit: 2823, margin: 50.8 },
 ]
-
-function Sidebar({ active }) {
-  const router = useRouter()
-  return (
-    <div style={{
-      width: '220px', minHeight: '100vh', background: THEME.sidebarBg,
-      display: 'flex', flexDirection: 'column', position: 'fixed', left: 0, top: 0,
-      borderRight: `1px solid ${THEME.sidebarBorder}`, zIndex: 100,
-    }}>
-      <div style={{ padding: '24px 20px', borderBottom: `1px solid ${THEME.sidebarBorder}` }}>
-        <div style={{ fontSize: '18px', fontWeight: '700', color: '#fff', letterSpacing: '0.1em', fontFamily: 'DM Mono, monospace' }}>REYDEL</div>
-        <div style={{ fontSize: '10px', color: THEME.accent, letterSpacing: '0.2em', marginTop: '2px', fontFamily: 'DM Mono, monospace' }}>TIRE & AUTO</div>
-      </div>
-      <nav style={{ flex: 1, padding: '16px 0' }}>
-        {NAV.map(item => (
-          <button key={item.id} onClick={() => router.push(item.href)} style={{
-            display: 'flex', alignItems: 'center', gap: '10px',
-            width: '100%', padding: '10px 20px', textAlign: 'left',
-            background: active === item.id ? '#2A2A2A' : 'transparent',
-            color: active === item.id ? '#fff' : '#666',
-            border: 'none', cursor: 'pointer', fontSize: '12px',
-            fontFamily: 'DM Mono, monospace', letterSpacing: '0.06em',
-            borderLeft: active === item.id ? `2px solid ${THEME.accent}` : '2px solid transparent',
-          }}>
-            {item.label}
-          </button>
-        ))}
-      </nav>
-      <div style={{ padding: '12px 20px', borderTop: `1px solid ${THEME.sidebarBorder}`, fontSize: '10px', color: '#3a3a3a', fontFamily: 'DM Mono, monospace' }}>
-        JAN – MAY 2026
-      </div>
-    </div>
-  )
-}
 
 function KPICard({ label, value, sub, subColor }) {
   return (
@@ -175,12 +142,14 @@ export default function Dashboard() {
     <>
       <Head><title>Reydel Tire — Dashboard</title></Head>
       <div style={{ display: 'flex', minHeight: '100vh', background: '#F8F8F8' }}>
-        <Sidebar active="dashboard" />
-        <div style={{ marginLeft: '220px', flex: 1, display: 'flex', flexDirection: 'column' }}>
+        <div style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
 
-          {/* Topbar */}
+          {/* Topbar — carries the brand now that the sidebar is gone here */}
           <div style={{ background: '#fff', borderBottom: '1px solid #E5E5E5', padding: '14px 28px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-            <div style={{ fontSize: '11px', color: '#1a1a1a', letterSpacing: '0.15em', fontFamily: 'DM Mono, monospace' }}>DASHBOARD</div>
+            <div style={{ display: 'flex', alignItems: 'baseline', gap: '10px' }}>
+              <span style={{ fontSize: '16px', fontWeight: '700', color: '#1a1a1a', letterSpacing: '0.1em', fontFamily: 'DM Mono, monospace' }}>REYDEL</span>
+              <span style={{ fontSize: '10px', color: THEME.accent, letterSpacing: '0.2em', fontFamily: 'DM Mono, monospace' }}>TIRE & AUTO</span>
+            </div>
             <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
               <div style={{ width: '6px', height: '6px', background: '#22c55e', borderRadius: '50%' }} />
               <div style={{ fontSize: '10px', color: '#888', fontFamily: 'DM Mono, monospace' }}>Live · Supabase</div>
@@ -188,6 +157,26 @@ export default function Dashboard() {
           </div>
 
           <div style={{ padding: '24px 28px' }}>
+            {/* Nav launcher — replaces the sidebar on the dashboard home.
+                auto-fit grid reflows to fewer columns on narrow screens. */}
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))', gap: '10px', marginBottom: '24px' }}>
+              {NAV_BUTTONS.map(item => (
+                <button key={item.id} onClick={() => router.push(item.href)} style={{
+                  background: '#fff', border: '1px solid #E5E5E5', borderRadius: '8px',
+                  padding: '16px', cursor: 'pointer', textAlign: 'left',
+                  fontFamily: 'DM Mono, monospace', display: 'flex', flexDirection: 'column', gap: '8px',
+                  transition: 'border-color 0.15s ease, transform 0.15s ease, box-shadow 0.15s ease',
+                }}
+                  onMouseEnter={e => { e.currentTarget.style.borderColor = THEME.accent; e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = '0 4px 12px rgba(0,0,0,0.06)' }}
+                  onMouseLeave={e => { e.currentTarget.style.borderColor = '#E5E5E5'; e.currentTarget.style.transform = 'none'; e.currentTarget.style.boxShadow = 'none' }}
+                >
+                  <span style={{ fontSize: '18px', color: THEME.accent, lineHeight: 1 }}>{item.icon}</span>
+                  <span style={{ fontSize: '12px', color: '#1a1a1a', letterSpacing: '0.06em' }}>{item.label}</span>
+                  <span style={{ fontSize: '9px', color: '#888' }}>{item.desc}</span>
+                </button>
+              ))}
+            </div>
+
             {loading ? (
               <div style={{ color: '#888', fontFamily: 'DM Mono, monospace', fontSize: '12px' }}>Loading...</div>
             ) : (

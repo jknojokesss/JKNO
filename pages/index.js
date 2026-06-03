@@ -319,7 +319,7 @@ export default function Landing() {
               fontSize: 'clamp(28px, 3.5vw, 44px)', fontWeight: '600',
               letterSpacing: '-0.3px', lineHeight: 1.15, color: '#1A1A2E',
               marginBottom: '16px' }}>
-              See exactly what your clients see.
+              Your numbers, clear at a glance.
             </h2>
             <p style={{ fontSize: '15px', color: '#5A6070', maxWidth: '480px',
               margin: '0 auto', lineHeight: 1.7 }}>
