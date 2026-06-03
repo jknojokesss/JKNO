@@ -6,6 +6,29 @@ import { supabase } from '../lib/supabase'
 const fmt = (n) => new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }).format(Math.abs(n))
 const pct = (n) => `${parseFloat(n).toFixed(1)}%`
 
+// Same heuristic as the Accounts page so both views label accounts identically.
+const categorize = (name) => {
+  const n = name.toLowerCase()
+  if (n.includes('sales') || n.includes('income') || n.includes('revenue')) return 'income'
+  if (n.includes('checking') || n.includes('bank of america') || n.includes('cash on hand') ||
+      n.includes('inventory asset') || n.includes('equipment') || n.includes('clearing')) return 'asset'
+  if (n.includes('loan') || n.includes('short term loans')) return 'liability'
+  return 'expense'
+}
+const CAT_LABEL = { income: 'Income', expense: 'Expense', asset: 'Asset', liability: 'Liability' }
+
+// Optional friendly descriptions; falls back to category + transaction types.
+const ACCOUNT_DESC = {
+  'Clover Clearing Account':     'Sales deposits cleared through Clover',
+  'TOTAL CHECKING (8059) - 1':   'Primary operating checking account',
+  'BUS COMPLETE CHK (5998) - 1': 'Business checking account',
+  'Bank of America 7875':        'Secondary bank account',
+  'Cost of Goods Sold':          'MAVISX / Weldon tire COGS',
+  'Clover Sales':                'Journal entries from Clover POS',
+  'Katz Chase':                  'Credit card expenses',
+  'Short Term Loans':            'Short term loan activity',
+}
+
 const THEME = { sidebarBg: '#1A1A1A', sidebarBorder: '#2A2A2A', accent: '#CC2222' }
 
 const NAV = [
@@ -137,6 +160,7 @@ function DrillModal({ account, onClose }) {
 export default function Financials() {
   const [monthly,      setMonthly]      = useState([])
   const [plTotals,     setPlTotals]     = useState({ income: [], cogs: [], expense: [], other_expense: [] })
+  const [accounts,     setAccounts]     = useState([])
   const [loading,      setLoading]      = useState(true)
   const [activeTab,    setActiveTab]    = useState('pl')
   const [drillAccount, setDrillAccount] = useState(null)
@@ -160,6 +184,19 @@ export default function Financials() {
         pData.forEach(row => { if (grouped[row.category]) grouped[row.category].push({ label: row.label, amount: Number(row.amount) }) })
         setPlTotals(grouped)
       }
+
+      // Live account balances — same server-aggregated view the Accounts page reads,
+      // so balances and txn counts match across both screens (no stale hardcoding).
+      const { data: aData } = await supabase
+        .from('account_balances').select('name, txn_count, total, types')
+      if (aData) setAccounts(aData.map(r => ({
+        name: r.name,
+        category: categorize(r.name),
+        total: Number(r.total),
+        txns: r.txn_count,
+        types: r.types || [],
+      })).sort((a, b) => Math.abs(b.total) - Math.abs(a.total)))
+
       setLoading(false)
     }
     load()
@@ -191,16 +228,7 @@ export default function Financials() {
     { id: 'accounts', label: 'Accounts' },
   ]
 
-  const KEY_ACCOUNTS = [
-    { name: 'Clover Clearing Account',    sub: 'Sales deposits cleared through Clover', txns: 779 },
-    { name: 'TOTAL CHECKING (8059) - 1',  sub: 'Primary operating checking account',    txns: 881 },
-    { name: 'BUS COMPLETE CHK (5998) - 1',sub: 'Business checking account',             txns: 621 },
-    { name: 'Bank of America 7875',        sub: 'Secondary bank account',               txns: 201 },
-    { name: 'Cost of Goods Sold',          sub: 'MAVISX / Weldon tire COGS',            txns: 382 },
-    { name: 'Clover Sales',                sub: 'Journal entries from Clover POS',       txns: 111 },
-    { name: 'Katz Chase',                  sub: 'Credit card expenses',                 txns: 40  },
-    { name: 'Short Term Loans',            sub: 'Short term loan activity',             txns: 22  },
-  ]
+  const accountsTotalTxns = accounts.reduce((s, a) => s + a.txns, 0)
 
   return (
     <>
@@ -399,25 +427,48 @@ export default function Financials() {
                 {/* Accounts Tab */}
                 {activeTab === 'accounts' && (
                   <div style={{ background: '#fff', border: '1px solid #E5E5E5', borderRadius: '6px', padding: '16px' }}>
-                    <div style={{ fontSize: '9px', color: '#888', letterSpacing: '0.15em', marginBottom: '12px', fontFamily: 'DM Mono, monospace' }}>KEY ACCOUNTS — CLICK TO DRILL DOWN</div>
-                    {KEY_ACCOUNTS.map(a => (
-                      <div key={a.name} onClick={() => setDrillAccount(a.name)} style={{
-                        display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-                        padding: '10px 12px', borderBottom: '1px solid #F0F0F0', cursor: 'pointer', borderRadius: '4px',
-                      }}
-                        onMouseEnter={e => e.currentTarget.style.background = '#F8F8F8'}
-                        onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
-                      >
-                        <div>
-                          <div style={{ fontSize: '11px', color: '#1a1a1a', fontFamily: 'DM Mono, monospace' }}>{a.name}</div>
-                          <div style={{ fontSize: '9px', color: '#888', marginTop: '2px', fontFamily: 'DM Mono, monospace' }}>{a.sub}</div>
-                        </div>
-                        <div style={{ textAlign: 'right' }}>
-                          <div style={{ fontSize: '10px', color: '#888', fontFamily: 'DM Mono, monospace' }}>{a.txns} txns</div>
-                          <div style={{ fontSize: '9px', color: THEME.accent, marginTop: '2px', fontFamily: 'DM Mono, monospace' }}>DRILL →</div>
-                        </div>
+                    <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', marginBottom: '12px' }}>
+                      <div style={{ fontSize: '9px', color: '#888', letterSpacing: '0.15em', fontFamily: 'DM Mono, monospace' }}>ACCOUNT BALANCES — CLICK TO DRILL DOWN</div>
+                      <div style={{ fontSize: '9px', color: '#888', fontFamily: 'DM Mono, monospace' }}>
+                        {accounts.length} accounts &nbsp;·&nbsp; {accountsTotalTxns.toLocaleString()} txns
                       </div>
-                    ))}
+                    </div>
+                    <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+                      <thead>
+                        <tr>
+                          <th style={hcell('left')}>ACCOUNT</th>
+                          <th style={hcell('left')}>CATEGORY</th>
+                          <th style={hcell('right')}>BALANCE</th>
+                          <th style={hcell('right')}>TXNS</th>
+                          <th style={hcell('right')}>ACTION</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {accounts.map(a => {
+                          const sub = ACCOUNT_DESC[a.name] || a.types.slice(0, 3).join(', ')
+                          return (
+                            <tr key={a.name} onClick={() => setDrillAccount(a.name)} style={{ cursor: 'pointer' }}
+                              onMouseEnter={e => e.currentTarget.style.background = '#F8F8F8'}
+                              onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
+                            >
+                              <td style={cell('left', { color: '#1a1a1a' })}>
+                                {a.name}
+                                {sub && <div style={{ fontSize: '9px', color: '#888', marginTop: '2px' }}>{sub}</div>}
+                              </td>
+                              <td style={cell('left', { color: '#888' })}>{CAT_LABEL[a.category]}</td>
+                              <td style={cell('right', { color: a.total >= 0 ? '#16a34a' : THEME.accent })}>{fmt(a.total)}</td>
+                              <td style={cell('right', { color: '#888' })}>{a.txns}</td>
+                              <td style={cell('right')}>
+                                <span style={{ fontSize: '9px', color: THEME.accent, fontFamily: 'DM Mono, monospace' }}>DRILL →</span>
+                              </td>
+                            </tr>
+                          )
+                        })}
+                        {accounts.length === 0 && (
+                          <tr><td colSpan={5} style={{ padding: '20px', color: '#888', fontFamily: 'DM Mono, monospace', fontSize: '11px', textAlign: 'center' }}>No accounts found</td></tr>
+                        )}
+                      </tbody>
+                    </table>
                   </div>
                 )}
 

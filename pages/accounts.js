@@ -50,18 +50,20 @@ export default function Accounts() {
       const { data: clientData } = await supabase.from('clients').select('*').eq('email', user.email).single()
       setClient(clientData)
 
-      const { data: gl } = await supabase
-        .from('gl_transactions').select('account, type, amount').eq('client_id', clientData?.id)
+      // Server-aggregated view (account_balances) sums ALL gl_transactions rows.
+      // Aggregating client-side off a raw gl_transactions select would silently
+      // cap at Supabase's 1,000-row read limit (gl_transactions has ~5k rows).
+      const { data: rows } = await supabase
+        .from('account_balances').select('name, txn_count, total, types').eq('client_id', clientData?.id)
 
-      if (gl?.length) {
-        const map = {}
-        gl.forEach(row => {
-          if (!map[row.account]) map[row.account] = { name: row.account, category: categorize(row.account), txnCount: 0, total: 0, types: new Set() }
-          map[row.account].txnCount++
-          map[row.account].total += Number(row.amount)
-          map[row.account].types.add(row.type)
-        })
-        setAccounts(Object.values(map).map(a => ({ ...a, types: [...a.types] })).sort((a, b) => Math.abs(b.total) - Math.abs(a.total)))
+      if (rows?.length) {
+        setAccounts(rows.map(r => ({
+          name: r.name,
+          category: categorize(r.name),
+          txnCount: r.txn_count,
+          total: Number(r.total),
+          types: r.types || [],
+        })).sort((a, b) => Math.abs(b.total) - Math.abs(a.total)))
       }
       setLoading(false)
     }
