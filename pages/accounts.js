@@ -3,7 +3,7 @@ import { useRouter } from 'next/router'
 import Head from 'next/head'
 import { supabase } from '../lib/supabase'
 import TopNav from '../components/TopNav'
-import { categorize } from '../lib/accountTypes'
+import { categorize, parentOf } from '../lib/accountTypes'
 
 const fmt = (n) =>
   new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }).format(Math.abs(n))
@@ -43,6 +43,7 @@ export default function Accounts() {
         setAccounts(rows.map(r => ({
           name: r.name,
           category: categorize(r.name),
+          parent: parentOf(r.name),
           txnCount: r.txn_count,
           total: Number(r.total),
           types: r.types || [],
@@ -78,6 +79,28 @@ export default function Accounts() {
     CATS.forEach(cat => { const items = filtered.filter(a => a.category === cat); if (items.length) g[cat] = items })
     return g
   }, [filtered])
+
+  // Order a category's accounts so each parent is followed by its sub-accounts
+  // (indented). Parent rows show a rolled-up total (own + subs); subs show their own.
+  const nestForDisplay = (items) => {
+    const names = new Set(items.map(a => a.name))
+    const kids = {}
+    const tops = []
+    items.forEach(a => {
+      if (a.parent && names.has(a.parent)) (kids[a.parent] = kids[a.parent] || []).push(a)
+      else tops.push(a)
+    })
+    return tops
+      .map(t => {
+        const sub = (kids[t.name] || []).slice().sort((x, y) => Math.abs(y.total) - Math.abs(x.total))
+        return { t, sub, rolled: t.total + sub.reduce((s, k) => s + k.total, 0) }
+      })
+      .sort((a, b) => Math.abs(b.rolled) - Math.abs(a.rolled))
+      .flatMap(({ t, sub, rolled }) => [
+        { account: t, isChild: false, displayTotal: rolled, hasSubs: sub.length > 0 },
+        ...sub.map(k => ({ account: k, isChild: true, displayTotal: k.total, hasSubs: false })),
+      ])
+  }
 
   const totalIncome   = accounts.filter(a => a.category === 'income').reduce((s, a) => s + a.total, 0)
   const totalExpenses = accounts.filter(a => a.category === 'expense').reduce((s, a) => s + Math.abs(a.total), 0)
@@ -154,28 +177,33 @@ export default function Accounts() {
                   </div>
                 </div>
                 <div style={{ background: '#fff', borderRadius: '6px', border: '1px solid #E5E5E5', overflow: 'hidden' }}>
-                  {items.map((account, i) => {
+                  {nestForDisplay(items).map((row, i, arr) => {
+                    const account = row.account
                     const isSelected = selected?.name === account.name
                     return (
                       <div key={account.name} onClick={() => selectAccount(account)} style={{
-                        padding: '11px 16px', borderBottom: i < items.length - 1 ? '1px solid #F0F0F0' : 'none',
+                        padding: '11px 16px', paddingLeft: row.isChild ? '40px' : '16px',
+                        borderBottom: i < arr.length - 1 ? '1px solid #F0F0F0' : 'none',
                         display: 'flex', alignItems: 'center', justifyContent: 'space-between', cursor: 'pointer',
-                        background: isSelected ? '#FFF5F5' : 'transparent',
+                        background: isSelected ? '#FFF5F5' : row.isChild ? '#FCFCFC' : 'transparent',
                         borderLeft: isSelected ? `3px solid ${THEME.accent}` : '3px solid transparent',
                       }}
                         onMouseEnter={e => { if (!isSelected) e.currentTarget.style.background = '#F8F8F8' }}
-                        onMouseLeave={e => { if (!isSelected) e.currentTarget.style.background = 'transparent' }}
+                        onMouseLeave={e => { if (!isSelected) e.currentTarget.style.background = row.isChild ? '#FCFCFC' : 'transparent' }}
                       >
                         <div>
-                          <div style={{ fontSize: '12px', fontWeight: '500', color: '#1a1a1a', fontFamily: 'DM Mono, monospace' }}>{account.name}</div>
+                          <div style={{ fontSize: '12px', fontWeight: row.isChild ? '400' : '500', color: row.isChild ? '#555' : '#1a1a1a', fontFamily: 'DM Mono, monospace' }}>
+                            {row.isChild ? '↳ ' : ''}{account.name}
+                          </div>
                           <div style={{ fontSize: '10px', color: '#888', fontFamily: 'DM Mono, monospace', marginTop: '2px' }}>
                             {account.txnCount} txns &nbsp;·&nbsp; {account.types.slice(0, 2).join(', ')}
+                            {row.hasSubs && <span> &nbsp;·&nbsp; incl. sub-accounts</span>}
                           </div>
                         </div>
                         <div style={{ textAlign: 'right' }}>
                           <div style={{ fontSize: '13px', fontWeight: '600', fontFamily: 'DM Mono, monospace',
                             color: cat === 'income' ? '#16a34a' : cat === 'expense' ? THEME.accent : '#1a1a1a' }}>
-                            {fmt(account.total)}
+                            {fmt(row.displayTotal)}
                           </div>
                         </div>
                       </div>

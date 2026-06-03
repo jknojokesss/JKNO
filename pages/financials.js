@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react'
 import Head from 'next/head'
 import { supabase } from '../lib/supabase'
 import TopNav from '../components/TopNav'
-import { categorize } from '../lib/accountTypes'
+import { categorize, parentOf } from '../lib/accountTypes'
 
 const fmt = (n) => new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }).format(Math.abs(n))
 const pct = (n) => `${parseFloat(n).toFixed(1)}%`
@@ -384,7 +384,8 @@ export default function Financials() {
                       </thead>
                       <tbody>
                         {accounts.map(a => {
-                          const sub = ACCOUNT_DESC[a.name] || a.types.slice(0, 3).join(', ')
+                          const parent = parentOf(a.name)
+                          const sub = parent ? `↳ sub-account of ${parent}` : (ACCOUNT_DESC[a.name] || a.types.slice(0, 3).join(', '))
                           return (
                             <tr key={a.name} onClick={() => setDrillAccount(a.name)} style={{ cursor: 'pointer' }}
                               onMouseEnter={e => e.currentTarget.style.background = '#F8F8F8'}
