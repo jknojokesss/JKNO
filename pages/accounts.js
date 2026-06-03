@@ -2,6 +2,7 @@ import { useEffect, useState, useMemo } from 'react'
 import { useRouter } from 'next/router'
 import Head from 'next/head'
 import { supabase } from '../lib/supabase'
+import TopNav from '../components/TopNav'
 
 const fmt = (n) =>
   new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }).format(Math.abs(n))
@@ -20,16 +21,6 @@ const CAT_LABEL = { income: 'Income', expense: 'Expenses', asset: 'Assets', liab
 const CAT_COLOR = { income: '#16a34a', expense: '#CC2222', asset: '#CC2222', liability: '#888' }
 
 const THEME = { sidebarBg: '#1A1A1A', sidebarBorder: '#2A2A2A', accent: '#CC2222' }
-
-const NAV = [
-  { id: 'dashboard',  label: 'Dashboard',    href: '/dashboard' },
-  { id: 'financials', label: 'Financials',   href: '/financials' },
-  { id: 'inventory',  label: 'Sales & Items',href: '/inventory' },
-  { id: 'orders',     label: 'Orders',       href: '/orders' },
-  { id: 'stock',      label: 'Stock',        href: '/stock' },
-  { id: 'accounts',   label: 'Accounts',     href: '/accounts' },
-  { id: 'ai',         label: '✦ Ask AI',     href: '/ai' },
-]
 
 export default function Accounts() {
   const router = useRouter()
@@ -114,49 +105,14 @@ export default function Accounts() {
         <style>{`* { box-sizing: border-box; margin: 0; padding: 0; }`}</style>
       </Head>
 
-      <div style={{ display: 'flex', minHeight: '100vh', background: '#F8F8F8' }}>
+      <div style={{ minHeight: '100vh', background: '#F8F8F8' }}>
+        <TopNav active="accounts" />
 
-        {/* Sidebar */}
-        <div style={{ width: '220px', minHeight: '100vh', background: THEME.sidebarBg, display: 'flex',
-          flexDirection: 'column', position: 'fixed', left: 0, top: 0,
-          borderRight: `1px solid ${THEME.sidebarBorder}`, zIndex: 100 }}>
-          <div style={{ padding: '24px 20px', borderBottom: `1px solid ${THEME.sidebarBorder}` }}>
-            <div style={{ fontSize: '18px', fontWeight: '700', color: '#fff', letterSpacing: '0.1em', fontFamily: 'DM Mono, monospace' }}>REYDEL</div>
-            <div style={{ fontSize: '10px', color: THEME.accent, letterSpacing: '0.2em', marginTop: '2px', fontFamily: 'DM Mono, monospace' }}>TIRE & AUTO</div>
-          </div>
-          <nav style={{ flex: 1, padding: '16px 0' }}>
-            {NAV.map(item => (
-              <button key={item.id} onClick={() => router.push(item.href)} style={{
-                display: 'flex', alignItems: 'center', width: '100%', padding: '10px 20px', textAlign: 'left',
-                background: item.id === 'accounts' ? '#2A2A2A' : 'transparent',
-                color: item.id === 'accounts' ? '#fff' : '#666',
-                border: 'none', cursor: 'pointer', fontSize: '12px',
-                fontFamily: 'DM Mono, monospace', letterSpacing: '0.06em',
-                borderLeft: item.id === 'accounts' ? `2px solid ${THEME.accent}` : '2px solid transparent',
-              }}>
-                {item.label}
-              </button>
-            ))}
-          </nav>
-          <div style={{ padding: '12px 20px', borderTop: `1px solid ${THEME.sidebarBorder}`, fontSize: '10px', color: '#3a3a3a', fontFamily: 'DM Mono, monospace' }}>
-            JAN – MAY 2026
-          </div>
-        </div>
-
-        {/* Main */}
-        <div style={{ marginLeft: '220px', flex: 1, display: 'flex', overflow: 'hidden' }}>
-
-          {/* Topbar */}
-          <div style={{ position: 'fixed', top: 0, left: '220px', right: 0, background: '#fff', borderBottom: '1px solid #E5E5E5', padding: '14px 28px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', zIndex: 50 }}>
-            <div style={{ fontSize: '11px', color: '#1a1a1a', letterSpacing: '0.15em', fontFamily: 'DM Mono, monospace' }}>ACCOUNTS</div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-              <div style={{ width: '6px', height: '6px', background: '#22c55e', borderRadius: '50%' }} />
-              <div style={{ fontSize: '10px', color: '#888', fontFamily: 'DM Mono, monospace' }}>Live · Supabase</div>
-            </div>
-          </div>
+        {/* Main — two columns: account list + optional detail panel */}
+        <div style={{ display: 'flex' }}>
 
           {/* Account list */}
-          <div style={{ flex: 1, overflowY: 'auto', padding: '24px 28px', paddingTop: '68px', borderRight: selected ? '1px solid #E5E5E5' : 'none' }}>
+          <div style={{ flex: 1, padding: '24px 28px', borderRight: selected ? '1px solid #E5E5E5' : 'none' }}>
 
             <div style={{ marginBottom: '20px' }}>
               <div style={{ fontSize: '9px', color: '#888', letterSpacing: '0.15em', marginBottom: '4px', fontFamily: 'DM Mono, monospace' }}>CHART OF ACCOUNTS</div>
@@ -240,8 +196,9 @@ export default function Accounts() {
 
           {/* Transaction detail panel */}
           {selected && (
-            <div style={{ width: '380px', flexShrink: 0, overflowY: 'auto', background: '#fff',
-              borderLeft: '1px solid #E5E5E5', padding: '68px 24px 24px' }}>
+            <div style={{ width: '380px', flexShrink: 0, alignSelf: 'flex-start',
+              position: 'sticky', top: '52px', maxHeight: 'calc(100vh - 52px)', overflowY: 'auto',
+              background: '#fff', borderLeft: '1px solid #E5E5E5', padding: '24px' }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '16px' }}>
                 <div>
                   <div style={{ fontSize: '9px', color: '#888', fontFamily: 'DM Mono, monospace', letterSpacing: '0.1em', marginBottom: '4px' }}>ACCOUNT DETAIL</div>

@@ -1,21 +1,11 @@
 import { useEffect, useState, useMemo } from 'react'
-import { useRouter } from 'next/router'
 import Head from 'next/head'
 import { supabase } from '../lib/supabase'
+import TopNav from '../components/TopNav'
 
 const fmt = (n) => new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }).format(Math.abs(n))
 
 const THEME = { sidebarBg: '#1A1A1A', sidebarBorder: '#2A2A2A', accent: '#CC2222' }
-
-const NAV = [
-  { id: 'dashboard',  label: 'Dashboard',    href: '/dashboard' },
-  { id: 'financials', label: 'Financials',   href: '/financials' },
-  { id: 'inventory',  label: 'Sales & Items',href: '/inventory' },
-  { id: 'orders',     label: 'Orders',       href: '/orders' },
-  { id: 'stock',      label: 'Stock',        href: '/stock' },
-  { id: 'accounts',   label: 'Accounts',     href: '/accounts' },
-  { id: 'ai',         label: '✦ Ask AI',     href: '/ai' },
-]
 
 const hcell = (align = 'left') => ({
   padding: '7px 12px', fontSize: '9px', color: '#888', background: '#FAFAFA',
@@ -44,40 +34,6 @@ async function fetchAllSales() {
     from += 1000
   }
   return all
-}
-
-function Sidebar({ active }) {
-  const router = useRouter()
-  return (
-    <div style={{
-      width: '220px', minHeight: '100vh', background: THEME.sidebarBg,
-      display: 'flex', flexDirection: 'column', position: 'fixed', left: 0, top: 0,
-      borderRight: `1px solid ${THEME.sidebarBorder}`, zIndex: 100,
-    }}>
-      <div style={{ padding: '24px 20px', borderBottom: `1px solid ${THEME.sidebarBorder}` }}>
-        <div style={{ fontSize: '18px', fontWeight: '700', color: '#fff', letterSpacing: '0.1em', fontFamily: 'DM Mono, monospace' }}>REYDEL</div>
-        <div style={{ fontSize: '10px', color: THEME.accent, letterSpacing: '0.2em', marginTop: '2px', fontFamily: 'DM Mono, monospace' }}>TIRE & AUTO</div>
-      </div>
-      <nav style={{ flex: 1, padding: '16px 0' }}>
-        {NAV.map(item => (
-          <button key={item.id} onClick={() => router.push(item.href)} style={{
-            display: 'flex', alignItems: 'center', gap: '10px',
-            width: '100%', padding: '10px 20px', textAlign: 'left',
-            background: active === item.id ? '#2A2A2A' : 'transparent',
-            color: active === item.id ? '#fff' : '#666',
-            border: 'none', cursor: 'pointer', fontSize: '12px',
-            fontFamily: 'DM Mono, monospace', letterSpacing: '0.06em',
-            borderLeft: active === item.id ? `2px solid ${THEME.accent}` : '2px solid transparent',
-          }}>
-            {item.label}
-          </button>
-        ))}
-      </nav>
-      <div style={{ padding: '12px 20px', borderTop: `1px solid ${THEME.sidebarBorder}`, fontSize: '10px', color: '#3a3a3a', fontFamily: 'DM Mono, monospace' }}>
-        JAN – MAY 2026
-      </div>
-    </div>
-  )
 }
 
 export default function Stock() {
@@ -137,17 +93,12 @@ export default function Stock() {
   return (
     <>
       <Head><title>Reydel Tire — Stock</title></Head>
-      <div style={{ display: 'flex', minHeight: '100vh', background: '#F8F8F8' }}>
-        <Sidebar active="stock" />
-        <div style={{ marginLeft: '220px', flex: 1 }}>
+      <div style={{ minHeight: '100vh', background: '#F8F8F8' }}>
+        <TopNav active="stock" right={
+          <div style={{ fontSize: '10px', color: '#888', fontFamily: 'DM Mono, monospace' }}>4/15/2026 purchase · opening inventory</div>
+        } />
 
-          {/* Topbar */}
-          <div style={{ background: '#fff', borderBottom: '1px solid #E5E5E5', padding: '14px 28px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-            <div style={{ fontSize: '11px', color: '#1a1a1a', letterSpacing: '0.15em', fontFamily: 'DM Mono, monospace' }}>STOCK — 4/15/2026 PURCHASE</div>
-            <div style={{ fontSize: '10px', color: '#888', fontFamily: 'DM Mono, monospace' }}>Opening inventory</div>
-          </div>
-
-          <div style={{ padding: '24px 28px' }}>
+        <div style={{ padding: '24px 28px' }}>
             {loading ? (
               <div style={{ color: '#888', fontFamily: 'DM Mono, monospace', fontSize: '12px' }}>Loading...</div>
             ) : (
@@ -224,7 +175,6 @@ export default function Stock() {
               </>
             )}
           </div>
-        </div>
       </div>
     </>
   )

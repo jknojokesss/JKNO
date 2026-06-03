@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
-import { useRouter } from 'next/router'
 import Head from 'next/head'
 import { supabase } from '../lib/supabase'
+import TopNav from '../components/TopNav'
 
 const fmt = (n) => new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }).format(Math.abs(n))
 const pct = (n) => `${parseFloat(n).toFixed(1)}%`
@@ -31,16 +31,6 @@ const ACCOUNT_DESC = {
 
 const THEME = { sidebarBg: '#1A1A1A', sidebarBorder: '#2A2A2A', accent: '#CC2222' }
 
-const NAV = [
-  { id: 'dashboard',  label: 'Dashboard',    href: '/dashboard' },
-  { id: 'financials', label: 'Financials',   href: '/financials' },
-  { id: 'inventory',  label: 'Sales & Items',href: '/inventory' },
-  { id: 'orders',     label: 'Orders',       href: '/orders' },
-  { id: 'stock',      label: 'Stock',        href: '/stock' },
-  { id: 'accounts',   label: 'Accounts',     href: '/accounts' },
-  { id: 'ai',         label: '✦ Ask AI',     href: '/ai' },
-]
-
 const cell = (align = 'left', extra = {}) => ({
   padding: '8px 10px', borderBottom: '1px solid #F0F0F0',
   color: '#333', fontSize: '11px', fontFamily: 'DM Mono, monospace',
@@ -51,40 +41,6 @@ const hcell = (align = 'left') => ({
   fontWeight: '400', letterSpacing: '0.1em', borderBottom: '1px solid #E5E5E5',
   fontFamily: 'DM Mono, monospace', textAlign: align,
 })
-
-function Sidebar({ active }) {
-  const router = useRouter()
-  return (
-    <div style={{
-      width: '220px', minHeight: '100vh', background: THEME.sidebarBg,
-      display: 'flex', flexDirection: 'column', position: 'fixed', left: 0, top: 0,
-      borderRight: `1px solid ${THEME.sidebarBorder}`, zIndex: 100,
-    }}>
-      <div style={{ padding: '24px 20px', borderBottom: `1px solid ${THEME.sidebarBorder}` }}>
-        <div style={{ fontSize: '18px', fontWeight: '700', color: '#fff', letterSpacing: '0.1em', fontFamily: 'DM Mono, monospace' }}>REYDEL</div>
-        <div style={{ fontSize: '10px', color: THEME.accent, letterSpacing: '0.2em', marginTop: '2px', fontFamily: 'DM Mono, monospace' }}>TIRE & AUTO</div>
-      </div>
-      <nav style={{ flex: 1, padding: '16px 0' }}>
-        {NAV.map(item => (
-          <button key={item.id} onClick={() => router.push(item.href)} style={{
-            display: 'flex', alignItems: 'center', gap: '10px',
-            width: '100%', padding: '10px 20px', textAlign: 'left',
-            background: active === item.id ? '#2A2A2A' : 'transparent',
-            color: active === item.id ? '#fff' : '#666',
-            border: 'none', cursor: 'pointer', fontSize: '12px',
-            fontFamily: 'DM Mono, monospace', letterSpacing: '0.06em',
-            borderLeft: active === item.id ? `2px solid ${THEME.accent}` : '2px solid transparent',
-          }}>
-            {item.label}
-          </button>
-        ))}
-      </nav>
-      <div style={{ padding: '12px 20px', borderTop: `1px solid ${THEME.sidebarBorder}`, fontSize: '10px', color: '#3a3a3a', fontFamily: 'DM Mono, monospace' }}>
-        JAN – MAY 2026
-      </div>
-    </div>
-  )
-}
 
 function DrillModal({ account, onClose }) {
   const [txns, setTxns] = useState([])
@@ -233,21 +189,11 @@ export default function Financials() {
   return (
     <>
       <Head><title>Reydel Tire — Financials</title></Head>
-      <div style={{ display: 'flex', minHeight: '100vh', background: '#F8F8F8' }}>
-        <Sidebar active="financials" />
+      <div style={{ minHeight: '100vh', background: '#F8F8F8' }}>
         <DrillModal account={drillAccount} onClose={() => setDrillAccount(null)} />
-        <div style={{ marginLeft: '220px', flex: 1 }}>
+        <TopNav active="financials" />
 
-          {/* Topbar */}
-          <div style={{ background: '#fff', borderBottom: '1px solid #E5E5E5', padding: '14px 28px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-            <div style={{ fontSize: '11px', color: '#1a1a1a', letterSpacing: '0.15em', fontFamily: 'DM Mono, monospace' }}>FINANCIALS</div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-              <div style={{ width: '6px', height: '6px', background: '#22c55e', borderRadius: '50%' }} />
-              <div style={{ fontSize: '10px', color: '#888', fontFamily: 'DM Mono, monospace' }}>Live · Supabase</div>
-            </div>
-          </div>
-
-          <div style={{ padding: '24px 28px' }}>
+        <div style={{ padding: '24px 28px' }}>
             {loading ? (
               <div style={{ color: '#888', fontFamily: 'DM Mono, monospace', fontSize: '12px' }}>Loading...</div>
             ) : (
@@ -475,7 +421,6 @@ export default function Financials() {
               </>
             )}
           </div>
-        </div>
       </div>
     </>
   )
