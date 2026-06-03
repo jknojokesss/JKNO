@@ -2,20 +2,13 @@ import { useEffect, useState } from 'react'
 import Head from 'next/head'
 import { supabase } from '../lib/supabase'
 import TopNav from '../components/TopNav'
+import { categorize } from '../lib/accountTypes'
 
 const fmt = (n) => new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }).format(Math.abs(n))
 const pct = (n) => `${parseFloat(n).toFixed(1)}%`
 
-// Same heuristic as the Accounts page so both views label accounts identically.
-const categorize = (name) => {
-  const n = name.toLowerCase()
-  if (n.includes('sales') || n.includes('income') || n.includes('revenue')) return 'income'
-  if (n.includes('checking') || n.includes('bank of america') || n.includes('cash on hand') ||
-      n.includes('inventory asset') || n.includes('equipment') || n.includes('clearing')) return 'asset'
-  if (n.includes('loan') || n.includes('short term loans')) return 'liability'
-  return 'expense'
-}
-const CAT_LABEL = { income: 'Income', expense: 'Expense', asset: 'Asset', liability: 'Liability' }
+// Account classification is shared with the Accounts page (lib/accountTypes).
+const CAT_LABEL = { income: 'Income', expense: 'Expense', asset: 'Asset', liability: 'Liability', equity: 'Equity' }
 
 // Optional friendly descriptions; falls back to category + transaction types.
 const ACCOUNT_DESC = {

@@ -3,22 +3,14 @@ import { useRouter } from 'next/router'
 import Head from 'next/head'
 import { supabase } from '../lib/supabase'
 import TopNav from '../components/TopNav'
+import { categorize } from '../lib/accountTypes'
 
 const fmt = (n) =>
   new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }).format(Math.abs(n))
 
-const categorize = (name) => {
-  const n = name.toLowerCase()
-  if (n.includes('sales') || n.includes('income') || n.includes('revenue')) return 'income'
-  if (n.includes('checking') || n.includes('bank of america') || n.includes('cash on hand') ||
-      n.includes('inventory asset') || n.includes('equipment') || n.includes('clearing')) return 'asset'
-  if (n.includes('loan') || n.includes('short term loans')) return 'liability'
-  return 'expense'
-}
-
-const CATS = ['income', 'expense', 'asset', 'liability']
-const CAT_LABEL = { income: 'Income', expense: 'Expenses', asset: 'Assets', liability: 'Liabilities' }
-const CAT_COLOR = { income: '#16a34a', expense: '#CC2222', asset: '#CC2222', liability: '#888' }
+const CATS = ['income', 'expense', 'asset', 'liability', 'equity']
+const CAT_LABEL = { income: 'Income', expense: 'Expenses', asset: 'Assets', liability: 'Liabilities', equity: 'Equity' }
+const CAT_COLOR = { income: '#16a34a', expense: '#CC2222', asset: '#CC2222', liability: '#888', equity: '#7c3aed' }
 
 const THEME = { sidebarBg: '#1A1A1A', sidebarBorder: '#2A2A2A', accent: '#CC2222' }
 
