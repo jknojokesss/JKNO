@@ -45,6 +45,11 @@ export default function Orders() {
   const [sort,       setSort]       = useState('date')
   const [sortDir,    setSortDir]    = useState('desc')
   const [showEst,    setShowEst]    = useState(true) // show rows with estimated cost
+  const [view,       setView]       = useState('live') // 'live' | 'precomputed'
+  const [opRows,     setOpRows]     = useState([])
+  const [opLoading,  setOpLoading]  = useState(false)
+  const [opLoaded,   setOpLoaded]   = useState(false)
+  const [opSearch,   setOpSearch]   = useState('')
 
   useEffect(() => {
     async function load() {
@@ -122,6 +127,18 @@ export default function Orders() {
     load()
   }, [])
 
+  // Lazily load the precomputed order_profit table the first time that tab opens.
+  // 551 rows < the 1000-row cap, so one query (no append loop = no risk of doubling).
+  useEffect(() => {
+    if (view !== 'precomputed' || opLoaded) return
+    setOpLoading(true)
+    supabase
+      .from('order_profit')
+      .select('sale_date,item_name,tire_size,revenue,cost,profit,margin_pct,cost_source,tire_type')
+      .order('sale_date', { ascending: false })
+      .then(({ data }) => { setOpRows(data || []); setOpLoaded(true); setOpLoading(false) })
+  }, [view, opLoaded])
+
   const toggleSort = (col) => {
     if (sort === col) setSortDir(d => d === 'desc' ? 'asc' : 'desc')
     else { setSort(col); setSortDir('desc') }
@@ -166,6 +183,15 @@ export default function Orders() {
     .map(s => ({ ...s, margin: s.totalProfit / s.totalRev * 100 }))
     .sort((a, b) => b.margin - a.margin)[0]
 
+  // Precomputed (order_profit) view
+  const opFiltered = opSearch
+    ? opRows.filter(r => `${r.item_name || ''} ${r.tire_size || ''}`.toLowerCase().includes(opSearch.toLowerCase()))
+    : opRows
+  const opRev    = opFiltered.reduce((s, r) => s + Number(r.revenue || 0), 0)
+  const opCost   = opFiltered.reduce((s, r) => s + Number(r.cost || 0), 0)
+  const opProfit = opFiltered.reduce((s, r) => s + Number(r.profit || 0), 0)
+  const opMargin = opRev > 0 ? (opProfit / opRev) * 100 : 0
+
   return (
     <>
       <Head><title>Reydel Tire — Orders</title></Head>
@@ -183,7 +209,23 @@ export default function Orders() {
         } />
 
         <div style={{ padding: '24px 28px' }}>
-            {loading ? (
+            {/* Tabs: live (Clover+Weldon) vs precomputed (order_profit) */}
+            <div style={{ display: 'flex', gap: '2px', borderBottom: '1px solid #E5E5E5', marginBottom: '20px' }}>
+              {[
+                { id: 'live',        label: 'Orders — Live (Clover + Weldon)' },
+                { id: 'precomputed', label: 'Orders — Precomputed (order_profit)' },
+              ].map(t => (
+                <button key={t.id} onClick={() => setView(t.id)} style={{
+                  padding: '8px 16px', fontSize: '10px', fontFamily: 'DM Mono, monospace', letterSpacing: '0.08em',
+                  background: 'none', border: 'none', cursor: 'pointer',
+                  color: view === t.id ? '#1a1a1a' : '#888',
+                  borderBottom: view === t.id ? `2px solid ${THEME.accent}` : '2px solid transparent',
+                  marginBottom: '-1px',
+                }}>{t.label}</button>
+              ))}
+            </div>
+
+            {view === 'live' && (loading ? (
               <div style={{ color: '#888', fontFamily: 'DM Mono, monospace', fontSize: '12px' }}>Loading...</div>
             ) : (
               <>
@@ -295,7 +337,98 @@ export default function Orders() {
                   </div>
                 </div>
               </>
-            )}
+            ))}
+
+            {view === 'precomputed' && (opLoading ? (
+              <div style={{ color: '#888', fontFamily: 'DM Mono, monospace', fontSize: '12px' }}>Loading...</div>
+            ) : (
+              <>
+                {/* KPI cards */}
+                <div style={{ display: 'flex', gap: '12px', marginBottom: '20px' }}>
+                  {[
+                    { label: 'LINE ITEMS',    value: opFiltered.length.toLocaleString(), sub: 'from order_profit', sc: '#888' },
+                    { label: 'TOTAL REVENUE', value: fmt0(opRev),    sub: 'shown',                       sc: '#16a34a' },
+                    { label: 'TOTAL COST',    value: fmt0(opCost),   sub: 'shown',                       sc: THEME.accent },
+                    { label: 'TOTAL PROFIT',  value: fmt0(opProfit), sub: `${opMargin.toFixed(1)}% margin`, sc: '#16a34a' },
+                  ].map(k => (
+                    <div key={k.label} style={{ flex: 1, background: '#fff', border: '1px solid #E5E5E5', borderRadius: '6px', padding: '14px 16px' }}>
+                      <div style={{ fontSize: '9px', color: '#888', letterSpacing: '0.15em', marginBottom: '6px', fontFamily: 'DM Mono, monospace' }}>{k.label}</div>
+                      <div style={{ fontSize: '18px', color: '#1a1a1a', fontWeight: '600', fontFamily: 'DM Mono, monospace' }}>{k.value}</div>
+                      <div style={{ fontSize: '10px', color: k.sc, marginTop: '4px', fontFamily: 'DM Mono, monospace' }}>{k.sub}</div>
+                    </div>
+                  ))}
+                </div>
+
+                {/* Search */}
+                <div style={{ display: 'flex', gap: '10px', marginBottom: '16px', alignItems: 'center' }}>
+                  <input value={opSearch} onChange={e => setOpSearch(e.target.value)}
+                    placeholder="Filter by tire size or item..."
+                    style={{ flex: 1, minWidth: '200px', padding: '8px 12px', border: '1px solid #E5E5E5', borderRadius: '4px',
+                      fontSize: '11px', fontFamily: 'DM Mono, monospace', outline: 'none', background: '#fff', color: '#1a1a1a' }}
+                  />
+                </div>
+
+                {/* Table */}
+                <div style={{ background: '#fff', border: '1px solid #E5E5E5', borderRadius: '6px', overflow: 'hidden' }}>
+                  <table style={{ width: '100%', borderCollapse: 'collapse', fontFamily: 'DM Mono, monospace' }}>
+                    <thead>
+                      <tr>
+                        <th style={hcell('left')}>DATE</th>
+                        <th style={hcell('left')}>TIRE / ITEM</th>
+                        <th style={hcell('left')}>SIZE</th>
+                        <th style={hcell('right')}>REVENUE</th>
+                        <th style={hcell('right')}>COST</th>
+                        <th style={hcell('right')}>PROFIT</th>
+                        <th style={hcell('right')}>MARGIN</th>
+                        <th style={hcell('left')}>COST SOURCE</th>
+                        <th style={hcell('left')}>TYPE</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {opFiltered.map((r, i) => (
+                        <tr key={i}
+                          onMouseEnter={e => e.currentTarget.style.background = '#F8F8F8'}
+                          onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
+                        >
+                          <td style={cell('left', { color: '#888', whiteSpace: 'nowrap' })}>{r.sale_date}</td>
+                          <td style={cell('left', { color: '#1a1a1a', maxWidth: '220px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' })}>{r.item_name}</td>
+                          <td style={cell('left', { color: '#888' })}>{r.tire_size}</td>
+                          <td style={cell('right', { color: '#1a1a1a' })}>{r.revenue != null ? fmtC(Number(r.revenue)) : '—'}</td>
+                          <td style={cell('right', { color: '#888' })}>{r.cost != null ? fmtC(Number(r.cost)) : '—'}</td>
+                          <td style={cell('right', { color: '#16a34a', fontWeight: '600' })}>{r.profit != null ? fmtC(Number(r.profit)) : '—'}</td>
+                          <td style={cell('right')}>
+                            {r.margin_pct != null ? (
+                              <span style={{ padding: '2px 7px', borderRadius: '3px', fontSize: '10px',
+                                background: Number(r.margin_pct) >= 60 ? '#dcfce7' : Number(r.margin_pct) >= 45 ? '#fef3c7' : '#fee2e2',
+                                color:      Number(r.margin_pct) >= 60 ? '#16a34a' : Number(r.margin_pct) >= 45 ? '#92400e' : THEME.accent }}>
+                                {Number(r.margin_pct).toFixed(1)}%
+                              </span>
+                            ) : '—'}
+                          </td>
+                          <td style={cell('left', { color: '#888' })}>{r.cost_source}</td>
+                          <td style={cell('left', { color: '#888' })}>{r.tire_type}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+
+                  {opFiltered.length === 0 && (
+                    <div style={{ padding: '24px', textAlign: 'center', color: '#888', fontFamily: 'DM Mono, monospace', fontSize: '11px' }}>
+                      No items{opSearch ? ' match' : ''}
+                    </div>
+                  )}
+
+                  <div style={{ padding: '10px 16px', borderTop: '2px solid #E5E5E5', background: '#FAFAFA', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <div style={{ fontSize: '10px', color: '#888', fontFamily: 'DM Mono, monospace' }}>
+                      {opFiltered.length.toLocaleString()} rows &nbsp;·&nbsp; source: order_profit table
+                    </div>
+                    <div style={{ fontSize: '11px', color: '#16a34a', fontFamily: 'DM Mono, monospace', fontWeight: '600' }}>
+                      {fmt0(opProfit)} profit shown
+                    </div>
+                  </div>
+                </div>
+              </>
+            ))}
           </div>
       </div>
     </>
