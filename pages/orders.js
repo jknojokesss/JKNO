@@ -53,7 +53,7 @@ export default function Orders() {
 
   useEffect(() => {
     async function load() {
-      const [{ data: lineItems }, { data: costs }, { data: brandCosts }, { data: itemCosts }] = await Promise.all([
+      const [{ data: lineItems }, { data: costs }, { data: brandCosts }, { data: itemCosts }, { data: stockRows }] = await Promise.all([
         (async () => {
           let all = [], from = 0
           while (true) {
@@ -69,6 +69,8 @@ export default function Orders() {
         supabase.from('weldon_costs').select('tire_size, cost'),
         supabase.from('weldon_brand_costs').select('brand, tire_size, cost'),
         supabase.from('clover_item_costs').select('item_label, cost'),
+        // stock-up inventory (4/15 bulk buy) — drives inventory vs same-day classification
+        supabase.from('stock_purchases').select('item_label, unit_cost, track_clover_sales'),
       ])
 
       // Build size → cost lookup (budget / no-brand)
@@ -83,6 +85,22 @@ export default function Orders() {
       const exactMap = {}
       itemCosts?.forEach(r => { exactMap[r.item_label.trim().toLowerCase()] = Number(r.cost) })
 
+      // Build stock-up size set + cost map for inventory vs same-day classification.
+      // A sale is "Inventory" (sold from shelf stock) when its size was part of the
+      // 4/15 stock-up AND the sale happened on/after that date. Otherwise it was a
+      // same-day Weldon order placed for that customer.
+      const STOCKUP_DATE = '2026-04-15'
+      const stockSizes = new Set()
+      const stockCostMap = {}
+      stockRows?.forEach(r => {
+        if (!r.track_clover_sales) return
+        const sz = normalizeSize(r.item_label)
+        if (!sz) return
+        stockSizes.add(sz)
+        const key = /cooper/i.test(r.item_label) ? `${sz}|cooper` : sz
+        stockCostMap[key] = Number(r.unit_cost)
+      })
+
       if (lineItems) {
         setRows(lineItems.map(r => {
           const sale = Number(r.revenue)
@@ -90,18 +108,34 @@ export default function Orders() {
           const normalized = normalizeSize(r.item_name)
           const brand = detectBrand(r.item_name)
           const isService  = !normalized
+          const isUsed = /used/i.test(r.item_name || '')
+          const isCooper = /cooper/i.test(r.item_name || '')
+
+          // Classify: inventory (sold from 4/15 stock-up shelf) vs same-day Weldon order.
+          const isStockSize = normalized != null && stockSizes.has(normalized)
+          const isInventory = !isService && !isUsed && r.date >= STOCKUP_DATE && isStockSize
+          const costSource = isService ? 'service'
+            : isUsed ? 'used_tire_inventory'
+            : isInventory ? 'inventory'
+            : 'weldon_same_day'
+
           // Match priority: exact label → brand+size → size-only → ratio estimate
           const exactCost = exactMap[(r.item_name || '').trim().toLowerCase()]
           const brandCost = (brand && normalized) ? brandCostMap[`${brand}|${normalized}`] : null
           const sizeCost  = normalized ? costMap[normalized] : null
           const weldonCost = exactCost ?? brandCost ?? sizeCost
+          // For inventory sales, the authoritative cost is the stock-up unit cost
+          // (Cooper variant when the item says Cooper); fall back to the Weldon lookups.
+          const invCost = isInventory
+            ? ((isCooper ? stockCostMap[`${normalized}|cooper`] : null) ?? stockCostMap[normalized])
+            : null
           // Exact-label cost (incl. used tires @ $18) wins even when the name has no parseable size.
-          const costPerUnit = exactCost != null ? exactCost
+          const costPerUnit = invCost != null ? invCost
+            : exactCost != null ? exactCost
             : isService ? 0
             : (weldonCost ?? sale * FALLBACK_RATIO)
-          const isEstimated = exactCost == null && !isService && weldonCost == null
-          const isExact = exactCost != null
-          const isUsed = /used/i.test(r.item_name || '')
+          const isEstimated = invCost == null && exactCost == null && !isService && weldonCost == null
+          const isExact = invCost != null || exactCost != null
           const cost   = costPerUnit * qty
           const profit = sale - cost
           const margin = sale > 0 ? (profit / sale) * 100 : 0
@@ -117,6 +151,8 @@ export default function Orders() {
             isEstimated,
             isExact,
             isUsed,
+            isInventory,
+            costSource,
             normalizedSize: normalized,
             orderId: r.order_id,
           }
@@ -163,6 +199,8 @@ export default function Orders() {
   }, [rows, search, sort, sortDir, showEst])
 
   const matched     = rows.filter(r => !r.isEstimated)
+  const invCount     = filtered.filter(r => r.costSource === 'inventory').length
+  const sameDayCount = filtered.filter(r => r.costSource === 'weldon_same_day').length
   const totalProfit = filtered.reduce((s, r) => s + r.profit, 0)
   const totalRev    = filtered.reduce((s, r) => s + r.sale, 0)
   const avgProfit   = filtered.length > 0 ? totalProfit / filtered.length : 0
@@ -282,6 +320,7 @@ export default function Orders() {
                       <tr>
                         <th style={hcell('left')}>DATE</th>
                         <th style={hcell('left')}>TIRE / ITEM</th>
+                        <th style={hcell('left')}>SOURCE</th>
                         <th style={hcell('right')}>QTY</th>
                         <th style={hcell('right')}>SALE</th>
                         <th style={hcell('right')}>COST</th>
@@ -298,6 +337,18 @@ export default function Orders() {
                           <td style={cell('left', { color: '#888', whiteSpace: 'nowrap' })}>{r.date}</td>
                           <td style={cell('left', { maxWidth: '220px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' })}>
                             <span style={{ color: '#1a1a1a', fontWeight: '500' }}>{r.item}</span>
+                          </td>
+                          <td style={cell('left')}>
+                            {(() => {
+                              const map = {
+                                inventory:           ['#dbeafe', '#1d4ed8', 'Inventory'],
+                                weldon_same_day:     ['#fef3c7', '#92400e', 'Same-Day'],
+                                used_tire_inventory: ['#f3f4f6', '#6b7280', 'Used'],
+                                service:             ['#f3f4f6', '#9ca3af', 'Service'],
+                              }
+                              const [bg, fg, label] = map[r.costSource] || map.service
+                              return <span style={{ padding: '2px 7px', borderRadius: '3px', fontSize: '10px', whiteSpace: 'nowrap', background: bg, color: fg }}>{label}</span>
+                            })()}
                           </td>
                           <td style={cell('right', { color: '#888' })}>{r.qty}</td>
                           <td style={cell('right', { color: '#1a1a1a' })}>{fmtC(r.sale)}</td>
@@ -329,7 +380,7 @@ export default function Orders() {
 
                   <div style={{ padding: '10px 16px', borderTop: '2px solid #E5E5E5', background: '#FAFAFA', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                     <div style={{ fontSize: '10px', color: '#888', fontFamily: 'DM Mono, monospace' }}>
-                      {filtered.length.toLocaleString()} rows &nbsp;·&nbsp; * = estimated cost (no Weldon match)
+                      {filtered.length.toLocaleString()} rows &nbsp;·&nbsp; {invCount.toLocaleString()} inventory &nbsp;·&nbsp; {sameDayCount.toLocaleString()} same-day &nbsp;·&nbsp; * = estimated cost (no Weldon match)
                     </div>
                     <div style={{ fontSize: '11px', color: '#16a34a', fontFamily: 'DM Mono, monospace', fontWeight: '600' }}>
                       {fmt0(totalProfit)} est. profit shown
