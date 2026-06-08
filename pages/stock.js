@@ -24,10 +24,20 @@ function sizeOf(name) {
   return m ? `${m[1]}/${m[2]}/${m[3]}` : null
 }
 
+// Returns normalized label for matching: size + optional brand tag (Cooper, Goodyear, Falken, LT, Kumho)
+const BRANDS = ['Cooper', 'Goodyear', 'Falken', 'Kumho', 'LT']
+function labelOf(name) {
+  if (!name) return null
+  const size = sizeOf(name)
+  if (!size) return null
+  const brand = BRANDS.find(b => name.toLowerCase().includes(b.toLowerCase()))
+  return brand ? `${size} ${brand}` : size
+}
+
 async function fetchAllSales() {
   let all = [], from = 0
   while (true) {
-    const { data } = await supabase.from('clover_line_items').select('item_name').gte('date', '2026-04-15').range(from, from + 999)
+    const { data } = await supabase.from('clover_line_items').select('item_name').gte('date', '2026-04-15').lte('date', '2026-05-31').range(from, from + 999)
     if (!data || data.length === 0) break
     all = [...all, ...data]
     if (data.length < 1000) break
@@ -45,31 +55,28 @@ export default function Stock() {
   useEffect(() => {
     async function load() {
       const [{ data }, sales] = await Promise.all([
-        supabase.from('stock_purchases').select('item_label, qty_purchased, unit_cost'),
+        supabase.from('stock_purchases').select('item_label, qty_purchased, unit_cost, track_clover_sales'),
         fetchAllSales(),
       ])
 
-      // Count tires sold by bare size (since 4/15)
+      // Count tires sold by exact label (size + brand if Clover named it)
       const sold = {}
       sales.forEach(r => {
-        const s = sizeOf(r.item_name)
-        if (s) sold[s] = (sold[s] || 0) + 1
+        const l = labelOf(r.item_name)
+        if (l) sold[l] = (sold[l] || 0) + 1
       })
 
       if (data) {
         setRows(data.map(p => {
-          const size = sizeOf(p.item_label)
-          const qtySold = size ? (sold[size] || 0) : 0
+          if (!p.track_clover_sales) {
+            const unitCost = Number(p.unit_cost)
+            return { label: p.item_label, stocked: p.qty_purchased, sold: 0, onHand: p.qty_purchased, unitCost, value: p.qty_purchased * unitCost }
+          }
+          const label = labelOf(p.item_label)
+          const qtySold = label ? (sold[label] || 0) : 0
           const onHand = Math.max(p.qty_purchased - qtySold, 0)
           const unitCost = Number(p.unit_cost)
-          return {
-            label: p.item_label,
-            stocked: p.qty_purchased,
-            sold: qtySold,
-            onHand,
-            unitCost,
-            value: onHand * unitCost,
-          }
+          return { label: p.item_label, stocked: p.qty_purchased, sold: qtySold, onHand, unitCost, value: onHand * unitCost }
         }))
       }
       setLoading(false)
@@ -95,7 +102,7 @@ export default function Stock() {
       <Head><title>Reydel Tire — Stock</title></Head>
       <div style={{ minHeight: '100vh', background: '#F8F8F8' }}>
         <TopNav active="stock" right={
-          <div style={{ fontSize: '10px', color: '#888', fontFamily: 'DM Mono, monospace' }}>4/15/2026 purchase · opening inventory</div>
+          <div style={{ fontSize: '10px', color: '#888', fontFamily: 'DM Mono, monospace' }}>4/15/2026 purchase · as of 5/31/2026</div>
         } />
 
         <div style={{ padding: '24px 28px' }}>
@@ -106,7 +113,7 @@ export default function Stock() {
                 {/* KPI cards */}
                 <div style={{ display: 'flex', gap: '12px', marginBottom: '20px' }}>
                   {[
-                    { label: 'ON HAND',      value: totalOnHand.toLocaleString() + ' tires', sub: 'stocked 4/15 − sold', sc: '#16a34a' },
+                    { label: 'ON HAND',      value: totalOnHand.toLocaleString() + ' tires', sub: 'stocked 4/15 − sold thru 5/31', sc: '#16a34a' },
                     { label: 'STOCK VALUE',  value: fmt(totalValue),                         sub: 'remaining, at cost',  sc: '#1a1a1a' },
                     { label: 'LINE ITEMS',   value: lines.toString(),                        sub: 'distinct entries',    sc: '#888' },
                   ].map(k => (
