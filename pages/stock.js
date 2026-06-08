@@ -75,17 +75,21 @@ export default function Stock() {
       })
 
       if (data) {
-        setRows(data.map(p => {
-          if (!p.track_clover_sales) {
-            const unitCost = Number(p.unit_cost)
-            return { label: p.item_label, stocked: p.qty_purchased, sold: 0, onHand: p.qty_purchased, unitCost, value: p.qty_purchased * unitCost }
-          }
-          const label = labelOf(p.item_label)
-          const qtySold = label ? (sold[label] || 0) : 0
-          const onHand = Math.max(p.qty_purchased - qtySold, 0)
-          const unitCost = Number(p.unit_cost)
-          return { label: p.item_label, stocked: p.qty_purchased, sold: qtySold, onHand, unitCost, value: onHand * unitCost }
-        }))
+        setRows(
+          data
+            // Our stock starts 4/15. Only tracked Weldon stock-ups (4/15 + the
+            // 4/28 / 5/18 restocks, net of returns) — never the pre-2026 carryover.
+            .filter(p => p.track_clover_sales)
+            .map(p => {
+              const label = labelOf(p.item_label) || p.item_label
+              const qtySold = sold[label] || 0
+              const onHand = Math.max(p.qty_purchased - qtySold, 0)
+              const unitCost = Number(p.unit_cost)
+              return { label, stocked: p.qty_purchased, sold: qtySold, onHand, unitCost, value: onHand * unitCost }
+            })
+            // Only what's actually on the rack — no zero-qty rows.
+            .filter(r => r.onHand > 0)
+        )
       }
       setLoading(false)
     }
@@ -110,7 +114,7 @@ export default function Stock() {
       <Head><title>Reydel Tire — Stock</title></Head>
       <div style={{ minHeight: '100vh', background: '#F8F8F8' }}>
         <TopNav active="stock" right={
-          <div style={{ fontSize: '10px', color: '#888', fontFamily: 'DM Mono, monospace' }}>4/15/2026 purchase · as of 5/31/2026</div>
+          <div style={{ fontSize: '10px', color: '#888', fontFamily: 'DM Mono, monospace' }}>live on-hand · 4/15 + restocks − Clover sales</div>
         } />
 
         <div style={{ padding: '24px 28px' }}>
@@ -121,9 +125,9 @@ export default function Stock() {
                 {/* KPI cards */}
                 <div style={{ display: 'flex', gap: '12px', marginBottom: '20px' }}>
                   {[
-                    { label: 'ON HAND',      value: totalOnHand.toLocaleString() + ' tires', sub: 'stocked 4/15 − sold thru 5/31', sc: '#16a34a' },
-                    { label: 'STOCK VALUE',  value: fmt(totalValue),                         sub: 'remaining, at cost',  sc: '#1a1a1a' },
-                    { label: 'LINE ITEMS',   value: lines.toString(),                        sub: 'distinct entries',    sc: '#888' },
+                    { label: 'ON HAND',      value: totalOnHand.toLocaleString() + ' tires', sub: 'in stock now', sc: '#16a34a' },
+                    { label: 'STOCK VALUE',  value: fmt(totalValue),                         sub: 'on-hand, at cost',  sc: '#1a1a1a' },
+                    { label: 'SIZES',        value: lines.toString(),                        sub: 'in stock',    sc: '#888' },
                   ].map(k => (
                     <div key={k.label} style={{ flex: 1, background: '#fff', border: '1px solid #E5E5E5', borderRadius: '6px', padding: '14px 16px' }}>
                       <div style={{ fontSize: '9px', color: '#888', letterSpacing: '0.15em', marginBottom: '6px', fontFamily: 'DM Mono, monospace' }}>{k.label}</div>
