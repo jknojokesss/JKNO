@@ -102,14 +102,18 @@ export default function Orders() {
       // same-day Weldon order placed for that customer.
       const STOCKUP_DATE = '2026-04-15'
       const stockSizes = new Set()
-      const stockCostMap = {}
+      const stockVariantCost = {}   // "size" or "size|cooper" → stocked unit cost
+      const maxStockedForSize = {}  // size → priciest tire we actually stocked in it
       stockRows?.forEach(r => {
         if (!r.track_clover_sales) return
         const sz = normalizeSize(r.item_label)
         if (!sz) return
         stockSizes.add(sz)
-        const key = /cooper/i.test(r.item_label) ? `${sz}|cooper` : sz
-        stockCostMap[key] = Number(r.unit_cost)
+        const lbl = r.item_label.toLowerCase()
+        const b = ['cooper', 'falken', 'goodyear', 'kumho'].find(x => lbl.includes(x))
+        const cost = Number(r.unit_cost)
+        stockVariantCost[b ? `${sz}|${b}` : sz] = cost
+        maxStockedForSize[sz] = Math.max(maxStockedForSize[sz] ?? 0, cost)
       })
 
       if (lineItems) {
@@ -122,31 +126,36 @@ export default function Orders() {
           const isUsed = /used/i.test(r.item_name || '')
           const isCooper = /cooper/i.test(r.item_name || '')
 
-          // Classify: inventory (sold from 4/15 stock-up shelf) vs same-day Weldon order.
+          // Cost lookup first — curated exact label wins, then brand+size, then size.
+          const exactCost = exactMap[(r.item_name || '').trim().toLowerCase()]
+          const brandCost = (brand && normalized) ? brandCostMap[`${brand}|${normalized}`] : null
+          const sizeCost  = normalized ? costMap[normalized] : null
+          const lookedUp  = exactCost ?? brandCost ?? sizeCost
+
+          // Classify inventory vs same-day. A sale is off the 4/15 shelf only if its
+          // size was stocked, on/after the stock-up, it's not a premium brand we never
+          // carried, AND it doesn't cost more than the priciest tire we stocked in that
+          // size (a "255/45/19 Brand" Pirelli at $253 isn't the $85/$179 shelf stock).
           const isStockSize = normalized != null && stockSizes.has(normalized)
-          // A premium brand we never stocked = same-day, even on a stock size.
-          const isInventory = !isService && !isUsed && r.date >= STOCKUP_DATE && isStockSize && !hasNonStockBrand(r.item_name)
+          const maxStocked = normalized ? (maxStockedForSize[normalized] ?? 0) : 0
+          const pricedAboveStock = lookedUp != null && maxStocked > 0 && lookedUp > maxStocked + 0.5
+          const isInventory = !isService && !isUsed && r.date >= STOCKUP_DATE
+            && isStockSize && !hasNonStockBrand(r.item_name) && !pricedAboveStock
           const costSource = isService ? 'service'
             : isUsed ? 'used_tire_inventory'
             : isInventory ? 'inventory'
             : 'weldon_same_day'
 
-          // Match priority: exact label → brand+size → size-only → ratio estimate
-          const exactCost = exactMap[(r.item_name || '').trim().toLowerCase()]
-          const brandCost = (brand && normalized) ? brandCostMap[`${brand}|${normalized}`] : null
-          const sizeCost  = normalized ? costMap[normalized] : null
-          const weldonCost = exactCost ?? brandCost ?? sizeCost
-          // For inventory sales, the authoritative cost is the stock-up unit cost
-          // (Cooper variant when the item says Cooper); fall back to the Weldon lookups.
+          // Inventory cost = the stocked variant (curated exact cost wins, then the
+          // Cooper / budget shelf cost). Same-day cost = the looked-up Weldon cost.
           const invCost = isInventory
-            ? ((isCooper ? stockCostMap[`${normalized}|cooper`] : null) ?? stockCostMap[normalized])
+            ? (exactCost ?? (isCooper ? stockVariantCost[`${normalized}|cooper`] : null) ?? stockVariantCost[normalized])
             : null
-          // Exact-label cost (incl. used tires @ $18) wins even when the name has no parseable size.
           const costPerUnit = invCost != null ? invCost
             : exactCost != null ? exactCost
             : isService ? 0
-            : (weldonCost ?? sale * FALLBACK_RATIO)
-          const isEstimated = invCost == null && exactCost == null && !isService && weldonCost == null
+            : (lookedUp ?? sale * FALLBACK_RATIO)
+          const isEstimated = invCost == null && exactCost == null && !isService && lookedUp == null
           const isExact = invCost != null || exactCost != null
           const cost   = costPerUnit * qty
           const profit = sale - cost
