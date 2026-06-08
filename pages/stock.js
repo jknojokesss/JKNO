@@ -18,19 +18,27 @@ const cell = (align = 'left', extra = {}) => ({
   textAlign: align, ...extra,
 })
 
+// Pull a canonical NNN/NN/NN size out of any format Clover or the stock sheet
+// uses: 235/60/17, 235/60R17, 235/60ZR17, P255/60R19, LT245/75R16, 235-60-17.
 function sizeOf(name) {
   if (!name) return null
-  const m = name.match(/(\d{3})[\s/-](\d{2})[\s/-]?[A-Za-z]{0,3}(\d{2})/)
+  const m = name.match(/(?:LT|P|C)?\s*(\d{3})[\s/\\-]+(\d{2})[\s/\\-]*[A-Za-z]{0,3}(\d{2})/i)
   return m ? `${m[1]}/${m[2]}/${m[3]}` : null
 }
 
-// Returns normalized label for matching: size + optional brand tag (Cooper, Goodyear, Falken, LT, Kumho)
+// Canonical label for matching a sale to a stock item: size + brand tag.
+// Order matters — check the more specific brands before LT so
+// "235/65/16 LT Kumho" resolves to Kumho, not LT.
 const BRANDS = ['Cooper', 'Goodyear', 'Falken', 'Kumho', 'LT']
 function labelOf(name) {
   if (!name) return null
   const size = sizeOf(name)
   if (!size) return null
-  const brand = BRANDS.find(b => name.toLowerCase().includes(b.toLowerCase()))
+  const lower = name.toLowerCase().replace(/good\s*year/g, 'goodyear')
+  let brand = BRANDS.find(b => lower.includes(b.toLowerCase()))
+  // Store convention: a bare "brand" / "Brand" / "brand name" tag means Cooper.
+  // Without this, "235/60/17 brand" splits off from the "235/60/17 Cooper" stock.
+  if (!brand && /\bbrand\b/.test(lower)) brand = 'Cooper'
   return brand ? `${size} ${brand}` : size
 }
 
