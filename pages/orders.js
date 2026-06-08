@@ -38,6 +38,17 @@ function detectBrand(name) {
   return BRANDS.find(b => n.includes(b)) || null
 }
 
+// Premium brands the 4/15 stock-up never carried. A sale naming one of these is
+// a same-day Weldon order even if its SIZE matches a stocked size — e.g.
+// "215/55/17 Michelin" ($186) is NOT the budget "215/55/17" shelf tire ($59.80).
+// (Cooper / Goodyear / Falken / Kumho are excluded here — those ARE stocked for
+// certain sizes, so they stay eligible for the inventory match.)
+const NON_STOCK_BRANDS = ['continental','michelin','pirelli','bridgestone','hankook','firestone','toyo']
+function hasNonStockBrand(name) {
+  const n = (name || '').toLowerCase().replace('bridge stone', 'bridgestone')
+  return NON_STOCK_BRANDS.some(b => n.includes(b))
+}
+
 export default function Orders() {
   const [rows,       setRows]       = useState([])
   const [loading,    setLoading]    = useState(true)
@@ -113,7 +124,8 @@ export default function Orders() {
 
           // Classify: inventory (sold from 4/15 stock-up shelf) vs same-day Weldon order.
           const isStockSize = normalized != null && stockSizes.has(normalized)
-          const isInventory = !isService && !isUsed && r.date >= STOCKUP_DATE && isStockSize
+          // A premium brand we never stocked = same-day, even on a stock size.
+          const isInventory = !isService && !isUsed && r.date >= STOCKUP_DATE && isStockSize && !hasNonStockBrand(r.item_name)
           const costSource = isService ? 'service'
             : isUsed ? 'used_tire_inventory'
             : isInventory ? 'inventory'
