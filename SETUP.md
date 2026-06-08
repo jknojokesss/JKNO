@@ -72,3 +72,38 @@ Same process as the Saratoga site:
 - [ ] Cash flow statement
 - [ ] Admin panel for you to manage all clients
 - [ ] Document upload section
+
+---
+
+## Maintenance — Adding a Weldon Restock to the Stock Page
+
+The **Stock** page (`pages/stock.js`) computes on-hand live from Clover sales,
+but the **purchases** are a fixed list of cost layers near the top of the file
+(`const LAYERS = [...]`). On-hand = layers − returns − sales (time-aware FIFO),
+so it ties to the books to the dollar. When Reydel does a new Weldon stock-up,
+add the new tires to that list — it's a 30-second edit.
+
+**For each line on the Weldon invoice, add one entry to `LAYERS`:**
+
+```js
+{ "s": "235/60/17", "l": "235/60/17", "q": 10, "c": 65, "d": "2026-06-20" },
+```
+
+| key | meaning |
+|-----|---------|
+| `s` | bare size `NNN/NN/NN` (no brand) — this is what sales match against |
+| `l` | display label — add the brand if premium, e.g. `"235/60/17 Cooper"` |
+| `q` | quantity on that invoice line |
+| `c` | unit cost (what Weldon charged per tire) |
+| `d` | date the stock arrived, `YYYY-MM-DD` — sales before this date won't draw from it |
+
+**Returns to Weldon** go in the `RETURNS = [...]` list right below, same idea
+but no date: `{ "s": "285/45/22", "q": 4, "c": 105 }`.
+
+**Two rules that keep it tying to QuickBooks:**
+1. The total of every `q × c` you add to `LAYERS` must equal what hit the
+   **Inventory Asset** account in QB for that stock-up.
+2. After editing, bump `AS_OF` (also near the top) if you want the page to count
+   sales through a later date.
+
+That's it — commit, push, Vercel redeploys. No database changes needed.
