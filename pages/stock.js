@@ -61,7 +61,7 @@ async function fetchSales() {
 // Time-aware FIFO: returns + chronological sales consumed from the size's
 // layers (only layers that have arrived by the sale date), cheapest/oldest
 // first. Whatever remains is on-hand.
-function computeOnHand(sales) {
+function computeOnHand(sales, weldon = []) {
   const layers = LAYERS.map(L => ({ ...L, remaining: L.q }))
 
   RETURNS.forEach(({ s, q, c }) => {
@@ -75,6 +75,23 @@ function computeOnHand(sales) {
   layers.forEach(L => { (bySize[L.s] = bySize[L.s] || []).push(L) })
   Object.values(bySize).forEach(a => a.sort((x, y) => x.d.localeCompare(y.d) || x.c - y.c))
 
+  // HYBRID — special-order matching, applied to sales AFTER 5/31 only (5/31 stays on
+  // the books method). A small Weldon order (qty <= 4) of a size, within ±3 days of the
+  // sale, means that tire was special-ordered for a customer — it never sat on our shelf,
+  // so it shouldn't deplete stock. Restocks are entered manually in LAYERS (any size),
+  // so they're the shelf source; they are NOT treated as special-orders here.
+  const sdPool = {}
+  ;(weldon || []).forEach(o => {
+    if (Number(o.qty) > 4) return
+    ;(sdPool[o.size] = sdPool[o.size] || []).push({ date: o.order_date, remaining: Number(o.qty) })
+  })
+  const isSpecialOrder = (size, date) => {
+    for (const o of sdPool[size] || []) {
+      if (o.remaining > 0 && Math.abs((new Date(o.date) - new Date(date)) / 864e5) <= 3) { o.remaining--; return true }
+    }
+    return false
+  }
+
   const tireSales = sales
     .filter(r => sizeOf(r.item_name) && !/used/i.test(r.item_name)
       && !SAME_DAY_ITEMS.has((r.item_name || '').trim().toLowerCase()))
@@ -82,6 +99,7 @@ function computeOnHand(sales) {
     .sort((a, b) => a.date.localeCompare(b.date))
 
   for (const sale of tireSales) {
+    if (sale.date > AS_OF && isSpecialOrder(sale.size, sale.date)) continue // post-5/31 special-order → shelf untouched
     const pool = bySize[sale.size] || []
     for (const L of pool) { if (L.remaining > 0 && L.d <= sale.date) { L.remaining--; break } }
   }
@@ -104,17 +122,21 @@ export default function Stock() {
   const [search,  setSearch]  = useState('')
   const [sort,    setSort]    = useState('value') // value | qty | size
   const [asOf,    setAsOf]    = useState(AS_OF)   // AS_OF (5/31, ties to books) | 'live'
+  const [weldon,  setWeldon]  = useState([])
 
   useEffect(() => {
-    fetchSales().then(sales => { setAllSales(sales); setLoading(false) })
+    Promise.all([
+      fetchSales(),
+      supabase.from('weldon_orders').select('order_date, size, qty'),
+    ]).then(([sales, w]) => { setAllSales(sales); setWeldon(w.data || []); setLoading(false) })
   }, [])
 
   // On-hand = layers minus returns minus sales through the selected cutoff.
-  // Flip asOf to 'live' to count every sale to date (current shelf) instead of 5/31.
+  // LIVE additionally skips post-5/31 special-orders (matched to small Weldon orders).
   const rows = useMemo(() => {
     const cutoff = asOf === 'live' ? '9999-12-31' : asOf
-    return computeOnHand(allSales.filter(r => r.date <= cutoff))
-  }, [allSales, asOf])
+    return computeOnHand(allSales.filter(r => r.date <= cutoff), weldon)
+  }, [allSales, weldon, asOf])
 
   const filtered = useMemo(() => {
     let r = search ? rows.filter(x => x.label.toLowerCase().includes(search.toLowerCase())) : rows
