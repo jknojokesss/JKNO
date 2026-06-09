@@ -121,6 +121,21 @@ export default function Stock() {
   const totalValue  = rows.reduce((s, r) => s + r.value, 0)
   const lines       = rows.length
 
+  // Export the on-hand snapshot (respects the current filter/sort) to a CSV.
+  const downloadCSV = () => {
+    const esc = v => `"${String(v).replace(/"/g, '""')}"`
+    const csv = [['Size / Item', 'On Hand', 'Unit Cost', 'Stock Value'].map(esc).join(',')]
+    filtered.forEach(r => csv.push([r.label, r.qty, r.unitCost.toFixed(2), r.value.toFixed(2)].map(esc).join(',')))
+    csv.push(['TOTAL', totalOnHand, '', totalValue.toFixed(2)].map(esc).join(','))
+    const blob = new Blob([csv.join('\n')], { type: 'text/csv;charset=utf-8;' })
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = url
+    a.download = 'reydel-stock-on-hand-2026-05-31.csv'
+    document.body.appendChild(a); a.click(); a.remove()
+    URL.revokeObjectURL(url)
+  }
+
   return (
     <>
       <Head><title>Reydel Tire — Stock</title></Head>
@@ -162,6 +177,10 @@ export default function Stock() {
                       color: sort === s.k ? '#fff' : '#888',
                     }}>{s.l}</button>
                   ))}
+                  <button onClick={downloadCSV} style={{
+                    padding: '7px 12px', fontSize: '9px', fontFamily: 'DM Mono, monospace', letterSpacing: '0.08em',
+                    border: 'none', borderRadius: '4px', cursor: 'pointer', background: '#16a34a', color: '#fff',
+                  }}>↓ CSV</button>
                 </div>
 
                 <div style={{ background: '#fff', border: '1px solid #E5E5E5', borderRadius: '6px', overflow: 'hidden' }}>
