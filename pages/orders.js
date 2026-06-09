@@ -58,6 +58,7 @@ export default function Orders() {
   const [sort,       setSort]       = useState('date')
   const [sortDir,    setSortDir]    = useState('desc')
   const [showEst,    setShowEst]    = useState(true) // show rows with estimated cost
+  const [asOf,       setAsOf]       = useState('all') // 'all' | '2026-05-31' (book period)
   const [view,       setView]       = useState('live') // 'live' | 'precomputed'
   const [opRows,     setOpRows]     = useState([])
   const [opLoading,  setOpLoading]  = useState(false)
@@ -196,6 +197,7 @@ export default function Orders() {
 
   const filtered = useMemo(() => {
     let r = rows
+    if (asOf !== 'all') r = r.filter(x => x.date <= asOf)
     if (search) r = r.filter(r => r.item.toLowerCase().includes(search.toLowerCase()))
     if (!showEst) r = r.filter(r => !r.isEstimated)
     return [...r].sort((a, b) => {
@@ -210,7 +212,7 @@ export default function Orders() {
       if (sort === 'sale')   return mul * (a.sale - b.sale)
       return 0
     })
-  }, [rows, search, sort, sortDir, showEst])
+  }, [rows, search, sort, sortDir, showEst, asOf])
 
   const matched     = rows.filter(r => !r.isEstimated)
   const invCount     = filtered.filter(r => r.costSource === 'inventory').length
@@ -219,6 +221,22 @@ export default function Orders() {
   const totalRev    = filtered.reduce((s, r) => s + r.sale, 0)
   const avgProfit   = filtered.length > 0 ? totalProfit / filtered.length : 0
   const avgMargin   = totalRev > 0 ? (totalProfit / totalRev) * 100 : 0
+
+  // Export the shown orders (respects filter/sort/as-of) to CSV.
+  const downloadCSV = () => {
+    const esc = v => `"${String(v).replace(/"/g, '""')}"`
+    const SRC = { inventory: 'Inventory', weldon_same_day: 'Same-Day', used_tire_inventory: 'Used', service: 'Service' }
+    const csv = [['Date', 'Item', 'Source', 'Qty', 'Sale', 'Cost', 'Profit', 'Margin %'].map(esc).join(',')]
+    filtered.forEach(r => csv.push([r.date, r.item, SRC[r.costSource] || r.costSource, r.qty, r.sale.toFixed(2), r.cost.toFixed(2), r.profit.toFixed(2), r.margin.toFixed(1)].map(esc).join(',')))
+    csv.push(['TOTAL', '', '', '', totalRev.toFixed(2), (totalRev - totalProfit).toFixed(2), totalProfit.toFixed(2), avgMargin.toFixed(1)].map(esc).join(','))
+    const blob = new Blob([csv.join('\n')], { type: 'text/csv;charset=utf-8;' })
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = url
+    a.download = `reydel-orders-${asOf === 'all' ? 'all' : asOf}.csv`
+    document.body.appendChild(a); a.click(); a.remove()
+    URL.revokeObjectURL(url)
+  }
 
   // Best margin size — NEW tires only (exclude used), matched, minimum 3 sales
   const bySize = {}
@@ -302,6 +320,13 @@ export default function Orders() {
 
                 {/* Controls */}
                 <div style={{ display: 'flex', gap: '10px', marginBottom: '16px', alignItems: 'center', flexWrap: 'wrap' }}>
+                  {[{ k: 'all', l: 'ALL' }, { k: '2026-05-31', l: 'THRU 5/31' }].map(o => (
+                    <button key={o.k} onClick={() => setAsOf(o.k)} style={{
+                      padding: '7px 12px', fontSize: '9px', fontFamily: 'DM Mono, monospace', letterSpacing: '0.08em',
+                      border: '1px solid #E5E5E5', borderRadius: '4px', cursor: 'pointer',
+                      background: asOf === o.k ? '#1a1a1a' : '#fff', color: asOf === o.k ? '#fff' : '#888',
+                    }}>{o.l}</button>
+                  ))}
                   <input value={search} onChange={e => setSearch(e.target.value)}
                     placeholder="Filter by tire size or item..."
                     style={{ flex: 1, minWidth: '200px', padding: '8px 12px', border: '1px solid #E5E5E5', borderRadius: '4px',
@@ -325,6 +350,10 @@ export default function Orders() {
                   }}>
                     {showEst ? 'HIDE EST.' : 'SHOW EST.'}
                   </button>
+                  <button onClick={downloadCSV} style={{
+                    padding: '7px 12px', fontSize: '9px', fontFamily: 'DM Mono, monospace', letterSpacing: '0.08em',
+                    border: 'none', borderRadius: '4px', cursor: 'pointer', background: '#16a34a', color: '#fff',
+                  }}>↓ CSV</button>
                 </div>
 
                 {/* Table */}
