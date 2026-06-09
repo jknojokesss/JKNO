@@ -49,7 +49,7 @@ async function fetchSales() {
   let all = [], from = 0
   while (true) {
     const { data } = await supabase.from('clover_line_items')
-      .select('item_name, date').gte('date', STOCK_START).lte('date', AS_OF).range(from, from + 999)
+      .select('item_name, date').gte('date', STOCK_START).range(from, from + 999)
     if (!data || data.length === 0) break
     all = [...all, ...data]
     if (data.length < 1000) break
@@ -99,14 +99,22 @@ function computeOnHand(sales) {
 export default function Stock() {
   // Require sign-in: send anonymous visitors to /login before any data renders.
   useEffect(() => { supabase.auth.getUser().then(({ data: { user } }) => { if (!user) window.location.replace('/login') }) }, [])
-  const [rows,    setRows]    = useState([])
+  const [allSales, setAllSales] = useState([])
   const [loading, setLoading] = useState(true)
   const [search,  setSearch]  = useState('')
   const [sort,    setSort]    = useState('value') // value | qty | size
+  const [asOf,    setAsOf]    = useState(AS_OF)   // AS_OF (5/31, ties to books) | 'live'
 
   useEffect(() => {
-    fetchSales().then(sales => { setRows(computeOnHand(sales)); setLoading(false) })
+    fetchSales().then(sales => { setAllSales(sales); setLoading(false) })
   }, [])
+
+  // On-hand = layers minus returns minus sales through the selected cutoff.
+  // Flip asOf to 'live' to count every sale to date (current shelf) instead of 5/31.
+  const rows = useMemo(() => {
+    const cutoff = asOf === 'live' ? '9999-12-31' : asOf
+    return computeOnHand(allSales.filter(r => r.date <= cutoff))
+  }, [allSales, asOf])
 
   const filtered = useMemo(() => {
     let r = search ? rows.filter(x => x.label.toLowerCase().includes(search.toLowerCase())) : rows
@@ -131,7 +139,7 @@ export default function Stock() {
     const url = URL.createObjectURL(blob)
     const a = document.createElement('a')
     a.href = url
-    a.download = 'reydel-stock-on-hand-2026-05-31.csv'
+    a.download = `reydel-stock-on-hand-${asOf === 'live' ? 'current' : asOf}.csv`
     document.body.appendChild(a); a.click(); a.remove()
     URL.revokeObjectURL(url)
   }
@@ -141,7 +149,7 @@ export default function Stock() {
       <Head><title>Reydel Tire — Stock</title></Head>
       <div style={{ minHeight: '100vh', background: '#F8F8F8' }}>
         <TopNav active="stock" right={
-          <div style={{ fontSize: '10px', color: '#888', fontFamily: 'DM Mono, monospace' }}>live on-hand · FIFO · as of 5/31/2026</div>
+          <div style={{ fontSize: '10px', color: '#888', fontFamily: 'DM Mono, monospace' }}>{asOf === 'live' ? 'live on-hand · current' : 'on-hand · as of 5/31/2026 (books)'} · FIFO</div>
         } />
 
         <div style={{ padding: '24px 28px' }}>
@@ -151,7 +159,7 @@ export default function Stock() {
               <>
                 <div style={{ display: 'flex', gap: '12px', marginBottom: '20px' }}>
                   {[
-                    { label: 'ON HAND',     value: totalOnHand.toLocaleString() + ' tires', sub: 'in stock as of 5/31', sc: '#16a34a' },
+                    { label: 'ON HAND',     value: totalOnHand.toLocaleString() + ' tires', sub: asOf === 'live' ? 'in stock now' : 'in stock at 5/31', sc: '#16a34a' },
                     { label: 'STOCK VALUE', value: fmt(totalValue),                          sub: 'on-hand, at cost',   sc: '#1a1a1a' },
                     { label: 'SIZES',       value: lines.toString(),                         sub: 'on the rack',        sc: '#888' },
                   ].map(k => (
@@ -164,6 +172,13 @@ export default function Stock() {
                 </div>
 
                 <div style={{ display: 'flex', gap: '10px', marginBottom: '16px', alignItems: 'center', flexWrap: 'wrap' }}>
+                  {[{ k: AS_OF, l: 'AS OF 5/31' }, { k: 'live', l: 'LIVE' }].map(o => (
+                    <button key={o.k} onClick={() => setAsOf(o.k)} style={{
+                      padding: '7px 12px', fontSize: '9px', fontFamily: 'DM Mono, monospace', letterSpacing: '0.08em',
+                      border: '1px solid #E5E5E5', borderRadius: '4px', cursor: 'pointer',
+                      background: asOf === o.k ? '#1a1a1a' : '#fff', color: asOf === o.k ? '#fff' : '#888',
+                    }}>{o.l}</button>
+                  ))}
                   <input value={search} onChange={e => setSearch(e.target.value)}
                     placeholder="Filter by size / item..."
                     style={{ flex: 1, minWidth: '180px', padding: '8px 12px', border: '1px solid #E5E5E5', borderRadius: '4px',
