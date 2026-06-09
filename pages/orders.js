@@ -66,7 +66,7 @@ export default function Orders() {
 
   useEffect(() => {
     async function load() {
-      const [{ data: lineItems }, { data: costs }, { data: brandCosts }, { data: itemCosts }, { data: stockRows }] = await Promise.all([
+      const [{ data: lineItems }, { data: weldon }] = await Promise.all([
         (async () => {
           let all = [], from = 0
           while (true) {
@@ -78,87 +78,78 @@ export default function Orders() {
           }
           return { data: all }
         })(),
-        // weldon fallback tables below
-        supabase.from('weldon_costs').select('tire_size, cost'),
-        supabase.from('weldon_brand_costs').select('brand, tire_size, cost'),
-        supabase.from('clover_item_costs').select('item_label, cost'),
-        // stock-up inventory (4/15 bulk buy) — drives inventory vs same-day classification
-        supabase.from('stock_purchases').select('item_label, unit_cost, track_clover_sales'),
+        // Weldon order history = source of truth for cost + inventory/same-day.
+        supabase.from('weldon_orders').select('order_date, size, qty, unit_cost, description'),
       ])
 
-      // Build size → cost lookup (budget / no-brand)
-      const costMap = {}
-      costs?.forEach(r => { costMap[r.tire_size] = Number(r.cost) })
-
-      // Build brand+size → cost lookup (premium brands)
-      const brandCostMap = {}
-      brandCosts?.forEach(r => { brandCostMap[`${r.brand}|${r.tire_size}`] = Number(r.cost) })
-
-      // Build exact-label → cost lookup (authoritative, from 4/15 inventory spreadsheet)
-      const exactMap = {}
-      itemCosts?.forEach(r => { exactMap[r.item_label.trim().toLowerCase()] = Number(r.cost) })
-
-      // Build stock-up size set + cost map for inventory vs same-day classification.
-      // A sale is "Inventory" (sold from shelf stock) when its size was part of the
-      // 4/15 stock-up AND the sale happened on/after that date. Otherwise it was a
-      // same-day Weldon order placed for that customer.
-      const STOCKUP_DATE = '2026-04-15'
-      const stockSizes = new Set()
-      const stockVariantCost = {}   // "size" or "size|cooper" → stocked unit cost
-      const maxStockedForSize = {}  // size → priciest tire we actually stocked in it
-      stockRows?.forEach(r => {
-        if (!r.track_clover_sales) return
-        const sz = normalizeSize(r.item_label)
-        if (!sz) return
-        stockSizes.add(sz)
-        const lbl = r.item_label.toLowerCase()
-        const b = ['cooper', 'falken', 'goodyear', 'kumho'].find(x => lbl.includes(x))
-        const cost = Number(r.unit_cost)
-        stockVariantCost[b ? `${sz}|${b}` : sz] = cost
-        maxStockedForSize[sz] = Math.max(maxStockedForSize[sz] ?? 0, cost)
+      // 4/15–17 stock-up profile per size (from the actual Weldon orders):
+      // budget = cheapest unit, max = priciest stocked, cooper = the Cooper variant cost.
+      const STOCKUP_DATE = '2026-04-15', STOCKUP_END = '2026-04-17'
+      const stockup = {}
+      const bySize = {}
+      ;(weldon || []).forEach(o => {
+        (bySize[o.size] = bySize[o.size] || []).push(o)
+        if (o.order_date >= STOCKUP_DATE && o.order_date <= STOCKUP_END) {
+          const s = stockup[o.size] = stockup[o.size] || { budget: Infinity, max: 0, cooper: null }
+          const c = Number(o.unit_cost)
+          s.budget = Math.min(s.budget, c); s.max = Math.max(s.max, c)
+          if (/cooper/i.test(o.description || '')) s.cooper = c
+        }
       })
+      const dayGap = (a, b) => Math.abs(Math.round((new Date(a) - new Date(b)) / 864e5))
+      // Tight same-day match: a small customer order (qty ≤ 4) within ±3 days, brand-preferred.
+      // This is how we both flag a same-day special order and price it.
+      const tightSameDay = (size, date, brand) => {
+        let best = null, bg = 99
+        for (const o of bySize[size] || []) {
+          if (Number(o.qty) > 4) continue
+          const g = dayGap(o.order_date, date); if (g > 3) continue
+          const score = g - (brand && (o.description || '').toLowerCase().includes(brand) ? 10 : 0)
+          if (score < bg) { bg = score; best = o }
+        }
+        return best ? Number(best.unit_cost) : null
+      }
+      // Nearest order of the size (any qty), brand-preferred — fallback cost for a same-day sale.
+      const nearestCost = (size, date, brand) => {
+        let best = null, bg = 1e9
+        for (const o of bySize[size] || []) {
+          const g = dayGap(o.order_date, date) - (brand && (o.description || '').toLowerCase().includes(brand) ? 60 : 0)
+          if (g < bg) { bg = g; best = o }
+        }
+        return best ? Number(best.unit_cost) : null
+      }
 
       if (lineItems) {
         setRows(lineItems.map(r => {
           const sale = Number(r.revenue)
           const qty  = Number(r.quantity || 1)
-          const normalized = normalizeSize(r.item_name)
-          const brand = detectBrand(r.item_name)
-          const isService  = !normalized
           const isUsed = /used/i.test(r.item_name || '')
-          const isCooper = /cooper/i.test(r.item_name || '')
+          const normalized = normalizeSize(r.item_name)
+          const isService = !normalized && !isUsed
+          const brand = detectBrand(r.item_name)
+          const isCooper = /cooper/i.test(r.item_name || '') || /\bbrand\b/i.test(r.item_name || '')
 
-          // Cost lookup first — curated exact label wins, then brand+size, then size.
-          const exactCost = exactMap[(r.item_name || '').trim().toLowerCase()]
-          const brandCost = (brand && normalized) ? brandCostMap[`${brand}|${normalized}`] : null
-          const sizeCost  = normalized ? costMap[normalized] : null
-          const lookedUp  = exactCost ?? brandCost ?? sizeCost
-
-          // Classify inventory vs same-day. A sale is off the 4/15 shelf only if its
-          // size was stocked, on/after the stock-up, it's not a premium brand we never
-          // carried, AND it doesn't cost more than the priciest tire we stocked in that
-          // size (a "255/45/19 Brand" Pirelli at $253 isn't the $85/$179 shelf stock).
-          const isStockSize = normalized != null && stockSizes.has(normalized)
-          const maxStocked = normalized ? (maxStockedForSize[normalized] ?? 0) : 0
-          const pricedAboveStock = lookedUp != null && maxStocked > 0 && lookedUp > maxStocked + 0.5
+          // Cost + classification straight from the Weldon orders.
+          const su = stockup[normalized]
+          const tight = normalized ? tightSameDay(normalized, r.date, brand) : null
+          const maxStocked = su ? su.max : 0
+          // A tier that cost more than anything we stocked in that size can't be shelf stock.
+          const pricedAbove = tight != null && maxStocked > 0 && tight > maxStocked + 0.5
           const isInventory = !isService && !isUsed && r.date >= STOCKUP_DATE
-            && isStockSize && !hasNonStockBrand(r.item_name) && !pricedAboveStock
-          const costSource = isService ? 'service'
-            : isUsed ? 'used_tire_inventory'
-            : isInventory ? 'inventory'
-            : 'weldon_same_day'
+            && !!su && !hasNonStockBrand(r.item_name) && !pricedAbove
 
-          // Inventory cost = the stocked variant (curated exact cost wins, then the
-          // Cooper / budget shelf cost). Same-day cost = the looked-up Weldon cost.
-          const invCost = isInventory
-            ? (exactCost ?? (isCooper ? stockVariantCost[`${normalized}|cooper`] : null) ?? stockVariantCost[normalized])
-            : null
-          const costPerUnit = invCost != null ? invCost
-            : exactCost != null ? exactCost
-            : isService ? 0
-            : (lookedUp ?? sale * FALLBACK_RATIO)
-          const isEstimated = invCost == null && exactCost == null && !isService && lookedUp == null
-          const isExact = invCost != null || exactCost != null
+          let costPerUnit, costSource, estimated = false
+          if (isUsed) { costPerUnit = 18; costSource = 'used_tire_inventory' }
+          else if (isService) { costPerUnit = 0; costSource = 'service' }
+          else if (isInventory) { costPerUnit = (isCooper && su.cooper) ? su.cooper : su.budget; costSource = 'inventory' }
+          else {
+            const sd = tight ?? nearestCost(normalized, r.date, brand)
+            costPerUnit = sd ?? (su ? su.budget : null) ?? (sale * FALLBACK_RATIO)
+            costSource = 'weldon_same_day'
+            estimated = sd == null && !su
+          }
+          const isEstimated = estimated
+          const isExact = !estimated && !isService
           const cost   = costPerUnit * qty
           const profit = sale - cost
           const margin = sale > 0 ? (profit / sale) * 100 : 0
