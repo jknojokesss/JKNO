@@ -87,7 +87,10 @@ function computeOnHand(sales, weldon = []) {
   })
   const isSpecialOrder = (size, date) => {
     for (const o of sdPool[size] || []) {
-      if (o.remaining > 0 && Math.abs((new Date(o.date) - new Date(date)) / 864e5) <= 3) { o.remaining--; return true }
+      // The Weldon order is placed on/before the sale (you order, it arrives, it sells) —
+      // allow 4 days before to 1 day after (timing slop), never a sale matched to a later order.
+      const gap = (new Date(date) - new Date(o.date)) / 864e5
+      if (o.remaining > 0 && gap >= -1 && gap <= 4) { o.remaining--; return true }
     }
     return false
   }
