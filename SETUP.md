@@ -107,3 +107,33 @@ but no date: `{ "s": "285/45/22", "q": 4, "c": 105 }`.
    sales through a later date.
 
 That's it — commit, push, Vercel redeploys. No database changes needed.
+
+---
+
+## How the Stock page counts on-hand (the hybrid)
+
+The Stock page has two views, toggled by the **AS OF 5/31 / LIVE** buttons:
+
+- **AS OF 5/31** — caps sales at 5/31 and counts *every* stock-size sale as a
+  shelf pull. This is the **book number** ($17,344 / 201) and it ties to the
+  inventory JEs. **Leave this method alone** — it's the accounting anchor.
+- **LIVE** — counts every sale to date, and adds one refinement *for sales after
+  5/31 only*: **special-order matching.**
+
+**Special-order matching (LIVE, post-5/31):** before a sale depletes the shelf,
+the page checks `weldon_orders`. If a **small Weldon order** (qty ≤ 4) of that
+size was placed within ~4 days **on/before** the sale, that tire was
+special-ordered for a customer — it came in from Weldon and went straight out,
+so it **doesn't reduce shelf stock.** Big Weldon orders (qty ≥ 5) are ignored
+here — those are restocks, handled by `LAYERS` (above), not matching.
+
+**The division of labor:**
+- **Restocks → you enter them in `LAYERS`** (exact for any size, including a
+  2-tire restock). The system never guesses a restock.
+- **Special-orders → matched automatically** from `weldon_orders`. No action.
+
+**One edge case:** if you ever do a **small restock (qty ≤ 4) after 5/31**, the
+matcher may mistake a couple of its sales for special-orders (a 2-tire restock
+and a 2-tire customer order look identical). It's only a tire or two. If it
+matters, add that order's `web_id` to a `RESTOCK_WEB_IDS` exclusion set so it's
+skipped by matching (ask the dev to wire it — it's a one-liner).
