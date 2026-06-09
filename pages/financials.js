@@ -107,6 +107,8 @@ function DrillModal({ account, onClose }) {
 }
 
 export default function Financials() {
+  // Require sign-in: send anonymous visitors to /login before any data renders.
+  useEffect(() => { supabase.auth.getUser().then(({ data: { user } }) => { if (!user) window.location.replace('/login') }) }, [])
   const [monthly,      setMonthly]      = useState([])
   const [plTotals,     setPlTotals]     = useState({ income: [], cogs: [], expense: [], other_expense: [] })
   const [accounts,     setAccounts]     = useState([])

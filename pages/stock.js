@@ -97,6 +97,8 @@ function computeOnHand(sales) {
 }
 
 export default function Stock() {
+  // Require sign-in: send anonymous visitors to /login before any data renders.
+  useEffect(() => { supabase.auth.getUser().then(({ data: { user } }) => { if (!user) window.location.replace('/login') }) }, [])
   const [rows,    setRows]    = useState([])
   const [loading, setLoading] = useState(true)
   const [search,  setSearch]  = useState('')

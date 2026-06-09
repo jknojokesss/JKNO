@@ -30,6 +30,8 @@ const cell = (align = 'left', extra = {}) => ({
 })
 
 export default function Inventory() {
+  // Require sign-in: send anonymous visitors to /login before any data renders.
+  useEffect(() => { supabase.auth.getUser().then(({ data: { user } }) => { if (!user) window.location.replace('/login') }) }, [])
   const [items,   setItems]   = useState([])
   const [monthly, setMonthly] = useState([])
   const [loading, setLoading] = useState(true)
