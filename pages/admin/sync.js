@@ -1,6 +1,7 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import Head from 'next/head'
 import { useRouter } from 'next/router'
+import { supabase } from '../../lib/supabase'
 
 const THEME = { sidebarBg: '#1A1A1A', accent: '#CC2222' }
 
@@ -11,6 +12,15 @@ export default function CloverSync() {
   const [busy, setBusy]     = useState(false)
   const [result, setResult] = useState(null)
   const [error, setError]   = useState(null)
+
+  // Admins only — match the other /admin pages.
+  useEffect(() => {
+    supabase.auth.getSession().then(async ({ data: { session } }) => {
+      if (!session) { router.push('/admin'); return }
+      const { data: adminData } = await supabase.from('admins').select('email').eq('email', session.user.email).single()
+      if (!adminData) { router.push('/admin') }
+    })
+  }, [])
 
   const run = async () => {
     setBusy(true); setResult(null); setError(null)
