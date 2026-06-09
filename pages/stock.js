@@ -39,6 +39,12 @@ const RETURNS = [{"s":"205/55/16","q":8,"c":48},{"s":"215/60/16","q":2,"c":98},{
 const STOCK_START = '2026-04-15'
 const AS_OF = '2026-05-31'
 
+// Confirmed same-day special orders — premium tires Weldon ordered for a specific
+// customer, never off our shelf, so they don't draw down stock. Verified against
+// the Weldon order history (e.g. "255/45/19 Brand" = Pirelli Scorpion ordered
+// 5/19 @ $253 for the 5/20 sale; the 4/15 stock-up held zero Pirellis).
+const SAME_DAY_ITEMS = new Set(['255/45/19 brand'])
+
 async function fetchSales() {
   let all = [], from = 0
   while (true) {
@@ -70,7 +76,8 @@ function computeOnHand(sales) {
   Object.values(bySize).forEach(a => a.sort((x, y) => x.d.localeCompare(y.d) || x.c - y.c))
 
   const tireSales = sales
-    .filter(r => sizeOf(r.item_name) && !/used/i.test(r.item_name))
+    .filter(r => sizeOf(r.item_name) && !/used/i.test(r.item_name)
+      && !SAME_DAY_ITEMS.has((r.item_name || '').trim().toLowerCase()))
     .map(r => ({ date: r.date, size: sizeOf(r.item_name) }))
     .sort((a, b) => a.date.localeCompare(b.date))
 
