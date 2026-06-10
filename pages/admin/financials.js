@@ -61,6 +61,31 @@ function parseGL(aoa) {
   return rows
 }
 
+// Parse a QuickBooks "Account List" / Chart of Accounts export into
+// {account, qb_type}. Finds the Type column by header; account name defaults to
+// the first column. Strips parent path (Parent:Sub → Sub) to match GL names.
+function parseCOA(aoa) {
+  let hdr = -1, nameCol = -1, typeCol = -1
+  for (let i = 0; i < Math.min(20, aoa.length); i++) {
+    const cells = aoa[i].map((c) => String(c).toLowerCase().trim())
+    const ti = cells.findIndex((c) => c === 'type')
+    if (ti >= 0) {
+      const ni = cells.findIndex((c) => ['account', 'name', 'full name', 'distribution account'].includes(c))
+      hdr = i; typeCol = ti; nameCol = ni >= 0 ? ni : 0
+      break
+    }
+  }
+  if (hdr === -1) return []
+  const out = []
+  for (let i = hdr + 1; i < aoa.length; i++) {
+    const name = String(aoa[i][nameCol] ?? '').trim()
+    const qb_type = String(aoa[i][typeCol] ?? '').trim()
+    if (!name || !qb_type) continue
+    out.push({ account: name.split(':').pop().trim(), qb_type })
+  }
+  return out
+}
+
 export default function GLImport() {
   const router = useRouter()
   const [ready, setReady]   = useState(false)   // SheetJS loaded
@@ -70,6 +95,13 @@ export default function GLImport() {
   const [busy, setBusy]     = useState(false)
   const [result, setResult] = useState(null)
   const [error, setError]   = useState(null)
+  // Chart of Accounts import
+  const [coaRows, setCoaRows]     = useState(null)
+  const [coaMeta, setCoaMeta]     = useState(null)
+  const [coaFile, setCoaFile]     = useState('')
+  const [coaBusy, setCoaBusy]     = useState(false)
+  const [coaResult, setCoaResult] = useState(null)
+  const [coaError, setCoaError]   = useState(null)
 
   // Admins only.
   useEffect(() => {
@@ -118,6 +150,43 @@ export default function GLImport() {
       setError(String(e.message || e))
     }
     setBusy(false)
+  }
+
+  const onCOAFile = async (e) => {
+    setCoaError(null); setCoaResult(null); setCoaRows(null); setCoaMeta(null)
+    const file = e.target.files?.[0]
+    if (!file) return
+    setCoaFile(file.name)
+    try {
+      const buf = await file.arrayBuffer()
+      const wb = window.XLSX.read(buf, { type: 'array' })
+      const aoa = window.XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]], { header: 1, raw: false, defval: '' })
+      const parsed = parseCOA(aoa)
+      if (!parsed.length) { setCoaError('No accounts found — is this the Chart of Accounts / Account List export? It needs a "Type" column.'); return }
+      setCoaMeta({ count: parsed.length, types: new Set(parsed.map((r) => r.qb_type)).size })
+      setCoaRows(parsed)
+    } catch (err) {
+      setCoaError('Could not read the file: ' + (err.message || err))
+    }
+  }
+
+  const doCOAImport = async () => {
+    if (!coaRows) return
+    setCoaBusy(true); setCoaError(null); setCoaResult(null)
+    try {
+      const { data: { session } } = await supabase.auth.getSession()
+      const res = await fetch('/api/coa-import', {
+        method: 'POST',
+        headers: { 'content-type': 'application/json', authorization: `Bearer ${session?.access_token}` },
+        body: JSON.stringify({ accounts: coaRows }),
+      })
+      const j = await res.json()
+      if (!res.ok) throw new Error(j.error || 'Import failed')
+      setCoaResult(j)
+    } catch (e) {
+      setCoaError(String(e.message || e))
+    }
+    setCoaBusy(false)
   }
 
   const label = { fontSize: '10px', color: '#888', letterSpacing: '0.1em' }
@@ -185,6 +254,68 @@ export default function GLImport() {
               <div style={{ marginTop: '20px', padding: '16px', background: '#fef2f2', border: '1px solid #fecaca', borderRadius: '4px', fontSize: '12px', color: '#991b1b', lineHeight: 1.6, wordBreak: 'break-word' }}>
                 <div style={{ fontWeight: '600', marginBottom: '6px' }}>✕ Error</div>
                 {error}
+              </div>
+            )}
+          </div>
+
+          {/* Chart of Accounts card — sets account classification */}
+          <div style={{ background: '#fff', border: '1px solid #E5E5E5', borderRadius: '8px', padding: '28px', marginTop: '20px' }}>
+            <div style={{ fontSize: '10px', color: THEME.accent, letterSpacing: '0.2em', marginBottom: '6px' }}>ADMIN</div>
+            <h1 style={{ fontSize: '20px', color: '#1a1a1a', marginBottom: '8px' }}>Chart of Accounts</h1>
+            <p style={{ fontSize: '12px', color: '#888', lineHeight: 1.6, marginBottom: '20px' }}>
+              Sets how each account is classified (asset / liability / equity / income / expense). In QuickBooks Online:
+              <b> Accounting → Chart of Accounts → Run Report</b> (Account List) → <b>Export → Excel</b>. Upload it whenever
+              you change an account&apos;s type in QB — the P&amp;L and Balance Sheet follow on the next GL import.
+            </p>
+
+            <label style={{ display: 'block', border: '1px dashed #CCC', borderRadius: '6px', padding: '24px', textAlign: 'center', cursor: ready ? 'pointer' : 'default', background: '#FAFAFA' }}>
+              <input type="file" accept=".xlsx,.xls" disabled={!ready} onChange={onCOAFile} style={{ display: 'none' }} />
+              <div style={{ fontSize: '12px', color: ready ? '#1a1a1a' : '#bbb' }}>
+                {ready ? (coaFile || 'Click to choose the Chart of Accounts .xlsx') : 'Loading spreadsheet reader…'}
+              </div>
+            </label>
+
+            {coaMeta && (
+              <div style={{ marginTop: '18px', padding: '14px', background: '#F8F8F8', border: '1px solid #E5E5E5', borderRadius: '6px', fontSize: '12px', color: '#333', lineHeight: 1.9 }}>
+                <div style={label}>PARSED PREVIEW</div>
+                Accounts: <b>{coaMeta.count}</b> &nbsp;·&nbsp; Distinct types: <b>{coaMeta.types}</b>
+              </div>
+            )}
+
+            {coaRows && (
+              <button onClick={doCOAImport} disabled={coaBusy}
+                style={{ width: '100%', marginTop: '18px', padding: '12px', background: coaBusy ? '#999' : '#1a1a1a', color: '#fff', border: 'none', borderRadius: '4px', fontSize: '12px', letterSpacing: '0.1em', cursor: coaBusy ? 'default' : 'pointer', fontFamily: 'DM Mono, monospace' }}>
+                {coaBusy ? 'UPDATING…' : `UPDATE ${coaMeta.count} ACCOUNT TYPES`}
+              </button>
+            )}
+
+            {coaResult && (
+              <div style={{ marginTop: '20px', padding: '16px', background: '#f0fdf4', border: '1px solid #bbf7d0', borderRadius: '4px', fontSize: '12px', color: '#166534', lineHeight: 1.9 }}>
+                <div style={{ fontWeight: '600', marginBottom: '6px' }}>✓ Classification updated</div>
+                Accounts classified: {coaResult.accountsClassified}<br />
+                {coaResult.breakdown && Object.entries(coaResult.breakdown).map(([k, v]) => `${k}: ${v}`).join('  ·  ')}
+                {coaResult.balanceSheet && (
+                  <div style={{ marginTop: '6px' }}>
+                    Balance sheet: {coaResult.balanceSheet.balanced ? '✓ in balance' : `✕ off by $${coaResult.balanceSheet.offBy}`}
+                  </div>
+                )}
+                {coaResult.unmapped?.length > 0 && (
+                  <div style={{ marginTop: '10px', padding: '10px', background: '#fffbeb', border: '1px solid #fde68a', borderRadius: '4px', color: '#92400e' }}>
+                    <b>Unrecognized types</b> (left unclassified): {coaResult.unmapped.map((a) => `${a.account} [${a.qb_type}]`).join(', ')}
+                  </div>
+                )}
+                {coaResult.glAccountsStillUnclassified?.length > 0 && (
+                  <div style={{ marginTop: '10px', padding: '10px', background: '#fef2f2', border: '1px solid #fecaca', borderRadius: '4px', color: '#991b1b' }}>
+                    <b>In the ledger but still unclassified</b> (possible name mismatch): {coaResult.glAccountsStillUnclassified.join(', ')}
+                  </div>
+                )}
+              </div>
+            )}
+
+            {coaError && (
+              <div style={{ marginTop: '20px', padding: '16px', background: '#fef2f2', border: '1px solid #fecaca', borderRadius: '4px', fontSize: '12px', color: '#991b1b', lineHeight: 1.6, wordBreak: 'break-word' }}>
+                <div style={{ fontWeight: '600', marginBottom: '6px' }}>✕ Error</div>
+                {coaError}
               </div>
             )}
           </div>
