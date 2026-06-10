@@ -3,9 +3,12 @@ name: Weldon Sync
 # Pulls new Weldon orders into Supabase nightly. Read-only on Weldon's side:
 # it logs in, reads the order-history pages, and writes only to our own DB.
 on:
-  schedule:
-    - cron: '0 8 * * *'   # 08:00 UTC daily (~3-4 AM ET), an hour after the Clover cron
-  workflow_dispatch: {}    # also gives you a "Run workflow" button for manual pulls
+  # NOTE: Weldon sits behind a Cloudflare bot challenge that blocks datacenter
+  # (GitHub Actions) IPs, so the cloud-scheduled run can't get past the login
+  # wall. The nightly schedule is disabled. Kept as workflow_dispatch only for
+  # reference; the working path is running this from a residential IP/real
+  # browser session (see weldon-sync/README or run the local pull).
+  workflow_dispatch: {}
 
 jobs:
   sync:
