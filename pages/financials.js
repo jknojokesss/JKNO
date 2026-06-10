@@ -108,7 +108,14 @@ function DrillModal({ account, onClose }) {
 
 export default function Financials() {
   // Require sign-in: send anonymous visitors to /login before any data renders.
-  useEffect(() => { supabase.auth.getUser().then(({ data: { user } }) => { if (!user) window.location.replace('/login') }) }, [])
+  // Also flag admins (JK No Jokes) so the GL import control shows only to them.
+  useEffect(() => {
+    supabase.auth.getUser().then(async ({ data: { user } }) => {
+      if (!user) { window.location.replace('/login'); return }
+      const { data: adminData } = await supabase.from('admins').select('email').eq('email', user.email).maybeSingle()
+      setIsAdmin(!!adminData)
+    })
+  }, [])
   const [monthly,      setMonthly]      = useState([])
   const [plTotals,     setPlTotals]     = useState({ income: [], cogs: [], expense: [], other_expense: [] })
   const [accounts,     setAccounts]     = useState([])
@@ -116,6 +123,7 @@ export default function Financials() {
   const [loading,      setLoading]      = useState(true)
   const [activeTab,    setActiveTab]    = useState('pl')
   const [drillAccount, setDrillAccount] = useState(null)
+  const [isAdmin,      setIsAdmin]      = useState(false)
 
   useEffect(() => {
     const MONTHS = { '01':'JAN','02':'FEB','03':'MAR','04':'APR','05':'MAY','06':'JUN','07':'JUL','08':'AUG','09':'SEP','10':'OCT','11':'NOV','12':'DEC' }
@@ -198,6 +206,15 @@ export default function Financials() {
               <div style={{ color: '#888', fontFamily: 'DM Mono, monospace', fontSize: '12px' }}>Loading...</div>
             ) : (
               <>
+                {/* Admin-only: import a fresh QuickBooks GL. Clients never see this. */}
+                {isAdmin && (
+                  <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: '12px' }}>
+                    <button onClick={() => { window.location.href = '/admin/financials' }}
+                      style={{ fontSize: '10px', fontFamily: 'DM Mono, monospace', letterSpacing: '0.08em', color: '#fff', background: THEME.accent, border: 'none', borderRadius: '4px', padding: '8px 14px', cursor: 'pointer' }}>
+                      ↑ IMPORT GL FROM QUICKBOOKS
+                    </button>
+                  </div>
+                )}
                 {/* KPI row */}
                 <div style={{ display: 'flex', gap: '12px', marginBottom: '20px' }}>
                   {[
