@@ -112,6 +112,7 @@ export default function Financials() {
   const [monthly,      setMonthly]      = useState([])
   const [plTotals,     setPlTotals]     = useState({ income: [], cogs: [], expense: [], other_expense: [] })
   const [accounts,     setAccounts]     = useState([])
+  const [bs,           setBs]           = useState([])
   const [loading,      setLoading]      = useState(true)
   const [activeTab,    setActiveTab]    = useState('pl')
   const [drillAccount, setDrillAccount] = useState(null)
@@ -148,6 +149,9 @@ export default function Financials() {
         types: r.types || [],
       })).sort((a, b) => Math.abs(b.total) - Math.abs(a.total)))
 
+      const { data: bData } = await supabase.from('bs_totals').select('account, amount, category')
+      if (bData) setBs(bData.map(r => ({ account: r.account, amount: Number(r.amount), category: r.category })))
+
       setLoading(false)
     }
     load()
@@ -174,6 +178,7 @@ export default function Financials() {
 
   const tabs = [
     { id: 'pl',       label: 'Profit & Loss' },
+    { id: 'bs',       label: 'Balance Sheet' },
     { id: 'monthly',  label: 'Monthly Table' },
     { id: 'expenses', label: 'Expense Breakdown' },
     { id: 'accounts', label: 'Accounts' },
@@ -284,6 +289,57 @@ export default function Financials() {
                     </div>
                   </div>
                 )}
+
+                {/* Balance Sheet Tab */}
+                {activeTab === 'bs' && (() => {
+                  const groups = { asset: [], liability: [], equity: [] }
+                  bs.forEach(r => { if (groups[r.category]) groups[r.category].push(r) })
+                  Object.values(groups).forEach(g => g.sort((a, b) => Math.abs(b.amount) - Math.abs(a.amount)))
+                  const tot = c => groups[c].reduce((s, r) => s + r.amount, 0)
+                  const totA = tot('asset'), totL = tot('liability'), totE = tot('equity')
+                  const balanced = Math.abs(totA - totL - totE) < 0.01
+                  const Section = ({ title, rows, total }) => (
+                    <div style={{ background: '#fff', border: '1px solid #E5E5E5', borderRadius: '6px', padding: '16px' }}>
+                      <div style={{ fontSize: '9px', color: '#888', letterSpacing: '0.15em', marginBottom: '12px', paddingBottom: '8px', borderBottom: '1px solid #F0F0F0', fontFamily: 'DM Mono, monospace' }}>{title}</div>
+                      <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+                        <tbody>
+                          {rows.map(r => (
+                            <tr key={r.account} onMouseEnter={e => e.currentTarget.style.background = '#F8F8F8'} onMouseLeave={e => e.currentTarget.style.background = 'transparent'}>
+                              <td style={cell('left', { color: r.account === 'Net Income' ? '#16a34a' : '#1a1a1a' })}>{r.account}</td>
+                              <td style={cell('right', { color: r.amount >= 0 ? '#1a1a1a' : THEME.accent })}>{fmt(r.amount)}</td>
+                              <td style={cell('right')}>
+                                {r.account !== 'Net Income' && (
+                                  <button onClick={() => setDrillAccount(r.account)} style={{ fontSize: '9px', background: '#F5F5F5', color: THEME.accent, border: '1px solid #E5E5E5', padding: '2px 8px', borderRadius: '3px', cursor: 'pointer', fontFamily: 'DM Mono, monospace' }}>DRILL →</button>
+                                )}
+                              </td>
+                            </tr>
+                          ))}
+                          <tr>
+                            <td colSpan={3} style={{ padding: '8px 10px', borderTop: '1px solid #E5E5E5', fontFamily: 'DM Mono, monospace', fontSize: '11px', color: '#1a1a1a', fontWeight: '600', textAlign: 'right' }}>
+                              Total {title.charAt(0) + title.slice(1).toLowerCase()}: <span>{fmt(total)}</span>
+                            </td>
+                          </tr>
+                        </tbody>
+                      </table>
+                    </div>
+                  )
+                  if (!bs.length) return <div style={{ color: '#888', fontFamily: 'DM Mono, monospace', fontSize: '12px' }}>No balance sheet data yet — import a General Ledger.</div>
+                  return (
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
+                      <Section title="ASSETS" rows={groups.asset} total={totA} />
+                      <Section title="LIABILITIES" rows={groups.liability} total={totL} />
+                      <Section title="EQUITY" rows={groups.equity} total={totE} />
+                      <div style={{ background: balanced ? '#f0fdf4' : '#fef2f2', border: `1px solid ${balanced ? '#bbf7d0' : '#fecaca'}`, borderRadius: '6px', padding: '16px 20px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                        <div style={{ fontSize: '12px', color: balanced ? '#16a34a' : '#991b1b', fontWeight: '600', fontFamily: 'DM Mono, monospace', letterSpacing: '0.08em' }}>
+                          {balanced ? '✓ IN BALANCE' : '✕ OUT OF BALANCE'}
+                        </div>
+                        <div style={{ fontSize: '11px', color: '#555', fontFamily: 'DM Mono, monospace' }}>
+                          Assets {fmt(totA)} &nbsp;=&nbsp; Liabilities + Equity {fmt(totL + totE)}
+                        </div>
+                      </div>
+                    </div>
+                  )
+                })()}
 
                 {/* Monthly Table Tab */}
                 {activeTab === 'monthly' && (
