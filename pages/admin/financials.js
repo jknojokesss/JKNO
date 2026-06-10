@@ -102,13 +102,22 @@ export default function GLImport() {
   const [coaBusy, setCoaBusy]     = useState(false)
   const [coaResult, setCoaResult] = useState(null)
   const [coaError, setCoaError]   = useState(null)
+  // Import history + undo
+  const [history, setHistory]         = useState([])
+  const [restoreBusy, setRestoreBusy] = useState(false)
+  const [restoreMsg, setRestoreMsg]   = useState(null)
+
+  const loadHistory = () =>
+    supabase.from('import_log').select('*').order('imported_at', { ascending: false }).limit(8)
+      .then(({ data }) => setHistory(data || []))
 
   // Admins only.
   useEffect(() => {
     supabase.auth.getSession().then(async ({ data: { session } }) => {
       if (!session) { router.push('/admin'); return }
       const { data: adminData } = await supabase.from('admins').select('email').eq('email', session.user.email).single()
-      if (!adminData) router.push('/admin')
+      if (!adminData) { router.push('/admin'); return }
+      loadHistory()
     })
   }, [])
 
@@ -146,6 +155,7 @@ export default function GLImport() {
       const j = await res.json()
       if (!res.ok) throw new Error(j.error || 'Import failed')
       setResult(j)
+      loadHistory()
     } catch (e) {
       setError(String(e.message || e))
     }
@@ -183,10 +193,27 @@ export default function GLImport() {
       const j = await res.json()
       if (!res.ok) throw new Error(j.error || 'Import failed')
       setCoaResult(j)
+      loadHistory()
     } catch (e) {
       setCoaError(String(e.message || e))
     }
     setCoaBusy(false)
+  }
+
+  const doRestore = async () => {
+    if (!window.confirm('Restore the previous ledger? This replaces the current ledger with the snapshot taken before the last GL import.')) return
+    setRestoreBusy(true); setRestoreMsg(null)
+    try {
+      const { data: { session } } = await supabase.auth.getSession()
+      const res = await fetch('/api/gl-restore', { method: 'POST', headers: { authorization: `Bearer ${session?.access_token}` } })
+      const j = await res.json()
+      if (!res.ok) throw new Error(j.error || 'Restore failed')
+      setRestoreMsg(`✓ Restored ${j.restored.toLocaleString()} rows · ${j.period} · ${j.balanceSheet?.balanced ? 'balanced' : 'OUT OF BALANCE'}`)
+      loadHistory()
+    } catch (e) {
+      setRestoreMsg('✕ ' + String(e.message || e))
+    }
+    setRestoreBusy(false)
   }
 
   const label = { fontSize: '10px', color: '#888', letterSpacing: '0.1em' }
@@ -317,6 +344,52 @@ export default function GLImport() {
                 <div style={{ fontWeight: '600', marginBottom: '6px' }}>✕ Error</div>
                 {coaError}
               </div>
+            )}
+          </div>
+
+          {/* Import history + one-level undo */}
+          <div style={{ background: '#fff', border: '1px solid #E5E5E5', borderRadius: '8px', padding: '28px', marginTop: '20px' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: '10px' }}>
+              <h1 style={{ fontSize: '20px', color: '#1a1a1a' }}>Import History</h1>
+              <button onClick={doRestore} disabled={restoreBusy}
+                style={{ fontSize: '10px', fontFamily: 'DM Mono, monospace', letterSpacing: '0.08em', color: '#1a1a1a', background: '#F5F5F5', border: '1px solid #E5E5E5', borderRadius: '4px', padding: '8px 12px', cursor: restoreBusy ? 'default' : 'pointer' }}>
+                {restoreBusy ? 'RESTORING…' : '↺ RESTORE PREVIOUS LEDGER'}
+              </button>
+            </div>
+            <p style={{ fontSize: '11px', color: '#888', lineHeight: 1.6, marginBottom: '14px' }}>
+              Every GL import snapshots the prior ledger first. "Restore previous" undoes the most recent import.
+            </p>
+            {restoreMsg && (
+              <div style={{ marginBottom: '14px', padding: '10px 12px', borderRadius: '4px', fontSize: '11px',
+                background: restoreMsg.startsWith('✓') ? '#f0fdf4' : '#fef2f2',
+                border: `1px solid ${restoreMsg.startsWith('✓') ? '#bbf7d0' : '#fecaca'}`,
+                color: restoreMsg.startsWith('✓') ? '#166534' : '#991b1b' }}>
+                {restoreMsg}
+              </div>
+            )}
+            {history.length === 0 ? (
+              <div style={{ fontSize: '11px', color: '#aaa' }}>No imports recorded yet.</div>
+            ) : (
+              <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+                <thead>
+                  <tr>
+                    {['When', 'Type', 'Rows', 'By', 'Bal'].map((h) => (
+                      <th key={h} style={{ padding: '6px 8px', fontSize: '9px', color: '#888', letterSpacing: '0.1em', textAlign: h === 'Rows' ? 'right' : 'left', borderBottom: '1px solid #E5E5E5', fontFamily: 'DM Mono, monospace' }}>{h.toUpperCase()}</th>
+                    ))}
+                  </tr>
+                </thead>
+                <tbody>
+                  {history.map((h) => (
+                    <tr key={h.id}>
+                      <td style={{ padding: '6px 8px', fontSize: '10px', color: '#333', fontFamily: 'DM Mono, monospace', borderBottom: '1px solid #F5F5F5' }}>{new Date(h.imported_at).toLocaleString()}</td>
+                      <td style={{ padding: '6px 8px', fontSize: '10px', color: '#333', fontFamily: 'DM Mono, monospace', borderBottom: '1px solid #F5F5F5' }}>{h.kind}</td>
+                      <td style={{ padding: '6px 8px', fontSize: '10px', color: '#333', fontFamily: 'DM Mono, monospace', textAlign: 'right', borderBottom: '1px solid #F5F5F5' }}>{h.row_count?.toLocaleString() ?? '—'}</td>
+                      <td style={{ padding: '6px 8px', fontSize: '10px', color: '#888', fontFamily: 'DM Mono, monospace', borderBottom: '1px solid #F5F5F5' }}>{h.imported_by}</td>
+                      <td style={{ padding: '6px 8px', fontSize: '10px', fontFamily: 'DM Mono, monospace', borderBottom: '1px solid #F5F5F5', color: h.balanced === false ? '#CC2222' : '#16a34a' }}>{h.balanced === null || h.balanced === undefined ? '—' : h.balanced ? '✓' : '✕'}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
             )}
           </div>
         </div>

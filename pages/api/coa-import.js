@@ -82,6 +82,12 @@ export default async function handler(req, res) {
     return res.status(500).json({ error: `Classification saved, but rebuilding the financials failed: ${e.message}` })
   }
 
+  await supabaseAdmin.from('import_log').insert({
+    kind: 'coa', imported_by: user.email, row_count: rows.length,
+    balanced: balanceSheet?.balanced ?? null, off_by: balanceSheet?.offBy ?? null,
+    note: glAccountsStillUnclassified.length ? `${glAccountsStillUnclassified.length} ledger account(s) unclassified` : null,
+  })
+
   return res.status(200).json({
     ok: true,
     accountsClassified: rows.length,

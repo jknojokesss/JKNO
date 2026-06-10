@@ -52,6 +52,10 @@ export default async function handler(req, res) {
   }
 
   try {
+    // snapshot the current ledger first, so this import can be undone
+    const snap = await supabaseAdmin.rpc('snapshot_gl', { p_client: CLIENT_ID })
+    if (snap.error) throw new Error(`snapshot: ${snap.error.message}`)
+
     // ----- replace the general ledger -----
     const del = await supabaseAdmin.from('gl_transactions').delete().eq('client_id', CLIENT_ID)
     if (del.error) throw new Error(`clearing GL: ${del.error.message}`)
@@ -64,6 +68,13 @@ export default async function handler(req, res) {
 
     // ----- rebuild P&L + monthly + balance sheet from the new ledger -----
     const summary = await rebuildFinancials(CLIENT_ID)
+
+    await supabaseAdmin.from('import_log').insert({
+      kind: 'gl', imported_by: user.email, row_count: rows.length,
+      period: summary.period, balanced: summary.balanceSheet?.balanced ?? null,
+      off_by: summary.balanceSheet?.offBy ?? null,
+      note: summary.newAccounts?.length ? `${summary.newAccounts.length} unclassified account(s)` : null,
+    })
 
     return res.status(200).json({ ok: true, glRows: rows.length, ...summary })
   } catch (e) {

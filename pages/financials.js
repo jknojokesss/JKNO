@@ -124,6 +124,7 @@ export default function Financials() {
   const [activeTab,    setActiveTab]    = useState('pl')
   const [drillAccount, setDrillAccount] = useState(null)
   const [isAdmin,      setIsAdmin]      = useState(false)
+  const [health,       setHealth]       = useState(null)
 
   useEffect(() => {
     const MONTHS = { '01':'JAN','02':'FEB','03':'MAR','04':'APR','05':'MAY','06':'JUN','07':'JUL','08':'AUG','09':'SEP','10':'OCT','11':'NOV','12':'DEC' }
@@ -160,6 +161,21 @@ export default function Financials() {
       const { data: bData } = await supabase.from('bs_totals').select('account, amount, category')
       if (bData) setBs(bData.map(r => ({ account: r.account, amount: Number(r.amount), category: r.category })))
 
+      // Data-health: freshness + Clover sync status (reconciliation is computed from data already loaded)
+      const [cpt, wf, li, sl] = await Promise.all([
+        supabase.from('clover_pos_total').select('*').maybeSingle(),
+        supabase.from('weldon_orders').select('created_at').order('created_at', { ascending: false }).limit(1),
+        supabase.from('import_log').select('imported_at, kind').order('imported_at', { ascending: false }).limit(1),
+        supabase.from('sync_log').select('ran_at, ok').eq('source', 'clover').order('ran_at', { ascending: false }).limit(1),
+      ])
+      setHealth({
+        cloverPos: cpt.data ? Number(cpt.data.total) : null,
+        cloverLastSynced: cpt.data?.last_synced || null,
+        weldonLastAdded: wf.data?.[0]?.created_at || null,
+        lastImport: li.data?.[0] || null,
+        lastCloverSync: sl.data?.[0] || null,
+      })
+
       setLoading(false)
     }
     load()
@@ -190,6 +206,7 @@ export default function Financials() {
     { id: 'monthly',  label: 'Monthly Table' },
     { id: 'expenses', label: 'Expense Breakdown' },
     { id: 'accounts', label: 'Accounts' },
+    ...(isAdmin ? [{ id: 'health', label: 'Data Health' }] : []),
   ]
 
   const accountsTotalTxns = accounts.reduce((s, a) => s + a.txns, 0)
@@ -486,6 +503,60 @@ export default function Financials() {
                     </table>
                   </div>
                 )}
+
+                {/* Data Health Tab (admin only) */}
+                {activeTab === 'health' && (() => {
+                  const glClover = (plTotals.income.find(r => r.label === 'Clover Sales')?.amount) || 0
+                  const cloverPos = health?.cloverPos
+                  const posVar = cloverPos != null ? cloverPos - glClover : null
+                  const bsAssets = bs.filter(r => r.category === 'asset').reduce((s, r) => s + r.amount, 0)
+                  const bsLE = bs.filter(r => r.category !== 'asset').reduce((s, r) => s + r.amount, 0)
+                  const bsBalanced = Math.abs(bsAssets - bsLE) < 0.01
+                  const niBs = bs.find(r => r.account === 'Net Income')?.amount || 0
+                  const niTie = Math.abs(niBs - plNetIncome) < 0.01
+                  const ago = (ts) => { if (!ts) return '—'; const h = (Date.now() - new Date(ts)) / 36e5; return h < 1 ? `${Math.round(h * 60)} min ago` : h < 48 ? `${Math.round(h)} h ago` : `${Math.round(h / 24)} d ago` }
+                  const cloverStale = health?.cloverLastSynced ? (Date.now() - new Date(health.cloverLastSynced)) / 36e5 > 36 : true
+                  const cloverFailed = health?.lastCloverSync?.ok === false
+                  const Row = ({ k, v, sub, bad }) => (
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', padding: '9px 0', borderBottom: '1px solid #F0F0F0' }}>
+                      <div style={{ fontSize: '11px', color: '#333', fontFamily: 'DM Mono, monospace' }}>{k}{sub && <span style={{ color: '#aaa', marginLeft: '8px' }}>{sub}</span>}</div>
+                      <div style={{ fontSize: '11px', fontFamily: 'DM Mono, monospace', color: bad ? '#CC2222' : '#1a1a1a' }}>{v}</div>
+                    </div>
+                  )
+                  const Check = ({ ok, label, detail }) => (
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', padding: '9px 0', borderBottom: '1px solid #F0F0F0' }}>
+                      <div style={{ fontSize: '11px', color: '#333', fontFamily: 'DM Mono, monospace' }}>
+                        <span style={{ color: ok ? '#16a34a' : '#CC2222', marginRight: '8px' }}>{ok ? '✓' : '✕'}</span>{label}
+                      </div>
+                      <div style={{ fontSize: '11px', color: '#888', fontFamily: 'DM Mono, monospace' }}>{detail}</div>
+                    </div>
+                  )
+                  return (
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
+                      {(cloverStale || cloverFailed) && (
+                        <div style={{ background: '#fef2f2', border: '1px solid #fecaca', borderRadius: '6px', padding: '14px 18px', fontSize: '12px', color: '#991b1b', fontFamily: 'DM Mono, monospace' }}>
+                          ⚠ {cloverFailed ? 'The last Clover sync FAILED.' : 'Clover data looks stale — no successful sync in over 36 hours.'} Check the API token / cron.
+                        </div>
+                      )}
+                      <div style={{ background: '#fff', border: '1px solid #E5E5E5', borderRadius: '6px', padding: '16px' }}>
+                        <div style={{ fontSize: '9px', color: '#888', letterSpacing: '0.15em', marginBottom: '8px', fontFamily: 'DM Mono, monospace' }}>DATA FRESHNESS</div>
+                        <Row k="Clover sales" v={ago(health?.cloverLastSynced)} sub={health?.cloverLastSynced ? new Date(health.cloverLastSynced).toLocaleString() : ''} bad={cloverStale} />
+                        <Row k="Last Clover sync" v={health?.lastCloverSync ? (health.lastCloverSync.ok ? 'OK' : 'FAILED') : '—'} sub={health?.lastCloverSync ? ago(health.lastCloverSync.ran_at) : ''} bad={cloverFailed} />
+                        <Row k="Weldon orders" v={ago(health?.weldonLastAdded)} sub={health?.weldonLastAdded ? new Date(health.weldonLastAdded).toLocaleString() : ''} />
+                        <Row k="Financials" v={health?.lastImport ? ago(health.lastImport.imported_at) : '—'} sub={health?.lastImport ? `last ${health.lastImport.kind} import` : ''} />
+                      </div>
+                      <div style={{ background: '#fff', border: '1px solid #E5E5E5', borderRadius: '6px', padding: '16px' }}>
+                        <div style={{ fontSize: '9px', color: '#888', letterSpacing: '0.15em', marginBottom: '8px', fontFamily: 'DM Mono, monospace' }}>RECONCILIATION</div>
+                        <Check ok={bsBalanced} label="Balance sheet balances" detail={`${fmt(bsAssets)} = ${fmt(bsLE)}`} />
+                        <Check ok={niTie} label="Net income ties P&L → Balance Sheet" detail={`${fmt(plNetIncome)} / ${fmt(niBs)}`} />
+                        <Check ok={posVar != null && glClover > 0 && Math.abs(posVar) < glClover * 0.05} label="Clover POS ≈ booked Clover Sales" detail={cloverPos != null ? `POS ${fmt(cloverPos)} vs GL ${fmt(glClover)} (Δ ${fmt(posVar)})` : '—'} />
+                        <div style={{ fontSize: '9px', color: '#aaa', marginTop: '8px', fontFamily: 'DM Mono, monospace' }}>
+                          POS vs booked won't be exact — timing, refunds, tax/tips differ. Large gaps are the signal.
+                        </div>
+                      </div>
+                    </div>
+                  )
+                })()}
 
               </>
             )}
