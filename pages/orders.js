@@ -219,8 +219,16 @@ export default function Orders() {
   const sameDayCount = filtered.filter(r => r.costSource === 'weldon_same_day').length
   const totalProfit = filtered.reduce((s, r) => s + r.profit, 0)
   const totalRev    = filtered.reduce((s, r) => s + r.sale, 0)
-  const avgProfit   = filtered.length > 0 ? totalProfit / filtered.length : 0
   const avgMargin   = totalRev > 0 ? (totalProfit / totalRev) * 100 : 0
+
+  // "Per tire" metrics exclude service lines (mounting/labor: no tire, and cost 0
+  // so 100% profit — counting them inflates both the $/tire and the margin).
+  const tireRows    = filtered.filter(r => r.costSource !== 'service')
+  const tireUnits   = tireRows.reduce((s, r) => s + (Number(r.qty) || 1), 0)
+  const tireProfit  = tireRows.reduce((s, r) => s + r.profit, 0)
+  const tireRev     = tireRows.reduce((s, r) => s + r.sale, 0)
+  const avgPerTire  = tireUnits > 0 ? tireProfit / tireUnits : 0
+  const tireMargin  = tireRev > 0 ? (tireProfit / tireRev) * 100 : 0
 
   // Export the shown orders (respects filter/sort/as-of) to CSV.
   const downloadCSV = () => {
@@ -303,7 +311,7 @@ export default function Orders() {
                 <div style={{ display: 'flex', gap: '12px', marginBottom: '20px' }}>
                   {[
                     { label: 'TOTAL ORDERS',      value: filtered.length.toLocaleString(),    sub: 'line items shown',           sc: '#888' },
-                    { label: 'AVG PROFIT / TIRE',  value: fmtC(avgProfit),                    sub: `${avgMargin.toFixed(1)}% avg margin`, sc: '#16a34a' },
+                    { label: 'AVG PROFIT / TIRE',  value: fmtC(avgPerTire),                   sub: `${tireMargin.toFixed(1)}% margin · tires only`, sc: '#16a34a' },
                     { label: 'BEST MARGIN SIZE',
                       value: bestMarginSize ? bestMarginSize.size : '—',
                       sub: bestMarginSize ? `${bestMarginSize.margin.toFixed(1)}% · ${bestMarginSize.count} sold` : 'need 3+ matched sales',
