@@ -9,6 +9,13 @@
 
 import { chromium } from 'playwright'
 import { createClient } from '@supabase/supabase-js'
+import WebSocketImpl from 'ws'
+
+// supabase-js initializes a realtime client on createClient() that requires a
+// global WebSocket constructor. We only use the database here (never realtime),
+// but the check still runs at init — polyfill it so this works on any Node
+// version (Node < 22 has no native WebSocket).
+if (!globalThis.WebSocket) globalThis.WebSocket = WebSocketImpl
 
 const { WELDON_USER, WELDON_PASS, SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY } = process.env
 for (const [k, v] of Object.entries({ WELDON_USER, WELDON_PASS, SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY })) {
