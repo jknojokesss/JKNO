@@ -68,9 +68,9 @@ function parseCOA(aoa) {
   let hdr = -1, nameCol = -1, typeCol = -1
   for (let i = 0; i < Math.min(20, aoa.length); i++) {
     const cells = aoa[i].map((c) => String(c).toLowerCase().trim())
-    const ti = cells.findIndex((c) => c === 'type')
+    const ti = cells.findIndex((c) => c === 'account type' || c === 'type')
     if (ti >= 0) {
-      const ni = cells.findIndex((c) => ['account', 'name', 'full name', 'distribution account'].includes(c))
+      const ni = cells.findIndex((c) => ['account name', 'account', 'name', 'full name', 'distribution account'].includes(c))
       hdr = i; typeCol = ti; nameCol = ni >= 0 ? ni : 0
       break
     }
@@ -213,7 +213,7 @@ export default function GLImport() {
             </p>
 
             <label style={{ display: 'block', border: '1px dashed #CCC', borderRadius: '6px', padding: '24px', textAlign: 'center', cursor: ready ? 'pointer' : 'default', background: '#FAFAFA' }}>
-              <input type="file" accept=".xlsx,.xls" disabled={!ready} onChange={onFile} style={{ display: 'none' }} />
+              <input type="file" accept=".xlsx,.xls,.csv" disabled={!ready} onChange={onFile} style={{ display: 'none' }} />
               <div style={{ fontSize: '12px', color: ready ? '#1a1a1a' : '#bbb' }}>
                 {ready ? (fileName || 'Click to choose the General Ledger .xlsx') : 'Loading spreadsheet reader…'}
               </div>
@@ -269,7 +269,7 @@ export default function GLImport() {
             </p>
 
             <label style={{ display: 'block', border: '1px dashed #CCC', borderRadius: '6px', padding: '24px', textAlign: 'center', cursor: ready ? 'pointer' : 'default', background: '#FAFAFA' }}>
-              <input type="file" accept=".xlsx,.xls" disabled={!ready} onChange={onCOAFile} style={{ display: 'none' }} />
+              <input type="file" accept=".xlsx,.xls,.csv" disabled={!ready} onChange={onCOAFile} style={{ display: 'none' }} />
               <div style={{ fontSize: '12px', color: ready ? '#1a1a1a' : '#bbb' }}>
                 {ready ? (coaFile || 'Click to choose the Chart of Accounts .xlsx') : 'Loading spreadsheet reader…'}
               </div>
