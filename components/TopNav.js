@@ -1,4 +1,6 @@
 import { useRouter } from 'next/router'
+import { useState, useEffect } from 'react'
+import { supabase } from '../lib/supabase'
 
 const THEME = { bg: '#1A1A1A', border: '#2A2A2A', accent: '#CC2222' }
 
@@ -17,6 +19,19 @@ const NAV = [
 // the flex-wrap lets the links reflow onto a second line on narrow screens.
 export default function TopNav({ active, right }) {
   const router = useRouter()
+  const [email, setEmail] = useState('')
+  const [isAdmin, setIsAdmin] = useState(false)
+
+  // Show who's signed in, and whether they're an admin (JK No Jokes).
+  useEffect(() => {
+    supabase.auth.getUser().then(async ({ data: { user } }) => {
+      if (!user) return
+      setEmail(user.email)
+      const { data } = await supabase.from('admins').select('email').eq('email', user.email).maybeSingle()
+      setIsAdmin(!!data)
+    })
+  }, [])
+
   return (
     <div style={{
       background: THEME.bg, borderBottom: `1px solid ${THEME.border}`,
@@ -44,7 +59,15 @@ export default function TopNav({ active, right }) {
         ))}
       </nav>
 
-      <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexShrink: 0 }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexShrink: 0 }}>
+        {email && (
+          <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+            {isAdmin && (
+              <span style={{ fontSize: '8px', letterSpacing: '0.15em', color: '#fff', background: THEME.accent, padding: '2px 6px', borderRadius: '3px', fontFamily: 'DM Mono, monospace' }}>ADMIN</span>
+            )}
+            <span style={{ fontSize: '10px', color: '#aaa', fontFamily: 'DM Mono, monospace' }} title={isAdmin ? 'Signed in as admin' : 'Signed in'}>{email}</span>
+          </div>
+        )}
         {right || (
           <>
             <div style={{ width: '6px', height: '6px', background: '#22c55e', borderRadius: '50%' }} />
