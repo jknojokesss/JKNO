@@ -29,6 +29,12 @@ function cleanRows(rows) {
   return out
 }
 
+// A full general ledger is a few thousand rows — lift the default 1mb body cap
+// (stays under Vercel's ~4.5mb request limit).
+export const config = {
+  api: { bodyParser: { sizeLimit: '4mb' } },
+}
+
 export default async function handler(req, res) {
   if (req.method !== 'POST') return res.status(405).json({ error: 'POST only' })
 
