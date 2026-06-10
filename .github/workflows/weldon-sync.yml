@@ -1,0 +1,35 @@
+name: Weldon Sync
+
+# Pulls new Weldon orders into Supabase nightly. Read-only on Weldon's side:
+# it logs in, reads the order-history pages, and writes only to our own DB.
+on:
+  schedule:
+    - cron: '0 8 * * *'   # 08:00 UTC daily (~3-4 AM ET), an hour after the Clover cron
+  workflow_dispatch: {}    # also gives you a "Run workflow" button for manual pulls
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install dependencies
+        working-directory: weldon-sync
+        run: npm install
+
+      - name: Install Chromium for Playwright
+        working-directory: weldon-sync
+        run: npx playwright install --with-deps chromium
+
+      - name: Run Weldon sync
+        working-directory: weldon-sync
+        env:
+          WELDON_USER:                ${{ secrets.WELDON_USER }}
+          WELDON_PASS:                ${{ secrets.WELDON_PASS }}
+          SUPABASE_URL:               ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY:  ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+        run: node sync.mjs
