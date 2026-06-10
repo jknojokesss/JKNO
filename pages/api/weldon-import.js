@@ -13,15 +13,21 @@ const CORS = {
 
 const isDate = (s) => /^\d{4}-\d{2}-\d{2}$/.test(s || '')
 
+// Weldon's invoiced view reaches back ~6 months, but we only track 2026 onward.
+// Drop anything older so the bookmarklet never backfills pre-2026 orders.
+const MIN_DATE = '2026-01-01'
+
 // Validate/sanitize the rows the bookmarklet sends — never trust them blindly.
 function clean(rows) {
   const out = []
   for (const r of Array.isArray(rows) ? rows : []) {
     const web_id = String(r?.web_id || '').trim()
     if (!/^\d{6,}$/.test(web_id)) continue
+    const order_date = isDate(r.order_date) ? r.order_date : null
+    if (order_date && order_date < MIN_DATE) continue // skip pre-2026 orders
     out.push({
       web_id,
-      order_date:    isDate(r.order_date) ? r.order_date : null,
+      order_date,
       invoiced_date: isDate(r.invoiced_date) ? r.invoiced_date : null,
       size:          /^\d{3}\/\d{2}\/\d{2}$/.test(r.size || '') ? r.size : null,
       qty:           Number.isFinite(+r.qty) ? Math.round(+r.qty) : null,
