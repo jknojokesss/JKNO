@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/router'
 import Head from 'next/head'
+import DemoDashboard from '../components/DemoDashboard'
 
 export default function Landing() {
   const router = useRouter()
@@ -313,7 +314,7 @@ export default function Landing() {
           <div style={{ textAlign: 'center', marginBottom: '56px' }}>
             <div style={{ fontFamily: 'DM Mono, monospace', fontSize: '11px',
               letterSpacing: '3px', color: '#C9A84C', marginBottom: '16px' }}>
-              — YOUR CLIENT PORTAL
+              — LIVE SAMPLE · CLICK AROUND
             </div>
             <h2 style={{ fontFamily: 'Cormorant Garamond, serif',
               fontSize: 'clamp(28px, 3.5vw, 44px)', fontWeight: '600',
@@ -323,8 +324,8 @@ export default function Landing() {
             </h2>
             <p style={{ fontSize: '15px', color: '#5A6070', maxWidth: '480px',
               margin: '0 auto', lineHeight: 1.7 }}>
-              Every client gets their own branded portal with real-time charts,
-              drill-down reports, and plain-English insights.
+              This one's live — click through the tabs below. Every client gets
+              their own branded portal with real-time charts and drill-down reports.
             </p>
           </div>
 
@@ -351,144 +352,8 @@ export default function Landing() {
               </div>
             </div>
 
-            {/* Dashboard content */}
-            <div style={{ display: 'flex', height: '480px' }}>
-
-              {/* Sidebar */}
-              <div style={{ width: '160px', background: '#0D1120',
-                borderRight: '1px solid #1E2540', padding: '20px 0',
-                display: 'flex', flexDirection: 'column', flexShrink: 0 }}>
-                <div style={{ padding: '0 16px 16px', borderBottom: '1px solid #1E2540',
-                  marginBottom: '12px' }}>
-                  <div style={{ fontFamily: 'Cormorant Garamond, serif', fontSize: '15px',
-                    fontWeight: '600', color: '#EAE8E4' }}>Acme Corp</div>
-                  <div style={{ fontFamily: 'DM Mono, monospace', fontSize: '8px',
-                    letterSpacing: '2px', color: '#C9A84C', marginTop: '2px' }}>FINANCIALS</div>
-                </div>
-                {[
-                  { label: 'Dashboard', active: true },
-                  { label: 'Financials', active: false },
-                  { label: 'Transactions', active: false },
-                  { label: 'Documents', active: false },
-                ].map((item, i) => (
-                  <div key={i} style={{ padding: '9px 16px',
-                    background: item.active ? '#1E2540' : 'transparent',
-                    borderLeft: item.active ? '2px solid #C9A84C' : '2px solid transparent',
-                    color: item.active ? '#EAE8E4' : '#4A5568',
-                    fontSize: '12px', fontFamily: 'DM Sans, sans-serif' }}>
-                    {item.label}
-                  </div>
-                ))}
-                <div style={{ marginTop: 'auto', padding: '16px',
-                  borderTop: '1px solid #1E2540' }}>
-                  <div style={{ fontFamily: 'Cormorant Garamond, serif',
-                    color: '#C9A84C', fontSize: '12px' }}>JK No Jokes</div>
-                </div>
-              </div>
-
-              {/* Main dashboard */}
-              <div style={{ flex: 1, background: '#F7F4EF', padding: '20px',
-                overflowY: 'hidden' }}>
-                {/* Header */}
-                <div style={{ marginBottom: '16px' }}>
-                  <div style={{ fontFamily: 'DM Mono, monospace', fontSize: '8px',
-                    letterSpacing: '2px', color: '#C9A84C', marginBottom: '2px' }}>DASHBOARD</div>
-                  <div style={{ fontFamily: 'Cormorant Garamond, serif', fontSize: '20px',
-                    fontWeight: '600', color: '#1A1A2E' }}>Acme Corp</div>
-                  <div style={{ fontSize: '11px', color: '#7A8090' }}>Financial overview — June 2025</div>
-                </div>
-
-                {/* KPI Cards */}
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4,1fr)',
-                  gap: '8px', marginBottom: '12px' }}>
-                  {[
-                    { label: 'REVENUE', value: '$61,000', change: '+10.9%', up: true },
-                    { label: 'EXPENSES', value: '$38,000', change: '+5.6%', up: false },
-                    { label: 'NET PROFIT', value: '$23,000', change: '+21.1%', up: true },
-                    { label: 'MARGIN', value: '37.7%', change: null },
-                  ].map((k, i) => (
-                    <div key={i} style={{ background: '#fff', border: '1px solid #EDF2F7',
-                      borderRadius: '2px', padding: '10px 12px' }}>
-                      <div style={{ fontFamily: 'DM Mono, monospace', fontSize: '7px',
-                        letterSpacing: '1px', color: '#A0AEC0', marginBottom: '4px' }}>{k.label}</div>
-                      <div style={{ fontFamily: 'Cormorant Garamond, serif', fontSize: '16px',
-                        fontWeight: '600', color: '#1A1A2E', lineHeight: 1 }}>{k.value}</div>
-                      {k.change && (
-                        <div style={{ fontSize: '9px', fontFamily: 'DM Mono, monospace',
-                          color: k.up ? '#2D6A4F' : '#C0392B', marginTop: '3px' }}>{k.change}</div>
-                      )}
-                    </div>
-                  ))}
-                </div>
-
-                {/* Charts row */}
-                <div style={{ display: 'grid', gridTemplateColumns: '3fr 2fr', gap: '8px' }}>
-                  {/* Line chart mockup */}
-                  <div style={{ background: '#fff', border: '1px solid #EDF2F7',
-                    borderRadius: '2px', padding: '12px' }}>
-                    <div style={{ fontFamily: 'DM Mono, monospace', fontSize: '8px',
-                      letterSpacing: '1px', color: '#A0AEC0', marginBottom: '2px' }}>6-MONTH TREND</div>
-                    <div style={{ fontFamily: 'Cormorant Garamond, serif', fontSize: '13px',
-                      fontWeight: '600', color: '#1A1A2E', marginBottom: '10px' }}>Revenue vs Expenses</div>
-                    {/* SVG chart */}
-                    <svg width="100%" height="80" viewBox="0 0 300 80">
-                      <defs>
-                        <linearGradient id="g1" x1="0" y1="0" x2="0" y2="1">
-                          <stop offset="0%" stopColor="#2D6A4F" stopOpacity="0.2"/>
-                          <stop offset="100%" stopColor="#2D6A4F" stopOpacity="0"/>
-                        </linearGradient>
-                        <linearGradient id="g2" x1="0" y1="0" x2="0" y2="1">
-                          <stop offset="0%" stopColor="#C0392B" stopOpacity="0.15"/>
-                          <stop offset="100%" stopColor="#C0392B" stopOpacity="0"/>
-                        </linearGradient>
-                      </defs>
-                      {/* Grid lines */}
-                      {[20,40,60].map(y => (
-                        <line key={y} x1="0" y1={y} x2="300" y2={y} stroke="#F0F0F0" strokeWidth="1"/>
-                      ))}
-                      {/* Revenue area */}
-                      <path d="M0,55 L60,48 L120,32 L180,38 L240,22 L300,10 L300,80 L0,80 Z"
-                        fill="url(#g1)"/>
-                      <path d="M0,55 L60,48 L120,32 L180,38 L240,22 L300,10"
-                        fill="none" stroke="#2D6A4F" strokeWidth="2"/>
-                      {/* Expense area */}
-                      <path d="M0,62 L60,60 L120,54 L180,56 L240,50 L300,45 L300,80 L0,80 Z"
-                        fill="url(#g2)"/>
-                      <path d="M0,62 L60,60 L120,54 L180,56 L240,50 L300,45"
-                        fill="none" stroke="#C0392B" strokeWidth="2"/>
-                      {/* X labels */}
-                      {['Jan','Feb','Mar','Apr','May','Jun'].map((m,i) => (
-                        <text key={m} x={i*60+30} y="78" textAnchor="middle"
-                          fontSize="7" fill="#A0AEC0" fontFamily="monospace">{m}</text>
-                      ))}
-                    </svg>
-                  </div>
-
-                  {/* Bar chart mockup */}
-                  <div style={{ background: '#fff', border: '1px solid #EDF2F7',
-                    borderRadius: '2px', padding: '12px' }}>
-                    <div style={{ fontFamily: 'DM Mono, monospace', fontSize: '8px',
-                      letterSpacing: '1px', color: '#A0AEC0', marginBottom: '2px' }}>THIS MONTH</div>
-                    <div style={{ fontFamily: 'Cormorant Garamond, serif', fontSize: '13px',
-                      fontWeight: '600', color: '#1A1A2E', marginBottom: '10px' }}>Expenses</div>
-                    <svg width="100%" height="80" viewBox="0 0 180 80">
-                      {[
-                        { label: 'Payroll', w: 140, y: 8 },
-                        { label: 'Rent', w: 60, y: 24 },
-                        { label: 'Marketing', w: 48, y: 40 },
-                        { label: 'Supplies', w: 32, y: 56 },
-                        { label: 'Other', w: 40, y: 72 },
-                      ].map((b,i) => (
-                        <g key={i}>
-                          <text x="0" y={b.y-1} fontSize="7" fill="#4A5568" fontFamily="sans-serif">{b.label}</text>
-                          <rect x="0" y={b.y+1} width={b.w} height="8" fill="#C9A84C" rx="1"/>
-                        </g>
-                      ))}
-                    </svg>
-                  </div>
-                </div>
-              </div>
-            </div>
+            {/* Live, interactive demo — same component as /demo */}
+            <DemoDashboard embedded />
           </div>
 
           {/* Caption below mockup */}
@@ -507,7 +372,7 @@ export default function Landing() {
           {/* Live demo CTA */}
           <div style={{ textAlign: 'center', marginTop: '40px' }}>
             <button className="cta-btn" onClick={() => router.push('/demo')}>
-              Explore the Live Demo →
+              Open full-screen demo →
             </button>
             <div style={{ fontFamily: 'DM Mono, monospace', fontSize: '10px', color: '#7A8090',
               marginTop: '12px', letterSpacing: '1.5px' }}>
