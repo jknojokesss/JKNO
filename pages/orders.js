@@ -58,6 +58,7 @@ export default function Orders() {
   const [sort,       setSort]       = useState('date')
   const [sortDir,    setSortDir]    = useState('desc')
   const [showEst,    setShowEst]    = useState(true) // show rows with estimated cost
+  const [srcFilter,  setSrcFilter]  = useState('all') // filter by cost source / match status
   const [asOf,       setAsOf]       = useState('all') // 'all' | '2026-05-31' (book period)
   const [view,       setView]       = useState('live') // 'live' | 'precomputed'
   const [opRows,     setOpRows]     = useState([])
@@ -208,6 +209,15 @@ export default function Orders() {
     if (asOf !== 'all') r = r.filter(x => x.date <= asOf)
     if (search) r = r.filter(r => r.item.toLowerCase().includes(search.toLowerCase()))
     if (!showEst) r = r.filter(r => !r.isEstimated)
+    if (srcFilter !== 'all') r = r.filter(x => {
+      const sdMatched = x.costSource === 'weldon_same_day' && x.matchGap != null && x.matchGap <= 4
+      if (srcFilter === 'sameday_matched') return sdMatched
+      if (srcFilter === 'sameday_est')     return x.costSource === 'weldon_same_day' && !sdMatched
+      if (srcFilter === 'inventory')       return x.costSource === 'inventory'
+      if (srcFilter === 'used')            return x.costSource === 'used_tire_inventory'
+      if (srcFilter === 'service')         return x.costSource === 'service'
+      return true
+    })
     return [...r].sort((a, b) => {
       const mul = sortDir === 'desc' ? -1 : 1
       if (sort === 'date') {
@@ -220,7 +230,7 @@ export default function Orders() {
       if (sort === 'sale')   return mul * (a.sale - b.sale)
       return 0
     })
-  }, [rows, search, sort, sortDir, showEst, asOf])
+  }, [rows, search, sort, sortDir, showEst, asOf, srcFilter])
 
   const matched     = rows.filter(r => !r.isEstimated)
   const invCount     = filtered.filter(r => r.costSource === 'inventory').length
@@ -367,6 +377,18 @@ export default function Orders() {
                       {s.label} {sort === s.key ? (sortDir === 'desc' ? '↓' : '↑') : ''}
                     </button>
                   ))}
+                  <select value={srcFilter} onChange={e => setSrcFilter(e.target.value)} style={{
+                    padding: '7px 10px', fontSize: '9px', fontFamily: 'DM Mono, monospace', letterSpacing: '0.06em',
+                    border: '1px solid #E5E5E5', borderRadius: '4px', cursor: 'pointer',
+                    background: srcFilter === 'all' ? '#F0F0F0' : '#fef3c7', color: '#555',
+                  }}>
+                    <option value="all">ALL SOURCES</option>
+                    <option value="inventory">INVENTORY</option>
+                    <option value="sameday_matched">SAME-DAY · MATCHED</option>
+                    <option value="sameday_est">SAME-DAY · EST.</option>
+                    <option value="used">USED</option>
+                    <option value="service">SERVICE</option>
+                  </select>
                   <button onClick={() => setShowEst(e => !e)} style={{
                     padding: '7px 12px', fontSize: '9px', fontFamily: 'DM Mono, monospace', letterSpacing: '0.08em',
                     border: '1px solid #E5E5E5', borderRadius: '4px', cursor: 'pointer',
