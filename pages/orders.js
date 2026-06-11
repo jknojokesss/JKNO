@@ -110,11 +110,11 @@ export default function Orders() {
         }
         return best ? Number(best.unit_cost) : null
       }
-      // Same-day cost: among Weldon orders of this size, prefer one that's
+      // Same-day match: among Weldon orders of this size, prefer one that's
       // affordable (cost ≤ sale — a special order isn't placed at a loss), then a
       // brand match, then the order closest in date (the tire actually bought for
-      // this customer). This stops a budget sale being costed at a premium tier.
-      const sameDayCost = (size, date, brand, sale) => {
+      // this customer). Returns the matched order so we can also show the date gap.
+      const sameDayMatch = (size, date, brand, sale) => {
         let best = null, bestScore = -Infinity
         for (const o of bySize[size] || []) {
           const cost = Number(o.unit_cost)
@@ -123,7 +123,7 @@ export default function Orders() {
           const score = affordable * 1e6 + brandMatch * 1e4 - dayGap(o.order_date, date)
           if (score > bestScore) { bestScore = score; best = o }
         }
-        return best ? Number(best.unit_cost) : null
+        return best
       }
 
       if (lineItems) {
@@ -145,15 +145,16 @@ export default function Orders() {
           const isInventory = !isService && !isUsed && r.date >= STOCKUP_DATE
             && !!su && !hasNonStockBrand(r.item_name) && !pricedAbove
 
-          let costPerUnit, costSource, estimated = false
+          let costPerUnit, costSource, estimated = false, matchGap = null
           if (isUsed) { costPerUnit = 18; costSource = 'used_tire_inventory' }
           else if (isService) { costPerUnit = 0; costSource = 'service' }
           else if (isInventory) { costPerUnit = (isCooper && su.cooper) ? su.cooper : su.budget; costSource = 'inventory' }
           else {
-            const sd = sameDayCost(normalized, r.date, brand, sale)
-            costPerUnit = sd ?? (su ? su.budget : null) ?? (sale * FALLBACK_RATIO)
+            const m = sameDayMatch(normalized, r.date, brand, sale)
+            costPerUnit = m ? Number(m.unit_cost) : ((su ? su.budget : null) ?? (sale * FALLBACK_RATIO))
             costSource = 'weldon_same_day'
-            estimated = sd == null && !su
+            estimated = !m && !su
+            if (m) matchGap = dayGap(m.order_date, r.date)
           }
           const isEstimated = estimated
           const isExact = !estimated && !isService
@@ -174,6 +175,7 @@ export default function Orders() {
             isUsed,
             isInventory,
             costSource,
+            matchGap,
             normalizedSize: normalized,
             orderId: r.order_id,
           }
@@ -223,6 +225,8 @@ export default function Orders() {
   const matched     = rows.filter(r => !r.isEstimated)
   const invCount     = filtered.filter(r => r.costSource === 'inventory').length
   const sameDayCount = filtered.filter(r => r.costSource === 'weldon_same_day').length
+  const sameDayMatched = filtered.filter(r => r.costSource === 'weldon_same_day' && r.matchGap != null && r.matchGap <= 4).length
+  const sameDayProxy   = sameDayCount - sameDayMatched
   const totalProfit = filtered.reduce((s, r) => s + r.profit, 0)
   const totalRev    = filtered.reduce((s, r) => s + r.sale, 0)
   const avgMargin   = totalRev > 0 ? (totalProfit / totalRev) * 100 : 0
@@ -241,9 +245,13 @@ export default function Orders() {
   // Export the shown orders (respects filter/sort/as-of) to CSV.
   const downloadCSV = () => {
     const esc = v => `"${String(v).replace(/"/g, '""')}"`
-    const SRC = { inventory: 'Inventory', weldon_same_day: 'Same-Day', used_tire_inventory: 'Used', service: 'Service' }
+    const srcLabel = (r) => {
+      if (r.costSource === 'weldon_same_day')
+        return r.matchGap == null ? 'Est' : (r.matchGap <= 4 ? `Same-Day (${r.matchGap}d)` : `Est (${r.matchGap}d)`)
+      return { inventory: 'Inventory', used_tire_inventory: 'Used', service: 'Service' }[r.costSource] || r.costSource
+    }
     const csv = [['Date', 'Item', 'Source', 'Qty', 'Sale', 'Cost', 'Profit', 'Margin %'].map(esc).join(',')]
-    filtered.forEach(r => csv.push([r.date, r.item, SRC[r.costSource] || r.costSource, r.qty, r.sale.toFixed(2), r.cost.toFixed(2), r.profit.toFixed(2), r.margin.toFixed(1)].map(esc).join(',')))
+    filtered.forEach(r => csv.push([r.date, r.item, srcLabel(r), r.qty, r.sale.toFixed(2), r.cost.toFixed(2), r.profit.toFixed(2), r.margin.toFixed(1)].map(esc).join(',')))
     csv.push(['TOTAL', '', '', '', totalRev.toFixed(2), (totalRev - totalProfit).toFixed(2), totalProfit.toFixed(2), avgMargin.toFixed(1)].map(esc).join(','))
     const blob = new Blob([csv.join('\n')], { type: 'text/csv;charset=utf-8;' })
     const url = URL.createObjectURL(blob)
@@ -400,9 +408,20 @@ export default function Orders() {
                           </td>
                           <td style={cell('left')}>
                             {(() => {
+                              if (r.costSource === 'weldon_same_day') {
+                                const matched = r.matchGap != null && r.matchGap <= 4
+                                const bg = matched ? '#fef3c7' : '#f3f4f6'
+                                const fg = matched ? '#92400e' : '#9ca3af'
+                                const label = r.matchGap == null ? '~ Est' : matched ? `Same-Day ${r.matchGap}d` : `~ Est ${r.matchGap}d`
+                                const tip = r.matchGap == null
+                                  ? 'No Weldon purchase of this size — cost is an estimate'
+                                  : matched
+                                    ? `Matched a Weldon order ${r.matchGap} day(s) from the sale`
+                                    : `No same-day purchase — cost borrowed from a Weldon order ${r.matchGap} days away`
+                                return <span title={tip} style={{ padding: '2px 7px', borderRadius: '3px', fontSize: '10px', whiteSpace: 'nowrap', background: bg, color: fg }}>{label}</span>
+                              }
                               const map = {
                                 inventory:           ['#dbeafe', '#1d4ed8', 'Inventory'],
-                                weldon_same_day:     ['#fef3c7', '#92400e', 'Same-Day'],
                                 used_tire_inventory: ['#f3f4f6', '#6b7280', 'Used'],
                                 service:             ['#f3f4f6', '#9ca3af', 'Service'],
                               }
@@ -440,7 +459,7 @@ export default function Orders() {
 
                   <div style={{ padding: '10px 16px', borderTop: '2px solid #E5E5E5', background: '#FAFAFA', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                     <div style={{ fontSize: '10px', color: '#888', fontFamily: 'DM Mono, monospace' }}>
-                      {filtered.length.toLocaleString()} rows &nbsp;·&nbsp; {invCount.toLocaleString()} inventory &nbsp;·&nbsp; {sameDayCount.toLocaleString()} same-day &nbsp;·&nbsp; * = estimated cost (no Weldon match)
+                      {filtered.length.toLocaleString()} rows &nbsp;·&nbsp; {invCount.toLocaleString()} inventory &nbsp;·&nbsp; {sameDayCount.toLocaleString()} same-day ({sameDayMatched} matched · {sameDayProxy} est.) &nbsp;·&nbsp; * = estimated cost
                     </div>
                     <div style={{ fontSize: '11px', color: '#16a34a', fontFamily: 'DM Mono, monospace', fontWeight: '600' }}>
                       {fmt0(totalProfit)} est. profit shown
