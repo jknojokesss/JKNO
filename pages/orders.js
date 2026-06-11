@@ -110,12 +110,18 @@ export default function Orders() {
         }
         return best ? Number(best.unit_cost) : null
       }
-      // Nearest order of the size (any qty), brand-preferred — fallback cost for a same-day sale.
-      const nearestCost = (size, date, brand) => {
-        let best = null, bg = 1e9
+      // Same-day cost: among Weldon orders of this size, prefer one that's
+      // affordable (cost ≤ sale — a special order isn't placed at a loss), then a
+      // brand match, then the order closest in date (the tire actually bought for
+      // this customer). This stops a budget sale being costed at a premium tier.
+      const sameDayCost = (size, date, brand, sale) => {
+        let best = null, bestScore = -Infinity
         for (const o of bySize[size] || []) {
-          const g = dayGap(o.order_date, date) - (brand && (o.description || '').toLowerCase().includes(brand) ? 60 : 0)
-          if (g < bg) { bg = g; best = o }
+          const cost = Number(o.unit_cost)
+          const affordable = cost <= sale + 0.01 ? 1 : 0
+          const brandMatch = brand && (o.description || '').toLowerCase().includes(brand) ? 1 : 0
+          const score = affordable * 1e6 + brandMatch * 1e4 - dayGap(o.order_date, date)
+          if (score > bestScore) { bestScore = score; best = o }
         }
         return best ? Number(best.unit_cost) : null
       }
@@ -144,7 +150,7 @@ export default function Orders() {
           else if (isService) { costPerUnit = 0; costSource = 'service' }
           else if (isInventory) { costPerUnit = (isCooper && su.cooper) ? su.cooper : su.budget; costSource = 'inventory' }
           else {
-            const sd = tight ?? nearestCost(normalized, r.date, brand)
+            const sd = sameDayCost(normalized, r.date, brand, sale)
             costPerUnit = sd ?? (su ? su.budget : null) ?? (sale * FALLBACK_RATIO)
             costSource = 'weldon_same_day'
             estimated = sd == null && !su
