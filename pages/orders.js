@@ -155,10 +155,14 @@ export default function Orders() {
             costPerUnit = m ? Number(m.unit_cost) : ((su ? su.budget : null) ?? (sale * FALLBACK_RATIO))
             costSource = 'weldon_same_day'
             estimated = !m && !su
-            if (m) matchGap = dayGap(m.order_date, r.date)
+            // signed gap: positive = the tire was bought BEFORE the sale (a real special order)
+            if (m) matchGap = Math.round((new Date(r.date) - new Date(m.order_date)) / 864e5)
           }
           const isEstimated = estimated
           const isExact = !estimated && !isService
+          // "Matched" = cost anchored to a real purchase: a Weldon order from up to
+          // 14 days before the sale (≤1 day after, for timing slop).
+          const matchedSameDay = costSource === 'weldon_same_day' && matchGap != null && matchGap >= -1 && matchGap <= 14
           const cost   = costPerUnit * qty
           const profit = sale - cost
           const margin = sale > 0 ? (profit / sale) * 100 : 0
@@ -177,6 +181,7 @@ export default function Orders() {
             isInventory,
             costSource,
             matchGap,
+            matchedSameDay,
             normalizedSize: normalized,
             orderId: r.order_id,
           }
@@ -210,7 +215,7 @@ export default function Orders() {
     if (search) r = r.filter(r => r.item.toLowerCase().includes(search.toLowerCase()))
     if (!showEst) r = r.filter(r => !r.isEstimated)
     if (srcFilter !== 'all') r = r.filter(x => {
-      const sdMatched = x.costSource === 'weldon_same_day' && x.matchGap != null && x.matchGap <= 4
+      const sdMatched = x.matchedSameDay
       if (srcFilter === 'sameday_matched') return sdMatched
       if (srcFilter === 'sameday_est')     return x.costSource === 'weldon_same_day' && !sdMatched
       if (srcFilter === 'inventory')       return x.costSource === 'inventory'
@@ -235,7 +240,7 @@ export default function Orders() {
   const matched     = rows.filter(r => !r.isEstimated)
   const invCount     = filtered.filter(r => r.costSource === 'inventory').length
   const sameDayCount = filtered.filter(r => r.costSource === 'weldon_same_day').length
-  const sameDayMatched = filtered.filter(r => r.costSource === 'weldon_same_day' && r.matchGap != null && r.matchGap <= 4).length
+  const sameDayMatched = filtered.filter(r => r.matchedSameDay).length
   const sameDayProxy   = sameDayCount - sameDayMatched
   const totalProfit = filtered.reduce((s, r) => s + r.profit, 0)
   const totalRev    = filtered.reduce((s, r) => s + r.sale, 0)
@@ -257,7 +262,7 @@ export default function Orders() {
     const esc = v => `"${String(v).replace(/"/g, '""')}"`
     const srcLabel = (r) => {
       if (r.costSource === 'weldon_same_day')
-        return r.matchGap == null ? 'Est' : (r.matchGap <= 4 ? `Same-Day (${r.matchGap}d)` : `Est (${r.matchGap}d)`)
+        return r.matchGap == null ? 'Est' : (r.matchedSameDay ? `Same-Day (${Math.abs(r.matchGap)}d)` : `Est (${Math.abs(r.matchGap)}d)`)
       return { inventory: 'Inventory', used_tire_inventory: 'Used', service: 'Service' }[r.costSource] || r.costSource
     }
     const csv = [['Date', 'Item', 'Source', 'Qty', 'Sale', 'Cost', 'Profit', 'Margin %'].map(esc).join(',')]
@@ -431,15 +436,16 @@ export default function Orders() {
                           <td style={cell('left')}>
                             {(() => {
                               if (r.costSource === 'weldon_same_day') {
-                                const matched = r.matchGap != null && r.matchGap <= 4
+                                const matched = r.matchedSameDay
+                                const g = r.matchGap == null ? null : Math.abs(r.matchGap)
                                 const bg = matched ? '#fef3c7' : '#f3f4f6'
                                 const fg = matched ? '#92400e' : '#9ca3af'
-                                const label = r.matchGap == null ? '~ Est' : matched ? `Same-Day ${r.matchGap}d` : `~ Est ${r.matchGap}d`
-                                const tip = r.matchGap == null
+                                const label = g == null ? '~ Est' : matched ? `Same-Day ${g}d` : `~ Est ${g}d`
+                                const tip = g == null
                                   ? 'No Weldon purchase of this size — cost is an estimate'
                                   : matched
-                                    ? `Matched a Weldon order ${r.matchGap} day(s) from the sale`
-                                    : `No same-day purchase — cost borrowed from a Weldon order ${r.matchGap} days away`
+                                    ? `Matched a Weldon order ${g} day(s) ${r.matchGap >= 0 ? 'before' : 'after'} the sale`
+                                    : `No same-day purchase — cost borrowed from a Weldon order ${g} days away`
                                 return <span title={tip} style={{ padding: '2px 7px', borderRadius: '3px', fontSize: '10px', whiteSpace: 'nowrap', background: bg, color: fg }}>{label}</span>
                               }
                               const map = {
