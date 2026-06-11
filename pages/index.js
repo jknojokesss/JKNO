@@ -290,8 +290,8 @@ export default function Landing() {
               Get Started →
             </button>
             <button className="ghost-btn"
-              onClick={() => document.getElementById('features')?.scrollIntoView({ behavior: 'smooth' })}>
-              See How It Works
+              onClick={() => router.push('/demo')}>
+              See a Live Demo →
             </button>
           </div>
         </div>
@@ -502,6 +502,17 @@ export default function Landing() {
               <div key={i} style={{ fontFamily: 'DM Mono, monospace', fontSize: '11px',
                 letterSpacing: '1px', color: '#7A8090' }}>{item}</div>
             ))}
+          </div>
+
+          {/* Live demo CTA */}
+          <div style={{ textAlign: 'center', marginTop: '40px' }}>
+            <button className="cta-btn" onClick={() => router.push('/demo')}>
+              Explore the Live Demo →
+            </button>
+            <div style={{ fontFamily: 'DM Mono, monospace', fontSize: '10px', color: '#7A8090',
+              marginTop: '12px', letterSpacing: '1.5px' }}>
+              CLICKABLE · SAMPLE DATA · NO LOGIN
+            </div>
           </div>
         </div>
       </section>

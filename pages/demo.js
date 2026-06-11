@@ -1,0 +1,353 @@
+import { useState } from 'react'
+import Head from 'next/head'
+import { useRouter } from 'next/router'
+
+// ─────────────────────────────────────────────────────────────────────────
+// PUBLIC SALES DEMO. 100% hardcoded sample data for a fictional business —
+// no Supabase, no auth, no real client data. Safe to show anyone.
+// ─────────────────────────────────────────────────────────────────────────
+
+const GOLD = '#C9A84C', GREEN = '#2D6A4F', RED = '#C0392B'
+const ink = '#1A1A2E', muted = '#5A6070', faint = '#A0AEC0'
+
+const usd0 = (n) => '$' + Math.round(Math.abs(n)).toLocaleString('en-US')
+const usd2 = (n) => '$' + Math.abs(n).toFixed(2)
+
+const BIZ = 'Riverside Tire & Auto'
+
+const MONTHLY = [
+  { m: 'JAN', rev: 38200, net: 9400 },
+  { m: 'FEB', rev: 31400, net: 6800 },
+  { m: 'MAR', rev: 49800, net: 14200 },
+  { m: 'APR', rev: 41200, net: 10100 },
+  { m: 'MAY', rev: 46600, net: 12600 },
+  { m: 'JUN', rev: 52300, net: 14900 },
+]
+const TOTAL_REV = 259500, GROSS = 161300, OPEX = 93300, NET = 68000
+
+const PL = {
+  income: [
+    { label: 'Tire Sales', amount: 196000 },
+    { label: 'Service Income', amount: 63500 },
+  ],
+  cogs: [{ label: 'Cost of Goods Sold', amount: 98200 }],
+  expenses: [
+    { label: 'Payroll', amount: 52000 },
+    { label: 'Rent', amount: 18000 },
+    { label: 'Insurance', amount: 6400 },
+    { label: 'Merchant / Bank Fees', amount: 4900 },
+    { label: 'Vehicle', amount: 3800 },
+    { label: 'Utilities', amount: 3600 },
+    { label: 'Supplies', amount: 2700 },
+    { label: 'Marketing', amount: 1900 },
+  ],
+}
+
+const ORDERS = [
+  { date: '06/10', item: '235/60/18', src: 'Inventory', sale: 189.95, cost: 86, gap: null },
+  { date: '06/10', item: '215/55/17', src: 'Same-Day', sale: 159.35, cost: 64, gap: 2 },
+  { date: '06/09', item: '245/50/20', src: 'Inventory', sale: 204.16, cost: 95, gap: null },
+  { date: '06/09', item: '205/65/16', src: 'Inventory', sale: 144.20, cost: 56, gap: null },
+  { date: '06/08', item: '275/55/20', src: 'Same-Day', sale: 204.86, cost: 98, gap: 3 },
+  { date: '06/08', item: '235/65/17 (Used)', src: 'Used', sale: 95.00, cost: 18, gap: null },
+  { date: '06/07', item: '225/65/17', src: 'Inventory', sale: 149.99, cost: 65, gap: null },
+  { date: '06/07', item: 'Mount & Balance', src: 'Service', sale: 40.00, cost: 0, gap: null },
+  { date: '06/06', item: '255/45/19', src: 'Same-Day', sale: 224.61, cost: 110, gap: 1 },
+  { date: '06/06', item: '195/65/15 (Used)', src: 'Used', sale: 80.00, cost: 18, gap: null },
+]
+
+const STOCK = [
+  { size: '235/60/18', qty: 12, unit: 86 },
+  { size: '205/65/16', qty: 18, unit: 56 },
+  { size: '215/55/17', qty: 9, unit: 64 },
+  { size: '245/50/20', qty: 7, unit: 95 },
+  { size: '225/65/17', qty: 11, unit: 65 },
+  { size: '255/45/19', qty: 6, unit: 110 },
+  { size: '275/55/20', qty: 5, unit: 98 },
+]
+
+export default function Demo() {
+  const router = useRouter()
+  const [tab, setTab] = useState('dashboard')
+
+  const maxRev = Math.max(...MONTHLY.map((d) => d.rev))
+  const stockUnits = STOCK.reduce((s, r) => s + r.qty, 0)
+  const stockValue = STOCK.reduce((s, r) => s + r.qty * r.unit, 0)
+
+  // Orders-tab metrics
+  const newRows = ORDERS.filter((r) => r.src === 'Inventory' || r.src === 'Same-Day')
+  const usedRows = ORDERS.filter((r) => r.src === 'Used')
+  const avg = (arr) => {
+    if (!arr.length) return { perTire: 0, margin: 0 }
+    const profit = arr.reduce((s, r) => s + (r.sale - r.cost), 0)
+    const rev = arr.reduce((s, r) => s + r.sale, 0)
+    return { perTire: profit / arr.length, margin: (profit / rev) * 100 }
+  }
+  const newT = avg(newRows), usedT = avg(usedRows)
+
+  const tabs = [
+    { id: 'dashboard', label: 'Dashboard' },
+    { id: 'pl', label: 'Profit & Loss' },
+    { id: 'orders', label: 'Sales & Margins' },
+    { id: 'stock', label: 'Stock' },
+  ]
+
+  const label = { fontFamily: 'DM Mono, monospace', fontSize: '9px', letterSpacing: '1.5px', color: faint }
+  const card = { background: '#fff', border: '1px solid #EDF2F7', borderRadius: '4px', padding: '16px' }
+  const serif = { fontFamily: 'Cormorant Garamond, serif' }
+
+  const Kpi = ({ k, v, sub, color }) => (
+    <div style={{ ...card, flex: 1, minWidth: '150px' }}>
+      <div style={label}>{k}</div>
+      <div style={{ ...serif, fontSize: '26px', fontWeight: 600, color: ink, lineHeight: 1.1, marginTop: '4px' }}>{v}</div>
+      {sub && <div style={{ fontFamily: 'DM Mono, monospace', fontSize: '10px', color: color || muted, marginTop: '4px' }}>{sub}</div>}
+    </div>
+  )
+
+  const srcChip = (r) => {
+    const map = {
+      Inventory: ['#E8EEF9', '#2C5282'],
+      'Same-Day': ['#FBF3DD', '#8A6D1F'],
+      Used: ['#EEF2F0', '#52796F'],
+      Service: ['#F1F1F4', '#6B7280'],
+    }
+    const [bg, fg] = map[r.src] || map.Service
+    const text = r.src === 'Same-Day' ? `Same-Day ${r.gap}d` : r.src
+    return <span style={{ background: bg, color: fg, fontFamily: 'DM Mono, monospace', fontSize: '10px', padding: '2px 8px', borderRadius: '3px', whiteSpace: 'nowrap' }}>{text}</span>
+  }
+
+  return (
+    <>
+      <Head>
+        <title>Live Demo — JK No Jokes Bookkeeping</title>
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=DM+Sans:wght@300;400;500&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet" />
+        <style>{`* { box-sizing: border-box; margin: 0; padding: 0; } body { background:#F7F4EF; font-family:'DM Sans',sans-serif; }`}</style>
+      </Head>
+
+      {/* Demo banner */}
+      <div style={{ background: GOLD, color: '#1A1A2E', textAlign: 'center', padding: '8px 16px', fontFamily: 'DM Mono, monospace', fontSize: '11px', letterSpacing: '1px' }}>
+        LIVE DEMO · SAMPLE DATA FOR A FICTIONAL SHOP — this is what your portal could look like
+      </div>
+
+      {/* App-style nav */}
+      <div style={{ background: '#1A2035', display: 'flex', alignItems: 'center', gap: '18px', padding: '0 24px', minHeight: '54px', flexWrap: 'wrap', position: 'sticky', top: 0, zIndex: 50 }}>
+        <div style={{ display: 'flex', alignItems: 'baseline', gap: '8px', flexShrink: 0 }}>
+          <span style={{ ...serif, fontSize: '17px', fontWeight: 700, color: '#EAE8E4' }}>{BIZ}</span>
+          <span style={{ fontFamily: 'DM Mono, monospace', fontSize: '8px', letterSpacing: '2px', color: GOLD }}>FINANCIALS</span>
+        </div>
+        <nav style={{ display: 'flex', gap: '2px', flex: 1, flexWrap: 'wrap' }}>
+          {tabs.map((t) => (
+            <button key={t.id} onClick={() => setTab(t.id)} style={{
+              padding: '8px 13px', background: 'transparent', border: 'none', cursor: 'pointer',
+              color: tab === t.id ? '#fff' : '#7A86A8', fontSize: '12px', fontFamily: 'DM Mono, monospace', letterSpacing: '0.05em',
+              borderBottom: tab === t.id ? `2px solid ${GOLD}` : '2px solid transparent',
+            }}>{t.label}</button>
+          ))}
+        </nav>
+        <button onClick={() => { window.location.href = '/#contact' }} style={{ flexShrink: 0, background: GOLD, color: '#1A1A2E', border: 'none', borderRadius: '4px', padding: '8px 14px', fontFamily: 'DM Mono, monospace', fontSize: '10px', letterSpacing: '1px', cursor: 'pointer' }}>
+          GET THIS FOR YOUR SHOP →
+        </button>
+      </div>
+
+      <div style={{ padding: '24px', maxWidth: '1080px', margin: '0 auto' }}>
+
+        {/* DASHBOARD */}
+        {tab === 'dashboard' && (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
+            <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
+              <Kpi k="REVENUE (YTD)" v={usd0(TOTAL_REV)} sub="Tires + service" />
+              <Kpi k="GROSS PROFIT" v={usd0(GROSS)} sub={`${(GROSS / TOTAL_REV * 100).toFixed(0)}% gross margin`} color={GREEN} />
+              <Kpi k="EXPENSES" v={usd0(OPEX)} sub="Operating" color={RED} />
+              <Kpi k="NET INCOME" v={usd0(NET)} sub={`${(NET / TOTAL_REV * 100).toFixed(0)}% net margin`} color={GREEN} />
+            </div>
+
+            <div style={card}>
+              <div style={label}>MONTHLY — REVENUE & NET PROFIT</div>
+              <svg width="100%" height="200" viewBox="0 0 600 200" style={{ marginTop: '12px' }}>
+                {[0.25, 0.5, 0.75, 1].map((g) => (
+                  <line key={g} x1="0" y1={180 - g * 160} x2="600" y2={180 - g * 160} stroke="#F0F0F0" />
+                ))}
+                {MONTHLY.map((d, i) => {
+                  const x = 30 + i * 95
+                  const rh = (d.rev / maxRev) * 150
+                  const nh = (d.net / maxRev) * 150
+                  return (
+                    <g key={d.m}>
+                      <rect x={x} y={180 - rh} width="34" height={rh} fill={GOLD} rx="2" />
+                      <rect x={x + 38} y={180 - nh} width="34" height={nh} fill={GREEN} rx="2" />
+                      <text x={x + 36} y="194" textAnchor="middle" fontSize="10" fill={faint} fontFamily="monospace">{d.m}</text>
+                      <text x={x + 17} y={176 - rh} textAnchor="middle" fontSize="9" fill={muted} fontFamily="monospace">{usd0(d.rev / 1000)}k</text>
+                    </g>
+                  )
+                })}
+              </svg>
+              <div style={{ display: 'flex', gap: '20px', marginTop: '6px', fontFamily: 'DM Mono, monospace', fontSize: '10px', color: muted }}>
+                <span><span style={{ color: GOLD }}>■</span> Revenue</span>
+                <span><span style={{ color: GREEN }}>■</span> Net profit</span>
+              </div>
+            </div>
+
+            <div style={{ display: 'flex', gap: '14px', flexWrap: 'wrap' }}>
+              <div style={{ ...card, flex: 2, minWidth: '280px' }}>
+                <div style={label}>TOP EXPENSES</div>
+                <div style={{ marginTop: '10px' }}>
+                  {PL.expenses.slice(0, 5).map((e) => {
+                    const max = PL.expenses[0].amount
+                    return (
+                      <div key={e.label} style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '6px 0' }}>
+                        <div style={{ width: '150px', fontSize: '12px', color: ink }}>{e.label}</div>
+                        <div style={{ flex: 1, height: '6px', background: '#EEE', borderRadius: '3px' }}>
+                          <div style={{ width: `${(e.amount / max) * 100}%`, height: '6px', background: GOLD, borderRadius: '3px' }} />
+                        </div>
+                        <div style={{ width: '64px', textAlign: 'right', fontFamily: 'DM Mono, monospace', fontSize: '11px', color: muted }}>{usd0(e.amount)}</div>
+                      </div>
+                    )
+                  })}
+                </div>
+              </div>
+              <div style={{ ...card, flex: 1, minWidth: '180px' }}>
+                <div style={label}>ON-HAND STOCK</div>
+                <div style={{ ...serif, fontSize: '30px', fontWeight: 600, color: ink, marginTop: '6px' }}>{stockUnits} tires</div>
+                <div style={{ fontFamily: 'DM Mono, monospace', fontSize: '11px', color: muted, marginTop: '2px' }}>{usd0(stockValue)} at cost</div>
+                <div style={{ marginTop: '14px', fontFamily: 'DM Mono, monospace', fontSize: '11px', color: GREEN }}>✓ Balance sheet ties out</div>
+                <div style={{ fontFamily: 'DM Mono, monospace', fontSize: '11px', color: GREEN, marginTop: '4px' }}>✓ Synced from POS nightly</div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* PROFIT & LOSS */}
+        {tab === 'pl' && (() => {
+          const inc = PL.income.reduce((s, r) => s + r.amount, 0)
+          const cogs = PL.cogs.reduce((s, r) => s + r.amount, 0)
+          const exp = PL.expenses.reduce((s, r) => s + r.amount, 0)
+          const Section = ({ title, rows, neg, total, totalLabel, totalColor }) => (
+            <div style={card}>
+              <div style={{ ...label, paddingBottom: '8px', borderBottom: '1px solid #F0F0F0', marginBottom: '6px' }}>{title}</div>
+              {rows.map((r) => (
+                <div key={r.label} style={{ display: 'flex', justifyContent: 'space-between', padding: '7px 2px', borderBottom: '1px solid #F7F7F7' }}>
+                  <span style={{ fontSize: '13px', color: ink }}>{r.label}</span>
+                  <span style={{ fontFamily: 'DM Mono, monospace', fontSize: '13px', color: neg ? RED : GREEN }}>{neg ? '−' : ''}{usd0(r.amount)}</span>
+                </div>
+              ))}
+              <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '12px', paddingTop: '8px', fontFamily: 'DM Mono, monospace', fontSize: '13px', fontWeight: 600 }}>
+                <span style={{ color: muted }}>{totalLabel}</span>
+                <span style={{ color: totalColor || ink }}>{usd0(total)}</span>
+              </div>
+            </div>
+          )
+          return (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
+              <Section title="INCOME" rows={PL.income} total={inc} totalLabel="Total Income:" totalColor={GREEN} />
+              <Section title="COST OF GOODS SOLD" rows={PL.cogs} neg total={inc - cogs} totalLabel="Gross Profit:" totalColor={GREEN} />
+              <Section title="OPERATING EXPENSES" rows={PL.expenses} neg total={exp} totalLabel="Total Expenses:" totalColor={RED} />
+              <div style={{ background: '#F2F7F3', border: '1px solid #CFE4D6', borderRadius: '4px', padding: '16px 20px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <span style={{ fontFamily: 'DM Mono, monospace', fontSize: '13px', letterSpacing: '1px', color: GREEN, fontWeight: 600 }}>NET INCOME</span>
+                <span style={{ ...serif, fontSize: '24px', fontWeight: 700, color: GREEN }}>{usd0(inc - cogs - exp)}</span>
+              </div>
+              <div style={{ fontFamily: 'DM Mono, monospace', fontSize: '10px', color: faint, textAlign: 'center' }}>
+                Every line drills into the transactions behind it — pulled straight from the POS + bank feed.
+              </div>
+            </div>
+          )
+        })()}
+
+        {/* SALES & MARGINS */}
+        {tab === 'orders' && (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
+            <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
+              <Kpi k="PROFIT / NEW TIRE" v={usd2(newT.perTire)} sub={`${newT.margin.toFixed(0)}% margin · ${newRows.length} sold`} color={GREEN} />
+              <Kpi k="PROFIT / USED TIRE" v={usd2(usedT.perTire)} sub={`${usedT.margin.toFixed(0)}% margin · ${usedRows.length} sold`} color={GREEN} />
+              <Kpi k="BEST MARGIN SIZE" v="205/65/16" sub="61% · best seller" color={GOLD} />
+            </div>
+            <div style={card}>
+              <div style={{ ...label, marginBottom: '8px' }}>RECENT SALES — COSTED TO THE TIRE</div>
+              <div style={{ overflowX: 'auto' }}>
+                <table style={{ width: '100%', borderCollapse: 'collapse', minWidth: '560px' }}>
+                  <thead>
+                    <tr>{['DATE', 'TIRE / ITEM', 'SOURCE', 'SALE', 'COST', 'PROFIT', 'MARGIN'].map((h, i) => (
+                      <th key={h} style={{ fontFamily: 'DM Mono, monospace', fontSize: '8px', letterSpacing: '1px', color: faint, textAlign: i < 3 ? 'left' : 'right', padding: '6px 8px', borderBottom: '1px solid #E5E5E5' }}>{h}</th>
+                    ))}</tr>
+                  </thead>
+                  <tbody>
+                    {ORDERS.map((r, i) => {
+                      const profit = r.sale - r.cost
+                      const margin = r.sale > 0 ? (profit / r.sale) * 100 : 0
+                      return (
+                        <tr key={i}>
+                          <td style={{ fontFamily: 'DM Mono, monospace', fontSize: '11px', color: muted, padding: '7px 8px', borderBottom: '1px solid #F5F5F5' }}>{r.date}</td>
+                          <td style={{ fontSize: '12px', color: ink, padding: '7px 8px', borderBottom: '1px solid #F5F5F5' }}>{r.item}</td>
+                          <td style={{ padding: '7px 8px', borderBottom: '1px solid #F5F5F5' }}>{srcChip(r)}</td>
+                          <td style={{ fontFamily: 'DM Mono, monospace', fontSize: '11px', color: ink, textAlign: 'right', padding: '7px 8px', borderBottom: '1px solid #F5F5F5' }}>{usd2(r.sale)}</td>
+                          <td style={{ fontFamily: 'DM Mono, monospace', fontSize: '11px', color: muted, textAlign: 'right', padding: '7px 8px', borderBottom: '1px solid #F5F5F5' }}>{usd2(r.cost)}</td>
+                          <td style={{ fontFamily: 'DM Mono, monospace', fontSize: '11px', color: GREEN, fontWeight: 600, textAlign: 'right', padding: '7px 8px', borderBottom: '1px solid #F5F5F5' }}>{usd2(profit)}</td>
+                          <td style={{ textAlign: 'right', padding: '7px 8px', borderBottom: '1px solid #F5F5F5' }}>
+                            <span style={{ fontFamily: 'DM Mono, monospace', fontSize: '10px', padding: '1px 6px', borderRadius: '3px', background: margin >= 55 ? '#E3F1E8' : '#FBF3DD', color: margin >= 55 ? GREEN : '#8A6D1F' }}>{margin.toFixed(0)}%</span>
+                          </td>
+                        </tr>
+                      )
+                    })}
+                  </tbody>
+                </table>
+              </div>
+              <div style={{ fontFamily: 'DM Mono, monospace', fontSize: '10px', color: faint, marginTop: '10px' }}>
+                Each tire is matched to its supplier cost automatically — even special-orders (Same-Day) vs. shelf stock (Inventory).
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* STOCK */}
+        {tab === 'stock' && (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
+            <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
+              <Kpi k="TIRES ON HAND" v={`${stockUnits}`} sub="Across all sizes" />
+              <Kpi k="STOCK VALUE" v={usd0(stockValue)} sub="At supplier cost" color={GREEN} />
+              <Kpi k="LIVE FROM POS" v="Nightly" sub="Auto-synced" color={GOLD} />
+            </div>
+            <div style={card}>
+              <div style={{ ...label, marginBottom: '8px' }}>ON-HAND BY SIZE</div>
+              <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+                <thead>
+                  <tr>{['SIZE', 'ON HAND', 'UNIT COST', 'VALUE'].map((h, i) => (
+                    <th key={h} style={{ fontFamily: 'DM Mono, monospace', fontSize: '8px', letterSpacing: '1px', color: faint, textAlign: i === 0 ? 'left' : 'right', padding: '6px 8px', borderBottom: '1px solid #E5E5E5' }}>{h}</th>
+                  ))}</tr>
+                </thead>
+                <tbody>
+                  {STOCK.map((r) => (
+                    <tr key={r.size}>
+                      <td style={{ fontSize: '13px', color: ink, padding: '8px', borderBottom: '1px solid #F5F5F5' }}>{r.size}</td>
+                      <td style={{ fontFamily: 'DM Mono, monospace', fontSize: '12px', color: ink, textAlign: 'right', padding: '8px', borderBottom: '1px solid #F5F5F5' }}>{r.qty}</td>
+                      <td style={{ fontFamily: 'DM Mono, monospace', fontSize: '12px', color: muted, textAlign: 'right', padding: '8px', borderBottom: '1px solid #F5F5F5' }}>{usd0(r.unit)}</td>
+                      <td style={{ fontFamily: 'DM Mono, monospace', fontSize: '12px', color: ink, textAlign: 'right', padding: '8px', borderBottom: '1px solid #F5F5F5' }}>{usd0(r.qty * r.unit)}</td>
+                    </tr>
+                  ))}
+                  <tr>
+                    <td colSpan={3} style={{ fontFamily: 'DM Mono, monospace', fontSize: '12px', fontWeight: 600, color: ink, textAlign: 'right', padding: '10px 8px', borderTop: '2px solid #E5E5E5' }}>Total stock value</td>
+                    <td style={{ fontFamily: 'DM Mono, monospace', fontSize: '12px', fontWeight: 600, color: GREEN, textAlign: 'right', padding: '10px 8px', borderTop: '2px solid #E5E5E5' }}>{usd0(stockValue)}</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        )}
+
+        {/* Bottom CTA */}
+        <div style={{ marginTop: '28px', textAlign: 'center', padding: '32px', background: '#fff', border: '1px solid #EDF2F7', borderRadius: '6px' }}>
+          <div style={{ ...serif, fontSize: '26px', fontWeight: 600, color: ink }}>Want this for your business?</div>
+          <p style={{ color: muted, fontSize: '14px', margin: '8px auto 20px', maxWidth: '440px', lineHeight: 1.6 }}>
+            We'll build you a portal like this one — real numbers, synced from your POS, books that actually tie out.
+          </p>
+          <button onClick={() => { window.location.href = '/#contact' }} style={{ background: GOLD, color: '#1A1A2E', border: 'none', padding: '15px 34px', fontFamily: 'DM Mono, monospace', fontSize: '12px', letterSpacing: '2px', cursor: 'pointer', borderRadius: '2px' }}>
+            GET STARTED →
+          </button>
+          <div style={{ marginTop: '14px' }}>
+            <button onClick={() => router.push('/')} style={{ background: 'none', border: 'none', color: muted, fontFamily: 'DM Mono, monospace', fontSize: '11px', cursor: 'pointer' }}>← Back to jknojokes.com</button>
+          </div>
+        </div>
+      </div>
+    </>
+  )
+}
