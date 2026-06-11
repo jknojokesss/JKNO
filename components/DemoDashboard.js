@@ -123,34 +123,41 @@ export default function DemoDashboard({ embedded = false }) {
       {/* Mobile: let the embedded dashboard flow with the page instead of
           scrolling inside a fixed-height window, and tighten paddings.
           !important is required to beat the inline styles below. */}
-      <style>{`
+      <style dangerouslySetInnerHTML={{ __html: `
         @media (max-width: 640px) {
           .jknj-demo-content { height: auto !important; overflow: visible !important; padding: 14px !important; }
-          .jknj-demo-nav { padding: 8px 12px !important; gap: 10px !important; min-height: 0 !important; }
+          .jknj-demo-titlerow { padding: 9px 12px 0 !important; }
+          .jknj-demo-tabs { padding: 0 12px !important; }
           .jknj-demo-biz { font-size: 15px !important; }
         }
         @media (max-width: 400px) {
           .jknj-demo-kpi { min-width: 100% !important; }
         }
-      `}</style>
-      {/* App-style nav */}
-      <div className="jknj-demo-nav" style={{ background: '#1A2035', display: 'flex', alignItems: 'center', gap: '16px', padding: '8px 18px', minHeight: '50px', flexWrap: 'wrap', position: embedded ? 'static' : 'sticky', top: 0, zIndex: 50 }}>
-        <div style={{ display: 'flex', alignItems: 'baseline', gap: '8px', flexShrink: 0 }}>
-          <span className="jknj-demo-biz" style={{ ...serif, fontSize: '16px', fontWeight: 700, color: '#EAE8E4' }}>{BIZ}</span>
-          <span style={{ fontFamily: 'DM Mono, monospace', fontSize: '8px', letterSpacing: '2px', color: GOLD }}>FINANCIALS</span>
+        /* Hide the scrollbar on the tab strip (it scrolls horizontally on narrow screens) */
+        .jknj-demo-tabs { scrollbar-width: none; -ms-overflow-style: none; }
+        .jknj-demo-tabs::-webkit-scrollbar { display: none; }
+      ` }} />
+      {/* App-style header: title + CTA on top, dedicated tab strip below so the
+          tabs always sit on one clean baseline and never wrap awkwardly. */}
+      <div className="jknj-demo-nav" style={{ background: '#1A2035', position: embedded ? 'static' : 'sticky', top: 0, zIndex: 50 }}>
+        <div className="jknj-demo-titlerow" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '12px', padding: '10px 18px 0' }}>
+          <div style={{ display: 'flex', alignItems: 'baseline', gap: '8px', minWidth: 0 }}>
+            <span className="jknj-demo-biz" style={{ ...serif, fontSize: '17px', fontWeight: 700, color: '#EAE8E4', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{BIZ}</span>
+            <span style={{ fontFamily: 'DM Mono, monospace', fontSize: '8px', letterSpacing: '2px', color: GOLD, flexShrink: 0 }}>FINANCIALS</span>
+          </div>
+          <button onClick={goContact} style={{ flexShrink: 0, background: GOLD, color: '#1A1A2E', border: 'none', borderRadius: '4px', padding: '7px 12px', fontFamily: 'DM Mono, monospace', fontSize: '10px', letterSpacing: '1px', cursor: 'pointer', whiteSpace: 'nowrap' }}>
+            GET THIS →
+          </button>
         </div>
-        <nav style={{ display: 'flex', gap: '2px', flex: 1, flexWrap: 'wrap' }}>
+        <nav className="jknj-demo-tabs" style={{ display: 'flex', gap: '4px', padding: '0 18px', borderBottom: '1px solid rgba(255,255,255,0.10)', overflowX: 'auto' }}>
           {tabs.map((t) => (
             <button key={t.id} onClick={() => setTab(t.id)} style={{
-              padding: '7px 11px', background: 'transparent', border: 'none', cursor: 'pointer',
-              color: tab === t.id ? '#fff' : '#7A86A8', fontSize: '11px', fontFamily: 'DM Mono, monospace', letterSpacing: '0.04em',
-              borderBottom: tab === t.id ? `2px solid ${GOLD}` : '2px solid transparent',
+              padding: '9px 12px', background: 'transparent', border: 'none', cursor: 'pointer', whiteSpace: 'nowrap',
+              color: tab === t.id ? '#fff' : '#8893B5', fontSize: '11px', fontFamily: 'DM Mono, monospace', letterSpacing: '0.04em',
+              borderBottom: tab === t.id ? `2px solid ${GOLD}` : '2px solid transparent', marginBottom: '-1px',
             }}>{t.label}</button>
           ))}
         </nav>
-        <button onClick={goContact} style={{ flexShrink: 0, background: GOLD, color: '#1A1A2E', border: 'none', borderRadius: '4px', padding: '7px 12px', fontFamily: 'DM Mono, monospace', fontSize: '10px', letterSpacing: '1px', cursor: 'pointer' }}>
-          GET THIS →
-        </button>
       </div>
 
       <div className="jknj-demo-content" style={{ padding: embedded ? '16px' : '24px', maxWidth: embedded ? 'none' : '1080px', margin: '0 auto', height: embedded ? '430px' : 'auto', overflowY: embedded ? 'auto' : 'visible' }}>
