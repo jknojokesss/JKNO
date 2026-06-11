@@ -221,14 +221,16 @@ export default function Orders() {
   const totalRev    = filtered.reduce((s, r) => s + r.sale, 0)
   const avgMargin   = totalRev > 0 ? (totalProfit / totalRev) * 100 : 0
 
-  // "Per tire" metrics exclude service lines (mounting/labor: no tire, and cost 0
-  // so 100% profit — counting them inflates both the $/tire and the margin).
-  const tireRows    = filtered.filter(r => r.costSource !== 'service')
-  const tireUnits   = tireRows.reduce((s, r) => s + (Number(r.qty) || 1), 0)
-  const tireProfit  = tireRows.reduce((s, r) => s + r.profit, 0)
-  const tireRev     = tireRows.reduce((s, r) => s + r.sale, 0)
-  const avgPerTire  = tireUnits > 0 ? tireProfit / tireUnits : 0
-  const tireMargin  = tireRev > 0 ? (tireProfit / tireRev) * 100 : 0
+  // Per-tire economics, split new vs used. Both exclude service lines (mounting/
+  // labor: no tire, cost 0 — they'd inflate the $/tire and margin).
+  const perTire = (arr) => {
+    const units  = arr.reduce((s, r) => s + (Number(r.qty) || 1), 0)
+    const profit = arr.reduce((s, r) => s + r.profit, 0)
+    const rev    = arr.reduce((s, r) => s + r.sale, 0)
+    return { units, avg: units > 0 ? profit / units : 0, margin: rev > 0 ? (profit / rev) * 100 : 0 }
+  }
+  const newT  = perTire(filtered.filter(r => r.costSource === 'inventory' || r.costSource === 'weldon_same_day'))
+  const usedT = perTire(filtered.filter(r => r.costSource === 'used_tire_inventory'))
 
   // Export the shown orders (respects filter/sort/as-of) to CSV.
   const downloadCSV = () => {
@@ -311,7 +313,8 @@ export default function Orders() {
                 <div style={{ display: 'flex', gap: '12px', marginBottom: '20px' }}>
                   {[
                     { label: 'TOTAL ORDERS',      value: filtered.length.toLocaleString(),    sub: 'line items shown',           sc: '#888' },
-                    { label: 'AVG PROFIT / TIRE',  value: fmtC(avgPerTire),                   sub: `${tireMargin.toFixed(1)}% margin · tires only`, sc: '#16a34a' },
+                    { label: 'PROFIT / NEW TIRE',  value: fmtC(newT.avg),  sub: `${newT.margin.toFixed(1)}% · ${newT.units} sold`, sc: '#16a34a' },
+                    { label: 'PROFIT / USED TIRE', value: fmtC(usedT.avg), sub: usedT.units ? `${usedT.margin.toFixed(1)}% · ${usedT.units} sold` : 'none sold', sc: '#16a34a' },
                     { label: 'BEST MARGIN SIZE',
                       value: bestMarginSize ? bestMarginSize.size : '—',
                       sub: bestMarginSize ? `${bestMarginSize.margin.toFixed(1)}% · ${bestMarginSize.count} sold` : 'need 3+ matched sales',
