@@ -92,10 +92,12 @@ export default function Orders() {
       ;(weldon || []).forEach(o => {
         (bySize[o.size] = bySize[o.size] || []).push(o)
         if (o.order_date >= STOCKUP_DATE && o.order_date <= STOCKUP_END) {
-          const s = stockup[o.size] = stockup[o.size] || { budget: Infinity, max: 0, cooper: null }
           const c = Number(o.unit_cost)
-          s.budget = Math.min(s.budget, c); s.max = Math.max(s.max, c)
-          if (/cooper/i.test(o.description || '')) s.cooper = c
+          if (c > 0) { // ignore zero/blank-cost rows so they can't poison the budget
+            const s = stockup[o.size] = stockup[o.size] || { budget: Infinity, max: 0, cooper: null }
+            s.budget = Math.min(s.budget, c); s.max = Math.max(s.max, c)
+            if (/cooper/i.test(o.description || '')) s.cooper = c
+          }
         }
       })
       const dayGap = (a, b) => Math.abs(Math.round((new Date(a) - new Date(b)) / 864e5))
@@ -105,6 +107,7 @@ export default function Orders() {
         let best = null, bg = 99
         for (const o of bySize[size] || []) {
           if (Number(o.qty) > 4) continue
+          if (!(Number(o.unit_cost) > 0)) continue // a $0/blank Weldon order is not a real cost
           const g = dayGap(o.order_date, date); if (g > 3) continue
           const score = g - (brand && (o.description || '').toLowerCase().includes(brand) ? 10 : 0)
           if (score < bg) { bg = score; best = o }
@@ -119,6 +122,7 @@ export default function Orders() {
         let best = null, bestScore = -Infinity
         for (const o of bySize[size] || []) {
           const cost = Number(o.unit_cost)
+          if (!(cost > 0)) continue // skip zero/blank-cost orders — never anchor cost to $0
           const affordable = cost <= sale + 0.01 ? 1 : 0
           const brandMatch = brand && (o.description || '').toLowerCase().includes(brand) ? 1 : 0
           const score = affordable * 1e6 + brandMatch * 1e4 - dayGap(o.order_date, date)
