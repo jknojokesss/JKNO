@@ -161,8 +161,10 @@ export default function Orders() {
           const isEstimated = estimated
           const isExact = !estimated && !isService
           // "Matched" = cost anchored to a real purchase: a Weldon order from up to
-          // 14 days before the sale (≤1 day after, for timing slop).
-          const matchedSameDay = costSource === 'weldon_same_day' && matchGap != null && matchGap >= -1 && matchGap <= 14
+          // 14 days before the sale, or up to 7 days after (deposit-then-order).
+          // Beyond that window it's an estimate. matchGap = sale − order (days);
+          // positive = bought before the sale.
+          const matchedSameDay = costSource === 'weldon_same_day' && matchGap != null && matchGap >= -7 && matchGap <= 14
           const cost   = costPerUnit * qty
           const profit = sale - cost
           const margin = sale > 0 ? (profit / sale) * 100 : 0
