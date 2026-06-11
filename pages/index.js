@@ -3,6 +3,9 @@ import { useRouter } from 'next/router'
 import Head from 'next/head'
 import DemoDashboard from '../components/DemoDashboard'
 
+// Calendly booking link for the $25 gift-card offer.
+const BOOKING_URL = 'https://calendly.com/jk-jknojokes/30min'
+
 export default function Landing() {
   const router = useRouter()
   const [scrolled, setScrolled] = useState(false)
@@ -185,11 +188,40 @@ export default function Landing() {
 
         .ticker-wrap { overflow: hidden; white-space: nowrap; }
         .ticker-inner { display: inline-block; animation: ticker 20s linear infinite; }
-        
+
+        .offer-btn {
+          display: inline-block;
+          background: linear-gradient(135deg, #F0DEAC 0%, #C9A84C 55%, #B8943C 100%);
+          color: #1A1A2E;
+          text-decoration: none;
+          font-family: 'Cormorant Garamond', serif;
+          font-weight: 700;
+          font-size: clamp(22px, 3.4vw, 36px);
+          line-height: 1.2;
+          padding: 26px 44px;
+          border-radius: 12px;
+          box-shadow: 0 14px 44px rgba(201,168,76,0.4);
+          transition: transform 0.2s ease, box-shadow 0.2s ease;
+          position: relative;
+          overflow: hidden;
+          max-width: 100%;
+        }
+        .offer-btn:hover { transform: translateY(-3px) scale(1.01); box-shadow: 0 20px 60px rgba(201,168,76,0.55); }
+        .offer-btn::after {
+          content: '';
+          position: absolute; top: 0; left: -60%;
+          width: 40%; height: 100%;
+          background: linear-gradient(120deg, transparent, rgba(255,255,255,0.55), transparent);
+          transform: skewX(-20deg);
+          animation: shine 3.4s ease-in-out infinite;
+        }
+        @keyframes shine { 0% { left: -60%; } 55%, 100% { left: 140%; } }
+
         @media (max-width: 768px) {
           .features-grid { grid-template-columns: 1fr !important; }
           .hero-title-text { font-size: 48px !important; }
           .split-section { grid-template-columns: 1fr !important; }
+          .offer-btn { padding: 20px 24px !important; font-size: 20px !important; }
         }
       `}</style>
 
@@ -295,6 +327,31 @@ export default function Landing() {
               See a Live Demo →
             </button>
           </div>
+        </div>
+      </section>
+
+      {/* $25 GIFT CARD OFFER */}
+      <section id="offer" style={{
+        background: 'linear-gradient(160deg, #1A2035 0%, #242C4A 100%)',
+        padding: 'clamp(52px, 8vw, 88px) clamp(20px, 5vw, 48px)',
+        textAlign: 'center', position: 'relative', overflow: 'hidden',
+      }}>
+        <div style={{ position: 'absolute', inset: 0,
+          background: 'radial-gradient(circle at 50% 0%, rgba(201,168,76,0.20), transparent 60%)',
+          pointerEvents: 'none' }} />
+        <div style={{ position: 'relative', maxWidth: '860px', margin: '0 auto' }}>
+          <div style={{ fontFamily: 'DM Mono, monospace', fontSize: '12px',
+            letterSpacing: '3px', color: '#C9A84C', marginBottom: '24px' }}>
+            🎁 LIMITED-TIME OFFER FOR NEW CLIENTS
+          </div>
+          <a href={BOOKING_URL} target="_blank" rel="noopener noreferrer" className="offer-btn">
+            FREE $25 gift card + free consultation, sign up now!
+          </a>
+          <p style={{ maxWidth: '540px', margin: '24px auto 0', fontSize: '13px',
+            lineHeight: 1.6, color: '#9AA3BD' }}>
+            Must have a current small business and be willing to share details about your
+            current financial setup.
+          </p>
         </div>
       </section>
 
