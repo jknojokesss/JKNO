@@ -634,7 +634,7 @@ export default function Landing() {
               <label style={{ display: 'block', fontFamily: 'DM Mono, monospace',
                 fontSize: '10px', letterSpacing: '2px', color: '#5A6070',
                 marginBottom: '8px' }}>YOUR NAME</label>
-              <input type="text" placeholder="Jonathan Katz"
+              <input type="text" placeholder="John Smith"
                 value={form.name} onChange={e => setForm({ ...form, name: e.target.value })} />
             </div>
             <div>
