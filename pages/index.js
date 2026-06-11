@@ -309,7 +309,7 @@ export default function Landing() {
 
 
       {/* DASHBOARD MOCKUP SECTION */}
-      <section style={{ padding: '100px 48px', background: '#F7F4EF', overflow: 'hidden' }}>
+      <section style={{ padding: 'clamp(56px, 9vw, 100px) clamp(14px, 5vw, 48px)', background: '#F7F4EF', overflow: 'hidden' }}>
         <div style={{ maxWidth: '1200px', margin: '0 auto' }}>
           <div style={{ textAlign: 'center', marginBottom: '56px' }}>
             <div style={{ fontFamily: 'DM Mono, monospace', fontSize: '11px',

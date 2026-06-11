@@ -99,7 +99,7 @@ export default function DemoDashboard({ embedded = false }) {
   const serif = { fontFamily: 'Cormorant Garamond, serif' }
 
   const Kpi = ({ k, v, sub, color }) => (
-    <div style={{ ...card, flex: 1, minWidth: '140px' }}>
+    <div className="jknj-demo-kpi" style={{ ...card, flex: 1, minWidth: '140px' }}>
       <div style={label}>{k}</div>
       <div style={{ ...serif, fontSize: embedded ? '22px' : '26px', fontWeight: 600, color: ink, lineHeight: 1.1, marginTop: '4px' }}>{v}</div>
       {sub && <div style={{ fontFamily: 'DM Mono, monospace', fontSize: '10px', color: color || muted, marginTop: '4px' }}>{sub}</div>}
@@ -120,10 +120,23 @@ export default function DemoDashboard({ embedded = false }) {
 
   return (
     <div style={{ background: '#F7F4EF' }}>
+      {/* Mobile: let the embedded dashboard flow with the page instead of
+          scrolling inside a fixed-height window, and tighten paddings.
+          !important is required to beat the inline styles below. */}
+      <style>{`
+        @media (max-width: 640px) {
+          .jknj-demo-content { height: auto !important; overflow: visible !important; padding: 14px !important; }
+          .jknj-demo-nav { padding: 8px 12px !important; gap: 10px !important; min-height: 0 !important; }
+          .jknj-demo-biz { font-size: 15px !important; }
+        }
+        @media (max-width: 400px) {
+          .jknj-demo-kpi { min-width: 100% !important; }
+        }
+      `}</style>
       {/* App-style nav */}
-      <div style={{ background: '#1A2035', display: 'flex', alignItems: 'center', gap: '16px', padding: '0 18px', minHeight: '50px', flexWrap: 'wrap', position: embedded ? 'static' : 'sticky', top: 0, zIndex: 50 }}>
+      <div className="jknj-demo-nav" style={{ background: '#1A2035', display: 'flex', alignItems: 'center', gap: '16px', padding: '8px 18px', minHeight: '50px', flexWrap: 'wrap', position: embedded ? 'static' : 'sticky', top: 0, zIndex: 50 }}>
         <div style={{ display: 'flex', alignItems: 'baseline', gap: '8px', flexShrink: 0 }}>
-          <span style={{ ...serif, fontSize: '16px', fontWeight: 700, color: '#EAE8E4' }}>{BIZ}</span>
+          <span className="jknj-demo-biz" style={{ ...serif, fontSize: '16px', fontWeight: 700, color: '#EAE8E4' }}>{BIZ}</span>
           <span style={{ fontFamily: 'DM Mono, monospace', fontSize: '8px', letterSpacing: '2px', color: GOLD }}>FINANCIALS</span>
         </div>
         <nav style={{ display: 'flex', gap: '2px', flex: 1, flexWrap: 'wrap' }}>
@@ -140,7 +153,7 @@ export default function DemoDashboard({ embedded = false }) {
         </button>
       </div>
 
-      <div style={{ padding: embedded ? '16px' : '24px', maxWidth: embedded ? 'none' : '1080px', margin: '0 auto', height: embedded ? '430px' : 'auto', overflowY: embedded ? 'auto' : 'visible' }}>
+      <div className="jknj-demo-content" style={{ padding: embedded ? '16px' : '24px', maxWidth: embedded ? 'none' : '1080px', margin: '0 auto', height: embedded ? '430px' : 'auto', overflowY: embedded ? 'auto' : 'visible' }}>
 
         {/* DASHBOARD */}
         {tab === 'dashboard' && (
