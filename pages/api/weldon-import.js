@@ -59,9 +59,30 @@ export default async function handler(req, res) {
     .select('web_id')
   if (error) return res.status(500).json({ error: error.message })
 
+  // Backfill costs: an order can land with a blank/zero cost (Weldon left the
+  // per-tire price off the order row) and get a real cost on a later sync. Fill
+  // those blanks from a freshly-scraped positive cost — but never overwrite an
+  // existing positive cost, so real values and manual corrections stay put.
+  let backfilled = 0
+  const { data: blanks } = await supabaseAdmin
+    .from('weldon_orders')
+    .select('web_id')
+    .or('unit_cost.is.null,unit_cost.lte.0')
+  const blankIds = new Set((blanks || []).map((b) => b.web_id))
+  for (const r of rows) {
+    if (r.web_id && blankIds.has(r.web_id) && Number.isFinite(r.unit_cost) && r.unit_cost > 0) {
+      const { error: uErr } = await supabaseAdmin
+        .from('weldon_orders')
+        .update({ unit_cost: r.unit_cost })
+        .eq('web_id', r.web_id)
+      if (!uErr) backfilled++
+    }
+  }
+
   return res.status(200).json({
     ok: true,
     received: rows.length,
     inserted: (data || []).length,
+    backfilled,
   })
 }

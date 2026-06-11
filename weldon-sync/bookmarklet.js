@@ -49,12 +49,18 @@
 
     // Fill blank costs (some cash orders) from the order-detail page.
     for (const r of rows) {
-      if (r.unit_cost == null && r.detail) {
+      if ((r.unit_cost == null || r.unit_cost <= 0) && r.detail) {
         try {
           const url = r.detail.startsWith('http') ? r.detail : `${BASE}/${r.detail.replace(/^\/?(productcart\/pc\/)?/, '')}`
           const nums = ((await getDoc(url)).body.innerText.match(/\$[\d,]+(?:\.\d{2})?/g) || [])
             .map((s) => parseFloat(s.replace(/[^0-9.]/g, ''))).filter((n) => n > 0)
-          if (nums.length) { const lt = nums.slice(-2); r.unit_cost = lt.length === 2 ? Math.min(lt[0], lt[1]) : (r.qty ? +(lt[0] / r.qty).toFixed(2) : lt[0]) }
+          // No per-tire price on the order row → derive it the way Reydel does:
+          // order total (the largest $ on the detail page) ÷ number of tires.
+          if (nums.length) {
+            const total = Math.max(...nums)
+            const q = r.qty && r.qty > 0 ? r.qty : 1
+            r.unit_cost = +(total / q).toFixed(2)
+          }
         } catch (e) {}
       }
       delete r.detail
