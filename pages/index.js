@@ -217,6 +217,30 @@ export default function Landing() {
         }
         @keyframes shine { 0% { left: -60%; } 55%, 100% { left: 140%; } }
 
+        .promo-bar {
+          position: fixed; top: 0; left: 0; right: 0; z-index: 200;
+          height: 44px;
+          display: flex; align-items: center; justify-content: center; gap: 10px;
+          background: linear-gradient(90deg, #C9A84C 0%, #F0DEAC 50%, #C9A84C 100%);
+          color: #1A1A2E; text-decoration: none;
+          font-family: 'DM Mono', monospace; font-size: 13px; letter-spacing: 1px;
+          white-space: nowrap; overflow: hidden; padding: 0 16px;
+          border-bottom: 1px solid rgba(0,0,0,0.12);
+        }
+        .promo-bar:hover { background: linear-gradient(90deg, #D4B65E 0%, #F6E7BD 50%, #D4B65E 100%); }
+        .promo-bar b { font-weight: 700; }
+        .promo-book {
+          background: #1A2035; color: #F0DEAC; padding: 4px 12px; border-radius: 20px;
+          font-size: 11px; letter-spacing: 1px; white-space: nowrap;
+        }
+        .promo-short { display: none; }
+        @media (max-width: 600px) {
+          .promo-full { display: none; }
+          .promo-short { display: inline; }
+          .promo-bar { font-size: 11px; letter-spacing: 0.4px; gap: 8px; padding: 0 10px; }
+          .promo-book { padding: 4px 10px; font-size: 10px; }
+        }
+
         @media (max-width: 768px) {
           .features-grid { grid-template-columns: 1fr !important; }
           .hero-title-text { font-size: 48px !important; }
@@ -225,9 +249,17 @@ export default function Landing() {
         }
       `}</style>
 
+      {/* PERSISTENT PROMO BAR — always visible at the very top */}
+      <a href={BOOKING_URL} target="_blank" rel="noopener noreferrer" className="promo-bar">
+        <span aria-hidden="true">🎁</span>
+        <span className="promo-full"><b>FREE $25 gift card</b> + free consultation for new clients</span>
+        <span className="promo-short"><b>FREE $25 gift card</b> + free consult</span>
+        <span className="promo-book">BOOK NOW →</span>
+      </a>
+
       {/* NAV */}
       <nav style={{
-        position: 'fixed', top: 0, left: 0, right: 0, zIndex: 100,
+        position: 'fixed', top: '44px', left: 0, right: 0, zIndex: 100,
         padding: '20px 48px',
         background: scrolled ? 'rgba(247,244,239,0.97)' : 'transparent',
         backdropFilter: scrolled ? 'blur(12px)' : 'none',
@@ -257,7 +289,7 @@ export default function Landing() {
 
       {/* Mobile menu */}
       {menuOpen && (
-        <div style={{ position: 'fixed', top: '64px', left: 0, right: 0, zIndex: 99,
+        <div style={{ position: 'fixed', top: '108px', left: 0, right: 0, zIndex: 99,
           background: '#EEEAE2', borderBottom: '1px solid #DDD8CE', padding: '20px' }}>
           {['Features', 'About', 'Contact'].map(item => (
             <button key={item} className="nav-link" style={{ display: 'block', padding: '12px 0',
