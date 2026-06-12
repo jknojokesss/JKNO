@@ -73,6 +73,7 @@ export default function Orders() {
   const [sortDir,    setSortDir]    = useState('desc')
   const [showEst,    setShowEst]    = useState(true) // show rows with estimated cost
   const [srcFilter,  setSrcFilter]  = useState('all') // filter by cost source / match status
+  const [sizeFilter, setSizeFilter] = useState('all') // filter by tire size
   const [asOf,       setAsOf]       = useState('all') // 'all' | '2026-05-31' (book period)
   const [view,       setView]       = useState('live') // 'live' | 'precomputed'
   const [opRows,     setOpRows]     = useState([])
@@ -229,11 +230,21 @@ export default function Orders() {
     else { setSort(col); setSortDir('desc') }
   }
 
+  // Distinct tire sizes present (with row counts), for the size dropdown.
+  const sizes = useMemo(() => {
+    const counts = {}
+    rows.forEach(r => { if (r.normalizedSize) counts[r.normalizedSize] = (counts[r.normalizedSize] || 0) + 1 })
+    return Object.keys(counts)
+      .sort((a, b) => { const pa = a.split('/').map(Number), pb = b.split('/').map(Number); return pa[0] - pb[0] || pa[1] - pb[1] || pa[2] - pb[2] })
+      .map(size => ({ size, count: counts[size] }))
+  }, [rows])
+
   const filtered = useMemo(() => {
     let r = rows
     if (asOf !== 'all') r = r.filter(x => x.date <= asOf)
     if (search) r = r.filter(r => r.item.toLowerCase().includes(search.toLowerCase()))
     if (!showEst) r = r.filter(r => !r.isEstimated)
+    if (sizeFilter !== 'all') r = r.filter(x => x.normalizedSize === sizeFilter)
     if (srcFilter !== 'all') r = r.filter(x => {
       const sdMatched = x.matchedSameDay
       if (srcFilter === 'sameday_matched') return sdMatched
@@ -255,7 +266,7 @@ export default function Orders() {
       if (sort === 'sale')   return mul * (a.sale - b.sale)
       return 0
     })
-  }, [rows, search, sort, sortDir, showEst, asOf, srcFilter])
+  }, [rows, search, sort, sortDir, showEst, asOf, srcFilter, sizeFilter])
 
   const matched     = rows.filter(r => !r.isEstimated)
   const invCount     = filtered.filter(r => r.costSource === 'inventory').length
@@ -402,6 +413,14 @@ export default function Orders() {
                       {s.label} {sort === s.key ? (sortDir === 'desc' ? '↓' : '↑') : ''}
                     </button>
                   ))}
+                  <select value={sizeFilter} onChange={e => setSizeFilter(e.target.value)} style={{
+                    padding: '7px 10px', fontSize: '9px', fontFamily: 'DM Mono, monospace', letterSpacing: '0.06em',
+                    border: '1px solid #E5E5E5', borderRadius: '4px', cursor: 'pointer', maxWidth: '170px',
+                    background: sizeFilter === 'all' ? '#F0F0F0' : '#dbeafe', color: '#555',
+                  }}>
+                    <option value="all">ALL SIZES ({sizes.length})</option>
+                    {sizes.map(s => <option key={s.size} value={s.size}>{s.size} ({s.count})</option>)}
+                  </select>
                   <select value={srcFilter} onChange={e => setSrcFilter(e.target.value)} style={{
                     padding: '7px 10px', fontSize: '9px', fontFamily: 'DM Mono, monospace', letterSpacing: '0.06em',
                     border: '1px solid #E5E5E5', borderRadius: '4px', cursor: 'pointer',
