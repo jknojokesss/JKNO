@@ -30,12 +30,26 @@ function normalizeSize(name) {
   return null
 }
 
-// Detect premium brand in item name (matches weldon_brand_costs.brand values)
-const BRANDS = ['continental','michelin','pirelli','bridgestone','goodyear','cooper','kumho','hankook','falken','firestone','toyo']
-function detectBrand(name) {
-  if (!name) return null
-  const n = name.toLowerCase().replace('bridge stone', 'bridgestone')
-  return BRANDS.find(b => n.includes(b)) || null
+// Match a sale to the *same tire*, not just the same size: compare the
+// meaningful brand/model words in the sale's item name against the Weldon order
+// description. This generalizes beyond a hardcoded brand list — e.g. a
+// "245/75/16LT General" sale matches the "General Grabber HD" purchase ($180)
+// instead of a cheaper same-size "Arroyo Eco Pro HT" ($92) a day closer in date.
+const SIZE_RE_G = /\d{3}[\/\s\\-]\d{2}[\/\s\\-]?[a-z]{0,3}\d{2}/gi
+const MODEL_STOP = new Set(['lt','xl','sl','as','at','ht','rt','uhp','hp','tire','tires','new','used','set','the','and','for'])
+const modelWords = (s) => new Set(
+  (s || '').toLowerCase()
+    .replace(SIZE_RE_G, ' ')          // drop the size so only brand/model words remain
+    .replace(/[^a-z\s]/g, ' ')
+    .split(/\s+/)
+    .filter((w) => w.length > 2 && !MODEL_STOP.has(w))
+)
+// Count brand/model words shared between a sale's item words and an order desc.
+const sharedModel = (itemWords, desc) => {
+  const b = modelWords(desc)
+  let n = 0
+  for (const w of itemWords) if (b.has(w)) n++
+  return n
 }
 
 // Premium brands the 4/15 stock-up never carried. A sale naming one of these is
@@ -103,13 +117,13 @@ export default function Orders() {
       const dayGap = (a, b) => Math.abs(Math.round((new Date(a) - new Date(b)) / 864e5))
       // Tight same-day match: a small customer order (qty ≤ 4) within ±3 days, brand-preferred.
       // This is how we both flag a same-day special order and price it.
-      const tightSameDay = (size, date, brand) => {
+      const tightSameDay = (size, date, itemWords) => {
         let best = null, bg = 99
         for (const o of bySize[size] || []) {
           if (Number(o.qty) > 4) continue
           if (!(Number(o.unit_cost) > 0)) continue // a $0/blank Weldon order is not a real cost
           const g = dayGap(o.order_date, date); if (g > 3) continue
-          const score = g - (brand && (o.description || '').toLowerCase().includes(brand) ? 10 : 0)
+          const score = g - (sharedModel(itemWords, o.description) ? 10 : 0)
           if (score < bg) { bg = score; best = o }
         }
         return best ? Number(best.unit_cost) : null
@@ -118,14 +132,14 @@ export default function Orders() {
       // affordable (cost ≤ sale — a special order isn't placed at a loss), then a
       // brand match, then the order closest in date (the tire actually bought for
       // this customer). Returns the matched order so we can also show the date gap.
-      const sameDayMatch = (size, date, brand, sale) => {
+      const sameDayMatch = (size, date, itemWords, sale) => {
         let best = null, bestScore = -Infinity
         for (const o of bySize[size] || []) {
           const cost = Number(o.unit_cost)
           if (!(cost > 0)) continue // skip zero/blank-cost orders — never anchor cost to $0
           const affordable = cost <= sale + 0.01 ? 1 : 0
-          const brandMatch = brand && (o.description || '').toLowerCase().includes(brand) ? 1 : 0
-          const score = affordable * 1e6 + brandMatch * 1e4 - dayGap(o.order_date, date)
+          const model = sharedModel(itemWords, o.description) // shared brand/model words
+          const score = affordable * 1e6 + model * 1e4 - dayGap(o.order_date, date)
           if (score > bestScore) { bestScore = score; best = o }
         }
         return best
@@ -138,12 +152,12 @@ export default function Orders() {
           const isUsed = /used/i.test(r.item_name || '')
           const normalized = normalizeSize(r.item_name)
           const isService = !normalized && !isUsed
-          const brand = detectBrand(r.item_name)
+          const itemWords = modelWords(r.item_name)
           const isCooper = /cooper/i.test(r.item_name || '') || /\bbrand\b/i.test(r.item_name || '')
 
           // Cost + classification straight from the Weldon orders.
           const su = stockup[normalized]
-          const tight = normalized ? tightSameDay(normalized, r.date, brand) : null
+          const tight = normalized ? tightSameDay(normalized, r.date, itemWords) : null
           const maxStocked = su ? su.max : 0
           // A tier that cost more than anything we stocked in that size can't be shelf stock.
           const pricedAbove = tight != null && maxStocked > 0 && tight > maxStocked + 0.5
@@ -155,7 +169,7 @@ export default function Orders() {
           else if (isService) { costPerUnit = 0; costSource = 'service' }
           else if (isInventory) { costPerUnit = (isCooper && su.cooper) ? su.cooper : su.budget; costSource = 'inventory' }
           else {
-            const m = sameDayMatch(normalized, r.date, brand, sale)
+            const m = sameDayMatch(normalized, r.date, itemWords, sale)
             costPerUnit = m ? Number(m.unit_cost) : ((su ? su.budget : null) ?? (sale * FALLBACK_RATIO))
             costSource = 'weldon_same_day'
             estimated = !m && !su
