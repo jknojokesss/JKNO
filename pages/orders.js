@@ -7,6 +7,7 @@ const fmtC = (n) => new Intl.NumberFormat('en-US', { style: 'currency', currency
 const fmt0 = (n) => new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }).format(n)
 
 const FALLBACK_RATIO = 0.412 // used when no Weldon match found
+const TYP_MARGIN = 0.40 // assumed typical tire margin, used to infer cost tier from sale price
 
 const THEME = { sidebarBg: '#1A1A1A', sidebarBorder: '#2A2A2A', accent: '#CC2222' }
 
@@ -183,6 +184,24 @@ export default function Orders() {
             // signed gap: positive = the tire was bought BEFORE the sale (a real special order)
             if (m) { matchGap = Math.round((new Date(r.date) - new Date(m.order_date)) / 864e5); matchModelShared = sharedModel(itemWords, m.description) }
           }
+
+          // ── Price-tier inference ────────────────────────────────────────────
+          // A generic Clover name ("235/45/18 Brand") can't be brand-matched, so the
+          // date match can land on a cheap tier even though the SALE PRICE says it was
+          // a premium tire. When the price implies a tier well above the cost we
+          // matched, re-cost to the tier the price points at (flagged as an estimate).
+          // Only fires when we did NOT match a brand/model, and only re-costs UP — a
+          // low price (e.g. a premium tire sold near cost) keeps its real match.
+          let priceInferred = false
+          if (!isUsed && !isService && normalized && (itemWords.size === 0 || !matchModelShared)) {
+            const sizeCosts = (bySize[normalized] || []).map(o => Number(o.unit_cost)).filter(c => c > 0)
+            if (sizeCosts.length) {
+              const expected = sale * (1 - TYP_MARGIN) // cost the sale price implies at a normal markup
+              const tierCost = sizeCosts.reduce((b, c) => Math.abs(c - expected) < Math.abs(b - expected) ? c : b)
+              if (tierCost > costPerUnit * 1.3) { costPerUnit = tierCost; estimated = true; priceInferred = true }
+            }
+          }
+
           const isEstimated = estimated
           const isExact = !estimated && !isService
           // "Matched" = cost anchored to a real purchase: a Weldon order from up to
@@ -210,6 +229,7 @@ export default function Orders() {
             matchGap,
             matchedSameDay,
             matchModelShared,
+            priceInferred,
             hasModelWords: itemWords.size > 0,
             normalizedSize: normalized,
             orderId: r.order_id,
@@ -288,6 +308,7 @@ export default function Orders() {
       const sdMatched = x.matchedSameDay
       if (srcFilter === 'sameday_matched') return sdMatched
       if (srcFilter === 'sameday_est')     return x.costSource === 'weldon_same_day' && !sdMatched
+      if (srcFilter === 'price_inferred')  return x.priceInferred
       if (srcFilter === 'inventory')       return x.costSource === 'inventory'
       if (srcFilter === 'used')            return x.costSource === 'used_tire_inventory'
       if (srcFilter === 'service')         return x.costSource === 'service'
@@ -470,6 +491,7 @@ export default function Orders() {
                     <option value="inventory">INVENTORY</option>
                     <option value="sameday_matched">SAME-DAY · MATCHED</option>
                     <option value="sameday_est">SAME-DAY · EST.</option>
+                    <option value="price_inferred">~ TIER EST (price)</option>
                     <option value="used">USED</option>
                     <option value="service">SERVICE</option>
                   </select>
@@ -521,6 +543,7 @@ export default function Orders() {
                           <td style={cell('left')}>
                             {flag && <span title={flag.reason} style={{ cursor: 'help', marginRight: '5px' }}>⚠️</span>}
                             {(() => {
+                              if (r.priceInferred) return <span title="Cost estimated from the sale price — the Clover item had no brand to match exactly, and the price points to this tier" style={{ padding: '2px 7px', borderRadius: '3px', fontSize: '10px', whiteSpace: 'nowrap', background: '#ede9fe', color: '#6d28d9' }}>~ Tier est</span>
                               if (r.costSource === 'weldon_same_day') {
                                 const matched = r.matchedSameDay
                                 const g = r.matchGap == null ? null : Math.abs(r.matchGap)
