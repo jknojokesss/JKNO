@@ -167,29 +167,38 @@ export default function Orders() {
           const itemWords = modelWords(r.item_name)
           const isCooper = /cooper/i.test(r.item_name || '') || /\bbrand\b/i.test(r.item_name || '')
 
-          // Cost + classification straight from the Weldon orders.
+          // ── Cost + classification ───────────────────────────────────────────
+          // Budget (shelf) cost for this size: the stock-up budget if we have it,
+          // else the cheapest Weldon cost we've ever paid for the size.
           const su = stockup[normalized]
-          const tight = normalized ? tightSameDay(normalized, r.date, itemWords) : null
-          const maxStocked = su ? su.max : 0
-          // A tier that cost more than anything we stocked in that size can't be shelf
-          // stock — but only count it if THIS sale could actually be that tire (its cost
-          // ≤ the sale price). An unaffordable one-off premium order bought near the sale
-          // date (e.g. a $186 Michelin near a $149 budget sale) must not disqualify it.
-          const pricedAbove = tight != null && maxStocked > 0 && tight > maxStocked + 0.5 && tight <= sale + 0.01
+          const sizeCostList = normalized ? (bySize[normalized] || []).map(o => Number(o.unit_cost)).filter(c => c > 0) : []
+          const sizeBudget = su ? su.budget : (sizeCostList.length ? Math.min(...sizeCostList) : null)
+
+          // Best Weldon purchase of this size (brand/affordable preferred), plus whether
+          // it looks like a real special order: a pricier-than-shelf tire, affordable for
+          // this sale, bought within the match window. Routine budget restocks do NOT
+          // count — those sales are shelf stock (inventory).
+          const m = (!isUsed && !isService && normalized) ? sameDayMatch(normalized, r.date, itemWords, sale) : null
+          const mGap = m ? Math.round((new Date(r.date) - new Date(m.order_date)) / 864e5) : null
+          const specialOrder = !!m && mGap >= -7 && mGap <= 14
+            && Number(m.unit_cost) <= sale + 0.01 && sizeBudget != null && Number(m.unit_cost) > sizeBudget * 1.3
+
+          // After the stock-up, a tire sold in a size we carry is shelf stock (inventory)
+          // unless it was a special order. Premium-branded items are never shelf stock.
           const isInventory = !isService && !isUsed && r.date >= STOCKUP_DATE
-            && !!su && !hasNonStockBrand(r.item_name) && !pricedAbove
+            && sizeBudget != null && !hasNonStockBrand(r.item_name) && !specialOrder
 
           let costPerUnit, costSource, estimated = false, matchGap = null, matchModelShared = null
           if (isUsed) { costPerUnit = 18; costSource = 'used_tire_inventory' }
           else if (isService) { costPerUnit = 0; costSource = 'service' }
-          else if (isInventory) { costPerUnit = (isCooper && su.cooper) ? su.cooper : su.budget; costSource = 'inventory' }
+          else if (isInventory) { costPerUnit = (isCooper && su && su.cooper) ? su.cooper : sizeBudget; costSource = 'inventory' }
           else {
-            const m = sameDayMatch(normalized, r.date, itemWords, sale)
-            costPerUnit = m ? Number(m.unit_cost) : ((su ? su.budget : null) ?? (sale * FALLBACK_RATIO))
+            // special order, or a pre-stock-up sale: use the matched purchase;
+            // fall back to a ratio only when the size is genuinely unknown.
+            costPerUnit = m ? Number(m.unit_cost) : (sale * FALLBACK_RATIO)
             costSource = 'weldon_same_day'
-            estimated = !m && !su
-            // signed gap: positive = the tire was bought BEFORE the sale (a real special order)
-            if (m) { matchGap = Math.round((new Date(r.date) - new Date(m.order_date)) / 864e5); matchModelShared = sharedModel(itemWords, m.description) }
+            estimated = !m
+            if (m) { matchGap = mGap; matchModelShared = sharedModel(itemWords, m.description) }
           }
 
           // ── Price-tier inference ────────────────────────────────────────────
