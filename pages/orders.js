@@ -45,16 +45,19 @@ const MODEL_STOP = new Set([
 ])
 const modelWords = (s) => new Set(
   (s || '').toLowerCase()
+    // collapse common two-word brand spellings so "Good year" == "Goodyear"
+    .replace(/good\s*year/g, 'goodyear').replace(/bridge\s*stone/g, 'bridgestone').replace(/fire\s*stone/g, 'firestone')
     .replace(SIZE_RE_G, ' ')          // drop the size so only brand/model words remain
     .replace(/[^a-z\s]/g, ' ')
     .split(/\s+/)
     .filter((w) => w.length > 2 && !MODEL_STOP.has(w))
 )
 // Count brand/model words shared between a sale's item words and an order desc.
+// Uses substring matching (≥4 chars) so partial spellings still match.
 const sharedModel = (itemWords, desc) => {
-  const b = modelWords(desc)
+  const b = [...modelWords(desc)]
   let n = 0
-  for (const w of itemWords) if (b.has(w)) n++
+  for (const w of itemWords) if (b.some(x => x === w || (w.length >= 4 && (x.includes(w) || w.includes(x))))) n++
   return n
 }
 
@@ -286,12 +289,10 @@ export default function Orders() {
   //    25–60% band, which usually means the cost is wrong.
   const rowFlag = (r) => {
     if (r.costSource === 'used_tire_inventory' || r.costSource === 'service') return null
-    if (r.costSource === 'weldon_same_day' && r.hasModelWords && r.matchModelShared === 0)
-      return { level: 'mismatch', reason: "Cost borrowed from a different model — no same-size purchase matched this tire's brand/model. Verify." }
     if (!r.isEstimated) {
       const st = sizeStats[r.normalizedSize]
       const typ = st && st.n >= 3 ? ` (≈${st.median.toFixed(0)}% typical for ${r.normalizedSize})` : ''
-      if (r.margin >= 65) return { level: 'high', reason: `Margin ${r.margin.toFixed(0)}% looks high${typ} — cost may be too low / mismatched. Verify.` }
+      if (r.margin >= 65) return { level: 'high', reason: `Margin ${r.margin.toFixed(0)}% looks high${typ} — cost may be too low. Verify.` }
       if (r.margin < 8)   return { level: 'low',  reason: `Margin ${r.margin.toFixed(0)}% looks low${typ} — cost may be too high. Verify.` }
     }
     return null
