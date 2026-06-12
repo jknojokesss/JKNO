@@ -74,6 +74,7 @@ export default function Orders() {
   const [showEst,    setShowEst]    = useState(true) // show rows with estimated cost
   const [srcFilter,  setSrcFilter]  = useState('all') // filter by cost source / match status
   const [sizeFilter, setSizeFilter] = useState('all') // filter by tire size
+  const [flaggedOnly, setFlaggedOnly] = useState(false) // show only suspicious-cost rows
   const [asOf,       setAsOf]       = useState('all') // 'all' | '2026-05-31' (book period)
   const [view,       setView]       = useState('live') // 'live' | 'precomputed'
   const [opRows,     setOpRows]     = useState([])
@@ -165,7 +166,7 @@ export default function Orders() {
           const isInventory = !isService && !isUsed && r.date >= STOCKUP_DATE
             && !!su && !hasNonStockBrand(r.item_name) && !pricedAbove
 
-          let costPerUnit, costSource, estimated = false, matchGap = null
+          let costPerUnit, costSource, estimated = false, matchGap = null, matchModelShared = null
           if (isUsed) { costPerUnit = 18; costSource = 'used_tire_inventory' }
           else if (isService) { costPerUnit = 0; costSource = 'service' }
           else if (isInventory) { costPerUnit = (isCooper && su.cooper) ? su.cooper : su.budget; costSource = 'inventory' }
@@ -175,7 +176,7 @@ export default function Orders() {
             costSource = 'weldon_same_day'
             estimated = !m && !su
             // signed gap: positive = the tire was bought BEFORE the sale (a real special order)
-            if (m) matchGap = Math.round((new Date(r.date) - new Date(m.order_date)) / 864e5)
+            if (m) { matchGap = Math.round((new Date(r.date) - new Date(m.order_date)) / 864e5); matchModelShared = sharedModel(itemWords, m.description) }
           }
           const isEstimated = estimated
           const isExact = !estimated && !isService
@@ -203,6 +204,8 @@ export default function Orders() {
             costSource,
             matchGap,
             matchedSameDay,
+            matchModelShared,
+            hasModelWords: itemWords.size > 0,
             normalizedSize: normalized,
             orderId: r.order_id,
           }
@@ -239,11 +242,42 @@ export default function Orders() {
       .map(size => ({ size, count: counts[size] }))
   }, [rows])
 
+  // Per-size typical (median) margin, for outlier context in the flag tooltip.
+  const sizeStats = useMemo(() => {
+    const by = {}
+    rows.forEach(r => {
+      if (r.isExact && !r.isUsed && r.costSource !== 'service' && r.normalizedSize)
+        (by[r.normalizedSize] = by[r.normalizedSize] || []).push(r.margin)
+    })
+    const out = {}
+    for (const k in by) { const a = by[k].slice().sort((x, y) => x - y); out[k] = { median: a[Math.floor(a.length / 2)], n: a.length } }
+    return out
+  }, [rows])
+
+  // Flag a row whose cost looks suspicious, so mismatches surface on their own:
+  //  • mismatch — the sale names a brand/model but the matched purchase shares none
+  //    of those words (cost was borrowed from a different tire of the same size);
+  //  • high/low — a real (non-estimated) tire whose margin is outside the normal
+  //    25–60% band, which usually means the cost is wrong.
+  const rowFlag = (r) => {
+    if (r.costSource === 'used_tire_inventory' || r.costSource === 'service') return null
+    if (r.costSource === 'weldon_same_day' && r.hasModelWords && r.matchModelShared === 0)
+      return { level: 'mismatch', reason: "Cost borrowed from a different model — no same-size purchase matched this tire's brand/model. Verify." }
+    if (!r.isEstimated) {
+      const st = sizeStats[r.normalizedSize]
+      const typ = st && st.n >= 3 ? ` (≈${st.median.toFixed(0)}% typical for ${r.normalizedSize})` : ''
+      if (r.margin >= 65) return { level: 'high', reason: `Margin ${r.margin.toFixed(0)}% looks high${typ} — cost may be too low / mismatched. Verify.` }
+      if (r.margin < 8)   return { level: 'low',  reason: `Margin ${r.margin.toFixed(0)}% looks low${typ} — cost may be too high. Verify.` }
+    }
+    return null
+  }
+
   const filtered = useMemo(() => {
     let r = rows
     if (asOf !== 'all') r = r.filter(x => x.date <= asOf)
     if (search) r = r.filter(r => r.item.toLowerCase().includes(search.toLowerCase()))
     if (!showEst) r = r.filter(r => !r.isEstimated)
+    if (flaggedOnly) r = r.filter(x => !!rowFlag(x))
     if (sizeFilter !== 'all') r = r.filter(x => x.normalizedSize === sizeFilter)
     if (srcFilter !== 'all') r = r.filter(x => {
       const sdMatched = x.matchedSameDay
@@ -266,13 +300,14 @@ export default function Orders() {
       if (sort === 'sale')   return mul * (a.sale - b.sale)
       return 0
     })
-  }, [rows, search, sort, sortDir, showEst, asOf, srcFilter, sizeFilter])
+  }, [rows, search, sort, sortDir, showEst, asOf, srcFilter, sizeFilter, flaggedOnly])
 
   const matched     = rows.filter(r => !r.isEstimated)
   const invCount     = filtered.filter(r => r.costSource === 'inventory').length
   const sameDayCount = filtered.filter(r => r.costSource === 'weldon_same_day').length
   const sameDayMatched = filtered.filter(r => r.matchedSameDay).length
   const sameDayProxy   = sameDayCount - sameDayMatched
+  const flaggedCount   = filtered.filter(r => rowFlag(r)).length
   const totalProfit = filtered.reduce((s, r) => s + r.profit, 0)
   const totalRev    = filtered.reduce((s, r) => s + r.sale, 0)
   const avgMargin   = totalRev > 0 ? (totalProfit / totalRev) * 100 : 0
@@ -441,6 +476,11 @@ export default function Orders() {
                   }}>
                     {showEst ? 'HIDE EST.' : 'SHOW EST.'}
                   </button>
+                  <button onClick={() => setFlaggedOnly(f => !f)} title="Show only rows whose cost looks suspicious" style={{
+                    padding: '7px 12px', fontSize: '9px', fontFamily: 'DM Mono, monospace', letterSpacing: '0.08em',
+                    border: 'none', borderRadius: '4px', cursor: 'pointer',
+                    background: flaggedOnly ? '#f59e0b' : '#F0F0F0', color: flaggedOnly ? '#fff' : '#888',
+                  }}>⚠ FLAGGED{flaggedCount ? ` (${flaggedCount})` : ''}</button>
                   <button onClick={downloadCSV} style={{
                     padding: '7px 12px', fontSize: '9px', fontFamily: 'DM Mono, monospace', letterSpacing: '0.08em',
                     border: 'none', borderRadius: '4px', cursor: 'pointer', background: '#16a34a', color: '#fff',
@@ -463,16 +503,18 @@ export default function Orders() {
                       </tr>
                     </thead>
                     <tbody>
-                      {filtered.map((r, i) => (
+                      {filtered.map((r, i) => { const flag = rowFlag(r); return (
                         <tr key={i}
-                          onMouseEnter={e => e.currentTarget.style.background = '#F8F8F8'}
-                          onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
+                          onMouseEnter={e => e.currentTarget.style.background = flag ? '#FCEFC7' : '#F8F8F8'}
+                          onMouseLeave={e => e.currentTarget.style.background = flag ? '#FEF9E7' : 'transparent'}
+                          style={{ background: flag ? '#FEF9E7' : 'transparent' }}
                         >
                           <td style={cell('left', { color: '#888', whiteSpace: 'nowrap' })}>{r.date}</td>
                           <td style={cell('left', { maxWidth: '220px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' })}>
                             <span style={{ color: '#1a1a1a', fontWeight: '500' }}>{r.item}</span>
                           </td>
                           <td style={cell('left')}>
+                            {flag && <span title={flag.reason} style={{ cursor: 'help', marginRight: '5px' }}>⚠️</span>}
                             {(() => {
                               if (r.costSource === 'weldon_same_day') {
                                 const matched = r.matchedSameDay
@@ -514,7 +556,7 @@ export default function Orders() {
                             </span>
                           </td>
                         </tr>
-                      ))}
+                      )})}
                     </tbody>
                   </table>
 
@@ -526,7 +568,7 @@ export default function Orders() {
 
                   <div style={{ padding: '10px 16px', borderTop: '2px solid #E5E5E5', background: '#FAFAFA', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                     <div style={{ fontSize: '10px', color: '#888', fontFamily: 'DM Mono, monospace' }}>
-                      {filtered.length.toLocaleString()} rows &nbsp;·&nbsp; {invCount.toLocaleString()} inventory &nbsp;·&nbsp; {sameDayCount.toLocaleString()} same-day ({sameDayMatched} matched · {sameDayProxy} est.) &nbsp;·&nbsp; * = estimated cost
+                      {filtered.length.toLocaleString()} rows &nbsp;·&nbsp; {invCount.toLocaleString()} inventory &nbsp;·&nbsp; {sameDayCount.toLocaleString()} same-day ({sameDayMatched} matched · {sameDayProxy} est.) &nbsp;·&nbsp; <span style={{ color: flaggedCount ? '#b45309' : '#888' }}>⚠ {flaggedCount} flagged</span> &nbsp;·&nbsp; * = estimated cost
                     </div>
                     <div style={{ fontSize: '11px', color: '#16a34a', fontFamily: 'DM Mono, monospace', fontWeight: '600' }}>
                       {fmt0(totalProfit)} est. profit shown
