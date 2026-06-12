@@ -8,6 +8,7 @@ const fmt0 = (n) => new Intl.NumberFormat('en-US', { style: 'currency', currency
 
 const FALLBACK_RATIO = 0.412 // used when no Weldon match found
 const TYP_MARGIN = 0.40 // assumed typical tire margin, used to infer cost tier from sale price
+const BUDGET_RETAIL_X = 2.5 // a budget tire's retail rarely exceeds ~2.5x its cost (~60% margin)
 
 const THEME = { sidebarBg: '#1A1A1A', sidebarBorder: '#2A2A2A', accent: '#CC2222' }
 
@@ -202,9 +203,17 @@ export default function Orders() {
           if (!isUsed && !isService && normalized && (itemWords.size === 0 || !matchModelShared)) {
             const sizeCosts = (bySize[normalized] || []).map(o => Number(o.unit_cost)).filter(c => c > 0)
             if (sizeCosts.length) {
+              const minCost = Math.min(...sizeCosts)
+              const budgetMax = Math.max(...sizeCosts.filter(c => c <= minCost * 1.4)) // priciest "budget" tier
               const expected = sale * (1 - TYP_MARGIN) // cost the sale price implies at a normal markup
               const tierCost = sizeCosts.reduce((b, c) => Math.abs(c - expected) < Math.abs(b - expected) ? c : b)
-              if (tierCost > costPerUnit * 1.3) { costPerUnit = tierCost; estimated = true; priceInferred = true }
+              // Only re-cost when the price is too high to be a budget tire (above its
+              // retail ceiling) AND points to a tier well above what we matched. This
+              // leaves ordinary budget-priced sales alone — they keep their real ~60%
+              // margins — and only fixes genuinely premium-priced mismatches.
+              if (sale > budgetMax * BUDGET_RETAIL_X && tierCost > costPerUnit * 1.3) {
+                costPerUnit = tierCost; estimated = true; priceInferred = true
+              }
             }
           }
 
