@@ -49,17 +49,21 @@
 
     // Fill blank costs (some cash orders) from the order-detail page.
     for (const r of rows) {
+      // Cost priority (the server enforces it):
+      //   1) the per-tire box price (already in r.unit_cost) always wins;
+      //   2) if blank, leave unit_cost null so a later sync can fill it from the box;
+      //   3) last resort — send the order total (cc charge = largest $ on the detail
+      //      page) ÷ tires as derived_cost. The server only uses it for an order
+      //      that's still blank on a later sync, so the box price gets first crack.
       if ((r.unit_cost == null || r.unit_cost <= 0) && r.detail) {
         try {
           const url = r.detail.startsWith('http') ? r.detail : `${BASE}/${r.detail.replace(/^\/?(productcart\/pc\/)?/, '')}`
           const nums = ((await getDoc(url)).body.innerText.match(/\$[\d,]+(?:\.\d{2})?/g) || [])
             .map((s) => parseFloat(s.replace(/[^0-9.]/g, ''))).filter((n) => n > 0)
-          // No per-tire price on the order row → derive it the way Reydel does:
-          // order total (the largest $ on the detail page) ÷ number of tires.
           if (nums.length) {
             const total = Math.max(...nums)
             const q = r.qty && r.qty > 0 ? r.qty : 1
-            r.unit_cost = +(total / q).toFixed(2)
+            r.derived_cost = +(total / q).toFixed(2)
           }
         } catch (e) {}
       }
