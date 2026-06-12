@@ -77,7 +77,7 @@
     })
     const j = await res.json()
     if (!res.ok) throw new Error(j.error || res.status)
-    alert(`Weldon sync ✓  scanned ${j.received} orders, added ${j.inserted} new.`)
+    alert(`Weldon sync ✓  scanned ${j.received} orders, added ${j.inserted} new, filled ${j.backfilled || 0} costs.`)
   } catch (e) {
     alert('Weldon sync failed: ' + (e.message || e))
   }
