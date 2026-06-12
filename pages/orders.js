@@ -170,8 +170,11 @@ export default function Orders() {
           const su = stockup[normalized]
           const tight = normalized ? tightSameDay(normalized, r.date, itemWords) : null
           const maxStocked = su ? su.max : 0
-          // A tier that cost more than anything we stocked in that size can't be shelf stock.
-          const pricedAbove = tight != null && maxStocked > 0 && tight > maxStocked + 0.5
+          // A tier that cost more than anything we stocked in that size can't be shelf
+          // stock — but only count it if THIS sale could actually be that tire (its cost
+          // ≤ the sale price). An unaffordable one-off premium order bought near the sale
+          // date (e.g. a $186 Michelin near a $149 budget sale) must not disqualify it.
+          const pricedAbove = tight != null && maxStocked > 0 && tight > maxStocked + 0.5 && tight <= sale + 0.01
           const isInventory = !isService && !isUsed && r.date >= STOCKUP_DATE
             && !!su && !hasNonStockBrand(r.item_name) && !pricedAbove
 
