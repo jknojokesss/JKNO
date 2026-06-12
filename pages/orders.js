@@ -36,7 +36,12 @@ function normalizeSize(name) {
 // "245/75/16LT General" sale matches the "General Grabber HD" purchase ($180)
 // instead of a cheaper same-size "Arroyo Eco Pro HT" ($92) a day closer in date.
 const SIZE_RE_G = /\d{3}[\/\s\\-]\d{2}[\/\s\\-]?[a-z]{0,3}\d{2}/gi
-const MODEL_STOP = new Set(['lt','xl','sl','as','at','ht','rt','uhp','hp','tire','tires','new','used','set','the','and','for'])
+const MODEL_STOP = new Set([
+  'lt','xl','sl','as','at','ht','rt','uhp','hp','tire','tires','new','used','set','the','and','for',
+  // placeholder words shops type into Clover when they don't enter the real brand —
+  // these must not count as a brand/model or they create false "mismatch" flags.
+  'brand','name','generic','misc','unknown','item','assorted','various',
+])
 const modelWords = (s) => new Set(
   (s || '').toLowerCase()
     .replace(SIZE_RE_G, ' ')          // drop the size so only brand/model words remain
