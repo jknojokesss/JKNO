@@ -7,7 +7,10 @@
 
 const DEMO_URL = 'https://www.jknojokes.com/demo'
 const BOOK_URL = 'https://calendly.com/jk-jknojokes/30min'
-const OWNER = 'jk@jknojokes.com'
+// Where leads get emailed. With the onboarding@resend.dev test sender, this MUST
+// be the email your Resend account is registered under, or the send bounces.
+// Override with LEAD_NOTIFY_EMAIL once a domain is verified.
+const OWNER = process.env.LEAD_NOTIFY_EMAIL || 'katz.jonathan11@gmail.com'
 // onboarding@resend.dev can only send to your own account email, so it works for
 // the owner notification but NOT for prospect auto-replies. Override with a
 // verified-domain address via the RESEND_FROM env var to enable auto-replies.
@@ -56,7 +59,7 @@ export default async function handler(req, res) {
     })
   } catch (e) {
     console.error('Owner notify failed:', e)
-    return res.status(500).json({ error: 'Could not save the lead. Check your connection and try again.' })
+    return res.status(500).json({ error: 'Could not send the lead email.', detail: String(e.message || e).slice(0, 300) })
   }
 
   // 2) Auto-reply to the prospect (best effort — needs a verified Resend domain).

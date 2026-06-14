@@ -24,7 +24,7 @@ export default function Expo() {
       const res = await fetch('/api/expo-lead', {
         method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(form),
       })
-      if (!res.ok) { const j = await res.json().catch(() => ({})); throw new Error(j.error || 'Something went wrong') }
+      if (!res.ok) { const j = await res.json().catch(() => ({})); throw new Error((j.error || 'Something went wrong') + (j.detail ? ` [${j.detail}]` : '')) }
       setStatus('done')
     } catch (err) {
       setErrMsg(err.message + ' — their info is saved on this device, you can re-send later.')
