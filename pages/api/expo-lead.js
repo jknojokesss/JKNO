@@ -10,7 +10,7 @@ const BOOK_URL = 'https://calendly.com/jk-jknojokes/30min'
 // Where leads get emailed. With the onboarding@resend.dev test sender, this MUST
 // be the email your Resend account is registered under, or the send bounces.
 // Override with LEAD_NOTIFY_EMAIL once a domain is verified.
-const OWNER = process.env.LEAD_NOTIFY_EMAIL || 'katz.jonathan11@gmail.com'
+const OWNER = process.env.LEAD_NOTIFY_EMAIL || 'jk@jknojokes.com'
 // Send from Resend's verified test address. (We intentionally ignore RESEND_FROM
 // for now — it's set to an unverified @jknojokes.com domain, which Resend rejects
 // with a 403. Once jknojokes.com is verified in Resend, switch FROM back to it to
