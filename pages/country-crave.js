@@ -22,7 +22,6 @@ const ACCOUNTS = [
   { name: 'Gourmet Glatt — Cedarhurst', contact: 'Sara L.', last: 'May 28', days: 15, cases: 960, status: 'reorder' },
   { name: 'Wesley Kosher', contact: 'Chaim T.', last: 'Apr 30', days: 44, cases: 720, status: 'reorder' },
   { name: 'KolSave — Inwood', contact: 'Yossi B.', last: 'Jun 1', days: 11, cases: 540, status: 'recent' },
-  { name: 'ShopRite — Howell', contact: 'Mike R.', last: 'Apr 2', days: 71, cases: 420, status: 'lapsed' },
   { name: 'Foodtown — Brooklyn', contact: 'Angela M.', last: 'Mar 19', days: 85, cases: 300, status: 'lapsed' },
   { name: 'Evergreen Market', contact: 'Tony P.', last: '—', days: null, cases: 0, status: 'lead' },
   { name: 'The Peppermill', contact: 'Rivka S.', last: '—', days: null, cases: 0, status: 'lead' },
