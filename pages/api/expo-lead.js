@@ -11,11 +11,9 @@ const BOOK_URL = 'https://calendly.com/jk-jknojokes/30min'
 // be the email your Resend account is registered under, or the send bounces.
 // Override with LEAD_NOTIFY_EMAIL once a domain is verified.
 const OWNER = process.env.LEAD_NOTIFY_EMAIL || 'jk@jknojokes.com'
-// Send from Resend's verified test address. (We intentionally ignore RESEND_FROM
-// for now — it's set to an unverified @jknojokes.com domain, which Resend rejects
-// with a 403. Once jknojokes.com is verified in Resend, switch FROM back to it to
-// unlock prospect auto-replies + inbox deliverability.)
-const FROM = 'JK No Jokes <onboarding@resend.dev>'
+// jknojokes.com is verified in Resend, so we send from the domain — this lets us
+// email any prospect (not just the account owner) and lands in inboxes, not spam.
+const FROM = 'JK No Jokes <jk@jknojokes.com>'
 
 const esc = (s) => String(s || '').replace(/[<>&]/g, (c) => ({ '<': '&lt;', '>': '&gt;', '&': '&amp;' }[c]))
 
