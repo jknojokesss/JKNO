@@ -11,10 +11,11 @@ const BOOK_URL = 'https://calendly.com/jk-jknojokes/30min'
 // be the email your Resend account is registered under, or the send bounces.
 // Override with LEAD_NOTIFY_EMAIL once a domain is verified.
 const OWNER = process.env.LEAD_NOTIFY_EMAIL || 'katz.jonathan11@gmail.com'
-// onboarding@resend.dev can only send to your own account email, so it works for
-// the owner notification but NOT for prospect auto-replies. Override with a
-// verified-domain address via the RESEND_FROM env var to enable auto-replies.
-const FROM = process.env.RESEND_FROM || 'JK No Jokes <onboarding@resend.dev>'
+// Send from Resend's verified test address. (We intentionally ignore RESEND_FROM
+// for now — it's set to an unverified @jknojokes.com domain, which Resend rejects
+// with a 403. Once jknojokes.com is verified in Resend, switch FROM back to it to
+// unlock prospect auto-replies + inbox deliverability.)
+const FROM = 'JK No Jokes <onboarding@resend.dev>'
 
 const esc = (s) => String(s || '').replace(/[<>&]/g, (c) => ({ '<': '&lt;', '>': '&gt;', '&': '&amp;' }[c]))
 
