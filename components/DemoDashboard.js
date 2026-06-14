@@ -90,6 +90,7 @@ export default function DemoDashboard({ embedded = false }) {
   const tabs = [
     { id: 'dashboard', label: 'Dashboard' },
     { id: 'pl', label: 'Profit & Loss' },
+    { id: 'bs', label: 'Balance Sheet' },
     { id: 'orders', label: 'Sales & Margins' },
     { id: 'stock', label: 'Stock' },
   ]
@@ -258,6 +259,41 @@ export default function DemoDashboard({ embedded = false }) {
               </div>
               <div style={{ fontFamily: 'DM Mono, monospace', fontSize: '10px', color: faint, textAlign: 'center' }}>
                 Every line drills into the transactions behind it — pulled straight from the POS + bank feed.
+              </div>
+            </div>
+          )
+        })()}
+
+        {/* BALANCE SHEET */}
+        {tab === 'bs' && (() => {
+          const assets = [['Cash / Bank', 42300], ['Accounts Receivable', 8150], ['Inventory (tires on hand)', 24500], ['Equipment (net)', 36000]]
+          const liabilities = [['Accounts Payable', 12400], ['Credit Card', 3800], ['Equipment Loan', 19750]]
+          const equity = [["Owner's Capital", 7000], ['Net Income (YTD)', 68000]]
+          const sum = (a) => a.reduce((s, [, v]) => s + v, 0)
+          const tA = sum(assets), tL = sum(liabilities), tE = sum(equity)
+          const Block = ({ title, rows, total, totalLabel, color }) => (
+            <div style={card}>
+              <div style={{ ...label, paddingBottom: '8px', borderBottom: '1px solid #F0F0F0', marginBottom: '6px' }}>{title}</div>
+              {rows.map(([k, v]) => (
+                <div key={k} style={{ display: 'flex', justifyContent: 'space-between', padding: '7px 2px', borderBottom: '1px solid #F7F7F7' }}>
+                  <span style={{ fontSize: '13px', color: ink }}>{k}</span>
+                  <span style={{ fontFamily: 'DM Mono, monospace', fontSize: '13px', color: muted }}>{usd0(v)}</span>
+                </div>
+              ))}
+              <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '12px', paddingTop: '8px', fontFamily: 'DM Mono, monospace', fontSize: '13px', fontWeight: 600 }}>
+                <span style={{ color: muted }}>{totalLabel}:</span>
+                <span style={{ color: color || ink }}>{usd0(total)}</span>
+              </div>
+            </div>
+          )
+          return (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
+              <Block title="ASSETS" rows={assets} total={tA} totalLabel="Total Assets" color={GREEN} />
+              <Block title="LIABILITIES" rows={liabilities} total={tL} totalLabel="Total Liabilities" color={RED} />
+              <Block title="EQUITY" rows={equity} total={tE} totalLabel="Total Equity" color={ink} />
+              <div style={{ background: '#F2F7F3', border: '1px solid #CFE4D6', borderRadius: '4px', padding: '14px 18px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '6px' }}>
+                <span style={{ fontFamily: 'DM Mono, monospace', fontSize: '11px', letterSpacing: '1px', color: GREEN, fontWeight: 600 }}>✓ IN BALANCE</span>
+                <span style={{ fontFamily: 'DM Mono, monospace', fontSize: '12px', color: muted }}>Assets {usd0(tA)} = Liabilities + Equity {usd0(tL + tE)}</span>
               </div>
             </div>
           )
