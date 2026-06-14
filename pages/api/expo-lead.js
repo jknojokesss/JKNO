@@ -13,7 +13,7 @@ const BOOK_URL = 'https://calendly.com/jk-jknojokes/30min'
 const OWNER = process.env.LEAD_NOTIFY_EMAIL || 'jk@jknojokes.com'
 // jknojokes.com is verified in Resend, so we send from the domain — this lets us
 // email any prospect (not just the account owner) and lands in inboxes, not spam.
-const FROM = 'JK No Jokes <jk@jknojokes.com>'
+const FROM = 'JK No Jokes Financials <jk@jknojokes.com>'
 
 const esc = (s) => String(s || '').replace(/[<>&]/g, (c) => ({ '<': '&lt;', '>': '&gt;', '&': '&amp;' }[c]))
 
@@ -70,13 +70,13 @@ export default async function handler(req, res) {
       subject: 'Great meeting you — your dashboard demo + a $25 gift card',
       html: `
         <div style="font-family:Georgia,serif;max-width:520px;margin:0 auto;padding:36px 22px;color:#1A1A2E;">
-          <h1 style="font-size:22px;margin:0 0 4px;">JK<span style="color:#C9A84C;">.</span> <span style="font-size:13px;color:#7A8090;">No Jokes Bookkeeping</span></h1>
+          <h1 style="font-size:22px;margin:0 0 4px;">JK<span style="color:#C9A84C;">.</span> <span style="font-size:13px;color:#7A8090;">No Jokes Financials</span></h1>
           <p style="font-size:15px;line-height:1.6;color:#1A1A2E;">Hi ${esc(name)} — great meeting you${business ? ` and hearing about ${esc(business)}` : ''}.</p>
           <p style="font-size:15px;line-height:1.6;color:#1A1A2E;">Here's the live dashboard I showed you (sample data) so you can poke around it yourself:</p>
           <p style="margin:22px 0;"><a href="${DEMO_URL}" style="background:#C9A84C;color:#1A1A2E;text-decoration:none;padding:12px 22px;border-radius:4px;font-family:monospace;font-size:13px;letter-spacing:1px;">SEE THE LIVE DEMO →</a></p>
           <p style="font-size:15px;line-height:1.6;color:#1A1A2E;">And the offer for stopping by: book a free consultation this week and I'll send you a <strong>$25 gift card</strong> just for showing up.</p>
           <p style="margin:22px 0;"><a href="${BOOK_URL}" style="background:#1A2035;color:#F0DEAC;text-decoration:none;padding:12px 22px;border-radius:4px;font-family:monospace;font-size:13px;letter-spacing:1px;">BOOK A FREE CALL →</a></p>
-          <p style="font-size:14px;line-height:1.6;color:#5A6070;">Talk soon,<br/>JK · <a href="mailto:${OWNER}" style="color:#C9A84C;">${OWNER}</a></p>
+          <p style="font-size:14px;line-height:1.6;color:#5A6070;">Talk soon,<br/>Jonathan Katz · <a href="mailto:${OWNER}" style="color:#C9A84C;">${OWNER}</a></p>
         </div>`,
     })
     autoReplied = true
