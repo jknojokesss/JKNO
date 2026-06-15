@@ -51,6 +51,7 @@ export default function ApplianceRepair() {
   const [jobs, setJobs] = useState(SEED)
   const [adding, setAdding] = useState(false)
   const [expanded, setExpanded] = useState(null)
+  const [expandedTech, setExpandedTech] = useState(null)
   const [f, setF] = useState({ customer: '', appliance: '', tech: 'Mike', status: 'scheduled', parts: '', labor: '', charged: '' })
   const [lf, setLf] = useState({ type: 'part', desc: '', cost: '', hours: '' })
 
@@ -253,7 +254,8 @@ export default function ApplianceRepair() {
         {/* TECHS */}
         {tab === 'techs' && (
           <div style={card}>
-            <div style={{ ...serif, fontSize: '20px', fontWeight: 600, color: INK, marginBottom: '12px' }}>By technician</div>
+            <div style={{ ...serif, fontSize: '20px', fontWeight: 600, color: INK, marginBottom: '4px' }}>By technician</div>
+            <div style={{ fontFamily: 'DM Mono, monospace', fontSize: '10px', color: MUTED, marginBottom: '12px' }}>Tap a tech to see the jobs they're on</div>
             <div style={{ overflowX: 'auto' }}>
               <table style={{ width: '100%', borderCollapse: 'collapse', minWidth: '520px' }}>
                 <thead><tr>{['TECH', 'OPEN JOBS', 'BILLED', 'PROFIT'].map((h, i) => <th key={h} style={{ ...th, textAlign: i ? 'right' : 'left' }}>{h}</th>)}</tr></thead>
@@ -263,13 +265,37 @@ export default function ApplianceRepair() {
                     const ob = tj.filter((j) => j.status !== 'done').length
                     const bl = tj.reduce((s, j) => s + Number(j.charged || 0), 0)
                     const pr = tj.reduce((s, j) => s + profitOf(j), 0)
+                    const isOpen = expandedTech === t
                     return (
-                      <tr key={t}>
-                        <td style={{ ...td, fontWeight: 600 }}>{t}</td>
-                        <td style={{ ...td, textAlign: 'right', fontFamily: 'DM Mono, monospace' }}>{ob}</td>
-                        <td style={{ ...td, textAlign: 'right', fontFamily: 'DM Mono, monospace' }}>{usd0(bl)}</td>
-                        <td style={{ ...td, textAlign: 'right', fontFamily: 'DM Mono, monospace', color: GREEN, fontWeight: 600 }}>{usd0(pr)}</td>
-                      </tr>
+                      <Fragment key={t}>
+                        <tr>
+                          <td style={{ ...td, fontWeight: 600, cursor: 'pointer' }} onClick={() => setExpandedTech(isOpen ? null : t)}>
+                            <span style={{ color: ORANGE, marginRight: '4px' }}>{isOpen ? '▾' : '▸'}</span>{t}
+                          </td>
+                          <td style={{ ...td, textAlign: 'right', fontFamily: 'DM Mono, monospace' }}>{ob}</td>
+                          <td style={{ ...td, textAlign: 'right', fontFamily: 'DM Mono, monospace' }}>{usd0(bl)}</td>
+                          <td style={{ ...td, textAlign: 'right', fontFamily: 'DM Mono, monospace', color: GREEN, fontWeight: 600 }}>{usd0(pr)}</td>
+                        </tr>
+                        {isOpen && (
+                          <tr>
+                            <td colSpan={4} style={{ padding: '0 10px 14px', background: '#F7F9FB' }}>
+                              <div style={{ padding: '10px 14px', border: '1px solid #E2E7ED', borderRadius: '6px', background: '#fff' }}>
+                                <div style={{ ...lbl, marginBottom: '6px' }}>{t.toUpperCase()}'S JOBS</div>
+                                {tj.length === 0 ? <div style={{ fontSize: '12px', color: MUTED, padding: '4px 0' }}>No jobs assigned.</div> :
+                                  tj.map((j) => (
+                                    <div key={j.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '10px', padding: '7px 0', borderBottom: '1px solid #EEF1F5' }}>
+                                      <span style={{ fontSize: '12px', color: INK }}><span style={{ fontWeight: 600 }}>{j.customer}</span> <span style={{ color: MUTED }}>· {j.appliance}</span></span>
+                                      <span style={{ display: 'flex', alignItems: 'center', gap: '12px', flexShrink: 0 }}>
+                                        <Badge s={j.status} />
+                                        <span style={{ fontFamily: 'DM Mono, monospace', fontSize: '12px', color: profitOf(j) >= 0 ? GREEN : RED, fontWeight: 600, minWidth: '60px', textAlign: 'right' }}>{usd0(profitOf(j))}</span>
+                                      </span>
+                                    </div>
+                                  ))}
+                              </div>
+                            </td>
+                          </tr>
+                        )}
+                      </Fragment>
                     )
                   })}
                 </tbody>
