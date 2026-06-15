@@ -12,7 +12,7 @@ const DARK = '#1E2A38', BLUE = '#2C6E9B', ORANGE = '#E0813C', BG = '#EEF1F5'
 const INK = '#1F2A36', MUTED = '#647082', FAINT = '#97A3B2'
 const GREEN = '#2E7D52', RED = '#C0492F', CARD = '#FFFFFF'
 const BOOK = 'https://calendly.com/jk-jknojokes/30min'
-const BIZ = 'Apex Appliance Repair'
+const BIZ = 'YT Appliance Repair'
 const TECHS = ['Mike', 'Luis', 'Unassigned']
 
 const usd0 = (n) => '$' + Math.round(Math.abs(n)).toLocaleString('en-US')
