@@ -59,11 +59,13 @@ const ACTION = { reorder: 'Call for reorder', recent: '—', lead: 'Intro call',
 
 export default function CountryCrave() {
   const [tab, setTab] = useState('dashboard')
+  const [accounts, setAccounts] = useState(ACCOUNTS)
+  const setAccountStatus = (name, status) => setAccounts((prev) => prev.map((a) => (a.name === name ? { ...a, status } : a)))
 
   const totalRev = PRODUCTS.reduce((s, p) => s + p.rev, 0)
   const totalCases = PRODUCTS.reduce((s, p) => s + p.cases, 0)
-  const active = ACCOUNTS.filter((a) => a.cases > 0).length
-  const followups = ACCOUNTS.filter((a) => a.status !== 'recent')
+  const active = accounts.filter((a) => a.cases > 0).length
+  const followups = accounts.filter((a) => a.status !== 'recent')
   const maxRev = Math.max(...MONTHLY.map((d) => d.rev))
 
   const tabs = [
@@ -84,9 +86,14 @@ export default function CountryCrave() {
       {sub && <div style={{ fontFamily: 'DM Mono, monospace', fontSize: '10px', color: color || MUTED, marginTop: '4px' }}>{sub}</div>}
     </div>
   )
-  const Badge = ({ s }) => {
-    const [bg, fg, text] = STATUS[s]
-    return <span style={{ background: bg, color: fg, fontFamily: 'DM Mono, monospace', fontSize: '10px', padding: '2px 8px', borderRadius: '3px', whiteSpace: 'nowrap' }}>{text}</span>
+  const StatusSelect = ({ a }) => {
+    const [bg, fg] = STATUS[a.status]
+    return (
+      <select value={a.status} onChange={(e) => setAccountStatus(a.name, e.target.value)}
+        style={{ background: bg, color: fg, border: 'none', borderRadius: '3px', fontFamily: 'DM Mono, monospace', fontSize: '10px', padding: '3px 6px', cursor: 'pointer', maxWidth: '140px' }}>
+        {Object.entries(STATUS).map(([v, arr]) => <option key={v} value={v} style={{ background: '#fff', color: INK }}>{arr[2]}</option>)}
+      </select>
+    )
   }
   const th = { fontFamily: 'DM Mono, monospace', fontSize: '8px', letterSpacing: '1px', color: FAINT, textAlign: 'left', padding: '7px 10px', borderBottom: '1px solid #E8DDCC' }
   const td = { fontSize: '12px', color: INK, padding: '8px 10px', borderBottom: '1px solid #F2EADF' }
@@ -157,13 +164,13 @@ export default function CountryCrave() {
                     ))}
                   </tr></thead>
                   <tbody>
-                    {[...ACCOUNTS].sort((a, b) => (b.days || 999) - (a.days || 999)).map((a, i) => (
+                    {[...accounts].sort((a, b) => (b.days || 999) - (a.days || 999)).map((a, i) => (
                       <tr key={i} style={{ background: a.status === 'recent' ? 'transparent' : '#FBF6EE' }}>
                         <td style={{ ...td, fontWeight: 500 }}>{a.name}</td>
                         <td style={{ ...td, color: MUTED }}>{a.contact}</td>
                         <td style={{ ...td, color: MUTED, fontFamily: 'DM Mono, monospace', fontSize: '11px' }}>{a.last}{a.days != null ? ` · ${a.days}d ago` : ''}</td>
                         <td style={{ ...td, textAlign: 'right', fontFamily: 'DM Mono, monospace' }}>{a.cases ? a.cases.toLocaleString() : '—'}</td>
-                        <td style={td}><Badge s={a.status} /></td>
+                        <td style={td}><StatusSelect a={a} /></td>
                         <td style={{ ...td, fontFamily: 'DM Mono, monospace', fontSize: '11px', color: a.status === 'recent' ? FAINT : BROWN, fontWeight: a.status === 'recent' ? 400 : 600 }}>{ACTION[a.status]}</td>
                       </tr>
                     ))}
@@ -220,14 +227,14 @@ export default function CountryCrave() {
                 <thead><tr>{['ACCOUNT', 'CONTACT', 'LAST ORDER', 'CASES (YTD)', 'EST. VALUE', 'STATUS'].map((h, i) => (
                   <th key={h} style={{ ...th, textAlign: i >= 3 && i <= 4 ? 'right' : 'left' }}>{h}</th>))}</tr></thead>
                 <tbody>
-                  {ACCOUNTS.map((a, i) => (
+                  {accounts.map((a, i) => (
                     <tr key={i}>
                       <td style={{ ...td, fontWeight: 500 }}>{a.name}</td>
                       <td style={{ ...td, color: MUTED }}>{a.contact}</td>
                       <td style={{ ...td, color: MUTED, fontFamily: 'DM Mono, monospace', fontSize: '11px' }}>{a.last}</td>
                       <td style={{ ...td, textAlign: 'right', fontFamily: 'DM Mono, monospace' }}>{a.cases ? a.cases.toLocaleString() : '—'}</td>
                       <td style={{ ...td, textAlign: 'right', fontFamily: 'DM Mono, monospace', color: GREEN }}>{a.cases ? usd0(a.cases * 31) : '—'}</td>
-                      <td style={td}><Badge s={a.status} /></td>
+                      <td style={td}><StatusSelect a={a} /></td>
                     </tr>
                   ))}
                 </tbody>
