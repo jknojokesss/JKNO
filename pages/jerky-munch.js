@@ -131,7 +131,7 @@ export default function JerkyMunch() {
   ].map(d => ({ ...d, delta: d.now - d.was })).sort((a, b) => Math.abs(b.delta) - Math.abs(a.delta))
 
   const card = { background: '#FFFDF9', border: `1px solid ${BORDER}`, borderRadius: '14px', padding: '20px' }
-  const lbl = { fontFamily: 'DM Mono, monospace', fontSize: '10px', letterSpacing: '2px', color: '#B3A488' }
+  const lbl = { fontFamily: 'DM Mono, monospace', fontSize: '11px', fontWeight: 500, letterSpacing: '1.2px', color: '#6F5E47' }
   const inp = { padding: '10px 12px', fontSize: '14px', border: `1px solid ${BORDER}`, borderRadius: '9px', background: CREAM, color: INK, outline: 'none' }
   const big = { fontFamily: 'Oswald, sans-serif', fontWeight: 600 }
 
@@ -139,7 +139,7 @@ export default function JerkyMunch() {
     <div style={{ ...card, flex: 1, minWidth: '150px', padding: '15px 17px' }}>
       <div style={lbl}>{k}</div>
       <div style={{ ...big, fontSize: '29px', color: accent || INK, lineHeight: 1.15, marginTop: '3px' }}>{v}</div>
-      <div style={{ fontFamily: 'DM Mono, monospace', fontSize: '10px', color: '#BFB096', marginTop: '2px' }}>{sub}</div>
+      <div style={{ fontFamily: 'DM Mono, monospace', fontSize: '10px', fontWeight: 500, color: '#9A8868', marginTop: '2px' }}>{sub}</div>
     </div>
   )
   const Row = ({ l, v, neg, bold, top }) => (
@@ -148,6 +148,14 @@ export default function JerkyMunch() {
       <span style={{ fontFamily: 'DM Mono, monospace', fontSize: '13px', color: neg ? RED : (bold ? INK : MUTED), fontWeight: bold ? 600 : 400 }}>{v}</span>
     </div>
   )
+  const Pill = ({ value, opts, map, onChange }) => (
+    <select value={value} onClick={(e) => e.stopPropagation()} onChange={(e) => { e.stopPropagation(); onChange(e.target.value) }}
+      style={{ appearance: 'none', WebkitAppearance: 'none', cursor: 'pointer', padding: '6px 26px 6px 12px', borderRadius: '20px', border: 'none',
+        fontFamily: 'DM Mono, monospace', fontSize: '11px', fontWeight: 500, letterSpacing: '0.3px', color: '#fff',
+        background: `${map[value].color} url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='10' height='10' viewBox='0 0 10 10'><path d='M2 3.5L5 6.5L8 3.5' stroke='white' stroke-width='1.4' fill='none'/></svg>") no-repeat right 9px center` }}>
+      {opts.map(o => <option key={o.id} value={o.id} style={{ color: INK, background: '#fff' }}>{o.label}</option>)}
+    </select>
+  )
 
   const TABS = [['overview', 'Overview'], ['pnl', 'P&L'], ['trend', 'Month vs Month'], ['consign', 'Consignment'], ['direct', 'Direct Sales'], ['expenses', 'Expenses'], ['ads', 'Advertising']]
 
@@ -155,9 +163,16 @@ export default function JerkyMunch() {
     <>
       <Head>
         <title>{BIZ} — Dashboard</title>
-        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+        <link rel="manifest" href="/jerky-munch.webmanifest" />
+        <meta name="theme-color" content="#2B2018" />
+        <meta name="apple-mobile-web-app-capable" content="yes" />
+        <meta name="mobile-web-app-capable" content="yes" />
+        <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+        <meta name="apple-mobile-web-app-title" content="Jerky Munch" />
+        <link rel="apple-touch-icon" href="/jerky-icon.svg" />
         <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@500;600;700&family=DM+Sans:wght@400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet" />
-        <style>{`*{box-sizing:border-box;margin:0;padding:0}body{background:${CREAM};font-family:'DM Sans',sans-serif}::placeholder{color:#BFB096}`}</style>
+        <style>{`*{box-sizing:border-box;margin:0;padding:0}html{-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale;text-rendering:optimizeLegibility}body{background:${CREAM};font-family:'DM Sans',sans-serif;color:${INK}}::placeholder{color:#A99A82}`}</style>
       </Head>
 
       <div style={{ maxWidth: '900px', margin: '0 auto', padding: '0 18px 60px' }}>

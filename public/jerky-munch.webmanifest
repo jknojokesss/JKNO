@@ -1,0 +1,15 @@
+{
+  "name": "Jerky Munch Dashboard",
+  "short_name": "Jerky Munch",
+  "description": "Consignment, direct sales, ads and P&L — one screen.",
+  "start_url": "/jerky-munch",
+  "scope": "/jerky-munch",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#2B2018",
+  "theme_color": "#2B2018",
+  "icons": [
+    { "src": "/jerky-icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" },
+    { "src": "/jerky-icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "maskable" }
+  ]
+}
