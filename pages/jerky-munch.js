@@ -29,20 +29,24 @@ const SEED_CONSIGN = [
 ]
 
 const SEED_DIRECT = [
-  { id: uid(), who: 'Online store (Shopify)', units: 120, rev: 1188 },
-  { id: uid(), who: 'Farmers Market — Toms River', units: 45, rev: 405 },
-  { id: uid(), who: 'Acme Corp — office bulk order', units: 60, rev: 480 },
-  { id: uid(), who: 'Gym pop-up weekend', units: 30, rev: 270 },
+  { id: uid(), who: 'Online store (Shopify)', source: 'Shopify / online', units: 120, rev: 1188 },
+  { id: uid(), who: 'Farmers Market — Toms River', source: 'Farmers market', units: 45, rev: 405 },
+  { id: uid(), who: 'Acme Corp — office bulk order', source: 'Wholesale / bulk', units: 60, rev: 480 },
+  { id: uid(), who: 'Gym pop-up weekend', source: 'Pop-up event', units: 30, rev: 270 },
 ]
+const DIRECT_SOURCES = ['Shopify / online', 'Farmers market', 'Pop-up event', 'Wholesale / bulk', 'Other']
 
 const SEED_ADS = [
-  { id: uid(), channel: 'Instagram Ads', spend: 600, rev: 2400 },
-  { id: uid(), channel: 'Influencer — @njfoodie', spend: 400, rev: 1600 },
-  { id: uid(), channel: 'Google Search', spend: 300, rev: 900 },
-  { id: uid(), channel: 'Facebook Ads', spend: 450, rev: 180 },
-  { id: uid(), channel: 'Local 5K Sponsorship', spend: 250, rev: 150 },
-  { id: uid(), channel: 'Flyers / print', spend: 120, rev: 90 },
+  { id: uid(), channel: 'Instagram Ads', spend: 600, rev: 2400, track: 'Meta pixel + code IG10', tracked: true },
+  { id: uid(), channel: 'Influencer — @njfoodie', spend: 400, rev: 1600, track: 'Promo code NJFOODIE', tracked: true },
+  { id: uid(), channel: 'Google Search', spend: 300, rev: 900, track: 'Google conversion tag', tracked: true },
+  { id: uid(), channel: 'Facebook Ads', spend: 450, rev: 180, track: 'Meta pixel', tracked: true },
+  { id: uid(), channel: 'Local 5K Sponsorship', spend: 250, rev: 150, track: 'Estimated — needs a promo code', tracked: false },
+  { id: uid(), channel: 'Flyers / print', spend: 120, rev: 90, track: 'Estimated — needs a promo code', tracked: false },
 ]
+const COGS_CATS = ['Ingredients', 'Packaging']
+// prior month — for month-over-month comparison
+const PRIOR = { directRev: 1980, consignRev: 1510, cogs: 2280, opexNonAd: 640, adSpend: 1650, missVal: 78, month: 'May' }
 const DIAGNOSES = ['', 'Sold but not reported (store owes me)', 'Theft / shrinkage', 'Damaged or expired', 'Free samples given out', 'Miscount — recount needed', 'Unknown — investigating']
 const verdict = (roas) => roas >= 2 ? { c: GREEN, t: '🟢 SCALE IT' } : roas >= 1 ? { c: AMBER, t: '🟡 WATCH' } : { c: RED, t: '🔴 CUT IT' }
 
@@ -70,6 +74,8 @@ export default function JerkyMunch() {
   const [expenses, setExpenses] = useState(SEED_EXPENSES)
   const [addingE, setAddingE] = useState(false)
   const [ef, setEf] = useState({ vendor: '', amt: '', pay: 'personal' })
+  const [addingD, setAddingD] = useState(false)
+  const [df, setDf] = useState({ who: '', source: 'Shopify / online', units: '', rev: '' })
 
   const dv = (k) => draft[k] || ''
   const setDv = (k, v) => setDraft({ ...draft, [k]: v })
@@ -82,6 +88,8 @@ export default function JerkyMunch() {
   const addPartner = () => { if (!cf.store.trim()) return; setConsign([{ id: uid(), store: cf.store.trim(), price: Number(cf.price) || 0, sent: Number(cf.sent) || 0, returned: 0, paid: 0, counted: null, countedDate: '', diagnosis: '', log: [{ at: new Date().toLocaleDateString([], { month: 'short', day: 'numeric' }), t: 'Added consignment partner' }] }, ...consign]); setCf({ store: '', price: '', sent: '' }); setAdding(false) }
   const setExpensePay = (id, pay) => setExpenses(expenses.map(e => e.id === id ? { ...e, pay } : e))
   const addExpense = () => { if (!ef.vendor.trim()) return; setExpenses([{ id: uid(), vendor: ef.vendor.trim(), cat: 'Other', amt: Number(ef.amt) || 0, pay: ef.pay }, ...expenses]); setEf({ vendor: '', amt: '', pay: 'personal' }); setAddingE(false) }
+  const addDirect = () => { if (!df.who.trim()) return; setDirect([{ id: uid(), who: df.who.trim(), source: df.source, units: Number(df.units) || 0, rev: Number(df.rev) || 0 }, ...direct]); setDf({ who: '', source: 'Shopify / online', units: '', rev: '' }); setAddingD(false) }
+  const removeDirect = (id) => setDirect(direct.filter(d => d.id !== id))
 
   // aggregates
   const R = consign.map(c => ({ ...c, ...recon(c) }))
@@ -102,6 +110,26 @@ export default function JerkyMunch() {
   const personalExp = expenses.filter(e => e.pay === 'personal').reduce((s, e) => s + e.amt, 0)
   const businessExp = totalExp - personalExp
 
+  // P&L
+  const pct = (n) => revenue ? Math.round(n / revenue * 100) : 0
+  const cogs = expenses.filter(e => COGS_CATS.includes(e.cat)).reduce((s, e) => s + e.amt, 0)
+  const opexNonAd = expenses.filter(e => !COGS_CATS.includes(e.cat)).reduce((s, e) => s + e.amt, 0)
+  const grossProfit = revenue - cogs
+  const totalOpex = opexNonAd + adSpend
+  const netProfit = grossProfit - totalOpex
+
+  // month-over-month vs PRIOR
+  const priorRevenue = PRIOR.directRev + PRIOR.consignRev
+  const priorNet = priorRevenue - PRIOR.cogs - PRIOR.opexNonAd - PRIOR.adSpend
+  const netDelta = netProfit - priorNet
+  const drivers = [
+    { label: 'Direct sales', now: directRev, was: PRIOR.directRev, good: 'up' },
+    { label: 'Consignment collected', now: cashCollected, was: PRIOR.consignRev, good: 'up' },
+    { label: 'Cost of goods', now: -cogs, was: -PRIOR.cogs, good: 'up' },
+    { label: 'Ad spend', now: -adSpend, was: -PRIOR.adSpend, good: 'up' },
+    { label: 'Other operating costs', now: -opexNonAd, was: -PRIOR.opexNonAd, good: 'up' },
+  ].map(d => ({ ...d, delta: d.now - d.was })).sort((a, b) => Math.abs(b.delta) - Math.abs(a.delta))
+
   const card = { background: '#FFFDF9', border: `1px solid ${BORDER}`, borderRadius: '14px', padding: '20px' }
   const lbl = { fontFamily: 'DM Mono, monospace', fontSize: '10px', letterSpacing: '2px', color: '#B3A488' }
   const inp = { padding: '10px 12px', fontSize: '14px', border: `1px solid ${BORDER}`, borderRadius: '9px', background: CREAM, color: INK, outline: 'none' }
@@ -121,7 +149,7 @@ export default function JerkyMunch() {
     </div>
   )
 
-  const TABS = [['overview', 'Overview'], ['consign', 'Consignment'], ['direct', 'Direct Sales'], ['expenses', 'Expenses'], ['ads', 'Advertising']]
+  const TABS = [['overview', 'Overview'], ['pnl', 'P&L'], ['trend', 'Month vs Month'], ['consign', 'Consignment'], ['direct', 'Direct Sales'], ['expenses', 'Expenses'], ['ads', 'Advertising']]
 
   return (
     <>
@@ -200,6 +228,88 @@ export default function JerkyMunch() {
                 <Row l="Should be on shelves" v={R.reduce((s, c) => s + Math.max(c.expected, 0), 0)} />
                 <Row l="Missing / unaccounted" v={missUnits} neg bold top />
               </div>
+            </div>
+          </>
+        )}
+
+        {/* ===== P&L ===== */}
+        {tab === 'pnl' && (
+          <>
+            <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap', marginBottom: '16px' }}>
+              <KPI k="REVENUE" v={m0(revenue)} sub="direct + consignment" accent={GREEN} />
+              <KPI k="GROSS PROFIT" v={m0(grossProfit)} sub={`${pct(grossProfit)}% margin`} accent={KRAFT} />
+              <KPI k={netProfit >= 0 ? 'NET PROFIT' : 'NET LOSS'} v={m0(netProfit)} sub={netProfit >= 0 ? 'in the black' : 'in the red'} accent={netProfit >= 0 ? GREEN : RED} />
+            </div>
+
+            <div style={{ ...card }}>
+              <div style={{ ...lbl, marginBottom: '14px' }}>PROFIT &amp; LOSS — THIS MONTH (cash basis)</div>
+
+              <div style={{ ...lbl, color: KRAFT, margin: '4px 0' }}>REVENUE</div>
+              <Row l="Direct sales" v={m0(directRev)} />
+              <Row l="Consignment (collected)" v={m0(cashCollected)} />
+              <Row l="Total revenue" v={m0(revenue)} bold top />
+
+              <div style={{ ...lbl, color: KRAFT, margin: '16px 0 4px' }}>COST OF GOODS SOLD</div>
+              {COGS_CATS.map(cat => { const v = expenses.filter(e => e.cat === cat).reduce((s, e) => s + e.amt, 0); return v > 0 ? <Row key={cat} l={cat} v={`−${m0(v)}`} /> : null })}
+              <Row l="Total COGS" v={`−${m0(cogs)}`} bold top />
+              <Row l={`GROSS PROFIT  ·  ${pct(grossProfit)}% margin`} v={m0(grossProfit)} bold top />
+
+              <div style={{ ...lbl, color: KRAFT, margin: '16px 0 4px' }}>OPERATING EXPENSES</div>
+              <Row l="Advertising" v={`−${m0(adSpend)}`} />
+              {[...new Set(expenses.filter(e => !COGS_CATS.includes(e.cat)).map(e => e.cat))].map(cat => { const v = expenses.filter(e => e.cat === cat).reduce((s, e) => s + e.amt, 0); return <Row key={cat} l={cat} v={`−${m0(v)}`} /> })}
+              <Row l="Total operating expenses" v={`−${m0(totalOpex)}`} bold top />
+
+              <div style={{ marginTop: '12px', padding: '12px 14px', background: netProfit >= 0 ? '#EAF3EC' : '#FBEDE9', borderRadius: '10px' }}>
+                <Row l={`${netProfit >= 0 ? 'NET PROFIT' : 'NET LOSS'}  ·  ${pct(netProfit)}% margin`} v={m0(netProfit)} bold neg={netProfit < 0} />
+              </div>
+            </div>
+
+            <div style={{ ...card, marginTop: '16px', background: CHAR, borderColor: CHAR, color: CREAM, fontSize: '14px', lineHeight: 1.6 }}>
+              <div style={{ fontFamily: 'DM Mono, monospace', fontSize: '10px', letterSpacing: '2px', color: SPICE, marginBottom: '8px' }}>THE CFO READ</div>
+              {netProfit < 0
+                ? <>You're <b>{m0(-netProfit)} in the red</b> this month — fixable, not fatal. Two levers: cut the <b>{m0(wastedSpend - wastedReturn)}</b> of dead ad spend and collect the <b>{m0(missVal)}</b> you're owed on missing consignment units. Do both and this swings toward black — <i>without selling one extra bag.</i></>
+                : <>You netted <b>{m0(netProfit)}</b>. Cut the <b>{m0(wastedSpend - wastedReturn)}</b> of dead ad spend and collect the <b>{m0(missVal)}</b> you're owed and it grows — same jerky, more profit.</>}
+            </div>
+          </>
+        )}
+
+        {/* ===== MONTH VS MONTH ===== */}
+        {tab === 'trend' && (
+          <>
+            <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap', marginBottom: '16px' }}>
+              <KPI k={`${PRIOR.month.toUpperCase()} NET`} v={m0(priorNet)} sub="last month" accent={priorNet >= 0 ? GREEN : RED} />
+              <KPI k="THIS MONTH NET" v={m0(netProfit)} sub="now" accent={netProfit >= 0 ? GREEN : RED} />
+              <KPI k="CHANGE" v={`${netDelta >= 0 ? '+' : ''}${m0(netDelta)}`} sub={netDelta >= 0 ? 'better 📈' : 'worse 📉'} accent={netDelta >= 0 ? GREEN : RED} />
+            </div>
+
+            <div style={{ ...card, marginBottom: '16px' }}>
+              <div style={{ ...lbl, marginBottom: '4px' }}>WHY PROFIT MOVED {netDelta >= 0 ? '+' : ''}{m0(netDelta)} vs {PRIOR.month.toUpperCase()}</div>
+              <p style={{ fontSize: '12px', color: MUTED, marginBottom: '12px' }}>Biggest movers first. Green helped profit, red hurt it.</p>
+              {drivers.map(d => {
+                const helped = d.delta >= 0
+                const mag = Math.min(Math.abs(d.delta) / Math.max(...drivers.map(x => Math.abs(x.delta)), 1) * 100, 100)
+                return (
+                  <div key={d.label} style={{ padding: '9px 0', borderTop: `1px solid ${CREAM}` }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '5px' }}>
+                      <span style={{ fontSize: '14px', color: INK, fontWeight: 500 }}>{d.label}</span>
+                      <span style={{ fontFamily: 'DM Mono, monospace', fontSize: '13px', fontWeight: 600, color: helped ? GREEN : RED }}>{helped ? '+' : ''}{m0(d.delta)}</span>
+                    </div>
+                    <div style={{ height: '6px', background: CREAM, borderRadius: '4px', overflow: 'hidden' }}>
+                      <div style={{ width: `${mag}%`, height: '100%', background: helped ? GREEN : RED }} />
+                    </div>
+                  </div>
+                )
+              })}
+            </div>
+
+            <div style={{ ...card, background: CHAR, borderColor: CHAR, color: CREAM, fontSize: '14px', lineHeight: 1.6 }}>
+              <div style={{ fontFamily: 'DM Mono, monospace', fontSize: '10px', letterSpacing: '2px', color: SPICE, marginBottom: '8px' }}>WHAT CHANGED, IN PLAIN ENGLISH</div>
+              {(() => {
+                const top = drivers[0], help = top.delta >= 0
+                return <>The biggest swing was <b>{top.label.toLowerCase()}</b>, which {help ? 'added' : 'cost you'} <b>{m0(Math.abs(top.delta))}</b> vs {PRIOR.month}. {netDelta >= 0
+                  ? <>Overall you're <b>{m0(netDelta)} more profitable</b> than last month — keep doing whatever drove the green bars.</>
+                  : <>Overall you're <b>{m0(-netDelta)} less profitable.</b> Look at the red bars — that's exactly where the money went, and exactly what to fix this month.</>}</>
+              })()}
             </div>
           </>
         )}
@@ -319,18 +429,44 @@ export default function JerkyMunch() {
             <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap', marginBottom: '16px' }}>
               <KPI k="DIRECT REVENUE" v={m0(directRev)} sub="cash in hand" accent={GREEN} />
               <KPI k="UNITS SOLD" v={directUnits} sub="direct channel" />
-              <KPI k="AVG $ / UNIT" v={money(directRev / directUnits)} sub="vs ~$6.3 consignment" accent={SPICE} />
+              <KPI k="AVG $ / UNIT" v={directUnits ? money(directRev / directUnits) : '—'} sub="vs ~$6.3 consignment" accent={SPICE} />
             </div>
             <p style={{ fontSize: '13px', color: MUTED, marginBottom: '14px', lineHeight: 1.5 }}>
-              Direct sales clear at a <b style={{ color: INK }}>higher margin</b> than consignment — no store cut, paid on the spot. Worth seeing side-by-side so you know where to push.
+              Direct clears at a <b style={{ color: INK }}>higher margin</b> than consignment — no store cut, paid on the spot. <b style={{ color: INK }}>Online orders sync from Shopify, market & pop-up sales from your Square reader, cash & wholesale you log here.</b>
             </p>
+            {!addingD ? (
+              <button onClick={() => setAddingD(true)} style={{ width: '100%', background: CHAR, color: CREAM, border: 'none', borderRadius: '11px', padding: '13px', fontFamily: 'DM Mono, monospace', fontSize: '12px', letterSpacing: '1px', cursor: 'pointer', marginBottom: '16px' }}>+ LOG A DIRECT SALE</button>
+            ) : (
+              <div style={{ ...card, marginBottom: '16px' }}>
+                <div style={{ ...lbl, marginBottom: '12px' }}>NEW DIRECT SALE</div>
+                <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+                  <input value={df.who} onChange={e => setDf({ ...df, who: e.target.value })} placeholder="Customer / event *" style={{ ...inp, flex: 2, minWidth: '160px' }} />
+                  <select value={df.source} onChange={e => setDf({ ...df, source: e.target.value })} style={{ ...inp, flex: 1, minWidth: '150px', cursor: 'pointer' }}>
+                    {DIRECT_SOURCES.map(s => <option key={s}>{s}</option>)}
+                  </select>
+                </div>
+                <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', marginTop: '8px' }}>
+                  <input value={df.units} onChange={e => setDf({ ...df, units: e.target.value })} type="number" placeholder="Units" style={{ ...inp, flex: 1, minWidth: '100px' }} />
+                  <input value={df.rev} onChange={e => setDf({ ...df, rev: e.target.value })} type="number" placeholder="$ total" style={{ ...inp, flex: 1, minWidth: '100px' }} />
+                </div>
+                <div style={{ display: 'flex', gap: '8px', marginTop: '12px' }}>
+                  <button onClick={() => setAddingD(false)} style={{ flex: 1, background: 'none', border: `1px solid ${BORDER}`, borderRadius: '9px', padding: '11px', fontFamily: 'DM Mono, monospace', fontSize: '12px', color: MUTED, cursor: 'pointer' }}>CANCEL</button>
+                  <button onClick={addDirect} style={{ flex: 2, background: SPICE, color: '#fff', border: 'none', borderRadius: '9px', padding: '11px', fontFamily: 'DM Mono, monospace', fontSize: '12px', letterSpacing: '1px', cursor: 'pointer' }}>+ LOG SALE</button>
+                </div>
+              </div>
+            )}
             {direct.map(d => (
               <div key={d.id} style={{ ...card, marginBottom: '10px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '8px' }}>
                 <div>
                   <div style={{ ...big, fontSize: '18px', color: INK }}>{d.who}</div>
-                  <div style={{ fontSize: '12px', color: MUTED, marginTop: '2px' }}>{d.units} units · {money(d.rev / d.units)}/unit</div>
+                  <div style={{ fontSize: '12px', color: MUTED, marginTop: '2px' }}>
+                    <span style={{ fontFamily: 'DM Mono, monospace', fontSize: '10px', letterSpacing: '0.5px', color: KRAFT, textTransform: 'uppercase' }}>{d.source}</span> · {d.units} units · {d.units ? money(d.rev / d.units) : '$0'}/unit
+                  </div>
                 </div>
-                <div style={{ ...big, fontSize: '22px', color: GREEN }}>{m0(d.rev)}</div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                  <span style={{ ...big, fontSize: '22px', color: GREEN }}>{m0(d.rev)}</span>
+                  <button onClick={() => removeDirect(d.id)} style={{ background: 'none', border: 'none', color: '#C9BBA0', fontSize: '18px', cursor: 'pointer', lineHeight: 1 }}>×</button>
+                </div>
               </div>
             ))}
           </>
@@ -391,6 +527,9 @@ export default function JerkyMunch() {
             <div style={{ ...card, background: '#FBEDE9', borderColor: '#E7C3B8', marginBottom: '16px', fontSize: '14px', color: INK, lineHeight: 1.5 }}>
               👉 <b>Action:</b> you're spending <b>{m0(wastedSpend)}/mo</b> on channels that bring back only <b>{m0(wastedReturn)}</b>. Cut the red ones and you keep <b>{m0(wastedSpend - wastedReturn)}</b> a month — <b>{m0((wastedSpend - wastedReturn) * 12)}/yr</b> — with zero lost sales.
             </div>
+            <div style={{ ...card, marginBottom: '16px', fontSize: '13px', color: MUTED, lineHeight: 1.55 }}>
+              <b style={{ color: INK }}>How each sale is traced to a channel:</b> a unique promo code per channel (IG10, NJFOODIE), the Meta/Google pixel on your Shopify store, or a “how’d you hear about us?” at checkout. Channels marked <b style={{ color: AMBER }}>“est.”</b> have no code yet — their ROI is a guess. <b style={{ color: INK }}>Step one is giving every channel a code so the number becomes real, not a hunch.</b>
+            </div>
             {ads.slice().sort((a, b) => (b.rev / b.spend) - (a.rev / a.spend)).map(a => {
               const roas = a.rev / a.spend, vd = verdict(roas)
               return (
@@ -398,7 +537,8 @@ export default function JerkyMunch() {
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '8px' }}>
                     <div>
                       <div style={{ ...big, fontSize: '18px', color: INK }}>{a.channel}</div>
-                      <div style={{ fontSize: '12px', color: MUTED, marginTop: '2px', fontFamily: 'DM Mono, monospace' }}>{m0(a.spend)} spent → {m0(a.rev)} back · <b style={{ color: vd.c }}>{roas.toFixed(1)}x</b></div>
+                      <div style={{ fontSize: '12px', color: MUTED, marginTop: '2px', fontFamily: 'DM Mono, monospace' }}>{m0(a.spend)} spent → {m0(a.rev)} back · <b style={{ color: vd.c }}>{roas.toFixed(1)}x{a.tracked ? '' : ' est.'}</b></div>
+                      <div style={{ fontSize: '11px', color: a.tracked ? KRAFT : AMBER, marginTop: '4px' }}>{a.tracked ? '🎯 ' : '⚠ '}{a.track}</div>
                     </div>
                     <span style={{ fontFamily: 'DM Mono, monospace', fontSize: '11px', fontWeight: 600, color: '#fff', background: vd.c, padding: '5px 11px', borderRadius: '20px' }}>{vd.t}</span>
                   </div>
