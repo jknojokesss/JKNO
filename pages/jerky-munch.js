@@ -7,6 +7,7 @@ const BIZ = 'Jerky Munch'
 
 const money = (n) => '$' + (Math.round(n * 100) / 100).toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 2 })
 const m0 = (n) => '$' + Math.round(n).toLocaleString()
+const sgn = (n) => (n < 0 ? '-$' : '$') + Math.abs(Math.round(n)).toLocaleString()
 const uid = () => Math.random().toString(36).slice(2, 9)
 const todayStr = new Date().toISOString().slice(0, 10)
 const fmtD = (s) => s ? new Date(s + 'T00:00:00').toLocaleDateString([], { month: 'short', day: 'numeric' }) : '—'
@@ -118,17 +119,28 @@ export default function JerkyMunch() {
   const totalOpex = opexNonAd + adSpend
   const netProfit = grossProfit - totalOpex
 
-  // month-over-month vs PRIOR
+  // month-over-month vs PRIOR — comparative P&L (each line as a profit contribution: revenue +, costs −)
+  const thisMonth = new Date().toLocaleString('en-US', { month: 'short' })
   const priorRevenue = PRIOR.directRev + PRIOR.consignRev
-  const priorNet = priorRevenue - PRIOR.cogs - PRIOR.opexNonAd - PRIOR.adSpend
+  const priorGross = priorRevenue - PRIOR.cogs
+  const priorTotalOpex = PRIOR.adSpend + PRIOR.opexNonAd
+  const priorNet = priorGross - priorTotalOpex
   const netDelta = netProfit - priorNet
-  const drivers = [
-    { label: 'Direct sales', now: directRev, was: PRIOR.directRev, good: 'up' },
-    { label: 'Consignment collected', now: cashCollected, was: PRIOR.consignRev, good: 'up' },
-    { label: 'Cost of goods', now: -cogs, was: -PRIOR.cogs, good: 'up' },
-    { label: 'Ad spend', now: -adSpend, was: -PRIOR.adSpend, good: 'up' },
-    { label: 'Other operating costs', now: -opexNonAd, was: -PRIOR.opexNonAd, good: 'up' },
-  ].map(d => ({ ...d, delta: d.now - d.was })).sort((a, b) => Math.abs(b.delta) - Math.abs(a.delta))
+  const revDelta = revenue - priorRevenue
+  const cmp = [
+    { label: 'Direct sales', now: directRev, prior: PRIOR.directRev, kind: 'line' },
+    { label: 'Consignment collected', now: cashCollected, prior: PRIOR.consignRev, kind: 'line' },
+    { label: 'Total revenue', now: revenue, prior: priorRevenue, kind: 'subtotal' },
+    { label: 'Cost of goods sold', now: -cogs, prior: -PRIOR.cogs, kind: 'line' },
+    { label: 'Gross profit', now: grossProfit, prior: priorGross, kind: 'subtotal' },
+    { label: 'Advertising', now: -adSpend, prior: -PRIOR.adSpend, kind: 'line' },
+    { label: 'Other operating costs', now: -opexNonAd, prior: -PRIOR.opexNonAd, kind: 'line' },
+    { label: 'Total operating expenses', now: -totalOpex, prior: -priorTotalOpex, kind: 'subtotal' },
+    { label: netProfit >= 0 ? 'NET PROFIT' : 'NET LOSS', now: netProfit, prior: priorNet, kind: 'total' },
+  ]
+  const movers = cmp.filter(c => c.kind === 'line').map(c => ({ ...c, delta: c.now - c.prior }))
+  const bestMover = movers.slice().sort((a, b) => b.delta - a.delta)[0]
+  const worstMover = movers.slice().sort((a, b) => a.delta - b.delta)[0]
 
   const card = { background: '#FFFDF9', border: `1px solid ${BORDER}`, borderRadius: '14px', padding: '20px' }
   const lbl = { fontFamily: 'DM Mono, monospace', fontSize: '11px', fontWeight: 500, letterSpacing: '1.2px', color: '#6F5E47' }
@@ -156,6 +168,17 @@ export default function JerkyMunch() {
       {opts.map(o => <option key={o.id} value={o.id} style={{ color: INK, background: '#fff' }}>{o.label}</option>)}
     </select>
   )
+  const CmpRow = ({ label, now, prior, kind }) => {
+    const delta = now - prior, strong = kind === 'subtotal' || kind === 'total', help = delta >= 0
+    return (
+      <div style={{ display: 'flex', alignItems: 'center', gap: '4px', padding: kind === 'total' ? '11px 0 2px' : '7px 0', borderTop: strong ? `1px solid ${BORDER}` : `1px solid ${CREAM}` }}>
+        <span style={{ flex: 1, minWidth: 0, fontSize: kind === 'total' ? '14px' : '13px', color: strong ? INK : MUTED, fontWeight: strong ? 700 : 400 }}>{label}</span>
+        <span style={{ width: '70px', textAlign: 'right', fontFamily: 'DM Mono, monospace', fontSize: '12px', color: strong ? INK : '#5C5040', fontWeight: strong ? 600 : 400 }}>{sgn(now)}</span>
+        <span style={{ width: '70px', textAlign: 'right', fontFamily: 'DM Mono, monospace', fontSize: '12px', color: '#A99A82' }}>{sgn(prior)}</span>
+        <span style={{ width: '60px', textAlign: 'right', fontFamily: 'DM Mono, monospace', fontSize: '12px', fontWeight: 600, color: delta === 0 ? '#A99A82' : (help ? GREEN : RED) }}>{delta === 0 ? '—' : (delta > 0 ? '+' : '') + sgn(delta)}</span>
+      </div>
+    )
+  }
 
   const TABS = [['overview', 'Overview'], ['pnl', 'P&L'], ['trend', 'Month vs Month'], ['consign', 'Consignment'], ['direct', 'Direct Sales'], ['expenses', 'Expenses'], ['ads', 'Advertising']]
 
@@ -292,39 +315,28 @@ export default function JerkyMunch() {
         {tab === 'trend' && (
           <>
             <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap', marginBottom: '16px' }}>
-              <KPI k={`${PRIOR.month.toUpperCase()} NET`} v={m0(priorNet)} sub="last month" accent={priorNet >= 0 ? GREEN : RED} />
-              <KPI k="THIS MONTH NET" v={m0(netProfit)} sub="now" accent={netProfit >= 0 ? GREEN : RED} />
-              <KPI k="CHANGE" v={`${netDelta >= 0 ? '+' : ''}${m0(netDelta)}`} sub={netDelta >= 0 ? 'better 📈' : 'worse 📉'} accent={netDelta >= 0 ? GREEN : RED} />
+              <KPI k={`${PRIOR.month.toUpperCase()} NET`} v={sgn(priorNet)} sub="last month" accent={priorNet >= 0 ? GREEN : RED} />
+              <KPI k={`${thisMonth.toUpperCase()} NET`} v={sgn(netProfit)} sub="this month" accent={netProfit >= 0 ? GREEN : RED} />
+              <KPI k="CHANGE" v={`${netDelta >= 0 ? '+' : ''}${sgn(netDelta)}`} sub={netDelta >= 0 ? 'more profit' : 'less profit'} accent={netDelta >= 0 ? GREEN : RED} />
             </div>
 
             <div style={{ ...card, marginBottom: '16px' }}>
-              <div style={{ ...lbl, marginBottom: '4px' }}>WHY PROFIT MOVED {netDelta >= 0 ? '+' : ''}{m0(netDelta)} vs {PRIOR.month.toUpperCase()}</div>
-              <p style={{ fontSize: '12px', color: MUTED, marginBottom: '12px' }}>Biggest movers first. Green helped profit, red hurt it.</p>
-              {drivers.map(d => {
-                const helped = d.delta >= 0
-                const mag = Math.min(Math.abs(d.delta) / Math.max(...drivers.map(x => Math.abs(x.delta)), 1) * 100, 100)
-                return (
-                  <div key={d.label} style={{ padding: '9px 0', borderTop: `1px solid ${CREAM}` }}>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '5px' }}>
-                      <span style={{ fontSize: '14px', color: INK, fontWeight: 500 }}>{d.label}</span>
-                      <span style={{ fontFamily: 'DM Mono, monospace', fontSize: '13px', fontWeight: 600, color: helped ? GREEN : RED }}>{helped ? '+' : ''}{m0(d.delta)}</span>
-                    </div>
-                    <div style={{ height: '6px', background: CREAM, borderRadius: '4px', overflow: 'hidden' }}>
-                      <div style={{ width: `${mag}%`, height: '100%', background: helped ? GREEN : RED }} />
-                    </div>
-                  </div>
-                )
-              })}
+              <div style={{ ...lbl, marginBottom: '10px' }}>PROFIT &amp; LOSS — {thisMonth.toUpperCase()} vs {PRIOR.month.toUpperCase()}</div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '4px', paddingBottom: '6px' }}>
+                <span style={{ flex: 1 }} />
+                <span style={{ ...lbl, width: '70px', textAlign: 'right', color: INK }}>{thisMonth}</span>
+                <span style={{ ...lbl, width: '70px', textAlign: 'right', color: '#A99A82' }}>{PRIOR.month}</span>
+                <span style={{ ...lbl, width: '60px', textAlign: 'right' }}>Δ</span>
+              </div>
+              {cmp.map(line => <CmpRow key={line.label} {...line} />)}
+              <p style={{ fontSize: '11px', color: MUTED, marginTop: '12px', fontFamily: 'DM Mono, monospace' }}>Δ in green = better for profit · red = worse. Costs shown negative.</p>
             </div>
 
             <div style={{ ...card, background: CHAR, borderColor: CHAR, color: CREAM, fontSize: '14px', lineHeight: 1.6 }}>
-              <div style={{ fontFamily: 'DM Mono, monospace', fontSize: '10px', letterSpacing: '2px', color: SPICE, marginBottom: '8px' }}>WHAT CHANGED, IN PLAIN ENGLISH</div>
-              {(() => {
-                const top = drivers[0], help = top.delta >= 0
-                return <>The biggest swing was <b>{top.label.toLowerCase()}</b>, which {help ? 'added' : 'cost you'} <b>{m0(Math.abs(top.delta))}</b> vs {PRIOR.month}. {netDelta >= 0
-                  ? <>Overall you're <b>{m0(netDelta)} more profitable</b> than last month — keep doing whatever drove the green bars.</>
-                  : <>Overall you're <b>{m0(-netDelta)} less profitable.</b> Look at the red bars — that's exactly where the money went, and exactly what to fix this month.</>}</>
-              })()}
+              <div style={{ fontFamily: 'DM Mono, monospace', fontSize: '10px', letterSpacing: '2px', color: SPICE, marginBottom: '8px' }}>WHY THE NET MOVED {netDelta >= 0 ? '+' : ''}{sgn(netDelta)}</div>
+              <>Revenue {revDelta >= 0 ? 'climbed' : 'fell'} <b>{sgn(Math.abs(revDelta))}</b> vs {PRIOR.month}{bestMover && bestMover.delta > 0 ? <> (mostly <b>{bestMover.label.toLowerCase()}</b>, {sgn(bestMover.delta)})</> : null}. But <b>{worstMover.label.toLowerCase()}</b> moved <b>{sgn(worstMover.delta)}</b> against you. {netDelta >= 0
+                ? <>Net came out <b>{sgn(netDelta)} better</b> — keep pulling the levers that turned green.</>
+                : <>Net came out <b>{sgn(Math.abs(netDelta))} worse</b> — that red line is exactly what ate your gains, and exactly what to fix.</>}</>
             </div>
           </>
         )}
