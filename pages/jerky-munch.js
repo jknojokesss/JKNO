@@ -731,9 +731,6 @@ export default function JerkyMunch() {
                 <KPI k="Units sold" v={directUnits} sub="direct channel" />
                 <KPI k="Avg $ / unit" v={directUnits ? money(directRev / directUnits) : '—'} sub="$13 retail vs ~$8.5 consignment" accent={KRAFT} />
               </div>
-              <p style={{ fontSize: '13px', color: MUTED, marginBottom: '14px', lineHeight: 1.5 }}>
-                Direct clears at a <b style={{ color: INK }}>higher margin</b> than consignment — no store cut, paid on the spot. <b style={{ color: INK }}>Online orders sync from Shopify, market & pop-up sales from your Square reader, cash & wholesale you log here.</b>
-              </p>
               {!addingD ? (
                 <button onClick={() => setAddingD(true)} style={{ width: '100%', background: CHAR, color: CREAM, border: 'none', borderRadius: '11px', padding: '13px', ...btn, marginBottom: '16px' }}>+ Log a direct sale</button>
               ) : (
@@ -839,7 +836,7 @@ export default function JerkyMunch() {
                 <KPI k="Wasted" v={m0(wastedSpend)} sub="on losing channels" accent={RED} />
               </div>
               <div style={{ ...card, marginBottom: '16px', fontSize: '13px', color: MUTED, lineHeight: 1.55 }}>
-                <b style={{ color: INK }}>How each sale is traced to a channel:</b> a unique promo code per channel (IG10, NJFOODIE), the Meta/Google pixel on your Shopify store, or a “how’d you hear about us?” at checkout. Channels marked <b style={{ color: AMBER }}>“est.”</b> have no code yet — their ROI is a guess. <b style={{ color: INK }}>Step one is giving every channel a code so the number becomes real.</b>
+                <b style={{ color: INK }}>How each sale is traced to a channel:</b> a unique promo code per channel (IG10, NJFOODIE), the Meta/Google pixel on your Shopify store, or a “how’d you hear about us?” at checkout. Channels marked <b style={{ color: AMBER }}>“est.”</b> have no code yet — their ROI is a guess.
               </div>
               {!addingA ? (
                 <button onClick={() => setAddingA(true)} style={{ width: '100%', background: CHAR, color: CREAM, border: 'none', borderRadius: '11px', padding: '13px', ...btn, marginBottom: '16px' }}>+ Add a channel</button>
@@ -977,18 +974,6 @@ export default function JerkyMunch() {
             </>
           )}
 
-          {/* CTA */}
-          <div style={{ background: SPICE, borderRadius: '16px', padding: '26px', marginTop: '26px', color: '#fff' }}>
-            <div style={{ ...lbl, color: '#FCE0D8', marginBottom: '8px' }}>How I'd help — two ways</div>
-            <div style={{ ...big, fontSize: '21px', fontWeight: 600, lineHeight: 1.4, marginBottom: '12px' }}>
-              Be your CFO, or run the whole back office. Your call.
-            </div>
-            <p style={{ fontSize: '14px', color: '#FDEEE9', lineHeight: 1.6, marginBottom: '14px' }}>
-              <b>As your CFO:</b> I keep this dashboard live, reconcile every consignment account, chase the money you're owed, and tell you each month exactly where to cut and where to push.<br />
-              <b>Full takeover:</b> I do all of that <i>plus</i> your books, taxes-ready, so you never touch a spreadsheet again and just make jerky.
-            </p>
-            <div style={{ fontSize: '13px', fontWeight: 500, color: '#fff' }}>— Jonathan Katz · <span style={{ color: CHAR, fontWeight: 700 }}>JK No Jokes Financials</span></div>
-          </div>
         </main>
       </div>
     </>
