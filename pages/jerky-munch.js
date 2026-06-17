@@ -92,6 +92,25 @@ const PNL_ROWS = [
   { label: 'Net profit / loss', key: 'net', kind: 'total', cost: false },
 ]
 
+// products sold this month (swap illustrations for real photos anytime)
+const PRODUCTS = [
+  { name: 'Original Beef', color: '#8B3A2B', sold: 78 },
+  { name: 'Teriyaki', color: '#A9763A', sold: 64 },
+  { name: 'Spicy Habanero', color: '#C8462C', sold: 52 },
+  { name: 'Peppered', color: '#5B4636', sold: 33 },
+  { name: 'Turkey Jerky', color: '#C99A2E', sold: 20 },
+]
+const Bag = ({ color }) => (
+  <svg width="58" height="58" viewBox="0 0 64 64" style={{ display: 'block', margin: '0 auto' }}>
+    <rect x="13" y="8" width="38" height="9" rx="2" fill={color} opacity="0.5" />
+    <rect x="14" y="14" width="36" height="44" rx="6" fill={color} />
+    <rect x="14" y="14" width="36" height="11" rx="6" fill="#000" opacity="0.08" />
+    <rect x="20" y="28" width="24" height="20" rx="3" fill="#FFFDF9" opacity="0.95" />
+    <rect x="23" y="33" width="18" height="3" rx="1.5" fill={color} />
+    <rect x="23" y="39" width="12" height="3" rx="1.5" fill={color} opacity="0.55" />
+  </svg>
+)
+
 const MONO = "'IBM Plex Mono', monospace"
 
 export default function JerkyMunch() {
@@ -109,6 +128,7 @@ export default function JerkyMunch() {
   const [addingD, setAddingD] = useState(false)
   const [df, setDf] = useState({ who: '', source: 'Shopify / online', units: '', rev: '' })
   const [pnlMonths, setPnlMonths] = useState(2)
+  const [pnlView, setPnlView] = useState('single')
   const [logoOk, setLogoOk] = useState(true)
   const [addingA, setAddingA] = useState(false)
   const [af, setAf] = useState({ channel: '', spend: '', rev: '', track: '' })
@@ -175,6 +195,8 @@ export default function JerkyMunch() {
   const grossProfit = revenue - cogs
   const totalOpex = opexNonAd + adSpend
   const netProfit = grossProfit - totalOpex
+  const bagsSold = PRODUCTS.reduce((s, p) => s + p.sold, 0)
+  const bagsOut = R.reduce((s, c) => s + Math.max(c.expected, 0), 0)
 
   // multi-month series — current month appended live so interactivity flows through
   const thisMonth = new Date().toLocaleString('en-US', { month: 'short' })
@@ -224,8 +246,9 @@ export default function JerkyMunch() {
     </select>
   )
 
-  const TABS = [['overview', 'Overview'], ['pnl', 'P&L'], ['trend', 'Months Compared'], ['consign', 'Consignment'], ['direct', 'Direct Sales'], ['expenses', 'Expenses'], ['ads', 'Advertising']]
-  const currentLabel = (TABS.find(t => t[0] === tab) || ['', ''])[1]
+  const TABS = [['overview', 'Overview'], ['pnl', 'P&L'], ['consign', 'Consignment'], ['direct', 'Direct Sales'], ['expenses', 'Expenses'], ['ads', 'Advertising']]
+  const EXTRA = [['quickbooks', 'QuickBooks sync'], ['askai', 'Ask AI']]
+  const currentLabel = ([...TABS, ...EXTRA].find(t => t[0] === tab) || ['', ''])[1]
 
   return (
     <>
@@ -271,6 +294,19 @@ export default function JerkyMunch() {
                 </button>
               )
             })}
+            <div style={{ ...lbl, color: '#7A6A52', fontSize: '10px', margin: '16px 14px 6px' }}>Tools</div>
+            {EXTRA.map(([id, label]) => {
+              const active = tab === id
+              return (
+                <button key={id} className="jm-navbtn" onClick={() => { setTab(id); setExpanded(null) }}
+                  style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '8px', ...(active ? { background: 'rgba(255,255,255,.12)', color: CREAM, boxShadow: `inset 3px 0 0 ${SPICE}` } : {}) }}>
+                  <span>{label}</span>
+                  {id === 'quickbooks'
+                    ? <span style={{ width: '7px', height: '7px', borderRadius: '50%', background: '#4FbE6A', flexShrink: 0 }} />
+                    : <span style={{ fontSize: '9px', fontWeight: 700, color: '#fff', background: SPICE, padding: '2px 6px', borderRadius: '10px', flexShrink: 0 }}>AI</span>}
+                </button>
+              )
+            })}
           </nav>
           <div style={{ padding: '12px 10px 0', borderTop: '1px solid rgba(255,255,255,.1)', marginTop: '8px' }}>
             <div style={{ fontFamily: MONO, fontSize: '10px', color: '#8A7A66', lineHeight: 1.6 }}>Built &amp; maintained by<br /><span style={{ color: SPICE, fontWeight: 600 }}>JK No Jokes Financials</span></div>
@@ -295,10 +331,10 @@ export default function JerkyMunch() {
           {tab === 'overview' && (
             <>
               <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap', marginBottom: '16px' }}>
-                <KPI k="Revenue / mo" v={m0(revenue)} sub="direct + consignment" accent={SPICE} />
-                <KPI k="Out on consignment" v={m0(onShelfVal)} sub="your jerky in stores" accent={KRAFT} />
+                <KPI k="Bags sold this month" v={bagsSold} sub="across all flavors" accent={INK} />
+                <KPI k="Revenue / mo" v={m0(revenue)} sub={`${bagsSold} bags · direct + consignment`} accent={SPICE} />
+                <KPI k="Out on consignment" v={m0(onShelfVal)} sub={`${bagsOut} bags sitting in stores`} accent={KRAFT} />
                 <KPI k="Missing pieces" v={`${missUnits}`} sub={`${m0(missVal)} to investigate`} accent={missUnits ? RED : GREEN} />
-                <KPI k="Ad ROI" v={`${(adRev / adSpend).toFixed(1)}x`} sub={`${m0(adSpend)} spent`} accent={adRev / adSpend >= 2 ? GREEN : AMBER} />
               </div>
 
               <div style={{ ...card, background: CHAR, borderColor: CHAR, color: CREAM, marginBottom: '16px' }}>
@@ -316,29 +352,36 @@ export default function JerkyMunch() {
                 ))}
               </div>
 
-              <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
-                <div style={{ ...card, flex: 1, minWidth: '240px' }}>
-                  <div style={{ ...lbl, marginBottom: '10px' }}>Cash position</div>
-                  <Row l="Collected from consignment" v={m0(cashCollected)} />
-                  <Row l="Direct sales" v={m0(directRev)} />
-                  <Row l="Still out in stores (unsold)" v={m0(onShelfVal)} />
-                  <Row l="Owed to you (missing/sold)" v={m0(missVal)} neg />
-                  <Row l="Revenue booked this month" v={m0(revenue)} bold top />
+              <div style={{ ...card }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', flexWrap: 'wrap', gap: '8px', marginBottom: '16px' }}>
+                  <div style={{ ...lbl }}>Sold this month, by flavor</div>
+                  <div style={{ fontSize: '13px', color: MUTED }}><b style={{ ...big, fontSize: '18px', color: INK }}>{bagsSold}</b> bags total</div>
                 </div>
-                <div style={{ ...card, flex: 1, minWidth: '240px' }}>
-                  <div style={{ ...lbl, marginBottom: '10px' }}>Inventory flow</div>
-                  <Row l="Units sent to consignment" v={consign.reduce((s, c) => s + c.sent, 0)} />
-                  <Row l="Sold & paid for" v={R.reduce((s, c) => s + c.paidUnits, 0)} />
-                  <Row l="Returned to you" v={consign.reduce((s, c) => s + c.returned, 0)} />
-                  <Row l="Should be on shelves" v={R.reduce((s, c) => s + Math.max(c.expected, 0), 0)} />
-                  <Row l="Missing / unaccounted" v={missUnits} neg bold top />
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(148px, 1fr))', gap: '12px' }}>
+                  {PRODUCTS.slice().sort((a, b) => b.sold - a.sold).map(p => (
+                    <div key={p.name} style={{ border: `1px solid ${BORDER}`, borderRadius: '12px', padding: '16px 12px 14px', textAlign: 'center', background: CREAM }}>
+                      <Bag color={p.color} />
+                      <div style={{ fontWeight: 600, color: INK, marginTop: '8px', fontSize: '14px' }}>{p.name}</div>
+                      <div style={{ ...big, fontSize: '26px', color: INK, marginTop: '4px' }}>{p.sold}</div>
+                      <div style={{ fontSize: '11px', color: MUTED }}>bags this month</div>
+                    </div>
+                  ))}
                 </div>
+                <p style={{ fontSize: '12px', color: MUTED, marginTop: '14px' }}>These are placeholder illustrations — drop in real product photos whenever you like.</p>
               </div>
             </>
           )}
 
           {/* ===== P&L ===== */}
           {tab === 'pnl' && (
+            <div style={{ display: 'flex', gap: '6px', marginBottom: '16px', flexWrap: 'wrap' }}>
+              {[['single', 'This month'], ['compare', 'Compare months']].map(([v, l]) => (
+                <button key={v} onClick={() => setPnlView(v)} style={{ padding: '8px 16px', borderRadius: '18px', border: `1px solid ${pnlView === v ? CHAR : BORDER}`, background: pnlView === v ? CHAR : CARDBG, color: pnlView === v ? CREAM : MUTED, ...btn }}>{l}</button>
+              ))}
+            </div>
+          )}
+
+          {tab === 'pnl' && pnlView === 'single' && (
             <>
               <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap', marginBottom: '16px' }}>
                 <KPI k="Revenue" v={m0(revenue)} sub="direct + consignment" accent={GREEN} />
@@ -374,8 +417,8 @@ export default function JerkyMunch() {
             </>
           )}
 
-          {/* ===== MONTHS COMPARED ===== */}
-          {tab === 'trend' && (
+          {/* ===== MONTHS COMPARED (sub-view of P&L) ===== */}
+          {tab === 'pnl' && pnlView === 'compare' && (
             <>
               <div style={{ display: 'flex', gap: '8px', marginBottom: '16px', flexWrap: 'wrap', alignItems: 'center' }}>
                 <span style={{ ...lbl }}>Compare</span>
@@ -713,6 +756,76 @@ export default function JerkyMunch() {
                   </div>
                 )
               })}
+            </>
+          )}
+
+          {/* ===== QUICKBOOKS SYNC ===== */}
+          {tab === 'quickbooks' && (
+            <>
+              <div style={{ ...card, marginBottom: '16px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '12px' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
+                  <div style={{ width: '46px', height: '46px', borderRadius: '10px', background: '#2CA01C', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', ...big, fontSize: '20px' }}>qb</div>
+                  <div>
+                    <div style={{ ...big, fontSize: '18px', color: INK }}>QuickBooks Online</div>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '13px', color: GREEN, marginTop: '3px' }}><span style={{ width: '8px', height: '8px', borderRadius: '50%', background: GREEN }} />Connected · last synced 8 min ago</div>
+                  </div>
+                </div>
+                <button style={{ background: CHAR, color: CREAM, border: 'none', borderRadius: '10px', padding: '11px 20px', ...btn }}>Sync now</button>
+              </div>
+              <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap', marginBottom: '16px' }}>
+                <KPI k="Income synced" v={m0(revenue)} sub="this month → QB" accent={GREEN} />
+                <KPI k="Expenses synced" v={m0(totalExp)} sub="auto-categorized" accent={KRAFT} />
+                <KPI k="Transactions" v="142" sub="this month" />
+              </div>
+              <div style={{ ...card }}>
+                <div style={{ ...lbl, marginBottom: '12px' }}>What flows into QuickBooks automatically</div>
+                {[
+                  ['Sales income', 'Direct + consignment, by product'],
+                  ['Expenses & bills', 'Mapped to the right accounts'],
+                  ['Personal-card items', 'Flagged as owner reimbursements'],
+                  ['Consignment payments', 'Matched to each store'],
+                  ['Profit & loss', 'Always reconciles to this dashboard'],
+                ].map(([t, d], i) => (
+                  <div key={i} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '11px 0', borderTop: i ? `1px solid ${CREAM}` : 'none', gap: '10px' }}>
+                    <div><div style={{ fontWeight: 600, color: INK, fontSize: '14px' }}>{t}</div><div style={{ fontSize: '12.5px', color: MUTED }}>{d}</div></div>
+                    <span style={{ fontSize: '12px', fontWeight: 600, color: GREEN, background: 'rgba(62,124,79,.12)', padding: '4px 11px', borderRadius: '20px', whiteSpace: 'nowrap' }}>Synced</span>
+                  </div>
+                ))}
+              </div>
+              <p style={{ fontSize: '12px', color: MUTED, marginTop: '12px' }}>Don't use QuickBooks? No problem — everything here runs on its own. The sync is optional.</p>
+            </>
+          )}
+
+          {/* ===== ASK AI (preview) ===== */}
+          {tab === 'askai' && (
+            <>
+              <div style={{ ...card, marginBottom: '16px', borderColor: 'rgba(200,70,44,.28)' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '4px' }}>
+                  <span style={{ ...big, fontSize: '18px', color: INK }}>Ask your numbers</span>
+                  <span style={{ fontSize: '10px', fontWeight: 700, color: '#fff', background: SPICE, padding: '2px 8px', borderRadius: '10px' }}>PREVIEW</span>
+                </div>
+                <div style={{ fontSize: '13.5px', color: MUTED, lineHeight: 1.55 }}>A look at what's coming: ask plain-English questions about your business and get answers straight from your live data. Here are a few samples.</div>
+              </div>
+              {[
+                { q: 'Which store owes me the most right now?', a: <>Your counts show <b>Wawa Pilot — Rt 37</b> has the biggest gap: <b>10 bags missing</b> (~$65), most likely sold-but-unreported. Across all stores you're owed about <b>{m0(missVal)}</b> — I'd invoice the worst offenders.</> },
+                { q: 'Where am I wasting ad money?', a: <>Three channels are underwater — <b>Facebook, the 5K, and flyers</b>. Together they cost <b>{m0(wastedSpend)}/mo</b> and return only <b>{m0(wastedReturn)}</b>. Move that budget to Instagram and your influencer (both ~4x).</> },
+                { q: 'Did I actually make money this month?', a: <>Revenue is <b>{m0(revenue)}</b>, but after costs your net is <b>{m0(netProfit)}</b>. The two drags are ad waste and uncollected consignment money — fix both and you flip positive without selling a single extra bag.</> },
+              ].map((m, i) => (
+                <div key={i} style={{ marginBottom: '16px' }}>
+                  <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: '8px' }}>
+                    <div style={{ background: CHAR, color: CREAM, padding: '10px 14px', borderRadius: '14px 14px 4px 14px', maxWidth: '80%', fontSize: '14px' }}>{m.q}</div>
+                  </div>
+                  <div style={{ display: 'flex', gap: '10px', alignItems: 'flex-start' }}>
+                    <div style={{ width: '30px', height: '30px', borderRadius: '8px', background: SPICE, color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, ...big, fontSize: '12px' }}>JK</div>
+                    <div style={{ ...card, padding: '13px 15px', fontSize: '14px', lineHeight: 1.55, maxWidth: '85%' }}>{m.a}</div>
+                  </div>
+                </div>
+              ))}
+              <div style={{ ...card, display: 'flex', gap: '8px', alignItems: 'center', marginTop: '8px' }}>
+                <input disabled placeholder="Ask anything about your business…" style={{ ...inp, flex: 1, background: '#fff', cursor: 'not-allowed' }} />
+                <button disabled style={{ background: MUTED, color: '#fff', border: 'none', borderRadius: '9px', padding: '11px 18px', ...btn, cursor: 'not-allowed' }}>Send</button>
+              </div>
+              <p style={{ fontSize: '12px', color: MUTED, marginTop: '10px', textAlign: 'center' }}>Live Q&amp;A is on the roadmap — this is a preview of the feature.</p>
             </>
           )}
 
