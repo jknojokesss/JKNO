@@ -313,7 +313,7 @@ export default function JerkyMunch() {
     </select>
   )
 
-  const TABS = [['overview', 'Overview'], ['pnl', 'P&L'], ['consign', 'Consignment'], ['direct', 'Direct Sales'], ['ads', 'Advertising']]
+  const TABS = [['overview', 'Overview'], ['consign', 'Consignment'], ['direct', 'Direct Sales'], ['ads', 'Advertising'], ['pnl', 'P&L']]
   const EXTRA = [['expenses', 'Import expenses'], ['quickbooks', 'QuickBooks sync'], ['askai', 'Ask AI']]
   const currentLabel = ([...TABS, ...EXTRA].find(t => t[0] === tab) || ['', ''])[1]
 
