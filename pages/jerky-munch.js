@@ -48,9 +48,9 @@ const SEED_ADS = [
 ]
 const COGS_CATS = ['Ingredients', 'Packaging']
 const DIAGNOSES = ['', 'Sold but not reported (store owes me)', 'Theft / shrinkage', 'Damaged or expired', 'Free samples given out', 'Miscount — recount needed', 'Unknown — investigating']
-const verdict = (roas) => roas >= 2 ? { c: GREEN, t: '🟢 SCALE IT' } : roas >= 1 ? { c: AMBER, t: '🟡 WATCH' } : { c: RED, t: '🔴 CUT IT' }
+const verdict = (roas) => roas >= 2 ? { c: GREEN, t: 'Scale' } : roas >= 1 ? { c: AMBER, t: 'Watch' } : { c: RED, t: 'Cut' }
 
-const PAY = [{ id: 'business', label: 'Business acct', color: MUTED }, { id: 'personal', label: '⚠ Personal CC', color: RED }]
+const PAY = [{ id: 'business', label: 'Business acct', color: MUTED }, { id: 'personal', label: 'Personal CC', color: RED }]
 const PAYM = Object.fromEntries(PAY.map(p => [p.id, p]))
 const SEED_EXPENSES = [
   { id: uid(), vendor: 'Beef supplier — Sysco', cat: 'Ingredients', amt: 1850, pay: 'business' },
@@ -191,15 +191,16 @@ export default function JerkyMunch() {
   const rangeRev = lines.reduce((s, l) => s + l.rev, 0)
 
   const card = { background: CARDBG, border: `1px solid ${BORDER}`, borderRadius: '14px', padding: '20px' }
-  const lbl = { fontFamily: MONO, fontSize: '11px', fontWeight: 600, letterSpacing: '0.8px', color: '#6F5E47' }
+  const lbl = { fontFamily: "'Inter', sans-serif", fontSize: '12px', fontWeight: 600, letterSpacing: '0.1px', color: '#96866C' }
   const inp = { padding: '10px 12px', fontSize: '14px', border: `1px solid ${BORDER}`, borderRadius: '9px', background: CREAM, color: INK, outline: 'none', fontFamily: 'inherit' }
   const big = { fontFamily: 'Oswald, sans-serif', fontWeight: 600 }
+  const btn = { fontFamily: "'Inter', sans-serif", fontWeight: 600, fontSize: '13px', letterSpacing: '0.1px', cursor: 'pointer' }
 
   const KPI = ({ k, v, sub, accent }) => (
     <div style={{ ...card, flex: 1, minWidth: '150px', padding: '15px 17px' }}>
       <div style={lbl}>{k}</div>
-      <div style={{ ...big, fontSize: '29px', color: accent || INK, lineHeight: 1.15, marginTop: '3px' }}>{v}</div>
-      <div style={{ fontFamily: MONO, fontSize: '10px', fontWeight: 500, color: '#9A8868', marginTop: '2px' }}>{sub}</div>
+      <div style={{ ...big, fontSize: '29px', color: accent || INK, lineHeight: 1.15, marginTop: '4px' }}>{v}</div>
+      <div style={{ fontFamily: "'Inter', sans-serif", fontSize: '12px', fontWeight: 400, color: '#A2937A', marginTop: '3px' }}>{sub}</div>
     </div>
   )
   const Row = ({ l, v, neg, bold, top }) => (
@@ -211,7 +212,7 @@ export default function JerkyMunch() {
   const Pill = ({ value, opts, map, onChange }) => (
     <select value={value} onClick={(e) => e.stopPropagation()} onChange={(e) => { e.stopPropagation(); onChange(e.target.value) }}
       style={{ appearance: 'none', WebkitAppearance: 'none', cursor: 'pointer', padding: '6px 26px 6px 12px', borderRadius: '20px', border: 'none',
-        fontFamily: MONO, fontSize: '11px', fontWeight: 600, letterSpacing: '0.2px', color: '#fff',
+        fontFamily: "'Inter', sans-serif", fontSize: '12px', fontWeight: 600, letterSpacing: '0.1px', color: '#fff',
         background: `${map[value].color} url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='10' height='10' viewBox='0 0 10 10'><path d='M2 3.5L5 6.5L8 3.5' stroke='white' stroke-width='1.4' fill='none'/></svg>") no-repeat right 9px center` }}>
       {opts.map(o => <option key={o.id} value={o.id} style={{ color: INK, background: '#fff' }}>{o.label}</option>)}
     </select>
@@ -247,8 +248,8 @@ export default function JerkyMunch() {
         {/* Sidebar */}
         <aside className="jm-side">
           <div style={{ padding: '0 8px 16px' }}>
-            <div style={{ ...big, fontSize: '22px', color: CREAM, letterSpacing: '0.5px' }}>🥩 JERKY MUNCH</div>
-            <div style={{ ...lbl, color: '#B6A78C', marginTop: '3px' }}>DASHBOARD</div>
+            <div style={{ ...big, fontSize: '22px', color: CREAM, letterSpacing: '0.5px' }}>🥩 Jerky Munch</div>
+            <div style={{ ...lbl, color: '#B6A78C', marginTop: '3px' }}>Dashboard</div>
           </div>
           <nav className="jm-nav">
             {TABS.map(([id, label]) => {
@@ -271,8 +272,8 @@ export default function JerkyMunch() {
           {/* Top bar */}
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '10px', marginBottom: '22px' }}>
             <div>
-              <div style={{ ...lbl, color: SPICE }}>JERKY MUNCH</div>
-              <h1 style={{ ...big, fontSize: '28px', color: INK, textTransform: 'uppercase', letterSpacing: '0.5px', lineHeight: 1.1 }}>{currentLabel}</h1>
+              <div style={{ ...lbl, color: SPICE }}>Jerky Munch</div>
+              <h1 style={{ ...big, fontSize: '28px', color: INK, letterSpacing: '0.3px', lineHeight: 1.1 }}>{currentLabel}</h1>
             </div>
             <div style={{ textAlign: 'right' }}>
               <div style={{ ...big, fontSize: '24px', color: SPICE }}>{m0(revenue)}</div>
@@ -284,30 +285,30 @@ export default function JerkyMunch() {
           {tab === 'overview' && (
             <>
               <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap', marginBottom: '16px' }}>
-                <KPI k="REVENUE / MO" v={m0(revenue)} sub="direct + consignment" accent={SPICE} />
-                <KPI k="OUT ON CONSIGNMENT" v={m0(onShelfVal)} sub="your jerky in stores" accent={KRAFT} />
-                <KPI k="MISSING PIECES" v={`${missUnits}`} sub={`${m0(missVal)} to investigate`} accent={missUnits ? RED : GREEN} />
-                <KPI k="AD ROI" v={`${(adRev / adSpend).toFixed(1)}x`} sub={`${m0(adSpend)} spent`} accent={adRev / adSpend >= 2 ? GREEN : AMBER} />
+                <KPI k="Revenue / mo" v={m0(revenue)} sub="direct + consignment" accent={SPICE} />
+                <KPI k="Out on consignment" v={m0(onShelfVal)} sub="your jerky in stores" accent={KRAFT} />
+                <KPI k="Missing pieces" v={`${missUnits}`} sub={`${m0(missVal)} to investigate`} accent={missUnits ? RED : GREEN} />
+                <KPI k="Ad ROI" v={`${(adRev / adSpend).toFixed(1)}x`} sub={`${m0(adSpend)} spent`} accent={adRev / adSpend >= 2 ? GREEN : AMBER} />
               </div>
 
               <div style={{ ...card, background: CHAR, borderColor: CHAR, color: CREAM, marginBottom: '16px' }}>
-                <div style={{ fontFamily: MONO, fontSize: '10px', fontWeight: 600, letterSpacing: '1.5px', color: SPICE, marginBottom: '14px' }}>WHAT THE NUMBERS ARE TELLING YOU TO DO</div>
+                <div style={{ ...lbl, color: '#E8A07F', marginBottom: '14px' }}>What to do next</div>
                 {[
-                  { i: '🔴', t: <>You're burning <b>{m0(wastedSpend)}/mo</b> on Facebook, the 5K, and flyers — they return only <b>{m0(wastedReturn)}</b>. Kill them and pocket the difference. Move it to Instagram + your influencer (both 4x).</> },
-                  { i: '📦', t: <><b>{missUnits} units (~{m0(missVal)})</b> are missing across your consignment stores. <b>{worst?.store}</b> is the worst ({worst?.variance} gone). Most likely they sold them and didn't pay you — that's money you're owed.</> },
-                  { i: '💵', t: <><b>{m0(onShelfVal)}</b> of your jerky is sitting in stores unsold. The <b>Butcher Collective</b> hasn't paid a dime on 75 units since May — go check if it's even moving.</> },
-                  { i: '💳', t: <>You've got <b>{m0(personalExp)}</b> of business expenses on your <b>personal credit card</b> this month — the business owes you that back, and unrecorded it costs you the tax deduction. I separate every one.</> },
-                  { i: '✅', t: <><b>CrossFit Toms River</b> reconciles to zero — clean account. Whatever that relationship is, go get 5 more like it.</> },
+                  { c: RED, t: <>You're burning <b>{m0(wastedSpend)}/mo</b> on Facebook, the 5K, and flyers — they return only <b>{m0(wastedReturn)}</b>. Kill them and pocket the difference. Move it to Instagram + your influencer (both 4x).</> },
+                  { c: KRAFT, t: <><b>{missUnits} units (~{m0(missVal)})</b> are missing across your consignment stores. <b>{worst?.store}</b> is the worst ({worst?.variance} gone). Most likely they sold them and didn't pay you — that's money you're owed.</> },
+                  { c: AMBER, t: <><b>{m0(onShelfVal)}</b> of your jerky is sitting in stores unsold. The <b>Butcher Collective</b> hasn't paid a dime on 75 units since May — go check if it's even moving.</> },
+                  { c: RED, t: <>You've got <b>{m0(personalExp)}</b> of business expenses on your <b>personal credit card</b> this month — the business owes you that back, and unrecorded it costs you the tax deduction. I separate every one.</> },
+                  { c: GREEN, t: <><b>CrossFit Toms River</b> reconciles to zero — clean account. Whatever that relationship is, go get 5 more like it.</> },
                 ].map((x, i) => (
-                  <div key={i} style={{ display: 'flex', gap: '10px', padding: '9px 0', borderTop: i ? '1px solid rgba(255,255,255,.08)' : 'none', fontSize: '14px', lineHeight: 1.5, color: '#EDE4D5' }}>
-                    <span style={{ fontSize: '16px' }}>{x.i}</span><span>{x.t}</span>
+                  <div key={i} style={{ display: 'flex', gap: '12px', padding: '10px 0', borderTop: i ? '1px solid rgba(255,255,255,.08)' : 'none', fontSize: '14px', lineHeight: 1.55, color: '#E9E0D2' }}>
+                    <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: x.c, marginTop: '7px', flexShrink: 0 }} /><span>{x.t}</span>
                   </div>
                 ))}
               </div>
 
               <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
                 <div style={{ ...card, flex: 1, minWidth: '240px' }}>
-                  <div style={{ ...lbl, marginBottom: '10px' }}>CASH POSITION</div>
+                  <div style={{ ...lbl, marginBottom: '10px' }}>Cash position</div>
                   <Row l="Collected from consignment" v={m0(cashCollected)} />
                   <Row l="Direct sales" v={m0(directRev)} />
                   <Row l="Still out in stores (unsold)" v={m0(onShelfVal)} />
@@ -315,7 +316,7 @@ export default function JerkyMunch() {
                   <Row l="Revenue booked this month" v={m0(revenue)} bold top />
                 </div>
                 <div style={{ ...card, flex: 1, minWidth: '240px' }}>
-                  <div style={{ ...lbl, marginBottom: '10px' }}>INVENTORY FLOW</div>
+                  <div style={{ ...lbl, marginBottom: '10px' }}>Inventory flow</div>
                   <Row l="Units sent to consignment" v={consign.reduce((s, c) => s + c.sent, 0)} />
                   <Row l="Sold & paid for" v={R.reduce((s, c) => s + c.paidUnits, 0)} />
                   <Row l="Returned to you" v={consign.reduce((s, c) => s + c.returned, 0)} />
@@ -330,32 +331,32 @@ export default function JerkyMunch() {
           {tab === 'pnl' && (
             <>
               <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap', marginBottom: '16px' }}>
-                <KPI k="REVENUE" v={m0(revenue)} sub="direct + consignment" accent={GREEN} />
-                <KPI k="GROSS PROFIT" v={m0(grossProfit)} sub={`${pct(grossProfit)}% margin`} accent={KRAFT} />
-                <KPI k={netProfit >= 0 ? 'NET PROFIT' : 'NET LOSS'} v={m0(netProfit)} sub={netProfit >= 0 ? 'in the black' : 'in the red'} accent={netProfit >= 0 ? GREEN : RED} />
+                <KPI k="Revenue" v={m0(revenue)} sub="direct + consignment" accent={GREEN} />
+                <KPI k="Gross profit" v={m0(grossProfit)} sub={`${pct(grossProfit)}% margin`} accent={KRAFT} />
+                <KPI k={netProfit >= 0 ? 'Net profit' : 'Net loss'} v={m0(netProfit)} sub={netProfit >= 0 ? 'in the black' : 'in the red'} accent={netProfit >= 0 ? GREEN : RED} />
               </div>
 
               <div style={{ ...card }}>
-                <div style={{ ...lbl, marginBottom: '14px' }}>PROFIT &amp; LOSS — THIS MONTH (cash basis)</div>
-                <div style={{ ...lbl, color: KRAFT, margin: '4px 0' }}>REVENUE</div>
+                <div style={{ ...lbl, marginBottom: '14px' }}>Profit &amp; loss — this month (cash basis)</div>
+                <div style={{ ...lbl, color: KRAFT, margin: '4px 0' }}>Revenue</div>
                 <Row l="Direct sales" v={m0(directRev)} />
                 <Row l="Consignment (collected)" v={m0(cashCollected)} />
                 <Row l="Total revenue" v={m0(revenue)} bold top />
-                <div style={{ ...lbl, color: KRAFT, margin: '16px 0 4px' }}>COST OF GOODS SOLD</div>
+                <div style={{ ...lbl, color: KRAFT, margin: '16px 0 4px' }}>Cost of goods sold</div>
                 {COGS_CATS.map(cat => { const v = expenses.filter(e => e.cat === cat).reduce((s, e) => s + e.amt, 0); return v > 0 ? <Row key={cat} l={cat} v={`−${m0(v)}`} /> : null })}
                 <Row l="Total COGS" v={`−${m0(cogs)}`} bold top />
-                <Row l={`GROSS PROFIT  ·  ${pct(grossProfit)}% margin`} v={m0(grossProfit)} bold top />
-                <div style={{ ...lbl, color: KRAFT, margin: '16px 0 4px' }}>OPERATING EXPENSES</div>
+                <Row l={`Gross profit  ·  ${pct(grossProfit)}% margin`} v={m0(grossProfit)} bold top />
+                <div style={{ ...lbl, color: KRAFT, margin: '16px 0 4px' }}>Operating expenses</div>
                 <Row l="Advertising" v={`−${m0(adSpend)}`} />
                 {[...new Set(expenses.filter(e => !COGS_CATS.includes(e.cat)).map(e => e.cat))].map(cat => { const v = expenses.filter(e => e.cat === cat).reduce((s, e) => s + e.amt, 0); return <Row key={cat} l={cat} v={`−${m0(v)}`} /> })}
                 <Row l="Total operating expenses" v={`−${m0(totalOpex)}`} bold top />
                 <div style={{ marginTop: '12px', padding: '12px 14px', background: netProfit >= 0 ? '#EAF3EC' : '#FBEDE9', borderRadius: '10px' }}>
-                  <Row l={`${netProfit >= 0 ? 'NET PROFIT' : 'NET LOSS'}  ·  ${pct(netProfit)}% margin`} v={m0(netProfit)} bold neg={netProfit < 0} />
+                  <Row l={`${netProfit >= 0 ? 'Net profit' : 'Net loss'}  ·  ${pct(netProfit)}% margin`} v={m0(netProfit)} bold neg={netProfit < 0} />
                 </div>
               </div>
 
               <div style={{ ...card, marginTop: '16px', background: CHAR, borderColor: CHAR, color: CREAM, fontSize: '14px', lineHeight: 1.6 }}>
-                <div style={{ fontFamily: MONO, fontSize: '10px', fontWeight: 600, letterSpacing: '1.5px', color: SPICE, marginBottom: '8px' }}>THE CFO READ</div>
+                <div style={{ ...lbl, color: '#E8A07F', marginBottom: '8px' }}>The CFO read</div>
                 {netProfit < 0
                   ? <>You're <b>{m0(-netProfit)} in the red</b> this month — fixable, not fatal. Two levers: cut the <b>{m0(wastedSpend - wastedReturn)}</b> of dead ad spend and collect the <b>{m0(missVal)}</b> you're owed on missing consignment units. Do both and this swings toward black — <i>without selling one extra bag.</i></>
                   : <>You netted <b>{m0(netProfit)}</b>. Cut the <b>{m0(wastedSpend - wastedReturn)}</b> of dead ad spend and collect the <b>{m0(missVal)}</b> you're owed and it grows — same jerky, more profit.</>}
@@ -367,26 +368,26 @@ export default function JerkyMunch() {
           {tab === 'trend' && (
             <>
               <div style={{ display: 'flex', gap: '8px', marginBottom: '16px', flexWrap: 'wrap', alignItems: 'center' }}>
-                <span style={{ ...lbl }}>COMPARE</span>
+                <span style={{ ...lbl }}>Compare</span>
                 {[2, 3, 6, 12].map(n => (
-                  <button key={n} onClick={() => setPnlMonths(n)} style={{ padding: '7px 15px', borderRadius: '18px', border: `1px solid ${pnlMonths === n ? CHAR : BORDER}`, background: pnlMonths === n ? CHAR : CARDBG, color: pnlMonths === n ? CREAM : MUTED, fontFamily: MONO, fontSize: '12px', fontWeight: 600, cursor: 'pointer' }}>{n} mo</button>
+                  <button key={n} onClick={() => setPnlMonths(n)} style={{ padding: '7px 15px', borderRadius: '18px', border: `1px solid ${pnlMonths === n ? CHAR : BORDER}`, background: pnlMonths === n ? CHAR : CARDBG, color: pnlMonths === n ? CREAM : MUTED, ...btn, fontSize: '13px' }}>{n} mo</button>
                 ))}
               </div>
 
               <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap', marginBottom: '16px' }}>
                 {pnlMonths === 2 ? <>
-                  <KPI k={`${baseL.m.toUpperCase()} NET`} v={sgn(baseL.net)} sub="earlier month" accent={baseL.net >= 0 ? GREEN : RED} />
-                  <KPI k={`${lastL.m.toUpperCase()} NET`} v={sgn(lastL.net)} sub="latest month" accent={lastL.net >= 0 ? GREEN : RED} />
-                  <KPI k="CHANGE" v={`${tNetDelta >= 0 ? '+' : ''}${sgn(tNetDelta)}`} sub={tNetDelta >= 0 ? 'more profit' : 'less profit'} accent={tNetDelta >= 0 ? GREEN : RED} />
+                  <KPI k={`${baseL.m} net`} v={sgn(baseL.net)} sub="earlier month" accent={baseL.net >= 0 ? GREEN : RED} />
+                  <KPI k={`${lastL.m} net`} v={sgn(lastL.net)} sub="latest month" accent={lastL.net >= 0 ? GREEN : RED} />
+                  <KPI k="Change" v={`${tNetDelta >= 0 ? '+' : ''}${sgn(tNetDelta)}`} sub={tNetDelta >= 0 ? 'more profit' : 'less profit'} accent={tNetDelta >= 0 ? GREEN : RED} />
                 </> : <>
-                  <KPI k={`${pnlMonths}-MO REVENUE`} v={m0(rangeRev)} sub={`${baseL.m}–${lastL.m}`} accent={KRAFT} />
-                  <KPI k={`${pnlMonths}-MO NET`} v={sgn(rangeNet)} sub="total profit" accent={rangeNet >= 0 ? GREEN : RED} />
-                  <KPI k="AVG NET / MO" v={sgn(rangeNet / lines.length)} sub="across the range" accent={rangeNet >= 0 ? GREEN : RED} />
+                  <KPI k={`${pnlMonths}-mo revenue`} v={m0(rangeRev)} sub={`${baseL.m}–${lastL.m}`} accent={KRAFT} />
+                  <KPI k={`${pnlMonths}-mo net`} v={sgn(rangeNet)} sub="total profit" accent={rangeNet >= 0 ? GREEN : RED} />
+                  <KPI k="Avg net / mo" v={sgn(rangeNet / lines.length)} sub="across the range" accent={rangeNet >= 0 ? GREEN : RED} />
                 </>}
               </div>
 
               <div style={{ ...card }}>
-                <div style={{ ...lbl, marginBottom: '12px' }}>PROFIT &amp; LOSS — {baseL.m.toUpperCase()} → {lastL.m.toUpperCase()}</div>
+                <div style={{ ...lbl, marginBottom: '12px' }}>Profit &amp; loss — {baseL.m} → {lastL.m}</div>
                 <div style={{ overflowX: 'auto' }}>
                   <div style={{ minWidth: 'max-content' }}>
                     <div style={{ display: 'flex', alignItems: 'center', paddingBottom: '8px', borderBottom: `1px solid ${BORDER}` }}>
@@ -408,11 +409,11 @@ export default function JerkyMunch() {
                     })}
                   </div>
                 </div>
-                <p style={{ fontSize: '11px', color: MUTED, marginTop: '12px', fontFamily: MONO }}>Costs shown negative. {pnlMonths === 2 ? 'Δ green = better for profit, red = worse.' : 'Scroll sideways for the full range.'}</p>
+                <p style={{ fontSize: '12px', color: MUTED, marginTop: '12px' }}>Costs shown negative. {pnlMonths === 2 ? 'Δ green = better for profit, red = worse.' : 'Scroll sideways for the full range.'}</p>
               </div>
 
               <div style={{ ...card, marginTop: '16px', background: CHAR, borderColor: CHAR, color: CREAM, fontSize: '14px', lineHeight: 1.6 }}>
-                <div style={{ fontFamily: MONO, fontSize: '10px', fontWeight: 600, letterSpacing: '1.5px', color: SPICE, marginBottom: '8px' }}>WHY THE NET MOVED {tNetDelta >= 0 ? '+' : ''}{sgn(tNetDelta)} ({baseL.m} → {lastL.m})</div>
+                <div style={{ ...lbl, color: '#E8A07F', marginBottom: '8px' }}>Why the net moved {tNetDelta >= 0 ? '+' : ''}{sgn(tNetDelta)} ({baseL.m} → {lastL.m})</div>
                 <>Revenue {tRevDelta >= 0 ? 'climbed' : 'fell'} <b>{sgn(Math.abs(tRevDelta))}</b>{tBest && tBest.delta > 0 ? <> (mostly <b>{tBest.label}</b>, {sgn(tBest.delta)})</> : null}. But <b>{tWorst.label}</b> moved <b>{sgn(tWorst.delta)}</b> against you. {tNetDelta >= 0
                   ? <>Net came out <b>{sgn(tNetDelta)} better</b> — keep pulling the levers that turned green.</>
                   : <>Net came out <b>{sgn(Math.abs(tNetDelta))} worse</b> — that red line is exactly what ate your gains, and exactly what to fix.</>}</>
@@ -424,32 +425,32 @@ export default function JerkyMunch() {
           {tab === 'consign' && (
             <>
               <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap', marginBottom: '16px' }}>
-                <KPI k="PARTNERS" v={consign.length} sub="stores carrying you" />
-                <KPI k="OUT ON SHELVES" v={R.reduce((s, c) => s + Math.max(c.expected, 0), 0)} sub={`${m0(onShelfVal)} of product`} accent={KRAFT} />
-                <KPI k="COLLECTED" v={m0(cashCollected)} sub="checks in the door" accent={GREEN} />
-                <KPI k="MISSING" v={missUnits} sub={`${m0(missVal)} to chase`} accent={missUnits ? RED : GREEN} />
+                <KPI k="Partners" v={consign.length} sub="stores carrying you" />
+                <KPI k="Out on shelves" v={R.reduce((s, c) => s + Math.max(c.expected, 0), 0)} sub={`${m0(onShelfVal)} of product`} accent={KRAFT} />
+                <KPI k="Collected" v={m0(cashCollected)} sub="checks in the door" accent={GREEN} />
+                <KPI k="Missing" v={missUnits} sub={`${m0(missVal)} to chase`} accent={missUnits ? RED : GREEN} />
               </div>
 
               {!adding ? (
-                <button onClick={() => setAdding(true)} style={{ width: '100%', background: CHAR, color: CREAM, border: 'none', borderRadius: '11px', padding: '13px', fontFamily: MONO, fontSize: '12px', fontWeight: 600, letterSpacing: '0.5px', cursor: 'pointer', marginBottom: '16px' }}>+ ADD A CONSIGNMENT PARTNER</button>
+                <button onClick={() => setAdding(true)} style={{ width: '100%', background: CHAR, color: CREAM, border: 'none', borderRadius: '11px', padding: '13px', ...btn, marginBottom: '16px' }}>+ Add a consignment partner</button>
               ) : (
                 <div style={{ ...card, marginBottom: '16px' }}>
-                  <div style={{ ...lbl, marginBottom: '12px' }}>NEW CONSIGNMENT PARTNER</div>
+                  <div style={{ ...lbl, marginBottom: '12px' }}>New consignment partner</div>
                   <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
                     <input value={cf.store} onChange={e => setCf({ ...cf, store: e.target.value })} placeholder="Store name *" style={{ ...inp, flex: 2, minWidth: '160px' }} />
                     <input value={cf.price} onChange={e => setCf({ ...cf, price: e.target.value })} type="number" placeholder="$ / unit" style={{ ...inp, flex: 1, minWidth: '90px' }} />
                     <input value={cf.sent} onChange={e => setCf({ ...cf, sent: e.target.value })} type="number" placeholder="Units sent" style={{ ...inp, flex: 1, minWidth: '100px' }} />
                   </div>
                   <div style={{ display: 'flex', gap: '8px', marginTop: '12px' }}>
-                    <button onClick={() => setAdding(false)} style={{ flex: 1, background: 'none', border: `1px solid ${BORDER}`, borderRadius: '9px', padding: '11px', fontFamily: MONO, fontSize: '12px', color: MUTED, cursor: 'pointer' }}>CANCEL</button>
-                    <button onClick={addPartner} style={{ flex: 2, background: SPICE, color: '#fff', border: 'none', borderRadius: '9px', padding: '11px', fontFamily: MONO, fontSize: '12px', fontWeight: 600, letterSpacing: '0.5px', cursor: 'pointer' }}>+ ADD PARTNER</button>
+                    <button onClick={() => setAdding(false)} style={{ flex: 1, background: 'none', border: `1px solid ${BORDER}`, borderRadius: '9px', padding: '11px', ...btn, color: MUTED }}>Cancel</button>
+                    <button onClick={addPartner} style={{ flex: 2, background: SPICE, color: '#fff', border: 'none', borderRadius: '9px', padding: '11px', ...btn }}>+ Add partner</button>
                   </div>
                 </div>
               )}
 
               {R.map(c => {
                 const open = expanded === c.id
-                const badge = c.status === 'reconciled' ? { c: GREEN, t: '✓ RECONCILED' } : c.status === 'short' ? { c: RED, t: `⚠ ${c.variance} MISSING` } : c.status === 'over' ? { c: AMBER, t: `${-c.variance} OVER` } : { c: MUTED, t: 'NOT COUNTED' }
+                const badge = c.status === 'reconciled' ? { c: GREEN, t: 'Reconciled' } : c.status === 'short' ? { c: RED, t: `${c.variance} missing` } : c.status === 'over' ? { c: AMBER, t: `${-c.variance} over` } : { c: MUTED, t: 'Not counted' }
                 return (
                   <div key={c.id} style={{ ...card, padding: 0, marginBottom: '12px', overflow: 'hidden', borderColor: open ? CHAR : (c.status === 'short' ? '#E7C3B8' : BORDER) }}>
                     <div onClick={() => setExpanded(open ? null : c.id)} style={{ padding: '15px 18px', cursor: 'pointer' }}>
@@ -460,13 +461,13 @@ export default function JerkyMunch() {
                             {money(c.price)}/unit · sent {c.sent} · paid for {c.paidUnits} · {money(c.paid)} collected
                           </div>
                         </div>
-                        <span style={{ fontFamily: MONO, fontSize: '11px', fontWeight: 600, color: '#fff', background: badge.c, padding: '5px 11px', borderRadius: '20px', whiteSpace: 'nowrap' }}>{badge.t}</span>
+                        <span style={{ fontFamily: "'Inter', sans-serif", fontSize: '12px', fontWeight: 600, color: '#fff', background: badge.c, padding: '5px 11px', borderRadius: '20px', whiteSpace: 'nowrap' }}>{badge.t}</span>
                       </div>
                     </div>
 
                     {open && (
                       <div style={{ padding: '0 18px 18px', borderTop: `1px solid ${CREAM}` }}>
-                        <div style={{ ...lbl, margin: '14px 0 6px' }}>THE RECONCILIATION</div>
+                        <div style={{ ...lbl, margin: '14px 0 6px' }}>The reconciliation</div>
                         <div style={{ background: CREAM, borderRadius: '10px', padding: '14px 16px' }}>
                           <Row l="Units sent out" v={c.sent} />
                           <Row l={`− Paid by checks (${money(c.paid)} ÷ ${money(c.price)})`} v={`−${c.paidUnits}`} />
@@ -474,44 +475,44 @@ export default function JerkyMunch() {
                           <Row l="Should still be on the shelf" v={Math.max(c.expected, 0)} bold top />
                           <Row l={`Actually counted (${fmtD(c.countedDate)})`} v={c.counted == null ? '— not counted' : c.counted} />
                           <Row
-                            l={c.variance > 0 ? '⚠ MISSING — unaccounted for' : c.variance < 0 ? 'Overage — recount' : '✓ Matches perfectly'}
+                            l={c.variance > 0 ? 'Missing — unaccounted for' : c.variance < 0 ? 'Overage — recount' : 'Matches perfectly'}
                             v={c.variance > 0 ? `${c.variance}  (${money(c.varVal)})` : c.variance < 0 ? `${-c.variance}` : '0'}
                             neg={c.variance > 0} bold top />
                         </div>
 
                         {c.variance > 0 && (
                           <div style={{ marginTop: '14px' }}>
-                            <div style={{ ...lbl, marginBottom: '6px' }}>WHY ARE {c.variance} MISSING? (diagnose it)</div>
+                            <div style={{ ...lbl, marginBottom: '6px' }}>Why are {c.variance} missing? (diagnose it)</div>
                             <select value={c.diagnosis} onChange={e => upd(c.id, { diagnosis: e.target.value }, `Diagnosed missing units: ${e.target.value || 'cleared'}`)} style={{ ...inp, width: '100%', cursor: 'pointer' }}>
                               {DIAGNOSES.map(d => <option key={d} value={d}>{d || 'Pick a reason…'}</option>)}
                             </select>
                             {c.diagnosis === 'Sold but not reported (store owes me)' && (
                               <div style={{ marginTop: '8px', fontSize: '13px', color: RED, background: '#FBEDE9', borderRadius: '8px', padding: '9px 12px' }}>
-                                💰 Then <b>{c.store}</b> owes you <b>{money(c.varVal)}</b>. Send them an invoice for the {c.variance} units.
+                                Then <b>{c.store}</b> owes you <b>{money(c.varVal)}</b>. Send them an invoice for the {c.variance} units.
                               </div>
                             )}
                           </div>
                         )}
 
-                        <div style={{ ...lbl, margin: '16px 0 8px' }}>UPDATE THIS ACCOUNT</div>
+                        <div style={{ ...lbl, margin: '16px 0 8px' }}>Update this account</div>
                         <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
                           <div style={{ flex: 1, minWidth: '150px', display: 'flex', gap: '6px' }}>
                             <input value={dv(c.id + '_chk')} onChange={e => setDv(c.id + '_chk', e.target.value)} type="number" placeholder="Check $" style={{ ...inp, flex: 1, minWidth: 0 }} />
-                            <button onClick={() => logCheck(c.id)} style={{ background: GREEN, color: '#fff', border: 'none', borderRadius: '9px', padding: '0 12px', fontFamily: MONO, fontSize: '11px', fontWeight: 600, cursor: 'pointer' }}>LOG</button>
+                            <button onClick={() => logCheck(c.id)} style={{ background: GREEN, color: '#fff', border: 'none', borderRadius: '9px', padding: '0 14px', ...btn, fontSize: '12px' }}>Log</button>
                           </div>
                           <div style={{ flex: 1, minWidth: '150px', display: 'flex', gap: '6px' }}>
                             <input value={dv(c.id + '_cnt')} onChange={e => setDv(c.id + '_cnt', e.target.value)} type="number" placeholder="Count on shelf" style={{ ...inp, flex: 1, minWidth: 0 }} />
-                            <button onClick={() => logCount(c.id)} style={{ background: KRAFT, color: '#fff', border: 'none', borderRadius: '9px', padding: '0 12px', fontFamily: MONO, fontSize: '11px', fontWeight: 600, cursor: 'pointer' }}>LOG</button>
+                            <button onClick={() => logCount(c.id)} style={{ background: KRAFT, color: '#fff', border: 'none', borderRadius: '9px', padding: '0 14px', ...btn, fontSize: '12px' }}>Log</button>
                           </div>
                           <div style={{ flex: 1, minWidth: '150px', display: 'flex', gap: '6px' }}>
                             <input value={dv(c.id + '_shp')} onChange={e => setDv(c.id + '_shp', e.target.value)} type="number" placeholder="Ship more" style={{ ...inp, flex: 1, minWidth: 0 }} />
-                            <button onClick={() => shipMore(c.id)} style={{ background: CHAR, color: CREAM, border: 'none', borderRadius: '9px', padding: '0 12px', fontFamily: MONO, fontSize: '11px', fontWeight: 600, cursor: 'pointer' }}>SHIP</button>
+                            <button onClick={() => shipMore(c.id)} style={{ background: CHAR, color: CREAM, border: 'none', borderRadius: '9px', padding: '0 14px', ...btn, fontSize: '12px' }}>Ship</button>
                           </div>
                         </div>
 
                         {(c.log || []).length > 0 && (
                           <div style={{ marginTop: '16px', borderTop: `1px solid ${CREAM}`, paddingTop: '12px' }}>
-                            <div style={{ ...lbl, marginBottom: '8px' }}>HISTORY</div>
+                            <div style={{ ...lbl, marginBottom: '8px' }}>History</div>
                             {c.log.map((e, i) => (
                               <div key={i} style={{ fontSize: '12px', color: MUTED, padding: '3px 0' }}>
                                 <span style={{ color: '#BFB096', fontFamily: MONO, marginRight: '8px' }}>{e.at}</span>{e.t}
@@ -531,18 +532,18 @@ export default function JerkyMunch() {
           {tab === 'direct' && (
             <>
               <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap', marginBottom: '16px' }}>
-                <KPI k="DIRECT REVENUE" v={m0(directRev)} sub="cash in hand" accent={GREEN} />
-                <KPI k="UNITS SOLD" v={directUnits} sub="direct channel" />
-                <KPI k="AVG $ / UNIT" v={directUnits ? money(directRev / directUnits) : '—'} sub="vs ~$6.3 consignment" accent={SPICE} />
+                <KPI k="Direct revenue" v={m0(directRev)} sub="cash in hand" accent={GREEN} />
+                <KPI k="Units sold" v={directUnits} sub="direct channel" />
+                <KPI k="Avg $ / unit" v={directUnits ? money(directRev / directUnits) : '—'} sub="vs ~$6.3 consignment" accent={SPICE} />
               </div>
               <p style={{ fontSize: '13px', color: MUTED, marginBottom: '14px', lineHeight: 1.5 }}>
                 Direct clears at a <b style={{ color: INK }}>higher margin</b> than consignment — no store cut, paid on the spot. <b style={{ color: INK }}>Online orders sync from Shopify, market & pop-up sales from your Square reader, cash & wholesale you log here.</b>
               </p>
               {!addingD ? (
-                <button onClick={() => setAddingD(true)} style={{ width: '100%', background: CHAR, color: CREAM, border: 'none', borderRadius: '11px', padding: '13px', fontFamily: MONO, fontSize: '12px', fontWeight: 600, letterSpacing: '0.5px', cursor: 'pointer', marginBottom: '16px' }}>+ LOG A DIRECT SALE</button>
+                <button onClick={() => setAddingD(true)} style={{ width: '100%', background: CHAR, color: CREAM, border: 'none', borderRadius: '11px', padding: '13px', ...btn, marginBottom: '16px' }}>+ Log a direct sale</button>
               ) : (
                 <div style={{ ...card, marginBottom: '16px' }}>
-                  <div style={{ ...lbl, marginBottom: '12px' }}>NEW DIRECT SALE</div>
+                  <div style={{ ...lbl, marginBottom: '12px' }}>New direct sale</div>
                   <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
                     <input value={df.who} onChange={e => setDf({ ...df, who: e.target.value })} placeholder="Customer / event *" style={{ ...inp, flex: 2, minWidth: '160px' }} />
                     <select value={df.source} onChange={e => setDf({ ...df, source: e.target.value })} style={{ ...inp, flex: 1, minWidth: '150px', cursor: 'pointer' }}>
@@ -554,8 +555,8 @@ export default function JerkyMunch() {
                     <input value={df.rev} onChange={e => setDf({ ...df, rev: e.target.value })} type="number" placeholder="$ total" style={{ ...inp, flex: 1, minWidth: '100px' }} />
                   </div>
                   <div style={{ display: 'flex', gap: '8px', marginTop: '12px' }}>
-                    <button onClick={() => setAddingD(false)} style={{ flex: 1, background: 'none', border: `1px solid ${BORDER}`, borderRadius: '9px', padding: '11px', fontFamily: MONO, fontSize: '12px', color: MUTED, cursor: 'pointer' }}>CANCEL</button>
-                    <button onClick={addDirect} style={{ flex: 2, background: SPICE, color: '#fff', border: 'none', borderRadius: '9px', padding: '11px', fontFamily: MONO, fontSize: '12px', fontWeight: 600, letterSpacing: '0.5px', cursor: 'pointer' }}>+ LOG SALE</button>
+                    <button onClick={() => setAddingD(false)} style={{ flex: 1, background: 'none', border: `1px solid ${BORDER}`, borderRadius: '9px', padding: '11px', ...btn, color: MUTED }}>Cancel</button>
+                    <button onClick={addDirect} style={{ flex: 2, background: SPICE, color: '#fff', border: 'none', borderRadius: '9px', padding: '11px', ...btn }}>+ Log sale</button>
                   </div>
                 </div>
               )}
@@ -564,7 +565,7 @@ export default function JerkyMunch() {
                   <div>
                     <div style={{ ...big, fontSize: '18px', color: INK }}>{d.who}</div>
                     <div style={{ fontSize: '12px', color: MUTED, marginTop: '2px' }}>
-                      <span style={{ fontFamily: MONO, fontSize: '10px', fontWeight: 600, letterSpacing: '0.4px', color: KRAFT, textTransform: 'uppercase' }}>{d.source}</span> · {d.units} units · {d.units ? money(d.rev / d.units) : '$0'}/unit
+                      <span style={{ fontWeight: 600, color: KRAFT }}>{d.source}</span> · {d.units} units · {d.units ? money(d.rev / d.units) : '$0'}/unit
                     </div>
                   </div>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
@@ -580,26 +581,26 @@ export default function JerkyMunch() {
           {tab === 'expenses' && (
             <>
               <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap', marginBottom: '16px' }}>
-                <KPI k="TOTAL SPEND / MO" v={m0(totalExp)} sub="all business costs" />
-                <KPI k="ON PERSONAL CARD" v={m0(personalExp)} sub="mixed in — needs fixing" accent={RED} />
-                <KPI k="ON BUSINESS ACCT" v={m0(businessExp)} sub="clean & separate" accent={GREEN} />
+                <KPI k="Total spend / mo" v={m0(totalExp)} sub="all business costs" />
+                <KPI k="On personal card" v={m0(personalExp)} sub="mixed in — needs fixing" accent={RED} />
+                <KPI k="On business acct" v={m0(businessExp)} sub="clean & separate" accent={GREEN} />
               </div>
               <div style={{ ...card, background: '#FBEDE9', borderColor: '#E7C3B8', marginBottom: '16px', fontSize: '14px', color: INK, lineHeight: 1.55 }}>
-                💳 <b>{m0(personalExp)}</b> of business expenses ran through your <b>personal credit card</b> this month. Two problems: the business owes that money back to <i>you</i>, and if it never hits the books you <b>lose the deduction and overpay the IRS</b>. Tap any expense to move it to the right account — I track and separate every one for you.
+                <b>{m0(personalExp)}</b> of business expenses ran through your <b>personal credit card</b> this month. Two problems: the business owes that money back to <i>you</i>, and if it never hits the books you <b>lose the deduction and overpay the IRS</b>. Tap any expense to move it to the right account — I track and separate every one for you.
               </div>
 
               {!addingE ? (
                 <>
                   <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', marginBottom: '8px' }}>
-                    <button onClick={() => setAddingE(true)} style={{ flex: 1, minWidth: '160px', background: CHAR, color: CREAM, border: 'none', borderRadius: '11px', padding: '13px', fontFamily: MONO, fontSize: '12px', fontWeight: 600, letterSpacing: '0.5px', cursor: 'pointer' }}>+ ADD AN EXPENSE</button>
-                    <button onClick={() => fileRef.current && fileRef.current.click()} style={{ flex: 1, minWidth: '160px', background: CARDBG, color: INK, border: `1px solid ${BORDER}`, borderRadius: '11px', padding: '13px', fontFamily: MONO, fontSize: '12px', fontWeight: 600, letterSpacing: '0.5px', cursor: 'pointer' }}>⬆ IMPORT CSV</button>
+                    <button onClick={() => setAddingE(true)} style={{ flex: 1, minWidth: '160px', background: CHAR, color: CREAM, border: 'none', borderRadius: '11px', padding: '13px', ...btn }}>+ Add an expense</button>
+                    <button onClick={() => fileRef.current && fileRef.current.click()} style={{ flex: 1, minWidth: '160px', background: CARDBG, color: INK, border: `1px solid ${BORDER}`, borderRadius: '11px', padding: '13px', ...btn }}>Import CSV</button>
                     <input ref={fileRef} type="file" accept=".csv,text/csv" onChange={importCSV} style={{ display: 'none' }} />
                   </div>
-                  <p style={{ fontSize: '11px', color: MUTED, marginBottom: '16px', fontFamily: MONO }}>CSV columns: vendor, amount, category, business/personal — drop in a bank or card export and it loads instantly.</p>
+                  <p style={{ fontSize: '12px', color: MUTED, marginBottom: '16px' }}>CSV columns: vendor, amount, category, business/personal — drop in a bank or card export and it loads instantly.</p>
                 </>
               ) : (
                 <div style={{ ...card, marginBottom: '16px' }}>
-                  <div style={{ ...lbl, marginBottom: '12px' }}>NEW EXPENSE</div>
+                  <div style={{ ...lbl, marginBottom: '12px' }}>New expense</div>
                   <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
                     <input value={ef.vendor} onChange={e => setEf({ ...ef, vendor: e.target.value })} placeholder="What was it? *" style={{ ...inp, flex: 2, minWidth: '160px' }} />
                     <input value={ef.amt} onChange={e => setEf({ ...ef, amt: e.target.value })} type="number" placeholder="$ amount" style={{ ...inp, flex: 1, minWidth: '100px' }} />
@@ -608,8 +609,8 @@ export default function JerkyMunch() {
                     </select>
                   </div>
                   <div style={{ display: 'flex', gap: '8px', marginTop: '12px' }}>
-                    <button onClick={() => setAddingE(false)} style={{ flex: 1, background: 'none', border: `1px solid ${BORDER}`, borderRadius: '9px', padding: '11px', fontFamily: MONO, fontSize: '12px', color: MUTED, cursor: 'pointer' }}>CANCEL</button>
-                    <button onClick={addExpense} style={{ flex: 2, background: SPICE, color: '#fff', border: 'none', borderRadius: '9px', padding: '11px', fontFamily: MONO, fontSize: '12px', fontWeight: 600, letterSpacing: '0.5px', cursor: 'pointer' }}>+ ADD EXPENSE</button>
+                    <button onClick={() => setAddingE(false)} style={{ flex: 1, background: 'none', border: `1px solid ${BORDER}`, borderRadius: '9px', padding: '11px', ...btn, color: MUTED }}>Cancel</button>
+                    <button onClick={addExpense} style={{ flex: 2, background: SPICE, color: '#fff', border: 'none', borderRadius: '9px', padding: '11px', ...btn }}>+ Add expense</button>
                   </div>
                 </div>
               )}
@@ -617,7 +618,7 @@ export default function JerkyMunch() {
                 <div key={e.id} style={{ ...card, marginBottom: '10px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '10px', borderColor: e.pay === 'personal' ? '#E7C3B8' : BORDER }}>
                   <div>
                     <div style={{ ...big, fontSize: '17px', color: INK }}>{e.vendor}</div>
-                    <div style={{ fontSize: '12px', color: MUTED, marginTop: '2px', fontFamily: MONO }}>{e.cat}</div>
+                    <div style={{ fontSize: '12px', color: MUTED, marginTop: '3px' }}>{e.cat}</div>
                   </div>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
                     <span style={{ ...big, fontSize: '19px', color: e.pay === 'personal' ? RED : INK }}>{m0(e.amt)}</span>
@@ -632,12 +633,12 @@ export default function JerkyMunch() {
           {tab === 'ads' && (
             <>
               <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap', marginBottom: '16px' }}>
-                <KPI k="AD SPEND / MO" v={m0(adSpend)} sub="all channels" />
-                <KPI k="RETURN" v={m0(adRev)} sub={`${(adRev / adSpend).toFixed(1)}x overall`} accent={GREEN} />
-                <KPI k="WASTED" v={m0(wastedSpend)} sub="on losing channels" accent={RED} />
+                <KPI k="Ad spend / mo" v={m0(adSpend)} sub="all channels" />
+                <KPI k="Return" v={m0(adRev)} sub={`${(adRev / adSpend).toFixed(1)}x overall`} accent={GREEN} />
+                <KPI k="Wasted" v={m0(wastedSpend)} sub="on losing channels" accent={RED} />
               </div>
               <div style={{ ...card, background: '#FBEDE9', borderColor: '#E7C3B8', marginBottom: '16px', fontSize: '14px', color: INK, lineHeight: 1.5 }}>
-                👉 <b>Action:</b> you're spending <b>{m0(wastedSpend)}/mo</b> on channels that bring back only <b>{m0(wastedReturn)}</b>. Cut the red ones and you keep <b>{m0(wastedSpend - wastedReturn)}</b> a month — <b>{m0((wastedSpend - wastedReturn) * 12)}/yr</b> — with zero lost sales.
+                <b>Action:</b> you're spending <b>{m0(wastedSpend)}/mo</b> on channels that bring back only <b>{m0(wastedReturn)}</b>. Cut the red ones and you keep <b>{m0(wastedSpend - wastedReturn)}</b> a month — <b>{m0((wastedSpend - wastedReturn) * 12)}/yr</b> — with zero lost sales.
               </div>
               <div style={{ ...card, marginBottom: '16px', fontSize: '13px', color: MUTED, lineHeight: 1.55 }}>
                 <b style={{ color: INK }}>How each sale is traced to a channel:</b> a unique promo code per channel (IG10, NJFOODIE), the Meta/Google pixel on your Shopify store, or a “how’d you hear about us?” at checkout. Channels marked <b style={{ color: AMBER }}>“est.”</b> have no code yet — their ROI is a guess. <b style={{ color: INK }}>Step one is giving every channel a code so the number becomes real.</b>
@@ -649,10 +650,10 @@ export default function JerkyMunch() {
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '8px' }}>
                       <div>
                         <div style={{ ...big, fontSize: '18px', color: INK }}>{a.channel}</div>
-                        <div style={{ fontSize: '12px', color: MUTED, marginTop: '2px', fontFamily: MONO }}>{m0(a.spend)} spent → {m0(a.rev)} back · <b style={{ color: vd.c }}>{roas.toFixed(1)}x{a.tracked ? '' : ' est.'}</b></div>
-                        <div style={{ fontSize: '11px', color: a.tracked ? KRAFT : AMBER, marginTop: '4px' }}>{a.tracked ? '🎯 ' : '⚠ '}{a.track}</div>
+                        <div style={{ fontSize: '12.5px', color: MUTED, marginTop: '3px' }}>{m0(a.spend)} spent → {m0(a.rev)} back · <b style={{ color: vd.c }}>{roas.toFixed(1)}x{a.tracked ? '' : ' est.'}</b></div>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '12px', color: a.tracked ? KRAFT : AMBER, marginTop: '5px' }}><span style={{ width: '6px', height: '6px', borderRadius: '50%', background: a.tracked ? KRAFT : AMBER, flexShrink: 0 }} />{a.track}</div>
                       </div>
-                      <span style={{ fontFamily: MONO, fontSize: '11px', fontWeight: 600, color: '#fff', background: vd.c, padding: '5px 11px', borderRadius: '20px' }}>{vd.t}</span>
+                      <span style={{ fontFamily: "'Inter', sans-serif", fontSize: '12px', fontWeight: 600, color: '#fff', background: vd.c, padding: '5px 12px', borderRadius: '20px' }}>{vd.t}</span>
                     </div>
                     <div style={{ marginTop: '12px', height: '8px', background: CREAM, borderRadius: '5px', overflow: 'hidden', display: 'flex' }}>
                       <div style={{ width: `${Math.min(roas / 4 * 100, 100)}%`, background: vd.c }} />
@@ -665,7 +666,7 @@ export default function JerkyMunch() {
 
           {/* CTA */}
           <div style={{ background: SPICE, borderRadius: '16px', padding: '26px', marginTop: '26px', color: '#fff' }}>
-            <div style={{ fontFamily: MONO, fontSize: '10px', fontWeight: 600, letterSpacing: '1.5px', color: '#FCE0D8', marginBottom: '8px' }}>HOW I'D HELP — TWO WAYS</div>
+            <div style={{ ...lbl, color: '#FCE0D8', marginBottom: '8px' }}>How I'd help — two ways</div>
             <div style={{ ...big, fontSize: '21px', fontWeight: 600, lineHeight: 1.4, marginBottom: '12px' }}>
               Be your CFO, or run the whole back office. Your call.
             </div>
@@ -673,7 +674,7 @@ export default function JerkyMunch() {
               <b>As your CFO:</b> I keep this dashboard live, reconcile every consignment account, chase the money you're owed, and tell you each month exactly where to cut and where to push.<br />
               <b>Full takeover:</b> I do all of that <i>plus</i> your books, taxes-ready, so you never touch a spreadsheet again and just make jerky.
             </p>
-            <div style={{ fontFamily: MONO, fontSize: '13px', color: '#fff' }}>— Jonathan Katz · <span style={{ color: CHAR, fontWeight: 600 }}>JK No Jokes Financials</span></div>
+            <div style={{ fontSize: '13px', fontWeight: 500, color: '#fff' }}>— Jonathan Katz · <span style={{ color: CHAR, fontWeight: 700 }}>JK No Jokes Financials</span></div>
           </div>
         </main>
       </div>
