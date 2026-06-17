@@ -506,13 +506,6 @@ export default function JerkyMunch() {
                   <Row l={`${netProfit >= 0 ? 'Net profit' : 'Net loss'}  ·  ${pct(netProfit)}% margin`} v={m0(netProfit)} bold neg={netProfit < 0} />
                 </div>
               </div>
-
-              <div style={{ ...card, marginTop: '16px', background: CHAR, borderColor: CHAR, color: CREAM, fontSize: '14px', lineHeight: 1.6 }}>
-                <div style={{ ...lbl, color: '#E8A07F', marginBottom: '8px' }}>The CFO read</div>
-                {netProfit < 0
-                  ? <>You're <b>{m0(-netProfit)} in the red</b> this month — fixable, not fatal. Two levers: cut the <b>{m0(wastedSpend - wastedReturn)}</b> of dead ad spend and collect the <b>{m0(missVal)}</b> you're owed on missing consignment units. Do both and this swings toward black — <i>without selling one extra bag.</i></>
-                  : <>You netted <b>{m0(netProfit)}</b>. Cut the <b>{m0(wastedSpend - wastedReturn)}</b> of dead ad spend and collect the <b>{m0(missVal)}</b> you're owed and it grows — same jerky, more profit.</>}
-              </div>
             </>
           )}
 
@@ -844,9 +837,6 @@ export default function JerkyMunch() {
                 <KPI k="Ad spend / mo" v={m0(adSpend)} sub="all channels" />
                 <KPI k="Return" v={m0(adRev)} sub={`${(adRev / adSpend).toFixed(1)}x overall`} accent={GREEN} />
                 <KPI k="Wasted" v={m0(wastedSpend)} sub="on losing channels" accent={RED} />
-              </div>
-              <div style={{ ...card, background: '#FBEDE9', borderColor: '#E7C3B8', marginBottom: '16px', fontSize: '14px', color: INK, lineHeight: 1.5 }}>
-                <b>Action:</b> you're spending <b>{m0(wastedSpend)}/mo</b> on channels that bring back only <b>{m0(wastedReturn)}</b>. Cut the red ones and you keep <b>{m0(wastedSpend - wastedReturn)}</b> a month — <b>{m0((wastedSpend - wastedReturn) * 12)}/yr</b> — with zero lost sales.
               </div>
               <div style={{ ...card, marginBottom: '16px', fontSize: '13px', color: MUTED, lineHeight: 1.55 }}>
                 <b style={{ color: INK }}>How each sale is traced to a channel:</b> a unique promo code per channel (IG10, NJFOODIE), the Meta/Google pixel on your Shopify store, or a “how’d you hear about us?” at checkout. Channels marked <b style={{ color: AMBER }}>“est.”</b> have no code yet — their ROI is a guess. <b style={{ color: INK }}>Step one is giving every channel a code so the number becomes real.</b>
