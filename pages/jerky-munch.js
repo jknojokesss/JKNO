@@ -23,11 +23,15 @@ const recon = (c) => {
 }
 
 const SEED_CONSIGN = [
-  { id: uid(), store: 'Cumberland Farms — Brick', price: 6, sent: 120, returned: 10, paid: 480, counted: 24, countedDate: '2026-06-09', diagnosis: '', log: [{ at: 'Jun 9', t: 'Counted 24 on shelf' }, { at: 'Jun 2', t: 'Check received $480' }] },
-  { id: uid(), store: 'Wawa Pilot — Rt 37', price: 6.5, sent: 200, returned: 0, paid: 845, counted: 60, countedDate: '2026-06-11', diagnosis: '', log: [{ at: 'Jun 11', t: 'Counted 60 on shelf' }, { at: 'May 28', t: 'Check received $845' }] },
-  { id: uid(), store: 'CrossFit Toms River', price: 7, sent: 60, returned: 5, paid: 280, counted: 15, countedDate: '2026-06-10', diagnosis: '', log: [{ at: 'Jun 10', t: 'Counted 15 — reconciles clean' }, { at: 'Jun 1', t: 'Check received $280' }] },
-  { id: uid(), store: 'Jersey Shore Surf Co', price: 6, sent: 90, returned: 0, paid: 180, counted: 55, countedDate: '2026-06-08', diagnosis: '', log: [{ at: 'Jun 8', t: 'Counted 55 on shelf' }, { at: 'May 30', t: 'Check received $180' }] },
-  { id: uid(), store: 'Local Butcher Collective', price: 6.5, sent: 75, returned: 0, paid: 0, counted: 75, countedDate: '2026-05-20', diagnosis: '', log: [{ at: 'May 20', t: 'Shipped 75 units' }] },
+  { id: uid(), store: 'Gourmet Glatt North', price: 8.5, sent: 60, returned: 0, paid: 425, counted: 6, countedDate: '2026-06-15', diagnosis: '', cycle: 1, log: [{ at: 'Jun 15', t: 'Counted 6 on shelf' }, { at: 'Jun 6', t: 'Check received $425' }] },
+  { id: uid(), store: 'Gourmet Glatt South', price: 8.5, sent: 48, returned: 4, paid: 340, counted: 2, countedDate: '2026-06-15', diagnosis: '', cycle: 1, log: [{ at: 'Jun 15', t: 'Counted 2 on shelf' }, { at: 'Jun 5', t: 'Check received $340' }] },
+  { id: uid(), store: 'Seasons', price: 9, sent: 54, returned: 0, paid: 360, counted: 14, countedDate: '2026-06-14', diagnosis: '', cycle: 1, log: [{ at: 'Jun 14', t: 'Counted 14 — reconciles clean' }, { at: 'Jun 4', t: 'Check received $360' }] },
+  { id: uid(), store: 'Nutmeg', price: 8, sent: 40, returned: 0, paid: 200, counted: 8, countedDate: '2026-06-16', diagnosis: '', cycle: 1, log: [{ at: 'Jun 16', t: 'Counted 8 on shelf' }, { at: 'Jun 2', t: 'Check received $200' }] },
+  { id: uid(), store: 'Aisle 9 Jackson', price: 8.5, sent: 36, returned: 0, paid: 255, counted: 4, countedDate: '2026-06-13', diagnosis: '', cycle: 1, log: [{ at: 'Jun 13', t: 'Counted 4 on shelf' }, { at: 'Jun 3', t: 'Check received $255' }] },
+  { id: uid(), store: 'Aisle 9 Lakewood', price: 8.5, sent: 44, returned: 0, paid: 340, counted: 4, countedDate: '2026-06-13', diagnosis: '', cycle: 1, log: [{ at: 'Jun 13', t: 'Counted 4 — reconciles clean' }, { at: 'Jun 3', t: 'Check received $340' }] },
+  { id: uid(), store: 'Foodex', price: 8, sent: 30, returned: 0, paid: 160, counted: 9, countedDate: '2026-06-12', diagnosis: '', cycle: 1, log: [{ at: 'Jun 12', t: 'Counted 9 on shelf' }, { at: 'Jun 1', t: 'Check received $160' }] },
+  { id: uid(), store: 'Superstop', price: 8, sent: 36, returned: 0, paid: 0, counted: 36, countedDate: '2026-06-10', diagnosis: '', cycle: 1, log: [{ at: 'Jun 10', t: 'Shipped 36 units — first delivery' }] },
+  { id: uid(), store: 'Evergreen', price: 9, sent: 40, returned: 0, paid: 270, counted: 8, countedDate: '2026-06-16', diagnosis: '', cycle: 1, log: [{ at: 'Jun 16', t: 'Counted 8 on shelf' }, { at: 'Jun 5', t: 'Check received $270' }] },
 ]
 
 const SEED_DIRECT = [
@@ -104,11 +108,15 @@ const PRODUCTS = [
 ]
 // per-period sales for the front-page leaderboards (week vs month)
 const STORE_PERF = [
-  { store: 'Wawa Pilot — Rt 37', week: 30, weekRev: 195, month: 130, monthRev: 845 },
-  { store: 'Cumberland Farms — Brick', week: 17, weekRev: 102, month: 80, monthRev: 480 },
-  { store: 'CrossFit Toms River', week: 9, weekRev: 63, month: 40, monthRev: 280 },
-  { store: 'Jersey Shore Surf Co', week: 7, weekRev: 42, month: 30, monthRev: 180 },
-  { store: 'Local Butcher Collective', week: 0, weekRev: 0, month: 0, monthRev: 0 },
+  { store: 'Gourmet Glatt North', week: 13, weekRev: 110, month: 50, monthRev: 425 },
+  { store: 'Gourmet Glatt South', week: 10, weekRev: 85, month: 40, monthRev: 340 },
+  { store: 'Seasons', week: 11, weekRev: 99, month: 40, monthRev: 360 },
+  { store: 'Aisle 9 Lakewood', week: 10, weekRev: 85, month: 40, monthRev: 340 },
+  { store: 'Evergreen', week: 9, weekRev: 81, month: 30, monthRev: 270 },
+  { store: 'Aisle 9 Jackson', week: 8, weekRev: 68, month: 30, monthRev: 255 },
+  { store: 'Nutmeg', week: 7, weekRev: 56, month: 25, monthRev: 200 },
+  { store: 'Foodex', week: 6, weekRev: 48, month: 20, monthRev: 160 },
+  { store: 'Superstop', week: 7, weekRev: 56, month: 18, monthRev: 144 },
 ]
 const DIRECT_PERF = [
   { who: 'Online store (Shopify)', source: 'Shopify / online', week: 31, weekRev: 290, month: 120, monthRev: 1188 },
@@ -387,7 +395,7 @@ export default function JerkyMunch() {
                     <div style={{ ...lbl }}>Top consignment stores</div>
                     <MiniToggle value={storePer} onChange={setStorePer} />
                   </div>
-                  {(() => { const pv = s => storePer === 'week' ? s.weekRev : s.monthRev; const pb = s => storePer === 'week' ? s.week : s.month; const sorted = STORE_PERF.slice().sort((a, b) => pv(b) - pv(a)); const max = pv(sorted[0]) || 1; return sorted.map((c, i) => (
+                  {(() => { const pv = s => storePer === 'week' ? s.weekRev : s.monthRev; const pb = s => storePer === 'week' ? s.week : s.month; const sorted = STORE_PERF.slice().sort((a, b) => pv(b) - pv(a)); const max = pv(sorted[0]) || 1; return sorted.slice(0, 6).map((c, i) => (
                     <div key={c.store} style={{ padding: '9px 0', borderTop: i ? `1px solid ${CREAM}` : 'none' }}>
                       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', gap: '8px', marginBottom: '6px' }}>
                         <span style={{ fontWeight: 600, color: INK, fontSize: '14px' }}>{c.store}</span>
@@ -899,7 +907,7 @@ export default function JerkyMunch() {
                 <div style={{ fontSize: '13.5px', color: MUTED, lineHeight: 1.55 }}>A look at what's coming: ask plain-English questions about your business and get answers straight from your live data. Here are a few samples.</div>
               </div>
               {[
-                { q: 'Which store owes me the most right now?', a: <>Your counts show <b>Wawa Pilot — Rt 37</b> has the biggest gap: <b>10 bags missing</b> (~$65), most likely sold-but-unreported. Across all stores you're owed about <b>{m0(missVal)}</b> — I'd invoice the worst offenders.</> },
+                { q: 'Which store owes me the most right now?', a: <>Your counts show <b>Nutmeg</b> has the biggest gap: <b>7 bags missing</b> (~$56), most likely sold-but-unreported. Across all stores you're owed about <b>{m0(missVal)}</b> — I'd invoice the worst offenders.</> },
                 { q: 'Where am I wasting ad money?', a: <>Three channels are underwater — <b>Facebook, the 5K, and flyers</b>. Together they cost <b>{m0(wastedSpend)}/mo</b> and return only <b>{m0(wastedReturn)}</b>. Move that budget to Instagram and your influencer (both ~4x).</> },
                 { q: 'Did I actually make money this month?', a: <>Revenue is <b>{m0(revenue)}</b>, but after costs your net is <b>{m0(netProfit)}</b>. The two drags are ad waste and uncollected consignment money — fix both and you flip positive without selling a single extra bag.</> },
               ].map((m, i) => (
