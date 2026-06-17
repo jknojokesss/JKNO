@@ -132,7 +132,11 @@ export default function JerkyMunch() {
   const [logoOk, setLogoOk] = useState(true)
   const [addingA, setAddingA] = useState(false)
   const [af, setAf] = useState({ channel: '', spend: '', rev: '', track: '' })
+  const [coa, setCoa] = useState({ name: 'chart-of-accounts.csv', rows: 48 })
+  const [gl, setGl] = useState({ name: 'general-ledger-jun.csv', rows: 142 })
   const fileRef = useRef(null)
+  const coaRef = useRef(null)
+  const glRef = useRef(null)
 
   const dv = (k) => draft[k] || ''
   const setDv = (k, v) => setDraft({ ...draft, [k]: v })
@@ -163,6 +167,7 @@ export default function JerkyMunch() {
     }
     reader.readAsText(file)
   }
+  const importBook = (e, setter) => { const file = e.target.files && e.target.files[0]; if (!file) return; const reader = new FileReader(); reader.onload = ev => { const rows = String(ev.target.result || '').split(/\r?\n/).filter(r => r.trim()).length; setter({ name: file.name, rows: Math.max(rows - 1, 0) }) }; reader.readAsText(file); e.target.value = '' }
   const addDirect = () => { if (!df.who.trim()) return; setDirect([{ id: uid(), who: df.who.trim(), source: df.source, units: Number(df.units) || 0, rev: Number(df.rev) || 0 }, ...direct]); setDf({ who: '', source: 'Shopify / online', units: '', rev: '' }); setAddingD(false) }
   const removeDirect = (id) => setDirect(direct.filter(d => d.id !== id))
   const addAd = () => { if (!af.channel.trim()) return; const tr = af.track.trim(); setAds([{ id: uid(), channel: af.channel.trim(), spend: Number(af.spend) || 0, rev: Number(af.rev) || 0, track: tr || 'Estimated — needs a promo code', tracked: !!tr }, ...ads]); setAf({ channel: '', spend: '', rev: '', track: '' }); setAddingA(false) }
@@ -757,40 +762,43 @@ export default function JerkyMunch() {
             </>
           )}
 
-          {/* ===== QUICKBOOKS SYNC ===== */}
+          {/* ===== QUICKBOOKS SYNC (drop in GL + COA) ===== */}
           {tab === 'quickbooks' && (
             <>
-              <div style={{ ...card, marginBottom: '16px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '12px' }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
-                  <div style={{ width: '46px', height: '46px', borderRadius: '10px', background: '#2CA01C', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', ...big, fontSize: '20px' }}>qb</div>
+              <div style={{ ...card, marginBottom: '16px' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '14px', marginBottom: '10px' }}>
+                  <div style={{ width: '44px', height: '44px', borderRadius: '10px', background: '#2CA01C', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', ...big, fontSize: '19px' }}>qb</div>
                   <div>
-                    <div style={{ ...big, fontSize: '18px', color: INK }}>QuickBooks Online</div>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '13px', color: GREEN, marginTop: '3px' }}><span style={{ width: '8px', height: '8px', borderRadius: '50%', background: GREEN }} />Connected · last synced 8 min ago</div>
+                    <div style={{ ...big, fontSize: '18px', color: INK }}>QuickBooks → your books</div>
+                    <div style={{ fontSize: '12.5px', color: MUTED, marginTop: '2px' }}>Export from QuickBooks, drop the files in here.</div>
                   </div>
                 </div>
-                <button style={{ background: CHAR, color: CREAM, border: 'none', borderRadius: '10px', padding: '11px 20px', ...btn }}>Sync now</button>
+                <p style={{ fontSize: '13.5px', color: MUTED, lineHeight: 1.55 }}>Two exports keep everything current — your <b style={{ color: INK }}>Chart of Accounts</b> and your <b style={{ color: INK }}>General Ledger</b>. Drop them in and the dashboard's P&L and balances update. No live connection to babysit — same way I run it for every client.</p>
               </div>
-              <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap', marginBottom: '16px' }}>
-                <KPI k="Income synced" v={m0(revenue)} sub="this month → QB" accent={GREEN} />
-                <KPI k="Expenses synced" v={m0(totalExp)} sub="auto-categorized" accent={KRAFT} />
-                <KPI k="Transactions" v="142" sub="this month" />
-              </div>
-              <div style={{ ...card }}>
-                <div style={{ ...lbl, marginBottom: '12px' }}>What flows into QuickBooks automatically</div>
-                {[
-                  ['Sales income', 'Direct + consignment, by product'],
-                  ['Expenses & bills', 'Mapped to the right accounts'],
-                  ['Personal-card items', 'Flagged as owner reimbursements'],
-                  ['Consignment payments', 'Matched to each store'],
-                  ['Profit & loss', 'Always reconciles to this dashboard'],
-                ].map(([t, d], i) => (
-                  <div key={i} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '11px 0', borderTop: i ? `1px solid ${CREAM}` : 'none', gap: '10px' }}>
-                    <div><div style={{ fontWeight: 600, color: INK, fontSize: '14px' }}>{t}</div><div style={{ fontSize: '12.5px', color: MUTED }}>{d}</div></div>
-                    <span style={{ fontSize: '12px', fontWeight: 600, color: GREEN, background: 'rgba(62,124,79,.12)', padding: '4px 11px', borderRadius: '20px', whiteSpace: 'nowrap' }}>Synced</span>
+
+              {[
+                { title: 'Chart of Accounts', desc: 'Your account list — assets, income, expenses…', st: coa, rf: coaRef, setter: setCoa },
+                { title: 'General Ledger', desc: 'Every transaction, by account and date', st: gl, rf: glRef, setter: setGl },
+              ].map((b, i) => (
+                <div key={i} style={{ ...card, marginBottom: '12px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '12px' }}>
+                  <div>
+                    <div style={{ fontWeight: 600, color: INK, fontSize: '16px' }}>{b.title}</div>
+                    <div style={{ fontSize: '12.5px', color: MUTED, marginTop: '2px' }}>{b.desc}</div>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '7px', fontSize: '12.5px', color: GREEN, marginTop: '9px' }}>
+                      <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: GREEN, flexShrink: 0 }} />
+                      Imported · <span style={{ fontFamily: MONO }}>{b.st.name}</span> · {b.st.rows} rows
+                    </div>
                   </div>
-                ))}
+                  <div>
+                    <button onClick={() => b.rf.current && b.rf.current.click()} style={{ background: CARDBG, color: INK, border: `1px solid ${BORDER}`, borderRadius: '10px', padding: '11px 18px', ...btn }}>Drop in / replace</button>
+                    <input ref={b.rf} type="file" accept=".csv,.txt" onChange={e => importBook(e, b.setter)} style={{ display: 'none' }} />
+                  </div>
+                </div>
+              ))}
+
+              <div style={{ ...card, background: '#EAF3EC', borderColor: '#CFE4D6', fontSize: '13.5px', color: INK, lineHeight: 1.55 }}>
+                Both files are in, so your P&L, account balances, and this whole dashboard reflect your real books. Each month you just drop in the fresh GL — takes about a minute.
               </div>
-              <p style={{ fontSize: '12px', color: MUTED, marginTop: '12px' }}>Don't use QuickBooks? No problem — everything here runs on its own. The sync is optional.</p>
             </>
           )}
 
