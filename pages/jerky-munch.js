@@ -109,6 +109,9 @@ export default function JerkyMunch() {
   const [addingD, setAddingD] = useState(false)
   const [df, setDf] = useState({ who: '', source: 'Shopify / online', units: '', rev: '' })
   const [pnlMonths, setPnlMonths] = useState(2)
+  const [logoOk, setLogoOk] = useState(true)
+  const [addingA, setAddingA] = useState(false)
+  const [af, setAf] = useState({ channel: '', spend: '', rev: '', track: '' })
   const fileRef = useRef(null)
 
   const dv = (k) => draft[k] || ''
@@ -142,6 +145,9 @@ export default function JerkyMunch() {
   }
   const addDirect = () => { if (!df.who.trim()) return; setDirect([{ id: uid(), who: df.who.trim(), source: df.source, units: Number(df.units) || 0, rev: Number(df.rev) || 0 }, ...direct]); setDf({ who: '', source: 'Shopify / online', units: '', rev: '' }); setAddingD(false) }
   const removeDirect = (id) => setDirect(direct.filter(d => d.id !== id))
+  const addAd = () => { if (!af.channel.trim()) return; const tr = af.track.trim(); setAds([{ id: uid(), channel: af.channel.trim(), spend: Number(af.spend) || 0, rev: Number(af.rev) || 0, track: tr || 'Estimated — needs a promo code', tracked: !!tr }, ...ads]); setAf({ channel: '', spend: '', rev: '', track: '' }); setAddingA(false) }
+  const removeAd = (id) => setAds(ads.filter(a => a.id !== id))
+  const setAdField = (id, f, v) => setAds(ads.map(a => a.id !== id ? a : (f === 'track' ? { ...a, track: v, tracked: v.trim().length > 0 } : { ...a, [f]: Number(v) || 0 })))
 
   // aggregates
   const R = consign.map(c => ({ ...c, ...recon(c) }))
@@ -193,7 +199,7 @@ export default function JerkyMunch() {
   const card = { background: CARDBG, border: `1px solid ${BORDER}`, borderRadius: '14px', padding: '20px' }
   const lbl = { fontFamily: "'Inter', sans-serif", fontSize: '12px', fontWeight: 600, letterSpacing: '0.1px', color: '#96866C' }
   const inp = { padding: '10px 12px', fontSize: '14px', border: `1px solid ${BORDER}`, borderRadius: '9px', background: CREAM, color: INK, outline: 'none', fontFamily: 'inherit' }
-  const big = { fontFamily: 'Oswald, sans-serif', fontWeight: 600 }
+  const big = { fontFamily: "'Inter', sans-serif", fontWeight: 700, letterSpacing: '-0.4px' }
   const btn = { fontFamily: "'Inter', sans-serif", fontWeight: 600, fontSize: '13px', letterSpacing: '0.1px', cursor: 'pointer' }
 
   const KPI = ({ k, v, sub, accent }) => (
@@ -233,7 +239,7 @@ export default function JerkyMunch() {
         <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
         <meta name="apple-mobile-web-app-title" content="Jerky Munch" />
         <link rel="apple-touch-icon" href="/jerky-icon.svg" />
-        <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@500;600;700&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+        <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
         <style>{`*{box-sizing:border-box;margin:0;padding:0}html{-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale;text-rendering:optimizeLegibility}body{background:${CREAM};font-family:'Inter',sans-serif;color:${INK}}::placeholder{color:#A99A82}
 .jm-shell{display:flex;min-height:100vh;align-items:stretch}
 .jm-side{width:236px;flex-shrink:0;background:${CHAR};color:${CREAM};display:flex;flex-direction:column;padding:22px 14px;position:sticky;top:0;height:100vh}
@@ -247,9 +253,13 @@ export default function JerkyMunch() {
       <div className="jm-shell">
         {/* Sidebar */}
         <aside className="jm-side">
-          <div style={{ padding: '0 8px 16px' }}>
-            <div style={{ ...big, fontSize: '22px', color: CREAM, letterSpacing: '0.5px' }}>🥩 Jerky Munch</div>
-            <div style={{ ...lbl, color: '#B6A78C', marginTop: '3px' }}>Dashboard</div>
+          <div style={{ padding: '0 6px 16px' }}>
+            {logoOk
+              ? <div style={{ background: '#FCEFE6', borderRadius: '12px', padding: '10px 12px' }}>
+                  <img src="/jerky-logo.png" alt="Jerky Munch" onError={() => setLogoOk(false)} style={{ width: '100%', maxWidth: '160px', display: 'block' }} />
+                </div>
+              : <div style={{ ...big, fontSize: '22px', color: CREAM }}>Jerky Munch</div>}
+            <div style={{ ...lbl, color: '#B6A78C', marginTop: '8px', paddingLeft: '4px' }}>Dashboard</div>
           </div>
           <nav className="jm-nav">
             {TABS.map(([id, label]) => {
@@ -643,21 +653,63 @@ export default function JerkyMunch() {
               <div style={{ ...card, marginBottom: '16px', fontSize: '13px', color: MUTED, lineHeight: 1.55 }}>
                 <b style={{ color: INK }}>How each sale is traced to a channel:</b> a unique promo code per channel (IG10, NJFOODIE), the Meta/Google pixel on your Shopify store, or a “how’d you hear about us?” at checkout. Channels marked <b style={{ color: AMBER }}>“est.”</b> have no code yet — their ROI is a guess. <b style={{ color: INK }}>Step one is giving every channel a code so the number becomes real.</b>
               </div>
-              {ads.slice().sort((a, b) => (b.rev / b.spend) - (a.rev / a.spend)).map(a => {
-                const roas = a.rev / a.spend, vd = verdict(roas)
+              {!addingA ? (
+                <button onClick={() => setAddingA(true)} style={{ width: '100%', background: CHAR, color: CREAM, border: 'none', borderRadius: '11px', padding: '13px', ...btn, marginBottom: '16px' }}>+ Add a channel</button>
+              ) : (
+                <div style={{ ...card, marginBottom: '16px' }}>
+                  <div style={{ ...lbl, marginBottom: '12px' }}>New ad channel</div>
+                  <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+                    <input value={af.channel} onChange={e => setAf({ ...af, channel: e.target.value })} placeholder="Channel (e.g. TikTok Ads) *" style={{ ...inp, flex: 2, minWidth: '170px' }} />
+                    <input value={af.track} onChange={e => setAf({ ...af, track: e.target.value })} placeholder="Promo code / how tracked" style={{ ...inp, flex: 1, minWidth: '150px' }} />
+                  </div>
+                  <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', marginTop: '8px' }}>
+                    <input value={af.spend} onChange={e => setAf({ ...af, spend: e.target.value })} type="number" placeholder="$ spent / mo" style={{ ...inp, flex: 1, minWidth: '120px' }} />
+                    <input value={af.rev} onChange={e => setAf({ ...af, rev: e.target.value })} type="number" placeholder="$ sales it drove" style={{ ...inp, flex: 1, minWidth: '120px' }} />
+                  </div>
+                  <div style={{ display: 'flex', gap: '8px', marginTop: '12px' }}>
+                    <button onClick={() => setAddingA(false)} style={{ flex: 1, background: 'none', border: `1px solid ${BORDER}`, borderRadius: '9px', padding: '11px', ...btn, color: MUTED }}>Cancel</button>
+                    <button onClick={addAd} style={{ flex: 2, background: SPICE, color: '#fff', border: 'none', borderRadius: '9px', padding: '11px', ...btn }}>+ Add channel</button>
+                  </div>
+                </div>
+              )}
+
+              {ads.slice().sort((a, b) => (b.spend ? b.rev / b.spend : 0) - (a.spend ? a.rev / a.spend : 0)).map(a => {
+                const roas = a.spend ? a.rev / a.spend : 0, vd = verdict(roas), open = expanded === a.id
                 return (
-                  <div key={a.id} style={{ ...card, marginBottom: '10px' }}>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '8px' }}>
-                      <div>
-                        <div style={{ ...big, fontSize: '18px', color: INK }}>{a.channel}</div>
-                        <div style={{ fontSize: '12.5px', color: MUTED, marginTop: '3px' }}>{m0(a.spend)} spent → {m0(a.rev)} back · <b style={{ color: vd.c }}>{roas.toFixed(1)}x{a.tracked ? '' : ' est.'}</b></div>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '12px', color: a.tracked ? KRAFT : AMBER, marginTop: '5px' }}><span style={{ width: '6px', height: '6px', borderRadius: '50%', background: a.tracked ? KRAFT : AMBER, flexShrink: 0 }} />{a.track}</div>
+                  <div key={a.id} style={{ ...card, marginBottom: '10px', padding: 0, overflow: 'hidden', borderColor: open ? CHAR : BORDER }}>
+                    <div onClick={() => setExpanded(open ? null : a.id)} style={{ padding: '16px 18px', cursor: 'pointer' }}>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '8px' }}>
+                        <div>
+                          <div style={{ ...big, fontSize: '18px', color: INK }}>{a.channel}</div>
+                          <div style={{ fontSize: '12.5px', color: MUTED, marginTop: '3px' }}>{m0(a.spend)} spent → {m0(a.rev)} back · <b style={{ color: vd.c }}>{roas.toFixed(1)}x{a.tracked ? '' : ' est.'}</b></div>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '12px', color: a.tracked ? KRAFT : AMBER, marginTop: '5px' }}><span style={{ width: '6px', height: '6px', borderRadius: '50%', background: a.tracked ? KRAFT : AMBER, flexShrink: 0 }} />{a.track}</div>
+                        </div>
+                        <span style={{ fontFamily: "'Inter', sans-serif", fontSize: '12px', fontWeight: 600, color: '#fff', background: vd.c, padding: '5px 12px', borderRadius: '20px' }}>{vd.t}</span>
                       </div>
-                      <span style={{ fontFamily: "'Inter', sans-serif", fontSize: '12px', fontWeight: 600, color: '#fff', background: vd.c, padding: '5px 12px', borderRadius: '20px' }}>{vd.t}</span>
+                      <div style={{ marginTop: '12px', height: '8px', background: CREAM, borderRadius: '5px', overflow: 'hidden', display: 'flex' }}>
+                        <div style={{ width: `${Math.min(roas / 4 * 100, 100)}%`, background: vd.c }} />
+                      </div>
                     </div>
-                    <div style={{ marginTop: '12px', height: '8px', background: CREAM, borderRadius: '5px', overflow: 'hidden', display: 'flex' }}>
-                      <div style={{ width: `${Math.min(roas / 4 * 100, 100)}%`, background: vd.c }} />
-                    </div>
+                    {open && (
+                      <div style={{ padding: '0 18px 18px', borderTop: `1px solid ${CREAM}` }}>
+                        <div style={{ ...lbl, margin: '14px 0 8px' }}>Update this month</div>
+                        <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+                          <div style={{ flex: 1, minWidth: '130px' }}>
+                            <div style={{ fontSize: '11px', color: MUTED, marginBottom: '4px' }}>$ spent</div>
+                            <input value={a.spend} onChange={e => setAdField(a.id, 'spend', e.target.value)} type="number" style={{ ...inp, width: '100%' }} />
+                          </div>
+                          <div style={{ flex: 1, minWidth: '130px' }}>
+                            <div style={{ fontSize: '11px', color: MUTED, marginBottom: '4px' }}>$ sales driven</div>
+                            <input value={a.rev} onChange={e => setAdField(a.id, 'rev', e.target.value)} type="number" style={{ ...inp, width: '100%' }} />
+                          </div>
+                        </div>
+                        <div style={{ ...lbl, margin: '14px 0 6px' }}>How it's tracked</div>
+                        <input value={a.track} onChange={e => setAdField(a.id, 'track', e.target.value)} placeholder="Promo code / pixel — leave blank if untracked" style={{ ...inp, width: '100%' }} />
+                        <div style={{ display: 'flex', marginTop: '14px' }}>
+                          <button onClick={() => removeAd(a.id)} style={{ marginLeft: 'auto', background: 'none', border: 'none', color: '#C0392B', fontSize: '13px', fontWeight: 600, cursor: 'pointer', fontFamily: "'Inter', sans-serif" }}>Delete channel</button>
+                        </div>
+                      </div>
+                    )}
                   </div>
                 )
               })}
