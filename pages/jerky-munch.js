@@ -342,19 +342,41 @@ export default function JerkyMunch() {
                 <KPI k="Missing pieces" v={`${missUnits}`} sub={`${m0(missVal)} to investigate`} accent={missUnits ? RED : GREEN} />
               </div>
 
-              <div style={{ ...card, background: CHAR, borderColor: CHAR, color: CREAM, marginBottom: '16px' }}>
-                <div style={{ ...lbl, color: '#E8A07F', marginBottom: '14px' }}>What to do next</div>
-                {[
-                  { c: RED, t: <>You're burning <b>{m0(wastedSpend)}/mo</b> on Facebook, the 5K, and flyers — they return only <b>{m0(wastedReturn)}</b>. Kill them and pocket the difference. Move it to Instagram + your influencer (both 4x).</> },
-                  { c: KRAFT, t: <><b>{missUnits} units (~{m0(missVal)})</b> are missing across your consignment stores. <b>{worst?.store}</b> is the worst ({worst?.variance} gone). Most likely they sold them and didn't pay you — that's money you're owed.</> },
-                  { c: AMBER, t: <><b>{m0(onShelfVal)}</b> of your jerky is sitting in stores unsold. The <b>Butcher Collective</b> hasn't paid a dime on 75 units since May — go check if it's even moving.</> },
-                  { c: RED, t: <>You've got <b>{m0(personalExp)}</b> of business expenses on your <b>personal credit card</b> this month — the business owes you that back, and unrecorded it costs you the tax deduction. I separate every one.</> },
-                  { c: GREEN, t: <><b>CrossFit Toms River</b> reconciles to zero — clean account. Whatever that relationship is, go get 5 more like it.</> },
-                ].map((x, i) => (
-                  <div key={i} style={{ display: 'flex', gap: '12px', padding: '10px 0', borderTop: i ? '1px solid rgba(255,255,255,.08)' : 'none', fontSize: '14px', lineHeight: 1.55, color: '#E9E0D2' }}>
-                    <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: x.c, marginTop: '7px', flexShrink: 0 }} /><span>{x.t}</span>
-                  </div>
-                ))}
+              <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap', marginBottom: '16px' }}>
+                <div style={{ ...card, flex: 1, minWidth: '290px' }}>
+                  <div style={{ ...lbl, marginBottom: '14px' }}>Top consignment stores</div>
+                  {(() => { const sorted = R.slice().sort((a, b) => b.paid - a.paid); const max = sorted[0]?.paid || 1; return sorted.map((c, i) => (
+                    <div key={c.id} style={{ padding: '9px 0', borderTop: i ? `1px solid ${CREAM}` : 'none' }}>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', gap: '8px', marginBottom: '6px' }}>
+                        <span style={{ fontWeight: 600, color: INK, fontSize: '14px' }}>{c.store}</span>
+                        <span style={{ ...big, fontSize: '15px', color: INK }}>{m0(c.paid)}</span>
+                      </div>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                        <div style={{ flex: 1, height: '6px', background: CREAM, borderRadius: '4px', overflow: 'hidden' }}>
+                          <div style={{ width: `${Math.round(c.paid / max * 100)}%`, height: '100%', background: KRAFT }} />
+                        </div>
+                        <span style={{ fontSize: '11px', color: MUTED, whiteSpace: 'nowrap' }}>{c.paidUnits} bags sold</span>
+                      </div>
+                    </div>
+                  )) })()}
+                </div>
+                <div style={{ ...card, flex: 1, minWidth: '290px' }}>
+                  <div style={{ ...lbl, marginBottom: '14px' }}>Top direct sales</div>
+                  {(() => { const sorted = direct.slice().sort((a, b) => b.rev - a.rev); const max = sorted[0]?.rev || 1; return sorted.map((d, i) => (
+                    <div key={d.id} style={{ padding: '9px 0', borderTop: i ? `1px solid ${CREAM}` : 'none' }}>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', gap: '8px', marginBottom: '6px' }}>
+                        <span style={{ fontWeight: 600, color: INK, fontSize: '14px' }}>{d.who}</span>
+                        <span style={{ ...big, fontSize: '15px', color: GREEN }}>{m0(d.rev)}</span>
+                      </div>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                        <div style={{ flex: 1, height: '6px', background: CREAM, borderRadius: '4px', overflow: 'hidden' }}>
+                          <div style={{ width: `${Math.round(d.rev / max * 100)}%`, height: '100%', background: GREEN }} />
+                        </div>
+                        <span style={{ fontSize: '11px', color: MUTED, whiteSpace: 'nowrap' }}>{d.units} bags · {d.source}</span>
+                      </div>
+                    </div>
+                  )) })()}
+                </div>
               </div>
 
               <div style={{ ...card }}>
