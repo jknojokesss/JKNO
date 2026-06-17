@@ -251,8 +251,8 @@ export default function JerkyMunch() {
     </select>
   )
 
-  const TABS = [['overview', 'Overview'], ['pnl', 'P&L'], ['consign', 'Consignment'], ['direct', 'Direct Sales'], ['expenses', 'Expenses'], ['ads', 'Advertising']]
-  const EXTRA = [['quickbooks', 'QuickBooks sync'], ['askai', 'Ask AI']]
+  const TABS = [['overview', 'Overview'], ['pnl', 'P&L'], ['consign', 'Consignment'], ['direct', 'Direct Sales'], ['ads', 'Advertising']]
+  const EXTRA = [['expenses', 'Expenses'], ['quickbooks', 'QuickBooks sync'], ['askai', 'Ask AI']]
   const currentLabel = ([...TABS, ...EXTRA].find(t => t[0] === tab) || ['', ''])[1]
 
   return (
@@ -306,7 +306,9 @@ export default function JerkyMunch() {
                   <span>{label}</span>
                   {id === 'quickbooks'
                     ? <span style={{ width: '7px', height: '7px', borderRadius: '50%', background: '#4FbE6A', flexShrink: 0 }} />
-                    : <span style={{ fontSize: '9px', fontWeight: 700, color: '#fff', background: SPICE, padding: '2px 6px', borderRadius: '10px', flexShrink: 0 }}>AI</span>}
+                    : id === 'askai'
+                      ? <span style={{ fontSize: '9px', fontWeight: 700, color: '#fff', background: SPICE, padding: '2px 6px', borderRadius: '10px', flexShrink: 0 }}>AI</span>
+                      : null}
                 </button>
               )
             })}
@@ -642,7 +644,7 @@ export default function JerkyMunch() {
                 <KPI k="On business acct" v={m0(businessExp)} sub="clean & separate" accent={GREEN} />
               </div>
               <div style={{ ...card, background: '#FBEDE9', borderColor: '#E7C3B8', marginBottom: '16px', fontSize: '14px', color: INK, lineHeight: 1.55 }}>
-                <b>{m0(personalExp)}</b> of business expenses ran through your <b>personal credit card</b> this month. Two problems: the business owes that money back to <i>you</i>, and if it never hits the books you <b>lose the deduction and overpay the IRS</b>. Tap any expense to move it to the right account — I track and separate every one for you.
+                <b>{m0(personalExp)}</b> of business expenses ran through your <b>personal credit card</b> this month. Two problems: the business owes that money back to <i>you</i>, and if it never hits the books you <b>lose the deduction and overpay the IRS</b>. Add them here — personal card or business — and <b>every one flows straight into your P&L</b>.
               </div>
 
               {!addingE ? (
