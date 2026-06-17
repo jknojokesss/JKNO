@@ -574,6 +574,25 @@ export default function JerkyMunch() {
                 <KPI k="Missing" v={missUnits} sub={`${m0(missVal)} to chase`} accent={missUnits ? RED : GREEN} />
               </div>
 
+              {R.some(c => c.variance > 0) && (
+                <div style={{ ...card, marginBottom: '16px', background: '#FBEDE9', borderColor: '#E7C3B8' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', flexWrap: 'wrap', gap: '8px', marginBottom: '10px' }}>
+                    <div style={{ ...lbl, color: RED }}>Money to collect</div>
+                    <div style={{ fontSize: '13px', color: MUTED }}><b style={{ ...big, fontSize: '18px', color: RED }}>{m0(missVal)}</b> across {R.filter(c => c.variance > 0).length} stores</div>
+                  </div>
+                  {R.filter(c => c.variance > 0).sort((a, b) => b.varVal - a.varVal).map((c, i) => (
+                    <div key={c.id} onClick={() => setExpanded(c.id)} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '8px 0', borderTop: i ? '1px solid #F2D2CB' : 'none', cursor: 'pointer', gap: '8px', flexWrap: 'wrap' }}>
+                      <div>
+                        <span style={{ fontWeight: 600, color: INK, fontSize: '14px' }}>{c.store}</span>
+                        <span style={{ fontSize: '12px', color: MUTED }}> · {c.variance} bags · {c.diagnosis ? c.diagnosis : 'needs a diagnosis'}</span>
+                      </div>
+                      <span style={{ ...big, fontSize: '15px', color: RED }}>{money(c.varVal)}</span>
+                    </div>
+                  ))}
+                  <p style={{ fontSize: '12px', color: MUTED, marginTop: '10px', lineHeight: 1.5 }}>Bags gone from shelves you haven't been paid for. Tap a store to diagnose it — then invoice the ones the store sold and didn't report, or write off the rest at close-out.</p>
+                </div>
+              )}
+
               {!adding ? (
                 <button onClick={() => setAdding(true)} style={{ width: '100%', background: CHAR, color: CREAM, border: 'none', borderRadius: '11px', padding: '13px', ...btn, marginBottom: '16px' }}>+ Add a consignment partner</button>
               ) : (
