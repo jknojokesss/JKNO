@@ -192,6 +192,15 @@ export default function JerkyMunch() {
   }
   const addExpense = () => { if (!ef.vendor.trim()) return; setExpenses([{ id: uid(), vendor: ef.vendor.trim(), cat: ef.cat || 'Other', amt: Number(ef.amt) || 0, pay: 'personal' }, ...expenses]); setEf({ vendor: '', amt: '', cat: 'Other', pay: 'personal' }); setAddingE(false) }
   const removeExpense = (id) => setExpenses(expenses.filter(e => e.id !== id))
+  const exportPersonal = () => {
+    const rows = [['Vendor', 'Category', 'Amount', 'Paid with']]
+    expenses.filter(e => e.pay === 'personal').forEach(e => rows.push([e.vendor, e.cat, e.amt, 'Personal card']))
+    const csv = rows.map(r => r.map(x => `"${String(x).replace(/"/g, '""')}"`).join(',')).join('\n')
+    const a = document.createElement('a')
+    a.href = 'data:text/csv;charset=utf-8,' + encodeURIComponent(csv)
+    a.download = 'personal-card-expenses.csv'
+    a.click()
+  }
   const importCSV = (e) => {
     const file = e.target.files && e.target.files[0]; if (!file) return
     const reader = new FileReader()
@@ -775,7 +784,7 @@ export default function JerkyMunch() {
             <>
               <div style={{ ...card, marginBottom: '16px' }}>
                 <div style={{ ...big, fontSize: '18px', color: INK, marginBottom: '6px' }}>Personal-card expenses only</div>
-                <p style={{ fontSize: '13.5px', color: MUTED, lineHeight: 1.55 }}>Anything on a <b style={{ color: INK }}>business card</b> already flows in through <b style={{ color: INK }}>QuickBooks</b>. This is just for what you put on your <b style={{ color: INK }}>personal card</b> — import a statement or add them by hand so each one <b style={{ color: INK }}>hits your P&L</b>, you keep the deduction, and the business pays you back.</p>
+                <p style={{ fontSize: '13.5px', color: MUTED, lineHeight: 1.55 }}>Anything on a <b style={{ color: INK }}>business card</b> already flows in through <b style={{ color: INK }}>QuickBooks</b>. This is just for what you put on your <b style={{ color: INK }}>personal card</b> — import a statement or add them by hand. Each one <b style={{ color: INK }}>hits your P&L</b> here, and <b style={{ color: INK }}>I post them into QuickBooks for you at the monthly close</b> — you never touch QB.</p>
               </div>
               <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap', marginBottom: '16px' }}>
                 <KPI k="On your personal card" v={m0(personalExp)} sub="the business owes you this back" accent={RED} />
@@ -819,6 +828,12 @@ export default function JerkyMunch() {
                   </div>
                 </div>
               ))}
+              {personalItems > 0 && (
+                <div style={{ marginTop: '6px' }}>
+                  <button onClick={exportPersonal} style={{ background: 'none', border: `1px solid ${BORDER}`, borderRadius: '9px', padding: '9px 14px', ...btn, color: MUTED }}>⤓ Export for books (CSV)</button>
+                  <p style={{ fontSize: '12px', color: MUTED, marginTop: '7px', lineHeight: 1.5 }}>The raw file, for your accountant if they want it — but you don't need this. I post these into QuickBooks for you at close.</p>
+                </div>
+              )}
             </>
           )}
 
