@@ -144,7 +144,9 @@ export default function JerkyMunch() {
   const [df, setDf] = useState({ who: '', source: 'Shopify / online', units: '', rev: '' })
   const [pnlMonths, setPnlMonths] = useState(2)
   const [pnlView, setPnlView] = useState('single')
-  const [period, setPeriod] = useState('month')
+  const [storePer, setStorePer] = useState('month')
+  const [directPer, setDirectPer] = useState('month')
+  const [flavorPer, setFlavorPer] = useState('month')
   const [logoOk, setLogoOk] = useState(true)
   const [addingA, setAddingA] = useState(false)
   const [af, setAf] = useState({ channel: '', spend: '', rev: '', track: '' })
@@ -217,7 +219,7 @@ export default function JerkyMunch() {
   const grossProfit = revenue - cogs
   const totalOpex = opexNonAd + adSpend
   const netProfit = grossProfit - totalOpex
-  const bagsPeriod = PRODUCTS.reduce((s, p) => s + p[period], 0)
+  const bagsMonth = PRODUCTS.reduce((s, p) => s + p.month, 0)
   const bagsOut = R.reduce((s, c) => s + Math.max(c.expected, 0), 0)
 
   // multi-month series — current month appended live so interactivity flows through
@@ -251,6 +253,13 @@ export default function JerkyMunch() {
       <div style={lbl}>{k}</div>
       <div style={{ ...big, fontSize: '29px', color: accent || INK, lineHeight: 1.15, marginTop: '4px' }}>{v}</div>
       <div style={{ fontFamily: "'Inter', sans-serif", fontSize: '12px', fontWeight: 400, color: '#A2937A', marginTop: '3px' }}>{sub}</div>
+    </div>
+  )
+  const MiniToggle = ({ value, onChange }) => (
+    <div style={{ display: 'inline-flex', border: `1px solid ${BORDER}`, borderRadius: '8px', overflow: 'hidden', flexShrink: 0 }}>
+      {[['week', 'Week'], ['month', 'Month']].map(([p, l]) => (
+        <button key={p} onClick={() => onChange(p)} style={{ padding: '4px 11px', border: 'none', background: value === p ? CHAR : 'transparent', color: value === p ? CREAM : MUTED, fontFamily: "'Inter', sans-serif", fontSize: '11px', fontWeight: 600, cursor: 'pointer' }}>{l}</button>
+      ))}
     </div>
   )
   const Row = ({ l, v, neg, bold, top }) => (
@@ -352,23 +361,20 @@ export default function JerkyMunch() {
           {/* ===== OVERVIEW ===== */}
           {tab === 'overview' && (
             <>
-              <div style={{ display: 'flex', gap: '6px', marginBottom: '16px', flexWrap: 'wrap' }}>
-                {[['week', 'This week'], ['month', 'This month']].map(([v, l]) => (
-                  <button key={v} onClick={() => setPeriod(v)} style={{ padding: '8px 16px', borderRadius: '18px', border: `1px solid ${period === v ? CHAR : BORDER}`, background: period === v ? CHAR : CARDBG, color: period === v ? CREAM : MUTED, ...btn }}>{l}</button>
-                ))}
-              </div>
-
               <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap', marginBottom: '16px' }}>
-                <KPI k={`Bags sold this ${period}`} v={bagsPeriod} sub="across all flavors" accent={INK} />
-                <KPI k="Revenue / mo" v={m0(revenue)} sub={`${bagsPeriod} bags this ${period}`} accent={SPICE} />
+                <KPI k="Bags sold this month" v={bagsMonth} sub="across all flavors" accent={INK} />
+                <KPI k="Revenue / mo" v={m0(revenue)} sub={`${bagsMonth} bags this month`} accent={SPICE} />
                 <KPI k="Out on consignment" v={m0(onShelfVal)} sub={`${bagsOut} bags sitting in stores`} accent={KRAFT} />
                 <KPI k="Missing pieces" v={`${missUnits}`} sub={`${m0(missVal)} to investigate`} accent={missUnits ? RED : GREEN} />
               </div>
 
               <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap', marginBottom: '16px' }}>
                 <div style={{ ...card, flex: 1, minWidth: '290px' }}>
-                  <div style={{ ...lbl, marginBottom: '14px' }}>Top consignment stores · this {period}</div>
-                  {(() => { const pv = s => period === 'week' ? s.weekRev : s.monthRev; const pb = s => period === 'week' ? s.week : s.month; const sorted = STORE_PERF.slice().sort((a, b) => pv(b) - pv(a)); const max = pv(sorted[0]) || 1; return sorted.map((c, i) => (
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '8px', marginBottom: '14px' }}>
+                    <div style={{ ...lbl }}>Top consignment stores</div>
+                    <MiniToggle value={storePer} onChange={setStorePer} />
+                  </div>
+                  {(() => { const pv = s => storePer === 'week' ? s.weekRev : s.monthRev; const pb = s => storePer === 'week' ? s.week : s.month; const sorted = STORE_PERF.slice().sort((a, b) => pv(b) - pv(a)); const max = pv(sorted[0]) || 1; return sorted.map((c, i) => (
                     <div key={c.store} style={{ padding: '9px 0', borderTop: i ? `1px solid ${CREAM}` : 'none' }}>
                       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', gap: '8px', marginBottom: '6px' }}>
                         <span style={{ fontWeight: 600, color: INK, fontSize: '14px' }}>{c.store}</span>
@@ -384,8 +390,11 @@ export default function JerkyMunch() {
                   )) })()}
                 </div>
                 <div style={{ ...card, flex: 1, minWidth: '290px' }}>
-                  <div style={{ ...lbl, marginBottom: '14px' }}>Top direct sales · this {period}</div>
-                  {(() => { const pv = s => period === 'week' ? s.weekRev : s.monthRev; const pb = s => period === 'week' ? s.week : s.month; const sorted = DIRECT_PERF.slice().sort((a, b) => pv(b) - pv(a)); const max = pv(sorted[0]) || 1; return sorted.map((d, i) => (
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '8px', marginBottom: '14px' }}>
+                    <div style={{ ...lbl }}>Top direct sales</div>
+                    <MiniToggle value={directPer} onChange={setDirectPer} />
+                  </div>
+                  {(() => { const pv = s => directPer === 'week' ? s.weekRev : s.monthRev; const pb = s => directPer === 'week' ? s.week : s.month; const sorted = DIRECT_PERF.slice().sort((a, b) => pv(b) - pv(a)); const max = pv(sorted[0]) || 1; return sorted.map((d, i) => (
                     <div key={d.who} style={{ padding: '9px 0', borderTop: i ? `1px solid ${CREAM}` : 'none' }}>
                       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', gap: '8px', marginBottom: '6px' }}>
                         <span style={{ fontWeight: 600, color: INK, fontSize: '14px' }}>{d.who}</span>
@@ -403,17 +412,20 @@ export default function JerkyMunch() {
               </div>
 
               <div style={{ ...card }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', flexWrap: 'wrap', gap: '8px', marginBottom: '16px' }}>
-                  <div style={{ ...lbl }}>Sold this {period}, by flavor</div>
-                  <div style={{ fontSize: '13px', color: MUTED }}><b style={{ ...big, fontSize: '18px', color: INK }}>{bagsPeriod}</b> bags total</div>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '8px', marginBottom: '16px' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap' }}>
+                    <div style={{ ...lbl }}>Sold by flavor</div>
+                    <MiniToggle value={flavorPer} onChange={setFlavorPer} />
+                  </div>
+                  <div style={{ fontSize: '13px', color: MUTED }}><b style={{ ...big, fontSize: '18px', color: INK }}>{PRODUCTS.reduce((s, p) => s + p[flavorPer], 0)}</b> bags this {flavorPer}</div>
                 </div>
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(148px, 1fr))', gap: '12px' }}>
-                  {PRODUCTS.slice().sort((a, b) => b[period] - a[period]).map(p => (
+                  {PRODUCTS.slice().sort((a, b) => b[flavorPer] - a[flavorPer]).map(p => (
                     <div key={p.name} style={{ border: `1px solid ${BORDER}`, borderRadius: '12px', padding: '16px 12px 14px', textAlign: 'center', background: CREAM }}>
                       <Bag color={p.color} />
                       <div style={{ fontWeight: 600, color: INK, marginTop: '8px', fontSize: '14px' }}>{p.name}</div>
-                      <div style={{ ...big, fontSize: '26px', color: INK, marginTop: '4px' }}>{p[period]}</div>
-                      <div style={{ fontSize: '11px', color: MUTED }}>bags this {period}</div>
+                      <div style={{ ...big, fontSize: '26px', color: INK, marginTop: '4px' }}>{p[flavorPer]}</div>
+                      <div style={{ fontSize: '11px', color: MUTED }}>bags this {flavorPer}</div>
                     </div>
                   ))}
                 </div>
