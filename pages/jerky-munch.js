@@ -95,11 +95,12 @@ const PNL_ROWS = [
 
 // products sold this month (swap illustrations for real photos anytime)
 const PRODUCTS = [
-  { name: 'Original Beef', color: '#8B3A2B', week: 19, month: 78 },
-  { name: 'Teriyaki', color: '#A9763A', week: 16, month: 64 },
-  { name: 'Spicy Habanero', color: '#C8462C', week: 14, month: 52 },
-  { name: 'Peppered', color: '#5B4636', week: 8, month: 33 },
-  { name: 'Turkey Jerky', color: '#C99A2E', week: 5, month: 20 },
+  { name: 'Barbecue', color: '#9E3B24', week: 22, month: 88 },
+  { name: 'Nashville', color: '#C24A22', week: 16, month: 64 },
+  { name: 'Maple Bourbon', color: '#97652C', week: 13, month: 50 },
+  { name: 'Teriyaki', color: '#6B4A2A', week: 11, month: 42 },
+  { name: 'Cracked Pepper', color: '#46403A', week: 8, month: 33 },
+  { name: 'Jalapeño', color: '#5C7C3A', week: 6, month: 25 },
 ]
 // per-period sales for the front-page leaderboards (week vs month)
 const STORE_PERF = [
@@ -164,7 +165,19 @@ export default function JerkyMunch() {
   const logCheck = (id) => { const a = Number(dv(id + '_chk')); if (a > 0) { const c = consign.find(x => x.id === id); upd(id, { paid: c.paid + a }, `Check received ${m0(a)}`); setDv(id + '_chk', '') } }
   const logCount = (id) => { const n = dv(id + '_cnt'); if (n !== '') { upd(id, { counted: Number(n), countedDate: todayStr }, `Counted ${n} on shelf`); setDv(id + '_cnt', '') } }
   const shipMore = (id) => { const n = Number(dv(id + '_shp')); if (n > 0) { const c = consign.find(x => x.id === id); upd(id, { sent: c.sent + n }, `Shipped ${n} more units`); setDv(id + '_shp', '') } }
-  const addPartner = () => { if (!cf.store.trim()) return; setConsign([{ id: uid(), store: cf.store.trim(), price: Number(cf.price) || 0, sent: Number(cf.sent) || 0, returned: 0, paid: 0, counted: null, countedDate: '', diagnosis: '', log: [{ at: new Date().toLocaleDateString([], { month: 'short', day: 'numeric' }), t: 'Added consignment partner' }] }, ...consign]); setCf({ store: '', price: '', sent: '' }); setAdding(false) }
+  const addPartner = () => { if (!cf.store.trim()) return; setConsign([{ id: uid(), store: cf.store.trim(), price: Number(cf.price) || 0, sent: Number(cf.sent) || 0, returned: 0, paid: 0, counted: null, countedDate: '', diagnosis: '', cycle: 1, log: [{ at: new Date().toLocaleDateString([], { month: 'short', day: 'numeric' }), t: 'Added consignment partner' }] }, ...consign]); setCf({ store: '', price: '', sent: '' }); setAdding(false) }
+  const closeOut = (id) => {
+    const c = consign.find(x => x.id === id); if (!c) return
+    const { variance, varVal } = recon(c)
+    const shelf = c.counted == null ? 0 : c.counted
+    let note
+    if (variance > 0) note = c.diagnosis === 'Sold but not reported (store owes me)'
+      ? `Closed cycle — invoiced ${money(varVal)} for ${variance} sold-not-reported bags. New cycle opens at ${shelf} on the shelf.`
+      : `Closed cycle — wrote off ${variance} bags (${money(varVal)})${c.diagnosis ? ` as ${c.diagnosis.toLowerCase()}` : ''}. New cycle opens at ${shelf} on the shelf.`
+    else note = `Closed cycle — reconciled clean. New cycle opens at ${shelf} on the shelf.`
+    upd(id, { sent: shelf, paid: 0, returned: 0, counted: shelf, diagnosis: '', cycle: (c.cycle || 1) + 1 }, note)
+    setExpanded(null)
+  }
   const addExpense = () => { if (!ef.vendor.trim()) return; setExpenses([{ id: uid(), vendor: ef.vendor.trim(), cat: ef.cat || 'Other', amt: Number(ef.amt) || 0, pay: 'personal' }, ...expenses]); setEf({ vendor: '', amt: '', cat: 'Other', pay: 'personal' }); setAddingE(false) }
   const removeExpense = (id) => setExpenses(expenses.filter(e => e.id !== id))
   const importCSV = (e) => {
@@ -573,7 +586,7 @@ export default function JerkyMunch() {
                         <div>
                           <div style={{ ...big, fontSize: '20px', color: INK }}>{c.store}</div>
                           <div style={{ fontSize: '12px', color: MUTED, marginTop: '3px' }}>
-                            {money(c.price)}/unit · sent {c.sent} · paid for {c.paidUnits} · {money(c.paid)} collected
+                            {money(c.price)}/unit · sent {c.sent} · paid for {c.paidUnits} · {money(c.paid)} collected · cycle {c.cycle || 1}
                           </div>
                         </div>
                         <span style={{ fontFamily: "'Inter', sans-serif", fontSize: '12px', fontWeight: 600, color: '#fff', background: badge.c, padding: '5px 11px', borderRadius: '20px', whiteSpace: 'nowrap' }}>{badge.t}</span>
@@ -630,6 +643,14 @@ export default function JerkyMunch() {
                             <button onClick={() => shipMore(c.id)} style={{ background: CHAR, color: CREAM, border: 'none', borderRadius: '9px', padding: '0 14px', ...btn, fontSize: '12px' }}>Ship</button>
                           </div>
                         </div>
+
+                        <div style={{ ...lbl, margin: '18px 0 6px' }}>End of cycle</div>
+                        <button onClick={() => { if (window.confirm(`Close out cycle ${c.cycle || 1} for ${c.store}? This settles the ${c.variance > 0 ? c.variance + ' missing bags' : 'reconciliation'} and starts a fresh cycle from the ${c.counted == null ? 0 : c.counted} bags on the shelf now.`)) closeOut(c.id) }} style={{ width: '100%', background: 'none', color: INK, border: `1px solid ${BORDER}`, borderRadius: '10px', padding: '12px', ...btn }}>Close out this cycle →</button>
+                        <p style={{ fontSize: '12px', color: MUTED, marginTop: '7px', lineHeight: 1.5 }}>
+                          {c.variance > 0
+                            ? <>Settles the <b>{c.variance} missing</b> {c.diagnosis === 'Sold but not reported (store owes me)' ? <>by <b style={{ color: RED }}>invoicing the store {money(c.varVal)}</b></> : <>as a <b>write-off</b></>}, then resets the count clean for the next delivery — so old gaps never bleed into the new cycle.</>
+                            : <>Reconciles clean and resets the count for the next delivery — so old numbers never bleed into the new cycle.</>}
+                        </p>
 
                         {(c.log || []).length > 0 && (
                           <div style={{ marginTop: '16px', borderTop: `1px solid ${CREAM}`, paddingTop: '12px' }}>
