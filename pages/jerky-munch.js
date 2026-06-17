@@ -35,10 +35,10 @@ const SEED_CONSIGN = [
 ]
 
 const SEED_DIRECT = [
-  { id: uid(), who: 'Online store (Shopify)', source: 'Shopify / online', units: 120, rev: 1188 },
-  { id: uid(), who: 'Farmers Market — Toms River', source: 'Farmers market', units: 45, rev: 405 },
-  { id: uid(), who: 'Acme Corp — office bulk order', source: 'Wholesale / bulk', units: 60, rev: 480 },
-  { id: uid(), who: 'Gym pop-up weekend', source: 'Pop-up event', units: 30, rev: 270 },
+  { id: uid(), who: 'Online store (Shopify)', source: 'Shopify / online', units: 120, rev: 1560 },
+  { id: uid(), who: 'Farmers Market — Toms River', source: 'Farmers market', units: 45, rev: 585 },
+  { id: uid(), who: 'Acme Corp — office bulk order', source: 'Wholesale / bulk', units: 60, rev: 540 },
+  { id: uid(), who: 'Gym pop-up weekend', source: 'Pop-up event', units: 30, rev: 390 },
 ]
 const DIRECT_SOURCES = ['Shopify / online', 'Farmers market', 'Pop-up event', 'Wholesale / bulk', 'Other']
 
@@ -102,7 +102,9 @@ const PRODUCTS = [
   { name: 'Barbecue', color: '#9E3B24', week: 22, month: 88 },
   { name: 'Nashville', color: '#C24A22', week: 16, month: 64 },
   { name: 'Maple Bourbon', color: '#97652C', week: 13, month: 50 },
+  { name: 'FirePopper', color: '#B2351A', week: 12, month: 46 },
   { name: 'Teriyaki', color: '#6B4A2A', week: 11, month: 42 },
+  { name: 'Sweet Chili', color: '#A8432C', week: 9, month: 37 },
   { name: 'Cracked Pepper', color: '#46403A', week: 8, month: 33 },
   { name: 'Jalapeño', color: '#5C7C3A', week: 6, month: 25 },
 ]
@@ -119,10 +121,10 @@ const STORE_PERF = [
   { store: 'Superstop', week: 7, weekRev: 56, month: 18, monthRev: 144 },
 ]
 const DIRECT_PERF = [
-  { who: 'Online store (Shopify)', source: 'Shopify / online', week: 31, weekRev: 290, month: 120, monthRev: 1188 },
-  { who: 'Gym pop-up weekend', source: 'Pop-up event', week: 30, weekRev: 270, month: 30, monthRev: 270 },
-  { who: 'Farmers Market — Toms River', source: 'Farmers market', week: 20, weekRev: 180, month: 45, monthRev: 405 },
-  { who: 'Acme Corp — office bulk', source: 'Wholesale / bulk', week: 0, weekRev: 0, month: 60, monthRev: 480 },
+  { who: 'Online store (Shopify)', source: 'Shopify / online', week: 31, weekRev: 403, month: 120, monthRev: 1560 },
+  { who: 'Gym pop-up weekend', source: 'Pop-up event', week: 30, weekRev: 390, month: 30, monthRev: 390 },
+  { who: 'Farmers Market — Toms River', source: 'Farmers market', week: 20, weekRev: 260, month: 45, monthRev: 585 },
+  { who: 'Acme Corp — office bulk', source: 'Wholesale / bulk', week: 0, weekRev: 0, month: 60, monthRev: 540 },
 ]
 const Bag = ({ color }) => (
   <svg width="58" height="58" viewBox="0 0 64 64" style={{ display: 'block', margin: '0 auto' }}>
@@ -153,9 +155,7 @@ export default function JerkyMunch() {
   const [df, setDf] = useState({ who: '', source: 'Shopify / online', units: '', rev: '' })
   const [pnlMonths, setPnlMonths] = useState(2)
   const [pnlView, setPnlView] = useState('single')
-  const [storePer, setStorePer] = useState('month')
-  const [directPer, setDirectPer] = useState('month')
-  const [flavorPer, setFlavorPer] = useState('month')
+  const [period, setPeriod] = useState('month')
   const [logoOk, setLogoOk] = useState(true)
   const [addingA, setAddingA] = useState(false)
   const [af, setAf] = useState({ channel: '', spend: '', rev: '', track: '' })
@@ -240,7 +240,7 @@ export default function JerkyMunch() {
   const grossProfit = revenue - cogs
   const totalOpex = opexNonAd + adSpend
   const netProfit = grossProfit - totalOpex
-  const bagsMonth = PRODUCTS.reduce((s, p) => s + p.month, 0)
+  const bagsPeriod = PRODUCTS.reduce((s, p) => s + p[period], 0)
   const bagsOut = R.reduce((s, c) => s + Math.max(c.expected, 0), 0)
 
   // multi-month series — current month appended live so interactivity flows through
@@ -382,20 +382,23 @@ export default function JerkyMunch() {
           {/* ===== OVERVIEW ===== */}
           {tab === 'overview' && (
             <>
+              <div style={{ display: 'flex', gap: '6px', marginBottom: '16px', flexWrap: 'wrap' }}>
+                {[['week', 'This week'], ['month', 'This month']].map(([v, l]) => (
+                  <button key={v} onClick={() => setPeriod(v)} style={{ padding: '8px 16px', borderRadius: '18px', border: `1px solid ${period === v ? CHAR : BORDER}`, background: period === v ? CHAR : CARDBG, color: period === v ? CREAM : MUTED, ...btn }}>{l}</button>
+                ))}
+              </div>
+
               <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap', marginBottom: '16px' }}>
-                <KPI k="Bags sold this month" v={bagsMonth} sub="across all flavors" accent={INK} />
-                <KPI k="Revenue / mo" v={m0(revenue)} sub={`${bagsMonth} bags this month`} accent={SPICE} />
+                <KPI k={`Bags sold this ${period}`} v={bagsPeriod} sub="across all flavors" accent={INK} />
+                <KPI k="Revenue / mo" v={m0(revenue)} sub={`${bagsPeriod} bags this ${period}`} accent={SPICE} />
                 <KPI k="Out on consignment" v={m0(onShelfVal)} sub={`${bagsOut} bags sitting in stores`} accent={KRAFT} />
                 <KPI k="Missing pieces" v={`${missUnits}`} sub={`${m0(missVal)} to investigate`} accent={missUnits ? RED : GREEN} />
               </div>
 
               <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap', marginBottom: '16px' }}>
                 <div style={{ ...card, flex: 1, minWidth: '290px' }}>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '8px', marginBottom: '14px' }}>
-                    <div style={{ ...lbl }}>Top consignment stores</div>
-                    <MiniToggle value={storePer} onChange={setStorePer} />
-                  </div>
-                  {(() => { const pv = s => storePer === 'week' ? s.weekRev : s.monthRev; const pb = s => storePer === 'week' ? s.week : s.month; const sorted = STORE_PERF.slice().sort((a, b) => pv(b) - pv(a)); const max = pv(sorted[0]) || 1; return sorted.slice(0, 6).map((c, i) => (
+                  <div style={{ ...lbl, marginBottom: '14px' }}>Top consignment stores · this {period}</div>
+                  {(() => { const pv = s => period === 'week' ? s.weekRev : s.monthRev; const pb = s => period === 'week' ? s.week : s.month; const sorted = STORE_PERF.slice().sort((a, b) => pv(b) - pv(a)); const max = pv(sorted[0]) || 1; return sorted.slice(0, 6).map((c, i) => (
                     <div key={c.store} style={{ padding: '9px 0', borderTop: i ? `1px solid ${CREAM}` : 'none' }}>
                       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', gap: '8px', marginBottom: '6px' }}>
                         <span style={{ fontWeight: 600, color: INK, fontSize: '14px' }}>{c.store}</span>
@@ -411,11 +414,8 @@ export default function JerkyMunch() {
                   )) })()}
                 </div>
                 <div style={{ ...card, flex: 1, minWidth: '290px' }}>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '8px', marginBottom: '14px' }}>
-                    <div style={{ ...lbl }}>Top direct sales</div>
-                    <MiniToggle value={directPer} onChange={setDirectPer} />
-                  </div>
-                  {(() => { const pv = s => directPer === 'week' ? s.weekRev : s.monthRev; const pb = s => directPer === 'week' ? s.week : s.month; const sorted = DIRECT_PERF.slice().sort((a, b) => pv(b) - pv(a)); const max = pv(sorted[0]) || 1; return sorted.map((d, i) => (
+                  <div style={{ ...lbl, marginBottom: '14px' }}>Top direct sales · this {period}</div>
+                  {(() => { const pv = s => period === 'week' ? s.weekRev : s.monthRev; const pb = s => period === 'week' ? s.week : s.month; const sorted = DIRECT_PERF.slice().sort((a, b) => pv(b) - pv(a)); const max = pv(sorted[0]) || 1; return sorted.map((d, i) => (
                     <div key={d.who} style={{ padding: '9px 0', borderTop: i ? `1px solid ${CREAM}` : 'none' }}>
                       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', gap: '8px', marginBottom: '6px' }}>
                         <span style={{ fontWeight: 600, color: INK, fontSize: '14px' }}>{d.who}</span>
@@ -433,20 +433,17 @@ export default function JerkyMunch() {
               </div>
 
               <div style={{ ...card }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '8px', marginBottom: '16px' }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap' }}>
-                    <div style={{ ...lbl }}>Sold by flavor</div>
-                    <MiniToggle value={flavorPer} onChange={setFlavorPer} />
-                  </div>
-                  <div style={{ fontSize: '13px', color: MUTED }}><b style={{ ...big, fontSize: '18px', color: INK }}>{PRODUCTS.reduce((s, p) => s + p[flavorPer], 0)}</b> bags this {flavorPer}</div>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', flexWrap: 'wrap', gap: '8px', marginBottom: '16px' }}>
+                  <div style={{ ...lbl }}>Sold this {period}, by flavor</div>
+                  <div style={{ fontSize: '13px', color: MUTED }}><b style={{ ...big, fontSize: '18px', color: INK }}>{bagsPeriod}</b> bags total</div>
                 </div>
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(148px, 1fr))', gap: '12px' }}>
-                  {PRODUCTS.slice().sort((a, b) => b[flavorPer] - a[flavorPer]).map(p => (
+                  {PRODUCTS.slice().sort((a, b) => b[period] - a[period]).map(p => (
                     <div key={p.name} style={{ border: `1px solid ${BORDER}`, borderRadius: '12px', padding: '16px 12px 14px', textAlign: 'center', background: CREAM }}>
                       <Bag color={p.color} />
                       <div style={{ fontWeight: 600, color: INK, marginTop: '8px', fontSize: '14px' }}>{p.name}</div>
-                      <div style={{ ...big, fontSize: '26px', color: INK, marginTop: '4px' }}>{p[flavorPer]}</div>
-                      <div style={{ fontSize: '11px', color: MUTED }}>bags this {flavorPer}</div>
+                      <div style={{ ...big, fontSize: '26px', color: INK, marginTop: '4px' }}>{p[period]}</div>
+                      <div style={{ fontSize: '11px', color: MUTED }}>bags this {period}</div>
                     </div>
                   ))}
                 </div>
@@ -684,7 +681,7 @@ export default function JerkyMunch() {
               <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap', marginBottom: '16px' }}>
                 <KPI k="Direct revenue" v={m0(directRev)} sub="cash in hand" accent={GREEN} />
                 <KPI k="Units sold" v={directUnits} sub="direct channel" />
-                <KPI k="Avg $ / unit" v={directUnits ? money(directRev / directUnits) : '—'} sub="vs ~$6.3 consignment" accent={SPICE} />
+                <KPI k="Avg $ / unit" v={directUnits ? money(directRev / directUnits) : '—'} sub="$13 retail vs ~$8.5 consignment" accent={SPICE} />
               </div>
               <p style={{ fontSize: '13px', color: MUTED, marginBottom: '14px', lineHeight: 1.5 }}>
                 Direct clears at a <b style={{ color: INK }}>higher margin</b> than consignment — no store cut, paid on the spot. <b style={{ color: INK }}>Online orders sync from Shopify, market & pop-up sales from your Square reader, cash & wholesale you log here.</b>
