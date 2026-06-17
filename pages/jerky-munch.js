@@ -156,6 +156,7 @@ export default function JerkyMunch() {
   const [pnlMonths, setPnlMonths] = useState(2)
   const [pnlView, setPnlView] = useState('single')
   const [period, setPeriod] = useState('month')
+  const [costPerBag, setCostPerBag] = useState(4.5)
   const [logoOk, setLogoOk] = useState(true)
   const [addingA, setAddingA] = useState(false)
   const [af, setAf] = useState({ channel: '', spend: '', rev: '', track: '' })
@@ -235,7 +236,9 @@ export default function JerkyMunch() {
 
   // P&L
   const pct = (n) => revenue ? Math.round(n / revenue * 100) : 0
-  const cogs = expenses.filter(e => COGS_CATS.includes(e.cat)).reduce((s, e) => s + e.amt, 0)
+  const soldBags = directUnits + R.reduce((s, c) => s + c.paidUnits, 0)
+  const cogs = soldBags * costPerBag
+  const directProfit = directRev - directUnits * costPerBag
   const opexNonAd = expenses.filter(e => !COGS_CATS.includes(e.cat)).reduce((s, e) => s + e.amt, 0)
   const grossProfit = revenue - cogs
   const totalOpex = opexNonAd + adSpend
@@ -264,7 +267,7 @@ export default function JerkyMunch() {
   const rangeRev = lines.reduce((s, l) => s + l.rev, 0)
 
   const card = { background: CARDBG, border: `1px solid ${BORDER}`, borderRadius: '14px', padding: '20px' }
-  const lbl = { fontFamily: "'Inter', sans-serif", fontSize: '12px', fontWeight: 600, letterSpacing: '0.1px', color: '#96866C' }
+  const lbl = { fontFamily: "'Inter', sans-serif", fontSize: '11px', fontWeight: 600, letterSpacing: '0.7px', textTransform: 'uppercase', color: '#96866C' }
   const inp = { padding: '10px 12px', fontSize: '14px', border: `1px solid ${BORDER}`, borderRadius: '9px', background: CREAM, color: INK, outline: 'none', fontFamily: 'inherit' }
   const big = { fontFamily: "'Inter', sans-serif", fontWeight: 700, letterSpacing: '-0.4px' }
   const btn = { fontFamily: "'Inter', sans-serif", fontWeight: 600, fontSize: '13px', letterSpacing: '0.1px', cursor: 'pointer' }
@@ -475,9 +478,13 @@ export default function JerkyMunch() {
                 <Row l="Direct sales" v={m0(directRev)} />
                 <Row l="Consignment (collected)" v={m0(cashCollected)} />
                 <Row l="Total revenue" v={m0(revenue)} bold top />
-                <div style={{ ...lbl, color: KRAFT, margin: '16px 0 4px' }}>Cost of goods sold</div>
-                {COGS_CATS.map(cat => { const v = expenses.filter(e => e.cat === cat).reduce((s, e) => s + e.amt, 0); return v > 0 ? <Row key={cat} l={cat} v={`−${m0(v)}`} /> : null })}
-                <Row l="Total COGS" v={`−${m0(cogs)}`} bold top />
+                <div style={{ ...lbl, color: KRAFT, margin: '16px 0 6px' }}>Cost of goods sold</div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '2px 0 8px', flexWrap: 'wrap' }}>
+                  <span style={{ fontSize: '13px', color: MUTED }}>Cost to make one bag:</span>
+                  <span style={{ display: 'inline-flex', alignItems: 'center', gap: '3px', color: MUTED }}>$<input value={costPerBag} onChange={e => setCostPerBag(Number(e.target.value) || 0)} type="number" step="0.25" style={{ ...inp, width: '74px', padding: '6px 9px' }} /></span>
+                  <span style={{ fontSize: '12px', color: '#A2937A' }}>← estimate, set the real number</span>
+                </div>
+                <Row l={`Cost of goods sold (${soldBags} bags × ${money(costPerBag)})`} v={`−${m0(cogs)}`} />
                 <Row l={`Gross profit  ·  ${pct(grossProfit)}% margin`} v={m0(grossProfit)} bold top />
                 <div style={{ ...lbl, color: KRAFT, margin: '16px 0 4px' }}>Operating expenses</div>
                 <Row l="Advertising" v={`−${m0(adSpend)}`} />
@@ -680,8 +687,9 @@ export default function JerkyMunch() {
             <>
               <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap', marginBottom: '16px' }}>
                 <KPI k="Direct revenue" v={m0(directRev)} sub="cash in hand" accent={GREEN} />
+                <KPI k="Direct profit" v={m0(directProfit)} sub={`after $${costPerBag}/bag cost`} accent={SPICE} />
                 <KPI k="Units sold" v={directUnits} sub="direct channel" />
-                <KPI k="Avg $ / unit" v={directUnits ? money(directRev / directUnits) : '—'} sub="$13 retail vs ~$8.5 consignment" accent={SPICE} />
+                <KPI k="Avg $ / unit" v={directUnits ? money(directRev / directUnits) : '—'} sub="$13 retail vs ~$8.5 consignment" accent={KRAFT} />
               </div>
               <p style={{ fontSize: '13px', color: MUTED, marginBottom: '14px', lineHeight: 1.5 }}>
                 Direct clears at a <b style={{ color: INK }}>higher margin</b> than consignment — no store cut, paid on the spot. <b style={{ color: INK }}>Online orders sync from Shopify, market & pop-up sales from your Square reader, cash & wholesale you log here.</b>
@@ -712,7 +720,7 @@ export default function JerkyMunch() {
                   <div>
                     <div style={{ ...big, fontSize: '18px', color: INK }}>{d.who}</div>
                     <div style={{ fontSize: '12px', color: MUTED, marginTop: '2px' }}>
-                      <span style={{ fontWeight: 600, color: KRAFT }}>{d.source}</span> · {d.units} units · {d.units ? money(d.rev / d.units) : '$0'}/unit
+                      <span style={{ fontWeight: 600, color: KRAFT }}>{d.source}</span> · {d.units} units · {d.units ? money(d.rev / d.units) : '$0'}/unit · <span style={{ color: GREEN, fontWeight: 600 }}>{m0(d.rev - d.units * costPerBag)} profit</span>
                     </div>
                   </div>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
