@@ -276,13 +276,11 @@ export default function JerkyMunch() {
       <div className="jm-shell">
         {/* Sidebar */}
         <aside className="jm-side">
-          <div style={{ padding: '0 6px 16px' }}>
-            {logoOk
-              ? <div style={{ background: '#FCEFE6', borderRadius: '12px', padding: '10px 12px' }}>
-                  <img src="/jerky-logo.png" alt="Jerky Munch" onError={() => setLogoOk(false)} style={{ width: '100%', maxWidth: '160px', display: 'block' }} />
-                </div>
-              : <div style={{ ...big, fontSize: '22px', color: CREAM }}>Jerky Munch</div>}
-            <div style={{ ...lbl, color: '#B6A78C', marginTop: '8px', paddingLeft: '4px' }}>Dashboard</div>
+          <div style={{ padding: '2px 8px 16px' }}>
+            <div style={{ ...big, fontSize: '25px', letterSpacing: '-0.5px', lineHeight: 1 }}>
+              <span style={{ color: SPICE }}>Jerky</span> <span style={{ color: '#E0863A' }}>Munch</span>
+            </div>
+            <div style={{ ...lbl, color: '#B6A78C', marginTop: '7px' }}>Dashboard</div>
           </div>
           <nav className="jm-nav">
             {TABS.map(([id, label]) => {
