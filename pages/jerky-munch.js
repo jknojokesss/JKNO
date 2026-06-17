@@ -47,6 +47,7 @@ const SEED_ADS = [
   { id: uid(), channel: 'Flyers / print', spend: 120, rev: 90, track: 'Estimated — needs a promo code', tracked: false },
 ]
 const COGS_CATS = ['Ingredients', 'Packaging']
+const EXP_CATS = ['Ingredients', 'Packaging', 'Marketing', 'Fees', 'Equipment', 'Travel', 'Other']
 const DIAGNOSES = ['', 'Sold but not reported (store owes me)', 'Theft / shrinkage', 'Damaged or expired', 'Free samples given out', 'Miscount — recount needed', 'Unknown — investigating']
 const verdict = (roas) => roas >= 2 ? { c: GREEN, t: 'Scale' } : roas >= 1 ? { c: AMBER, t: 'Watch' } : { c: RED, t: 'Cut' }
 
@@ -124,7 +125,7 @@ export default function JerkyMunch() {
   const [cf, setCf] = useState({ store: '', price: '', sent: '' })
   const [expenses, setExpenses] = useState(SEED_EXPENSES)
   const [addingE, setAddingE] = useState(false)
-  const [ef, setEf] = useState({ vendor: '', amt: '', pay: 'personal' })
+  const [ef, setEf] = useState({ vendor: '', amt: '', cat: 'Other', pay: 'personal' })
   const [addingD, setAddingD] = useState(false)
   const [df, setDf] = useState({ who: '', source: 'Shopify / online', units: '', rev: '' })
   const [pnlMonths, setPnlMonths] = useState(2)
@@ -147,8 +148,8 @@ export default function JerkyMunch() {
   const logCount = (id) => { const n = dv(id + '_cnt'); if (n !== '') { upd(id, { counted: Number(n), countedDate: todayStr }, `Counted ${n} on shelf`); setDv(id + '_cnt', '') } }
   const shipMore = (id) => { const n = Number(dv(id + '_shp')); if (n > 0) { const c = consign.find(x => x.id === id); upd(id, { sent: c.sent + n }, `Shipped ${n} more units`); setDv(id + '_shp', '') } }
   const addPartner = () => { if (!cf.store.trim()) return; setConsign([{ id: uid(), store: cf.store.trim(), price: Number(cf.price) || 0, sent: Number(cf.sent) || 0, returned: 0, paid: 0, counted: null, countedDate: '', diagnosis: '', log: [{ at: new Date().toLocaleDateString([], { month: 'short', day: 'numeric' }), t: 'Added consignment partner' }] }, ...consign]); setCf({ store: '', price: '', sent: '' }); setAdding(false) }
-  const setExpensePay = (id, pay) => setExpenses(expenses.map(e => e.id === id ? { ...e, pay } : e))
-  const addExpense = () => { if (!ef.vendor.trim()) return; setExpenses([{ id: uid(), vendor: ef.vendor.trim(), cat: 'Other', amt: Number(ef.amt) || 0, pay: ef.pay }, ...expenses]); setEf({ vendor: '', amt: '', pay: 'personal' }); setAddingE(false) }
+  const addExpense = () => { if (!ef.vendor.trim()) return; setExpenses([{ id: uid(), vendor: ef.vendor.trim(), cat: ef.cat || 'Other', amt: Number(ef.amt) || 0, pay: 'personal' }, ...expenses]); setEf({ vendor: '', amt: '', cat: 'Other', pay: 'personal' }); setAddingE(false) }
+  const removeExpense = (id) => setExpenses(expenses.filter(e => e.id !== id))
   const importCSV = (e) => {
     const file = e.target.files && e.target.files[0]; if (!file) return
     const reader = new FileReader()
@@ -160,7 +161,7 @@ export default function JerkyMunch() {
         if (i === 0 && /vendor|name|descr|item/i.test(cols[0] || '')) return
         const vendor = cols[0], amt = Number((cols[1] || '').replace(/[$,]/g, ''))
         if (!vendor || !amt) return
-        out.push({ id: uid(), vendor, cat: cols[2] || 'Other', amt, pay: /personal/i.test(cols[3] || '') ? 'personal' : 'business' })
+        out.push({ id: uid(), vendor, cat: cols[2] || 'Other', amt, pay: 'personal' })
       })
       if (out.length) setExpenses(prev => [...out, ...prev])
       e.target.value = ''
@@ -191,6 +192,7 @@ export default function JerkyMunch() {
   const revenue = directRev + cashCollected
   const totalExp = expenses.reduce((s, e) => s + e.amt, 0)
   const personalExp = expenses.filter(e => e.pay === 'personal').reduce((s, e) => s + e.amt, 0)
+  const personalItems = expenses.filter(e => e.pay === 'personal').length
   const businessExp = totalExp - personalExp
 
   // P&L
@@ -252,7 +254,7 @@ export default function JerkyMunch() {
   )
 
   const TABS = [['overview', 'Overview'], ['pnl', 'P&L'], ['consign', 'Consignment'], ['direct', 'Direct Sales'], ['ads', 'Advertising']]
-  const EXTRA = [['expenses', 'Expenses'], ['quickbooks', 'QuickBooks sync'], ['askai', 'Ask AI']]
+  const EXTRA = [['expenses', 'Import expenses'], ['quickbooks', 'QuickBooks sync'], ['askai', 'Ask AI']]
   const currentLabel = ([...TABS, ...EXTRA].find(t => t[0] === tab) || ['', ''])[1]
 
   return (
@@ -543,6 +545,12 @@ export default function JerkyMunch() {
                         </div>
                         <span style={{ fontFamily: "'Inter', sans-serif", fontSize: '12px', fontWeight: 600, color: '#fff', background: badge.c, padding: '5px 11px', borderRadius: '20px', whiteSpace: 'nowrap' }}>{badge.t}</span>
                       </div>
+                      {c.variance > 0 && c.diagnosis && (
+                        <div style={{ marginTop: '10px', fontSize: '12.5px', color: c.diagnosis.includes('owes') ? RED : INK, background: c.diagnosis.includes('owes') ? '#FBEDE9' : CREAM, border: `1px solid ${c.diagnosis.includes('owes') ? '#E7C3B8' : BORDER}`, borderRadius: '8px', padding: '8px 11px', display: 'flex', alignItems: 'center', gap: '7px' }}>
+                          <span style={{ width: '7px', height: '7px', borderRadius: '50%', background: c.diagnosis.includes('owes') ? RED : KRAFT, flexShrink: 0 }} />
+                          <span>Diagnosed: <b>{c.diagnosis}</b></span>
+                        </div>
+                      )}
                     </div>
 
                     {open && (
@@ -660,49 +668,49 @@ export default function JerkyMunch() {
           {/* ===== EXPENSES ===== */}
           {tab === 'expenses' && (
             <>
-              <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap', marginBottom: '16px' }}>
-                <KPI k="Total spend / mo" v={m0(totalExp)} sub="all business costs" />
-                <KPI k="On personal card" v={m0(personalExp)} sub="mixed in — needs fixing" accent={RED} />
-                <KPI k="On business acct" v={m0(businessExp)} sub="clean & separate" accent={GREEN} />
+              <div style={{ ...card, marginBottom: '16px' }}>
+                <div style={{ ...big, fontSize: '18px', color: INK, marginBottom: '6px' }}>Personal-card expenses only</div>
+                <p style={{ fontSize: '13.5px', color: MUTED, lineHeight: 1.55 }}>Anything on a <b style={{ color: INK }}>business card</b> already flows in through <b style={{ color: INK }}>QuickBooks</b>. This is just for what you put on your <b style={{ color: INK }}>personal card</b> — import a statement or add them by hand so each one <b style={{ color: INK }}>hits your P&L</b>, you keep the deduction, and the business pays you back.</p>
               </div>
-              <div style={{ ...card, background: '#FBEDE9', borderColor: '#E7C3B8', marginBottom: '16px', fontSize: '14px', color: INK, lineHeight: 1.55 }}>
-                <b>{m0(personalExp)}</b> of business expenses ran through your <b>personal credit card</b> this month. Two problems: the business owes that money back to <i>you</i>, and if it never hits the books you <b>lose the deduction and overpay the IRS</b>. Add them here — personal card or business — and <b>every one flows straight into your P&L</b>.
+              <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap', marginBottom: '16px' }}>
+                <KPI k="On your personal card" v={m0(personalExp)} sub="the business owes you this back" accent={RED} />
+                <KPI k="Items this month" v={personalItems} sub="all flow into your P&L" accent={KRAFT} />
               </div>
 
               {!addingE ? (
                 <>
                   <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', marginBottom: '8px' }}>
-                    <button onClick={() => setAddingE(true)} style={{ flex: 1, minWidth: '160px', background: CHAR, color: CREAM, border: 'none', borderRadius: '11px', padding: '13px', ...btn }}>+ Add an expense</button>
-                    <button onClick={() => fileRef.current && fileRef.current.click()} style={{ flex: 1, minWidth: '160px', background: CARDBG, color: INK, border: `1px solid ${BORDER}`, borderRadius: '11px', padding: '13px', ...btn }}>Import CSV</button>
+                    <button onClick={() => fileRef.current && fileRef.current.click()} style={{ flex: 2, minWidth: '180px', background: CHAR, color: CREAM, border: 'none', borderRadius: '11px', padding: '13px', ...btn }}>Import expenses (CSV)</button>
+                    <button onClick={() => setAddingE(true)} style={{ flex: 1, minWidth: '150px', background: CARDBG, color: INK, border: `1px solid ${BORDER}`, borderRadius: '11px', padding: '13px', ...btn }}>Add one manually</button>
                     <input ref={fileRef} type="file" accept=".csv,text/csv" onChange={importCSV} style={{ display: 'none' }} />
                   </div>
-                  <p style={{ fontSize: '12px', color: MUTED, marginBottom: '16px' }}>CSV columns: vendor, amount, category, business/personal — drop in a bank or card export and it loads instantly.</p>
+                  <p style={{ fontSize: '12px', color: MUTED, marginBottom: '16px' }}>Drop in your personal-card statement (CSV: vendor, amount, category) and every line loads at once.</p>
                 </>
               ) : (
                 <div style={{ ...card, marginBottom: '16px' }}>
-                  <div style={{ ...lbl, marginBottom: '12px' }}>New expense</div>
+                  <div style={{ ...lbl, marginBottom: '12px' }}>New personal-card expense</div>
                   <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
                     <input value={ef.vendor} onChange={e => setEf({ ...ef, vendor: e.target.value })} placeholder="What was it? *" style={{ ...inp, flex: 2, minWidth: '160px' }} />
                     <input value={ef.amt} onChange={e => setEf({ ...ef, amt: e.target.value })} type="number" placeholder="$ amount" style={{ ...inp, flex: 1, minWidth: '100px' }} />
-                    <select value={ef.pay} onChange={e => setEf({ ...ef, pay: e.target.value })} style={{ ...inp, flex: 1, minWidth: '150px', cursor: 'pointer' }}>
-                      {PAY.map(p => <option key={p.id} value={p.id}>{p.label}</option>)}
+                    <select value={ef.cat} onChange={e => setEf({ ...ef, cat: e.target.value })} style={{ ...inp, flex: 1, minWidth: '140px', cursor: 'pointer' }}>
+                      {EXP_CATS.map(c => <option key={c}>{c}</option>)}
                     </select>
                   </div>
                   <div style={{ display: 'flex', gap: '8px', marginTop: '12px' }}>
                     <button onClick={() => setAddingE(false)} style={{ flex: 1, background: 'none', border: `1px solid ${BORDER}`, borderRadius: '9px', padding: '11px', ...btn, color: MUTED }}>Cancel</button>
-                    <button onClick={addExpense} style={{ flex: 2, background: SPICE, color: '#fff', border: 'none', borderRadius: '9px', padding: '11px', ...btn }}>+ Add expense</button>
+                    <button onClick={addExpense} style={{ flex: 2, background: SPICE, color: '#fff', border: 'none', borderRadius: '9px', padding: '11px', ...btn }}>Add expense</button>
                   </div>
                 </div>
               )}
-              {expenses.map(e => (
-                <div key={e.id} style={{ ...card, marginBottom: '10px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '10px', borderColor: e.pay === 'personal' ? '#E7C3B8' : BORDER }}>
+              {expenses.filter(e => e.pay === 'personal').map(e => (
+                <div key={e.id} style={{ ...card, marginBottom: '10px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '10px' }}>
                   <div>
                     <div style={{ ...big, fontSize: '17px', color: INK }}>{e.vendor}</div>
                     <div style={{ fontSize: '12px', color: MUTED, marginTop: '3px' }}>{e.cat}</div>
                   </div>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                    <span style={{ ...big, fontSize: '19px', color: e.pay === 'personal' ? RED : INK }}>{m0(e.amt)}</span>
-                    <Pill value={e.pay} opts={PAY} map={PAYM} onChange={(v) => setExpensePay(e.id, v)} />
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
+                    <span style={{ ...big, fontSize: '19px', color: RED }}>{m0(e.amt)}</span>
+                    <button onClick={() => removeExpense(e.id)} style={{ background: 'none', border: 'none', color: '#C9BBA0', fontSize: '18px', cursor: 'pointer', lineHeight: 1 }}>×</button>
                   </div>
                 </div>
               ))}
