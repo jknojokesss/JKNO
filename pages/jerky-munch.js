@@ -201,6 +201,19 @@ export default function JerkyMunch() {
     a.download = 'personal-card-expenses.csv'
     a.click()
   }
+  const exportClose = () => {
+    const rows = [['Account', 'Amount'],
+      ['Consignment income', cashCollected],
+      ['Direct income (non-Shopify)', offlineDirectRev],
+      ['Cost of goods sold', -closeCogs],
+      ['AR — invoice stores (sold-not-reported)', closeAR],
+      ['(Shopify online — booked via Shopify, do NOT re-enter)', shopifyRev]]
+    const csv = rows.map(r => r.map(x => `"${String(x).replace(/"/g, '""')}"`).join(',')).join('\n')
+    const a = document.createElement('a')
+    a.href = 'data:text/csv;charset=utf-8,' + encodeURIComponent(csv)
+    a.download = 'monthly-close-to-quickbooks.csv'
+    a.click()
+  }
   const importCSV = (e) => {
     const file = e.target.files && e.target.files[0]; if (!file) return
     const reader = new FileReader()
@@ -258,6 +271,16 @@ export default function JerkyMunch() {
   const bagsPeriod = PRODUCTS.reduce((s, p) => s + p[period], 0)
   const bagsOut = R.reduce((s, c) => s + Math.max(c.expected, 0), 0)
 
+  // monthly close → QB (Shopify online excluded — it books through Shopify, no double-count)
+  const shopifyRev = direct.filter(d => d.source === 'Shopify / online').reduce((s, d) => s + d.rev, 0)
+  const offlineDirectRev = direct.filter(d => d.source !== 'Shopify / online').reduce((s, d) => s + d.rev, 0)
+  const offlineDirectUnits = direct.filter(d => d.source !== 'Shopify / online').reduce((s, d) => s + d.units, 0)
+  const consignUnits = R.reduce((s, c) => s + c.paidUnits, 0)
+  const closeIncome = cashCollected + offlineDirectRev
+  const closeUnits = consignUnits + offlineDirectUnits
+  const closeCogs = closeUnits * costPerBag
+  const closeAR = R.filter(c => c.variance > 0 && c.diagnosis === 'Sold but not reported (store owes me)').reduce((s, c) => s + c.varVal, 0)
+
   // multi-month series — current month appended live so interactivity flows through
   const thisMonth = new Date().toLocaleString('en-US', { month: 'short' })
   const monthsAll = [...MONTH_SERIES, { m: thisMonth, directRev, consignRev: cashCollected, cogs, adSpend, opexNonAd }]
@@ -314,7 +337,7 @@ export default function JerkyMunch() {
   )
 
   const TABS = [['overview', 'Overview'], ['consign', 'Consignment'], ['direct', 'Direct Sales'], ['ads', 'Advertising'], ['pnl', 'P&L']]
-  const EXTRA = [['expenses', 'Import expenses'], ['quickbooks', 'QuickBooks sync'], ['askai', 'Ask AI']]
+  const EXTRA = [['expenses', 'Import expenses'], ['quickbooks', 'QuickBooks sync'], ['close', 'Monthly close'], ['askai', 'Ask AI']]
   const currentLabel = ([...TABS, ...EXTRA].find(t => t[0] === tab) || ['', ''])[1]
 
   return (
@@ -946,6 +969,46 @@ export default function JerkyMunch() {
               <div style={{ ...card, background: '#EAF3EC', borderColor: '#CFE4D6', fontSize: '13.5px', color: INK, lineHeight: 1.55 }}>
                 Both files are in, so your P&L, account balances, and this whole dashboard reflect your real books. Each month you just drop in the fresh GL — takes about a minute.
               </div>
+            </>
+          )}
+
+          {/* ===== MONTHLY CLOSE → QB ===== */}
+          {tab === 'close' && (
+            <>
+              <div style={{ ...card, marginBottom: '16px' }}>
+                <div style={{ ...big, fontSize: '18px', color: INK, marginBottom: '6px' }}>Monthly close → QuickBooks</div>
+                <p style={{ fontSize: '13.5px', color: MUTED, lineHeight: 1.55 }}>Exactly what to post to QuickBooks this month. <b style={{ color: INK }}>Shopify online sales aren't in here</b> — they book through Shopify, so nothing doubles up. This is everything Shopify can't see, already categorized.</p>
+              </div>
+
+              <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap', marginBottom: '16px' }}>
+                <KPI k="Income to post" v={m0(closeIncome)} sub="consignment + offline direct" accent={GREEN} />
+                <KPI k="COGS to post" v={m0(closeCogs)} sub={`${closeUnits} bags × ${money(costPerBag)}`} accent={KRAFT} />
+                <KPI k="AR to invoice" v={m0(closeAR)} sub="stores that owe you" accent={closeAR ? RED : MUTED} />
+              </div>
+
+              <div style={{ ...card }}>
+                <div style={{ ...lbl, color: KRAFT, margin: '2px 0 4px' }}>Income to post</div>
+                <Row l="Consignment collected" v={m0(cashCollected)} />
+                <Row l="Direct sales — non-Shopify (market, pop-up, cash, wholesale)" v={m0(offlineDirectRev)} />
+                <Row l="Total income to post" v={m0(closeIncome)} bold top />
+
+                <div style={{ ...lbl, color: KRAFT, margin: '16px 0 4px' }}>Cost of goods sold</div>
+                <Row l={`${closeUnits} bags sold × ${money(costPerBag)}/bag`} v={`−${m0(closeCogs)}`} bold top />
+
+                <div style={{ ...lbl, color: KRAFT, margin: '16px 0 4px' }}>Accounts receivable</div>
+                <Row l="Invoice stores for sold-not-reported bags" v={m0(closeAR)} bold top />
+                {closeAR === 0 && <p style={{ fontSize: '12px', color: MUTED, marginTop: '4px' }}>None flagged yet — diagnose missing pieces as “sold but not reported” on the Consignment tab to invoice them.</p>}
+
+                <div style={{ marginTop: '16px', padding: '12px 14px', background: CREAM, borderRadius: '10px', border: `1px dashed ${BORDER}` }}>
+                  <div style={{ ...lbl, marginBottom: '4px' }}>Booked elsewhere — do NOT re-enter</div>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '13px', color: MUTED }}>
+                    <span>Shopify online sales <span style={{ color: '#A2937A' }}>(via Shopify → QuickBooks)</span></span>
+                    <span style={{ fontFamily: MONO }}>{m0(shopifyRev)}</span>
+                  </div>
+                </div>
+              </div>
+
+              <button onClick={exportClose} style={{ marginTop: '14px', background: CHAR, color: CREAM, border: 'none', borderRadius: '11px', padding: '13px 20px', ...btn }}>⤓ Export for QuickBooks (CSV)</button>
             </>
           )}
 
