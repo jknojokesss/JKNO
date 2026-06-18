@@ -320,7 +320,15 @@ export default function JerkyMunch() {
   return (
     <>
       <Head>
-        <title>{BIZ} — Dashboard</title>
+        <title>{`${BIZ} — Dashboard`}</title>
+        <meta name="description" content="Every consignment store, every sale, your real profit — one screen." />
+        <meta property="og:title" content="Jerky Munch — Dashboard" />
+        <meta property="og:description" content="Every consignment store, every sale, your real profit — one screen." />
+        <meta property="og:type" content="website" />
+        <meta property="og:url" content="https://www.jknojokes.com/jerky-munch" />
+        <meta name="twitter:card" content="summary" />
+        <meta name="twitter:title" content="Jerky Munch — Dashboard" />
+        <meta name="twitter:description" content="Every consignment store, every sale, your real profit — one screen." />
         <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
         <link rel="manifest" href="/jerky-munch.webmanifest" />
         <meta name="theme-color" content="#2B2018" />
