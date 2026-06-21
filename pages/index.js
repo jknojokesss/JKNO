@@ -61,8 +61,8 @@ export default function Landing() {
     },
     {
       icon: '⬡',
-      title: 'No QuickBooks Required',
-      desc: 'We built our own system from the ground up. That means cleaner data, smarter reporting, and zero bloated software eating into your budget.',
+      title: 'QuickBooks Optional',
+      desc: 'Keep QuickBooks or skip it — your call. We can plug into the books you already have, or run everything on our own system. Either way: cleaner data, smarter reporting, no bloat.',
     },
     {
       icon: '◎',
@@ -85,7 +85,7 @@ export default function Landing() {
     <>
       <Head>
         <title>JK No Jokes Financials — Real-Time Financials for Your Business</title>
-        <meta name="description" content="AI-powered financials with a custom client portal. Real-time numbers, plain-English insights, and dashboards built for your business — no QuickBooks, no bloat." />
+        <meta name="description" content="AI-powered financials with a custom client portal. Real-time numbers, plain-English insights, and dashboards built for your business — with or without QuickBooks." />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600;700&family=DM+Sans:wght@300;400;500&family=DM+Mono:wght@400;500&family=Playfair+Display:wght@700&display=swap" rel="stylesheet" />
@@ -340,7 +340,7 @@ export default function Landing() {
             letterSpacing: '-0.5px', marginBottom: '32px' }}>
             Your financials.<br />
             <span style={{ color: '#C9A84C' }}>No jokes.</span><br />
-            No QuickBooks.
+            No guesswork.
           </h1>
 
           <p className="hero-sub" style={{ fontSize: 'clamp(16px, 2vw, 20px)',
@@ -550,7 +550,7 @@ export default function Landing() {
               { number: 'AI', label: 'Powered Analysis' },
               { number: '24/7', label: 'Portal Access' },
               { number: '100%', label: 'Custom Built' },
-              { number: '0', label: 'QuickBooks' },
+              { number: '0', label: 'Guesswork' },
             ].map((stat, i) => (
               <div key={i} style={{ background: '#E8E4DC', padding: '36px 28px' }}>
                 <div style={{ fontFamily: 'Cormorant Garamond, serif', fontSize: '40px',
