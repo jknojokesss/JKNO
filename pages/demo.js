@@ -106,7 +106,7 @@ const PRODUCTS = [
   { name: 'Challah', color: '#D8A24A', icon: 'braid', week: 16, month: 64 },
   { name: 'Croissants', color: '#C98A3E', icon: 'croissant', week: 13, month: 50 },
   { name: 'Bagels', color: '#9E6B34', icon: 'bagel', week: 12, month: 46 },
-  { name: 'Cinnamon Babka', color: '#7A4A2E', icon: 'loaf', week: 11, month: 42 },
+  { name: 'Cinnamon Babka', color: '#7A4A2E', icon: 'babka', week: 11, month: 42 },
   { name: 'Rye Bread', color: '#6B4A2A', icon: 'loaf', week: 9, month: 37 },
   { name: 'Muffins', color: '#C2693E', icon: 'muffin', week: 8, month: 33 },
   { name: 'Baguettes', color: '#C99A5A', icon: 'baguette', week: 6, month: 25 },
@@ -182,7 +182,14 @@ const Item = ({ color, type }) => {
       </g>
     </svg>
   )
-  // loaf (default — sourdough / rye / babka)
+  if (type === 'babka') return (
+    <svg width="56" height="56" viewBox="0 0 64 64" style={W}>
+      <rect x="12" y="14" width="40" height="36" rx="9" fill={color} />
+      <rect x="14" y="17" width="36" height="8" rx="6" fill={SH} opacity="0.12" />
+      <path d="M32 32 C32 28.5 36 28.5 36 32 C36 37 28 37 28 31 C28 23.5 40 23.5 40 32 C40 41 24 41 24 31" fill="none" stroke={SH} strokeOpacity="0.42" strokeWidth="3" strokeLinecap="round" />
+    </svg>
+  )
+  // loaf (default — sourdough / rye)
   return (
     <svg width="56" height="56" viewBox="0 0 64 64" style={W}>
       <path d="M9 41 C9 25 22 19 32 19 C42 19 55 25 55 41 C55 46 52 49 47 49 L17 49 C12 49 9 46 9 41 Z" fill={color} />
