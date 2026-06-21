@@ -127,7 +127,7 @@ export default function Login() {
             </div>
             <div style={{ fontFamily: 'DM Mono, monospace', fontSize: '9px',
               letterSpacing: '3px', color: '#C9A84C', textTransform: 'uppercase', marginTop: '8px' }}>
-              No Jokes Bookkeeping
+              No Jokes Financials
             </div>
             <div style={{ width: '40px', height: '1px', background: '#2E3A5C', margin: '16px auto 0' }} />
           </div>

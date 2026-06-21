@@ -57,7 +57,7 @@ export default function Expo() {
             <div style={{ fontFamily: "'Playfair Display', Georgia, serif", fontSize: '30px', fontWeight: 700, letterSpacing: '2px', color: INK }}>
               JK<span style={{ color: GOLD }}>.</span>
             </div>
-            <div style={{ fontFamily: "'DM Mono', monospace", fontSize: '10px', letterSpacing: '3px', color: GOLD, marginTop: '2px' }}>NO JOKES BOOKKEEPING</div>
+            <div style={{ fontFamily: "'DM Mono', monospace", fontSize: '10px', letterSpacing: '3px', color: GOLD, marginTop: '2px' }}>NO JOKES FINANCIALS</div>
           </div>
 
           {status === 'done' ? (

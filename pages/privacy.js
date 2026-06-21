@@ -4,7 +4,7 @@ import { useRouter } from 'next/router'
 const SECTIONS = [
   {
     heading: '1. Introduction',
-    body: 'JK No Jokes Bookkeeping ("we," "us," or "our") operates jknojokes.com and provides financial dashboard and bookkeeping services. This Privacy Policy explains how we collect, use, and protect your information.',
+    body: 'JK No Jokes Financials ("we," "us," or "our") operates jknojokes.com and provides financial dashboard and bookkeeping services. This Privacy Policy explains how we collect, use, and protect your information.',
   },
   {
     heading: '2. Information We Collect',
@@ -72,8 +72,8 @@ export default function Privacy() {
   return (
     <>
       <Head>
-        <title>Privacy Policy — JK No Jokes Bookkeeping</title>
-        <meta name="description" content="Privacy Policy for JK No Jokes Bookkeeping" />
+        <title>Privacy Policy — JK No Jokes Financials</title>
+        <meta name="description" content="Privacy Policy for JK No Jokes Financials" />
         <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600;700&family=DM+Sans:wght@300;400;500&family=DM+Mono:wght@400;500&family=Playfair+Display:wght@700&display=swap" rel="stylesheet" />
         <style>{`* { box-sizing: border-box; margin: 0; padding: 0; } body { background: #F7F4EF; color: #1A1A2E; font-family: 'DM Sans', sans-serif; }`}</style>
       </Head>
@@ -98,7 +98,7 @@ export default function Privacy() {
             Privacy Policy
           </h1>
           <div style={{ fontFamily: 'DM Sans, sans-serif', fontSize: '15px', color: '#5A6070', lineHeight: 1.7 }}>
-            <strong style={{ color: '#1A1A2E' }}>JK No Jokes Bookkeeping</strong><br />
+            <strong style={{ color: '#1A1A2E' }}>JK No Jokes Financials</strong><br />
             Last updated: May 31, 2026
           </div>
         </div>
@@ -134,7 +134,7 @@ export default function Privacy() {
               {s.footer && <p style={{ fontSize: '15px', color: '#5A6070', lineHeight: 1.8 }}>{s.footer}</p>}
               {s.contact && (
                 <div style={{ marginTop: '12px', padding: '20px 24px', background: '#E8E4DC', border: '1px solid #DDD8CE' }}>
-                  <div style={{ fontFamily: 'DM Mono, monospace', fontSize: '13px', fontWeight: '600', color: '#1A1A2E', marginBottom: '6px' }}>JK No Jokes Bookkeeping</div>
+                  <div style={{ fontFamily: 'DM Mono, monospace', fontSize: '13px', fontWeight: '600', color: '#1A1A2E', marginBottom: '6px' }}>JK No Jokes Financials</div>
                   <div style={{ fontSize: '14px', color: '#5A6070' }}>Email: <a href="mailto:jk@jknojokes.com" style={{ color: '#C9A84C', textDecoration: 'none' }}>jk@jknojokes.com</a></div>
                   <div style={{ fontSize: '14px', color: '#5A6070' }}>Website: jknojokes.com</div>
                 </div>
@@ -147,7 +147,7 @@ export default function Privacy() {
       {/* Footer */}
       <footer style={{ borderTop: '1px solid #DDD8CE', padding: '28px 48px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '12px', background: '#F7F4EF' }}>
         <div style={{ fontFamily: 'Playfair Display, serif', fontSize: '18px', fontWeight: '700', letterSpacing: '2px' }}>JK<span style={{ color: '#C9A84C' }}>.</span></div>
-        <div style={{ fontFamily: 'DM Mono, monospace', fontSize: '10px', color: '#5A6070', letterSpacing: '1px' }}>© {new Date().getFullYear()} JK NO JOKES BOOKKEEPING</div>
+        <div style={{ fontFamily: 'DM Mono, monospace', fontSize: '10px', color: '#5A6070', letterSpacing: '1px' }}>© {new Date().getFullYear()} JK NO JOKES FINANCIALS</div>
         <div style={{ display: 'flex', gap: '20px' }}>
           <button onClick={() => router.push('/privacy')} style={{ background: 'none', border: 'none', cursor: 'pointer', fontFamily: 'DM Mono, monospace', fontSize: '10px', color: '#C9A84C', letterSpacing: '1px' }}>PRIVACY</button>
           <button onClick={() => router.push('/terms')} style={{ background: 'none', border: 'none', cursor: 'pointer', fontFamily: 'DM Mono, monospace', fontSize: '10px', color: '#5A6070', letterSpacing: '1px' }}>TERMS</button>

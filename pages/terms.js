@@ -4,11 +4,11 @@ import { useRouter } from 'next/router'
 const SECTIONS = [
   {
     heading: '1. Agreement to Terms',
-    body: 'By accessing or using jknojokes.com or any JK No Jokes Bookkeeping services you agree to be bound by these Terms of Service. If you do not agree to these terms do not use our services.',
+    body: 'By accessing or using jknojokes.com or any JK No Jokes Financials services you agree to be bound by these Terms of Service. If you do not agree to these terms do not use our services.',
   },
   {
     heading: '2. Description of Services',
-    body: 'JK No Jokes Bookkeeping provides:',
+    body: 'JK No Jokes Financials provides:',
     bullets: [
       'Custom financial dashboards and client portals',
       'Bookkeeping and financial reporting services',
@@ -28,7 +28,7 @@ const SECTIONS = [
   },
   {
     heading: '4. Financial Data and Bank Connectivity',
-    body: 'By connecting your bank accounts through our platform you authorize JK No Jokes Bookkeeping to:',
+    body: 'By connecting your bank accounts through our platform you authorize JK No Jokes Financials to:',
     bullets: [
       'Access your transaction history in read-only mode via Plaid',
       'Store and process your financial data to provide our services',
@@ -56,11 +56,11 @@ const SECTIONS = [
   },
   {
     heading: '8. Intellectual Property',
-    body: 'The JK No Jokes Bookkeeping platform, dashboard technology, and all associated software are our proprietary property. You may not copy, reproduce, or reverse engineer any part of our platform.',
+    body: 'The JK No Jokes Financials platform, dashboard technology, and all associated software are our proprietary property. You may not copy, reproduce, or reverse engineer any part of our platform.',
   },
   {
     heading: '9. Limitation of Liability',
-    body: 'To the maximum extent permitted by law JK No Jokes Bookkeeping shall not be liable for any indirect, incidental, special, or consequential damages arising from your use of our services. Our total liability shall not exceed the fees paid by you in the three months prior to the claim.',
+    body: 'To the maximum extent permitted by law JK No Jokes Financials shall not be liable for any indirect, incidental, special, or consequential damages arising from your use of our services. Our total liability shall not exceed the fees paid by you in the three months prior to the claim.',
   },
   {
     heading: '10. Termination',
@@ -86,8 +86,8 @@ export default function Terms() {
   return (
     <>
       <Head>
-        <title>Terms of Service — JK No Jokes Bookkeeping</title>
-        <meta name="description" content="Terms of Service for JK No Jokes Bookkeeping" />
+        <title>Terms of Service — JK No Jokes Financials</title>
+        <meta name="description" content="Terms of Service for JK No Jokes Financials" />
         <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600;700&family=DM+Sans:wght@300;400;500&family=DM+Mono:wght@400;500&family=Playfair+Display:wght@700&display=swap" rel="stylesheet" />
         <style>{`* { box-sizing: border-box; margin: 0; padding: 0; } body { background: #F7F4EF; color: #1A1A2E; font-family: 'DM Sans', sans-serif; }`}</style>
       </Head>
@@ -112,7 +112,7 @@ export default function Terms() {
             Terms of Service
           </h1>
           <div style={{ fontFamily: 'DM Sans, sans-serif', fontSize: '15px', color: '#5A6070', lineHeight: 1.7 }}>
-            <strong style={{ color: '#1A1A2E' }}>JK No Jokes Bookkeeping</strong><br />
+            <strong style={{ color: '#1A1A2E' }}>JK No Jokes Financials</strong><br />
             Last updated: May 31, 2026
           </div>
         </div>
@@ -131,7 +131,7 @@ export default function Terms() {
               {s.footer && <p style={{ fontSize: '15px', color: '#5A6070', lineHeight: 1.8 }}>{s.footer}</p>}
               {s.contact && (
                 <div style={{ marginTop: '12px', padding: '20px 24px', background: '#E8E4DC', border: '1px solid #DDD8CE' }}>
-                  <div style={{ fontFamily: 'DM Mono, monospace', fontSize: '13px', fontWeight: '600', color: '#1A1A2E', marginBottom: '6px' }}>JK No Jokes Bookkeeping</div>
+                  <div style={{ fontFamily: 'DM Mono, monospace', fontSize: '13px', fontWeight: '600', color: '#1A1A2E', marginBottom: '6px' }}>JK No Jokes Financials</div>
                   <div style={{ fontSize: '14px', color: '#5A6070' }}>Email: <a href="mailto:jk@jknojokes.com" style={{ color: '#C9A84C', textDecoration: 'none' }}>jk@jknojokes.com</a></div>
                   <div style={{ fontSize: '14px', color: '#5A6070' }}>Website: jknojokes.com</div>
                 </div>
@@ -144,7 +144,7 @@ export default function Terms() {
       {/* Footer */}
       <footer style={{ borderTop: '1px solid #DDD8CE', padding: '28px 48px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '12px', background: '#F7F4EF' }}>
         <div style={{ fontFamily: 'Playfair Display, serif', fontSize: '18px', fontWeight: '700', letterSpacing: '2px' }}>JK<span style={{ color: '#C9A84C' }}>.</span></div>
-        <div style={{ fontFamily: 'DM Mono, monospace', fontSize: '10px', color: '#5A6070', letterSpacing: '1px' }}>© {new Date().getFullYear()} JK NO JOKES BOOKKEEPING</div>
+        <div style={{ fontFamily: 'DM Mono, monospace', fontSize: '10px', color: '#5A6070', letterSpacing: '1px' }}>© {new Date().getFullYear()} JK NO JOKES FINANCIALS</div>
         <div style={{ display: 'flex', gap: '20px' }}>
           <button onClick={() => router.push('/privacy')} style={{ background: 'none', border: 'none', cursor: 'pointer', fontFamily: 'DM Mono, monospace', fontSize: '10px', color: '#5A6070', letterSpacing: '1px' }}>PRIVACY</button>
           <button onClick={() => router.push('/terms')} style={{ background: 'none', border: 'none', cursor: 'pointer', fontFamily: 'DM Mono, monospace', fontSize: '10px', color: '#C9A84C', letterSpacing: '1px' }}>TERMS</button>

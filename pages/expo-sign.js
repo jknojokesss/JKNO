@@ -48,7 +48,7 @@ export default function ExpoSign() {
         <div style={{ fontFamily: "'Playfair Display', Georgia, serif", fontSize: '40px', fontWeight: 700, letterSpacing: '2px', color: INK }}>
           JK<span style={{ color: GOLD }}>.</span>
         </div>
-        <div style={{ fontFamily: "'DM Mono', monospace", fontSize: '12px', letterSpacing: '4px', color: GOLD, marginTop: '4px' }}>NO JOKES BOOKKEEPING</div>
+        <div style={{ fontFamily: "'DM Mono', monospace", fontSize: '12px', letterSpacing: '4px', color: GOLD, marginTop: '4px' }}>NO JOKES FINANCIALS</div>
 
         <h1 style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: '54px', fontWeight: 700, color: INK, lineHeight: 1.05, margin: '40px 0 8px', maxWidth: '640px' }}>
           Do you know your <span style={{ color: GOLD }}>real</span> profit?

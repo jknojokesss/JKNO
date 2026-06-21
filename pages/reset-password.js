@@ -69,7 +69,7 @@ export default function ResetPassword() {
               fontWeight: '700', color: '#0D0D0D' }}>JK</div>
             <div style={{ fontFamily: 'DM Mono, monospace', fontSize: '10px',
               letterSpacing: '3px', color: '#C9A84C', marginTop: '6px' }}>
-              No Jokes Bookkeeping
+              No Jokes Financials
             </div>
             <div style={{ width: '40px', height: '1px', background: '#C9A84C', margin: '16px auto 0' }} />
           </div>

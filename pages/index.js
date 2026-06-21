@@ -84,8 +84,8 @@ export default function Landing() {
   return (
     <>
       <Head>
-        <title>JK No Jokes Bookkeeping — Modern Bookkeeping for Small Business</title>
-        <meta name="description" content="AI-powered bookkeeping with custom client portals. No QuickBooks. Real-time financials built for your business." />
+        <title>JK No Jokes Financials — Real-Time Financials for Your Business</title>
+        <meta name="description" content="AI-powered financials with a custom client portal. Real-time numbers, plain-English insights, and dashboards built for your business — no QuickBooks, no bloat." />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600;700&family=DM+Sans:wght@300;400;500&family=DM+Mono:wght@400;500&family=Playfair+Display:wght@700&display=swap" rel="stylesheet" />
@@ -331,22 +331,22 @@ export default function Landing() {
           <div style={{ fontFamily: 'DM Mono, monospace', fontSize: '11px',
             letterSpacing: '3px', color: '#C9A84C', marginBottom: '24px',
             animation: 'fadeIn 0.6s ease both' }}>
-            — BOOKKEEPING. REIMAGINED.
+            — FINANCIALS. REIMAGINED.
           </div>
 
           <h1 className="hero-title" style={{ fontFamily: 'Cormorant Garamond, serif',
             fontSize: 'clamp(40px, 6vw, 80px)',
             fontWeight: '600', lineHeight: 1.05,
             letterSpacing: '-0.5px', marginBottom: '32px' }}>
-            Your books.<br />
+            Your financials.<br />
             <span style={{ color: '#C9A84C' }}>No jokes.</span><br />
             No QuickBooks.
           </h1>
 
           <p className="hero-sub" style={{ fontSize: 'clamp(16px, 2vw, 20px)',
             color: '#5A6070', lineHeight: 1.7, maxWidth: '560px', marginBottom: '48px' }}>
-            AI-powered bookkeeping with a custom client portal built for your business.
-            Real-time financials, plain-English insights, and zero bloated software.
+            AI-powered financials with a custom client portal built for your business.
+            Real-time numbers, plain-English insights, and zero bloated software.
           </p>
 
           <div className="hero-cta" style={{ display: 'flex', gap: '16px', flexWrap: 'wrap' }}>
@@ -491,7 +491,7 @@ export default function Landing() {
           </div>
           <h2 style={{ fontFamily: 'Cormorant Garamond, serif', fontSize: 'clamp(32px, 4vw, 52px)',
             fontWeight: '600', letterSpacing: '-1px', lineHeight: 1.1, color: '#1A1A2E' }}>
-            Bookkeeping built for<br />the modern business.
+            Financials built for<br />the modern business.
           </h2>
         </div>
 
@@ -529,10 +529,10 @@ export default function Landing() {
             </div>
             <h2 style={{ fontFamily: 'Cormorant Garamond, serif', fontSize: 'clamp(28px, 3.5vw, 44px)',
               fontWeight: '600', letterSpacing: '-1px', lineHeight: 1.15, marginBottom: '24px' }}>
-              Not your average bookkeeper.
+              Beyond bookkeeping.
             </h2>
             <p style={{ fontSize: '15px', color: '#5A6070', lineHeight: 1.8, marginBottom: '20px' }}>
-              JK No Jokes is a boutique bookkeeping service that combines deep financial expertise with cutting-edge AI technology. We don't just record your numbers — we help you understand them.
+              JK No Jokes Financials is a boutique finance firm that pairs deep financial expertise with cutting-edge AI. We don't just record your numbers — we build the system that turns them into decisions.
             </p>
             <p style={{ fontSize: '15px', color: '#5A6070', lineHeight: 1.8, marginBottom: '32px' }}>
               Every client gets their own custom-built financial portal — a clean, intuitive dashboard that shows exactly how their business is performing, updated in real time, accessible from any device.
@@ -641,7 +641,7 @@ export default function Landing() {
           </div>
           <div style={{ fontFamily: 'DM Mono, monospace', fontSize: '11px',
             color: '#5A6070', letterSpacing: '1px' }}>
-            © {new Date().getFullYear()} JK NO JOKES BOOKKEEPING
+            © {new Date().getFullYear()} JK NO JOKES FINANCIALS
           </div>
           <button className="ghost-btn" style={{ padding: '10px 20px', fontSize: '11px' }}
             onClick={() => router.push('/login')}>
