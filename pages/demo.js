@@ -25,9 +25,9 @@ const recon = (c) => {
 
 const SEED_CONSIGN = [
   { id: uid(), store: 'Midtown Market', price: 8.5, sent: 60, returned: 0, paid: 425, counted: 6, countedDate: '2026-06-15', diagnosis: '', cycle: 1, lastContact: '2026-06-15', restock: 'now', notes: 'Reorders every ~2 weeks. Wants more of the Original.', log: [{ at: 'Jun 15', t: 'Counted 6 on shelf' }, { at: 'Jun 6', t: 'Check received $425' }] },
-  { id: uid(), store: 'Hillside Grocery', price: 8.5, sent: 48, returned: 4, paid: 340, counted: 2, countedDate: '2026-06-15', diagnosis: '', cycle: 1, lastContact: '2026-06-12', restock: 'now', notes: 'Down to 2 bags — promised a delivery this week.', log: [{ at: 'Jun 15', t: 'Counted 2 on shelf' }, { at: 'Jun 5', t: 'Check received $340' }] },
+  { id: uid(), store: 'Hillside Grocery', price: 8.5, sent: 48, returned: 4, paid: 340, counted: 2, countedDate: '2026-06-15', diagnosis: '', cycle: 1, lastContact: '2026-06-12', restock: 'now', notes: 'Down to 2 loaves — promised a delivery this week.', log: [{ at: 'Jun 15', t: 'Counted 2 on shelf' }, { at: 'Jun 5', t: 'Check received $340' }] },
   { id: uid(), store: 'Parkway Foods', price: 9, sent: 54, returned: 0, paid: 360, counted: 14, countedDate: '2026-06-14', diagnosis: '', cycle: 1, lastContact: '2026-06-14', restock: 'good', notes: 'Steady account. Strong seller.', log: [{ at: 'Jun 14', t: 'Counted 14 — reconciles clean' }, { at: 'Jun 4', t: 'Check received $360' }] },
-  { id: uid(), store: 'Cedar Market', price: 8, sent: 40, returned: 0, paid: 200, counted: 8, countedDate: '2026-06-16', diagnosis: '', cycle: 1, lastContact: '2026-05-26', restock: 'soon', notes: "Haven't spoken in ~3 weeks — check in, and ask about the missing bags.", log: [{ at: 'Jun 16', t: 'Counted 8 on shelf' }, { at: 'Jun 2', t: 'Check received $200' }] },
+  { id: uid(), store: 'Cedar Market', price: 8, sent: 40, returned: 0, paid: 200, counted: 8, countedDate: '2026-06-16', diagnosis: '', cycle: 1, lastContact: '2026-05-26', restock: 'soon', notes: "Haven't spoken in ~3 weeks — check in, and ask about the missing items.", log: [{ at: 'Jun 16', t: 'Counted 8 on shelf' }, { at: 'Jun 2', t: 'Check received $200' }] },
   { id: uid(), store: 'Sunrise Grocers', price: 8.5, sent: 36, returned: 0, paid: 255, counted: 4, countedDate: '2026-06-13', diagnosis: '', cycle: 1, lastContact: '2026-06-13', restock: 'soon', notes: 'New buyer contact — trial going well so far.', log: [{ at: 'Jun 13', t: 'Counted 4 on shelf' }, { at: 'Jun 3', t: 'Check received $255' }] },
   { id: uid(), store: 'Harbor Foods', price: 8.5, sent: 44, returned: 0, paid: 340, counted: 4, countedDate: '2026-06-13', diagnosis: '', cycle: 1, lastContact: '2026-06-13', restock: 'good', notes: 'Clean account, always pays on time.', log: [{ at: 'Jun 13', t: 'Counted 4 — reconciles clean' }, { at: 'Jun 3', t: 'Check received $340' }] },
   { id: uid(), store: 'Greenfield Grocery', price: 8, sent: 30, returned: 0, paid: 160, counted: 9, countedDate: '2026-06-12', diagnosis: '', cycle: 1, lastContact: '2026-06-05', restock: 'soon', notes: 'Slower mover — try a sampler display by the register.', log: [{ at: 'Jun 12', t: 'Counted 9 on shelf' }, { at: 'Jun 1', t: 'Check received $160' }] },
@@ -62,7 +62,7 @@ const PAY = [{ id: 'business', label: 'Business acct', color: MUTED }, { id: 'pe
 const PAYM = Object.fromEntries(PAY.map(p => [p.id, p]))
 const SEED_EXPENSES = [
   { id: uid(), vendor: 'Ingredient supplier', cat: 'Ingredients', amt: 1850, pay: 'business' },
-  { id: uid(), vendor: 'Packaging & bags', cat: 'Packaging', amt: 420, pay: 'personal' },
+  { id: uid(), vendor: 'Packaging & boxes', cat: 'Packaging', amt: 420, pay: 'personal' },
   { id: uid(), vendor: 'Seasoning & supplies', cat: 'Ingredients', amt: 260, pay: 'personal' },
   { id: uid(), vendor: 'Market booth fee', cat: 'Fees', amt: 150, pay: 'personal' },
   { id: uid(), vendor: 'Equipment repair', cat: 'Equipment', amt: 180, pay: 'business' },
@@ -102,14 +102,14 @@ const PNL_ROWS = [
 
 // products sold this month (swap illustrations for real photos anytime)
 const PRODUCTS = [
-  { name: 'Sourdough Loaf', color: '#B07A3C', week: 22, month: 88 },
-  { name: 'Challah', color: '#D8A24A', week: 16, month: 64 },
-  { name: 'Croissants', color: '#C98A3E', week: 13, month: 50 },
-  { name: 'Bagels', color: '#9E6B34', week: 12, month: 46 },
-  { name: 'Cinnamon Babka', color: '#7A4A2E', week: 11, month: 42 },
-  { name: 'Rye Bread', color: '#6B4A2A', week: 9, month: 37 },
-  { name: 'Muffins', color: '#C2693E', week: 8, month: 33 },
-  { name: 'Baguettes', color: '#C99A5A', week: 6, month: 25 },
+  { name: 'Sourdough Loaf', color: '#B07A3C', icon: 'loaf', week: 22, month: 88 },
+  { name: 'Challah', color: '#D8A24A', icon: 'braid', week: 16, month: 64 },
+  { name: 'Croissants', color: '#C98A3E', icon: 'croissant', week: 13, month: 50 },
+  { name: 'Bagels', color: '#9E6B34', icon: 'bagel', week: 12, month: 46 },
+  { name: 'Cinnamon Babka', color: '#7A4A2E', icon: 'loaf', week: 11, month: 42 },
+  { name: 'Rye Bread', color: '#6B4A2A', icon: 'loaf', week: 9, month: 37 },
+  { name: 'Muffins', color: '#C2693E', icon: 'muffin', week: 8, month: 33 },
+  { name: 'Baguettes', color: '#C99A5A', icon: 'baguette', week: 6, month: 25 },
 ]
 // per-period sales for the front-page leaderboards (week vs month)
 const STORE_PERF = [
@@ -129,16 +129,71 @@ const DIRECT_PERF = [
   { who: 'Farmers market — downtown', source: 'Farmers market', week: 20, weekRev: 260, month: 45, monthRev: 585 },
   { who: 'Acme Corp — office bulk', source: 'Wholesale / bulk', week: 0, weekRev: 0, month: 60, monthRev: 540 },
 ]
-const Bag = ({ color }) => (
-  <svg width="58" height="58" viewBox="0 0 64 64" style={{ display: 'block', margin: '0 auto' }}>
-    <rect x="13" y="8" width="38" height="9" rx="2" fill={color} opacity="0.5" />
-    <rect x="14" y="14" width="36" height="44" rx="6" fill={color} />
-    <rect x="14" y="14" width="36" height="11" rx="6" fill="#000" opacity="0.08" />
-    <rect x="20" y="28" width="24" height="20" rx="3" fill="#FFFDF9" opacity="0.95" />
-    <rect x="23" y="33" width="18" height="3" rx="1.5" fill={color} />
-    <rect x="23" y="39" width="12" height="3" rx="1.5" fill={color} opacity="0.55" />
-  </svg>
-)
+const Item = ({ color, type }) => {
+  const SH = '#FFFFFF', DK = '#000000'
+  const W = { display: 'block', margin: '0 auto' }
+  if (type === 'bagel') return (
+    <svg width="56" height="56" viewBox="0 0 64 64" style={W}>
+      <circle cx="32" cy="33" r="22" fill={color} />
+      <ellipse cx="32" cy="26" rx="18" ry="11" fill={SH} opacity="0.12" />
+      <circle cx="32" cy="33" r="8.5" fill={CREAM} />
+      <circle cx="32" cy="33" r="8.5" fill="none" stroke={DK} strokeOpacity="0.1" strokeWidth="2" />
+      {[[24, 21], [40, 22], [45, 32], [23, 41], [40, 43], [31, 17]].map(([x, y], i) => (
+        <ellipse key={i} cx={x} cy={y} rx="1.9" ry="1.3" fill={SH} opacity="0.6" />
+      ))}
+    </svg>
+  )
+  if (type === 'croissant') return (
+    <svg width="56" height="56" viewBox="0 0 64 64" style={W}>
+      <g transform="rotate(20 32 32)">
+        <path d="M41 16 A18 18 0 1 0 41 48" fill="none" stroke={color} strokeWidth="15" strokeLinecap="round" />
+        <path d="M41 16 A18 18 0 1 0 41 48" fill="none" stroke={SH} strokeOpacity="0.16" strokeWidth="5" strokeLinecap="round" />
+      </g>
+    </svg>
+  )
+  if (type === 'muffin') return (
+    <svg width="56" height="56" viewBox="0 0 64 64" style={W}>
+      <path d="M21 35 L25 53 L39 53 L43 35 Z" fill={color} opacity="0.82" />
+      <path d="M28 37 L29 52 M34 37 L34 52" stroke={DK} strokeOpacity="0.13" strokeWidth="2" strokeLinecap="round" />
+      <path d="M15 36 C15 23 24 17 32 17 C40 17 49 23 49 36 Z" fill={color} />
+      <path d="M19 31 C21 24 27 21 32 21" stroke={SH} strokeOpacity="0.3" strokeWidth="2.5" strokeLinecap="round" fill="none" />
+      {[[25, 28], [34, 25], [40, 31], [30, 33]].map(([x, y], i) => (
+        <circle key={i} cx={x} cy={y} r="2" fill={DK} opacity="0.22" />
+      ))}
+    </svg>
+  )
+  if (type === 'braid') return (
+    <svg width="56" height="56" viewBox="0 0 64 64" style={W}>
+      <ellipse cx="32" cy="33" rx="25" ry="14" fill={color} />
+      <ellipse cx="32" cy="28" rx="21" ry="8" fill={SH} opacity="0.1" />
+      {[21, 30, 39, 48].map((x, i) => (
+        <path key={i} d={`M${x} 21 L${x - 9} 45`} stroke={DK} strokeOpacity="0.14" strokeWidth="2.5" strokeLinecap="round" />
+      ))}
+    </svg>
+  )
+  if (type === 'baguette') return (
+    <svg width="56" height="56" viewBox="0 0 64 64" style={W}>
+      <g transform="rotate(-32 32 32)">
+        <rect x="7" y="27" width="50" height="12" rx="6" fill={color} />
+        <rect x="11" y="29" width="42" height="3" rx="1.5" fill={SH} opacity="0.2" />
+        {[18, 28, 38, 48].map((x, i) => (
+          <path key={i} d={`M${x} 28 L${x + 5} 38`} stroke={DK} strokeOpacity="0.16" strokeWidth="2" strokeLinecap="round" />
+        ))}
+      </g>
+    </svg>
+  )
+  // loaf (default — sourdough / rye / babka)
+  return (
+    <svg width="56" height="56" viewBox="0 0 64 64" style={W}>
+      <path d="M9 41 C9 25 22 19 32 19 C42 19 55 25 55 41 C55 46 52 49 47 49 L17 49 C12 49 9 46 9 41 Z" fill={color} />
+      <path d="M14 28 C20 23 26 22 30 22" stroke={SH} strokeOpacity="0.25" strokeWidth="2.5" strokeLinecap="round" fill="none" />
+      {[[24, 28, 18, 38], [33, 26, 27, 39], [44, 28, 38, 38]].map(([x1, y1, x2, y2], i) => (
+        <path key={i} d={`M${x1} ${y1} L${x2} ${y2}`} stroke={SH} strokeOpacity="0.38" strokeWidth="2.5" strokeLinecap="round" />
+      ))}
+      <rect x="11" y="46" width="42" height="3" rx="1.5" fill={DK} opacity="0.1" />
+    </svg>
+  )
+}
 
 const MONO = "'IBM Plex Mono', monospace"
 
@@ -184,8 +239,8 @@ export default function Demo() {
     const shelf = c.counted == null ? 0 : c.counted
     let note
     if (variance > 0) note = c.diagnosis === 'Sold but not reported (store owes me)'
-      ? `Closed cycle — invoiced ${money(varVal)} for ${variance} sold-not-reported bags. New cycle opens at ${shelf} on the shelf.`
-      : `Closed cycle — wrote off ${variance} bags (${money(varVal)})${c.diagnosis ? ` as ${c.diagnosis.toLowerCase()}` : ''}. New cycle opens at ${shelf} on the shelf.`
+      ? `Closed cycle — invoiced ${money(varVal)} for ${variance} sold-not-reported items. New cycle opens at ${shelf} on the shelf.`
+      : `Closed cycle — wrote off ${variance} items (${money(varVal)})${c.diagnosis ? ` as ${c.diagnosis.toLowerCase()}` : ''}. New cycle opens at ${shelf} on the shelf.`
     else note = `Closed cycle — reconciled clean. New cycle opens at ${shelf} on the shelf.`
     upd(id, { sent: shelf, paid: 0, returned: 0, counted: shelf, diagnosis: '', cycle: (c.cycle || 1) + 1 }, note)
     setExpanded(null)
@@ -430,9 +485,9 @@ export default function Demo() {
               </div>
 
               <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap', marginBottom: '16px' }}>
-                <KPI k={`Bags sold this ${period}`} v={bagsPeriod} sub="across all flavors" accent={INK} />
-                <KPI k="Revenue / mo" v={m0(revenue)} sub={`${bagsPeriod} bags this ${period}`} accent={SPICE} />
-                <KPI k="Out on consignment" v={m0(onShelfVal)} sub={`${bagsOut} bags sitting in stores`} accent={KRAFT} />
+                <KPI k={`Items sold this ${period}`} v={bagsPeriod} sub="across all products" accent={INK} />
+                <KPI k="Revenue / mo" v={m0(revenue)} sub={`${bagsPeriod} items this ${period}`} accent={SPICE} />
+                <KPI k="Out on consignment" v={m0(onShelfVal)} sub={`${bagsOut} items sitting in stores`} accent={KRAFT} />
                 <KPI k="Missing pieces" v={`${missUnits}`} sub={`${m0(missVal)} to investigate`} accent={missUnits ? RED : GREEN} />
               </div>
 
@@ -449,7 +504,7 @@ export default function Demo() {
                         <div style={{ flex: 1, height: '6px', background: CREAM, borderRadius: '4px', overflow: 'hidden' }}>
                           <div style={{ width: `${Math.round(pv(c) / max * 100)}%`, height: '100%', background: KRAFT }} />
                         </div>
-                        <span style={{ fontSize: '11px', color: MUTED, whiteSpace: 'nowrap' }}>{pb(c)} bags sold</span>
+                        <span style={{ fontSize: '11px', color: MUTED, whiteSpace: 'nowrap' }}>{pb(c)} items sold</span>
                       </div>
                     </div>
                   )) })()}
@@ -466,7 +521,7 @@ export default function Demo() {
                         <div style={{ flex: 1, height: '6px', background: CREAM, borderRadius: '4px', overflow: 'hidden' }}>
                           <div style={{ width: `${Math.round(pv(d) / max * 100)}%`, height: '100%', background: GREEN }} />
                         </div>
-                        <span style={{ fontSize: '11px', color: MUTED, whiteSpace: 'nowrap' }}>{pb(d)} bags · {d.source}</span>
+                        <span style={{ fontSize: '11px', color: MUTED, whiteSpace: 'nowrap' }}>{pb(d)} items · {d.source}</span>
                       </div>
                     </div>
                   )) })()}
@@ -475,16 +530,16 @@ export default function Demo() {
 
               <div style={{ ...card }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', flexWrap: 'wrap', gap: '8px', marginBottom: '16px' }}>
-                  <div style={{ ...lbl }}>Sold this {period}, by flavor</div>
-                  <div style={{ fontSize: '13px', color: MUTED }}><b style={{ ...big, fontSize: '18px', color: INK }}>{bagsPeriod}</b> bags total</div>
+                  <div style={{ ...lbl }}>Sold this {period}, by product</div>
+                  <div style={{ fontSize: '13px', color: MUTED }}><b style={{ ...big, fontSize: '18px', color: INK }}>{bagsPeriod}</b> items total</div>
                 </div>
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(148px, 1fr))', gap: '12px' }}>
                   {PRODUCTS.slice().sort((a, b) => b[period] - a[period]).map(p => (
                     <div key={p.name} style={{ border: `1px solid ${BORDER}`, borderRadius: '12px', padding: '16px 12px 14px', textAlign: 'center', background: CREAM }}>
-                      <Bag color={p.color} />
+                      <Item color={p.color} type={p.icon} />
                       <div style={{ fontWeight: 600, color: INK, marginTop: '8px', fontSize: '14px' }}>{p.name}</div>
                       <div style={{ ...big, fontSize: '26px', color: INK, marginTop: '4px' }}>{p[period]}</div>
-                      <div style={{ fontSize: '11px', color: MUTED }}>bags this {period}</div>
+                      <div style={{ fontSize: '11px', color: MUTED }}>items this {period}</div>
                     </div>
                   ))}
                 </div>
@@ -518,11 +573,11 @@ export default function Demo() {
                 <Row l="Total revenue" v={m0(revenue)} bold top />
                 <div style={{ ...lbl, color: KRAFT, margin: '16px 0 6px' }}>Cost of goods sold</div>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '2px 0 8px', flexWrap: 'wrap' }}>
-                  <span style={{ fontSize: '13px', color: MUTED }}>Cost to make one bag:</span>
+                  <span style={{ fontSize: '13px', color: MUTED }}>Cost to make one item:</span>
                   <span style={{ display: 'inline-flex', alignItems: 'center', gap: '3px', color: MUTED }}>$<input value={costPerBag} onChange={e => setCostPerBag(Number(e.target.value) || 0)} type="number" step="0.25" style={{ ...inp, width: '74px', padding: '6px 9px' }} /></span>
                   <span style={{ fontSize: '12px', color: '#A2937A' }}>← estimate, set the real number</span>
                 </div>
-                <Row l={`Cost of goods sold (${soldBags} bags × ${money(costPerBag)})`} v={`−${m0(cogs)}`} />
+                <Row l={`Cost of goods sold (${soldBags} items × ${money(costPerBag)})`} v={`−${m0(cogs)}`} />
                 <Row l={`Gross profit  ·  ${pct(grossProfit)}% margin`} v={m0(grossProfit)} bold top />
                 <div style={{ ...lbl, color: KRAFT, margin: '16px 0 4px' }}>Operating expenses</div>
                 <Row l="Advertising" v={`−${m0(adSpend)}`} />
@@ -612,12 +667,12 @@ export default function Demo() {
                     <div key={c.id} onClick={() => setExpanded(c.id)} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '8px 0', borderTop: i ? '1px solid #F2D2CB' : 'none', cursor: 'pointer', gap: '8px', flexWrap: 'wrap' }}>
                       <div>
                         <span style={{ fontWeight: 600, color: INK, fontSize: '14px' }}>{c.store}</span>
-                        <span style={{ fontSize: '12px', color: MUTED }}> · {c.variance} bags · {c.diagnosis ? c.diagnosis : 'needs a diagnosis'}</span>
+                        <span style={{ fontSize: '12px', color: MUTED }}> · {c.variance} items · {c.diagnosis ? c.diagnosis : 'needs a diagnosis'}</span>
                       </div>
                       <span style={{ ...big, fontSize: '15px', color: RED }}>{money(c.varVal)}</span>
                     </div>
                   ))}
-                  <p style={{ fontSize: '12px', color: MUTED, marginTop: '10px', lineHeight: 1.5 }}>Bags gone from shelves you haven't been paid for. Tap a store to diagnose it — then invoice the ones the store sold and didn't report, or write off the rest at close-out.</p>
+                  <p style={{ fontSize: '12px', color: MUTED, marginTop: '10px', lineHeight: 1.5 }}>Items gone from shelves you haven't been paid for. Tap a store to diagnose it — then invoice the ones the store sold and didn't report, or write off the rest at close-out.</p>
                 </div>
               )}
 
@@ -723,7 +778,7 @@ export default function Demo() {
                         <textarea value={c.notes || ''} onChange={e => upd(c.id, { notes: e.target.value })} rows={2} placeholder="Notes — who you talk to, what they like, what they said…" style={{ ...inp, width: '100%', resize: 'vertical', fontFamily: 'inherit' }} />
 
                         <div style={{ ...lbl, margin: '18px 0 6px' }}>End of cycle</div>
-                        <button onClick={() => { if (window.confirm(`Close out cycle ${c.cycle || 1} for ${c.store}? This settles the ${c.variance > 0 ? c.variance + ' missing bags' : 'reconciliation'} and starts a fresh cycle from the ${c.counted == null ? 0 : c.counted} bags on the shelf now.`)) closeOut(c.id) }} style={{ width: '100%', background: 'none', color: INK, border: `1px solid ${BORDER}`, borderRadius: '10px', padding: '12px', ...btn }}>Close out this cycle →</button>
+                        <button onClick={() => { if (window.confirm(`Close out cycle ${c.cycle || 1} for ${c.store}? This settles the ${c.variance > 0 ? c.variance + ' missing items' : 'reconciliation'} and starts a fresh cycle from the ${c.counted == null ? 0 : c.counted} items on the shelf now.`)) closeOut(c.id) }} style={{ width: '100%', background: 'none', color: INK, border: `1px solid ${BORDER}`, borderRadius: '10px', padding: '12px', ...btn }}>Close out this cycle →</button>
                         <p style={{ fontSize: '12px', color: MUTED, marginTop: '7px', lineHeight: 1.5 }}>
                           {c.variance > 0
                             ? <>Settles the <b>{c.variance} missing</b> {c.diagnosis === 'Sold but not reported (store owes me)' ? <>by <b style={{ color: RED }}>invoicing the store {money(c.varVal)}</b></> : <>as a <b>write-off</b></>}, then resets the count clean for the next delivery — so old gaps never bleed into the new cycle.</>
@@ -753,7 +808,7 @@ export default function Demo() {
             <>
               <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap', marginBottom: '16px' }}>
                 <KPI k="Direct revenue" v={m0(directRev)} sub="cash in hand" accent={GREEN} />
-                <KPI k="Direct profit" v={m0(directProfit)} sub={`after $${costPerBag}/bag cost`} accent={SPICE} />
+                <KPI k="Direct profit" v={m0(directProfit)} sub={`after $${costPerBag}/item cost`} accent={SPICE} />
                 <KPI k="Units sold" v={directUnits} sub="direct channel" />
                 <KPI k="Avg $ / unit" v={directUnits ? money(directRev / directUnits) : '—'} sub="$13 retail vs ~$8.5 consignment" accent={KRAFT} />
               </div>
@@ -977,7 +1032,7 @@ export default function Demo() {
 
               <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap', marginBottom: '16px' }}>
                 <KPI k="Income to post" v={m0(closeIncome)} sub="consignment + offline direct" accent={GREEN} />
-                <KPI k="COGS to post" v={m0(closeCogs)} sub={`${closeUnits} bags × ${money(costPerBag)}`} accent={KRAFT} />
+                <KPI k="COGS to post" v={m0(closeCogs)} sub={`${closeUnits} items × ${money(costPerBag)}`} accent={KRAFT} />
                 <KPI k="AR to invoice" v={m0(closeAR)} sub="stores that owe you" accent={closeAR ? RED : MUTED} />
               </div>
 
@@ -988,10 +1043,10 @@ export default function Demo() {
                 <Row l="Total income to post" v={m0(closeIncome)} bold top />
 
                 <div style={{ ...lbl, color: KRAFT, margin: '16px 0 4px' }}>Cost of goods sold</div>
-                <Row l={`${closeUnits} bags sold × ${money(costPerBag)}/bag`} v={`−${m0(closeCogs)}`} bold top />
+                <Row l={`${closeUnits} items sold × ${money(costPerBag)}/item`} v={`−${m0(closeCogs)}`} bold top />
 
                 <div style={{ ...lbl, color: KRAFT, margin: '16px 0 4px' }}>Accounts receivable</div>
-                <Row l="Invoice stores for sold-not-reported bags" v={m0(closeAR)} bold top />
+                <Row l="Invoice stores for sold-not-reported items" v={m0(closeAR)} bold top />
                 {closeAR === 0 && <p style={{ fontSize: '12px', color: MUTED, marginTop: '4px' }}>None flagged yet — diagnose missing pieces as “sold but not reported” on the Consignment tab to invoice them.</p>}
 
                 <div style={{ marginTop: '16px', padding: '12px 14px', background: CREAM, borderRadius: '10px', border: `1px dashed ${BORDER}` }}>
@@ -1018,9 +1073,9 @@ export default function Demo() {
                 <div style={{ fontSize: '13.5px', color: MUTED, lineHeight: 1.55 }}>A look at what's coming: ask plain-English questions about your business and get answers straight from your live data. Here are a few samples.</div>
               </div>
               {[
-                { q: 'Which store owes me the most right now?', a: <>Your counts show <b>Cedar Market</b> has the biggest gap: <b>7 bags missing</b> (~$56), most likely sold-but-unreported. Across all stores you're owed about <b>{m0(missVal)}</b> — I'd invoice the worst offenders.</> },
+                { q: 'Which store owes me the most right now?', a: <>Your counts show <b>Cedar Market</b> has the biggest gap: <b>7 items missing</b> (~$56), most likely sold-but-unreported. Across all stores you're owed about <b>{m0(missVal)}</b> — I'd invoice the worst offenders.</> },
                 { q: 'Where am I wasting ad money?', a: <>Three channels are underwater — <b>Facebook, the 5K, and flyers</b>. Together they cost <b>{m0(wastedSpend)}/mo</b> and return only <b>{m0(wastedReturn)}</b>. Move that budget to Instagram and your influencer (both ~4x).</> },
-                { q: 'Did I actually make money this month?', a: <>Revenue is <b>{m0(revenue)}</b>, but after costs your net is <b>{m0(netProfit)}</b>. The two drags are ad waste and uncollected consignment money — fix both and you flip positive without selling a single extra bag.</> },
+                { q: 'Did I actually make money this month?', a: <>Revenue is <b>{m0(revenue)}</b>, but after costs your net is <b>{m0(netProfit)}</b>. The two drags are ad waste and uncollected consignment money — fix both and you flip positive without selling a single extra item.</> },
               ].map((m, i) => (
                 <div key={i} style={{ marginBottom: '16px' }}>
                   <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: '8px' }}>
