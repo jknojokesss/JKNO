@@ -1,10 +1,10 @@
 import { useState, useRef } from 'react'
 import Head from 'next/head'
 
-const CHAR = '#2B2018', SPICE = '#C8462C', KRAFT = '#A9763A', CREAM = '#F6F0E6'
-const INK = '#2B2018', MUTED = '#8A7A66', GREEN = '#3E7C4F', BORDER = '#E6DBC8', AMBER = '#C98A2A', RED = '#C03A22'
-const CARDBG = '#FFFDF9'
-const BIZ = 'Riverside Provisions'
+const CHAR = '#3A2A30', SPICE = '#C2567C', KRAFT = '#C2923E', CREAM = '#FBF4EC'
+const INK = '#2E2230', MUTED = '#8C7C82', GREEN = '#3E7C4F', BORDER = '#ECE0D8', AMBER = '#C98A2A', RED = '#C03A22'
+const CARDBG = '#FFFDFA'
+const BIZ = 'Riverside Bakery'
 
 const money = (n) => '$' + (Math.round(n * 100) / 100).toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 2 })
 const m0 = (n) => '$' + Math.round(n).toLocaleString()
@@ -102,14 +102,14 @@ const PNL_ROWS = [
 
 // products sold this month (swap illustrations for real photos anytime)
 const PRODUCTS = [
-  { name: 'Original', color: '#9E3B24', week: 22, month: 88 },
-  { name: 'Sea Salt', color: '#C24A22', week: 16, month: 64 },
-  { name: 'Honey BBQ', color: '#97652C', week: 13, month: 50 },
-  { name: 'Variety Pack', color: '#B2351A', week: 12, month: 46 },
-  { name: 'Classic', color: '#6B4A2A', week: 11, month: 42 },
-  { name: 'Sweet & Spicy', color: '#A8432C', week: 9, month: 37 },
-  { name: 'Black Pepper', color: '#46403A', week: 8, month: 33 },
-  { name: 'Smokehouse', color: '#5C7C3A', week: 6, month: 25 },
+  { name: 'Sourdough Loaf', color: '#B07A3C', week: 22, month: 88 },
+  { name: 'Challah', color: '#D8A24A', week: 16, month: 64 },
+  { name: 'Croissants', color: '#C98A3E', week: 13, month: 50 },
+  { name: 'Bagels', color: '#9E6B34', week: 12, month: 46 },
+  { name: 'Cinnamon Babka', color: '#7A4A2E', week: 11, month: 42 },
+  { name: 'Rye Bread', color: '#6B4A2A', week: 9, month: 37 },
+  { name: 'Muffins', color: '#C2693E', week: 8, month: 33 },
+  { name: 'Baguettes', color: '#C99A5A', week: 6, month: 25 },
 ]
 // per-period sales for the front-page leaderboards (week vs month)
 const STORE_PERF = [
@@ -371,7 +371,7 @@ export default function Demo() {
         <aside className="jm-side">
           <div style={{ padding: '2px 8px 16px' }}>
             <div style={{ ...big, fontSize: '25px', letterSpacing: '-0.5px', lineHeight: 1 }}>
-              <span style={{ color: SPICE }}>Riverside</span> <span style={{ color: '#E0863A' }}>Provisions</span>
+              <span style={{ color: SPICE }}>Riverside</span> <span style={{ color: KRAFT }}>Bakery</span>
             </div>
             <div style={{ ...lbl, color: '#B6A78C', marginTop: '7px' }}>Dashboard</div>
           </div>
