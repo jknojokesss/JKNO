@@ -441,8 +441,19 @@ export default function Landing() {
               </div>
             </div>
 
-            {/* Live, interactive demo — same component as /demo */}
-            <DemoDashboard embedded />
+            {/* Live, interactive demo — the same Riverside Bakery dashboard served at /demo */}
+            <iframe
+              src="/demo"
+              title="Live dashboard demo"
+              loading="lazy"
+              style={{
+                display: 'block',
+                width: '100%',
+                height: '660px',
+                border: 'none',
+                background: '#FBF4EC',
+              }}
+            />
           </div>
 
           {/* Caption below mockup */}
