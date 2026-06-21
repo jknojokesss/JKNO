@@ -413,7 +413,7 @@ export default function Landing() {
             </h2>
             <p style={{ fontSize: '15px', color: '#5A6070', maxWidth: '480px',
               margin: '0 auto', lineHeight: 1.7 }}>
-              This one's live — click through the tabs below. Every client gets
+              This one's live — click around the dashboard below. Every client gets
               their own branded portal with real-time charts and drill-down reports.
             </p>
           </div>
