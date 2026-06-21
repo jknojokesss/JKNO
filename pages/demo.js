@@ -213,6 +213,7 @@ export default function Demo() {
   const [df, setDf] = useState({ who: '', source: 'Shopify / online', units: '', rev: '' })
   const [pnlMonths, setPnlMonths] = useState(2)
   const [pnlView, setPnlView] = useState('single')
+  const [pnlOpen, setPnlOpen] = useState(null)
   const [period, setPeriod] = useState('month')
   const [costPerBag, setCostPerBag] = useState(4.5)
   const [logoOk, setLogoOk] = useState(true)
@@ -382,6 +383,37 @@ export default function Demo() {
       <span style={{ fontFamily: MONO, fontSize: '13px', color: neg ? RED : (bold ? INK : MUTED), fontWeight: bold ? 600 : 400 }}>{v}</span>
     </div>
   )
+  // Clickable P&L line — expands to show the transactions behind the number.
+  const DrillRow = ({ k, l, v, items, hint }) => {
+    const open = pnlOpen === k
+    const has = items && items.length > 0
+    return (
+      <>
+        <div onClick={() => has && setPnlOpen(open ? null : k)}
+          style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '6px 0', cursor: has ? 'pointer' : 'default' }}>
+          <span style={{ fontSize: '13px', color: MUTED, display: 'inline-flex', alignItems: 'center', gap: '7px' }}>
+            {has && <span style={{ color: SPICE, fontSize: '9px', display: 'inline-block', transform: open ? 'rotate(90deg)' : 'none', transition: 'transform .15s' }}>▶</span>}
+            {l}
+          </span>
+          <span style={{ fontFamily: MONO, fontSize: '13px', color: MUTED, display: 'inline-flex', alignItems: 'center', gap: '9px' }}>
+            {v}
+            {has && <span style={{ fontFamily: "'Inter', sans-serif", fontSize: '10px', fontWeight: 600, color: SPICE }}>{open ? 'hide' : 'view'}</span>}
+          </span>
+        </div>
+        {open && has && (
+          <div style={{ margin: '0 0 12px 17px', padding: '4px 12px', background: CREAM, border: `1px solid ${BORDER}`, borderRadius: '9px' }}>
+            {hint && <div style={{ fontSize: '11px', color: '#A2937A', padding: '6px 0 2px' }}>{hint}</div>}
+            {items.map((it, i) => (
+              <div key={i} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', gap: '10px', padding: '6px 0', borderTop: i ? `1px solid ${BORDER}` : 'none' }}>
+                <span style={{ fontSize: '12px', color: INK }}>{it.l}{it.sub ? <span style={{ color: MUTED }}> · {it.sub}</span> : null}</span>
+                <span style={{ fontFamily: MONO, fontSize: '12px', color: INK, whiteSpace: 'nowrap' }}>{it.v}</span>
+              </div>
+            ))}
+          </div>
+        )}
+      </>
+    )
+  }
   const Pill = ({ value, opts, map, onChange }) => (
     <select value={value} onClick={(e) => e.stopPropagation()} onChange={(e) => { e.stopPropagation(); onChange(e.target.value) }}
       style={{ appearance: 'none', WebkitAppearance: 'none', cursor: 'pointer', padding: '6px 26px 6px 12px', borderRadius: '20px', border: 'none',
@@ -568,8 +600,10 @@ export default function Demo() {
               <div style={{ ...card }}>
                 <div style={{ ...lbl, marginBottom: '14px' }}>Profit &amp; loss — this month (cash basis)</div>
                 <div style={{ ...lbl, color: KRAFT, margin: '4px 0' }}>Revenue</div>
-                <Row l="Direct sales" v={m0(directRev)} />
-                <Row l="Consignment (collected)" v={m0(cashCollected)} />
+                <DrillRow k="direct" l="Direct sales" v={m0(directRev)}
+                  items={direct.map(d => ({ l: d.who, sub: d.source, v: m0(d.rev) }))} />
+                <DrillRow k="consign" l="Consignment (collected)" v={m0(cashCollected)}
+                  items={R.filter(c => c.paid > 0).map(c => ({ l: c.store, sub: `${c.paidUnits} sold`, v: m0(c.paid) }))} />
                 <Row l="Total revenue" v={m0(revenue)} bold top />
                 <div style={{ ...lbl, color: KRAFT, margin: '16px 0 6px' }}>Cost of goods sold</div>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '2px 0 8px', flexWrap: 'wrap' }}>
@@ -577,11 +611,17 @@ export default function Demo() {
                   <span style={{ display: 'inline-flex', alignItems: 'center', gap: '3px', color: MUTED }}>$<input value={costPerBag} onChange={e => setCostPerBag(Number(e.target.value) || 0)} type="number" step="0.25" style={{ ...inp, width: '74px', padding: '6px 9px' }} /></span>
                   <span style={{ fontSize: '12px', color: '#A2937A' }}>← estimate, set the real number</span>
                 </div>
-                <Row l={`Cost of goods sold (${soldBags} items × ${money(costPerBag)})`} v={`−${m0(cogs)}`} />
+                <DrillRow k="cogs" l={`Cost of goods sold (${soldBags} items × ${money(costPerBag)})`} v={`−${m0(cogs)}`}
+                  hint="Units sold × your cost to make one item."
+                  items={[
+                    { l: 'Direct sales units', sub: `${directUnits} × ${money(costPerBag)}`, v: `−${m0(directUnits * costPerBag)}` },
+                    { l: 'Consignment units sold', sub: `${R.reduce((s, c) => s + c.paidUnits, 0)} × ${money(costPerBag)}`, v: `−${m0(R.reduce((s, c) => s + c.paidUnits, 0) * costPerBag)}` },
+                  ]} />
                 <Row l={`Gross profit  ·  ${pct(grossProfit)}% margin`} v={m0(grossProfit)} bold top />
                 <div style={{ ...lbl, color: KRAFT, margin: '16px 0 4px' }}>Operating expenses</div>
-                <Row l="Advertising" v={`−${m0(adSpend)}`} />
-                {[...new Set(expenses.filter(e => !COGS_CATS.includes(e.cat)).map(e => e.cat))].map(cat => { const v = expenses.filter(e => e.cat === cat).reduce((s, e) => s + e.amt, 0); return <Row key={cat} l={cat} v={`−${m0(v)}`} /> })}
+                <DrillRow k="ads" l="Advertising" v={`−${m0(adSpend)}`}
+                  items={ads.map(a => ({ l: a.channel, sub: a.spend ? `${(a.rev / a.spend).toFixed(1)}× ROAS` : '', v: `−${m0(a.spend)}` }))} />
+                {[...new Set(expenses.filter(e => !COGS_CATS.includes(e.cat)).map(e => e.cat))].map(cat => { const list = expenses.filter(e => e.cat === cat); const v = list.reduce((s, e) => s + e.amt, 0); return <DrillRow key={cat} k={`exp-${cat}`} l={cat} v={`−${m0(v)}`} items={list.map(e => ({ l: e.vendor, sub: PAYM[e.pay] ? PAYM[e.pay].label : '', v: `−${m0(e.amt)}` }))} /> })}
                 <Row l="Total operating expenses" v={`−${m0(totalOpex)}`} bold top />
                 <div style={{ marginTop: '12px', padding: '12px 14px', background: netProfit >= 0 ? '#EAF3EC' : '#FBEDE9', borderRadius: '10px' }}>
                   <Row l={`${netProfit >= 0 ? 'Net profit' : 'Net loss'}  ·  ${pct(netProfit)}% margin`} v={m0(netProfit)} bold neg={netProfit < 0} />

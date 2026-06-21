@@ -72,7 +72,7 @@ export default function Landing() {
     {
       icon: '⬟',
       title: 'Drill Into Every Number',
-      desc: 'Click any line item and see every transaction behind it. Full transparency — from your P&L to your balance sheet to your cash flow.',
+      desc: 'Click any line on your P&L and see every transaction behind it — the vendors, sales, and ad spend that make up the number. Full transparency, no black boxes.',
     },
     {
       icon: '◉',
