@@ -1,7 +1,7 @@
 import { useState, useRef } from 'react'
 import Head from 'next/head'
 
-const CHAR = '#3A2A30', SPICE = '#C2567C', KRAFT = '#C2923E', CREAM = '#FBF4EC'
+const CHAR = '#1E2A3A', SPICE = '#2A6CB8', KRAFT = '#C2923E', CREAM = '#FBF4EC'
 const INK = '#2E2230', MUTED = '#8C7C82', GREEN = '#3E7C4F', BORDER = '#ECE0D8', AMBER = '#C98A2A', RED = '#C03A22'
 const CARDBG = '#FFFDFA'
 const BIZ = 'Riverside Bakery'
@@ -440,7 +440,7 @@ export default function Demo() {
         <meta name="twitter:title" content="JK No Jokes — live dashboard demo" />
         <meta name="twitter:description" content="A live look at the JK No Jokes client dashboard — sales, stores, and real profit on one screen." />
         <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-        <meta name="theme-color" content="#2B2018" />
+        <meta name="theme-color" content="#1E2A3A" />
         <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
         <style>{`*{box-sizing:border-box;margin:0;padding:0}html{-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale;text-rendering:optimizeLegibility}body{background:${CREAM};font-family:'Inter',sans-serif;color:${INK}}::placeholder{color:#A99A82}
 .jm-shell{display:flex;min-height:100vh;align-items:stretch}
