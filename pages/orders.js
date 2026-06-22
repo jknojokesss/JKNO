@@ -8,7 +8,9 @@ const fmt0 = (n) => new Intl.NumberFormat('en-US', { style: 'currency', currency
 
 const FALLBACK_RATIO = 0.412 // used when no Weldon match found
 const TYP_MARGIN = 0.40 // assumed typical tire margin, used to infer cost tier from sale price
-const BUDGET_RETAIL_X = 2.5 // a budget tire's retail rarely exceeds ~2.5x its cost (~60% margin)
+const BUDGET_RETAIL_X = 3.2 // a budget tire's retail rarely exceeds ~3.2x its cost (~69% margin); real
+                            // shelf sales mark up to ~2.6x, premium tires retail 3.5x+, so this cleanly
+                            // separates them — a generic, sub-3.2x sale is shelf stock, not a special order
 
 const THEME = { sidebarBg: '#1A1A1A', sidebarBorder: '#2A2A2A', accent: '#CC2222' }
 
