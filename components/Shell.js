@@ -15,6 +15,7 @@ const NAV = [
 ]
 
 const mono = 'DM Mono, monospace'
+const ui = "'Inter', sans-serif"
 
 // Left-sidebar app shell — Riverside Bakery layout, Reydel colors. Wraps each
 // inner page's content as `children`; replaces the old horizontal TopNav bar.
@@ -74,10 +75,11 @@ export default function Shell({ active, right, children }) {
       <main className="rdl-main">{children}</main>
 
       <style>{`
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap');
         .rdl-shell { display: flex; min-height: 100vh; align-items: stretch; background: ${THEME.content}; }
         .rdl-side { width: 210px; flex-shrink: 0; background: ${THEME.bg}; border-right: 1px solid ${THEME.border}; display: flex; flex-direction: column; padding: 18px 12px; position: sticky; top: 0; height: 100vh; }
         .rdl-nav { display: flex; flex-direction: column; gap: 2px; flex: 1; }
-        .rdl-navbtn { display: block; width: 100%; text-align: left; padding: 10px 13px; border-radius: 7px; border: none; background: transparent; color: #888; font-family: ${mono}; font-size: 12px; letter-spacing: 0.06em; cursor: pointer; white-space: nowrap; transition: background .15s, color .15s; }
+        .rdl-navbtn { display: block; width: 100%; text-align: left; padding: 9px 12px; border-radius: 7px; border: none; background: transparent; color: #888; font-family: ${ui}; font-size: 12.5px; font-weight: 500; letter-spacing: 0.01em; cursor: pointer; white-space: nowrap; transition: background .15s, color .15s; }
         .rdl-navbtn:hover { background: rgba(255,255,255,.05); color: #ccc; }
         .rdl-foot { padding: 12px 8px 0; border-top: 1px solid ${THEME.border}; margin-top: 8px; }
         .rdl-main { flex: 1; min-width: 0; background: ${THEME.content}; }
