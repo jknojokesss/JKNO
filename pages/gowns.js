@@ -49,7 +49,8 @@ export default function Gowns() {
 
   const save = () => {
     if (!form.name.trim()) { alert('Please enter a customer name first.'); return }
-    const clean = { ...form, name: form.name.trim(), items: form.items.filter(it => it.desc.trim() || it.price), savedAt: Date.now() }
+    const orderNo = form.orderNo || (orders.reduce((m, o) => Math.max(m, o.orderNo || 0), 1000) + 1)
+    const clean = { ...form, orderNo, name: form.name.trim(), items: form.items.filter(it => it.desc.trim() || it.price), savedAt: Date.now() }
     if (!clean.items.length) clean.items = [{ id: uid(), desc: '', price: '' }]
     setOrders(prev => prev.some(o => o.id === form.id) ? prev.map(o => o.id === form.id ? clean : o) : [clean, ...prev])
     setView('list'); window.scrollTo(0, 0)
@@ -117,7 +118,7 @@ export default function Gowns() {
                         <div style={{ fontSize: '20px', fontWeight: 700, color: INK }}>{o.name}</div>
                         <div style={{ fontSize: '20px', fontWeight: 700, color: INK, whiteSpace: 'nowrap' }}>{money(t)}</div>
                       </div>
-                      <div style={{ fontSize: '14px', color: MUTED, marginTop: '3px' }}>{fmtDate(o.date)}</div>
+                      <div style={{ fontSize: '14px', color: MUTED, marginTop: '3px' }}>{o.orderNo ? `No. ${o.orderNo} · ` : ''}{fmtDate(o.date)}</div>
                       <div style={{ display: 'flex', gap: '7px', flexWrap: 'wrap', marginTop: '11px' }}>
                         {bal <= 0
                           ? <span style={{ fontSize: '13px', fontWeight: 600, color: GREEN, background: '#EAF3EC', padding: '4px 11px', borderRadius: '20px' }}>Paid in full ✓</span>
@@ -143,7 +144,10 @@ export default function Gowns() {
               {editing && <button onClick={() => del(form.id)} style={{ background: 'none', border: 'none', color: '#C0504C', fontSize: '15px', cursor: 'pointer', fontFamily: 'inherit' }}>Delete</button>}
             </div>
 
-            <div style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: '28px', fontWeight: 700, marginBottom: '18px' }}>{editing ? 'Edit Order' : 'New Order'}</div>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: '18px' }}>
+              <div style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: '28px', fontWeight: 700 }}>{editing ? 'Edit Order' : 'New Order'}</div>
+              <div style={{ fontSize: '16px', fontWeight: 700, color: ROSE }}>{form.orderNo ? `No. ${form.orderNo}` : 'No. —'}</div>
+            </div>
 
             {/* Customer */}
             <div className="gw-card" style={{ padding: '18px', marginBottom: '14px' }}>
@@ -169,8 +173,8 @@ export default function Gowns() {
               <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
                 {form.items.map((it, i) => (
                   <div key={it.id} style={{ display: 'flex', gap: '9px', alignItems: 'center' }}>
-                    <input value={it.desc} onChange={e => setItem(it.id, 'desc', e.target.value)} placeholder={i === 0 ? 'Gown, veil, alteration…' : 'Item'} style={{ ...input, flex: 1 }} />
-                    <input value={it.price} onChange={e => setItem(it.id, 'price', e.target.value)} type="number" inputMode="decimal" step="0.01" placeholder="$" style={{ ...input, width: '108px', textAlign: 'right' }} />
+                    <input value={it.desc} onChange={e => setItem(it.id, 'desc', e.target.value)} placeholder={i === 0 ? 'Style, color, details…' : 'Description'} style={{ ...input, flex: 1 }} />
+                    <input value={it.price} onChange={e => setItem(it.id, 'price', e.target.value)} type="number" inputMode="decimal" step="0.01" placeholder="Amount" style={{ ...input, width: '108px', textAlign: 'right' }} />
                     <button onClick={() => removeItem(it.id)} aria-label="remove" style={{ flexShrink: 0, width: '40px', height: '40px', borderRadius: '10px', border: `1.5px solid ${LINE}`, background: '#fff', color: MUTED, fontSize: '20px', cursor: 'pointer', lineHeight: 1 }}>×</button>
                   </div>
                 ))}
