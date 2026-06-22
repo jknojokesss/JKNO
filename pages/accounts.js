@@ -2,7 +2,7 @@ import { useEffect, useState, useMemo } from 'react'
 import { useRouter } from 'next/router'
 import Head from 'next/head'
 import { supabase } from '../lib/supabase'
-import TopNav from '../components/TopNav'
+import Shell from '../components/Shell'
 import { categorize, parentOf } from '../lib/accountTypes'
 
 const fmt = (n) =>
@@ -120,8 +120,7 @@ export default function Accounts() {
         <style>{`* { box-sizing: border-box; margin: 0; padding: 0; }`}</style>
       </Head>
 
-      <div style={{ minHeight: '100vh', background: '#F8F8F8' }}>
-        <TopNav active="accounts" />
+      <Shell active="accounts">
 
         {/* Main — two columns: account list + optional detail panel */}
         <div style={{ display: 'flex' }}>
@@ -272,7 +271,7 @@ export default function Accounts() {
             </div>
           )}
         </div>
-      </div>
+      </Shell>
     </>
   )
 }

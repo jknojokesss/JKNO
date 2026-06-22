@@ -1,7 +1,7 @@
 import { useEffect, useState, useMemo } from 'react'
 import Head from 'next/head'
 import { supabase } from '../lib/supabase'
-import TopNav from '../components/TopNav'
+import Shell from '../components/Shell'
 
 const fmt  = (n) => new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }).format(Math.abs(n))
 const fmtD = (n) => new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(Math.abs(n))
@@ -102,13 +102,12 @@ export default function Inventory() {
   return (
     <>
       <Head><title>Reydel Tire — Sales & Items</title></Head>
-      <div style={{ minHeight: '100vh', background: '#F8F8F8' }}>
-        <TopNav active="inventory" right={
+      <Shell active="inventory" right={
           <>
             <div style={{ width: '6px', height: '6px', background: '#22c55e', borderRadius: '50%' }} />
             <div style={{ fontSize: '10px', color: '#888', fontFamily: 'DM Mono, monospace' }}>Clover POS · Live</div>
           </>
-        } />
+        }>
 
         <div style={{ padding: '24px 28px' }}>
             {loading ? (
@@ -241,7 +240,7 @@ export default function Inventory() {
               </>
             )}
           </div>
-      </div>
+      </Shell>
     </>
   )
 }

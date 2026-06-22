@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import Head from 'next/head'
 import { supabase } from '../lib/supabase'
-import TopNav from '../components/TopNav'
+import Shell from '../components/Shell'
 import { categorize, parentOf } from '../lib/accountTypes'
 
 const fmt = (n) => new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }).format(Math.abs(n))
@@ -214,9 +214,8 @@ export default function Financials() {
   return (
     <>
       <Head><title>Reydel Tire — Financials</title></Head>
-      <div style={{ minHeight: '100vh', background: '#F8F8F8' }}>
+      <Shell active="financials">
         <DrillModal account={drillAccount} onClose={() => setDrillAccount(null)} />
-        <TopNav active="financials" />
 
         <div style={{ padding: '24px 28px' }}>
             {loading ? (
@@ -561,7 +560,7 @@ export default function Financials() {
               </>
             )}
           </div>
-      </div>
+      </Shell>
     </>
   )
 }

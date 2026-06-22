@@ -1,7 +1,7 @@
 import { useEffect, useState, useMemo } from 'react'
 import Head from 'next/head'
 import { supabase } from '../lib/supabase'
-import TopNav from '../components/TopNav'
+import Shell from '../components/Shell'
 
 const fmtC = (n) => new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(n)
 const fmt0 = (n) => new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }).format(n)
@@ -418,8 +418,7 @@ export default function Orders() {
   return (
     <>
       <Head><title>Reydel Tire — Orders</title></Head>
-      <div style={{ minHeight: '100vh', background: '#F8F8F8' }}>
-        <TopNav active="orders" right={
+      <Shell active="orders" right={
           <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
             <div style={{ fontSize: '10px', color: '#888', fontFamily: 'DM Mono, monospace' }}>
               {matched.length} / {rows.length} matched to Weldon costs
@@ -429,7 +428,7 @@ export default function Orders() {
               <div style={{ fontSize: '10px', color: '#888', fontFamily: 'DM Mono, monospace' }}>Clover + Weldon</div>
             </div>
           </div>
-        } />
+        }>
 
         <div style={{ padding: '24px 28px' }}>
             {/* Tabs: live (Clover+Weldon) vs precomputed (order_profit) */}
@@ -719,7 +718,7 @@ export default function Orders() {
               </>
             ))}
           </div>
-      </div>
+      </Shell>
     </>
   )
 }

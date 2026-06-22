@@ -1,7 +1,7 @@
 import { useEffect, useState, useMemo } from 'react'
 import Head from 'next/head'
 import { supabase } from '../lib/supabase'
-import TopNav from '../components/TopNav'
+import Shell from '../components/Shell'
 
 const fmt = (n) => new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }).format(Math.abs(n))
 
@@ -172,10 +172,9 @@ export default function Stock() {
   return (
     <>
       <Head><title>Reydel Tire — Stock</title></Head>
-      <div style={{ minHeight: '100vh', background: '#F8F8F8' }}>
-        <TopNav active="stock" right={
+      <Shell active="stock" right={
           <div style={{ fontSize: '10px', color: '#888', fontFamily: 'DM Mono, monospace' }}>{asOf === 'live' ? 'live on-hand · current' : 'on-hand · as of 5/31/2026 (books)'} · FIFO</div>
-        } />
+        }>
 
         <div style={{ padding: '24px 28px' }}>
             {loading ? (
@@ -258,7 +257,7 @@ export default function Stock() {
               </>
             )}
           </div>
-      </div>
+      </Shell>
     </>
   )
 }
