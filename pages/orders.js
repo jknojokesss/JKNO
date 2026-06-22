@@ -182,6 +182,11 @@ export default function Orders() {
           const mGap = m ? Math.round((new Date(r.date) - new Date(m.order_date)) / 864e5) : null
           const specialOrder = !!m && mGap >= -7 && mGap <= 14
             && Number(m.unit_cost) <= sale + 0.01 && sizeBudget != null && Number(m.unit_cost) > sizeBudget * 1.3
+            // ...but only if the SALE itself looks premium — it shares a brand/model with the
+            // matched order, or its price is above what a budget/shelf tire of this size sells for.
+            // A generic-named, budget-priced sale is shelf stock even if a brand special order
+            // for the same size happened the same day; don't borrow the brand's cost.
+            && (sharedModel(itemWords, m.description) > 0 || sale > sizeBudget * BUDGET_RETAIL_X)
 
           // After the stock-up, a tire sold in a size we carry is shelf stock (inventory)
           // unless it was a special order. Premium-branded items are never shelf stock.
