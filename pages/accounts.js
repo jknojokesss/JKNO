@@ -107,7 +107,7 @@ export default function Accounts() {
   const totalTxns     = accounts.reduce((s, a) => s + a.txnCount, 0)
 
   if (loading) return (
-    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100vh', background: '#F8F8F8', fontFamily: 'DM Mono, monospace' }}>
+    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100vh', background: '#F8F8F8', fontFamily: 'Inter, sans-serif' }}>
       <div style={{ color: '#888', fontSize: '13px', letterSpacing: '0.05em' }}>Loading accounts...</div>
     </div>
   )
@@ -129,8 +129,8 @@ export default function Accounts() {
           <div style={{ flex: 1, padding: '24px 28px', borderRight: selected ? '1px solid #E5E5E5' : 'none' }}>
 
             <div style={{ marginBottom: '20px' }}>
-              <div style={{ fontSize: '9px', color: '#888', letterSpacing: '0.15em', marginBottom: '4px', fontFamily: 'DM Mono, monospace' }}>CHART OF ACCOUNTS</div>
-              <div style={{ fontSize: '11px', color: '#888', fontFamily: 'DM Mono, monospace' }}>
+              <div style={{ fontSize: '9px', color: '#888', letterSpacing: '0.15em', marginBottom: '4px', fontFamily: 'Inter, sans-serif' }}>CHART OF ACCOUNTS</div>
+              <div style={{ fontSize: '11px', color: '#888', fontFamily: 'Inter, sans-serif' }}>
                 Jan – May 2026 &nbsp;·&nbsp; {accounts.length} accounts &nbsp;·&nbsp; {totalTxns.toLocaleString()} transactions
               </div>
             </div>
@@ -144,8 +144,8 @@ export default function Accounts() {
                   color: totalIncome - totalExpenses >= 0 ? '#16a34a' : THEME.accent },
               ].map((card, i) => (
                 <div key={i} style={{ background: '#fff', borderRadius: '6px', padding: '14px 16px', border: '1px solid #E5E5E5', borderTop: `3px solid ${card.color}` }}>
-                  <div style={{ fontSize: '9px', color: '#888', fontFamily: 'DM Mono, monospace', letterSpacing: '0.15em', marginBottom: '6px' }}>{card.label}</div>
-                  <div style={{ fontSize: '20px', fontWeight: '600', color: card.color, fontFamily: 'DM Mono, monospace' }}>{card.value}</div>
+                  <div style={{ fontSize: '9px', color: '#888', fontFamily: 'Inter, sans-serif', letterSpacing: '0.15em', marginBottom: '6px' }}>{card.label}</div>
+                  <div style={{ fontSize: '20px', fontWeight: '600', color: card.color, fontFamily: 'Inter, sans-serif' }}>{card.value}</div>
                 </div>
               ))}
             </div>
@@ -154,12 +154,12 @@ export default function Accounts() {
             <div style={{ display: 'flex', gap: '10px', marginBottom: '20px', alignItems: 'center', flexWrap: 'wrap' }}>
               <input value={search} onChange={e => setSearch(e.target.value)} placeholder="Search accounts..."
                 style={{ flex: 1, minWidth: '160px', padding: '7px 12px', border: '1px solid #E5E5E5',
-                  borderRadius: '4px', fontSize: '11px', fontFamily: 'DM Mono, monospace', outline: 'none', background: '#fff', color: '#1a1a1a' }}
+                  borderRadius: '4px', fontSize: '11px', fontFamily: 'Inter, sans-serif', outline: 'none', background: '#fff', color: '#1a1a1a' }}
               />
               {['all', ...CATS].map(cat => (
                 <button key={cat} onClick={() => setActiveCat(cat)} style={{
                   padding: '6px 12px', borderRadius: '4px', cursor: 'pointer', fontSize: '9px',
-                  fontFamily: 'DM Mono, monospace', letterSpacing: '0.08em', textTransform: 'uppercase',
+                  fontFamily: 'Inter, sans-serif', letterSpacing: '0.08em', textTransform: 'uppercase',
                   background: activeCat === cat ? THEME.accent : '#F0F0F0',
                   color: activeCat === cat ? '#fff' : '#888', border: 'none',
                 }}>{cat}</button>
@@ -170,8 +170,8 @@ export default function Accounts() {
             {Object.entries(grouped).map(([cat, items]) => (
               <div key={cat} style={{ marginBottom: '24px' }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
-                  <div style={{ fontSize: '9px', color: '#888', fontFamily: 'DM Mono, monospace', letterSpacing: '0.1em', textTransform: 'uppercase' }}>{CAT_LABEL[cat]}</div>
-                  <div style={{ fontSize: '11px', fontFamily: 'DM Mono, monospace', color: CAT_COLOR[cat], fontWeight: '600' }}>
+                  <div style={{ fontSize: '9px', color: '#888', fontFamily: 'Inter, sans-serif', letterSpacing: '0.1em', textTransform: 'uppercase' }}>{CAT_LABEL[cat]}</div>
+                  <div style={{ fontSize: '11px', fontFamily: 'Inter, sans-serif', color: CAT_COLOR[cat], fontWeight: '600' }}>
                     {fmt(items.reduce((s, a) => s + Math.abs(a.total), 0))} total
                   </div>
                 </div>
@@ -191,16 +191,16 @@ export default function Accounts() {
                         onMouseLeave={e => { if (!isSelected) e.currentTarget.style.background = row.isChild ? '#FCFCFC' : 'transparent' }}
                       >
                         <div>
-                          <div style={{ fontSize: '12px', fontWeight: row.isChild ? '400' : '500', color: row.isChild ? '#555' : '#1a1a1a', fontFamily: 'DM Mono, monospace' }}>
+                          <div style={{ fontSize: '12px', fontWeight: row.isChild ? '400' : '500', color: row.isChild ? '#555' : '#1a1a1a', fontFamily: 'Inter, sans-serif' }}>
                             {row.isChild ? '↳ ' : ''}{account.name}
                           </div>
-                          <div style={{ fontSize: '10px', color: '#888', fontFamily: 'DM Mono, monospace', marginTop: '2px' }}>
+                          <div style={{ fontSize: '10px', color: '#888', fontFamily: 'Inter, sans-serif', marginTop: '2px' }}>
                             {account.txnCount} txns &nbsp;·&nbsp; {account.types.slice(0, 2).join(', ')}
                             {row.hasSubs && <span> &nbsp;·&nbsp; incl. sub-accounts</span>}
                           </div>
                         </div>
                         <div style={{ textAlign: 'right' }}>
-                          <div style={{ fontSize: '13px', fontWeight: '600', fontFamily: 'DM Mono, monospace',
+                          <div style={{ fontSize: '13px', fontWeight: '600', fontFamily: 'Inter, sans-serif',
                             color: cat === 'income' ? '#16a34a' : cat === 'expense' ? THEME.accent : '#1a1a1a' }}>
                             {fmt(row.displayTotal)}
                           </div>
@@ -220,9 +220,9 @@ export default function Accounts() {
               background: '#fff', borderLeft: '1px solid #E5E5E5', padding: '24px' }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '16px' }}>
                 <div>
-                  <div style={{ fontSize: '9px', color: '#888', fontFamily: 'DM Mono, monospace', letterSpacing: '0.1em', marginBottom: '4px' }}>ACCOUNT DETAIL</div>
-                  <div style={{ fontSize: '15px', fontWeight: '600', color: '#1a1a1a', fontFamily: 'DM Mono, monospace' }}>{selected.name}</div>
-                  <div style={{ fontSize: '22px', fontWeight: '700', color: THEME.accent, fontFamily: 'DM Mono, monospace', marginTop: '4px' }}>{fmt(selected.total)}</div>
+                  <div style={{ fontSize: '9px', color: '#888', fontFamily: 'Inter, sans-serif', letterSpacing: '0.1em', marginBottom: '4px' }}>ACCOUNT DETAIL</div>
+                  <div style={{ fontSize: '15px', fontWeight: '600', color: '#1a1a1a', fontFamily: 'Inter, sans-serif' }}>{selected.name}</div>
+                  <div style={{ fontSize: '22px', fontWeight: '700', color: THEME.accent, fontFamily: 'Inter, sans-serif', marginTop: '4px' }}>{fmt(selected.total)}</div>
                 </div>
                 <button onClick={() => { setSelected(null); setTxns([]) }}
                   style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#888', fontSize: '20px', padding: '4px' }}>×</button>
@@ -230,17 +230,17 @@ export default function Accounts() {
 
               <div style={{ display: 'flex', gap: '20px', padding: '10px 14px', background: '#F8F8F8', borderRadius: '4px', marginBottom: '16px', border: '1px solid #E5E5E5' }}>
                 <div>
-                  <div style={{ fontSize: '9px', color: '#888', fontFamily: 'DM Mono, monospace', letterSpacing: '0.05em' }}>TRANSACTIONS</div>
-                  <div style={{ fontSize: '18px', fontWeight: '700', color: '#1a1a1a', fontFamily: 'DM Mono, monospace' }}>{selected.txnCount}</div>
+                  <div style={{ fontSize: '9px', color: '#888', fontFamily: 'Inter, sans-serif', letterSpacing: '0.05em' }}>TRANSACTIONS</div>
+                  <div style={{ fontSize: '18px', fontWeight: '700', color: '#1a1a1a', fontFamily: 'Inter, sans-serif' }}>{selected.txnCount}</div>
                 </div>
                 <div>
-                  <div style={{ fontSize: '9px', color: '#888', fontFamily: 'DM Mono, monospace', letterSpacing: '0.05em' }}>CATEGORY</div>
-                  <div style={{ fontSize: '12px', fontWeight: '600', color: '#1a1a1a', fontFamily: 'DM Mono, monospace', textTransform: 'capitalize', marginTop: '2px' }}>{selected.category}</div>
+                  <div style={{ fontSize: '9px', color: '#888', fontFamily: 'Inter, sans-serif', letterSpacing: '0.05em' }}>CATEGORY</div>
+                  <div style={{ fontSize: '12px', fontWeight: '600', color: '#1a1a1a', fontFamily: 'Inter, sans-serif', textTransform: 'capitalize', marginTop: '2px' }}>{selected.category}</div>
                 </div>
               </div>
 
               {txnLoading ? (
-                <div style={{ padding: '40px', textAlign: 'center', color: '#888', fontFamily: 'DM Mono, monospace', fontSize: '11px' }}>Loading...</div>
+                <div style={{ padding: '40px', textAlign: 'center', color: '#888', fontFamily: 'Inter, sans-serif', fontSize: '11px' }}>Loading...</div>
               ) : (
                 <>
                   {txns.map((t, i) => (
@@ -248,13 +248,13 @@ export default function Accounts() {
                       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '10px' }}>
                         <div style={{ flex: 1 }}>
                           <div style={{ fontSize: '11px', color: '#1a1a1a', lineHeight: '1.4' }}>{t.description || t.type}</div>
-                          {t.split_account && <div style={{ fontSize: '10px', color: '#888', fontFamily: 'DM Mono, monospace', marginTop: '2px' }}>→ {t.split_account}</div>}
+                          {t.split_account && <div style={{ fontSize: '10px', color: '#888', fontFamily: 'Inter, sans-serif', marginTop: '2px' }}>→ {t.split_account}</div>}
                           <div style={{ display: 'flex', gap: '8px', marginTop: '2px' }}>
-                            <span style={{ fontSize: '9px', color: '#888', fontFamily: 'DM Mono, monospace' }}>{t.date}</span>
-                            <span style={{ fontSize: '9px', color: '#888', fontFamily: 'DM Mono, monospace' }}>{t.type}</span>
+                            <span style={{ fontSize: '9px', color: '#888', fontFamily: 'Inter, sans-serif' }}>{t.date}</span>
+                            <span style={{ fontSize: '9px', color: '#888', fontFamily: 'Inter, sans-serif' }}>{t.type}</span>
                           </div>
                         </div>
-                        <div style={{ fontSize: '12px', fontWeight: '600', flexShrink: 0, fontFamily: 'DM Mono, monospace',
+                        <div style={{ fontSize: '12px', fontWeight: '600', flexShrink: 0, fontFamily: 'Inter, sans-serif',
                           color: Number(t.amount) >= 0 ? '#16a34a' : THEME.accent }}>
                           {Number(t.amount) >= 0 ? '' : '–'}{fmt(t.amount)}
                         </div>
@@ -262,7 +262,7 @@ export default function Accounts() {
                     </div>
                   ))}
                   {txns.length === 100 && (
-                    <div style={{ padding: '12px 0', textAlign: 'center', color: '#888', fontSize: '10px', fontFamily: 'DM Mono, monospace' }}>
+                    <div style={{ padding: '12px 0', textAlign: 'center', color: '#888', fontSize: '10px', fontFamily: 'Inter, sans-serif' }}>
                       Showing most recent 100 transactions
                     </div>
                   )}

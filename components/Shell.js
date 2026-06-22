@@ -82,7 +82,7 @@ export default function Shell({ active, right, children }) {
         .rdl-navbtn { display: block; width: 100%; text-align: left; padding: 9px 12px; border-radius: 7px; border: none; background: transparent; color: #888; font-family: ${ui}; font-size: 12.5px; font-weight: 500; letter-spacing: 0.01em; cursor: pointer; white-space: nowrap; transition: background .15s, color .15s; }
         .rdl-navbtn:hover { background: rgba(255,255,255,.05); color: #ccc; }
         .rdl-foot { padding: 12px 8px 0; border-top: 1px solid ${THEME.border}; margin-top: 8px; }
-        .rdl-main { flex: 1; min-width: 0; background: ${THEME.content}; }
+        .rdl-main { flex: 1; min-width: 0; background: ${THEME.content}; font-variant-numeric: tabular-nums; }
         @media (max-width: 860px) {
           .rdl-shell { flex-direction: column; }
           .rdl-side { width: auto; height: auto; position: static; flex-direction: column; padding: 12px; }

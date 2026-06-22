@@ -21,11 +21,11 @@ const THEME = { sidebarBg: '#1A1A1A', sidebarBorder: '#2A2A2A', accent: '#CC2222
 const hcell = (align = 'left') => ({
   padding: '6px 10px', fontSize: '9px', color: '#888', background: '#FAFAFA',
   fontWeight: '400', letterSpacing: '0.1em', borderBottom: '1px solid #E5E5E5',
-  fontFamily: 'DM Mono, monospace', textAlign: align,
+  fontFamily: 'Inter, sans-serif', textAlign: align,
 })
 const cell = (align = 'left', extra = {}) => ({
   padding: '8px 10px', borderBottom: '1px solid #F0F0F0',
-  color: '#333', fontSize: '11px', fontFamily: 'DM Mono, monospace',
+  color: '#333', fontSize: '11px', fontFamily: 'Inter, sans-serif',
   textAlign: align, ...extra,
 })
 
@@ -105,13 +105,13 @@ export default function Inventory() {
       <Shell active="inventory" right={
           <>
             <div style={{ width: '6px', height: '6px', background: '#22c55e', borderRadius: '50%' }} />
-            <div style={{ fontSize: '10px', color: '#888', fontFamily: 'DM Mono, monospace' }}>Clover POS · Live</div>
+            <div style={{ fontSize: '10px', color: '#888', fontFamily: 'Inter, sans-serif' }}>Clover POS · Live</div>
           </>
         }>
 
         <div style={{ padding: '24px 28px' }}>
             {loading ? (
-              <div style={{ color: '#888', fontFamily: 'DM Mono, monospace', fontSize: '12px' }}>Loading...</div>
+              <div style={{ color: '#888', fontFamily: 'Inter, sans-serif', fontSize: '12px' }}>Loading...</div>
             ) : (
               <>
                 {/* KPI row */}
@@ -123,9 +123,9 @@ export default function Inventory() {
                     { label: 'AVG ORDER VALUE', value: fmtD(avgOrder),                 sub: 'per line item',           sc: THEME.accent },
                   ].map(k => (
                     <div key={k.label} style={{ flex: 1, background: '#fff', border: '1px solid #E5E5E5', borderRadius: '6px', padding: '14px 16px' }}>
-                      <div style={{ fontSize: '9px', color: '#888', letterSpacing: '0.15em', marginBottom: '6px', fontFamily: 'DM Mono, monospace' }}>{k.label}</div>
-                      <div style={{ fontSize: '20px', color: '#1a1a1a', fontWeight: '600', fontFamily: 'DM Mono, monospace' }}>{k.value}</div>
-                      <div style={{ fontSize: '10px', color: k.sc, marginTop: '4px', fontFamily: 'DM Mono, monospace' }}>{k.sub}</div>
+                      <div style={{ fontSize: '9px', color: '#888', letterSpacing: '0.15em', marginBottom: '6px', fontFamily: 'Inter, sans-serif' }}>{k.label}</div>
+                      <div style={{ fontSize: '20px', color: '#1a1a1a', fontWeight: '600', fontFamily: 'Inter, sans-serif' }}>{k.value}</div>
+                      <div style={{ fontSize: '10px', color: k.sc, marginTop: '4px', fontFamily: 'Inter, sans-serif' }}>{k.sub}</div>
                     </div>
                   ))}
                 </div>
@@ -134,7 +134,7 @@ export default function Inventory() {
                 <div style={{ display: 'flex', gap: '2px', borderBottom: '1px solid #E5E5E5', marginBottom: '20px' }}>
                   {tabs.map(t => (
                     <button key={t.id} onClick={() => setTab(t.id)} style={{
-                      padding: '8px 16px', fontSize: '10px', fontFamily: 'DM Mono, monospace',
+                      padding: '8px 16px', fontSize: '10px', fontFamily: 'Inter, sans-serif',
                       letterSpacing: '0.08em', background: 'none', border: 'none', cursor: 'pointer',
                       color: tab === t.id ? '#1a1a1a' : '#888',
                       borderBottom: tab === t.id ? `2px solid ${THEME.accent}` : '2px solid transparent',
@@ -151,11 +151,11 @@ export default function Inventory() {
                         value={search} onChange={e => setSearch(e.target.value)}
                         placeholder="Search items..."
                         style={{ flex: 1, padding: '7px 12px', background: '#fff', border: '1px solid #E5E5E5',
-                          borderRadius: '4px', color: '#1a1a1a', fontSize: '11px', fontFamily: 'DM Mono, monospace', outline: 'none' }}
+                          borderRadius: '4px', color: '#1a1a1a', fontSize: '11px', fontFamily: 'Inter, sans-serif', outline: 'none' }}
                       />
                       {[{ key: 'revenue', label: 'REVENUE' }, { key: 'orders', label: 'ORDERS' }, { key: 'avg', label: 'AVG SALE' }].map(s => (
                         <button key={s.key} onClick={() => setSort(s.key)} style={{
-                          padding: '6px 12px', fontSize: '9px', fontFamily: 'DM Mono, monospace',
+                          padding: '6px 12px', fontSize: '9px', fontFamily: 'Inter, sans-serif',
                           letterSpacing: '0.08em', border: 'none', borderRadius: '4px', cursor: 'pointer',
                           background: sort === s.key ? THEME.accent : '#F0F0F0',
                           color: sort === s.key ? '#fff' : '#888',
@@ -199,7 +199,7 @@ export default function Inventory() {
                       </tbody>
                     </table>
                     {sorted.length === 0 && (
-                      <div style={{ padding: '20px', textAlign: 'center', color: '#888', fontFamily: 'DM Mono, monospace', fontSize: '11px' }}>
+                      <div style={{ padding: '20px', textAlign: 'center', color: '#888', fontFamily: 'Inter, sans-serif', fontSize: '11px' }}>
                         No items match "{search}"
                       </div>
                     )}
@@ -209,29 +209,29 @@ export default function Inventory() {
                 {/* By Month */}
                 {tab === 'monthly' && (
                   <div style={{ background: '#fff', border: '1px solid #E5E5E5', borderRadius: '6px', padding: '16px' }}>
-                    <div style={{ fontSize: '9px', color: '#888', letterSpacing: '0.15em', marginBottom: '14px', fontFamily: 'DM Mono, monospace' }}>
+                    <div style={{ fontSize: '9px', color: '#888', letterSpacing: '0.15em', marginBottom: '14px', fontFamily: 'Inter, sans-serif' }}>
                       CLOVER SALES BY MONTH
                     </div>
                     {(() => {
                       const maxRev = Math.max(...monthly.map(m => m.revenue), 1)
                       return monthly.map((m, i) => (
                         <div key={m.month} style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '10px 0', borderBottom: i < monthly.length - 1 ? '1px solid #F0F0F0' : 'none' }}>
-                          <div style={{ width: '80px', fontSize: '10px', color: '#888', fontFamily: 'DM Mono, monospace', flexShrink: 0 }}>{m.label}</div>
+                          <div style={{ width: '80px', fontSize: '10px', color: '#888', fontFamily: 'Inter, sans-serif', flexShrink: 0 }}>{m.label}</div>
                           <div style={{ flex: 1, height: '6px', background: '#E5E5E5', borderRadius: '3px' }}>
                             <div style={{ height: '6px', background: THEME.accent, borderRadius: '3px', width: `${Math.round(m.revenue / maxRev * 100)}%` }} />
                           </div>
-                          <div style={{ width: '80px', textAlign: 'right', fontSize: '11px', color: '#16a34a', fontFamily: 'DM Mono, monospace', fontWeight: '600', flexShrink: 0 }}>
+                          <div style={{ width: '80px', textAlign: 'right', fontSize: '11px', color: '#16a34a', fontFamily: 'Inter, sans-serif', fontWeight: '600', flexShrink: 0 }}>
                             {fmt(m.revenue)}
                           </div>
-                          <div style={{ width: '60px', textAlign: 'right', fontSize: '10px', color: '#888', fontFamily: 'DM Mono, monospace', flexShrink: 0 }}>
+                          <div style={{ width: '60px', textAlign: 'right', fontSize: '10px', color: '#888', fontFamily: 'Inter, sans-serif', flexShrink: 0 }}>
                             {m.orders} orders
                           </div>
                         </div>
                       ))
                     })()}
                     <div style={{ display: 'flex', justifyContent: 'space-between', paddingTop: '12px', borderTop: '1px solid #E5E5E5', marginTop: '4px' }}>
-                      <div style={{ fontSize: '10px', color: '#888', fontFamily: 'DM Mono, monospace' }}>TOTAL</div>
-                      <div style={{ fontSize: '12px', color: '#16a34a', fontFamily: 'DM Mono, monospace', fontWeight: '600' }}>
+                      <div style={{ fontSize: '10px', color: '#888', fontFamily: 'Inter, sans-serif' }}>TOTAL</div>
+                      <div style={{ fontSize: '12px', color: '#16a34a', fontFamily: 'Inter, sans-serif', fontWeight: '600' }}>
                         {fmt(monthly.reduce((s, m) => s + m.revenue, 0))}
                       </div>
                     </div>

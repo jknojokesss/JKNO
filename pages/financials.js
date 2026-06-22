@@ -26,13 +26,13 @@ const THEME = { sidebarBg: '#1A1A1A', sidebarBorder: '#2A2A2A', accent: '#CC2222
 
 const cell = (align = 'left', extra = {}) => ({
   padding: '8px 10px', borderBottom: '1px solid #F0F0F0',
-  color: '#333', fontSize: '11px', fontFamily: 'DM Mono, monospace',
+  color: '#333', fontSize: '11px', fontFamily: 'Inter, sans-serif',
   textAlign: align, ...extra,
 })
 const hcell = (align = 'left') => ({
   padding: '6px 10px', fontSize: '9px', color: '#888', background: '#FAFAFA',
   fontWeight: '400', letterSpacing: '0.1em', borderBottom: '1px solid #E5E5E5',
-  fontFamily: 'DM Mono, monospace', textAlign: align,
+  fontFamily: 'Inter, sans-serif', textAlign: align,
 })
 
 function DrillModal({ account, onClose }) {
@@ -64,12 +64,12 @@ function DrillModal({ account, onClose }) {
         boxShadow: '0 8px 32px rgba(0,0,0,0.12)',
       }}>
         <div style={{ padding: '16px 20px', borderBottom: '1px solid #E5E5E5', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-          <div style={{ fontSize: '12px', color: '#1a1a1a', fontFamily: 'DM Mono, monospace', letterSpacing: '0.1em', fontWeight: '600' }}>{account}</div>
+          <div style={{ fontSize: '12px', color: '#1a1a1a', fontFamily: 'Inter, sans-serif', letterSpacing: '0.1em', fontWeight: '600' }}>{account}</div>
           <button onClick={onClose} style={{ background: 'none', border: 'none', color: '#888', cursor: 'pointer', fontSize: '20px', lineHeight: 1 }}>×</button>
         </div>
         <div style={{ overflowY: 'auto', flex: 1 }}>
           {loading ? (
-            <div style={{ padding: '20px', color: '#888', fontFamily: 'DM Mono, monospace', fontSize: '11px' }}>Loading transactions...</div>
+            <div style={{ padding: '20px', color: '#888', fontFamily: 'Inter, sans-serif', fontSize: '11px' }}>Loading transactions...</div>
           ) : (
             <table style={{ width: '100%', borderCollapse: 'collapse' }}>
               <thead>
@@ -90,14 +90,14 @@ function DrillModal({ account, onClose }) {
                   </tr>
                 ))}
                 {txns.length === 0 && (
-                  <tr><td colSpan={4} style={{ padding: '20px', color: '#888', fontFamily: 'DM Mono, monospace', fontSize: '11px', textAlign: 'center' }}>No transactions found</td></tr>
+                  <tr><td colSpan={4} style={{ padding: '20px', color: '#888', fontFamily: 'Inter, sans-serif', fontSize: '11px', textAlign: 'center' }}>No transactions found</td></tr>
                 )}
               </tbody>
             </table>
           )}
         </div>
         {txns.length === 500 && (
-          <div style={{ padding: '10px 20px', borderTop: '1px solid #E5E5E5', fontSize: '9px', color: '#888', fontFamily: 'DM Mono, monospace' }}>
+          <div style={{ padding: '10px 20px', borderTop: '1px solid #E5E5E5', fontSize: '9px', color: '#888', fontFamily: 'Inter, sans-serif' }}>
             Showing most recent 500 transactions
           </div>
         )}
@@ -219,14 +219,14 @@ export default function Financials() {
 
         <div style={{ padding: '24px 28px' }}>
             {loading ? (
-              <div style={{ color: '#888', fontFamily: 'DM Mono, monospace', fontSize: '12px' }}>Loading...</div>
+              <div style={{ color: '#888', fontFamily: 'Inter, sans-serif', fontSize: '12px' }}>Loading...</div>
             ) : (
               <>
                 {/* Admin-only: import a fresh QuickBooks GL. Clients never see this. */}
                 {isAdmin && (
                   <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: '12px' }}>
                     <button onClick={() => { window.location.href = '/admin/financials' }}
-                      style={{ fontSize: '10px', fontFamily: 'DM Mono, monospace', letterSpacing: '0.08em', color: '#fff', background: THEME.accent, border: 'none', borderRadius: '4px', padding: '8px 14px', cursor: 'pointer' }}>
+                      style={{ fontSize: '10px', fontFamily: 'Inter, sans-serif', letterSpacing: '0.08em', color: '#fff', background: THEME.accent, border: 'none', borderRadius: '4px', padding: '8px 14px', cursor: 'pointer' }}>
                       ↑ IMPORT GL FROM QUICKBOOKS
                     </button>
                   </div>
@@ -240,9 +240,9 @@ export default function Financials() {
                     { label: 'NET INCOME',     value: fmt(plNetIncome),   sub: pct(plNetIncome / plIncome * 100) + ' net margin',    sc: '#16a34a' },
                   ].map(k => (
                     <div key={k.label} style={{ flex: 1, background: '#fff', border: '1px solid #E5E5E5', borderRadius: '6px', padding: '14px 16px' }}>
-                      <div style={{ fontSize: '9px', color: '#888', letterSpacing: '0.15em', marginBottom: '6px', fontFamily: 'DM Mono, monospace' }}>{k.label}</div>
-                      <div style={{ fontSize: '20px', color: '#1a1a1a', fontWeight: '600', fontFamily: 'DM Mono, monospace' }}>{k.value}</div>
-                      <div style={{ fontSize: '10px', color: k.sc, marginTop: '4px', fontFamily: 'DM Mono, monospace' }}>{k.sub}</div>
+                      <div style={{ fontSize: '9px', color: '#888', letterSpacing: '0.15em', marginBottom: '6px', fontFamily: 'Inter, sans-serif' }}>{k.label}</div>
+                      <div style={{ fontSize: '20px', color: '#1a1a1a', fontWeight: '600', fontFamily: 'Inter, sans-serif' }}>{k.value}</div>
+                      <div style={{ fontSize: '10px', color: k.sc, marginTop: '4px', fontFamily: 'Inter, sans-serif' }}>{k.sub}</div>
                     </div>
                   ))}
                 </div>
@@ -251,7 +251,7 @@ export default function Financials() {
                 <div style={{ display: 'flex', gap: '2px', borderBottom: '1px solid #E5E5E5', marginBottom: '20px' }}>
                   {tabs.map(t => (
                     <button key={t.id} onClick={() => setActiveTab(t.id)} style={{
-                      padding: '8px 16px', fontSize: '10px', fontFamily: 'DM Mono, monospace',
+                      padding: '8px 16px', fontSize: '10px', fontFamily: 'Inter, sans-serif',
                       letterSpacing: '0.08em', background: 'none', border: 'none', cursor: 'pointer',
                       color: activeTab === t.id ? '#1a1a1a' : '#888',
                       borderBottom: activeTab === t.id ? `2px solid ${THEME.accent}` : '2px solid transparent',
@@ -267,7 +267,7 @@ export default function Financials() {
                       const sectionTotal = section.rows.reduce((s, r) => s + r.amount, 0)
                       return (
                         <div key={section.section} style={{ background: '#fff', border: '1px solid #E5E5E5', borderRadius: '6px', padding: '16px' }}>
-                          <div style={{ fontSize: '9px', color: '#888', letterSpacing: '0.15em', marginBottom: '12px', paddingBottom: '8px', borderBottom: '1px solid #F0F0F0', fontFamily: 'DM Mono, monospace' }}>{section.section}</div>
+                          <div style={{ fontSize: '9px', color: '#888', letterSpacing: '0.15em', marginBottom: '12px', paddingBottom: '8px', borderBottom: '1px solid #F0F0F0', fontFamily: 'Inter, sans-serif' }}>{section.section}</div>
                           <table style={{ width: '100%', borderCollapse: 'collapse' }}>
                             <thead>
                               <tr>
@@ -290,14 +290,14 @@ export default function Financials() {
                                       <button onClick={() => setDrillAccount(row.account)} style={{
                                         fontSize: '9px', background: '#F5F5F5', color: THEME.accent,
                                         border: '1px solid #E5E5E5', padding: '2px 8px', borderRadius: '3px',
-                                        cursor: 'pointer', fontFamily: 'DM Mono, monospace',
+                                        cursor: 'pointer', fontFamily: 'Inter, sans-serif',
                                       }}>DRILL →</button>
                                     ) : null}
                                   </td>
                                 </tr>
                               ))}
                               <tr>
-                                <td colSpan={4} style={{ padding: '8px 10px', borderTop: '1px solid #E5E5E5', fontFamily: 'DM Mono, monospace', fontSize: '11px', color: '#1a1a1a', fontWeight: '600', textAlign: 'right' }}>
+                                <td colSpan={4} style={{ padding: '8px 10px', borderTop: '1px solid #E5E5E5', fontFamily: 'Inter, sans-serif', fontSize: '11px', color: '#1a1a1a', fontWeight: '600', textAlign: 'right' }}>
                                   {section.section === 'INCOME' ? 'Total Income: ' :
                                    section.section === 'COST OF GOODS SOLD' ? 'Gross Profit: ' :
                                    section.section === 'OPERATING EXPENSES' ? 'Total Operating Expenses: ' :
@@ -314,10 +314,10 @@ export default function Financials() {
                     })}
                     {/* Net income */}
                     <div style={{ background: '#f0fdf4', border: '1px solid #bbf7d0', borderRadius: '6px', padding: '16px 20px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                      <div style={{ fontSize: '13px', color: '#16a34a', fontWeight: '600', fontFamily: 'DM Mono, monospace', letterSpacing: '0.1em' }}>NET INCOME</div>
-                      <div style={{ fontSize: '22px', color: '#16a34a', fontWeight: '700', fontFamily: 'DM Mono, monospace' }}>{fmt(plNetIncome)}</div>
+                      <div style={{ fontSize: '13px', color: '#16a34a', fontWeight: '600', fontFamily: 'Inter, sans-serif', letterSpacing: '0.1em' }}>NET INCOME</div>
+                      <div style={{ fontSize: '22px', color: '#16a34a', fontWeight: '700', fontFamily: 'Inter, sans-serif' }}>{fmt(plNetIncome)}</div>
                     </div>
-                    <div style={{ fontSize: '9px', color: '#888', fontFamily: 'DM Mono, monospace' }}>
+                    <div style={{ fontSize: '9px', color: '#888', fontFamily: 'Inter, sans-serif' }}>
                       * May COGS estimated: $1,313 QB actual + $13,896 Weldon purchases pending QB entry
                     </div>
                   </div>
@@ -333,7 +333,7 @@ export default function Financials() {
                   const balanced = Math.abs(totA - totL - totE) < 0.01
                   const Section = ({ title, rows, total }) => (
                     <div style={{ background: '#fff', border: '1px solid #E5E5E5', borderRadius: '6px', padding: '16px' }}>
-                      <div style={{ fontSize: '9px', color: '#888', letterSpacing: '0.15em', marginBottom: '12px', paddingBottom: '8px', borderBottom: '1px solid #F0F0F0', fontFamily: 'DM Mono, monospace' }}>{title}</div>
+                      <div style={{ fontSize: '9px', color: '#888', letterSpacing: '0.15em', marginBottom: '12px', paddingBottom: '8px', borderBottom: '1px solid #F0F0F0', fontFamily: 'Inter, sans-serif' }}>{title}</div>
                       <table style={{ width: '100%', borderCollapse: 'collapse' }}>
                         <tbody>
                           {rows.map(r => (
@@ -342,13 +342,13 @@ export default function Financials() {
                               <td style={cell('right', { color: r.amount >= 0 ? '#1a1a1a' : THEME.accent })}>{fmt(r.amount)}</td>
                               <td style={cell('right')}>
                                 {r.account !== 'Net Income' && (
-                                  <button onClick={() => setDrillAccount(r.account)} style={{ fontSize: '9px', background: '#F5F5F5', color: THEME.accent, border: '1px solid #E5E5E5', padding: '2px 8px', borderRadius: '3px', cursor: 'pointer', fontFamily: 'DM Mono, monospace' }}>DRILL →</button>
+                                  <button onClick={() => setDrillAccount(r.account)} style={{ fontSize: '9px', background: '#F5F5F5', color: THEME.accent, border: '1px solid #E5E5E5', padding: '2px 8px', borderRadius: '3px', cursor: 'pointer', fontFamily: 'Inter, sans-serif' }}>DRILL →</button>
                                 )}
                               </td>
                             </tr>
                           ))}
                           <tr>
-                            <td colSpan={3} style={{ padding: '8px 10px', borderTop: '1px solid #E5E5E5', fontFamily: 'DM Mono, monospace', fontSize: '11px', color: '#1a1a1a', fontWeight: '600', textAlign: 'right' }}>
+                            <td colSpan={3} style={{ padding: '8px 10px', borderTop: '1px solid #E5E5E5', fontFamily: 'Inter, sans-serif', fontSize: '11px', color: '#1a1a1a', fontWeight: '600', textAlign: 'right' }}>
                               Total {title.charAt(0) + title.slice(1).toLowerCase()}: <span>{fmt(total)}</span>
                             </td>
                           </tr>
@@ -356,17 +356,17 @@ export default function Financials() {
                       </table>
                     </div>
                   )
-                  if (!bs.length) return <div style={{ color: '#888', fontFamily: 'DM Mono, monospace', fontSize: '12px' }}>No balance sheet data yet — import a General Ledger.</div>
+                  if (!bs.length) return <div style={{ color: '#888', fontFamily: 'Inter, sans-serif', fontSize: '12px' }}>No balance sheet data yet — import a General Ledger.</div>
                   return (
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
                       <Section title="ASSETS" rows={groups.asset} total={totA} />
                       <Section title="LIABILITIES" rows={groups.liability} total={totL} />
                       <Section title="EQUITY" rows={groups.equity} total={totE} />
                       <div style={{ background: balanced ? '#f0fdf4' : '#fef2f2', border: `1px solid ${balanced ? '#bbf7d0' : '#fecaca'}`, borderRadius: '6px', padding: '16px 20px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                        <div style={{ fontSize: '12px', color: balanced ? '#16a34a' : '#991b1b', fontWeight: '600', fontFamily: 'DM Mono, monospace', letterSpacing: '0.08em' }}>
+                        <div style={{ fontSize: '12px', color: balanced ? '#16a34a' : '#991b1b', fontWeight: '600', fontFamily: 'Inter, sans-serif', letterSpacing: '0.08em' }}>
                           {balanced ? '✓ IN BALANCE' : '✕ OUT OF BALANCE'}
                         </div>
-                        <div style={{ fontSize: '11px', color: '#555', fontFamily: 'DM Mono, monospace' }}>
+                        <div style={{ fontSize: '11px', color: '#555', fontFamily: 'Inter, sans-serif' }}>
                           Assets {fmt(totA)} &nbsp;=&nbsp; Liabilities + Equity {fmt(totL + totE)}
                         </div>
                       </div>
@@ -377,8 +377,8 @@ export default function Financials() {
                 {/* Monthly Table Tab */}
                 {activeTab === 'monthly' && (
                   <div style={{ background: '#fff', border: '1px solid #E5E5E5', borderRadius: '6px', padding: '16px' }}>
-                    <div style={{ fontSize: '9px', color: '#888', letterSpacing: '0.15em', marginBottom: '12px', fontFamily: 'DM Mono, monospace' }}>MONTHLY P&L — FROM QUICKBOOKS</div>
-                    <table style={{ width: '100%', borderCollapse: 'collapse', fontFamily: 'DM Mono, monospace' }}>
+                    <div style={{ fontSize: '9px', color: '#888', letterSpacing: '0.15em', marginBottom: '12px', fontFamily: 'Inter, sans-serif' }}>MONTHLY P&L — FROM QUICKBOOKS</div>
+                    <table style={{ width: '100%', borderCollapse: 'collapse', fontFamily: 'Inter, sans-serif' }}>
                       <thead>
                         <tr>
                           {['Month','Revenue','COGS','Gross Profit','Net Profit','Margin'].map(h => (
@@ -413,12 +413,12 @@ export default function Financials() {
                             { v: fmt(totals.profit),                         a: 'right', c: '#16a34a', w: '700' },
                             { v: pct(totals.profit / totals.revenue * 100),  a: 'right', c: '#16a34a', w: '700' },
                           ].map((col, i) => (
-                            <td key={i} style={{ padding: '9px 10px', borderTop: '2px solid #E5E5E5', background: '#FAFAFA', color: col.c, fontSize: '11px', fontWeight: col.w, fontFamily: 'DM Mono, monospace', textAlign: col.a }}>{col.v}</td>
+                            <td key={i} style={{ padding: '9px 10px', borderTop: '2px solid #E5E5E5', background: '#FAFAFA', color: col.c, fontSize: '11px', fontWeight: col.w, fontFamily: 'Inter, sans-serif', textAlign: col.a }}>{col.v}</td>
                           ))}
                         </tr>
                       </tbody>
                     </table>
-                    <div style={{ marginTop: '10px', fontSize: '9px', color: '#888', fontFamily: 'DM Mono, monospace' }}>
+                    <div style={{ marginTop: '10px', fontSize: '9px', color: '#888', fontFamily: 'Inter, sans-serif' }}>
                       * May COGS estimated — Weldon $13,896 pending QB entry
                     </div>
                   </div>
@@ -435,18 +435,18 @@ export default function Financials() {
                       const groupTotal = group.rows.reduce((s, r) => s + r.amount, 0)
                       return (
                         <div key={group.heading} style={{ background: '#fff', border: '1px solid #E5E5E5', borderRadius: '6px', padding: '16px' }}>
-                          <div style={{ fontSize: '9px', color: '#888', letterSpacing: '0.15em', marginBottom: '14px', fontFamily: 'DM Mono, monospace' }}>{group.heading}</div>
+                          <div style={{ fontSize: '9px', color: '#888', letterSpacing: '0.15em', marginBottom: '14px', fontFamily: 'Inter, sans-serif' }}>{group.heading}</div>
                           {[...group.rows].sort((a, b) => b.amount - a.amount).map(e => (
                             <div key={e.label} style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '7px 0', borderBottom: '1px solid #F0F0F0' }}>
-                              <div style={{ width: '180px', fontSize: '10px', color: '#333', flexShrink: 0, fontFamily: 'DM Mono, monospace' }}>{e.label}</div>
+                              <div style={{ width: '180px', fontSize: '10px', color: '#333', flexShrink: 0, fontFamily: 'Inter, sans-serif' }}>{e.label}</div>
                               <div style={{ flex: 1, height: '5px', background: '#E5E5E5', borderRadius: '3px' }}>
                                 <div style={{ height: '5px', background: THEME.accent, borderRadius: '3px', width: `${Math.round(e.amount / maxV * 100)}%` }} />
                               </div>
-                              <div style={{ width: '70px', textAlign: 'right', fontSize: '10px', color: THEME.accent, fontFamily: 'DM Mono, monospace' }}>{fmt(e.amount)}</div>
+                              <div style={{ width: '70px', textAlign: 'right', fontSize: '10px', color: THEME.accent, fontFamily: 'Inter, sans-serif' }}>{fmt(e.amount)}</div>
                             </div>
                           ))}
                           <div style={{ display: 'flex', justifyContent: 'flex-end', paddingTop: '8px', borderTop: '1px solid #E5E5E5', marginTop: '4px' }}>
-                            <span style={{ fontSize: '10px', color: '#1a1a1a', fontFamily: 'DM Mono, monospace', fontWeight: '600' }}>Total: {fmt(groupTotal)}</span>
+                            <span style={{ fontSize: '10px', color: '#1a1a1a', fontFamily: 'Inter, sans-serif', fontWeight: '600' }}>Total: {fmt(groupTotal)}</span>
                           </div>
                         </div>
                       )
@@ -458,8 +458,8 @@ export default function Financials() {
                 {activeTab === 'accounts' && (
                   <div style={{ background: '#fff', border: '1px solid #E5E5E5', borderRadius: '6px', padding: '16px' }}>
                     <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', marginBottom: '12px' }}>
-                      <div style={{ fontSize: '9px', color: '#888', letterSpacing: '0.15em', fontFamily: 'DM Mono, monospace' }}>ACCOUNT BALANCES — CLICK TO DRILL DOWN</div>
-                      <div style={{ fontSize: '9px', color: '#888', fontFamily: 'DM Mono, monospace' }}>
+                      <div style={{ fontSize: '9px', color: '#888', letterSpacing: '0.15em', fontFamily: 'Inter, sans-serif' }}>ACCOUNT BALANCES — CLICK TO DRILL DOWN</div>
+                      <div style={{ fontSize: '9px', color: '#888', fontFamily: 'Inter, sans-serif' }}>
                         {accounts.length} accounts &nbsp;·&nbsp; {accountsTotalTxns.toLocaleString()} txns
                       </div>
                     </div>
@@ -490,13 +490,13 @@ export default function Financials() {
                               <td style={cell('right', { color: a.total >= 0 ? '#16a34a' : THEME.accent })}>{fmt(a.total)}</td>
                               <td style={cell('right', { color: '#888' })}>{a.txns}</td>
                               <td style={cell('right')}>
-                                <span style={{ fontSize: '9px', color: THEME.accent, fontFamily: 'DM Mono, monospace' }}>DRILL →</span>
+                                <span style={{ fontSize: '9px', color: THEME.accent, fontFamily: 'Inter, sans-serif' }}>DRILL →</span>
                               </td>
                             </tr>
                           )
                         })}
                         {accounts.length === 0 && (
-                          <tr><td colSpan={5} style={{ padding: '20px', color: '#888', fontFamily: 'DM Mono, monospace', fontSize: '11px', textAlign: 'center' }}>No accounts found</td></tr>
+                          <tr><td colSpan={5} style={{ padding: '20px', color: '#888', fontFamily: 'Inter, sans-serif', fontSize: '11px', textAlign: 'center' }}>No accounts found</td></tr>
                         )}
                       </tbody>
                     </table>
@@ -518,38 +518,38 @@ export default function Financials() {
                   const cloverFailed = health?.lastCloverSync?.ok === false
                   const Row = ({ k, v, sub, bad }) => (
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', padding: '9px 0', borderBottom: '1px solid #F0F0F0' }}>
-                      <div style={{ fontSize: '11px', color: '#333', fontFamily: 'DM Mono, monospace' }}>{k}{sub && <span style={{ color: '#aaa', marginLeft: '8px' }}>{sub}</span>}</div>
-                      <div style={{ fontSize: '11px', fontFamily: 'DM Mono, monospace', color: bad ? '#CC2222' : '#1a1a1a' }}>{v}</div>
+                      <div style={{ fontSize: '11px', color: '#333', fontFamily: 'Inter, sans-serif' }}>{k}{sub && <span style={{ color: '#aaa', marginLeft: '8px' }}>{sub}</span>}</div>
+                      <div style={{ fontSize: '11px', fontFamily: 'Inter, sans-serif', color: bad ? '#CC2222' : '#1a1a1a' }}>{v}</div>
                     </div>
                   )
                   const Check = ({ ok, label, detail }) => (
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', padding: '9px 0', borderBottom: '1px solid #F0F0F0' }}>
-                      <div style={{ fontSize: '11px', color: '#333', fontFamily: 'DM Mono, monospace' }}>
+                      <div style={{ fontSize: '11px', color: '#333', fontFamily: 'Inter, sans-serif' }}>
                         <span style={{ color: ok ? '#16a34a' : '#CC2222', marginRight: '8px' }}>{ok ? '✓' : '✕'}</span>{label}
                       </div>
-                      <div style={{ fontSize: '11px', color: '#888', fontFamily: 'DM Mono, monospace' }}>{detail}</div>
+                      <div style={{ fontSize: '11px', color: '#888', fontFamily: 'Inter, sans-serif' }}>{detail}</div>
                     </div>
                   )
                   return (
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
                       {(cloverStale || cloverFailed) && (
-                        <div style={{ background: '#fef2f2', border: '1px solid #fecaca', borderRadius: '6px', padding: '14px 18px', fontSize: '12px', color: '#991b1b', fontFamily: 'DM Mono, monospace' }}>
+                        <div style={{ background: '#fef2f2', border: '1px solid #fecaca', borderRadius: '6px', padding: '14px 18px', fontSize: '12px', color: '#991b1b', fontFamily: 'Inter, sans-serif' }}>
                           ⚠ {cloverFailed ? 'The last Clover sync FAILED.' : 'Clover data looks stale — no successful sync in over 36 hours.'} Check the API token / cron.
                         </div>
                       )}
                       <div style={{ background: '#fff', border: '1px solid #E5E5E5', borderRadius: '6px', padding: '16px' }}>
-                        <div style={{ fontSize: '9px', color: '#888', letterSpacing: '0.15em', marginBottom: '8px', fontFamily: 'DM Mono, monospace' }}>DATA FRESHNESS</div>
+                        <div style={{ fontSize: '9px', color: '#888', letterSpacing: '0.15em', marginBottom: '8px', fontFamily: 'Inter, sans-serif' }}>DATA FRESHNESS</div>
                         <Row k="Clover sales" v={ago(health?.cloverLastSynced)} sub={health?.cloverLastSynced ? new Date(health.cloverLastSynced).toLocaleString() : ''} bad={cloverStale} />
                         <Row k="Last Clover sync" v={health?.lastCloverSync ? (health.lastCloverSync.ok ? 'OK' : 'FAILED') : '—'} sub={health?.lastCloverSync ? ago(health.lastCloverSync.ran_at) : ''} bad={cloverFailed} />
                         <Row k="Weldon orders" v={ago(health?.weldonLastAdded)} sub={health?.weldonLastAdded ? new Date(health.weldonLastAdded).toLocaleString() : ''} />
                         <Row k="Financials" v={health?.lastImport ? ago(health.lastImport.imported_at) : '—'} sub={health?.lastImport ? `last ${health.lastImport.kind} import` : ''} />
                       </div>
                       <div style={{ background: '#fff', border: '1px solid #E5E5E5', borderRadius: '6px', padding: '16px' }}>
-                        <div style={{ fontSize: '9px', color: '#888', letterSpacing: '0.15em', marginBottom: '8px', fontFamily: 'DM Mono, monospace' }}>RECONCILIATION</div>
+                        <div style={{ fontSize: '9px', color: '#888', letterSpacing: '0.15em', marginBottom: '8px', fontFamily: 'Inter, sans-serif' }}>RECONCILIATION</div>
                         <Check ok={bsBalanced} label="Balance sheet balances" detail={`${fmt(bsAssets)} = ${fmt(bsLE)}`} />
                         <Check ok={niTie} label="Net income ties P&L → Balance Sheet" detail={`${fmt(plNetIncome)} / ${fmt(niBs)}`} />
                         <Check ok={posVar != null && glClover > 0 && Math.abs(posVar) < glClover * 0.05} label="Clover POS ≈ booked Clover Sales" detail={cloverPos != null ? `POS ${fmt(cloverPos)} vs GL ${fmt(glClover)} (Δ ${fmt(posVar)})` : '—'} />
-                        <div style={{ fontSize: '9px', color: '#aaa', marginTop: '8px', fontFamily: 'DM Mono, monospace' }}>
+                        <div style={{ fontSize: '9px', color: '#aaa', marginTop: '8px', fontFamily: 'Inter, sans-serif' }}>
                           POS vs booked won't be exact — timing, refunds, tax/tips differ. Large gaps are the signal.
                         </div>
                       </div>

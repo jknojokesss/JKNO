@@ -15,11 +15,11 @@ const THEME = { sidebarBg: '#1A1A1A', sidebarBorder: '#2A2A2A', accent: '#CC2222
 const hcell = (align = 'left') => ({
   padding: '7px 12px', fontSize: '9px', color: '#888', background: '#FAFAFA',
   fontWeight: '400', letterSpacing: '0.1em', borderBottom: '1px solid #E5E5E5',
-  fontFamily: 'DM Mono, monospace', textAlign: align,
+  fontFamily: 'Inter, sans-serif', textAlign: align,
 })
 const cell = (align = 'left', extra = {}) => ({
   padding: '9px 12px', borderBottom: '1px solid #F0F0F0',
-  color: '#333', fontSize: '11px', fontFamily: 'DM Mono, monospace',
+  color: '#333', fontSize: '11px', fontFamily: 'Inter, sans-serif',
   textAlign: align, ...extra,
 })
 
@@ -420,12 +420,12 @@ export default function Orders() {
       <Head><title>Reydel Tire — Orders</title></Head>
       <Shell active="orders" right={
           <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
-            <div style={{ fontSize: '10px', color: '#888', fontFamily: 'DM Mono, monospace' }}>
+            <div style={{ fontSize: '10px', color: '#888', fontFamily: 'Inter, sans-serif' }}>
               {matched.length} / {rows.length} matched to Weldon costs
             </div>
             <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
               <div style={{ width: '6px', height: '6px', background: '#22c55e', borderRadius: '50%' }} />
-              <div style={{ fontSize: '10px', color: '#888', fontFamily: 'DM Mono, monospace' }}>Clover + Weldon</div>
+              <div style={{ fontSize: '10px', color: '#888', fontFamily: 'Inter, sans-serif' }}>Clover + Weldon</div>
             </div>
           </div>
         }>
@@ -438,7 +438,7 @@ export default function Orders() {
                 { id: 'precomputed', label: 'Orders — Precomputed (order_profit)' },
               ].map(t => (
                 <button key={t.id} onClick={() => setView(t.id)} style={{
-                  padding: '8px 16px', fontSize: '10px', fontFamily: 'DM Mono, monospace', letterSpacing: '0.08em',
+                  padding: '8px 16px', fontSize: '10px', fontFamily: 'Inter, sans-serif', letterSpacing: '0.08em',
                   background: 'none', border: 'none', cursor: 'pointer',
                   color: view === t.id ? '#1a1a1a' : '#888',
                   borderBottom: view === t.id ? `2px solid ${THEME.accent}` : '2px solid transparent',
@@ -448,7 +448,7 @@ export default function Orders() {
             </div>
 
             {view === 'live' && (loading ? (
-              <div style={{ color: '#888', fontFamily: 'DM Mono, monospace', fontSize: '12px' }}>Loading...</div>
+              <div style={{ color: '#888', fontFamily: 'Inter, sans-serif', fontSize: '12px' }}>Loading...</div>
             ) : (
               <>
                 {/* KPI cards */}
@@ -464,9 +464,9 @@ export default function Orders() {
                     { label: 'TOTAL PROFIT',       value: fmt0(totalProfit),                  sub: 'matched + est.',             sc: '#16a34a' },
                   ].map(k => (
                     <div key={k.label} style={{ flex: 1, background: '#fff', border: '1px solid #E5E5E5', borderRadius: '6px', padding: '14px 16px' }}>
-                      <div style={{ fontSize: '9px', color: '#888', letterSpacing: '0.15em', marginBottom: '6px', fontFamily: 'DM Mono, monospace' }}>{k.label}</div>
-                      <div style={{ fontSize: k.label === 'BEST MARGIN SIZE' ? '14px' : '18px', color: '#1a1a1a', fontWeight: '600', fontFamily: 'DM Mono, monospace', lineHeight: 1.2 }}>{k.value}</div>
-                      <div style={{ fontSize: '10px', color: k.sc, marginTop: '4px', fontFamily: 'DM Mono, monospace' }}>{k.sub}</div>
+                      <div style={{ fontSize: '9px', color: '#888', letterSpacing: '0.15em', marginBottom: '6px', fontFamily: 'Inter, sans-serif' }}>{k.label}</div>
+                      <div style={{ fontSize: k.label === 'BEST MARGIN SIZE' ? '14px' : '18px', color: '#1a1a1a', fontWeight: '600', fontFamily: 'Inter, sans-serif', lineHeight: 1.2 }}>{k.value}</div>
+                      <div style={{ fontSize: '10px', color: k.sc, marginTop: '4px', fontFamily: 'Inter, sans-serif' }}>{k.sub}</div>
                     </div>
                   ))}
                 </div>
@@ -475,7 +475,7 @@ export default function Orders() {
                 <div style={{ display: 'flex', gap: '10px', marginBottom: '16px', alignItems: 'center', flexWrap: 'wrap' }}>
                   {[{ k: 'all', l: 'ALL' }, { k: '2026-05-31', l: 'THRU 5/31' }].map(o => (
                     <button key={o.k} onClick={() => setAsOf(o.k)} style={{
-                      padding: '7px 12px', fontSize: '9px', fontFamily: 'DM Mono, monospace', letterSpacing: '0.08em',
+                      padding: '7px 12px', fontSize: '9px', fontFamily: 'Inter, sans-serif', letterSpacing: '0.08em',
                       border: '1px solid #E5E5E5', borderRadius: '4px', cursor: 'pointer',
                       background: asOf === o.k ? '#1a1a1a' : '#fff', color: asOf === o.k ? '#fff' : '#888',
                     }}>{o.l}</button>
@@ -483,11 +483,11 @@ export default function Orders() {
                   <input value={search} onChange={e => setSearch(e.target.value)}
                     placeholder="Filter by tire size or item..."
                     style={{ flex: 1, minWidth: '200px', padding: '8px 12px', border: '1px solid #E5E5E5', borderRadius: '4px',
-                      fontSize: '11px', fontFamily: 'DM Mono, monospace', outline: 'none', background: '#fff', color: '#1a1a1a' }}
+                      fontSize: '11px', fontFamily: 'Inter, sans-serif', outline: 'none', background: '#fff', color: '#1a1a1a' }}
                   />
                   {[{ key: 'date', label: 'DATE' }, { key: 'profit', label: 'PROFIT' }, { key: 'margin', label: 'MARGIN' }, { key: 'sale', label: 'SALE' }].map(s => (
                     <button key={s.key} onClick={() => toggleSort(s.key)} style={{
-                      padding: '7px 12px', fontSize: '9px', fontFamily: 'DM Mono, monospace', letterSpacing: '0.08em',
+                      padding: '7px 12px', fontSize: '9px', fontFamily: 'Inter, sans-serif', letterSpacing: '0.08em',
                       border: 'none', borderRadius: '4px', cursor: 'pointer',
                       background: sort === s.key ? THEME.accent : '#F0F0F0',
                       color: sort === s.key ? '#fff' : '#888',
@@ -496,7 +496,7 @@ export default function Orders() {
                     </button>
                   ))}
                   <select value={sizeFilter} onChange={e => setSizeFilter(e.target.value)} style={{
-                    padding: '7px 10px', fontSize: '9px', fontFamily: 'DM Mono, monospace', letterSpacing: '0.06em',
+                    padding: '7px 10px', fontSize: '9px', fontFamily: 'Inter, sans-serif', letterSpacing: '0.06em',
                     border: '1px solid #E5E5E5', borderRadius: '4px', cursor: 'pointer', maxWidth: '170px',
                     background: sizeFilter === 'all' ? '#F0F0F0' : '#dbeafe', color: '#555',
                   }}>
@@ -504,7 +504,7 @@ export default function Orders() {
                     {sizes.map(s => <option key={s.size} value={s.size}>{s.size} ({s.count})</option>)}
                   </select>
                   <select value={srcFilter} onChange={e => setSrcFilter(e.target.value)} style={{
-                    padding: '7px 10px', fontSize: '9px', fontFamily: 'DM Mono, monospace', letterSpacing: '0.06em',
+                    padding: '7px 10px', fontSize: '9px', fontFamily: 'Inter, sans-serif', letterSpacing: '0.06em',
                     border: '1px solid #E5E5E5', borderRadius: '4px', cursor: 'pointer',
                     background: srcFilter === 'all' ? '#F0F0F0' : '#fef3c7', color: '#555',
                   }}>
@@ -517,7 +517,7 @@ export default function Orders() {
                     <option value="service">SERVICE</option>
                   </select>
                   <button onClick={() => setShowEst(e => !e)} style={{
-                    padding: '7px 12px', fontSize: '9px', fontFamily: 'DM Mono, monospace', letterSpacing: '0.08em',
+                    padding: '7px 12px', fontSize: '9px', fontFamily: 'Inter, sans-serif', letterSpacing: '0.08em',
                     border: '1px solid #E5E5E5', borderRadius: '4px', cursor: 'pointer',
                     background: showEst ? '#F0F0F0' : THEME.accent,
                     color: showEst ? '#888' : '#fff',
@@ -525,19 +525,19 @@ export default function Orders() {
                     {showEst ? 'HIDE EST.' : 'SHOW EST.'}
                   </button>
                   <button onClick={() => setFlaggedOnly(f => !f)} title="Show only rows whose cost looks suspicious" style={{
-                    padding: '7px 12px', fontSize: '9px', fontFamily: 'DM Mono, monospace', letterSpacing: '0.08em',
+                    padding: '7px 12px', fontSize: '9px', fontFamily: 'Inter, sans-serif', letterSpacing: '0.08em',
                     border: 'none', borderRadius: '4px', cursor: 'pointer',
                     background: flaggedOnly ? '#f59e0b' : '#F0F0F0', color: flaggedOnly ? '#fff' : '#888',
                   }}>⚠ FLAGGED{flaggedCount ? ` (${flaggedCount})` : ''}</button>
                   <button onClick={downloadCSV} style={{
-                    padding: '7px 12px', fontSize: '9px', fontFamily: 'DM Mono, monospace', letterSpacing: '0.08em',
+                    padding: '7px 12px', fontSize: '9px', fontFamily: 'Inter, sans-serif', letterSpacing: '0.08em',
                     border: 'none', borderRadius: '4px', cursor: 'pointer', background: '#16a34a', color: '#fff',
                   }}>↓ CSV</button>
                 </div>
 
                 {/* Table */}
                 <div style={{ background: '#fff', border: '1px solid #E5E5E5', borderRadius: '6px', overflow: 'hidden' }}>
-                  <table style={{ width: '100%', borderCollapse: 'collapse', fontFamily: 'DM Mono, monospace' }}>
+                  <table style={{ width: '100%', borderCollapse: 'collapse', fontFamily: 'Inter, sans-serif' }}>
                     <thead>
                       <tr>
                         <th style={hcell('left')}>DATE</th>
@@ -610,16 +610,16 @@ export default function Orders() {
                   </table>
 
                   {filtered.length === 0 && (
-                    <div style={{ padding: '24px', textAlign: 'center', color: '#888', fontFamily: 'DM Mono, monospace', fontSize: '11px' }}>
+                    <div style={{ padding: '24px', textAlign: 'center', color: '#888', fontFamily: 'Inter, sans-serif', fontSize: '11px' }}>
                       No items match
                     </div>
                   )}
 
                   <div style={{ padding: '10px 16px', borderTop: '2px solid #E5E5E5', background: '#FAFAFA', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                    <div style={{ fontSize: '10px', color: '#888', fontFamily: 'DM Mono, monospace' }}>
+                    <div style={{ fontSize: '10px', color: '#888', fontFamily: 'Inter, sans-serif' }}>
                       {filtered.length.toLocaleString()} rows &nbsp;·&nbsp; {invCount.toLocaleString()} inventory &nbsp;·&nbsp; {sameDayCount.toLocaleString()} same-day ({sameDayMatched} matched · {sameDayProxy} est.) &nbsp;·&nbsp; <span style={{ color: flaggedCount ? '#b45309' : '#888' }}>⚠ {flaggedCount} flagged</span> &nbsp;·&nbsp; * = estimated cost
                     </div>
-                    <div style={{ fontSize: '11px', color: '#16a34a', fontFamily: 'DM Mono, monospace', fontWeight: '600' }}>
+                    <div style={{ fontSize: '11px', color: '#16a34a', fontFamily: 'Inter, sans-serif', fontWeight: '600' }}>
                       {fmt0(totalProfit)} est. profit shown
                     </div>
                   </div>
@@ -628,7 +628,7 @@ export default function Orders() {
             ))}
 
             {view === 'precomputed' && (opLoading ? (
-              <div style={{ color: '#888', fontFamily: 'DM Mono, monospace', fontSize: '12px' }}>Loading...</div>
+              <div style={{ color: '#888', fontFamily: 'Inter, sans-serif', fontSize: '12px' }}>Loading...</div>
             ) : (
               <>
                 {/* KPI cards */}
@@ -640,9 +640,9 @@ export default function Orders() {
                     { label: 'TOTAL PROFIT',  value: fmt0(opProfit), sub: `${opMargin.toFixed(1)}% margin`, sc: '#16a34a' },
                   ].map(k => (
                     <div key={k.label} style={{ flex: 1, background: '#fff', border: '1px solid #E5E5E5', borderRadius: '6px', padding: '14px 16px' }}>
-                      <div style={{ fontSize: '9px', color: '#888', letterSpacing: '0.15em', marginBottom: '6px', fontFamily: 'DM Mono, monospace' }}>{k.label}</div>
-                      <div style={{ fontSize: '18px', color: '#1a1a1a', fontWeight: '600', fontFamily: 'DM Mono, monospace' }}>{k.value}</div>
-                      <div style={{ fontSize: '10px', color: k.sc, marginTop: '4px', fontFamily: 'DM Mono, monospace' }}>{k.sub}</div>
+                      <div style={{ fontSize: '9px', color: '#888', letterSpacing: '0.15em', marginBottom: '6px', fontFamily: 'Inter, sans-serif' }}>{k.label}</div>
+                      <div style={{ fontSize: '18px', color: '#1a1a1a', fontWeight: '600', fontFamily: 'Inter, sans-serif' }}>{k.value}</div>
+                      <div style={{ fontSize: '10px', color: k.sc, marginTop: '4px', fontFamily: 'Inter, sans-serif' }}>{k.sub}</div>
                     </div>
                   ))}
                 </div>
@@ -652,13 +652,13 @@ export default function Orders() {
                   <input value={opSearch} onChange={e => setOpSearch(e.target.value)}
                     placeholder="Filter by tire size or item..."
                     style={{ flex: 1, minWidth: '200px', padding: '8px 12px', border: '1px solid #E5E5E5', borderRadius: '4px',
-                      fontSize: '11px', fontFamily: 'DM Mono, monospace', outline: 'none', background: '#fff', color: '#1a1a1a' }}
+                      fontSize: '11px', fontFamily: 'Inter, sans-serif', outline: 'none', background: '#fff', color: '#1a1a1a' }}
                   />
                 </div>
 
                 {/* Table */}
                 <div style={{ background: '#fff', border: '1px solid #E5E5E5', borderRadius: '6px', overflow: 'hidden' }}>
-                  <table style={{ width: '100%', borderCollapse: 'collapse', fontFamily: 'DM Mono, monospace' }}>
+                  <table style={{ width: '100%', borderCollapse: 'collapse', fontFamily: 'Inter, sans-serif' }}>
                     <thead>
                       <tr>
                         <th style={hcell('left')}>DATE</th>
@@ -701,16 +701,16 @@ export default function Orders() {
                   </table>
 
                   {opFiltered.length === 0 && (
-                    <div style={{ padding: '24px', textAlign: 'center', color: '#888', fontFamily: 'DM Mono, monospace', fontSize: '11px' }}>
+                    <div style={{ padding: '24px', textAlign: 'center', color: '#888', fontFamily: 'Inter, sans-serif', fontSize: '11px' }}>
                       No items{opSearch ? ' match' : ''}
                     </div>
                   )}
 
                   <div style={{ padding: '10px 16px', borderTop: '2px solid #E5E5E5', background: '#FAFAFA', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                    <div style={{ fontSize: '10px', color: '#888', fontFamily: 'DM Mono, monospace' }}>
+                    <div style={{ fontSize: '10px', color: '#888', fontFamily: 'Inter, sans-serif' }}>
                       {opFiltered.length.toLocaleString()} rows &nbsp;·&nbsp; source: order_profit table
                     </div>
-                    <div style={{ fontSize: '11px', color: '#16a34a', fontFamily: 'DM Mono, monospace', fontWeight: '600' }}>
+                    <div style={{ fontSize: '11px', color: '#16a34a', fontFamily: 'Inter, sans-serif', fontWeight: '600' }}>
                       {fmt0(opProfit)} profit shown
                     </div>
                   </div>

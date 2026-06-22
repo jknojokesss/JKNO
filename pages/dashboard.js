@@ -3,6 +3,7 @@ import { useRouter } from 'next/router'
 import Head from 'next/head'
 import { supabase } from '../lib/supabase'
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts'
+import Shell from '../components/Shell'
 
 const fmt  = (n) => new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }).format(Math.abs(n))
 const fmtD = (n) => new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(Math.abs(n))
@@ -45,9 +46,9 @@ const TOP_TIRES = [
 function KPICard({ label, value, sub, subColor }) {
   return (
     <div style={{ background: '#fff', border: '1px solid #E5E5E5', borderRadius: '6px', padding: '14px 16px', flex: 1 }}>
-      <div style={{ fontSize: '9px', color: '#888', letterSpacing: '0.15em', marginBottom: '6px', fontFamily: 'DM Mono, monospace' }}>{label}</div>
-      <div style={{ fontSize: '20px', color: '#1a1a1a', fontWeight: '600', fontFamily: 'DM Mono, monospace' }}>{value}</div>
-      {sub && <div style={{ fontSize: '10px', color: subColor || '#888', marginTop: '4px', fontFamily: 'DM Mono, monospace' }}>{sub}</div>}
+      <div style={{ fontSize: '9px', color: '#888', letterSpacing: '0.15em', marginBottom: '6px', fontFamily: 'Inter, sans-serif' }}>{label}</div>
+      <div style={{ fontSize: '20px', color: '#1a1a1a', fontWeight: '600', fontFamily: 'Inter, sans-serif' }}>{value}</div>
+      {sub && <div style={{ fontSize: '10px', color: subColor || '#888', marginTop: '4px', fontFamily: 'Inter, sans-serif' }}>{sub}</div>}
     </div>
   )
 }
@@ -56,9 +57,9 @@ const CustomTooltip = ({ active, payload, label }) => {
   if (!active || !payload?.length) return null
   return (
     <div style={{ background: '#fff', border: '1px solid #E5E5E5', borderRadius: '4px', padding: '10px 14px', boxShadow: '0 4px 12px rgba(0,0,0,0.08)' }}>
-      <div style={{ fontSize: '11px', color: '#888', marginBottom: '6px', fontFamily: 'DM Mono, monospace' }}>{label}</div>
+      <div style={{ fontSize: '11px', color: '#888', marginBottom: '6px', fontFamily: 'Inter, sans-serif' }}>{label}</div>
       {payload.map(p => (
-        <div key={p.name} style={{ fontSize: '12px', color: p.color === '#E5E5E5' ? '#888' : p.color, fontFamily: 'DM Mono, monospace' }}>
+        <div key={p.name} style={{ fontSize: '12px', color: p.color === '#E5E5E5' ? '#888' : p.color, fontFamily: 'Inter, sans-serif' }}>
           {p.name}: {fmt(p.value)}
         </div>
       ))}
@@ -137,50 +138,17 @@ export default function Dashboard() {
   const hcell = (align = 'left') => ({
     padding: '5px 8px', fontSize: '9px', color: '#888', fontWeight: '400',
     letterSpacing: '0.08em', borderBottom: '1px solid #E5E5E5',
-    textAlign: align, background: '#FAFAFA', fontFamily: 'DM Mono, monospace',
+    textAlign: align, background: '#FAFAFA', fontFamily: 'Inter, sans-serif',
   })
 
   return (
     <>
       <Head><title>Reydel Tire — Dashboard</title></Head>
-      <div style={{ display: 'flex', minHeight: '100vh', background: '#F8F8F8' }}>
-        <div style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
-
-          {/* Topbar — carries the brand now that the sidebar is gone here */}
-          <div style={{ background: '#fff', borderBottom: '1px solid #E5E5E5', padding: '14px 28px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-            <div style={{ display: 'flex', alignItems: 'baseline', gap: '10px' }}>
-              <span style={{ fontSize: '16px', fontWeight: '700', color: '#1a1a1a', letterSpacing: '0.1em', fontFamily: 'DM Mono, monospace' }}>REYDEL</span>
-              <span style={{ fontSize: '10px', color: THEME.accent, letterSpacing: '0.2em', fontFamily: 'DM Mono, monospace' }}>TIRE & AUTO</span>
-            </div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-              <div style={{ width: '6px', height: '6px', background: '#22c55e', borderRadius: '50%' }} />
-              <div style={{ fontSize: '10px', color: '#888', fontFamily: 'DM Mono, monospace' }}>Live · Supabase</div>
-            </div>
-          </div>
-
+      <Shell active="dashboard">
           <div style={{ padding: '24px 28px' }}>
-            {/* Nav launcher — replaces the sidebar on the dashboard home.
-                auto-fit grid reflows to fewer columns on narrow screens. */}
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))', gap: '10px', marginBottom: '24px' }}>
-              {NAV_BUTTONS.map(item => (
-                <button key={item.id} onClick={() => router.push(item.href)} style={{
-                  background: '#fff', border: '1px solid #E5E5E5', borderRadius: '8px',
-                  padding: '16px', cursor: 'pointer', textAlign: 'left',
-                  fontFamily: 'DM Mono, monospace', display: 'flex', flexDirection: 'column', gap: '8px',
-                  transition: 'border-color 0.15s ease, transform 0.15s ease, box-shadow 0.15s ease',
-                }}
-                  onMouseEnter={e => { e.currentTarget.style.borderColor = THEME.accent; e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = '0 4px 12px rgba(0,0,0,0.06)' }}
-                  onMouseLeave={e => { e.currentTarget.style.borderColor = '#E5E5E5'; e.currentTarget.style.transform = 'none'; e.currentTarget.style.boxShadow = 'none' }}
-                >
-                  <span style={{ fontSize: '18px', color: THEME.accent, lineHeight: 1 }}>{item.icon}</span>
-                  <span style={{ fontSize: '12px', color: '#1a1a1a', letterSpacing: '0.06em' }}>{item.label}</span>
-                  <span style={{ fontSize: '9px', color: '#888' }}>{item.desc}</span>
-                </button>
-              ))}
-            </div>
 
             {loading ? (
-              <div style={{ color: '#888', fontFamily: 'DM Mono, monospace', fontSize: '12px' }}>Loading...</div>
+              <div style={{ color: '#888', fontFamily: 'Inter, sans-serif', fontSize: '12px' }}>Loading...</div>
             ) : (
               <>
                 {/* KPIs */}
@@ -195,7 +163,7 @@ export default function Dashboard() {
                 <div style={{ display: 'flex', gap: '2px', borderBottom: '1px solid #E5E5E5', marginBottom: '20px' }}>
                   {tabs.map(t => (
                     <button key={t.id} onClick={() => setActiveTab(t.id)} style={{
-                      padding: '8px 16px', fontSize: '10px', fontFamily: 'DM Mono, monospace',
+                      padding: '8px 16px', fontSize: '10px', fontFamily: 'Inter, sans-serif',
                       letterSpacing: '0.08em', background: 'none', border: 'none', cursor: 'pointer',
                       color: activeTab === t.id ? '#1a1a1a' : '#888',
                       borderBottom: activeTab === t.id ? `2px solid ${THEME.accent}` : '2px solid transparent',
@@ -211,10 +179,10 @@ export default function Dashboard() {
 
                       {/* Monthly chart */}
                       <div style={{ background: '#fff', border: '1px solid #E5E5E5', borderRadius: '6px', padding: '16px' }}>
-                        <div style={{ fontSize: '9px', color: '#888', letterSpacing: '0.15em', marginBottom: '12px', fontFamily: 'DM Mono, monospace' }}>MONTHLY REVENUE / EXPENSES / PROFIT</div>
+                        <div style={{ fontSize: '9px', color: '#888', letterSpacing: '0.15em', marginBottom: '12px', fontFamily: 'Inter, sans-serif' }}>MONTHLY REVENUE / EXPENSES / PROFIT</div>
                         <div style={{ display: 'flex', gap: '12px', marginBottom: '10px' }}>
                           {[['#CC2222','Revenue'],['#D0D0D0','Expenses'],['#16a34a','Profit']].map(([c, l]) => (
-                            <span key={l} style={{ display: 'flex', alignItems: 'center', gap: '4px', fontSize: '9px', color: '#888', fontFamily: 'DM Mono, monospace' }}>
+                            <span key={l} style={{ display: 'flex', alignItems: 'center', gap: '4px', fontSize: '9px', color: '#888', fontFamily: 'Inter, sans-serif' }}>
                               <span style={{ width: '8px', height: '8px', background: c, borderRadius: '1px', display: 'inline-block' }} />{l}
                             </span>
                           ))}
@@ -222,8 +190,8 @@ export default function Dashboard() {
                         <ResponsiveContainer width="100%" height={160}>
                           <BarChart data={monthly} barGap={2} barCategoryGap="25%">
                             <CartesianGrid strokeDasharray="3 3" stroke="#F0F0F0" vertical={false} />
-                            <XAxis dataKey="label" tick={{ fontSize: 10, fill: '#888', fontFamily: 'DM Mono, monospace' }} axisLine={false} tickLine={false} />
-                            <YAxis tick={{ fontSize: 10, fill: '#888', fontFamily: 'DM Mono, monospace' }} axisLine={false} tickLine={false} tickFormatter={v => `$${(v / 1000).toFixed(0)}k`} />
+                            <XAxis dataKey="label" tick={{ fontSize: 10, fill: '#888', fontFamily: 'Inter, sans-serif' }} axisLine={false} tickLine={false} />
+                            <YAxis tick={{ fontSize: 10, fill: '#888', fontFamily: 'Inter, sans-serif' }} axisLine={false} tickLine={false} tickFormatter={v => `$${(v / 1000).toFixed(0)}k`} />
                             <Tooltip content={<CustomTooltip />} />
                             <Bar dataKey="revenue"  name="Revenue"  fill="#CC2222" radius={[2,2,0,0]} />
                             <Bar dataKey="expenses" name="Expenses" fill="#D0D0D0" radius={[2,2,0,0]} />
@@ -234,8 +202,8 @@ export default function Dashboard() {
 
                       {/* Monthly profit table */}
                       <div style={{ background: '#fff', border: '1px solid #E5E5E5', borderRadius: '6px', padding: '16px' }}>
-                        <div style={{ fontSize: '9px', color: '#888', letterSpacing: '0.15em', marginBottom: '12px', fontFamily: 'DM Mono, monospace' }}>PROFIT BY MONTH</div>
-                        <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '11px', fontFamily: 'DM Mono, monospace' }}>
+                        <div style={{ fontSize: '9px', color: '#888', letterSpacing: '0.15em', marginBottom: '12px', fontFamily: 'Inter, sans-serif' }}>PROFIT BY MONTH</div>
+                        <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '11px', fontFamily: 'Inter, sans-serif' }}>
                           <thead>
                             <tr>
                               {['Month','Profit','Margin'].map(h => (
@@ -266,17 +234,17 @@ export default function Dashboard() {
                             </tr>
                           </tbody>
                         </table>
-                        <div style={{ marginTop: '10px', fontSize: '9px', color: '#888', fontFamily: 'DM Mono, monospace' }}>* May COGS estimated</div>
+                        <div style={{ marginTop: '10px', fontSize: '9px', color: '#888', fontFamily: 'Inter, sans-serif' }}>* May COGS estimated</div>
                       </div>
                     </div>
 
                     {/* Top tires */}
                     <div style={{ background: '#fff', border: '1px solid #E5E5E5', borderRadius: '6px', padding: '16px' }}>
                       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '12px' }}>
-                        <div style={{ fontSize: '9px', color: '#888', letterSpacing: '0.15em', fontFamily: 'DM Mono, monospace' }}>TOP TIRE SIZES — GROSS PROFIT</div>
-                        <button onClick={() => router.push('/orders')} style={{ fontSize: '10px', color: THEME.accent, background: 'none', border: 'none', cursor: 'pointer', fontFamily: 'DM Mono, monospace' }}>VIEW ORDERS →</button>
+                        <div style={{ fontSize: '9px', color: '#888', letterSpacing: '0.15em', fontFamily: 'Inter, sans-serif' }}>TOP TIRE SIZES — GROSS PROFIT</div>
+                        <button onClick={() => router.push('/orders')} style={{ fontSize: '10px', color: THEME.accent, background: 'none', border: 'none', cursor: 'pointer', fontFamily: 'Inter, sans-serif' }}>VIEW ORDERS →</button>
                       </div>
-                      <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '11px', fontFamily: 'DM Mono, monospace' }}>
+                      <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '11px', fontFamily: 'Inter, sans-serif' }}>
                         <thead>
                           <tr>
                             {['Size','Units','Revenue','COGS','Profit','Margin'].map(h => (
@@ -312,13 +280,13 @@ export default function Dashboard() {
                 {activeTab === 'inventory' && (
                   <div style={{ background: '#fff', border: '1px solid #E5E5E5', borderRadius: '6px', overflow: 'hidden' }}>
                     <div style={{ padding: '14px 16px', borderBottom: '1px solid #E5E5E5', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                      <div style={{ fontSize: '9px', color: '#888', letterSpacing: '0.15em', fontFamily: 'DM Mono, monospace' }}>ALL ITEMS — RANKED BY REVENUE</div>
-                      <button onClick={() => router.push('/inventory')} style={{ fontSize: '10px', color: THEME.accent, background: 'none', border: 'none', cursor: 'pointer', fontFamily: 'DM Mono, monospace' }}>FULL PAGE →</button>
+                      <div style={{ fontSize: '9px', color: '#888', letterSpacing: '0.15em', fontFamily: 'Inter, sans-serif' }}>ALL ITEMS — RANKED BY REVENUE</div>
+                      <button onClick={() => router.push('/inventory')} style={{ fontSize: '10px', color: THEME.accent, background: 'none', border: 'none', cursor: 'pointer', fontFamily: 'Inter, sans-serif' }}>FULL PAGE →</button>
                     </div>
                     {itemsLoading ? (
-                      <div style={{ padding: '40px', textAlign: 'center', color: '#888', fontFamily: 'DM Mono, monospace', fontSize: '11px' }}>Loading...</div>
+                      <div style={{ padding: '40px', textAlign: 'center', color: '#888', fontFamily: 'Inter, sans-serif', fontSize: '11px' }}>Loading...</div>
                     ) : (
-                      <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '11px', fontFamily: 'DM Mono, monospace' }}>
+                      <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '11px', fontFamily: 'Inter, sans-serif' }}>
                         <thead>
                           <tr>
                             {['#','Item','Orders','Revenue','Avg Sale'].map(h => (
@@ -344,8 +312,7 @@ export default function Dashboard() {
               </>
             )}
           </div>
-        </div>
-      </div>
+      </Shell>
     </>
   )
 }

@@ -10,11 +10,11 @@ const THEME = { sidebarBg: '#1A1A1A', sidebarBorder: '#2A2A2A', accent: '#CC2222
 const hcell = (align = 'left') => ({
   padding: '7px 12px', fontSize: '9px', color: '#888', background: '#FAFAFA',
   fontWeight: '400', letterSpacing: '0.1em', borderBottom: '1px solid #E5E5E5',
-  fontFamily: 'DM Mono, monospace', textAlign: align,
+  fontFamily: 'Inter, sans-serif', textAlign: align,
 })
 const cell = (align = 'left', extra = {}) => ({
   padding: '9px 12px', borderBottom: '1px solid #F0F0F0',
-  color: '#333', fontSize: '11px', fontFamily: 'DM Mono, monospace',
+  color: '#333', fontSize: '11px', fontFamily: 'Inter, sans-serif',
   textAlign: align, ...extra,
 })
 
@@ -173,12 +173,12 @@ export default function Stock() {
     <>
       <Head><title>Reydel Tire — Stock</title></Head>
       <Shell active="stock" right={
-          <div style={{ fontSize: '10px', color: '#888', fontFamily: 'DM Mono, monospace' }}>{asOf === 'live' ? 'live on-hand · current' : 'on-hand · as of 5/31/2026 (books)'} · FIFO</div>
+          <div style={{ fontSize: '10px', color: '#888', fontFamily: 'Inter, sans-serif' }}>{asOf === 'live' ? 'live on-hand · current' : 'on-hand · as of 5/31/2026 (books)'} · FIFO</div>
         }>
 
         <div style={{ padding: '24px 28px' }}>
             {loading ? (
-              <div style={{ color: '#888', fontFamily: 'DM Mono, monospace', fontSize: '12px' }}>Loading...</div>
+              <div style={{ color: '#888', fontFamily: 'Inter, sans-serif', fontSize: '12px' }}>Loading...</div>
             ) : (
               <>
                 <div style={{ display: 'flex', gap: '12px', marginBottom: '20px' }}>
@@ -188,9 +188,9 @@ export default function Stock() {
                     { label: 'SIZES',       value: lines.toString(),                         sub: 'on the rack',        sc: '#888' },
                   ].map(k => (
                     <div key={k.label} style={{ flex: 1, background: '#fff', border: '1px solid #E5E5E5', borderRadius: '6px', padding: '14px 16px' }}>
-                      <div style={{ fontSize: '9px', color: '#888', letterSpacing: '0.15em', marginBottom: '6px', fontFamily: 'DM Mono, monospace' }}>{k.label}</div>
-                      <div style={{ fontSize: '20px', color: '#1a1a1a', fontWeight: '600', fontFamily: 'DM Mono, monospace' }}>{k.value}</div>
-                      <div style={{ fontSize: '10px', color: k.sc, marginTop: '4px', fontFamily: 'DM Mono, monospace' }}>{k.sub}</div>
+                      <div style={{ fontSize: '9px', color: '#888', letterSpacing: '0.15em', marginBottom: '6px', fontFamily: 'Inter, sans-serif' }}>{k.label}</div>
+                      <div style={{ fontSize: '20px', color: '#1a1a1a', fontWeight: '600', fontFamily: 'Inter, sans-serif' }}>{k.value}</div>
+                      <div style={{ fontSize: '10px', color: k.sc, marginTop: '4px', fontFamily: 'Inter, sans-serif' }}>{k.sub}</div>
                     </div>
                   ))}
                 </div>
@@ -198,7 +198,7 @@ export default function Stock() {
                 <div style={{ display: 'flex', gap: '10px', marginBottom: '16px', alignItems: 'center', flexWrap: 'wrap' }}>
                   {[{ k: AS_OF, l: 'AS OF 5/31' }, { k: 'live', l: 'LIVE' }].map(o => (
                     <button key={o.k} onClick={() => setAsOf(o.k)} style={{
-                      padding: '7px 12px', fontSize: '9px', fontFamily: 'DM Mono, monospace', letterSpacing: '0.08em',
+                      padding: '7px 12px', fontSize: '9px', fontFamily: 'Inter, sans-serif', letterSpacing: '0.08em',
                       border: '1px solid #E5E5E5', borderRadius: '4px', cursor: 'pointer',
                       background: asOf === o.k ? '#1a1a1a' : '#fff', color: asOf === o.k ? '#fff' : '#888',
                     }}>{o.l}</button>
@@ -206,24 +206,24 @@ export default function Stock() {
                   <input value={search} onChange={e => setSearch(e.target.value)}
                     placeholder="Filter by size / item..."
                     style={{ flex: 1, minWidth: '180px', padding: '8px 12px', border: '1px solid #E5E5E5', borderRadius: '4px',
-                      fontSize: '11px', fontFamily: 'DM Mono, monospace', outline: 'none', background: '#fff', color: '#1a1a1a' }}
+                      fontSize: '11px', fontFamily: 'Inter, sans-serif', outline: 'none', background: '#fff', color: '#1a1a1a' }}
                   />
                   {[{ k: 'value', l: 'VALUE' }, { k: 'qty', l: 'ON HAND' }, { k: 'size', l: 'SIZE' }].map(s => (
                     <button key={s.k} onClick={() => setSort(s.k)} style={{
-                      padding: '7px 12px', fontSize: '9px', fontFamily: 'DM Mono, monospace', letterSpacing: '0.08em',
+                      padding: '7px 12px', fontSize: '9px', fontFamily: 'Inter, sans-serif', letterSpacing: '0.08em',
                       border: 'none', borderRadius: '4px', cursor: 'pointer',
                       background: sort === s.k ? THEME.accent : '#F0F0F0',
                       color: sort === s.k ? '#fff' : '#888',
                     }}>{s.l}</button>
                   ))}
                   <button onClick={downloadCSV} style={{
-                    padding: '7px 12px', fontSize: '9px', fontFamily: 'DM Mono, monospace', letterSpacing: '0.08em',
+                    padding: '7px 12px', fontSize: '9px', fontFamily: 'Inter, sans-serif', letterSpacing: '0.08em',
                     border: 'none', borderRadius: '4px', cursor: 'pointer', background: '#16a34a', color: '#fff',
                   }}>↓ CSV</button>
                 </div>
 
                 <div style={{ background: '#fff', border: '1px solid #E5E5E5', borderRadius: '6px', overflow: 'hidden' }}>
-                  <table style={{ width: '100%', borderCollapse: 'collapse', fontFamily: 'DM Mono, monospace' }}>
+                  <table style={{ width: '100%', borderCollapse: 'collapse', fontFamily: 'Inter, sans-serif' }}>
                     <thead>
                       <tr>
                         <th style={hcell('left')}>SIZE / ITEM</th>
@@ -247,11 +247,11 @@ export default function Stock() {
                     </tbody>
                   </table>
                   {filtered.length === 0 && (
-                    <div style={{ padding: '24px', textAlign: 'center', color: '#888', fontFamily: 'DM Mono, monospace', fontSize: '11px' }}>No items match</div>
+                    <div style={{ padding: '24px', textAlign: 'center', color: '#888', fontFamily: 'Inter, sans-serif', fontSize: '11px' }}>No items match</div>
                   )}
                   <div style={{ padding: '10px 16px', borderTop: '2px solid #E5E5E5', background: '#FAFAFA', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                    <div style={{ fontSize: '10px', color: '#888', fontFamily: 'DM Mono, monospace' }}>{filtered.length} sizes in stock</div>
-                    <div style={{ fontSize: '11px', color: '#16a34a', fontFamily: 'DM Mono, monospace', fontWeight: '600' }}>Total: {fmt(totalValue)}</div>
+                    <div style={{ fontSize: '10px', color: '#888', fontFamily: 'Inter, sans-serif' }}>{filtered.length} sizes in stock</div>
+                    <div style={{ fontSize: '11px', color: '#16a34a', fontFamily: 'Inter, sans-serif', fontWeight: '600' }}>Total: {fmt(totalValue)}</div>
                   </div>
                 </div>
               </>
