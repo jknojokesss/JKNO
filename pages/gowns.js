@@ -59,7 +59,8 @@ export default function Gowns() {
   const [suggest, setSuggest] = useState(null) // { id, matches, query }
   const [catalog, setCatalog] = useState(DEFAULT_ITEMS)
   const [newItem, setNewItem] = useState(null) // { rowId, no, desc, taxable, alteration } — add-item modal
-  const [todoInput, setTodoInput] = useState({}) // { orderId: inputText }
+  const [todoInput, setTodoInput] = useState({}) // { orderId: { text, assignee, date } }
+  const [todoView, setTodoView] = useState('person') // 'person' | 'date'
   const [loaded, setLoaded] = useState(false)
 
   useEffect(() => {
@@ -138,7 +139,13 @@ export default function Gowns() {
   }
   const del = (id) => { if (window.confirm('Delete this order?')) { setOrders(prev => prev.filter(o => o.id !== id)); setView('list') } }
   const patchOrder = (id, patch) => setOrders(prev => prev.map(o => o.id === id ? { ...o, ...patch } : o))
-  const addTodo = (orderId, text) => { if (!text.trim()) return; patchOrder(orderId, { todos: [...(orders.find(o => o.id === orderId)?.todos || []), { id: uid(), text: text.trim(), done: false, date: todayStr() }] }); setTodoInput(p => ({ ...p, [orderId]: '' })) }
+  const addTodo = (orderId) => {
+    const inp = todoInput[orderId] || {}
+    if (!inp.text?.trim()) return
+    const todo = { id: uid(), text: inp.text.trim(), assignedTo: inp.assignee?.trim() || '', date: inp.date || todayStr(), done: false }
+    patchOrder(orderId, { todos: [...(orders.find(o => o.id === orderId)?.todos || []), todo] })
+    setTodoInput(p => ({ ...p, [orderId]: { text: '', assignee: inp.assignee || '', date: '' } }))
+  }
   const toggleTodo = (orderId, todoId) => { const o = orders.find(x => x.id === orderId); if (!o) return; patchOrder(orderId, { todos: o.todos.map(t => t.id === todoId ? { ...t, done: !t.done } : t) }) }
   const removeTodo = (orderId, todoId) => { const o = orders.find(x => x.id === orderId); if (!o) return; patchOrder(orderId, { todos: o.todos.filter(t => t.id !== todoId) }) }
 
@@ -218,6 +225,7 @@ export default function Gowns() {
               <button onClick={() => setTab('open')} style={tabBtn(tab === 'open')}>Open ({openList.length})</button>
               <button onClick={() => setTab('completed')} style={tabBtn(tab === 'completed')}>Completed ({doneList.length})</button>
               <button onClick={() => setTab('all')} style={tabBtn(tab === 'all')}>All ({orders.length})</button>
+              <button onClick={() => setTab('todos')} style={tabBtn(tab === 'todos')}>Tasks ({orders.reduce((s, o) => s + (o.todos || []).filter(t => !t.done).length, 0)})</button>
             </div>
 
             {orders.length > 0 && (
@@ -225,13 +233,13 @@ export default function Gowns() {
                 style={{ ...fieldIn, fontSize: '18px', marginBottom: '16px' }} />
             )}
 
-            {filtered.length === 0 ? (
+            {tab !== 'todos' && filtered.length === 0 ? (
               <div className="gw-card" style={{ padding: '44px 24px', textAlign: 'center', color: MUTED }}>
                 <div style={{ fontSize: '40px', marginBottom: '10px' }}>🪡</div>
                 <div style={{ fontSize: '17px', color: INK, fontWeight: 600, marginBottom: '4px' }}>{orders.length ? `No ${tab === 'all' ? '' : tab + ' '}orders` : 'No orders yet'}</div>
                 <div style={{ fontSize: '15px' }}>{orders.length ? (search ? 'Try a different name.' : 'Nothing here right now.') : 'Tap "+ New Order" to write your first one.'}</div>
               </div>
-            ) : (
+            ) : tab !== 'todos' ? (
               <div className="gw-grid">
                 {filtered.map(o => {
                   const sub = sumItems(o.items), tax = calcTax(o.items, o.taxRate), tot = sub + tax, p = sumPaid(o), bal = tot - p
@@ -296,38 +304,46 @@ export default function Gowns() {
                         <div style={{ marginTop: '10px', fontSize: '13px', color: MUTED, lineHeight: 1.4 }}><span style={{ fontWeight: 600, color: INK }}>Note:</span> {o.notes}</div>
                       )}
 
-                      {/* ── Date + To-do section ── */}
+                      {/* ── To-do section ── */}
                       <div onClick={e => e.stopPropagation()} style={{ marginTop: '12px', paddingTop: '12px', borderTop: '1px solid #F0E9E3' }}>
-                        {/* Follow-up date */}
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '10px' }}>
-                          <span style={{ fontSize: '13px', fontWeight: 600, color: PAD, flexShrink: 0 }}>📅 Follow-up</span>
-                          <input type="date" value={o.followUpDate || ''} onChange={e => patchOrder(o.id, { followUpDate: e.target.value })}
-                            style={{ fontSize: '13px', border: '1.5px solid #E2D7D1', borderRadius: '8px', padding: '5px 8px', fontFamily: 'inherit', color: INK, background: '#fff', cursor: 'pointer', outline: 'none' }} />
-                          {o.followUpDate && <button onClick={() => patchOrder(o.id, { followUpDate: '' })} style={{ background: 'none', border: 'none', color: MUTED, fontSize: '16px', cursor: 'pointer', lineHeight: 1 }}>×</button>}
-                        </div>
+                        <div style={{ fontSize: '11px', fontWeight: 700, letterSpacing: '0.06em', textTransform: 'uppercase', color: PAD, marginBottom: '8px' }}>Tasks</div>
 
-                        {/* To-do list */}
+                        {/* Existing todos */}
                         {(o.todos || []).length > 0 && (
                           <div style={{ marginBottom: '8px', display: 'flex', flexDirection: 'column', gap: '5px' }}>
                             {(o.todos || []).map(t => (
-                              <div key={t.id} style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                                <input type="checkbox" checked={t.done} onChange={() => toggleTodo(o.id, t.id)}
-                                  style={{ width: '16px', height: '16px', accentColor: PAD, flexShrink: 0, cursor: 'pointer' }} />
-                                <span style={{ fontSize: '13px', flex: 1, color: t.done ? MUTED : INK, textDecoration: t.done ? 'line-through' : 'none', lineHeight: 1.4 }}>{t.text}{t.date ? <span style={{ color: MUTED, fontWeight: 400, marginLeft: '6px', fontSize: '12px' }}>· {fmtShort(t.date)}</span> : null}</span>
-                                <button onClick={() => removeTodo(o.id, t.id)} style={{ background: 'none', border: 'none', color: '#D0C5BF', fontSize: '15px', cursor: 'pointer', lineHeight: 1, flexShrink: 0 }}>×</button>
+                              <div key={t.id} style={{ display: 'grid', gridTemplateColumns: '80px 1fr auto auto', gap: '6px', alignItems: 'center', padding: '5px 8px', background: t.done ? '#F8F6F3' : '#F0F4FF', borderRadius: '8px' }}>
+                                <span style={{ fontSize: '12px', color: MUTED, fontWeight: 500 }}>{t.date ? fmtShort(t.date) : '—'}</span>
+                                <span style={{ fontSize: '13px', color: t.done ? MUTED : INK, textDecoration: t.done ? 'line-through' : 'none', lineHeight: 1.3 }}>
+                                  {t.text}
+                                  {t.assignedTo ? <span style={{ display: 'block', fontSize: '11px', color: ROSE_DK, fontWeight: 600, marginTop: '1px' }}>{t.assignedTo}</span> : null}
+                                </span>
+                                <input type="checkbox" checked={t.done} onChange={() => toggleTodo(o.id, t.id)} style={{ width: '15px', height: '15px', accentColor: PAD, cursor: 'pointer' }} />
+                                <button onClick={() => removeTodo(o.id, t.id)} style={{ background: 'none', border: 'none', color: '#D0C5BF', fontSize: '15px', cursor: 'pointer', lineHeight: 1 }}>×</button>
                               </div>
                             ))}
                           </div>
                         )}
 
-                        {/* Add to-do input */}
-                        <div style={{ display: 'flex', gap: '6px' }}>
-                          <input value={todoInput[o.id] || ''} onChange={e => setTodoInput(p => ({ ...p, [o.id]: e.target.value }))}
-                            onKeyDown={e => { if (e.key === 'Enter') addTodo(o.id, todoInput[o.id] || '') }}
-                            placeholder="+ Add to-do…"
-                            style={{ flex: 1, fontSize: '13px', border: '1.5px solid #E2D7D1', borderRadius: '8px', padding: '7px 10px', fontFamily: 'inherit', color: INK, outline: 'none', background: '#fff' }} />
-                          <button onClick={() => addTodo(o.id, todoInput[o.id] || '')}
-                            style={{ padding: '7px 12px', fontSize: '13px', fontWeight: 600, background: PAD, color: '#fff', border: 'none', borderRadius: '8px', cursor: 'pointer', fontFamily: 'inherit' }}>Add</button>
+                        {/* Add todo row */}
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '5px' }}>
+                          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '5px' }}>
+                            <input type="date" value={(todoInput[o.id] || {}).date || ''}
+                              onChange={e => setTodoInput(p => ({ ...p, [o.id]: { ...(p[o.id] || {}), date: e.target.value } }))}
+                              style={{ fontSize: '13px', border: '1.5px solid #E2D7D1', borderRadius: '8px', padding: '6px 8px', fontFamily: 'inherit', color: INK, outline: 'none', background: '#fff' }} />
+                            <input value={(todoInput[o.id] || {}).assignee || ''}
+                              onChange={e => setTodoInput(p => ({ ...p, [o.id]: { ...(p[o.id] || {}), assignee: e.target.value } }))}
+                              placeholder="Assigned to…"
+                              style={{ fontSize: '13px', border: '1.5px solid #E2D7D1', borderRadius: '8px', padding: '6px 8px', fontFamily: 'inherit', color: INK, outline: 'none', background: '#fff' }} />
+                          </div>
+                          <div style={{ display: 'flex', gap: '5px' }}>
+                            <input value={(todoInput[o.id] || {}).text || ''}
+                              onChange={e => setTodoInput(p => ({ ...p, [o.id]: { ...(p[o.id] || {}), text: e.target.value } }))}
+                              onKeyDown={e => { if (e.key === 'Enter') addTodo(o.id) }}
+                              placeholder="Task…"
+                              style={{ flex: 1, fontSize: '13px', border: '1.5px solid #E2D7D1', borderRadius: '8px', padding: '6px 8px', fontFamily: 'inherit', color: INK, outline: 'none', background: '#fff' }} />
+                            <button onClick={() => addTodo(o.id)} style={{ padding: '6px 12px', fontSize: '13px', fontWeight: 600, background: PAD, color: '#fff', border: 'none', borderRadius: '8px', cursor: 'pointer', fontFamily: 'inherit' }}>Add</button>
+                          </div>
                         </div>
                       </div>
 
@@ -340,9 +356,70 @@ export default function Gowns() {
                   )
                 })}
               </div>
-            )}
+            ) : null}
 
-            {orders.length > 0 && (
+            {/* ===== TASKS TAB ===== */}
+            {tab === 'todos' && (() => {
+              const allTodos = orders.flatMap(o => (o.todos || []).map(t => ({ ...t, orderId: o.id, orderNo: o.orderNo, customerName: fullName(o) })))
+              const open = allTodos.filter(t => !t.done)
+              const byPerson = open.reduce((acc, t) => { const k = t.assignedTo || 'Unassigned'; if (!acc[k]) acc[k] = []; acc[k].push(t); return acc }, {})
+              const byDate = [...open].sort((a, b) => (a.date || '').localeCompare(b.date || ''))
+              const taskRow = (t) => (
+                <div key={t.id} style={{ display: 'grid', gridTemplateColumns: '80px 1fr auto', gap: '10px', alignItems: 'center', padding: '11px 14px', borderBottom: `1px solid ${CREAM}` }}>
+                  <span style={{ fontSize: '13px', color: MUTED, fontWeight: 500, whiteSpace: 'nowrap' }}>{t.date ? fmtShort(t.date) : '—'}</span>
+                  <div>
+                    <div style={{ fontSize: '14px', color: INK, fontWeight: 500 }}>{t.text}</div>
+                    <div style={{ fontSize: '12px', color: MUTED, marginTop: '2px' }}>
+                      <span style={{ color: REDNO, fontWeight: 600, cursor: 'pointer' }} onClick={() => { const o = orders.find(x => x.id === t.orderId); if (o) openOrder(o) }}>No. {t.orderNo}</span>
+                      {' · '}{t.customerName}
+                    </div>
+                  </div>
+                  <input type="checkbox" checked={false} onChange={() => toggleTodo(t.orderId, t.id)} style={{ width: '17px', height: '17px', accentColor: PAD, cursor: 'pointer' }} />
+                </div>
+              )
+              return (
+                <div>
+                  <div style={{ display: 'flex', gap: '8px', marginBottom: '16px' }}>
+                    {[['person', 'By Person'], ['date', 'By Date']].map(([v, l]) => (
+                      <button key={v} onClick={() => setTodoView(v)} style={{ ...tabBtn(todoView === v), flex: 'none', padding: '10px 20px' }}>{l}</button>
+                    ))}
+                  </div>
+
+                  {open.length === 0 && (
+                    <div className="gw-card" style={{ padding: '36px 24px', textAlign: 'center', color: MUTED }}>
+                      <div style={{ fontSize: '32px', marginBottom: '8px' }}>✓</div>
+                      <div style={{ fontSize: '16px', fontWeight: 600, color: INK }}>All caught up</div>
+                      <div style={{ fontSize: '14px', marginTop: '4px' }}>No open tasks across any orders.</div>
+                    </div>
+                  )}
+
+                  {todoView === 'person' && Object.keys(byPerson).sort().map(person => (
+                    <div key={person} className="gw-card" style={{ marginBottom: '14px', overflow: 'hidden' }}>
+                      <div style={{ padding: '12px 14px', background: '#F0F4FF', borderBottom: `1px solid ${GRID}`, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                        <span style={{ fontSize: '14px', fontWeight: 700, color: PAD }}>{person}</span>
+                        <span style={{ fontSize: '12px', color: MUTED }}>{byPerson[person].length} task{byPerson[person].length !== 1 ? 's' : ''}</span>
+                      </div>
+                      {byPerson[person].sort((a, b) => (a.date || '').localeCompare(b.date || '')).map(taskRow)}
+                    </div>
+                  ))}
+
+                  {todoView === 'date' && (() => {
+                    const grouped = byDate.reduce((acc, t) => { const k = t.date || 'No date'; if (!acc[k]) acc[k] = []; acc[k].push(t); return acc }, {})
+                    return Object.keys(grouped).map(date => (
+                      <div key={date} className="gw-card" style={{ marginBottom: '14px', overflow: 'hidden' }}>
+                        <div style={{ padding: '12px 14px', background: '#F0F4FF', borderBottom: `1px solid ${GRID}`, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                          <span style={{ fontSize: '14px', fontWeight: 700, color: PAD }}>{date === 'No date' ? 'No date' : fmtDate(date)}</span>
+                          <span style={{ fontSize: '12px', color: MUTED }}>{grouped[date].length} task{grouped[date].length !== 1 ? 's' : ''}</span>
+                        </div>
+                        {grouped[date].map(taskRow)}
+                      </div>
+                    ))
+                  })()}
+                </div>
+              )
+            })()}
+
+            {orders.length > 0 && tab !== 'todos' && (
               <>
                 <button onClick={downloadCSV} style={{ width: '100%', marginTop: '26px', padding: '14px', fontSize: '14px', fontWeight: 600, color: PAD, background: '#fff', border: `1.5px solid ${GRID}`, borderRadius: '12px', cursor: 'pointer', fontFamily: 'inherit' }}>
                   ⬇ Export to Excel (.csv)
