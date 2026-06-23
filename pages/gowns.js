@@ -20,13 +20,14 @@ const todayStr = () => new Date().toISOString().slice(0, 10)
 const fmtDate = (s) => s ? new Date(s + 'T00:00:00').toLocaleDateString([], { month: 'numeric', day: 'numeric', year: '2-digit' }) : ''
 const fmtShort = (s) => s ? new Date(s + 'T00:00:00').toLocaleDateString([], { month: 'short', day: 'numeric' }) : ''
 const uid = () => Math.random().toString(36).slice(2, 9)
-const sumItems = (items) => (items || []).reduce((s, i) => s + (parseFloat(i.amount) || 0), 0)
+const lineAmt = (it) => { const v = (parseFloat(it.qty) || 1) * (parseFloat(it.price) || 0); return v || (parseFloat(it.amount) || 0) }
+const sumItems = (items) => (items || []).reduce((s, i) => s + lineAmt(i), 0)
 const sumPaid = (o) => (o.payments || []).reduce((s, p) => s + (parseFloat(p.amount) || 0), 0)
 const balanceOf = (o) => sumItems(o.items) - sumPaid(o)
 // Open until fully paid AND (no alterations, or alterations finished).
 const isOpen = (o) => balanceOf(o) > 0.005 || (o.alterations && !o.alterationsDone)
 
-const blankRow = () => ({ id: uid(), qty: '', desc: '', price: '', amount: '' })
+const blankRow = () => ({ id: uid(), qty: '1', desc: '', price: '' })
 const blankForm = () => ({
   id: uid(), orderNo: null, name: '', phone: '', date: todayStr(),
   items: [blankRow(), blankRow(), blankRow()],
@@ -55,22 +56,11 @@ export default function Gowns() {
 
   const startNew = () => { setForm(blankForm()); setPay({ amount: '', method: '', date: todayStr() }); setEditing(false); setView('form'); window.scrollTo(0, 0) }
   const openOrder = (o) => {
-    const items = (o.items && o.items.length ? o.items : [blankRow()]).map(it => ({ qty: '', price: '', amount: '', ...it }))
+    const items = (o.items && o.items.length ? o.items : [blankRow()]).map(it => ({ qty: '1', price: '', ...it }))
     setForm({ ...blankForm(), ...o, items, payments: o.payments || [] }); setPay({ amount: '', method: '', date: todayStr() }); setEditing(true); setView('form'); window.scrollTo(0, 0)
   }
   const setF = (k, v) => setForm(f => ({ ...f, [k]: v }))
-  const setItem = (id, k, v) => setForm(f => ({
-    ...f,
-    items: f.items.map(it => {
-      if (it.id !== id) return it
-      const n = { ...it, [k]: v }
-      if (k === 'qty' || k === 'price') {
-        const p = parseFloat(n.price), q = parseFloat(n.qty)
-        if (!isNaN(p)) n.amount = String(Math.round((((isNaN(q) || q === 0) ? 1 : q) * p) * 100) / 100)
-      }
-      return n
-    }),
-  }))
+  const setItem = (id, k, v) => setForm(f => ({ ...f, items: f.items.map(it => it.id === id ? { ...it, [k]: v } : it) }))
   const addRow = () => setForm(f => ({ ...f, items: [...f.items, blankRow()] }))
   const removeRow = (id) => setForm(f => ({ ...f, items: f.items.length > 1 ? f.items.filter(it => it.id !== id) : f.items }))
 
@@ -85,7 +75,7 @@ export default function Gowns() {
   const save = () => {
     if (!form.name.trim()) { alert('Please enter a customer name first.'); return }
     const orderNo = form.orderNo || (orders.reduce((m, o) => Math.max(m, o.orderNo || 0), 1000) + 1)
-    let items = form.items.filter(it => it.desc.trim() || it.amount || it.price)
+    let items = form.items.filter(it => it.desc.trim() || it.price)
     if (!items.length) items = [blankRow()]
     const clean = { ...form, orderNo, name: form.name.trim(), items, savedAt: Date.now() }
     setOrders(prev => prev.some(o => o.id === form.id) ? prev.map(o => o.id === form.id ? clean : o) : [clean, ...prev])
@@ -108,8 +98,8 @@ export default function Gowns() {
       const payNote = p > 0 ? `Paid ${money(p)}${bal > 0.005 ? `, owes ${money(bal)}` : ' (paid in full)'}` : ''
       const memo = esc([o.notes, o.alterations ? `[Alterations${o.alterationsDone ? ' done' : ''}${o.alterationsDue ? ' due ' + o.alterationsDue : ''}${o.alterationsNote ? ': ' + o.alterationsNote : ''}]` : '', payNote].filter(Boolean).join(' | '))
       out.push(['TRNS', 'INVOICE', dt(o.date), QB_AR, esc(o.name), t.toFixed(2), String(o.orderNo || ''), memo].join('\t'))
-      o.items.filter(it => (parseFloat(it.amount) || 0) !== 0).forEach(it => {
-        out.push(['SPL', 'INVOICE', dt(o.date), QB_INCOME, esc(o.name), (-(parseFloat(it.amount) || 0)).toFixed(2), esc(it.desc)].join('\t'))
+      o.items.filter(it => lineAmt(it) !== 0).forEach(it => {
+        out.push(['SPL', 'INVOICE', dt(o.date), QB_INCOME, esc(o.name), (-lineAmt(it)).toFixed(2), esc(it.desc)].join('\t'))
       })
       out.push('ENDTRNS')
     })
@@ -145,6 +135,8 @@ export default function Gowns() {
           body { background: ${CREAM}; font-family: 'Inter', sans-serif; color: ${INK}; -webkit-font-smoothing: antialiased; }
           ::placeholder { color: #B7C2DC; }
           input:focus, textarea:focus { background: #FAFCFF; }
+          input[type=number]::-webkit-outer-spin-button, input[type=number]::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+          input[type=number] { -moz-appearance: textfield; }
           .gw-wrap { max-width: 980px; margin: 0 auto; padding: 20px 14px 64px; }
           .gw-press:active { transform: scale(0.99); }
           .gw-card { background: #fff; border: 1px solid #E7DDD6; border-radius: 16px; }
@@ -199,10 +191,10 @@ export default function Gowns() {
 
                       {/* items */}
                       <div style={{ marginTop: '12px', fontSize: '14px', color: INK }}>
-                        {o.items.filter(it => it.desc.trim() || it.amount).slice(0, 3).map(it => (
+                        {o.items.filter(it => it.desc.trim() || it.price).slice(0, 3).map(it => (
                           <div key={it.id} style={{ display: 'flex', justifyContent: 'space-between', gap: '10px', padding: '2px 0' }}>
-                            <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{it.qty ? `${it.qty}× ` : ''}{it.desc || '—'}</span>
-                            <span style={{ color: MUTED, whiteSpace: 'nowrap' }}>{money0(parseFloat(it.amount) || 0)}</span>
+                            <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{(parseFloat(it.qty) || 1) > 1 ? `${it.qty}× ` : ''}{it.desc || '—'}</span>
+                            <span style={{ color: MUTED, whiteSpace: 'nowrap' }}>{money0(lineAmt(it))}</span>
                           </div>
                         ))}
                       </div>
@@ -302,20 +294,18 @@ export default function Gowns() {
               {/* table header */}
               <div style={{ display: 'flex', borderBottom: `1px solid ${GRID}` }}>
                 <div style={{ ...th, width: '26px', textAlign: 'center', padding: '8px 0' }} />
-                <div style={{ ...th, width: '40px', textAlign: 'center', borderLeft: `1px solid ${GRID}` }}>Qty</div>
+                <div style={{ ...th, width: '44px', textAlign: 'center', borderLeft: `1px solid ${GRID}` }}>Qty</div>
                 <div style={{ ...th, flex: 1, borderLeft: `1px solid ${GRID}` }}>Description</div>
-                <div style={{ ...th, width: '62px', textAlign: 'right', borderLeft: `1px solid ${GRID}` }}>Price</div>
-                <div style={{ ...th, width: '74px', textAlign: 'right', borderLeft: `1px solid ${GRID}` }}>Amount</div>
+                <div style={{ ...th, width: '92px', textAlign: 'right', borderLeft: `1px solid ${GRID}` }}>Price</div>
                 <div style={{ ...th, width: '26px', padding: '8px 0' }} />
               </div>
               {/* rows */}
               {form.items.map((it, i) => (
                 <div key={it.id} style={{ display: 'flex', borderBottom: `1px solid ${GRID}`, alignItems: 'center' }}>
                   <div style={{ width: '26px', textAlign: 'center', fontSize: '11px', color: PAD, fontWeight: 600 }}>{i + 1}</div>
-                  <input value={it.qty} onChange={e => setItem(it.id, 'qty', e.target.value)} type="number" inputMode="numeric" style={{ ...cellIn, width: '40px', textAlign: 'center', padding: '12px 2px', borderLeft: `1px solid ${GRID}` }} />
+                  <input value={it.qty} onChange={e => setItem(it.id, 'qty', e.target.value)} type="number" inputMode="numeric" style={{ ...cellIn, width: '44px', textAlign: 'center', padding: '12px 2px', borderLeft: `1px solid ${GRID}` }} />
                   <input value={it.desc} onChange={e => setItem(it.id, 'desc', e.target.value)} placeholder={i === 0 ? 'Style, color, details…' : ''} style={{ ...cellIn, flex: 1, borderLeft: `1px solid ${GRID}` }} />
-                  <input value={it.price} onChange={e => setItem(it.id, 'price', e.target.value)} type="number" inputMode="decimal" step="0.01" style={{ ...cellIn, width: '62px', textAlign: 'right', padding: '12px 6px', borderLeft: `1px solid ${GRID}` }} />
-                  <input value={it.amount} onChange={e => setItem(it.id, 'amount', e.target.value)} type="number" inputMode="decimal" step="0.01" style={{ ...cellIn, width: '74px', textAlign: 'right', padding: '12px 6px', borderLeft: `1px solid ${GRID}`, fontWeight: 600 }} />
+                  <input value={it.price} onChange={e => setItem(it.id, 'price', e.target.value)} type="number" inputMode="decimal" step="0.01" placeholder="$" style={{ ...cellIn, width: '92px', textAlign: 'right', padding: '12px 8px', borderLeft: `1px solid ${GRID}`, fontWeight: 600 }} />
                   <button onClick={() => removeRow(it.id)} aria-label="remove" style={{ width: '26px', height: '40px', border: 'none', background: 'none', color: '#C7B7B1', fontSize: '18px', cursor: 'pointer', lineHeight: 1 }}>×</button>
                 </div>
               ))}
