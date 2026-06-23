@@ -178,7 +178,7 @@ export default function Gowns() {
                       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '10px' }}>
                         <div>
                           <div style={{ fontSize: '20px', fontWeight: 700, lineHeight: 1.15 }}>{o.name}</div>
-                          <div style={{ fontSize: '13px', color: MUTED, marginTop: '2px' }}>{fmtDate(o.date)}</div>
+                          <div style={{ fontSize: '13px', color: MUTED, marginTop: '2px' }}>{fmtDate(o.date)}{o.phone ? ` · ${o.phone}` : ''}</div>
                         </div>
                         <div style={{ fontSize: '17px', fontWeight: 800, color: REDNO, whiteSpace: 'nowrap' }}>No. {o.orderNo}</div>
                       </div>
