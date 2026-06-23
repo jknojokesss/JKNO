@@ -231,22 +231,6 @@ export default function Financials() {
                     </button>
                   </div>
                 )}
-                {/* KPI row */}
-                <div style={{ display: 'flex', gap: '12px', marginBottom: '20px' }}>
-                  {[
-                    { label: 'TOTAL REVENUE',  value: fmt(plIncome),      sub: 'All sources',                                        sc: '#16a34a' },
-                    { label: 'GROSS PROFIT',   value: fmt(plGrossProfit), sub: pct(plGrossProfit / plIncome * 100) + ' gross margin', sc: '#16a34a' },
-                    { label: 'TOTAL EXPENSES', value: fmt(plExpenses),    sub: 'Operating expenses',                                 sc: THEME.accent },
-                    { label: 'NET INCOME',     value: fmt(plNetIncome),   sub: pct(plNetIncome / plIncome * 100) + ' net margin',    sc: '#16a34a' },
-                  ].map(k => (
-                    <div key={k.label} style={{ flex: 1, background: '#fff', border: '1px solid #E5E5E5', borderRadius: '6px', padding: '14px 16px' }}>
-                      <div style={{ fontSize: '9px', color: '#888', letterSpacing: '0.15em', marginBottom: '6px', fontFamily: 'Inter, sans-serif' }}>{k.label}</div>
-                      <div style={{ fontSize: '20px', color: '#1a1a1a', fontWeight: '600', fontFamily: 'Inter, sans-serif' }}>{k.value}</div>
-                      <div style={{ fontSize: '10px', color: k.sc, marginTop: '4px', fontFamily: 'Inter, sans-serif' }}>{k.sub}</div>
-                    </div>
-                  ))}
-                </div>
-
                 {/* Tabs */}
                 <div style={{ display: 'flex', gap: '2px', borderBottom: '1px solid #E5E5E5', marginBottom: '20px' }}>
                   {tabs.map(t => (
