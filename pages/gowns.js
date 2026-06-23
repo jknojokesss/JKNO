@@ -12,8 +12,8 @@ const BIZ = 'The Gown Studio'
 const METHODS = ['Cash', 'Check', 'Card', 'On Acct.', 'Zelle']
 const DEFAULT_TAX_RATE = 8.875   // NYC rate — editable per order
 
-// Item catalog — taxable defaults to true; set taxable: false for non-taxable items (alterations, fees, etc.)
-const ITEMS = [
+// Built-in items — always available. User-added items layer on top from localStorage.
+const DEFAULT_ITEMS = [
   { no: 'GM92', desc: 'Green Gown' },
   { no: 'ALT',  desc: 'Alterations', taxable: false, alteration: true },
 ]
@@ -56,14 +56,18 @@ export default function Gowns() {
   const [editing, setEditing] = useState(false)
   const [search, setSearch] = useState('')
   const [pay, setPay] = useState({ amount: '', method: '', date: todayStr() })
-  const [suggest, setSuggest] = useState(null) // { id, matches }
+  const [suggest, setSuggest] = useState(null) // { id, matches, query }
+  const [catalog, setCatalog] = useState(DEFAULT_ITEMS)
+  const [newItem, setNewItem] = useState(null) // { rowId, no, desc, taxable, alteration } — add-item modal
   const [loaded, setLoaded] = useState(false)
 
   useEffect(() => {
     try { const raw = localStorage.getItem('gown_orders'); if (raw) setOrders(JSON.parse(raw)) } catch (e) {}
+    try { const raw = localStorage.getItem('gown_catalog'); if (raw) { const saved = JSON.parse(raw); setCatalog([...DEFAULT_ITEMS, ...saved.filter(s => !DEFAULT_ITEMS.find(d => d.no === s.no))]) } } catch (e) {}
     setLoaded(true)
   }, [])
   useEffect(() => { if (loaded) { try { localStorage.setItem('gown_orders', JSON.stringify(orders)) } catch (e) {} } }, [orders, loaded])
+  useEffect(() => { if (loaded) { try { const custom = catalog.filter(c => !DEFAULT_ITEMS.find(d => d.no === c.no)); localStorage.setItem('gown_catalog', JSON.stringify(custom)) } catch (e) {} } }, [catalog, loaded])
 
   const subtotal = sumItems(form.items)
   const taxAmount = calcTax(form.items, form.taxRate)
@@ -86,8 +90,8 @@ export default function Gowns() {
     setItem(id, 'itemNo', val)
     if (val.trim()) {
       const q = val.trim().toLowerCase()
-      const matches = ITEMS.filter(it => it.no.toLowerCase().includes(q))
-      setSuggest(matches.length ? { id, matches } : null)
+      const matches = catalog.filter(it => it.no.toLowerCase().includes(q))
+      setSuggest({ id, matches, query: val.trim() })
     } else {
       setSuggest(null)
     }
@@ -95,6 +99,13 @@ export default function Gowns() {
   const pickItem = (rowId, item) => {
     setForm(f => ({ ...f, items: f.items.map(it => it.id === rowId ? { ...it, itemNo: item.no, desc: item.desc, taxable: item.taxable !== false } : it), ...(item.alteration ? { alterations: true } : {}) }))
     setSuggest(null)
+  }
+  const saveNewItem = () => {
+    if (!newItem || !newItem.no.trim() || !newItem.desc.trim()) return
+    const item = { no: newItem.no.trim().toUpperCase(), desc: newItem.desc.trim(), taxable: newItem.taxable, alteration: newItem.alteration }
+    setCatalog(prev => [...prev.filter(c => c.no !== item.no), item])
+    pickItem(newItem.rowId, item)
+    setNewItem(null)
   }
 
   const addRow = () => setForm(f => ({ ...f, items: [...f.items, blankRow()] }))
@@ -392,13 +403,17 @@ export default function Gowns() {
                         style={{ ...cellIn, width: '100%', fontWeight: 600, letterSpacing: '0.03em', textTransform: 'uppercase' }}
                       />
                       {showSuggest && (
-                        <div style={{ position: 'absolute', top: '100%', left: 0, zIndex: 99, background: '#fff', border: `2px solid ${PAD}`, borderRadius: '10px', boxShadow: '0 4px 16px rgba(0,0,0,0.13)', minWidth: '200px', overflow: 'hidden' }}>
+                        <div style={{ position: 'absolute', top: '100%', left: 0, zIndex: 99, background: '#fff', border: `2px solid ${PAD}`, borderRadius: '10px', boxShadow: '0 4px 16px rgba(0,0,0,0.13)', minWidth: '220px', overflow: 'hidden' }}>
                           {suggest.matches.map(m => (
                             <div key={m.no} onMouseDown={() => pickItem(it.id, m)} style={{ padding: '12px 14px', cursor: 'pointer', fontSize: '15px', borderBottom: `1px solid ${GRID}` }}>
                               <span style={{ fontWeight: 700, color: PAD, marginRight: '8px' }}>{m.no}</span>
                               <span style={{ color: INK }}>{m.desc}</span>
                             </div>
                           ))}
+                          <div onMouseDown={() => { setSuggest(null); setNewItem({ rowId: it.id, no: suggest.query, desc: '', taxable: true, alteration: false }) }}
+                            style={{ padding: '11px 14px', cursor: 'pointer', fontSize: '13px', fontWeight: 600, color: ROSE_DK, background: '#FDF5F7', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                            <span style={{ fontSize: '16px' }}>＋</span> Save &ldquo;{suggest.query}&rdquo; as new item
+                          </div>
                         </div>
                       )}
                     </div>
@@ -527,6 +542,40 @@ export default function Gowns() {
           </div>
         )}
       </div>
+
+      {/* ===== NEW ITEM MODAL ===== */}
+      {newItem && (
+        <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.45)', zIndex: 200, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '20px' }}>
+          <div style={{ background: '#fff', borderRadius: '18px', padding: '24px', width: '100%', maxWidth: '380px', boxShadow: '0 8px 40px rgba(0,0,0,0.18)' }}>
+            <div style={{ fontSize: '18px', fontWeight: 700, color: INK, marginBottom: '18px' }}>Save new item to catalog</div>
+
+            <div style={{ marginBottom: '12px' }}>
+              <div style={{ fontSize: '12px', fontWeight: 600, color: MUTED, marginBottom: '5px', textTransform: 'uppercase', letterSpacing: '0.04em' }}>Item #</div>
+              <input value={newItem.no} onChange={e => setNewItem(n => ({ ...n, no: e.target.value.toUpperCase() }))} style={{ width: '100%', padding: '12px 14px', fontSize: '17px', border: '1.5px solid #E2D7D1', borderRadius: '10px', fontFamily: 'inherit', fontWeight: 700, color: PAD, outline: 'none' }} />
+            </div>
+            <div style={{ marginBottom: '16px' }}>
+              <div style={{ fontSize: '12px', fontWeight: 600, color: MUTED, marginBottom: '5px', textTransform: 'uppercase', letterSpacing: '0.04em' }}>Description</div>
+              <input value={newItem.desc} onChange={e => setNewItem(n => ({ ...n, desc: e.target.value }))} placeholder="What is this item?" autoFocus style={{ width: '100%', padding: '12px 14px', fontSize: '17px', border: '1.5px solid #E2D7D1', borderRadius: '10px', fontFamily: 'inherit', color: INK, outline: 'none' }} />
+            </div>
+
+            <div style={{ display: 'flex', gap: '12px', marginBottom: '20px' }}>
+              <label style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer', fontSize: '15px', fontWeight: 600 }}>
+                <input type="checkbox" checked={newItem.taxable} onChange={e => setNewItem(n => ({ ...n, taxable: e.target.checked }))} style={{ width: '18px', height: '18px', accentColor: PAD }} />
+                Taxable
+              </label>
+              <label style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer', fontSize: '15px', fontWeight: 600 }}>
+                <input type="checkbox" checked={newItem.alteration} onChange={e => setNewItem(n => ({ ...n, alteration: e.target.checked, taxable: e.target.checked ? false : n.taxable }))} style={{ width: '18px', height: '18px', accentColor: ROSE }} />
+                Alteration
+              </label>
+            </div>
+
+            <div style={{ display: 'flex', gap: '10px' }}>
+              <button onClick={() => setNewItem(null)} style={{ flex: 1, padding: '13px', fontSize: '16px', fontWeight: 600, background: '#fff', border: '1.5px solid #E2D7D1', borderRadius: '12px', cursor: 'pointer', fontFamily: 'inherit', color: MUTED }}>Cancel</button>
+              <button onClick={saveNewItem} style={{ flex: 2, padding: '13px', fontSize: '16px', fontWeight: 700, background: ROSE, color: '#fff', border: 'none', borderRadius: '12px', cursor: 'pointer', fontFamily: 'inherit' }}>Save &amp; use</button>
+            </div>
+          </div>
+        </div>
+      )}
     </>
   )
 }
