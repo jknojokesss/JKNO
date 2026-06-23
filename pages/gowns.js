@@ -61,6 +61,7 @@ export default function Gowns() {
   const [newItem, setNewItem] = useState(null) // { rowId, no, desc, taxable, alteration } — add-item modal
   const [todoInput, setTodoInput] = useState({}) // { orderId: { text, assignee, date } }
   const [todoView, setTodoView] = useState('person') // 'person' | 'date'
+  const [selectedCustomer, setSelectedCustomer] = useState(null) // customer key
   const [loaded, setLoaded] = useState(false)
 
   useEffect(() => {
@@ -226,20 +227,21 @@ export default function Gowns() {
               <button onClick={() => setTab('completed')} style={tabBtn(tab === 'completed')}>Completed ({doneList.length})</button>
               <button onClick={() => setTab('all')} style={tabBtn(tab === 'all')}>All ({orders.length})</button>
               <button onClick={() => setTab('todos')} style={tabBtn(tab === 'todos')}>Tasks ({orders.reduce((s, o) => s + (o.todos || []).filter(t => !t.done).length, 0)})</button>
+              <button onClick={() => { setTab('customers'); setSelectedCustomer(null) }} style={tabBtn(tab === 'customers')}>Customers</button>
             </div>
 
-            {orders.length > 0 && (
+            {orders.length > 0 && tab !== 'todos' && tab !== 'customers' && (
               <input value={search} onChange={e => setSearch(e.target.value)} placeholder="Search by customer name…"
                 style={{ ...fieldIn, fontSize: '18px', marginBottom: '16px' }} />
             )}
 
-            {tab !== 'todos' && filtered.length === 0 ? (
+            {tab !== 'todos' && tab !== 'customers' && filtered.length === 0 ? (
               <div className="gw-card" style={{ padding: '44px 24px', textAlign: 'center', color: MUTED }}>
                 <div style={{ fontSize: '40px', marginBottom: '10px' }}>🪡</div>
                 <div style={{ fontSize: '17px', color: INK, fontWeight: 600, marginBottom: '4px' }}>{orders.length ? `No ${tab === 'all' ? '' : tab + ' '}orders` : 'No orders yet'}</div>
                 <div style={{ fontSize: '15px' }}>{orders.length ? (search ? 'Try a different name.' : 'Nothing here right now.') : 'Tap "+ New Order" to write your first one.'}</div>
               </div>
-            ) : tab !== 'todos' ? (
+            ) : tab !== 'todos' && tab !== 'customers' ? (
               <div className="gw-grid">
                 {filtered.map(o => {
                   const sub = sumItems(o.items), tax = calcTax(o.items, o.taxRate), tot = sub + tax, p = sumPaid(o), bal = tot - p
@@ -419,11 +421,104 @@ export default function Gowns() {
               )
             })()}
 
-            {orders.length > 0 && tab !== 'todos' && (
+            {/* ===== CUSTOMERS TAB ===== */}
+            {tab === 'customers' && (() => {
+              const custMap = orders.reduce((acc, o) => {
+                const key = o.phone || fullName(o)
+                if (!key) return acc
+                if (!acc[key]) acc[key] = { name: fullName(o), phone: o.phone || '', address: o.address || '', city: o.city || '', state: o.state || '', zip: o.zip || '', orders: [] }
+                acc[key].orders.push(o)
+                return acc
+              }, {})
+              const customers = Object.entries(custMap).sort((a, b) => a[1].name.localeCompare(b[1].name))
+
+              if (selectedCustomer && custMap[selectedCustomer]) {
+                const cust = custMap[selectedCustomer]
+                const custOrders = cust.orders.sort((a, b) => (b.date || '').localeCompare(a.date || ''))
+                const totalSpent = custOrders.reduce((s, o) => s + orderTotal(o), 0)
+                return (
+                  <div>
+                    <button onClick={() => setSelectedCustomer(null)} style={{ background: 'none', border: 'none', color: ROSE_DK, fontSize: '15px', fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit', padding: '0 0 14px' }}>← All customers</button>
+                    <div className="gw-card" style={{ padding: '18px 20px', marginBottom: '16px' }}>
+                      <div style={{ fontSize: '24px', fontWeight: 700, color: INK }}>{cust.name}</div>
+                      {cust.phone && <div style={{ fontSize: '14px', color: MUTED, marginTop: '4px' }}>{cust.phone}</div>}
+                      {cust.address && <div style={{ fontSize: '14px', color: MUTED, marginTop: '2px' }}>{cust.address}{cust.city ? `, ${cust.city}` : ''}{cust.state ? `, ${cust.state}` : ''}{cust.zip ? ` ${cust.zip}` : ''}</div>}
+                      <div style={{ display: 'flex', gap: '20px', marginTop: '14px', paddingTop: '12px', borderTop: '1px solid #F0E9E3' }}>
+                        <div><div style={{ fontSize: '22px', fontWeight: 800, color: INK }}>{custOrders.length}</div><div style={{ fontSize: '11px', color: MUTED, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.04em' }}>Orders</div></div>
+                        <div><div style={{ fontSize: '22px', fontWeight: 800, color: GREEN }}>{money(totalSpent)}</div><div style={{ fontSize: '11px', color: MUTED, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.04em' }}>Total spent</div></div>
+                        <div><div style={{ fontSize: '22px', fontWeight: 800, color: INK }}>{fmtDate(custOrders[0]?.date)}</div><div style={{ fontSize: '11px', color: MUTED, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.04em' }}>Last order</div></div>
+                      </div>
+                    </div>
+                    <div style={{ fontSize: '12px', fontWeight: 700, color: MUTED, textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '10px' }}>Order history</div>
+                    {custOrders.map(o => {
+                      const tot = orderTotal(o), bal = balanceOf(o)
+                      return (
+                        <div key={o.id} className="gw-card gw-card-click gw-press" onClick={() => openOrder(o)} style={{ padding: '14px 16px', marginBottom: '10px', cursor: 'pointer', borderLeft: `4px solid ${isOpen(o) ? ROSE : GREEN}`, display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '10px' }}>
+                          <div>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                              <span style={{ fontSize: '17px', fontWeight: 800, color: REDNO }}>No. {o.orderNo}</span>
+                              <span style={{ fontSize: '13px', color: MUTED }}>{fmtDate(o.date)}</span>
+                            </div>
+                            <div style={{ fontSize: '13px', color: MUTED, marginTop: '4px' }}>{o.items.filter(it => it.desc).slice(0, 2).map(it => it.desc).join(', ')}</div>
+                          </div>
+                          <div style={{ textAlign: 'right' }}>
+                            <div style={{ fontSize: '18px', fontWeight: 800 }}>{money(tot)}</div>
+                            {bal > 0.005
+                              ? <div style={{ fontSize: '12px', fontWeight: 700, color: AMBER }}>Owes {money(bal)}</div>
+                              : <div style={{ fontSize: '12px', fontWeight: 700, color: GREEN }}>Paid ✓</div>}
+                          </div>
+                        </div>
+                      )
+                    })}
+                  </div>
+                )
+              }
+
+              return (
+                <div>
+                  {customers.length === 0 ? (
+                    <div className="gw-card" style={{ padding: '44px 24px', textAlign: 'center', color: MUTED }}>
+                      <div style={{ fontSize: '32px', marginBottom: '8px' }}>👗</div>
+                      <div style={{ fontSize: '16px', fontWeight: 600, color: INK }}>No customers yet</div>
+                      <div style={{ fontSize: '14px', marginTop: '4px' }}>Customers are built from your orders automatically.</div>
+                    </div>
+                  ) : (
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                      {customers.map(([key, cust]) => {
+                        const totalSpent = cust.orders.reduce((s, o) => s + orderTotal(o), 0)
+                        const lastOrder = cust.orders.sort((a, b) => (b.date || '').localeCompare(a.date || ''))[0]
+                        const openOrders = cust.orders.filter(isOpen).length
+                        return (
+                          <div key={key} className="gw-card gw-card-click gw-press" onClick={() => setSelectedCustomer(key)} style={{ padding: '15px 18px', cursor: 'pointer', display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '12px' }}>
+                            <div>
+                              <div style={{ fontSize: '18px', fontWeight: 700, color: INK }}>{cust.name}</div>
+                              <div style={{ fontSize: '13px', color: MUTED, marginTop: '3px' }}>
+                                {cust.phone}{cust.city ? (cust.phone ? ` · ${cust.city}` : cust.city) : ''}
+                              </div>
+                              <div style={{ fontSize: '12px', color: MUTED, marginTop: '3px' }}>
+                                {cust.orders.length} order{cust.orders.length !== 1 ? 's' : ''} · Last: {fmtDate(lastOrder?.date)}
+                                {openOrders > 0 && <span style={{ color: AMBER, fontWeight: 600, marginLeft: '8px' }}>● {openOrders} open</span>}
+                              </div>
+                            </div>
+                            <div style={{ textAlign: 'right', flexShrink: 0 }}>
+                              <div style={{ fontSize: '20px', fontWeight: 800, color: GREEN }}>{money(totalSpent)}</div>
+                              <div style={{ fontSize: '11px', color: MUTED, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.04em' }}>Total spent</div>
+                            </div>
+                          </div>
+                        )
+                      })}
+                    </div>
+                  )}
+                </div>
+              )
+            })()}
+
+            {orders.length > 0 && tab !== 'todos' && tab !== 'customers' && (
               <>
                 <button onClick={downloadCSV} style={{ width: '100%', marginTop: '26px', padding: '14px', fontSize: '14px', fontWeight: 600, color: PAD, background: '#fff', border: `1.5px solid ${GRID}`, borderRadius: '12px', cursor: 'pointer', fontFamily: 'inherit' }}>
                   ⬇ Export to Excel (.csv)
                 </button>
+
                 <div style={{ textAlign: 'center', marginTop: '6px', fontSize: '11px', color: '#B9ADA8' }}>for your bookkeeper</div>
               </>
             )}
