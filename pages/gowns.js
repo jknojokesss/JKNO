@@ -138,7 +138,7 @@ export default function Gowns() {
   }
   const del = (id) => { if (window.confirm('Delete this order?')) { setOrders(prev => prev.filter(o => o.id !== id)); setView('list') } }
   const patchOrder = (id, patch) => setOrders(prev => prev.map(o => o.id === id ? { ...o, ...patch } : o))
-  const addTodo = (orderId, text) => { if (!text.trim()) return; patchOrder(orderId, { todos: [...(orders.find(o => o.id === orderId)?.todos || []), { id: uid(), text: text.trim(), done: false }] }); setTodoInput(p => ({ ...p, [orderId]: '' })) }
+  const addTodo = (orderId, text) => { if (!text.trim()) return; patchOrder(orderId, { todos: [...(orders.find(o => o.id === orderId)?.todos || []), { id: uid(), text: text.trim(), done: false, date: todayStr() }] }); setTodoInput(p => ({ ...p, [orderId]: '' })) }
   const toggleTodo = (orderId, todoId) => { const o = orders.find(x => x.id === orderId); if (!o) return; patchOrder(orderId, { todos: o.todos.map(t => t.id === todoId ? { ...t, done: !t.done } : t) }) }
   const removeTodo = (orderId, todoId) => { const o = orders.find(x => x.id === orderId); if (!o) return; patchOrder(orderId, { todos: o.todos.filter(t => t.id !== todoId) }) }
 
@@ -313,7 +313,7 @@ export default function Gowns() {
                               <div key={t.id} style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                                 <input type="checkbox" checked={t.done} onChange={() => toggleTodo(o.id, t.id)}
                                   style={{ width: '16px', height: '16px', accentColor: PAD, flexShrink: 0, cursor: 'pointer' }} />
-                                <span style={{ fontSize: '13px', flex: 1, color: t.done ? MUTED : INK, textDecoration: t.done ? 'line-through' : 'none', lineHeight: 1.4 }}>{t.text}</span>
+                                <span style={{ fontSize: '13px', flex: 1, color: t.done ? MUTED : INK, textDecoration: t.done ? 'line-through' : 'none', lineHeight: 1.4 }}>{t.text}{t.date ? <span style={{ color: MUTED, fontWeight: 400, marginLeft: '6px', fontSize: '12px' }}>· {fmtShort(t.date)}</span> : null}</span>
                                 <button onClick={() => removeTodo(o.id, t.id)} style={{ background: 'none', border: 'none', color: '#D0C5BF', fontSize: '15px', cursor: 'pointer', lineHeight: 1, flexShrink: 0 }}>×</button>
                               </div>
                             ))}
