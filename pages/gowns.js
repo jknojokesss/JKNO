@@ -71,7 +71,7 @@ export default function Gowns() {
 
   const save = () => {
     if (!form.name.trim()) { alert('Please enter a customer name first.'); return }
-    if (!form.phone.trim()) { alert('Please enter a phone number.'); return }
+    if (!editing && !form.phone.trim()) { alert('Please enter a phone number.'); return }
     const orderNo = form.orderNo || (orders.reduce((m, o) => Math.max(m, o.orderNo || 0), 1000) + 1)
     let items = form.items.filter(it => it.desc.trim() || it.price)
     if (!items.length) items = [blankRow()]
