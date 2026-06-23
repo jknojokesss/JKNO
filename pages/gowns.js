@@ -10,9 +10,6 @@ const ROSE = '#B14D6A', ROSE_DK = '#8E3B54', GREEN = '#2E7D46', AMBER = '#9C6B12
 
 const BIZ = 'The Gown Studio' // placeholder — swap to her real name
 const METHODS = ['Cash', 'Check', 'Charge', 'On Acct.', 'Zelle']
-// QuickBooks accounts for the .iif export — set to match the client's chart of accounts.
-const QB_AR = 'Accounts Receivable'
-const QB_INCOME = 'Gown Sales'
 
 const money = (n) => '$' + (Math.round((n || 0) * 100) / 100).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })
 const money0 = (n) => '$' + Math.round(n || 0).toLocaleString()
@@ -84,30 +81,23 @@ export default function Gowns() {
   }
   const del = (id) => { if (window.confirm('Delete this order?')) { setOrders(prev => prev.filter(o => o.id !== id)); setView('list') } }
 
-  const downloadIIF = () => {
-    const valid = orders.filter(o => sumItems(o.items) !== 0)
-    if (!valid.length) { alert('No orders with amounts to export yet.'); return }
-    const dt = (s) => { const p = (s || todayStr()).split('-'); return `${parseInt(p[1], 10)}/${parseInt(p[2], 10)}/${p[0]}` }
-    const esc = (s) => String(s == null ? '' : s).replace(/[\t\r\n]+/g, ' ').trim()
-    const out = [
-      ['!TRNS', 'TRNSTYPE', 'DATE', 'ACCNT', 'NAME', 'AMOUNT', 'DOCNUM', 'MEMO'].join('\t'),
-      ['!SPL', 'TRNSTYPE', 'DATE', 'ACCNT', 'NAME', 'AMOUNT', 'MEMO'].join('\t'),
-      '!ENDTRNS',
-    ]
-    valid.forEach(o => {
+  const downloadCSV = () => {
+    if (!orders.length) { alert('No orders to export yet.'); return }
+    const esc = (s) => { const v = String(s == null ? '' : s).replace(/[\r\n]+/g, ' ').trim(); return v.includes(',') || v.includes('"') ? `"${v.replace(/"/g, '""')}"` : v }
+    const headers = ['Order #', 'Date', 'Customer', 'Phone', 'Items', 'Total', 'Amount Paid', 'Balance', 'Status', 'Payments', 'Alterations', 'Notes']
+    const rows = orders.map(o => {
       const t = sumItems(o.items), p = sumPaid(o), bal = t - p
-      const payNote = p > 0 ? `Paid ${money(p)}${bal > 0.005 ? `, owes ${money(bal)}` : ' (paid in full)'}` : ''
-      const memo = esc([o.notes, o.alterations ? `[Alterations${o.alterationsDone ? ' done' : ''}${o.alterationsDue ? ' due ' + o.alterationsDue : ''}${o.alterationsNote ? ': ' + o.alterationsNote : ''}]` : '', payNote].filter(Boolean).join(' | '))
-      out.push(['TRNS', 'INVOICE', dt(o.date), QB_AR, esc(o.name), t.toFixed(2), String(o.orderNo || ''), memo].join('\t'))
-      o.items.filter(it => lineAmt(it) !== 0).forEach(it => {
-        out.push(['SPL', 'INVOICE', dt(o.date), QB_INCOME, esc(o.name), (-lineAmt(it)).toFixed(2), esc(it.desc)].join('\t'))
-      })
-      out.push('ENDTRNS')
+      const itemsSummary = o.items.filter(it => it.desc || lineAmt(it)).map(it => `${it.qty > 1 ? it.qty + 'x ' : ''}${it.desc || ''}${lineAmt(it) ? ' (' + money(lineAmt(it)) + ')' : ''}`).join('; ')
+      const payHistory = (o.payments || []).map(p => `${money(p.amount)}${p.method ? ' ' + p.method : ''}${p.date ? ' ' + fmtDate(p.date) : ''}`).join('; ')
+      const altNote = o.alterations ? `${o.alterationsDone ? 'Done' : 'Pending'}${o.alterationsDue ? ' (due ' + fmtDate(o.alterationsDue) + ')' : ''}${o.alterationsNote ? ': ' + o.alterationsNote : ''}` : ''
+      const status = isOpen(o) ? 'Open' : 'Completed'
+      return [o.orderNo || '', o.date || '', o.name, o.phone || '', itemsSummary, t.toFixed(2), p.toFixed(2), bal.toFixed(2), status, payHistory, altNote, o.notes || ''].map(esc).join(',')
     })
-    const blob = new Blob([out.join('\r\n') + '\r\n'], { type: 'text/plain;charset=utf-8' })
+    const csv = [headers.join(','), ...rows].join('\r\n')
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8' })
     const url = URL.createObjectURL(blob)
     const a = document.createElement('a')
-    a.href = url; a.download = `gown-orders-${todayStr()}.iif`; a.click()
+    a.href = url; a.download = `gown-orders-${todayStr()}.csv`; a.click()
     setTimeout(() => URL.revokeObjectURL(url), 1000)
   }
 
@@ -251,8 +241,8 @@ export default function Gowns() {
 
             {orders.length > 0 && (
               <>
-                <button onClick={downloadIIF} style={{ width: '100%', marginTop: '26px', padding: '14px', fontSize: '14px', fontWeight: 600, color: PAD, background: '#fff', border: `1.5px solid ${GRID}`, borderRadius: '12px', cursor: 'pointer', fontFamily: 'inherit' }}>
-                  ⬇ Export for QuickBooks (.iif)
+                <button onClick={downloadCSV} style={{ width: '100%', marginTop: '26px', padding: '14px', fontSize: '14px', fontWeight: 600, color: PAD, background: '#fff', border: `1.5px solid ${GRID}`, borderRadius: '12px', cursor: 'pointer', fontFamily: 'inherit' }}>
+                  ⬇ Export to Excel (.csv)
                 </button>
                 <div style={{ textAlign: 'center', marginTop: '6px', fontSize: '11px', color: '#B9ADA8' }}>for your bookkeeper</div>
               </>
