@@ -10,7 +10,7 @@ const ROSE = '#B14D6A', ROSE_DK = '#8E3B54', GREEN = '#2E7D46', AMBER = '#9C6B12
 
 const BIZ = 'The Gown Studio'
 const METHODS = ['Cash', 'Check', 'Card', 'On Acct.', 'Zelle']
-const DEFAULT_TAX_RATE = 6.625   // NJ rate — change as needed
+const DEFAULT_TAX_RATE = 8       // NY combined rate — editable per order
 
 const money = (n) => '$' + (Math.round((n || 0) * 100) / 100).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })
 const money0 = (n) => '$' + Math.round(n || 0).toLocaleString()
@@ -34,7 +34,7 @@ const blankRow = () => ({ id: uid(), qty: '1', desc: '', price: '', taxable: tru
 const blankForm = () => ({
   id: uid(), orderNo: null,
   firstName: '', lastName: '',
-  phone: '', address: '', city: '', state: '', zip: '',
+  phone: '', address: '', city: '', state: 'NY', zip: '',
   date: todayStr(),
   items: [blankRow(), blankRow(), blankRow()],
   payments: [], alterations: false, alterationsDone: false,
