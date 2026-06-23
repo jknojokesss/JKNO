@@ -139,6 +139,57 @@ export default function Gowns() {
     setView('list'); window.scrollTo(0, 0)
   }
   const del = (id) => { if (window.confirm('Delete this order?')) { setOrders(prev => prev.filter(o => o.id !== id)); setView('list') } }
+
+  const printOrders = (ordersToPrint) => {
+    const rows = ordersToPrint.map(o => {
+      const sub = sumItems(o.items), tax = calcTax(o.items, o.taxRate), tot = sub + tax, p = sumPaid(o), bal = tot - p
+      const itemRows = o.items.filter(it => it.desc?.trim() || lineAmt(it)).map(it =>
+        `<tr><td style="padding:5px 8px;border:1px solid #ccc;">${it.itemNo || ''}</td><td style="padding:5px 8px;border:1px solid #ccc;">${(parseFloat(it.qty)||1) > 1 ? it.qty+'× ' : ''}${it.desc || ''}</td><td style="padding:5px 8px;border:1px solid #ccc;text-align:right;">${money(lineAmt(it))}</td><td style="padding:5px 8px;border:1px solid #ccc;text-align:center;font-size:11px;">${it.taxable === false ? 'No' : 'Yes'}</td></tr>`
+      ).join('')
+      const payRows = (o.payments || []).map(pmt =>
+        `<div style="font-size:13px;color:#2E7D46;">✓ ${money(pmt.amount)}${pmt.method ? ' · '+pmt.method : ''}${pmt.date ? ' · '+fmtDate(pmt.date) : ''}</div>`
+      ).join('')
+      const addr = [o.address, o.city, o.state, o.zip].filter(Boolean).join(', ')
+      return `
+        <div style="page-break-after:always;padding:24px;font-family:sans-serif;max-width:680px;margin:0 auto;">
+          <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:16px;border-bottom:2px solid #2A4C9C;padding-bottom:12px;">
+            <div>
+              <div style="font-size:22px;font-weight:700;">${BIZ}</div>
+              <div style="font-size:13px;color:#666;margin-top:2px;">Order Date: ${fmtDate(o.date)}</div>
+            </div>
+            <div style="font-size:26px;font-weight:800;color:#C8322B;">No. ${o.orderNo || '—'}</div>
+          </div>
+          <div style="margin-bottom:14px;">
+            <div style="font-size:18px;font-weight:700;">${fullName(o)}</div>
+            ${o.phone ? `<div style="font-size:13px;color:#555;margin-top:2px;">${o.phone}</div>` : ''}
+            ${addr ? `<div style="font-size:13px;color:#555;margin-top:2px;">${addr}</div>` : ''}
+          </div>
+          <table style="width:100%;border-collapse:collapse;margin-bottom:12px;font-size:14px;">
+            <thead><tr style="background:#EAF0FB;">
+              <th style="padding:6px 8px;border:1px solid #ccc;text-align:left;font-size:11px;">Item #</th>
+              <th style="padding:6px 8px;border:1px solid #ccc;text-align:left;font-size:11px;">Description</th>
+              <th style="padding:6px 8px;border:1px solid #ccc;text-align:right;font-size:11px;">Price</th>
+              <th style="padding:6px 8px;border:1px solid #ccc;text-align:center;font-size:11px;">Tax</th>
+            </tr></thead>
+            <tbody>${itemRows}</tbody>
+          </table>
+          <div style="text-align:right;font-size:13px;color:#555;margin-bottom:4px;">Subtotal: ${money(sub)}</div>
+          ${tax > 0 ? `<div style="text-align:right;font-size:13px;color:#555;margin-bottom:4px;">Tax (${o.taxRate||0}%): ${money(tax)}</div>` : ''}
+          <div style="text-align:right;font-size:20px;font-weight:800;margin-bottom:12px;">Total: ${money(tot)}</div>
+          ${payRows ? `<div style="margin-bottom:8px;">${payRows}</div>` : ''}
+          <div style="font-size:15px;font-weight:700;${bal > 0.005 ? 'color:#9C6B12;' : 'color:#2E7D46;'}">
+            ${bal > 0.005 ? `Balance due: ${money(bal)}` : 'Paid in full ✓'}
+          </div>
+          ${o.alterations ? `<div style="margin-top:10px;padding:8px 12px;background:#FBEAF0;border-radius:6px;font-size:13px;"><b>✂ Alterations${o.alterationsDone ? ' — done ✓' : ' — in progress'}${o.alterationsDue ? ' · due '+fmtDate(o.alterationsDue) : ''}</b>${o.alterationsNote ? '<br>'+o.alterationsNote : ''}</div>` : ''}
+          ${o.notes ? `<div style="margin-top:8px;font-size:13px;color:#555;"><b>Notes:</b> ${o.notes}</div>` : ''}
+        </div>`
+    }).join('')
+    const win = window.open('', '_blank')
+    win.document.write(`<!DOCTYPE html><html><head><title>${BIZ} — Orders</title><style>@media print{body{margin:0}}</style></head><body>${rows}</body></html>`)
+    win.document.close()
+    win.focus()
+    setTimeout(() => win.print(), 400)
+  }
   const patchOrder = (id, patch) => setOrders(prev => prev.map(o => o.id === id ? { ...o, ...patch } : o))
   const addTodo = (orderId) => {
     const inp = todoInput[orderId] || {}
@@ -515,9 +566,14 @@ export default function Gowns() {
 
             {orders.length > 0 && tab !== 'todos' && tab !== 'customers' && (
               <>
-                <button onClick={downloadCSV} style={{ width: '100%', marginTop: '26px', padding: '14px', fontSize: '14px', fontWeight: 600, color: PAD, background: '#fff', border: `1.5px solid ${GRID}`, borderRadius: '12px', cursor: 'pointer', fontFamily: 'inherit' }}>
-                  ⬇ Export to Excel (.csv)
-                </button>
+                <div style={{ display: 'flex', gap: '10px', marginTop: '26px' }}>
+                  <button onClick={downloadCSV} style={{ flex: 1, padding: '14px', fontSize: '14px', fontWeight: 600, color: PAD, background: '#fff', border: `1.5px solid ${GRID}`, borderRadius: '12px', cursor: 'pointer', fontFamily: 'inherit' }}>
+                    ⬇ Export to Excel (.csv)
+                  </button>
+                  <button onClick={() => printOrders(filtered)} style={{ flex: 1, padding: '14px', fontSize: '14px', fontWeight: 600, color: '#fff', background: PAD, border: 'none', borderRadius: '12px', cursor: 'pointer', fontFamily: 'inherit' }}>
+                    🖨 Print orders
+                  </button>
+                </div>
 
                 <div style={{ textAlign: 'center', marginTop: '6px', fontSize: '11px', color: '#B9ADA8' }}>for your bookkeeper</div>
               </>
