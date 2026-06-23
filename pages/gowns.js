@@ -74,6 +74,7 @@ export default function Gowns() {
 
   const save = () => {
     if (!form.name.trim()) { alert('Please enter a customer name first.'); return }
+    if (!form.phone.trim()) { alert('Please enter a phone number.'); return }
     const orderNo = form.orderNo || (orders.reduce((m, o) => Math.max(m, o.orderNo || 0), 1000) + 1)
     let items = form.items.filter(it => it.desc.trim() || it.price)
     if (!items.length) items = [blankRow()]
@@ -289,7 +290,7 @@ export default function Gowns() {
               {/* phone */}
               <div style={{ display: 'flex', alignItems: 'center', borderBottom: `1px solid ${GRID}`, padding: '4px 10px' }}>
                 <span style={{ ...lbl, width: '62px', flexShrink: 0 }}>Phone</span>
-                <input value={form.phone} onChange={e => setF('phone', e.target.value)} type="tel" placeholder="(optional)" style={cellIn} />
+                <input value={form.phone} onChange={e => setF('phone', e.target.value)} type="tel" placeholder="required" style={cellIn} />
               </div>
               {/* table header */}
               <div style={{ display: 'flex', borderBottom: `1px solid ${GRID}` }}>
