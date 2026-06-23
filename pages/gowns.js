@@ -12,6 +12,11 @@ const BIZ = 'The Gown Studio'
 const METHODS = ['Cash', 'Check', 'Card', 'On Acct.', 'Zelle']
 const DEFAULT_TAX_RATE = 8.875   // NYC rate — editable per order
 
+// Item catalog — add all items here once she sends the full list
+const ITEMS = [
+  { no: 'GM92', desc: 'Green Gown' },
+]
+
 const money = (n) => '$' + (Math.round((n || 0) * 100) / 100).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })
 const money0 = (n) => '$' + Math.round(n || 0).toLocaleString()
 const todayStr = () => new Date().toISOString().slice(0, 10)
@@ -30,7 +35,7 @@ const isOpen = (o) => balanceOf(o) > 0.005 || (o.alterations && !o.alterationsDo
 // backward-compat: old orders have a single `name` field
 const fullName = (o) => o.firstName ? `${o.firstName} ${o.lastName || ''}`.trim() : (o.name || '')
 
-const blankRow = () => ({ id: uid(), qty: '1', desc: '', price: '', taxable: true })
+const blankRow = () => ({ id: uid(), qty: '1', itemNo: '', desc: '', price: '', taxable: true })
 const blankForm = () => ({
   id: uid(), orderNo: null,
   firstName: '', lastName: '',
@@ -50,6 +55,7 @@ export default function Gowns() {
   const [editing, setEditing] = useState(false)
   const [search, setSearch] = useState('')
   const [pay, setPay] = useState({ amount: '', method: '', date: todayStr() })
+  const [suggest, setSuggest] = useState(null) // { id, matches }
   const [loaded, setLoaded] = useState(false)
 
   useEffect(() => {
@@ -75,6 +81,21 @@ export default function Gowns() {
   }
   const setF = (k, v) => setForm(f => ({ ...f, [k]: v }))
   const setItem = (id, k, v) => setForm(f => ({ ...f, items: f.items.map(it => it.id === id ? { ...it, [k]: v } : it) }))
+  const onItemNo = (id, val) => {
+    setItem(id, 'itemNo', val)
+    if (val.trim()) {
+      const q = val.trim().toLowerCase()
+      const matches = ITEMS.filter(it => it.no.toLowerCase().includes(q))
+      setSuggest(matches.length ? { id, matches } : null)
+    } else {
+      setSuggest(null)
+    }
+  }
+  const pickItem = (rowId, item) => {
+    setForm(f => ({ ...f, items: f.items.map(it => it.id === rowId ? { ...it, itemNo: item.no, desc: item.desc } : it) }))
+    setSuggest(null)
+  }
+
   const addRow = () => setForm(f => ({ ...f, items: [...f.items, blankRow()] }))
   const removeRow = (id) => setForm(f => ({ ...f, items: f.items.length > 1 ? f.items.filter(it => it.id !== id) : f.items }))
 
@@ -346,6 +367,7 @@ export default function Gowns() {
               <div style={{ display: 'flex', borderBottom: `1px solid ${GRID}` }}>
                 <div style={{ ...th, width: '26px', textAlign: 'center', padding: '8px 0' }} />
                 <div style={{ ...th, width: '44px', textAlign: 'center', borderLeft: `1px solid ${GRID}` }}>Qty</div>
+                <div style={{ ...th, width: '72px', borderLeft: `1px solid ${GRID}` }}>Item #</div>
                 <div style={{ ...th, flex: 1, borderLeft: `1px solid ${GRID}` }}>Description</div>
                 <div style={{ ...th, width: '92px', textAlign: 'right', borderLeft: `1px solid ${GRID}` }}>Price</div>
                 <div style={{ ...th, width: '38px', textAlign: 'center', borderLeft: `1px solid ${GRID}` }} title="Check = taxable">Tax</div>
@@ -353,18 +375,41 @@ export default function Gowns() {
               </div>
 
               {/* rows */}
-              {form.items.map((it, i) => (
-                <div key={it.id} style={{ display: 'flex', borderBottom: `1px solid ${GRID}`, alignItems: 'center' }}>
-                  <div style={{ width: '26px', textAlign: 'center', fontSize: '11px', color: PAD, fontWeight: 600 }}>{i + 1}</div>
-                  <input value={it.qty} onChange={e => setItem(it.id, 'qty', e.target.value)} type="number" inputMode="numeric" style={{ ...cellIn, width: '44px', textAlign: 'center', padding: '12px 2px', borderLeft: `1px solid ${GRID}` }} />
-                  <input value={it.desc} onChange={e => setItem(it.id, 'desc', e.target.value)} placeholder={i === 0 ? 'Style, color, details…' : ''} style={{ ...cellIn, flex: 1, borderLeft: `1px solid ${GRID}` }} />
-                  <input value={it.price} onChange={e => setItem(it.id, 'price', e.target.value)} type="number" inputMode="decimal" step="0.01" placeholder="$" style={{ ...cellIn, width: '92px', textAlign: 'right', padding: '12px 8px', borderLeft: `1px solid ${GRID}`, fontWeight: 600 }} />
-                  <div style={{ width: '38px', display: 'flex', alignItems: 'center', justifyContent: 'center', borderLeft: `1px solid ${GRID}`, alignSelf: 'stretch' }}>
-                    <input type="checkbox" className="tax-check" checked={it.taxable !== false} onChange={e => setItem(it.id, 'taxable', e.target.checked)} title="Taxable" />
+              {form.items.map((it, i) => {
+                const showSuggest = suggest && suggest.id === it.id
+                return (
+                  <div key={it.id} style={{ display: 'flex', borderBottom: `1px solid ${GRID}`, alignItems: 'center', position: 'relative' }}>
+                    <div style={{ width: '26px', textAlign: 'center', fontSize: '11px', color: PAD, fontWeight: 600 }}>{i + 1}</div>
+                    <input value={it.qty} onChange={e => setItem(it.id, 'qty', e.target.value)} type="number" inputMode="numeric" style={{ ...cellIn, width: '44px', textAlign: 'center', padding: '12px 2px', borderLeft: `1px solid ${GRID}` }} />
+                    {/* item # with typeahead */}
+                    <div style={{ width: '72px', borderLeft: `1px solid ${GRID}`, position: 'relative', alignSelf: 'stretch', display: 'flex', alignItems: 'center' }}>
+                      <input
+                        value={it.itemNo || ''}
+                        onChange={e => onItemNo(it.id, e.target.value)}
+                        onBlur={() => setTimeout(() => setSuggest(null), 150)}
+                        placeholder="—"
+                        style={{ ...cellIn, width: '100%', fontWeight: 600, letterSpacing: '0.03em', textTransform: 'uppercase' }}
+                      />
+                      {showSuggest && (
+                        <div style={{ position: 'absolute', top: '100%', left: 0, zIndex: 99, background: '#fff', border: `2px solid ${PAD}`, borderRadius: '10px', boxShadow: '0 4px 16px rgba(0,0,0,0.13)', minWidth: '200px', overflow: 'hidden' }}>
+                          {suggest.matches.map(m => (
+                            <div key={m.no} onMouseDown={() => pickItem(it.id, m)} style={{ padding: '12px 14px', cursor: 'pointer', fontSize: '15px', borderBottom: `1px solid ${GRID}` }}>
+                              <span style={{ fontWeight: 700, color: PAD, marginRight: '8px' }}>{m.no}</span>
+                              <span style={{ color: INK }}>{m.desc}</span>
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                    <input value={it.desc} onChange={e => setItem(it.id, 'desc', e.target.value)} placeholder={i === 0 ? 'Style, color, details…' : ''} style={{ ...cellIn, flex: 1, borderLeft: `1px solid ${GRID}` }} />
+                    <input value={it.price} onChange={e => setItem(it.id, 'price', e.target.value)} type="number" inputMode="decimal" step="0.01" placeholder="$" style={{ ...cellIn, width: '92px', textAlign: 'right', padding: '12px 8px', borderLeft: `1px solid ${GRID}`, fontWeight: 600 }} />
+                    <div style={{ width: '38px', display: 'flex', alignItems: 'center', justifyContent: 'center', borderLeft: `1px solid ${GRID}`, alignSelf: 'stretch' }}>
+                      <input type="checkbox" className="tax-check" checked={it.taxable !== false} onChange={e => setItem(it.id, 'taxable', e.target.checked)} title="Taxable" />
+                    </div>
+                    <button onClick={() => removeRow(it.id)} aria-label="remove" style={{ width: '26px', height: '40px', border: 'none', background: 'none', color: '#C7B7B1', fontSize: '18px', cursor: 'pointer', lineHeight: 1 }}>×</button>
                   </div>
-                  <button onClick={() => removeRow(it.id)} aria-label="remove" style={{ width: '26px', height: '40px', border: 'none', background: 'none', color: '#C7B7B1', fontSize: '18px', cursor: 'pointer', lineHeight: 1 }}>×</button>
-                </div>
-              ))}
+                )
+              })}
 
               <button onClick={addRow} style={{ width: '100%', padding: '11px', fontSize: '14px', fontWeight: 600, color: PAD, background: '#F6F9FE', border: 'none', borderBottom: `2px solid ${PAD}`, cursor: 'pointer', fontFamily: 'inherit' }}>+ Add line</button>
 
