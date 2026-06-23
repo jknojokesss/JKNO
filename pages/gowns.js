@@ -15,7 +15,7 @@ const DEFAULT_TAX_RATE = 8.875   // NYC rate — editable per order
 // Item catalog — taxable defaults to true; set taxable: false for non-taxable items (alterations, fees, etc.)
 const ITEMS = [
   { no: 'GM92', desc: 'Green Gown' },
-  { no: 'ALT',  desc: 'Alterations', taxable: false },
+  { no: 'ALT',  desc: 'Alterations', taxable: false, alteration: true },
 ]
 
 const money = (n) => '$' + (Math.round((n || 0) * 100) / 100).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })
@@ -93,7 +93,7 @@ export default function Gowns() {
     }
   }
   const pickItem = (rowId, item) => {
-    setForm(f => ({ ...f, items: f.items.map(it => it.id === rowId ? { ...it, itemNo: item.no, desc: item.desc, taxable: item.taxable !== false } : it) }))
+    setForm(f => ({ ...f, items: f.items.map(it => it.id === rowId ? { ...it, itemNo: item.no, desc: item.desc, taxable: item.taxable !== false } : it), ...(item.alteration ? { alterations: true } : {}) }))
     setSuggest(null)
   }
 
