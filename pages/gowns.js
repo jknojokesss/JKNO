@@ -9,7 +9,7 @@ const REDNO = '#C8322B'      // the red pre-printed order number on the pad
 const ROSE = '#B14D6A', ROSE_DK = '#8E3B54', GREEN = '#2E7D46', AMBER = '#9C6B12'
 
 const BIZ = 'The Gown Studio' // placeholder — swap to her real name
-const METHODS = ['Cash', 'Check', 'Charge', 'On Acct.', 'Zelle']
+const METHODS = ['Cash', 'Check', 'Card', 'On Acct.', 'Zelle']
 
 const money = (n) => '$' + (Math.round((n || 0) * 100) / 100).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })
 const money0 = (n) => '$' + Math.round(n || 0).toLocaleString()
