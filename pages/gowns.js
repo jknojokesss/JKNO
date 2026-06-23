@@ -59,6 +59,7 @@ export default function Gowns() {
   const [suggest, setSuggest] = useState(null) // { id, matches, query }
   const [catalog, setCatalog] = useState(DEFAULT_ITEMS)
   const [newItem, setNewItem] = useState(null) // { rowId, no, desc, taxable, alteration } — add-item modal
+  const [todoInput, setTodoInput] = useState({}) // { orderId: inputText }
   const [loaded, setLoaded] = useState(false)
 
   useEffect(() => {
@@ -136,6 +137,10 @@ export default function Gowns() {
     setView('list'); window.scrollTo(0, 0)
   }
   const del = (id) => { if (window.confirm('Delete this order?')) { setOrders(prev => prev.filter(o => o.id !== id)); setView('list') } }
+  const patchOrder = (id, patch) => setOrders(prev => prev.map(o => o.id === id ? { ...o, ...patch } : o))
+  const addTodo = (orderId, text) => { if (!text.trim()) return; patchOrder(orderId, { todos: [...(orders.find(o => o.id === orderId)?.todos || []), { id: uid(), text: text.trim(), done: false }] }); setTodoInput(p => ({ ...p, [orderId]: '' })) }
+  const toggleTodo = (orderId, todoId) => { const o = orders.find(x => x.id === orderId); if (!o) return; patchOrder(orderId, { todos: o.todos.map(t => t.id === todoId ? { ...t, done: !t.done } : t) }) }
+  const removeTodo = (orderId, todoId) => { const o = orders.find(x => x.id === orderId); if (!o) return; patchOrder(orderId, { todos: o.todos.filter(t => t.id !== todoId) }) }
 
   const downloadCSV = () => {
     if (!orders.length) { alert('No orders to export yet.'); return }
@@ -290,6 +295,41 @@ export default function Gowns() {
                       {o.notes && (
                         <div style={{ marginTop: '10px', fontSize: '13px', color: MUTED, lineHeight: 1.4 }}><span style={{ fontWeight: 600, color: INK }}>Note:</span> {o.notes}</div>
                       )}
+
+                      {/* ── Date + To-do section ── */}
+                      <div onClick={e => e.stopPropagation()} style={{ marginTop: '12px', paddingTop: '12px', borderTop: '1px solid #F0E9E3' }}>
+                        {/* Follow-up date */}
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '10px' }}>
+                          <span style={{ fontSize: '13px', fontWeight: 600, color: PAD, flexShrink: 0 }}>📅 Follow-up</span>
+                          <input type="date" value={o.followUpDate || ''} onChange={e => patchOrder(o.id, { followUpDate: e.target.value })}
+                            style={{ fontSize: '13px', border: '1.5px solid #E2D7D1', borderRadius: '8px', padding: '5px 8px', fontFamily: 'inherit', color: INK, background: '#fff', cursor: 'pointer', outline: 'none' }} />
+                          {o.followUpDate && <button onClick={() => patchOrder(o.id, { followUpDate: '' })} style={{ background: 'none', border: 'none', color: MUTED, fontSize: '16px', cursor: 'pointer', lineHeight: 1 }}>×</button>}
+                        </div>
+
+                        {/* To-do list */}
+                        {(o.todos || []).length > 0 && (
+                          <div style={{ marginBottom: '8px', display: 'flex', flexDirection: 'column', gap: '5px' }}>
+                            {(o.todos || []).map(t => (
+                              <div key={t.id} style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                <input type="checkbox" checked={t.done} onChange={() => toggleTodo(o.id, t.id)}
+                                  style={{ width: '16px', height: '16px', accentColor: PAD, flexShrink: 0, cursor: 'pointer' }} />
+                                <span style={{ fontSize: '13px', flex: 1, color: t.done ? MUTED : INK, textDecoration: t.done ? 'line-through' : 'none', lineHeight: 1.4 }}>{t.text}</span>
+                                <button onClick={() => removeTodo(o.id, t.id)} style={{ background: 'none', border: 'none', color: '#D0C5BF', fontSize: '15px', cursor: 'pointer', lineHeight: 1, flexShrink: 0 }}>×</button>
+                              </div>
+                            ))}
+                          </div>
+                        )}
+
+                        {/* Add to-do input */}
+                        <div style={{ display: 'flex', gap: '6px' }}>
+                          <input value={todoInput[o.id] || ''} onChange={e => setTodoInput(p => ({ ...p, [o.id]: e.target.value }))}
+                            onKeyDown={e => { if (e.key === 'Enter') addTodo(o.id, todoInput[o.id] || '') }}
+                            placeholder="+ Add to-do…"
+                            style={{ flex: 1, fontSize: '13px', border: '1.5px solid #E2D7D1', borderRadius: '8px', padding: '7px 10px', fontFamily: 'inherit', color: INK, outline: 'none', background: '#fff' }} />
+                          <button onClick={() => addTodo(o.id, todoInput[o.id] || '')}
+                            style={{ padding: '7px 12px', fontSize: '13px', fontWeight: 600, background: PAD, color: '#fff', border: 'none', borderRadius: '8px', cursor: 'pointer', fontFamily: 'inherit' }}>Add</button>
+                        </div>
+                      </div>
 
                       <div style={{ marginTop: '12px' }}>
                         {isOpen(o)
