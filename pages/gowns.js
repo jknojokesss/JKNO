@@ -111,9 +111,9 @@ export default function Gowns() {
   const cellIn = { width: '100%', border: 'none', outline: 'none', background: 'transparent', fontFamily: 'inherit', fontSize: '16px', color: INK, padding: '12px 8px' }
   const th = { padding: '8px', fontSize: '10px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.03em', color: PAD, background: '#EAF0FB' }
   const fieldIn = { width: '100%', padding: '13px 14px', fontSize: '17px', border: '1.5px solid #E2D7D1', borderRadius: '11px', background: '#fff', color: INK, outline: 'none', fontFamily: 'inherit' }
-  const primaryBtn = { padding: '15px 20px', fontSize: '17px', fontWeight: 700, color: '#fff', background: ROSE, border: 'none', borderRadius: '13px', cursor: 'pointer' }
+  const primaryBtn = { padding: '15px 20px', fontSize: '17px', fontWeight: 700, color: '#fff', background: ROSE, border: 'none', borderRadius: '13px', cursor: 'pointer', boxShadow: '0 2px 10px rgba(177,77,106,0.3)' }
   const ghostBtn = { width: '100%', padding: '14px', fontSize: '16px', fontWeight: 600, color: ROSE_DK, background: '#fff', border: `1.5px solid #E2D7D1`, borderRadius: '12px', cursor: 'pointer' }
-  const tabBtn = (on) => ({ flex: 1, padding: '13px 10px', fontSize: '15px', fontWeight: 700, borderRadius: '12px', cursor: 'pointer', fontFamily: 'inherit', border: `1.5px solid ${on ? PAD : '#E2D7D1'}`, background: on ? PAD : '#fff', color: on ? '#fff' : INK })
+  const tabBtn = (on) => ({ flex: 1, padding: '12px 8px', fontSize: '15px', fontWeight: 700, borderRadius: '12px', cursor: 'pointer', fontFamily: 'inherit', border: `1.5px solid ${on ? PAD : '#DDD5CE'}`, background: on ? PAD : '#fff', color: on ? '#fff' : '#6B6870', boxShadow: on ? '0 2px 8px rgba(42,76,156,0.2)' : 'none' })
 
   return (
     <>
@@ -124,30 +124,33 @@ export default function Gowns() {
         <style>{`
           * { box-sizing: border-box; margin: 0; padding: 0; }
           body { background: ${CREAM}; font-family: 'Inter', sans-serif; color: ${INK}; -webkit-font-smoothing: antialiased; }
-          ::placeholder { color: #B7C2DC; }
-          input:focus, textarea:focus { background: #FAFCFF; }
+          ::placeholder { color: #C4BAB4; }
+          input:focus, textarea:focus { background: #FAFCFF; border-color: ${PAD} !important; }
           input[type=number]::-webkit-outer-spin-button, input[type=number]::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
           input[type=number] { -moz-appearance: textfield; }
-          .gw-wrap { max-width: 980px; margin: 0 auto; padding: 20px 14px 64px; }
-          .gw-press:active { transform: scale(0.99); }
-          .gw-card { background: #fff; border: 1px solid #E7DDD6; border-radius: 16px; }
-          .gw-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 14px; }
+          .gw-header { background: #1C1C2E; padding: 22px 20px 18px; text-align: center; margin: -20px -14px 24px; }
+          .gw-wrap { max-width: 980px; margin: 0 auto; padding: 20px 14px 80px; }
+          .gw-press:active { transform: scale(0.98); opacity: 0.92; }
+          .gw-card { background: #fff; border: 1px solid #EAE0D8; border-radius: 18px; box-shadow: 0 2px 14px rgba(0,0,0,0.07); }
+          .gw-card-click:hover { box-shadow: 0 4px 22px rgba(0,0,0,0.11); transform: translateY(-1px); transition: box-shadow 0.15s, transform 0.15s; }
+          .gw-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(310px, 1fr)); gap: 16px; }
+          .gw-new-btn { width: 100%; padding: 17px; font-size: 18px; font-weight: 700; color: #fff; background: ${ROSE}; border: none; border-radius: 14px; cursor: pointer; font-family: inherit; letter-spacing: 0.01em; box-shadow: 0 3px 12px rgba(177,77,106,0.35); }
+          .gw-new-btn:active { transform: scale(0.98); box-shadow: none; }
+          .gw-tabs { display: flex; gap: 8px; margin-top: 12px; }
         `}</style>
       </Head>
 
       <div className="gw-wrap">
-        <div style={{ textAlign: 'center', marginBottom: '18px' }}>
-          <div style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: '32px', fontWeight: 700, lineHeight: 1.1 }}>{BIZ}</div>
-          <div style={{ fontSize: '12px', letterSpacing: '0.18em', textTransform: 'uppercase', color: ROSE, marginTop: '3px', fontWeight: 600 }}>Order Book</div>
+        <div className="gw-header">
+          <div style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: '34px', fontWeight: 700, color: '#fff', lineHeight: 1.1, letterSpacing: '0.01em' }}>{BIZ}</div>
+          <div style={{ fontSize: '11px', letterSpacing: '0.22em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.45)', marginTop: '5px', fontWeight: 600 }}>Order Book</div>
         </div>
 
         {/* ===== LIST ===== */}
         {view === 'list' && (
           <>
-            <div style={{ display: 'flex', gap: '10px', marginBottom: '16px', flexWrap: 'wrap' }}>
-              <button className="gw-press" onClick={startNew} style={{ ...primaryBtn, display: 'flex', alignItems: 'center', gap: '7px' }}>
-                <span style={{ fontSize: '22px', lineHeight: 1 }}>+</span> New Order
-              </button>
+            <button className="gw-new-btn gw-press" onClick={startNew}>+ New Order</button>
+            <div className="gw-tabs" style={{ marginBottom: '16px' }}>
               <button onClick={() => setTab('open')} style={tabBtn(tab === 'open')}>Open ({openList.length})</button>
               <button onClick={() => setTab('completed')} style={tabBtn(tab === 'completed')}>Completed ({doneList.length})</button>
               <button onClick={() => setTab('all')} style={tabBtn(tab === 'all')}>All ({orders.length})</button>
@@ -170,7 +173,7 @@ export default function Gowns() {
                   const t = sumItems(o.items), p = sumPaid(o), bal = t - p
                   const needsAlt = o.alterations && !o.alterationsDone
                   return (
-                    <div key={o.id} className="gw-card gw-press" onClick={() => openOrder(o)} style={{ padding: '16px 18px', cursor: 'pointer', display: 'flex', flexDirection: 'column' }}>
+                    <div key={o.id} className="gw-card gw-card-click gw-press" onClick={() => openOrder(o)} style={{ padding: '16px 18px', cursor: 'pointer', display: 'flex', flexDirection: 'column', borderLeft: `4px solid ${isOpen(o) ? ROSE : GREEN}`, borderRadius: '18px' }}>
                       {/* top: name + red order no */}
                       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '10px' }}>
                         <div>
