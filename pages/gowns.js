@@ -53,7 +53,7 @@ export default function Gowns() {
 
   const startNew = () => { setForm(blankForm()); setPay({ amount: '', method: '', date: todayStr() }); setEditing(false); setView('form'); window.scrollTo(0, 0) }
   const openOrder = (o) => {
-    const items = (o.items && o.items.length ? o.items : [blankRow()]).map(it => ({ qty: '1', price: '', ...it }))
+    const items = (o.items && o.items.length ? o.items : [blankRow()]).map(it => ({ qty: '1', ...it, price: it.price || String(it.amount || '') }))
     setForm({ ...blankForm(), ...o, items, payments: o.payments || [] }); setPay({ amount: '', method: '', date: todayStr() }); setEditing(true); setView('form'); window.scrollTo(0, 0)
   }
   const setF = (k, v) => setForm(f => ({ ...f, [k]: v }))
