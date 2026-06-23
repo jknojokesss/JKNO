@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useMemo } from 'react'
 import { useRouter } from 'next/router'
 import Head from 'next/head'
 import { supabase } from '../lib/supabase'
@@ -70,7 +70,7 @@ const CustomTooltip = ({ active, payload, label }) => {
 async function fetchAllClover() {
   let all = [], from = 0
   while (true) {
-    const { data } = await supabase.from('clover_line_items').select('item_name, revenue').range(from, from + 999)
+    const { data } = await supabase.from('clover_line_items').select('item_name, revenue, quantity, date, order_id').range(from, from + 999)
     if (!data || data.length === 0) break
     all = [...all, ...data]
     if (data.length < 1000) break
@@ -83,10 +83,10 @@ export default function Dashboard() {
   // Require sign-in: send anonymous visitors to /login before any data renders.
   useEffect(() => { supabase.auth.getUser().then(({ data: { user } }) => { if (!user) window.location.replace('/login') }) }, [])
   const [monthly,   setMonthly]   = useState([])
+  const [clover,    setClover]    = useState([])
   const [loading,   setLoading]   = useState(true)
   const [activeTab, setActiveTab] = useState('overview')
-  const [topItems,  setTopItems]  = useState([])
-  const [itemsLoading, setItemsLoading] = useState(false)
+  const [period,    setPeriod]    = useState('month')
   const router = useRouter()
 
   useEffect(() => {
@@ -103,32 +103,40 @@ export default function Dashboard() {
           notes: r.notes || null,
         })))
       }
+      setClover(await fetchAllClover())
       setLoading(false)
     }
     load()
   }, [])
 
-  useEffect(() => {
-    if (activeTab !== 'inventory') return
-    if (topItems.length > 0) return
-    setItemsLoading(true)
-    fetchAllClover().then(rows => {
-      const map = {}
-      rows.forEach(r => {
-        const k = normalizeItemName(r.item_name)
-        if (!map[k]) map[k] = { name: k, orders: 0, revenue: 0 }
-        map[k].orders++
-        map[k].revenue += Number(r.revenue)
-      })
-      setTopItems(Object.values(map).sort((a, b) => b.revenue - a.revenue).slice(0, 30))
-      setItemsLoading(false)
-    })
-  }, [activeTab])
-
   const totalRevenue = monthly.reduce((s, r) => s + r.revenue, 0)
   const totalProfit  = monthly.reduce((s, r) => s + r.profit, 0)
-  const totalCogs    = monthly.reduce((s, r) => s + r.cogs, 0)
   const avgMargin    = totalRevenue > 0 ? (totalProfit / totalRevenue * 100).toFixed(1) : 0
+
+  // ── Current-period stats from live Clover sales ──────────────────────────────
+  const now = new Date()
+  const monthStart = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-01`
+  const wd = new Date(now); wd.setDate(now.getDate() - 6)
+  const weekStart = `${wd.getFullYear()}-${String(wd.getMonth() + 1).padStart(2, '0')}-${String(wd.getDate()).padStart(2, '0')}`
+  const startStr = period === 'week' ? weekStart : monthStart
+  const periodLabel = period === 'week' ? 'Last 7 days' : now.toLocaleDateString([], { month: 'long' }) + ' so far'
+  const periodRows = clover.filter(r => r.date && r.date >= startStr)
+  const pRevenue = periodRows.reduce((s, r) => s + Number(r.revenue || 0), 0)
+  const pUnits = periodRows.reduce((s, r) => s + Number(r.quantity || 1), 0)
+  const pOrders = new Set(periodRows.map(r => r.order_id)).size
+  const pAvg = pOrders ? pRevenue / pOrders : 0
+  const periodTop = (() => {
+    const map = {}
+    periodRows.forEach(r => { const k = normalizeItemName(r.item_name); if (!map[k]) map[k] = { name: k, revenue: 0, units: 0 }; map[k].revenue += Number(r.revenue || 0); map[k].units += Number(r.quantity || 1) })
+    return Object.values(map).sort((a, b) => b.revenue - a.revenue).slice(0, 7)
+  })()
+  const periodMax = periodTop[0] ? periodTop[0].revenue : 1
+
+  const topItems = useMemo(() => {
+    const map = {}
+    clover.forEach(r => { const k = normalizeItemName(r.item_name); if (!map[k]) map[k] = { name: k, orders: 0, revenue: 0 }; map[k].orders++; map[k].revenue += Number(r.revenue || 0) })
+    return Object.values(map).sort((a, b) => b.revenue - a.revenue).slice(0, 30)
+  }, [clover])
 
   const tabs = [
     { id: 'overview',   label: 'Overview' },
@@ -151,12 +159,23 @@ export default function Dashboard() {
               <div style={{ color: '#888', fontFamily: 'Inter, sans-serif', fontSize: '12px' }}>Loading...</div>
             ) : (
               <>
-                {/* KPIs */}
-                <div style={{ display: 'flex', gap: '12px', marginBottom: '20px' }}>
-                  <KPICard label="TOTAL REVENUE"   value={fmt(totalRevenue)} sub="Jan–May 2026"        subColor="#16a34a" />
-                  <KPICard label="NET PROFIT"      value={fmt(totalProfit)}  sub={`${avgMargin}% margin`} subColor="#16a34a" />
-                  <KPICard label="TOTAL COGS"      value={fmt(totalCogs)}    sub="QB + Weldon matched" subColor="#888" />
-                  <KPICard label="GL TRANSACTIONS" value="5,187"             sub="99.7% matched"       subColor="#16a34a" />
+                {/* Period toggle */}
+                <div style={{ display: 'flex', gap: '8px', marginBottom: '14px' }}>
+                  {[['week', 'Last 7 days'], ['month', 'This month']].map(([p, l]) => (
+                    <button key={p} onClick={() => setPeriod(p)} style={{
+                      padding: '8px 16px', borderRadius: '20px', fontSize: '12px', fontWeight: 600, cursor: 'pointer',
+                      fontFamily: 'Inter, sans-serif', border: `1px solid ${period === p ? '#1a1a1a' : '#E5E5E5'}`,
+                      background: period === p ? '#1a1a1a' : '#fff', color: period === p ? '#fff' : '#888',
+                    }}>{l}</button>
+                  ))}
+                </div>
+
+                {/* Period KPIs (live Clover sales) */}
+                <div style={{ display: 'flex', gap: '12px', marginBottom: '20px', flexWrap: 'wrap' }}>
+                  <KPICard label="REVENUE"    value={fmt(pRevenue)}            sub={periodLabel}        subColor="#16a34a" />
+                  <KPICard label="SALES"      value={pOrders.toLocaleString()} sub={`${periodLabel} · tickets`} subColor="#888" />
+                  <KPICard label="TIRES SOLD" value={pUnits.toLocaleString()}  sub={periodLabel}        subColor="#888" />
+                  <KPICard label="AVG TICKET" value={fmt(pAvg)}                sub="revenue ÷ tickets"  subColor="#888" />
                 </div>
 
                 {/* Tabs */}
@@ -238,40 +257,28 @@ export default function Dashboard() {
                       </div>
                     </div>
 
-                    {/* Top tires */}
+                    {/* Top sellers this period (live) */}
                     <div style={{ background: '#fff', border: '1px solid #E5E5E5', borderRadius: '6px', padding: '16px' }}>
-                      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '12px' }}>
-                        <div style={{ fontSize: '9px', color: '#888', letterSpacing: '0.15em', fontFamily: 'Inter, sans-serif' }}>TOP TIRE SIZES — GROSS PROFIT</div>
-                        <button onClick={() => router.push('/orders')} style={{ fontSize: '10px', color: THEME.accent, background: 'none', border: 'none', cursor: 'pointer', fontFamily: 'Inter, sans-serif' }}>VIEW ORDERS →</button>
+                      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '14px' }}>
+                        <div style={{ fontSize: '9px', color: '#888', letterSpacing: '0.15em', fontFamily: 'Inter, sans-serif' }}>TOP SELLERS — {periodLabel.toUpperCase()}</div>
+                        <button onClick={() => router.push('/inventory')} style={{ fontSize: '10px', color: THEME.accent, background: 'none', border: 'none', cursor: 'pointer', fontFamily: 'Inter, sans-serif' }}>ALL ITEMS →</button>
                       </div>
-                      <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '11px', fontFamily: 'Inter, sans-serif' }}>
-                        <thead>
-                          <tr>
-                            {['Size','Units','Revenue','COGS','Profit','Margin'].map(h => (
-                              <th key={h} style={hcell(h === 'Size' ? 'left' : 'right')}>{h}</th>
-                            ))}
-                          </tr>
-                        </thead>
-                        <tbody>
-                          {TOP_TIRES.map(t => (
-                            <tr key={t.size} onMouseEnter={e => e.currentTarget.style.background = '#F8F8F8'} onMouseLeave={e => e.currentTarget.style.background = 'transparent'}>
-                              <td style={{ padding: '7px 8px', borderBottom: '1px solid #F0F0F0', color: '#1a1a1a', fontWeight: '500' }}>{t.size}</td>
-                              <td style={{ padding: '7px 8px', borderBottom: '1px solid #F0F0F0', color: '#888', textAlign: 'right' }}>{t.units}</td>
-                              <td style={{ padding: '7px 8px', borderBottom: '1px solid #F0F0F0', color: '#333', textAlign: 'right' }}>{fmt(t.revenue)}</td>
-                              <td style={{ padding: '7px 8px', borderBottom: '1px solid #F0F0F0', color: '#888', textAlign: 'right' }}>{fmt(t.cogs)}</td>
-                              <td style={{ padding: '7px 8px', borderBottom: '1px solid #F0F0F0', color: '#16a34a', textAlign: 'right', fontWeight: '600' }}>{fmt(t.profit)}</td>
-                              <td style={{ padding: '7px 8px', borderBottom: '1px solid #F0F0F0', textAlign: 'right' }}>
-                                <div style={{ display: 'flex', alignItems: 'center', gap: '6px', justifyContent: 'flex-end' }}>
-                                  <div style={{ width: '50px', height: '3px', background: '#E5E5E5', borderRadius: '2px' }}>
-                                    <div style={{ height: '3px', background: THEME.accent, borderRadius: '2px', width: `${Math.round(t.profit / 8471 * 100)}%` }} />
-                                  </div>
-                                  <span style={{ fontSize: '9px', color: '#888', minWidth: '32px' }}>{t.margin}%</span>
-                                </div>
-                              </td>
-                            </tr>
-                          ))}
-                        </tbody>
-                      </table>
+                      {periodTop.length === 0 ? (
+                        <div style={{ fontSize: '12px', color: '#888', fontFamily: 'Inter, sans-serif', padding: '8px 0' }}>No sales in this period yet.</div>
+                      ) : periodTop.map((t, i) => (
+                        <div key={t.name} style={{ padding: '9px 0', borderTop: i ? '1px solid #F4F4F4' : 'none' }}>
+                          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', gap: '10px', marginBottom: '5px' }}>
+                            <span style={{ fontSize: '13px', color: '#1a1a1a', fontWeight: 500, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{t.name}</span>
+                            <span style={{ fontSize: '13px', color: '#1a1a1a', fontWeight: 600, whiteSpace: 'nowrap' }}>{fmt(t.revenue)}</span>
+                          </div>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                            <div style={{ flex: 1, height: '5px', background: '#F0F0F0', borderRadius: '3px', overflow: 'hidden' }}>
+                              <div style={{ width: `${Math.round(t.revenue / periodMax * 100)}%`, height: '100%', background: THEME.accent }} />
+                            </div>
+                            <span style={{ fontSize: '10px', color: '#888', whiteSpace: 'nowrap', minWidth: '54px', textAlign: 'right' }}>{t.units} sold</span>
+                          </div>
+                        </div>
+                      ))}
                     </div>
                   </>
                 )}
@@ -283,9 +290,7 @@ export default function Dashboard() {
                       <div style={{ fontSize: '9px', color: '#888', letterSpacing: '0.15em', fontFamily: 'Inter, sans-serif' }}>ALL ITEMS — RANKED BY REVENUE</div>
                       <button onClick={() => router.push('/inventory')} style={{ fontSize: '10px', color: THEME.accent, background: 'none', border: 'none', cursor: 'pointer', fontFamily: 'Inter, sans-serif' }}>FULL PAGE →</button>
                     </div>
-                    {itemsLoading ? (
-                      <div style={{ padding: '40px', textAlign: 'center', color: '#888', fontFamily: 'Inter, sans-serif', fontSize: '11px' }}>Loading...</div>
-                    ) : (
+                    {(
                       <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '11px', fontFamily: 'Inter, sans-serif' }}>
                         <thead>
                           <tr>

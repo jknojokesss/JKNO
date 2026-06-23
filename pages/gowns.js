@@ -30,7 +30,7 @@ const blankRow = () => ({ id: uid(), qty: '', desc: '', price: '', amount: '' })
 const blankForm = () => ({
   id: uid(), orderNo: null, name: '', phone: '', date: todayStr(),
   items: [blankRow(), blankRow(), blankRow()],
-  payments: [], alterations: false, alterationsDone: false, alterationsNote: '', notes: '',
+  payments: [], alterations: false, alterationsDone: false, alterationsNote: '', alterationsDue: '', notes: '',
 })
 
 export default function Gowns() {
@@ -106,7 +106,7 @@ export default function Gowns() {
     valid.forEach(o => {
       const t = sumItems(o.items), p = sumPaid(o), bal = t - p
       const payNote = p > 0 ? `Paid ${money(p)}${bal > 0.005 ? `, owes ${money(bal)}` : ' (paid in full)'}` : ''
-      const memo = esc([o.notes, o.alterations ? `[Alterations${o.alterationsDone ? ' done' : ''}${o.alterationsNote ? ': ' + o.alterationsNote : ''}]` : '', payNote].filter(Boolean).join(' | '))
+      const memo = esc([o.notes, o.alterations ? `[Alterations${o.alterationsDone ? ' done' : ''}${o.alterationsDue ? ' due ' + o.alterationsDue : ''}${o.alterationsNote ? ': ' + o.alterationsNote : ''}]` : '', payNote].filter(Boolean).join(' | '))
       out.push(['TRNS', 'INVOICE', dt(o.date), QB_AR, esc(o.name), t.toFixed(2), String(o.orderNo || ''), memo].join('\t'))
       o.items.filter(it => (parseFloat(it.amount) || 0) !== 0).forEach(it => {
         out.push(['SPL', 'INVOICE', dt(o.date), QB_INCOME, esc(o.name), (-(parseFloat(it.amount) || 0)).toFixed(2), esc(it.desc)].join('\t'))
@@ -122,7 +122,7 @@ export default function Gowns() {
 
   const openList = orders.filter(isOpen)
   const doneList = orders.filter(o => !isOpen(o))
-  const base = tab === 'open' ? openList : doneList
+  const base = tab === 'open' ? openList : tab === 'completed' ? doneList : orders
   const filtered = base.filter(o => !search || o.name.toLowerCase().includes(search.toLowerCase()))
 
   // ── styles ──────────────────────────────────────────────────────────────────
@@ -167,6 +167,7 @@ export default function Gowns() {
               </button>
               <button onClick={() => setTab('open')} style={tabBtn(tab === 'open')}>Open ({openList.length})</button>
               <button onClick={() => setTab('completed')} style={tabBtn(tab === 'completed')}>Completed ({doneList.length})</button>
+              <button onClick={() => setTab('all')} style={tabBtn(tab === 'all')}>All ({orders.length})</button>
             </div>
 
             {orders.length > 0 && (
@@ -177,7 +178,7 @@ export default function Gowns() {
             {filtered.length === 0 ? (
               <div className="gw-card" style={{ padding: '44px 24px', textAlign: 'center', color: MUTED }}>
                 <div style={{ fontSize: '40px', marginBottom: '10px' }}>🪡</div>
-                <div style={{ fontSize: '17px', color: INK, fontWeight: 600, marginBottom: '4px' }}>{orders.length ? `No ${tab} orders` : 'No orders yet'}</div>
+                <div style={{ fontSize: '17px', color: INK, fontWeight: 600, marginBottom: '4px' }}>{orders.length ? `No ${tab === 'all' ? '' : tab + ' '}orders` : 'No orders yet'}</div>
                 <div style={{ fontSize: '15px' }}>{orders.length ? (search ? 'Try a different name.' : 'Nothing here right now.') : 'Tap “+ New Order” to write your first one.'}</div>
               </div>
             ) : (
@@ -234,10 +235,13 @@ export default function Gowns() {
                       {o.alterations && (
                         <div style={{ marginTop: '10px', padding: '10px 12px', borderRadius: '10px', background: needsAlt ? '#FBEAF0' : '#EFEAF3', border: `1px solid ${needsAlt ? '#F1D5E0' : '#E2DAE8'}` }}>
                           <div style={{ fontSize: '13px', fontWeight: 700, color: needsAlt ? ROSE_DK : MUTED }}>
-                            ✂ Alterations {needsAlt ? '— in progress' : '— done ✓'}
+                            ✂ Alterations {needsAlt ? '— in progress' : '— done ✓'}{o.alterationsDue ? ` · due ${fmtShort(o.alterationsDue)}` : ''}
                           </div>
                           {o.alterationsNote && <div style={{ fontSize: '14px', color: INK, marginTop: '3px', lineHeight: 1.4 }}>{o.alterationsNote}</div>}
                         </div>
+                      )}
+                      {o.notes && (
+                        <div style={{ marginTop: '10px', fontSize: '13px', color: MUTED, lineHeight: 1.4 }}><span style={{ fontWeight: 600, color: INK }}>Note:</span> {o.notes}</div>
                       )}
 
                       {/* status footer */}
@@ -385,18 +389,23 @@ export default function Gowns() {
               </button>
 
               {form.alterations && (
-                <>
-                  <textarea value={form.alterationsNote} onChange={e => setF('alterationsNote', e.target.value)} rows={2} placeholder="What needs to be done — hem, take in, etc."
-                    style={{ ...fieldIn, marginTop: '12px', resize: 'vertical', lineHeight: 1.5 }} />
+                <div style={{ marginTop: '12px', padding: '14px', background: '#FBEAF0', border: '1px solid #F1D5E0', borderRadius: '12px' }}>
+                  <div style={{ fontSize: '12px', fontWeight: 700, color: ROSE_DK, textTransform: 'uppercase', letterSpacing: '0.04em', marginBottom: '8px' }}>✂ Alterations — what&apos;s needed</div>
+                  <textarea value={form.alterationsNote} onChange={e => setF('alterationsNote', e.target.value)} rows={2} placeholder="Hem, take in, add bustle…"
+                    style={{ ...fieldIn, resize: 'vertical', lineHeight: 1.5 }} />
+                  <div style={{ marginTop: '10px' }}>
+                    <div style={{ fontSize: '12px', fontWeight: 600, color: ROSE_DK, marginBottom: '5px' }}>Alterations due</div>
+                    <input type="date" value={form.alterationsDue} onChange={e => setF('alterationsDue', e.target.value)} style={fieldIn} />
+                  </div>
                   <button onClick={() => setF('alterationsDone', !form.alterationsDone)} className="gw-press" style={{
-                    width: '100%', display: 'flex', alignItems: 'center', gap: '12px', padding: '12px 14px', marginTop: '10px',
+                    width: '100%', display: 'flex', alignItems: 'center', gap: '12px', padding: '12px 14px', marginTop: '12px',
                     border: `1.5px solid ${form.alterationsDone ? GREEN : '#E2D7D1'}`, background: form.alterationsDone ? '#E7F4EC' : '#fff',
                     borderRadius: '12px', cursor: 'pointer', fontFamily: 'inherit',
                   }}>
                     <span style={{ width: '24px', height: '24px', borderRadius: '7px', border: `2px solid ${form.alterationsDone ? GREEN : '#CDBFBA'}`, background: form.alterationsDone ? GREEN : '#fff', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '15px', flexShrink: 0 }}>{form.alterationsDone ? '✓' : ''}</span>
                     <span style={{ fontSize: '16px', fontWeight: 600, color: form.alterationsDone ? GREEN : INK }}>Alterations complete</span>
                   </button>
-                </>
+                </div>
               )}
 
               <div style={{ fontSize: '13px', fontWeight: 600, color: MUTED, margin: '16px 0 7px', textTransform: 'uppercase', letterSpacing: '0.04em' }}>Notes</div>
