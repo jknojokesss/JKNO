@@ -18,13 +18,13 @@ const BRANDS = ['Michele', 'Michael Kors', 'Armani', 'Burberry', 'Citizen', 'Bul
 const STATUSES = { ordered: { label: 'Ordered', color: MUTED }, in_transit: { label: 'In Transit ✈', color: '#2A6CB8' }, arrived: { label: 'Arrived ✓', color: GREEN }, delayed: { label: 'Delayed ⚠', color: RED } }
 
 const SEED_POS = [
-  { id: uid(), poNo: 'PO-001', supplier: 'HK Watch Imports Ltd', origin: 'Hong Kong', brand: 'Michele', units: 24, unitCost: 180, total: 4320, ordered: '2026-06-01', eta: '2026-06-20', status: 'arrived', billNo: 'BILL-001', billPaid: true, notes: '' },
-  { id: uid(), poNo: 'PO-002', supplier: 'Euro Luxury SA', origin: 'Italy', brand: 'Armani', units: 18, unitCost: 220, total: 3960, ordered: '2026-06-05', eta: '2026-06-28', status: 'arrived', billNo: 'BILL-002', billPaid: false, notes: '' },
-  { id: uid(), poNo: 'PO-003', supplier: 'Optical World Italia', origin: 'Italy', brand: 'Ray-Ban', units: 60, unitCost: 48, total: 2880, ordered: '2026-06-10', eta: '2026-06-30', status: 'in_transit', billNo: null, billPaid: false, notes: '' },
-  { id: uid(), poNo: 'PO-004', supplier: 'MK Global Dist.', origin: 'USA', brand: 'Michael Kors', units: 30, unitCost: 165, total: 4950, ordered: '2026-06-12', eta: '2026-07-08', status: 'in_transit', billNo: null, billPaid: false, notes: '' },
-  { id: uid(), poNo: 'PO-005', supplier: 'HK Watch Imports Ltd', origin: 'Hong Kong', brand: 'Citizen', units: 48, unitCost: 95, total: 4560, ordered: '2026-06-15', eta: '2026-07-15', status: 'ordered', billNo: null, billPaid: false, notes: '' },
-  { id: uid(), poNo: 'PO-006', supplier: 'Burberry Wholesale EU', origin: 'UK', brand: 'Burberry', units: 12, unitCost: 310, total: 3720, ordered: '2026-06-08', eta: '2026-06-25', status: 'delayed', billNo: null, billPaid: false, notes: 'Customs hold in London — estimated 1-week delay' },
-  { id: uid(), poNo: 'PO-007', supplier: 'Pacific Sun Optics', origin: 'Japan', brand: 'Mau Jim', units: 36, unitCost: 72, total: 2592, ordered: '2026-06-18', eta: '2026-07-20', status: 'ordered', billNo: null, billPaid: false, notes: '' },
+  { id: uid(), poNo: 'PO-001', supplier: 'HK Watch Imports Ltd', origin: 'Hong Kong', brand: 'Michele', units: 24, unitCost: 180, total: 4320, ordered: '2026-06-01', eta: '2026-06-20', status: 'arrived', billNo: 'BILL-001', billPaid: true, shipper: 'DHL Express', customs: 'A&M Customs Brokers', notes: '' },
+  { id: uid(), poNo: 'PO-002', supplier: 'Euro Luxury SA', origin: 'Italy', brand: 'Armani', units: 18, unitCost: 220, total: 3960, ordered: '2026-06-05', eta: '2026-06-28', status: 'arrived', billNo: 'BILL-002', billPaid: false, shipper: 'FedEx International', customs: 'A&M Customs Brokers', notes: '' },
+  { id: uid(), poNo: 'PO-003', supplier: 'Optical World Italia', origin: 'Italy', brand: 'Ray-Ban', units: 60, unitCost: 48, total: 2880, ordered: '2026-06-10', eta: '2026-06-30', status: 'in_transit', billNo: null, billPaid: false, shipper: 'FedEx International', customs: 'A&M Customs Brokers', notes: '' },
+  { id: uid(), poNo: 'PO-004', supplier: 'MK Global Dist.', origin: 'USA', brand: 'Michael Kors', units: 30, unitCost: 165, total: 4950, ordered: '2026-06-12', eta: '2026-07-08', status: 'in_transit', billNo: null, billPaid: false, shipper: 'UPS Freight', customs: '', notes: '' },
+  { id: uid(), poNo: 'PO-005', supplier: 'HK Watch Imports Ltd', origin: 'Hong Kong', brand: 'Citizen', units: 48, unitCost: 95, total: 4560, ordered: '2026-06-15', eta: '2026-07-15', status: 'ordered', billNo: null, billPaid: false, shipper: 'DHL Express', customs: 'A&M Customs Brokers', notes: '' },
+  { id: uid(), poNo: 'PO-006', supplier: 'Burberry Wholesale EU', origin: 'UK', brand: 'Burberry', units: 12, unitCost: 310, total: 3720, ordered: '2026-06-08', eta: '2026-06-25', status: 'delayed', billNo: null, billPaid: false, shipper: 'DHL Express', customs: 'A&M Customs Brokers', notes: 'Customs hold in London — estimated 1-week delay' },
+  { id: uid(), poNo: 'PO-007', supplier: 'Pacific Sun Optics', origin: 'Japan', brand: 'Mau Jim', units: 36, unitCost: 72, total: 2592, ordered: '2026-06-18', eta: '2026-07-20', status: 'ordered', billNo: null, billPaid: false, shipper: 'Japan Post EMS', customs: 'A&M Customs Brokers', notes: '' },
 ]
 
 const SEED_INVOICES = [
@@ -44,7 +44,7 @@ export default function MNETrading() {
   const [expanded, setExpanded] = useState(null)
   const [addingPO, setAddingPO] = useState(false)
   const [addingInv, setAddingInv] = useState(false)
-  const [pof, setPof] = useState({ supplier: '', origin: '', brand: BRANDS[0], units: '', unitCost: '', eta: '', notes: '' })
+  const [pof, setPof] = useState({ supplier: '', origin: '', brand: BRANDS[0], units: '', unitCost: '', eta: '', shipper: '', customs: '', notes: '' })
   const [invf, setInvf] = useState({ customer: '', brand: BRANDS[0], units: '', unitPrice: '', due: '', notes: '' })
 
   // aggregates
@@ -72,7 +72,7 @@ export default function MNETrading() {
   const addPO = () => {
     if (!pof.supplier.trim() || !pof.brand) return
     const total = (Number(pof.units)||0) * (Number(pof.unitCost)||0)
-    const newPO = { id: uid(), poNo: `PO-${String(pos.length+1).padStart(3,'0')}`, supplier: pof.supplier.trim(), origin: pof.origin.trim(), brand: pof.brand, units: Number(pof.units)||0, unitCost: Number(pof.unitCost)||0, total, ordered: new Date().toISOString().slice(0,10), eta: pof.eta, status: 'ordered', billNo: null, billPaid: false, notes: pof.notes }
+    const newPO = { id: uid(), poNo: `PO-${String(pos.length+1).padStart(3,'0')}`, supplier: pof.supplier.trim(), origin: pof.origin.trim(), brand: pof.brand, units: Number(pof.units)||0, unitCost: Number(pof.unitCost)||0, total, ordered: new Date().toISOString().slice(0,10), eta: pof.eta, status: 'ordered', billNo: null, billPaid: false, shipper: pof.shipper.trim(), customs: pof.customs.trim(), notes: pof.notes }
     setPos(prev => [newPO, ...prev])
     setPof({ supplier: '', origin: '', brand: BRANDS[0], units: '', unitCost: '', eta: '', notes: '' }); setAddingPO(false)
   }
@@ -262,6 +262,7 @@ export default function MNETrading() {
                         </div>
                         <div style={{ fontSize: '13px', color: INK, fontWeight: 600, marginTop: '5px' }}>{p.brand} <span style={{ fontWeight: 400, color: MUTED }}>· {p.units} units · {p.supplier}{p.origin ? ` (${p.origin})` : ''}</span></div>
                         <div style={{ fontSize: '12px', color: MUTED, marginTop: '2px' }}>Ordered {fmtD(p.ordered)} · ETA {fmtD(p.eta)} · {money(p.unitCost)}/unit</div>
+                        {(p.shipper || p.customs) && <div style={{ fontSize: '12px', color: MUTED, marginTop: '3px' }}>{p.shipper ? `✈ ${p.shipper}` : ''}{p.shipper && p.customs ? ' · ' : ''}{p.customs ? `🛃 ${p.customs}` : ''}</div>}
                       </div>
                       <div style={{ ...big, fontSize: '20px', color: INK, flexShrink: 0 }}>{m0(p.total)}</div>
                     </div>
@@ -312,6 +313,10 @@ export default function MNETrading() {
                       <input value={pof.unitCost} onChange={e => setPof({...pof, unitCost: e.target.value})} type="number" placeholder="Cost / unit $" style={{ ...inp, flex: 1, minWidth: '110px', width: 'auto' }} />
                       <input value={pof.eta} onChange={e => setPof({...pof, eta: e.target.value})} type="date" style={{ ...inp, flex: 1, minWidth: '140px', width: 'auto' }} />
                     </div>
+                    <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', marginTop: '8px' }}>
+                      <input value={pof.shipper} onChange={e => setPof({...pof, shipper: e.target.value})} placeholder="Shipper (e.g. DHL, FedEx)" style={{ ...inp, flex: 1, minWidth: '160px', width: 'auto' }} />
+                      <input value={pof.customs} onChange={e => setPof({...pof, customs: e.target.value})} placeholder="Customs broker (optional)" style={{ ...inp, flex: 1, minWidth: '160px', width: 'auto' }} />
+                    </div>
                     <input value={pof.notes} onChange={e => setPof({...pof, notes: e.target.value})} placeholder="Notes (optional)" style={{ ...inp, marginTop: '8px' }} />
                     {pof.units && pof.unitCost && <div style={{ fontSize: '13px', color: MUTED, margin: '8px 0 0' }}>Total: <b style={{ color: INK }}>{m0((Number(pof.units)||0)*(Number(pof.unitCost)||0))}</b></div>}
                     <div style={{ display: 'flex', gap: '8px', marginTop: '12px' }}>
@@ -347,6 +352,7 @@ export default function MNETrading() {
                             </div>
                             <div style={{ fontSize: '13px', color: INK, fontWeight: 600, marginTop: '5px' }}>{p.brand} <span style={{ fontWeight: 400, color: MUTED }}>· {p.units} units · {p.supplier}{p.origin ? ` (${p.origin})` : ''}</span></div>
                             <div style={{ fontSize: '12px', color: MUTED, marginTop: '2px' }}>Arrived {fmtD(p.eta)} · {money(p.unitCost)}/unit</div>
+                            {(p.shipper || p.customs) && <div style={{ fontSize: '12px', color: MUTED, marginTop: '3px' }}>{p.shipper ? `✈ ${p.shipper}` : ''}{p.shipper && p.customs ? ' · ' : ''}{p.customs ? `🛃 ${p.customs}` : ''}</div>}
                           </div>
                           <div style={{ ...big, fontSize: '20px', color: p.billPaid ? GREEN : RED, flexShrink: 0 }}>{m0(p.total)}</div>
                         </div>
