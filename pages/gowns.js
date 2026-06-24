@@ -1,5 +1,6 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import Head from 'next/head'
+import { supabase } from '../lib/supabase'
 
 // ── Theme ───────────────────────────────────────────────────────────────────
 const INK = '#23262E', MUTED = '#8A8A93', CREAM = '#F4F1EA'
@@ -36,6 +37,34 @@ const isOpen = (o) => balanceOf(o) > 0.005 || (o.alterations && !o.alterationsDo
 // backward-compat: old orders have a single `name` field
 const fullName = (o) => o.firstName ? `${o.firstName} ${o.lastName || ''}`.trim() : (o.name || '')
 
+// ── Supabase row converters ──────────────────────────────────────────────────
+const toDB = (o, userId) => ({
+  id: o.id, user_id: userId, order_no: o.orderNo || null,
+  first_name: o.firstName || '', last_name: o.lastName || '',
+  phone: o.phone || '', address: o.address || '', city: o.city || '',
+  state: o.state || 'NY', zip: o.zip || '',
+  order_date: o.date || todayStr(),
+  items: o.items || [], payments: o.payments || [],
+  alterations: o.alterations || false, alterations_done: o.alterationsDone || false,
+  alterations_note: o.alterationsNote || '',
+  alterations_due: o.alterationsDue || null,
+  notes: o.notes || '', tax_rate: o.taxRate || DEFAULT_TAX_RATE,
+  follow_up_date: o.followUpDate || null, todos: o.todos || [],
+  saved_at: new Date().toISOString(),
+})
+const fromDB = (r) => ({
+  id: r.id, orderNo: r.order_no,
+  firstName: r.first_name, lastName: r.last_name,
+  name: `${r.first_name} ${r.last_name}`.trim(),
+  phone: r.phone, address: r.address, city: r.city, state: r.state, zip: r.zip,
+  date: r.order_date, items: r.items || [], payments: r.payments || [],
+  alterations: r.alterations, alterationsDone: r.alterations_done,
+  alterationsNote: r.alterations_note, alterationsDue: r.alterations_due,
+  notes: r.notes, taxRate: r.tax_rate,
+  followUpDate: r.follow_up_date, todos: r.todos || [],
+  savedAt: new Date(r.saved_at).getTime(),
+})
+
 const blankRow = () => ({ id: uid(), qty: '1', itemNo: '', desc: '', price: '', taxable: true })
 const blankForm = () => ({
   id: uid(), orderNo: null,
@@ -49,6 +78,13 @@ const blankForm = () => ({
 })
 
 export default function Gowns() {
+  const [user, setUser] = useState(null)
+  const [authLoading, setAuthLoading] = useState(true)
+  const [loginEmail, setLoginEmail] = useState('')
+  const [loginPass, setLoginPass] = useState('')
+  const [loginErr, setLoginErr] = useState('')
+  const [loginBusy, setLoginBusy] = useState(false)
+
   const [orders, setOrders] = useState([])
   const [view, setView] = useState('list')
   const [tab, setTab] = useState('open')
@@ -56,21 +92,61 @@ export default function Gowns() {
   const [editing, setEditing] = useState(false)
   const [search, setSearch] = useState('')
   const [pay, setPay] = useState({ amount: '', method: '', date: todayStr() })
-  const [suggest, setSuggest] = useState(null) // { id, matches, query }
+  const [suggest, setSuggest] = useState(null)
   const [catalog, setCatalog] = useState(DEFAULT_ITEMS)
-  const [newItem, setNewItem] = useState(null) // { rowId, no, desc, taxable, alteration } — add-item modal
-  const [todoInput, setTodoInput] = useState({}) // { orderId: { text, assignee, date } }
-  const [todoView, setTodoView] = useState('person') // 'person' | 'date'
-  const [selectedCustomer, setSelectedCustomer] = useState(null) // customer key
+  const [newItem, setNewItem] = useState(null)
+  const [todoInput, setTodoInput] = useState({})
+  const [todoView, setTodoView] = useState('person')
+  const [selectedCustomer, setSelectedCustomer] = useState(null)
   const [loaded, setLoaded] = useState(false)
 
+  // ── auth ────────────────────────────────────────────────────────────────────
   useEffect(() => {
-    try { const raw = localStorage.getItem('gown_orders'); if (raw) setOrders(JSON.parse(raw)) } catch (e) {}
-    try { const raw = localStorage.getItem('gown_catalog'); if (raw) { const saved = JSON.parse(raw); setCatalog([...DEFAULT_ITEMS, ...saved.filter(s => !DEFAULT_ITEMS.find(d => d.no === s.no))]) } } catch (e) {}
+    supabase.auth.getSession().then(({ data }) => {
+      if (data.session) { setUser(data.session.user); loadData(data.session.user) }
+      setAuthLoading(false)
+    })
+    const { data: l } = supabase.auth.onAuthStateChange((_, s) => {
+      if (!s) { setUser(null); setOrders([]); setCatalog(DEFAULT_ITEMS) }
+    })
+    return () => l.subscription.unsubscribe()
+  }, [])
+
+  const handleLogin = async (e) => {
+    e.preventDefault(); setLoginErr(''); setLoginBusy(true)
+    const { data, error } = await supabase.auth.signInWithPassword({ email: loginEmail, password: loginPass })
+    if (error) { setLoginErr(error.message); setLoginBusy(false); return }
+    setUser(data.user)
+    await loadData(data.user)
+    setAuthLoading(false); setLoginBusy(false)
+  }
+
+  // ── data fetch + localStorage migration ─────────────────────────────────────
+  const loadData = useCallback(async (u) => {
+    // Auto-migrate localStorage data on first login
+    try {
+      const { data: existing } = await supabase.from('gown_orders').select('id').limit(1)
+      if (!existing?.length) {
+        const raw = localStorage.getItem('gown_orders')
+        if (raw) {
+          const local = JSON.parse(raw)
+          if (local?.length) {
+            await supabase.from('gown_orders').insert(local.map(o => toDB(o, u.id)))
+            localStorage.removeItem('gown_orders')
+          }
+        }
+      }
+    } catch (e) {}
+
+    const [{ data: orderRows }, { data: catRows }] = await Promise.all([
+      supabase.from('gown_orders').select('*').order('created_at', { ascending: false }),
+      supabase.from('gown_catalog').select('*'),
+    ])
+    setOrders((orderRows || []).map(fromDB))
+    const customItems = (catRows || []).map(r => ({ no: r.item_no, desc: r.description, taxable: r.taxable, alteration: r.alteration }))
+    setCatalog([...DEFAULT_ITEMS, ...customItems.filter(c => !DEFAULT_ITEMS.find(d => d.no === c.no))])
     setLoaded(true)
   }, [])
-  useEffect(() => { if (loaded) { try { localStorage.setItem('gown_orders', JSON.stringify(orders)) } catch (e) {} } }, [orders, loaded])
-  useEffect(() => { if (loaded) { try { const custom = catalog.filter(c => !DEFAULT_ITEMS.find(d => d.no === c.no)); localStorage.setItem('gown_catalog', JSON.stringify(custom)) } catch (e) {} } }, [catalog, loaded])
 
   const subtotal = sumItems(form.items)
   const taxAmount = calcTax(form.items, form.taxRate)
@@ -103,9 +179,10 @@ export default function Gowns() {
     setForm(f => ({ ...f, items: f.items.map(it => it.id === rowId ? { ...it, itemNo: item.no, desc: item.desc, taxable: item.taxable !== false } : it), ...(item.alteration ? { alterations: true } : {}) }))
     setSuggest(null)
   }
-  const saveNewItem = () => {
+  const saveNewItem = async () => {
     if (!newItem || !newItem.no.trim() || !newItem.desc.trim()) return
     const item = { no: newItem.no.trim().toUpperCase(), desc: newItem.desc.trim(), taxable: newItem.taxable, alteration: newItem.alteration }
+    await supabase.from('gown_catalog').upsert({ user_id: user.id, item_no: item.no, description: item.desc, taxable: item.taxable, alteration: item.alteration }, { onConflict: 'user_id,item_no' })
     setCatalog(prev => [...prev.filter(c => c.no !== item.no), item])
     pickItem(newItem.rowId, item)
     setNewItem(null)
@@ -122,7 +199,7 @@ export default function Gowns() {
   }
   const removePayment = (id) => setForm(f => ({ ...f, payments: f.payments.filter(p => p.id !== id) }))
 
-  const save = () => {
+  const save = async () => {
     if (!form.firstName.trim()) { alert('Please enter a first name.'); return }
     if (!form.lastName.trim()) { alert('Please enter a last name.'); return }
     if (!editing && !form.phone.trim()) { alert('Please enter a phone number.'); return }
@@ -133,12 +210,19 @@ export default function Gowns() {
     const orderNo = form.orderNo || (orders.reduce((m, o) => Math.max(m, o.orderNo || 0), 1000) + 1)
     let items = form.items.filter(it => it.desc.trim() || it.price)
     if (!items.length) items = [blankRow()]
-    const name = `${form.firstName.trim()} ${form.lastName.trim()}`
-    const clean = { ...form, orderNo, name, firstName: form.firstName.trim(), lastName: form.lastName.trim(), items, savedAt: Date.now() }
-    setOrders(prev => prev.some(o => o.id === form.id) ? prev.map(o => o.id === form.id ? clean : o) : [clean, ...prev])
+    const clean = { ...form, orderNo, firstName: form.firstName.trim(), lastName: form.lastName.trim(), name: `${form.firstName.trim()} ${form.lastName.trim()}`, items }
+    const { data, error } = await supabase.from('gown_orders').upsert(toDB(clean, user.id)).select().single()
+    if (error) { alert('Error saving: ' + error.message); return }
+    const saved = fromDB(data)
+    setOrders(prev => prev.some(o => o.id === clean.id) ? prev.map(o => o.id === clean.id ? saved : o) : [saved, ...prev])
     setView('list'); window.scrollTo(0, 0)
   }
-  const del = (id) => { if (window.confirm('Delete this order?')) { setOrders(prev => prev.filter(o => o.id !== id)); setView('list') } }
+  const del = async (id) => {
+    if (window.confirm('Delete this order?')) {
+      await supabase.from('gown_orders').delete().eq('id', id)
+      setOrders(prev => prev.filter(o => o.id !== id)); setView('list')
+    }
+  }
 
   const printOrders = (ordersToPrint) => {
     const PAD_BLUE = '#2A4C9C', GRID_BLUE = '#AEBFE3', RED_NO = '#C8322B'
@@ -244,7 +328,12 @@ export default function Gowns() {
     win.focus()
     setTimeout(() => win.print(), 400)
   }
-  const patchOrder = (id, patch) => setOrders(prev => prev.map(o => o.id === id ? { ...o, ...patch } : o))
+  const patchOrder = async (id, patch) => {
+    const updated = orders.find(o => o.id === id); if (!updated) return
+    const newOrder = { ...updated, ...patch }
+    setOrders(prev => prev.map(o => o.id === id ? newOrder : o))
+    await supabase.from('gown_orders').update(toDB(newOrder, user.id)).eq('id', id)
+  }
   const addTodo = (orderId) => {
     const inp = todoInput[orderId] || {}
     if (!inp.text?.trim()) return
@@ -290,6 +379,39 @@ export default function Gowns() {
   const primaryBtn = { padding: '15px 20px', fontSize: '17px', fontWeight: 700, color: '#fff', background: ROSE, border: 'none', borderRadius: '13px', cursor: 'pointer', boxShadow: '0 2px 10px rgba(177,77,106,0.3)' }
   const ghostBtn = { width: '100%', padding: '14px', fontSize: '16px', fontWeight: 600, color: ROSE_DK, background: '#fff', border: `1.5px solid #E2D7D1`, borderRadius: '12px', cursor: 'pointer' }
   const tabBtn = (on) => ({ flex: 1, padding: '12px 8px', fontSize: '15px', fontWeight: 700, borderRadius: '12px', cursor: 'pointer', fontFamily: 'inherit', border: `1.5px solid ${on ? PAD : '#DDD5CE'}`, background: on ? PAD : '#fff', color: on ? '#fff' : '#6B6870', boxShadow: on ? '0 2px 8px rgba(42,76,156,0.2)' : 'none' })
+
+  // ── login screen ─────────────────────────────────────────────────────────────
+  if (authLoading) return null
+  if (!user) return (
+    <>
+      <Head><title>{BIZ} — Sign in</title><meta name="viewport" content="width=device-width,initial-scale=1"/><link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@600;700&family=Inter:wght@400;600;700&display=swap" rel="stylesheet"/></Head>
+      <div style={{ minHeight: '100vh', background: CREAM, display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: "'Inter',sans-serif", padding: '20px' }}>
+        <div style={{ width: '100%', maxWidth: '360px' }}>
+          <div style={{ textAlign: 'center', marginBottom: '28px' }}>
+            <div style={{ fontFamily: "'Cormorant Garamond',serif", fontSize: '30px', fontWeight: 700, color: '#1C1C2E' }}>{BIZ}</div>
+            <div style={{ fontSize: '11px', letterSpacing: '0.2em', textTransform: 'uppercase', color: ROSE, marginTop: '4px', fontWeight: 600 }}>Order Book</div>
+          </div>
+          <form onSubmit={handleLogin} style={{ background: '#fff', borderRadius: '16px', padding: '26px', border: '1px solid #EAE0D8', boxShadow: '0 2px 16px rgba(0,0,0,0.07)' }}>
+            <div style={{ marginBottom: '14px' }}>
+              <label style={{ display: 'block', fontSize: '11px', fontWeight: 700, color: MUTED, marginBottom: '5px', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Email</label>
+              <input type="email" value={loginEmail} onChange={e => setLoginEmail(e.target.value)} required autoFocus style={{ width: '100%', padding: '12px 14px', fontSize: '16px', border: '1.5px solid #E2D7D1', borderRadius: '10px', fontFamily: 'inherit', outline: 'none' }} />
+            </div>
+            <div style={{ marginBottom: '20px' }}>
+              <label style={{ display: 'block', fontSize: '11px', fontWeight: 700, color: MUTED, marginBottom: '5px', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Password</label>
+              <input type="password" value={loginPass} onChange={e => setLoginPass(e.target.value)} required style={{ width: '100%', padding: '12px 14px', fontSize: '16px', border: '1.5px solid #E2D7D1', borderRadius: '10px', fontFamily: 'inherit', outline: 'none' }} />
+            </div>
+            {loginErr && <div style={{ color: REDNO, fontSize: '13px', marginBottom: '12px' }}>{loginErr}</div>}
+            <button type="submit" disabled={loginBusy} style={{ width: '100%', padding: '14px', fontSize: '16px', fontWeight: 700, color: '#fff', background: ROSE, border: 'none', borderRadius: '12px', cursor: loginBusy ? 'wait' : 'pointer', fontFamily: 'inherit' }}>
+              {loginBusy ? 'Signing in…' : 'Sign in'}
+            </button>
+          </form>
+          <div style={{ textAlign: 'center', marginTop: '16px', fontSize: '12px', color: '#B9ADA8' }}>
+            Managed by <span style={{ color: ROSE_DK, fontWeight: 600 }}>JK No Jokes Financials</span>
+          </div>
+        </div>
+      </div>
+    </>
+  )
 
   return (
     <>
