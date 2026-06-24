@@ -168,7 +168,7 @@ export default function AdminDashboard() {
               boxShadow: '0 4px 20px rgba(0,0,0,0.2)' }}
               onMouseEnter={e => { e.currentTarget.style.borderColor = '#C9A84C'; e.currentTarget.style.transform = 'translateY(-2px)' }}
               onMouseLeave={e => { e.currentTarget.style.borderColor = '#1E2540'; e.currentTarget.style.transform = 'translateY(0)' }}
-              onClick={() => router.push(`/admin/client/${client.id}`)}>
+              onClick={() => client.url ? window.open(client.url, '_blank') : router.push(`/admin/client/${client.id}`)}>
 
               {/* Client avatar */}
               <div style={{ width: '44px', height: '44px', borderRadius: '4px',
