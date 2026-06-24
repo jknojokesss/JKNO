@@ -147,66 +147,66 @@ export default function Gowns() {
       const addr = [o.address, o.city, o.state, o.zip].filter(Boolean).join(', ')
       const itemLines = o.items.filter(it => it.desc?.trim() || lineAmt(it)).map((it, i) => `
         <tr>
-          <td style="width:28px;text-align:center;padding:7px 4px;border-right:1px solid ${GRID_BLUE};color:${PAD_BLUE};font-size:11px;font-weight:600;">${i+1}</td>
-          <td style="width:70px;padding:7px 6px;border-right:1px solid ${GRID_BLUE};font-size:13px;font-weight:700;color:${PAD_BLUE};letter-spacing:0.03em;">${it.itemNo || ''}</td>
-          <td style="width:44px;padding:7px 4px;border-right:1px solid ${GRID_BLUE};text-align:center;font-size:13px;">${(parseFloat(it.qty)||1) > 1 ? it.qty : '1'}</td>
-          <td style="padding:7px 8px;border-right:1px solid ${GRID_BLUE};font-size:13px;">${it.desc || ''}</td>
-          <td style="width:90px;padding:7px 8px;text-align:right;font-size:13px;font-weight:600;">${lineAmt(it) ? money(lineAmt(it)) : ''}</td>
+          <td style="width:36px;text-align:center;padding:12px 6px;border-right:1px solid ${GRID_BLUE};color:${PAD_BLUE};font-size:13px;font-weight:600;">${i+1}</td>
+          <td style="width:90px;padding:12px 8px;border-right:1px solid ${GRID_BLUE};font-size:16px;font-weight:700;color:${PAD_BLUE};letter-spacing:0.03em;">${it.itemNo || ''}</td>
+          <td style="width:54px;padding:12px 6px;border-right:1px solid ${GRID_BLUE};text-align:center;font-size:16px;">${(parseFloat(it.qty)||1) > 1 ? it.qty : '1'}</td>
+          <td style="padding:12px 12px;border-right:1px solid ${GRID_BLUE};font-size:16px;">${it.desc || ''}</td>
+          <td style="width:110px;padding:12px 12px;text-align:right;font-size:16px;font-weight:600;">${lineAmt(it) ? money(lineAmt(it)) : ''}</td>
         </tr>`).join('')
       // blank filler rows to make it look like the pad
       const fillerCount = Math.max(0, 6 - o.items.filter(it => it.desc?.trim() || lineAmt(it)).length)
-      const fillerRows = Array(fillerCount).fill(`<tr><td style="border-right:1px solid ${GRID_BLUE};padding:7px 4px;"> </td><td style="border-right:1px solid ${GRID_BLUE};padding:7px 4px;"> </td><td style="border-right:1px solid ${GRID_BLUE};padding:7px 4px;"> </td><td style="border-right:1px solid ${GRID_BLUE};padding:7px 4px;"> </td><td style="padding:7px 4px;"> </td></tr>`).join('')
+      const fillerRows = Array(fillerCount).fill(`<tr><td style="border-right:1px solid ${GRID_BLUE};padding:12px 6px;"> </td><td style="border-right:1px solid ${GRID_BLUE};padding:12px 6px;"> </td><td style="border-right:1px solid ${GRID_BLUE};padding:12px 6px;"> </td><td style="border-right:1px solid ${GRID_BLUE};padding:12px 6px;"> </td><td style="padding:12px 6px;"> </td></tr>`).join('')
       const payLines = (o.payments||[]).map(pmt => `<div style="font-size:12px;color:#2E7D46;margin-top:3px;">✓ ${money(pmt.amount)}${pmt.method ? ' · '+pmt.method : ''}${pmt.date ? ' · '+fmtDate(pmt.date) : ''}</div>`).join('')
       return `
-        <div style="page-break-after:always;padding:20px;font-family:'Arial',sans-serif;max-width:680px;margin:0 auto;">
+        <div style="page-break-after:always;padding:28px 32px;font-family:'Arial',sans-serif;width:100%;">
           <!-- Pad border -->
           <div style="border:2px solid ${PAD_BLUE};border-radius:4px;overflow:hidden;">
 
             <!-- Header: biz name left, order no right -->
-            <div style="display:flex;justify-content:space-between;align-items:center;padding:8px 12px 4px;border-bottom:1px solid ${GRID_BLUE};background:#F6F9FE;">
-              <div style="font-size:18px;font-weight:700;color:${PAD_BLUE};">${BIZ}</div>
-              <div style="font-size:22px;font-weight:800;color:${RED_NO};letter-spacing:0.02em;">No. ${o.orderNo || '—'}</div>
+            <div style="display:flex;justify-content:space-between;align-items:center;padding:14px 18px 10px;border-bottom:1px solid ${GRID_BLUE};background:#F6F9FE;">
+              <div style="font-size:26px;font-weight:700;color:${PAD_BLUE};">${BIZ}</div>
+              <div style="font-size:32px;font-weight:800;color:${RED_NO};letter-spacing:0.02em;">No. ${o.orderNo || '—'}</div>
             </div>
 
             <!-- Date row -->
-            <div style="display:flex;align-items:center;border-bottom:1px solid ${GRID_BLUE};padding:6px 12px;">
-              <span style="font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;color:${PAD_BLUE};width:56px;">Date</span>
-              <span style="font-size:13px;border-bottom:1px solid ${PAD_BLUE};flex:1;padding-bottom:2px;">${fmtDate(o.date)}</span>
+            <div style="display:flex;align-items:center;border-bottom:1px solid ${GRID_BLUE};padding:10px 18px;">
+              <span style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;color:${PAD_BLUE};width:70px;">Date</span>
+              <span style="font-size:17px;border-bottom:1px solid ${PAD_BLUE};flex:1;padding-bottom:3px;">${fmtDate(o.date)}</span>
             </div>
 
             <!-- First / Last name row -->
             <div style="display:flex;border-bottom:1px solid ${GRID_BLUE};">
-              <div style="flex:1;display:flex;align-items:center;padding:6px 12px;border-right:1px solid ${GRID_BLUE};">
-                <span style="font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;color:${PAD_BLUE};width:32px;">First</span>
-                <span style="font-size:14px;font-weight:600;border-bottom:1px solid ${PAD_BLUE};flex:1;padding-bottom:2px;">${o.firstName || ''}</span>
+              <div style="flex:1;display:flex;align-items:center;padding:10px 18px;border-right:1px solid ${GRID_BLUE};">
+                <span style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;color:${PAD_BLUE};width:40px;">First</span>
+                <span style="font-size:20px;font-weight:600;border-bottom:1px solid ${PAD_BLUE};flex:1;padding-bottom:3px;">${o.firstName || ''}</span>
               </div>
-              <div style="flex:1;display:flex;align-items:center;padding:6px 12px;">
-                <span style="font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;color:${PAD_BLUE};width:28px;">Last</span>
-                <span style="font-size:14px;font-weight:600;border-bottom:1px solid ${PAD_BLUE};flex:1;padding-bottom:2px;">${o.lastName || ''}</span>
+              <div style="flex:1;display:flex;align-items:center;padding:10px 18px;">
+                <span style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;color:${PAD_BLUE};width:36px;">Last</span>
+                <span style="font-size:20px;font-weight:600;border-bottom:1px solid ${PAD_BLUE};flex:1;padding-bottom:3px;">${o.lastName || ''}</span>
               </div>
             </div>
 
             <!-- Phone row -->
-            <div style="display:flex;align-items:center;border-bottom:1px solid ${GRID_BLUE};padding:6px 12px;">
-              <span style="font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;color:${PAD_BLUE};width:56px;">Phone</span>
-              <span style="font-size:13px;border-bottom:1px solid ${PAD_BLUE};flex:1;padding-bottom:2px;">${o.phone || ''}</span>
+            <div style="display:flex;align-items:center;border-bottom:1px solid ${GRID_BLUE};padding:10px 18px;">
+              <span style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;color:${PAD_BLUE};width:70px;">Phone</span>
+              <span style="font-size:17px;border-bottom:1px solid ${PAD_BLUE};flex:1;padding-bottom:3px;">${o.phone || ''}</span>
             </div>
 
             <!-- Address row -->
-            <div style="display:flex;align-items:center;border-bottom:1px solid ${GRID_BLUE};padding:6px 12px;">
-              <span style="font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;color:${PAD_BLUE};width:56px;">Address</span>
-              <span style="font-size:13px;border-bottom:1px solid ${PAD_BLUE};flex:1;padding-bottom:2px;">${addr}</span>
+            <div style="display:flex;align-items:center;border-bottom:1px solid ${GRID_BLUE};padding:10px 18px;">
+              <span style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;color:${PAD_BLUE};width:70px;">Address</span>
+              <span style="font-size:17px;border-bottom:1px solid ${PAD_BLUE};flex:1;padding-bottom:3px;">${addr}</span>
             </div>
 
             <!-- Item table -->
             <table style="width:100%;border-collapse:collapse;border-bottom:2px solid ${PAD_BLUE};">
               <thead>
                 <tr style="background:#EAF0FB;">
-                  <th style="width:28px;padding:6px 4px;border-right:1px solid ${GRID_BLUE};font-size:9px;text-transform:uppercase;letter-spacing:0.04em;color:${PAD_BLUE};text-align:center;">#</th>
-                  <th style="width:70px;padding:6px 6px;border-right:1px solid ${GRID_BLUE};font-size:9px;text-transform:uppercase;letter-spacing:0.04em;color:${PAD_BLUE};text-align:left;">Item #</th>
-                  <th style="width:44px;padding:6px 4px;border-right:1px solid ${GRID_BLUE};font-size:9px;text-transform:uppercase;letter-spacing:0.04em;color:${PAD_BLUE};text-align:center;">Qty</th>
-                  <th style="padding:6px 8px;border-right:1px solid ${GRID_BLUE};font-size:9px;text-transform:uppercase;letter-spacing:0.04em;color:${PAD_BLUE};text-align:left;">Description</th>
-                  <th style="width:90px;padding:6px 8px;font-size:9px;text-transform:uppercase;letter-spacing:0.04em;color:${PAD_BLUE};text-align:right;">Price</th>
+                  <th style="width:36px;padding:10px 6px;border-right:1px solid ${GRID_BLUE};font-size:11px;text-transform:uppercase;letter-spacing:0.04em;color:${PAD_BLUE};text-align:center;">#</th>
+                  <th style="width:90px;padding:10px 8px;border-right:1px solid ${GRID_BLUE};font-size:11px;text-transform:uppercase;letter-spacing:0.04em;color:${PAD_BLUE};text-align:left;">Item #</th>
+                  <th style="width:54px;padding:10px 6px;border-right:1px solid ${GRID_BLUE};font-size:11px;text-transform:uppercase;letter-spacing:0.04em;color:${PAD_BLUE};text-align:center;">Qty</th>
+                  <th style="padding:10px 12px;border-right:1px solid ${GRID_BLUE};font-size:11px;text-transform:uppercase;letter-spacing:0.04em;color:${PAD_BLUE};text-align:left;">Description</th>
+                  <th style="width:110px;padding:10px 12px;font-size:11px;text-transform:uppercase;letter-spacing:0.04em;color:${PAD_BLUE};text-align:right;">Price</th>
                 </tr>
               </thead>
               <tbody style="border-bottom:1px solid ${GRID_BLUE};">
@@ -215,25 +215,25 @@ export default function Gowns() {
             </table>
 
             <!-- Totals -->
-            <div style="padding:8px 12px;display:flex;flex-direction:column;align-items:flex-end;gap:3px;border-bottom:1px solid ${GRID_BLUE};">
-              <div style="font-size:12px;color:#666;">Subtotal: <b>${money(sub)}</b></div>
-              ${tax > 0 ? `<div style="font-size:12px;color:#666;">Tax (${o.taxRate||0}%): <b>${money(tax)}</b></div>` : ''}
-              <div style="font-size:18px;font-weight:800;color:${PAD_BLUE};margin-top:2px;">Total: ${money(tot)}</div>
+            <div style="padding:12px 18px;display:flex;flex-direction:column;align-items:flex-end;gap:5px;border-bottom:1px solid ${GRID_BLUE};">
+              <div style="font-size:15px;color:#666;">Subtotal: <b>${money(sub)}</b></div>
+              ${tax > 0 ? `<div style="font-size:15px;color:#666;">Tax (${o.taxRate||0}%): <b>${money(tax)}</b></div>` : ''}
+              <div style="font-size:24px;font-weight:800;color:${PAD_BLUE};margin-top:4px;">Total: ${money(tot)}</div>
             </div>
 
             <!-- Payments + balance -->
-            <div style="padding:8px 12px;border-bottom:${o.alterations||o.notes ? '1px solid '+GRID_BLUE : 'none'};">
+            <div style="padding:12px 18px;border-bottom:${o.alterations||o.notes ? '1px solid '+GRID_BLUE : 'none'};">
               ${payLines}
-              <div style="font-size:14px;font-weight:700;margin-top:6px;color:${bal > 0.005 ? '#9C6B12' : '#2E7D46'};">
+              <div style="font-size:18px;font-weight:700;margin-top:8px;color:${bal > 0.005 ? '#9C6B12' : '#2E7D46'};">
                 ${bal > 0.005 ? `Balance due: ${money(bal)}` : 'Paid in full ✓'}
               </div>
             </div>
 
             <!-- Alterations -->
-            ${o.alterations ? `<div style="padding:8px 12px;background:#FBEAF0;border-bottom:${o.notes?'1px solid '+GRID_BLUE:'none'};font-size:12px;"><b style="color:#8E3B54;">✂ Alterations${o.alterationsDone?' — done ✓':' — in progress'}${o.alterationsDue?' · due '+fmtDate(o.alterationsDue):''}</b>${o.alterationsNote?'<br>'+o.alterationsNote:''}</div>` : ''}
+            ${o.alterations ? `<div style="padding:12px 18px;background:#FBEAF0;border-bottom:${o.notes?'1px solid '+GRID_BLUE:'none'};font-size:15px;"><b style="color:#8E3B54;">✂ Alterations${o.alterationsDone?' — done ✓':' — in progress'}${o.alterationsDue?' · due '+fmtDate(o.alterationsDue):''}</b>${o.alterationsNote?'<br><span style="font-size:15px;">'+o.alterationsNote+'</span>':''}</div>` : ''}
 
             <!-- Notes -->
-            ${o.notes ? `<div style="padding:8px 12px;font-size:12px;color:#555;"><b>Notes:</b> ${o.notes}</div>` : ''}
+            ${o.notes ? `<div style="padding:12px 18px;font-size:15px;color:#555;"><b>Notes:</b> ${o.notes}</div>` : ''}
 
           </div>
         </div>`
