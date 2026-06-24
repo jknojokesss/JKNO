@@ -16,15 +16,19 @@ const daysTill = (s) => { if (!s) return null; const d = Math.round((new Date(s+
 
 const BRANDS = ['Michele', 'Michael Kors', 'Armani', 'Burberry', 'Citizen', 'Bulova', 'Mau Jim', 'Ray-Ban', 'Oakley']
 const STATUSES = { ordered: { label: 'Ordered', color: MUTED }, in_transit: { label: 'In Transit ✈', color: '#2A6CB8' }, arrived: { label: 'Arrived ✓', color: GREEN }, delayed: { label: 'Delayed ⚠', color: RED } }
+const LANDED_TYPES = ['Freight', 'Duties', 'Delivery', 'Worker', 'Other']
+const totalLanded = (p) => (p.landedCosts || []).reduce((s, c) => s + Number(c.amount || 0), 0)
+const landedPerUnit = (p) => p.units ? totalLanded(p) / p.units : 0
+const totalCostPerUnit = (p) => Number(p.unitCost || 0) + landedPerUnit(p)
 
 const SEED_POS = [
-  { id: uid(), poNo: 'PO-001', supplier: 'HK Watch Imports Ltd', origin: 'Hong Kong', brand: 'Michele', units: 24, unitCost: 180, total: 4320, ordered: '2026-06-01', eta: '2026-06-20', status: 'arrived', billNo: 'BILL-001', billPaid: true, shipper: 'DHL Express', customs: 'A&M Customs Brokers', notes: '' },
-  { id: uid(), poNo: 'PO-002', supplier: 'Euro Luxury SA', origin: 'Italy', brand: 'Armani', units: 18, unitCost: 220, total: 3960, ordered: '2026-06-05', eta: '2026-06-28', status: 'arrived', billNo: 'BILL-002', billPaid: false, shipper: 'FedEx International', customs: 'A&M Customs Brokers', notes: '' },
-  { id: uid(), poNo: 'PO-003', supplier: 'Optical World Italia', origin: 'Italy', brand: 'Ray-Ban', units: 60, unitCost: 48, total: 2880, ordered: '2026-06-10', eta: '2026-06-30', status: 'in_transit', billNo: null, billPaid: false, shipper: 'FedEx International', customs: 'A&M Customs Brokers', notes: '' },
-  { id: uid(), poNo: 'PO-004', supplier: 'MK Global Dist.', origin: 'USA', brand: 'Michael Kors', units: 30, unitCost: 165, total: 4950, ordered: '2026-06-12', eta: '2026-07-08', status: 'in_transit', billNo: null, billPaid: false, shipper: 'UPS Freight', customs: '', notes: '' },
-  { id: uid(), poNo: 'PO-005', supplier: 'HK Watch Imports Ltd', origin: 'Hong Kong', brand: 'Citizen', units: 48, unitCost: 95, total: 4560, ordered: '2026-06-15', eta: '2026-07-15', status: 'ordered', billNo: null, billPaid: false, shipper: 'DHL Express', customs: 'A&M Customs Brokers', notes: '' },
-  { id: uid(), poNo: 'PO-006', supplier: 'Burberry Wholesale EU', origin: 'UK', brand: 'Burberry', units: 12, unitCost: 310, total: 3720, ordered: '2026-06-08', eta: '2026-06-25', status: 'delayed', billNo: null, billPaid: false, shipper: 'DHL Express', customs: 'A&M Customs Brokers', notes: 'Customs hold in London — estimated 1-week delay' },
-  { id: uid(), poNo: 'PO-007', supplier: 'Pacific Sun Optics', origin: 'Japan', brand: 'Mau Jim', units: 36, unitCost: 72, total: 2592, ordered: '2026-06-18', eta: '2026-07-20', status: 'ordered', billNo: null, billPaid: false, shipper: 'Japan Post EMS', customs: 'A&M Customs Brokers', notes: '' },
+  { id: uid(), poNo: 'PO-001', supplier: 'HK Watch Imports Ltd', origin: 'Hong Kong', brand: 'Michele', units: 24, unitCost: 180, total: 4320, ordered: '2026-06-01', eta: '2026-06-20', status: 'arrived', billNo: 'BILL-001', billPaid: true, shipper: 'DHL Express', customs: 'A&M Customs Brokers', notes: '', landedCosts: [{ id: uid(), type: 'Freight', amount: 480 }, { id: uid(), type: 'Duties', amount: 648 }, { id: uid(), type: 'Delivery', amount: 120 }] },
+  { id: uid(), poNo: 'PO-002', supplier: 'Euro Luxury SA', origin: 'Italy', brand: 'Armani', units: 18, unitCost: 220, total: 3960, ordered: '2026-06-05', eta: '2026-06-28', status: 'arrived', billNo: 'BILL-002', billPaid: false, shipper: 'FedEx International', customs: 'A&M Customs Brokers', notes: '', landedCosts: [{ id: uid(), type: 'Freight', amount: 360 }, { id: uid(), type: 'Duties', amount: 594 }] },
+  { id: uid(), poNo: 'PO-003', supplier: 'Optical World Italia', origin: 'Italy', brand: 'Ray-Ban', units: 60, unitCost: 48, total: 2880, ordered: '2026-06-10', eta: '2026-06-30', status: 'in_transit', billNo: null, billPaid: false, shipper: 'FedEx International', customs: 'A&M Customs Brokers', notes: '', landedCosts: [] },
+  { id: uid(), poNo: 'PO-004', supplier: 'MK Global Dist.', origin: 'USA', brand: 'Michael Kors', units: 30, unitCost: 165, total: 4950, ordered: '2026-06-12', eta: '2026-07-08', status: 'in_transit', billNo: null, billPaid: false, shipper: 'UPS Freight', customs: '', notes: '', landedCosts: [] },
+  { id: uid(), poNo: 'PO-005', supplier: 'HK Watch Imports Ltd', origin: 'Hong Kong', brand: 'Citizen', units: 48, unitCost: 95, total: 4560, ordered: '2026-06-15', eta: '2026-07-15', status: 'ordered', billNo: null, billPaid: false, shipper: 'DHL Express', customs: 'A&M Customs Brokers', notes: '', landedCosts: [] },
+  { id: uid(), poNo: 'PO-006', supplier: 'Burberry Wholesale EU', origin: 'UK', brand: 'Burberry', units: 12, unitCost: 310, total: 3720, ordered: '2026-06-08', eta: '2026-06-25', status: 'delayed', billNo: null, billPaid: false, shipper: 'DHL Express', customs: 'A&M Customs Brokers', notes: 'Customs hold in London — estimated 1-week delay', landedCosts: [] },
+  { id: uid(), poNo: 'PO-007', supplier: 'Pacific Sun Optics', origin: 'Japan', brand: 'Mau Jim', units: 36, unitCost: 72, total: 2592, ordered: '2026-06-18', eta: '2026-07-20', status: 'ordered', billNo: null, billPaid: false, shipper: 'Japan Post EMS', customs: 'A&M Customs Brokers', notes: '', landedCosts: [] },
 ]
 
 const SEED_INVOICES = [
@@ -45,6 +49,8 @@ export default function MNETrading() {
   const [addingPO, setAddingPO] = useState(false)
   const [addingInv, setAddingInv] = useState(false)
   const [pof, setPof] = useState({ supplier: '', origin: '', brand: BRANDS[0], units: '', unitCost: '', eta: '', shipper: '', customs: '', notes: '' })
+  const [lcForm, setLcForm] = useState({}) // { poId: { type, amount } }
+  const [addingLC, setAddingLC] = useState(null) // poId
   const [invf, setInvf] = useState({ customer: '', brand: BRANDS[0], units: '', unitPrice: '', due: '', notes: '' })
 
   // aggregates
@@ -83,6 +89,14 @@ export default function MNETrading() {
     setInvoices(prev => [newInv, ...prev])
     setInvf({ customer: '', brand: BRANDS[0], units: '', unitPrice: '', due: '', notes: '' }); setAddingInv(false)
   }
+  const addLandedCost = (poId) => {
+    const f = lcForm[poId] || {}
+    if (!f.amount || Number(f.amount) <= 0) return
+    setPos(prev => prev.map(p => p.id === poId ? { ...p, landedCosts: [...(p.landedCosts||[]), { id: uid(), type: f.type || 'Freight', amount: Number(f.amount) }] } : p))
+    setLcForm(prev => ({ ...prev, [poId]: { type: 'Freight', amount: '' } }))
+    setAddingLC(null)
+  }
+  const removeLandedCost = (poId, lcId) => setPos(prev => prev.map(p => p.id === poId ? { ...p, landedCosts: (p.landedCosts||[]).filter(c => c.id !== lcId) } : p))
   const markArrived = (id) => setPos(prev => prev.map(p => p.id === id ? { ...p, status: 'arrived', billNo: `BILL-${String(arrivedPOs.length+1).padStart(3,'0')}` } : p))
   const markBillPaid = (id) => setPos(prev => prev.map(p => p.id === id ? { ...p, billPaid: true } : p))
   const markInvPaid = (id) => setInvoices(prev => prev.map(i => i.id === id ? { ...i, paid: true, paidDate: new Date().toISOString().slice(0,10) } : i))
@@ -263,6 +277,7 @@ export default function MNETrading() {
                         <div style={{ fontSize: '13px', color: INK, fontWeight: 600, marginTop: '5px' }}>{p.brand} <span style={{ fontWeight: 400, color: MUTED }}>· {p.units} units · {p.supplier}{p.origin ? ` (${p.origin})` : ''}</span></div>
                         <div style={{ fontSize: '12px', color: MUTED, marginTop: '2px' }}>Ordered {fmtD(p.ordered)} · ETA {fmtD(p.eta)} · {money(p.unitCost)}/unit</div>
                         {(p.shipper || p.customs) && <div style={{ fontSize: '12px', color: MUTED, marginTop: '3px' }}>{p.shipper ? `✈ ${p.shipper}` : ''}{p.shipper && p.customs ? ' · ' : ''}{p.customs ? `🛃 ${p.customs}` : ''}</div>}
+                        {(p.landedCosts||[]).length > 0 && <div style={{ fontSize: '12px', marginTop: '4px', color: AMBER, fontWeight: 600 }}>{money(p.unitCost)}/unit → {money(totalCostPerUnit(p))}/unit landed</div>}
                       </div>
                       <div style={{ ...big, fontSize: '20px', color: INK, flexShrink: 0 }}>{m0(p.total)}</div>
                     </div>
@@ -270,7 +285,51 @@ export default function MNETrading() {
                   </div>
                   {open && (
                     <div style={{ padding: '0 18px 16px', borderTop: `1px solid ${CREAM}` }}>
-                      <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', marginTop: '14px' }}>
+                      {/* Landed cost breakdown */}
+                      <div style={{ marginTop: '16px' }}>
+                        <div style={{ fontSize: '12px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.06em', color: NAVY, marginBottom: '8px' }}>Landed Cost Breakdown</div>
+                        <div style={{ background: CREAM, borderRadius: '10px', padding: '12px 14px' }}>
+                          <div style={{ display: 'flex', justifyContent: 'space-between', padding: '5px 0', borderBottom: `1px solid ${BORDER}`, marginBottom: '6px' }}>
+                            <span style={{ fontSize: '13px', color: MUTED }}>Unit cost</span>
+                            <span style={{ fontFamily: MONO, fontSize: '13px', fontWeight: 600, color: INK }}>{money(p.unitCost)}/unit</span>
+                          </div>
+                          {(p.landedCosts||[]).length === 0 && <div style={{ fontSize: '13px', color: MUTED, padding: '4px 0' }}>No landed costs added yet.</div>}
+                          {(p.landedCosts||[]).map(c => (
+                            <div key={c.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '5px 0', borderBottom: `1px dashed ${BORDER}` }}>
+                              <span style={{ fontSize: '13px', color: INK }}>{c.type}</span>
+                              <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                                <span style={{ fontSize: '12px', color: MUTED }}>{m0(c.amount)} total</span>
+                                <span style={{ fontFamily: MONO, fontSize: '13px', color: AMBER }}>{money(p.units ? c.amount/p.units : 0)}/unit</span>
+                                <button onClick={() => removeLandedCost(p.id, c.id)} style={{ background: 'none', border: 'none', color: '#C9BBA0', fontSize: '15px', cursor: 'pointer', lineHeight: 1 }}>×</button>
+                              </div>
+                            </div>
+                          ))}
+                          {(p.landedCosts||[]).length > 0 && <>
+                            <div style={{ display: 'flex', justifyContent: 'space-between', padding: '7px 0', borderTop: `1px solid ${BORDER}`, marginTop: '4px' }}>
+                              <span style={{ fontSize: '13px', fontWeight: 600, color: INK }}>Total landed/unit</span>
+                              <span style={{ fontFamily: MONO, fontSize: '13px', fontWeight: 600, color: AMBER }}>{money(landedPerUnit(p))}/unit</span>
+                            </div>
+                            <div style={{ display: 'flex', justifyContent: 'space-between', padding: '7px 0', borderTop: `2px solid ${NAVY}`, marginTop: '2px' }}>
+                              <span style={{ fontSize: '14px', fontWeight: 700, color: NAVY }}>Total cost/unit</span>
+                              <span style={{ fontFamily: MONO, fontSize: '14px', fontWeight: 700, color: NAVY }}>{money(totalCostPerUnit(p))}/unit</span>
+                            </div>
+                          </>}
+                        </div>
+                        {addingLC === p.id ? (
+                          <div style={{ display: 'flex', gap: '8px', marginTop: '8px', flexWrap: 'wrap' }}>
+                            <select value={(lcForm[p.id]||{}).type||'Freight'} onChange={e => setLcForm(prev => ({...prev, [p.id]: {...(prev[p.id]||{}), type: e.target.value}}))} style={{ ...inp, flex: 1, minWidth: '120px', cursor: 'pointer', width: 'auto' }}>
+                              {LANDED_TYPES.map(t => <option key={t}>{t}</option>)}
+                            </select>
+                            <input value={(lcForm[p.id]||{}).amount||''} onChange={e => setLcForm(prev => ({...prev, [p.id]: {...(prev[p.id]||{}), amount: e.target.value}}))} type="number" placeholder="Total $ amount" style={{ ...inp, flex: 1, minWidth: '130px', width: 'auto' }} />
+                            <button onClick={() => addLandedCost(p.id)} style={{ background: NAVY, color: '#fff', border: 'none', borderRadius: '9px', padding: '10px 14px', ...btn }}>Add</button>
+                            <button onClick={() => setAddingLC(null)} style={{ background: 'none', border: `1px solid ${BORDER}`, borderRadius: '9px', padding: '10px 14px', ...btn, color: MUTED }}>Cancel</button>
+                          </div>
+                        ) : (
+                          <button onClick={() => { setAddingLC(p.id); setLcForm(prev => ({...prev, [p.id]: { type: 'Freight', amount: '' }})) }} style={{ marginTop: '8px', background: 'none', border: `1px dashed ${NAVY}`, borderRadius: '9px', padding: '8px 14px', ...btn, color: NAVY, fontSize: '13px' }}>+ Add landed cost</button>
+                        )}
+                      </div>
+
+                      <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', marginTop: '16px' }}>
                         <button onClick={() => { markArrived(p.id); setExpanded(null) }} style={{ background: GREEN, color: '#fff', border: 'none', borderRadius: '9px', padding: '10px 16px', ...btn }}>✓ Goods arrived — convert to bill</button>
                         {p.status !== 'delayed' && (
                           <button onClick={() => setPos(prev => prev.map(x => x.id === p.id ? {...x, status: 'delayed'} : x))} style={{ background: 'none', border: `1px solid ${RED}`, borderRadius: '9px', padding: '10px 16px', ...btn, color: RED }}>⚠ Flag as delayed</button>
@@ -353,6 +412,7 @@ export default function MNETrading() {
                             <div style={{ fontSize: '13px', color: INK, fontWeight: 600, marginTop: '5px' }}>{p.brand} <span style={{ fontWeight: 400, color: MUTED }}>· {p.units} units · {p.supplier}{p.origin ? ` (${p.origin})` : ''}</span></div>
                             <div style={{ fontSize: '12px', color: MUTED, marginTop: '2px' }}>Arrived {fmtD(p.eta)} · {money(p.unitCost)}/unit</div>
                             {(p.shipper || p.customs) && <div style={{ fontSize: '12px', color: MUTED, marginTop: '3px' }}>{p.shipper ? `✈ ${p.shipper}` : ''}{p.shipper && p.customs ? ' · ' : ''}{p.customs ? `🛃 ${p.customs}` : ''}</div>}
+                            {(p.landedCosts||[]).length > 0 && <div style={{ fontSize: '12px', marginTop: '4px', color: AMBER, fontWeight: 600 }}>{money(p.unitCost)}/unit → {money(totalCostPerUnit(p))}/unit landed</div>}
                           </div>
                           <div style={{ ...big, fontSize: '20px', color: p.billPaid ? GREEN : RED, flexShrink: 0 }}>{m0(p.total)}</div>
                         </div>
