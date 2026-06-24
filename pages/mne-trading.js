@@ -35,7 +35,7 @@ const SEED_INVOICES = [
   { id: uid(), invNo: 'INV-005', customer: 'Fifth Ave Eyewear', brand: 'Ray-Ban', units: 30, unitPrice: 95, total: 2850, date: '2026-06-23', due: '2026-07-23', paid: false, paidDate: null, notes: 'Pre-sold — goods in transit' },
 ]
 
-const TABS = [['overview', 'Overview'], ['pos', 'Purchase Orders'], ['invoices', 'Invoices'], ['pnl', 'P&L'], ['quickbooks', 'QuickBooks']]
+const TABS = [['overview', 'Overview'], ['pos', "PO's & Bills"], ['invoices', 'Invoices'], ['pnl', 'P&L'], ['quickbooks', 'QuickBooks']]
 
 export default function MNETrading() {
   const [tab, setTab] = useState('overview')
@@ -244,83 +244,124 @@ export default function MNETrading() {
             </>
           )}
 
-          {/* ===== PURCHASE ORDERS ===== */}
-          {tab === 'pos' && (
-            <>
-              <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap', marginBottom: '16px' }}>
-                <KPI k="Total POs" v={pos.length} sub={`${m0(pos.reduce((s,p)=>s+p.total,0))} in goods`} />
-                <KPI k="In transit" v={inTransitPOs.length} sub={m0(inTransitValue)} accent='#2A6CB8' />
-                <KPI k="Arrived" v={arrivedPOs.length} sub={`${m0(totalBilled)} billed`} accent={GREEN} />
-                <KPI k="Unpaid bills" v={m0(unpaidBills)} sub="owed to suppliers" accent={RED} />
-              </div>
-
-              {!addingPO ? (
-                <button onClick={() => setAddingPO(true)} style={{ width: '100%', background: NAVY, color: '#fff', border: 'none', borderRadius: '11px', padding: '13px', ...btn, marginBottom: '16px', fontSize: '14px' }}>+ New Purchase Order</button>
-              ) : (
-                <div style={{ ...card, marginBottom: '16px' }}>
-                  <div style={{ ...lbl, marginBottom: '12px' }}>New Purchase Order</div>
-                  <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
-                    <input value={pof.supplier} onChange={e => setPof({...pof, supplier: e.target.value})} placeholder="Supplier name *" style={{ ...inp, flex: 2, minWidth: '160px', width: 'auto' }} />
-                    <input value={pof.origin} onChange={e => setPof({...pof, origin: e.target.value})} placeholder="Country of origin" style={{ ...inp, flex: 1, minWidth: '130px', width: 'auto' }} />
-                    <select value={pof.brand} onChange={e => setPof({...pof, brand: e.target.value})} style={{ ...inp, flex: 1, minWidth: '130px', cursor: 'pointer', width: 'auto' }}>
-                      {BRANDS.map(b => <option key={b}>{b}</option>)}
-                    </select>
-                  </div>
-                  <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', marginTop: '8px' }}>
-                    <input value={pof.units} onChange={e => setPof({...pof, units: e.target.value})} type="number" placeholder="Units" style={{ ...inp, flex: 1, minWidth: '80px', width: 'auto' }} />
-                    <input value={pof.unitCost} onChange={e => setPof({...pof, unitCost: e.target.value})} type="number" placeholder="Cost / unit $" style={{ ...inp, flex: 1, minWidth: '110px', width: 'auto' }} />
-                    <input value={pof.eta} onChange={e => setPof({...pof, eta: e.target.value})} type="date" style={{ ...inp, flex: 1, minWidth: '140px', width: 'auto' }} />
-                  </div>
-                  <input value={pof.notes} onChange={e => setPof({...pof, notes: e.target.value})} placeholder="Notes (optional)" style={{ ...inp, marginTop: '8px' }} />
-                  {pof.units && pof.unitCost && <div style={{ fontSize: '13px', color: MUTED, margin: '8px 0 0' }}>Total: <b style={{ color: INK }}>{m0((Number(pof.units)||0)*(Number(pof.unitCost)||0))}</b></div>}
-                  <div style={{ display: 'flex', gap: '8px', marginTop: '12px' }}>
-                    <button onClick={() => setAddingPO(false)} style={{ flex: 1, background: 'none', border: `1px solid ${BORDER}`, borderRadius: '9px', padding: '11px', ...btn, color: MUTED }}>Cancel</button>
-                    <button onClick={addPO} style={{ flex: 2, background: NAVY, color: '#fff', border: 'none', borderRadius: '9px', padding: '11px', ...btn }}>Create PO</button>
-                  </div>
-                </div>
-              )}
-
-              {pos.map(p => {
-                const open = expanded === p.id
-                const st = STATUSES[p.status] || STATUSES.ordered
-                return (
-                  <div key={p.id} style={{ ...card, padding: 0, marginBottom: '12px', overflow: 'hidden', borderColor: open ? NAVY : BORDER }}>
-                    <div onClick={() => setExpanded(open ? null : p.id)} style={{ padding: '15px 18px', cursor: 'pointer' }}>
-                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '10px', flexWrap: 'wrap' }}>
-                        <div>
-                          <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap' }}>
-                            <span style={{ ...big, fontSize: '16px', color: NAVY }}>{p.poNo}</span>
-                            {p.billNo && <span style={{ fontFamily: MONO, fontSize: '11px', color: MUTED }}>{p.billNo}</span>}
-                            <span style={statusBadge(p.status)}>{st.label}</span>
-                            {p.status === 'arrived' && <span style={{ fontSize: '11px', fontWeight: 600, color: p.billPaid ? GREEN : RED }}>{p.billPaid ? 'Bill paid ✓' : 'Bill unpaid'}</span>}
-                          </div>
-                          <div style={{ fontSize: '13px', color: INK, fontWeight: 600, marginTop: '5px' }}>{p.brand} <span style={{ fontWeight: 400, color: MUTED }}>· {p.units} units · {p.supplier}{p.origin ? ` (${p.origin})` : ''}</span></div>
-                          <div style={{ fontSize: '12px', color: MUTED, marginTop: '2px' }}>Ordered {fmtD(p.ordered)} · ETA {fmtD(p.eta)} · {money(p.unitCost)}/unit</div>
+          {/* ===== PO's & BILLS ===== */}
+          {tab === 'pos' && (() => {
+            const openPOs = pos.filter(p => p.status !== 'arrived')
+            const bills = pos.filter(p => p.status === 'arrived')
+            const POCard = (p) => {
+              const open = expanded === p.id
+              const st = STATUSES[p.status] || STATUSES.ordered
+              return (
+                <div key={p.id} style={{ ...card, padding: 0, marginBottom: '12px', overflow: 'hidden', borderColor: open ? NAVY : BORDER }}>
+                  <div onClick={() => setExpanded(open ? null : p.id)} style={{ padding: '15px 18px', cursor: 'pointer' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '10px', flexWrap: 'wrap' }}>
+                      <div>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap' }}>
+                          <span style={{ ...big, fontSize: '16px', color: NAVY }}>{p.poNo}</span>
+                          <span style={statusBadge(p.status)}>{st.label}</span>
                         </div>
-                        <div style={{ ...big, fontSize: '20px', color: INK, flexShrink: 0 }}>{m0(p.total)}</div>
+                        <div style={{ fontSize: '13px', color: INK, fontWeight: 600, marginTop: '5px' }}>{p.brand} <span style={{ fontWeight: 400, color: MUTED }}>· {p.units} units · {p.supplier}{p.origin ? ` (${p.origin})` : ''}</span></div>
+                        <div style={{ fontSize: '12px', color: MUTED, marginTop: '2px' }}>Ordered {fmtD(p.ordered)} · ETA {fmtD(p.eta)} · {money(p.unitCost)}/unit</div>
                       </div>
-                      {p.notes && <div style={{ marginTop: '8px', fontSize: '12px', color: p.status === 'delayed' ? RED : MUTED, background: p.status === 'delayed' ? '#FBEDE9' : CREAM, borderRadius: '7px', padding: '6px 10px' }}>{p.notes}</div>}
+                      <div style={{ ...big, fontSize: '20px', color: INK, flexShrink: 0 }}>{m0(p.total)}</div>
                     </div>
-                    {open && (
-                      <div style={{ padding: '0 18px 16px', borderTop: `1px solid ${CREAM}` }}>
-                        <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', marginTop: '14px' }}>
-                          {p.status !== 'arrived' && (
-                            <button onClick={() => markArrived(p.id)} style={{ background: GREEN, color: '#fff', border: 'none', borderRadius: '9px', padding: '10px 16px', ...btn }}>✓ Mark as arrived — create bill</button>
-                          )}
-                          {p.status === 'arrived' && !p.billPaid && (
-                            <button onClick={() => markBillPaid(p.id)} style={{ background: GREEN, color: '#fff', border: 'none', borderRadius: '9px', padding: '10px 16px', ...btn }}>✓ Mark bill paid ({m0(p.total)})</button>
-                          )}
-                          {p.status !== 'delayed' && p.status !== 'arrived' && (
-                            <button onClick={() => setPos(prev => prev.map(x => x.id === p.id ? {...x, status: 'delayed'} : x))} style={{ background: 'none', border: `1px solid ${RED}`, borderRadius: '9px', padding: '10px 16px', ...btn, color: RED }}>⚠ Flag as delayed</button>
-                          )}
+                    {p.notes && <div style={{ marginTop: '8px', fontSize: '12px', color: p.status === 'delayed' ? RED : MUTED, background: p.status === 'delayed' ? '#FBEDE9' : CREAM, borderRadius: '7px', padding: '6px 10px' }}>{p.notes}</div>}
+                  </div>
+                  {open && (
+                    <div style={{ padding: '0 18px 16px', borderTop: `1px solid ${CREAM}` }}>
+                      <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', marginTop: '14px' }}>
+                        <button onClick={() => { markArrived(p.id); setExpanded(null) }} style={{ background: GREEN, color: '#fff', border: 'none', borderRadius: '9px', padding: '10px 16px', ...btn }}>✓ Goods arrived — convert to bill</button>
+                        {p.status !== 'delayed' && (
+                          <button onClick={() => setPos(prev => prev.map(x => x.id === p.id ? {...x, status: 'delayed'} : x))} style={{ background: 'none', border: `1px solid ${RED}`, borderRadius: '9px', padding: '10px 16px', ...btn, color: RED }}>⚠ Flag as delayed</button>
+                        )}
+                      </div>
+                    </div>
+                  )}
+                </div>
+              )
+            }
+            return (
+              <>
+                <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap', marginBottom: '20px' }}>
+                  <KPI k="Open POs" v={openPOs.length} sub={m0(openPOs.reduce((s,p)=>s+p.total,0))} accent='#2A6CB8' />
+                  <KPI k="In transit" v={inTransitPOs.length} sub={m0(inTransitValue)} accent={AMBER} />
+                  <KPI k="Bills outstanding" v={m0(unpaidBills)} sub={`${bills.filter(p=>!p.billPaid).length} unpaid`} accent={RED} />
+                  <KPI k="Bills paid" v={m0(bills.filter(p=>p.billPaid).reduce((s,p)=>s+p.total,0))} sub={`${bills.filter(p=>p.billPaid).length} paid`} accent={GREEN} />
+                </div>
+
+                {/* ── PURCHASE ORDERS section ── */}
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
+                  <div style={{ fontSize: '16px', fontWeight: 700, color: NAVY }}>Purchase Orders</div>
+                  <span style={{ fontSize: '12px', color: MUTED }}>{openPOs.length} open</span>
+                </div>
+
+                {!addingPO ? (
+                  <button onClick={() => setAddingPO(true)} style={{ width: '100%', background: NAVY, color: '#fff', border: 'none', borderRadius: '11px', padding: '13px', ...btn, marginBottom: '14px', fontSize: '14px' }}>+ New Purchase Order</button>
+                ) : (
+                  <div style={{ ...card, marginBottom: '14px' }}>
+                    <div style={{ ...lbl, marginBottom: '12px' }}>New Purchase Order</div>
+                    <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+                      <input value={pof.supplier} onChange={e => setPof({...pof, supplier: e.target.value})} placeholder="Supplier name *" style={{ ...inp, flex: 2, minWidth: '160px', width: 'auto' }} />
+                      <input value={pof.origin} onChange={e => setPof({...pof, origin: e.target.value})} placeholder="Country of origin" style={{ ...inp, flex: 1, minWidth: '130px', width: 'auto' }} />
+                      <select value={pof.brand} onChange={e => setPof({...pof, brand: e.target.value})} style={{ ...inp, flex: 1, minWidth: '130px', cursor: 'pointer', width: 'auto' }}>
+                        {BRANDS.map(b => <option key={b}>{b}</option>)}
+                      </select>
+                    </div>
+                    <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', marginTop: '8px' }}>
+                      <input value={pof.units} onChange={e => setPof({...pof, units: e.target.value})} type="number" placeholder="Units" style={{ ...inp, flex: 1, minWidth: '80px', width: 'auto' }} />
+                      <input value={pof.unitCost} onChange={e => setPof({...pof, unitCost: e.target.value})} type="number" placeholder="Cost / unit $" style={{ ...inp, flex: 1, minWidth: '110px', width: 'auto' }} />
+                      <input value={pof.eta} onChange={e => setPof({...pof, eta: e.target.value})} type="date" style={{ ...inp, flex: 1, minWidth: '140px', width: 'auto' }} />
+                    </div>
+                    <input value={pof.notes} onChange={e => setPof({...pof, notes: e.target.value})} placeholder="Notes (optional)" style={{ ...inp, marginTop: '8px' }} />
+                    {pof.units && pof.unitCost && <div style={{ fontSize: '13px', color: MUTED, margin: '8px 0 0' }}>Total: <b style={{ color: INK }}>{m0((Number(pof.units)||0)*(Number(pof.unitCost)||0))}</b></div>}
+                    <div style={{ display: 'flex', gap: '8px', marginTop: '12px' }}>
+                      <button onClick={() => setAddingPO(false)} style={{ flex: 1, background: 'none', border: `1px solid ${BORDER}`, borderRadius: '9px', padding: '11px', ...btn, color: MUTED }}>Cancel</button>
+                      <button onClick={addPO} style={{ flex: 2, background: NAVY, color: '#fff', border: 'none', borderRadius: '9px', padding: '11px', ...btn }}>Create PO</button>
+                    </div>
+                  </div>
+                )}
+
+                {openPOs.length === 0 && <div style={{ ...card, padding: '28px', textAlign: 'center', color: MUTED, marginBottom: '14px' }}>No open purchase orders.</div>}
+                {openPOs.map(p => POCard(p))}
+
+                {/* ── BILLS section ── */}
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', margin: '28px 0 12px', paddingTop: '24px', borderTop: `2px solid ${BORDER}` }}>
+                  <div style={{ fontSize: '16px', fontWeight: 700, color: NAVY }}>Bills</div>
+                  <span style={{ fontSize: '12px', color: MUTED }}>{bills.length} bill{bills.length !== 1 ? 's' : ''} · {m0(totalBilled)} total</span>
+                </div>
+
+                {bills.length === 0 && <div style={{ ...card, padding: '28px', textAlign: 'center', color: MUTED }}>No bills yet — mark a PO as arrived to create a bill.</div>}
+                {bills.map(p => {
+                  const open = expanded === p.id
+                  return (
+                    <div key={p.id} style={{ ...card, padding: 0, marginBottom: '12px', overflow: 'hidden', borderColor: open ? NAVY : (p.billPaid ? BORDER : '#E7C3B8') }}>
+                      <div onClick={() => setExpanded(open ? null : p.id)} style={{ padding: '15px 18px', cursor: 'pointer' }}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '10px', flexWrap: 'wrap' }}>
+                          <div>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap' }}>
+                              <span style={{ ...big, fontSize: '16px', color: NAVY }}>{p.billNo}</span>
+                              <span style={{ fontSize: '11px', color: MUTED, fontFamily: MONO }}>from {p.poNo}</span>
+                              <span style={{ fontSize: '12px', fontWeight: 600, color: p.billPaid ? GREEN : RED, background: p.billPaid ? '#E7F4EC' : '#FBEDE9', padding: '3px 10px', borderRadius: '20px' }}>
+                                {p.billPaid ? 'Paid ✓' : 'Unpaid'}
+                              </span>
+                            </div>
+                            <div style={{ fontSize: '13px', color: INK, fontWeight: 600, marginTop: '5px' }}>{p.brand} <span style={{ fontWeight: 400, color: MUTED }}>· {p.units} units · {p.supplier}{p.origin ? ` (${p.origin})` : ''}</span></div>
+                            <div style={{ fontSize: '12px', color: MUTED, marginTop: '2px' }}>Arrived {fmtD(p.eta)} · {money(p.unitCost)}/unit</div>
+                          </div>
+                          <div style={{ ...big, fontSize: '20px', color: p.billPaid ? GREEN : RED, flexShrink: 0 }}>{m0(p.total)}</div>
                         </div>
                       </div>
-                    )}
-                  </div>
-                )
-              })}
-            </>
-          )}
+                      {open && !p.billPaid && (
+                        <div style={{ padding: '0 18px 16px', borderTop: `1px solid ${CREAM}` }}>
+                          <button onClick={() => { markBillPaid(p.id); setExpanded(null) }} style={{ marginTop: '14px', background: GREEN, color: '#fff', border: 'none', borderRadius: '9px', padding: '10px 18px', ...btn }}>✓ Mark bill paid — {m0(p.total)}</button>
+                        </div>
+                      )}
+                    </div>
+                  )
+                })}
+              </>
+            )
+          })()}
 
           {/* ===== INVOICES ===== */}
           {tab === 'invoices' && (
