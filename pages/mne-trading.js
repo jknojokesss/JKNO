@@ -184,7 +184,9 @@ export default function MNETrading() {
                     { label: 'Arrived', count: arrivedPOs.length, color: GREEN },
                     { label: 'Delayed', count: delayedPOs.length, color: RED },
                   ].map(s => (
-                    <div key={s.label} style={{ background: CREAM, borderRadius: '10px', padding: '12px 14px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', border: `1px solid ${BORDER}` }}>
+                    <div key={s.label} onClick={() => setTab('pos')} style={{ background: CREAM, borderRadius: '10px', padding: '12px 14px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', border: `1px solid ${BORDER}`, cursor: 'pointer', transition: 'box-shadow .15s' }}
+                      onMouseEnter={e => e.currentTarget.style.boxShadow='0 3px 12px rgba(0,0,0,0.1)'}
+                      onMouseLeave={e => e.currentTarget.style.boxShadow='none'}>
                       <span style={{ fontSize: '13px', fontWeight: 600, color: INK }}>{s.label}</span>
                       <span style={{ ...big, fontSize: '22px', color: s.color }}>{s.count}</span>
                     </div>
@@ -194,7 +196,7 @@ export default function MNETrading() {
                   <div style={{ background: '#FBEDE9', border: '1px solid #E7C3B8', borderRadius: '10px', padding: '12px 14px' }}>
                     <div style={{ fontSize: '12px', fontWeight: 700, color: RED, marginBottom: '6px' }}>⚠ Delayed shipments</div>
                     {delayedPOs.map(p => (
-                      <div key={p.id} style={{ fontSize: '13px', color: INK, marginBottom: '4px' }}>
+                      <div key={p.id} onClick={() => { setTab('pos'); setExpanded(p.id) }} style={{ fontSize: '13px', color: INK, marginBottom: '4px', cursor: 'pointer', textDecoration: 'underline', textDecorationColor: '#E7C3B8' }}>
                         <b>{p.poNo}</b> · {p.brand} ({p.units} units) — {p.notes || 'Delay reported'}
                       </div>
                     ))}
@@ -207,7 +209,9 @@ export default function MNETrading() {
                 <div style={{ ...card, flex: 1, minWidth: '280px' }}>
                   <div style={{ ...lbl, marginBottom: '12px' }}>Recent invoices</div>
                   {invoices.slice(0,4).map((inv, i) => (
-                    <div key={inv.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '8px 0', borderTop: i ? `1px solid ${CREAM}` : 'none', gap: '8px' }}>
+                    <div key={inv.id} onClick={() => { setTab('invoices'); setExpanded(inv.id) }} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '8px 0', borderTop: i ? `1px solid ${CREAM}` : 'none', gap: '8px', cursor: 'pointer', borderRadius: '8px', margin: '0 -6px', padding: '8px 6px' }}
+                      onMouseEnter={e => e.currentTarget.style.background='#F0EDE8'}
+                      onMouseLeave={e => e.currentTarget.style.background='transparent'}>
                       <div>
                         <div style={{ fontWeight: 600, fontSize: '14px' }}>{inv.customer}</div>
                         <div style={{ fontSize: '12px', color: MUTED }}>{inv.brand} · {inv.invNo}</div>
@@ -224,7 +228,9 @@ export default function MNETrading() {
                   {[...inTransitPOs, ...pos.filter(p=>p.status==='ordered')].sort((a,b)=>(a.eta||'').localeCompare(b.eta||'')).slice(0,4).map((p, i) => {
                     const d = daysTill(p.eta)
                     return (
-                      <div key={p.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '8px 0', borderTop: i ? `1px solid ${CREAM}` : 'none', gap: '8px' }}>
+                      <div key={p.id} onClick={() => { setTab('pos'); setExpanded(p.id) }} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '8px 6px', borderTop: i ? `1px solid ${CREAM}` : 'none', gap: '8px', cursor: 'pointer', borderRadius: '8px', margin: '0 -6px' }}
+                        onMouseEnter={e => e.currentTarget.style.background='#F0EDE8'}
+                        onMouseLeave={e => e.currentTarget.style.background='transparent'}>
                         <div>
                           <div style={{ fontWeight: 600, fontSize: '14px' }}>{p.brand} <span style={{ fontWeight: 400, color: MUTED, fontSize: '13px' }}>({p.units} units)</span></div>
                           <div style={{ fontSize: '12px', color: MUTED }}>{p.supplier} · ETA {fmtD(p.eta)}</div>
