@@ -7,9 +7,18 @@ const nextConfig = {
   async redirects() {
     // The shul vote moved to its own project on saratogashteibel.org.
     // Keep old jknojokes.com/shul-vote links working for the 36 voters.
+    // Host-scoped so this NEVER fires when saratogashteibel.org is (even
+    // briefly, mid-propagation) served by this project — avoids a self-loop.
     return [
       {
         source: '/shul-vote',
+        has: [{ type: 'host', value: 'jknojokes.com' }],
+        destination: 'https://saratogashteibel.org/shul-vote',
+        permanent: false,
+      },
+      {
+        source: '/shul-vote',
+        has: [{ type: 'host', value: 'www.jknojokes.com' }],
         destination: 'https://saratogashteibel.org/shul-vote',
         permanent: false,
       },
