@@ -371,8 +371,8 @@ export default function Landing() {
           {/* Demo tablets */}
           <div id="demos">{(() => {
             const DEMOS = [
-              { label: 'Riverside Bakery', sub: 'Services + Items', src: '/demo', icon: '◈' },
-              { label: 'Riverside Tires', sub: 'Products + Consignment', src: '/riverside-tires', icon: '◎' },
+              { label: 'Riverside Bakery', sub: 'Products + Consignment', src: '/demo', icon: '◈' },
+              { label: 'Riverside Tires', sub: 'Items + Services', src: '/riverside-tires', icon: '◎' },
               { label: 'Riverside Appliance', sub: 'Service-based', src: '/appliance-repair', icon: '⬡' },
               { label: 'Riverbank Funding', sub: 'SBA Dashboard', src: '/sba-lending', icon: '▣' },
             ]
@@ -489,8 +489,8 @@ export default function Landing() {
           {/* Demo tablets */}
           {(() => {
             const DEMOS = [
-              { label: 'Riverside Bakery', sub: 'Services + Items', src: '/demo', icon: '◈' },
-              { label: 'Riverside Tires', sub: 'Products + Consignment', src: '/riverside-tires', icon: '◎' },
+              { label: 'Riverside Bakery', sub: 'Products + Consignment', src: '/demo', icon: '◈' },
+              { label: 'Riverside Tires', sub: 'Items + Services', src: '/riverside-tires', icon: '◎' },
               { label: 'Riverside Appliance', sub: 'Service-based', src: '/appliance-repair', icon: '⬡' },
               { label: 'Riverbank Funding', sub: 'SBA Dashboard', src: '/sba-lending', icon: '▣' },
             ]
