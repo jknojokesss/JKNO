@@ -6,6 +6,27 @@ import DemoDashboard from '../components/DemoDashboard'
 // Calendly booking link for the $25 gift-card offer.
 const BOOKING_URL = 'https://calendly.com/jk-jknojokes/30min'
 
+function TypingText({ onDone }) {
+  const [displayed, setDisplayed] = useState('')
+  const full = "Closing another month and you have no idea how your business is doing?"
+  useEffect(() => {
+    let i = 0
+    const t = setInterval(() => {
+      i++
+      setDisplayed(full.slice(0, i))
+      if (i >= full.length) { clearInterval(t); setTimeout(onDone, 400) }
+    }, 38)
+    return () => clearInterval(t)
+  }, [])
+  return (
+    <div style={{ fontSize: 'clamp(18px,2.4vw,26px)', fontWeight: 500, color: '#fff', lineHeight: 1.5, fontFamily: 'Cormorant Garamond, serif' }}>
+      {displayed}
+      <span style={{ display: 'inline-block', width: '2px', height: '1em', background: '#C9A84C', verticalAlign: 'text-bottom', marginLeft: '3px', animation: 'blink .7s infinite' }} />
+      <style>{`@keyframes blink{0%,100%{opacity:1}50%{opacity:0}}`}</style>
+    </div>
+  )
+}
+
 export default function Landing() {
   const router = useRouter()
   const [scrolled, setScrolled] = useState(false)
@@ -13,6 +34,8 @@ export default function Landing() {
   const [submitted, setSubmitted] = useState(false)
   const [submitting, setSubmitting] = useState(false)
   const [menuOpen, setMenuOpen] = useState(false)
+  const [activeDemo, setActiveDemo] = useState(0)
+  const [typingDone, setTypingDone] = useState(false)
   const [isMobile, setIsMobile] = useState(false)
 
   useEffect(() => {
@@ -397,64 +420,94 @@ export default function Landing() {
       </div>
 
 
-      {/* DASHBOARD MOCKUP SECTION */}
+      {/* DEMO SHOWCASE SECTION */}
       <section style={{ padding: 'clamp(56px, 9vw, 100px) clamp(14px, 5vw, 48px)', background: '#F7F4EF', overflow: 'hidden' }}>
         <div style={{ maxWidth: '1200px', margin: '0 auto' }}>
-          <div style={{ textAlign: 'center', marginBottom: '56px' }}>
-            <div style={{ fontFamily: 'DM Mono, monospace', fontSize: '11px',
-              letterSpacing: '3px', color: '#C9A84C', marginBottom: '16px' }}>
-              — LIVE SAMPLE · CLICK AROUND
-            </div>
-            <h2 style={{ fontFamily: 'Cormorant Garamond, serif',
-              fontSize: 'clamp(28px, 3.5vw, 44px)', fontWeight: '600',
-              letterSpacing: '-0.3px', lineHeight: 1.15, color: '#1A1A2E',
-              marginBottom: '16px' }}>
-              Your numbers, clear at a glance.
-            </h2>
-            <p style={{ fontSize: '15px', color: '#5A6070', maxWidth: '480px',
-              margin: '0 auto', lineHeight: 1.7 }}>
-              This one's live — click around the dashboard below. Every client gets
-              their own branded portal with real-time charts and drill-down reports.
-            </p>
-          </div>
 
-          {/* Browser mockup frame */}
-          <div style={{
-            background: '#1A2035',
-            borderRadius: '12px',
-            boxShadow: '0 40px 100px rgba(0,0,0,0.25), 0 0 0 1px rgba(0,0,0,0.1)',
-            overflow: 'hidden',
-            maxWidth: '960px',
-            margin: '0 auto',
-          }}>
-            {/* Browser chrome */}
-            <div style={{ background: '#0D1120', padding: '12px 16px',
-              display: 'flex', alignItems: 'center', gap: '8px',
-              borderBottom: '1px solid #2E3A5C' }}>
-              <div style={{ width: 10, height: 10, borderRadius: '50%', background: '#FF5F57' }} />
-              <div style={{ width: 10, height: 10, borderRadius: '50%', background: '#FFBD2E' }} />
-              <div style={{ width: 10, height: 10, borderRadius: '50%', background: '#28C840' }} />
-              <div style={{ flex: 1, margin: '0 12px', background: '#1E2540',
-                borderRadius: '4px', padding: '4px 12px', textAlign: 'center' }}>
-                <span style={{ fontFamily: 'DM Mono, monospace', fontSize: '11px',
-                  color: '#6B7A96' }}>jknojokes.com/dashboard</span>
+          {/* Calendar + typing hero */}
+          <div style={{ display: 'flex', gap: '48px', alignItems: 'center', flexWrap: 'wrap', background: '#1A2035', borderRadius: '16px', padding: 'clamp(28px,5vw,52px)', marginBottom: '40px', position: 'relative', overflow: 'hidden' }}>
+            <div style={{ position: 'absolute', inset: 0, background: 'radial-gradient(circle at 80% 50%, rgba(201,168,76,0.12), transparent 60%)', pointerEvents: 'none' }} />
+
+            {/* Mini calendar */}
+            <div style={{ flexShrink: 0, background: '#0D1523', borderRadius: '12px', padding: '16px', width: '210px', position: 'relative' }}>
+              <div style={{ fontFamily: 'DM Mono, monospace', fontSize: '11px', color: '#C9A84C', letterSpacing: '0.1em', marginBottom: '12px' }}>JUNE 2026</div>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7,1fr)', gap: '2px', marginBottom: '6px' }}>
+                {['S','M','T','W','T','F','S'].map((d,i) => (
+                  <div key={i} style={{ textAlign: 'center', fontSize: '9px', color: '#3A5060', paddingBottom: '4px' }}>{d}</div>
+                ))}
+              </div>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7,1fr)', gap: '2px' }}>
+                {/* June 2026 starts on Monday — 1 blank */}
+                <div />
+                {Array.from({ length: 30 }, (_, i) => i + 1).map(d => (
+                  <div key={d} style={{ position: 'relative', width: '24px', height: '24px', display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: '4px', background: d === 28 ? '#C9A84C' : 'transparent', margin: '1px auto' }}>
+                    <span style={{ fontSize: '10px', color: d < 28 ? '#1D2D3A' : d === 28 ? '#1A1A1A' : '#3A5060', fontFamily: 'DM Mono, monospace', fontWeight: d === 28 ? 700 : 400 }}>{d}</span>
+                    {d < 28 && (
+                      <div style={{ position: 'absolute', left: '3px', right: '3px', top: '50%', height: '1.5px', background: '#C03A22', transform: 'rotate(-15deg)', borderRadius: '1px' }} />
+                    )}
+                  </div>
+                ))}
               </div>
             </div>
 
-            {/* Live, interactive demo — the same Riverside Bakery dashboard served at /demo */}
-            <iframe
-              src="/demo"
-              title="Live dashboard demo"
-              loading="lazy"
-              style={{
-                display: 'block',
-                width: '100%',
-                height: '660px',
-                border: 'none',
-                background: '#FBF4EC',
-              }}
-            />
+            {/* Typing text */}
+            <div style={{ flex: 1, minWidth: '220px', position: 'relative' }}>
+              <TypingText onDone={() => setTypingDone(true)} />
+              <div style={{ marginTop: '20px', fontSize: '17px', fontWeight: 500, color: '#C9A84C', opacity: typingDone ? 1 : 0, transition: 'opacity 0.6s ease', fontFamily: 'Cormorant Garamond, serif', letterSpacing: '0.2px' }}>
+                JK No Jokes Financials can help.
+              </div>
+            </div>
           </div>
+
+          {/* Demo tablets */}
+          {(() => {
+            const DEMOS = [
+              { label: 'Riverside Bakery', sub: 'Services + Items', src: '/demo', icon: '◈' },
+              { label: 'Riverside Tires', sub: 'Products + Consignment', src: '/riverside-tires', icon: '◎' },
+              { label: 'Riverside Appliance', sub: 'Service-based', src: '/appliance-repair', icon: '⬡' },
+              { label: 'Riverbank Funding', sub: 'SBA Dashboard', src: '/sba-lending', icon: '▣' },
+            ]
+            return (
+              <>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(160px,1fr))', gap: '10px', marginBottom: '20px' }}>
+                  {DEMOS.map((d, i) => (
+                    <button key={i} onClick={() => setActiveDemo(i)} style={{
+                      fontFamily: 'inherit', cursor: 'pointer', textAlign: 'left',
+                      padding: '16px', borderRadius: '12px',
+                      border: activeDemo === i ? '2px solid #C9A84C' : '1px solid #DDD8CE',
+                      background: activeDemo === i ? '#FFF8EC' : '#fff',
+                      transition: 'all 0.15s',
+                    }}>
+                      <div style={{ fontSize: '20px', marginBottom: '8px', color: activeDemo === i ? '#C9A84C' : '#5A6070' }}>{d.icon}</div>
+                      <div style={{ fontSize: '13px', fontWeight: 600, color: '#1A1A2E', marginBottom: '3px' }}>{d.label}</div>
+                      <div style={{ fontSize: '11px', color: '#5A6070' }}>{d.sub}</div>
+                    </button>
+                  ))}
+                </div>
+
+                {/* Browser mockup frame */}
+                <div style={{ background: '#1A2035', borderRadius: '12px', boxShadow: '0 40px 100px rgba(0,0,0,0.25)', overflow: 'hidden', maxWidth: '960px', margin: '0 auto' }}>
+                  <div style={{ background: '#0D1120', padding: '12px 16px', display: 'flex', alignItems: 'center', gap: '8px', borderBottom: '1px solid #2E3A5C' }}>
+                    <div style={{ width: 10, height: 10, borderRadius: '50%', background: '#FF5F57' }} />
+                    <div style={{ width: 10, height: 10, borderRadius: '50%', background: '#FFBD2E' }} />
+                    <div style={{ width: 10, height: 10, borderRadius: '50%', background: '#28C840' }} />
+                    <div style={{ flex: 1, margin: '0 12px', background: '#1E2540', borderRadius: '4px', padding: '4px 12px', textAlign: 'center' }}>
+                      <span style={{ fontFamily: 'DM Mono, monospace', fontSize: '11px', color: '#6B7A96' }}>
+                        jknojokes.com{DEMOS[activeDemo].src}
+                      </span>
+                    </div>
+                  </div>
+                  <iframe
+                    key={activeDemo}
+                    src={DEMOS[activeDemo].src}
+                    title={`${DEMOS[activeDemo].label} demo`}
+                    loading="lazy"
+                    style={{ display: 'block', width: '100%', height: '660px', border: 'none', background: '#FBF4EC' }}
+                  />
+                </div>
+              </>
+            )
+          })()}
 
           {/* Caption below mockup */}
           <div style={{ textAlign: 'center', marginTop: '32px', display: 'flex',

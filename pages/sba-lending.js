@@ -11,7 +11,7 @@ import Head from 'next/head'
 const DARK = '#15263F', NAVY = '#1F6FB2', GREEN = '#1E8E5A', BG = '#EEF2F7'
 const INK = '#1B2A3A', MUTED = '#5C6B7A', FAINT = '#9AA7B4', RED = '#C0492F', CARD = '#FFFFFF'
 const BOOK = 'https://calendly.com/jk-jknojokes/30min'
-const BIZ = "Aryeh's SBA Dashboard"
+const BIZ = 'Riverbank Funding'
 
 const usd0 = (n) => '$' + Math.round(Math.abs(n)).toLocaleString('en-US')
 const fmtDate = (s) => { if (!s) return '—'; const d = new Date(s + 'T00:00:00'); return isNaN(d) ? s : d.toLocaleDateString([], { month: 'short', year: 'numeric' }) }
