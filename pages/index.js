@@ -15,7 +15,7 @@ function TypingText({ onDone }) {
       i++
       setDisplayed(full.slice(0, i))
       if (i >= full.length) { clearInterval(t); setTimeout(onDone, 400) }
-    }, 38)
+    }, 22)
     return () => clearInterval(t)
   }, [])
   return (
@@ -36,6 +36,7 @@ export default function Landing() {
   const [menuOpen, setMenuOpen] = useState(false)
   const [activeDemo, setActiveDemo] = useState(0)
   const [typingDone, setTypingDone] = useState(false)
+  const [crossedDays, setCrossedDays] = useState(0)
   const [isMobile, setIsMobile] = useState(false)
 
   useEffect(() => {
@@ -49,6 +50,17 @@ export default function Landing() {
     checkMobile()
     window.addEventListener('resize', checkMobile)
     return () => window.removeEventListener('resize', checkMobile)
+  }, [])
+
+  useEffect(() => {
+    let day = 0
+    const total = 27
+    const t = setInterval(() => {
+      day++
+      setCrossedDays(day)
+      if (day >= total) clearInterval(t)
+    }, 60)
+    return () => clearInterval(t)
   }, [])
 
   const handleSubmit = async () => {
@@ -363,7 +375,7 @@ export default function Landing() {
                 {Array.from({ length: 30 }, (_, i) => i + 1).map(d => (
                   <div key={d} style={{ position: 'relative', width: '24px', height: '24px', display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: '4px', background: d === 28 ? '#C9A84C' : 'transparent', margin: '1px auto' }}>
                     <span style={{ fontSize: '10px', color: d < 28 ? '#1D2D3A' : d === 28 ? '#1A1A1A' : '#3A5060', fontFamily: 'DM Mono, monospace', fontWeight: d === 28 ? 700 : 400 }}>{d}</span>
-                    {d < 28 && <div style={{ position: 'absolute', left: '3px', right: '3px', top: '50%', height: '1.5px', background: '#C03A22', transform: 'rotate(-15deg)', borderRadius: '1px' }} />}
+                    {d <= crossedDays && d < 28 && <div style={{ position: 'absolute', left: '3px', right: '3px', top: '50%', height: '1.5px', background: '#C03A22', transform: 'rotate(-15deg)', borderRadius: '1px', transition: 'opacity 0.1s' }} />}
                   </div>
                 ))}
               </div>
