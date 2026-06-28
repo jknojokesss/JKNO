@@ -328,60 +328,87 @@ export default function Landing() {
         </div>
       )}
 
-      {/* HERO */}
-      <section style={{
-        minHeight: '100vh',
-        display: 'flex', alignItems: 'center',
-        padding: '120px 48px 80px',
-        position: 'relative', overflow: 'hidden',
-      }}>
-        {/* Background grid */}
-        <div style={{
-          position: 'absolute', inset: 0,
-          backgroundImage: `linear-gradient(#DDD8CE 1px, transparent 1px), linear-gradient(90deg, #DDD8CE 1px, transparent 1px)`,
-          backgroundSize: '60px 60px',
-          opacity: 0.3,
-        }} />
-        {/* Gold glow */}
-        <div style={{
-          position: 'absolute', top: '20%', right: '10%',
-          width: '400px', height: '400px',
-          background: 'radial-gradient(circle, rgba(201,168,76,0.15) 0%, transparent 70%)',
-          pointerEvents: 'none',
-        }} />
+      {/* HERO — calendar + typing + demo tablets */}
+      <section style={{ padding: 'clamp(80px,10vw,120px) clamp(14px,5vw,48px) clamp(48px,6vw,80px)', background: '#F7F4EF', overflow: 'hidden' }}>
+        <div style={{ maxWidth: '1200px', margin: '0 auto' }}>
 
-        <div style={{ position: 'relative', maxWidth: '1100px', margin: '0 auto', width: '100%' }}>
-          <div style={{ fontFamily: 'DM Mono, monospace', fontSize: '11px',
-            letterSpacing: '3px', color: '#C9A84C', marginBottom: '24px',
-            animation: 'fadeIn 0.6s ease both' }}>
-            — FINANCIALS. REIMAGINED.
+          {/* Calendar + typing */}
+          <div style={{ display: 'flex', gap: '48px', alignItems: 'center', flexWrap: 'wrap', background: '#1A2035', borderRadius: '16px', padding: 'clamp(28px,5vw,52px)', marginBottom: '32px', position: 'relative', overflow: 'hidden' }}>
+            <div style={{ position: 'absolute', inset: 0, background: 'radial-gradient(circle at 80% 50%, rgba(201,168,76,0.12), transparent 60%)', pointerEvents: 'none' }} />
+
+            {/* Mini calendar */}
+            <div style={{ flexShrink: 0, background: '#0D1523', borderRadius: '12px', padding: '16px', width: '210px', position: 'relative' }}>
+              <div style={{ fontFamily: 'DM Mono, monospace', fontSize: '11px', color: '#C9A84C', letterSpacing: '0.1em', marginBottom: '12px' }}>JUNE 2026</div>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7,1fr)', gap: '2px', marginBottom: '6px' }}>
+                {['S','M','T','W','T','F','S'].map((d,i) => (
+                  <div key={i} style={{ textAlign: 'center', fontSize: '9px', color: '#3A5060', paddingBottom: '4px' }}>{d}</div>
+                ))}
+              </div>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7,1fr)', gap: '2px' }}>
+                <div />
+                {Array.from({ length: 30 }, (_, i) => i + 1).map(d => (
+                  <div key={d} style={{ position: 'relative', width: '24px', height: '24px', display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: '4px', background: d === 28 ? '#C9A84C' : 'transparent', margin: '1px auto' }}>
+                    <span style={{ fontSize: '10px', color: d < 28 ? '#1D2D3A' : d === 28 ? '#1A1A1A' : '#3A5060', fontFamily: 'DM Mono, monospace', fontWeight: d === 28 ? 700 : 400 }}>{d}</span>
+                    {d < 28 && <div style={{ position: 'absolute', left: '3px', right: '3px', top: '50%', height: '1.5px', background: '#C03A22', transform: 'rotate(-15deg)', borderRadius: '1px' }} />}
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Typing text */}
+            <div style={{ flex: 1, minWidth: '220px', position: 'relative' }}>
+              <TypingText onDone={() => setTypingDone(true)} />
+              <div style={{ marginTop: '20px', fontSize: 'clamp(16px,2vw,20px)', fontWeight: 500, color: '#C9A84C', opacity: typingDone ? 1 : 0, transition: 'opacity 0.6s ease', fontFamily: 'Cormorant Garamond, serif' }}>
+                JK No Jokes Financials can help.
+              </div>
+              <div style={{ marginTop: '24px', display: 'flex', gap: '12px', flexWrap: 'wrap', opacity: typingDone ? 1 : 0, transition: 'opacity 0.8s ease 0.4s' }}>
+                <button className="cta-btn" onClick={() => document.getElementById('contact')?.scrollIntoView({ behavior: 'smooth' })}>Get Started →</button>
+                <button className="ghost-btn" onClick={() => document.getElementById('demos')?.scrollIntoView({ behavior: 'smooth' })}>See Live Demos ↓</button>
+              </div>
+            </div>
           </div>
 
-          <h1 className="hero-title" style={{ fontFamily: 'Cormorant Garamond, serif',
-            fontSize: 'clamp(40px, 6vw, 80px)',
-            fontWeight: '600', lineHeight: 1.05,
-            letterSpacing: '-0.5px', marginBottom: '32px' }}>
-            Your financials.<br />
-            <span style={{ color: '#C9A84C' }}>No jokes.</span><br />
-            No guesswork.
-          </h1>
-
-          <p className="hero-sub" style={{ fontSize: 'clamp(16px, 2vw, 20px)',
-            color: '#5A6070', lineHeight: 1.7, maxWidth: '560px', marginBottom: '48px' }}>
-            AI-powered financials with a custom client portal built for your business.
-            Real-time numbers, plain-English insights, and zero bloated software.
-          </p>
-
-          <div className="hero-cta" style={{ display: 'flex', gap: '16px', flexWrap: 'wrap' }}>
-            <button className="cta-btn"
-              onClick={() => document.getElementById('contact')?.scrollIntoView({ behavior: 'smooth' })}>
-              Get Started →
-            </button>
-            <button className="ghost-btn"
-              onClick={() => router.push('/demo')}>
-              See a Live Demo →
-            </button>
-          </div>
+          {/* Demo tablets */}
+          <div id="demos">{(() => {
+            const DEMOS = [
+              { label: 'Riverside Bakery', sub: 'Services + Items', src: '/demo', icon: '◈' },
+              { label: 'Riverside Tires', sub: 'Products + Consignment', src: '/riverside-tires', icon: '◎' },
+              { label: 'Riverside Appliance', sub: 'Service-based', src: '/appliance-repair', icon: '⬡' },
+              { label: 'Riverbank Funding', sub: 'SBA Dashboard', src: '/sba-lending', icon: '▣' },
+            ]
+            return (
+              <>
+                <div style={{ fontFamily: 'DM Mono, monospace', fontSize: '11px', letterSpacing: '3px', color: '#C9A84C', marginBottom: '16px' }}>— LIVE DEMOS · CLICK AROUND</div>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(160px,1fr))', gap: '10px', marginBottom: '20px' }}>
+                  {DEMOS.map((d, i) => (
+                    <button key={i} onClick={() => setActiveDemo(i)} style={{
+                      fontFamily: 'inherit', cursor: 'pointer', textAlign: 'left',
+                      padding: '16px', borderRadius: '12px',
+                      border: activeDemo === i ? '2px solid #C9A84C' : '1px solid #DDD8CE',
+                      background: activeDemo === i ? '#FFF8EC' : '#fff',
+                      transition: 'all 0.15s',
+                    }}>
+                      <div style={{ fontSize: '20px', marginBottom: '8px', color: activeDemo === i ? '#C9A84C' : '#5A6070' }}>{d.icon}</div>
+                      <div style={{ fontSize: '13px', fontWeight: 600, color: '#1A1A2E', marginBottom: '3px' }}>{d.label}</div>
+                      <div style={{ fontSize: '11px', color: '#5A6070' }}>{d.sub}</div>
+                    </button>
+                  ))}
+                </div>
+                <div style={{ background: '#1A2035', borderRadius: '12px', boxShadow: '0 40px 100px rgba(0,0,0,0.25)', overflow: 'hidden' }}>
+                  <div style={{ background: '#0D1120', padding: '12px 16px', display: 'flex', alignItems: 'center', gap: '8px', borderBottom: '1px solid #2E3A5C' }}>
+                    <div style={{ width: 10, height: 10, borderRadius: '50%', background: '#FF5F57' }} />
+                    <div style={{ width: 10, height: 10, borderRadius: '50%', background: '#FFBD2E' }} />
+                    <div style={{ width: 10, height: 10, borderRadius: '50%', background: '#28C840' }} />
+                    <div style={{ flex: 1, margin: '0 12px', background: '#1E2540', borderRadius: '4px', padding: '4px 12px', textAlign: 'center' }}>
+                      <span style={{ fontFamily: 'DM Mono, monospace', fontSize: '11px', color: '#6B7A96' }}>jknojokes.com{DEMOS[activeDemo].src}</span>
+                    </div>
+                  </div>
+                  <iframe key={activeDemo} src={DEMOS[activeDemo].src} title={`${DEMOS[activeDemo].label} demo`} loading="lazy"
+                    style={{ display: 'block', width: '100%', height: '660px', border: 'none', background: '#FBF4EC' }} />
+                </div>
+              </>
+            )
+          })()}</div>
         </div>
       </section>
 
@@ -420,9 +447,9 @@ export default function Landing() {
       </div>
 
 
-      {/* DEMO SHOWCASE SECTION */}
-      <section style={{ padding: 'clamp(56px, 9vw, 100px) clamp(14px, 5vw, 48px)', background: '#F7F4EF', overflow: 'hidden' }}>
-        <div style={{ maxWidth: '1200px', margin: '0 auto' }}>
+      {/* REMOVED — demo showcase moved to hero above */}
+      <section style={{ display: 'none' }}>
+        <div>
 
           {/* Calendar + typing hero */}
           <div style={{ display: 'flex', gap: '48px', alignItems: 'center', flexWrap: 'wrap', background: '#1A2035', borderRadius: '16px', padding: 'clamp(28px,5vw,52px)', marginBottom: '40px', position: 'relative', overflow: 'hidden' }}>
