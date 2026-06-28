@@ -388,7 +388,7 @@ export default function Landing() {
               { label: 'Riverside Bakery', sub: 'Products + Consignment', src: '/demo', icon: '◈' },
               { label: 'Riverside Tires', sub: 'Items + Services', src: '/riverside-tires', icon: '◎' },
               { label: 'Riverside Appliance', sub: 'Service-based', src: '/appliance-repair', icon: '⬡' },
-              { label: 'Riverbank Funding', sub: 'SBA Dashboard', src: '/sba-lending', icon: '▣' },
+              { label: 'Riverbank Funding', sub: 'Loan Dashboard', src: '/sba-lending', icon: '▣' },
             ]
             return (
               <>
