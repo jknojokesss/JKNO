@@ -189,6 +189,23 @@ export default function Orders() {
         }
         return best
       }
+      // For a branded INVENTORY sale, cost it at THAT brand's Weldon price for the
+      // size instead of the size's cheapest tier — fixes a premium tire (Kumho,
+      // Michelin, etc.) sitting in a size that also stocks a budget tier. Prefers the
+      // 4/15 stock-up purchase of the brand (the real shelf cost), else the cheapest
+      // brand-matching buy. Returns null for generic/no-brand sales (→ keep budget
+      // cost). Since it's the MIN over the brand's purchases and the brand subset is a
+      // subset of the size, the result is always >= the budget tier: this can only
+      // RAISE a cost (correct an inflated margin), never lower one. Subsumes the old
+      // Cooper special-case.
+      const brandedStockCost = (size, itemWords) => {
+        if (!itemWords || itemWords.size === 0) return null
+        const pool = (bySize[size] || []).filter(o => Number(o.unit_cost) > 0 && sharedModel(itemWords, o.description) > 0)
+        if (!pool.length) return null
+        const suPool = pool.filter(o => o.order_date >= STOCKUP_DATE && o.order_date <= STOCKUP_END)
+        const src = suPool.length ? suPool : pool
+        return Math.min(...src.map(o => Number(o.unit_cost)))
+      }
 
       if (lineItems) {
         setRows(lineItems.map(r => {
@@ -243,7 +260,13 @@ export default function Orders() {
             matchGap = Math.round((new Date(r.date) - new Date(cust.order_date)) / 864e5)
             matchModelShared = sharedModel(itemWords, cust.description)
           }
-          else if (isInventory) { costPerUnit = (isCooper && su && su.cooper) ? su.cooper : sizeBudget; costSource = 'inventory' }
+          else if (isInventory) {
+            // Brand-specific shelf cost first (Kumho, Cooper, etc. in a multi-tier
+            // size); else the Cooper special-case; else the size's budget tier.
+            const bc = brandedStockCost(normalized, itemWords)
+            costPerUnit = bc != null ? bc : ((isCooper && su && su.cooper) ? su.cooper : sizeBudget)
+            costSource = 'inventory'
+          }
           else {
             // special order, or a pre-stock-up sale: use the matched purchase;
             // fall back to a ratio only when the size is genuinely unknown.
