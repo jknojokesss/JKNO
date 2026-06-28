@@ -294,8 +294,8 @@ export default function Landing() {
           <span style={{ fontFamily: 'Playfair Display, serif', fontSize: '26px', fontWeight: '700', letterSpacing: '-0.5px', color: '#1A1A2E' }}>
             JK<span style={{ color: '#C9A84C' }}>.</span>
           </span>
-          <span style={{ fontFamily: 'DM Mono, monospace', fontSize: '11px', fontWeight: '400', letterSpacing: '3px', color: '#1A1A2E' }}>
-            NO JOKES FINANCIALS
+          <span style={{ fontFamily: 'DM Mono, monospace', fontSize: '14px', fontWeight: '500', letterSpacing: '6px', color: '#1A1A2E' }}>
+            NO&nbsp;JOKES&nbsp;FINANCIALS
           </span>
         </div>
         {!isMobile && <div style={{ display: 'flex', gap: '36px', alignItems: 'center' }}>
