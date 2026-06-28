@@ -385,11 +385,11 @@ export default function Landing() {
           {/* Demo tablets */}
           <div id="demos">{(() => {
             const DEMOS = [
-              { label: 'Riverside Bakery', sub: 'Products + Consignment', src: '/demo', icon: '◈' },
-              { label: 'Riverside Tires', sub: 'Items + Services', src: '/riverside-tires', icon: '◎' },
-              { label: 'Riverfall Gowns', sub: 'Order Tracking', src: '/riverfall-gowns', icon: '◇' },
-              { label: 'Riverside Appliance', sub: 'Service-based', src: '/appliance-repair', icon: '⬡' },
-              { label: 'Riverbank Funding', sub: 'Loan Dashboard', src: '/sba-lending', icon: '▣' },
+              { label: 'Riverside Bakery', sub: 'Products + Consignment', src: '/demo', icon: '🥐' },
+              { label: 'Riverside Tires', sub: 'Items + Services', src: '/riverside-tires', icon: '🔩' },
+              { label: 'Riverfall Gowns', sub: 'Order Tracking', src: '/riverfall-gowns', icon: '👗' },
+              { label: 'Riverside Appliance', sub: 'Service-based', src: '/appliance-repair', icon: '🔧' },
+              { label: 'Riverbank Funding', sub: 'Loan Dashboard', src: '/sba-lending', icon: '🏦' },
             ]
             return (
               <>
