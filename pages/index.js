@@ -290,9 +290,9 @@ export default function Landing() {
         transition: 'all 0.3s ease',
         display: 'flex', alignItems: 'center', justifyContent: 'space-between',
       }}>
-        <div style={{ fontFamily: 'Playfair Display, serif', fontSize: '22px',
-          fontWeight: '700', letterSpacing: '2px' }}>
-          JK<span style={{ color: '#C9A84C' }}>.</span>
+        <div style={{ fontFamily: 'Playfair Display, serif', fontSize: '16px',
+          fontWeight: '700', letterSpacing: '1.5px' }}>
+          JK <span style={{ color: '#C9A84C' }}>No Jokes</span> Financials
         </div>
         {!isMobile && <div style={{ display: 'flex', gap: '36px', alignItems: 'center' }}>
           <button className="nav-link" onClick={() => document.getElementById('features')?.scrollIntoView({ behavior: 'smooth' })}>Features</button>
