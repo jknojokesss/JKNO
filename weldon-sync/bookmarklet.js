@@ -27,6 +27,8 @@
       const desc = cells[3] || ''; const sm = desc.match(sizeRe)
       let brand = desc.replace(/^Item:\s*\S+\s*/i, ''); if (sm) brand = brand.slice(0, brand.indexOf(sm[0]))
       const status = cells[6] || ''; const im = status.match(/Invoiced:\s*(\d{1,2})\/(\d{1,2})\/(\d{4})/)
+      // "PO# STOCK" = a shelf/inventory buy; "PO# <name/number>" = a customer order.
+      const pm = status.match(/PO#\s*(.+?)\s*$/i)
       const a = tr.querySelector('a[href*="orderdetail"]')
       out.push({
         web_id: m[1],
@@ -36,6 +38,7 @@
         qty: parseInt((cells[2] || '').replace(/[^0-9]/g, ''), 10) || null,
         unit_cost: parseFloat((cells[4] || '').replace(/[^0-9.]/g, '')) || null,
         description: brand.replace(/\s+/g, ' ').trim(),
+        po_number: pm ? pm[1].trim().slice(0, 60) : null,
         detail: a ? a.getAttribute('href') : null,
       })
     }

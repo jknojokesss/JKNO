@@ -33,6 +33,9 @@ function clean(rows) {
       qty:           Number.isFinite(+r.qty) ? Math.round(+r.qty) : null,
       unit_cost:     Number.isFinite(+r.unit_cost) ? +r.unit_cost : null,
       description:   String(r.description || '').slice(0, 200),
+      // Weldon "PO#" field off the order-detail cell: "STOCK" = shelf/inventory
+      // buy, anything else (a customer name / PO#) = a customer/same-day order.
+      po_number:     r.po_number ? String(r.po_number).trim().slice(0, 60) : null,
       // Transient hint (cc charge ÷ qty) — used only as a last resort, never a column.
       derived_cost:  Number.isFinite(+r.derived_cost) && +r.derived_cost > 0 ? +r.derived_cost : null,
     })
@@ -96,10 +99,29 @@ export default async function handler(req, res) {
     if (!uErr) backfilled++
   }
 
+  // 4) Backfill po_number onto orders already in the DB without it. This is an
+  //    UPDATE keyed by web_id (never an insert), so re-syncing never duplicates
+  //    an order — it just fills the STOCK/customer flag the older sync missed.
+  const { data: noPo } = await supabaseAdmin
+    .from('weldon_orders')
+    .select('web_id')
+    .is('po_number', null)
+  const noPoIds = new Set((noPo || []).map((b) => b.web_id))
+  let po_tagged = 0
+  for (const r of dbRows) {
+    if (!r.po_number || !r.web_id || !noPoIds.has(r.web_id)) continue
+    const { error: pErr } = await supabaseAdmin
+      .from('weldon_orders')
+      .update({ po_number: r.po_number })
+      .eq('web_id', r.web_id)
+    if (!pErr) po_tagged++
+  }
+
   return res.status(200).json({
     ok: true,
     received: dbRows.length,
     inserted: (insData || []).length,
     backfilled,
+    po_tagged,
   })
 }
