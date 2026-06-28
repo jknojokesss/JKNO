@@ -44,15 +44,15 @@ const ITEMS = [
 ]
 
 const ORDERS = [
-  { id: 'WO-041', customer: 'David Kaplan',    service: '235/65/17 Bridgestone x4 + balance', total: 520, status: 'completed', date: 'Jun 25', tech: 'Mike' },
-  { id: 'WO-042', customer: 'Rachel Goldstein', service: 'Oil change + tire rotation',         total: 115, status: 'completed', date: 'Jun 25', tech: 'Luis' },
-  { id: 'WO-043', customer: 'Moshe Friedman',  service: '205/55/16 Michelin x2 + balance',    total: 248, status: 'in-progress', date: 'Jun 26', tech: 'Mike' },
-  { id: 'WO-044', customer: 'Sarah Cohen',      service: 'Tire plug repair',                   total: 25,  status: 'completed', date: 'Jun 26', tech: 'Luis' },
-  { id: 'WO-045', customer: 'Aaron Levy',       service: '245/70/17 BFG A/T x4 + alignment',  total: 620, status: 'in-progress', date: 'Jun 27', tech: 'Mike' },
-  { id: 'WO-046', customer: 'Chana Weiss',      service: 'TPMS sensor x2 + balance',          total: 210, status: 'scheduled', date: 'Jun 28', tech: 'Luis' },
-  { id: 'WO-047', customer: 'Yosef Stern',      service: '225/60/17 Goodyear x4',             total: 440, status: 'scheduled', date: 'Jun 28', tech: 'Mike' },
-  { id: 'WO-048', customer: 'Rivka Horowitz',   service: 'Lug nut replacement + torque check', total: 65, status: 'scheduled', date: 'Jun 28', tech: 'Luis' },
-  { id: 'WO-049', customer: 'Shmuel Berger',    service: '255/50/20 Michelin x4',             total: 880, status: 'scheduled', date: 'Jun 29', tech: 'Mike' },
+  { id: 'WO-041', customer: 'James Carter',    service: '235/65/17 Bridgestone x4 + balance', total: 520, status: 'completed', date: 'Jun 25', tech: 'Mike' },
+  { id: 'WO-042', customer: 'Linda Torres',    service: 'Oil change + tire rotation',         total: 115, status: 'completed', date: 'Jun 25', tech: 'Luis' },
+  { id: 'WO-043', customer: 'Kevin Nguyen',    service: '205/55/16 Michelin x2 + balance',   total: 248, status: 'in-progress', date: 'Jun 26', tech: 'Mike' },
+  { id: 'WO-044', customer: 'Diane Morris',    service: 'Tire plug repair',                  total: 25,  status: 'completed', date: 'Jun 26', tech: 'Luis' },
+  { id: 'WO-045', customer: 'Marcus Johnson',  service: '245/70/17 BFG A/T x4 + alignment', total: 620, status: 'in-progress', date: 'Jun 27', tech: 'Mike' },
+  { id: 'WO-046', customer: 'Sandra Reyes',    service: 'TPMS sensor x2 + balance',         total: 210, status: 'scheduled', date: 'Jun 28', tech: 'Luis' },
+  { id: 'WO-047', customer: 'Brian Walsh',     service: '225/60/17 Goodyear x4',            total: 440, status: 'scheduled', date: 'Jun 28', tech: 'Mike' },
+  { id: 'WO-048', customer: 'Angela Kim',      service: 'Lug nut replacement + torque check', total: 65, status: 'scheduled', date: 'Jun 28', tech: 'Luis' },
+  { id: 'WO-049', customer: 'Robert Patel',    service: '255/50/20 Michelin x4',            total: 880, status: 'scheduled', date: 'Jun 29', tech: 'Mike' },
 ]
 
 const STOCK = [

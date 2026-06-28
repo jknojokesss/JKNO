@@ -32,13 +32,13 @@ const STATUS_OPTS = [
 ]
 
 const SEED = [
-  { id: 1, customer: 'Greenfield Apts', appliance: '3× AC units — not cooling', tech: 'Luis', status: 'in_progress', charged: 1250, lines: [{ type: 'part', desc: 'Run capacitors ×3', cost: 240 }, { type: 'part', desc: 'Contactor', cost: 170 }, { type: 'labor', desc: 'Labor 2.0 hrs', cost: 180 }] },
-  { id: 2, customer: 'Sarah M.', appliance: 'Whirlpool fridge — not cooling', tech: 'Mike', status: 'waiting_part', charged: 320, lines: [{ type: 'part', desc: 'Compressor relay', cost: 145 }] },
-  { id: 3, customer: "Dave's Diner", appliance: 'Commercial oven — igniter', tech: 'Luis', status: 'in_progress', charged: 410, lines: [{ type: 'part', desc: 'Hot surface igniter', cost: 88 }, { type: 'labor', desc: 'Labor 0.8 hrs', cost: 75 }] },
-  { id: 4, customer: 'Ken W.', appliance: 'Bosch fridge — ice maker', tech: 'Mike', status: 'waiting_part', charged: 285, lines: [{ type: 'part', desc: 'Ice maker assembly', cost: 95 }] },
-  { id: 5, customer: 'Rachel K.', appliance: 'LG washer — leaking', tech: 'Mike', status: 'scheduled', charged: 240, lines: [] },
-  { id: 6, customer: 'Tom B.', appliance: 'GE dryer — no heat', tech: 'Luis', status: 'done', charged: 215, lines: [{ type: 'part', desc: 'Heating element', cost: 62 }] },
-  { id: 7, customer: 'Maria S.', appliance: 'Samsung dishwasher — won’t drain', tech: 'Mike', status: 'done', charged: 180, lines: [{ type: 'part', desc: 'Drain pump', cost: 38 }] },
+  { id: 1, customer: 'Oakwood Apartments', appliance: '3× AC units — not cooling', tech: 'Luis', status: 'in_progress', charged: 1250, lines: [{ type: 'part', desc: 'Run capacitors ×3', cost: 240 }, { type: 'part', desc: 'Contactor', cost: 170 }, { type: 'labor', desc: 'Labor 2.0 hrs', cost: 180 }] },
+  { id: 2, customer: 'Diane Foster', appliance: 'Whirlpool fridge — not cooling', tech: 'Mike', status: 'waiting_part', charged: 320, lines: [{ type: 'part', desc: 'Compressor relay', cost: 145 }] },
+  { id: 3, customer: "Tony's Diner", appliance: 'Commercial oven — igniter', tech: 'Luis', status: 'in_progress', charged: 410, lines: [{ type: 'part', desc: 'Hot surface igniter', cost: 88 }, { type: 'labor', desc: 'Labor 0.8 hrs', cost: 75 }] },
+  { id: 4, customer: 'Greg Patterson', appliance: 'Bosch fridge — ice maker', tech: 'Mike', status: 'waiting_part', charged: 285, lines: [{ type: 'part', desc: 'Ice maker assembly', cost: 95 }] },
+  { id: 5, customer: 'Carol Simmons', appliance: 'LG washer — leaking', tech: 'Mike', status: 'scheduled', charged: 240, lines: [] },
+  { id: 6, customer: 'Tom Bradley', appliance: 'GE dryer — no heat', tech: 'Luis', status: 'done', charged: 215, lines: [{ type: 'part', desc: 'Heating element', cost: 62 }] },
+  { id: 7, customer: 'Ana Delgado', appliance: 'Samsung dishwasher — won’t drain', tech: 'Mike', status: 'done', charged: 180, lines: [{ type: 'part', desc: 'Drain pump', cost: 38 }] },
 ]
 
 const partsOf = (j) => j.lines.filter((l) => l.type === 'part').reduce((s, l) => s + l.cost, 0)
