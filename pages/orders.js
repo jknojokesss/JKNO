@@ -109,12 +109,17 @@ export default function Orders() {
           return { data: all }
         })(),
         // Weldon order history = source of truth for cost + inventory/same-day.
-        supabase.from('weldon_orders').select('order_date, size, qty, unit_cost, description'),
+        supabase.from('weldon_orders').select('order_date, size, qty, unit_cost, description, po_number'),
       ])
 
       // 4/15–17 stock-up profile per size (from the actual Weldon orders):
       // budget = cheapest unit, max = priciest stocked, cooper = the Cooper variant cost.
       const STOCKUP_DATE = '2026-04-15', STOCKUP_END = '2026-04-17'
+      // The Weldon "PO# STOCK" convention went live ~4/27: from this date a blank
+      // PO# reliably means a customer (same-day) order and STOCK means a shelf
+      // restock. Before it, a blank PO# is meaningless (tons of stock orders predate
+      // the field), so we only trust the PO# signal for purchases on/after this date.
+      const PO_CONVENTION_DATE = '2026-04-27'
       const stockup = {}
       const bySize = {}
       ;(weldon || []).forEach(o => {
@@ -158,6 +163,25 @@ export default function Orders() {
         }
         return best
       }
+      // Confirmed customer (same-day) order via the PO# flag: a blank-PO# Weldon
+      // purchase (NOT "STOCK") of this size, placed on/after the convention date,
+      // that lines up with the sale (±3 days, affordable, brand-preferred). This is
+      // authoritative where the price heuristic guesses — it rescues budget same-day
+      // orders that would otherwise be misfiled as shelf inventory.
+      const customerSameDay = (size, date, itemWords, sale) => {
+        let best = null, bg = 99
+        for (const o of bySize[size] || []) {
+          if (o.order_date < PO_CONVENTION_DATE) continue                 // pre-convention blank = unreliable
+          if ((o.po_number || '').toUpperCase() === 'STOCK') continue     // STOCK = shelf restock, not a customer buy
+          if (o.po_number) continue                                       // only a truly blank PO# is the customer signal
+          const cost = Number(o.unit_cost); if (!(cost > 0)) continue
+          if (cost > sale + 0.01) continue                                // a special order isn't placed at a loss
+          const g = dayGap(o.order_date, date); if (g > 3) continue
+          const score = g - (sharedModel(itemWords, o.description) ? 10 : 0)
+          if (score < bg) { bg = score; best = o }
+        }
+        return best
+      }
 
       if (lineItems) {
         setRows(lineItems.map(r => {
@@ -190,14 +214,28 @@ export default function Orders() {
             // for the same size happened the same day; don't borrow the brand's cost.
             && (sharedModel(itemWords, m.description) > 0 || sale > sizeBudget * BUDGET_RETAIL_X)
 
+          // PO#-confirmed customer order (only on/after the convention date). When
+          // present it OVERRIDES the price heuristic — a blank-PO# Weldon buy is hard
+          // proof the tire was ordered for a customer, not pulled from the shelf.
+          const cust = (!isUsed && !isService && normalized && r.date >= PO_CONVENTION_DATE)
+            ? customerSameDay(normalized, r.date, itemWords, sale) : null
+
           // After the stock-up, a tire sold in a size we carry is shelf stock (inventory)
-          // unless it was a special order. Premium-branded items are never shelf stock.
-          const isInventory = !isService && !isUsed && r.date >= STOCKUP_DATE
+          // unless it was a special order or a PO#-confirmed customer order. Premium-
+          // branded items are never shelf stock.
+          const isInventory = !cust && !isService && !isUsed && r.date >= STOCKUP_DATE
             && sizeBudget != null && !hasNonStockBrand(r.item_name) && !specialOrder
 
           let costPerUnit, costSource, estimated = false, matchGap = null, matchModelShared = null
           if (isUsed) { costPerUnit = 18; costSource = 'used_tire_inventory' }
           else if (isService) { costPerUnit = 0; costSource = 'service' }
+          else if (cust) {
+            // blank-PO# customer purchase = confirmed same-day order (PO# convention)
+            costPerUnit = Number(cust.unit_cost)
+            costSource = 'weldon_same_day'
+            matchGap = Math.round((new Date(r.date) - new Date(cust.order_date)) / 864e5)
+            matchModelShared = sharedModel(itemWords, cust.description)
+          }
           else if (isInventory) { costPerUnit = (isCooper && su && su.cooper) ? su.cooper : sizeBudget; costSource = 'inventory' }
           else {
             // special order, or a pre-stock-up sale: use the matched purchase;
