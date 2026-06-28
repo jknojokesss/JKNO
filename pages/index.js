@@ -308,8 +308,9 @@ export default function Landing() {
           </span>
         </div>
         {!isMobile && <div style={{ display: 'flex', gap: '36px', alignItems: 'center' }}>
-          <button className="nav-link" onClick={() => document.getElementById('features')?.scrollIntoView({ behavior: 'smooth' })}>Features</button>
-          <button className="nav-link" onClick={() => document.getElementById('about')?.scrollIntoView({ behavior: 'smooth' })}>About</button>
+          <button className="nav-link" onClick={() => router.push('/how-it-works')}>How It Works</button>
+          <button className="nav-link" onClick={() => router.push('/what-we-do')}>What You Get</button>
+          <button className="nav-link" onClick={() => router.push('/about')}>Who We Are</button>
           <button className="nav-link" onClick={() => document.getElementById('contact')?.scrollIntoView({ behavior: 'smooth' })}>Contact</button>
           <button className="cta-btn" style={{ padding: '10px 24px', fontSize: '11px' }}
             onClick={() => router.push('/login')}>
@@ -496,121 +497,7 @@ export default function Landing() {
         </div>
       </section>
 
-      {/* HOW IT WORKS */}
-      <section style={{ background: '#F7F4EF', padding: 'clamp(64px,9vw,100px) clamp(20px,5vw,48px)' }}>
-        <div style={{ maxWidth: '1100px', margin: '0 auto' }}>
-          <div style={{ textAlign: 'center', marginBottom: '56px' }}>
-            <div style={{ fontFamily: 'DM Mono, monospace', fontSize: '11px', letterSpacing: '3px', color: '#C9A84C', marginBottom: '16px' }}>— HOW IT WORKS</div>
-            <h2 style={{ fontFamily: 'Cormorant Garamond, serif', fontSize: 'clamp(28px,3.5vw,44px)', fontWeight: 600, color: '#1A1A2E', lineHeight: 1.15 }}>
-              From messy books to clear numbers.<br />In three steps.
-            </h2>
-          </div>
-          <div className="hiw-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(260px,1fr))', gap: '2px' }}>
-            {[
-              { n: '01', title: 'We learn your business', body: 'One call. You tell us how your business works — how you get paid, what you sell, what you spend. We handle the rest.' },
-              { n: '02', title: 'We build your portal', body: 'A custom dashboard built around your business — your brands, your income streams, your reports. Not a generic template.' },
-              { n: '03', title: 'Your numbers stay current', body: 'Every month your books are updated and your portal reflects where you actually stand. Log in any time, from any device.' },
-            ].map((s, i) => (
-              <div key={i} className="hiw-panel" style={{ background: i === 1 ? '#1A2035' : '#fff', padding: 'clamp(28px,4vw,44px)', border: '1px solid #DDD8CE', borderRadius: i === 0 ? '16px 0 0 16px' : i === 2 ? '0 16px 16px 0' : '0', position: 'relative' }}>
-                <div style={{ fontFamily: 'Cormorant Garamond, serif', fontSize: '64px', fontWeight: 700, color: i === 1 ? 'rgba(201,168,76,0.15)' : '#F0EBE2', lineHeight: 1, marginBottom: '20px' }}>{s.n}</div>
-                <div style={{ fontFamily: 'Cormorant Garamond, serif', fontSize: '24px', fontWeight: 600, color: i === 1 ? '#fff' : '#1A1A2E', marginBottom: '12px', lineHeight: 1.2 }}>{s.title}</div>
-                <div style={{ fontSize: '15px', color: i === 1 ? '#9AA3BD' : '#5A6070', lineHeight: 1.7 }}>{s.body}</div>
-                {i === 1 && <div style={{ position: 'absolute', top: '20px', right: '20px', fontFamily: 'DM Mono, monospace', fontSize: '9px', color: '#C9A84C', letterSpacing: '2px' }}>MOST POPULAR</div>}
-              </div>
-            ))}
-          </div>
-          <div style={{ textAlign: 'center', marginTop: '44px' }}>
-            <button className="cta-btn" onClick={() => document.getElementById('contact')?.scrollIntoView({ behavior: 'smooth' })}>
-              Let's build yours →
-            </button>
-          </div>
-        </div>
-      </section>
 
-      {/* FEATURES */}
-      <section id="features" className="section-pad" style={{ padding: '120px 48px', maxWidth: '1200px', margin: '0 auto' }}>
-        <div style={{ marginBottom: '64px' }}>
-          <div style={{ fontFamily: 'DM Mono, monospace', fontSize: '11px',
-            letterSpacing: '3px', color: '#C9A84C', marginBottom: '16px' }}>
-            — WHAT YOU GET
-          </div>
-          <h2 style={{ fontFamily: 'Cormorant Garamond, serif', fontSize: 'clamp(32px, 4vw, 52px)',
-            fontWeight: '600', letterSpacing: '-1px', lineHeight: 1.1, color: '#1A1A2E' }}>
-            Financials built for<br />the modern business.
-          </h2>
-        </div>
-
-        <div className="features-grid" style={{
-          display: 'grid',
-          gridTemplateColumns: 'repeat(3, 1fr)',
-          gap: '1px',
-          background: '#DDD8CE',
-          border: '1px solid #DDD8CE',
-        }}>
-          {features.map((f, i) => (
-            <div key={i} className="feature-card">
-              <div style={{ fontSize: '24px', color: '#C9A84C', marginBottom: '20px' }}>{f.icon}</div>
-              <h3 style={{ fontFamily: 'DM Sans, sans-serif', fontSize: '15px',
-                fontWeight: '600', marginBottom: '12px', letterSpacing: '0' }}>
-                {f.title}
-              </h3>
-              <p style={{ fontSize: '14px', color: '#5A6070', lineHeight: 1.7 }}>{f.desc}</p>
-            </div>
-          ))}
-        </div>
-      </section>
-
-      {/* ABOUT / SPLIT SECTION */}
-      <section id="about" className="section-pad" style={{ padding: '120px 48px', background: '#EEEAE2',
-        borderTop: '1px solid #DDD8CE', borderBottom: '1px solid #DDD8CE' }}>
-        <div className="split-section" style={{
-          display: 'grid', gridTemplateColumns: '1fr 1fr',
-          gap: '80px', maxWidth: '1100px', margin: '0 auto', alignItems: 'center',
-        }}>
-          <div>
-            <div style={{ fontFamily: 'DM Mono, monospace', fontSize: '11px',
-              letterSpacing: '3px', color: '#C9A84C', marginBottom: '16px' }}>
-              — WHO WE ARE
-            </div>
-            <h2 style={{ fontFamily: 'Cormorant Garamond, serif', fontSize: 'clamp(28px, 3.5vw, 44px)',
-              fontWeight: '600', letterSpacing: '-1px', lineHeight: 1.15, marginBottom: '24px' }}>
-              Beyond bookkeeping.
-            </h2>
-            <p style={{ fontSize: '15px', color: '#5A6070', lineHeight: 1.8, marginBottom: '20px' }}>
-              JK No Jokes Financials is a boutique finance firm that pairs deep financial expertise with cutting-edge AI. We don't just record your numbers — we build the system that turns them into decisions.
-            </p>
-            <p style={{ fontSize: '15px', color: '#5A6070', lineHeight: 1.8, marginBottom: '32px' }}>
-              Every client gets their own custom-built financial portal — a clean, intuitive dashboard that shows exactly how their business is performing, updated in real time, accessible from any device.
-            </p>
-            <button className="cta-btn"
-              onClick={() => document.getElementById('contact')?.scrollIntoView({ behavior: 'smooth' })}>
-              Work With Us
-            </button>
-          </div>
-
-          {/* Stats panel */}
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1px',
-            background: '#DDD8CE', border: '1px solid #DDD8CE' }}>
-            {[
-              { number: 'AI', label: 'Powered Analysis' },
-              { number: '24/7', label: 'Portal Access' },
-              { number: '100%', label: 'Custom Built' },
-              { number: '0', label: 'Guesswork' },
-            ].map((stat, i) => (
-              <div key={i} style={{ background: '#E8E4DC', padding: '36px 28px' }}>
-                <div style={{ fontFamily: 'Cormorant Garamond, serif', fontSize: '40px',
-                  fontWeight: '600', color: '#C9A84C', lineHeight: 1, marginBottom: '8px' }}>
-                  {stat.number}
-                </div>
-                <div style={{ fontSize: '13px', color: '#5A6070', fontFamily: 'DM Mono, monospace',
-                  letterSpacing: '1px' }}>
-                  {stat.label.toUpperCase()}
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
 
       {/* CONTACT */}
       <section id="contact" className="section-pad" style={{ padding: '120px 48px', maxWidth: '680px', margin: '0 auto' }}>
