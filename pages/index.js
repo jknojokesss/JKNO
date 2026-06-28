@@ -267,8 +267,17 @@ export default function Landing() {
         @media (max-width: 768px) {
           .features-grid { grid-template-columns: 1fr !important; }
           .hero-title-text { font-size: 48px !important; }
-          .split-section { grid-template-columns: 1fr !important; }
+          .split-section { grid-template-columns: 1fr !important; gap: 32px !important; }
           .offer-btn { padding: 20px 24px !important; font-size: 20px !important; }
+          .section-pad { padding: clamp(48px,8vw,120px) clamp(16px,5vw,48px) !important; }
+          .hiw-panel { border-radius: 12px !important; }
+          .hiw-grid { gap: 12px !important; }
+          .nav-tagline { display: none; }
+          .footer-pad { padding: 24px 16px !important; }
+          .cta-btn, .ghost-btn { padding: 14px 20px !important; font-size: 11px !important; }
+        }
+        @media (max-width: 480px) {
+          .nav-tagline { display: none; }
         }
       `}</style>
 
@@ -294,7 +303,7 @@ export default function Landing() {
           <span style={{ fontFamily: 'Playfair Display, serif', fontSize: '26px', fontWeight: '700', letterSpacing: '-0.5px', color: '#1A1A2E' }}>
             JK<span style={{ color: '#C9A84C' }}>.</span>
           </span>
-          <span style={{ fontFamily: 'DM Mono, monospace', fontSize: '14px', fontWeight: '500', letterSpacing: '6px', color: '#1A1A2E' }}>
+          <span className="nav-tagline" style={{ fontFamily: 'DM Mono, monospace', fontSize: '14px', fontWeight: '500', letterSpacing: '6px', color: '#1A1A2E' }}>
             NO&nbsp;JOKES&nbsp;FINANCIALS
           </span>
         </div>
@@ -407,8 +416,17 @@ export default function Landing() {
                       <span style={{ fontFamily: 'DM Mono, monospace', fontSize: '11px', color: '#6B7A96' }}>jknojokes.com{DEMOS[activeDemo].src}</span>
                     </div>
                   </div>
-                  <iframe key={activeDemo} src={DEMOS[activeDemo].src} title={`${DEMOS[activeDemo].label} demo`} loading="lazy"
-                    style={{ display: 'block', width: '100%', height: '660px', border: 'none', background: '#FBF4EC' }} />
+                  {isMobile
+                    ? <div style={{ padding: '32px', textAlign: 'center' }}>
+                        <div style={{ fontFamily: 'DM Mono, monospace', fontSize: '11px', color: '#6B7A96', marginBottom: '16px', letterSpacing: '1px' }}>DEMO BEST VIEWED ON DESKTOP</div>
+                        <a href={DEMOS[activeDemo].src} target="_blank" rel="noopener noreferrer"
+                          style={{ display: 'inline-block', background: '#C9A84C', color: '#1A1A2E', textDecoration: 'none', padding: '14px 28px', fontFamily: 'DM Mono, monospace', fontSize: '12px', letterSpacing: '2px', borderRadius: '4px' }}>
+                          OPEN {DEMOS[activeDemo].label.toUpperCase()} DEMO →
+                        </a>
+                      </div>
+                    : <iframe key={activeDemo} src={DEMOS[activeDemo].src} title={`${DEMOS[activeDemo].label} demo`} loading="lazy"
+                        style={{ display: 'block', width: '100%', height: '660px', border: 'none', background: '#FBF4EC' }} />
+                  }
                 </div>
               </>
             )
@@ -487,13 +505,13 @@ export default function Landing() {
               From messy books to clear numbers.<br />In three steps.
             </h2>
           </div>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(260px,1fr))', gap: '2px' }}>
+          <div className="hiw-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(260px,1fr))', gap: '2px' }}>
             {[
               { n: '01', title: 'We learn your business', body: 'One call. You tell us how your business works — how you get paid, what you sell, what you spend. We handle the rest.' },
               { n: '02', title: 'We build your portal', body: 'A custom dashboard built around your business — your brands, your income streams, your reports. Not a generic template.' },
               { n: '03', title: 'Your numbers stay current', body: 'Every month your books are updated and your portal reflects where you actually stand. Log in any time, from any device.' },
             ].map((s, i) => (
-              <div key={i} style={{ background: i === 1 ? '#1A2035' : '#fff', padding: 'clamp(28px,4vw,44px)', border: '1px solid #DDD8CE', borderRadius: i === 0 ? '16px 0 0 16px' : i === 2 ? '0 16px 16px 0' : '0', position: 'relative' }}>
+              <div key={i} className="hiw-panel" style={{ background: i === 1 ? '#1A2035' : '#fff', padding: 'clamp(28px,4vw,44px)', border: '1px solid #DDD8CE', borderRadius: i === 0 ? '16px 0 0 16px' : i === 2 ? '0 16px 16px 0' : '0', position: 'relative' }}>
                 <div style={{ fontFamily: 'Cormorant Garamond, serif', fontSize: '64px', fontWeight: 700, color: i === 1 ? 'rgba(201,168,76,0.15)' : '#F0EBE2', lineHeight: 1, marginBottom: '20px' }}>{s.n}</div>
                 <div style={{ fontFamily: 'Cormorant Garamond, serif', fontSize: '24px', fontWeight: 600, color: i === 1 ? '#fff' : '#1A1A2E', marginBottom: '12px', lineHeight: 1.2 }}>{s.title}</div>
                 <div style={{ fontSize: '15px', color: i === 1 ? '#9AA3BD' : '#5A6070', lineHeight: 1.7 }}>{s.body}</div>
@@ -510,7 +528,7 @@ export default function Landing() {
       </section>
 
       {/* FEATURES */}
-      <section id="features" style={{ padding: '120px 48px', maxWidth: '1200px', margin: '0 auto' }}>
+      <section id="features" className="section-pad" style={{ padding: '120px 48px', maxWidth: '1200px', margin: '0 auto' }}>
         <div style={{ marginBottom: '64px' }}>
           <div style={{ fontFamily: 'DM Mono, monospace', fontSize: '11px',
             letterSpacing: '3px', color: '#C9A84C', marginBottom: '16px' }}>
@@ -543,7 +561,7 @@ export default function Landing() {
       </section>
 
       {/* ABOUT / SPLIT SECTION */}
-      <section id="about" style={{ padding: '120px 48px', background: '#EEEAE2',
+      <section id="about" className="section-pad" style={{ padding: '120px 48px', background: '#EEEAE2',
         borderTop: '1px solid #DDD8CE', borderBottom: '1px solid #DDD8CE' }}>
         <div className="split-section" style={{
           display: 'grid', gridTemplateColumns: '1fr 1fr',
@@ -595,7 +613,7 @@ export default function Landing() {
       </section>
 
       {/* CONTACT */}
-      <section id="contact" style={{ padding: '120px 48px', maxWidth: '680px', margin: '0 auto' }}>
+      <section id="contact" className="section-pad" style={{ padding: '120px 48px', maxWidth: '680px', margin: '0 auto' }}>
         <div style={{ marginBottom: '56px', textAlign: 'center' }}>
           <div style={{ fontFamily: 'DM Mono, monospace', fontSize: '11px',
             letterSpacing: '3px', color: '#C9A84C', marginBottom: '16px' }}>
@@ -659,7 +677,7 @@ export default function Landing() {
       </section>
 
       {/* FOOTER */}
-      <footer style={{ borderTop: '1px solid #DDD8CE', padding: '32px 48px',
+      <footer className="footer-pad" style={{ borderTop: '1px solid #DDD8CE', padding: '32px 48px',
         display: 'flex', flexDirection: 'column', gap: '16px' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '16px' }}>
           <div style={{ fontFamily: 'Playfair Display, serif', fontSize: '20px',
