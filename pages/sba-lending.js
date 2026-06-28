@@ -95,7 +95,7 @@ export default function SbaLending() {
         <aside className="sb-side">
           <div style={{ paddingBottom: '20px' }}>
             <div style={{ fontFamily: 'Cormorant Garamond, serif', fontSize: '16px', fontWeight: 600, color: '#fff', lineHeight: 1.2 }}>Riverbank<br />Funding</div>
-            <div style={{ fontFamily: 'DM Mono, monospace', fontSize: '9px', color: '#4A9FD4', letterSpacing: '.18em', marginTop: '4px' }}>SBA PIPELINE</div>
+            <div style={{ fontFamily: 'DM Mono, monospace', fontSize: '9px', color: '#4A9FD4', letterSpacing: '.18em', marginTop: '4px' }}>LOAN DASHBOARD</div>
           </div>
           <nav style={{ flex: 1 }}>
             {tabs.map(t => (
