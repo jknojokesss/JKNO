@@ -123,6 +123,12 @@ export default function Orders() {
       // restock. Before it, a blank PO# is meaningless (tons of stock orders predate
       // the field), so we only trust the PO# signal for purchases on/after this date.
       const PO_CONVENTION_DATE = '2026-04-27'
+      // May is a CLOSED/booked period. Only apply the new PO#-based same-day
+      // RECLASSIFICATION to the open period (June onward) so the live view keeps
+      // matching the May journal entries already posted. (The PO# convention itself
+      // started 4/27 — that date still governs which purchases count as a customer
+      // signal — but we don't relabel closed-period sales.)
+      const RECLASS_FROM = '2026-06-01'
       const stockup = {}
       const bySize = {}
       ;(weldon || []).forEach(o => {
@@ -241,7 +247,7 @@ export default function Orders() {
           // PO#-confirmed customer order (only on/after the convention date). When
           // present it OVERRIDES the price heuristic — a blank-PO# Weldon buy is hard
           // proof the tire was ordered for a customer, not pulled from the shelf.
-          const cust = (!isUsed && !isService && normalized && r.date >= PO_CONVENTION_DATE)
+          const cust = (!isUsed && !isService && normalized && r.date >= RECLASS_FROM)
             ? customerSameDay(normalized, r.date, itemWords, sale) : null
 
           // After the stock-up, a tire sold in a size we carry is shelf stock (inventory)
@@ -261,9 +267,11 @@ export default function Orders() {
             matchModelShared = sharedModel(itemWords, cust.description)
           }
           else if (isInventory) {
-            // Brand-specific shelf cost first (Kumho, Cooper, etc. in a multi-tier
-            // size); else the Cooper special-case; else the size's budget tier.
-            const bc = brandedStockCost(normalized, itemWords)
+            // Brand-specific shelf cost (Kumho, Cooper, etc. in a multi-tier size),
+            // but only for the OPEN period — May is closed/booked, so pre-June keeps
+            // its exact prior costing (Cooper special-case, else size budget). This
+            // freezes the closed month byte-for-byte.
+            const bc = r.date >= RECLASS_FROM ? brandedStockCost(normalized, itemWords) : null
             costPerUnit = bc != null ? bc : ((isCooper && su && su.cooper) ? su.cooper : sizeBudget)
             costSource = 'inventory'
           }
