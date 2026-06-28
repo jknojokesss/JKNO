@@ -451,117 +451,60 @@ export default function Landing() {
       </div>
 
 
-      {/* REMOVED — demo showcase moved to hero above */}
-      <section style={{ display: 'none' }}>
-        <div>
-
-          {/* Calendar + typing hero */}
-          <div style={{ display: 'flex', gap: '48px', alignItems: 'center', flexWrap: 'wrap', background: '#1A2035', borderRadius: '16px', padding: 'clamp(28px,5vw,52px)', marginBottom: '40px', position: 'relative', overflow: 'hidden' }}>
-            <div style={{ position: 'absolute', inset: 0, background: 'radial-gradient(circle at 80% 50%, rgba(201,168,76,0.12), transparent 60%)', pointerEvents: 'none' }} />
-
-            {/* Mini calendar */}
-            <div style={{ flexShrink: 0, background: '#0D1523', borderRadius: '12px', padding: '16px', width: '210px', position: 'relative' }}>
-              <div style={{ fontFamily: 'DM Mono, monospace', fontSize: '11px', color: '#C9A84C', letterSpacing: '0.1em', marginBottom: '12px' }}>JUNE 2026</div>
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7,1fr)', gap: '2px', marginBottom: '6px' }}>
-                {['S','M','T','W','T','F','S'].map((d,i) => (
-                  <div key={i} style={{ textAlign: 'center', fontSize: '9px', color: '#3A5060', paddingBottom: '4px' }}>{d}</div>
-                ))}
-              </div>
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7,1fr)', gap: '2px' }}>
-                {/* June 2026 starts on Monday — 1 blank */}
-                <div />
-                {Array.from({ length: 30 }, (_, i) => i + 1).map(d => (
-                  <div key={d} style={{ position: 'relative', width: '24px', height: '24px', display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: '4px', background: d === 28 ? '#C9A84C' : 'transparent', margin: '1px auto' }}>
-                    <span style={{ fontSize: '10px', color: d < 28 ? '#1D2D3A' : d === 28 ? '#1A1A1A' : '#3A5060', fontFamily: 'DM Mono, monospace', fontWeight: d === 28 ? 700 : 400 }}>{d}</span>
-                    {d < 28 && (
-                      <div style={{ position: 'absolute', left: '3px', right: '3px', top: '50%', height: '1.5px', background: '#C03A22', transform: 'rotate(-15deg)', borderRadius: '1px' }} />
-                    )}
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            {/* Typing text */}
-            <div style={{ flex: 1, minWidth: '220px', position: 'relative' }}>
-              <TypingText onDone={() => setTypingDone(true)} />
-              <div style={{ marginTop: '20px', fontSize: '17px', fontWeight: 500, color: '#C9A84C', opacity: typingDone ? 1 : 0, transition: 'opacity 0.6s ease', fontFamily: 'Cormorant Garamond, serif', letterSpacing: '0.2px' }}>
-                JK No Jokes Financials can help.
-              </div>
-            </div>
+      {/* POST-DEMO CTA */}
+      <section style={{ background: '#1A2035', padding: 'clamp(52px,8vw,88px) clamp(20px,5vw,48px)', textAlign: 'center', position: 'relative', overflow: 'hidden' }}>
+        <div style={{ position: 'absolute', inset: 0, background: 'radial-gradient(circle at 50% 0%, rgba(201,168,76,0.18), transparent 60%)', pointerEvents: 'none' }} />
+        <div style={{ position: 'relative', maxWidth: '680px', margin: '0 auto' }}>
+          <div style={{ fontFamily: 'DM Mono, monospace', fontSize: '11px', letterSpacing: '3px', color: '#C9A84C', marginBottom: '20px' }}>— READY TO GET YOURS BUILT?</div>
+          <h2 style={{ fontFamily: 'Cormorant Garamond, serif', fontSize: 'clamp(32px,4vw,52px)', fontWeight: 600, color: '#fff', lineHeight: 1.1, marginBottom: '20px' }}>
+            You just saw the demo.<br />Now imagine it with <span style={{ color: '#C9A84C' }}>your numbers.</span>
+          </h2>
+          <p style={{ fontSize: '16px', color: '#9AA3BD', lineHeight: 1.7, maxWidth: '480px', margin: '0 auto 36px' }}>
+            Every client gets a custom-built portal — branded to your business, built around how you actually operate. No templates. No cookie-cutter software.
+          </p>
+          <div style={{ display: 'flex', gap: '14px', justifyContent: 'center', flexWrap: 'wrap' }}>
+            <button className="cta-btn" onClick={() => document.getElementById('contact')?.scrollIntoView({ behavior: 'smooth' })}>
+              Get Started →
+            </button>
+            <a href={BOOKING_URL} target="_blank" rel="noopener noreferrer" className="ghost-btn" style={{ textDecoration: 'none' }}>
+              Book a free call
+            </a>
           </div>
-
-          {/* Demo tablets */}
-          {(() => {
-            const DEMOS = [
-              { label: 'Riverside Bakery', sub: 'Products + Consignment', src: '/demo', icon: '◈' },
-              { label: 'Riverside Tires', sub: 'Items + Services', src: '/riverside-tires', icon: '◎' },
-              { label: 'Riverside Appliance', sub: 'Service-based', src: '/appliance-repair', icon: '⬡' },
-              { label: 'Riverbank Funding', sub: 'SBA Dashboard', src: '/sba-lending', icon: '▣' },
-            ]
-            return (
-              <>
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(160px,1fr))', gap: '10px', marginBottom: '20px' }}>
-                  {DEMOS.map((d, i) => (
-                    <button key={i} onClick={() => setActiveDemo(i)} style={{
-                      fontFamily: 'inherit', cursor: 'pointer', textAlign: 'left',
-                      padding: '16px', borderRadius: '12px',
-                      border: activeDemo === i ? '2px solid #C9A84C' : '1px solid #DDD8CE',
-                      background: activeDemo === i ? '#FFF8EC' : '#fff',
-                      transition: 'all 0.15s',
-                    }}>
-                      <div style={{ fontSize: '20px', marginBottom: '8px', color: activeDemo === i ? '#C9A84C' : '#5A6070' }}>{d.icon}</div>
-                      <div style={{ fontSize: '13px', fontWeight: 600, color: '#1A1A2E', marginBottom: '3px' }}>{d.label}</div>
-                      <div style={{ fontSize: '11px', color: '#5A6070' }}>{d.sub}</div>
-                    </button>
-                  ))}
-                </div>
-
-                {/* Browser mockup frame */}
-                <div style={{ background: '#1A2035', borderRadius: '12px', boxShadow: '0 40px 100px rgba(0,0,0,0.25)', overflow: 'hidden', maxWidth: '960px', margin: '0 auto' }}>
-                  <div style={{ background: '#0D1120', padding: '12px 16px', display: 'flex', alignItems: 'center', gap: '8px', borderBottom: '1px solid #2E3A5C' }}>
-                    <div style={{ width: 10, height: 10, borderRadius: '50%', background: '#FF5F57' }} />
-                    <div style={{ width: 10, height: 10, borderRadius: '50%', background: '#FFBD2E' }} />
-                    <div style={{ width: 10, height: 10, borderRadius: '50%', background: '#28C840' }} />
-                    <div style={{ flex: 1, margin: '0 12px', background: '#1E2540', borderRadius: '4px', padding: '4px 12px', textAlign: 'center' }}>
-                      <span style={{ fontFamily: 'DM Mono, monospace', fontSize: '11px', color: '#6B7A96' }}>
-                        jknojokes.com{DEMOS[activeDemo].src}
-                      </span>
-                    </div>
-                  </div>
-                  <iframe
-                    key={activeDemo}
-                    src={DEMOS[activeDemo].src}
-                    title={`${DEMOS[activeDemo].label} demo`}
-                    loading="lazy"
-                    style={{ display: 'block', width: '100%', height: '660px', border: 'none', background: '#FBF4EC' }}
-                  />
-                </div>
-              </>
-            )
-          })()}
-
-          {/* Caption below mockup */}
-          <div style={{ textAlign: 'center', marginTop: '32px', display: 'flex',
-            justifyContent: 'center', gap: '40px', flexWrap: 'wrap' }}>
-            {[
-              '✓ Custom branded per client',
-              '✓ Drill down into every number',
-              '✓ Works on any device',
-            ].map((item, i) => (
-              <div key={i} style={{ fontFamily: 'DM Mono, monospace', fontSize: '11px',
-                letterSpacing: '1px', color: '#7A8090' }}>{item}</div>
+          <div style={{ marginTop: '28px', display: 'flex', justifyContent: 'center', gap: '32px', flexWrap: 'wrap' }}>
+            {['✓ Custom branded', '✓ No QuickBooks required', '✓ Up and running in days'].map((t, i) => (
+              <span key={i} style={{ fontFamily: 'DM Mono, monospace', fontSize: '11px', letterSpacing: '1px', color: '#5A6A80' }}>{t}</span>
             ))}
           </div>
+        </div>
+      </section>
 
-          {/* Live demo CTA */}
-          <div style={{ textAlign: 'center', marginTop: '40px' }}>
-            <button className="cta-btn" onClick={() => router.push('/demo')}>
-              Open full-screen demo →
+      {/* HOW IT WORKS */}
+      <section style={{ background: '#F7F4EF', padding: 'clamp(64px,9vw,100px) clamp(20px,5vw,48px)' }}>
+        <div style={{ maxWidth: '1100px', margin: '0 auto' }}>
+          <div style={{ textAlign: 'center', marginBottom: '56px' }}>
+            <div style={{ fontFamily: 'DM Mono, monospace', fontSize: '11px', letterSpacing: '3px', color: '#C9A84C', marginBottom: '16px' }}>— HOW IT WORKS</div>
+            <h2 style={{ fontFamily: 'Cormorant Garamond, serif', fontSize: 'clamp(28px,3.5vw,44px)', fontWeight: 600, color: '#1A1A2E', lineHeight: 1.15 }}>
+              From messy books to clear numbers.<br />In three steps.
+            </h2>
+          </div>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(260px,1fr))', gap: '2px' }}>
+            {[
+              { n: '01', title: 'We learn your business', body: 'One call. You tell us how your business works — how you get paid, what you sell, what you spend. We handle the rest.' },
+              { n: '02', title: 'We build your portal', body: 'A custom dashboard built around your business — your brands, your income streams, your reports. Not a generic template.' },
+              { n: '03', title: 'Your numbers stay current', body: 'Every month your books are updated and your portal reflects where you actually stand. Log in any time, from any device.' },
+            ].map((s, i) => (
+              <div key={i} style={{ background: i === 1 ? '#1A2035' : '#fff', padding: 'clamp(28px,4vw,44px)', border: '1px solid #DDD8CE', borderRadius: i === 0 ? '16px 0 0 16px' : i === 2 ? '0 16px 16px 0' : '0', position: 'relative' }}>
+                <div style={{ fontFamily: 'Cormorant Garamond, serif', fontSize: '64px', fontWeight: 700, color: i === 1 ? 'rgba(201,168,76,0.15)' : '#F0EBE2', lineHeight: 1, marginBottom: '20px' }}>{s.n}</div>
+                <div style={{ fontFamily: 'Cormorant Garamond, serif', fontSize: '24px', fontWeight: 600, color: i === 1 ? '#fff' : '#1A1A2E', marginBottom: '12px', lineHeight: 1.2 }}>{s.title}</div>
+                <div style={{ fontSize: '15px', color: i === 1 ? '#9AA3BD' : '#5A6070', lineHeight: 1.7 }}>{s.body}</div>
+                {i === 1 && <div style={{ position: 'absolute', top: '20px', right: '20px', fontFamily: 'DM Mono, monospace', fontSize: '9px', color: '#C9A84C', letterSpacing: '2px' }}>MOST POPULAR</div>}
+              </div>
+            ))}
+          </div>
+          <div style={{ textAlign: 'center', marginTop: '44px' }}>
+            <button className="cta-btn" onClick={() => document.getElementById('contact')?.scrollIntoView({ behavior: 'smooth' })}>
+              Let's build yours →
             </button>
-            <div style={{ fontFamily: 'DM Mono, monospace', fontSize: '10px', color: '#7A8090',
-              marginTop: '12px', letterSpacing: '1.5px' }}>
-              CLICKABLE · SAMPLE DATA · NO LOGIN
-            </div>
           </div>
         </div>
       </section>
