@@ -459,7 +459,6 @@ export default function Demo() {
 @media(max-width:860px){.jm-shell{flex-direction:column}.jm-side{width:auto;height:auto;position:static;flex-direction:column;padding:14px 12px}.jm-nav{flex-direction:row;overflow-x:auto;gap:6px;padding-bottom:4px}.jm-navbtn{width:auto;padding:8px 15px;border-radius:18px;background:rgba(255,255,255,.07)}.jm-main{padding:18px 16px 52px;max-width:100%}}`}</style>
       </Head>
 
-      <div style={{ background: SPICE, color: '#fff', textAlign: 'center', padding: '8px 16px', fontFamily: MONO, fontSize: '11px', fontWeight: 600, letterSpacing: '1px' }}>LIVE DEMO · SAMPLE DATA FOR A FICTIONAL BUSINESS</div>
       <div className="jm-shell">
         {/* Sidebar */}
         <aside className="jm-side">
@@ -496,7 +495,7 @@ export default function Demo() {
             })}
           </nav>
           <div style={{ padding: '12px 10px 0', borderTop: '1px solid rgba(255,255,255,.1)', marginTop: '8px' }}>
-            <div style={{ fontFamily: MONO, fontSize: '10px', color: '#8A7A66', lineHeight: 1.6 }}>Built &amp; maintained by<br /><span style={{ color: SPICE, fontWeight: 600 }}>JK No Jokes Financials</span></div>
+            <div style={{ fontFamily: MONO, fontSize: '9px', color: '#8A7A66', lineHeight: 1.7 }}>SAMPLE DASHBOARD<br /><span style={{ color: SPICE, fontWeight: 600 }}>JK No Jokes Financials</span></div>
           </div>
         </aside>
 
