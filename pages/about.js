@@ -50,6 +50,14 @@ export default function About() {
       <section style={{ padding:'0 clamp(16px,5vw,48px) clamp(64px,9vw,100px)', maxWidth:'1100px', margin:'0 auto' }}>
         <div className="split" style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:'80px', alignItems:'center' }}>
           <div>
+            {/* Portrait */}
+            <div style={{ marginBottom:'36px', display:'flex', alignItems:'center', gap:'20px' }}>
+              <img src="/1779727210800.jpg" alt="Jonathan Katz" style={{ width:'100px', height:'100px', borderRadius:'50%', objectFit:'cover', border:'3px solid #C9A84C', flexShrink:0 }} />
+              <div>
+                <div style={{ fontFamily:'Cormorant Garamond,serif', fontSize:'22px', fontWeight:600, lineHeight:1.2 }}>Jonathan (Chaim) Katz</div>
+                <div style={{ fontFamily:'DM Mono,monospace', fontSize:'10px', letterSpacing:'1.5px', color:'#C9A84C', marginTop:'4px' }}>FOUNDER · JK NO JOKES FINANCIALS</div>
+              </div>
+            </div>
             <p style={{ fontSize:'16px', color:'#5A6070', lineHeight:1.8, marginBottom:'24px' }}>
               We don't just record your numbers — we build the system that turns them into decisions. Every client gets their own custom-built financial portal, updated in real time, accessible from any device.
             </p>
