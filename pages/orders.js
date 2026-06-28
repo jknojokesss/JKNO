@@ -14,6 +14,9 @@ const BUDGET_RETAIL_X = 3.2 // a budget tire's retail rarely exceeds ~3.2x its c
 const MIN_SAMEDAY_MARGIN = 0.18 // reject a PO#-confirmed same-day cost match that implies a thinner
                                 // margin than this — it means we anchored a budget sale to a pricier
                                 // same-size order (wrong tier), so fall back to the heuristic instead
+const MAX_SAMEDAY_MARGIN = 0.55 // ...and reject one implying a FATTER margin than this — a same-day
+                                // special order isn't a 65%-markup shelf sale, so a too-cheap cost means
+                                // we anchored a budget tier to a premium sale (e.g. a Cooper to an Agility)
 
 const THEME = { sidebarBg: '#1A1A1A', sidebarBorder: '#2A2A2A', accent: '#CC2222' }
 
@@ -178,7 +181,6 @@ export default function Orders() {
       // authoritative where the price heuristic guesses — it rescues budget same-day
       // orders that would otherwise be misfiled as shelf inventory.
       const customerSameDay = (size, date, itemWords, sale) => {
-        const branded = itemWords.size > 0
         let best = null, bg = 99
         for (const o of bySize[size] || []) {
           if (o.order_date < PO_CONVENTION_DATE) continue                 // pre-convention blank = unreliable
@@ -186,9 +188,13 @@ export default function Orders() {
           if (o.po_number) continue                                       // only a truly blank PO# is the customer signal
           const cost = Number(o.unit_cost); if (!(cost > 0)) continue
           if (cost > sale + 0.01) continue                                // a special order isn't placed at a loss
-          if (cost > sale * (1 - MIN_SAMEDAY_MARGIN)) continue            // implausibly thin margin = wrong tier matched
+          if (cost > sale * (1 - MIN_SAMEDAY_MARGIN)) continue            // implausibly THIN margin = matched too-pricey a tier
+          if (cost < sale * (1 - MAX_SAMEDAY_MARGIN)) continue            // implausibly FAT margin = matched a budget tier to a premium sale
+          // Brand/model overlap is NOT required — Clover may name a tire by brand
+          // ("General") while Weldon names it by model ("Grabber HDLT"), so the same
+          // tire shares no word. The margin guards above keep the match honest; brand
+          // overlap just boosts the score so a true brand match wins ties.
           const shared = sharedModel(itemWords, o.description)
-          if (branded && shared === 0) continue                           // a named-brand sale must share the order's brand
           const g = dayGap(o.order_date, date); if (g > 3) continue
           const score = g - (shared ? 10 : 0)
           if (score < bg) { bg = score; best = o }
