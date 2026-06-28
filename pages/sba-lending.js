@@ -81,35 +81,36 @@ export default function SbaLending() {
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=DM+Sans:wght@300;400;500&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet" />
-        <style>{`*{box-sizing:border-box;margin:0;padding:0}body{background:${BG};font-family:'DM Sans',sans-serif}
-          .sb-tabs::-webkit-scrollbar{display:none}.sb-tabs{scrollbar-width:none}::placeholder{color:#A7B2BD}`}</style>
+        <style>{`*{box-sizing:border-box;margin:0;padding:0}body{background:${BG};font-family:'DM Sans',sans-serif}::placeholder{color:#A7B2BD}
+          .sb-shell{display:flex;min-height:100vh}
+          .sb-side{width:200px;flex-shrink:0;background:${DARK};display:flex;flex-direction:column;padding:20px 12px;position:sticky;top:0;height:100vh;overflow-y:auto}
+          .sb-nav-btn{display:block;width:100%;text-align:left;padding:9px 12px;border-radius:6px;border:none;background:transparent;color:#5A7080;font-family:'DM Sans',sans-serif;font-size:13px;cursor:pointer;margin-bottom:2px}
+          .sb-nav-btn:hover{background:rgba(255,255,255,.06);color:#ccc}
+          .sb-nav-btn.on{background:rgba(255,255,255,.09);color:#fff;box-shadow:inset 3px 0 0 ${GREEN}}
+          .sb-main{flex:1;min-width:0;padding:28px 28px 60px}
+          @media(max-width:640px){.sb-side{display:none}.sb-main{padding:16px 14px 48px}}`}</style>
       </Head>
 
-      <div style={{ background: NAVY, color: '#fff', textAlign: 'center', padding: '8px 16px', fontFamily: 'DM Mono, monospace', fontSize: '11px', letterSpacing: '1px' }}>
-        SAMPLE DASHBOARD · built for Aryeh by JK No Jokes Financials
-      </div>
-
-      <div style={{ background: DARK }}>
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '12px', padding: '12px 18px 0', flexWrap: 'wrap' }}>
-          <div style={{ display: 'flex', alignItems: 'baseline', gap: '10px' }}>
-            <span style={{ fontSize: '18px' }}>🏦</span>
-            <span style={{ ...serif, fontSize: '20px', fontWeight: 700, color: '#E8EEF5' }}>{BIZ}</span>
-            <span style={{ fontFamily: 'DM Mono, monospace', fontSize: '8px', letterSpacing: '2px', color: '#7FB0D6' }}>SBA PIPELINE</span>
+      <div className="sb-shell">
+        <aside className="sb-side">
+          <div style={{ paddingBottom: '20px' }}>
+            <div style={{ fontFamily: 'Cormorant Garamond, serif', fontSize: '16px', fontWeight: 600, color: '#fff', lineHeight: 1.2 }}>Riverbank<br />Funding</div>
+            <div style={{ fontFamily: 'DM Mono, monospace', fontSize: '9px', color: '#4A9FD4', letterSpacing: '.18em', marginTop: '4px' }}>SBA PIPELINE</div>
           </div>
-          <a href={BOOK} target="_blank" rel="noopener noreferrer" style={{ background: GREEN, color: '#fff', textDecoration: 'none', borderRadius: '4px', padding: '7px 12px', fontFamily: 'DM Mono, monospace', fontSize: '10px', letterSpacing: '1px', whiteSpace: 'nowrap' }}>BUILT BY JK →</a>
-        </div>
-        <nav className="sb-tabs" style={{ display: 'flex', gap: '4px', padding: '0 18px', overflowX: 'auto', borderBottom: '1px solid rgba(255,255,255,0.1)', marginTop: '8px' }}>
-          {tabs.map((t) => (
-            <button key={t.id} onClick={() => setTab(t.id)} style={{
-              padding: '9px 12px', background: 'transparent', border: 'none', cursor: 'pointer', whiteSpace: 'nowrap',
-              color: tab === t.id ? '#fff' : '#8499AC', fontSize: '11px', fontFamily: 'DM Mono, monospace', letterSpacing: '0.04em',
-              borderBottom: tab === t.id ? `2px solid ${GREEN}` : '2px solid transparent', marginBottom: '-1px',
-            }}>{t.label}</button>
-          ))}
-        </nav>
-      </div>
+          <nav style={{ flex: 1 }}>
+            {tabs.map(t => (
+              <button key={t.id} className={`sb-nav-btn${tab === t.id ? ' on' : ''}`} onClick={() => setTab(t.id)}>{t.label}</button>
+            ))}
+          </nav>
+          <div style={{ borderTop: '1px solid #1E3248', paddingTop: '14px', marginTop: '8px' }}>
+            <div style={{ fontFamily: 'DM Mono, monospace', fontSize: '9px', color: '#304A60', lineHeight: 1.6 }}>
+              SAMPLE DASHBOARD<br /><span style={{ color: GREEN }}>JK No Jokes Financials</span>
+            </div>
+            <a href={BOOK} target="_blank" rel="noopener noreferrer" style={{ display: 'inline-block', marginTop: '10px', background: GREEN, color: '#fff', textDecoration: 'none', borderRadius: '5px', padding: '7px 12px', fontFamily: 'DM Mono, monospace', fontSize: '10px', letterSpacing: '1px' }}>BUILT BY JK →</a>
+          </div>
+        </aside>
 
-      <div style={{ maxWidth: '1040px', margin: '0 auto', padding: '20px 16px 48px' }}>
+        <main className="sb-main">
 
         {/* LEADS */}
         {tab === 'leads' && (
@@ -281,6 +282,7 @@ export default function SbaLending() {
           <a href={BOOK} target="_blank" rel="noopener noreferrer" style={{ background: GREEN, color: '#fff', textDecoration: 'none', padding: '14px 30px', borderRadius: '4px', fontFamily: 'DM Mono, monospace', fontSize: '12px', letterSpacing: '2px' }}>LET'S TALK →</a>
           <div style={{ marginTop: '14px', fontFamily: 'DM Mono, monospace', fontSize: '11px', color: FAINT }}>Jonathan Katz · JK No Jokes Financials · jk@jknojokes.com</div>
         </div>
+        </main>
       </div>
     </>
   )
