@@ -42,7 +42,7 @@ export default function About() {
           Beyond bookkeeping.
         </h1>
         <p style={{ fontSize:'17px', color:'#5A6070', lineHeight:1.7, maxWidth:'520px', margin:'0 auto' }}>
-          JK No Jokes Financials is a boutique finance firm that pairs deep financial expertise with cutting-edge AI.
+          JK No Jokes Financials is a boutique finance firm that combines deep financial expertise with custom-built technology — built specifically for your business.
         </p>
       </section>
 
@@ -76,7 +76,7 @@ export default function About() {
           {/* Stats */}
           <div className="stats" style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:'1px', background:'#DDD8CE', border:'1px solid #DDD8CE' }}>
             {[
-              { number:'AI', label:'Powered Analysis' },
+              { number:'1', label:'Point of Contact' },
               { number:'24/7', label:'Portal Access' },
               { number:'100%', label:'Custom Built' },
               { number:'0', label:'Guesswork' },

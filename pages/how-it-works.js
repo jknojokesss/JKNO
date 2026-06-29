@@ -54,7 +54,7 @@ export default function HowItWorks() {
           {[
             { n:'01', title:'We learn your business', body:'One call. You tell us how your business works — how you get paid, what you sell, what you spend. We listen, ask the right questions, and figure out exactly what your dashboard needs to show.' },
             { n:'02', title:'We build your portal', body:'A custom dashboard built around your business — your brands, your income streams, your reports. Not a generic template. Not off-the-shelf software. Built for you, looks like you.' },
-            { n:'03', title:'Your numbers stay current', body:'Every month your books are updated and your portal reflects where you actually stand. Log in any time, from any device. Ask AI a question about your numbers and get a plain-English answer.' },
+            { n:'03', title:'Your numbers stay current', body:'Every month your books are updated and your portal reflects where you actually stand. Log in any time, from any device. Have a question? Reach out and get a plain-English answer — fast.' },
           ].map((s, i) => (
             <div key={i} className="hiw-panel" style={{ background: i===1?'#1A2035':'#fff', padding:'clamp(28px,4vw,52px)', border:'1px solid #DDD8CE', borderRadius: i===0?'16px 0 0 16px':i===2?'0 16px 16px 0':'0', position:'relative' }}>
               <div style={{ fontFamily:'Cormorant Garamond,serif', fontSize:'72px', fontWeight:700, color: i===1?'rgba(201,168,76,0.12)':'#F0EBE2', lineHeight:1, marginBottom:'24px' }}>{s.n}</div>

@@ -4,7 +4,7 @@ import { useRouter } from 'next/router'
 const BOOKING_URL = 'https://calendly.com/jk-jknojokes/30min'
 
 const features = [
-  { icon: '◈', title: 'AI-Powered Insights', desc: 'Your financials explained in plain English. No jargon, no confusion — just clear answers about how your business is doing and what to watch.' },
+  { icon: '◈', title: 'Plain-English Insights', desc: 'Your financials explained clearly. No jargon, no confusion — just straight answers about how your business is doing and what to watch.' },
   { icon: '▣', title: 'Custom-Built Dashboards', desc: 'Every client gets a portal built around their business. See your revenue, expenses, and profit at a glance — tailored to what matters to you.' },
   { icon: '⬡', title: 'QuickBooks Optional', desc: 'Keep QuickBooks or skip it — your call. We can plug into the books you already have, or run everything on our own system. Either way: cleaner data, smarter reporting, no bloat.' },
   { icon: '◎', title: 'Real-Time Financials', desc: 'Log in any time, from any device, and see exactly where your business stands. Your numbers are always up to date and always accessible.' },

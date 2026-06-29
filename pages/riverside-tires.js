@@ -19,7 +19,7 @@ const NAV = [
   { id: 'orders',     label: 'Orders'       },
   { id: 'stock',      label: 'Stock'        },
   { id: 'accounts',   label: 'Accounts'     },
-  { id: 'ai',         label: '✦ Ask AI'    },
+  { id: 'ai',         label: '✦ Ask Us'    },
 ]
 
 const ITEMS = [
@@ -405,7 +405,7 @@ export default function RiversideTires() {
           {/* ── ASK AI ── */}
           {tab==='ai' && <>
             <div style={{ background:'#fff', border:`1px solid ${BORDER}`, borderRadius:'12px', padding:'28px', maxWidth:'680px' }}>
-              <div style={{ fontFamily:serif, fontSize:'22px', fontWeight:600, marginBottom:'6px' }}>✦ Ask AI</div>
+              <div style={{ fontFamily:serif, fontSize:'22px', fontWeight:600, marginBottom:'6px' }}>✦ Ask Us</div>
               <div style={{ fontFamily:mono, fontSize:'10px', color:MUTED, marginBottom:'20px', letterSpacing:'.05em' }}>Ask anything about your business data</div>
               <div style={{ display:'flex', gap:'8px', marginBottom:'16px' }}>
                 <input value={aiQ} onChange={e=>setAiQ(e.target.value)} onKeyDown={e=>e.key==='Enter'&&askAi()}

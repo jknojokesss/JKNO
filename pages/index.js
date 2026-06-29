@@ -86,7 +86,7 @@ export default function Landing() {
   const features = [
     {
       icon: '◈',
-      title: 'AI-Powered Insights',
+      title: 'Clear Financial Insights',
       desc: 'Your financials explained in plain English. No jargon, no confusion — just clear answers about how your business is doing and what to watch.',
     },
     {
@@ -120,7 +120,7 @@ export default function Landing() {
     <>
       <Head>
         <title>JK No Jokes Financials — Real-Time Financials for Your Business</title>
-        <meta name="description" content="AI-powered financials with a custom client portal. Real-time numbers, plain-English insights, and dashboards built for your business — with or without QuickBooks." />
+        <meta name="description" content="Custom financials with a client portal. Real-time numbers, plain-English insights, and dashboards built for your business — with or without QuickBooks." />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600;700&family=DM+Sans:wght@300;400;500&family=DM+Mono:wght@400;500&family=Playfair+Display:wght@700&display=swap" rel="stylesheet" />
@@ -478,7 +478,7 @@ export default function Landing() {
         padding: '16px 0', background: '#EEEAE2', overflow: 'hidden' }}>
         <div className="ticker-inner" style={{ fontFamily: 'DM Mono, monospace',
           fontSize: '12px', letterSpacing: '2px', color: '#7A8090', whiteSpace: 'nowrap' }}>
-          {Array(4).fill('AI-POWERED INSIGHTS · CUSTOM DASHBOARDS · REAL-TIME FINANCIALS · NO QUICKBOOKS · DRILL-DOWN REPORTING · POS INTEGRATION · PLAIN ENGLISH BOOKS · ').join('')}
+          {Array(4).fill('CUSTOM DASHBOARDS · REAL-TIME FINANCIALS · NO QUICKBOOKS · DRILL-DOWN REPORTING · POS INTEGRATION · PLAIN ENGLISH BOOKS · BUILT FOR YOUR BUSINESS ·').join('')}
         </div>
       </div>
 
