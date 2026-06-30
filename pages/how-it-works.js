@@ -43,6 +43,9 @@ export default function HowItWorks() {
         <h1 style={{ fontFamily:'Cormorant Garamond,serif', fontSize:'clamp(36px,5vw,64px)', fontWeight:600, lineHeight:1.1, marginBottom:'20px' }}>
           From messy books to<br />clear numbers.
         </h1>
+        <div style={{ fontFamily:'Cormorant Garamond,serif', fontStyle:'italic', fontSize:'clamp(20px,2.8vw,30px)', color:'#C9A84C', fontWeight:600, marginBottom:'20px' }}>
+          The JK Way™ — simple by design.
+        </div>
         <p style={{ fontSize:'17px', color:'#5A6070', lineHeight:1.7, maxWidth:'540px', margin:'0 auto' }}>
           Three steps. No bloated software. No learning curve. Just a system that works while you focus on running your business.
         </p>

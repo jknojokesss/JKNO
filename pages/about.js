@@ -41,6 +41,9 @@ export default function About() {
         <h1 style={{ fontFamily:'Cormorant Garamond,serif', fontSize:'clamp(36px,5vw,64px)', fontWeight:600, lineHeight:1.1, marginBottom:'20px' }}>
           Beyond bookkeeping.
         </h1>
+        <div style={{ fontFamily:'Cormorant Garamond,serif', fontStyle:'italic', fontSize:'clamp(20px,2.8vw,30px)', color:'#C9A84C', fontWeight:600, marginBottom:'20px' }}>
+          The JK Way™ — finance with a human behind it.
+        </div>
         <p style={{ fontSize:'17px', color:'#5A6070', lineHeight:1.7, maxWidth:'520px', margin:'0 auto' }}>
           JK No Jokes Financials is a boutique finance firm that combines deep financial expertise with custom-built technology — built specifically for your business.
         </p>
