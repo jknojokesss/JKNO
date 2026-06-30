@@ -379,7 +379,7 @@ export default function Landing() {
         <div style={{ position: 'absolute', inset: 0, background: 'radial-gradient(circle at 22% -10%, rgba(201,168,76,0.22), transparent 55%)', pointerEvents: 'none' }} />
         <div style={{ position: 'absolute', inset: 0, backgroundImage: 'radial-gradient(rgba(26,32,53,0.05) 1px, transparent 1px)', backgroundSize: '24px 24px', maskImage: 'radial-gradient(ellipse 70% 60% at 30% 30%, #000 30%, transparent 75%)', WebkitMaskImage: 'radial-gradient(ellipse 70% 60% at 30% 30%, #000 30%, transparent 75%)', pointerEvents: 'none' }} />
 
-        <div style={{ position: 'relative', maxWidth: '1180px', margin: '0 auto', textAlign: 'left' }}>
+        <div style={{ position: 'relative', maxWidth: '1200px', margin: '0 auto', textAlign: 'left' }}>
           <h1 className="hero-title hero-title-text" style={{ fontFamily: 'Playfair Display, serif', fontWeight: 700, fontSize: 'clamp(34px,6.6vw,82px)', lineHeight: 1.06, color: '#1A2035', letterSpacing: '-1px' }}>
             Understand the <span className="gold-shimmer">Story</span><br />Behind Your Numbers.
           </h1>
