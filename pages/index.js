@@ -132,11 +132,12 @@ export default function Landing() {
         body {
           background-color: #F5F1EA;
           background-image:
-            radial-gradient(circle at 12% 8%, rgba(201,168,76,0.10), transparent 38%),
-            radial-gradient(circle at 88% 70%, rgba(26,32,53,0.05), transparent 42%),
-            radial-gradient(rgba(26,32,53,0.045) 1px, transparent 1px);
-          background-size: 100% 100%, 100% 100%, 26px 26px;
-          background-attachment: fixed, fixed, fixed;
+            linear-gradient(rgba(26,32,53,0.055) 1px, transparent 1px),
+            linear-gradient(90deg, rgba(26,32,53,0.055) 1px, transparent 1px),
+            radial-gradient(circle at 12% 8%, rgba(201,168,76,0.16), transparent 45%),
+            radial-gradient(circle at 88% 92%, rgba(201,168,76,0.12), transparent 45%);
+          background-size: 38px 38px, 38px 38px, 100% 100%, 100% 100%;
+          background-attachment: fixed;
           color: #1A1A2E; font-family: 'DM Sans', sans-serif;
         }
 
@@ -383,10 +384,9 @@ export default function Landing() {
       )}
 
       {/* HERO — headline + dashboard */}
-      <section style={{ padding: 'clamp(64px,9vw,112px) clamp(14px,5vw,48px) clamp(40px,5vw,64px)', background: 'linear-gradient(180deg, #FBF9F4 0%, #F7F4EF 100%)', position: 'relative', overflow: 'hidden' }}>
-        {/* textured backdrop */}
+      <section style={{ padding: 'clamp(64px,9vw,112px) clamp(14px,5vw,48px) clamp(40px,5vw,64px)', background: 'transparent', position: 'relative', overflow: 'hidden' }}>
+        {/* gold glow over the page grid */}
         <div style={{ position: 'absolute', inset: 0, background: 'radial-gradient(circle at 22% -10%, rgba(201,168,76,0.22), transparent 55%)', pointerEvents: 'none' }} />
-        <div style={{ position: 'absolute', inset: 0, backgroundImage: 'radial-gradient(rgba(26,32,53,0.05) 1px, transparent 1px)', backgroundSize: '24px 24px', maskImage: 'radial-gradient(ellipse 70% 60% at 30% 30%, #000 30%, transparent 75%)', WebkitMaskImage: 'radial-gradient(ellipse 70% 60% at 30% 30%, #000 30%, transparent 75%)', pointerEvents: 'none' }} />
 
         <div style={{ position: 'relative', maxWidth: '1200px', margin: '0 auto 0 clamp(0px,3vw,72px)', textAlign: 'left' }}>
           <h1 className="hero-title hero-title-text" style={{ fontFamily: "'Space Grotesk', sans-serif", fontWeight: 700, fontSize: 'clamp(33px,6.3vw,78px)', lineHeight: 1.07, color: '#1A2035', letterSpacing: '-2px' }}>
