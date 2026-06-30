@@ -567,31 +567,6 @@ export default function Landing() {
         )}
       </section>
 
-      {/* $25 GIFT CARD OFFER */}
-      <section id="offer" style={{
-        background: 'linear-gradient(160deg, #1A2035 0%, #242C4A 100%)',
-        padding: 'clamp(52px, 8vw, 88px) clamp(20px, 5vw, 48px)',
-        textAlign: 'center', position: 'relative', overflow: 'hidden',
-      }}>
-        <div style={{ position: 'absolute', inset: 0,
-          background: 'radial-gradient(circle at 50% 0%, rgba(201,168,76,0.20), transparent 60%)',
-          pointerEvents: 'none' }} />
-        <div style={{ position: 'relative', maxWidth: '860px', margin: '0 auto' }}>
-          <div style={{ fontFamily: 'DM Mono, monospace', fontSize: '12px',
-            letterSpacing: '3px', color: '#C9A84C', marginBottom: '24px' }}>
-            🎁 LIMITED-TIME OFFER FOR NEW CLIENTS
-          </div>
-          <a href={BOOKING_URL} target="_blank" rel="noopener noreferrer" className="offer-btn">
-            FREE $25 gift card + free consultation, sign up now!
-          </a>
-          <p style={{ maxWidth: '540px', margin: '24px auto 0', fontSize: '13px',
-            lineHeight: 1.6, color: '#9AA3BD' }}>
-            Must have a current small business and be willing to share details about your
-            current financial setup.
-          </p>
-        </div>
-      </section>
-
       {/* FOOTER */}
       <footer className="footer-pad" style={{ borderTop: '1px solid #DDD8CE', padding: '32px 48px',
         display: 'flex', flexDirection: 'column', gap: '16px' }}>
