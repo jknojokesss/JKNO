@@ -380,9 +380,6 @@ export default function Landing() {
         <div style={{ position: 'absolute', inset: 0, backgroundImage: 'radial-gradient(rgba(26,32,53,0.05) 1px, transparent 1px)', backgroundSize: '24px 24px', maskImage: 'radial-gradient(ellipse 70% 60% at 30% 30%, #000 30%, transparent 75%)', WebkitMaskImage: 'radial-gradient(ellipse 70% 60% at 30% 30%, #000 30%, transparent 75%)', pointerEvents: 'none' }} />
 
         <div style={{ position: 'relative', maxWidth: '1180px', margin: '0 auto', textAlign: 'left' }}>
-          <div className="hero-badge" style={{ marginBottom: '26px' }}>
-            <span className="hero-pill-badge">✦&nbsp; FINANCIAL CLARITY · BUILT FOR YOUR BUSINESS</span>
-          </div>
           <h1 className="hero-title hero-title-text" style={{ fontFamily: 'Playfair Display, serif', fontWeight: 700, fontSize: 'clamp(34px,6.6vw,82px)', lineHeight: 1.06, color: '#1A2035', letterSpacing: '-1px' }}>
             Understand the <span className="gold-shimmer">Story</span><br />Behind Your Numbers.
           </h1>
