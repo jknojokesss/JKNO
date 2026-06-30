@@ -278,7 +278,7 @@ export default function Landing() {
 
         @media (max-width: 768px) {
           .features-grid { grid-template-columns: 1fr !important; }
-          .hero-title-text { font-size: 48px !important; }
+          .hero-title-text { font-size: 34px !important; }
           .split-section { grid-template-columns: 1fr !important; gap: 32px !important; }
           .offer-btn { padding: 20px 24px !important; font-size: 20px !important; }
           .section-pad { padding: clamp(48px,8vw,120px) clamp(16px,5vw,48px) !important; }
@@ -356,11 +356,11 @@ export default function Landing() {
 
       {/* HERO — headline + dashboard */}
       <section style={{ padding: 'clamp(72px,9vw,120px) clamp(14px,5vw,48px) clamp(40px,5vw,64px)', background: '#F7F4EF', overflow: 'hidden' }}>
-        <div style={{ maxWidth: '900px', margin: '0 auto', textAlign: 'center' }}>
-          <h1 className="hero-title hero-title-text" style={{ fontFamily: 'Playfair Display, serif', fontWeight: 700, fontSize: 'clamp(34px,5.5vw,60px)', lineHeight: 1.08, color: '#1A2035', letterSpacing: '-0.5px' }}>
+        <div style={{ maxWidth: '1180px', margin: '0 auto', textAlign: 'center' }}>
+          <h1 className="hero-title hero-title-text" style={{ fontFamily: 'Playfair Display, serif', fontWeight: 700, fontSize: 'clamp(34px,6.6vw,82px)', lineHeight: 1.06, color: '#1A2035', letterSpacing: '-1px' }}>
             Understand the Story Behind Your Numbers.
           </h1>
-          <div className="hero-sub" style={{ marginTop: '16px', fontFamily: 'Cormorant Garamond, serif', fontStyle: 'italic', fontSize: 'clamp(18px,2.4vw,26px)', color: '#C9A84C', fontWeight: 600 }}>
+          <div className="hero-sub" style={{ marginTop: '18px', fontFamily: 'Cormorant Garamond, serif', fontStyle: 'italic', fontSize: 'clamp(23px,3.4vw,40px)', color: '#C9A84C', fontWeight: 600 }}>
             The JK Way™ to Financial Clarity
           </div>
           <p className="hero-sub" style={{ margin: '20px auto 0', maxWidth: '620px', fontSize: 'clamp(15px,1.7vw,18px)', lineHeight: 1.65, color: '#5A6070' }}>
@@ -368,7 +368,7 @@ export default function Landing() {
           </p>
           <div className="hero-cta" style={{ marginTop: '32px', display: 'flex', gap: '12px', flexWrap: 'wrap', justifyContent: 'center' }}>
             <button className="cta-btn" onClick={() => document.getElementById('demos')?.scrollIntoView({ behavior: 'smooth' })}>See It in Action ↓</button>
-            <a className="ghost-btn" href={BOOKING_URL} target="_blank" rel="noopener noreferrer" style={{ textDecoration: 'none', display: 'inline-flex', alignItems: 'center' }}>Book a Demo</a>
+            <a className="ghost-btn" href={BOOKING_URL} target="_blank" rel="noopener noreferrer" style={{ textDecoration: 'none', display: 'inline-flex', alignItems: 'center' }}>Book a Free Call</a>
           </div>
         </div>
 
