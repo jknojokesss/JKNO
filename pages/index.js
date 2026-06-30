@@ -367,7 +367,7 @@ export default function Landing() {
             Tailored financial insights that help business owners understand their business, make better decisions, and grow with confidence.
           </p>
           <div className="hero-cta" style={{ marginTop: '32px', display: 'flex', gap: '12px', flexWrap: 'wrap', justifyContent: 'center' }}>
-            <button className="cta-btn" onClick={() => document.getElementById('demos')?.scrollIntoView({ behavior: 'smooth' })}>See the Dashboard ↓</button>
+            <button className="cta-btn" onClick={() => document.getElementById('demos')?.scrollIntoView({ behavior: 'smooth' })}>See It in Action ↓</button>
             <a className="ghost-btn" href={BOOKING_URL} target="_blank" rel="noopener noreferrer" style={{ textDecoration: 'none', display: 'inline-flex', alignItems: 'center' }}>Book a Demo</a>
           </div>
         </div>
@@ -424,6 +424,24 @@ export default function Landing() {
               </>
             )
           })()}</div>
+        </div>
+      </section>
+
+      {/* WHY THE JK WAY */}
+      <section style={{ background: '#fff', padding: 'clamp(56px,8vw,96px) clamp(20px,5vw,48px)', borderTop: '1px solid #EDE8DF' }}>
+        <div style={{ maxWidth: '720px', margin: '0 auto', textAlign: 'center' }}>
+          <h2 style={{ fontFamily: 'Playfair Display, serif', fontWeight: 700, fontSize: 'clamp(28px,4vw,44px)', color: '#1A2035', lineHeight: 1.15, marginBottom: '28px' }}>
+            Why The JK Way™?
+          </h2>
+          <p style={{ fontFamily: 'Cormorant Garamond, serif', fontSize: 'clamp(19px,2.4vw,24px)', lineHeight: 1.55, color: '#1A2035', marginBottom: '18px' }}>
+            Most financial reports tell you <em>what</em> happened.
+          </p>
+          <p style={{ fontFamily: 'Cormorant Garamond, serif', fontSize: 'clamp(19px,2.4vw,24px)', lineHeight: 1.55, color: '#1A2035', marginBottom: '28px' }}>
+            The JK Way™ helps you understand <em>why</em> it happened—and what to do next.
+          </p>
+          <p style={{ fontFamily: 'Cormorant Garamond, serif', fontStyle: 'italic', fontSize: 'clamp(17px,2vw,21px)', lineHeight: 1.55, color: '#C9A84C', fontWeight: 600 }}>
+            Every business is different. Your financial insights should be too.
+          </p>
         </div>
       </section>
 
