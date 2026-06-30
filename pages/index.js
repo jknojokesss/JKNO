@@ -174,7 +174,7 @@ export default function Landing() {
           padding: 9px 18px; font-family: 'DM Mono', monospace; font-size: 11px;
           letter-spacing: 1.5px; color: #1A2035; box-shadow: 0 8px 24px rgba(26,32,53,0.07);
         }
-        .hero-pill { font-family: 'DM Mono', monospace; font-size: 11px; letter-spacing: 1px; color: #5A6070; }
+        .hero-pill { font-family: 'DM Mono', monospace; font-size: 13.5px; letter-spacing: 0.5px; color: #3D4456; font-weight: 500; }
 
         .feature-card {
           background: #E8E4DC;
@@ -384,7 +384,7 @@ export default function Landing() {
       )}
 
       {/* HERO — headline + dashboard */}
-      <section style={{ padding: 'clamp(64px,9vw,112px) clamp(14px,5vw,48px) clamp(40px,5vw,64px)', background: 'transparent', position: 'relative', overflow: 'hidden' }}>
+      <section style={{ padding: 'clamp(44px,6vw,80px) clamp(14px,5vw,48px) clamp(40px,5vw,64px)', background: 'transparent', position: 'relative', overflow: 'hidden' }}>
         {/* gold glow over the page grid */}
         <div style={{ position: 'absolute', inset: 0, background: 'radial-gradient(circle at 22% -10%, rgba(201,168,76,0.22), transparent 55%)', pointerEvents: 'none' }} />
 
@@ -395,12 +395,15 @@ export default function Landing() {
           <div className="hero-sub" style={{ marginTop: '20px', fontFamily: "'DM Mono', monospace", fontSize: 'clamp(13px,1.7vw,17px)', color: '#B8943C', fontWeight: 500, letterSpacing: '2.5px', textTransform: 'uppercase' }}>
             The JK Way™ to Financial Clarity
           </div>
-          <p className="hero-sub" style={{ margin: '20px 0 0', maxWidth: '620px', fontSize: 'clamp(15px,1.7vw,18px)', lineHeight: 1.65, color: '#5A6070' }}>
-            Tailored financial insights that help business owners understand their business, make better decisions, and grow with confidence.
+          <p className="hero-sub" style={{ margin: '20px 0 0', maxWidth: '640px', fontSize: 'clamp(15px,1.7vw,18px)', lineHeight: 1.65, color: '#5A6070' }}>
+            Built by finance pros, designed for business owners — every dashboard is <strong style={{ color: '#1A2035', fontWeight: 600 }}>tailored to the way your business actually operates.</strong>
+          </p>
+          <p className="hero-sub" style={{ margin: '16px 0 0', maxWidth: '600px', fontSize: 'clamp(17px,2vw,21px)', lineHeight: 1.4, color: '#1A2035', fontWeight: 500 }}>
+            Know where your business stands before making your next decision.
           </p>
           <div className="hero-cta" style={{ marginTop: '32px', display: 'flex', gap: '12px', flexWrap: 'wrap', justifyContent: 'flex-start' }}>
             <button className="cta-btn" onClick={() => document.getElementById('demos')?.scrollIntoView({ behavior: 'smooth' })}>See It in Action ↓</button>
-            <a className="ghost-btn" href={BOOKING_URL} target="_blank" rel="noopener noreferrer" style={{ textDecoration: 'none', display: 'inline-flex', alignItems: 'center' }}>Book a Free Call</a>
+            <a className="ghost-btn" href={BOOKING_URL} target="_blank" rel="noopener noreferrer" style={{ textDecoration: 'none', display: 'inline-flex', alignItems: 'center' }}>Book a Demo</a>
           </div>
           <div className="hero-pills" style={{ marginTop: '26px', display: 'flex', gap: 'clamp(16px,3vw,32px)', justifyContent: 'flex-start', flexWrap: 'wrap' }}>
             {['✓ Real-time numbers', '✓ Plain English', '✓ No QuickBooks required'].map((t, i) => (
@@ -410,7 +413,7 @@ export default function Landing() {
         </div>
 
         {/* Large dashboard, immediately below */}
-        <div style={{ maxWidth: '1200px', margin: 'clamp(40px,5vw,64px) auto 0 clamp(0px,3vw,72px)' }}>
+        <div style={{ maxWidth: '1200px', margin: 'clamp(22px,3vw,38px) auto 0 clamp(0px,3vw,72px)' }}>
           <div id="demos">{(() => {
             const DEMOS = [
               { label: 'Riverside Bakery', sub: 'Products + Consignment', src: '/demo', icon: '🥐' },
