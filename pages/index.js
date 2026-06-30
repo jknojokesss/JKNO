@@ -459,35 +459,34 @@ export default function Landing() {
       </section>
 
       {/* WHY THE JK WAY */}
-      <section style={{ background: '#1A2035', padding: 'clamp(64px,9vw,104px) clamp(20px,5vw,48px)', position: 'relative', overflow: 'hidden' }}>
-        <div style={{ position: 'absolute', inset: 0, background: 'radial-gradient(circle at 50% 0%, rgba(201,168,76,0.16), transparent 62%)', pointerEvents: 'none' }} />
+      <section style={{ background: 'linear-gradient(180deg, #FBF9F4 0%, #F4F0E8 100%)', padding: 'clamp(64px,9vw,104px) clamp(20px,5vw,48px)', position: 'relative', overflow: 'hidden', borderTop: '1px solid #EDE8DF' }}>
         <div style={{ position: 'relative', maxWidth: '980px', margin: '0 auto', textAlign: 'center' }}>
           <div style={{ fontFamily: 'DM Mono, monospace', fontSize: '11px', letterSpacing: '3px', color: '#C9A84C', marginBottom: '18px' }}>— THE JK WAY™</div>
-          <h2 style={{ fontFamily: 'Playfair Display, serif', fontWeight: 700, fontSize: 'clamp(30px,4.4vw,52px)', color: '#fff', lineHeight: 1.12, marginBottom: '12px' }}>
-            Numbers are easy.<br /><span style={{ color: '#C9A84C' }}>The story</span> is everything.
+          <h2 style={{ fontFamily: 'Playfair Display, serif', fontWeight: 700, fontSize: 'clamp(30px,4.4vw,52px)', color: '#1A2035', lineHeight: 1.12, marginBottom: '12px' }}>
+            Numbers are easy.<br /><span style={{ color: '#B8943C' }}>The story</span> is everything.
           </h2>
-          <div style={{ width: '54px', height: '2px', background: '#C9A84C', margin: '26px auto 44px', opacity: 0.7 }} />
+          <div style={{ width: '54px', height: '2px', background: '#C9A84C', margin: '26px auto 44px', opacity: 0.8 }} />
 
           {/* What vs Why cards */}
           <div className="jkway-cards" style={{ display: 'flex', gap: '18px', alignItems: 'stretch', justifyContent: 'center', flexWrap: 'wrap' }}>
-            <div style={{ flex: '1 1 300px', maxWidth: '380px', background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.10)', borderRadius: '14px', padding: 'clamp(24px,3vw,34px)', textAlign: 'left' }}>
-              <div style={{ fontFamily: 'DM Mono, monospace', fontSize: '10px', letterSpacing: '2px', color: '#6B7693', marginBottom: '14px' }}>MOST REPORTS</div>
-              <div style={{ fontFamily: 'Cormorant Garamond, serif', fontSize: 'clamp(22px,2.6vw,30px)', lineHeight: 1.3, color: '#9AA3BD' }}>
-                Tell you <span style={{ color: '#fff', fontWeight: 600 }}>what</span> happened.
+            <div style={{ flex: '1 1 300px', maxWidth: '380px', background: '#fff', border: '1px solid #E6E0D4', borderRadius: '14px', padding: 'clamp(24px,3vw,34px)', textAlign: 'left', boxShadow: '0 10px 30px rgba(26,32,53,0.05)' }}>
+              <div style={{ fontFamily: 'DM Mono, monospace', fontSize: '10px', letterSpacing: '2px', color: '#A39A86', marginBottom: '14px' }}>MOST REPORTS</div>
+              <div style={{ fontFamily: 'Cormorant Garamond, serif', fontSize: 'clamp(22px,2.6vw,30px)', lineHeight: 1.3, color: '#8A8475' }}>
+                Tell you <span style={{ color: '#1A2035', fontWeight: 600 }}>what</span> happened.
               </div>
             </div>
 
             <div className="jkway-arrow" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#C9A84C', fontSize: '26px', flexShrink: 0 }}>→</div>
 
-            <div style={{ flex: '1 1 300px', maxWidth: '380px', background: 'rgba(201,168,76,0.10)', border: '1px solid #C9A84C', borderRadius: '14px', padding: 'clamp(24px,3vw,34px)', textAlign: 'left', boxShadow: '0 0 50px rgba(201,168,76,0.10)' }}>
-              <div style={{ fontFamily: 'DM Mono, monospace', fontSize: '10px', letterSpacing: '2px', color: '#C9A84C', marginBottom: '14px' }}>THE JK WAY™</div>
-              <div style={{ fontFamily: 'Cormorant Garamond, serif', fontSize: 'clamp(22px,2.6vw,30px)', lineHeight: 1.3, color: '#fff' }}>
-                Shows you <span style={{ color: '#C9A84C', fontWeight: 600 }}>why</span> — and what to do next.
+            <div style={{ flex: '1 1 300px', maxWidth: '380px', background: 'linear-gradient(165deg, #FFFDF8 0%, #FBF3DF 100%)', border: '1.5px solid #C9A84C', borderRadius: '14px', padding: 'clamp(24px,3vw,34px)', textAlign: 'left', boxShadow: '0 14px 40px rgba(201,168,76,0.18)' }}>
+              <div style={{ fontFamily: 'DM Mono, monospace', fontSize: '10px', letterSpacing: '2px', color: '#B8943C', marginBottom: '14px' }}>THE JK WAY™</div>
+              <div style={{ fontFamily: 'Cormorant Garamond, serif', fontSize: 'clamp(22px,2.6vw,30px)', lineHeight: 1.3, color: '#1A2035' }}>
+                Shows you <span style={{ color: '#B8943C', fontWeight: 700 }}>why</span> — and what to do next.
               </div>
             </div>
           </div>
 
-          <p style={{ fontFamily: 'Cormorant Garamond, serif', fontStyle: 'italic', fontSize: 'clamp(18px,2.1vw,23px)', lineHeight: 1.55, color: '#C9A84C', fontWeight: 600, marginTop: '44px' }}>
+          <p style={{ fontFamily: 'Cormorant Garamond, serif', fontStyle: 'italic', fontSize: 'clamp(18px,2.1vw,23px)', lineHeight: 1.55, color: '#B8943C', fontWeight: 600, marginTop: '44px' }}>
             Every business is different. Your financial insights should be too.
           </p>
         </div>
