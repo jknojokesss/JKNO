@@ -571,18 +571,19 @@ export default function Landing() {
             fontWeight: '700', letterSpacing: '2px' }}>
             JK<span style={{ color: '#C9A84C' }}>.</span>
           </div>
-          <div style={{ fontFamily: 'DM Mono, monospace', fontSize: '11px',
-            color: '#5A6070', letterSpacing: '1px' }}>
-            © {new Date().getFullYear()} JK NO JOKES FINANCIALS
-          </div>
           <button className="ghost-btn" style={{ padding: '10px 20px', fontSize: '11px' }}
             onClick={() => router.push('/login')}>
             CLIENT LOGIN →
           </button>
         </div>
-        <div style={{ display: 'flex', gap: '24px', justifyContent: 'center', paddingTop: '8px', borderTop: '1px solid #EEE9E0' }}>
-          <button onClick={() => router.push('/privacy')} style={{ background: 'none', border: 'none', cursor: 'pointer', fontFamily: 'DM Mono, monospace', fontSize: '10px', color: '#5A6070', letterSpacing: '1px' }}>PRIVACY POLICY</button>
-          <button onClick={() => router.push('/terms')} style={{ background: 'none', border: 'none', cursor: 'pointer', fontFamily: 'DM Mono, monospace', fontSize: '10px', color: '#5A6070', letterSpacing: '1px' }}>TERMS OF SERVICE</button>
+        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '10px', paddingTop: '16px', borderTop: '1px solid #EEE9E0' }}>
+          <div style={{ fontFamily: 'DM Mono, monospace', fontSize: '11px', color: '#5A6070', letterSpacing: '1px' }}>
+            © {new Date().getFullYear()} JK NO JOKES FINANCIALS
+          </div>
+          <div style={{ display: 'flex', gap: '24px', justifyContent: 'center' }}>
+            <button onClick={() => router.push('/privacy')} style={{ background: 'none', border: 'none', cursor: 'pointer', fontFamily: 'DM Mono, monospace', fontSize: '10px', color: '#5A6070', letterSpacing: '1px' }}>PRIVACY POLICY</button>
+            <button onClick={() => router.push('/terms')} style={{ background: 'none', border: 'none', cursor: 'pointer', fontFamily: 'DM Mono, monospace', fontSize: '10px', color: '#5A6070', letterSpacing: '1px' }}>TERMS OF SERVICE</button>
+          </div>
         </div>
       </footer>
     </>
