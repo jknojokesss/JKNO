@@ -480,35 +480,6 @@ export default function Landing() {
       </div>
 
 
-      {/* POST-DEMO CTA */}
-      <section style={{ background: '#1A2035', padding: 'clamp(52px,8vw,88px) clamp(20px,5vw,48px)', textAlign: 'center', position: 'relative', overflow: 'hidden' }}>
-        <div style={{ position: 'absolute', inset: 0, background: 'radial-gradient(circle at 50% 0%, rgba(201,168,76,0.18), transparent 60%)', pointerEvents: 'none' }} />
-        <div style={{ position: 'relative', maxWidth: '680px', margin: '0 auto' }}>
-          <div style={{ fontFamily: 'DM Mono, monospace', fontSize: '11px', letterSpacing: '3px', color: '#C9A84C', marginBottom: '20px' }}>— READY TO GET YOURS BUILT?</div>
-          <h2 style={{ fontFamily: 'Cormorant Garamond, serif', fontSize: 'clamp(32px,4vw,52px)', fontWeight: 600, color: '#fff', lineHeight: 1.1, marginBottom: '20px' }}>
-            You just saw the demo.<br />Now imagine it with <span style={{ color: '#C9A84C' }}>your numbers.</span>
-          </h2>
-          <p style={{ fontSize: '16px', color: '#9AA3BD', lineHeight: 1.7, maxWidth: '480px', margin: '0 auto 36px' }}>
-            Every client gets a custom-built portal — branded to your business, built around how you actually operate. No templates. No cookie-cutter software.
-          </p>
-          <div style={{ display: 'flex', gap: '14px', justifyContent: 'center', flexWrap: 'wrap' }}>
-            <button className="cta-btn" onClick={() => document.getElementById('contact')?.scrollIntoView({ behavior: 'smooth' })}>
-              Get Started →
-            </button>
-            <a href={BOOKING_URL} target="_blank" rel="noopener noreferrer" className="ghost-btn" style={{ textDecoration: 'none' }}>
-              Book a free call
-            </a>
-          </div>
-          <div style={{ marginTop: '28px', display: 'flex', justifyContent: 'center', gap: '32px', flexWrap: 'wrap' }}>
-            {['✓ Custom branded', '✓ No QuickBooks required', '✓ Up and running in days'].map((t, i) => (
-              <span key={i} style={{ fontFamily: 'DM Mono, monospace', fontSize: '11px', letterSpacing: '1px', color: '#5A6A80' }}>{t}</span>
-            ))}
-          </div>
-        </div>
-      </section>
-
-
-
       {/* CONTACT */}
       <section id="contact" className="section-pad" style={{ padding: '120px 48px', maxWidth: '680px', margin: '0 auto' }}>
         <div style={{ marginBottom: '56px', textAlign: 'center' }}>
