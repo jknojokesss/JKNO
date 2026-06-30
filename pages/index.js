@@ -123,7 +123,7 @@ export default function Landing() {
         <meta name="description" content="Custom financials with a client portal. Real-time numbers, plain-English insights, and dashboards built for your business — with or without QuickBooks." />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <link rel="preconnect" href="https://fonts.googleapis.com" />
-        <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600;700&family=DM+Sans:wght@300;400;500&family=DM+Mono:wght@400;500&family=Playfair+Display:wght@700&family=Space+Grotesk:wght@500;600;700&family=Fraunces:ital,opsz,wght@1,9..144,500;1,9..144,600&display=swap" rel="stylesheet" />
+        <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600;700&family=DM+Sans:wght@300;400;500&family=DM+Mono:wght@400;500&family=Playfair+Display:wght@700&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet" />
       </Head>
 
       <style>{`
@@ -392,7 +392,7 @@ export default function Landing() {
           <h1 className="hero-title hero-title-text" style={{ fontFamily: "'Space Grotesk', sans-serif", fontWeight: 700, fontSize: 'clamp(33px,6.3vw,78px)', lineHeight: 1.07, color: '#1A2035', letterSpacing: '-2px' }}>
             Understand the <span className="gold-shimmer">Story</span><br />Behind Your Numbers.
           </h1>
-          <div className="hero-sub" style={{ marginTop: '20px', fontFamily: "'Fraunces', serif", fontStyle: 'italic', fontSize: 'clamp(22px,3.2vw,38px)', color: '#B8943C', fontWeight: 600, letterSpacing: '-0.3px' }}>
+          <div className="hero-sub" style={{ marginTop: '20px', fontFamily: "'DM Mono', monospace", fontSize: 'clamp(13px,1.7vw,17px)', color: '#B8943C', fontWeight: 500, letterSpacing: '2.5px', textTransform: 'uppercase' }}>
             The JK Way™ to Financial Clarity
           </div>
           <p className="hero-sub" style={{ margin: '20px 0 0', maxWidth: '620px', fontSize: 'clamp(15px,1.7vw,18px)', lineHeight: 1.65, color: '#5A6070' }}>
