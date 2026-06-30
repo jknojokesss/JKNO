@@ -144,9 +144,27 @@ export default function Landing() {
           to { transform: translateX(-50%); }
         }
 
+        .hero-badge { animation: fadeUp 0.8s ease 0s both; }
         .hero-title { animation: fadeUp 0.8s ease 0.1s both; }
         .hero-sub { animation: fadeUp 0.8s ease 0.25s both; }
         .hero-cta { animation: fadeUp 0.8s ease 0.4s both; }
+        .hero-pills { animation: fadeUp 0.8s ease 0.55s both; }
+
+        @keyframes shimmer { 0% { background-position: 0% 50%; } 100% { background-position: 200% 50%; } }
+        @keyframes floaty { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-7px); } }
+        .gold-shimmer {
+          background: linear-gradient(100deg,#B8943C,#E8D5A3,#C9A84C,#E8D5A3,#B8943C);
+          background-size: 200% auto; background-clip: text; -webkit-background-clip: text;
+          -webkit-text-fill-color: transparent; color: transparent;
+          animation: shimmer 5s linear infinite;
+        }
+        .hero-pill-badge {
+          display: inline-flex; align-items: center; gap: 9px;
+          background: #fff; border: 1px solid #E2D9C5; border-radius: 999px;
+          padding: 9px 18px; font-family: 'DM Mono', monospace; font-size: 11px;
+          letter-spacing: 1.5px; color: #1A2035; box-shadow: 0 8px 24px rgba(26,32,53,0.07);
+        }
+        .hero-pill { font-family: 'DM Mono', monospace; font-size: 11px; letter-spacing: 1px; color: #5A6070; }
 
         .feature-card {
           background: #E8E4DC;
@@ -356,10 +374,17 @@ export default function Landing() {
       )}
 
       {/* HERO — headline + dashboard */}
-      <section style={{ padding: 'clamp(72px,9vw,120px) clamp(14px,5vw,48px) clamp(40px,5vw,64px)', background: '#F7F4EF', overflow: 'hidden' }}>
-        <div style={{ maxWidth: '1180px', margin: '0 auto', textAlign: 'center' }}>
+      <section style={{ padding: 'clamp(64px,9vw,112px) clamp(14px,5vw,48px) clamp(40px,5vw,64px)', background: 'linear-gradient(180deg, #FBF9F4 0%, #F7F4EF 100%)', position: 'relative', overflow: 'hidden' }}>
+        {/* textured backdrop */}
+        <div style={{ position: 'absolute', inset: 0, background: 'radial-gradient(circle at 50% -10%, rgba(201,168,76,0.22), transparent 55%)', pointerEvents: 'none' }} />
+        <div style={{ position: 'absolute', inset: 0, backgroundImage: 'radial-gradient(rgba(26,32,53,0.05) 1px, transparent 1px)', backgroundSize: '24px 24px', maskImage: 'radial-gradient(ellipse 70% 60% at 50% 30%, #000 30%, transparent 75%)', WebkitMaskImage: 'radial-gradient(ellipse 70% 60% at 50% 30%, #000 30%, transparent 75%)', pointerEvents: 'none' }} />
+
+        <div style={{ position: 'relative', maxWidth: '1180px', margin: '0 auto', textAlign: 'center' }}>
+          <div className="hero-badge" style={{ marginBottom: '26px' }}>
+            <span className="hero-pill-badge">✦&nbsp; FINANCIAL CLARITY · BUILT FOR YOUR BUSINESS</span>
+          </div>
           <h1 className="hero-title hero-title-text" style={{ fontFamily: 'Playfair Display, serif', fontWeight: 700, fontSize: 'clamp(34px,6.6vw,82px)', lineHeight: 1.06, color: '#1A2035', letterSpacing: '-1px' }}>
-            Understand the Story Behind Your Numbers.
+            Understand the <span className="gold-shimmer">Story</span><br />Behind Your Numbers.
           </h1>
           <div className="hero-sub" style={{ marginTop: '18px', fontFamily: 'Cormorant Garamond, serif', fontStyle: 'italic', fontSize: 'clamp(23px,3.4vw,40px)', color: '#C9A84C', fontWeight: 600 }}>
             The JK Way™ to Financial Clarity
@@ -370,6 +395,11 @@ export default function Landing() {
           <div className="hero-cta" style={{ marginTop: '32px', display: 'flex', gap: '12px', flexWrap: 'wrap', justifyContent: 'center' }}>
             <button className="cta-btn" onClick={() => document.getElementById('demos')?.scrollIntoView({ behavior: 'smooth' })}>See It in Action ↓</button>
             <a className="ghost-btn" href={BOOKING_URL} target="_blank" rel="noopener noreferrer" style={{ textDecoration: 'none', display: 'inline-flex', alignItems: 'center' }}>Book a Free Call</a>
+          </div>
+          <div className="hero-pills" style={{ marginTop: '26px', display: 'flex', gap: 'clamp(16px,3vw,32px)', justifyContent: 'center', flexWrap: 'wrap' }}>
+            {['✓ Real-time numbers', '✓ Plain English', '✓ No QuickBooks required'].map((t, i) => (
+              <span key={i} className="hero-pill">{t}</span>
+            ))}
           </div>
         </div>
 
