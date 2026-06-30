@@ -123,7 +123,7 @@ export default function Landing() {
         <meta name="description" content="Custom financials with a client portal. Real-time numbers, plain-English insights, and dashboards built for your business — with or without QuickBooks." />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <link rel="preconnect" href="https://fonts.googleapis.com" />
-        <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600;700&family=DM+Sans:wght@300;400;500&family=DM+Mono:wght@400;500&family=Playfair+Display:wght@700&display=swap" rel="stylesheet" />
+        <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600;700&family=DM+Sans:wght@300;400;500&family=DM+Mono:wght@400;500&family=Playfair+Display:wght@700&family=Space+Grotesk:wght@500;600;700&family=Fraunces:ital,opsz,wght@1,9..144,500;1,9..144,600&display=swap" rel="stylesheet" />
       </Head>
 
       <style>{`
@@ -389,10 +389,10 @@ export default function Landing() {
         <div style={{ position: 'absolute', inset: 0, backgroundImage: 'radial-gradient(rgba(26,32,53,0.05) 1px, transparent 1px)', backgroundSize: '24px 24px', maskImage: 'radial-gradient(ellipse 70% 60% at 30% 30%, #000 30%, transparent 75%)', WebkitMaskImage: 'radial-gradient(ellipse 70% 60% at 30% 30%, #000 30%, transparent 75%)', pointerEvents: 'none' }} />
 
         <div style={{ position: 'relative', maxWidth: '1200px', margin: '0 auto 0 clamp(0px,3vw,72px)', textAlign: 'left' }}>
-          <h1 className="hero-title hero-title-text" style={{ fontFamily: 'Playfair Display, serif', fontWeight: 700, fontSize: 'clamp(34px,6.6vw,82px)', lineHeight: 1.06, color: '#1A2035', letterSpacing: '-1px' }}>
+          <h1 className="hero-title hero-title-text" style={{ fontFamily: "'Space Grotesk', sans-serif", fontWeight: 700, fontSize: 'clamp(33px,6.3vw,78px)', lineHeight: 1.07, color: '#1A2035', letterSpacing: '-2px' }}>
             Understand the <span className="gold-shimmer">Story</span><br />Behind Your Numbers.
           </h1>
-          <div className="hero-sub" style={{ marginTop: '18px', fontFamily: 'Cormorant Garamond, serif', fontStyle: 'italic', fontSize: 'clamp(23px,3.4vw,40px)', color: '#C9A84C', fontWeight: 600 }}>
+          <div className="hero-sub" style={{ marginTop: '20px', fontFamily: "'Fraunces', serif", fontStyle: 'italic', fontSize: 'clamp(22px,3.2vw,38px)', color: '#B8943C', fontWeight: 600, letterSpacing: '-0.3px' }}>
             The JK Way™ to Financial Clarity
           </div>
           <p className="hero-sub" style={{ margin: '20px 0 0', maxWidth: '620px', fontSize: 'clamp(15px,1.7vw,18px)', lineHeight: 1.65, color: '#5A6070' }}>
