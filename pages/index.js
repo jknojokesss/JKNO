@@ -129,7 +129,16 @@ export default function Landing() {
       <style>{`
         * { box-sizing: border-box; margin: 0; padding: 0; }
         html { scroll-behavior: smooth; }
-        body { background: #F7F4EF; color: #1A1A2E; font-family: 'DM Sans', sans-serif; }
+        body {
+          background-color: #F5F1EA;
+          background-image:
+            radial-gradient(circle at 12% 8%, rgba(201,168,76,0.10), transparent 38%),
+            radial-gradient(circle at 88% 70%, rgba(26,32,53,0.05), transparent 42%),
+            radial-gradient(rgba(26,32,53,0.045) 1px, transparent 1px);
+          background-size: 100% 100%, 100% 100%, 26px 26px;
+          background-attachment: fixed, fixed, fixed;
+          color: #1A1A2E; font-family: 'DM Sans', sans-serif;
+        }
 
         @keyframes fadeUp {
           from { opacity: 0; transform: translateY(24px); }
