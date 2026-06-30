@@ -376,10 +376,10 @@ export default function Landing() {
       {/* HERO — headline + dashboard */}
       <section style={{ padding: 'clamp(64px,9vw,112px) clamp(14px,5vw,48px) clamp(40px,5vw,64px)', background: 'linear-gradient(180deg, #FBF9F4 0%, #F7F4EF 100%)', position: 'relative', overflow: 'hidden' }}>
         {/* textured backdrop */}
-        <div style={{ position: 'absolute', inset: 0, background: 'radial-gradient(circle at 50% -10%, rgba(201,168,76,0.22), transparent 55%)', pointerEvents: 'none' }} />
-        <div style={{ position: 'absolute', inset: 0, backgroundImage: 'radial-gradient(rgba(26,32,53,0.05) 1px, transparent 1px)', backgroundSize: '24px 24px', maskImage: 'radial-gradient(ellipse 70% 60% at 50% 30%, #000 30%, transparent 75%)', WebkitMaskImage: 'radial-gradient(ellipse 70% 60% at 50% 30%, #000 30%, transparent 75%)', pointerEvents: 'none' }} />
+        <div style={{ position: 'absolute', inset: 0, background: 'radial-gradient(circle at 22% -10%, rgba(201,168,76,0.22), transparent 55%)', pointerEvents: 'none' }} />
+        <div style={{ position: 'absolute', inset: 0, backgroundImage: 'radial-gradient(rgba(26,32,53,0.05) 1px, transparent 1px)', backgroundSize: '24px 24px', maskImage: 'radial-gradient(ellipse 70% 60% at 30% 30%, #000 30%, transparent 75%)', WebkitMaskImage: 'radial-gradient(ellipse 70% 60% at 30% 30%, #000 30%, transparent 75%)', pointerEvents: 'none' }} />
 
-        <div style={{ position: 'relative', maxWidth: '1180px', margin: '0 auto', textAlign: 'center' }}>
+        <div style={{ position: 'relative', maxWidth: '1180px', margin: '0 auto', textAlign: 'left' }}>
           <div className="hero-badge" style={{ marginBottom: '26px' }}>
             <span className="hero-pill-badge">✦&nbsp; FINANCIAL CLARITY · BUILT FOR YOUR BUSINESS</span>
           </div>
@@ -389,14 +389,14 @@ export default function Landing() {
           <div className="hero-sub" style={{ marginTop: '18px', fontFamily: 'Cormorant Garamond, serif', fontStyle: 'italic', fontSize: 'clamp(23px,3.4vw,40px)', color: '#C9A84C', fontWeight: 600 }}>
             The JK Way™ to Financial Clarity
           </div>
-          <p className="hero-sub" style={{ margin: '20px auto 0', maxWidth: '620px', fontSize: 'clamp(15px,1.7vw,18px)', lineHeight: 1.65, color: '#5A6070' }}>
+          <p className="hero-sub" style={{ margin: '20px 0 0', maxWidth: '620px', fontSize: 'clamp(15px,1.7vw,18px)', lineHeight: 1.65, color: '#5A6070' }}>
             Tailored financial insights that help business owners understand their business, make better decisions, and grow with confidence.
           </p>
-          <div className="hero-cta" style={{ marginTop: '32px', display: 'flex', gap: '12px', flexWrap: 'wrap', justifyContent: 'center' }}>
+          <div className="hero-cta" style={{ marginTop: '32px', display: 'flex', gap: '12px', flexWrap: 'wrap', justifyContent: 'flex-start' }}>
             <button className="cta-btn" onClick={() => document.getElementById('demos')?.scrollIntoView({ behavior: 'smooth' })}>See It in Action ↓</button>
             <a className="ghost-btn" href={BOOKING_URL} target="_blank" rel="noopener noreferrer" style={{ textDecoration: 'none', display: 'inline-flex', alignItems: 'center' }}>Book a Free Call</a>
           </div>
-          <div className="hero-pills" style={{ marginTop: '26px', display: 'flex', gap: 'clamp(16px,3vw,32px)', justifyContent: 'center', flexWrap: 'wrap' }}>
+          <div className="hero-pills" style={{ marginTop: '26px', display: 'flex', gap: 'clamp(16px,3vw,32px)', justifyContent: 'flex-start', flexWrap: 'wrap' }}>
             {['✓ Real-time numbers', '✓ Plain English', '✓ No QuickBooks required'].map((t, i) => (
               <span key={i} className="hero-pill">{t}</span>
             ))}
