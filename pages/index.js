@@ -354,47 +354,26 @@ export default function Landing() {
         </div>
       )}
 
-      {/* HERO — calendar + typing + demo tablets */}
-      <section style={{ padding: 'clamp(80px,10vw,120px) clamp(14px,5vw,48px) clamp(48px,6vw,80px)', background: '#F7F4EF', overflow: 'hidden' }}>
-        <div style={{ maxWidth: '1200px', margin: '0 auto' }}>
-
-          {/* Calendar + typing */}
-          <div style={{ display: 'flex', gap: '48px', alignItems: 'center', flexWrap: 'wrap', background: '#1A2035', borderRadius: '16px', padding: 'clamp(28px,5vw,52px)', marginBottom: '32px', position: 'relative', overflow: 'hidden' }}>
-            <div style={{ position: 'absolute', inset: 0, background: 'radial-gradient(circle at 80% 50%, rgba(201,168,76,0.12), transparent 60%)', pointerEvents: 'none' }} />
-
-            {/* Mini calendar */}
-            <div style={{ flexShrink: 0, background: '#0D1523', borderRadius: '12px', padding: '16px', width: '210px', position: 'relative' }}>
-              <div style={{ fontFamily: 'DM Mono, monospace', fontSize: '11px', color: '#C9A84C', letterSpacing: '0.1em', marginBottom: '12px' }}>JUNE 2026</div>
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7,1fr)', gap: '2px', marginBottom: '6px' }}>
-                {['S','M','T','W','T','F','S'].map((d,i) => (
-                  <div key={i} style={{ textAlign: 'center', fontSize: '9px', color: '#3A5060', paddingBottom: '4px' }}>{d}</div>
-                ))}
-              </div>
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7,1fr)', gap: '2px' }}>
-                <div />
-                {Array.from({ length: 30 }, (_, i) => i + 1).map(d => (
-                  <div key={d} style={{ position: 'relative', width: '24px', height: '24px', display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: '4px', background: d === 28 ? '#C9A84C' : 'transparent', margin: '1px auto' }}>
-                    <span style={{ fontSize: '10px', color: d < 28 ? '#1D2D3A' : d === 28 ? '#1A1A1A' : '#3A5060', fontFamily: 'DM Mono, monospace', fontWeight: d === 28 ? 700 : 400 }}>{d}</span>
-                    {d <= crossedDays && d < 28 && <div style={{ position: 'absolute', left: '3px', right: '3px', top: '50%', height: '1.5px', background: '#C03A22', transform: 'rotate(-15deg)', borderRadius: '1px', transition: 'opacity 0.1s' }} />}
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            {/* Typing text */}
-            <div style={{ flex: 1, minWidth: '220px', position: 'relative' }}>
-              <TypingText onDone={() => setTypingDone(true)} />
-              <div style={{ marginTop: '20px', fontSize: 'clamp(16px,2vw,20px)', fontWeight: 500, color: '#C9A84C', opacity: typingDone ? 1 : 0, transition: 'opacity 0.6s ease', fontFamily: 'Cormorant Garamond, serif' }}>
-                JK No Jokes Financials can help.
-              </div>
-              <div style={{ marginTop: '24px', display: 'flex', gap: '12px', flexWrap: 'wrap', opacity: typingDone ? 1 : 0, transition: 'opacity 0.8s ease 0.4s' }}>
-                <button className="cta-btn" onClick={() => document.getElementById('contact')?.scrollIntoView({ behavior: 'smooth' })}>Get Started →</button>
-                <button className="ghost-btn" onClick={() => document.getElementById('demos')?.scrollIntoView({ behavior: 'smooth' })}>See Live Demos ↓</button>
-              </div>
-            </div>
+      {/* HERO — headline + dashboard */}
+      <section style={{ padding: 'clamp(72px,9vw,120px) clamp(14px,5vw,48px) clamp(40px,5vw,64px)', background: '#F7F4EF', overflow: 'hidden' }}>
+        <div style={{ maxWidth: '900px', margin: '0 auto', textAlign: 'center' }}>
+          <h1 className="hero-title hero-title-text" style={{ fontFamily: 'Playfair Display, serif', fontWeight: 700, fontSize: 'clamp(34px,5.5vw,60px)', lineHeight: 1.08, color: '#1A2035', letterSpacing: '-0.5px' }}>
+            Understand the Story Behind Your Numbers.
+          </h1>
+          <div className="hero-sub" style={{ marginTop: '16px', fontFamily: 'Cormorant Garamond, serif', fontStyle: 'italic', fontSize: 'clamp(18px,2.4vw,26px)', color: '#C9A84C', fontWeight: 600 }}>
+            The JK Way™ to Financial Clarity
           </div>
+          <p className="hero-sub" style={{ margin: '20px auto 0', maxWidth: '620px', fontSize: 'clamp(15px,1.7vw,18px)', lineHeight: 1.65, color: '#5A6070' }}>
+            Tailored financial insights that help business owners understand their business, make better decisions, and grow with confidence.
+          </p>
+          <div className="hero-cta" style={{ marginTop: '32px', display: 'flex', gap: '12px', flexWrap: 'wrap', justifyContent: 'center' }}>
+            <button className="cta-btn" onClick={() => document.getElementById('demos')?.scrollIntoView({ behavior: 'smooth' })}>See the Dashboard ↓</button>
+            <a className="ghost-btn" href={BOOKING_URL} target="_blank" rel="noopener noreferrer" style={{ textDecoration: 'none', display: 'inline-flex', alignItems: 'center' }}>Book a Demo</a>
+          </div>
+        </div>
 
-          {/* Demo tablets */}
+        {/* Large dashboard, immediately below */}
+        <div style={{ maxWidth: '1200px', margin: 'clamp(40px,5vw,64px) auto 0' }}>
           <div id="demos">{(() => {
             const DEMOS = [
               { label: 'Riverside Bakery', sub: 'Products + Consignment', src: '/demo', icon: '🥐' },
