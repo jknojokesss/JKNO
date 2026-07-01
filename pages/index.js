@@ -495,7 +495,7 @@ export default function Landing() {
             </div>
           </div>
 
-          <p style={{ fontFamily: 'Cormorant Garamond, serif', fontStyle: 'italic', fontSize: 'clamp(18px,2.1vw,23px)', lineHeight: 1.55, color: '#B8943C', fontWeight: 600, marginTop: '44px' }}>
+          <p style={{ fontFamily: "'DM Mono', monospace", fontSize: 'clamp(12px,1.5vw,15.5px)', letterSpacing: '2px', textTransform: 'uppercase', lineHeight: 1.7, color: '#B8943C', fontWeight: 500, marginTop: '44px' }}>
             Every business is different. Your financial insights should be too.
           </p>
         </div>
