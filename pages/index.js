@@ -403,7 +403,7 @@ export default function Landing() {
           </p>
           <div className="hero-cta" style={{ marginTop: '32px', display: 'flex', gap: '12px', flexWrap: 'wrap', justifyContent: 'flex-start' }}>
             <button className="cta-btn" onClick={() => document.getElementById('demos')?.scrollIntoView({ behavior: 'smooth' })}>See It in Action ↓</button>
-            <a className="ghost-btn" href={BOOKING_URL} target="_blank" rel="noopener noreferrer" style={{ textDecoration: 'none', display: 'inline-flex', alignItems: 'center' }}>Book a Demo</a>
+            <a className="ghost-btn" href={BOOKING_URL} target="_blank" rel="noopener noreferrer" style={{ textDecoration: 'none', display: 'inline-flex', alignItems: 'center' }}>Get Yours Built</a>
           </div>
           <div className="hero-pills" style={{ marginTop: '26px', display: 'flex', gap: 'clamp(16px,3vw,32px)', justifyContent: 'flex-start', flexWrap: 'wrap' }}>
             {['✓ Real-time numbers', '✓ Plain English', '✓ No QuickBooks required'].map((t, i) => (
