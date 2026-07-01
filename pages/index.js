@@ -333,7 +333,7 @@ export default function Landing() {
       {/* NAV */}
       <nav style={{
         position: 'fixed', top: '44px', left: 0, right: 0, zIndex: 100,
-        padding: '20px 48px',
+        padding: '20px 32px',
         background: scrolled ? 'rgba(247,244,239,0.97)' : 'transparent',
         backdropFilter: scrolled ? 'blur(12px)' : 'none',
         borderBottom: scrolled ? '1px solid #DDD8CE' : 'none',
@@ -348,7 +348,7 @@ export default function Landing() {
             NO&nbsp;JOKES&nbsp;FINANCIALS
           </span>
         </div>
-        {!isMobile && <div style={{ display: 'flex', gap: '36px', alignItems: 'center' }}>
+        {!isMobile && <div style={{ display: 'flex', gap: '22px', alignItems: 'center' }}>
           <button className="nav-link" onClick={() => router.push('/how-it-works')}>How It Works</button>
           <button className="nav-link" onClick={() => router.push('/what-we-do')}>What You Get</button>
           <button className="nav-link" onClick={() => router.push('/about')}>Who We Are</button>
@@ -384,7 +384,7 @@ export default function Landing() {
       )}
 
       {/* HERO — headline + dashboard */}
-      <section style={{ padding: 'clamp(44px,6vw,80px) clamp(14px,5vw,48px) clamp(40px,5vw,64px)', background: 'transparent', position: 'relative', overflow: 'hidden' }}>
+      <section style={{ padding: 'clamp(100px,11vw,140px) clamp(14px,5vw,48px) clamp(40px,5vw,64px)', background: 'transparent', position: 'relative', overflow: 'hidden' }}>
         {/* gold glow over the page grid */}
         <div style={{ position: 'absolute', inset: 0, background: 'radial-gradient(circle at 22% -10%, rgba(201,168,76,0.22), transparent 55%)', pointerEvents: 'none' }} />
 
@@ -393,7 +393,7 @@ export default function Landing() {
             Understand the <span className="gold-shimmer">Story</span><br />Behind Your Numbers.
           </h1>
           <div className="hero-sub" style={{ marginTop: '20px', fontFamily: "'DM Mono', monospace", fontSize: 'clamp(13px,1.7vw,17px)', color: '#B8943C', fontWeight: 500, letterSpacing: '2.5px', textTransform: 'uppercase' }}>
-            The JK Way™ to Financial Clarity
+            Financial Clarity — The JK Way™
           </div>
           <p className="hero-sub" style={{ margin: '20px 0 0', maxWidth: '640px', fontSize: 'clamp(15px,1.7vw,18px)', lineHeight: 1.65, color: '#5A6070' }}>
             Built by finance pros, designed for business owners — every dashboard is <strong style={{ color: '#1A2035', fontWeight: 600 }}>tailored to the way your business actually operates.</strong>
