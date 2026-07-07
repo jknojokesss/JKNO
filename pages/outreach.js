@@ -72,7 +72,7 @@ export default function Outreach() {
     const to = encodeURIComponent(contact.email)
     const subject = encodeURIComponent(EMAIL_SUBJECT)
     const body = encodeURIComponent(emailBody(contact.firstName || 'there'))
-    window.open(`https://mail.zoho.com/zm/#compose?to=${to}&subject=${subject}&body=${body}`, '_blank')
+    window.open(`https://mail.zoho.com/mail/compose.do?to=${to}&subject=${subject}&body=${body}`, '_blank')
     markSent(idx)
   }
 
