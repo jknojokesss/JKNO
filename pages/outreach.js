@@ -197,7 +197,7 @@ export default function Outreach() {
                         <td style={{ ...cell, fontSize: '12px', color: '#8A8275' }}>{c.city || '—'}</td>
                         <td style={{ ...cell, textAlign: 'center' }}>
                           {c.sent ? (
-                            <span style={{ fontFamily: "'DM Mono', monospace", fontSize: '11px', color: '#16a34a', letterSpacing: '1px' }}>✓ SENT</span>
+                            <span style={{ fontFamily: "'DM Mono', monospace", fontSize: '11px', color: '#16a34a', letterSpacing: '1px', cursor: 'pointer' }} onClick={() => setContacts((prev) => prev.map((x, j) => j === realIdx ? { ...x, sent: false } : x))} title="Click to undo">✓ SENT ↩</span>
                           ) : (
                             <button
                               onClick={() => openZoho(c, realIdx)}
