@@ -1,5 +1,6 @@
-import { useState, useRef } from 'react'
+import { useState, useRef, useEffect } from 'react'
 import Head from 'next/head'
+import { supabase } from '../lib/supabase'
 
 const GOLD = '#C9A84C'
 const INK = '#0D0D0D'
@@ -38,10 +39,8 @@ function parseCSV(text) {
 const EMPTY_FORM = { firstName: '', lastName: '', company: '', email: '', title: '', city: '', phone: '' }
 
 export default function Outreach() {
-  const [contacts, setContacts] = useState(() => {
-    if (typeof window === 'undefined') return []
-    try { return JSON.parse(localStorage.getItem('jkno_outreach') || '[]') } catch { return [] }
-  })
+  const [contacts, setContacts] = useState([])
+  const [loading, setLoading] = useState(true)
   const [search, setSearch] = useState('')
   const [dragOver, setDragOver] = useState(false)
   const [fileName, setFileName] = useState('')
@@ -49,32 +48,58 @@ export default function Outreach() {
   const [formError, setFormError] = useState('')
   const fileRef = useRef()
 
-  const saveContacts = (updated) => {
-    setContacts(updated)
-    try { localStorage.setItem('jkno_outreach', JSON.stringify(updated)) } catch {}
-  }
+  useEffect(() => {
+    supabase.from('outreach_contacts').select('*').order('created_at', { ascending: true }).then(({ data }) => {
+      if (data) setContacts(data.map((r) => ({ ...r, firstName: r.first_name, lastName: r.last_name })))
+      setLoading(false)
+    })
+  }, [])
 
   const handleFile = (file) => {
     if (!file) return
     setFileName(file.name)
     const reader = new FileReader()
-    reader.onload = (e) => saveContacts([...contacts, ...parseCSV(e.target.result)])
+    reader.onload = async (e) => {
+      const parsed = parseCSV(e.target.result)
+      const rows = parsed.map((c) => ({ first_name: c.firstName, last_name: c.lastName, company: c.company, email: c.email, title: c.title, city: c.city, phone: c.phone, sent: false }))
+      const { data } = await supabase.from('outreach_contacts').insert(rows).select()
+      if (data) setContacts((prev) => [...prev, ...data.map((r) => ({ ...r, firstName: r.first_name, lastName: r.last_name }))])
+    }
     reader.readAsText(file)
   }
 
-  const handleAdd = () => {
+  const handleAdd = async () => {
     if (!form.firstName && !form.lastName) { setFormError('First name is required.'); return }
     if (!form.email) { setFormError('Email is required.'); return }
-    saveContacts([...contacts, { ...form, sent: false }])
+    const { data } = await supabase.from('outreach_contacts').insert({ first_name: form.firstName, last_name: form.lastName, company: form.company, email: form.email, title: form.title, city: form.city, phone: form.phone, sent: false }).select().single()
+    if (data) setContacts((prev) => [...prev, { ...data, firstName: data.first_name, lastName: data.last_name }])
     setForm(EMPTY_FORM)
     setFormError('')
   }
 
-  const markSent = (idx) =>
-    saveContacts(contacts.map((c, i) => i === idx ? { ...c, sent: true } : c))
+  const markSent = async (idx) => {
+    const c = contacts[idx]
+    await supabase.from('outreach_contacts').update({ sent: true }).eq('id', c.id)
+    setContacts((prev) => prev.map((x, i) => i === idx ? { ...x, sent: true } : x))
+  }
 
-  const removeContact = (idx) =>
-    saveContacts(contacts.filter((_, i) => i !== idx))
+  const markUnsent = async (idx) => {
+    const c = contacts[idx]
+    await supabase.from('outreach_contacts').update({ sent: false }).eq('id', c.id)
+    setContacts((prev) => prev.map((x, i) => i === idx ? { ...x, sent: false } : x))
+  }
+
+  const removeContact = async (idx) => {
+    const c = contacts[idx]
+    await supabase.from('outreach_contacts').delete().eq('id', c.id)
+    setContacts((prev) => prev.filter((_, i) => i !== idx))
+  }
+
+  const clearAll = async () => {
+    await supabase.from('outreach_contacts').delete().neq('id', '00000000-0000-0000-0000-000000000000')
+    setContacts([])
+    setFileName('')
+  }
 
   const openZoho = (contact, idx) => {
     const to = encodeURIComponent(contact.email)
@@ -83,6 +108,8 @@ export default function Outreach() {
     window.open(`https://mail.zoho.com/mail/compose.do?to=${to}&subject=${subject}&body=${body}`, '_blank')
     markSent(idx)
   }
+
+  if (loading) return <div style={{ background: PAPER, minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: "'DM Mono', monospace", fontSize: '13px', color: '#8A8275' }}>Loading…</div>
 
   const filtered = contacts.filter((c) => {
     const q = search.toLowerCase()
@@ -174,7 +201,7 @@ export default function Outreach() {
               </div>
               <div style={{ display: 'flex', gap: '10px' }}>
                 <input placeholder="Search…" value={search} onChange={(e) => setSearch(e.target.value)} style={{ ...input, width: '180px' }} />
-                <button onClick={() => { saveContacts([]); setFileName('') }} style={{ background: '#F0ECE2', border: 'none', borderRadius: '8px', padding: '8px 16px', fontFamily: "'DM Mono', monospace", fontSize: '11px', letterSpacing: '1px', color: '#8A8275', cursor: 'pointer' }}>CLEAR ALL</button>
+                <button onClick={clearAll} style={{ background: '#F0ECE2', border: 'none', borderRadius: '8px', padding: '8px 16px', fontFamily: "'DM Mono', monospace", fontSize: '11px', letterSpacing: '1px', color: '#8A8275', cursor: 'pointer' }}>CLEAR ALL</button>
               </div>
             </div>
 
@@ -205,7 +232,7 @@ export default function Outreach() {
                         <td style={{ ...cell, fontSize: '12px', color: '#8A8275' }}>{c.city || '—'}</td>
                         <td style={{ ...cell, textAlign: 'center' }}>
                           {c.sent ? (
-                            <span style={{ fontFamily: "'DM Mono', monospace", fontSize: '11px', color: '#16a34a', letterSpacing: '1px', cursor: 'pointer' }} onClick={() => saveContacts(contacts.map((x, j) => j === realIdx ? { ...x, sent: false } : x))} title="Click to undo">✓ SENT ↩</span>
+                            <span style={{ fontFamily: "'DM Mono', monospace", fontSize: '11px', color: '#16a34a', letterSpacing: '1px', cursor: 'pointer' }} onClick={() => markUnsent(realIdx)} title="Click to undo">✓ SENT ↩</span>
                           ) : (
                             <button
                               onClick={() => openZoho(c, realIdx)}
