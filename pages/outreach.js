@@ -10,7 +10,7 @@ const SLATE = '#2C3E50'
 const EMAIL_SUBJECT = `Quick question about your books`
 
 const emailBody = (firstName) =>
-  `Hi ${firstName},\n\nDo you actually know your numbers week to week, or are you waiting on your accountant to tell you how last month went?\n\nI build financial dashboards for local businesses that give you a live view of your P&L, cash flow, and sales — and beyond just financials, I can build dashboards to track anything in your business: orders, inventory, team performance, you name it.\n\nYou can see a live demo at jknojokes.com — happy to walk you through it personally too. Interested?\n\nReach out today!\n\n— Jonathan Katz | JK No Jokes Financials | jknojokes.com`
+  `Hi ${firstName},\n\nDo you actually know your numbers week to week, or are you waiting on your accountant to tell you how last month went?\n\nI build financial dashboards for local businesses that give you a live view of your P&L, cash flow, and sales — and beyond just financials, I can build dashboards to track anything in your business: orders, inventory, team performance, you name it.\n\nYou can see a live demo at jknojokes.com — happy to walk you through it personally too.\n\nInterested? Reach out today!\n\n— Jonathan Katz | JK No Jokes Financials | jknojokes.com`
 
 function parseCSV(text) {
   const lines = text.trim().split(/\r?\n/)
