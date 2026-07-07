@@ -102,10 +102,17 @@ export default function Outreach() {
   }
 
   const openZoho = async (contact, idx) => {
-    const body = `To: ${contact.email}\nSubject: ${EMAIL_SUBJECT}\n\n${emailBody(contact.firstName || 'there')}`
-    try { await navigator.clipboard.writeText(body) } catch {}
-    window.open('https://mail.zoho.com/zm/#mail/folder/inbox', '_blank')
-    markSent(idx)
+    try {
+      const res = await fetch('/api/send-outreach', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ to: contact.email, firstName: contact.firstName }),
+      })
+      if (!res.ok) { const e = await res.json(); alert('Send failed: ' + e.error); return }
+      markSent(idx)
+    } catch (err) {
+      alert('Send failed: ' + err.message)
+    }
   }
 
   if (loading) return <div style={{ background: PAPER, minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: "'DM Mono', monospace", fontSize: '13px', color: '#8A8275' }}>Loading…</div>
@@ -238,7 +245,7 @@ export default function Outreach() {
                               disabled={!c.email}
                               style={{ background: c.email ? GOLD : '#EDE7DA', color: c.email ? INK : '#B0A898', border: 'none', borderRadius: '7px', padding: '7px 16px', fontFamily: "'DM Mono', monospace", fontSize: '11px', letterSpacing: '1px', cursor: c.email ? 'pointer' : 'default', whiteSpace: 'nowrap' }}
                             >
-                              COPY & OPEN →
+                              SEND EMAIL →
                             </button>
                           )}
                         </td>
