@@ -102,10 +102,9 @@ export default function Outreach() {
   }
 
   const openZoho = (contact, idx) => {
-    const to = encodeURIComponent(contact.email)
     const subject = encodeURIComponent(EMAIL_SUBJECT)
     const body = encodeURIComponent(emailBody(contact.firstName || 'there'))
-    window.open(`https://mail.zoho.com/mail/compose.do?to=${to}&subject=${subject}&body=${body}`, '_blank')
+    window.location.href = `mailto:${contact.email}?subject=${subject}&body=${body}`
     markSent(idx)
   }
 
