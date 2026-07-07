@@ -101,10 +101,10 @@ export default function Outreach() {
     setFileName('')
   }
 
-  const openZoho = (contact, idx) => {
-    const subject = encodeURIComponent(EMAIL_SUBJECT)
-    const body = encodeURIComponent(emailBody(contact.firstName || 'there'))
-    window.location.href = `mailto:${contact.email}?subject=${subject}&body=${body}`
+  const openZoho = async (contact, idx) => {
+    const body = `To: ${contact.email}\nSubject: ${EMAIL_SUBJECT}\n\n${emailBody(contact.firstName || 'there')}`
+    try { await navigator.clipboard.writeText(body) } catch {}
+    window.open('https://mail.zoho.com/zm/#mail/folder/inbox', '_blank')
     markSent(idx)
   }
 
@@ -238,7 +238,7 @@ export default function Outreach() {
                               disabled={!c.email}
                               style={{ background: c.email ? GOLD : '#EDE7DA', color: c.email ? INK : '#B0A898', border: 'none', borderRadius: '7px', padding: '7px 16px', fontFamily: "'DM Mono', monospace", fontSize: '11px', letterSpacing: '1px', cursor: c.email ? 'pointer' : 'default', whiteSpace: 'nowrap' }}
                             >
-                              SEND EMAIL →
+                              COPY & OPEN →
                             </button>
                           )}
                         </td>
