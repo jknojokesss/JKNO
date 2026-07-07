@@ -38,7 +38,10 @@ function parseCSV(text) {
 const EMPTY_FORM = { firstName: '', lastName: '', company: '', email: '', title: '', city: '', phone: '' }
 
 export default function Outreach() {
-  const [contacts, setContacts] = useState([])
+  const [contacts, setContacts] = useState(() => {
+    if (typeof window === 'undefined') return []
+    try { return JSON.parse(localStorage.getItem('jkno_outreach') || '[]') } catch { return [] }
+  })
   const [search, setSearch] = useState('')
   const [dragOver, setDragOver] = useState(false)
   const [fileName, setFileName] = useState('')
@@ -46,27 +49,32 @@ export default function Outreach() {
   const [formError, setFormError] = useState('')
   const fileRef = useRef()
 
+  const saveContacts = (updated) => {
+    setContacts(updated)
+    try { localStorage.setItem('jkno_outreach', JSON.stringify(updated)) } catch {}
+  }
+
   const handleFile = (file) => {
     if (!file) return
     setFileName(file.name)
     const reader = new FileReader()
-    reader.onload = (e) => setContacts((prev) => [...prev, ...parseCSV(e.target.result)])
+    reader.onload = (e) => saveContacts([...contacts, ...parseCSV(e.target.result)])
     reader.readAsText(file)
   }
 
   const handleAdd = () => {
     if (!form.firstName && !form.lastName) { setFormError('First name is required.'); return }
     if (!form.email) { setFormError('Email is required.'); return }
-    setContacts((prev) => [...prev, { ...form, sent: false }])
+    saveContacts([...contacts, { ...form, sent: false }])
     setForm(EMPTY_FORM)
     setFormError('')
   }
 
   const markSent = (idx) =>
-    setContacts((prev) => prev.map((c, i) => i === idx ? { ...c, sent: true } : c))
+    saveContacts(contacts.map((c, i) => i === idx ? { ...c, sent: true } : c))
 
   const removeContact = (idx) =>
-    setContacts((prev) => prev.filter((_, i) => i !== idx))
+    saveContacts(contacts.filter((_, i) => i !== idx))
 
   const openZoho = (contact, idx) => {
     const to = encodeURIComponent(contact.email)
@@ -166,7 +174,7 @@ export default function Outreach() {
               </div>
               <div style={{ display: 'flex', gap: '10px' }}>
                 <input placeholder="Search…" value={search} onChange={(e) => setSearch(e.target.value)} style={{ ...input, width: '180px' }} />
-                <button onClick={() => { setContacts([]); setFileName('') }} style={{ background: '#F0ECE2', border: 'none', borderRadius: '8px', padding: '8px 16px', fontFamily: "'DM Mono', monospace", fontSize: '11px', letterSpacing: '1px', color: '#8A8275', cursor: 'pointer' }}>CLEAR ALL</button>
+                <button onClick={() => { saveContacts([]); setFileName('') }} style={{ background: '#F0ECE2', border: 'none', borderRadius: '8px', padding: '8px 16px', fontFamily: "'DM Mono', monospace", fontSize: '11px', letterSpacing: '1px', color: '#8A8275', cursor: 'pointer' }}>CLEAR ALL</button>
               </div>
             </div>
 
@@ -197,7 +205,7 @@ export default function Outreach() {
                         <td style={{ ...cell, fontSize: '12px', color: '#8A8275' }}>{c.city || '—'}</td>
                         <td style={{ ...cell, textAlign: 'center' }}>
                           {c.sent ? (
-                            <span style={{ fontFamily: "'DM Mono', monospace", fontSize: '11px', color: '#16a34a', letterSpacing: '1px', cursor: 'pointer' }} onClick={() => setContacts((prev) => prev.map((x, j) => j === realIdx ? { ...x, sent: false } : x))} title="Click to undo">✓ SENT ↩</span>
+                            <span style={{ fontFamily: "'DM Mono', monospace", fontSize: '11px', color: '#16a34a', letterSpacing: '1px', cursor: 'pointer' }} onClick={() => saveContacts(contacts.map((x, j) => j === realIdx ? { ...x, sent: false } : x))} title="Click to undo">✓ SENT ↩</span>
                           ) : (
                             <button
                               onClick={() => openZoho(c, realIdx)}
