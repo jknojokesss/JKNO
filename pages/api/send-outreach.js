@@ -30,7 +30,7 @@ Interested? Reach out today!
 
   try {
     await transporter.sendMail({
-      from: `"Jonathan Katz | JK No Jokes" <${process.env.ZOHO_EMAIL}>`,
+      from: `"JK No Jokes Financials" <${process.env.ZOHO_EMAIL}>`,
       to,
       subject: 'Quick question about your books',
       text: body,
