@@ -18,11 +18,11 @@ export default async function handler(req, res) {
 
   const body = `Hi ${firstName || 'there'},
 
-I build live dashboards for local businesses — your sales, cash flow, and orders on one screen instead of waiting on your accountant to tell you how last month went.
+I do bookkeeping and build live dashboards for local businesses — sales, cash flow, and orders on one screen.
 
-I put together a demo you can click around at jknojokes.com — and beyond financials, I can build dashboards to track anything in your business: orders, inventory, team performance, you name it.
+Here's a demo you can click around: jknojokes.com
 
-Happy to walk you through it personally too. Interested? Reach out today!
+Everything in it can be custom-built for your business — orders, inventory, team performance, whatever you need tracked. Happy to walk you through it personally. Interested? Reach out today!
 
 — Jonathan Katz | JK No Jokes Financials | jknojokes.com`
 
