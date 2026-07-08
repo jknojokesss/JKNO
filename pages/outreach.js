@@ -10,7 +10,7 @@ const SLATE = '#2C3E50'
 const EMAIL_SUBJECT = `what your numbers could look like (demo inside)`
 
 const emailBody = (firstName) =>
-  `Hi ${firstName},\n\nI do bookkeeping and build live dashboards for local businesses — sales, cash flow, and orders on one screen.\n\nHere's a demo you can click around: jknojokes.com\n\nEverything in it can be custom-built for your business — orders, inventory, team performance, whatever you need tracked. Happy to walk you through it personally. Interested? Reach out today!\n\n— Jonathan Katz | JK No Jokes Financials | jknojokes.com`
+  `Hi ${firstName},\n\nI do bookkeeping and build live dashboards for local businesses — sales, cash flow, and orders on one screen.\n\nHere's a demo you can click around: jknojokes.com\n\nEverything in it can be custom-built for your business — orders, inventory, team performance, whatever you need tracked. Happy to walk you through it personally. Interested? Reach out today!\n\n— Jonathan Katz | JK No Jokes Financials | jknojokes.com\n\nP.S. Not for you? Just reply STOP and I won't email again.`
 
 function parseCSV(text) {
   const lines = text.trim().split(/\r?\n/)
@@ -104,8 +104,28 @@ export default function Outreach() {
 
   const markSent = async (idx) => {
     const c = contacts[idx]
-    await supabase.from('outreach_contacts').update({ sent: true }).eq('id', c.id)
-    setContacts((prev) => prev.map((x, i) => i === idx ? { ...x, sent: true } : x))
+    const sentAt = new Date().toISOString()
+    await supabase.from('outreach_contacts').update({ sent: true, sent_at: sentAt }).eq('id', c.id)
+    setContacts((prev) => prev.map((x, i) => i === idx ? { ...x, sent: true, sent_at: sentAt } : x))
+  }
+
+  const FOLLOW_UP_DAYS = 4
+  const dueForFollowUp = (c) =>
+    c.sent && !c.followed_up && c.sent_at && (Date.now() - new Date(c.sent_at).getTime()) / 86400000 >= FOLLOW_UP_DAYS
+
+  const sendFollowUp = async (contact, idx) => {
+    try {
+      const res = await fetch('/api/send-outreach', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ to: contact.email, firstName: contact.firstName, followUp: true }),
+      })
+      if (!res.ok) { const e = await res.json(); alert('Send failed: ' + e.error); return }
+      await supabase.from('outreach_contacts').update({ followed_up: true }).eq('id', contact.id)
+      setContacts((prev) => prev.map((x, i) => i === idx ? { ...x, followed_up: true } : x))
+    } catch (err) {
+      alert('Send failed: ' + err.message)
+    }
   }
 
   const markUnsent = async (idx) => {
@@ -282,8 +302,15 @@ export default function Outreach() {
                         <td style={{ ...cell, fontFamily: "'DM Mono', monospace", fontSize: '12px', color: '#5A6070' }}>{c.email || '—'}</td>
                         <td style={{ ...cell, fontSize: '12px', color: '#8A8275' }}>{c.city || '—'}</td>
                         <td style={{ ...cell, textAlign: 'center' }}>
-                          {c.sent ? (
-                            <span style={{ fontFamily: "'DM Mono', monospace", fontSize: '11px', color: '#16a34a', letterSpacing: '1px', cursor: 'pointer' }} onClick={() => markUnsent(realIdx)} title="Click to undo">✓ SENT ↩</span>
+                          {c.sent && dueForFollowUp(c) ? (
+                            <button
+                              onClick={() => sendFollowUp(c, realIdx)}
+                              style={{ background: '#2C3E50', color: '#fff', border: 'none', borderRadius: '7px', padding: '7px 16px', fontFamily: "'DM Mono', monospace", fontSize: '11px', letterSpacing: '1px', cursor: 'pointer', whiteSpace: 'nowrap' }}
+                            >
+                              FOLLOW UP →
+                            </button>
+                          ) : c.sent ? (
+                            <span style={{ fontFamily: "'DM Mono', monospace", fontSize: '11px', color: '#16a34a', letterSpacing: '1px', cursor: 'pointer' }} onClick={() => markUnsent(realIdx)} title="Click to undo">{c.followed_up ? '✓✓ FOLLOWED UP' : '✓ SENT ↩'}</span>
                           ) : (
                             <button
                               onClick={() => openZoho(c, realIdx)}
