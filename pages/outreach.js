@@ -46,14 +46,38 @@ export default function Outreach() {
   const [fileName, setFileName] = useState('')
   const [form, setForm] = useState(EMPTY_FORM)
   const [formError, setFormError] = useState('')
+  const [scrapeCat, setScrapeCat] = useState('')
+  const [scrapeTown, setScrapeTown] = useState('Lakewood')
+  const [scraping, setScraping] = useState(false)
+  const [scrapeMsg, setScrapeMsg] = useState('')
   const fileRef = useRef()
 
-  useEffect(() => {
-    supabase.from('outreach_contacts').select('*').order('created_at', { ascending: true }).then(({ data }) => {
-      if (data) setContacts(data.map((r) => ({ ...r, firstName: r.first_name, lastName: r.last_name })))
-      setLoading(false)
-    })
-  }, [])
+  const refetch = async () => {
+    const { data } = await supabase.from('outreach_contacts').select('*').order('created_at', { ascending: true })
+    if (data) setContacts(data.map((r) => ({ ...r, firstName: r.first_name, lastName: r.last_name })))
+  }
+
+  useEffect(() => { refetch().then(() => setLoading(false)) }, [])
+
+  const scrapeLeads = async () => {
+    if (!scrapeCat.trim()) { setScrapeMsg('Enter a category.'); return }
+    setScraping(true)
+    setScrapeMsg('Searching Google Maps and scraping websites… (up to a minute)')
+    try {
+      const res = await fetch('/api/scrape-leads', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ category: scrapeCat.trim(), town: scrapeTown.trim() }),
+      })
+      const d = await res.json()
+      if (!res.ok) { setScrapeMsg('Error: ' + (d.error || 'failed')); setScraping(false); return }
+      setScrapeMsg(`Found ${d.found} businesses · ${d.withEmails} had emails · added ${d.added} new${d.skippedDuplicates ? ` · skipped ${d.skippedDuplicates} dupes` : ''}.`)
+      await refetch()
+    } catch (err) {
+      setScrapeMsg('Error: ' + err.message)
+    }
+    setScraping(false)
+  }
 
   const handleFile = (file) => {
     if (!file) return
@@ -143,7 +167,27 @@ export default function Outreach() {
         <div style={{ marginBottom: '32px' }}>
           <div style={{ fontFamily: "'Playfair Display', Georgia, serif", fontSize: '22px', fontWeight: 700, letterSpacing: '2px', color: INK }}>JK<span style={{ color: GOLD }}>.</span></div>
           <h1 style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: '36px', fontWeight: 600, color: INK, marginTop: '4px' }}>Outreach</h1>
-          <p style={{ color: '#7A7060', fontSize: '14px', marginTop: '4px' }}>Add contacts manually or upload a CSV — then fire emails straight into Zoho.</p>
+          <p style={{ color: '#7A7060', fontSize: '14px', marginTop: '4px' }}>Find local leads, add contacts manually, or upload a CSV — then fire emails straight into Zoho.</p>
+        </div>
+
+        {/* Find leads via Google Maps */}
+        <div style={{ background: '#0D0D0D', borderRadius: '14px', padding: '24px', marginBottom: '24px' }}>
+          <div style={{ fontFamily: "'DM Mono', monospace", fontSize: '10px', letterSpacing: '2px', color: GOLD, marginBottom: '6px' }}>FIND LOCAL LEADS · GOOGLE MAPS</div>
+          <p style={{ color: '#B0A898', fontSize: '13px', marginBottom: '16px' }}>Pulls every business in a category + town, scrapes their websites for emails, and adds the ones it finds.</p>
+          <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap', alignItems: 'flex-end' }}>
+            <div style={{ flex: '2', minWidth: '180px' }}>
+              <div style={{ fontSize: '11px', color: '#8A8275', marginBottom: '4px', fontFamily: "'DM Mono', monospace", letterSpacing: '1px' }}>CATEGORY</div>
+              <input style={{ ...input, width: '100%' }} value={scrapeCat} onChange={(e) => setScrapeCat(e.target.value)} placeholder="restaurants" onKeyDown={(e) => e.key === 'Enter' && !scraping && scrapeLeads()} />
+            </div>
+            <div style={{ flex: '1', minWidth: '130px' }}>
+              <div style={{ fontSize: '11px', color: '#8A8275', marginBottom: '4px', fontFamily: "'DM Mono', monospace", letterSpacing: '1px' }}>TOWN (NJ)</div>
+              <input style={{ ...input, width: '100%' }} value={scrapeTown} onChange={(e) => setScrapeTown(e.target.value)} placeholder="Lakewood" onKeyDown={(e) => e.key === 'Enter' && !scraping && scrapeLeads()} />
+            </div>
+            <button onClick={scrapeLeads} disabled={scraping} style={{ background: scraping ? '#8A7A3C' : GOLD, color: INK, border: 'none', borderRadius: '8px', padding: '10px 24px', fontFamily: "'DM Mono', monospace", fontSize: '12px', letterSpacing: '1px', cursor: scraping ? 'default' : 'pointer', height: '38px' }}>
+              {scraping ? 'SEARCHING…' : 'FIND LEADS'}
+            </button>
+          </div>
+          {scrapeMsg && <p style={{ fontFamily: "'DM Mono', monospace", fontSize: '12px', color: scrapeMsg.startsWith('Error') ? '#E24B4A' : '#5DCAA5', marginTop: '14px' }}>{scrapeMsg}</p>}
         </div>
 
         {/* Manual entry form */}
