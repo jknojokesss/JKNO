@@ -7,10 +7,10 @@ const INK = '#0D0D0D'
 const PAPER = '#F7F4EF'
 const SLATE = '#2C3E50'
 
-const EMAIL_SUBJECT = `Quick question about your books`
+const EMAIL_SUBJECT = `what your numbers could look like (demo inside)`
 
 const emailBody = (firstName) =>
-  `Hi ${firstName},\n\nDo you actually know your numbers week to week, or are you waiting on your accountant to tell you how last month went?\n\nI build financial dashboards for local businesses that give you a live view of your P&L, cash flow, and sales — and beyond just financials, I can build dashboards to track anything in your business: orders, inventory, team performance, you name it.\n\nYou can see a live demo at jknojokes.com — happy to walk you through it personally too.\n\nInterested? Reach out today!\n\n— Jonathan Katz | JK No Jokes Financials | jknojokes.com`
+  `Hi ${firstName},\n\nI build live dashboards for local businesses — your sales, cash flow, and orders on one screen instead of waiting on your accountant to tell you how last month went.\n\nI put together a demo you can click around at jknojokes.com — and beyond financials, I can build dashboards to track anything in your business: orders, inventory, team performance, you name it.\n\nHappy to walk you through it personally too. Interested? Reach out today!\n\n— Jonathan Katz | JK No Jokes Financials | jknojokes.com`
 
 function parseCSV(text) {
   const lines = text.trim().split(/\r?\n/)

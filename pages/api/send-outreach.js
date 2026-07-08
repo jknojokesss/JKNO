@@ -18,13 +18,11 @@ export default async function handler(req, res) {
 
   const body = `Hi ${firstName || 'there'},
 
-Do you actually know your numbers week to week, or are you waiting on your accountant to tell you how last month went?
+I build live dashboards for local businesses — your sales, cash flow, and orders on one screen instead of waiting on your accountant to tell you how last month went.
 
-I build financial dashboards for local businesses that give you a live view of your P&L, cash flow, and sales — and beyond just financials, I can build dashboards to track anything in your business: orders, inventory, team performance, you name it.
+I put together a demo you can click around at jknojokes.com — and beyond financials, I can build dashboards to track anything in your business: orders, inventory, team performance, you name it.
 
-You can see a live demo at jknojokes.com — happy to walk you through it personally too.
-
-Interested? Reach out today!
+Happy to walk you through it personally too. Interested? Reach out today!
 
 — Jonathan Katz | JK No Jokes Financials | jknojokes.com`
 
@@ -32,7 +30,7 @@ Interested? Reach out today!
     await transporter.sendMail({
       from: `"Jonathan Katz at JK Financials" <${process.env.ZOHO_EMAIL}>`,
       to,
-      subject: 'Quick question about your books',
+      subject: 'what your numbers could look like (demo inside)',
       text: body,
     })
     res.status(200).json({ ok: true })
