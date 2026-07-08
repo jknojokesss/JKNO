@@ -69,7 +69,8 @@ export default function Outreach() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ category: scrapeCat.trim(), town: scrapeTown.trim() }),
       })
-      const d = await res.json()
+      let d
+      try { d = await res.json() } catch { setScrapeMsg('Error: the search timed out — try a more specific category (e.g. "pizza" not "small business").'); setScraping(false); return }
       if (!res.ok) { setScrapeMsg('Error: ' + (d.error || 'failed')); setScraping(false); return }
       setScrapeMsg(`Found ${d.found} businesses · ${d.withEmails} had emails · added ${d.added} new${d.skippedDuplicates ? ` · skipped ${d.skippedDuplicates} dupes` : ''}.`)
       await refetch()

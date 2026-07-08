@@ -19,12 +19,13 @@ function extractEmail(html) {
   return null
 }
 
-async function fetchText(url, ms = 6000) {
+async function fetchText(url, ms = 5000) {
   const ctrl = new AbortController()
   const t = setTimeout(() => ctrl.abort(), ms)
   try {
     const res = await fetch(url, { signal: ctrl.signal, headers: { 'User-Agent': 'Mozilla/5.0 (compatible; LeadBot/1.0)' } })
-    return await res.text()
+    const text = await res.text()
+    return text.slice(0, 300000)
   } catch {
     return ''
   } finally {
@@ -38,9 +39,9 @@ async function findEmail(website) {
     let html = await fetchText(base)
     let email = extractEmail(html)
     if (email) return email
-    // try a contact page
-    for (const path of ['/contact', '/contact-us', '/about']) {
-      html = await fetchText(base + path, 4000)
+    // try contact pages
+    for (const path of ['/contact', '/contact-us']) {
+      html = await fetchText(base + path, 3500)
       email = extractEmail(html)
       if (email) return email
     }
@@ -82,8 +83,8 @@ export default async function handler(req, res) {
     const query = `${category} in ${town}, NJ`
     const places = await searchPlaces(query)
 
-    // scrape emails for those with a website, in parallel
-    const withSites = places.filter((p) => p.websiteUri)
+    // scrape emails for those with a website, in parallel (capped to stay under the function time limit)
+    const withSites = places.filter((p) => p.websiteUri).slice(0, 45)
     const emails = await Promise.all(withSites.map((p) => findEmail(p.websiteUri)))
 
     const leads = withSites.map((p, i) => ({
