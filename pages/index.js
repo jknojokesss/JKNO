@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import { useRouter } from 'next/router'
 import Head from 'next/head'
 import DemoDashboard from '../components/DemoDashboard'
+import { ALL_DEMOS } from '../lib/industryDemos'
 
 // Calendly booking link for the $25 gift-card offer.
 const BOOKING_URL = 'https://calendly.com/jk-jknojokes/30min'
@@ -349,6 +350,7 @@ export default function Landing() {
           </span>
         </div>
         {!isMobile && <div style={{ display: 'flex', gap: '22px', alignItems: 'center' }}>
+          <button className="nav-link" onClick={() => router.push('/demos')}>Demos</button>
           <button className="nav-link" onClick={() => router.push('/how-it-works')}>How It Works</button>
           <button className="nav-link" onClick={() => router.push('/what-we-do')}>What You Get</button>
           <button className="nav-link" onClick={() => router.push('/about')}>Who We Are</button>
@@ -369,10 +371,14 @@ export default function Landing() {
       {menuOpen && (
         <div style={{ position: 'fixed', top: '108px', left: 0, right: 0, zIndex: 99,
           background: '#EEEAE2', borderBottom: '1px solid #DDD8CE', padding: '20px' }}>
-          {['Features', 'About', 'Contact'].map(item => (
+          {['Demos', 'Features', 'About', 'Contact'].map(item => (
             <button key={item} className="nav-link" style={{ display: 'block', padding: '12px 0',
               width: '100%', textAlign: 'left', fontSize: '14px', color: '#1A1A2E' }}
-              onClick={() => { document.getElementById(item.toLowerCase())?.scrollIntoView({ behavior: 'smooth' }); setMenuOpen(false) }}>
+              onClick={() => {
+                if (item === 'Demos') { router.push('/demos') }
+                else { document.getElementById(item.toLowerCase())?.scrollIntoView({ behavior: 'smooth' }) }
+                setMenuOpen(false)
+              }}>
               {item}
             </button>
           ))}
@@ -511,6 +517,53 @@ export default function Landing() {
       </div>
 
 
+      {/* INDUSTRY DEMOS */}
+      <section id="industries" style={{ padding: 'clamp(56px, 9vw, 100px) clamp(20px, 5vw, 48px)',
+        background: '#EEEAE2', borderTop: '1px solid #DDD8CE', borderBottom: '1px solid #DDD8CE' }}>
+        <div style={{ maxWidth: '1100px', margin: '0 auto' }}>
+          <div style={{ textAlign: 'center', marginBottom: '48px' }}>
+            <div style={{ fontFamily: 'DM Mono, monospace', fontSize: '11px',
+              letterSpacing: '3px', color: '#C9A84C', marginBottom: '16px' }}>
+              — {ALL_DEMOS.length} LIVE DEMOS · FIND YOURS
+            </div>
+            <h2 style={{ fontFamily: 'Cormorant Garamond, serif',
+              fontSize: 'clamp(28px, 4vw, 48px)', fontWeight: '600',
+              letterSpacing: '-0.5px', lineHeight: 1.15, color: '#1A1A2E', marginBottom: '16px' }}>
+              Built for your industry.<br />Not "for everyone."
+            </h2>
+            <p style={{ fontSize: '15px', color: '#5A6070', maxWidth: '520px',
+              margin: '0 auto', lineHeight: 1.7 }}>
+              A pizzeria's numbers don't look like a law firm's. Click your industry below —
+              every demo is live, clickable, and built the way we'd build yours.
+            </p>
+          </div>
+
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: '10px', justifyContent: 'center' }}>
+            {ALL_DEMOS.map(d => (
+              <a key={d.href} href={d.href} style={{
+                display: 'inline-flex', alignItems: 'center', gap: '8px',
+                background: '#F7F4EF', border: '1px solid #DDD8CE', borderRadius: '30px',
+                padding: '10px 18px', textDecoration: 'none', color: '#1A1A2E',
+                fontSize: '13px', fontFamily: 'DM Sans, sans-serif', transition: 'all 0.2s ease',
+              }}
+                onMouseEnter={e => { e.currentTarget.style.borderColor = '#C9A84C'; e.currentTarget.style.background = '#fff' }}
+                onMouseLeave={e => { e.currentTarget.style.borderColor = '#DDD8CE'; e.currentTarget.style.background = '#F7F4EF' }}>
+                <span>{d.emoji}</span> {d.industry}
+              </a>
+            ))}
+          </div>
+
+          <div style={{ textAlign: 'center', marginTop: '36px' }}>
+            <button className="cta-btn" onClick={() => router.push('/demos')}>
+              Browse All {ALL_DEMOS.length} Demos →
+            </button>
+            <div style={{ fontFamily: 'DM Mono, monospace', fontSize: '10px', color: '#7A8090',
+              marginTop: '12px', letterSpacing: '1.5px' }}>
+              DON'T SEE YOURS? WE'LL BUILD IT FREE BEFORE YOU PAY A DIME.
+            </div>
+          </div>
+        </div>
+      </section>
       {/* CONTACT */}
       <section id="contact" className="section-pad" style={{ padding: '120px 48px', maxWidth: '680px', margin: '0 auto' }}>
         <div style={{ marginBottom: '56px', textAlign: 'center' }}>
