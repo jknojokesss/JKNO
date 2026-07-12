@@ -76,11 +76,12 @@ async function searchPlaces(textQuery) {
 
 export default async function handler(req, res) {
   if (req.method !== 'POST') return res.status(405).end()
-  const { category, town } = req.body
+  const { category, town, state } = req.body
   if (!category || !town) return res.status(400).json({ error: 'Missing category or town' })
+  const st = (state || 'NJ').toUpperCase().trim()
 
   try {
-    const query = `${category} in ${town}, NJ`
+    const query = `${category} in ${town}, ${st}`
     const places = await searchPlaces(query)
 
     // scrape emails for those with a website, in parallel (capped to stay under the function time limit)
@@ -93,7 +94,7 @@ export default async function handler(req, res) {
       company: p.displayName?.text || '',
       email: emails[i] || '',
       title: '',
-      city: town,
+      city: `${town}, ${st}`,
       phone: p.nationalPhoneNumber || '',
       sent: false,
     })).filter((l) => l.email)

@@ -48,6 +48,7 @@ export default function Outreach() {
   const [formError, setFormError] = useState('')
   const [scrapeCat, setScrapeCat] = useState('')
   const [scrapeTown, setScrapeTown] = useState('Lakewood')
+  const [scrapeState, setScrapeState] = useState('NJ')
   const [scraping, setScraping] = useState(false)
   const [scrapeMsg, setScrapeMsg] = useState('')
   const fileRef = useRef()
@@ -67,7 +68,7 @@ export default function Outreach() {
       const res = await fetch('/api/scrape-leads', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ category: scrapeCat.trim(), town: scrapeTown.trim() }),
+        body: JSON.stringify({ category: scrapeCat.trim(), town: scrapeTown.trim(), state: scrapeState }),
       })
       let d
       try { d = await res.json() } catch { setScrapeMsg('Error: the search timed out — try a more specific category (e.g. "pizza" not "small business").'); setScraping(false); return }
@@ -200,9 +201,16 @@ export default function Outreach() {
               <div style={{ fontSize: '11px', color: '#8A8275', marginBottom: '4px', fontFamily: "'DM Mono', monospace", letterSpacing: '1px' }}>CATEGORY</div>
               <input style={{ ...input, width: '100%' }} value={scrapeCat} onChange={(e) => setScrapeCat(e.target.value)} placeholder="restaurants" onKeyDown={(e) => e.key === 'Enter' && !scraping && scrapeLeads()} />
             </div>
-            <div style={{ flex: '1', minWidth: '130px' }}>
-              <div style={{ fontSize: '11px', color: '#8A8275', marginBottom: '4px', fontFamily: "'DM Mono', monospace", letterSpacing: '1px' }}>TOWN (NJ)</div>
+            <div style={{ flex: '1', minWidth: '110px' }}>
+              <div style={{ fontSize: '11px', color: '#8A8275', marginBottom: '4px', fontFamily: "'DM Mono', monospace", letterSpacing: '1px' }}>TOWN</div>
               <input style={{ ...input, width: '100%' }} value={scrapeTown} onChange={(e) => setScrapeTown(e.target.value)} placeholder="Lakewood" onKeyDown={(e) => e.key === 'Enter' && !scraping && scrapeLeads()} />
+            </div>
+            <div style={{ minWidth: '78px' }}>
+              <div style={{ fontSize: '11px', color: '#8A8275', marginBottom: '4px', fontFamily: "'DM Mono', monospace", letterSpacing: '1px' }}>STATE</div>
+              <select style={{ ...input, width: '100%', cursor: 'pointer' }} value={scrapeState} onChange={(e) => setScrapeState(e.target.value)}>
+                <option value="NJ">NJ</option>
+                <option value="NY">NY</option>
+              </select>
             </div>
             <button onClick={scrapeLeads} disabled={scraping} style={{ background: scraping ? '#8A7A3C' : GOLD, color: INK, border: 'none', borderRadius: '8px', padding: '10px 24px', fontFamily: "'DM Mono', monospace", fontSize: '12px', letterSpacing: '1px', cursor: scraping ? 'default' : 'pointer', height: '38px' }}>
               {scraping ? 'SEARCHING…' : 'FIND LEADS'}
