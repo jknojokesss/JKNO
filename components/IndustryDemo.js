@@ -32,11 +32,13 @@ const STATUS_SETS = {
 }
 
 export default function IndustryDemo({ cfg }) {
-  const { biz, industry, emoji, theme, months, revCats, expLines, extraKpi, ops } = cfg
+  const { biz, industry, emoji, theme, months, revCats, expLines, extraKpi, insights, ops } = cfg
   const [tab, setTab] = useState('dash')
   const [mi, setMi] = useState(11)
   const [openLine, setOpenLine] = useState(null)
   const [rows, setRows] = useState(ops.rows)
+  const [adding, setAdding] = useState(false)
+  const [f, setF] = useState({ a: '', chg: '', cost: '' })
 
   const rev = months.rev, exp = months.exp
   const profit = rev.map((r, i) => r - exp[i])
@@ -141,14 +143,46 @@ export default function IndustryDemo({ cfg }) {
                 </div>
               </div>
               <div style={{ display: 'flex', alignItems: 'flex-end', gap: '6px', height: '150px', marginTop: '18px' }}>
-                {rev.map((r, i) => (
-                  <button key={i} onClick={() => setMi(i)} style={{ flex: 1, border: 'none', background: 'transparent', cursor: 'pointer', padding: 0, display: 'flex', flexDirection: 'column', justifyContent: 'flex-end', height: '100%' }}>
-                    <div style={{ width: '100%', height: `${Math.max(8, (r / maxRev) * 100)}%`, background: i === mi ? A : '#D5DCE4', borderRadius: '3px 3px 0 0', transition: 'background 0.15s' }} />
-                    <div style={{ fontFamily: 'DM Mono, monospace', fontSize: '8px', color: i === mi ? INK : FAINT, marginTop: '5px', textAlign: 'center', width: '100%' }}>{MONTHS[i]}</div>
-                  </button>
+                {rev.map((r, i) => {
+                  const pShare = Math.max(0.04, profit[i] / r)
+                  const sel = i === mi
+                  return (
+                    <button key={i} onClick={() => setMi(i)} title={`${MONTHS[i]}: ${usd0(r)} revenue · ${usd0(profit[i])} profit`} style={{ flex: 1, border: 'none', background: 'transparent', cursor: 'pointer', padding: 0, display: 'flex', flexDirection: 'column', justifyContent: 'flex-end', height: '100%' }}>
+                      <div style={{ width: '100%', height: `${Math.max(10, (r / maxRev) * 100)}%`, display: 'flex', flexDirection: 'column', borderRadius: '3px 3px 0 0', overflow: 'hidden' }}>
+                        <div style={{ flex: 1 - pShare, background: sel ? `${A}44` : '#E2E7ED', transition: 'background 0.15s' }} />
+                        <div style={{ flex: pShare, background: sel ? A : '#B9C4D0', transition: 'background 0.15s' }} />
+                      </div>
+                      <div style={{ fontFamily: 'DM Mono, monospace', fontSize: '8px', color: sel ? INK : FAINT, marginTop: '5px', textAlign: 'center', width: '100%', fontWeight: sel ? 700 : 400 }}>{MONTHS[i]}</div>
+                    </button>
+                  )
+                })}
+              </div>
+              <div style={{ display: 'flex', gap: '16px', marginTop: '12px', justifyContent: 'flex-end' }}>
+                {[[A, 'PROFIT'], [`${A}44`, 'EXPENSES']].map(([c, t], i) => (
+                  <span key={i} style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', fontFamily: 'DM Mono, monospace', fontSize: '8px', letterSpacing: '1px', color: FAINT }}>
+                    <span style={{ width: '10px', height: '10px', borderRadius: '2px', background: c, display: 'inline-block' }} />{t}
+                  </span>
                 ))}
               </div>
             </div>
+
+            {insights && (
+              <div style={{ ...card, borderLeft: `3px solid ${A}`, background: '#FDFCFA' }}>
+                <div style={{ display: 'flex', alignItems: 'baseline', gap: '10px', marginBottom: '12px' }}>
+                  <span style={{ color: A, fontSize: '16px' }}>◈</span>
+                  <div>
+                    <div style={{ ...serif, fontSize: '18px', fontWeight: 600, color: INK }}>What your numbers are saying</div>
+                    <div style={{ fontFamily: 'DM Mono, monospace', fontSize: '9px', letterSpacing: '1px', color: FAINT }}>PLAIN-ENGLISH INSIGHTS, READ STRAIGHT FROM YOUR BOOKS</div>
+                  </div>
+                </div>
+                {insights.map((t, i) => (
+                  <div key={i} style={{ display: 'flex', gap: '10px', padding: '9px 0', borderTop: i > 0 ? '1px solid #EEF1F5' : 'none' }}>
+                    <span style={{ fontFamily: 'DM Mono, monospace', fontSize: '10px', color: A, lineHeight: '19px' }}>0{i + 1}</span>
+                    <span style={{ fontSize: '13px', color: '#3A4552', lineHeight: 1.6 }}>{t}</span>
+                  </div>
+                ))}
+              </div>
+            )}
 
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(300px,1fr))', gap: '16px' }}>
               <div style={card}>
@@ -241,11 +275,38 @@ export default function IndustryDemo({ cfg }) {
         {tab === 'ops' && ops.type !== 'sales' && (
           <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
             <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
-              {ops.kpis.map((k, i) => <Kpi key={i} k={k.k} v={k.v} sub={k.sub} color={i === 0 ? A : undefined} />)}
+              {(ops.type === 'jobs' ? [
+                { k: 'OPEN', v: rows.filter((r) => r.s !== 'done').length, sub: `${rows.filter((r) => r.s === 'waiting').length} on hold` },
+                { k: 'ON THE BOARD', v: usd0(rows.reduce((s, r) => s + r.chg, 0)), sub: 'total charged' },
+                { k: 'PROFIT ON THE BOARD', v: usd0(rows.reduce((s, r) => s + (r.chg - r.cost), 0)), sub: `${Math.round((rows.reduce((s, r) => s + (r.chg - r.cost), 0) / Math.max(1, rows.reduce((s, r) => s + r.chg, 0))) * 100)}% blended margin` },
+              ] : ops.kpis).map((k, i) => <Kpi key={i} k={k.k} v={k.v} sub={k.sub} color={i === 0 ? A : undefined} />)}
             </div>
             <div style={card}>
-              <div style={{ ...serif, fontSize: '20px', fontWeight: 600, color: INK, marginBottom: '4px' }}>{ops.title}</div>
-              <div style={{ fontFamily: 'DM Mono, monospace', fontSize: '10px', color: MUTED, marginBottom: '12px' }}>{ops.sub}</div>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '8px' }}>
+                <div>
+                  <div style={{ ...serif, fontSize: '20px', fontWeight: 600, color: INK, marginBottom: '4px' }}>{ops.title}</div>
+                  <div style={{ fontFamily: 'DM Mono, monospace', fontSize: '10px', color: MUTED, marginBottom: '12px' }}>{ops.sub}</div>
+                </div>
+                {ops.type === 'jobs' && (
+                  <button onClick={() => setAdding((x) => !x)} style={{ background: adding ? '#E2E7ED' : A, color: adding ? MUTED : '#fff', border: 'none', borderRadius: '5px', padding: '9px 14px', fontFamily: 'DM Mono, monospace', fontSize: '11px', letterSpacing: '1px', cursor: 'pointer' }}>
+                    {adding ? '✕ CANCEL' : `+ NEW ${ops.unit || 'JOB'}`}
+                  </button>
+                )}
+              </div>
+              {ops.type === 'jobs' && adding && (
+                <div style={{ background: '#F7F9FB', border: '1px dashed #CFD8E2', borderRadius: '6px', padding: '14px', marginBottom: '14px' }}>
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(150px,1fr))', gap: '10px' }}>
+                    <input style={{ padding: '9px 10px', fontSize: '13px', fontFamily: "'DM Sans',sans-serif", border: '1px solid #CFD8E2', borderRadius: '5px', background: '#fff', color: INK, outline: 'none' }} placeholder="Describe the job" value={f.a} onChange={(e) => setF({ ...f, a: e.target.value })} />
+                    <input style={{ padding: '9px 10px', fontSize: '13px', fontFamily: "'DM Sans',sans-serif", border: '1px solid #CFD8E2', borderRadius: '5px', background: '#fff', color: INK, outline: 'none' }} type="number" placeholder="Charging $" value={f.chg} onChange={(e) => setF({ ...f, chg: e.target.value })} />
+                    <input style={{ padding: '9px 10px', fontSize: '13px', fontFamily: "'DM Sans',sans-serif", border: '1px solid #CFD8E2', borderRadius: '5px', background: '#fff', color: INK, outline: 'none' }} type="number" placeholder="Your cost $" value={f.cost} onChange={(e) => setF({ ...f, cost: e.target.value })} />
+                  </div>
+                  <button onClick={() => {
+                    if (!f.a || !Number(f.chg)) return
+                    setRows([{ a: f.a, b: 'Just added — watch the numbers above', who: '—', s: 'scheduled', chg: Number(f.chg), cost: Number(f.cost || 0) }, ...rows])
+                    setF({ a: '', chg: '', cost: '' }); setAdding(false)
+                  }} style={{ marginTop: '12px', background: D, color: '#fff', border: 'none', borderRadius: '5px', padding: '10px 18px', fontFamily: 'DM Mono, monospace', fontSize: '11px', letterSpacing: '1px', cursor: 'pointer' }}>ADD IT →</button>
+                </div>
+              )}
               <div style={{ overflowX: 'auto' }}>
                 <table style={{ width: '100%', borderCollapse: 'collapse', minWidth: '680px' }}>
                   <thead><tr>{ops.cols.map((h, i) => <th key={i} style={{ ...th, textAlign: i >= ops.cols.length - 2 ? 'right' : 'left' }}>{h}</th>)}</tr></thead>
