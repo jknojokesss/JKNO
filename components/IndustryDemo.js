@@ -52,6 +52,10 @@ export default function IndustryDemo({ cfg }) {
     gl: { name: 'general-ledger-jun.csv', rows: 142 },
     updated: null,
   })
+  const [doneMap, setDoneMap] = useState({})
+  const [qf, setQf] = useState({ sys: 0, hrs: 10, mk: 40, permit: true })
+  const [mix, setMix] = useState(0)
+  const [ownerIx, setOwnerIx] = useState(0)
 
   const rev = months.rev, exp = months.exp
   const profit = rev.map((r, i) => r - exp[i])
@@ -104,10 +108,12 @@ export default function IndustryDemo({ cfg }) {
     </select>
   )
 
+  const extras = cfg.extras || []
   const tabs = [
     { id: 'dash', label: 'Dashboard' },
     { id: 'pnl', label: 'P&L' },
     { id: 'ops', label: ops.label },
+    ...extras.map((x, i) => ({ id: 'x' + i, label: x.tab })),
     { id: 'ask', label: 'Ask Us' },
   ]
 
@@ -526,6 +532,211 @@ export default function IndustryDemo({ cfg }) {
             </div>
           </div>
         )}
+
+        {/* SIGNATURE EXTRAS — per-industry modules from cfg.extras */}
+        {extras.map((ex, xi) => tab === 'x' + xi && (
+          <div key={xi} style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+            {ex.kpis && (
+              <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
+                {ex.kpis.map((k, i) => <Kpi key={i} k={k.k} v={k.v} sub={k.sub} color={i === 0 ? A : undefined} />)}
+              </div>
+            )}
+            {ex.modules.map((m, mi2) => {
+              const TONES = { red: ['#F9DFDA', '#C0492F'], amber: ['#FFF3D6', '#9A7B1E'], green: ['#E1F0E6', '#2E7D52'], blue: ['#E1ECF5', '#2C6E9B'] }
+              const Flag = ({ f }) => f ? <span style={{ background: TONES[f.tone][0], color: TONES[f.tone][1], fontFamily: "'Inter', sans-serif", fontSize: '10px', fontWeight: 600, letterSpacing: '0.4px', padding: '3px 9px', borderRadius: '10px', whiteSpace: 'nowrap' }}>{f.f}</span> : null
+              const head = (
+                <div style={{ marginBottom: '12px' }}>
+                  <div style={{ ...serif, fontSize: '19px', color: INK }}>{m.t}</div>
+                  {m.sub && <div style={{ fontFamily: "'Inter', sans-serif", fontSize: '12px', color: MUTED, marginTop: '2px' }}>{m.sub}</div>}
+                </div>
+              )
+
+              if (m.type === 'worklist') {
+                const doneCt = m.rows.filter((_, j) => doneMap[`${xi}-${mi2}-${j}`]).length
+                return (
+                  <div key={mi2} style={card}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '8px', flexWrap: 'wrap' }}>
+                      {head}
+                      {m.act && doneCt > 0 && <span style={{ background: '#E1F0E6', color: GREEN, fontFamily: "'Inter', sans-serif", fontSize: '11px', fontWeight: 600, padding: '5px 12px', borderRadius: '12px' }}>✓ {doneCt} handled just now</span>}
+                    </div>
+                    {m.rows.map((r, j) => {
+                      const done = doneMap[`${xi}-${mi2}-${j}`]
+                      return (
+                        <div key={j} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '10px', padding: '10px 0', borderTop: j > 0 ? '1px solid #EEF1F5' : 'none', opacity: done ? 0.4 : 1, flexWrap: 'wrap' }}>
+                          <div style={{ flex: '1 1 220px', minWidth: 0 }}>
+                            <div style={{ fontSize: '13px', fontWeight: 500, color: INK, textDecoration: done ? 'line-through' : 'none' }}>{r.a}</div>
+                            <div style={{ fontSize: '11.5px', color: MUTED }}>{r.b}</div>
+                          </div>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flexWrap: 'wrap' }}>
+                            {r.meta && <span style={{ fontFamily: "'Inter', sans-serif", fontSize: '11px', color: FAINT }}>{r.meta}</span>}
+                            {r.val && <span style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: '12.5px', fontWeight: 600, color: INK }}>{r.val}</span>}
+                            <Flag f={r.flag} />
+                            {m.act && !done && (
+                              <button onClick={() => setDoneMap({ ...doneMap, [`${xi}-${mi2}-${j}`]: true })} style={{ background: '#fff', border: `1px solid ${A}`, color: A, borderRadius: '5px', padding: '6px 11px', fontFamily: "'Inter', sans-serif", fontSize: '10.5px', fontWeight: 600, letterSpacing: '0.3px', cursor: 'pointer', whiteSpace: 'nowrap' }}>{m.act}</button>
+                            )}
+                            {m.act && done && <span style={{ color: GREEN, fontSize: '13px' }}>✓</span>}
+                          </div>
+                        </div>
+                      )
+                    })}
+                    {m.note && <div style={{ fontFamily: "'Inter', sans-serif", fontSize: '11px', color: FAINT, marginTop: '10px' }}>{m.note}</div>}
+                  </div>
+                )
+              }
+
+              if (m.type === 'board') {
+                return (
+                  <div key={mi2} style={card}>
+                    {head}
+                    <div style={{ overflowX: 'auto' }}>
+                      <table style={{ width: '100%', borderCollapse: 'collapse', minWidth: '640px' }}>
+                        <thead><tr>{m.cols.map((h, i) => <th key={i} style={{ ...th, textAlign: i > 0 ? 'right' : 'left' }}>{h}</th>)}</tr></thead>
+                        <tbody>
+                          {m.rows.map((r, j) => (
+                            <tr key={j}>
+                              {r.map((c, i) => (
+                                <td key={i} style={{ ...td, textAlign: i > 0 ? 'right' : 'left', fontFamily: i > 0 && !(c && c.f) ? "'IBM Plex Mono', monospace" : "'Inter', sans-serif", fontSize: i > 0 ? '11.5px' : '12.5px', fontWeight: i === 0 ? 500 : 400 }}>
+                                  {c && c.f ? <Flag f={c} /> : c}
+                                </td>
+                              ))}
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                    {m.note && <div style={{ fontFamily: "'Inter', sans-serif", fontSize: '11px', color: FAINT, marginTop: '10px' }}>{m.note}</div>}
+                  </div>
+                )
+              }
+
+              if (m.type === 'segments') {
+                return (
+                  <div key={mi2} style={card}>
+                    {head}
+                    <div style={{ display: 'grid', gridTemplateColumns: `repeat(auto-fit,minmax(190px,1fr))`, gap: '12px' }}>
+                      {m.segs.map((s, j) => (
+                        <div key={j} style={{ border: s.hot ? `1.5px solid ${A}` : '1px solid #E2E7ED', background: s.hot ? `${A}0D` : '#FAFBFC', borderRadius: '8px', padding: '14px' }}>
+                          <div style={{ ...lbl, color: s.hot ? A : FAINT, marginBottom: '10px' }}>{s.name}</div>
+                          {s.lines.map(([la, va], i2) => (
+                            <div key={i2} style={{ display: 'flex', justifyContent: 'space-between', padding: '4px 0', fontSize: '12px' }}>
+                              <span style={{ color: MUTED }}>{la}</span>
+                              <span style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: '11.5px', color: String(va).startsWith('(') ? RED : INK }}>{va}</span>
+                            </div>
+                          ))}
+                          {s.foot && (
+                            <div style={{ display: 'flex', justifyContent: 'space-between', padding: '8px 0 0', marginTop: '6px', borderTop: '1px solid #E2E7ED' }}>
+                              <span style={{ fontSize: '12px', fontWeight: 600, color: INK }}>{s.foot[0]}</span>
+                              <span style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: '12.5px', fontWeight: 600, color: s.footTone === 'red' ? RED : GREEN }}>{s.foot[1]}</span>
+                            </div>
+                          )}
+                        </div>
+                      ))}
+                    </div>
+                    {m.note && <div style={{ fontFamily: "'Inter', sans-serif", fontSize: '11px', color: FAINT, marginTop: '12px' }}>{m.note}</div>}
+                  </div>
+                )
+              }
+
+              if (m.type === 'quote') {
+                const sys = m.systems[qf.sys]
+                const cost = sys[1] + qf.hrs * m.rate + (qf.permit ? m.permitCost : 0)
+                const price = Math.round(cost * (1 + qf.mk / 100))
+                return (
+                  <div key={mi2} style={card}>
+                    {head}
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(200px,1fr))', gap: '14px', marginBottom: '16px' }}>
+                      <div>
+                        <div style={{ ...lbl, marginBottom: '6px' }}>SYSTEM</div>
+                        <select value={qf.sys} onChange={(e) => setQf({ ...qf, sys: Number(e.target.value), hrs: m.systems[Number(e.target.value)][2] })} style={{ width: '100%', padding: '10px', fontSize: '13px', fontFamily: "'Inter',sans-serif", border: '1px solid #CFD8E2', borderRadius: '6px', background: '#fff', color: INK }}>
+                          {m.systems.map((s, i) => <option key={i} value={i}>{s[0]}</option>)}
+                        </select>
+                      </div>
+                      <div>
+                        <div style={{ ...lbl, marginBottom: '6px' }}>LABOR HOURS — {qf.hrs}</div>
+                        <input type="range" min="2" max="40" value={qf.hrs} onChange={(e) => setQf({ ...qf, hrs: Number(e.target.value) })} style={{ width: '100%', accentColor: A, marginTop: '12px' }} />
+                      </div>
+                      <div>
+                        <div style={{ ...lbl, marginBottom: '6px' }}>MARKUP — {qf.mk}%</div>
+                        <input type="range" min="15" max="80" value={qf.mk} onChange={(e) => setQf({ ...qf, mk: Number(e.target.value) })} style={{ width: '100%', accentColor: A, marginTop: '12px' }} />
+                      </div>
+                      <div>
+                        <div style={{ ...lbl, marginBottom: '6px' }}>PERMIT</div>
+                        <button onClick={() => setQf({ ...qf, permit: !qf.permit })} style={{ padding: '9px 16px', borderRadius: '6px', border: `1px solid ${qf.permit ? A : '#CFD8E2'}`, background: qf.permit ? `${A}14` : '#fff', color: qf.permit ? INK : MUTED, fontFamily: "'Inter',sans-serif", fontSize: '12.5px', fontWeight: 600, cursor: 'pointer' }}>
+                          {qf.permit ? `✓ Included (+$${m.permitCost})` : 'Not needed'}
+                        </button>
+                      </div>
+                    </div>
+                    <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
+                      <div style={{ flex: 1, minWidth: '150px', background: `${A}12`, border: `1px solid ${A}55`, borderRadius: '8px', padding: '14px' }}>
+                        <div style={{ ...lbl, color: A }}>QUOTE THE CUSTOMER</div>
+                        <div style={{ ...serif, fontSize: '26px', color: INK, marginTop: '4px' }}>{usd0(price)}</div>
+                      </div>
+                      <div style={{ flex: 1, minWidth: '150px', background: '#F7F9FB', borderRadius: '8px', padding: '14px' }}>
+                        <div style={lbl}>YOUR COST</div>
+                        <div style={{ ...serif, fontSize: '26px', color: MUTED, marginTop: '4px' }}>{usd0(cost)}</div>
+                      </div>
+                      <div style={{ flex: 1, minWidth: '150px', background: '#F7F9FB', borderRadius: '8px', padding: '14px' }}>
+                        <div style={lbl}>PROFIT ON THE JOB</div>
+                        <div style={{ ...serif, fontSize: '26px', color: GREEN, marginTop: '4px' }}>{usd0(price - cost)} <span style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: '12px' }}>{Math.round(((price - cost) / price) * 100)}%</span></div>
+                      </div>
+                    </div>
+                    {m.note && <div style={{ fontFamily: "'Inter', sans-serif", fontSize: '11px', color: FAINT, marginTop: '12px' }}>{m.note}</div>}
+                  </div>
+                )
+              }
+
+              if (m.type === 'mix') {
+                const delta = Math.round(mix * m.perCap * (m.bM - m.aM) / 100)
+                return (
+                  <div key={mi2} style={card}>
+                    {head}
+                    <div style={{ ...lbl, marginBottom: '6px' }}>END-CAPS FLIPPED {m.aName.toUpperCase()} → {m.bName.toUpperCase()}: {mix}</div>
+                    <input type="range" min="0" max={m.max} value={mix} onChange={(e) => setMix(Number(e.target.value))} style={{ width: '100%', accentColor: A }} />
+                    <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap', marginTop: '16px' }}>
+                      <div style={{ flex: 1, minWidth: '160px', background: '#F7F9FB', borderRadius: '8px', padding: '14px' }}>
+                        <div style={lbl}>SHELF REVENUE MOVED</div>
+                        <div style={{ ...serif, fontSize: '24px', color: INK, marginTop: '4px' }}>{usd0(mix * m.perCap)}/mo</div>
+                        <div style={{ fontFamily: "'Inter', sans-serif", fontSize: '11px', color: FAINT, marginTop: '4px' }}>{m.aName} ({m.aM}% margin) → {m.bName} ({m.bM}%)</div>
+                      </div>
+                      <div style={{ flex: 1, minWidth: '160px', background: `${A}12`, border: `1px solid ${A}55`, borderRadius: '8px', padding: '14px' }}>
+                        <div style={{ ...lbl, color: A }}>EXTRA PROFIT</div>
+                        <div style={{ ...serif, fontSize: '24px', color: GREEN, marginTop: '4px' }}>+{usd0(delta)}/mo</div>
+                        <div style={{ fontFamily: "'Inter', sans-serif", fontSize: '11px', color: FAINT, marginTop: '4px' }}>{usd0(delta * 12)}/year — same shelf, same store</div>
+                      </div>
+                    </div>
+                    {m.note && <div style={{ fontFamily: "'Inter', sans-serif", fontSize: '11px', color: FAINT, marginTop: '12px' }}>{m.note}</div>}
+                  </div>
+                )
+              }
+
+              if (m.type === 'statement') {
+                const o = m.owners[Math.min(ownerIx, m.owners.length - 1)]
+                const fee = Math.round(o.collected * o.feePct / 100)
+                const net = o.collected - o.repairs - fee
+                return (
+                  <div key={mi2} style={card}>
+                    {head}
+                    <select value={ownerIx} onChange={(e) => setOwnerIx(Number(e.target.value))} style={{ padding: '10px 12px', fontSize: '13px', fontFamily: "'Inter',sans-serif", border: '1px solid #CFD8E2', borderRadius: '6px', background: '#fff', color: INK, marginBottom: '14px', maxWidth: '340px', width: '100%' }}>
+                      {m.owners.map((ow, i) => <option key={i} value={i}>{ow.name} — {ow.props}</option>)}
+                    </select>
+                    {[['Rent collected', usd0(o.collected), INK], ['Repairs & maintenance', `(${usd0(o.repairs)})`, RED], [`Management fee (${o.feePct}%)`, `(${usd0(fee)})`, RED]].map(([la, va, co], i) => (
+                      <div key={i} style={{ display: 'flex', justifyContent: 'space-between', padding: '9px 0', borderBottom: '1px solid #EEF1F5' }}>
+                        <span style={{ fontSize: '13px', color: INK }}>{la}</span>
+                        <span style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: '12px', color: co }}>{va}</span>
+                      </div>
+                    ))}
+                    <div style={{ display: 'flex', justifyContent: 'space-between', padding: '12px 0 2px' }}>
+                      <span style={{ ...serif, fontSize: '17px', color: INK }}>Net to owner</span>
+                      <span style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: '15px', fontWeight: 600, color: GREEN }}>{usd0(net)}</span>
+                    </div>
+                    {m.note && <div style={{ fontFamily: "'Inter', sans-serif", fontSize: '11px', color: FAINT, marginTop: '10px' }}>{m.note}</div>}
+                  </div>
+                )
+              }
+              return null
+            })}
+          </div>
+        ))}
 
         {/* ASK US */}
         {tab === 'ask' && (
