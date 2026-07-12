@@ -78,28 +78,28 @@ export default function IndustryDemo({ cfg }) {
   const D = theme.dark, A = theme.accent
   const INK = '#1F2A36', MUTED = '#647082', FAINT = '#97A3B2'
   const GREEN = '#2E7D52', RED = '#C0492F'
-  const serif = { fontFamily: 'Cormorant Garamond, serif' }
-  const lbl = { fontFamily: 'DM Mono, monospace', fontSize: '9px', letterSpacing: '1.5px', color: FAINT }
+  const serif = { fontFamily: "'Inter', sans-serif", fontWeight: 700, letterSpacing: '-0.4px' }
+  const lbl = { fontFamily: "'Inter', sans-serif", fontSize: '11px', fontWeight: 600, letterSpacing: '0.7px', textTransform: 'uppercase', color: FAINT }
   const card = { background: '#fff', border: '1px solid #DDE3EA', borderRadius: '6px', padding: '16px' }
-  const th = { fontFamily: 'DM Mono, monospace', fontSize: '8px', letterSpacing: '1px', color: FAINT, textAlign: 'left', padding: '8px 10px', borderBottom: '1px solid #E2E7ED' }
+  const th = { fontFamily: "'Inter', sans-serif", fontSize: '10px', fontWeight: 600, letterSpacing: '0.6px', textTransform: 'uppercase', color: FAINT, textAlign: 'left', padding: '8px 10px', borderBottom: '1px solid #E2E7ED' }
   const td = { fontSize: '12px', color: INK, padding: '9px 10px', borderBottom: '1px solid #EEF1F5', verticalAlign: 'top' }
 
   const Kpi = ({ k, v, sub, color }) => (
     <div style={{ ...card, flex: 1, minWidth: '150px' }}>
       <div style={lbl}>{k}</div>
       <div style={{ ...serif, fontSize: '26px', fontWeight: 600, color: INK, lineHeight: 1.1, marginTop: '4px' }}>{v}</div>
-      {sub && <div style={{ fontFamily: 'DM Mono, monospace', fontSize: '10px', color: color || MUTED, marginTop: '4px' }}>{sub}</div>}
+      {sub && <div style={{ fontFamily: "'Inter', sans-serif", fontSize: '12px', color: color || MUTED, marginTop: '4px' }}>{sub}</div>}
     </div>
   )
   const Badge = ({ set, s }) => {
     const [bg, fg, t] = STATUS_SETS[set][s]
-    return <span style={{ background: bg, color: fg, fontFamily: 'DM Mono, monospace', fontSize: '10px', padding: '2px 8px', borderRadius: '3px', whiteSpace: 'nowrap' }}>{t}</span>
+    return <span style={{ background: bg, color: fg, fontFamily: "'IBM Plex Mono', monospace", fontSize: '10px', padding: '2px 8px', borderRadius: '3px', whiteSpace: 'nowrap' }}>{t}</span>
   }
   const StatusSelect = ({ set, row }) => (
     <select
       value={row.s}
       onChange={(e) => setRows((prev) => prev.map((r) => (r === row ? { ...r, s: e.target.value } : r)))}
-      style={{ fontFamily: 'DM Mono, monospace', fontSize: '10px', padding: '3px 6px', border: '1px solid #CFD8E2', borderRadius: '4px', background: '#fff', color: INK, cursor: 'pointer' }}>
+      style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: '10px', padding: '3px 6px', border: '1px solid #CFD8E2', borderRadius: '4px', background: '#fff', color: INK, cursor: 'pointer' }}>
       {Object.entries(STATUS_SETS[set]).map(([v, [, , t]]) => <option key={v} value={v}>{t}</option>)}
     </select>
   )
@@ -128,8 +128,8 @@ export default function IndustryDemo({ cfg }) {
         <meta name="description" content={`Live sample financial dashboard for a ${industry.toLowerCase()} business — built by JK No Jokes Financials.`} />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <link rel="preconnect" href="https://fonts.googleapis.com" />
-        <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=DM+Sans:wght@300;400;500&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet" />
-        <style>{`*{box-sizing:border-box;margin:0;padding:0}body{background:#EEF1F5;font-family:'DM Sans',sans-serif}
+        <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+        <style>{`*{box-sizing:border-box;margin:0;padding:0}html{-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale}body{background:#EEF1F5;font-family:'Inter',sans-serif}
           .id-tabs::-webkit-scrollbar{display:none}.id-tabs{scrollbar-width:none}::placeholder{color:#A8B2BE}
           .id-shell{display:flex;align-items:flex-start;min-height:100vh}
           .id-side{width:236px;flex-shrink:0;position:sticky;top:0;height:100vh;display:flex;flex-direction:column}
@@ -138,54 +138,52 @@ export default function IndustryDemo({ cfg }) {
           @media(max-width:860px){.id-shell{display:block}.id-side{display:none}.id-topbar{display:block}.id-main{padding:18px 14px 48px}}`}</style>
       </Head>
 
-      <div style={{ background: A, color: '#fff', textAlign: 'center', padding: '8px 16px', fontFamily: 'DM Mono, monospace', fontSize: '11px', letterSpacing: '1px' }}>
+      <div style={{ background: A, color: '#fff', textAlign: 'center', padding: '8px 16px', fontFamily: "'Inter', sans-serif", fontSize: '12.5px', fontWeight: 600, letterSpacing: '0.3px' }}>
         SAMPLE DASHBOARD · built for a {industry.toLowerCase()} business by JK No Jokes Financials
       </div>
 
       <div className="id-shell">
         {/* SIDEBAR — desktop */}
         <aside className="id-side" style={{ background: D }}>
-          <div style={{ padding: '22px 20px 18px', borderBottom: '1px solid rgba(255,255,255,0.08)' }}>
-            <div style={{ fontSize: '26px', marginBottom: '10px' }}>{emoji}</div>
-            <div style={{ ...serif, fontSize: '21px', fontWeight: 700, color: '#EAF0F6', lineHeight: 1.15 }}>{biz}</div>
-            <div style={{ fontFamily: 'DM Mono, monospace', fontSize: '8px', letterSpacing: '2px', color: A, marginTop: '6px' }}>{industry.toUpperCase()}</div>
+          <div style={{ padding: '24px 20px 18px', borderBottom: '1px solid rgba(255,255,255,0.08)' }}>
+            <div style={{ fontFamily: "'Inter', sans-serif", fontWeight: 700, fontSize: '24px', letterSpacing: '-0.5px', lineHeight: 1.15, color: '#EAF0F6' }}>
+              <span style={{ color: A }}>{biz.split(' ')[0]}</span> {biz.split(' ').slice(1).join(' ')}
+            </div>
+            <div style={{ ...lbl, color: '#8C9AAA', marginTop: '7px' }}>{industry}</div>
           </div>
           <nav style={{ display: 'flex', flexDirection: 'column', padding: '14px 10px', gap: '2px', flex: 1 }}>
             {tabs.map((t) => {
               const on = tab === t.id
               return (
                 <button key={t.id} onClick={() => setTab(t.id)} style={{
-                  display: 'flex', alignItems: 'center', gap: '10px', textAlign: 'left', width: '100%',
-                  padding: '11px 14px', borderRadius: '6px', cursor: 'pointer',
-                  background: on ? 'rgba(255,255,255,0.07)' : 'transparent',
-                  border: 'none', borderLeft: on ? `2px solid ${A}` : '2px solid transparent',
-                  color: on ? '#fff' : '#8C9AAA', fontSize: '13px', fontFamily: "'DM Sans',sans-serif", fontWeight: on ? 600 : 400,
-                }}>
-                  <span style={{ width: '5px', height: '5px', borderRadius: '50%', background: on ? A : '#4A566B' }} />{t.label}
-                </button>
+                  display: 'block', textAlign: 'left', width: '100%',
+                  padding: '11px 14px', borderRadius: '10px', cursor: 'pointer', border: 'none',
+                  background: on ? 'rgba(255,255,255,0.12)' : 'transparent',
+                  boxShadow: on ? `inset 3px 0 0 ${A}` : 'none',
+                  color: on ? '#fff' : '#8C9AAA', fontSize: '14px', fontFamily: "'Inter',sans-serif", fontWeight: 500,
+                }}>{t.label}</button>
               )
             })}
           </nav>
           <div style={{ padding: '16px 16px 22px' }}>
-            <a href={BOOK} target="_blank" rel="noopener noreferrer" style={{ display: 'block', textAlign: 'center', background: A, color: '#fff', textDecoration: 'none', borderRadius: '6px', padding: '11px 12px', fontFamily: 'DM Mono, monospace', fontSize: '10px', letterSpacing: '1px' }}>GET THIS BUILT →</a>
-            <div style={{ fontFamily: 'DM Mono, monospace', fontSize: '8px', letterSpacing: '1px', color: '#5A6478', textAlign: 'center', marginTop: '12px', lineHeight: 1.5 }}>SAMPLE DATA · NO LOGIN<br />BY JK NO JOKES FINANCIALS</div>
+            <a href={BOOK} target="_blank" rel="noopener noreferrer" style={{ display: 'block', textAlign: 'center', background: A, color: '#fff', textDecoration: 'none', borderRadius: '6px', padding: '11px 12px', fontFamily: "'Inter', sans-serif", fontSize: '12px', fontWeight: 600, letterSpacing: '0.3px' }}>GET THIS BUILT →</a>
+            <div style={{ fontFamily: "'Inter', sans-serif", fontSize: '9.5px', fontWeight: 600, letterSpacing: '0.6px', color: '#5A6478', textAlign: 'center', marginTop: '12px', lineHeight: 1.5 }}>SAMPLE DATA · NO LOGIN<br />BY JK NO JOKES FINANCIALS</div>
           </div>
         </aside>
 
         {/* TOP BAR — mobile */}
         <div className="id-topbar" style={{ background: D }}>
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '12px', padding: '12px 16px 0' }}>
-            <div style={{ display: 'flex', alignItems: 'baseline', gap: '9px', minWidth: 0 }}>
-              <span style={{ fontSize: '18px' }}>{emoji}</span>
-              <span style={{ ...serif, fontSize: '18px', fontWeight: 700, color: '#EAF0F6', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{biz}</span>
+            <div style={{ minWidth: 0, fontFamily: "'Inter', sans-serif", fontWeight: 700, fontSize: '18px', letterSpacing: '-0.4px', color: '#EAF0F6', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+              <span style={{ color: A }}>{biz.split(' ')[0]}</span> {biz.split(' ').slice(1).join(' ')}
             </div>
-            <a href={BOOK} target="_blank" rel="noopener noreferrer" style={{ background: A, color: '#fff', textDecoration: 'none', borderRadius: '4px', padding: '7px 11px', fontFamily: 'DM Mono, monospace', fontSize: '9px', letterSpacing: '1px', whiteSpace: 'nowrap' }}>GET THIS BUILT →</a>
+            <a href={BOOK} target="_blank" rel="noopener noreferrer" style={{ background: A, color: '#fff', textDecoration: 'none', borderRadius: '4px', padding: '7px 11px', fontFamily: "'Inter', sans-serif", fontSize: '11px', fontWeight: 600, letterSpacing: '0.4px', whiteSpace: 'nowrap' }}>GET THIS BUILT →</a>
           </div>
           <nav className="id-tabs" style={{ display: 'flex', gap: '4px', padding: '0 16px', overflowX: 'auto', borderBottom: '1px solid rgba(255,255,255,0.1)', marginTop: '10px' }}>
             {tabs.map((t) => (
               <button key={t.id} onClick={() => setTab(t.id)} style={{
                 padding: '9px 12px', background: 'transparent', border: 'none', cursor: 'pointer', whiteSpace: 'nowrap',
-                color: tab === t.id ? '#fff' : '#8C9AAA', fontSize: '11px', fontFamily: 'DM Mono, monospace', letterSpacing: '0.04em',
+                color: tab === t.id ? '#fff' : '#8C9AAA', fontSize: '13px', fontWeight: 500, fontFamily: "'Inter', sans-serif", letterSpacing: '0.1px',
                 borderBottom: tab === t.id ? `2px solid ${A}` : '2px solid transparent', marginBottom: '-1px',
               }}>{t.label}</button>
             ))}
@@ -208,9 +206,9 @@ export default function IndustryDemo({ cfg }) {
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', flexWrap: 'wrap', gap: '8px' }}>
                 <div>
                   <div style={{ ...serif, fontSize: '20px', fontWeight: 600, color: INK }}>Revenue, last 12 months</div>
-                  <div style={{ fontFamily: 'DM Mono, monospace', fontSize: '10px', color: MUTED }}>Tap a month — every number on this page updates</div>
+                  <div style={{ fontFamily: "'Inter', sans-serif", fontSize: '12px', color: MUTED }}>Tap a month — every number on this page updates</div>
                 </div>
-                <div style={{ fontFamily: 'DM Mono, monospace', fontSize: '10px', color: MUTED }}>
+                <div style={{ fontFamily: "'Inter', sans-serif", fontSize: '12px', color: MUTED }}>
                   {MONTHS[mi]}: <span style={{ color: INK }}>{usd0(rev[mi])}</span> rev · <span style={{ color: GREEN }}>{usd0(profit[mi])}</span> profit
                 </div>
               </div>
@@ -224,14 +222,14 @@ export default function IndustryDemo({ cfg }) {
                         <div style={{ flex: 1 - pShare, background: sel ? `${A}44` : '#E2E7ED', transition: 'background 0.15s' }} />
                         <div style={{ flex: pShare, background: sel ? A : '#B9C4D0', transition: 'background 0.15s' }} />
                       </div>
-                      <div style={{ fontFamily: 'DM Mono, monospace', fontSize: '8px', color: sel ? INK : FAINT, marginTop: '5px', textAlign: 'center', width: '100%', fontWeight: sel ? 700 : 400 }}>{MONTHS[i]}</div>
+                      <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: '8px', color: sel ? INK : FAINT, marginTop: '5px', textAlign: 'center', width: '100%', fontWeight: sel ? 700 : 400 }}>{MONTHS[i]}</div>
                     </button>
                   )
                 })}
               </div>
               <div style={{ display: 'flex', gap: '16px', marginTop: '12px', justifyContent: 'flex-end' }}>
                 {[[A, 'PROFIT'], [`${A}44`, 'EXPENSES']].map(([c, t], i) => (
-                  <span key={i} style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', fontFamily: 'DM Mono, monospace', fontSize: '8px', letterSpacing: '1px', color: FAINT }}>
+                  <span key={i} style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', fontFamily: "'Inter', sans-serif", fontSize: '9.5px', fontWeight: 600, letterSpacing: '0.7px', color: FAINT }}>
                     <span style={{ width: '10px', height: '10px', borderRadius: '2px', background: c, display: 'inline-block' }} />{t}
                   </span>
                 ))}
@@ -244,12 +242,12 @@ export default function IndustryDemo({ cfg }) {
                   <span style={{ color: A, fontSize: '16px' }}>◈</span>
                   <div>
                     <div style={{ ...serif, fontSize: '18px', fontWeight: 600, color: INK }}>What your numbers are saying</div>
-                    <div style={{ fontFamily: 'DM Mono, monospace', fontSize: '9px', letterSpacing: '1px', color: FAINT }}>PLAIN-ENGLISH INSIGHTS, READ STRAIGHT FROM YOUR BOOKS</div>
+                    <div style={{ fontFamily: "'Inter', sans-serif", fontSize: '10.5px', fontWeight: 600, letterSpacing: '0.7px', color: FAINT }}>PLAIN-ENGLISH INSIGHTS, READ STRAIGHT FROM YOUR BOOKS</div>
                   </div>
                 </div>
                 {insights.map((t, i) => (
                   <div key={i} style={{ display: 'flex', gap: '10px', padding: '9px 0', borderTop: i > 0 ? '1px solid #EEF1F5' : 'none' }}>
-                    <span style={{ fontFamily: 'DM Mono, monospace', fontSize: '10px', color: A, lineHeight: '19px' }}>0{i + 1}</span>
+                    <span style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: '10px', color: A, lineHeight: '19px' }}>0{i + 1}</span>
                     <span style={{ fontSize: '13px', color: '#3A4552', lineHeight: 1.6 }}>{t}</span>
                   </div>
                 ))}
@@ -265,7 +263,7 @@ export default function IndustryDemo({ cfg }) {
                     <div key={i} style={{ marginBottom: '12px' }}>
                       <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '12px', color: INK, marginBottom: '4px' }}>
                         <span>{name}</span>
-                        <span style={{ fontFamily: 'DM Mono, monospace', fontSize: '11px' }}>{usd0(v)} · {pct}%</span>
+                        <span style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: '11px' }}>{usd0(v)} · {pct}%</span>
                       </div>
                       <div style={{ height: '7px', background: '#EEF1F5', borderRadius: '4px' }}>
                         <div style={{ height: '100%', width: `${pct}%`, background: A, borderRadius: '4px' }} />
@@ -279,10 +277,10 @@ export default function IndustryDemo({ cfg }) {
                 {expLines.map((l, i) => (
                   <div key={i} style={{ display: 'flex', justifyContent: 'space-between', padding: '8px 0', borderBottom: i < expLines.length - 1 ? '1px solid #EEF1F5' : 'none' }}>
                     <span style={{ fontSize: '12px', color: INK }}>{l.n}</span>
-                    <span style={{ fontFamily: 'DM Mono, monospace', fontSize: '11px', color: MUTED }}>{usd0(l.a * eScale)}</span>
+                    <span style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: '11px', color: MUTED }}>{usd0(l.a * eScale)}</span>
                   </div>
                 ))}
-                <button onClick={() => setTab('pnl')} style={{ marginTop: '12px', background: 'transparent', border: `1px solid ${A}`, color: A, borderRadius: '5px', padding: '8px 14px', fontFamily: 'DM Mono, monospace', fontSize: '10px', letterSpacing: '1px', cursor: 'pointer' }}>
+                <button onClick={() => setTab('pnl')} style={{ marginTop: '12px', background: 'transparent', border: `1px solid ${A}`, color: A, borderRadius: '5px', padding: '8px 14px', fontFamily: "'Inter', sans-serif", fontSize: '12px', fontWeight: 600, letterSpacing: '0.3px', cursor: 'pointer' }}>
                   DRILL INTO THE P&L →
                 </button>
               </div>
@@ -297,13 +295,13 @@ export default function IndustryDemo({ cfg }) {
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '8px', marginBottom: '14px' }}>
                 <div>
                   <div style={{ ...serif, fontSize: '20px', fontWeight: 600, color: INK }}>Profit &amp; loss{pnlView === 'month' ? ` — ${MONTHS[mi]}` : ''}</div>
-                  <div style={{ fontFamily: 'DM Mono, monospace', fontSize: '10px', color: MUTED }}>{pnlView === 'month' ? 'Click any expense line to see the transactions behind it' : 'Three months side by side — watch which line moved'}</div>
+                  <div style={{ fontFamily: "'Inter', sans-serif", fontSize: '12px', color: MUTED }}>{pnlView === 'month' ? 'Click any expense line to see the transactions behind it' : 'Three months side by side — watch which line moved'}</div>
                 </div>
                 <div style={{ display: 'flex', gap: '6px' }}>
                   {[['month', 'THIS MONTH'], ['compare', '3-MONTH VIEW']].map(([v, t]) => (
                     <button key={v} onClick={() => setPnlView(v)} style={{
                       padding: '7px 12px', borderRadius: '5px', cursor: 'pointer',
-                      fontFamily: 'DM Mono, monospace', fontSize: '9px', letterSpacing: '1px',
+                      fontFamily: "'Inter', sans-serif", fontSize: '11px', fontWeight: 600, letterSpacing: '0.4px',
                       border: pnlView === v ? `1px solid ${A}` : '1px solid #DDE3EA',
                       background: pnlView === v ? `${A}18` : '#fff', color: pnlView === v ? INK : MUTED,
                     }}>{t}</button>
@@ -313,7 +311,7 @@ export default function IndustryDemo({ cfg }) {
 
               {pnlView === 'compare' && (() => {
                 const cols = mi >= 2 ? [mi - 2, mi - 1, mi] : [0, 1, 2]
-                const num = { textAlign: 'right', fontFamily: 'DM Mono, monospace', fontSize: '11px' }
+                const num = { textAlign: 'right', fontFamily: "'IBM Plex Mono', monospace", fontSize: '11px' }
                 return (
                   <div style={{ overflowX: 'auto' }}>
                     <table style={{ width: '100%', borderCollapse: 'collapse', minWidth: '520px' }}>
@@ -346,7 +344,7 @@ export default function IndustryDemo({ cfg }) {
                         </tr>
                       </tbody>
                     </table>
-                    <div style={{ fontFamily: 'DM Mono, monospace', fontSize: '9px', color: FAINT, marginTop: '10px' }}>Tap a different month on the Dashboard chart and this view follows it.</div>
+                    <div style={{ fontFamily: "'Inter', sans-serif", fontSize: '11px', color: FAINT, marginTop: '10px' }}>Tap a different month on the Dashboard chart and this view follows it.</div>
                   </div>
                 )
               })()}
@@ -356,12 +354,12 @@ export default function IndustryDemo({ cfg }) {
               {revCats.map(([name, amt], i) => (
                 <div key={i} style={{ display: 'flex', justifyContent: 'space-between', padding: '9px 0', borderBottom: '1px solid #EEF1F5' }}>
                   <span style={{ fontSize: '13px', color: INK }}>{name}</span>
-                  <span style={{ fontFamily: 'DM Mono, monospace', fontSize: '12px', color: INK }}>{usd0(amt * rScale)}</span>
+                  <span style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: '12px', color: INK }}>{usd0(amt * rScale)}</span>
                 </div>
               ))}
               <div style={{ display: 'flex', justifyContent: 'space-between', padding: '10px 0', borderBottom: '2px solid #DDE3EA' }}>
                 <span style={{ fontSize: '13px', fontWeight: 600, color: INK }}>Total revenue</span>
-                <span style={{ fontFamily: 'DM Mono, monospace', fontSize: '12px', fontWeight: 600, color: INK }}>{usd0(rev[mi])}</span>
+                <span style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: '12px', fontWeight: 600, color: INK }}>{usd0(rev[mi])}</span>
               </div>
 
               <div style={{ ...lbl, marginTop: '18px' }}>EXPENSES</div>
@@ -369,28 +367,28 @@ export default function IndustryDemo({ cfg }) {
                 <div key={i}>
                   <button onClick={() => setOpenLine(openLine === i ? null : i)} style={{ display: 'flex', justifyContent: 'space-between', width: '100%', padding: '9px 0', background: 'transparent', border: 'none', borderBottom: '1px solid #EEF1F5', cursor: 'pointer', alignItems: 'center' }}>
                     <span style={{ fontSize: '13px', color: INK, display: 'flex', alignItems: 'center', gap: '8px' }}>
-                      <span style={{ fontFamily: 'DM Mono, monospace', fontSize: '9px', color: A }}>{openLine === i ? '▾' : '▸'}</span>{l.n}
+                      <span style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: '9px', color: A }}>{openLine === i ? '▾' : '▸'}</span>{l.n}
                     </span>
-                    <span style={{ fontFamily: 'DM Mono, monospace', fontSize: '12px', color: RED }}>({usd0(l.a * eScale)})</span>
+                    <span style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: '12px', color: RED }}>({usd0(l.a * eScale)})</span>
                   </button>
                   {openLine === i && (
                     <div style={{ background: '#F7F9FB', borderRadius: '6px', padding: '4px 12px', margin: '6px 0 10px' }}>
                       {l.tx.map(([d, vendor, amt], j) => (
                         <div key={j} style={{ display: 'flex', justifyContent: 'space-between', padding: '7px 0', borderBottom: j < l.tx.length - 1 ? '1px solid #E9EDF2' : 'none' }}>
                           <span style={{ fontSize: '12px', color: MUTED }}>
-                            <span style={{ fontFamily: 'DM Mono, monospace', fontSize: '10px', color: FAINT, marginRight: '10px' }}>{d}</span>{vendor}
+                            <span style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: '10px', color: FAINT, marginRight: '10px' }}>{d}</span>{vendor}
                           </span>
-                          <span style={{ fontFamily: 'DM Mono, monospace', fontSize: '11px', color: MUTED }}>{usd0(amt)}</span>
+                          <span style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: '11px', color: MUTED }}>{usd0(amt)}</span>
                         </div>
                       ))}
-                      <div style={{ fontFamily: 'DM Mono, monospace', fontSize: '9px', color: FAINT, padding: '7px 0' }}>Sample transactions — in your portal this is every real charge, straight from your bank &amp; card feeds.</div>
+                      <div style={{ fontFamily: "'Inter', sans-serif", fontSize: '11px', color: FAINT, padding: '7px 0' }}>Sample transactions — in your portal this is every real charge, straight from your bank &amp; card feeds.</div>
                     </div>
                   )}
                 </div>
               ))}
               <div style={{ display: 'flex', justifyContent: 'space-between', padding: '12px 0 2px' }}>
                 <span style={{ ...serif, fontSize: '18px', fontWeight: 700, color: INK }}>Net profit</span>
-                <span style={{ fontFamily: 'DM Mono, monospace', fontSize: '15px', fontWeight: 600, color: GREEN }}>{usd0(profit[mi])}</span>
+                <span style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: '15px', fontWeight: 600, color: GREEN }}>{usd0(profit[mi])}</span>
               </div>
               </>)}
             </div>
@@ -398,18 +396,18 @@ export default function IndustryDemo({ cfg }) {
             {/* BOOKS DROP-IN */}
             <div style={card}>
               <div style={{ ...serif, fontSize: '18px', fontWeight: 600, color: INK, marginBottom: '4px' }}>Already have books? Drop them in.</div>
-              <div style={{ fontFamily: 'DM Mono, monospace', fontSize: '10px', color: MUTED, marginBottom: '14px' }}>QuickBooks, Wave, a spreadsheet — export it, we take it from there. No re-entering anything.</div>
+              <div style={{ fontFamily: "'Inter', sans-serif", fontSize: '12px', color: MUTED, marginBottom: '14px' }}>QuickBooks, Wave, a spreadsheet — export it, we take it from there. No re-entering anything.</div>
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(240px,1fr))', gap: '10px' }}>
                 {[['coa', 'CHART OF ACCOUNTS'], ['gl', 'GENERAL LEDGER']].map(([k, label]) => (
                   <div key={k} style={{ border: '1px dashed #CFD8E2', borderRadius: '8px', padding: '14px', background: '#F7F9FB', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '10px', flexWrap: 'wrap' }}>
                     <div>
                       <div style={{ ...lbl, marginBottom: '6px' }}>{label}</div>
-                      <div style={{ fontFamily: 'DM Mono, monospace', fontSize: '11px', color: INK }}>📄 {books[k].name}</div>
-                      <div style={{ fontFamily: 'DM Mono, monospace', fontSize: '9px', color: books.updated === k ? GREEN : FAINT, marginTop: '4px' }}>
+                      <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: '11px', color: INK }}>📄 {books[k].name}</div>
+                      <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: '9px', color: books.updated === k ? GREEN : FAINT, marginTop: '4px' }}>
                         {books.updated === k ? `✓ ${books[k].rows} rows imported just now` : `${books[k].rows} rows imported`}
                       </div>
                     </div>
-                    <button onClick={() => dropIn(k)} style={{ background: '#fff', border: `1px solid ${A}`, color: A, borderRadius: '5px', padding: '8px 13px', fontFamily: 'DM Mono, monospace', fontSize: '9px', letterSpacing: '1px', cursor: 'pointer' }}>
+                    <button onClick={() => dropIn(k)} style={{ background: '#fff', border: `1px solid ${A}`, color: A, borderRadius: '5px', padding: '8px 13px', fontFamily: "'Inter', sans-serif", fontSize: '11px', fontWeight: 600, letterSpacing: '0.4px', cursor: 'pointer' }}>
                       DROP IN / REPLACE
                     </button>
                   </div>
@@ -433,10 +431,10 @@ export default function IndustryDemo({ cfg }) {
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '8px' }}>
                 <div>
                   <div style={{ ...serif, fontSize: '20px', fontWeight: 600, color: INK, marginBottom: '4px' }}>{ops.title}</div>
-                  <div style={{ fontFamily: 'DM Mono, monospace', fontSize: '10px', color: MUTED, marginBottom: '12px' }}>{ops.sub}</div>
+                  <div style={{ fontFamily: "'Inter', sans-serif", fontSize: '12px', color: MUTED, marginBottom: '12px' }}>{ops.sub}</div>
                 </div>
                 {AM && (
-                  <button onClick={() => setAdding((x) => !x)} style={{ background: adding ? '#E2E7ED' : A, color: adding ? MUTED : '#fff', border: 'none', borderRadius: '5px', padding: '9px 14px', fontFamily: 'DM Mono, monospace', fontSize: '11px', letterSpacing: '1px', cursor: 'pointer' }}>
+                  <button onClick={() => setAdding((x) => !x)} style={{ background: adding ? '#E2E7ED' : A, color: adding ? MUTED : '#fff', border: 'none', borderRadius: '5px', padding: '9px 14px', fontFamily: "'Inter', sans-serif", fontSize: '12.5px', fontWeight: 600, letterSpacing: '0.3px', cursor: 'pointer' }}>
                     {adding ? '✕ CANCEL' : AM.btn}
                   </button>
                 )}
@@ -444,15 +442,15 @@ export default function IndustryDemo({ cfg }) {
               {AM && adding && (
                 <div style={{ background: '#F7F9FB', border: '1px dashed #CFD8E2', borderRadius: '6px', padding: '14px', marginBottom: '14px' }}>
                   <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(150px,1fr))', gap: '10px' }}>
-                    <input style={{ padding: '9px 10px', fontSize: '13px', fontFamily: "'DM Sans',sans-serif", border: '1px solid #CFD8E2', borderRadius: '5px', background: '#fff', color: INK, outline: 'none' }} placeholder={AM.ph[0]} value={f.a} onChange={(e) => setF({ ...f, a: e.target.value })} />
-                    <input style={{ padding: '9px 10px', fontSize: '13px', fontFamily: "'DM Sans',sans-serif", border: '1px solid #CFD8E2', borderRadius: '5px', background: '#fff', color: INK, outline: 'none' }} type="number" placeholder={AM.ph[1]} value={f.chg} onChange={(e) => setF({ ...f, chg: e.target.value })} />
-                    <input style={{ padding: '9px 10px', fontSize: '13px', fontFamily: "'DM Sans',sans-serif", border: '1px solid #CFD8E2', borderRadius: '5px', background: '#fff', color: INK, outline: 'none' }} type="number" placeholder={AM.ph[2]} value={f.cost} onChange={(e) => setF({ ...f, cost: e.target.value })} />
+                    <input style={{ padding: '9px 10px', fontSize: '13px', fontFamily: "'Inter',sans-serif", border: '1px solid #CFD8E2', borderRadius: '5px', background: '#fff', color: INK, outline: 'none' }} placeholder={AM.ph[0]} value={f.a} onChange={(e) => setF({ ...f, a: e.target.value })} />
+                    <input style={{ padding: '9px 10px', fontSize: '13px', fontFamily: "'Inter',sans-serif", border: '1px solid #CFD8E2', borderRadius: '5px', background: '#fff', color: INK, outline: 'none' }} type="number" placeholder={AM.ph[1]} value={f.chg} onChange={(e) => setF({ ...f, chg: e.target.value })} />
+                    <input style={{ padding: '9px 10px', fontSize: '13px', fontFamily: "'Inter',sans-serif", border: '1px solid #CFD8E2', borderRadius: '5px', background: '#fff', color: INK, outline: 'none' }} type="number" placeholder={AM.ph[2]} value={f.cost} onChange={(e) => setF({ ...f, cost: e.target.value })} />
                   </div>
                   <button onClick={() => {
                     if (!f.a || !Number(f.chg)) return
                     setRows([AM.build(f), ...rows])
                     setF({ a: '', chg: '', cost: '' }); setAdding(false)
-                  }} style={{ marginTop: '12px', background: D, color: '#fff', border: 'none', borderRadius: '5px', padding: '10px 18px', fontFamily: 'DM Mono, monospace', fontSize: '11px', letterSpacing: '1px', cursor: 'pointer' }}>ADD IT →</button>
+                  }} style={{ marginTop: '12px', background: D, color: '#fff', border: 'none', borderRadius: '5px', padding: '10px 18px', fontFamily: "'Inter', sans-serif", fontSize: '12.5px', fontWeight: 600, letterSpacing: '0.3px', cursor: 'pointer' }}>ADD IT →</button>
                 </div>
               )}
               <div style={{ overflowX: 'auto' }}>
@@ -464,8 +462,8 @@ export default function IndustryDemo({ cfg }) {
                         <td style={td}><div style={{ fontWeight: 500 }}>{r.a}</div><div style={{ fontSize: '11px', color: MUTED }}>{r.b}</div></td>
                         {r.who !== undefined && <td style={td}>{r.who}</td>}
                         <td style={td}><StatusSelect set={ops.type} row={r} /></td>
-                        <td style={{ ...td, textAlign: 'right', fontFamily: 'DM Mono, monospace', fontSize: '11px' }}>{usd0(r.chg)}</td>
-                        <td style={{ ...td, textAlign: 'right', fontFamily: 'DM Mono, monospace', fontSize: '11px', color: ops.type === 'clients' ? (r.cost > 0 ? RED : MUTED) : GREEN }}>
+                        <td style={{ ...td, textAlign: 'right', fontFamily: "'IBM Plex Mono', monospace", fontSize: '11px' }}>{usd0(r.chg)}</td>
+                        <td style={{ ...td, textAlign: 'right', fontFamily: "'IBM Plex Mono', monospace", fontSize: '11px', color: ops.type === 'clients' ? (r.cost > 0 ? RED : MUTED) : GREEN }}>
                           {ops.type === 'clients' ? (r.cost > 0 ? usd0(r.cost) : '—') : usd0(r.chg - r.cost)}
                         </td>
                       </tr>
@@ -473,7 +471,7 @@ export default function IndustryDemo({ cfg }) {
                   </tbody>
                 </table>
               </div>
-              <div style={{ fontFamily: 'DM Mono, monospace', fontSize: '9px', color: FAINT, marginTop: '10px' }}>Fully interactive — change a status above. In your build this syncs to your real workflow.</div>
+              <div style={{ fontFamily: "'Inter', sans-serif", fontSize: '11px', color: FAINT, marginTop: '10px' }}>Fully interactive — change a status above. In your build this syncs to your real workflow.</div>
             </div>
           </div>
         )}
@@ -487,25 +485,25 @@ export default function IndustryDemo({ cfg }) {
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '8px' }}>
                 <div>
                   <div style={{ ...serif, fontSize: '20px', fontWeight: 600, color: INK, marginBottom: '4px' }}>{ops.title}</div>
-                  <div style={{ fontFamily: 'DM Mono, monospace', fontSize: '10px', color: MUTED, marginBottom: '12px' }}>{ops.sub}</div>
+                  <div style={{ fontFamily: "'Inter', sans-serif", fontSize: '12px', color: MUTED, marginBottom: '12px' }}>{ops.sub}</div>
                 </div>
-                <button onClick={() => setAddingItem((x) => !x)} style={{ background: addingItem ? '#E2E7ED' : A, color: addingItem ? MUTED : '#fff', border: 'none', borderRadius: '5px', padding: '9px 14px', fontFamily: 'DM Mono, monospace', fontSize: '11px', letterSpacing: '1px', cursor: 'pointer' }}>
+                <button onClick={() => setAddingItem((x) => !x)} style={{ background: addingItem ? '#E2E7ED' : A, color: addingItem ? MUTED : '#fff', border: 'none', borderRadius: '5px', padding: '9px 14px', fontFamily: "'Inter', sans-serif", fontSize: '12.5px', fontWeight: 600, letterSpacing: '0.3px', cursor: 'pointer' }}>
                   {addingItem ? '✕ CANCEL' : '+ ADD ITEM'}
                 </button>
               </div>
               {addingItem && (
                 <div style={{ background: '#F7F9FB', border: '1px dashed #CFD8E2', borderRadius: '6px', padding: '14px', marginBottom: '14px' }}>
                   <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(140px,1fr))', gap: '10px' }}>
-                    <input style={{ padding: '9px 10px', fontSize: '13px', fontFamily: "'DM Sans',sans-serif", border: '1px solid #CFD8E2', borderRadius: '5px', background: '#fff', color: INK, outline: 'none' }} placeholder="Item / service name" value={fi.name} onChange={(e) => setFi({ ...fi, name: e.target.value })} />
-                    <input style={{ padding: '9px 10px', fontSize: '13px', fontFamily: "'DM Sans',sans-serif", border: '1px solid #CFD8E2', borderRadius: '5px', background: '#fff', color: INK, outline: 'none' }} type="number" placeholder="Sold (qty)" value={fi.qty} onChange={(e) => setFi({ ...fi, qty: e.target.value })} />
-                    <input style={{ padding: '9px 10px', fontSize: '13px', fontFamily: "'DM Sans',sans-serif", border: '1px solid #CFD8E2', borderRadius: '5px', background: '#fff', color: INK, outline: 'none' }} type="number" placeholder="Revenue $" value={fi.rev} onChange={(e) => setFi({ ...fi, rev: e.target.value })} />
-                    <input style={{ padding: '9px 10px', fontSize: '13px', fontFamily: "'DM Sans',sans-serif", border: '1px solid #CFD8E2', borderRadius: '5px', background: '#fff', color: INK, outline: 'none' }} type="number" placeholder="Cost $" value={fi.cost} onChange={(e) => setFi({ ...fi, cost: e.target.value })} />
+                    <input style={{ padding: '9px 10px', fontSize: '13px', fontFamily: "'Inter',sans-serif", border: '1px solid #CFD8E2', borderRadius: '5px', background: '#fff', color: INK, outline: 'none' }} placeholder="Item / service name" value={fi.name} onChange={(e) => setFi({ ...fi, name: e.target.value })} />
+                    <input style={{ padding: '9px 10px', fontSize: '13px', fontFamily: "'Inter',sans-serif", border: '1px solid #CFD8E2', borderRadius: '5px', background: '#fff', color: INK, outline: 'none' }} type="number" placeholder="Sold (qty)" value={fi.qty} onChange={(e) => setFi({ ...fi, qty: e.target.value })} />
+                    <input style={{ padding: '9px 10px', fontSize: '13px', fontFamily: "'Inter',sans-serif", border: '1px solid #CFD8E2', borderRadius: '5px', background: '#fff', color: INK, outline: 'none' }} type="number" placeholder="Revenue $" value={fi.rev} onChange={(e) => setFi({ ...fi, rev: e.target.value })} />
+                    <input style={{ padding: '9px 10px', fontSize: '13px', fontFamily: "'Inter',sans-serif", border: '1px solid #CFD8E2', borderRadius: '5px', background: '#fff', color: INK, outline: 'none' }} type="number" placeholder="Cost $" value={fi.cost} onChange={(e) => setFi({ ...fi, cost: e.target.value })} />
                   </div>
                   <button onClick={() => {
                     if (!fi.name || !Number(fi.rev)) return
                     setItems([[fi.name, Number(fi.qty || 1), Number(fi.rev), Number(fi.cost || 0)], ...items])
                     setFi({ name: '', qty: '', rev: '', cost: '' }); setAddingItem(false)
-                  }} style={{ marginTop: '12px', background: D, color: '#fff', border: 'none', borderRadius: '5px', padding: '10px 18px', fontFamily: 'DM Mono, monospace', fontSize: '11px', letterSpacing: '1px', cursor: 'pointer' }}>ADD IT →</button>
+                  }} style={{ marginTop: '12px', background: D, color: '#fff', border: 'none', borderRadius: '5px', padding: '10px 18px', fontFamily: "'Inter', sans-serif", fontSize: '12.5px', fontWeight: 600, letterSpacing: '0.3px', cursor: 'pointer' }}>ADD IT →</button>
                 </div>
               )}
               <div style={{ overflowX: 'auto' }}>
@@ -515,16 +513,16 @@ export default function IndustryDemo({ cfg }) {
                     {items.map(([name, qty, revA, cost], i) => (
                       <tr key={i}>
                         <td style={td}>{name}</td>
-                        <td style={{ ...td, textAlign: 'right', fontFamily: 'DM Mono, monospace', fontSize: '11px' }}>{qty}</td>
-                        <td style={{ ...td, textAlign: 'right', fontFamily: 'DM Mono, monospace', fontSize: '11px' }}>{usd0(revA)}</td>
-                        <td style={{ ...td, textAlign: 'right', fontFamily: 'DM Mono, monospace', fontSize: '11px', color: MUTED }}>{usd0(cost)}</td>
-                        <td style={{ ...td, textAlign: 'right', fontFamily: 'DM Mono, monospace', fontSize: '11px', color: GREEN }}>{Math.round(((revA - cost) / revA) * 100)}%</td>
+                        <td style={{ ...td, textAlign: 'right', fontFamily: "'IBM Plex Mono', monospace", fontSize: '11px' }}>{qty}</td>
+                        <td style={{ ...td, textAlign: 'right', fontFamily: "'IBM Plex Mono', monospace", fontSize: '11px' }}>{usd0(revA)}</td>
+                        <td style={{ ...td, textAlign: 'right', fontFamily: "'IBM Plex Mono', monospace", fontSize: '11px', color: MUTED }}>{usd0(cost)}</td>
+                        <td style={{ ...td, textAlign: 'right', fontFamily: "'IBM Plex Mono', monospace", fontSize: '11px', color: GREEN }}>{Math.round(((revA - cost) / revA) * 100)}%</td>
                       </tr>
                     ))}
                   </tbody>
                 </table>
               </div>
-              <div style={{ fontFamily: 'DM Mono, monospace', fontSize: '9px', color: FAINT, marginTop: '10px' }}>In your build this flows in automatically from your POS — Clover, Square, Toast, or whatever you run.</div>
+              <div style={{ fontFamily: "'Inter', sans-serif", fontSize: '11px', color: FAINT, marginTop: '10px' }}>In your build this flows in automatically from your POS — Clover, Square, Toast, or whatever you run.</div>
             </div>
           </div>
         )}
@@ -537,17 +535,17 @@ export default function IndustryDemo({ cfg }) {
                 <span style={{ color: A, fontSize: '16px' }}>◈</span>
                 <div style={{ ...serif, fontSize: '20px', fontWeight: 600, color: INK }}>Ask your numbers</div>
               </div>
-              <div style={{ fontFamily: 'DM Mono, monospace', fontSize: '10px', color: MUTED, marginBottom: '16px' }}>Plain English in, plain English out. In your real portal, ask anything — it reads your live books.</div>
+              <div style={{ fontFamily: "'Inter', sans-serif", fontSize: '12px', color: MUTED, marginBottom: '16px' }}>Plain English in, plain English out. In your real portal, ask anything — it reads your live books.</div>
 
               <div style={{ display: 'flex', gap: '8px', marginBottom: '14px', flexWrap: 'wrap' }}>
                 <input
-                  style={{ flex: '1 1 260px', padding: '12px 14px', fontSize: '14px', fontFamily: "'DM Sans',sans-serif", border: '1px solid #CFD8E2', borderRadius: '6px', background: '#fff', color: INK, outline: 'none' }}
+                  style={{ flex: '1 1 260px', padding: '12px 14px', fontSize: '14px', fontFamily: "'Inter',sans-serif", border: '1px solid #CFD8E2', borderRadius: '6px', background: '#fff', color: INK, outline: 'none' }}
                   placeholder={`e.g. "Why was ${MONTHS[worstMi]} so slow?"`}
                   value={typed}
                   onChange={(e) => setTyped(e.target.value)}
                   onKeyDown={(e) => { if (e.key === 'Enter' && typed.trim()) { askIt('free') } }}
                 />
-                <button onClick={() => typed.trim() && askIt('free')} style={{ background: A, color: '#fff', border: 'none', borderRadius: '6px', padding: '12px 22px', fontFamily: 'DM Mono, monospace', fontSize: '11px', letterSpacing: '1px', cursor: 'pointer' }}>ASK →</button>
+                <button onClick={() => typed.trim() && askIt('free')} style={{ background: A, color: '#fff', border: 'none', borderRadius: '6px', padding: '12px 22px', fontFamily: "'Inter', sans-serif", fontSize: '12.5px', fontWeight: 600, letterSpacing: '0.3px', cursor: 'pointer' }}>ASK →</button>
               </div>
 
               <div style={{ ...lbl, marginBottom: '8px' }}>OR TRY ONE OF THESE</div>
@@ -555,7 +553,7 @@ export default function IndustryDemo({ cfg }) {
                 {askQs.map((x, i) => (
                   <button key={i} onClick={() => askIt(i)} style={{
                     padding: '9px 14px', borderRadius: '20px', cursor: 'pointer', fontSize: '12px',
-                    fontFamily: "'DM Sans',sans-serif", textAlign: 'left',
+                    fontFamily: "'Inter',sans-serif", textAlign: 'left',
                     border: ask === i ? `2px solid ${A}` : '1px solid #DDE3EA',
                     background: ask === i ? `${A}14` : '#fff', color: INK,
                   }}>{x.q}</button>
@@ -563,7 +561,7 @@ export default function IndustryDemo({ cfg }) {
               </div>
 
               {thinking && (
-                <div style={{ background: '#F7F9FB', borderRadius: '8px', padding: '16px', fontFamily: 'DM Mono, monospace', fontSize: '11px', color: MUTED }}>
+                <div style={{ background: '#F7F9FB', borderRadius: '8px', padding: '16px', fontFamily: "'Inter', sans-serif", fontSize: '12.5px', color: MUTED }}>
                   ◈ Reading your books…
                 </div>
               )}
@@ -582,13 +580,13 @@ export default function IndustryDemo({ cfg }) {
             {/* WHAT-IF */}
             <div style={card}>
               <div style={{ ...serif, fontSize: '18px', fontWeight: 600, color: INK, marginBottom: '4px' }}>Try a decision before you make it</div>
-              <div style={{ fontFamily: 'DM Mono, monospace', fontSize: '10px', color: MUTED, marginBottom: '18px' }}>Drag the sliders — what happens to {MONTHS[mi]}'s profit if revenue or spending moves?</div>
+              <div style={{ fontFamily: "'Inter', sans-serif", fontSize: '12px', color: MUTED, marginBottom: '18px' }}>Drag the sliders — what happens to {MONTHS[mi]}'s profit if revenue or spending moves?</div>
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(220px,1fr))', gap: '18px', marginBottom: '18px' }}>
                 {[['r', 'REVENUE'], ['e', 'EXPENSES']].map(([k, label]) => (
                   <div key={k}>
                     <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px' }}>
                       <span style={lbl}>{label}</span>
-                      <span style={{ fontFamily: 'DM Mono, monospace', fontSize: '11px', color: whatIf[k] === 0 ? MUTED : whatIf[k] > 0 ? (k === 'r' ? GREEN : RED) : (k === 'r' ? RED : GREEN), fontWeight: 600 }}>
+                      <span style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: '11px', color: whatIf[k] === 0 ? MUTED : whatIf[k] > 0 ? (k === 'r' ? GREEN : RED) : (k === 'r' ? RED : GREEN), fontWeight: 600 }}>
                         {whatIf[k] > 0 ? '+' : ''}{whatIf[k]}%
                       </span>
                     </div>
@@ -607,13 +605,13 @@ export default function IndustryDemo({ cfg }) {
                   <div style={{ ...lbl, color: A }}>PROFIT IF YOU DO IT</div>
                   <div style={{ ...serif, fontSize: '24px', fontWeight: 600, color: simProfit >= profit[mi] ? GREEN : RED, marginTop: '4px' }}>
                     {usd0(simProfit)}
-                    <span style={{ fontFamily: 'DM Mono, monospace', fontSize: '11px', marginLeft: '8px' }}>
+                    <span style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: '11px', marginLeft: '8px' }}>
                       {simProfit >= profit[mi] ? '▲' : '▼'} {usd0(simProfit - profit[mi])}
                     </span>
                   </div>
                 </div>
               </div>
-              <div style={{ fontFamily: 'DM Mono, monospace', fontSize: '9px', color: FAINT, marginTop: '12px' }}>This is the kind of question your portal answers before you sign the lease, hire the tech, or raise the price.</div>
+              <div style={{ fontFamily: "'Inter', sans-serif", fontSize: '11px', color: FAINT, marginTop: '12px' }}>This is the kind of question your portal answers before you sign the lease, hire the tech, or raise the price.</div>
             </div>
           </div>
         )}
@@ -623,14 +621,14 @@ export default function IndustryDemo({ cfg }) {
           <div style={{ ...serif, fontSize: '22px', fontWeight: 600, color: '#EAF0F6', marginBottom: '8px' }}>
             Want this for your {industry.toLowerCase()} business — with your real numbers?
           </div>
-          <div style={{ fontFamily: 'DM Mono, monospace', fontSize: '11px', color: '#8C9AAA', marginBottom: '18px' }}>
+          <div style={{ fontFamily: "'Inter', sans-serif", fontSize: '13px', color: '#8C9AAA', marginBottom: '18px' }}>
             Built custom for you. Books included. Free consult + $25 gift card for new clients.
           </div>
-          <a href={BOOK} target="_blank" rel="noopener noreferrer" style={{ background: A, color: '#fff', textDecoration: 'none', borderRadius: '5px', padding: '12px 24px', fontFamily: 'DM Mono, monospace', fontSize: '11px', letterSpacing: '1px', display: 'inline-block' }}>
+          <a href={BOOK} target="_blank" rel="noopener noreferrer" style={{ background: A, color: '#fff', textDecoration: 'none', borderRadius: '5px', padding: '12px 24px', fontFamily: "'Inter', sans-serif", fontSize: '12.5px', fontWeight: 600, letterSpacing: '0.3px', display: 'inline-block' }}>
             BOOK A 10-MINUTE CALL →
           </a>
           <div style={{ marginTop: '14px' }}>
-            <a href="/demos" style={{ fontFamily: 'DM Mono, monospace', fontSize: '10px', color: '#8C9AAA', letterSpacing: '1px' }}>← ALL INDUSTRY DEMOS</a>
+            <a href="/demos" style={{ fontFamily: "'Inter', sans-serif", fontSize: '11px', fontWeight: 600, color: '#8C9AAA', letterSpacing: '0.4px' }}>← ALL INDUSTRY DEMOS</a>
           </div>
         </div>
         </div>
