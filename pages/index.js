@@ -421,18 +421,22 @@ export default function Landing() {
         {/* Large dashboard, immediately below */}
         <div style={{ maxWidth: '1200px', margin: 'clamp(22px,3vw,38px) auto 0 clamp(0px,3vw,72px)' }}>
           <div id="demos">{(() => {
-            const DEMOS = [
+            const FEATURED = [
               { label: 'Riverside Bakery', sub: 'Products + Consignment', src: '/demo', icon: '🥐' },
               { label: 'Riverside Tires', sub: 'Items + Services', src: '/riverside-tires', icon: '🔩' },
               { label: 'Riverfall Gowns', sub: 'Order Tracking', src: '/riverfall-gowns', icon: '👗' },
               { label: 'Riverside Appliance', sub: 'Service-based', src: '/appliance-repair', icon: '🔧' },
               { label: 'Riverbank Funding', sub: 'Loan Dashboard', src: '/sba-lending', icon: '🏦' },
             ]
+            const INDUSTRY = ALL_DEMOS.filter(d => d.href.startsWith('/demos/')).map(d => ({ label: d.biz, sub: d.industry, src: d.href, icon: d.emoji }))
+            const DEMOS = [...FEATURED, ...INDUSTRY]
+            const active = DEMOS[activeDemo] || DEMOS[0]
+            const pick = (i) => { setActiveDemo(i); if (typeof document !== 'undefined') document.getElementById('demos')?.scrollIntoView({ behavior: 'smooth', block: 'start' }) }
             return (
               <>
                 <div style={{ fontFamily: 'DM Mono, monospace', fontSize: '11px', letterSpacing: '3px', color: '#C9A84C', marginBottom: '16px' }}>— LIVE DEMOS · CLICK AROUND</div>
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(160px,1fr))', gap: '10px', marginBottom: '20px' }}>
-                  {DEMOS.map((d, i) => (
+                  {FEATURED.map((d, i) => (
                     <button key={i} onClick={() => setActiveDemo(i)} style={{
                       fontFamily: 'inherit', cursor: 'pointer', textAlign: 'left',
                       padding: '16px', borderRadius: '12px',
@@ -452,20 +456,43 @@ export default function Landing() {
                     <div style={{ width: 10, height: 10, borderRadius: '50%', background: '#FFBD2E' }} />
                     <div style={{ width: 10, height: 10, borderRadius: '50%', background: '#28C840' }} />
                     <div style={{ flex: 1, margin: '0 12px', background: '#1E2540', borderRadius: '4px', padding: '4px 12px', textAlign: 'center' }}>
-                      <span style={{ fontFamily: 'DM Mono, monospace', fontSize: '11px', color: '#6B7A96' }}>jknojokes.com{DEMOS[activeDemo].src}</span>
+                      <span style={{ fontFamily: 'DM Mono, monospace', fontSize: '11px', color: '#6B7A96' }}>jknojokes.com{active.src}</span>
                     </div>
                   </div>
                   {isMobile
                     ? <div style={{ padding: '32px', textAlign: 'center' }}>
                         <div style={{ fontFamily: 'DM Mono, monospace', fontSize: '11px', color: '#6B7A96', marginBottom: '16px', letterSpacing: '1px' }}>DEMO BEST VIEWED ON DESKTOP</div>
-                        <a href={DEMOS[activeDemo].src} target="_blank" rel="noopener noreferrer"
+                        <a href={active.src} target="_blank" rel="noopener noreferrer"
                           style={{ display: 'inline-block', background: '#C9A84C', color: '#1A1A2E', textDecoration: 'none', padding: '14px 28px', fontFamily: 'DM Mono, monospace', fontSize: '12px', letterSpacing: '2px', borderRadius: '4px' }}>
-                          OPEN {DEMOS[activeDemo].label.toUpperCase()} DEMO →
+                          OPEN {active.label.toUpperCase()} DEMO →
                         </a>
                       </div>
-                    : <iframe key={activeDemo} src={DEMOS[activeDemo].src} title={`${DEMOS[activeDemo].label} demo`} loading="lazy"
+                    : <iframe key={activeDemo} src={active.src} title={`${active.label} demo`} loading="lazy"
                         style={{ display: 'block', width: '100%', height: '660px', border: 'none', background: '#FBF4EC' }} />
                   }
+                </div>
+
+                {/* All 20 industries — click loads into the preview above */}
+                <div style={{ marginTop: '30px' }}>
+                  <div style={{ fontFamily: 'DM Mono, monospace', fontSize: '11px', letterSpacing: '3px', color: '#C9A84C', marginBottom: '6px' }}>— OR JUMP STRAIGHT TO YOUR INDUSTRY</div>
+                  <div style={{ fontSize: '13px', color: '#5A6070', marginBottom: '16px' }}>Click any industry — it loads live in the preview above. {INDUSTRY.length} built, more any time.</div>
+                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
+                    {INDUSTRY.map((d, i) => {
+                      const idx = FEATURED.length + i
+                      const on = activeDemo === idx
+                      return (
+                        <button key={idx} onClick={() => pick(idx)} style={{
+                          display: 'inline-flex', alignItems: 'center', gap: '7px', cursor: 'pointer',
+                          fontFamily: 'DM Sans, sans-serif', fontSize: '13px', color: on ? '#1A1A2E' : '#3A4150',
+                          padding: '9px 15px', borderRadius: '30px',
+                          border: on ? '2px solid #C9A84C' : '1px solid #DDD8CE',
+                          background: on ? '#FFF8EC' : '#fff', transition: 'all 0.15s',
+                        }}>
+                          <span>{d.icon}</span> {d.sub}
+                        </button>
+                      )
+                    })}
+                  </div>
                 </div>
               </>
             )
@@ -516,54 +543,6 @@ export default function Landing() {
         </div>
       </div>
 
-
-      {/* INDUSTRY DEMOS */}
-      <section id="industries" style={{ padding: 'clamp(56px, 9vw, 100px) clamp(20px, 5vw, 48px)',
-        background: '#EEEAE2', borderTop: '1px solid #DDD8CE', borderBottom: '1px solid #DDD8CE' }}>
-        <div style={{ maxWidth: '1100px', margin: '0 auto' }}>
-          <div style={{ textAlign: 'center', marginBottom: '48px' }}>
-            <div style={{ fontFamily: 'DM Mono, monospace', fontSize: '11px',
-              letterSpacing: '3px', color: '#C9A84C', marginBottom: '16px' }}>
-              — {ALL_DEMOS.length} LIVE DEMOS · FIND YOURS
-            </div>
-            <h2 style={{ fontFamily: 'Cormorant Garamond, serif',
-              fontSize: 'clamp(28px, 4vw, 48px)', fontWeight: '600',
-              letterSpacing: '-0.5px', lineHeight: 1.15, color: '#1A1A2E', marginBottom: '16px' }}>
-              Built for your industry.<br />Not "for everyone."
-            </h2>
-            <p style={{ fontSize: '15px', color: '#5A6070', maxWidth: '520px',
-              margin: '0 auto', lineHeight: 1.7 }}>
-              A pizzeria's numbers don't look like a law firm's. Click your industry below —
-              every demo is live, clickable, and built the way we'd build yours.
-            </p>
-          </div>
-
-          <div style={{ display: 'flex', flexWrap: 'wrap', gap: '10px', justifyContent: 'center' }}>
-            {ALL_DEMOS.map(d => (
-              <a key={d.href} href={d.href} style={{
-                display: 'inline-flex', alignItems: 'center', gap: '8px',
-                background: '#F7F4EF', border: '1px solid #DDD8CE', borderRadius: '30px',
-                padding: '10px 18px', textDecoration: 'none', color: '#1A1A2E',
-                fontSize: '13px', fontFamily: 'DM Sans, sans-serif', transition: 'all 0.2s ease',
-              }}
-                onMouseEnter={e => { e.currentTarget.style.borderColor = '#C9A84C'; e.currentTarget.style.background = '#fff' }}
-                onMouseLeave={e => { e.currentTarget.style.borderColor = '#DDD8CE'; e.currentTarget.style.background = '#F7F4EF' }}>
-                <span>{d.emoji}</span> {d.industry}
-              </a>
-            ))}
-          </div>
-
-          <div style={{ textAlign: 'center', marginTop: '36px' }}>
-            <button className="cta-btn" onClick={() => router.push('/demos')}>
-              Browse All {ALL_DEMOS.length} Demos →
-            </button>
-            <div style={{ fontFamily: 'DM Mono, monospace', fontSize: '10px', color: '#7A8090',
-              marginTop: '12px', letterSpacing: '1.5px' }}>
-              DON'T SEE YOURS? WE'LL BUILD IT FREE BEFORE YOU PAY A DIME.
-            </div>
-          </div>
-        </div>
-      </section>
       {/* CONTACT */}
       <section id="contact" className="section-pad" style={{ padding: '120px 48px', maxWidth: '680px', margin: '0 auto' }}>
         <div style={{ marginBottom: '56px', textAlign: 'center' }}>
