@@ -108,7 +108,7 @@ export default function IndustryDemo({ cfg }) {
     { id: 'dash', label: 'Dashboard' },
     { id: 'pnl', label: 'P&L' },
     { id: 'ops', label: ops.label },
-    { id: 'ask', label: 'Ask AI' },
+    { id: 'ask', label: 'Ask Us' },
   ]
 
   // Add-a-row config per ops archetype — every demo gets a live add workflow.
@@ -529,7 +529,7 @@ export default function IndustryDemo({ cfg }) {
           </div>
         )}
 
-        {/* ASK AI */}
+        {/* ASK US */}
         {tab === 'ask' && (
           <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
             <div style={{ ...card, borderLeft: `3px solid ${A}`, background: '#FDFCFA' }}>
