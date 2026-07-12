@@ -431,26 +431,32 @@ export default function Landing() {
             const INDUSTRY = ALL_DEMOS.filter(d => d.href.startsWith('/demos/')).map(d => ({ label: d.biz, sub: d.industry, src: d.href, icon: d.emoji }))
             const DEMOS = [...FEATURED, ...INDUSTRY]
             const active = DEMOS[activeDemo] || DEMOS[0]
-            const pick = (i) => { setActiveDemo(i); if (typeof document !== 'undefined') document.getElementById('demos')?.scrollIntoView({ behavior: 'smooth', block: 'start' }) }
+            const pick = (i) => { setActiveDemo(i); if (typeof document !== 'undefined') document.getElementById('demo-preview')?.scrollIntoView({ behavior: 'smooth', block: 'start' }) }
             return (
               <>
-                <div style={{ fontFamily: 'DM Mono, monospace', fontSize: '11px', letterSpacing: '3px', color: '#C9A84C', marginBottom: '16px' }}>— LIVE DEMOS · CLICK AROUND</div>
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(160px,1fr))', gap: '10px', marginBottom: '20px' }}>
-                  {FEATURED.map((d, i) => (
-                    <button key={i} onClick={() => setActiveDemo(i)} style={{
-                      fontFamily: 'inherit', cursor: 'pointer', textAlign: 'left',
-                      padding: '16px', borderRadius: '12px',
-                      border: activeDemo === i ? '2px solid #C9A84C' : '1px solid #DDD8CE',
-                      background: activeDemo === i ? '#FFF8EC' : '#fff',
-                      transition: 'all 0.15s',
-                    }}>
-                      <div style={{ fontSize: '20px', marginBottom: '8px', color: activeDemo === i ? '#C9A84C' : '#5A6070' }}>{d.icon}</div>
-                      <div style={{ fontSize: '13px', fontWeight: 600, color: '#1A1A2E', marginBottom: '3px' }}>{d.label}</div>
-                      <div style={{ fontSize: '11px', color: '#5A6070' }}>{d.sub}</div>
-                    </button>
-                  ))}
+                {/* ALL 20 INDUSTRIES — right under the hero */}
+                <div style={{ fontFamily: 'DM Mono, monospace', fontSize: '11px', letterSpacing: '3px', color: '#C9A84C', marginBottom: '6px' }}>— {INDUSTRY.length} LIVE DEMOS · PICK YOUR INDUSTRY</div>
+                <div style={{ fontSize: '13px', color: '#5A6070', marginBottom: '16px' }}>Click your industry — a real dashboard loads in the preview below. Don't see yours? We'll build it free.</div>
+                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', marginBottom: '30px' }}>
+                  {INDUSTRY.map((d, i) => {
+                    const idx = FEATURED.length + i
+                    const on = activeDemo === idx
+                    return (
+                      <button key={idx} onClick={() => pick(idx)} style={{
+                        display: 'inline-flex', alignItems: 'center', gap: '7px', cursor: 'pointer',
+                        fontFamily: 'DM Sans, sans-serif', fontSize: '13px', color: on ? '#1A1A2E' : '#3A4150',
+                        padding: '9px 15px', borderRadius: '30px',
+                        border: on ? '2px solid #C9A84C' : '1px solid #DDD8CE',
+                        background: on ? '#FFF8EC' : '#fff', transition: 'all 0.15s',
+                      }}>
+                        <span>{d.icon}</span> {d.sub}
+                      </button>
+                    )
+                  })}
                 </div>
-                <div style={{ background: '#1A2035', borderRadius: '12px', boxShadow: '0 40px 100px rgba(0,0,0,0.25)', overflow: 'hidden' }}>
+
+                {/* LIVE PREVIEW */}
+                <div id="demo-preview" style={{ background: '#1A2035', borderRadius: '12px', boxShadow: '0 40px 100px rgba(0,0,0,0.25)', overflow: 'hidden' }}>
                   <div style={{ background: '#0D1120', padding: '12px 16px', display: 'flex', alignItems: 'center', gap: '8px', borderBottom: '1px solid #2E3A5C' }}>
                     <div style={{ width: 10, height: 10, borderRadius: '50%', background: '#FF5F57' }} />
                     <div style={{ width: 10, height: 10, borderRadius: '50%', background: '#FFBD2E' }} />
@@ -472,26 +478,23 @@ export default function Landing() {
                   }
                 </div>
 
-                {/* All 20 industries — click loads into the preview above */}
+                {/* FEATURED BRANDED BUILDS */}
                 <div style={{ marginTop: '30px' }}>
-                  <div style={{ fontFamily: 'DM Mono, monospace', fontSize: '11px', letterSpacing: '3px', color: '#C9A84C', marginBottom: '6px' }}>— OR JUMP STRAIGHT TO YOUR INDUSTRY</div>
-                  <div style={{ fontSize: '13px', color: '#5A6070', marginBottom: '16px' }}>Click any industry — it loads live in the preview above. {INDUSTRY.length} built, more any time.</div>
-                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
-                    {INDUSTRY.map((d, i) => {
-                      const idx = FEATURED.length + i
-                      const on = activeDemo === idx
-                      return (
-                        <button key={idx} onClick={() => pick(idx)} style={{
-                          display: 'inline-flex', alignItems: 'center', gap: '7px', cursor: 'pointer',
-                          fontFamily: 'DM Sans, sans-serif', fontSize: '13px', color: on ? '#1A1A2E' : '#3A4150',
-                          padding: '9px 15px', borderRadius: '30px',
-                          border: on ? '2px solid #C9A84C' : '1px solid #DDD8CE',
-                          background: on ? '#FFF8EC' : '#fff', transition: 'all 0.15s',
-                        }}>
-                          <span>{d.icon}</span> {d.sub}
-                        </button>
-                      )
-                    })}
+                  <div style={{ fontFamily: 'DM Mono, monospace', fontSize: '11px', letterSpacing: '3px', color: '#C9A84C', marginBottom: '16px' }}>— OR EXPLORE A FULLY-BUILT EXAMPLE</div>
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(160px,1fr))', gap: '10px' }}>
+                    {FEATURED.map((d, i) => (
+                      <button key={i} onClick={() => pick(i)} style={{
+                        fontFamily: 'inherit', cursor: 'pointer', textAlign: 'left',
+                        padding: '16px', borderRadius: '12px',
+                        border: activeDemo === i ? '2px solid #C9A84C' : '1px solid #DDD8CE',
+                        background: activeDemo === i ? '#FFF8EC' : '#fff',
+                        transition: 'all 0.15s',
+                      }}>
+                        <div style={{ fontSize: '20px', marginBottom: '8px', color: activeDemo === i ? '#C9A84C' : '#5A6070' }}>{d.icon}</div>
+                        <div style={{ fontSize: '13px', fontWeight: 600, color: '#1A1A2E', marginBottom: '3px' }}>{d.label}</div>
+                        <div style={{ fontSize: '11px', color: '#5A6070' }}>{d.sub}</div>
+                      </button>
+                    ))}
                   </div>
                 </div>
               </>
