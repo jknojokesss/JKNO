@@ -93,34 +93,69 @@ export default function IndustryDemo({ cfg }) {
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=DM+Sans:wght@300;400;500&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet" />
         <style>{`*{box-sizing:border-box;margin:0;padding:0}body{background:#EEF1F5;font-family:'DM Sans',sans-serif}
-          .id-tabs::-webkit-scrollbar{display:none}.id-tabs{scrollbar-width:none}::placeholder{color:#A8B2BE}`}</style>
+          .id-tabs::-webkit-scrollbar{display:none}.id-tabs{scrollbar-width:none}::placeholder{color:#A8B2BE}
+          .id-shell{display:flex;align-items:flex-start;min-height:100vh}
+          .id-side{width:236px;flex-shrink:0;position:sticky;top:0;height:100vh;display:flex;flex-direction:column}
+          .id-topbar{display:none}
+          .id-main{flex:1;width:100%;max-width:1060px;margin:0 auto;padding:22px 22px 56px}
+          @media(max-width:860px){.id-shell{display:block}.id-side{display:none}.id-topbar{display:block}.id-main{padding:18px 14px 48px}}`}</style>
       </Head>
 
       <div style={{ background: A, color: '#fff', textAlign: 'center', padding: '8px 16px', fontFamily: 'DM Mono, monospace', fontSize: '11px', letterSpacing: '1px' }}>
         SAMPLE DASHBOARD · built for a {industry.toLowerCase()} business by JK No Jokes Financials
       </div>
 
-      <div style={{ background: D }}>
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '12px', padding: '12px 18px 0', flexWrap: 'wrap' }}>
-          <div style={{ display: 'flex', alignItems: 'baseline', gap: '10px' }}>
-            <span style={{ fontSize: '20px' }}>{emoji}</span>
-            <span style={{ ...serif, fontSize: '20px', fontWeight: 700, color: '#EAF0F6' }}>{biz}</span>
-            <span style={{ fontFamily: 'DM Mono, monospace', fontSize: '8px', letterSpacing: '2px', color: A }}>{industry.toUpperCase()}</span>
+      <div className="id-shell">
+        {/* SIDEBAR — desktop */}
+        <aside className="id-side" style={{ background: D }}>
+          <div style={{ padding: '22px 20px 18px', borderBottom: '1px solid rgba(255,255,255,0.08)' }}>
+            <div style={{ fontSize: '26px', marginBottom: '10px' }}>{emoji}</div>
+            <div style={{ ...serif, fontSize: '21px', fontWeight: 700, color: '#EAF0F6', lineHeight: 1.15 }}>{biz}</div>
+            <div style={{ fontFamily: 'DM Mono, monospace', fontSize: '8px', letterSpacing: '2px', color: A, marginTop: '6px' }}>{industry.toUpperCase()}</div>
           </div>
-          <a href={BOOK} target="_blank" rel="noopener noreferrer" style={{ background: A, color: '#fff', textDecoration: 'none', borderRadius: '4px', padding: '7px 12px', fontFamily: 'DM Mono, monospace', fontSize: '10px', letterSpacing: '1px', whiteSpace: 'nowrap' }}>GET THIS BUILT →</a>
-        </div>
-        <nav className="id-tabs" style={{ display: 'flex', gap: '4px', padding: '0 18px', overflowX: 'auto', borderBottom: '1px solid rgba(255,255,255,0.1)', marginTop: '8px' }}>
-          {tabs.map((t) => (
-            <button key={t.id} onClick={() => setTab(t.id)} style={{
-              padding: '9px 12px', background: 'transparent', border: 'none', cursor: 'pointer', whiteSpace: 'nowrap',
-              color: tab === t.id ? '#fff' : '#8C9AAA', fontSize: '11px', fontFamily: 'DM Mono, monospace', letterSpacing: '0.04em',
-              borderBottom: tab === t.id ? `2px solid ${A}` : '2px solid transparent', marginBottom: '-1px',
-            }}>{t.label}</button>
-          ))}
-        </nav>
-      </div>
+          <nav style={{ display: 'flex', flexDirection: 'column', padding: '14px 10px', gap: '2px', flex: 1 }}>
+            {tabs.map((t) => {
+              const on = tab === t.id
+              return (
+                <button key={t.id} onClick={() => setTab(t.id)} style={{
+                  display: 'flex', alignItems: 'center', gap: '10px', textAlign: 'left', width: '100%',
+                  padding: '11px 14px', borderRadius: '6px', cursor: 'pointer',
+                  background: on ? 'rgba(255,255,255,0.07)' : 'transparent',
+                  border: 'none', borderLeft: on ? `2px solid ${A}` : '2px solid transparent',
+                  color: on ? '#fff' : '#8C9AAA', fontSize: '13px', fontFamily: "'DM Sans',sans-serif", fontWeight: on ? 600 : 400,
+                }}>
+                  <span style={{ width: '5px', height: '5px', borderRadius: '50%', background: on ? A : '#4A566B' }} />{t.label}
+                </button>
+              )
+            })}
+          </nav>
+          <div style={{ padding: '16px 16px 22px' }}>
+            <a href={BOOK} target="_blank" rel="noopener noreferrer" style={{ display: 'block', textAlign: 'center', background: A, color: '#fff', textDecoration: 'none', borderRadius: '6px', padding: '11px 12px', fontFamily: 'DM Mono, monospace', fontSize: '10px', letterSpacing: '1px' }}>GET THIS BUILT →</a>
+            <div style={{ fontFamily: 'DM Mono, monospace', fontSize: '8px', letterSpacing: '1px', color: '#5A6478', textAlign: 'center', marginTop: '12px', lineHeight: 1.5 }}>SAMPLE DATA · NO LOGIN<br />BY JK NO JOKES FINANCIALS</div>
+          </div>
+        </aside>
 
-      <div style={{ maxWidth: '1040px', margin: '0 auto', padding: '20px 16px 48px' }}>
+        {/* TOP BAR — mobile */}
+        <div className="id-topbar" style={{ background: D }}>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '12px', padding: '12px 16px 0' }}>
+            <div style={{ display: 'flex', alignItems: 'baseline', gap: '9px', minWidth: 0 }}>
+              <span style={{ fontSize: '18px' }}>{emoji}</span>
+              <span style={{ ...serif, fontSize: '18px', fontWeight: 700, color: '#EAF0F6', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{biz}</span>
+            </div>
+            <a href={BOOK} target="_blank" rel="noopener noreferrer" style={{ background: A, color: '#fff', textDecoration: 'none', borderRadius: '4px', padding: '7px 11px', fontFamily: 'DM Mono, monospace', fontSize: '9px', letterSpacing: '1px', whiteSpace: 'nowrap' }}>GET THIS BUILT →</a>
+          </div>
+          <nav className="id-tabs" style={{ display: 'flex', gap: '4px', padding: '0 16px', overflowX: 'auto', borderBottom: '1px solid rgba(255,255,255,0.1)', marginTop: '10px' }}>
+            {tabs.map((t) => (
+              <button key={t.id} onClick={() => setTab(t.id)} style={{
+                padding: '9px 12px', background: 'transparent', border: 'none', cursor: 'pointer', whiteSpace: 'nowrap',
+                color: tab === t.id ? '#fff' : '#8C9AAA', fontSize: '11px', fontFamily: 'DM Mono, monospace', letterSpacing: '0.04em',
+                borderBottom: tab === t.id ? `2px solid ${A}` : '2px solid transparent', marginBottom: '-1px',
+              }}>{t.label}</button>
+            ))}
+          </nav>
+        </div>
+
+        <div className="id-main">
 
         {/* DASHBOARD */}
         {tab === 'dash' && (
@@ -373,6 +408,7 @@ export default function IndustryDemo({ cfg }) {
           <div style={{ marginTop: '14px' }}>
             <a href="/demos" style={{ fontFamily: 'DM Mono, monospace', fontSize: '10px', color: '#8C9AAA', letterSpacing: '1px' }}>← ALL INDUSTRY DEMOS</a>
           </div>
+        </div>
         </div>
       </div>
     </>
