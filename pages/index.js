@@ -434,12 +434,11 @@ export default function Landing() {
             const pick = (i) => { setActiveDemo(i); if (typeof document !== 'undefined') document.getElementById('demo-preview')?.scrollIntoView({ behavior: 'smooth', block: 'start' }) }
             return (
               <>
-                {/* ALL 20 INDUSTRIES — right under the hero */}
-                <div style={{ fontFamily: 'DM Mono, monospace', fontSize: '11px', letterSpacing: '3px', color: '#C9A84C', marginBottom: '6px' }}>— {INDUSTRY.length} LIVE DEMOS · PICK YOUR INDUSTRY</div>
-                <div style={{ fontSize: '13px', color: '#5A6070', marginBottom: '16px' }}>Click your industry — a real dashboard loads in the preview below. Don't see yours? We'll build it free.</div>
+                {/* ALL DEMOS — one picker, right under the hero */}
+                <div style={{ fontFamily: 'DM Mono, monospace', fontSize: '11px', letterSpacing: '3px', color: '#C9A84C', marginBottom: '6px' }}>— {DEMOS.length} LIVE DEMOS · PICK YOURS</div>
+                <div style={{ fontSize: '13px', color: '#5A6070', marginBottom: '16px' }}>Click any one — a real dashboard loads in the window below. Don't see your industry? We'll build it free.</div>
                 <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', marginBottom: '30px' }}>
-                  {INDUSTRY.map((d, i) => {
-                    const idx = FEATURED.length + i
+                  {DEMOS.map((d, idx) => {
                     const on = activeDemo === idx
                     return (
                       <button key={idx} onClick={() => pick(idx)} style={{
@@ -449,7 +448,7 @@ export default function Landing() {
                         border: on ? '2px solid #C9A84C' : '1px solid #DDD8CE',
                         background: on ? '#FFF8EC' : '#fff', transition: 'all 0.15s',
                       }}>
-                        <span>{d.icon}</span> {d.sub}
+                        <span>{d.icon}</span> {idx < FEATURED.length ? d.label : d.sub}
                       </button>
                     )
                   })}
@@ -478,25 +477,6 @@ export default function Landing() {
                   }
                 </div>
 
-                {/* FEATURED BRANDED BUILDS */}
-                <div style={{ marginTop: '30px' }}>
-                  <div style={{ fontFamily: 'DM Mono, monospace', fontSize: '11px', letterSpacing: '3px', color: '#C9A84C', marginBottom: '16px' }}>— OR EXPLORE A FULLY-BUILT EXAMPLE</div>
-                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(160px,1fr))', gap: '10px' }}>
-                    {FEATURED.map((d, i) => (
-                      <button key={i} onClick={() => pick(i)} style={{
-                        fontFamily: 'inherit', cursor: 'pointer', textAlign: 'left',
-                        padding: '16px', borderRadius: '12px',
-                        border: activeDemo === i ? '2px solid #C9A84C' : '1px solid #DDD8CE',
-                        background: activeDemo === i ? '#FFF8EC' : '#fff',
-                        transition: 'all 0.15s',
-                      }}>
-                        <div style={{ fontSize: '20px', marginBottom: '8px', color: activeDemo === i ? '#C9A84C' : '#5A6070' }}>{d.icon}</div>
-                        <div style={{ fontSize: '13px', fontWeight: 600, color: '#1A1A2E', marginBottom: '3px' }}>{d.label}</div>
-                        <div style={{ fontSize: '11px', color: '#5A6070' }}>{d.sub}</div>
-                      </button>
-                    ))}
-                  </div>
-                </div>
               </>
             )
           })()}</div>
