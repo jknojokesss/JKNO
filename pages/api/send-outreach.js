@@ -31,9 +31,11 @@ const followUpEmail = (firstName) => ({
   subject: 're: what your numbers could look like (demo inside)',
   body: `Hi ${firstName || 'there'},
 
-Just bumping this in case it got buried — the live dashboard demo is at jknojokes.com. Takes two minutes to click around.
+Following up, and I did something specific this time. After I reached out, I put up live sample dashboards by industry — so instead of a generic demo, you can click your own line of work and watch a real one load: jknojokes.com/demos
 
-If now's not the time, no worries at all.
+Quick gut-check: do you know your actual profit for this month, today — or weeks later when the books catch up? That's the whole thing I fix.
+
+If it's useful, 10 minutes and I'll build one around your real numbers. If not, just reply "not now" and I'll leave your inbox alone.
 
 — Jonathan Katz | JK No Jokes Financials | jknojokes.com
 
