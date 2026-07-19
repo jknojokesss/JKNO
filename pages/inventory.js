@@ -1,4 +1,5 @@
 import { useEffect, useState, useMemo } from 'react'
+import { useRouter } from 'next/router'
 import Head from 'next/head'
 import { supabase } from '../lib/supabase'
 import Shell from '../components/Shell'
@@ -42,6 +43,10 @@ export default function Inventory() {
   const [period,  setPeriod]  = useState('all')
   const [compareOn,     setCompareOn]     = useState(false)
   const [comparePeriod, setComparePeriod] = useState(null)
+  const router = useRouter()
+
+  // Deep-link: /inventory?q=235/60/17 pre-fills the search (e.g. from the dashboard).
+  useEffect(() => { if (router.query.q) setSearch(String(router.query.q)) }, [router.query.q])
 
   useEffect(() => {
     async function load() {

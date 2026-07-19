@@ -49,11 +49,15 @@ const MIX_META = {
   other:     { label: 'Other',            color: '#b8ae9a' },
 }
 
-function KPICard({ label, value, sub, trend, accent }) {
+function KPICard({ label, value, sub, trend, accent, onClick }) {
   const tColor = trend > 0 ? C.green : trend < 0 ? '#b91c1c' : C.sub
   return (
-    <div style={{ background: C.card, border: `1px solid ${C.border}`, borderRadius: '12px', padding: '16px 18px', flex: 1, minWidth: '168px', boxShadow: C.shadow, position: 'relative', overflow: 'hidden' }}>
+    <div onClick={onClick}
+      onMouseEnter={onClick ? e => { e.currentTarget.style.boxShadow = '0 5px 16px rgba(60,45,20,0.11)'; e.currentTarget.style.transform = 'translateY(-1px)' } : undefined}
+      onMouseLeave={onClick ? e => { e.currentTarget.style.boxShadow = C.shadow; e.currentTarget.style.transform = 'none' } : undefined}
+      style={{ background: C.card, border: `1px solid ${C.border}`, borderRadius: '12px', padding: '16px 18px', flex: 1, minWidth: '168px', boxShadow: C.shadow, position: 'relative', overflow: 'hidden', cursor: onClick ? 'pointer' : 'default', transition: 'box-shadow .15s, transform .15s' }}>
       <div style={{ position: 'absolute', top: 0, left: 0, width: '3px', height: '100%', background: accent || C.red }} />
+      {onClick && <div style={{ position: 'absolute', top: '12px', right: '13px', fontSize: '11px', color: C.muted }}>→</div>}
       <div style={{ fontSize: '9px', color: C.muted, letterSpacing: '0.14em', marginBottom: '9px', fontFamily: ui, fontWeight: 600 }}>{label}</div>
       <div style={{ fontSize: '24px', color: C.ink, fontWeight: 700, fontFamily: ui, letterSpacing: '-0.02em' }}>{value}</div>
       {sub && <div style={{ fontSize: '11px', color: trend != null ? tColor : C.sub, marginTop: '6px', fontFamily: ui, fontWeight: 500 }}>{trend != null && (trend > 0 ? '▲ ' : trend < 0 ? '▼ ' : '')}{sub}</div>}
@@ -230,13 +234,17 @@ export default function Dashboard() {
                 {/* Growth KPIs (closed-month) */}
                 <div style={{ display: 'flex', gap: '12px', marginBottom: '14px', flexWrap: 'wrap' }}>
                   <KPICard label={`REVENUE · ${last ? last.label : ''}`} value={last ? fmt(last.revenue) : '—'}
-                    trend={momRev} sub={momRev != null ? `${Math.abs(momRev).toFixed(0)}% vs ${prev.label}` : 'latest closed month'} accent={C.red} />
+                    trend={momRev} sub={momRev != null ? `${Math.abs(momRev).toFixed(0)}% vs ${prev.label}` : 'latest closed month'} accent={C.red}
+                    onClick={() => router.push('/financials')} />
                   <KPICard label={`GROSS PROFIT · ${last ? last.label : ''}`} value={last ? fmt(grossLast) : '—'}
-                    sub={last ? `${pct(grossMarginLast)} gross margin` : null} accent={C.gold} />
+                    sub={last ? `${pct(grossMarginLast)} gross margin` : null} accent={C.gold}
+                    onClick={() => router.push('/financials')} />
                   <KPICard label={`NET PROFIT · ${last ? last.label : ''}`} value={last ? fmt(last.profit) : '—'}
-                    sub={last ? `${pct(netMarginLast)} net margin` : null} accent={C.green} />
+                    sub={last ? `${pct(netMarginLast)} net margin` : null} accent={C.green}
+                    onClick={() => router.push('/financials')} />
                   <KPICard label={`REVENUE · YTD ${year}`} value={fmt(ytdRev)}
-                    sub={`${ytd.length} mo · ${fmt(ytdProfit)} profit`} accent={C.red} />
+                    sub={`${ytd.length} mo · ${fmt(ytdProfit)} profit`} accent={C.red}
+                    onClick={() => router.push('/financials')} />
                 </div>
 
                 {/* Live "this month in progress" strip */}
@@ -256,7 +264,10 @@ export default function Dashboard() {
                   <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
                     {[['REVENUE', fmt(pRevenue), C.green], ['TICKETS', pOrders.toLocaleString(), C.sub],
                       ['TIRES SOLD', pUnits.toLocaleString(), C.sub], ['AVG TICKET', fmt(pAvg), C.sub]].map(([l, v, col]) => (
-                      <div key={l} style={{ flex: 1, minWidth: '120px', background: C.hover, borderRadius: '9px', padding: '11px 14px' }}>
+                      <div key={l} onClick={() => router.push('/orders')}
+                        onMouseEnter={e => e.currentTarget.style.background = '#EFE7D6'}
+                        onMouseLeave={e => e.currentTarget.style.background = C.hover}
+                        style={{ flex: 1, minWidth: '120px', background: C.hover, borderRadius: '9px', padding: '11px 14px', cursor: 'pointer', transition: 'background .15s' }}>
                         <div style={{ fontSize: '9px', color: C.muted, letterSpacing: '0.12em', marginBottom: '5px', fontFamily: ui, fontWeight: 600 }}>{l}</div>
                         <div style={{ fontSize: '18px', color: C.ink, fontWeight: 700, fontFamily: ui }}>{v}</div>
                         <div style={{ fontSize: '9px', color: col, marginTop: '3px', fontFamily: ui }}>{periodLabel}</div>
@@ -285,7 +296,10 @@ export default function Dashboard() {
 
                       {/* Monthly chart with profit trend line */}
                       <div style={cardStyle}>
-                        <div style={capLabel}>REVENUE, EXPENSES &amp; PROFIT BY MONTH</div>
+                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '12px' }}>
+                          <div style={{ ...capLabel, marginBottom: 0 }}>REVENUE, EXPENSES &amp; PROFIT BY MONTH</div>
+                          <button onClick={() => router.push('/financials')} style={{ fontSize: '10px', color: C.red, background: 'none', border: 'none', cursor: 'pointer', fontFamily: ui, fontWeight: 600 }}>FULL P&amp;L →</button>
+                        </div>
                         <div style={{ display: 'flex', gap: '14px', marginBottom: '10px' }}>
                           {[[C.red,'Revenue'],['#D8CDB4','Expenses'],[C.green,'Profit']].map(([c, l]) => (
                             <span key={l} style={{ display: 'flex', alignItems: 'center', gap: '5px', fontSize: '9px', color: C.muted, fontFamily: ui, fontWeight: 500 }}>
@@ -315,7 +329,7 @@ export default function Dashboard() {
                           </thead>
                           <tbody>
                             {closed.map(m => (
-                              <tr key={m.month} onMouseEnter={e => e.currentTarget.style.background = C.hover} onMouseLeave={e => e.currentTarget.style.background = 'transparent'}>
+                              <tr key={m.month} onClick={() => router.push('/financials')} style={{ cursor: 'pointer' }} onMouseEnter={e => e.currentTarget.style.background = C.hover} onMouseLeave={e => e.currentTarget.style.background = 'transparent'}>
                                 <td style={{ padding: '7px 8px', borderBottom: '1px solid #F1EADB', color: C.ink }}>
                                   {m.label}{m.notes && <span style={{ fontSize: '8px', color: C.red, marginLeft: '4px' }}>*est</span>}
                                 </td>
@@ -344,13 +358,19 @@ export default function Dashboard() {
 
                       {/* Sales mix */}
                       <div style={cardStyle}>
-                        <div style={capLabel}>SALES MIX · SHARE OF REVENUE</div>
+                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '12px' }}>
+                          <div style={{ ...capLabel, marginBottom: 0 }}>SALES MIX · SHARE OF REVENUE</div>
+                          <button onClick={() => router.push('/inventory')} style={{ fontSize: '10px', color: C.red, background: 'none', border: 'none', cursor: 'pointer', fontFamily: ui, fontWeight: 600 }}>ITEMS →</button>
+                        </div>
                         {mix.list.length === 0 ? (
                           <div style={{ fontSize: '12px', color: C.muted, fontFamily: ui, padding: '8px 0' }}>No sales data yet.</div>
                         ) : mix.list.map((c, i) => {
                           const p = mix.total > 0 ? c.rev / mix.total * 100 : 0
                           return (
-                            <div key={c.label} style={{ padding: '10px 0', borderTop: i ? '1px solid #F1EADB' : 'none' }}>
+                            <div key={c.label} onClick={() => router.push('/inventory')}
+                              onMouseEnter={e => e.currentTarget.style.background = C.hover}
+                              onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
+                              style={{ padding: '10px 8px', margin: '0 -8px', borderTop: i ? '1px solid #F1EADB' : 'none', cursor: 'pointer', borderRadius: '6px', transition: 'background .15s' }}>
                               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: '6px' }}>
                                 <span style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '13px', color: C.ink, fontWeight: 500, fontFamily: ui }}>
                                   <span style={{ width: '9px', height: '9px', borderRadius: '2px', background: c.color, display: 'inline-block' }} />{c.label}
@@ -377,7 +397,10 @@ export default function Dashboard() {
                         {topSizes.length === 0 ? (
                           <div style={{ fontSize: '12px', color: C.muted, fontFamily: ui, padding: '8px 0' }}>No tire sales yet.</div>
                         ) : topSizes.map((t, i) => (
-                          <div key={t.name} style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '8px 0', borderTop: i ? '1px solid #F1EADB' : 'none' }}>
+                          <div key={t.name} onClick={() => router.push(`/inventory?q=${encodeURIComponent(t.name)}`)}
+                            onMouseEnter={e => e.currentTarget.style.background = C.hover}
+                            onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
+                            style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '8px', margin: '0 -8px', borderTop: i ? '1px solid #F1EADB' : 'none', cursor: 'pointer', borderRadius: '6px', transition: 'background .15s' }}>
                             <span style={{ width: '20px', height: '20px', borderRadius: '6px', flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '10px', fontWeight: 700, fontFamily: ui, background: i < 3 ? C.red : '#EBE1CD', color: i < 3 ? '#fff' : C.muted }}>{i + 1}</span>
                             <div style={{ minWidth: 0, flex: 1 }}>
                               <div style={{ fontSize: '12px', fontWeight: 600, color: C.ink, fontFamily: ui, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{t.name}</div>
