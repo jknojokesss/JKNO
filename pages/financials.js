@@ -272,7 +272,6 @@ export default function Financials() {
     { id: 'pl',       label: 'Profit & Loss' },
     { id: 'bs',       label: 'Balance Sheet' },
     { id: 'monthly',  label: 'Monthly Table' },
-    { id: 'expenses', label: 'Expense Breakdown' },
     { id: 'accounts', label: 'Account Balances' },
     ...(isAdmin ? [{ id: 'health', label: 'Data Health' }] : []),
   ]
@@ -532,11 +531,16 @@ export default function Financials() {
                       <tbody>
                         {monthly.map((m, i) => {
                           const partial = m.key >= curKey
+                          const drillable = plMonths.includes(m.key)
                           return (
-                            <tr key={i} onMouseEnter={e => e.currentTarget.style.background = '#F5EFE3'} onMouseLeave={e => e.currentTarget.style.background = 'transparent'} style={{ opacity: partial ? 0.6 : 1 }}>
+                            <tr key={i}
+                              onClick={drillable ? () => { setCompareOn(false); setPlPeriod(m.key); setActiveTab('pl') } : undefined}
+                              onMouseEnter={e => e.currentTarget.style.background = '#F5EFE3'} onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
+                              style={{ opacity: partial ? 0.6 : 1, cursor: drillable ? 'pointer' : 'default' }}>
                               <td style={cell('left', { color: '#1a1a1a', fontWeight: '600' })}>
                                 {m.label}
                                 {partial && <span style={{ marginLeft: '6px', fontSize: '8px', color: '#a39a88', letterSpacing: '0.06em' }}>· IN PROGRESS</span>}
+                                {drillable && !partial && <span style={{ marginLeft: '6px', fontSize: '9px', color: THEME.accent }}>→</span>}
                               </td>
                               <td style={cell('right')}>{fmt(m.revenue)}</td>
                               <td style={cell('right', { color: THEME.accent })}>{fmt(m.cogs)}</td>
@@ -569,41 +573,6 @@ export default function Financials() {
                   </div>
                 )}
 
-                {/* Expense Breakdown Tab */}
-                {activeTab === 'expenses' && (
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
-                    {[
-                      { heading: 'OPERATING EXPENSES', rows: plTotals.expense },
-                      { heading: 'OTHER EXPENSES',     rows: plTotals.other_expense },
-                    ].map(group => {
-                      const maxV = Math.max(...group.rows.map(r => r.amount), 1)
-                      const groupTotal = group.rows.reduce((s, r) => s + r.amount, 0)
-                      return (
-                        <div key={group.heading} style={{ background: '#fff', border: '1px solid #E7DECB', borderRadius: '12px', boxShadow: '0 1px 3px rgba(60,45,20,0.05)', padding: '20px 22px', maxWidth: '660px' }}>
-                          <div style={{ fontSize: '9px', color: '#a39a88', letterSpacing: '0.14em', fontWeight: 700, marginBottom: '16px', fontFamily: ui }}>{group.heading}</div>
-                          {[...group.rows].sort((a, b) => b.amount - a.amount).map(e => (
-                            <div key={e.label} style={{ padding: '9px 0', borderBottom: '1px solid #F1EADB' }}>
-                              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: '5px' }}>
-                                <span style={{ fontSize: '12px', color: '#4a4438', fontFamily: ui }}>{e.label}</span>
-                                <span style={{ display: 'flex', alignItems: 'baseline', gap: '8px' }}>
-                                  <span style={{ fontSize: '10px', color: '#a39a88', fontFamily: ui }}>{groupTotal > 0 ? pct(e.amount / groupTotal * 100) : '—'}</span>
-                                  <span style={{ fontSize: '12px', color: '#1a1a1a', fontWeight: 600, fontFamily: ui, fontVariantNumeric: 'tabular-nums' }}>{fmt(e.amount)}</span>
-                                </span>
-                              </div>
-                              <div style={{ height: '6px', background: '#F1EADB', borderRadius: '3px', overflow: 'hidden' }}>
-                                <div style={{ height: '100%', background: `linear-gradient(90deg, ${THEME.accent}, #e05a3a)`, borderRadius: '3px', width: `${Math.round(e.amount / maxV * 100)}%` }} />
-                              </div>
-                            </div>
-                          ))}
-                          <div style={{ display: 'flex', justifyContent: 'space-between', paddingTop: '12px', marginTop: '4px', borderTop: '1px solid #E7DECB' }}>
-                            <span style={{ fontSize: '12px', color: '#1a1a1a', fontFamily: ui, fontWeight: 700 }}>Total</span>
-                            <span style={{ fontSize: '12px', color: '#1a1a1a', fontFamily: ui, fontWeight: 700, fontVariantNumeric: 'tabular-nums' }}>{fmt(groupTotal)}</span>
-                          </div>
-                        </div>
-                      )
-                    })}
-                  </div>
-                )}
 
                 {/* Accounts Tab — balances grouped by type, collapsible */}
                 {activeTab === 'accounts' && (() => {
