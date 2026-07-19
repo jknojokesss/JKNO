@@ -28,6 +28,27 @@ function normalizeItemName(name) {
     .trim()
 }
 
+// Derive a sales category from the (often inconsistent) Clover item name — we
+// don't rely on Clover's own categories. Size pattern → new tire; keyword net
+// catches service/repair even when it's named "Brakes" or "Sensors"; the rest
+// falls into a visible "Other" bucket rather than being mis-assigned or hidden.
+const SERVICE_RE = /align|mount|balance|patch|plug|rotat|labor|install|valve|tpms|service|repair|brake|sensor|wiper|batter|light|bulb|\bair\b|spare|lug|rim|stud|seal|oil|filter|fix|swap|band/
+function saleCategory(name) {
+  const n = (name || '').toLowerCase().trim()
+  if (!n) return 'other'
+  if (n.length <= 5 && /tip/.test(n)) return 'tips'
+  if (/\d{3}[\s/\\-]?\d{2}[\s/\\-]?r?\d{2}/.test(n)) return 'new_tire'
+  if (/used/.test(n)) return 'used_tire'
+  if (SERVICE_RE.test(n)) return 'service'
+  return 'other'
+}
+const MIX_META = {
+  new_tire:  { label: 'New Tires',        color: '#CC2222' },
+  service:   { label: 'Service & Repair', color: '#C9A84C' },
+  used_tire: { label: 'Used Tires',       color: '#6b6355' },
+  other:     { label: 'Other',            color: '#b8ae9a' },
+}
+
 function KPICard({ label, value, sub, trend, accent }) {
   const tColor = trend > 0 ? C.green : trend < 0 ? '#b91c1c' : C.sub
   return (
@@ -143,11 +164,30 @@ export default function Dashboard() {
     return Object.values(map).sort((a, b) => b.revenue - a.revenue).slice(0, 30)
   }, [clover])
 
-  // Top 10 items by revenue (all-time), with units sold — for the home grid.
-  const top10 = useMemo(() => {
+  // Sales mix by category — robust to messy item names (bucketed, not per-item).
+  const mix = useMemo(() => {
+    const cats = {}
+    clover.forEach(r => {
+      const c = saleCategory(r.item_name)
+      if (c === 'tips') return
+      const k = MIX_META[c] ? c : 'other'
+      cats[k] = (cats[k] || 0) + Number(r.revenue || 0)
+    })
+    const total = Object.values(cats).reduce((s, v) => s + v, 0)
+    const list = Object.entries(cats).map(([k, rev]) => ({ ...MIX_META[k], rev })).sort((a, b) => b.rev - a.rev)
+    return { list, total }
+  }, [clover])
+
+  // Top new-tire sizes (companion detail to the mix).
+  const topSizes = useMemo(() => {
     const map = {}
-    clover.forEach(r => { const k = normalizeItemName(r.item_name); if (!map[k]) map[k] = { name: k, revenue: 0, units: 0 }; map[k].revenue += Number(r.revenue || 0); map[k].units += Number(r.quantity || 1) })
-    return Object.values(map).sort((a, b) => b.revenue - a.revenue).slice(0, 10)
+    clover.forEach(r => {
+      if (saleCategory(r.item_name) !== 'new_tire') return
+      const k = normalizeItemName(r.item_name)
+      if (!map[k]) map[k] = { name: k, revenue: 0, units: 0 }
+      map[k].revenue += Number(r.revenue || 0); map[k].units += Number(r.quantity || 1)
+    })
+    return Object.values(map).sort((a, b) => b.revenue - a.revenue).slice(0, 6)
   }, [clover])
 
   const tabs = [
@@ -299,28 +339,54 @@ export default function Dashboard() {
                       </div>
                     </div>
 
-                    {/* Top 10 best sellers (all-time, by revenue) */}
-                    <div style={cardStyle}>
-                      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '16px' }}>
-                        <div style={{ ...capLabel, marginBottom: 0 }}>TOP 10 BEST SELLERS · BY REVENUE</div>
-                        <button onClick={() => router.push('/inventory')} style={{ fontSize: '10px', color: C.red, background: 'none', border: 'none', cursor: 'pointer', fontFamily: ui, fontWeight: 600 }}>ALL ITEMS →</button>
-                      </div>
-                      {top10.length === 0 ? (
-                        <div style={{ fontSize: '12px', color: C.muted, fontFamily: ui, padding: '8px 0' }}>No sales data yet.</div>
-                      ) : (
-                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(230px, 1fr))', gap: '10px' }}>
-                          {top10.map((t, i) => (
-                            <div key={t.name} style={{ display: 'flex', alignItems: 'center', gap: '12px', background: C.hover, borderRadius: '10px', padding: '11px 13px' }}>
-                              <div style={{ width: '26px', height: '26px', borderRadius: '7px', flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '12px', fontWeight: 700, fontFamily: ui, background: i < 3 ? C.red : '#EBE1CD', color: i < 3 ? '#fff' : C.muted }}>{i + 1}</div>
-                              <div style={{ minWidth: 0, flex: 1 }}>
-                                <div style={{ fontSize: '13px', fontWeight: 600, color: C.ink, fontFamily: ui, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{t.name}</div>
-                                <div style={{ fontSize: '10px', color: C.muted, fontFamily: ui, marginTop: '2px' }}>{t.units.toLocaleString()} sold</div>
+                    {/* Sales mix by category + top tire sizes */}
+                    <div style={{ display: 'grid', gridTemplateColumns: '1.25fr 1fr', gap: '16px' }}>
+
+                      {/* Sales mix */}
+                      <div style={cardStyle}>
+                        <div style={capLabel}>SALES MIX · SHARE OF REVENUE</div>
+                        {mix.list.length === 0 ? (
+                          <div style={{ fontSize: '12px', color: C.muted, fontFamily: ui, padding: '8px 0' }}>No sales data yet.</div>
+                        ) : mix.list.map((c, i) => {
+                          const p = mix.total > 0 ? c.rev / mix.total * 100 : 0
+                          return (
+                            <div key={c.label} style={{ padding: '10px 0', borderTop: i ? '1px solid #F1EADB' : 'none' }}>
+                              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: '6px' }}>
+                                <span style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '13px', color: C.ink, fontWeight: 500, fontFamily: ui }}>
+                                  <span style={{ width: '9px', height: '9px', borderRadius: '2px', background: c.color, display: 'inline-block' }} />{c.label}
+                                </span>
+                                <span style={{ display: 'flex', alignItems: 'baseline', gap: '9px' }}>
+                                  <span style={{ fontSize: '11px', color: C.muted, fontFamily: ui }}>{p.toFixed(0)}%</span>
+                                  <span style={{ fontSize: '13px', color: C.ink, fontWeight: 700, fontFamily: ui, fontVariantNumeric: 'tabular-nums' }}>{fmt(c.rev)}</span>
+                                </span>
                               </div>
-                              <div style={{ fontSize: '14px', fontWeight: 700, color: C.ink, fontFamily: ui, whiteSpace: 'nowrap', fontVariantNumeric: 'tabular-nums' }}>{fmt(t.revenue)}</div>
+                              <div style={{ height: '7px', background: '#F1EADB', borderRadius: '4px', overflow: 'hidden' }}>
+                                <div style={{ width: `${p}%`, height: '100%', background: c.color }} />
+                              </div>
                             </div>
-                          ))}
+                          )
+                        })}
+                      </div>
+
+                      {/* Top tire sizes */}
+                      <div style={cardStyle}>
+                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '10px' }}>
+                          <div style={{ ...capLabel, marginBottom: 0 }}>TOP TIRE SIZES</div>
+                          <button onClick={() => router.push('/inventory')} style={{ fontSize: '10px', color: C.red, background: 'none', border: 'none', cursor: 'pointer', fontFamily: ui, fontWeight: 600 }}>ALL →</button>
                         </div>
-                      )}
+                        {topSizes.length === 0 ? (
+                          <div style={{ fontSize: '12px', color: C.muted, fontFamily: ui, padding: '8px 0' }}>No tire sales yet.</div>
+                        ) : topSizes.map((t, i) => (
+                          <div key={t.name} style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '8px 0', borderTop: i ? '1px solid #F1EADB' : 'none' }}>
+                            <span style={{ width: '20px', height: '20px', borderRadius: '6px', flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '10px', fontWeight: 700, fontFamily: ui, background: i < 3 ? C.red : '#EBE1CD', color: i < 3 ? '#fff' : C.muted }}>{i + 1}</span>
+                            <div style={{ minWidth: 0, flex: 1 }}>
+                              <div style={{ fontSize: '12px', fontWeight: 600, color: C.ink, fontFamily: ui, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{t.name}</div>
+                              <div style={{ fontSize: '9px', color: C.muted, fontFamily: ui }}>{t.units.toLocaleString()} sold</div>
+                            </div>
+                            <div style={{ fontSize: '12px', fontWeight: 700, color: C.ink, fontFamily: ui, whiteSpace: 'nowrap', fontVariantNumeric: 'tabular-nums' }}>{fmt(t.revenue)}</div>
+                          </div>
+                        ))}
+                      </div>
                     </div>
                   </>
                 )}
