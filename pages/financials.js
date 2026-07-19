@@ -1,4 +1,4 @@
-import { useEffect, useState, useMemo } from 'react'
+import React, { useEffect, useState } from 'react'
 import Head from 'next/head'
 import { supabase } from '../lib/supabase'
 import Shell from '../components/Shell'
@@ -125,6 +125,8 @@ export default function Financials() {
   const [plLabelCat,   setPlLabelCat]   = useState({})   // { account: 'income'|'cogs'|'expense'|'other_expense' }
   const [plMonths,     setPlMonths]     = useState([])   // sorted month keys
   const [plPeriod,     setPlPeriod]     = useState('all')
+  const [compareOn,    setCompareOn]    = useState(false)
+  const [comparePeriod, setComparePeriod] = useState(null)
   const [accounts,     setAccounts]     = useState([])
   const [bs,           setBs]           = useState([])
   const [bsOpen,       setBsOpen]       = useState({ asset: true, liability: false, equity: true })
@@ -231,28 +233,28 @@ export default function Financials() {
   const plOtherExp    = plTotals.other_expense.reduce((s, r) => s + r.amount, 0)
   const plNetIncome   = plIncome - plCogs - plExpenses - plOtherExp
 
-  // P&L for the currently selected period (all-time or a single month).
-  const plView = useMemo(() => {
-    const empty = { income: [], cogs: [], expense: [], other_expense: [] }
+  // Build a P&L for any period (all-time or a single month key).
+  const buildPL = (period) => {
     let g
-    if (plPeriod === 'all') {
+    if (period === 'all') {
       g = plTotals
     } else {
       g = { income: [], cogs: [], expense: [], other_expense: [] }
-      const monthData = plByMonth[plPeriod] || {}
+      const monthData = plByMonth[period] || {}
       Object.entries(monthData).forEach(([acct, sum]) => {
         const cat = plLabelCat[acct]
         if (cat && Math.round(Math.abs(sum)) > 0) g[cat].push({ label: acct, amount: sum })
       })
       Object.values(g).forEach(arr => arr.sort((a, b) => Math.abs(b.amount) - Math.abs(a.amount)))
     }
-    g = g || empty
     const inc  = g.income.reduce((s, r) => s + r.amount, 0)
     const cogs = g.cogs.reduce((s, r) => s + r.amount, 0)
     const exp  = g.expense.reduce((s, r) => s + r.amount, 0)
     const oth  = g.other_expense.reduce((s, r) => s + r.amount, 0)
     return { g, inc, cogs, gross: inc - cogs, exp, oth, net: inc - cogs - exp - oth }
-  }, [plPeriod, plTotals, plByMonth, plLabelCat])
+  }
+  const plView = buildPL(plPeriod)
+  const plCmp  = compareOn && comparePeriod && plPeriod !== 'all' ? buildPL(comparePeriod) : null
 
   // ── Shared statement styling ────────────────────────────────────────────────
   const ui = "'Inter', sans-serif"
@@ -327,30 +329,116 @@ export default function Financials() {
                   ))}
                 </div>
 
-                {/* P&L Tab — clean statement with month selector */}
+                {/* P&L Tab — clean statement with month selector + compare */}
                 {activeTab === 'pl' && (
                   <>
-                    {/* Period selector */}
-                    <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap', marginBottom: '18px', alignItems: 'center' }}>
+                    {/* Period selector + compare toggle */}
+                    <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap', marginBottom: compareOn ? '10px' : '18px', alignItems: 'center' }}>
                       <span style={{ fontSize: '9px', color: '#a39a88', letterSpacing: '0.14em', marginRight: '2px', fontFamily: ui, fontWeight: 600 }}>PERIOD</span>
                       {[{ k: 'all', l: 'All time' }, ...plMonths.map(k => ({ k, l: MONTHS[k.slice(5, 7)] }))].map(o => (
                         <button key={o.k} onClick={() => setPlPeriod(o.k)} style={pill(plPeriod === o.k)}>{o.l}</button>
                       ))}
+                      {plMonths.length > 1 && (
+                        <button onClick={() => {
+                          const next = !compareOn
+                          setCompareOn(next)
+                          if (next) {
+                            let base = plPeriod
+                            if (base === 'all') { base = plMonths[plMonths.length - 1]; setPlPeriod(base) }
+                            if (!comparePeriod || comparePeriod === base) {
+                              const idx = plMonths.indexOf(base)
+                              setComparePeriod(plMonths[idx - 1] || plMonths.find(m => m !== base) || base)
+                            }
+                          }
+                        }} style={{ ...pill(compareOn), marginLeft: '10px' }}>⇄ Compare</button>
+                      )}
                     </div>
 
+                    {/* Compare-to selector */}
+                    {compareOn && (
+                      <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap', marginBottom: '18px', alignItems: 'center' }}>
+                        <span style={{ fontSize: '9px', color: '#a39a88', letterSpacing: '0.14em', marginRight: '2px', fontFamily: ui, fontWeight: 600 }}>COMPARE&nbsp;TO</span>
+                        {plMonths.map(k => (
+                          <button key={k} onClick={() => setComparePeriod(k)} style={pill(comparePeriod === k)}>{MONTHS[k.slice(5, 7)]}</button>
+                        ))}
+                      </div>
+                    )}
+
                     {/* Statement card */}
-                    <div style={{ ...card, maxWidth: '660px' }}>
+                    <div style={{ ...card, maxWidth: plCmp ? '740px' : '660px' }}>
                       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', borderBottom: '1px solid #E7DECB', paddingBottom: '12px', marginBottom: '4px' }}>
                         <div>
                           <div style={{ fontSize: '15px', fontWeight: 700, color: '#1a1a1a', fontFamily: ui, letterSpacing: '-0.01em' }}>Profit &amp; Loss</div>
                           <div style={{ fontSize: '10px', color: '#a39a88', marginTop: '2px', fontFamily: ui }}>Reydel Tire &amp; Auto</div>
                         </div>
-                        <div style={{ fontSize: '12px', color: '#6b6355', fontFamily: ui, fontWeight: 500 }}>{plPeriod === 'all' ? 'All time' : monthLabel(plPeriod)}</div>
+                        <div style={{ fontSize: '12px', color: '#6b6355', fontFamily: ui, fontWeight: 500 }}>
+                          {plCmp ? `${monthLabel(plPeriod)} vs ${monthLabel(comparePeriod)}` : (plPeriod === 'all' ? 'All time' : monthLabel(plPeriod))}
+                        </div>
                       </div>
 
                       {plView.g.income.length === 0 && plView.g.expense.length === 0 ? (
                         <div style={{ fontSize: '12px', color: '#a39a88', fontFamily: ui, padding: '18px 8px' }}>No activity in this period.</div>
-                      ) : (
+                      ) : plCmp ? (() => {
+                        // ── Comparison table ──────────────────────────────────
+                        const dCol = d => Math.round(d) === 0 ? '#a39a88' : d > 0 ? '#16a34a' : '#b0483a'
+                        const dStr = d => Math.round(Math.abs(d)) === 0 ? '—' : (d > 0 ? '+' : '−') + fmt(d)
+                        const cNum = { padding: '6px 10px', fontSize: '12px', textAlign: 'right', fontVariantNumeric: 'tabular-nums', fontFamily: ui }
+                        const cHead = { padding: '7px 10px', fontSize: '9px', color: '#a39a88', fontWeight: 600, letterSpacing: '0.06em', textAlign: 'right', borderBottom: '1px solid #E7DECB', fontFamily: ui }
+                        const rowsOf = (sec, sign) => {
+                          const seen = new Set(), out = []
+                          ;[...plView.g[sec], ...plCmp.g[sec]].forEach(r => { if (!seen.has(r.label)) { seen.add(r.label); out.push(r.label) } })
+                          const val = (view, l) => { const f = view.g[sec].find(r => r.label === l); return sign * (f ? f.amount : 0) }
+                          return out.map(l => ({ label: l, a: val(plView, l), b: val(plCmp, l) }))
+                        }
+                        const SEC = [
+                          { head: 'INCOME', sec: 'income', sign: 1, tLabel: 'Total Income', tA: plView.inc, tB: plCmp.inc, account: l => l },
+                          { head: 'COST OF GOODS SOLD', sec: 'cogs', sign: -1, tLabel: 'Gross Profit', tA: plView.gross, tB: plCmp.gross, accent: true, account: () => 'Cost of Goods Sold' },
+                          { head: 'OPERATING EXPENSES', sec: 'expense', sign: -1, tLabel: 'Total Operating Expenses', tA: -plView.exp, tB: -plCmp.exp, account: l => l },
+                          ...((plView.g.other_expense.length || plCmp.g.other_expense.length) ? [{ head: 'OTHER EXPENSES', sec: 'other_expense', sign: -1, tLabel: 'Total Other Expenses', tA: -plView.oth, tB: -plCmp.oth, account: l => l }] : []),
+                        ]
+                        return (
+                          <table style={{ width: '100%', borderCollapse: 'collapse', marginTop: '4px' }}>
+                            <thead>
+                              <tr>
+                                <th style={{ ...cHead, textAlign: 'left' }}></th>
+                                <th style={cHead}>{MONTHS[plPeriod.slice(5, 7)]}&nbsp;{plPeriod.slice(0, 4)}</th>
+                                <th style={cHead}>{MONTHS[comparePeriod.slice(5, 7)]}&nbsp;{comparePeriod.slice(0, 4)}</th>
+                                <th style={cHead}>Change</th>
+                              </tr>
+                            </thead>
+                            <tbody>
+                              {SEC.map(S => (
+                                <React.Fragment key={S.sec}>
+                                  <tr><td colSpan={4} style={{ fontSize: '9px', color: '#a39a88', letterSpacing: '0.14em', fontWeight: 700, padding: '14px 10px 3px', fontFamily: ui }}>{S.head}</td></tr>
+                                  {rowsOf(S.sec, S.sign).map(r => (
+                                    <tr key={r.label} onClick={() => setDrillAccount(S.account(r.label))}
+                                      onMouseEnter={e => e.currentTarget.style.background = '#F5EFE3'} onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
+                                      style={{ cursor: 'pointer' }}>
+                                      <td style={{ padding: '6px 10px 6px 24px', fontSize: '12px', color: '#4a4438', fontFamily: ui }}>{r.label}</td>
+                                      <td style={{ ...cNum, color: r.a >= 0 ? '#1a1a1a' : '#b0483a' }}>{paren(r.a)}</td>
+                                      <td style={{ ...cNum, color: '#8a8378' }}>{paren(r.b)}</td>
+                                      <td style={{ ...cNum, color: dCol(r.a - r.b), fontWeight: 500 }}>{dStr(r.a - r.b)}</td>
+                                    </tr>
+                                  ))}
+                                  <tr>
+                                    <td style={{ padding: '8px 10px', fontSize: '12px', fontWeight: 600, color: '#1a1a1a', fontFamily: ui, borderTop: '1px solid #E7DECB' }}>{S.tLabel}</td>
+                                    <td style={{ ...cNum, fontWeight: 700, borderTop: '1px solid #E7DECB', color: S.accent ? '#16a34a' : (S.tA >= 0 ? '#1a1a1a' : '#b0483a') }}>{paren(S.tA)}</td>
+                                    <td style={{ ...cNum, fontWeight: 700, borderTop: '1px solid #E7DECB', color: '#6b6355' }}>{paren(S.tB)}</td>
+                                    <td style={{ ...cNum, fontWeight: 700, borderTop: '1px solid #E7DECB', color: dCol(S.tA - S.tB) }}>{dStr(S.tA - S.tB)}</td>
+                                  </tr>
+                                </React.Fragment>
+                              ))}
+                              {/* Net income */}
+                              <tr>
+                                <td style={{ padding: '12px 10px', fontSize: '12px', fontWeight: 700, letterSpacing: '0.06em', color: '#16a34a', fontFamily: ui, borderTop: '2px solid #E7DECB' }}>NET INCOME</td>
+                                <td style={{ ...cNum, fontSize: '15px', fontWeight: 700, color: plView.net >= 0 ? '#16a34a' : '#991b1b', borderTop: '2px solid #E7DECB' }}>{paren(plView.net)}</td>
+                                <td style={{ ...cNum, fontSize: '13px', fontWeight: 700, color: '#6b6355', borderTop: '2px solid #E7DECB' }}>{paren(plCmp.net)}</td>
+                                <td style={{ ...cNum, fontSize: '13px', fontWeight: 700, color: dCol(plView.net - plCmp.net), borderTop: '2px solid #E7DECB' }}>{dStr(plView.net - plCmp.net)}</td>
+                              </tr>
+                            </tbody>
+                          </table>
+                        )
+                      })() : (
                         <>
                           <SectionHead>INCOME</SectionHead>
                           {plView.g.income.map(r => <LineItem key={r.label} label={r.label} amount={r.amount} account={r.label} />)}

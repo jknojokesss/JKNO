@@ -143,6 +143,13 @@ export default function Dashboard() {
     return Object.values(map).sort((a, b) => b.revenue - a.revenue).slice(0, 30)
   }, [clover])
 
+  // Top 10 items by revenue (all-time), with units sold — for the home grid.
+  const top10 = useMemo(() => {
+    const map = {}
+    clover.forEach(r => { const k = normalizeItemName(r.item_name); if (!map[k]) map[k] = { name: k, revenue: 0, units: 0 }; map[k].revenue += Number(r.revenue || 0); map[k].units += Number(r.quantity || 1) })
+    return Object.values(map).sort((a, b) => b.revenue - a.revenue).slice(0, 10)
+  }, [clover])
+
   const tabs = [
     { id: 'overview',   label: 'Overview' },
     { id: 'inventory',  label: 'Sales & Items' },
@@ -292,28 +299,28 @@ export default function Dashboard() {
                       </div>
                     </div>
 
-                    {/* Top sellers this period (live) */}
+                    {/* Top 10 best sellers (all-time, by revenue) */}
                     <div style={cardStyle}>
-                      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '14px' }}>
-                        <div style={{ ...capLabel, marginBottom: 0 }}>TOP SELLERS — {periodLabel.toUpperCase()}</div>
+                      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '16px' }}>
+                        <div style={{ ...capLabel, marginBottom: 0 }}>TOP 10 BEST SELLERS · BY REVENUE</div>
                         <button onClick={() => router.push('/inventory')} style={{ fontSize: '10px', color: C.red, background: 'none', border: 'none', cursor: 'pointer', fontFamily: ui, fontWeight: 600 }}>ALL ITEMS →</button>
                       </div>
-                      {periodTop.length === 0 ? (
-                        <div style={{ fontSize: '12px', color: C.muted, fontFamily: ui, padding: '8px 0' }}>No sales in this period yet.</div>
-                      ) : periodTop.map((t, i) => (
-                        <div key={t.name} style={{ padding: '9px 0', borderTop: i ? '1px solid #F1EADB' : 'none' }}>
-                          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', gap: '10px', marginBottom: '5px' }}>
-                            <span style={{ fontSize: '13px', color: C.ink, fontWeight: 500, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{t.name}</span>
-                            <span style={{ fontSize: '13px', color: C.ink, fontWeight: 600, whiteSpace: 'nowrap' }}>{fmt(t.revenue)}</span>
-                          </div>
-                          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                            <div style={{ flex: 1, height: '6px', background: '#F1EADB', borderRadius: '3px', overflow: 'hidden' }}>
-                              <div style={{ width: `${Math.round(t.revenue / periodMax * 100)}%`, height: '100%', background: `linear-gradient(90deg, ${C.red}, #e05a3a)` }} />
+                      {top10.length === 0 ? (
+                        <div style={{ fontSize: '12px', color: C.muted, fontFamily: ui, padding: '8px 0' }}>No sales data yet.</div>
+                      ) : (
+                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(230px, 1fr))', gap: '10px' }}>
+                          {top10.map((t, i) => (
+                            <div key={t.name} style={{ display: 'flex', alignItems: 'center', gap: '12px', background: C.hover, borderRadius: '10px', padding: '11px 13px' }}>
+                              <div style={{ width: '26px', height: '26px', borderRadius: '7px', flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '12px', fontWeight: 700, fontFamily: ui, background: i < 3 ? C.red : '#EBE1CD', color: i < 3 ? '#fff' : C.muted }}>{i + 1}</div>
+                              <div style={{ minWidth: 0, flex: 1 }}>
+                                <div style={{ fontSize: '13px', fontWeight: 600, color: C.ink, fontFamily: ui, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{t.name}</div>
+                                <div style={{ fontSize: '10px', color: C.muted, fontFamily: ui, marginTop: '2px' }}>{t.units.toLocaleString()} sold</div>
+                              </div>
+                              <div style={{ fontSize: '14px', fontWeight: 700, color: C.ink, fontFamily: ui, whiteSpace: 'nowrap', fontVariantNumeric: 'tabular-nums' }}>{fmt(t.revenue)}</div>
                             </div>
-                            <span style={{ fontSize: '10px', color: C.muted, whiteSpace: 'nowrap', minWidth: '54px', textAlign: 'right' }}>{t.units} sold</span>
-                          </div>
+                          ))}
                         </div>
-                      ))}
+                      )}
                     </div>
                   </>
                 )}
