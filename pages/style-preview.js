@@ -1,5 +1,5 @@
 import Head from 'next/head'
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Cell, ResponsiveContainer } from 'recharts'
+import { ComposedChart, Bar, Line, XAxis, YAxis, CartesianGrid, ResponsiveContainer } from 'recharts'
 
 // Standalone preview — "printed briefing" on warm paper. Hero stat + sentence
 // + real statement, no stat-card grid, sharp rules not shadow-boxes. Unlinked.
@@ -19,7 +19,11 @@ const Row = ({ label, val, indent, strong, green, top }) => (
 )
 
 export default function StylePreview() {
-  const trend = [{ m: 'JAN', p: 14 }, { m: 'FEB', p: 10 }, { m: 'MAR', p: 21 }, { m: 'APR', p: 13 }, { m: 'MAY', p: 18 }, { m: 'JUN', p: 39 }]
+  const trend = [
+    { m: 'JAN', rev: 40, exp: 26, profit: 14 }, { m: 'FEB', rev: 30, exp: 20, profit: 10 },
+    { m: 'MAR', rev: 50, exp: 29, profit: 21 }, { m: 'APR', rev: 36, exp: 23, profit: 13 },
+    { m: 'MAY', rev: 51, exp: 33, profit: 18 }, { m: 'JUN', rev: 75, exp: 36, profit: 39 },
+  ]
   return (
     <>
       <Head>
@@ -86,16 +90,23 @@ export default function StylePreview() {
               </div>
 
               <div>
-                <div style={{ fontFamily: head, fontSize: 16, fontWeight: 700, color: C.ink, letterSpacing: '0.05em', textTransform: 'uppercase', paddingBottom: 8, borderBottom: `1px solid ${C.hair}`, marginBottom: 14 }}>Profit · Last 6 Months</div>
-                <ResponsiveContainer width="100%" height={210}>
-                  <BarChart data={trend} margin={{ top: 4, right: 4, left: -18, bottom: 0 }} barCategoryGap="30%">
+                <div style={{ fontFamily: head, fontSize: 16, fontWeight: 700, color: C.ink, letterSpacing: '0.05em', textTransform: 'uppercase', paddingBottom: 8, borderBottom: `1px solid ${C.hair}`, marginBottom: 10 }}>Revenue, Expenses &amp; Profit</div>
+                <div style={{ display: 'flex', gap: 16, marginBottom: 8 }}>
+                  {[[C.red, 'Revenue'], ['#C7BFB0', 'Expenses'], [C.green, 'Profit']].map(([c, l]) => (
+                    <span key={l} style={{ display: 'flex', alignItems: 'center', gap: 5, fontFamily: ui, fontSize: 10, color: C.sub }}>
+                      <span style={{ width: 8, height: 8, background: c, display: 'inline-block' }} />{l}
+                    </span>
+                  ))}
+                </div>
+                <ResponsiveContainer width="100%" height={200}>
+                  <ComposedChart data={trend} margin={{ top: 4, right: 4, left: -18, bottom: 0 }} barGap={2} barCategoryGap="26%">
                     <CartesianGrid strokeDasharray="2 3" stroke={C.line} vertical={false} />
                     <XAxis dataKey="m" tick={{ fontSize: 10, fill: C.muted, fontFamily: mono }} axisLine={false} tickLine={false} />
                     <YAxis tick={{ fontSize: 10, fill: C.muted, fontFamily: mono }} axisLine={false} tickLine={false} tickFormatter={v => `$${v}K`} />
-                    <Bar dataKey="p" name="Profit">
-                      {trend.map(d => <Cell key={d.m} fill={d.m === 'JUN' ? C.red : '#C7BFB0'} />)}
-                    </Bar>
-                  </BarChart>
+                    <Bar dataKey="rev" name="Revenue" fill={C.red} />
+                    <Bar dataKey="exp" name="Expenses" fill="#C7BFB0" />
+                    <Line dataKey="profit" name="Profit" stroke={C.green} strokeWidth={2.5} dot={{ r: 3, fill: C.green }} />
+                  </ComposedChart>
                 </ResponsiveContainer>
               </div>
             </div>
