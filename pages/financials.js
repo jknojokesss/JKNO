@@ -28,7 +28,7 @@ const ACCOUNT_DESC = {
 const THEME = { sidebarBg: '#1A1A1A', sidebarBorder: '#2A2A2A', accent: '#CC2222' }
 
 const cell = (align = 'left', extra = {}) => ({
-  padding: '8px 10px', borderBottom: '1px solid #F0F0F0',
+  padding: '8px 10px', borderBottom: '1px solid #F1EADB',
   color: '#333', fontSize: '11px', fontFamily: 'Inter, sans-serif',
   textAlign: align, ...extra,
 })
@@ -490,7 +490,7 @@ export default function Financials() {
                         <div key={group.heading} style={{ background: '#fff', border: '1px solid #E7DECB', borderRadius: '10px', boxShadow: '0 1px 3px rgba(60,45,20,0.05)', padding: '16px' }}>
                           <div style={{ fontSize: '9px', color: '#888', letterSpacing: '0.15em', marginBottom: '14px', fontFamily: 'Inter, sans-serif' }}>{group.heading}</div>
                           {[...group.rows].sort((a, b) => b.amount - a.amount).map(e => (
-                            <div key={e.label} style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '7px 0', borderBottom: '1px solid #F0F0F0' }}>
+                            <div key={e.label} style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '7px 0', borderBottom: '1px solid #F1EADB' }}>
                               <div style={{ width: '180px', fontSize: '10px', color: '#333', flexShrink: 0, fontFamily: 'Inter, sans-serif' }}>{e.label}</div>
                               <div style={{ flex: 1, height: '5px', background: '#E7DECB', borderRadius: '3px' }}>
                                 <div style={{ height: '5px', background: THEME.accent, borderRadius: '3px', width: `${Math.round(e.amount / maxV * 100)}%` }} />
@@ -570,13 +570,13 @@ export default function Financials() {
                   const cloverStale = health?.cloverLastSynced ? (Date.now() - new Date(health.cloverLastSynced)) / 36e5 > 36 : true
                   const cloverFailed = health?.lastCloverSync?.ok === false
                   const Row = ({ k, v, sub, bad }) => (
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', padding: '9px 0', borderBottom: '1px solid #F0F0F0' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', padding: '9px 0', borderBottom: '1px solid #F1EADB' }}>
                       <div style={{ fontSize: '11px', color: '#333', fontFamily: 'Inter, sans-serif' }}>{k}{sub && <span style={{ color: '#aaa', marginLeft: '8px' }}>{sub}</span>}</div>
                       <div style={{ fontSize: '11px', fontFamily: 'Inter, sans-serif', color: bad ? '#CC2222' : '#1a1a1a' }}>{v}</div>
                     </div>
                   )
                   const Check = ({ ok, label, detail }) => (
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', padding: '9px 0', borderBottom: '1px solid #F0F0F0' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', padding: '9px 0', borderBottom: '1px solid #F1EADB' }}>
                       <div style={{ fontSize: '11px', color: '#333', fontFamily: 'Inter, sans-serif' }}>
                         <span style={{ color: ok ? '#16a34a' : '#CC2222', marginRight: '8px' }}>{ok ? '✓' : '✕'}</span>{label}
                       </div>

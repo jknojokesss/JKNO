@@ -24,7 +24,7 @@ const hcell = (align = 'left') => ({
   fontFamily: 'Inter, sans-serif', textAlign: align,
 })
 const cell = (align = 'left', extra = {}) => ({
-  padding: '8px 10px', borderBottom: '1px solid #F0F0F0',
+  padding: '8px 10px', borderBottom: '1px solid #F1EADB',
   color: '#333', fontSize: '11px', fontFamily: 'Inter, sans-serif',
   textAlign: align, ...extra,
 })
@@ -157,7 +157,7 @@ export default function Inventory() {
                         <button key={s.key} onClick={() => setSort(s.key)} style={{
                           padding: '6px 12px', fontSize: '9px', fontFamily: 'Inter, sans-serif',
                           letterSpacing: '0.08em', border: 'none', borderRadius: '4px', cursor: 'pointer',
-                          background: sort === s.key ? THEME.accent : '#F0F0F0',
+                          background: sort === s.key ? THEME.accent : '#F1EADB',
                           color: sort === s.key ? '#fff' : '#888',
                         }}>{s.label}</button>
                       ))}
@@ -215,7 +215,7 @@ export default function Inventory() {
                     {(() => {
                       const maxRev = Math.max(...monthly.map(m => m.revenue), 1)
                       return monthly.map((m, i) => (
-                        <div key={m.month} style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '10px 0', borderBottom: i < monthly.length - 1 ? '1px solid #F0F0F0' : 'none' }}>
+                        <div key={m.month} style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '10px 0', borderBottom: i < monthly.length - 1 ? '1px solid #F1EADB' : 'none' }}>
                           <div style={{ width: '80px', fontSize: '10px', color: '#888', fontFamily: 'Inter, sans-serif', flexShrink: 0 }}>{m.label}</div>
                           <div style={{ flex: 1, height: '6px', background: '#E7DECB', borderRadius: '3px' }}>
                             <div style={{ height: '6px', background: THEME.accent, borderRadius: '3px', width: `${Math.round(m.revenue / maxRev * 100)}%` }} />

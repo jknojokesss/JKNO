@@ -160,7 +160,7 @@ export default function Accounts() {
                 <button key={cat} onClick={() => setActiveCat(cat)} style={{
                   padding: '6px 12px', borderRadius: '4px', cursor: 'pointer', fontSize: '9px',
                   fontFamily: 'Inter, sans-serif', letterSpacing: '0.08em', textTransform: 'uppercase',
-                  background: activeCat === cat ? THEME.accent : '#F0F0F0',
+                  background: activeCat === cat ? THEME.accent : '#F1EADB',
                   color: activeCat === cat ? '#fff' : '#888', border: 'none',
                 }}>{cat}</button>
               ))}
@@ -182,7 +182,7 @@ export default function Accounts() {
                     return (
                       <div key={account.name} onClick={() => selectAccount(account)} style={{
                         padding: '11px 16px', paddingLeft: row.isChild ? '40px' : '16px',
-                        borderBottom: i < arr.length - 1 ? '1px solid #F0F0F0' : 'none',
+                        borderBottom: i < arr.length - 1 ? '1px solid #F1EADB' : 'none',
                         display: 'flex', alignItems: 'center', justifyContent: 'space-between', cursor: 'pointer',
                         background: isSelected ? '#FFF5F5' : row.isChild ? '#FCFCFC' : 'transparent',
                         borderLeft: isSelected ? `3px solid ${THEME.accent}` : '3px solid transparent',
@@ -244,7 +244,7 @@ export default function Accounts() {
               ) : (
                 <>
                   {txns.map((t, i) => (
-                    <div key={i} style={{ padding: '10px 0', borderBottom: i < txns.length - 1 ? '1px solid #F0F0F0' : 'none' }}>
+                    <div key={i} style={{ padding: '10px 0', borderBottom: i < txns.length - 1 ? '1px solid #F1EADB' : 'none' }}>
                       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '10px' }}>
                         <div style={{ flex: 1 }}>
                           <div style={{ fontSize: '11px', color: '#1a1a1a', lineHeight: '1.4' }}>{t.description || t.type}</div>

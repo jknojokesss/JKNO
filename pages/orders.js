@@ -26,7 +26,7 @@ const hcell = (align = 'left') => ({
   fontFamily: 'Inter, sans-serif', textAlign: align,
 })
 const cell = (align = 'left', extra = {}) => ({
-  padding: '9px 12px', borderBottom: '1px solid #F0F0F0',
+  padding: '9px 12px', borderBottom: '1px solid #F1EADB',
   color: '#333', fontSize: '11px', fontFamily: 'Inter, sans-serif',
   textAlign: align, ...extra,
 })
@@ -578,7 +578,7 @@ export default function Orders() {
                     <button key={s.key} onClick={() => toggleSort(s.key)} style={{
                       padding: '7px 12px', fontSize: '9px', fontFamily: 'Inter, sans-serif', letterSpacing: '0.08em',
                       border: 'none', borderRadius: '4px', cursor: 'pointer',
-                      background: sort === s.key ? THEME.accent : '#F0F0F0',
+                      background: sort === s.key ? THEME.accent : '#F1EADB',
                       color: sort === s.key ? '#fff' : '#888',
                     }}>
                       {s.label} {sort === s.key ? (sortDir === 'desc' ? '↓' : '↑') : ''}
@@ -587,7 +587,7 @@ export default function Orders() {
                   <select value={sizeFilter} onChange={e => setSizeFilter(e.target.value)} style={{
                     padding: '7px 10px', fontSize: '9px', fontFamily: 'Inter, sans-serif', letterSpacing: '0.06em',
                     border: '1px solid #E7DECB', borderRadius: '4px', cursor: 'pointer', maxWidth: '170px',
-                    background: sizeFilter === 'all' ? '#F0F0F0' : '#dbeafe', color: '#555',
+                    background: sizeFilter === 'all' ? '#F1EADB' : '#dbeafe', color: '#555',
                   }}>
                     <option value="all">ALL SIZES ({sizes.length})</option>
                     {sizes.map(s => <option key={s.size} value={s.size}>{s.size} ({s.count})</option>)}
@@ -595,7 +595,7 @@ export default function Orders() {
                   <select value={srcFilter} onChange={e => setSrcFilter(e.target.value)} style={{
                     padding: '7px 10px', fontSize: '9px', fontFamily: 'Inter, sans-serif', letterSpacing: '0.06em',
                     border: '1px solid #E7DECB', borderRadius: '4px', cursor: 'pointer',
-                    background: srcFilter === 'all' ? '#F0F0F0' : '#fef3c7', color: '#555',
+                    background: srcFilter === 'all' ? '#F1EADB' : '#fef3c7', color: '#555',
                   }}>
                     <option value="all">ALL SOURCES</option>
                     <option value="inventory">INVENTORY</option>
@@ -608,7 +608,7 @@ export default function Orders() {
                   <button onClick={() => setShowEst(e => !e)} style={{
                     padding: '7px 12px', fontSize: '9px', fontFamily: 'Inter, sans-serif', letterSpacing: '0.08em',
                     border: '1px solid #E7DECB', borderRadius: '4px', cursor: 'pointer',
-                    background: showEst ? '#F0F0F0' : THEME.accent,
+                    background: showEst ? '#F1EADB' : THEME.accent,
                     color: showEst ? '#888' : '#fff',
                   }}>
                     {showEst ? 'HIDE EST.' : 'SHOW EST.'}
@@ -616,7 +616,7 @@ export default function Orders() {
                   <button onClick={() => setFlaggedOnly(f => !f)} title="Show only rows whose cost looks suspicious" style={{
                     padding: '7px 12px', fontSize: '9px', fontFamily: 'Inter, sans-serif', letterSpacing: '0.08em',
                     border: 'none', borderRadius: '4px', cursor: 'pointer',
-                    background: flaggedOnly ? '#f59e0b' : '#F0F0F0', color: flaggedOnly ? '#fff' : '#888',
+                    background: flaggedOnly ? '#f59e0b' : '#F1EADB', color: flaggedOnly ? '#fff' : '#888',
                   }}>⚠ FLAGGED{flaggedCount ? ` (${flaggedCount})` : ''}</button>
                   <button onClick={downloadCSV} style={{
                     padding: '7px 12px', fontSize: '9px', fontFamily: 'Inter, sans-serif', letterSpacing: '0.08em',

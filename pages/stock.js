@@ -13,7 +13,7 @@ const hcell = (align = 'left') => ({
   fontFamily: 'Inter, sans-serif', textAlign: align,
 })
 const cell = (align = 'left', extra = {}) => ({
-  padding: '9px 12px', borderBottom: '1px solid #F0F0F0',
+  padding: '9px 12px', borderBottom: '1px solid #F1EADB',
   color: '#333', fontSize: '11px', fontFamily: 'Inter, sans-serif',
   textAlign: align, ...extra,
 })
@@ -214,7 +214,7 @@ export default function Stock() {
                     <button key={s.k} onClick={() => setSort(s.k)} style={{
                       padding: '7px 12px', fontSize: '9px', fontFamily: 'Inter, sans-serif', letterSpacing: '0.08em',
                       border: 'none', borderRadius: '4px', cursor: 'pointer',
-                      background: sort === s.k ? THEME.accent : '#F0F0F0',
+                      background: sort === s.k ? THEME.accent : '#F1EADB',
                       color: sort === s.k ? '#fff' : '#888',
                     }}>{s.l}</button>
                   ))}
