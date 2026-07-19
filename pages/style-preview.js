@@ -1,11 +1,10 @@
 import Head from 'next/head'
 
-// Standalone preview — "front page" concept: hero stat + sentence + real
-// statement, no stat-card grid. Dark industrial. Unlinked.
+// Standalone preview — "printed briefing" on warm paper. Hero stat + sentence
+// + real statement, no stat-card grid, sharp rules not shadow-boxes. Unlinked.
 const C = {
-  bg: '#0C0C0D', panel: '#141517', side: '#17181B', bar: '#0A0A0B',
-  border: '#282A2E', line: '#202226', text: '#EDEBE6', sub: '#8B877C', muted: '#5E5B54',
-  red: '#DE3B2F', green: '#57B58A',
+  paper: '#F2F0EA', ink: '#1B1815', sub: '#6A655C', muted: '#9A9284',
+  hair: '#DBD5C7', line: '#E6E1D6', side: '#1E1C19', red: '#B0281C', green: '#1C7A4E',
 }
 const head = "'Barlow Semi Condensed', sans-serif"
 const ui = "'Inter', sans-serif"
@@ -13,67 +12,67 @@ const mono = "'IBM Plex Mono', monospace"
 
 const Row = ({ label, val, indent, strong, green, top }) => (
   <div style={{ display: 'flex', justifyContent: 'space-between', padding: strong ? '9px 2px' : '6px 2px', paddingLeft: indent ? 18 : 2, borderTop: top ? `1px solid ${C.line}` : 'none' }}>
-    <span style={{ fontFamily: ui, fontSize: strong ? 13 : 12.5, color: strong ? C.text : C.sub, fontWeight: strong ? 600 : 400 }}>{label}</span>
-    <span style={{ fontFamily: mono, fontSize: strong ? 13 : 12.5, color: green ? C.green : C.text, fontWeight: 500 }}>{val}</span>
+    <span style={{ fontFamily: ui, fontSize: strong ? 13 : 12.5, color: strong ? C.ink : C.sub, fontWeight: strong ? 600 : 400 }}>{label}</span>
+    <span style={{ fontFamily: mono, fontSize: strong ? 13 : 12.5, color: green ? C.green : C.ink, fontWeight: 500 }}>{val}</span>
   </div>
 )
 
 export default function StylePreview() {
-  const trend = [['JAN', 39, 14], ['FEB', 30, 10], ['MAR', 50, 21], ['APR', 36, 13], ['MAY', 51, 18], ['JUN', 75, 39]]
+  const trend = [['JAN', 14], ['FEB', 10], ['MAR', 21], ['APR', 13], ['MAY', 18], ['JUN', 39]]
   const maxP = 39
   return (
     <>
       <Head>
-        <title>Reydel — front page</title>
+        <title>Reydel — briefing</title>
         <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Semi+Condensed:wght@500;600;700&family=IBM+Plex+Mono:wght@400;500;600&family=Inter:wght@400;500;600&display=swap" />
       </Head>
-      <div style={{ display: 'flex', minHeight: '100vh', background: C.bg }}>
+      <div style={{ display: 'flex', minHeight: '100vh', background: C.paper }}>
 
-        {/* Sidebar */}
-        <aside style={{ width: 208, background: C.side, borderRight: `1px solid ${C.border}`, boxShadow: `inset -3px 0 0 ${C.red}`, padding: '20px 15px', flexShrink: 0 }}>
+        {/* Sidebar — graphite, red spine */}
+        <aside style={{ width: 208, background: C.side, boxShadow: `inset -3px 0 0 ${C.red}`, padding: '20px 15px', flexShrink: 0 }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 8 }}>
             <span style={{ width: 32, height: 32, background: C.red, display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: head, fontWeight: 700, fontSize: 19, color: '#fff' }}>R</span>
             <div>
               <div style={{ fontFamily: head, fontSize: 20, fontWeight: 700, color: '#fff', letterSpacing: '0.04em', lineHeight: 1 }}>REYDEL</div>
-              <div style={{ fontFamily: head, fontSize: 10, fontWeight: 500, color: C.muted, letterSpacing: '0.3em', marginTop: 3 }}>TIRE &amp; AUTO</div>
+              <div style={{ fontFamily: head, fontSize: 10, fontWeight: 500, color: '#7C766B', letterSpacing: '0.3em', marginTop: 3 }}>TIRE &amp; AUTO</div>
             </div>
           </div>
-          <div style={{ height: 1, background: C.border, margin: '16px 0' }} />
+          <div style={{ height: 1, background: '#33302B', margin: '16px 0' }} />
           {['Dashboard', 'Financials', 'Sales & Items', 'Orders', 'Stock'].map((n, i) => (
-            <div key={n} style={{ fontFamily: head, fontSize: 13, letterSpacing: '0.06em', textTransform: 'uppercase', color: i === 0 ? '#fff' : C.sub, padding: '10px 10px', background: i === 0 ? 'rgba(222,59,47,.12)' : 'transparent', borderLeft: i === 0 ? `2px solid ${C.red}` : '2px solid transparent', fontWeight: i === 0 ? 600 : 500 }}>{n}</div>
+            <div key={n} style={{ fontFamily: head, fontSize: 13, letterSpacing: '0.06em', textTransform: 'uppercase', color: i === 0 ? '#fff' : '#948D81', padding: '10px 10px', background: i === 0 ? 'rgba(176,40,28,.16)' : 'transparent', borderLeft: i === 0 ? `2px solid ${C.red}` : '2px solid transparent', fontWeight: i === 0 ? 600 : 500 }}>{n}</div>
           ))}
         </aside>
 
         {/* Content */}
         <main style={{ flex: 1, minWidth: 0 }}>
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: C.bar, borderBottom: `1px solid ${C.border}`, padding: '12px 34px' }}>
-            <div style={{ fontFamily: mono, fontSize: 11, color: C.sub, letterSpacing: '0.06em' }}>REYDEL TIRE &amp; AUTO · TOMS RIVER, NJ</div>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderBottom: `1px solid ${C.hair}`, padding: '12px 34px' }}>
+            <div style={{ fontFamily: mono, fontSize: 11, color: C.muted, letterSpacing: '0.06em' }}>REYDEL TIRE &amp; AUTO · TOMS RIVER, NJ</div>
             <div style={{ fontFamily: mono, fontSize: 11, color: C.green }}>● LIVE · JUN 2026</div>
           </div>
 
           <div style={{ padding: '34px 34px', maxWidth: 1000 }}>
 
-            {/* HERO — one number, one sentence */}
+            {/* HERO */}
             <div style={{ fontFamily: head, fontSize: 13, fontWeight: 600, color: C.red, letterSpacing: '0.18em', textTransform: 'uppercase' }}>Net Profit · June 2026</div>
-            <div style={{ fontFamily: head, fontSize: 82, fontWeight: 700, color: C.text, letterSpacing: '-0.01em', lineHeight: 1, margin: '6px 0 12px' }}>$39,204</div>
+            <div style={{ fontFamily: head, fontSize: 82, fontWeight: 700, color: C.ink, letterSpacing: '-0.01em', lineHeight: 1, margin: '6px 0 12px' }}>$39,204</div>
             <div style={{ fontFamily: ui, fontSize: 16, color: C.sub, maxWidth: 620, lineHeight: 1.5 }}>
-              Reydel's strongest month on record — <span style={{ color: C.text }}>$75,090 in sales, up 48% over May</span>, at a 52% net margin. Tires drove 72% of it; brakes and service the rest.
+              Reydel's strongest month on record — <span style={{ color: C.ink, fontWeight: 500 }}>$75,090 in sales, up 48% over May</span>, at a 52% net margin. Tires drove 72% of it; brakes and service the rest.
             </div>
 
             {/* Inline stat strip — rules, not boxes */}
-            <div style={{ display: 'flex', gap: 0, marginTop: 24, borderTop: `1px solid ${C.border}`, borderBottom: `1px solid ${C.border}` }}>
+            <div style={{ display: 'flex', marginTop: 24, borderTop: `1px solid ${C.hair}`, borderBottom: `1px solid ${C.hair}` }}>
               {[['Revenue', '$75,090'], ['Gross profit', '$53,907'], ['Tickets', '630'], ['Avg ticket', '$119'], ['Tires sold', '486']].map(([l, v], i) => (
                 <div key={l} style={{ flex: 1, padding: '14px 18px', borderLeft: i ? `1px solid ${C.line}` : 'none' }}>
                   <div style={{ fontFamily: ui, fontSize: 11, color: C.muted }}>{l}</div>
-                  <div style={{ fontFamily: mono, fontSize: 17, color: C.text, fontWeight: 500, marginTop: 5 }}>{v}</div>
+                  <div style={{ fontFamily: mono, fontSize: 17, color: C.ink, fontWeight: 500, marginTop: 5 }}>{v}</div>
                 </div>
               ))}
             </div>
 
-            {/* Body: statement + trend */}
+            {/* Body */}
             <div style={{ display: 'grid', gridTemplateColumns: '1.25fr 1fr', gap: 28, marginTop: 30 }}>
               <div>
-                <div style={{ fontFamily: head, fontSize: 16, fontWeight: 700, color: C.text, letterSpacing: '0.05em', textTransform: 'uppercase', paddingBottom: 8, borderBottom: `1px solid ${C.border}`, marginBottom: 4 }}>Profit &amp; Loss — June</div>
+                <div style={{ fontFamily: head, fontSize: 16, fontWeight: 700, color: C.ink, letterSpacing: '0.05em', textTransform: 'uppercase', paddingBottom: 8, borderBottom: `1px solid ${C.hair}`, marginBottom: 4 }}>Profit &amp; Loss — June</div>
                 <div style={{ fontFamily: head, fontSize: 11, fontWeight: 600, color: C.muted, letterSpacing: '0.14em', margin: '12px 0 2px' }}>INCOME</div>
                 <Row label="Clover Sales" val="$73,450" indent />
                 <Row label="Sales Income" val="$1,640" indent />
@@ -87,24 +86,24 @@ export default function StylePreview() {
               </div>
 
               <div>
-                <div style={{ fontFamily: head, fontSize: 16, fontWeight: 700, color: C.text, letterSpacing: '0.05em', textTransform: 'uppercase', paddingBottom: 8, borderBottom: `1px solid ${C.border}`, marginBottom: 12 }}>Profit · Last 6 Months</div>
-                {trend.map(([m, , p]) => (
+                <div style={{ fontFamily: head, fontSize: 16, fontWeight: 700, color: C.ink, letterSpacing: '0.05em', textTransform: 'uppercase', paddingBottom: 8, borderBottom: `1px solid ${C.hair}`, marginBottom: 12 }}>Profit · Last 6 Months</div>
+                {trend.map(([m, p]) => (
                   <div key={m} style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '7px 0' }}>
                     <span style={{ fontFamily: mono, fontSize: 11, color: C.sub, width: 30 }}>{m}</span>
                     <div style={{ flex: 1, height: 8, background: C.line }}>
-                      <div style={{ height: 8, width: `${Math.round(p / maxP * 100)}%`, background: m === 'JUN' ? C.red : '#3A3B40' }} />
+                      <div style={{ height: 8, width: `${Math.round(p / maxP * 100)}%`, background: m === 'JUN' ? C.red : '#C7BFB0' }} />
                     </div>
-                    <span style={{ fontFamily: mono, fontSize: 12, color: m === 'JUN' ? C.text : C.sub, width: 44, textAlign: 'right' }}>${p}K</span>
+                    <span style={{ fontFamily: mono, fontSize: 12, color: m === 'JUN' ? C.ink : C.sub, width: 44, textAlign: 'right' }}>${p}K</span>
                   </div>
                 ))}
               </div>
             </div>
 
             {/* Specimen */}
-            <div style={{ marginTop: 34, paddingTop: 18, borderTop: `1px solid ${C.border}`, display: 'flex', gap: 40, flexWrap: 'wrap' }}>
-              <div><div style={{ fontFamily: head, fontSize: 24, fontWeight: 700, color: C.text, textTransform: 'uppercase', letterSpacing: '0.04em' }}>Barlow Condensed</div><div style={{ fontFamily: ui, fontSize: 11, color: C.muted, marginTop: 2 }}>Headlines · hero · titles</div></div>
-              <div><div style={{ fontFamily: ui, fontSize: 20, fontWeight: 500, color: C.text }}>Inter — prose &amp; labels</div><div style={{ fontFamily: ui, fontSize: 11, color: C.muted, marginTop: 2 }}>The sentences that read human</div></div>
-              <div><div style={{ fontFamily: mono, fontSize: 20, fontWeight: 500, color: C.text }}>$1,234,567</div><div style={{ fontFamily: ui, fontSize: 11, color: C.muted, marginTop: 2 }}>IBM Plex Mono · figures</div></div>
+            <div style={{ marginTop: 34, paddingTop: 18, borderTop: `1px solid ${C.hair}`, display: 'flex', gap: 40, flexWrap: 'wrap' }}>
+              <div><div style={{ fontFamily: head, fontSize: 24, fontWeight: 700, color: C.ink, textTransform: 'uppercase', letterSpacing: '0.04em' }}>Barlow Condensed</div><div style={{ fontFamily: ui, fontSize: 11, color: C.muted, marginTop: 2 }}>Headlines · hero · titles</div></div>
+              <div><div style={{ fontFamily: ui, fontSize: 20, fontWeight: 500, color: C.ink }}>Inter — prose &amp; labels</div><div style={{ fontFamily: ui, fontSize: 11, color: C.muted, marginTop: 2 }}>The sentences that read human</div></div>
+              <div><div style={{ fontFamily: mono, fontSize: 20, fontWeight: 500, color: C.ink }}>$1,234,567</div><div style={{ fontFamily: ui, fontSize: 11, color: C.muted, marginTop: 2 }}>IBM Plex Mono · figures</div></div>
             </div>
           </div>
         </main>
