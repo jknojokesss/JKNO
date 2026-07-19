@@ -9,7 +9,7 @@ export const config = { maxDuration: 60 }
 const FALLBACK_RATIO = 0.412, TYP_MARGIN = 0.40, BUDGET_RETAIL_X = 3.2, MIN_SAMEDAY_MARGIN = 0.18, MAX_SAMEDAY_MARGIN = 0.55
 const STOCKUP_DATE = '2026-04-15', STOCKUP_END = '2026-04-17', PO_CONVENTION_DATE = '2026-04-27', RECLASS_FROM = '2026-06-01'
 
-function normalizeSize(name) { if (!name) return null; const m = name.match(/(?:LT|P|C)?(\d{3})[\s\/\-](\d{2})[\s\/\-]?[A-Z]{0,3}(\d{2})/i); return m ? `${m[1]}/${m[2]}/${m[3]}` : null }
+function normalizeSize(name) { if (!name) return null; const m = name.match(/(?:LT|P|C)?(\d{3})[\s\/\\-](\d{2})[\s\/\\-]?[A-Z]{0,3}(\d{2})/i); return m ? `${m[1]}/${m[2]}/${m[3]}` : null }
 const SIZE_RE_G = /\d{3}[\/\s\\-]\d{2}[\/\s\\-]?[a-z]{0,3}\d{2}/gi
 const MODEL_STOP = new Set(['lt','xl','sl','as','at','ht','rt','uhp','hp','tire','tires','new','used','set','the','and','for','brand','name','generic','misc','unknown','item','assorted','various'])
 const modelWords = (s) => new Set((s || '').toLowerCase().replace(/good\s*year/g,'goodyear').replace(/bridge\s*stone/g,'bridgestone').replace(/fire\s*stone/g,'firestone').replace(SIZE_RE_G,' ').replace(/[^a-z\s]/g,' ').split(/\s+/).filter(w => w.length > 2 && !MODEL_STOP.has(w)))

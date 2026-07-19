@@ -35,7 +35,7 @@ const cell = (align = 'left', extra = {}) => ({
 function normalizeSize(name) {
   if (!name) return null
   // Handle "235/60/18" (already correct), "235/60R18", "LT235/65R16", "P255/60R19", "235-60-18"
-  const m = name.match(/(?:LT|P|C)?(\d{3})[\s\/\-](\d{2})[\s\/\-]?[A-Z]{0,3}(\d{2})/i)
+  const m = name.match(/(?:LT|P|C)?(\d{3})[\s\/\\-](\d{2})[\s\/\\-]?[A-Z]{0,3}(\d{2})/i)
   if (m) return `${m[1]}/${m[2]}/${m[3]}`
   return null
 }
