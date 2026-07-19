@@ -1,22 +1,15 @@
 import Head from 'next/head'
 
-// Standalone type/palette preview — dark industrial "shop ledger". Unlinked.
+// Standalone preview — "front page" concept: hero stat + sentence + real
+// statement, no stat-card grid. Dark industrial. Unlinked.
 const C = {
   bg: '#0C0C0D', panel: '#141517', side: '#17181B', bar: '#0A0A0B',
-  border: '#282A2E', line: '#202226', text: '#E9E7E2', sub: '#8B877C', muted: '#5E5B54',
+  border: '#282A2E', line: '#202226', text: '#EDEBE6', sub: '#8B877C', muted: '#5E5B54',
   red: '#DE3B2F', green: '#57B58A',
 }
 const head = "'Barlow Semi Condensed', sans-serif"
 const ui = "'Inter', sans-serif"
 const mono = "'IBM Plex Mono', monospace"
-
-const KPI = ({ label, value, sub, subColor, primary }) => (
-  <div style={{ flex: 1, minWidth: 160, background: C.panel, borderLeft: `2px solid ${primary ? C.red : C.border}`, borderTop: `1px solid ${C.line}`, borderRight: `1px solid ${C.line}`, borderBottom: `1px solid ${C.line}`, padding: '14px 16px' }}>
-    <div style={{ fontFamily: head, fontSize: 11, color: C.sub, fontWeight: 600, letterSpacing: '0.12em', textTransform: 'uppercase' }}>{label}</div>
-    <div style={{ fontFamily: mono, fontSize: 26, color: C.text, fontWeight: 600, marginTop: 9, letterSpacing: '-0.02em' }}>{value}</div>
-    {sub && <div style={{ fontFamily: mono, fontSize: 11, color: subColor || C.muted, marginTop: 7 }}>{sub}</div>}
-  </div>
-)
 
 const Row = ({ label, val, indent, strong, green, top }) => (
   <div style={{ display: 'flex', justifyContent: 'space-between', padding: strong ? '9px 2px' : '6px 2px', paddingLeft: indent ? 18 : 2, borderTop: top ? `1px solid ${C.line}` : 'none' }}>
@@ -26,15 +19,17 @@ const Row = ({ label, val, indent, strong, green, top }) => (
 )
 
 export default function StylePreview() {
+  const trend = [['JAN', 39, 14], ['FEB', 30, 10], ['MAR', 50, 21], ['APR', 36, 13], ['MAY', 51, 18], ['JUN', 75, 39]]
+  const maxP = 39
   return (
     <>
       <Head>
-        <title>Reydel — shop ledger</title>
+        <title>Reydel — front page</title>
         <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Semi+Condensed:wght@500;600;700&family=IBM+Plex+Mono:wght@400;500;600&family=Inter:wght@400;500;600&display=swap" />
       </Head>
       <div style={{ display: 'flex', minHeight: '100vh', background: C.bg }}>
 
-        {/* Sidebar — steel, red spine */}
+        {/* Sidebar */}
         <aside style={{ width: 208, background: C.side, borderRight: `1px solid ${C.border}`, boxShadow: `inset -3px 0 0 ${C.red}`, padding: '20px 15px', flexShrink: 0 }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 8 }}>
             <span style={{ width: 32, height: 32, background: C.red, display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: head, fontWeight: 700, fontSize: 19, color: '#fff' }}>R</span>
@@ -51,60 +46,65 @@ export default function StylePreview() {
 
         {/* Content */}
         <main style={{ flex: 1, minWidth: 0 }}>
-          {/* Status bar */}
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: C.bar, borderBottom: `1px solid ${C.border}`, padding: '13px 30px' }}>
-            <div style={{ fontFamily: head, fontSize: 22, fontWeight: 700, color: C.text, letterSpacing: '0.04em', textTransform: 'uppercase' }}>Business Overview</div>
-            <div style={{ fontFamily: mono, fontSize: 11, color: C.sub, display: 'flex', gap: 14, alignItems: 'center' }}>
-              <span style={{ color: C.green }}>● LIVE</span>
-              <span>THROUGH JUN 2026</span>
-            </div>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: C.bar, borderBottom: `1px solid ${C.border}`, padding: '12px 34px' }}>
+            <div style={{ fontFamily: mono, fontSize: 11, color: C.sub, letterSpacing: '0.06em' }}>REYDEL TIRE &amp; AUTO · TOMS RIVER, NJ</div>
+            <div style={{ fontFamily: mono, fontSize: 11, color: C.green }}>● LIVE · JUN 2026</div>
           </div>
 
-          <div style={{ padding: '26px 30px', maxWidth: 1000 }}>
-            <div style={{ display: 'flex', gap: 10, marginBottom: 26 }}>
-              <KPI primary label="Revenue · Jun" value="$75,090" sub="▲ 48% VS MAY" subColor={C.green} />
-              <KPI label="Gross profit" value="$53,907" sub="71.8% MARGIN" />
-              <KPI label="Net profit" value="$39,204" sub="52.2% MARGIN" />
-              <KPI label="Revenue YTD" value="$281,792" sub="6 MO · $114,776 PROFIT" />
+          <div style={{ padding: '34px 34px', maxWidth: 1000 }}>
+
+            {/* HERO — one number, one sentence */}
+            <div style={{ fontFamily: head, fontSize: 13, fontWeight: 600, color: C.red, letterSpacing: '0.18em', textTransform: 'uppercase' }}>Net Profit · June 2026</div>
+            <div style={{ fontFamily: head, fontSize: 82, fontWeight: 700, color: C.text, letterSpacing: '-0.01em', lineHeight: 1, margin: '6px 0 12px' }}>$39,204</div>
+            <div style={{ fontFamily: ui, fontSize: 16, color: C.sub, maxWidth: 620, lineHeight: 1.5 }}>
+              Reydel's strongest month on record — <span style={{ color: C.text }}>$75,090 in sales, up 48% over May</span>, at a 52% net margin. Tires drove 72% of it; brakes and service the rest.
             </div>
 
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 22 }}>
-              {/* Mini P&L */}
-              <div style={{ background: C.panel, border: `1px solid ${C.line}`, padding: '18px 20px' }}>
-                <div style={{ fontFamily: head, fontSize: 16, fontWeight: 700, color: C.text, letterSpacing: '0.05em', textTransform: 'uppercase', paddingBottom: 10, borderBottom: `1px solid ${C.border}`, marginBottom: 4 }}>Profit &amp; Loss — June</div>
+            {/* Inline stat strip — rules, not boxes */}
+            <div style={{ display: 'flex', gap: 0, marginTop: 24, borderTop: `1px solid ${C.border}`, borderBottom: `1px solid ${C.border}` }}>
+              {[['Revenue', '$75,090'], ['Gross profit', '$53,907'], ['Tickets', '630'], ['Avg ticket', '$119'], ['Tires sold', '486']].map(([l, v], i) => (
+                <div key={l} style={{ flex: 1, padding: '14px 18px', borderLeft: i ? `1px solid ${C.line}` : 'none' }}>
+                  <div style={{ fontFamily: ui, fontSize: 11, color: C.muted }}>{l}</div>
+                  <div style={{ fontFamily: mono, fontSize: 17, color: C.text, fontWeight: 500, marginTop: 5 }}>{v}</div>
+                </div>
+              ))}
+            </div>
+
+            {/* Body: statement + trend */}
+            <div style={{ display: 'grid', gridTemplateColumns: '1.25fr 1fr', gap: 28, marginTop: 30 }}>
+              <div>
+                <div style={{ fontFamily: head, fontSize: 16, fontWeight: 700, color: C.text, letterSpacing: '0.05em', textTransform: 'uppercase', paddingBottom: 8, borderBottom: `1px solid ${C.border}`, marginBottom: 4 }}>Profit &amp; Loss — June</div>
                 <div style={{ fontFamily: head, fontSize: 11, fontWeight: 600, color: C.muted, letterSpacing: '0.14em', margin: '12px 0 2px' }}>INCOME</div>
                 <Row label="Clover Sales" val="$73,450" indent />
                 <Row label="Sales Income" val="$1,640" indent />
                 <Row label="Total Income" val="$75,090" strong top />
-                <div style={{ fontFamily: head, fontSize: 11, fontWeight: 600, color: C.muted, letterSpacing: '0.14em', margin: '12px 0 2px' }}>COST OF GOODS SOLD</div>
+                <div style={{ fontFamily: head, fontSize: 11, fontWeight: 600, color: C.muted, letterSpacing: '0.14em', margin: '14px 0 2px' }}>COST OF GOODS SOLD</div>
                 <Row label="Cost of Goods Sold" val="($21,183)" indent />
                 <Row label="Gross Profit" val="$53,907" strong green top />
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: 16, padding: '13px 12px', background: 'rgba(87,181,138,.08)', borderLeft: `2px solid ${C.green}` }}>
-                  <span style={{ fontFamily: head, fontSize: 14, fontWeight: 700, color: C.green, letterSpacing: '0.06em', textTransform: 'uppercase' }}>Net Income</span>
-                  <span style={{ fontFamily: mono, fontSize: 21, fontWeight: 600, color: C.green }}>$39,204</span>
-                </div>
+                <div style={{ fontFamily: head, fontSize: 11, fontWeight: 600, color: C.muted, letterSpacing: '0.14em', margin: '14px 0 2px' }}>OPERATING EXPENSES</div>
+                <Row label="Payroll, rent, utilities…" val="($14,703)" indent />
+                <Row label="Net Income" val="$39,204" strong green top />
               </div>
 
-              {/* Monthly */}
-              <div style={{ background: C.panel, border: `1px solid ${C.line}`, padding: '18px 20px' }}>
-                <div style={{ fontFamily: head, fontSize: 16, fontWeight: 700, color: C.text, letterSpacing: '0.05em', textTransform: 'uppercase', paddingBottom: 10, borderBottom: `1px solid ${C.border}`, marginBottom: 6 }}>Profit by Month</div>
-                {[['MAR', '$21,074', '41.9%'], ['APR', '$12,676', '35.2%'], ['MAY', '$17,972', '35.5%'], ['JUN', '$39,204', '52.2%']].map(([m, p, mg], i) => (
-                  <div key={m} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '10px 2px', borderTop: i ? `1px solid ${C.line}` : 'none' }}>
-                    <span style={{ fontFamily: mono, fontSize: 12, color: C.sub, letterSpacing: '0.05em' }}>{m} 2026</span>
-                    <span style={{ display: 'flex', gap: 18, alignItems: 'baseline' }}>
-                      <span style={{ fontFamily: mono, fontSize: 13, color: C.green, fontWeight: 500 }}>{p}</span>
-                      <span style={{ fontFamily: mono, fontSize: 11, color: C.muted, width: 46, textAlign: 'right' }}>{mg}</span>
-                    </span>
+              <div>
+                <div style={{ fontFamily: head, fontSize: 16, fontWeight: 700, color: C.text, letterSpacing: '0.05em', textTransform: 'uppercase', paddingBottom: 8, borderBottom: `1px solid ${C.border}`, marginBottom: 12 }}>Profit · Last 6 Months</div>
+                {trend.map(([m, , p]) => (
+                  <div key={m} style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '7px 0' }}>
+                    <span style={{ fontFamily: mono, fontSize: 11, color: C.sub, width: 30 }}>{m}</span>
+                    <div style={{ flex: 1, height: 8, background: C.line }}>
+                      <div style={{ height: 8, width: `${Math.round(p / maxP * 100)}%`, background: m === 'JUN' ? C.red : '#3A3B40' }} />
+                    </div>
+                    <span style={{ fontFamily: mono, fontSize: 12, color: m === 'JUN' ? C.text : C.sub, width: 44, textAlign: 'right' }}>${p}K</span>
                   </div>
                 ))}
               </div>
             </div>
 
             {/* Specimen */}
-            <div style={{ marginTop: 28, paddingTop: 18, borderTop: `1px solid ${C.border}`, display: 'flex', gap: 40, flexWrap: 'wrap' }}>
-              <div><div style={{ fontFamily: head, fontSize: 26, fontWeight: 700, color: C.text, textTransform: 'uppercase', letterSpacing: '0.04em' }}>Barlow Condensed</div><div style={{ fontFamily: ui, fontSize: 11, color: C.muted, marginTop: 2 }}>Headlines · brand · titles</div></div>
-              <div><div style={{ fontFamily: ui, fontSize: 22, fontWeight: 500, color: C.text }}>Inter — interface</div><div style={{ fontFamily: ui, fontSize: 11, color: C.muted, marginTop: 2 }}>Labels · rows · body</div></div>
-              <div><div style={{ fontFamily: mono, fontSize: 22, fontWeight: 500, color: C.text }}>$1,234,567.89</div><div style={{ fontFamily: ui, fontSize: 11, color: C.muted, marginTop: 2 }}>IBM Plex Mono · all figures</div></div>
+            <div style={{ marginTop: 34, paddingTop: 18, borderTop: `1px solid ${C.border}`, display: 'flex', gap: 40, flexWrap: 'wrap' }}>
+              <div><div style={{ fontFamily: head, fontSize: 24, fontWeight: 700, color: C.text, textTransform: 'uppercase', letterSpacing: '0.04em' }}>Barlow Condensed</div><div style={{ fontFamily: ui, fontSize: 11, color: C.muted, marginTop: 2 }}>Headlines · hero · titles</div></div>
+              <div><div style={{ fontFamily: ui, fontSize: 20, fontWeight: 500, color: C.text }}>Inter — prose &amp; labels</div><div style={{ fontFamily: ui, fontSize: 11, color: C.muted, marginTop: 2 }}>The sentences that read human</div></div>
+              <div><div style={{ fontFamily: mono, fontSize: 20, fontWeight: 500, color: C.text }}>$1,234,567</div><div style={{ fontFamily: ui, fontSize: 11, color: C.muted, marginTop: 2 }}>IBM Plex Mono · figures</div></div>
             </div>
           </div>
         </main>
