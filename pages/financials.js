@@ -16,6 +16,12 @@ const monthLabel = (k) => `${MONTHS[k.slice(5, 7)]} ${k.slice(0, 4)}`
 // IS a cash movement; its `split_account` tells us why (operating/investing/financing).
 const CASH_ACCTS = ['TOTAL CHECKING (8059) - 1','BUS COMPLETE CHK (5998) - 1','Bank of America 7875','BOA Savings','Savings 1651']
 
+// Bank rec is complete through this month; later (in-progress) months have
+// payments recorded but deposits still clearing, so cash views cap here to
+// avoid showing a misleadingly-low un-reconciled mid-month balance.
+const RECONCILED_THROUGH = '2026-06'
+const RECONCILED_LABEL = 'Jun 30, 2026'
+
 
 const THEME = { sidebarBg: '#1A1A1A', sidebarBorder: '#2A2A2A', accent: '#B0281C' }
 
@@ -503,9 +509,11 @@ export default function Financials() {
                   }
                   const NICE = { 'Clover Clearing Account': 'Clover card deposits', 'Cash on hand': 'Cash deposits', 'Personal': 'Owner draws', 'Cost of Goods Sold': 'Inventory / COGS paid', 'Short Term Loans': 'Short-term loans', 'Heller CC': 'Credit card', 'Bleier Loan': 'Bleier loan', 'Heller Loan': 'Heller loan', 'Katz Chase': 'Credit card (Chase)', 'Opening Balance Equity': 'Opening balance' }
                   const labelOf = (sp) => { const p = (sp || '').split(':')[0]; return p ? (NICE[p] || p) : 'Cash sales & deposits' }
+                  // Cap at the reconciled month — in-progress months understate cash.
+                  const recRows = cashRows.filter(r => r.date && r.date.slice(0, 7) <= RECONCILED_THROUGH)
                   const buildCF = (period) => {
-                    const begin = period === 'all' ? 0 : cashRows.filter(r => r.date && r.date.slice(0, 7) < period).reduce((s, r) => s + Number(r.amount), 0)
-                    const rows = cashRows.filter(r => period === 'all' ? true : (r.date && r.date.slice(0, 7) === period))
+                    const begin = period === 'all' ? 0 : recRows.filter(r => r.date && r.date.slice(0, 7) < period).reduce((s, r) => s + Number(r.amount), 0)
+                    const rows = recRows.filter(r => period === 'all' ? true : (r.date && r.date.slice(0, 7) === period))
                     const secs = { operating: {}, investing: {}, financing: {}, transfer: {} }
                     rows.forEach(r => { const se = sectionOf(r.split_account); const l = labelOf(r.split_account); secs[se][l] = (secs[se][l] || 0) + Number(r.amount) })
                     const tot = (se) => Object.values(secs[se]).reduce((s, v) => s + v, 0)
@@ -516,7 +524,7 @@ export default function Financials() {
                   const cfView = buildCF(cfPeriod)
                   const cfCmp = cfCompareOn && cfComparePeriod && cfPeriod !== 'all' ? buildCF(cfComparePeriod) : null
                   const linesOf = (v, se) => Object.entries(v.secs[se]).map(([l, amt]) => ({ label: l, amt })).filter(x => Math.round(x.amt) !== 0).sort((a, b) => Math.abs(b.amt) - Math.abs(a.amt))
-                  const cfMonths = [...new Set(cashRows.filter(r => r.date).map(r => r.date.slice(0, 7)))].sort()
+                  const cfMonths = [...new Set(recRows.filter(r => r.date).map(r => r.date.slice(0, 7)))].sort()
 
                   return (
                     <>
@@ -554,7 +562,7 @@ export default function Financials() {
                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', borderBottom: '1px solid #DBD5C7', paddingBottom: '12px', marginBottom: '4px' }}>
                           <div>
                             <div style={{ fontSize: '15px', fontWeight: 700, color: '#1B1815', fontFamily: headF, letterSpacing: '0.02em', textTransform: 'uppercase' }}>Statement of Cash Flows</div>
-                            <div style={{ fontSize: '10px', color: '#a39a88', marginTop: '2px', fontFamily: ui }}>Reydel Tire &amp; Auto · actual cash in &amp; out</div>
+                            <div style={{ fontSize: '10px', color: '#1C7A4E', marginTop: '3px', fontFamily: monoF }}>✓ Reconciled through {RECONCILED_LABEL}</div>
                           </div>
                           <div style={{ fontSize: '12px', color: '#6b6355', fontFamily: ui, fontWeight: 500 }}>
                             {cfCmp ? `${monthLabel(cfPeriod)} vs ${monthLabel(cfComparePeriod)}` : (cfPeriod === 'all' ? 'All time' : monthLabel(cfPeriod))}
@@ -650,7 +658,7 @@ export default function Financials() {
                               <div style={{ display: 'flex', justifyContent: 'space-between', padding: '7px 2px', fontFamily: ui, fontSize: '12.5px', color: '#1B1815', fontWeight: 600, borderTop: '1px solid #E6E1D6' }}><span>Cash at end of period</span><span style={{ fontFamily: monoF }}>{fmt(cfView.end)}</span></div>
                             </div>
                             <div style={{ fontSize: '9px', color: '#a39a88', fontFamily: ui, marginTop: '10px' }}>
-                              Direct method — every bank/cash movement, grouped by purpose. Ties to the cash on the Balance Sheet.
+                              Direct method — every bank/cash movement, grouped by purpose, through the last reconciled month ({RECONCILED_LABEL}).
                             </div>
                           </>
                         )}
