@@ -10,6 +10,10 @@ const pct = (n) => `${parseFloat(n).toFixed(1)}%`
 const MONTHS = { '01':'JAN','02':'FEB','03':'MAR','04':'APR','05':'MAY','06':'JUN','07':'JUL','08':'AUG','09':'SEP','10':'OCT','11':'NOV','12':'DEC' }
 const monthLabel = (k) => `${MONTHS[k.slice(5, 7)]} ${k.slice(0, 4)}`
 
+// Cash / bank accounts — a GL row whose `account` is one of these IS a cash
+// movement; its `split_account` tells us why (→ operating / investing / financing).
+const CASH_ACCTS = ['Clover Clearing Account','TOTAL CHECKING (8059) - 1','BUS COMPLETE CHK (5998) - 1','Bank of America 7875','BOA Savings','Cash on hand','Savings 1651']
+
 
 const THEME = { sidebarBg: '#1A1A1A', sidebarBorder: '#2A2A2A', accent: '#B0281C' }
 
@@ -113,6 +117,8 @@ export default function Financials() {
   const [plPeriod,     setPlPeriod]     = useState('all')
   const [compareOn,    setCompareOn]    = useState(false)
   const [comparePeriod, setComparePeriod] = useState(null)
+  const [cashRows,     setCashRows]     = useState([])   // gl rows where account is a cash/bank account
+  const [cfPeriod,     setCfPeriod]     = useState('all')
   const [accounts,     setAccounts]     = useState([])
   const [bs,           setBs]           = useState([])
   const [bsOpen,       setBsOpen]       = useState({ asset: true, liability: false, equity: true })
@@ -183,6 +189,17 @@ export default function Financials() {
 
       const { data: bData } = await supabase.from('bs_totals').select('account, amount, category')
       if (bData) setBs(bData.map(r => ({ account: r.account, amount: Number(r.amount), category: r.category })))
+
+      // Cash-flow source: every GL row that moves a bank/cash account.
+      let cRows = [], cf = 0
+      while (true) {
+        const { data } = await supabase.from('gl_transactions').select('date, amount, split_account').in('account', CASH_ACCTS).range(cf, cf + 999)
+        if (!data || data.length === 0) break
+        cRows = cRows.concat(data)
+        if (data.length < 1000) break
+        cf += 1000
+      }
+      setCashRows(cRows)
 
       // Data-health: freshness + Clover sync status (reconciliation is computed from data already loaded)
       const [cpt, wf, li, sl] = await Promise.all([
@@ -270,6 +287,7 @@ export default function Financials() {
 
   const tabs = [
     { id: 'pl',       label: 'Profit & Loss' },
+    { id: 'cashflow', label: 'Cash Flow' },
     { id: 'bs',       label: 'Balance Sheet' },
     { id: 'monthly',  label: 'Monthly Table' },
     { id: 'accounts', label: 'Account Balances' },
@@ -459,6 +477,90 @@ export default function Financials() {
                     </div>
                   </>
                 )}
+
+                {/* Cash Flow Tab — direct method from cash-account activity */}
+                {activeTab === 'cashflow' && (() => {
+                  if (!cashRows.length) return <div style={{ color: '#9A9284', fontFamily: ui, fontSize: '12px' }}>No cash data yet — import a General Ledger.</div>
+                  const headF = "'Barlow Semi Condensed', sans-serif", monoF = "'IBM Plex Mono', monospace"
+                  const cashSet = new Set(CASH_ACCTS)
+                  const acctCat = {}
+                  bs.forEach(r => { acctCat[r.account] = r.category })
+                  Object.entries(plLabelCat).forEach(([k, v]) => { acctCat[k] = v })
+                  const sectionOf = (sp) => {
+                    if (cashSet.has(sp)) return 'transfer'
+                    const s = sp || ''
+                    if (!s) return 'operating'
+                    const parent = s.split(':')[0]
+                    if (/Accounts Payable|Clover Tax|Clover Gratuity/.test(parent)) return 'operating'
+                    const cat = acctCat[parent] || acctCat[s]
+                    if (cat === 'equity' || cat === 'liability') return 'financing'
+                    if (cat === 'asset') return 'investing'
+                    return 'operating'
+                  }
+                  const labelOf = (sp) => { const s = sp || ''; return s ? s.split(':')[0] : 'Cash sales & deposits' }
+                  const beginCash = cfPeriod === 'all' ? 0 : cashRows.filter(r => r.date && r.date.slice(0, 7) < cfPeriod).reduce((s, r) => s + Number(r.amount), 0)
+                  const periodRows = cashRows.filter(r => cfPeriod === 'all' ? true : (r.date && r.date.slice(0, 7) === cfPeriod))
+                  const secs = { operating: {}, investing: {}, financing: {}, transfer: {} }
+                  periodRows.forEach(r => { const se = sectionOf(r.split_account); const l = labelOf(r.split_account); secs[se][l] = (secs[se][l] || 0) + Number(r.amount) })
+                  const lines = (se) => Object.entries(secs[se]).map(([l, v]) => ({ label: l, amt: v })).filter(x => Math.round(x.amt) !== 0).sort((a, b) => Math.abs(b.amt) - Math.abs(a.amt))
+                  const tot = (se) => Object.values(secs[se]).reduce((s, v) => s + v, 0)
+                  const opT = tot('operating'), invT = tot('investing'), finT = tot('financing'), trT = tot('transfer')
+                  const netChange = opT + invT + finT + trT
+                  const endCash = beginCash + netChange
+                  const cfMonths = [...new Set(cashRows.filter(r => r.date).map(r => r.date.slice(0, 7)))].sort()
+
+                  return (
+                    <>
+                      <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap', marginBottom: '18px', alignItems: 'center' }}>
+                        <span style={{ fontSize: '9px', color: '#a39a88', letterSpacing: '0.14em', marginRight: '2px', fontFamily: ui, fontWeight: 600 }}>PERIOD</span>
+                        {[{ k: 'all', l: 'All time' }, ...cfMonths.map(k => ({ k, l: MONTHS[k.slice(5, 7)] }))].map(o => (
+                          <button key={o.k} onClick={() => setCfPeriod(o.k)} style={pill(cfPeriod === o.k)}>{o.l}</button>
+                        ))}
+                      </div>
+
+                      <div style={{ ...card, maxWidth: '660px' }}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', borderBottom: '1px solid #DBD5C7', paddingBottom: '12px', marginBottom: '4px' }}>
+                          <div>
+                            <div style={{ fontSize: '15px', fontWeight: 700, color: '#1B1815', fontFamily: headF, letterSpacing: '0.02em', textTransform: 'uppercase' }}>Statement of Cash Flows</div>
+                            <div style={{ fontSize: '10px', color: '#a39a88', marginTop: '2px', fontFamily: ui }}>Reydel Tire &amp; Auto · actual cash in &amp; out</div>
+                          </div>
+                          <div style={{ fontSize: '12px', color: '#6b6355', fontFamily: ui, fontWeight: 500 }}>{cfPeriod === 'all' ? 'All time' : monthLabel(cfPeriod)}</div>
+                        </div>
+
+                        <SectionHead>OPERATING ACTIVITIES</SectionHead>
+                        {lines('operating').map(r => <LineItem key={r.label} label={r.label} amount={r.amt} />)}
+                        <TotalRow label="Net cash from operations" amount={opT} accent={opT >= 0} />
+
+                        {lines('investing').length > 0 && (
+                          <>
+                            <SectionHead>INVESTING ACTIVITIES</SectionHead>
+                            {lines('investing').map(r => <LineItem key={r.label} label={r.label} amount={r.amt} />)}
+                            <TotalRow label="Net cash from investing" amount={invT} />
+                          </>
+                        )}
+
+                        <SectionHead>FINANCING ACTIVITIES</SectionHead>
+                        {lines('financing').map(r => <LineItem key={r.label} label={r.label} amount={r.amt} />)}
+                        <TotalRow label="Net cash from financing" amount={finT} />
+
+                        {Math.round(trT) !== 0 && <TotalRow label="Transfers between accounts" amount={trT} />}
+
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '16px', padding: '14px 12px', background: netChange >= 0 ? '#EEF3EE' : '#FBF0EE', border: `1px solid ${netChange >= 0 ? '#C6DECB' : '#E8C6C0'}` }}>
+                          <span style={{ fontSize: '12px', fontWeight: 700, letterSpacing: '0.08em', color: netChange >= 0 ? '#1C7A4E' : THEME.accent, fontFamily: headF, textTransform: 'uppercase' }}>Net change in cash</span>
+                          <span style={{ fontSize: '21px', fontWeight: 700, color: netChange >= 0 ? '#1C7A4E' : THEME.accent, fontFamily: monoF, fontVariantNumeric: 'tabular-nums' }}>{netChange < 0 ? `(${fmt(netChange)})` : fmt(netChange)}</span>
+                        </div>
+
+                        <div style={{ marginTop: '12px' }}>
+                          <div style={{ display: 'flex', justifyContent: 'space-between', padding: '6px 2px', fontFamily: ui, fontSize: '12px', color: '#6b6355' }}><span>Cash at start of period</span><span style={{ fontFamily: monoF }}>{fmt(beginCash)}</span></div>
+                          <div style={{ display: 'flex', justifyContent: 'space-between', padding: '7px 2px', fontFamily: ui, fontSize: '12.5px', color: '#1B1815', fontWeight: 600, borderTop: '1px solid #E6E1D6' }}><span>Cash at end of period</span><span style={{ fontFamily: monoF }}>{fmt(endCash)}</span></div>
+                        </div>
+                        <div style={{ fontSize: '9px', color: '#a39a88', fontFamily: ui, marginTop: '10px' }}>
+                          Direct method — every bank/cash movement, grouped by purpose. Ties to the cash on the Balance Sheet.
+                        </div>
+                      </div>
+                    </>
+                  )
+                })()}
 
                 {/* Balance Sheet Tab */}
                 {activeTab === 'bs' && (() => {
