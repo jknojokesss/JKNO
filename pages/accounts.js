@@ -107,7 +107,7 @@ export default function Accounts() {
   const totalTxns     = accounts.reduce((s, a) => s + a.txnCount, 0)
 
   if (loading) return (
-    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100vh', background: '#F8F8F8', fontFamily: 'Inter, sans-serif' }}>
+    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100vh', background: '#F5EFE3', fontFamily: 'Inter, sans-serif' }}>
       <div style={{ color: '#888', fontSize: '13px', letterSpacing: '0.05em' }}>Loading accounts...</div>
     </div>
   )
@@ -126,7 +126,7 @@ export default function Accounts() {
         <div style={{ display: 'flex' }}>
 
           {/* Account list */}
-          <div style={{ flex: 1, padding: '24px 28px', borderRight: selected ? '1px solid #E5E5E5' : 'none' }}>
+          <div style={{ flex: 1, padding: '24px 28px', borderRight: selected ? '1px solid #E7DECB' : 'none' }}>
 
             <div style={{ marginBottom: '20px' }}>
               <div style={{ fontSize: '9px', color: '#888', letterSpacing: '0.15em', marginBottom: '4px', fontFamily: 'Inter, sans-serif' }}>CHART OF ACCOUNTS</div>
@@ -143,7 +143,7 @@ export default function Accounts() {
                 { label: 'NET ACTIVITY',   value: fmt(totalIncome - totalExpenses),
                   color: totalIncome - totalExpenses >= 0 ? '#16a34a' : THEME.accent },
               ].map((card, i) => (
-                <div key={i} style={{ background: '#fff', borderRadius: '6px', padding: '14px 16px', border: '1px solid #E5E5E5', borderTop: `3px solid ${card.color}` }}>
+                <div key={i} style={{ background: '#fff', borderRadius: '6px', padding: '14px 16px', border: '1px solid #E7DECB', borderTop: `3px solid ${card.color}` }}>
                   <div style={{ fontSize: '9px', color: '#888', fontFamily: 'Inter, sans-serif', letterSpacing: '0.15em', marginBottom: '6px' }}>{card.label}</div>
                   <div style={{ fontSize: '20px', fontWeight: '600', color: card.color, fontFamily: 'Inter, sans-serif' }}>{card.value}</div>
                 </div>
@@ -153,7 +153,7 @@ export default function Accounts() {
             {/* Search + filter */}
             <div style={{ display: 'flex', gap: '10px', marginBottom: '20px', alignItems: 'center', flexWrap: 'wrap' }}>
               <input value={search} onChange={e => setSearch(e.target.value)} placeholder="Search accounts..."
-                style={{ flex: 1, minWidth: '160px', padding: '7px 12px', border: '1px solid #E5E5E5',
+                style={{ flex: 1, minWidth: '160px', padding: '7px 12px', border: '1px solid #E7DECB',
                   borderRadius: '4px', fontSize: '11px', fontFamily: 'Inter, sans-serif', outline: 'none', background: '#fff', color: '#1a1a1a' }}
               />
               {['all', ...CATS].map(cat => (
@@ -175,7 +175,7 @@ export default function Accounts() {
                     {fmt(items.reduce((s, a) => s + Math.abs(a.total), 0))} total
                   </div>
                 </div>
-                <div style={{ background: '#fff', borderRadius: '6px', border: '1px solid #E5E5E5', overflow: 'hidden' }}>
+                <div style={{ background: '#fff', borderRadius: '6px', border: '1px solid #E7DECB', overflow: 'hidden' }}>
                   {nestForDisplay(items).map((row, i, arr) => {
                     const account = row.account
                     const isSelected = selected?.name === account.name
@@ -187,7 +187,7 @@ export default function Accounts() {
                         background: isSelected ? '#FFF5F5' : row.isChild ? '#FCFCFC' : 'transparent',
                         borderLeft: isSelected ? `3px solid ${THEME.accent}` : '3px solid transparent',
                       }}
-                        onMouseEnter={e => { if (!isSelected) e.currentTarget.style.background = '#F8F8F8' }}
+                        onMouseEnter={e => { if (!isSelected) e.currentTarget.style.background = '#F5EFE3' }}
                         onMouseLeave={e => { if (!isSelected) e.currentTarget.style.background = row.isChild ? '#FCFCFC' : 'transparent' }}
                       >
                         <div>
@@ -217,7 +217,7 @@ export default function Accounts() {
           {selected && (
             <div style={{ width: '380px', flexShrink: 0, alignSelf: 'flex-start',
               position: 'sticky', top: '52px', maxHeight: 'calc(100vh - 52px)', overflowY: 'auto',
-              background: '#fff', borderLeft: '1px solid #E5E5E5', padding: '24px' }}>
+              background: '#fff', borderLeft: '1px solid #E7DECB', padding: '24px' }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '16px' }}>
                 <div>
                   <div style={{ fontSize: '9px', color: '#888', fontFamily: 'Inter, sans-serif', letterSpacing: '0.1em', marginBottom: '4px' }}>ACCOUNT DETAIL</div>
@@ -228,7 +228,7 @@ export default function Accounts() {
                   style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#888', fontSize: '20px', padding: '4px' }}>×</button>
               </div>
 
-              <div style={{ display: 'flex', gap: '20px', padding: '10px 14px', background: '#F8F8F8', borderRadius: '4px', marginBottom: '16px', border: '1px solid #E5E5E5' }}>
+              <div style={{ display: 'flex', gap: '20px', padding: '10px 14px', background: '#F5EFE3', borderRadius: '4px', marginBottom: '16px', border: '1px solid #E7DECB' }}>
                 <div>
                   <div style={{ fontSize: '9px', color: '#888', fontFamily: 'Inter, sans-serif', letterSpacing: '0.05em' }}>TRANSACTIONS</div>
                   <div style={{ fontSize: '18px', fontWeight: '700', color: '#1a1a1a', fontFamily: 'Inter, sans-serif' }}>{selected.txnCount}</div>

@@ -19,8 +19,8 @@ function normalizeItemName(name) {
 const THEME = { sidebarBg: '#1A1A1A', sidebarBorder: '#2A2A2A', accent: '#CC2222' }
 
 const hcell = (align = 'left') => ({
-  padding: '6px 10px', fontSize: '9px', color: '#888', background: '#FAFAFA',
-  fontWeight: '400', letterSpacing: '0.1em', borderBottom: '1px solid #E5E5E5',
+  padding: '6px 10px', fontSize: '9px', color: '#888', background: '#FAF6EC',
+  fontWeight: '400', letterSpacing: '0.1em', borderBottom: '1px solid #E7DECB',
   fontFamily: 'Inter, sans-serif', textAlign: align,
 })
 const cell = (align = 'left', extra = {}) => ({
@@ -122,7 +122,7 @@ export default function Inventory() {
                     { label: 'UNIQUE ITEMS',    value: items.length.toString(),         sub: 'products & services',     sc: '#888' },
                     { label: 'AVG ORDER VALUE', value: fmtD(avgOrder),                 sub: 'per line item',           sc: THEME.accent },
                   ].map(k => (
-                    <div key={k.label} style={{ flex: 1, background: '#fff', border: '1px solid #E5E5E5', borderRadius: '6px', padding: '14px 16px' }}>
+                    <div key={k.label} style={{ flex: 1, background: '#fff', border: '1px solid #E7DECB', borderRadius: '10px', boxShadow: '0 1px 3px rgba(60,45,20,0.05)', padding: '14px 16px' }}>
                       <div style={{ fontSize: '9px', color: '#888', letterSpacing: '0.15em', marginBottom: '6px', fontFamily: 'Inter, sans-serif' }}>{k.label}</div>
                       <div style={{ fontSize: '20px', color: '#1a1a1a', fontWeight: '600', fontFamily: 'Inter, sans-serif' }}>{k.value}</div>
                       <div style={{ fontSize: '10px', color: k.sc, marginTop: '4px', fontFamily: 'Inter, sans-serif' }}>{k.sub}</div>
@@ -131,7 +131,7 @@ export default function Inventory() {
                 </div>
 
                 {/* Tabs */}
-                <div style={{ display: 'flex', gap: '2px', borderBottom: '1px solid #E5E5E5', marginBottom: '20px' }}>
+                <div style={{ display: 'flex', gap: '2px', borderBottom: '1px solid #E7DECB', marginBottom: '20px' }}>
                   {tabs.map(t => (
                     <button key={t.id} onClick={() => setTab(t.id)} style={{
                       padding: '8px 16px', fontSize: '10px', fontFamily: 'Inter, sans-serif',
@@ -145,12 +145,12 @@ export default function Inventory() {
 
                 {/* Items Ranked */}
                 {tab === 'items' && (
-                  <div style={{ background: '#fff', border: '1px solid #E5E5E5', borderRadius: '6px', padding: '16px' }}>
+                  <div style={{ background: '#fff', border: '1px solid #E7DECB', borderRadius: '10px', boxShadow: '0 1px 3px rgba(60,45,20,0.05)', padding: '16px' }}>
                     <div style={{ display: 'flex', gap: '10px', marginBottom: '16px', alignItems: 'center' }}>
                       <input
                         value={search} onChange={e => setSearch(e.target.value)}
                         placeholder="Search items..."
-                        style={{ flex: 1, padding: '7px 12px', background: '#fff', border: '1px solid #E5E5E5',
+                        style={{ flex: 1, padding: '7px 12px', background: '#fff', border: '1px solid #E7DECB',
                           borderRadius: '4px', color: '#1a1a1a', fontSize: '11px', fontFamily: 'Inter, sans-serif', outline: 'none' }}
                       />
                       {[{ key: 'revenue', label: 'REVENUE' }, { key: 'orders', label: 'ORDERS' }, { key: 'avg', label: 'AVG SALE' }].map(s => (
@@ -177,7 +177,7 @@ export default function Inventory() {
                       <tbody>
                         {sorted.map((item, i) => (
                           <tr key={item.name}
-                            onMouseEnter={e => e.currentTarget.style.background = '#F8F8F8'}
+                            onMouseEnter={e => e.currentTarget.style.background = '#F5EFE3'}
                             onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
                           >
                             <td style={cell('left', { color: '#888', width: '32px' })}>{i + 1}</td>
@@ -190,7 +190,7 @@ export default function Inventory() {
                             </td>
                             <td style={cell('right', { color: '#888' })}>{fmtD(item.revenue / item.orders)}</td>
                             <td style={{ ...cell('left'), width: '120px' }}>
-                              <div style={{ height: '3px', background: '#E5E5E5', borderRadius: '2px' }}>
+                              <div style={{ height: '3px', background: '#E7DECB', borderRadius: '2px' }}>
                                 <div style={{ height: '3px', background: THEME.accent, borderRadius: '2px', width: `${Math.round(item.revenue / maxRevenue * 100)}%`, opacity: 0.7 }} />
                               </div>
                             </td>
@@ -208,7 +208,7 @@ export default function Inventory() {
 
                 {/* By Month */}
                 {tab === 'monthly' && (
-                  <div style={{ background: '#fff', border: '1px solid #E5E5E5', borderRadius: '6px', padding: '16px' }}>
+                  <div style={{ background: '#fff', border: '1px solid #E7DECB', borderRadius: '10px', boxShadow: '0 1px 3px rgba(60,45,20,0.05)', padding: '16px' }}>
                     <div style={{ fontSize: '9px', color: '#888', letterSpacing: '0.15em', marginBottom: '14px', fontFamily: 'Inter, sans-serif' }}>
                       CLOVER SALES BY MONTH
                     </div>
@@ -217,7 +217,7 @@ export default function Inventory() {
                       return monthly.map((m, i) => (
                         <div key={m.month} style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '10px 0', borderBottom: i < monthly.length - 1 ? '1px solid #F0F0F0' : 'none' }}>
                           <div style={{ width: '80px', fontSize: '10px', color: '#888', fontFamily: 'Inter, sans-serif', flexShrink: 0 }}>{m.label}</div>
-                          <div style={{ flex: 1, height: '6px', background: '#E5E5E5', borderRadius: '3px' }}>
+                          <div style={{ flex: 1, height: '6px', background: '#E7DECB', borderRadius: '3px' }}>
                             <div style={{ height: '6px', background: THEME.accent, borderRadius: '3px', width: `${Math.round(m.revenue / maxRev * 100)}%` }} />
                           </div>
                           <div style={{ width: '80px', textAlign: 'right', fontSize: '11px', color: '#16a34a', fontFamily: 'Inter, sans-serif', fontWeight: '600', flexShrink: 0 }}>
@@ -229,7 +229,7 @@ export default function Inventory() {
                         </div>
                       ))
                     })()}
-                    <div style={{ display: 'flex', justifyContent: 'space-between', paddingTop: '12px', borderTop: '1px solid #E5E5E5', marginTop: '4px' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', paddingTop: '12px', borderTop: '1px solid #E7DECB', marginTop: '4px' }}>
                       <div style={{ fontSize: '10px', color: '#888', fontFamily: 'Inter, sans-serif' }}>TOTAL</div>
                       <div style={{ fontSize: '12px', color: '#16a34a', fontFamily: 'Inter, sans-serif', fontWeight: '600' }}>
                         {fmt(monthly.reduce((s, m) => s + m.revenue, 0))}

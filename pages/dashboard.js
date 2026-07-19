@@ -2,7 +2,7 @@ import { useEffect, useState, useMemo } from 'react'
 import { useRouter } from 'next/router'
 import Head from 'next/head'
 import { supabase } from '../lib/supabase'
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts'
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Line, ComposedChart } from 'recharts'
 import Shell from '../components/Shell'
 
 const fmt  = (n) => new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }).format(Math.abs(n))
@@ -10,6 +10,14 @@ const fmtD = (n) => new Intl.NumberFormat('en-US', { style: 'currency', currency
 const pct  = (n) => `${parseFloat(n).toFixed(1)}%`
 
 const MONTHS = { '01':'JAN','02':'FEB','03':'MAR','04':'APR','05':'MAY','06':'JUN','07':'JUL','08':'AUG','09':'SEP','10':'OCT','11':'NOV','12':'DEC' }
+const ui = "'Inter', sans-serif"
+
+// Warm cream design tokens — matches the Shell canvas.
+const C = {
+  card: '#fff', border: '#E7DECB', shadow: '0 1px 3px rgba(60,45,20,0.05)',
+  ink: '#211E17', muted: '#a39a88', sub: '#6b6355', hover: '#F5EFE3', headBg: '#FAF6EC',
+  red: '#CC2222', green: '#15803d', greenBg: '#dcfce7', gold: '#C9A84C',
+}
 
 // Canonicalize tire-size format so "235/60R17" and "235/60/17" group as one item.
 function normalizeItemName(name) {
@@ -20,35 +28,14 @@ function normalizeItemName(name) {
     .trim()
 }
 
-const THEME = { sidebarBg: '#1A1A1A', sidebarBorder: '#2A2A2A', accent: '#CC2222' }
-
-// Dashboard is the home/launcher — these buttons replace the sidebar here.
-// (Inner pages keep their sidebar, whose Dashboard link returns here.)
-const NAV_BUTTONS = [
-  { id: 'financials', label: 'Financials',   href: '/financials', icon: '▣', desc: 'P&L, revenue & expenses' },
-  { id: 'inventory',  label: 'Sales & Items', href: '/inventory',  icon: '◧', desc: 'Top items by revenue' },
-  { id: 'orders',     label: 'Orders',        href: '/orders',     icon: '▤', desc: 'Order history' },
-  { id: 'stock',      label: 'Stock',         href: '/stock',      icon: '⬡', desc: 'Tires on hand' },
-  { id: 'accounts',   label: 'Accounts',      href: '/accounts',   icon: '◈', desc: 'Balances & transactions' },
-  { id: 'ai',         label: 'Ask AI',        href: '/ai',         icon: '✦', desc: 'Plain-English answers' },
-]
-
-const TOP_TIRES = [
-  { size: '235/60R17', units: 93, revenue: 15257, cogs: 6786, profit: 8471, margin: 55.5 },
-  { size: '235/60R18', units: 79, revenue: 13931, cogs: 6107, profit: 7824, margin: 56.2 },
-  { size: '215/55R17', units: 70, revenue: 10427, cogs: 4307, profit: 6120, margin: 58.7 },
-  { size: '235/55R19', units: 41, revenue: 7447,  cogs: 3163, profit: 4284, margin: 57.5 },
-  { size: '235/45R18', units: 33, revenue: 5557,  cogs: 2260, profit: 3297, margin: 59.3 },
-  { size: '255/45R19', units: 28, revenue: 6345,  cogs: 3323, profit: 3022, margin: 47.6 },
-  { size: '245/50R20', units: 27, revenue: 5552,  cogs: 2729, profit: 2823, margin: 50.8 },
-]
-
-function KPICard({ label, value, sub, subColor }) {
+function KPICard({ label, value, sub, trend, accent }) {
+  const tColor = trend > 0 ? C.green : trend < 0 ? '#b91c1c' : C.sub
   return (
-    <div style={{ background: '#fff', border: '1px solid #E5E5E5', borderRadius: '6px', padding: '14px 16px', flex: 1 }}>
-      <div style={{ fontSize: '9px', color: '#888', letterSpacing: '0.15em', marginBottom: '6px', fontFamily: 'Inter, sans-serif' }}>{label}</div>
-      <div style={{ fontSize: '20px', color: '#1a1a1a', fontWeight: '600', fontFamily: 'Inter, sans-serif' }}>{value}</div>
-      {sub && <div style={{ fontSize: '10px', color: subColor || '#888', marginTop: '4px', fontFamily: 'Inter, sans-serif' }}>{sub}</div>}
+    <div style={{ background: C.card, border: `1px solid ${C.border}`, borderRadius: '12px', padding: '16px 18px', flex: 1, minWidth: '168px', boxShadow: C.shadow, position: 'relative', overflow: 'hidden' }}>
+      <div style={{ position: 'absolute', top: 0, left: 0, width: '3px', height: '100%', background: accent || C.red }} />
+      <div style={{ fontSize: '9px', color: C.muted, letterSpacing: '0.14em', marginBottom: '9px', fontFamily: ui, fontWeight: 600 }}>{label}</div>
+      <div style={{ fontSize: '24px', color: C.ink, fontWeight: 700, fontFamily: ui, letterSpacing: '-0.02em' }}>{value}</div>
+      {sub && <div style={{ fontSize: '11px', color: trend != null ? tColor : C.sub, marginTop: '6px', fontFamily: ui, fontWeight: 500 }}>{trend != null && (trend > 0 ? '▲ ' : trend < 0 ? '▼ ' : '')}{sub}</div>}
     </div>
   )
 }
@@ -56,10 +43,10 @@ function KPICard({ label, value, sub, subColor }) {
 const CustomTooltip = ({ active, payload, label }) => {
   if (!active || !payload?.length) return null
   return (
-    <div style={{ background: '#fff', border: '1px solid #E5E5E5', borderRadius: '4px', padding: '10px 14px', boxShadow: '0 4px 12px rgba(0,0,0,0.08)' }}>
-      <div style={{ fontSize: '11px', color: '#888', marginBottom: '6px', fontFamily: 'Inter, sans-serif' }}>{label}</div>
-      {payload.map(p => (
-        <div key={p.name} style={{ fontSize: '12px', color: p.color === '#E5E5E5' ? '#888' : p.color, fontFamily: 'Inter, sans-serif' }}>
+    <div style={{ background: '#fff', border: `1px solid ${C.border}`, borderRadius: '8px', padding: '10px 14px', boxShadow: '0 6px 18px rgba(60,45,20,0.12)' }}>
+      <div style={{ fontSize: '11px', color: C.muted, marginBottom: '6px', fontFamily: ui }}>{label}</div>
+      {payload.filter(p => p.value != null).map(p => (
+        <div key={p.name} style={{ fontSize: '12px', color: p.color, fontFamily: ui, fontWeight: 500 }}>
           {p.name}: {fmt(p.value)}
         </div>
       ))}
@@ -113,6 +100,18 @@ export default function Dashboard() {
   const totalProfit  = monthly.reduce((s, r) => s + r.profit, 0)
   const avgMargin    = totalRevenue > 0 ? (totalProfit / totalRevenue * 100).toFixed(1) : 0
 
+  // ── Growth headline metrics (from closed monthly_summary) ────────────────────
+  const last = monthly[monthly.length - 1]
+  const prev = monthly[monthly.length - 2]
+  const year = last ? last.month.slice(0, 4) : String(new Date().getFullYear())
+  const momRev = prev && prev.revenue ? (last.revenue - prev.revenue) / prev.revenue * 100 : null
+  const t3 = monthly.slice(-3)
+  const runRate = t3.length ? (t3.reduce((s, r) => s + r.revenue, 0) / t3.length) * 12 : 0
+  const ytd = monthly.filter(r => r.month.slice(0, 4) === year)
+  const ytdRev = ytd.reduce((s, r) => s + r.revenue, 0)
+  const ytdProfit = ytd.reduce((s, r) => s + r.profit, 0)
+  const netMarginLast = last && last.revenue ? last.profit / last.revenue * 100 : 0
+
   // ── Current-period stats from live Clover sales ──────────────────────────────
   const now = new Date()
   const monthStart = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-01`
@@ -144,48 +143,82 @@ export default function Dashboard() {
   ]
 
   const hcell = (align = 'left') => ({
-    padding: '5px 8px', fontSize: '9px', color: '#888', fontWeight: '400',
-    letterSpacing: '0.08em', borderBottom: '1px solid #E5E5E5',
-    textAlign: align, background: '#FAFAFA', fontFamily: 'Inter, sans-serif',
+    padding: '6px 8px', fontSize: '9px', color: C.muted, fontWeight: '600',
+    letterSpacing: '0.08em', borderBottom: `1px solid ${C.border}`,
+    textAlign: align, background: C.headBg, fontFamily: ui,
   })
+  const cardStyle = { background: C.card, border: `1px solid ${C.border}`, borderRadius: '12px', padding: '16px', boxShadow: C.shadow }
+  const capLabel = { fontSize: '9px', color: C.muted, letterSpacing: '0.15em', marginBottom: '12px', fontFamily: ui, fontWeight: 600 }
 
   return (
     <>
       <Head><title>Reydel Tire — Dashboard</title></Head>
       <Shell active="dashboard">
-          <div style={{ padding: '24px 28px' }}>
+          <div style={{ padding: '26px 30px', maxWidth: '1160px' }}>
 
             {loading ? (
-              <div style={{ color: '#888', fontFamily: 'Inter, sans-serif', fontSize: '12px' }}>Loading...</div>
+              <div style={{ color: C.muted, fontFamily: ui, fontSize: '12px' }}>Loading...</div>
             ) : (
               <>
-                {/* Period toggle */}
-                <div style={{ display: 'flex', gap: '8px', marginBottom: '14px' }}>
-                  {[['week', 'Last 7 days'], ['month', 'This month']].map(([p, l]) => (
-                    <button key={p} onClick={() => setPeriod(p)} style={{
-                      padding: '8px 16px', borderRadius: '20px', fontSize: '12px', fontWeight: 600, cursor: 'pointer',
-                      fontFamily: 'Inter, sans-serif', border: `1px solid ${period === p ? '#1a1a1a' : '#E5E5E5'}`,
-                      background: period === p ? '#1a1a1a' : '#fff', color: period === p ? '#fff' : '#888',
-                    }}>{l}</button>
-                  ))}
+                {/* Header band */}
+                <div style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between', marginBottom: '22px', flexWrap: 'wrap', gap: '12px' }}>
+                  <div>
+                    <div style={{ fontSize: '23px', fontWeight: 700, color: C.ink, fontFamily: ui, letterSpacing: '-0.025em' }}>Business Overview</div>
+                    <div style={{ fontSize: '12px', color: C.muted, fontFamily: ui, marginTop: '4px' }}>
+                      Reydel Tire &amp; Auto{last ? ` · financials through ${last.label} ${year}` : ''}
+                    </div>
+                  </div>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '7px', background: C.card, border: `1px solid ${C.border}`, borderRadius: '20px', padding: '7px 13px', boxShadow: C.shadow }}>
+                    <span style={{ width: '7px', height: '7px', borderRadius: '50%', background: '#22c55e', boxShadow: '0 0 0 3px rgba(34,197,94,.15)' }} />
+                    <span style={{ fontSize: '11px', color: C.sub, fontFamily: ui, fontWeight: 500 }}>Live · synced from POS &amp; bank</span>
+                  </div>
                 </div>
 
-                {/* Period KPIs (live Clover sales) */}
-                <div style={{ display: 'flex', gap: '12px', marginBottom: '20px', flexWrap: 'wrap' }}>
-                  <KPICard label="REVENUE"    value={fmt(pRevenue)}            sub={periodLabel}        subColor="#16a34a" />
-                  <KPICard label="SALES"      value={pOrders.toLocaleString()} sub={`${periodLabel} · tickets`} subColor="#888" />
-                  <KPICard label="TIRES SOLD" value={pUnits.toLocaleString()}  sub={periodLabel}        subColor="#888" />
-                  <KPICard label="AVG TICKET" value={fmt(pAvg)}                sub="revenue ÷ tickets"  subColor="#888" />
+                {/* Growth KPIs (closed-month) */}
+                <div style={{ display: 'flex', gap: '12px', marginBottom: '14px', flexWrap: 'wrap' }}>
+                  <KPICard label={`REVENUE · ${last ? last.label : ''}`} value={last ? fmt(last.revenue) : '—'}
+                    trend={momRev} sub={momRev != null ? `${Math.abs(momRev).toFixed(0)}% vs ${prev.label}` : null} accent={C.red} />
+                  <KPICard label="ANNUALIZED RUN-RATE" value={fmt(runRate)} sub="trailing 3-month pace" accent={C.gold} />
+                  <KPICard label={`NET MARGIN · ${last ? last.label : ''}`} value={pct(netMarginLast)}
+                    sub={last ? `${fmt(last.profit)} net profit` : null} accent={C.green} />
+                  <KPICard label={`REVENUE · YTD ${year}`} value={fmt(ytdRev)}
+                    sub={`${ytd.length} mo · ${fmt(ytdProfit)} profit`} accent={C.red} />
+                </div>
+
+                {/* Live "this month in progress" strip */}
+                <div style={{ ...cardStyle, padding: '14px 16px', marginBottom: '22px' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '12px', flexWrap: 'wrap', gap: '8px' }}>
+                    <span style={{ ...capLabel, marginBottom: 0 }}>CURRENT ACTIVITY</span>
+                    <div style={{ display: 'flex', gap: '6px' }}>
+                      {[['week', 'Last 7 days'], ['month', 'This month']].map(([p, l]) => (
+                        <button key={p} onClick={() => setPeriod(p)} style={{
+                          padding: '6px 13px', borderRadius: '16px', fontSize: '11px', fontWeight: 600, cursor: 'pointer',
+                          fontFamily: ui, border: `1px solid ${period === p ? C.ink : C.border}`,
+                          background: period === p ? C.ink : '#fff', color: period === p ? '#fff' : C.muted,
+                        }}>{l}</button>
+                      ))}
+                    </div>
+                  </div>
+                  <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
+                    {[['REVENUE', fmt(pRevenue), C.green], ['TICKETS', pOrders.toLocaleString(), C.sub],
+                      ['TIRES SOLD', pUnits.toLocaleString(), C.sub], ['AVG TICKET', fmt(pAvg), C.sub]].map(([l, v, col]) => (
+                      <div key={l} style={{ flex: 1, minWidth: '120px', background: C.hover, borderRadius: '9px', padding: '11px 14px' }}>
+                        <div style={{ fontSize: '9px', color: C.muted, letterSpacing: '0.12em', marginBottom: '5px', fontFamily: ui, fontWeight: 600 }}>{l}</div>
+                        <div style={{ fontSize: '18px', color: C.ink, fontWeight: 700, fontFamily: ui }}>{v}</div>
+                        <div style={{ fontSize: '9px', color: col, marginTop: '3px', fontFamily: ui }}>{periodLabel}</div>
+                      </div>
+                    ))}
+                  </div>
                 </div>
 
                 {/* Tabs */}
-                <div style={{ display: 'flex', gap: '2px', borderBottom: '1px solid #E5E5E5', marginBottom: '20px' }}>
+                <div style={{ display: 'flex', gap: '2px', borderBottom: `1px solid ${C.border}`, marginBottom: '20px' }}>
                   {tabs.map(t => (
                     <button key={t.id} onClick={() => setActiveTab(t.id)} style={{
-                      padding: '8px 16px', fontSize: '10px', fontFamily: 'Inter, sans-serif',
+                      padding: '8px 16px', fontSize: '10px', fontFamily: ui, fontWeight: 600,
                       letterSpacing: '0.08em', background: 'none', border: 'none', cursor: 'pointer',
-                      color: activeTab === t.id ? '#1a1a1a' : '#888',
-                      borderBottom: activeTab === t.id ? `2px solid ${THEME.accent}` : '2px solid transparent',
+                      color: activeTab === t.id ? C.ink : C.muted,
+                      borderBottom: activeTab === t.id ? `2px solid ${C.red}` : '2px solid transparent',
                       marginBottom: '-1px',
                     }}>{t.label}</button>
                   ))}
@@ -194,88 +227,83 @@ export default function Dashboard() {
                 {/* Overview Tab */}
                 {activeTab === 'overview' && (
                   <>
-                    <div style={{ display: 'grid', gridTemplateColumns: '1.6fr 1fr', gap: '16px', marginBottom: '20px' }}>
+                    <div style={{ display: 'grid', gridTemplateColumns: '1.6fr 1fr', gap: '16px', marginBottom: '16px' }}>
 
-                      {/* Monthly chart */}
-                      <div style={{ background: '#fff', border: '1px solid #E5E5E5', borderRadius: '6px', padding: '16px' }}>
-                        <div style={{ fontSize: '9px', color: '#888', letterSpacing: '0.15em', marginBottom: '12px', fontFamily: 'Inter, sans-serif' }}>MONTHLY REVENUE / EXPENSES / PROFIT</div>
-                        <div style={{ display: 'flex', gap: '12px', marginBottom: '10px' }}>
-                          {[['#CC2222','Revenue'],['#D0D0D0','Expenses'],['#16a34a','Profit']].map(([c, l]) => (
-                            <span key={l} style={{ display: 'flex', alignItems: 'center', gap: '4px', fontSize: '9px', color: '#888', fontFamily: 'Inter, sans-serif' }}>
-                              <span style={{ width: '8px', height: '8px', background: c, borderRadius: '1px', display: 'inline-block' }} />{l}
+                      {/* Monthly chart with profit trend line */}
+                      <div style={cardStyle}>
+                        <div style={capLabel}>REVENUE, EXPENSES &amp; PROFIT BY MONTH</div>
+                        <div style={{ display: 'flex', gap: '14px', marginBottom: '10px' }}>
+                          {[[C.red,'Revenue'],['#D8CDB4','Expenses'],[C.green,'Profit']].map(([c, l]) => (
+                            <span key={l} style={{ display: 'flex', alignItems: 'center', gap: '5px', fontSize: '9px', color: C.muted, fontFamily: ui, fontWeight: 500 }}>
+                              <span style={{ width: '8px', height: '8px', background: c, borderRadius: '2px', display: 'inline-block' }} />{l}
                             </span>
                           ))}
                         </div>
-                        <ResponsiveContainer width="100%" height={160}>
-                          <BarChart data={monthly} barGap={2} barCategoryGap="25%">
-                            <CartesianGrid strokeDasharray="3 3" stroke="#F0F0F0" vertical={false} />
-                            <XAxis dataKey="label" tick={{ fontSize: 10, fill: '#888', fontFamily: 'Inter, sans-serif' }} axisLine={false} tickLine={false} />
-                            <YAxis tick={{ fontSize: 10, fill: '#888', fontFamily: 'Inter, sans-serif' }} axisLine={false} tickLine={false} tickFormatter={v => `$${(v / 1000).toFixed(0)}k`} />
-                            <Tooltip content={<CustomTooltip />} />
-                            <Bar dataKey="revenue"  name="Revenue"  fill="#CC2222" radius={[2,2,0,0]} />
-                            <Bar dataKey="expenses" name="Expenses" fill="#D0D0D0" radius={[2,2,0,0]} />
-                            <Bar dataKey="profit"   name="Profit"   fill="#16a34a" radius={[2,2,0,0]} />
-                          </BarChart>
+                        <ResponsiveContainer width="100%" height={200}>
+                          <ComposedChart data={monthly} barGap={2} barCategoryGap="24%">
+                            <CartesianGrid strokeDasharray="3 3" stroke="#EDE6D6" vertical={false} />
+                            <XAxis dataKey="label" tick={{ fontSize: 10, fill: C.muted, fontFamily: ui }} axisLine={false} tickLine={false} />
+                            <YAxis tick={{ fontSize: 10, fill: C.muted, fontFamily: ui }} axisLine={false} tickLine={false} tickFormatter={v => `$${(v / 1000).toFixed(0)}k`} />
+                            <Tooltip content={<CustomTooltip />} cursor={{ fill: 'rgba(204,34,34,0.04)' }} />
+                            <Bar dataKey="revenue"  name="Revenue"  fill={C.red} radius={[3,3,0,0]} />
+                            <Bar dataKey="expenses" name="Expenses" fill="#D8CDB4" radius={[3,3,0,0]} />
+                            <Line dataKey="profit"  name="Profit"   stroke={C.green} strokeWidth={2.5} dot={{ r: 3, fill: C.green }} />
+                          </ComposedChart>
                         </ResponsiveContainer>
                       </div>
 
                       {/* Monthly profit table */}
-                      <div style={{ background: '#fff', border: '1px solid #E5E5E5', borderRadius: '6px', padding: '16px' }}>
-                        <div style={{ fontSize: '9px', color: '#888', letterSpacing: '0.15em', marginBottom: '12px', fontFamily: 'Inter, sans-serif' }}>PROFIT BY MONTH</div>
-                        <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '11px', fontFamily: 'Inter, sans-serif' }}>
+                      <div style={cardStyle}>
+                        <div style={capLabel}>PROFIT BY MONTH</div>
+                        <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '11px', fontFamily: ui }}>
                           <thead>
-                            <tr>
-                              {['Month','Profit','Margin'].map(h => (
-                                <th key={h} style={hcell(h === 'Month' ? 'left' : 'right')}>{h}</th>
-                              ))}
-                            </tr>
+                            <tr>{['Month','Profit','Margin'].map(h => (<th key={h} style={hcell(h === 'Month' ? 'left' : 'right')}>{h}</th>))}</tr>
                           </thead>
                           <tbody>
                             {monthly.map(m => (
-                              <tr key={m.month} onMouseEnter={e => e.currentTarget.style.background = '#F8F8F8'} onMouseLeave={e => e.currentTarget.style.background = 'transparent'}>
-                                <td style={{ padding: '7px 8px', borderBottom: '1px solid #F0F0F0', color: '#333' }}>
-                                  {m.label}{m.notes && <span style={{ fontSize: '8px', color: THEME.accent, marginLeft: '4px' }}>*est</span>}
+                              <tr key={m.month} onMouseEnter={e => e.currentTarget.style.background = C.hover} onMouseLeave={e => e.currentTarget.style.background = 'transparent'}>
+                                <td style={{ padding: '7px 8px', borderBottom: '1px solid #F1EADB', color: C.ink }}>
+                                  {m.label}{m.notes && <span style={{ fontSize: '8px', color: C.red, marginLeft: '4px' }}>*est</span>}
                                 </td>
-                                <td style={{ padding: '7px 8px', borderBottom: '1px solid #F0F0F0', color: '#16a34a', textAlign: 'right' }}>{fmt(m.profit)}</td>
-                                <td style={{ padding: '7px 8px', borderBottom: '1px solid #F0F0F0', textAlign: 'right' }}>
-                                  <span style={{ background: '#dcfce7', color: '#16a34a', padding: '1px 6px', borderRadius: '3px', fontSize: '9px' }}>
+                                <td style={{ padding: '7px 8px', borderBottom: '1px solid #F1EADB', color: C.green, textAlign: 'right', fontWeight: 600 }}>{fmt(m.profit)}</td>
+                                <td style={{ padding: '7px 8px', borderBottom: '1px solid #F1EADB', textAlign: 'right' }}>
+                                  <span style={{ background: C.greenBg, color: C.green, padding: '1px 6px', borderRadius: '4px', fontSize: '9px', fontWeight: 600 }}>
                                     {m.revenue > 0 ? pct(m.profit / m.revenue * 100) : '—'}
                                   </span>
                                 </td>
                               </tr>
                             ))}
                             <tr>
-                              <td style={{ padding: '8px 8px', color: '#1a1a1a', fontWeight: '700', borderTop: '2px solid #E5E5E5', background: '#FAFAFA' }}>TOTAL</td>
-                              <td style={{ padding: '8px 8px', color: '#16a34a', fontWeight: '700', textAlign: 'right', borderTop: '2px solid #E5E5E5', background: '#FAFAFA' }}>{fmt(totalProfit)}</td>
-                              <td style={{ padding: '8px 8px', textAlign: 'right', borderTop: '2px solid #E5E5E5', background: '#FAFAFA' }}>
-                                <span style={{ background: '#dcfce7', color: '#16a34a', padding: '1px 6px', borderRadius: '3px', fontSize: '9px' }}>{avgMargin}%</span>
+                              <td style={{ padding: '8px 8px', color: C.ink, fontWeight: 700, borderTop: `2px solid ${C.border}`, background: C.headBg }}>TOTAL</td>
+                              <td style={{ padding: '8px 8px', color: C.green, fontWeight: 700, textAlign: 'right', borderTop: `2px solid ${C.border}`, background: C.headBg }}>{fmt(totalProfit)}</td>
+                              <td style={{ padding: '8px 8px', textAlign: 'right', borderTop: `2px solid ${C.border}`, background: C.headBg }}>
+                                <span style={{ background: C.greenBg, color: C.green, padding: '1px 6px', borderRadius: '4px', fontSize: '9px', fontWeight: 600 }}>{avgMargin}%</span>
                               </td>
                             </tr>
                           </tbody>
                         </table>
-                        <div style={{ marginTop: '10px', fontSize: '9px', color: '#888', fontFamily: 'Inter, sans-serif' }}>* May COGS estimated</div>
                       </div>
                     </div>
 
                     {/* Top sellers this period (live) */}
-                    <div style={{ background: '#fff', border: '1px solid #E5E5E5', borderRadius: '6px', padding: '16px' }}>
+                    <div style={cardStyle}>
                       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '14px' }}>
-                        <div style={{ fontSize: '9px', color: '#888', letterSpacing: '0.15em', fontFamily: 'Inter, sans-serif' }}>TOP SELLERS — {periodLabel.toUpperCase()}</div>
-                        <button onClick={() => router.push('/inventory')} style={{ fontSize: '10px', color: THEME.accent, background: 'none', border: 'none', cursor: 'pointer', fontFamily: 'Inter, sans-serif' }}>ALL ITEMS →</button>
+                        <div style={{ ...capLabel, marginBottom: 0 }}>TOP SELLERS — {periodLabel.toUpperCase()}</div>
+                        <button onClick={() => router.push('/inventory')} style={{ fontSize: '10px', color: C.red, background: 'none', border: 'none', cursor: 'pointer', fontFamily: ui, fontWeight: 600 }}>ALL ITEMS →</button>
                       </div>
                       {periodTop.length === 0 ? (
-                        <div style={{ fontSize: '12px', color: '#888', fontFamily: 'Inter, sans-serif', padding: '8px 0' }}>No sales in this period yet.</div>
+                        <div style={{ fontSize: '12px', color: C.muted, fontFamily: ui, padding: '8px 0' }}>No sales in this period yet.</div>
                       ) : periodTop.map((t, i) => (
-                        <div key={t.name} style={{ padding: '9px 0', borderTop: i ? '1px solid #F4F4F4' : 'none' }}>
+                        <div key={t.name} style={{ padding: '9px 0', borderTop: i ? '1px solid #F1EADB' : 'none' }}>
                           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', gap: '10px', marginBottom: '5px' }}>
-                            <span style={{ fontSize: '13px', color: '#1a1a1a', fontWeight: 500, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{t.name}</span>
-                            <span style={{ fontSize: '13px', color: '#1a1a1a', fontWeight: 600, whiteSpace: 'nowrap' }}>{fmt(t.revenue)}</span>
+                            <span style={{ fontSize: '13px', color: C.ink, fontWeight: 500, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{t.name}</span>
+                            <span style={{ fontSize: '13px', color: C.ink, fontWeight: 600, whiteSpace: 'nowrap' }}>{fmt(t.revenue)}</span>
                           </div>
                           <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                            <div style={{ flex: 1, height: '5px', background: '#F0F0F0', borderRadius: '3px', overflow: 'hidden' }}>
-                              <div style={{ width: `${Math.round(t.revenue / periodMax * 100)}%`, height: '100%', background: THEME.accent }} />
+                            <div style={{ flex: 1, height: '6px', background: '#F1EADB', borderRadius: '3px', overflow: 'hidden' }}>
+                              <div style={{ width: `${Math.round(t.revenue / periodMax * 100)}%`, height: '100%', background: `linear-gradient(90deg, ${C.red}, #e05a3a)` }} />
                             </div>
-                            <span style={{ fontSize: '10px', color: '#888', whiteSpace: 'nowrap', minWidth: '54px', textAlign: 'right' }}>{t.units} sold</span>
+                            <span style={{ fontSize: '10px', color: C.muted, whiteSpace: 'nowrap', minWidth: '54px', textAlign: 'right' }}>{t.units} sold</span>
                           </div>
                         </div>
                       ))}
@@ -285,33 +313,27 @@ export default function Dashboard() {
 
                 {/* Sales & Items Tab */}
                 {activeTab === 'inventory' && (
-                  <div style={{ background: '#fff', border: '1px solid #E5E5E5', borderRadius: '6px', overflow: 'hidden' }}>
-                    <div style={{ padding: '14px 16px', borderBottom: '1px solid #E5E5E5', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                      <div style={{ fontSize: '9px', color: '#888', letterSpacing: '0.15em', fontFamily: 'Inter, sans-serif' }}>ALL ITEMS — RANKED BY REVENUE</div>
-                      <button onClick={() => router.push('/inventory')} style={{ fontSize: '10px', color: THEME.accent, background: 'none', border: 'none', cursor: 'pointer', fontFamily: 'Inter, sans-serif' }}>FULL PAGE →</button>
+                  <div style={{ background: C.card, border: `1px solid ${C.border}`, borderRadius: '12px', overflow: 'hidden', boxShadow: C.shadow }}>
+                    <div style={{ padding: '14px 16px', borderBottom: `1px solid ${C.border}`, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                      <div style={{ ...capLabel, marginBottom: 0 }}>ALL ITEMS — RANKED BY REVENUE</div>
+                      <button onClick={() => router.push('/inventory')} style={{ fontSize: '10px', color: C.red, background: 'none', border: 'none', cursor: 'pointer', fontFamily: ui, fontWeight: 600 }}>FULL PAGE →</button>
                     </div>
-                    {(
-                      <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '11px', fontFamily: 'Inter, sans-serif' }}>
-                        <thead>
-                          <tr>
-                            {['#','Item','Orders','Revenue','Avg Sale'].map(h => (
-                              <th key={h} style={hcell(h === '#' || h === 'Item' ? 'left' : 'right')}>{h}</th>
-                            ))}
+                    <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '11px', fontFamily: ui }}>
+                      <thead>
+                        <tr>{['#','Item','Orders','Revenue','Avg Sale'].map(h => (<th key={h} style={hcell(h === '#' || h === 'Item' ? 'left' : 'right')}>{h}</th>))}</tr>
+                      </thead>
+                      <tbody>
+                        {topItems.map((item, i) => (
+                          <tr key={item.name} onMouseEnter={e => e.currentTarget.style.background = C.hover} onMouseLeave={e => e.currentTarget.style.background = 'transparent'}>
+                            <td style={{ padding: '8px 8px', borderBottom: '1px solid #F1EADB', color: C.muted, width: '32px' }}>{i + 1}</td>
+                            <td style={{ padding: '8px 8px', borderBottom: '1px solid #F1EADB', color: i < 3 ? C.ink : '#4a4438', fontWeight: i < 3 ? '600' : '400', maxWidth: '260px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{item.name}</td>
+                            <td style={{ padding: '8px 8px', borderBottom: '1px solid #F1EADB', color: C.muted, textAlign: 'right' }}>{item.orders}</td>
+                            <td style={{ padding: '8px 8px', borderBottom: '1px solid #F1EADB', color: i < 3 ? C.green : '#4a4438', fontWeight: i < 3 ? '600' : '400', textAlign: 'right' }}>{fmt(item.revenue)}</td>
+                            <td style={{ padding: '8px 8px', borderBottom: '1px solid #F1EADB', color: C.muted, textAlign: 'right' }}>{fmtD(item.revenue / item.orders)}</td>
                           </tr>
-                        </thead>
-                        <tbody>
-                          {topItems.map((item, i) => (
-                            <tr key={item.name} onMouseEnter={e => e.currentTarget.style.background = '#F8F8F8'} onMouseLeave={e => e.currentTarget.style.background = 'transparent'}>
-                              <td style={{ padding: '8px 8px', borderBottom: '1px solid #F0F0F0', color: '#888', width: '32px' }}>{i + 1}</td>
-                              <td style={{ padding: '8px 8px', borderBottom: '1px solid #F0F0F0', color: i < 3 ? '#1a1a1a' : '#333', fontWeight: i < 3 ? '600' : '400', maxWidth: '260px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{item.name}</td>
-                              <td style={{ padding: '8px 8px', borderBottom: '1px solid #F0F0F0', color: '#888', textAlign: 'right' }}>{item.orders}</td>
-                              <td style={{ padding: '8px 8px', borderBottom: '1px solid #F0F0F0', color: i < 3 ? '#16a34a' : '#333', fontWeight: i < 3 ? '600' : '400', textAlign: 'right' }}>{fmt(item.revenue)}</td>
-                              <td style={{ padding: '8px 8px', borderBottom: '1px solid #F0F0F0', color: '#888', textAlign: 'right' }}>{fmtD(item.revenue / item.orders)}</td>
-                            </tr>
-                          ))}
-                        </tbody>
-                      </table>
-                    )}
+                        ))}
+                      </tbody>
+                    </table>
                   </div>
                 )}
               </>

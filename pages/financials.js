@@ -30,8 +30,8 @@ const cell = (align = 'left', extra = {}) => ({
   textAlign: align, ...extra,
 })
 const hcell = (align = 'left') => ({
-  padding: '6px 10px', fontSize: '9px', color: '#888', background: '#FAFAFA',
-  fontWeight: '400', letterSpacing: '0.1em', borderBottom: '1px solid #E5E5E5',
+  padding: '6px 10px', fontSize: '9px', color: '#888', background: '#FAF6EC',
+  fontWeight: '400', letterSpacing: '0.1em', borderBottom: '1px solid #E7DECB',
   fontFamily: 'Inter, sans-serif', textAlign: align,
 })
 
@@ -59,11 +59,11 @@ function DrillModal({ account, onClose }) {
       display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 200,
     }}>
       <div onClick={e => e.stopPropagation()} style={{
-        background: '#fff', border: '1px solid #E5E5E5', borderRadius: '8px',
+        background: '#fff', border: '1px solid #E7DECB', borderRadius: '12px',
         width: '620px', maxHeight: '520px', display: 'flex', flexDirection: 'column',
-        boxShadow: '0 8px 32px rgba(0,0,0,0.12)',
+        boxShadow: '0 8px 32px rgba(40,30,10,0.18)',
       }}>
-        <div style={{ padding: '16px 20px', borderBottom: '1px solid #E5E5E5', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+        <div style={{ padding: '16px 20px', borderBottom: '1px solid #E7DECB', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
           <div style={{ fontSize: '12px', color: '#1a1a1a', fontFamily: 'Inter, sans-serif', letterSpacing: '0.1em', fontWeight: '600' }}>{account}</div>
           <button onClick={onClose} style={{ background: 'none', border: 'none', color: '#888', cursor: 'pointer', fontSize: '20px', lineHeight: 1 }}>×</button>
         </div>
@@ -82,7 +82,7 @@ function DrillModal({ account, onClose }) {
               </thead>
               <tbody>
                 {txns.map((t, i) => (
-                  <tr key={i} onMouseEnter={e => e.currentTarget.style.background = '#F8F8F8'} onMouseLeave={e => e.currentTarget.style.background = 'transparent'}>
+                  <tr key={i} onMouseEnter={e => e.currentTarget.style.background = '#F5EFE3'} onMouseLeave={e => e.currentTarget.style.background = 'transparent'}>
                     <td style={cell('left')}>{t.date}</td>
                     <td style={{ ...cell('left'), color: '#888', maxWidth: '260px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{t.description}</td>
                     <td style={{ ...cell('left'), color: '#888' }}>{t.type}</td>
@@ -97,7 +97,7 @@ function DrillModal({ account, onClose }) {
           )}
         </div>
         {txns.length === 500 && (
-          <div style={{ padding: '10px 20px', borderTop: '1px solid #E5E5E5', fontSize: '9px', color: '#888', fontFamily: 'Inter, sans-serif' }}>
+          <div style={{ padding: '10px 20px', borderTop: '1px solid #E7DECB', fontSize: '9px', color: '#888', fontFamily: 'Inter, sans-serif' }}>
             Showing most recent 500 transactions
           </div>
         )}
@@ -232,7 +232,7 @@ export default function Financials() {
                   </div>
                 )}
                 {/* Tabs */}
-                <div style={{ display: 'flex', gap: '2px', borderBottom: '1px solid #E5E5E5', marginBottom: '20px' }}>
+                <div style={{ display: 'flex', gap: '2px', borderBottom: '1px solid #E7DECB', marginBottom: '20px' }}>
                   {tabs.map(t => (
                     <button key={t.id} onClick={() => setActiveTab(t.id)} style={{
                       padding: '8px 16px', fontSize: '10px', fontFamily: 'Inter, sans-serif',
@@ -250,7 +250,7 @@ export default function Financials() {
                     {PL_ROWS.map(section => {
                       const sectionTotal = section.rows.reduce((s, r) => s + r.amount, 0)
                       return (
-                        <div key={section.section} style={{ background: '#fff', border: '1px solid #E5E5E5', borderRadius: '6px', padding: '16px' }}>
+                        <div key={section.section} style={{ background: '#fff', border: '1px solid #E7DECB', borderRadius: '10px', boxShadow: '0 1px 3px rgba(60,45,20,0.05)', padding: '16px' }}>
                           <div style={{ fontSize: '9px', color: '#888', letterSpacing: '0.15em', marginBottom: '12px', paddingBottom: '8px', borderBottom: '1px solid #F0F0F0', fontFamily: 'Inter, sans-serif' }}>{section.section}</div>
                           <table style={{ width: '100%', borderCollapse: 'collapse' }}>
                             <thead>
@@ -263,7 +263,7 @@ export default function Financials() {
                             </thead>
                             <tbody>
                               {section.rows.map(row => (
-                                <tr key={row.label} onMouseEnter={e => e.currentTarget.style.background = '#F8F8F8'} onMouseLeave={e => e.currentTarget.style.background = 'transparent'}>
+                                <tr key={row.label} onMouseEnter={e => e.currentTarget.style.background = '#F5EFE3'} onMouseLeave={e => e.currentTarget.style.background = 'transparent'}>
                                   <td style={cell('left', { color: '#1a1a1a' })}>{row.label}</td>
                                   <td style={cell('right', { color: row.amount >= 0 ? '#16a34a' : THEME.accent })}>{fmt(row.amount)}</td>
                                   <td style={cell('right', { color: '#888' })}>{row.txns || '—'}</td>
@@ -273,7 +273,7 @@ export default function Financials() {
                                     ) : row.account ? (
                                       <button onClick={() => setDrillAccount(row.account)} style={{
                                         fontSize: '9px', background: '#F5F5F5', color: THEME.accent,
-                                        border: '1px solid #E5E5E5', padding: '2px 8px', borderRadius: '3px',
+                                        border: '1px solid #E7DECB', padding: '2px 8px', borderRadius: '3px',
                                         cursor: 'pointer', fontFamily: 'Inter, sans-serif',
                                       }}>DRILL →</button>
                                     ) : null}
@@ -281,7 +281,7 @@ export default function Financials() {
                                 </tr>
                               ))}
                               <tr>
-                                <td colSpan={4} style={{ padding: '8px 10px', borderTop: '1px solid #E5E5E5', fontFamily: 'Inter, sans-serif', fontSize: '11px', color: '#1a1a1a', fontWeight: '600', textAlign: 'right' }}>
+                                <td colSpan={4} style={{ padding: '8px 10px', borderTop: '1px solid #E7DECB', fontFamily: 'Inter, sans-serif', fontSize: '11px', color: '#1a1a1a', fontWeight: '600', textAlign: 'right' }}>
                                   {section.section === 'INCOME' ? 'Total Income: ' :
                                    section.section === 'COST OF GOODS SOLD' ? 'Gross Profit: ' :
                                    section.section === 'OPERATING EXPENSES' ? 'Total Operating Expenses: ' :
@@ -316,23 +316,23 @@ export default function Financials() {
                   const totA = tot('asset'), totL = tot('liability'), totE = tot('equity')
                   const balanced = Math.abs(totA - totL - totE) < 0.01
                   const Section = ({ title, rows, total }) => (
-                    <div style={{ background: '#fff', border: '1px solid #E5E5E5', borderRadius: '6px', padding: '16px' }}>
+                    <div style={{ background: '#fff', border: '1px solid #E7DECB', borderRadius: '10px', boxShadow: '0 1px 3px rgba(60,45,20,0.05)', padding: '16px' }}>
                       <div style={{ fontSize: '9px', color: '#888', letterSpacing: '0.15em', marginBottom: '12px', paddingBottom: '8px', borderBottom: '1px solid #F0F0F0', fontFamily: 'Inter, sans-serif' }}>{title}</div>
                       <table style={{ width: '100%', borderCollapse: 'collapse' }}>
                         <tbody>
                           {rows.map(r => (
-                            <tr key={r.account} onMouseEnter={e => e.currentTarget.style.background = '#F8F8F8'} onMouseLeave={e => e.currentTarget.style.background = 'transparent'}>
+                            <tr key={r.account} onMouseEnter={e => e.currentTarget.style.background = '#F5EFE3'} onMouseLeave={e => e.currentTarget.style.background = 'transparent'}>
                               <td style={cell('left', { color: r.account === 'Net Income' ? '#16a34a' : '#1a1a1a' })}>{r.account}</td>
                               <td style={cell('right', { color: r.amount >= 0 ? '#1a1a1a' : THEME.accent })}>{fmt(r.amount)}</td>
                               <td style={cell('right')}>
                                 {r.account !== 'Net Income' && (
-                                  <button onClick={() => setDrillAccount(r.account)} style={{ fontSize: '9px', background: '#F5F5F5', color: THEME.accent, border: '1px solid #E5E5E5', padding: '2px 8px', borderRadius: '3px', cursor: 'pointer', fontFamily: 'Inter, sans-serif' }}>DRILL →</button>
+                                  <button onClick={() => setDrillAccount(r.account)} style={{ fontSize: '9px', background: '#F5F5F5', color: THEME.accent, border: '1px solid #E7DECB', padding: '2px 8px', borderRadius: '3px', cursor: 'pointer', fontFamily: 'Inter, sans-serif' }}>DRILL →</button>
                                 )}
                               </td>
                             </tr>
                           ))}
                           <tr>
-                            <td colSpan={3} style={{ padding: '8px 10px', borderTop: '1px solid #E5E5E5', fontFamily: 'Inter, sans-serif', fontSize: '11px', color: '#1a1a1a', fontWeight: '600', textAlign: 'right' }}>
+                            <td colSpan={3} style={{ padding: '8px 10px', borderTop: '1px solid #E7DECB', fontFamily: 'Inter, sans-serif', fontSize: '11px', color: '#1a1a1a', fontWeight: '600', textAlign: 'right' }}>
                               Total {title.charAt(0) + title.slice(1).toLowerCase()}: <span>{fmt(total)}</span>
                             </td>
                           </tr>
@@ -360,7 +360,7 @@ export default function Financials() {
 
                 {/* Monthly Table Tab */}
                 {activeTab === 'monthly' && (
-                  <div style={{ background: '#fff', border: '1px solid #E5E5E5', borderRadius: '6px', padding: '16px' }}>
+                  <div style={{ background: '#fff', border: '1px solid #E7DECB', borderRadius: '10px', boxShadow: '0 1px 3px rgba(60,45,20,0.05)', padding: '16px' }}>
                     <div style={{ fontSize: '9px', color: '#888', letterSpacing: '0.15em', marginBottom: '12px', fontFamily: 'Inter, sans-serif' }}>MONTHLY P&L — FROM QUICKBOOKS</div>
                     <table style={{ width: '100%', borderCollapse: 'collapse', fontFamily: 'Inter, sans-serif' }}>
                       <thead>
@@ -372,7 +372,7 @@ export default function Financials() {
                       </thead>
                       <tbody>
                         {monthly.map((m, i) => (
-                          <tr key={i} onMouseEnter={e => e.currentTarget.style.background = '#F8F8F8'} onMouseLeave={e => e.currentTarget.style.background = 'transparent'}>
+                          <tr key={i} onMouseEnter={e => e.currentTarget.style.background = '#F5EFE3'} onMouseLeave={e => e.currentTarget.style.background = 'transparent'}>
                             <td style={cell('left', { color: '#1a1a1a', fontWeight: '600' })}>
                               {m.label}
                               {m.notes && <span style={{ marginLeft: '6px', fontSize: '8px', color: '#92400e' }}>*est</span>}
@@ -397,7 +397,7 @@ export default function Financials() {
                             { v: fmt(totals.profit),                         a: 'right', c: '#16a34a', w: '700' },
                             { v: pct(totals.profit / totals.revenue * 100),  a: 'right', c: '#16a34a', w: '700' },
                           ].map((col, i) => (
-                            <td key={i} style={{ padding: '9px 10px', borderTop: '2px solid #E5E5E5', background: '#FAFAFA', color: col.c, fontSize: '11px', fontWeight: col.w, fontFamily: 'Inter, sans-serif', textAlign: col.a }}>{col.v}</td>
+                            <td key={i} style={{ padding: '9px 10px', borderTop: '2px solid #E7DECB', background: '#FAF6EC', color: col.c, fontSize: '11px', fontWeight: col.w, fontFamily: 'Inter, sans-serif', textAlign: col.a }}>{col.v}</td>
                           ))}
                         </tr>
                       </tbody>
@@ -418,18 +418,18 @@ export default function Financials() {
                       const maxV = Math.max(...group.rows.map(r => r.amount), 1)
                       const groupTotal = group.rows.reduce((s, r) => s + r.amount, 0)
                       return (
-                        <div key={group.heading} style={{ background: '#fff', border: '1px solid #E5E5E5', borderRadius: '6px', padding: '16px' }}>
+                        <div key={group.heading} style={{ background: '#fff', border: '1px solid #E7DECB', borderRadius: '10px', boxShadow: '0 1px 3px rgba(60,45,20,0.05)', padding: '16px' }}>
                           <div style={{ fontSize: '9px', color: '#888', letterSpacing: '0.15em', marginBottom: '14px', fontFamily: 'Inter, sans-serif' }}>{group.heading}</div>
                           {[...group.rows].sort((a, b) => b.amount - a.amount).map(e => (
                             <div key={e.label} style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '7px 0', borderBottom: '1px solid #F0F0F0' }}>
                               <div style={{ width: '180px', fontSize: '10px', color: '#333', flexShrink: 0, fontFamily: 'Inter, sans-serif' }}>{e.label}</div>
-                              <div style={{ flex: 1, height: '5px', background: '#E5E5E5', borderRadius: '3px' }}>
+                              <div style={{ flex: 1, height: '5px', background: '#E7DECB', borderRadius: '3px' }}>
                                 <div style={{ height: '5px', background: THEME.accent, borderRadius: '3px', width: `${Math.round(e.amount / maxV * 100)}%` }} />
                               </div>
                               <div style={{ width: '70px', textAlign: 'right', fontSize: '10px', color: THEME.accent, fontFamily: 'Inter, sans-serif' }}>{fmt(e.amount)}</div>
                             </div>
                           ))}
-                          <div style={{ display: 'flex', justifyContent: 'flex-end', paddingTop: '8px', borderTop: '1px solid #E5E5E5', marginTop: '4px' }}>
+                          <div style={{ display: 'flex', justifyContent: 'flex-end', paddingTop: '8px', borderTop: '1px solid #E7DECB', marginTop: '4px' }}>
                             <span style={{ fontSize: '10px', color: '#1a1a1a', fontFamily: 'Inter, sans-serif', fontWeight: '600' }}>Total: {fmt(groupTotal)}</span>
                           </div>
                         </div>
@@ -440,7 +440,7 @@ export default function Financials() {
 
                 {/* Accounts Tab */}
                 {activeTab === 'accounts' && (
-                  <div style={{ background: '#fff', border: '1px solid #E5E5E5', borderRadius: '6px', padding: '16px' }}>
+                  <div style={{ background: '#fff', border: '1px solid #E7DECB', borderRadius: '10px', boxShadow: '0 1px 3px rgba(60,45,20,0.05)', padding: '16px' }}>
                     <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', marginBottom: '12px' }}>
                       <div style={{ fontSize: '9px', color: '#888', letterSpacing: '0.15em', fontFamily: 'Inter, sans-serif' }}>ACCOUNT BALANCES — CLICK TO DRILL DOWN</div>
                       <div style={{ fontSize: '9px', color: '#888', fontFamily: 'Inter, sans-serif' }}>
@@ -463,7 +463,7 @@ export default function Financials() {
                           const sub = parent ? `↳ sub-account of ${parent}` : (ACCOUNT_DESC[a.name] || a.types.slice(0, 3).join(', '))
                           return (
                             <tr key={a.name} onClick={() => setDrillAccount(a.name)} style={{ cursor: 'pointer' }}
-                              onMouseEnter={e => e.currentTarget.style.background = '#F8F8F8'}
+                              onMouseEnter={e => e.currentTarget.style.background = '#F5EFE3'}
                               onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
                             >
                               <td style={cell('left', { color: '#1a1a1a' })}>
@@ -521,14 +521,14 @@ export default function Financials() {
                           ⚠ {cloverFailed ? 'The last Clover sync FAILED.' : 'Clover data looks stale — no successful sync in over 36 hours.'} Check the API token / cron.
                         </div>
                       )}
-                      <div style={{ background: '#fff', border: '1px solid #E5E5E5', borderRadius: '6px', padding: '16px' }}>
+                      <div style={{ background: '#fff', border: '1px solid #E7DECB', borderRadius: '10px', boxShadow: '0 1px 3px rgba(60,45,20,0.05)', padding: '16px' }}>
                         <div style={{ fontSize: '9px', color: '#888', letterSpacing: '0.15em', marginBottom: '8px', fontFamily: 'Inter, sans-serif' }}>DATA FRESHNESS</div>
                         <Row k="Clover sales" v={ago(health?.cloverLastSynced)} sub={health?.cloverLastSynced ? new Date(health.cloverLastSynced).toLocaleString() : ''} bad={cloverStale} />
                         <Row k="Last Clover sync" v={health?.lastCloverSync ? (health.lastCloverSync.ok ? 'OK' : 'FAILED') : '—'} sub={health?.lastCloverSync ? ago(health.lastCloverSync.ran_at) : ''} bad={cloverFailed} />
                         <Row k="Weldon orders" v={ago(health?.weldonLastAdded)} sub={health?.weldonLastAdded ? new Date(health.weldonLastAdded).toLocaleString() : ''} />
                         <Row k="Financials" v={health?.lastImport ? ago(health.lastImport.imported_at) : '—'} sub={health?.lastImport ? `last ${health.lastImport.kind} import` : ''} />
                       </div>
-                      <div style={{ background: '#fff', border: '1px solid #E5E5E5', borderRadius: '6px', padding: '16px' }}>
+                      <div style={{ background: '#fff', border: '1px solid #E7DECB', borderRadius: '10px', boxShadow: '0 1px 3px rgba(60,45,20,0.05)', padding: '16px' }}>
                         <div style={{ fontSize: '9px', color: '#888', letterSpacing: '0.15em', marginBottom: '8px', fontFamily: 'Inter, sans-serif' }}>RECONCILIATION</div>
                         <Check ok={bsBalanced} label="Balance sheet balances" detail={`${fmt(bsAssets)} = ${fmt(bsLE)}`} />
                         <Check ok={niTie} label="Net income ties P&L → Balance Sheet" detail={`${fmt(plNetIncome)} / ${fmt(niBs)}`} />
