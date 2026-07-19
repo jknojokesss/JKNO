@@ -124,7 +124,6 @@ export default function Inventory() {
   const totalUnits   = periodItems.reduce((s, i) => s + i.qty, 0)
   const totalOrders  = periodItems.reduce((s, i) => s + i.orders, 0)
   const avgOrder     = totalOrders > 0 ? totalRevenue / totalOrders : 0
-  const maxRevenue   = Math.max(...periodItems.map(i => i.revenue), 1)
   const periodTitle  = period === 'all' ? 'All time' : monthLabel(period)
 
   const tabs = [
@@ -186,6 +185,9 @@ export default function Inventory() {
                   const shortLbl = (k) => monthLabel(k).split(' ')[0]
                   const dCol = d => d === 0 ? '#a39a88' : d > 0 ? '#16a34a' : '#b0483a'
                   const dStr = d => d === 0 ? '—' : (d > 0 ? '+' : '−') + Math.abs(d)
+                  const LIMIT = 25
+                  const shownSingle = search ? sorted : sorted.slice(0, LIMIT)
+                  const shownCmp = search ? cmpRows : cmpRows.slice(0, LIMIT)
                   return (
                   <>
                     {/* Period selector + compare */}
@@ -251,7 +253,7 @@ export default function Inventory() {
                           </tr>
                         </thead>
                         <tbody>
-                          {cmpRows.map(r => (
+                          {shownCmp.map(r => (
                             <tr key={r.name} onMouseEnter={e => e.currentTarget.style.background = '#F5EFE3'} onMouseLeave={e => e.currentTarget.style.background = 'transparent'}>
                               <td style={cell('left', { color: '#1a1a1a', maxWidth: '240px' })}>{r.name}</td>
                               <td style={cell('right', { color: '#1a1a1a', fontWeight: '600' })}>{r.aQty}</td>
@@ -272,17 +274,16 @@ export default function Inventory() {
                             <th style={hcell('right')}>UNITS</th>
                             <th style={hcell('right')}>REVENUE</th>
                             <th style={hcell('right')}>AVG SALE</th>
-                            <th style={hcell('left')}></th>
                           </tr>
                         </thead>
                         <tbody>
-                          {sorted.map((item, i) => (
+                          {shownSingle.map((item, i) => (
                             <tr key={item.name}
                               onMouseEnter={e => e.currentTarget.style.background = '#F5EFE3'}
                               onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
                             >
                               <td style={cell('left', { color: '#888', width: '32px' })}>{i + 1}</td>
-                              <td style={cell('left', { color: i < 3 ? '#1a1a1a' : '#333', fontWeight: i < 3 ? '600' : '400', maxWidth: '260px' })}>
+                              <td style={cell('left', { color: i < 3 ? '#1a1a1a' : '#333', fontWeight: i < 3 ? '600' : '400', maxWidth: '340px' })}>
                                 {item.name}
                               </td>
                               <td style={cell('right', { color: '#1a1a1a', fontWeight: '600' })}>{item.qty.toLocaleString()}</td>
@@ -290,11 +291,6 @@ export default function Inventory() {
                                 {fmt(item.revenue)}
                               </td>
                               <td style={cell('right', { color: '#888' })}>{fmtD(item.revenue / item.orders)}</td>
-                              <td style={{ ...cell('left'), width: '120px' }}>
-                                <div style={{ height: '3px', background: '#E7DECB', borderRadius: '2px' }}>
-                                  <div style={{ height: '3px', background: THEME.accent, borderRadius: '2px', width: `${Math.round(item.revenue / maxRevenue * 100)}%`, opacity: 0.7 }} />
-                                </div>
-                              </td>
                             </tr>
                           ))}
                         </tbody>
@@ -303,6 +299,13 @@ export default function Inventory() {
                     {((cmpActive ? cmpRows.length : sorted.length) === 0) && (
                       <div style={{ padding: '20px', textAlign: 'center', color: '#888', fontFamily: 'Inter, sans-serif', fontSize: '11px' }}>
                         No items{search ? ` match "${search}"` : ' in this period'}
+                      </div>
+                    )}
+                    {!search && (cmpActive ? cmpRows.length : sorted.length) > LIMIT && (
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', paddingTop: '12px', marginTop: '4px', borderTop: '1px solid #E7DECB' }}>
+                        <span style={{ fontSize: '10px', color: '#a39a88', fontFamily: 'Inter, sans-serif' }}>
+                          Showing top {LIMIT} of {(cmpActive ? cmpRows.length : sorted.length).toLocaleString()} items — type in search to find any item
+                        </span>
                       </div>
                     )}
                   </div>
