@@ -236,27 +236,37 @@ export default function Dashboard() {
                     <span>Sales Mix</span>
                     <button onClick={() => router.push('/inventory')} style={{ fontFamily: mono, fontSize: 10, color: C.red, background: 'none', border: 'none', cursor: 'pointer', letterSpacing: '0.05em' }}>ITEMS →</button>
                   </div>
-                  {mix.list.map((c, i) => {
-                    const p = mix.total > 0 ? c.rev / mix.total * 100 : 0
-                    return (
-                      <div key={c.label} onClick={() => router.push('/inventory')}
-                        onMouseEnter={e => e.currentTarget.style.background = C.paper} onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
-                        style={{ padding: '9px 6px', margin: '0 -6px', cursor: 'pointer' }}>
-                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: 6 }}>
+                  {/* one 100% bar, split by category */}
+                  <div onClick={() => router.push('/inventory')} style={{ display: 'flex', width: '100%', height: 36, cursor: 'pointer', border: `1px solid ${C.hair}` }}>
+                    {mix.list.map((c, i) => {
+                      const p = mix.total > 0 ? c.rev / mix.total * 100 : 0
+                      return (
+                        <div key={c.label} title={`${c.label} · ${p.toFixed(0)}%`}
+                          style={{ width: `${p}%`, background: c.color, borderLeft: i ? `1px solid ${C.paper}` : 'none', display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden' }}>
+                          {p >= 9 && <span style={{ fontFamily: mono, fontSize: 11, color: '#fff', fontWeight: 600 }}>{p.toFixed(0)}%</span>}
+                        </div>
+                      )
+                    })}
+                  </div>
+                  {/* legend */}
+                  <div style={{ marginTop: 14 }}>
+                    {mix.list.map((c, i) => {
+                      const p = mix.total > 0 ? c.rev / mix.total * 100 : 0
+                      return (
+                        <div key={c.label} onClick={() => router.push('/inventory')}
+                          onMouseEnter={e => e.currentTarget.style.background = C.paper} onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
+                          style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '8px 6px', margin: '0 -6px', borderTop: i ? `1px solid ${C.line}` : 'none', cursor: 'pointer' }}>
                           <span style={{ display: 'flex', alignItems: 'center', gap: 8, fontFamily: ui, fontSize: 13, color: C.ink, fontWeight: 500 }}>
-                            <span style={{ width: 9, height: 9, background: c.color, display: 'inline-block' }} />{c.label}
+                            <span style={{ width: 10, height: 10, background: c.color, display: 'inline-block' }} />{c.label}
                           </span>
-                          <span style={{ display: 'flex', alignItems: 'baseline', gap: 9 }}>
+                          <span style={{ display: 'flex', alignItems: 'baseline', gap: 12 }}>
                             <span style={{ fontFamily: mono, fontSize: 11, color: C.muted }}>{p.toFixed(0)}%</span>
                             <span style={{ fontFamily: mono, fontSize: 13, color: C.ink, fontWeight: 600 }}>{fmt(c.rev)}</span>
                           </span>
                         </div>
-                        <div style={{ height: 7, background: C.line }}>
-                          <div style={{ width: `${p}%`, height: '100%', background: c.color }} />
-                        </div>
-                      </div>
-                    )
-                  })}
+                      )
+                    })}
+                  </div>
                 </div>
 
                 <div style={panel}>
