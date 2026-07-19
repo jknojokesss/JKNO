@@ -1,4 +1,5 @@
 import Head from 'next/head'
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Cell, ResponsiveContainer } from 'recharts'
 
 // Standalone preview — "printed briefing" on warm paper. Hero stat + sentence
 // + real statement, no stat-card grid, sharp rules not shadow-boxes. Unlinked.
@@ -18,8 +19,7 @@ const Row = ({ label, val, indent, strong, green, top }) => (
 )
 
 export default function StylePreview() {
-  const trend = [['JAN', 14], ['FEB', 10], ['MAR', 21], ['APR', 13], ['MAY', 18], ['JUN', 39]]
-  const maxP = 39
+  const trend = [{ m: 'JAN', p: 14 }, { m: 'FEB', p: 10 }, { m: 'MAR', p: 21 }, { m: 'APR', p: 13 }, { m: 'MAY', p: 18 }, { m: 'JUN', p: 39 }]
   return (
     <>
       <Head>
@@ -86,16 +86,17 @@ export default function StylePreview() {
               </div>
 
               <div>
-                <div style={{ fontFamily: head, fontSize: 16, fontWeight: 700, color: C.ink, letterSpacing: '0.05em', textTransform: 'uppercase', paddingBottom: 8, borderBottom: `1px solid ${C.hair}`, marginBottom: 12 }}>Profit · Last 6 Months</div>
-                {trend.map(([m, p]) => (
-                  <div key={m} style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '7px 0' }}>
-                    <span style={{ fontFamily: mono, fontSize: 11, color: C.sub, width: 30 }}>{m}</span>
-                    <div style={{ flex: 1, height: 8, background: C.line }}>
-                      <div style={{ height: 8, width: `${Math.round(p / maxP * 100)}%`, background: m === 'JUN' ? C.red : '#C7BFB0' }} />
-                    </div>
-                    <span style={{ fontFamily: mono, fontSize: 12, color: m === 'JUN' ? C.ink : C.sub, width: 44, textAlign: 'right' }}>${p}K</span>
-                  </div>
-                ))}
+                <div style={{ fontFamily: head, fontSize: 16, fontWeight: 700, color: C.ink, letterSpacing: '0.05em', textTransform: 'uppercase', paddingBottom: 8, borderBottom: `1px solid ${C.hair}`, marginBottom: 14 }}>Profit · Last 6 Months</div>
+                <ResponsiveContainer width="100%" height={210}>
+                  <BarChart data={trend} margin={{ top: 4, right: 4, left: -18, bottom: 0 }} barCategoryGap="30%">
+                    <CartesianGrid strokeDasharray="2 3" stroke={C.line} vertical={false} />
+                    <XAxis dataKey="m" tick={{ fontSize: 10, fill: C.muted, fontFamily: mono }} axisLine={false} tickLine={false} />
+                    <YAxis tick={{ fontSize: 10, fill: C.muted, fontFamily: mono }} axisLine={false} tickLine={false} tickFormatter={v => `$${v}K`} />
+                    <Bar dataKey="p" name="Profit">
+                      {trend.map(d => <Cell key={d.m} fill={d.m === 'JUN' ? C.red : '#C7BFB0'} />)}
+                    </Bar>
+                  </BarChart>
+                </ResponsiveContainer>
               </div>
             </div>
 
