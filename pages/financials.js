@@ -10,9 +10,11 @@ const pct = (n) => `${parseFloat(n).toFixed(1)}%`
 const MONTHS = { '01':'JAN','02':'FEB','03':'MAR','04':'APR','05':'MAY','06':'JUN','07':'JUL','08':'AUG','09':'SEP','10':'OCT','11':'NOV','12':'DEC' }
 const monthLabel = (k) => `${MONTHS[k.slice(5, 7)]} ${k.slice(0, 4)}`
 
-// Cash / bank accounts — a GL row whose `account` is one of these IS a cash
-// movement; its `split_account` tells us why (→ operating / investing / financing).
-const CASH_ACCTS = ['Clover Clearing Account','TOTAL CHECKING (8059) - 1','BUS COMPLETE CHK (5998) - 1','Bank of America 7875','BOA Savings','Cash on hand','Savings 1651']
+// Cash = strictly the bank accounts (checking + savings). Clover Clearing
+// (undeposited funds) and Cash on hand (drawer) are cash-equivalents, treated as
+// operating counterparties, not cash. A GL row whose `account` is a bank account
+// IS a cash movement; its `split_account` tells us why (operating/investing/financing).
+const CASH_ACCTS = ['TOTAL CHECKING (8059) - 1','BUS COMPLETE CHK (5998) - 1','Bank of America 7875','BOA Savings','Savings 1651']
 
 
 const THEME = { sidebarBg: '#1A1A1A', sidebarBorder: '#2A2A2A', accent: '#B0281C' }
@@ -491,13 +493,14 @@ export default function Financials() {
                     const s = sp || ''
                     if (!s) return 'operating'
                     const parent = s.split(':')[0]
-                    if (/Accounts Payable|Clover Tax|Clover Gratuity/.test(parent)) return 'operating'
+                    if (/Accounts Payable|Clover Tax|Clover Gratuity|Clover Clearing|Cash on hand/.test(parent)) return 'operating'
                     const cat = acctCat[parent] || acctCat[s]
                     if (cat === 'equity' || cat === 'liability') return 'financing'
                     if (cat === 'asset') return 'investing'
                     return 'operating'
                   }
-                  const labelOf = (sp) => { const s = sp || ''; return s ? s.split(':')[0] : 'Cash sales & deposits' }
+                  const NICE = { 'Clover Clearing Account': 'Clover card deposits', 'Cash on hand': 'Cash deposits', 'Personal': 'Owner draws', 'Cost of Goods Sold': 'Inventory / COGS paid', 'Short Term Loans': 'Short-term loans', 'Heller CC': 'Credit card', 'Bleier Loan': 'Bleier loan', 'Heller Loan': 'Heller loan', 'Katz Chase': 'Credit card (Chase)', 'Opening Balance Equity': 'Opening balance' }
+                  const labelOf = (sp) => { const p = (sp || '').split(':')[0]; return p ? (NICE[p] || p) : 'Cash sales & deposits' }
                   const beginCash = cfPeriod === 'all' ? 0 : cashRows.filter(r => r.date && r.date.slice(0, 7) < cfPeriod).reduce((s, r) => s + Number(r.amount), 0)
                   const periodRows = cashRows.filter(r => cfPeriod === 'all' ? true : (r.date && r.date.slice(0, 7) === cfPeriod))
                   const secs = { operating: {}, investing: {}, financing: {}, transfer: {} }
