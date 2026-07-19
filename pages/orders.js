@@ -8,6 +8,13 @@ const fmt0 = (n) => new Intl.NumberFormat('en-US', { style: 'currency', currency
 
 const FALLBACK_RATIO = 0.412 // used when no Weldon match found
 const TYP_MARGIN = 0.40 // assumed typical tire margin, used to infer cost tier from sale price
+// Parts jobs Clover rings with no tire size (brakes, sensors, batteries…) have a
+// REAL material cost — they are NOT zero-cost "service". Clover carries no cost,
+// so these ratios are ESTIMATES for the dashboard only (the books get real parts
+// cost from the bills). Tune to Reydel's actual parts margins. NOTE: tire plugs
+// stay "service" (mostly labor) per JK.
+const PARTS_COST = [[/\bbrake/i, 0.45], [/\bbatter/i, 0.55], [/\bsensor/i, 0.40], [/\bwipers?|\blights?|\bvalve|\blug\b|\bbead/i, 0.30]]
+const partsRatio = (name) => { for (const [re, r] of PARTS_COST) if (re.test(name || '')) return r; return null }
 const BUDGET_RETAIL_X = 3.2 // a budget tire's retail rarely exceeds ~3.2x its cost (~69% margin); real
                             // shelf sales mark up to ~2.6x, premium tires retail 3.5x+, so this cleanly
                             // separates them — a generic, sub-3.2x sale is shelf stock, not a special order
@@ -225,7 +232,10 @@ export default function Orders() {
           const qty  = Number(r.quantity || 1)
           const isUsed = /used/i.test(r.item_name || '')
           const normalized = normalizeSize(r.item_name)
-          const isService = !normalized && !isUsed
+          const noSizeService = !normalized && !isUsed
+          const pRatio = noSizeService ? partsRatio(r.item_name) : null
+          const isParts = pRatio != null
+          const isService = noSizeService && !isParts
           const itemWords = modelWords(r.item_name)
           const isCooper = /cooper/i.test(r.item_name || '') || /\bbrand\b/i.test(r.item_name || '')
 
@@ -265,6 +275,7 @@ export default function Orders() {
           let costPerUnit, costSource, estimated = false, matchGap = null, matchModelShared = null
           if (isUsed) { costPerUnit = 18; costSource = 'used_tire_inventory' }
           else if (isService) { costPerUnit = 0; costSource = 'service' }
+          else if (isParts) { costPerUnit = sale * pRatio; costSource = 'parts'; estimated = true }
           else if (cust) {
             // blank-PO# customer purchase = confirmed same-day order (PO# convention)
             costPerUnit = Number(cust.unit_cost)
@@ -398,7 +409,7 @@ export default function Orders() {
   //  • high/low — a real (non-estimated) tire whose margin is outside the normal
   //    25–60% band, which usually means the cost is wrong.
   const rowFlag = (r) => {
-    if (r.costSource === 'used_tire_inventory' || r.costSource === 'service') return null
+    if (r.costSource === 'used_tire_inventory' || r.costSource === 'service' || r.costSource === 'parts') return null
     if (!r.isEstimated) {
       const st = sizeStats[r.normalizedSize]
       const typ = st && st.n >= 3 ? ` (≈${st.median.toFixed(0)}% typical for ${r.normalizedSize})` : ''
@@ -466,7 +477,7 @@ export default function Orders() {
     const srcLabel = (r) => {
       if (r.costSource === 'weldon_same_day')
         return r.matchGap == null ? 'Est' : (r.matchedSameDay ? `Same-Day (${Math.abs(r.matchGap)}d)` : `Est (${Math.abs(r.matchGap)}d)`)
-      return { inventory: 'Inventory', used_tire_inventory: 'Used', service: 'Service' }[r.costSource] || r.costSource
+      return { inventory: 'Inventory', used_tire_inventory: 'Used', service: 'Service', parts: 'Parts' }[r.costSource] || r.costSource
     }
     const csv = [['Date', 'Item', 'Source', 'Qty', 'Sale', 'Cost', 'Profit', 'Margin %'].map(esc).join(',')]
     filtered.forEach(r => csv.push([r.date, r.item, srcLabel(r), r.qty, r.sale.toFixed(2), r.cost.toFixed(2), r.profit.toFixed(2), r.margin.toFixed(1)].map(esc).join(',')))
@@ -660,6 +671,7 @@ export default function Orders() {
                                 inventory:           ['#dbeafe', '#1d4ed8', 'Inventory'],
                                 used_tire_inventory: ['#f3f4f6', '#6b7280', 'Used'],
                                 service:             ['#f3f4f6', '#9ca3af', 'Service'],
+                                parts:               ['#fef3c7', '#b45309', 'Parts'],
                               }
                               const [bg, fg, label] = map[r.costSource] || map.service
                               return <span style={{ padding: '2px 7px', borderRadius: '0', fontSize: '10px', whiteSpace: 'nowrap', background: bg, color: fg }}>{label}</span>
