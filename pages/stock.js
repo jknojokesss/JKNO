@@ -126,8 +126,24 @@ export default function Stock() {
   const [loading, setLoading] = useState(true)
   const [search,  setSearch]  = useState('')
   const [sort,    setSort]    = useState('value') // value | qty | size
-  const [asOf,    setAsOf]    = useState(AS_OF)   // AS_OF (5/31, ties to books) | 'live'
+  const [asOf,    setAsOf]    = useState(AS_OF_JUNE) // month-end date key | 'live'
   const [weldon,  setWeldon]  = useState([])
+
+  // Month-end snapshot options: April through the last completed month, auto-grows.
+  const monthEnds = useMemo(() => {
+    const opts = []
+    const now = new Date()
+    let y = 2026, m = 3 // April (0-based)
+    while (y < now.getFullYear() || (y === now.getFullYear() && m < now.getMonth())) {
+      const lastDay = new Date(y, m + 1, 0).getDate()
+      opts.push({
+        k: `${y}-${String(m + 1).padStart(2, '0')}-${String(lastDay).padStart(2, '0')}`,
+        l: new Date(y, m, 1).toLocaleDateString([], { month: 'short', year: 'numeric' }),
+      })
+      m++; if (m > 11) { m = 0; y++ }
+    }
+    return opts
+  }, [])
 
   useEffect(() => {
     Promise.all([
@@ -202,13 +218,14 @@ export default function Stock() {
                 </div>
 
                 <div style={{ display: 'flex', gap: '10px', marginBottom: '16px', alignItems: 'center', flexWrap: 'wrap' }}>
-                  {[{ k: AS_OF, l: 'AS OF 5/31' }, { k: AS_OF_JUNE, l: 'AS OF 6/30' }, { k: 'live', l: 'LIVE' }].map(o => (
-                    <button key={o.k} onClick={() => setAsOf(o.k)} style={{
-                      padding: '7px 12px', fontSize: '9px', fontFamily: 'Inter, sans-serif', letterSpacing: '0.08em',
-                      border: '1px solid #E7DECB', borderRadius: '4px', cursor: 'pointer',
-                      background: asOf === o.k ? '#1a1a1a' : '#fff', color: asOf === o.k ? '#fff' : '#888',
-                    }}>{o.l}</button>
-                  ))}
+                  <select value={asOf} onChange={e => setAsOf(e.target.value)} style={{
+                    padding: '8px 12px', fontSize: '11px', fontFamily: 'Inter, sans-serif',
+                    border: '1px solid #E7DECB', borderRadius: '6px', cursor: 'pointer',
+                    background: '#1a1a1a', color: '#fff', fontWeight: 600, outline: 'none',
+                  }}>
+                    {monthEnds.map(o => <option key={o.k} value={o.k} style={{ background: '#fff', color: '#1a1a1a' }}>As of {o.l} month-end</option>)}
+                    <option value="live" style={{ background: '#fff', color: '#1a1a1a' }}>Live · current on-hand</option>
+                  </select>
                   <input value={search} onChange={e => setSearch(e.target.value)}
                     placeholder="Filter by size / item..."
                     style={{ flex: 1, minWidth: '180px', padding: '8px 12px', border: '1px solid #E7DECB', borderRadius: '4px',
