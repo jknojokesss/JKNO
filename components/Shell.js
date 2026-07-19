@@ -10,7 +10,7 @@ const NAV = [
   { id: 'inventory',  label: 'Sales & Items', href: '/inventory' },
   { id: 'orders',     label: 'Orders',        href: '/orders' },
   { id: 'stock',      label: 'Stock',         href: '/stock' },
-  { id: 'ai',         label: 'Ask AI',        href: '/ai' },
+  { id: 'ai',         label: 'Ask',           href: '/ai' },
 ]
 
 const head = "'Barlow Semi Condensed', sans-serif"
