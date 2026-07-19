@@ -46,7 +46,7 @@ export default function StylePreview() {
         {/* Content */}
         <main style={{ flex: 1, minWidth: 0 }}>
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderBottom: `1px solid ${C.hair}`, padding: '12px 34px' }}>
-            <div style={{ fontFamily: mono, fontSize: 11, color: C.muted, letterSpacing: '0.06em' }}>REYDEL TIRE &amp; AUTO · TOMS RIVER, NJ</div>
+            <div style={{ fontFamily: mono, fontSize: 11, color: C.muted, letterSpacing: '0.06em' }}>REYDEL TIRE &amp; AUTO · LAKEWOOD, NJ</div>
             <div style={{ fontFamily: mono, fontSize: 11, color: C.green }}>● LIVE · JUN 2026</div>
           </div>
 
