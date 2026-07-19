@@ -24,15 +24,27 @@ const sizeOf = (name) => { if (!name) return null; const m = name.match(/(?:LT|P
 const SAME_DAY_ITEMS = new Set(['255/45/19 brand'])
 const LAYERS = [{"s":"205/55/16","l":"205/55/16 Cooper","q":4,"c":96,"d":"2026-04-15"},{"s":"205/55/16","l":"205/55/16","q":1,"c":50,"d":"2026-04-15"},{"s":"205/55/16","l":"205/55/16","q":16,"c":48,"d":"2026-04-15"},{"s":"205/65/16","l":"205/65/16 Cooper","q":4,"c":105,"d":"2026-04-15"},{"s":"205/65/16","l":"205/65/16","q":16,"c":53,"d":"2026-04-15"},{"s":"215/55/17","l":"215/55/17 Cooper","q":4,"c":119,"d":"2026-04-15"},{"s":"215/55/17","l":"215/55/17","q":16,"c":58,"d":"2026-04-15"},{"s":"215/55/17","l":"215/55/17","q":4,"c":67,"d":"2026-04-15"},{"s":"215/60/16","l":"215/60/16 Cooper","q":4,"c":98,"d":"2026-04-15"},{"s":"215/60/16","l":"215/60/16","q":16,"c":59,"d":"2026-04-15"},{"s":"215/65/16","l":"215/65/16 Cooper","q":4,"c":102,"d":"2026-04-15"},{"s":"215/65/16","l":"215/65/16","q":16,"c":61,"d":"2026-04-15"},{"s":"225/50/17","l":"225/50/17 Cooper","q":4,"c":128,"d":"2026-04-15"},{"s":"225/50/17","l":"225/50/17","q":16,"c":58,"d":"2026-04-15"},{"s":"225/65/17","l":"225/65/17 Cooper","q":4,"c":115,"d":"2026-04-15"},{"s":"225/65/17","l":"225/65/17","q":16,"c":69,"d":"2026-04-15"},{"s":"235/45/18","l":"235/45/18 Cooper","q":4,"c":142,"d":"2026-04-15"},{"s":"235/45/18","l":"235/45/18","q":15,"c":62,"d":"2026-04-15"},{"s":"235/55/19","l":"235/55/19 Cooper","q":4,"c":160,"d":"2026-04-15"},{"s":"235/55/19","l":"235/55/19","q":16,"c":76,"d":"2026-04-15"},{"s":"235/60/17","l":"235/60/17","q":1,"c":76,"d":"2026-04-15"},{"s":"235/60/17","l":"235/60/17 Cooper","q":4,"c":130,"d":"2026-04-15"},{"s":"235/60/17","l":"235/60/17","q":16,"c":65,"d":"2026-04-15"},{"s":"235/60/18","l":"235/60/18 Cooper","q":4,"c":145,"d":"2026-04-15"},{"s":"235/60/18","l":"235/60/18","q":16,"c":74,"d":"2026-04-15"},{"s":"235/65/16","l":"235/65/16 Kumho","q":4,"c":147,"d":"2026-04-15"},{"s":"235/65/16","l":"235/65/16 LT","q":16,"c":85,"d":"2026-04-15"},{"s":"235/65/17","l":"235/65/17 Cooper","q":4,"c":130,"d":"2026-04-15"},{"s":"235/65/17","l":"235/65/17","q":16,"c":72,"d":"2026-04-15"},{"s":"235/65/18","l":"235/65/18 Cooper","q":4,"c":143,"d":"2026-04-15"},{"s":"235/65/18","l":"235/65/18","q":16,"c":77,"d":"2026-04-15"},{"s":"245/50/20","l":"245/50/20 Cooper","q":4,"c":158,"d":"2026-04-15"},{"s":"245/50/20","l":"245/50/20","q":16,"c":85,"d":"2026-04-15"},{"s":"245/60/18","l":"245/60/18 Cooper","q":4,"c":164,"d":"2026-04-15"},{"s":"245/60/18","l":"245/60/18","q":16,"c":74,"d":"2026-04-15"},{"s":"255/40/20","l":"255/40/20 Falken","q":4,"c":200,"d":"2026-04-15"},{"s":"255/40/20","l":"255/40/20","q":16,"c":90,"d":"2026-04-15"},{"s":"255/45/19","l":"255/45/19 Cooper","q":4,"c":179,"d":"2026-04-15"},{"s":"255/45/19","l":"255/45/19","q":16,"c":85,"d":"2026-04-15"},{"s":"285/45/22","l":"285/45/22 Goodyear","q":4,"c":189,"d":"2026-04-15"},{"s":"285/45/22","l":"285/45/22","q":16,"c":105,"d":"2026-04-15"},{"s":"235/55/19","l":"235/55/19","q":8,"c":76,"d":"2026-04-28"},{"s":"235/60/18","l":"235/60/18","q":6,"c":74,"d":"2026-04-28"},{"s":"235/60/18","l":"235/60/18 Cooper","q":2,"c":145,"d":"2026-04-28"},{"s":"235/55/19","l":"235/55/19 Cooper","q":2,"c":160,"d":"2026-04-28"},{"s":"235/60/17","l":"235/60/17","q":10,"c":65,"d":"2026-04-28"},{"s":"275/35/21","l":"275/35/21","q":1,"c":372,"d":"2026-04-23"},{"s":"215/55/17","l":"215/55/17","q":20,"c":58,"d":"2026-05-18"},{"s":"235/60/17","l":"235/60/17","q":8,"c":65,"d":"2026-05-18"},{"s":"235/60/18","l":"235/60/18","q":10,"c":74,"d":"2026-05-18"},{"s":"205/65/16","l":"205/65/16","q":12,"c":53,"d":"2026-05-18"},{"s":"235/45/18","l":"235/45/18","q":6,"c":62,"d":"2026-05-18"},{"s":"275/60/20","l":"275/60/20","q":4,"c":101,"d":"2026-05-18"},{"s":"245/45/19","l":"245/45/19","q":2,"c":80,"d":"2026-05-18"},{"s":"235/40/19","l":"235/40/19","q":4,"c":70,"d":"2026-05-18"},{"s":"225/45/17","l":"225/45/17","q":4,"c":59,"d":"2026-05-18"},{"s":"225/40/18","l":"225/40/18","q":2,"c":59,"d":"2026-05-18"},{"s":"225/60/17","l":"225/60/17","q":2,"c":65,"d":"2026-05-18"},{"s":"245/75/16","l":"245/75/16","q":2,"c":92,"d":"2026-05-18"},{"s":"225/45/18","l":"225/45/18","q":2,"c":64,"d":"2026-05-18"}]
 const RETURNS = [{"s":"205/55/16","q":8,"c":48},{"s":"215/60/16","q":2,"c":98},{"s":"215/65/16","q":10,"c":61},{"s":"215/65/16","q":2,"c":102},{"s":"225/50/17","q":2,"c":128},{"s":"225/50/17","q":8,"c":58},{"s":"225/65/17","q":2,"c":115},{"s":"225/65/17","q":8,"c":69},{"s":"235/65/16","q":8,"c":85},{"s":"255/40/20","q":2,"c":200},{"s":"255/40/20","q":10,"c":90},{"s":"285/45/22","q":10,"c":105},{"s":"285/45/22","q":2,"c":105},{"s":"285/45/22","q":2,"c":189}]
+// June 6/16 STOCK restocks (Weldon PO#STOCK) — arrived into inventory in June.
+const JUNE_LAYERS = [
+  {s:"205/55/16",l:"205/55/16 Street-H",q:2,c:57,d:"2026-06-16"},{s:"205/55/16",l:"205/55/16 Street-H",q:4,c:57,d:"2026-06-16"},
+  {s:"215/45/17",l:"215/45/17 Street-H",q:2,c:62,d:"2026-06-16"},{s:"215/55/17",l:"215/55/17 Endeavor",q:2,c:119,d:"2026-06-16"},
+  {s:"215/60/16",l:"215/60/16 Street-H",q:3,c:62,d:"2026-06-16"},{s:"215/65/16",l:"215/65/16 Street-H",q:4,c:66,d:"2026-06-16"},
+  {s:"235/45/18",l:"235/45/18 Agility",q:2,c:68,d:"2026-06-16"},{s:"235/55/19",l:"235/55/19 Agility",q:2,c:80,d:"2026-06-16"},
+  {s:"235/55/19",l:"235/55/19 Endeavor Plus",q:2,c:162,d:"2026-06-16"},{s:"235/55/19",l:"235/55/19 Agility",q:4,c:80,d:"2026-06-16"},
+  {s:"235/60/17",l:"235/60/17 Endeavor Plus",q:2,c:130,d:"2026-06-16"},{s:"235/60/17",l:"235/60/17 MileageMax",q:6,c:72,d:"2026-06-16"},
+  {s:"235/60/18",l:"235/60/18 Street-H",q:2,c:78,d:"2026-06-16"},{s:"235/65/16",l:"235/65/16 Ridgecrawler",q:4,c:92,d:"2026-06-16"},
+  {s:"235/65/17",l:"235/65/17 MileageMax",q:5,c:72,d:"2026-06-16"},{s:"245/60/18",l:"245/60/18 Paraller",q:4,c:78,d:"2026-06-16"},
+  {s:"255/40/20",l:"255/40/20 Grand Sport",q:2,c:90,d:"2026-06-16"},{s:"255/45/19",l:"255/45/19 Agility",q:3,c:96,d:"2026-06-16"},
+]
 function stockOnHandValue(sales, weldon, cutoff) {
-  const layers = LAYERS.map(L => ({ ...L, remaining: L.q }))
+  const layers = LAYERS.concat(JUNE_LAYERS).map(L => ({ ...L, remaining: L.q }))
   RETURNS.forEach(({ s, q, c }) => { let pool = layers.filter(L => L.s === s && L.c === c && L.remaining > 0); if (!pool.length) pool = layers.filter(L => L.s === s).sort((a, b) => a.c - b.c); let need = q; for (const L of pool) { if (need <= 0) break; const t = Math.min(L.remaining, need); L.remaining -= t; need -= t } })
   const bySize = {}; layers.forEach(L => { (bySize[L.s] = bySize[L.s] || []).push(L) }); Object.values(bySize).forEach(a => a.sort((x, y) => x.d.localeCompare(y.d) || x.c - y.c))
   const sdPool = {}; (weldon || []).forEach(o => { if (Number(o.qty) > 4) return; (sdPool[o.size] = sdPool[o.size] || []).push({ date: o.order_date, remaining: Number(o.qty) }) })
   const isSpecialOrder = (size, date) => { for (const o of sdPool[size] || []) { const gap = (new Date(date) - new Date(o.date)) / 864e5; if (o.remaining > 0 && gap >= -1 && gap <= 4) { o.remaining--; return true } } return false }
   const tireSales = sales.filter(r => r.date <= cutoff && sizeOf(r.item_name) && !/used/i.test(r.item_name) && !SAME_DAY_ITEMS.has((r.item_name || '').trim().toLowerCase())).map(r => ({ date: r.date, size: sizeOf(r.item_name) })).sort((a, b) => a.date.localeCompare(b.date))
   for (const sale of tireSales) { if (sale.date > STK_AS_OF && isSpecialOrder(sale.size, sale.date)) continue; const pool = bySize[sale.size] || []; for (const L of pool) { if (L.remaining > 0 && L.d <= sale.date) { L.remaining--; break } } }
-  let value = 0, units = 0; layers.forEach(L => { if (L.remaining > 0) { value += L.remaining * L.c; units += L.remaining } })
+  let value = 0, units = 0; layers.forEach(L => { if (L.remaining > 0 && L.d <= cutoff) { value += L.remaining * L.c; units += L.remaining } })
   return { value, units }
 }
 
@@ -89,6 +101,18 @@ export default async function handler(req, res) {
       '2026-05-31': stockOnHandValue(clover, weldon, '2026-05-31'),
       '2026-06-30': stockOnHandValue(clover, weldon, '2026-06-30'),
     }
-    res.status(200).json({ clover_rows: clover.length, weldon_rows: (weldon || []).length, months: out, stock_onhand_value: onhand })
+    const JUNE_STOCK_PURCHASES = 4450 // June 6/16 Weldon STOCK restocks (added to JUNE_LAYERS)
+    const juneUsed = Math.round((months['2026-06']?.by_source?.used_tire_inventory || 0) * 100) / 100
+    const juneInvSales = Math.round((onhand['2026-05-31'].value + JUNE_STOCK_PURCHASES - onhand['2026-06-30'].value) * 100) / 100
+    const june_relief = {
+      begin_5_31: onhand['2026-05-31'].value,
+      june_stock_purchases: JUNE_STOCK_PURCHASES,
+      end_6_30: onhand['2026-06-30'].value,
+      inventory_sales: juneInvSales,           // Dr COGS / Cr Inventory  (movement method)
+      used_tires: juneUsed,                    // Dr COGS / Cr Inventory  (used)
+      total_relief: Math.round((juneInvSales + juneUsed) * 100) / 100,
+      cross_check_sale_ledger: months['2026-06']?.inventory_cogs || 0,
+    }
+    res.status(200).json({ clover_rows: clover.length, weldon_rows: (weldon || []).length, months: out, stock_onhand_value: onhand, june_relief })
   } catch (err) { res.status(500).json({ error: err.message }) }
 }
