@@ -121,6 +121,8 @@ export default function Financials() {
   const [comparePeriod, setComparePeriod] = useState(null)
   const [cashRows,     setCashRows]     = useState([])   // gl rows where account is a cash/bank account
   const [cfPeriod,     setCfPeriod]     = useState('all')
+  const [cfCompareOn,  setCfCompareOn]  = useState(false)
+  const [cfComparePeriod, setCfComparePeriod] = useState(null)
   const [accounts,     setAccounts]     = useState([])
   const [bs,           setBs]           = useState([])
   const [bsOpen,       setBsOpen]       = useState({ asset: true, liability: false, equity: true })
@@ -501,65 +503,157 @@ export default function Financials() {
                   }
                   const NICE = { 'Clover Clearing Account': 'Clover card deposits', 'Cash on hand': 'Cash deposits', 'Personal': 'Owner draws', 'Cost of Goods Sold': 'Inventory / COGS paid', 'Short Term Loans': 'Short-term loans', 'Heller CC': 'Credit card', 'Bleier Loan': 'Bleier loan', 'Heller Loan': 'Heller loan', 'Katz Chase': 'Credit card (Chase)', 'Opening Balance Equity': 'Opening balance' }
                   const labelOf = (sp) => { const p = (sp || '').split(':')[0]; return p ? (NICE[p] || p) : 'Cash sales & deposits' }
-                  const beginCash = cfPeriod === 'all' ? 0 : cashRows.filter(r => r.date && r.date.slice(0, 7) < cfPeriod).reduce((s, r) => s + Number(r.amount), 0)
-                  const periodRows = cashRows.filter(r => cfPeriod === 'all' ? true : (r.date && r.date.slice(0, 7) === cfPeriod))
-                  const secs = { operating: {}, investing: {}, financing: {}, transfer: {} }
-                  periodRows.forEach(r => { const se = sectionOf(r.split_account); const l = labelOf(r.split_account); secs[se][l] = (secs[se][l] || 0) + Number(r.amount) })
-                  const lines = (se) => Object.entries(secs[se]).map(([l, v]) => ({ label: l, amt: v })).filter(x => Math.round(x.amt) !== 0).sort((a, b) => Math.abs(b.amt) - Math.abs(a.amt))
-                  const tot = (se) => Object.values(secs[se]).reduce((s, v) => s + v, 0)
-                  const opT = tot('operating'), invT = tot('investing'), finT = tot('financing'), trT = tot('transfer')
-                  const netChange = opT + invT + finT + trT
-                  const endCash = beginCash + netChange
+                  const buildCF = (period) => {
+                    const begin = period === 'all' ? 0 : cashRows.filter(r => r.date && r.date.slice(0, 7) < period).reduce((s, r) => s + Number(r.amount), 0)
+                    const rows = cashRows.filter(r => period === 'all' ? true : (r.date && r.date.slice(0, 7) === period))
+                    const secs = { operating: {}, investing: {}, financing: {}, transfer: {} }
+                    rows.forEach(r => { const se = sectionOf(r.split_account); const l = labelOf(r.split_account); secs[se][l] = (secs[se][l] || 0) + Number(r.amount) })
+                    const tot = (se) => Object.values(secs[se]).reduce((s, v) => s + v, 0)
+                    const opT = tot('operating'), invT = tot('investing'), finT = tot('financing'), trT = tot('transfer')
+                    const net = opT + invT + finT + trT
+                    return { secs, begin, end: begin + net, opT, invT, finT, trT, net }
+                  }
+                  const cfView = buildCF(cfPeriod)
+                  const cfCmp = cfCompareOn && cfComparePeriod && cfPeriod !== 'all' ? buildCF(cfComparePeriod) : null
+                  const linesOf = (v, se) => Object.entries(v.secs[se]).map(([l, amt]) => ({ label: l, amt })).filter(x => Math.round(x.amt) !== 0).sort((a, b) => Math.abs(b.amt) - Math.abs(a.amt))
                   const cfMonths = [...new Set(cashRows.filter(r => r.date).map(r => r.date.slice(0, 7)))].sort()
 
                   return (
                     <>
-                      <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap', marginBottom: '18px', alignItems: 'center' }}>
+                      {/* period + compare */}
+                      <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap', marginBottom: cfCompareOn ? '10px' : '18px', alignItems: 'center' }}>
                         <span style={{ fontSize: '9px', color: '#a39a88', letterSpacing: '0.14em', marginRight: '2px', fontFamily: ui, fontWeight: 600 }}>PERIOD</span>
                         {[{ k: 'all', l: 'All time' }, ...cfMonths.map(k => ({ k, l: MONTHS[k.slice(5, 7)] }))].map(o => (
                           <button key={o.k} onClick={() => setCfPeriod(o.k)} style={pill(cfPeriod === o.k)}>{o.l}</button>
                         ))}
+                        {cfMonths.length > 1 && (
+                          <button onClick={() => {
+                            const next = !cfCompareOn
+                            setCfCompareOn(next)
+                            if (next) {
+                              let base = cfPeriod
+                              if (base === 'all') { base = cfMonths[cfMonths.length - 1]; setCfPeriod(base) }
+                              if (!cfComparePeriod || cfComparePeriod === base) {
+                                const idx = cfMonths.indexOf(base)
+                                setCfComparePeriod(cfMonths[idx - 1] || cfMonths.find(m => m !== base) || base)
+                              }
+                            }
+                          }} style={{ ...pill(cfCompareOn), marginLeft: '10px' }}>⇄ Compare</button>
+                        )}
                       </div>
+                      {cfCompareOn && (
+                        <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap', marginBottom: '18px', alignItems: 'center' }}>
+                          <span style={{ fontSize: '9px', color: '#a39a88', letterSpacing: '0.14em', marginRight: '2px', fontFamily: ui, fontWeight: 600 }}>COMPARE&nbsp;TO</span>
+                          {cfMonths.map(k => (
+                            <button key={k} onClick={() => setCfComparePeriod(k)} style={pill(cfComparePeriod === k)}>{MONTHS[k.slice(5, 7)]}</button>
+                          ))}
+                        </div>
+                      )}
 
-                      <div style={{ ...card, maxWidth: '660px' }}>
+                      <div style={{ ...card, maxWidth: cfCmp ? '740px' : '660px' }}>
                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', borderBottom: '1px solid #DBD5C7', paddingBottom: '12px', marginBottom: '4px' }}>
                           <div>
                             <div style={{ fontSize: '15px', fontWeight: 700, color: '#1B1815', fontFamily: headF, letterSpacing: '0.02em', textTransform: 'uppercase' }}>Statement of Cash Flows</div>
                             <div style={{ fontSize: '10px', color: '#a39a88', marginTop: '2px', fontFamily: ui }}>Reydel Tire &amp; Auto · actual cash in &amp; out</div>
                           </div>
-                          <div style={{ fontSize: '12px', color: '#6b6355', fontFamily: ui, fontWeight: 500 }}>{cfPeriod === 'all' ? 'All time' : monthLabel(cfPeriod)}</div>
+                          <div style={{ fontSize: '12px', color: '#6b6355', fontFamily: ui, fontWeight: 500 }}>
+                            {cfCmp ? `${monthLabel(cfPeriod)} vs ${monthLabel(cfComparePeriod)}` : (cfPeriod === 'all' ? 'All time' : monthLabel(cfPeriod))}
+                          </div>
                         </div>
 
-                        <SectionHead>OPERATING ACTIVITIES</SectionHead>
-                        {lines('operating').map(r => <LineItem key={r.label} label={r.label} amount={r.amt} />)}
-                        <TotalRow label="Net cash from operations" amount={opT} accent={opT >= 0} />
-
-                        {lines('investing').length > 0 && (
+                        {cfCmp ? (() => {
+                          const dCol = d => Math.round(d) === 0 ? '#a39a88' : d > 0 ? '#1C7A4E' : '#b0483a'
+                          const dStr = d => Math.round(Math.abs(d)) === 0 ? '—' : (d > 0 ? '+' : '−') + fmt(d)
+                          const cNum = { padding: '6px 10px', fontSize: '12px', textAlign: 'right', fontVariantNumeric: 'tabular-nums', fontFamily: monoF }
+                          const cHead = { padding: '7px 10px', fontSize: '9px', color: '#a39a88', fontWeight: 600, letterSpacing: '0.06em', textAlign: 'right', borderBottom: '1px solid #DBD5C7', fontFamily: ui }
+                          const rowsOf = (se) => {
+                            const labels = [...new Set([...Object.keys(cfView.secs[se]), ...Object.keys(cfCmp.secs[se])])]
+                            return labels.map(l => ({ label: l, a: cfView.secs[se][l] || 0, b: cfCmp.secs[se][l] || 0 }))
+                              .filter(r => Math.round(r.a) !== 0 || Math.round(r.b) !== 0)
+                              .sort((x, y) => (Math.abs(y.a) + Math.abs(y.b)) - (Math.abs(x.a) + Math.abs(x.b)))
+                          }
+                          const SEC = [
+                            { key: 'operating', head: 'OPERATING ACTIVITIES', tLabel: 'Net cash from operations', tA: cfView.opT, tB: cfCmp.opT, accent: true },
+                            ...((linesOf(cfView, 'investing').length || linesOf(cfCmp, 'investing').length) ? [{ key: 'investing', head: 'INVESTING ACTIVITIES', tLabel: 'Net cash from investing', tA: cfView.invT, tB: cfCmp.invT }] : []),
+                            { key: 'financing', head: 'FINANCING ACTIVITIES', tLabel: 'Net cash from financing', tA: cfView.finT, tB: cfCmp.finT },
+                          ]
+                          return (
+                            <table style={{ width: '100%', borderCollapse: 'collapse', marginTop: '4px' }}>
+                              <thead><tr>
+                                <th style={{ ...cHead, textAlign: 'left' }}></th>
+                                <th style={cHead}>{MONTHS[cfPeriod.slice(5, 7)]}&nbsp;{cfPeriod.slice(0, 4)}</th>
+                                <th style={cHead}>{MONTHS[cfComparePeriod.slice(5, 7)]}&nbsp;{cfComparePeriod.slice(0, 4)}</th>
+                                <th style={cHead}>Change</th>
+                              </tr></thead>
+                              <tbody>
+                                {SEC.map(S => (
+                                  <React.Fragment key={S.key}>
+                                    <tr><td colSpan={4} style={{ fontSize: '9px', color: '#a39a88', letterSpacing: '0.14em', fontWeight: 700, padding: '14px 10px 3px', fontFamily: ui }}>{S.head}</td></tr>
+                                    {rowsOf(S.key).map(r => (
+                                      <tr key={r.label}>
+                                        <td style={{ padding: '6px 10px 6px 24px', fontSize: '12px', color: '#4A453C', fontFamily: ui }}>{r.label}</td>
+                                        <td style={{ ...cNum, color: r.a >= 0 ? '#1B1815' : '#b0483a' }}>{r.a < 0 ? `(${fmt(r.a)})` : fmt(r.a)}</td>
+                                        <td style={{ ...cNum, color: '#8a8378' }}>{r.b < 0 ? `(${fmt(r.b)})` : fmt(r.b)}</td>
+                                        <td style={{ ...cNum, color: dCol(r.a - r.b), fontWeight: 500 }}>{dStr(r.a - r.b)}</td>
+                                      </tr>
+                                    ))}
+                                    <tr>
+                                      <td style={{ padding: '8px 10px', fontSize: '12px', fontWeight: 600, color: '#1B1815', fontFamily: ui, borderTop: '1px solid #DBD5C7' }}>{S.tLabel}</td>
+                                      <td style={{ ...cNum, fontWeight: 700, borderTop: '1px solid #DBD5C7', color: S.accent && S.tA >= 0 ? '#1C7A4E' : (S.tA >= 0 ? '#1B1815' : '#b0483a') }}>{S.tA < 0 ? `(${fmt(S.tA)})` : fmt(S.tA)}</td>
+                                      <td style={{ ...cNum, fontWeight: 700, borderTop: '1px solid #DBD5C7', color: '#6b6355' }}>{S.tB < 0 ? `(${fmt(S.tB)})` : fmt(S.tB)}</td>
+                                      <td style={{ ...cNum, fontWeight: 700, borderTop: '1px solid #DBD5C7', color: dCol(S.tA - S.tB) }}>{dStr(S.tA - S.tB)}</td>
+                                    </tr>
+                                  </React.Fragment>
+                                ))}
+                                <tr>
+                                  <td style={{ padding: '12px 10px', fontSize: '12px', fontWeight: 700, letterSpacing: '0.05em', color: '#1B1815', fontFamily: headF, textTransform: 'uppercase', borderTop: '2px solid #DBD5C7' }}>Net change in cash</td>
+                                  <td style={{ ...cNum, fontSize: '14px', fontWeight: 700, color: cfView.net >= 0 ? '#1C7A4E' : THEME.accent, borderTop: '2px solid #DBD5C7' }}>{cfView.net < 0 ? `(${fmt(cfView.net)})` : fmt(cfView.net)}</td>
+                                  <td style={{ ...cNum, fontSize: '13px', fontWeight: 700, color: '#6b6355', borderTop: '2px solid #DBD5C7' }}>{cfCmp.net < 0 ? `(${fmt(cfCmp.net)})` : fmt(cfCmp.net)}</td>
+                                  <td style={{ ...cNum, fontSize: '13px', fontWeight: 700, color: dCol(cfView.net - cfCmp.net), borderTop: '2px solid #DBD5C7' }}>{dStr(cfView.net - cfCmp.net)}</td>
+                                </tr>
+                                <tr>
+                                  <td style={{ padding: '7px 10px', fontSize: '12px', color: '#6b6355', fontFamily: ui }}>Cash at end of period</td>
+                                  <td style={{ ...cNum, color: '#1B1815', fontWeight: 600 }}>{fmt(cfView.end)}</td>
+                                  <td style={{ ...cNum, color: '#6b6355' }}>{fmt(cfCmp.end)}</td>
+                                  <td style={{ ...cNum, color: dCol(cfView.end - cfCmp.end) }}>{dStr(cfView.end - cfCmp.end)}</td>
+                                </tr>
+                              </tbody>
+                            </table>
+                          )
+                        })() : (
                           <>
-                            <SectionHead>INVESTING ACTIVITIES</SectionHead>
-                            {lines('investing').map(r => <LineItem key={r.label} label={r.label} amount={r.amt} />)}
-                            <TotalRow label="Net cash from investing" amount={invT} />
+                            <SectionHead>OPERATING ACTIVITIES</SectionHead>
+                            {linesOf(cfView, 'operating').map(r => <LineItem key={r.label} label={r.label} amount={r.amt} />)}
+                            <TotalRow label="Net cash from operations" amount={cfView.opT} accent={cfView.opT >= 0} />
+
+                            {linesOf(cfView, 'investing').length > 0 && (
+                              <>
+                                <SectionHead>INVESTING ACTIVITIES</SectionHead>
+                                {linesOf(cfView, 'investing').map(r => <LineItem key={r.label} label={r.label} amount={r.amt} />)}
+                                <TotalRow label="Net cash from investing" amount={cfView.invT} />
+                              </>
+                            )}
+
+                            <SectionHead>FINANCING ACTIVITIES</SectionHead>
+                            {linesOf(cfView, 'financing').map(r => <LineItem key={r.label} label={r.label} amount={r.amt} />)}
+                            <TotalRow label="Net cash from financing" amount={cfView.finT} />
+
+                            {Math.round(cfView.trT) !== 0 && <TotalRow label="Transfers between accounts" amount={cfView.trT} />}
+
+                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '16px', padding: '14px 12px', background: cfView.net >= 0 ? '#EEF3EE' : '#FBF0EE', border: `1px solid ${cfView.net >= 0 ? '#C6DECB' : '#E8C6C0'}` }}>
+                              <span style={{ fontSize: '12px', fontWeight: 700, letterSpacing: '0.08em', color: cfView.net >= 0 ? '#1C7A4E' : THEME.accent, fontFamily: headF, textTransform: 'uppercase' }}>Net change in cash</span>
+                              <span style={{ fontSize: '21px', fontWeight: 700, color: cfView.net >= 0 ? '#1C7A4E' : THEME.accent, fontFamily: monoF, fontVariantNumeric: 'tabular-nums' }}>{cfView.net < 0 ? `(${fmt(cfView.net)})` : fmt(cfView.net)}</span>
+                            </div>
+
+                            <div style={{ marginTop: '12px' }}>
+                              <div style={{ display: 'flex', justifyContent: 'space-between', padding: '6px 2px', fontFamily: ui, fontSize: '12px', color: '#6b6355' }}><span>Cash at start of period</span><span style={{ fontFamily: monoF }}>{fmt(cfView.begin)}</span></div>
+                              <div style={{ display: 'flex', justifyContent: 'space-between', padding: '7px 2px', fontFamily: ui, fontSize: '12.5px', color: '#1B1815', fontWeight: 600, borderTop: '1px solid #E6E1D6' }}><span>Cash at end of period</span><span style={{ fontFamily: monoF }}>{fmt(cfView.end)}</span></div>
+                            </div>
+                            <div style={{ fontSize: '9px', color: '#a39a88', fontFamily: ui, marginTop: '10px' }}>
+                              Direct method — every bank/cash movement, grouped by purpose. Ties to the cash on the Balance Sheet.
+                            </div>
                           </>
                         )}
-
-                        <SectionHead>FINANCING ACTIVITIES</SectionHead>
-                        {lines('financing').map(r => <LineItem key={r.label} label={r.label} amount={r.amt} />)}
-                        <TotalRow label="Net cash from financing" amount={finT} />
-
-                        {Math.round(trT) !== 0 && <TotalRow label="Transfers between accounts" amount={trT} />}
-
-                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '16px', padding: '14px 12px', background: netChange >= 0 ? '#EEF3EE' : '#FBF0EE', border: `1px solid ${netChange >= 0 ? '#C6DECB' : '#E8C6C0'}` }}>
-                          <span style={{ fontSize: '12px', fontWeight: 700, letterSpacing: '0.08em', color: netChange >= 0 ? '#1C7A4E' : THEME.accent, fontFamily: headF, textTransform: 'uppercase' }}>Net change in cash</span>
-                          <span style={{ fontSize: '21px', fontWeight: 700, color: netChange >= 0 ? '#1C7A4E' : THEME.accent, fontFamily: monoF, fontVariantNumeric: 'tabular-nums' }}>{netChange < 0 ? `(${fmt(netChange)})` : fmt(netChange)}</span>
-                        </div>
-
-                        <div style={{ marginTop: '12px' }}>
-                          <div style={{ display: 'flex', justifyContent: 'space-between', padding: '6px 2px', fontFamily: ui, fontSize: '12px', color: '#6b6355' }}><span>Cash at start of period</span><span style={{ fontFamily: monoF }}>{fmt(beginCash)}</span></div>
-                          <div style={{ display: 'flex', justifyContent: 'space-between', padding: '7px 2px', fontFamily: ui, fontSize: '12.5px', color: '#1B1815', fontWeight: 600, borderTop: '1px solid #E6E1D6' }}><span>Cash at end of period</span><span style={{ fontFamily: monoF }}>{fmt(endCash)}</span></div>
-                        </div>
-                        <div style={{ fontSize: '9px', color: '#a39a88', fontFamily: ui, marginTop: '10px' }}>
-                          Direct method — every bank/cash movement, grouped by purpose. Ties to the cash on the Balance Sheet.
-                        </div>
                       </div>
                     </>
                   )
