@@ -38,6 +38,8 @@ const RETURNS = [{"s":"205/55/16","q":8,"c":48},{"s":"215/60/16","q":2,"c":98},{
 
 const STOCK_START = '2026-04-15'
 const AS_OF = '2026-05-31'
+const AS_OF_JUNE = '2026-06-30'
+const asOfLabel = (d) => { const [y, m, day] = d.split('-'); return `${+m}/${+day}/${y}` }
 
 // Confirmed same-day special orders — premium tires Weldon ordered for a specific
 // customer, never off our shelf, so they don't draw down stock. Verified against
@@ -173,7 +175,7 @@ export default function Stock() {
     <>
       <Head><title>Reydel Tire — Stock</title></Head>
       <Shell active="stock" right={
-          <div style={{ fontSize: '10px', color: '#888', fontFamily: 'Inter, sans-serif' }}>{asOf === 'live' ? 'live on-hand · current' : 'on-hand · as of 5/31/2026 (books)'} · FIFO</div>
+          <div style={{ fontSize: '10px', color: '#888', fontFamily: 'Inter, sans-serif' }}>{asOf === 'live' ? 'live on-hand · current' : `on-hand · as of ${asOfLabel(asOf)}${asOf === AS_OF ? ' (books)' : ''}`} · FIFO</div>
         }>
 
         <div style={{ padding: '24px 28px' }}>
@@ -183,7 +185,7 @@ export default function Stock() {
               <>
                 <div style={{ display: 'flex', gap: '12px', marginBottom: '20px' }}>
                   {[
-                    { label: 'ON HAND',     value: totalOnHand.toLocaleString() + ' tires', sub: asOf === 'live' ? 'in stock now' : 'in stock at 5/31', sc: '#16a34a' },
+                    { label: 'ON HAND',     value: totalOnHand.toLocaleString() + ' tires', sub: asOf === 'live' ? 'in stock now' : `in stock at ${asOfLabel(asOf).slice(0, -5)}`, sc: '#16a34a' },
                     { label: 'STOCK VALUE', value: fmt(totalValue),                          sub: 'on-hand, at cost',   sc: '#1a1a1a' },
                     { label: 'SIZES',       value: lines.toString(),                         sub: 'on the rack',        sc: '#888' },
                   ].map(k => (
@@ -196,7 +198,7 @@ export default function Stock() {
                 </div>
 
                 <div style={{ display: 'flex', gap: '10px', marginBottom: '16px', alignItems: 'center', flexWrap: 'wrap' }}>
-                  {[{ k: AS_OF, l: 'AS OF 5/31' }, { k: 'live', l: 'LIVE' }].map(o => (
+                  {[{ k: AS_OF, l: 'AS OF 5/31' }, { k: AS_OF_JUNE, l: 'AS OF 6/30' }, { k: 'live', l: 'LIVE' }].map(o => (
                     <button key={o.k} onClick={() => setAsOf(o.k)} style={{
                       padding: '7px 12px', fontSize: '9px', fontFamily: 'Inter, sans-serif', letterSpacing: '0.08em',
                       border: '1px solid #E5E5E5', borderRadius: '4px', cursor: 'pointer',
