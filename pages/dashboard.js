@@ -96,21 +96,27 @@ export default function Dashboard() {
     load()
   }, [])
 
-  const totalRevenue = monthly.reduce((s, r) => s + r.revenue, 0)
-  const totalProfit  = monthly.reduce((s, r) => s + r.profit, 0)
+  // Exclude the current, in-progress month from headline metrics — a partial
+  // month (e.g. through the 19th) shows misleading totals & margins. The live
+  // current month is surfaced separately in the "current activity" strip below.
+  const nowD = new Date()
+  const curKey = `${nowD.getFullYear()}-${String(nowD.getMonth() + 1).padStart(2, '0')}`
+  const closed = monthly.filter(m => m.month < curKey)
+
+  const totalRevenue = closed.reduce((s, r) => s + r.revenue, 0)
+  const totalProfit  = closed.reduce((s, r) => s + r.profit, 0)
   const avgMargin    = totalRevenue > 0 ? (totalProfit / totalRevenue * 100).toFixed(1) : 0
 
-  // ── Growth headline metrics (from closed monthly_summary) ────────────────────
-  const last = monthly[monthly.length - 1]
-  const prev = monthly[monthly.length - 2]
-  const year = last ? last.month.slice(0, 4) : String(new Date().getFullYear())
-  const momRev = prev && prev.revenue ? (last.revenue - prev.revenue) / prev.revenue * 100 : null
-  const t3 = monthly.slice(-3)
-  const runRate = t3.length ? (t3.reduce((s, r) => s + r.revenue, 0) / t3.length) * 12 : 0
-  const ytd = monthly.filter(r => r.month.slice(0, 4) === year)
+  const last = closed[closed.length - 1]
+  const prev = closed[closed.length - 2]
+  const year = last ? last.month.slice(0, 4) : String(nowD.getFullYear())
+  const momRev = last && prev && prev.revenue ? (last.revenue - prev.revenue) / prev.revenue * 100 : null
+  const grossLast = last ? last.revenue - last.cogs : 0
+  const grossMarginLast = last && last.revenue ? grossLast / last.revenue * 100 : 0
+  const netMarginLast = last && last.revenue ? last.profit / last.revenue * 100 : 0
+  const ytd = closed.filter(r => r.month.slice(0, 4) === year)
   const ytdRev = ytd.reduce((s, r) => s + r.revenue, 0)
   const ytdProfit = ytd.reduce((s, r) => s + r.profit, 0)
-  const netMarginLast = last && last.revenue ? last.profit / last.revenue * 100 : 0
 
   // ── Current-period stats from live Clover sales ──────────────────────────────
   const now = new Date()
@@ -177,10 +183,11 @@ export default function Dashboard() {
                 {/* Growth KPIs (closed-month) */}
                 <div style={{ display: 'flex', gap: '12px', marginBottom: '14px', flexWrap: 'wrap' }}>
                   <KPICard label={`REVENUE · ${last ? last.label : ''}`} value={last ? fmt(last.revenue) : '—'}
-                    trend={momRev} sub={momRev != null ? `${Math.abs(momRev).toFixed(0)}% vs ${prev.label}` : null} accent={C.red} />
-                  <KPICard label="ANNUALIZED RUN-RATE" value={fmt(runRate)} sub="trailing 3-month pace" accent={C.gold} />
-                  <KPICard label={`NET MARGIN · ${last ? last.label : ''}`} value={pct(netMarginLast)}
-                    sub={last ? `${fmt(last.profit)} net profit` : null} accent={C.green} />
+                    trend={momRev} sub={momRev != null ? `${Math.abs(momRev).toFixed(0)}% vs ${prev.label}` : 'latest closed month'} accent={C.red} />
+                  <KPICard label={`GROSS PROFIT · ${last ? last.label : ''}`} value={last ? fmt(grossLast) : '—'}
+                    sub={last ? `${pct(grossMarginLast)} gross margin` : null} accent={C.gold} />
+                  <KPICard label={`NET PROFIT · ${last ? last.label : ''}`} value={last ? fmt(last.profit) : '—'}
+                    sub={last ? `${pct(netMarginLast)} net margin` : null} accent={C.green} />
                   <KPICard label={`REVENUE · YTD ${year}`} value={fmt(ytdRev)}
                     sub={`${ytd.length} mo · ${fmt(ytdProfit)} profit`} accent={C.red} />
                 </div>
@@ -188,7 +195,7 @@ export default function Dashboard() {
                 {/* Live "this month in progress" strip */}
                 <div style={{ ...cardStyle, padding: '14px 16px', marginBottom: '22px' }}>
                   <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '12px', flexWrap: 'wrap', gap: '8px' }}>
-                    <span style={{ ...capLabel, marginBottom: 0 }}>CURRENT ACTIVITY</span>
+                    <span style={{ ...capLabel, marginBottom: 0 }}>{now.toLocaleDateString([], { month: 'long' }).toUpperCase()} · IN PROGRESS</span>
                     <div style={{ display: 'flex', gap: '6px' }}>
                       {[['week', 'Last 7 days'], ['month', 'This month']].map(([p, l]) => (
                         <button key={p} onClick={() => setPeriod(p)} style={{
@@ -240,7 +247,7 @@ export default function Dashboard() {
                           ))}
                         </div>
                         <ResponsiveContainer width="100%" height={200}>
-                          <ComposedChart data={monthly} barGap={2} barCategoryGap="24%">
+                          <ComposedChart data={closed} barGap={2} barCategoryGap="24%">
                             <CartesianGrid strokeDasharray="3 3" stroke="#EDE6D6" vertical={false} />
                             <XAxis dataKey="label" tick={{ fontSize: 10, fill: C.muted, fontFamily: ui }} axisLine={false} tickLine={false} />
                             <YAxis tick={{ fontSize: 10, fill: C.muted, fontFamily: ui }} axisLine={false} tickLine={false} tickFormatter={v => `$${(v / 1000).toFixed(0)}k`} />
@@ -260,7 +267,7 @@ export default function Dashboard() {
                             <tr>{['Month','Profit','Margin'].map(h => (<th key={h} style={hcell(h === 'Month' ? 'left' : 'right')}>{h}</th>))}</tr>
                           </thead>
                           <tbody>
-                            {monthly.map(m => (
+                            {closed.map(m => (
                               <tr key={m.month} onMouseEnter={e => e.currentTarget.style.background = C.hover} onMouseLeave={e => e.currentTarget.style.background = 'transparent'}>
                                 <td style={{ padding: '7px 8px', borderBottom: '1px solid #F1EADB', color: C.ink }}>
                                   {m.label}{m.notes && <span style={{ fontSize: '8px', color: C.red, marginLeft: '4px' }}>*est</span>}
