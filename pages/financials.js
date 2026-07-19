@@ -138,7 +138,8 @@ export default function Financials() {
     async function load() {
       const { data: mData } = await supabase.from('monthly_summary').select('*').order('month')
       if (mData) setMonthly(mData.map(r => ({
-        label: MONTHS[r.month.slice(5)] + ' ' + r.month.slice(0, 4),
+        key: r.month.slice(0, 7),
+        label: MONTHS[r.month.slice(5, 7)] + ' ' + r.month.slice(0, 4),
         revenue: parseFloat(r.revenue),
         expenses: parseFloat(r.expenses),
         profit: parseFloat(r.profit),
@@ -214,7 +215,11 @@ export default function Financials() {
     load()
   }, [])
 
-  const totals = monthly.reduce((s, r) => ({
+  // Current (in-progress) month key — a partial month is excluded from totals
+  // and flagged in the monthly table so it can't be misread as a full month.
+  const nowD = new Date()
+  const curKey = `${nowD.getFullYear()}-${String(nowD.getMonth() + 1).padStart(2, '0')}`
+  const totals = monthly.filter(m => m.key < curKey).reduce((s, r) => ({
     revenue: s.revenue + r.revenue, expenses: s.expenses + r.expenses,
     profit: s.profit + r.profit, cogs: s.cogs + r.cogs,
   }), { revenue: 0, expenses: 0, profit: 0, cogs: 0 })
@@ -291,20 +296,24 @@ export default function Financials() {
       <Shell active="financials">
         <DrillModal account={drillAccount} onClose={() => setDrillAccount(null)} />
 
-        <div style={{ padding: '24px 28px' }}>
+        <div style={{ padding: '26px 30px', maxWidth: '1160px' }}>
             {loading ? (
               <div style={{ color: '#888', fontFamily: 'Inter, sans-serif', fontSize: '12px' }}>Loading...</div>
             ) : (
               <>
-                {/* Admin-only: import a fresh QuickBooks GL. Clients never see this. */}
-                {isAdmin && (
-                  <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: '12px' }}>
+                {/* Page header */}
+                <div style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between', marginBottom: '20px', flexWrap: 'wrap', gap: '12px' }}>
+                  <div>
+                    <div style={{ fontSize: '23px', fontWeight: 700, color: '#211E17', fontFamily: ui, letterSpacing: '-0.025em' }}>Financials</div>
+                    <div style={{ fontSize: '12px', color: '#a39a88', fontFamily: ui, marginTop: '4px' }}>Reydel Tire &amp; Auto · profit &amp; loss, balance sheet and accounts</div>
+                  </div>
+                  {isAdmin && (
                     <button onClick={() => { window.location.href = '/admin/financials' }}
-                      style={{ fontSize: '10px', fontFamily: 'Inter, sans-serif', letterSpacing: '0.08em', color: '#fff', background: THEME.accent, border: 'none', borderRadius: '4px', padding: '8px 14px', cursor: 'pointer' }}>
+                      style={{ fontSize: '10px', fontFamily: ui, letterSpacing: '0.08em', color: '#fff', background: THEME.accent, border: 'none', borderRadius: '7px', padding: '9px 14px', cursor: 'pointer' }}>
                       ↑ IMPORT GL FROM QUICKBOOKS
                     </button>
-                  </div>
-                )}
+                  )}
+                </div>
                 {/* Tabs */}
                 <div style={{ display: 'flex', gap: '2px', borderBottom: '1px solid #E7DECB', marginBottom: '20px' }}>
                   {tabs.map(t => (
@@ -446,20 +455,28 @@ export default function Financials() {
                         </tr>
                       </thead>
                       <tbody>
-                        {monthly.map((m, i) => (
-                          <tr key={i} onMouseEnter={e => e.currentTarget.style.background = '#F5EFE3'} onMouseLeave={e => e.currentTarget.style.background = 'transparent'}>
-                            <td style={cell('left', { color: '#1a1a1a', fontWeight: '600' })}>{m.label}</td>
-                            <td style={cell('right')}>{fmt(m.revenue)}</td>
-                            <td style={cell('right', { color: THEME.accent })}>{fmt(m.cogs)}</td>
-                            <td style={cell('right', { color: '#16a34a' })}>{fmt(m.revenue - m.cogs)}</td>
-                            <td style={cell('right', { color: '#16a34a', fontWeight: '600' })}>{fmt(m.profit)}</td>
-                            <td style={cell('right')}>
-                              <span style={{ background: '#dcfce7', color: '#16a34a', padding: '1px 6px', borderRadius: '3px', fontSize: '9px' }}>
-                                {m.revenue > 0 ? pct(m.profit / m.revenue * 100) : '—'}
-                              </span>
-                            </td>
-                          </tr>
-                        ))}
+                        {monthly.map((m, i) => {
+                          const partial = m.key >= curKey
+                          return (
+                            <tr key={i} onMouseEnter={e => e.currentTarget.style.background = '#F5EFE3'} onMouseLeave={e => e.currentTarget.style.background = 'transparent'} style={{ opacity: partial ? 0.6 : 1 }}>
+                              <td style={cell('left', { color: '#1a1a1a', fontWeight: '600' })}>
+                                {m.label}
+                                {partial && <span style={{ marginLeft: '6px', fontSize: '8px', color: '#a39a88', letterSpacing: '0.06em' }}>· IN PROGRESS</span>}
+                              </td>
+                              <td style={cell('right')}>{fmt(m.revenue)}</td>
+                              <td style={cell('right', { color: THEME.accent })}>{fmt(m.cogs)}</td>
+                              <td style={cell('right', { color: '#16a34a' })}>{fmt(m.revenue - m.cogs)}</td>
+                              <td style={cell('right', { color: '#16a34a', fontWeight: '600' })}>{fmt(m.profit)}</td>
+                              <td style={cell('right')}>
+                                {partial ? <span style={{ fontSize: '9px', color: '#a39a88' }}>—</span> : (
+                                  <span style={{ background: '#dcfce7', color: '#16a34a', padding: '1px 6px', borderRadius: '3px', fontSize: '9px' }}>
+                                    {m.revenue > 0 ? pct(m.profit / m.revenue * 100) : '—'}
+                                  </span>
+                                )}
+                              </td>
+                            </tr>
+                          )
+                        })}
                         <tr>
                           {[
                             { v: 'TOTAL',                                    a: 'left',  c: '#1a1a1a', w: '700' },
@@ -487,19 +504,25 @@ export default function Financials() {
                       const maxV = Math.max(...group.rows.map(r => r.amount), 1)
                       const groupTotal = group.rows.reduce((s, r) => s + r.amount, 0)
                       return (
-                        <div key={group.heading} style={{ background: '#fff', border: '1px solid #E7DECB', borderRadius: '10px', boxShadow: '0 1px 3px rgba(60,45,20,0.05)', padding: '16px' }}>
-                          <div style={{ fontSize: '9px', color: '#888', letterSpacing: '0.15em', marginBottom: '14px', fontFamily: 'Inter, sans-serif' }}>{group.heading}</div>
+                        <div key={group.heading} style={{ background: '#fff', border: '1px solid #E7DECB', borderRadius: '12px', boxShadow: '0 1px 3px rgba(60,45,20,0.05)', padding: '20px 22px', maxWidth: '660px' }}>
+                          <div style={{ fontSize: '9px', color: '#a39a88', letterSpacing: '0.14em', fontWeight: 700, marginBottom: '16px', fontFamily: ui }}>{group.heading}</div>
                           {[...group.rows].sort((a, b) => b.amount - a.amount).map(e => (
-                            <div key={e.label} style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '7px 0', borderBottom: '1px solid #F1EADB' }}>
-                              <div style={{ width: '180px', fontSize: '10px', color: '#333', flexShrink: 0, fontFamily: 'Inter, sans-serif' }}>{e.label}</div>
-                              <div style={{ flex: 1, height: '5px', background: '#E7DECB', borderRadius: '3px' }}>
-                                <div style={{ height: '5px', background: THEME.accent, borderRadius: '3px', width: `${Math.round(e.amount / maxV * 100)}%` }} />
+                            <div key={e.label} style={{ padding: '9px 0', borderBottom: '1px solid #F1EADB' }}>
+                              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: '5px' }}>
+                                <span style={{ fontSize: '12px', color: '#4a4438', fontFamily: ui }}>{e.label}</span>
+                                <span style={{ display: 'flex', alignItems: 'baseline', gap: '8px' }}>
+                                  <span style={{ fontSize: '10px', color: '#a39a88', fontFamily: ui }}>{groupTotal > 0 ? pct(e.amount / groupTotal * 100) : '—'}</span>
+                                  <span style={{ fontSize: '12px', color: '#1a1a1a', fontWeight: 600, fontFamily: ui, fontVariantNumeric: 'tabular-nums' }}>{fmt(e.amount)}</span>
+                                </span>
                               </div>
-                              <div style={{ width: '70px', textAlign: 'right', fontSize: '10px', color: THEME.accent, fontFamily: 'Inter, sans-serif' }}>{fmt(e.amount)}</div>
+                              <div style={{ height: '6px', background: '#F1EADB', borderRadius: '3px', overflow: 'hidden' }}>
+                                <div style={{ height: '100%', background: `linear-gradient(90deg, ${THEME.accent}, #e05a3a)`, borderRadius: '3px', width: `${Math.round(e.amount / maxV * 100)}%` }} />
+                              </div>
                             </div>
                           ))}
-                          <div style={{ display: 'flex', justifyContent: 'flex-end', paddingTop: '8px', borderTop: '1px solid #E7DECB', marginTop: '4px' }}>
-                            <span style={{ fontSize: '10px', color: '#1a1a1a', fontFamily: 'Inter, sans-serif', fontWeight: '600' }}>Total: {fmt(groupTotal)}</span>
+                          <div style={{ display: 'flex', justifyContent: 'space-between', paddingTop: '12px', marginTop: '4px', borderTop: '1px solid #E7DECB' }}>
+                            <span style={{ fontSize: '12px', color: '#1a1a1a', fontFamily: ui, fontWeight: 700 }}>Total</span>
+                            <span style={{ fontSize: '12px', color: '#1a1a1a', fontFamily: ui, fontWeight: 700, fontVariantNumeric: 'tabular-nums' }}>{fmt(groupTotal)}</span>
                           </div>
                         </div>
                       )

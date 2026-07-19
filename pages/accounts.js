@@ -129,9 +129,9 @@ export default function Accounts() {
           <div style={{ flex: 1, padding: '24px 28px', borderRight: selected ? '1px solid #E7DECB' : 'none' }}>
 
             <div style={{ marginBottom: '20px' }}>
-              <div style={{ fontSize: '9px', color: '#888', letterSpacing: '0.15em', marginBottom: '4px', fontFamily: 'Inter, sans-serif' }}>CHART OF ACCOUNTS</div>
-              <div style={{ fontSize: '11px', color: '#888', fontFamily: 'Inter, sans-serif' }}>
-                Jan – May 2026 &nbsp;·&nbsp; {accounts.length} accounts &nbsp;·&nbsp; {totalTxns.toLocaleString()} transactions
+              <div style={{ fontSize: '23px', fontWeight: 700, color: '#211E17', fontFamily: 'Inter, sans-serif', letterSpacing: '-0.025em' }}>Chart of Accounts</div>
+              <div style={{ fontSize: '12px', color: '#a39a88', fontFamily: 'Inter, sans-serif', marginTop: '4px' }}>
+                Reydel Tire &amp; Auto · {accounts.length} accounts · {totalTxns.toLocaleString()} transactions
               </div>
             </div>
 

@@ -519,12 +519,17 @@ export default function Orders() {
           </div>
         }>
 
-        <div style={{ padding: '24px 28px' }}>
+        <div style={{ padding: '26px 30px', maxWidth: '1160px' }}>
+            {/* Page header */}
+            <div style={{ marginBottom: '20px' }}>
+              <div style={{ fontSize: '23px', fontWeight: 700, color: '#211E17', fontFamily: 'Inter, sans-serif', letterSpacing: '-0.025em' }}>Orders</div>
+              <div style={{ fontSize: '12px', color: '#a39a88', fontFamily: 'Inter, sans-serif', marginTop: '4px' }}>Reydel Tire &amp; Auto · order history with cost &amp; profit</div>
+            </div>
             {/* Tabs: live (Clover+Weldon) vs precomputed (order_profit) */}
             <div style={{ display: 'flex', gap: '2px', borderBottom: '1px solid #E7DECB', marginBottom: '20px' }}>
               {[
-                { id: 'live',        label: 'Orders — Live (Clover + Weldon)' },
-                { id: 'precomputed', label: 'Orders — Precomputed (order_profit)' },
+                { id: 'live',        label: 'Live Orders' },
+                { id: 'precomputed', label: 'Snapshot' },
               ].map(t => (
                 <button key={t.id} onClick={() => setView(t.id)} style={{
                   padding: '8px 16px', fontSize: '10px', fontFamily: 'Inter, sans-serif', letterSpacing: '0.08em',

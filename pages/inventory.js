@@ -109,11 +109,15 @@ export default function Inventory() {
           </>
         }>
 
-        <div style={{ padding: '24px 28px' }}>
+        <div style={{ padding: '26px 30px', maxWidth: '1160px' }}>
             {loading ? (
               <div style={{ color: '#888', fontFamily: 'Inter, sans-serif', fontSize: '12px' }}>Loading...</div>
             ) : (
               <>
+                <div style={{ marginBottom: '20px' }}>
+                  <div style={{ fontSize: '23px', fontWeight: 700, color: '#211E17', fontFamily: 'Inter, sans-serif', letterSpacing: '-0.025em' }}>Sales &amp; Items</div>
+                  <div style={{ fontSize: '12px', color: '#a39a88', fontFamily: 'Inter, sans-serif', marginTop: '4px' }}>Reydel Tire &amp; Auto · items ranked by revenue</div>
+                </div>
                 {/* KPI row */}
                 <div style={{ display: 'flex', gap: '12px', marginBottom: '20px' }}>
                   {[

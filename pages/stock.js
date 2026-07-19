@@ -178,11 +178,15 @@ export default function Stock() {
           <div style={{ fontSize: '10px', color: '#888', fontFamily: 'Inter, sans-serif' }}>{asOf === 'live' ? 'live on-hand · current' : `on-hand · as of ${asOfLabel(asOf)}${asOf === AS_OF ? ' (books)' : ''}`} · FIFO</div>
         }>
 
-        <div style={{ padding: '24px 28px' }}>
+        <div style={{ padding: '26px 30px', maxWidth: '1160px' }}>
             {loading ? (
               <div style={{ color: '#888', fontFamily: 'Inter, sans-serif', fontSize: '12px' }}>Loading...</div>
             ) : (
               <>
+                <div style={{ marginBottom: '20px' }}>
+                  <div style={{ fontSize: '23px', fontWeight: 700, color: '#211E17', fontFamily: 'Inter, sans-serif', letterSpacing: '-0.025em' }}>Stock on Hand</div>
+                  <div style={{ fontSize: '12px', color: '#a39a88', fontFamily: 'Inter, sans-serif', marginTop: '4px' }}>Reydel Tire &amp; Auto · live tire inventory, FIFO cost</div>
+                </div>
                 <div style={{ display: 'flex', gap: '12px', marginBottom: '20px' }}>
                   {[
                     { label: 'ON HAND',     value: totalOnHand.toLocaleString() + ' tires', sub: asOf === 'live' ? 'in stock now' : `in stock at ${asOfLabel(asOf).slice(0, -5)}`, sc: '#16a34a' },
