@@ -18,15 +18,15 @@ const MAX_SAMEDAY_MARGIN = 0.55 // ...and reject one implying a FATTER margin th
                                 // special order isn't a 65%-markup shelf sale, so a too-cheap cost means
                                 // we anchored a budget tier to a premium sale (e.g. a Cooper to an Agility)
 
-const THEME = { sidebarBg: '#1A1A1A', sidebarBorder: '#2A2A2A', accent: '#CC2222' }
+const THEME = { sidebarBg: '#1A1A1A', sidebarBorder: '#2A2A2A', accent: '#B0281C' }
 
 const hcell = (align = 'left') => ({
-  padding: '7px 12px', fontSize: '9px', color: '#888', background: '#FAF6EC',
-  fontWeight: '400', letterSpacing: '0.1em', borderBottom: '1px solid #E7DECB',
+  padding: '7px 12px', fontSize: '9px', color: '#888', background: '#ECE7DD',
+  fontWeight: '400', letterSpacing: '0.1em', borderBottom: '1px solid #DBD5C7',
   fontFamily: 'Inter, sans-serif', textAlign: align,
 })
 const cell = (align = 'left', extra = {}) => ({
-  padding: '9px 12px', borderBottom: '1px solid #F1EADB',
+  padding: '9px 12px', borderBottom: '1px solid #E6E1D6',
   color: '#333', fontSize: '11px', fontFamily: 'Inter, sans-serif',
   textAlign: align, ...extra,
 })
@@ -522,8 +522,8 @@ export default function Orders() {
         <div style={{ padding: '26px 30px', maxWidth: '1160px' }}>
             {/* Page header */}
             <div style={{ marginBottom: '20px' }}>
-              <div style={{ fontSize: '23px', fontWeight: 700, color: '#211E17', fontFamily: 'Inter, sans-serif', letterSpacing: '-0.025em' }}>Orders</div>
-              <div style={{ fontSize: '12px', color: '#a39a88', fontFamily: 'Inter, sans-serif', marginTop: '4px' }}>Reydel Tire &amp; Auto · order history with cost &amp; profit</div>
+              <div style={{ fontSize: '23px', fontWeight: 700, color: '#1B1815', fontFamily: "'Barlow Semi Condensed', sans-serif", letterSpacing: '0.02em', textTransform: 'uppercase' }}>Orders</div>
+              <div style={{ fontSize: '12px', color: '#9A9284', fontFamily: 'Inter, sans-serif', marginTop: '4px' }}>Reydel Tire &amp; Auto · order history with cost &amp; profit</div>
             </div>
             {(loading ? (
               <div style={{ color: '#888', fontFamily: 'Inter, sans-serif', fontSize: '12px' }}>Loading...</div>
@@ -533,17 +533,17 @@ export default function Orders() {
                 <div style={{ display: 'flex', gap: '12px', marginBottom: '20px' }}>
                   {[
                     { label: 'TOTAL ORDERS',      value: filtered.length.toLocaleString(),    sub: 'line items shown',           sc: '#888' },
-                    { label: 'PROFIT / NEW TIRE',  value: fmtC(newT.avg),  sub: `${newT.margin.toFixed(1)}% · ${newT.units} sold`, sc: '#16a34a' },
-                    { label: 'PROFIT / USED TIRE', value: fmtC(usedT.avg), sub: usedT.units ? `${usedT.margin.toFixed(1)}% · ${usedT.units} sold` : 'none sold', sc: '#16a34a' },
+                    { label: 'PROFIT / NEW TIRE',  value: fmtC(newT.avg),  sub: `${newT.margin.toFixed(1)}% · ${newT.units} sold`, sc: '#1C7A4E' },
+                    { label: 'PROFIT / USED TIRE', value: fmtC(usedT.avg), sub: usedT.units ? `${usedT.margin.toFixed(1)}% · ${usedT.units} sold` : 'none sold', sc: '#1C7A4E' },
                     { label: 'BEST MARGIN SIZE',
                       value: bestMarginSize ? bestMarginSize.size : '—',
                       sub: bestMarginSize ? `${bestMarginSize.margin.toFixed(1)}% · ${bestMarginSize.count} sold` : 'need 3+ matched sales',
                       sc: THEME.accent },
-                    { label: 'TOTAL PROFIT',       value: fmt0(totalProfit),                  sub: 'matched + est.',             sc: '#16a34a' },
+                    { label: 'TOTAL PROFIT',       value: fmt0(totalProfit),                  sub: 'matched + est.',             sc: '#1C7A4E' },
                   ].map(k => (
-                    <div key={k.label} style={{ flex: 1, background: '#fff', border: '1px solid #E7DECB', borderRadius: '10px', boxShadow: '0 1px 3px rgba(60,45,20,0.05)', padding: '14px 16px' }}>
+                    <div key={k.label} style={{ flex: 1, background: '#fff', border: '1px solid #DBD5C7', borderRadius: '0', boxShadow: 'none', padding: '14px 16px' }}>
                       <div style={{ fontSize: '9px', color: '#888', letterSpacing: '0.15em', marginBottom: '6px', fontFamily: 'Inter, sans-serif' }}>{k.label}</div>
-                      <div style={{ fontSize: k.label === 'BEST MARGIN SIZE' ? '14px' : '18px', color: '#1a1a1a', fontWeight: '600', fontFamily: 'Inter, sans-serif', lineHeight: 1.2 }}>{k.value}</div>
+                      <div style={{ fontSize: k.label === 'BEST MARGIN SIZE' ? '14px' : '18px', color: '#1B1815', fontWeight: '600', fontFamily: 'Inter, sans-serif', lineHeight: 1.2 }}>{k.value}</div>
                       <div style={{ fontSize: '10px', color: k.sc, marginTop: '4px', fontFamily: 'Inter, sans-serif' }}>{k.sub}</div>
                     </div>
                   ))}
@@ -554,20 +554,20 @@ export default function Orders() {
                   {[{ k: 'all', l: 'ALL' }, { k: '2026-05-31', l: 'THRU 5/31' }].map(o => (
                     <button key={o.k} onClick={() => setAsOf(o.k)} style={{
                       padding: '7px 12px', fontSize: '9px', fontFamily: 'Inter, sans-serif', letterSpacing: '0.08em',
-                      border: '1px solid #E7DECB', borderRadius: '4px', cursor: 'pointer',
-                      background: asOf === o.k ? '#1a1a1a' : '#fff', color: asOf === o.k ? '#fff' : '#888',
+                      border: '1px solid #DBD5C7', borderRadius: '0', cursor: 'pointer',
+                      background: asOf === o.k ? '#1B1815' : '#fff', color: asOf === o.k ? '#fff' : '#888',
                     }}>{o.l}</button>
                   ))}
                   <input value={search} onChange={e => setSearch(e.target.value)}
                     placeholder="Filter by tire size or item..."
-                    style={{ flex: 1, minWidth: '200px', padding: '8px 12px', border: '1px solid #E7DECB', borderRadius: '4px',
-                      fontSize: '11px', fontFamily: 'Inter, sans-serif', outline: 'none', background: '#fff', color: '#1a1a1a' }}
+                    style={{ flex: 1, minWidth: '200px', padding: '8px 12px', border: '1px solid #DBD5C7', borderRadius: '0',
+                      fontSize: '11px', fontFamily: 'Inter, sans-serif', outline: 'none', background: '#fff', color: '#1B1815' }}
                   />
                   {[{ key: 'date', label: 'DATE' }, { key: 'profit', label: 'PROFIT' }, { key: 'margin', label: 'MARGIN' }, { key: 'sale', label: 'SALE' }].map(s => (
                     <button key={s.key} onClick={() => toggleSort(s.key)} style={{
                       padding: '7px 12px', fontSize: '9px', fontFamily: 'Inter, sans-serif', letterSpacing: '0.08em',
-                      border: 'none', borderRadius: '4px', cursor: 'pointer',
-                      background: sort === s.key ? THEME.accent : '#F1EADB',
+                      border: 'none', borderRadius: '0', cursor: 'pointer',
+                      background: sort === s.key ? THEME.accent : '#E6E1D6',
                       color: sort === s.key ? '#fff' : '#888',
                     }}>
                       {s.label} {sort === s.key ? (sortDir === 'desc' ? '↓' : '↑') : ''}
@@ -575,16 +575,16 @@ export default function Orders() {
                   ))}
                   <select value={sizeFilter} onChange={e => setSizeFilter(e.target.value)} style={{
                     padding: '7px 10px', fontSize: '9px', fontFamily: 'Inter, sans-serif', letterSpacing: '0.06em',
-                    border: '1px solid #E7DECB', borderRadius: '4px', cursor: 'pointer', maxWidth: '170px',
-                    background: sizeFilter === 'all' ? '#F1EADB' : '#dbeafe', color: '#555',
+                    border: '1px solid #DBD5C7', borderRadius: '0', cursor: 'pointer', maxWidth: '170px',
+                    background: sizeFilter === 'all' ? '#E6E1D6' : '#dbeafe', color: '#555',
                   }}>
                     <option value="all">ALL SIZES ({sizes.length})</option>
                     {sizes.map(s => <option key={s.size} value={s.size}>{s.size} ({s.count})</option>)}
                   </select>
                   <select value={srcFilter} onChange={e => setSrcFilter(e.target.value)} style={{
                     padding: '7px 10px', fontSize: '9px', fontFamily: 'Inter, sans-serif', letterSpacing: '0.06em',
-                    border: '1px solid #E7DECB', borderRadius: '4px', cursor: 'pointer',
-                    background: srcFilter === 'all' ? '#F1EADB' : '#fef3c7', color: '#555',
+                    border: '1px solid #DBD5C7', borderRadius: '0', cursor: 'pointer',
+                    background: srcFilter === 'all' ? '#E6E1D6' : '#fef3c7', color: '#555',
                   }}>
                     <option value="all">ALL SOURCES</option>
                     <option value="inventory">INVENTORY</option>
@@ -596,25 +596,25 @@ export default function Orders() {
                   </select>
                   <button onClick={() => setShowEst(e => !e)} style={{
                     padding: '7px 12px', fontSize: '9px', fontFamily: 'Inter, sans-serif', letterSpacing: '0.08em',
-                    border: '1px solid #E7DECB', borderRadius: '4px', cursor: 'pointer',
-                    background: showEst ? '#F1EADB' : THEME.accent,
+                    border: '1px solid #DBD5C7', borderRadius: '0', cursor: 'pointer',
+                    background: showEst ? '#E6E1D6' : THEME.accent,
                     color: showEst ? '#888' : '#fff',
                   }}>
                     {showEst ? 'HIDE EST.' : 'SHOW EST.'}
                   </button>
                   <button onClick={() => setFlaggedOnly(f => !f)} title="Show only rows whose cost looks suspicious" style={{
                     padding: '7px 12px', fontSize: '9px', fontFamily: 'Inter, sans-serif', letterSpacing: '0.08em',
-                    border: 'none', borderRadius: '4px', cursor: 'pointer',
-                    background: flaggedOnly ? '#f59e0b' : '#F1EADB', color: flaggedOnly ? '#fff' : '#888',
+                    border: 'none', borderRadius: '0', cursor: 'pointer',
+                    background: flaggedOnly ? '#f59e0b' : '#E6E1D6', color: flaggedOnly ? '#fff' : '#888',
                   }}>⚠ FLAGGED{flaggedCount ? ` (${flaggedCount})` : ''}</button>
                   <button onClick={downloadCSV} style={{
                     padding: '7px 12px', fontSize: '9px', fontFamily: 'Inter, sans-serif', letterSpacing: '0.08em',
-                    border: 'none', borderRadius: '4px', cursor: 'pointer', background: '#16a34a', color: '#fff',
+                    border: 'none', borderRadius: '0', cursor: 'pointer', background: '#1C7A4E', color: '#fff',
                   }}>↓ CSV</button>
                 </div>
 
                 {/* Table */}
-                <div style={{ background: '#fff', border: '1px solid #E7DECB', borderRadius: '10px', boxShadow: '0 1px 3px rgba(60,45,20,0.05)', overflow: 'hidden' }}>
+                <div style={{ background: '#fff', border: '1px solid #DBD5C7', borderRadius: '0', boxShadow: 'none', overflow: 'hidden' }}>
                   <table style={{ width: '100%', borderCollapse: 'collapse', fontFamily: 'Inter, sans-serif' }}>
                     <thead>
                       <tr>
@@ -631,18 +631,18 @@ export default function Orders() {
                     <tbody>
                       {filtered.map((r, i) => { const flag = rowFlag(r); return (
                         <tr key={i}
-                          onMouseEnter={e => e.currentTarget.style.background = flag ? '#FCEFC7' : '#F5EFE3'}
+                          onMouseEnter={e => e.currentTarget.style.background = flag ? '#FCEFC7' : '#ECE8DF'}
                           onMouseLeave={e => e.currentTarget.style.background = flag ? '#FEF9E7' : 'transparent'}
                           style={{ background: flag ? '#FEF9E7' : 'transparent' }}
                         >
                           <td style={cell('left', { color: '#888', whiteSpace: 'nowrap' })}>{r.date}</td>
                           <td style={cell('left', { maxWidth: '220px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' })}>
-                            <span style={{ color: '#1a1a1a', fontWeight: '500' }}>{r.item}</span>
+                            <span style={{ color: '#1B1815', fontWeight: '500' }}>{r.item}</span>
                           </td>
                           <td style={cell('left')}>
                             {flag && <span title={flag.reason} style={{ cursor: 'help', marginRight: '5px' }}>⚠️</span>}
                             {(() => {
-                              if (r.priceInferred) return <span title="Cost estimated from the sale price — the Clover item had no brand to match exactly, and the price points to this tier" style={{ padding: '2px 7px', borderRadius: '3px', fontSize: '10px', whiteSpace: 'nowrap', background: '#ede9fe', color: '#6d28d9' }}>~ Tier est</span>
+                              if (r.priceInferred) return <span title="Cost estimated from the sale price — the Clover item had no brand to match exactly, and the price points to this tier" style={{ padding: '2px 7px', borderRadius: '0', fontSize: '10px', whiteSpace: 'nowrap', background: '#ede9fe', color: '#6d28d9' }}>~ Tier est</span>
                               if (r.costSource === 'weldon_same_day') {
                                 const matched = r.matchedSameDay
                                 const g = r.matchGap == null ? null : Math.abs(r.matchGap)
@@ -654,7 +654,7 @@ export default function Orders() {
                                   : matched
                                     ? `Matched a Weldon order ${g} day(s) ${r.matchGap >= 0 ? 'before' : 'after'} the sale`
                                     : `No same-day purchase — cost borrowed from a Weldon order ${g} days away`
-                                return <span title={tip} style={{ padding: '2px 7px', borderRadius: '3px', fontSize: '10px', whiteSpace: 'nowrap', background: bg, color: fg }}>{label}</span>
+                                return <span title={tip} style={{ padding: '2px 7px', borderRadius: '0', fontSize: '10px', whiteSpace: 'nowrap', background: bg, color: fg }}>{label}</span>
                               }
                               const map = {
                                 inventory:           ['#dbeafe', '#1d4ed8', 'Inventory'],
@@ -662,22 +662,22 @@ export default function Orders() {
                                 service:             ['#f3f4f6', '#9ca3af', 'Service'],
                               }
                               const [bg, fg, label] = map[r.costSource] || map.service
-                              return <span style={{ padding: '2px 7px', borderRadius: '3px', fontSize: '10px', whiteSpace: 'nowrap', background: bg, color: fg }}>{label}</span>
+                              return <span style={{ padding: '2px 7px', borderRadius: '0', fontSize: '10px', whiteSpace: 'nowrap', background: bg, color: fg }}>{label}</span>
                             })()}
                           </td>
                           <td style={cell('right', { color: '#888' })}>{r.qty}</td>
-                          <td style={cell('right', { color: '#1a1a1a' })}>{fmtC(r.sale)}</td>
+                          <td style={cell('right', { color: '#1B1815' })}>{fmtC(r.sale)}</td>
                           <td style={cell('right')}>
                             <span style={{ color: r.isEstimated ? '#aaa' : '#888' }}>
                               {fmtC(r.cost)}{r.isEstimated ? '*' : ''}
                             </span>
                           </td>
-                          <td style={cell('right', { color: '#16a34a', fontWeight: '600' })}>{fmtC(r.profit)}</td>
+                          <td style={cell('right', { color: '#1C7A4E', fontWeight: '600' })}>{fmtC(r.profit)}</td>
                           <td style={cell('right')}>
                             <span style={{
-                              padding: '2px 7px', borderRadius: '3px', fontSize: '10px',
-                              background: r.margin >= 60 ? '#dcfce7' : r.margin >= 45 ? '#fef3c7' : '#fee2e2',
-                              color:      r.margin >= 60 ? '#16a34a' : r.margin >= 45 ? '#92400e' : THEME.accent,
+                              padding: '2px 7px', borderRadius: '0', fontSize: '10px',
+                              background: r.margin >= 60 ? '#DDEBE0' : r.margin >= 45 ? '#fef3c7' : '#fee2e2',
+                              color:      r.margin >= 60 ? '#1C7A4E' : r.margin >= 45 ? '#92400e' : THEME.accent,
                             }}>
                               {r.margin.toFixed(1)}%
                             </span>
@@ -693,11 +693,11 @@ export default function Orders() {
                     </div>
                   )}
 
-                  <div style={{ padding: '10px 16px', borderTop: '2px solid #E7DECB', background: '#FAF6EC', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <div style={{ padding: '10px 16px', borderTop: '2px solid #DBD5C7', background: '#ECE7DD', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                     <div style={{ fontSize: '10px', color: '#888', fontFamily: 'Inter, sans-serif' }}>
                       {filtered.length.toLocaleString()} rows &nbsp;·&nbsp; {invCount.toLocaleString()} inventory &nbsp;·&nbsp; {sameDayCount.toLocaleString()} same-day ({sameDayMatched} matched · {sameDayProxy} est.) &nbsp;·&nbsp; <span style={{ color: flaggedCount ? '#b45309' : '#888' }}>⚠ {flaggedCount} flagged</span> &nbsp;·&nbsp; * = estimated cost
                     </div>
-                    <div style={{ fontSize: '11px', color: '#16a34a', fontFamily: 'Inter, sans-serif', fontWeight: '600' }}>
+                    <div style={{ fontSize: '11px', color: '#1C7A4E', fontFamily: 'Inter, sans-serif', fontWeight: '600' }}>
                       {fmt0(totalProfit)} est. profit shown
                     </div>
                   </div>

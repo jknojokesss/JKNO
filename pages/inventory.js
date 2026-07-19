@@ -17,15 +17,15 @@ function normalizeItemName(name) {
     .trim()
 }
 
-const THEME = { sidebarBg: '#1A1A1A', sidebarBorder: '#2A2A2A', accent: '#CC2222' }
+const THEME = { sidebarBg: '#1A1A1A', sidebarBorder: '#2A2A2A', accent: '#B0281C' }
 
 const hcell = (align = 'left') => ({
-  padding: '6px 10px', fontSize: '9px', color: '#888', background: '#FAF6EC',
-  fontWeight: '400', letterSpacing: '0.1em', borderBottom: '1px solid #E7DECB',
+  padding: '6px 10px', fontSize: '9px', color: '#888', background: '#ECE7DD',
+  fontWeight: '400', letterSpacing: '0.1em', borderBottom: '1px solid #DBD5C7',
   fontFamily: 'Inter, sans-serif', textAlign: align,
 })
 const cell = (align = 'left', extra = {}) => ({
-  padding: '8px 10px', borderBottom: '1px solid #F1EADB',
+  padding: '8px 10px', borderBottom: '1px solid #E6E1D6',
   color: '#333', fontSize: '11px', fontFamily: 'Inter, sans-serif',
   textAlign: align, ...extra,
 })
@@ -152,32 +152,32 @@ export default function Inventory() {
             ) : (
               <>
                 <div style={{ marginBottom: '20px' }}>
-                  <div style={{ fontSize: '23px', fontWeight: 700, color: '#211E17', fontFamily: 'Inter, sans-serif', letterSpacing: '-0.025em' }}>Sales &amp; Items</div>
-                  <div style={{ fontSize: '12px', color: '#a39a88', fontFamily: 'Inter, sans-serif', marginTop: '4px' }}>Reydel Tire &amp; Auto · items ranked by revenue</div>
+                  <div style={{ fontSize: '23px', fontWeight: 700, color: '#1B1815', fontFamily: "'Barlow Semi Condensed', sans-serif", letterSpacing: '0.02em', textTransform: 'uppercase' }}>Sales &amp; Items</div>
+                  <div style={{ fontSize: '12px', color: '#9A9284', fontFamily: 'Inter, sans-serif', marginTop: '4px' }}>Reydel Tire &amp; Auto · items ranked by revenue</div>
                 </div>
                 {/* KPI row */}
                 <div style={{ display: 'flex', gap: '12px', marginBottom: '20px' }}>
                   {[
-                    { label: 'REVENUE',       value: fmt(totalRevenue),             sub: periodTitle,           sc: '#16a34a' },
+                    { label: 'REVENUE',       value: fmt(totalRevenue),             sub: periodTitle,           sc: '#1C7A4E' },
                     { label: 'UNITS SOLD',    value: totalUnits.toLocaleString(),   sub: 'tires & items',       sc: '#888' },
                     { label: 'UNIQUE ITEMS',  value: periodItems.length.toString(), sub: 'products & services', sc: '#888' },
                     { label: 'AVG SALE',      value: fmtD(avgOrder),                sub: 'per line item',       sc: THEME.accent },
                   ].map(k => (
-                    <div key={k.label} style={{ flex: 1, background: '#fff', border: '1px solid #E7DECB', borderRadius: '10px', boxShadow: '0 1px 3px rgba(60,45,20,0.05)', padding: '14px 16px' }}>
+                    <div key={k.label} style={{ flex: 1, background: '#fff', border: '1px solid #DBD5C7', borderRadius: '0', boxShadow: 'none', padding: '14px 16px' }}>
                       <div style={{ fontSize: '9px', color: '#888', letterSpacing: '0.15em', marginBottom: '6px', fontFamily: 'Inter, sans-serif' }}>{k.label}</div>
-                      <div style={{ fontSize: '20px', color: '#1a1a1a', fontWeight: '600', fontFamily: 'Inter, sans-serif' }}>{k.value}</div>
+                      <div style={{ fontSize: '20px', color: '#1B1815', fontWeight: '600', fontFamily: 'Inter, sans-serif' }}>{k.value}</div>
                       <div style={{ fontSize: '10px', color: k.sc, marginTop: '4px', fontFamily: 'Inter, sans-serif' }}>{k.sub}</div>
                     </div>
                   ))}
                 </div>
 
                 {/* Tabs */}
-                <div style={{ display: 'flex', gap: '2px', borderBottom: '1px solid #E7DECB', marginBottom: '20px' }}>
+                <div style={{ display: 'flex', gap: '2px', borderBottom: '1px solid #DBD5C7', marginBottom: '20px' }}>
                   {tabs.map(t => (
                     <button key={t.id} onClick={() => setTab(t.id)} style={{
                       padding: '8px 16px', fontSize: '10px', fontFamily: 'Inter, sans-serif',
                       letterSpacing: '0.08em', background: 'none', border: 'none', cursor: 'pointer',
-                      color: tab === t.id ? '#1a1a1a' : '#888',
+                      color: tab === t.id ? '#1B1815' : '#888',
                       borderBottom: tab === t.id ? `2px solid ${THEME.accent}` : '2px solid transparent',
                       marginBottom: '-1px',
                     }}>{t.label}</button>
@@ -186,9 +186,9 @@ export default function Inventory() {
 
                 {/* Items Ranked */}
                 {tab === 'items' && (() => {
-                  const pill = (on) => ({ padding: '6px 12px', borderRadius: '16px', fontSize: '11px', fontWeight: 600, cursor: 'pointer', fontFamily: 'Inter, sans-serif', border: `1px solid ${on ? '#1a1a1a' : '#E7DECB'}`, background: on ? '#1a1a1a' : '#fff', color: on ? '#fff' : '#8a8378' })
+                  const pill = (on) => ({ padding: '6px 12px', borderRadius: '0', fontSize: '11px', fontWeight: 600, cursor: 'pointer', fontFamily: 'Inter, sans-serif', border: `1px solid ${on ? '#1B1815' : '#DBD5C7'}`, background: on ? '#1B1815' : '#fff', color: on ? '#fff' : '#8a8378' })
                   const shortLbl = (k) => monthLabel(k).split(' ')[0]
-                  const dCol = d => d === 0 ? '#a39a88' : d > 0 ? '#16a34a' : '#b0483a'
+                  const dCol = d => d === 0 ? '#9A9284' : d > 0 ? '#1C7A4E' : '#b0483a'
                   const dStr = d => d === 0 ? '—' : (d > 0 ? '+' : '−') + Math.abs(d)
                   const LIMIT = 25
                   const shownSingle = search ? sorted : sorted.slice(0, LIMIT)
@@ -197,7 +197,7 @@ export default function Inventory() {
                   <>
                     {/* Period selector + compare */}
                     <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap', marginBottom: compareOn ? '10px' : '16px', alignItems: 'center' }}>
-                      <span style={{ fontSize: '9px', color: '#a39a88', letterSpacing: '0.14em', marginRight: '2px', fontFamily: 'Inter, sans-serif', fontWeight: 600 }}>PERIOD</span>
+                      <span style={{ fontSize: '9px', color: '#9A9284', letterSpacing: '0.14em', marginRight: '2px', fontFamily: 'Inter, sans-serif', fontWeight: 600 }}>PERIOD</span>
                       {[{ k: 'all', l: 'All time' }, ...monthly.map(m => ({ k: m.month, l: m.label.split(' ')[0] }))].map(o => (
                         <button key={o.k} onClick={() => setPeriod(o.k)} style={pill(period === o.k)}>{o.l}</button>
                       ))}
@@ -219,26 +219,26 @@ export default function Inventory() {
                     </div>
                     {compareOn && (
                       <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap', marginBottom: '16px', alignItems: 'center' }}>
-                        <span style={{ fontSize: '9px', color: '#a39a88', letterSpacing: '0.14em', marginRight: '2px', fontFamily: 'Inter, sans-serif', fontWeight: 600 }}>COMPARE&nbsp;TO</span>
+                        <span style={{ fontSize: '9px', color: '#9A9284', letterSpacing: '0.14em', marginRight: '2px', fontFamily: 'Inter, sans-serif', fontWeight: 600 }}>COMPARE&nbsp;TO</span>
                         {monthly.map(m => (
                           <button key={m.month} onClick={() => setComparePeriod(m.month)} style={pill(comparePeriod === m.month)}>{m.label.split(' ')[0]}</button>
                         ))}
                       </div>
                     )}
 
-                  <div style={{ background: '#fff', border: '1px solid #E7DECB', borderRadius: '10px', boxShadow: '0 1px 3px rgba(60,45,20,0.05)', padding: '16px' }}>
+                  <div style={{ background: '#fff', border: '1px solid #DBD5C7', borderRadius: '0', boxShadow: 'none', padding: '16px' }}>
                     <div style={{ display: 'flex', gap: '10px', marginBottom: '16px', alignItems: 'center' }}>
                       <input
                         value={search} onChange={e => setSearch(e.target.value)}
                         placeholder="Search items..."
-                        style={{ flex: 1, padding: '7px 12px', background: '#fff', border: '1px solid #E7DECB',
-                          borderRadius: '4px', color: '#1a1a1a', fontSize: '11px', fontFamily: 'Inter, sans-serif', outline: 'none' }}
+                        style={{ flex: 1, padding: '7px 12px', background: '#fff', border: '1px solid #DBD5C7',
+                          borderRadius: '0', color: '#1B1815', fontSize: '11px', fontFamily: 'Inter, sans-serif', outline: 'none' }}
                       />
                       {!cmpActive && [{ key: 'revenue', label: 'REVENUE' }, { key: 'units', label: 'UNITS' }, { key: 'avg', label: 'AVG SALE' }].map(s => (
                         <button key={s.key} onClick={() => setSort(s.key)} style={{
                           padding: '6px 12px', fontSize: '9px', fontFamily: 'Inter, sans-serif',
-                          letterSpacing: '0.08em', border: 'none', borderRadius: '4px', cursor: 'pointer',
-                          background: sort === s.key ? THEME.accent : '#F1EADB',
+                          letterSpacing: '0.08em', border: 'none', borderRadius: '0', cursor: 'pointer',
+                          background: sort === s.key ? THEME.accent : '#E6E1D6',
                           color: sort === s.key ? '#fff' : '#888',
                         }}>{s.label}</button>
                       ))}
@@ -259,12 +259,12 @@ export default function Inventory() {
                         </thead>
                         <tbody>
                           {shownCmp.map(r => (
-                            <tr key={r.name} onMouseEnter={e => e.currentTarget.style.background = '#F5EFE3'} onMouseLeave={e => e.currentTarget.style.background = 'transparent'}>
-                              <td style={cell('left', { color: '#1a1a1a', maxWidth: '240px' })}>{r.name}</td>
-                              <td style={cell('right', { color: '#1a1a1a', fontWeight: '600' })}>{r.aQty}</td>
+                            <tr key={r.name} onMouseEnter={e => e.currentTarget.style.background = '#ECE8DF'} onMouseLeave={e => e.currentTarget.style.background = 'transparent'}>
+                              <td style={cell('left', { color: '#1B1815', maxWidth: '240px' })}>{r.name}</td>
+                              <td style={cell('right', { color: '#1B1815', fontWeight: '600' })}>{r.aQty}</td>
                               <td style={cell('right', { color: '#8a8378' })}>{r.bQty}</td>
                               <td style={cell('right', { color: dCol(r.aQty - r.bQty), fontWeight: '600' })}>{dStr(r.aQty - r.bQty)}</td>
-                              <td style={cell('right', { color: '#16a34a' })}>{fmt(r.aRev)}</td>
+                              <td style={cell('right', { color: '#1C7A4E' })}>{fmt(r.aRev)}</td>
                               <td style={cell('right', { color: '#8a8378' })}>{fmt(r.bRev)}</td>
                             </tr>
                           ))}
@@ -284,15 +284,15 @@ export default function Inventory() {
                         <tbody>
                           {shownSingle.map((item, i) => (
                             <tr key={item.name}
-                              onMouseEnter={e => e.currentTarget.style.background = '#F5EFE3'}
+                              onMouseEnter={e => e.currentTarget.style.background = '#ECE8DF'}
                               onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
                             >
                               <td style={cell('left', { color: '#888', width: '32px' })}>{i + 1}</td>
-                              <td style={cell('left', { color: i < 3 ? '#1a1a1a' : '#333', fontWeight: i < 3 ? '600' : '400', maxWidth: '340px' })}>
+                              <td style={cell('left', { color: i < 3 ? '#1B1815' : '#333', fontWeight: i < 3 ? '600' : '400', maxWidth: '340px' })}>
                                 {item.name}
                               </td>
-                              <td style={cell('right', { color: '#1a1a1a', fontWeight: '600' })}>{item.qty.toLocaleString()}</td>
-                              <td style={cell('right', { color: i < 3 ? '#16a34a' : '#333', fontWeight: i < 3 ? '600' : '400' })}>
+                              <td style={cell('right', { color: '#1B1815', fontWeight: '600' })}>{item.qty.toLocaleString()}</td>
+                              <td style={cell('right', { color: i < 3 ? '#1C7A4E' : '#333', fontWeight: i < 3 ? '600' : '400' })}>
                                 {fmt(item.revenue)}
                               </td>
                               <td style={cell('right', { color: '#888' })}>{fmtD(item.revenue / item.orders)}</td>
@@ -307,8 +307,8 @@ export default function Inventory() {
                       </div>
                     )}
                     {!search && (cmpActive ? cmpRows.length : sorted.length) > LIMIT && (
-                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', paddingTop: '12px', marginTop: '4px', borderTop: '1px solid #E7DECB' }}>
-                        <span style={{ fontSize: '10px', color: '#a39a88', fontFamily: 'Inter, sans-serif' }}>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', paddingTop: '12px', marginTop: '4px', borderTop: '1px solid #DBD5C7' }}>
+                        <span style={{ fontSize: '10px', color: '#9A9284', fontFamily: 'Inter, sans-serif' }}>
                           Showing top {LIMIT} of {(cmpActive ? cmpRows.length : sorted.length).toLocaleString()} items — type in search to find any item
                         </span>
                       </div>
@@ -320,19 +320,19 @@ export default function Inventory() {
 
                 {/* By Month */}
                 {tab === 'monthly' && (
-                  <div style={{ background: '#fff', border: '1px solid #E7DECB', borderRadius: '10px', boxShadow: '0 1px 3px rgba(60,45,20,0.05)', padding: '16px' }}>
+                  <div style={{ background: '#fff', border: '1px solid #DBD5C7', borderRadius: '0', boxShadow: 'none', padding: '16px' }}>
                     <div style={{ fontSize: '9px', color: '#888', letterSpacing: '0.15em', marginBottom: '14px', fontFamily: 'Inter, sans-serif' }}>
                       CLOVER SALES BY MONTH
                     </div>
                     {(() => {
                       const maxRev = Math.max(...monthly.map(m => m.revenue), 1)
                       return monthly.map((m, i) => (
-                        <div key={m.month} style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '10px 0', borderBottom: i < monthly.length - 1 ? '1px solid #F1EADB' : 'none' }}>
+                        <div key={m.month} style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '10px 0', borderBottom: i < monthly.length - 1 ? '1px solid #E6E1D6' : 'none' }}>
                           <div style={{ width: '80px', fontSize: '10px', color: '#888', fontFamily: 'Inter, sans-serif', flexShrink: 0 }}>{m.label}</div>
-                          <div style={{ flex: 1, height: '6px', background: '#E7DECB', borderRadius: '3px' }}>
-                            <div style={{ height: '6px', background: THEME.accent, borderRadius: '3px', width: `${Math.round(m.revenue / maxRev * 100)}%` }} />
+                          <div style={{ flex: 1, height: '6px', background: '#DBD5C7', borderRadius: '0' }}>
+                            <div style={{ height: '6px', background: THEME.accent, borderRadius: '0', width: `${Math.round(m.revenue / maxRev * 100)}%` }} />
                           </div>
-                          <div style={{ width: '80px', textAlign: 'right', fontSize: '11px', color: '#16a34a', fontFamily: 'Inter, sans-serif', fontWeight: '600', flexShrink: 0 }}>
+                          <div style={{ width: '80px', textAlign: 'right', fontSize: '11px', color: '#1C7A4E', fontFamily: 'Inter, sans-serif', fontWeight: '600', flexShrink: 0 }}>
                             {fmt(m.revenue)}
                           </div>
                           <div style={{ width: '72px', textAlign: 'right', fontSize: '10px', color: '#888', fontFamily: 'Inter, sans-serif', flexShrink: 0 }}>
@@ -341,9 +341,9 @@ export default function Inventory() {
                         </div>
                       ))
                     })()}
-                    <div style={{ display: 'flex', justifyContent: 'space-between', paddingTop: '12px', borderTop: '1px solid #E7DECB', marginTop: '4px' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', paddingTop: '12px', borderTop: '1px solid #DBD5C7', marginTop: '4px' }}>
                       <div style={{ fontSize: '10px', color: '#888', fontFamily: 'Inter, sans-serif' }}>TOTAL</div>
-                      <div style={{ fontSize: '12px', color: '#16a34a', fontFamily: 'Inter, sans-serif', fontWeight: '600' }}>
+                      <div style={{ fontSize: '12px', color: '#1C7A4E', fontFamily: 'Inter, sans-serif', fontWeight: '600' }}>
                         {fmt(monthly.reduce((s, m) => s + m.revenue, 0))}
                       </div>
                     </div>

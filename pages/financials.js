@@ -11,16 +11,16 @@ const MONTHS = { '01':'JAN','02':'FEB','03':'MAR','04':'APR','05':'MAY','06':'JU
 const monthLabel = (k) => `${MONTHS[k.slice(5, 7)]} ${k.slice(0, 4)}`
 
 
-const THEME = { sidebarBg: '#1A1A1A', sidebarBorder: '#2A2A2A', accent: '#CC2222' }
+const THEME = { sidebarBg: '#1A1A1A', sidebarBorder: '#2A2A2A', accent: '#B0281C' }
 
 const cell = (align = 'left', extra = {}) => ({
-  padding: '8px 10px', borderBottom: '1px solid #F1EADB',
+  padding: '8px 10px', borderBottom: '1px solid #E6E1D6',
   color: '#333', fontSize: '11px', fontFamily: 'Inter, sans-serif',
   textAlign: align, ...extra,
 })
 const hcell = (align = 'left') => ({
-  padding: '6px 10px', fontSize: '9px', color: '#888', background: '#FAF6EC',
-  fontWeight: '400', letterSpacing: '0.1em', borderBottom: '1px solid #E7DECB',
+  padding: '6px 10px', fontSize: '9px', color: '#888', background: '#ECE7DD',
+  fontWeight: '400', letterSpacing: '0.1em', borderBottom: '1px solid #DBD5C7',
   fontFamily: 'Inter, sans-serif', textAlign: align,
 })
 
@@ -48,12 +48,12 @@ function DrillModal({ account, onClose }) {
       display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 200,
     }}>
       <div onClick={e => e.stopPropagation()} style={{
-        background: '#fff', border: '1px solid #E7DECB', borderRadius: '12px',
+        background: '#fff', border: '1px solid #DBD5C7', borderRadius: '0',
         width: '620px', maxHeight: '520px', display: 'flex', flexDirection: 'column',
         boxShadow: '0 8px 32px rgba(40,30,10,0.18)',
       }}>
-        <div style={{ padding: '16px 20px', borderBottom: '1px solid #E7DECB', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-          <div style={{ fontSize: '12px', color: '#1a1a1a', fontFamily: 'Inter, sans-serif', letterSpacing: '0.1em', fontWeight: '600' }}>{account}</div>
+        <div style={{ padding: '16px 20px', borderBottom: '1px solid #DBD5C7', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+          <div style={{ fontSize: '12px', color: '#1B1815', fontFamily: 'Inter, sans-serif', letterSpacing: '0.1em', fontWeight: '600' }}>{account}</div>
           <button onClick={onClose} style={{ background: 'none', border: 'none', color: '#888', cursor: 'pointer', fontSize: '20px', lineHeight: 1 }}>×</button>
         </div>
         <div style={{ overflowY: 'auto', flex: 1 }}>
@@ -71,11 +71,11 @@ function DrillModal({ account, onClose }) {
               </thead>
               <tbody>
                 {txns.map((t, i) => (
-                  <tr key={i} onMouseEnter={e => e.currentTarget.style.background = '#F5EFE3'} onMouseLeave={e => e.currentTarget.style.background = 'transparent'}>
+                  <tr key={i} onMouseEnter={e => e.currentTarget.style.background = '#ECE8DF'} onMouseLeave={e => e.currentTarget.style.background = 'transparent'}>
                     <td style={cell('left')}>{t.date}</td>
                     <td style={{ ...cell('left'), color: '#888', maxWidth: '260px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{t.description}</td>
                     <td style={{ ...cell('left'), color: '#888' }}>{t.type}</td>
-                    <td style={{ ...cell('right'), color: parseFloat(t.amount) >= 0 ? '#16a34a' : '#CC2222' }}>{fmt(parseFloat(t.amount))}</td>
+                    <td style={{ ...cell('right'), color: parseFloat(t.amount) >= 0 ? '#1C7A4E' : '#B0281C' }}>{fmt(parseFloat(t.amount))}</td>
                   </tr>
                 ))}
                 {txns.length === 0 && (
@@ -86,7 +86,7 @@ function DrillModal({ account, onClose }) {
           )}
         </div>
         {txns.length === 500 && (
-          <div style={{ padding: '10px 20px', borderTop: '1px solid #E7DECB', fontSize: '9px', color: '#888', fontFamily: 'Inter, sans-serif' }}>
+          <div style={{ padding: '10px 20px', borderTop: '1px solid #DBD5C7', fontSize: '9px', color: '#888', fontFamily: 'Inter, sans-serif' }}>
             Showing most recent 500 transactions
           </div>
         )}
@@ -245,26 +245,26 @@ export default function Financials() {
 
   // ── Shared statement styling ────────────────────────────────────────────────
   const ui = "'Inter', sans-serif"
-  const card = { background: '#fff', border: '1px solid #E7DECB', borderRadius: '12px', boxShadow: '0 1px 3px rgba(60,45,20,0.05)', padding: '20px 22px' }
-  const pill = (on) => ({ padding: '6px 12px', borderRadius: '16px', fontSize: '11px', fontWeight: 600, cursor: 'pointer', fontFamily: ui, border: `1px solid ${on ? '#1a1a1a' : '#E7DECB'}`, background: on ? '#1a1a1a' : '#fff', color: on ? '#fff' : '#8a8378' })
+  const card = { background: '#fff', border: '1px solid #DBD5C7', borderRadius: '0', boxShadow: 'none', padding: '20px 22px' }
+  const pill = (on) => ({ padding: '6px 12px', borderRadius: '0', fontSize: '11px', fontWeight: 600, cursor: 'pointer', fontFamily: ui, border: `1px solid ${on ? '#1B1815' : '#DBD5C7'}`, background: on ? '#1B1815' : '#fff', color: on ? '#fff' : '#8a8378' })
   const paren = (n) => n < 0 ? `(${fmt(n)})` : fmt(n)
 
   const SectionHead = ({ children }) => (
-    <div style={{ fontSize: '9px', color: '#a39a88', letterSpacing: '0.14em', fontWeight: 700, fontFamily: ui, margin: '18px 0 4px' }}>{children}</div>
+    <div style={{ fontSize: '9px', color: '#9A9284', letterSpacing: '0.14em', fontWeight: 700, fontFamily: ui, margin: '18px 0 4px' }}>{children}</div>
   )
   const LineItem = ({ label, amount, account }) => (
     <div onClick={account ? () => setDrillAccount(account) : undefined}
-      onMouseEnter={e => { if (account) e.currentTarget.style.background = '#F5EFE3' }}
+      onMouseEnter={e => { if (account) e.currentTarget.style.background = '#ECE8DF' }}
       onMouseLeave={e => { e.currentTarget.style.background = 'transparent' }}
-      style={{ display: 'flex', justifyContent: 'space-between', padding: '6px 8px', fontSize: '12px', fontFamily: ui, color: '#4a4438', cursor: account ? 'pointer' : 'default', borderRadius: '5px' }}>
+      style={{ display: 'flex', justifyContent: 'space-between', padding: '6px 8px', fontSize: '12px', fontFamily: ui, color: '#4A453C', cursor: account ? 'pointer' : 'default', borderRadius: '0' }}>
       <span style={{ paddingLeft: '8px' }}>{label}</span>
-      <span style={{ color: amount >= 0 ? '#1a1a1a' : '#b0483a', fontVariantNumeric: 'tabular-nums' }}>{paren(amount)}</span>
+      <span style={{ color: amount >= 0 ? '#1B1815' : '#b0483a', fontVariantNumeric: 'tabular-nums' }}>{paren(amount)}</span>
     </div>
   )
   const TotalRow = ({ label, amount, accent, sub }) => (
-    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', padding: '9px 8px 4px', marginTop: '2px', borderTop: '1px solid #E7DECB', fontFamily: ui }}>
-      <span style={{ fontSize: '12px', fontWeight: 600, color: '#1a1a1a' }}>{label}{sub && <span style={{ fontSize: '10px', color: '#a39a88', fontWeight: 400, marginLeft: '8px' }}>{sub}</span>}</span>
-      <span style={{ fontSize: '12.5px', fontWeight: 700, color: accent ? '#16a34a' : (amount >= 0 ? '#1a1a1a' : '#b0483a'), fontVariantNumeric: 'tabular-nums' }}>{paren(amount)}</span>
+    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', padding: '9px 8px 4px', marginTop: '2px', borderTop: '1px solid #DBD5C7', fontFamily: ui }}>
+      <span style={{ fontSize: '12px', fontWeight: 600, color: '#1B1815' }}>{label}{sub && <span style={{ fontSize: '10px', color: '#9A9284', fontWeight: 400, marginLeft: '8px' }}>{sub}</span>}</span>
+      <span style={{ fontSize: '12.5px', fontWeight: 700, color: accent ? '#1C7A4E' : (amount >= 0 ? '#1B1815' : '#b0483a'), fontVariantNumeric: 'tabular-nums' }}>{paren(amount)}</span>
     </div>
   )
 
@@ -292,23 +292,23 @@ export default function Financials() {
                 {/* Page header */}
                 <div style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between', marginBottom: '20px', flexWrap: 'wrap', gap: '12px' }}>
                   <div>
-                    <div style={{ fontSize: '23px', fontWeight: 700, color: '#211E17', fontFamily: ui, letterSpacing: '-0.025em' }}>Financials</div>
-                    <div style={{ fontSize: '12px', color: '#a39a88', fontFamily: ui, marginTop: '4px' }}>Reydel Tire &amp; Auto · profit &amp; loss, balance sheet and accounts</div>
+                    <div style={{ fontSize: '23px', fontWeight: 700, color: '#1B1815', fontFamily: "'Barlow Semi Condensed', sans-serif", letterSpacing: '0.02em', textTransform: 'uppercase' }}>Financials</div>
+                    <div style={{ fontSize: '12px', color: '#9A9284', fontFamily: ui, marginTop: '4px' }}>Reydel Tire &amp; Auto · profit &amp; loss, balance sheet and accounts</div>
                   </div>
                   {isAdmin && (
                     <button onClick={() => { window.location.href = '/admin/financials' }}
-                      style={{ fontSize: '10px', fontFamily: ui, letterSpacing: '0.08em', color: '#fff', background: THEME.accent, border: 'none', borderRadius: '7px', padding: '9px 14px', cursor: 'pointer' }}>
+                      style={{ fontSize: '10px', fontFamily: ui, letterSpacing: '0.08em', color: '#fff', background: THEME.accent, border: 'none', borderRadius: '0', padding: '9px 14px', cursor: 'pointer' }}>
                       ↑ IMPORT GL FROM QUICKBOOKS
                     </button>
                   )}
                 </div>
                 {/* Tabs */}
-                <div style={{ display: 'flex', gap: '2px', borderBottom: '1px solid #E7DECB', marginBottom: '20px' }}>
+                <div style={{ display: 'flex', gap: '2px', borderBottom: '1px solid #DBD5C7', marginBottom: '20px' }}>
                   {tabs.map(t => (
                     <button key={t.id} onClick={() => setActiveTab(t.id)} style={{
                       padding: '8px 16px', fontSize: '10px', fontFamily: 'Inter, sans-serif',
                       letterSpacing: '0.08em', background: 'none', border: 'none', cursor: 'pointer',
-                      color: activeTab === t.id ? '#1a1a1a' : '#888',
+                      color: activeTab === t.id ? '#1B1815' : '#888',
                       borderBottom: activeTab === t.id ? `2px solid ${THEME.accent}` : '2px solid transparent',
                       marginBottom: '-1px',
                     }}>{t.label}</button>
@@ -320,7 +320,7 @@ export default function Financials() {
                   <>
                     {/* Period selector + compare toggle */}
                     <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap', marginBottom: compareOn ? '10px' : '18px', alignItems: 'center' }}>
-                      <span style={{ fontSize: '9px', color: '#a39a88', letterSpacing: '0.14em', marginRight: '2px', fontFamily: ui, fontWeight: 600 }}>PERIOD</span>
+                      <span style={{ fontSize: '9px', color: '#9A9284', letterSpacing: '0.14em', marginRight: '2px', fontFamily: ui, fontWeight: 600 }}>PERIOD</span>
                       {[{ k: 'all', l: 'All time' }, ...plMonths.map(k => ({ k, l: MONTHS[k.slice(5, 7)] }))].map(o => (
                         <button key={o.k} onClick={() => setPlPeriod(o.k)} style={pill(plPeriod === o.k)}>{o.l}</button>
                       ))}
@@ -343,7 +343,7 @@ export default function Financials() {
                     {/* Compare-to selector */}
                     {compareOn && (
                       <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap', marginBottom: '18px', alignItems: 'center' }}>
-                        <span style={{ fontSize: '9px', color: '#a39a88', letterSpacing: '0.14em', marginRight: '2px', fontFamily: ui, fontWeight: 600 }}>COMPARE&nbsp;TO</span>
+                        <span style={{ fontSize: '9px', color: '#9A9284', letterSpacing: '0.14em', marginRight: '2px', fontFamily: ui, fontWeight: 600 }}>COMPARE&nbsp;TO</span>
                         {plMonths.map(k => (
                           <button key={k} onClick={() => setComparePeriod(k)} style={pill(comparePeriod === k)}>{MONTHS[k.slice(5, 7)]}</button>
                         ))}
@@ -352,10 +352,10 @@ export default function Financials() {
 
                     {/* Statement card */}
                     <div style={{ ...card, maxWidth: plCmp ? '740px' : '660px' }}>
-                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', borderBottom: '1px solid #E7DECB', paddingBottom: '12px', marginBottom: '4px' }}>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', borderBottom: '1px solid #DBD5C7', paddingBottom: '12px', marginBottom: '4px' }}>
                         <div>
-                          <div style={{ fontSize: '15px', fontWeight: 700, color: '#1a1a1a', fontFamily: ui, letterSpacing: '-0.01em' }}>Profit &amp; Loss</div>
-                          <div style={{ fontSize: '10px', color: '#a39a88', marginTop: '2px', fontFamily: ui }}>Reydel Tire &amp; Auto</div>
+                          <div style={{ fontSize: '15px', fontWeight: 700, color: '#1B1815', fontFamily: ui, letterSpacing: '-0.01em' }}>Profit &amp; Loss</div>
+                          <div style={{ fontSize: '10px', color: '#9A9284', marginTop: '2px', fontFamily: ui }}>Reydel Tire &amp; Auto</div>
                         </div>
                         <div style={{ fontSize: '12px', color: '#6b6355', fontFamily: ui, fontWeight: 500 }}>
                           {plCmp ? `${monthLabel(plPeriod)} vs ${monthLabel(comparePeriod)}` : (plPeriod === 'all' ? 'All time' : monthLabel(plPeriod))}
@@ -363,13 +363,13 @@ export default function Financials() {
                       </div>
 
                       {plView.g.income.length === 0 && plView.g.expense.length === 0 ? (
-                        <div style={{ fontSize: '12px', color: '#a39a88', fontFamily: ui, padding: '18px 8px' }}>No activity in this period.</div>
+                        <div style={{ fontSize: '12px', color: '#9A9284', fontFamily: ui, padding: '18px 8px' }}>No activity in this period.</div>
                       ) : plCmp ? (() => {
                         // ── Comparison table ──────────────────────────────────
-                        const dCol = d => Math.round(d) === 0 ? '#a39a88' : d > 0 ? '#16a34a' : '#b0483a'
+                        const dCol = d => Math.round(d) === 0 ? '#9A9284' : d > 0 ? '#1C7A4E' : '#b0483a'
                         const dStr = d => Math.round(Math.abs(d)) === 0 ? '—' : (d > 0 ? '+' : '−') + fmt(d)
                         const cNum = { padding: '6px 10px', fontSize: '12px', textAlign: 'right', fontVariantNumeric: 'tabular-nums', fontFamily: ui }
-                        const cHead = { padding: '7px 10px', fontSize: '9px', color: '#a39a88', fontWeight: 600, letterSpacing: '0.06em', textAlign: 'right', borderBottom: '1px solid #E7DECB', fontFamily: ui }
+                        const cHead = { padding: '7px 10px', fontSize: '9px', color: '#9A9284', fontWeight: 600, letterSpacing: '0.06em', textAlign: 'right', borderBottom: '1px solid #DBD5C7', fontFamily: ui }
                         const rowsOf = (sec, sign) => {
                           const seen = new Set(), out = []
                           ;[...plView.g[sec], ...plCmp.g[sec]].forEach(r => { if (!seen.has(r.label)) { seen.add(r.label); out.push(r.label) } })
@@ -395,31 +395,31 @@ export default function Financials() {
                             <tbody>
                               {SEC.map(S => (
                                 <React.Fragment key={S.sec}>
-                                  <tr><td colSpan={4} style={{ fontSize: '9px', color: '#a39a88', letterSpacing: '0.14em', fontWeight: 700, padding: '14px 10px 3px', fontFamily: ui }}>{S.head}</td></tr>
+                                  <tr><td colSpan={4} style={{ fontSize: '9px', color: '#9A9284', letterSpacing: '0.14em', fontWeight: 700, padding: '14px 10px 3px', fontFamily: ui }}>{S.head}</td></tr>
                                   {rowsOf(S.sec, S.sign).map(r => (
                                     <tr key={r.label} onClick={() => setDrillAccount(S.account(r.label))}
-                                      onMouseEnter={e => e.currentTarget.style.background = '#F5EFE3'} onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
+                                      onMouseEnter={e => e.currentTarget.style.background = '#ECE8DF'} onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
                                       style={{ cursor: 'pointer' }}>
-                                      <td style={{ padding: '6px 10px 6px 24px', fontSize: '12px', color: '#4a4438', fontFamily: ui }}>{r.label}</td>
-                                      <td style={{ ...cNum, color: r.a >= 0 ? '#1a1a1a' : '#b0483a' }}>{paren(r.a)}</td>
+                                      <td style={{ padding: '6px 10px 6px 24px', fontSize: '12px', color: '#4A453C', fontFamily: ui }}>{r.label}</td>
+                                      <td style={{ ...cNum, color: r.a >= 0 ? '#1B1815' : '#b0483a' }}>{paren(r.a)}</td>
                                       <td style={{ ...cNum, color: '#8a8378' }}>{paren(r.b)}</td>
                                       <td style={{ ...cNum, color: dCol(r.a - r.b), fontWeight: 500 }}>{dStr(r.a - r.b)}</td>
                                     </tr>
                                   ))}
                                   <tr>
-                                    <td style={{ padding: '8px 10px', fontSize: '12px', fontWeight: 600, color: '#1a1a1a', fontFamily: ui, borderTop: '1px solid #E7DECB' }}>{S.tLabel}</td>
-                                    <td style={{ ...cNum, fontWeight: 700, borderTop: '1px solid #E7DECB', color: S.accent ? '#16a34a' : (S.tA >= 0 ? '#1a1a1a' : '#b0483a') }}>{paren(S.tA)}</td>
-                                    <td style={{ ...cNum, fontWeight: 700, borderTop: '1px solid #E7DECB', color: '#6b6355' }}>{paren(S.tB)}</td>
-                                    <td style={{ ...cNum, fontWeight: 700, borderTop: '1px solid #E7DECB', color: dCol(S.tA - S.tB) }}>{dStr(S.tA - S.tB)}</td>
+                                    <td style={{ padding: '8px 10px', fontSize: '12px', fontWeight: 600, color: '#1B1815', fontFamily: ui, borderTop: '1px solid #DBD5C7' }}>{S.tLabel}</td>
+                                    <td style={{ ...cNum, fontWeight: 700, borderTop: '1px solid #DBD5C7', color: S.accent ? '#1C7A4E' : (S.tA >= 0 ? '#1B1815' : '#b0483a') }}>{paren(S.tA)}</td>
+                                    <td style={{ ...cNum, fontWeight: 700, borderTop: '1px solid #DBD5C7', color: '#6b6355' }}>{paren(S.tB)}</td>
+                                    <td style={{ ...cNum, fontWeight: 700, borderTop: '1px solid #DBD5C7', color: dCol(S.tA - S.tB) }}>{dStr(S.tA - S.tB)}</td>
                                   </tr>
                                 </React.Fragment>
                               ))}
                               {/* Net income */}
                               <tr>
-                                <td style={{ padding: '12px 10px', fontSize: '12px', fontWeight: 700, letterSpacing: '0.06em', color: '#16a34a', fontFamily: ui, borderTop: '2px solid #E7DECB' }}>NET INCOME</td>
-                                <td style={{ ...cNum, fontSize: '15px', fontWeight: 700, color: plView.net >= 0 ? '#16a34a' : '#991b1b', borderTop: '2px solid #E7DECB' }}>{paren(plView.net)}</td>
-                                <td style={{ ...cNum, fontSize: '13px', fontWeight: 700, color: '#6b6355', borderTop: '2px solid #E7DECB' }}>{paren(plCmp.net)}</td>
-                                <td style={{ ...cNum, fontSize: '13px', fontWeight: 700, color: dCol(plView.net - plCmp.net), borderTop: '2px solid #E7DECB' }}>{dStr(plView.net - plCmp.net)}</td>
+                                <td style={{ padding: '12px 10px', fontSize: '12px', fontWeight: 700, letterSpacing: '0.06em', color: '#1C7A4E', fontFamily: ui, borderTop: '2px solid #DBD5C7' }}>NET INCOME</td>
+                                <td style={{ ...cNum, fontSize: '15px', fontWeight: 700, color: plView.net >= 0 ? '#1C7A4E' : '#991b1b', borderTop: '2px solid #DBD5C7' }}>{paren(plView.net)}</td>
+                                <td style={{ ...cNum, fontSize: '13px', fontWeight: 700, color: '#6b6355', borderTop: '2px solid #DBD5C7' }}>{paren(plCmp.net)}</td>
+                                <td style={{ ...cNum, fontSize: '13px', fontWeight: 700, color: dCol(plView.net - plCmp.net), borderTop: '2px solid #DBD5C7' }}>{dStr(plView.net - plCmp.net)}</td>
                               </tr>
                             </tbody>
                           </table>
@@ -447,11 +447,11 @@ export default function Financials() {
                           )}
 
                           {/* Net income */}
-                          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '16px', padding: '14px 12px', background: plView.net >= 0 ? '#f0fdf4' : '#fef2f2', border: `1px solid ${plView.net >= 0 ? '#bbf7d0' : '#fecaca'}`, borderRadius: '9px' }}>
-                            <span style={{ fontSize: '12px', fontWeight: 700, letterSpacing: '0.08em', color: plView.net >= 0 ? '#16a34a' : '#991b1b', fontFamily: ui }}>NET INCOME</span>
+                          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '16px', padding: '14px 12px', background: plView.net >= 0 ? '#EEF3EE' : '#fef2f2', border: `1px solid ${plView.net >= 0 ? '#C6DECB' : '#fecaca'}`, borderRadius: '0' }}>
+                            <span style={{ fontSize: '12px', fontWeight: 700, letterSpacing: '0.08em', color: plView.net >= 0 ? '#1C7A4E' : '#991b1b', fontFamily: ui }}>NET INCOME</span>
                             <span style={{ display: 'flex', alignItems: 'baseline', gap: '12px' }}>
                               {plView.inc > 0 && <span style={{ fontSize: '11px', color: '#6b6355', fontFamily: ui }}>{pct(plView.net / plView.inc * 100)} margin</span>}
-                              <span style={{ fontSize: '21px', fontWeight: 700, color: plView.net >= 0 ? '#16a34a' : '#991b1b', fontFamily: ui, fontVariantNumeric: 'tabular-nums' }}>{fmt(plView.net)}</span>
+                              <span style={{ fontSize: '21px', fontWeight: 700, color: plView.net >= 0 ? '#1C7A4E' : '#991b1b', fontFamily: ui, fontVariantNumeric: 'tabular-nums' }}>{fmt(plView.net)}</span>
                             </span>
                           </div>
                         </>
@@ -474,23 +474,23 @@ export default function Financials() {
                     return (
                       <div style={{ ...card, padding: '0', overflow: 'hidden' }}>
                         <div onClick={() => setBsOpen(s => ({ ...s, [cat]: !s[cat] }))}
-                          onMouseEnter={e => e.currentTarget.style.background = '#FAF6EC'} onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
+                          onMouseEnter={e => e.currentTarget.style.background = '#ECE7DD'} onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
                           style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '14px 18px', cursor: 'pointer', userSelect: 'none' }}>
                           <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                            <span style={{ fontSize: '10px', color: '#a39a88', transition: 'transform .15s', transform: open ? 'rotate(90deg)' : 'none', display: 'inline-block' }}>▶</span>
+                            <span style={{ fontSize: '10px', color: '#9A9284', transition: 'transform .15s', transform: open ? 'rotate(90deg)' : 'none', display: 'inline-block' }}>▶</span>
                             <span style={{ fontSize: '10px', color: '#6b6355', letterSpacing: '0.14em', fontWeight: 700, fontFamily: ui }}>{title}</span>
                             <span style={{ fontSize: '9px', color: '#b8ae9a', fontFamily: ui }}>{rows.length} account{rows.length === 1 ? '' : 's'}</span>
                           </div>
-                          <span style={{ fontSize: '14px', fontWeight: 700, color: total >= 0 ? '#1a1a1a' : THEME.accent, fontFamily: ui, fontVariantNumeric: 'tabular-nums' }}>{fmt(total)}</span>
+                          <span style={{ fontSize: '14px', fontWeight: 700, color: total >= 0 ? '#1B1815' : THEME.accent, fontFamily: ui, fontVariantNumeric: 'tabular-nums' }}>{fmt(total)}</span>
                         </div>
                         {open && (
-                          <div style={{ borderTop: '1px solid #E7DECB', padding: '6px 8px 10px' }}>
+                          <div style={{ borderTop: '1px solid #DBD5C7', padding: '6px 8px 10px' }}>
                             {rows.map(r => (
                               <div key={r.account} onClick={r.account !== 'Net Income' ? () => setDrillAccount(r.account) : undefined}
-                                onMouseEnter={e => e.currentTarget.style.background = '#F5EFE3'} onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
-                                style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '7px 10px', borderRadius: '5px', cursor: r.account !== 'Net Income' ? 'pointer' : 'default', fontFamily: ui }}>
-                                <span style={{ fontSize: '12px', color: r.account === 'Net Income' ? '#16a34a' : '#4a4438', paddingLeft: '18px' }}>{r.account}</span>
-                                <span style={{ fontSize: '12px', color: r.amount >= 0 ? '#1a1a1a' : THEME.accent, fontVariantNumeric: 'tabular-nums' }}>{fmt(r.amount)}</span>
+                                onMouseEnter={e => e.currentTarget.style.background = '#ECE8DF'} onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
+                                style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '7px 10px', borderRadius: '0', cursor: r.account !== 'Net Income' ? 'pointer' : 'default', fontFamily: ui }}>
+                                <span style={{ fontSize: '12px', color: r.account === 'Net Income' ? '#1C7A4E' : '#4A453C', paddingLeft: '18px' }}>{r.account}</span>
+                                <span style={{ fontSize: '12px', color: r.amount >= 0 ? '#1B1815' : THEME.accent, fontVariantNumeric: 'tabular-nums' }}>{fmt(r.amount)}</span>
                               </div>
                             ))}
                           </div>
@@ -504,8 +504,8 @@ export default function Financials() {
                       <Section title="ASSETS" cat="asset" rows={groups.asset} total={totA} />
                       <Section title="LIABILITIES" cat="liability" rows={groups.liability} total={totL} />
                       <Section title="EQUITY" cat="equity" rows={groups.equity} total={totE} />
-                      <div style={{ background: balanced ? '#f0fdf4' : '#fef2f2', border: `1px solid ${balanced ? '#bbf7d0' : '#fecaca'}`, borderRadius: '9px', padding: '14px 20px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                        <div style={{ fontSize: '12px', color: balanced ? '#16a34a' : '#991b1b', fontWeight: '700', fontFamily: 'Inter, sans-serif', letterSpacing: '0.08em' }}>
+                      <div style={{ background: balanced ? '#EEF3EE' : '#fef2f2', border: `1px solid ${balanced ? '#C6DECB' : '#fecaca'}`, borderRadius: '0', padding: '14px 20px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                        <div style={{ fontSize: '12px', color: balanced ? '#1C7A4E' : '#991b1b', fontWeight: '700', fontFamily: 'Inter, sans-serif', letterSpacing: '0.08em' }}>
                           {balanced ? '✓ IN BALANCE' : '✕ OUT OF BALANCE'}
                         </div>
                         <div style={{ fontSize: '11px', color: '#6b6355', fontFamily: 'Inter, sans-serif' }}>
@@ -518,7 +518,7 @@ export default function Financials() {
 
                 {/* Monthly Table Tab */}
                 {activeTab === 'monthly' && (
-                  <div style={{ background: '#fff', border: '1px solid #E7DECB', borderRadius: '10px', boxShadow: '0 1px 3px rgba(60,45,20,0.05)', padding: '16px' }}>
+                  <div style={{ background: '#fff', border: '1px solid #DBD5C7', borderRadius: '0', boxShadow: 'none', padding: '16px' }}>
                     <div style={{ fontSize: '9px', color: '#888', letterSpacing: '0.15em', marginBottom: '12px', fontFamily: 'Inter, sans-serif' }}>MONTHLY P&L — FROM QUICKBOOKS</div>
                     <table style={{ width: '100%', borderCollapse: 'collapse', fontFamily: 'Inter, sans-serif' }}>
                       <thead>
@@ -535,20 +535,20 @@ export default function Financials() {
                           return (
                             <tr key={i}
                               onClick={drillable ? () => { setCompareOn(false); setPlPeriod(m.key); setActiveTab('pl') } : undefined}
-                              onMouseEnter={e => e.currentTarget.style.background = '#F5EFE3'} onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
+                              onMouseEnter={e => e.currentTarget.style.background = '#ECE8DF'} onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
                               style={{ opacity: partial ? 0.6 : 1, cursor: drillable ? 'pointer' : 'default' }}>
-                              <td style={cell('left', { color: '#1a1a1a', fontWeight: '600' })}>
+                              <td style={cell('left', { color: '#1B1815', fontWeight: '600' })}>
                                 {m.label}
-                                {partial && <span style={{ marginLeft: '6px', fontSize: '8px', color: '#a39a88', letterSpacing: '0.06em' }}>· IN PROGRESS</span>}
+                                {partial && <span style={{ marginLeft: '6px', fontSize: '8px', color: '#9A9284', letterSpacing: '0.06em' }}>· IN PROGRESS</span>}
                                 {drillable && !partial && <span style={{ marginLeft: '6px', fontSize: '9px', color: THEME.accent }}>→</span>}
                               </td>
                               <td style={cell('right')}>{fmt(m.revenue)}</td>
                               <td style={cell('right', { color: THEME.accent })}>{fmt(m.cogs)}</td>
-                              <td style={cell('right', { color: '#16a34a' })}>{fmt(m.revenue - m.cogs)}</td>
-                              <td style={cell('right', { color: '#16a34a', fontWeight: '600' })}>{fmt(m.profit)}</td>
+                              <td style={cell('right', { color: '#1C7A4E' })}>{fmt(m.revenue - m.cogs)}</td>
+                              <td style={cell('right', { color: '#1C7A4E', fontWeight: '600' })}>{fmt(m.profit)}</td>
                               <td style={cell('right')}>
-                                {partial ? <span style={{ fontSize: '9px', color: '#a39a88' }}>—</span> : (
-                                  <span style={{ background: '#dcfce7', color: '#16a34a', padding: '1px 6px', borderRadius: '3px', fontSize: '9px' }}>
+                                {partial ? <span style={{ fontSize: '9px', color: '#9A9284' }}>—</span> : (
+                                  <span style={{ background: '#DDEBE0', color: '#1C7A4E', padding: '1px 6px', borderRadius: '0', fontSize: '9px' }}>
                                     {m.revenue > 0 ? pct(m.profit / m.revenue * 100) : '—'}
                                   </span>
                                 )}
@@ -558,14 +558,14 @@ export default function Financials() {
                         })}
                         <tr>
                           {[
-                            { v: 'TOTAL',                                    a: 'left',  c: '#1a1a1a', w: '700' },
-                            { v: fmt(totals.revenue),                        a: 'right', c: '#1a1a1a', w: '700' },
+                            { v: 'TOTAL',                                    a: 'left',  c: '#1B1815', w: '700' },
+                            { v: fmt(totals.revenue),                        a: 'right', c: '#1B1815', w: '700' },
                             { v: fmt(totals.cogs),                           a: 'right', c: THEME.accent, w: '700' },
-                            { v: fmt(totals.revenue - totals.cogs),          a: 'right', c: '#16a34a', w: '700' },
-                            { v: fmt(totals.profit),                         a: 'right', c: '#16a34a', w: '700' },
-                            { v: pct(totals.profit / totals.revenue * 100),  a: 'right', c: '#16a34a', w: '700' },
+                            { v: fmt(totals.revenue - totals.cogs),          a: 'right', c: '#1C7A4E', w: '700' },
+                            { v: fmt(totals.profit),                         a: 'right', c: '#1C7A4E', w: '700' },
+                            { v: pct(totals.profit / totals.revenue * 100),  a: 'right', c: '#1C7A4E', w: '700' },
                           ].map((col, i) => (
-                            <td key={i} style={{ padding: '9px 10px', borderTop: '2px solid #E7DECB', background: '#FAF6EC', color: col.c, fontSize: '11px', fontWeight: col.w, fontFamily: 'Inter, sans-serif', textAlign: col.a }}>{col.v}</td>
+                            <td key={i} style={{ padding: '9px 10px', borderTop: '2px solid #DBD5C7', background: '#ECE7DD', color: col.c, fontSize: '11px', fontWeight: col.w, fontFamily: 'Inter, sans-serif', textAlign: col.a }}>{col.v}</td>
                           ))}
                         </tr>
                       </tbody>
@@ -576,7 +576,7 @@ export default function Financials() {
 
                 {/* Accounts Tab — balances grouped by type, collapsible */}
                 {activeTab === 'accounts' && (() => {
-                  if (!accounts.length) return <div style={{ color: '#a39a88', fontFamily: ui, fontSize: '12px' }}>No account data yet — import a General Ledger.</div>
+                  if (!accounts.length) return <div style={{ color: '#9A9284', fontFamily: ui, fontSize: '12px' }}>No account data yet — import a General Ledger.</div>
                   const GROUPS = [
                     { cat: 'asset', label: 'ASSETS' }, { cat: 'liability', label: 'LIABILITIES' },
                     { cat: 'equity', label: 'EQUITY' }, { cat: 'income', label: 'INCOME' }, { cat: 'expense', label: 'EXPENSES' },
@@ -586,7 +586,7 @@ export default function Financials() {
                   }).filter(g => g.rows.length)
                   return (
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', maxWidth: '660px' }}>
-                      <div style={{ fontSize: '10px', color: '#a39a88', fontFamily: ui }}>
+                      <div style={{ fontSize: '10px', color: '#9A9284', fontFamily: ui }}>
                         {accounts.length} accounts · {accountsTotalTxns.toLocaleString()} transactions · click any account to see its ledger
                       </div>
                       {GROUPS.map(g => {
@@ -594,26 +594,26 @@ export default function Financials() {
                         return (
                           <div key={g.cat} style={{ ...card, padding: '0', overflow: 'hidden' }}>
                             <div onClick={() => setAcctOpen(s => ({ ...s, [g.cat]: !s[g.cat] }))}
-                              onMouseEnter={e => e.currentTarget.style.background = '#FAF6EC'} onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
+                              onMouseEnter={e => e.currentTarget.style.background = '#ECE7DD'} onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
                               style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '14px 18px', cursor: 'pointer', userSelect: 'none' }}>
                               <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                                <span style={{ fontSize: '10px', color: '#a39a88', transform: open ? 'rotate(90deg)' : 'none', display: 'inline-block', transition: 'transform .15s' }}>▶</span>
+                                <span style={{ fontSize: '10px', color: '#9A9284', transform: open ? 'rotate(90deg)' : 'none', display: 'inline-block', transition: 'transform .15s' }}>▶</span>
                                 <span style={{ fontSize: '10px', color: '#6b6355', letterSpacing: '0.14em', fontWeight: 700, fontFamily: ui }}>{g.label}</span>
                                 <span style={{ fontSize: '9px', color: '#b8ae9a', fontFamily: ui }}>{g.rows.length} account{g.rows.length === 1 ? '' : 's'}</span>
                               </div>
-                              <span style={{ fontSize: '14px', fontWeight: 700, color: g.total >= 0 ? '#1a1a1a' : THEME.accent, fontFamily: ui, fontVariantNumeric: 'tabular-nums' }}>{fmt(g.total)}</span>
+                              <span style={{ fontSize: '14px', fontWeight: 700, color: g.total >= 0 ? '#1B1815' : THEME.accent, fontFamily: ui, fontVariantNumeric: 'tabular-nums' }}>{fmt(g.total)}</span>
                             </div>
                             {open && (
-                              <div style={{ borderTop: '1px solid #E7DECB', padding: '6px 8px 10px' }}>
+                              <div style={{ borderTop: '1px solid #DBD5C7', padding: '6px 8px 10px' }}>
                                 {g.rows.map(a => (
                                   <div key={a.name} onClick={() => setDrillAccount(a.name)}
-                                    onMouseEnter={e => e.currentTarget.style.background = '#F5EFE3'} onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
-                                    style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '8px 10px', borderRadius: '5px', cursor: 'pointer', fontFamily: ui }}>
+                                    onMouseEnter={e => e.currentTarget.style.background = '#ECE8DF'} onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
+                                    style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '8px 10px', borderRadius: '0', cursor: 'pointer', fontFamily: ui }}>
                                     <div style={{ minWidth: 0 }}>
-                                      <div style={{ fontSize: '12px', color: '#4a4438', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{a.name}</div>
-                                      <div style={{ fontSize: '9px', color: '#a39a88', marginTop: '1px' }}>{a.txns} txns</div>
+                                      <div style={{ fontSize: '12px', color: '#4A453C', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{a.name}</div>
+                                      <div style={{ fontSize: '9px', color: '#9A9284', marginTop: '1px' }}>{a.txns} txns</div>
                                     </div>
-                                    <span style={{ fontSize: '12px', fontWeight: 600, color: a.total >= 0 ? '#16a34a' : THEME.accent, fontVariantNumeric: 'tabular-nums', flexShrink: 0, paddingLeft: '12px' }}>{fmt(a.total)}</span>
+                                    <span style={{ fontSize: '12px', fontWeight: 600, color: a.total >= 0 ? '#1C7A4E' : THEME.accent, fontVariantNumeric: 'tabular-nums', flexShrink: 0, paddingLeft: '12px' }}>{fmt(a.total)}</span>
                                   </div>
                                 ))}
                               </div>
@@ -639,15 +639,15 @@ export default function Financials() {
                   const cloverStale = health?.cloverLastSynced ? (Date.now() - new Date(health.cloverLastSynced)) / 36e5 > 36 : true
                   const cloverFailed = health?.lastCloverSync?.ok === false
                   const Row = ({ k, v, sub, bad }) => (
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', padding: '9px 0', borderBottom: '1px solid #F1EADB' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', padding: '9px 0', borderBottom: '1px solid #E6E1D6' }}>
                       <div style={{ fontSize: '11px', color: '#333', fontFamily: 'Inter, sans-serif' }}>{k}{sub && <span style={{ color: '#aaa', marginLeft: '8px' }}>{sub}</span>}</div>
-                      <div style={{ fontSize: '11px', fontFamily: 'Inter, sans-serif', color: bad ? '#CC2222' : '#1a1a1a' }}>{v}</div>
+                      <div style={{ fontSize: '11px', fontFamily: 'Inter, sans-serif', color: bad ? '#B0281C' : '#1B1815' }}>{v}</div>
                     </div>
                   )
                   const Check = ({ ok, label, detail }) => (
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', padding: '9px 0', borderBottom: '1px solid #F1EADB' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', padding: '9px 0', borderBottom: '1px solid #E6E1D6' }}>
                       <div style={{ fontSize: '11px', color: '#333', fontFamily: 'Inter, sans-serif' }}>
-                        <span style={{ color: ok ? '#16a34a' : '#CC2222', marginRight: '8px' }}>{ok ? '✓' : '✕'}</span>{label}
+                        <span style={{ color: ok ? '#1C7A4E' : '#B0281C', marginRight: '8px' }}>{ok ? '✓' : '✕'}</span>{label}
                       </div>
                       <div style={{ fontSize: '11px', color: '#888', fontFamily: 'Inter, sans-serif' }}>{detail}</div>
                     </div>
@@ -655,18 +655,18 @@ export default function Financials() {
                   return (
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
                       {(cloverStale || cloverFailed) && (
-                        <div style={{ background: '#fef2f2', border: '1px solid #fecaca', borderRadius: '6px', padding: '14px 18px', fontSize: '12px', color: '#991b1b', fontFamily: 'Inter, sans-serif' }}>
+                        <div style={{ background: '#fef2f2', border: '1px solid #fecaca', borderRadius: '0', padding: '14px 18px', fontSize: '12px', color: '#991b1b', fontFamily: 'Inter, sans-serif' }}>
                           ⚠ {cloverFailed ? 'The last Clover sync FAILED.' : 'Clover data looks stale — no successful sync in over 36 hours.'} Check the API token / cron.
                         </div>
                       )}
-                      <div style={{ background: '#fff', border: '1px solid #E7DECB', borderRadius: '10px', boxShadow: '0 1px 3px rgba(60,45,20,0.05)', padding: '16px' }}>
+                      <div style={{ background: '#fff', border: '1px solid #DBD5C7', borderRadius: '0', boxShadow: 'none', padding: '16px' }}>
                         <div style={{ fontSize: '9px', color: '#888', letterSpacing: '0.15em', marginBottom: '8px', fontFamily: 'Inter, sans-serif' }}>DATA FRESHNESS</div>
                         <Row k="Clover sales" v={ago(health?.cloverLastSynced)} sub={health?.cloverLastSynced ? new Date(health.cloverLastSynced).toLocaleString() : ''} bad={cloverStale} />
                         <Row k="Last Clover sync" v={health?.lastCloverSync ? (health.lastCloverSync.ok ? 'OK' : 'FAILED') : '—'} sub={health?.lastCloverSync ? ago(health.lastCloverSync.ran_at) : ''} bad={cloverFailed} />
                         <Row k="Weldon orders" v={ago(health?.weldonLastAdded)} sub={health?.weldonLastAdded ? new Date(health.weldonLastAdded).toLocaleString() : ''} />
                         <Row k="Financials" v={health?.lastImport ? ago(health.lastImport.imported_at) : '—'} sub={health?.lastImport ? `last ${health.lastImport.kind} import` : ''} />
                       </div>
-                      <div style={{ background: '#fff', border: '1px solid #E7DECB', borderRadius: '10px', boxShadow: '0 1px 3px rgba(60,45,20,0.05)', padding: '16px' }}>
+                      <div style={{ background: '#fff', border: '1px solid #DBD5C7', borderRadius: '0', boxShadow: 'none', padding: '16px' }}>
                         <div style={{ fontSize: '9px', color: '#888', letterSpacing: '0.15em', marginBottom: '8px', fontFamily: 'Inter, sans-serif' }}>RECONCILIATION</div>
                         <Check ok={bsBalanced} label="Balance sheet balances" detail={`${fmt(bsAssets)} = ${fmt(bsLE)}`} />
                         <Check ok={niTie} label="Net income ties P&L → Balance Sheet" detail={`${fmt(plNetIncome)} / ${fmt(niBs)}`} />

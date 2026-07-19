@@ -5,15 +5,15 @@ import Shell from '../components/Shell'
 
 const fmt = (n) => new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }).format(Math.abs(n))
 
-const THEME = { sidebarBg: '#1A1A1A', sidebarBorder: '#2A2A2A', accent: '#CC2222' }
+const THEME = { sidebarBg: '#1A1A1A', sidebarBorder: '#2A2A2A', accent: '#B0281C' }
 
 const hcell = (align = 'left') => ({
-  padding: '7px 12px', fontSize: '9px', color: '#888', background: '#FAF6EC',
-  fontWeight: '400', letterSpacing: '0.1em', borderBottom: '1px solid #E7DECB',
+  padding: '7px 12px', fontSize: '9px', color: '#888', background: '#ECE7DD',
+  fontWeight: '400', letterSpacing: '0.1em', borderBottom: '1px solid #DBD5C7',
   fontFamily: 'Inter, sans-serif', textAlign: align,
 })
 const cell = (align = 'left', extra = {}) => ({
-  padding: '9px 12px', borderBottom: '1px solid #F1EADB',
+  padding: '9px 12px', borderBottom: '1px solid #E6E1D6',
   color: '#333', fontSize: '11px', fontFamily: 'Inter, sans-serif',
   textAlign: align, ...extra,
 })
@@ -200,18 +200,18 @@ export default function Stock() {
             ) : (
               <>
                 <div style={{ marginBottom: '20px' }}>
-                  <div style={{ fontSize: '23px', fontWeight: 700, color: '#211E17', fontFamily: 'Inter, sans-serif', letterSpacing: '-0.025em' }}>Stock on Hand</div>
-                  <div style={{ fontSize: '12px', color: '#a39a88', fontFamily: 'Inter, sans-serif', marginTop: '4px' }}>Reydel Tire &amp; Auto · live tire inventory, FIFO cost</div>
+                  <div style={{ fontSize: '23px', fontWeight: 700, color: '#1B1815', fontFamily: "'Barlow Semi Condensed', sans-serif", letterSpacing: '0.02em', textTransform: 'uppercase' }}>Stock on Hand</div>
+                  <div style={{ fontSize: '12px', color: '#9A9284', fontFamily: 'Inter, sans-serif', marginTop: '4px' }}>Reydel Tire &amp; Auto · live tire inventory, FIFO cost</div>
                 </div>
                 <div style={{ display: 'flex', gap: '12px', marginBottom: '20px' }}>
                   {[
-                    { label: 'ON HAND',     value: totalOnHand.toLocaleString() + ' tires', sub: asOf === 'live' ? 'in stock now' : `in stock at ${asOfLabel(asOf).slice(0, -5)}`, sc: '#16a34a' },
-                    { label: 'STOCK VALUE', value: fmt(totalValue),                          sub: 'on-hand, at cost',   sc: '#1a1a1a' },
+                    { label: 'ON HAND',     value: totalOnHand.toLocaleString() + ' tires', sub: asOf === 'live' ? 'in stock now' : `in stock at ${asOfLabel(asOf).slice(0, -5)}`, sc: '#1C7A4E' },
+                    { label: 'STOCK VALUE', value: fmt(totalValue),                          sub: 'on-hand, at cost',   sc: '#1B1815' },
                     { label: 'SIZES',       value: lines.toString(),                         sub: 'on the rack',        sc: '#888' },
                   ].map(k => (
-                    <div key={k.label} style={{ flex: 1, background: '#fff', border: '1px solid #E7DECB', borderRadius: '10px', boxShadow: '0 1px 3px rgba(60,45,20,0.05)', padding: '14px 16px' }}>
+                    <div key={k.label} style={{ flex: 1, background: '#fff', border: '1px solid #DBD5C7', borderRadius: '0', boxShadow: 'none', padding: '14px 16px' }}>
                       <div style={{ fontSize: '9px', color: '#888', letterSpacing: '0.15em', marginBottom: '6px', fontFamily: 'Inter, sans-serif' }}>{k.label}</div>
-                      <div style={{ fontSize: '20px', color: '#1a1a1a', fontWeight: '600', fontFamily: 'Inter, sans-serif' }}>{k.value}</div>
+                      <div style={{ fontSize: '20px', color: '#1B1815', fontWeight: '600', fontFamily: 'Inter, sans-serif' }}>{k.value}</div>
                       <div style={{ fontSize: '10px', color: k.sc, marginTop: '4px', fontFamily: 'Inter, sans-serif' }}>{k.sub}</div>
                     </div>
                   ))}
@@ -220,32 +220,32 @@ export default function Stock() {
                 <div style={{ display: 'flex', gap: '10px', marginBottom: '16px', alignItems: 'center', flexWrap: 'wrap' }}>
                   <select value={asOf} onChange={e => setAsOf(e.target.value)} style={{
                     padding: '8px 12px', fontSize: '11px', fontFamily: 'Inter, sans-serif',
-                    border: '1px solid #E7DECB', borderRadius: '6px', cursor: 'pointer',
-                    background: '#1a1a1a', color: '#fff', fontWeight: 600, outline: 'none',
+                    border: '1px solid #DBD5C7', borderRadius: '0', cursor: 'pointer',
+                    background: '#1B1815', color: '#fff', fontWeight: 600, outline: 'none',
                   }}>
-                    {monthEnds.map(o => <option key={o.k} value={o.k} style={{ background: '#fff', color: '#1a1a1a' }}>As of {o.l} month-end</option>)}
-                    <option value="live" style={{ background: '#fff', color: '#1a1a1a' }}>Live · current on-hand</option>
+                    {monthEnds.map(o => <option key={o.k} value={o.k} style={{ background: '#fff', color: '#1B1815' }}>As of {o.l} month-end</option>)}
+                    <option value="live" style={{ background: '#fff', color: '#1B1815' }}>Live · current on-hand</option>
                   </select>
                   <input value={search} onChange={e => setSearch(e.target.value)}
                     placeholder="Filter by size / item..."
-                    style={{ flex: 1, minWidth: '180px', padding: '8px 12px', border: '1px solid #E7DECB', borderRadius: '4px',
-                      fontSize: '11px', fontFamily: 'Inter, sans-serif', outline: 'none', background: '#fff', color: '#1a1a1a' }}
+                    style={{ flex: 1, minWidth: '180px', padding: '8px 12px', border: '1px solid #DBD5C7', borderRadius: '0',
+                      fontSize: '11px', fontFamily: 'Inter, sans-serif', outline: 'none', background: '#fff', color: '#1B1815' }}
                   />
                   {[{ k: 'value', l: 'VALUE' }, { k: 'qty', l: 'ON HAND' }, { k: 'size', l: 'SIZE' }].map(s => (
                     <button key={s.k} onClick={() => setSort(s.k)} style={{
                       padding: '7px 12px', fontSize: '9px', fontFamily: 'Inter, sans-serif', letterSpacing: '0.08em',
-                      border: 'none', borderRadius: '4px', cursor: 'pointer',
-                      background: sort === s.k ? THEME.accent : '#F1EADB',
+                      border: 'none', borderRadius: '0', cursor: 'pointer',
+                      background: sort === s.k ? THEME.accent : '#E6E1D6',
                       color: sort === s.k ? '#fff' : '#888',
                     }}>{s.l}</button>
                   ))}
                   <button onClick={downloadCSV} style={{
                     padding: '7px 12px', fontSize: '9px', fontFamily: 'Inter, sans-serif', letterSpacing: '0.08em',
-                    border: 'none', borderRadius: '4px', cursor: 'pointer', background: '#16a34a', color: '#fff',
+                    border: 'none', borderRadius: '0', cursor: 'pointer', background: '#1C7A4E', color: '#fff',
                   }}>↓ CSV</button>
                 </div>
 
-                <div style={{ background: '#fff', border: '1px solid #E7DECB', borderRadius: '10px', boxShadow: '0 1px 3px rgba(60,45,20,0.05)', overflow: 'hidden' }}>
+                <div style={{ background: '#fff', border: '1px solid #DBD5C7', borderRadius: '0', boxShadow: 'none', overflow: 'hidden' }}>
                   <table style={{ width: '100%', borderCollapse: 'collapse', fontFamily: 'Inter, sans-serif' }}>
                     <thead>
                       <tr>
@@ -258,13 +258,13 @@ export default function Stock() {
                     <tbody>
                       {filtered.map((r, i) => (
                         <tr key={i}
-                          onMouseEnter={e => e.currentTarget.style.background = '#F5EFE3'}
+                          onMouseEnter={e => e.currentTarget.style.background = '#ECE8DF'}
                           onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
                         >
-                          <td style={cell('left', { color: '#1a1a1a', fontWeight: '600' })}>{r.label}</td>
-                          <td style={cell('right', { fontWeight: '700', color: '#16a34a' })}>{r.qty}</td>
+                          <td style={cell('left', { color: '#1B1815', fontWeight: '600' })}>{r.label}</td>
+                          <td style={cell('right', { fontWeight: '700', color: '#1C7A4E' })}>{r.qty}</td>
                           <td style={cell('right', { color: '#888' })}>{fmt(r.unitCost)}</td>
-                          <td style={cell('right', { color: '#1a1a1a', fontWeight: '600' })}>{fmt(r.value)}</td>
+                          <td style={cell('right', { color: '#1B1815', fontWeight: '600' })}>{fmt(r.value)}</td>
                         </tr>
                       ))}
                     </tbody>
@@ -272,9 +272,9 @@ export default function Stock() {
                   {filtered.length === 0 && (
                     <div style={{ padding: '24px', textAlign: 'center', color: '#888', fontFamily: 'Inter, sans-serif', fontSize: '11px' }}>No items match</div>
                   )}
-                  <div style={{ padding: '10px 16px', borderTop: '2px solid #E7DECB', background: '#FAF6EC', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <div style={{ padding: '10px 16px', borderTop: '2px solid #DBD5C7', background: '#ECE7DD', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                     <div style={{ fontSize: '10px', color: '#888', fontFamily: 'Inter, sans-serif' }}>{filtered.length} sizes in stock</div>
-                    <div style={{ fontSize: '11px', color: '#16a34a', fontFamily: 'Inter, sans-serif', fontWeight: '600' }}>Total: {fmt(totalValue)}</div>
+                    <div style={{ fontSize: '11px', color: '#1C7A4E', fontFamily: 'Inter, sans-serif', fontWeight: '600' }}>Total: {fmt(totalValue)}</div>
                   </div>
                 </div>
               </>
