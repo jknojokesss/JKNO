@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useMemo } from 'react'
 import Head from 'next/head'
 import { supabase } from '../lib/supabase'
 import Shell from '../components/Shell'
@@ -6,6 +6,9 @@ import { categorize, parentOf } from '../lib/accountTypes'
 
 const fmt = (n) => new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }).format(Math.abs(n))
 const pct = (n) => `${parseFloat(n).toFixed(1)}%`
+
+const MONTHS = { '01':'JAN','02':'FEB','03':'MAR','04':'APR','05':'MAY','06':'JUN','07':'JUL','08':'AUG','09':'SEP','10':'OCT','11':'NOV','12':'DEC' }
+const monthLabel = (k) => `${MONTHS[k.slice(5, 7)]} ${k.slice(0, 4)}`
 
 // Account classification is shared with the Accounts page (lib/accountTypes).
 const CAT_LABEL = { income: 'Income', expense: 'Expense', asset: 'Asset', liability: 'Liability', equity: 'Equity' }
@@ -118,8 +121,13 @@ export default function Financials() {
   }, [])
   const [monthly,      setMonthly]      = useState([])
   const [plTotals,     setPlTotals]     = useState({ income: [], cogs: [], expense: [], other_expense: [] })
+  const [plByMonth,    setPlByMonth]    = useState({})   // { 'YYYY-MM': { account: signedSum } }
+  const [plLabelCat,   setPlLabelCat]   = useState({})   // { account: 'income'|'cogs'|'expense'|'other_expense' }
+  const [plMonths,     setPlMonths]     = useState([])   // sorted month keys
+  const [plPeriod,     setPlPeriod]     = useState('all')
   const [accounts,     setAccounts]     = useState([])
   const [bs,           setBs]           = useState([])
+  const [bsOpen,       setBsOpen]       = useState({ asset: true, liability: false, equity: true })
   const [loading,      setLoading]      = useState(true)
   const [activeTab,    setActiveTab]    = useState('pl')
   const [drillAccount, setDrillAccount] = useState(null)
@@ -127,7 +135,6 @@ export default function Financials() {
   const [health,       setHealth]       = useState(null)
 
   useEffect(() => {
-    const MONTHS = { '01':'JAN','02':'FEB','03':'MAR','04':'APR','05':'MAY','06':'JUN','07':'JUL','08':'AUG','09':'SEP','10':'OCT','11':'NOV','12':'DEC' }
     async function load() {
       const { data: mData } = await supabase.from('monthly_summary').select('*').order('month')
       if (mData) setMonthly(mData.map(r => ({
@@ -140,10 +147,36 @@ export default function Financials() {
       })))
 
       const { data: pData } = await supabase.from('pl_totals').select('label, amount, category')
+      let plLabels = []
       if (pData) {
         const grouped = { income: [], cogs: [], expense: [], other_expense: [] }
-        pData.forEach(row => { if (grouped[row.category]) grouped[row.category].push({ label: row.label, amount: Number(row.amount) }) })
+        const labelCat = {}
+        pData.forEach(row => { if (grouped[row.category]) { grouped[row.category].push({ label: row.label, amount: Number(row.amount) }); labelCat[row.label] = row.category } })
         setPlTotals(grouped)
+        setPlLabelCat(labelCat)
+        plLabels = pData.map(r => r.label)
+      }
+
+      // Per-month P&L: GL sums by account tie exactly to pl_totals, so we can
+      // rebuild a real month-by-month statement from the raw ledger.
+      if (plLabels.length) {
+        let glRows = [], from = 0
+        while (true) {
+          const { data } = await supabase.from('gl_transactions').select('date, account, amount').in('account', plLabels).range(from, from + 999)
+          if (!data || data.length === 0) break
+          glRows = glRows.concat(data)
+          if (data.length < 1000) break
+          from += 1000
+        }
+        const byMonth = {}
+        glRows.forEach(t => {
+          if (!t.date) return
+          const m = t.date.slice(0, 7)
+          if (!byMonth[m]) byMonth[m] = {}
+          byMonth[m][t.account] = (byMonth[m][t.account] || 0) + Number(t.amount)
+        })
+        setPlByMonth(byMonth)
+        setPlMonths(Object.keys(byMonth).sort())
       }
 
       // Live account balances — same server-aggregated view the Accounts page reads,
@@ -186,19 +219,60 @@ export default function Financials() {
     profit: s.profit + r.profit, cogs: s.cogs + r.cogs,
   }), { revenue: 0, expenses: 0, profit: 0, cogs: 0 })
 
+  // All-time P&L (used for headline reconciliation and the "All time" view).
   const plIncome      = plTotals.income.reduce((s, r) => s + r.amount, 0)
   const plCogs        = plTotals.cogs.reduce((s, r) => s + r.amount, 0)
   const plExpenses    = plTotals.expense.reduce((s, r) => s + r.amount, 0)
   const plOtherExp    = plTotals.other_expense.reduce((s, r) => s + r.amount, 0)
-  const plGrossProfit = plIncome - plCogs
   const plNetIncome   = plIncome - plCogs - plExpenses - plOtherExp
 
-  const PL_ROWS = [
-    { section: 'INCOME',             rows: plTotals.income.map(r => ({ label: r.label, amount: r.amount, account: r.label })) },
-    { section: 'COST OF GOODS SOLD', rows: plTotals.cogs.map(r => ({ label: r.label, amount: -r.amount, account: 'Cost of Goods Sold' })) },
-    { section: 'OPERATING EXPENSES', rows: plTotals.expense.map(r => ({ label: r.label, amount: -r.amount, account: r.label })) },
-    { section: 'OTHER EXPENSES',     rows: plTotals.other_expense.map(r => ({ label: r.label, amount: -r.amount, account: r.label })) },
-  ]
+  // P&L for the currently selected period (all-time or a single month).
+  const plView = useMemo(() => {
+    const empty = { income: [], cogs: [], expense: [], other_expense: [] }
+    let g
+    if (plPeriod === 'all') {
+      g = plTotals
+    } else {
+      g = { income: [], cogs: [], expense: [], other_expense: [] }
+      const monthData = plByMonth[plPeriod] || {}
+      Object.entries(monthData).forEach(([acct, sum]) => {
+        const cat = plLabelCat[acct]
+        if (cat && Math.round(Math.abs(sum)) > 0) g[cat].push({ label: acct, amount: sum })
+      })
+      Object.values(g).forEach(arr => arr.sort((a, b) => Math.abs(b.amount) - Math.abs(a.amount)))
+    }
+    g = g || empty
+    const inc  = g.income.reduce((s, r) => s + r.amount, 0)
+    const cogs = g.cogs.reduce((s, r) => s + r.amount, 0)
+    const exp  = g.expense.reduce((s, r) => s + r.amount, 0)
+    const oth  = g.other_expense.reduce((s, r) => s + r.amount, 0)
+    return { g, inc, cogs, gross: inc - cogs, exp, oth, net: inc - cogs - exp - oth }
+  }, [plPeriod, plTotals, plByMonth, plLabelCat])
+
+  // ── Shared statement styling ────────────────────────────────────────────────
+  const ui = "'Inter', sans-serif"
+  const card = { background: '#fff', border: '1px solid #E7DECB', borderRadius: '12px', boxShadow: '0 1px 3px rgba(60,45,20,0.05)', padding: '20px 22px' }
+  const pill = (on) => ({ padding: '6px 12px', borderRadius: '16px', fontSize: '11px', fontWeight: 600, cursor: 'pointer', fontFamily: ui, border: `1px solid ${on ? '#1a1a1a' : '#E7DECB'}`, background: on ? '#1a1a1a' : '#fff', color: on ? '#fff' : '#8a8378' })
+  const paren = (n) => n < 0 ? `(${fmt(n)})` : fmt(n)
+
+  const SectionHead = ({ children }) => (
+    <div style={{ fontSize: '9px', color: '#a39a88', letterSpacing: '0.14em', fontWeight: 700, fontFamily: ui, margin: '18px 0 4px' }}>{children}</div>
+  )
+  const LineItem = ({ label, amount, account }) => (
+    <div onClick={account ? () => setDrillAccount(account) : undefined}
+      onMouseEnter={e => { if (account) e.currentTarget.style.background = '#F5EFE3' }}
+      onMouseLeave={e => { e.currentTarget.style.background = 'transparent' }}
+      style={{ display: 'flex', justifyContent: 'space-between', padding: '6px 8px', fontSize: '12px', fontFamily: ui, color: '#4a4438', cursor: account ? 'pointer' : 'default', borderRadius: '5px' }}>
+      <span style={{ paddingLeft: '8px' }}>{label}</span>
+      <span style={{ color: amount >= 0 ? '#1a1a1a' : '#b0483a', fontVariantNumeric: 'tabular-nums' }}>{paren(amount)}</span>
+    </div>
+  )
+  const TotalRow = ({ label, amount, accent, sub }) => (
+    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', padding: '9px 8px 4px', marginTop: '2px', borderTop: '1px solid #E7DECB', fontFamily: ui }}>
+      <span style={{ fontSize: '12px', fontWeight: 600, color: '#1a1a1a' }}>{label}{sub && <span style={{ fontSize: '10px', color: '#a39a88', fontWeight: 400, marginLeft: '8px' }}>{sub}</span>}</span>
+      <span style={{ fontSize: '12.5px', fontWeight: 700, color: accent ? '#16a34a' : (amount >= 0 ? '#1a1a1a' : '#b0483a'), fontVariantNumeric: 'tabular-nums' }}>{paren(amount)}</span>
+    </div>
+  )
 
   const tabs = [
     { id: 'pl',       label: 'Profit & Loss' },
@@ -244,67 +318,63 @@ export default function Financials() {
                   ))}
                 </div>
 
-                {/* P&L Tab */}
+                {/* P&L Tab — clean statement with month selector */}
                 {activeTab === 'pl' && (
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
-                    {PL_ROWS.map(section => {
-                      const sectionTotal = section.rows.reduce((s, r) => s + r.amount, 0)
-                      return (
-                        <div key={section.section} style={{ background: '#fff', border: '1px solid #E7DECB', borderRadius: '10px', boxShadow: '0 1px 3px rgba(60,45,20,0.05)', padding: '16px' }}>
-                          <div style={{ fontSize: '9px', color: '#888', letterSpacing: '0.15em', marginBottom: '12px', paddingBottom: '8px', borderBottom: '1px solid #F0F0F0', fontFamily: 'Inter, sans-serif' }}>{section.section}</div>
-                          <table style={{ width: '100%', borderCollapse: 'collapse' }}>
-                            <thead>
-                              <tr>
-                                <th style={hcell('left')}>ACCOUNT</th>
-                                <th style={hcell('right')}>AMOUNT</th>
-                                <th style={hcell('right')}>TXNS</th>
-                                <th style={hcell('right')}>ACTION</th>
-                              </tr>
-                            </thead>
-                            <tbody>
-                              {section.rows.map(row => (
-                                <tr key={row.label} onMouseEnter={e => e.currentTarget.style.background = '#F5EFE3'} onMouseLeave={e => e.currentTarget.style.background = 'transparent'}>
-                                  <td style={cell('left', { color: '#1a1a1a' })}>{row.label}</td>
-                                  <td style={cell('right', { color: row.amount >= 0 ? '#16a34a' : THEME.accent })}>{fmt(row.amount)}</td>
-                                  <td style={cell('right', { color: '#888' })}>{row.txns || '—'}</td>
-                                  <td style={cell('right')}>
-                                    {row.note ? (
-                                      <span style={{ fontSize: '9px', background: '#fef3c7', color: '#92400e', padding: '2px 6px', borderRadius: '3px' }}>{row.note}</span>
-                                    ) : row.account ? (
-                                      <button onClick={() => setDrillAccount(row.account)} style={{
-                                        fontSize: '9px', background: '#F5F5F5', color: THEME.accent,
-                                        border: '1px solid #E7DECB', padding: '2px 8px', borderRadius: '3px',
-                                        cursor: 'pointer', fontFamily: 'Inter, sans-serif',
-                                      }}>DRILL →</button>
-                                    ) : null}
-                                  </td>
-                                </tr>
-                              ))}
-                              <tr>
-                                <td colSpan={4} style={{ padding: '8px 10px', borderTop: '1px solid #E7DECB', fontFamily: 'Inter, sans-serif', fontSize: '11px', color: '#1a1a1a', fontWeight: '600', textAlign: 'right' }}>
-                                  {section.section === 'INCOME' ? 'Total Income: ' :
-                                   section.section === 'COST OF GOODS SOLD' ? 'Gross Profit: ' :
-                                   section.section === 'OPERATING EXPENSES' ? 'Total Operating Expenses: ' :
-                                   'Total Other Expenses: '}
-                                  <span style={{ color: section.section === 'COST OF GOODS SOLD' ? '#16a34a' : sectionTotal >= 0 ? '#16a34a' : THEME.accent }}>
-                                    {section.section === 'COST OF GOODS SOLD' ? fmt(plGrossProfit) : fmt(sectionTotal)}
-                                  </span>
-                                </td>
-                              </tr>
-                            </tbody>
-                          </table>
+                  <>
+                    {/* Period selector */}
+                    <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap', marginBottom: '18px', alignItems: 'center' }}>
+                      <span style={{ fontSize: '9px', color: '#a39a88', letterSpacing: '0.14em', marginRight: '2px', fontFamily: ui, fontWeight: 600 }}>PERIOD</span>
+                      {[{ k: 'all', l: 'All time' }, ...plMonths.map(k => ({ k, l: MONTHS[k.slice(5, 7)] }))].map(o => (
+                        <button key={o.k} onClick={() => setPlPeriod(o.k)} style={pill(plPeriod === o.k)}>{o.l}</button>
+                      ))}
+                    </div>
+
+                    {/* Statement card */}
+                    <div style={{ ...card, maxWidth: '660px' }}>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', borderBottom: '1px solid #E7DECB', paddingBottom: '12px', marginBottom: '4px' }}>
+                        <div>
+                          <div style={{ fontSize: '15px', fontWeight: 700, color: '#1a1a1a', fontFamily: ui, letterSpacing: '-0.01em' }}>Profit &amp; Loss</div>
+                          <div style={{ fontSize: '10px', color: '#a39a88', marginTop: '2px', fontFamily: ui }}>Reydel Tire &amp; Auto</div>
                         </div>
-                      )
-                    })}
-                    {/* Net income */}
-                    <div style={{ background: '#f0fdf4', border: '1px solid #bbf7d0', borderRadius: '6px', padding: '16px 20px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                      <div style={{ fontSize: '13px', color: '#16a34a', fontWeight: '600', fontFamily: 'Inter, sans-serif', letterSpacing: '0.1em' }}>NET INCOME</div>
-                      <div style={{ fontSize: '22px', color: '#16a34a', fontWeight: '700', fontFamily: 'Inter, sans-serif' }}>{fmt(plNetIncome)}</div>
+                        <div style={{ fontSize: '12px', color: '#6b6355', fontFamily: ui, fontWeight: 500 }}>{plPeriod === 'all' ? 'All time' : monthLabel(plPeriod)}</div>
+                      </div>
+
+                      {plView.g.income.length === 0 && plView.g.expense.length === 0 ? (
+                        <div style={{ fontSize: '12px', color: '#a39a88', fontFamily: ui, padding: '18px 8px' }}>No activity in this period.</div>
+                      ) : (
+                        <>
+                          <SectionHead>INCOME</SectionHead>
+                          {plView.g.income.map(r => <LineItem key={r.label} label={r.label} amount={r.amount} account={r.label} />)}
+                          <TotalRow label="Total Income" amount={plView.inc} />
+
+                          <SectionHead>COST OF GOODS SOLD</SectionHead>
+                          {plView.g.cogs.map(r => <LineItem key={r.label} label={r.label} amount={-r.amount} account="Cost of Goods Sold" />)}
+                          <TotalRow label="Gross Profit" amount={plView.gross} accent sub={plView.inc > 0 ? `${pct(plView.gross / plView.inc * 100)} margin` : null} />
+
+                          <SectionHead>OPERATING EXPENSES</SectionHead>
+                          {plView.g.expense.map(r => <LineItem key={r.label} label={r.label} amount={-r.amount} account={r.label} />)}
+                          <TotalRow label="Total Operating Expenses" amount={-plView.exp} />
+
+                          {plView.g.other_expense.length > 0 && (
+                            <>
+                              <SectionHead>OTHER EXPENSES</SectionHead>
+                              {plView.g.other_expense.map(r => <LineItem key={r.label} label={r.label} amount={-r.amount} account={r.label} />)}
+                              <TotalRow label="Total Other Expenses" amount={-plView.oth} />
+                            </>
+                          )}
+
+                          {/* Net income */}
+                          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '16px', padding: '14px 12px', background: plView.net >= 0 ? '#f0fdf4' : '#fef2f2', border: `1px solid ${plView.net >= 0 ? '#bbf7d0' : '#fecaca'}`, borderRadius: '9px' }}>
+                            <span style={{ fontSize: '12px', fontWeight: 700, letterSpacing: '0.08em', color: plView.net >= 0 ? '#16a34a' : '#991b1b', fontFamily: ui }}>NET INCOME</span>
+                            <span style={{ display: 'flex', alignItems: 'baseline', gap: '12px' }}>
+                              {plView.inc > 0 && <span style={{ fontSize: '11px', color: '#6b6355', fontFamily: ui }}>{pct(plView.net / plView.inc * 100)} margin</span>}
+                              <span style={{ fontSize: '21px', fontWeight: 700, color: plView.net >= 0 ? '#16a34a' : '#991b1b', fontFamily: ui, fontVariantNumeric: 'tabular-nums' }}>{fmt(plView.net)}</span>
+                            </span>
+                          </div>
+                        </>
+                      )}
                     </div>
-                    <div style={{ fontSize: '9px', color: '#888', fontFamily: 'Inter, sans-serif' }}>
-                      * May COGS estimated: $1,313 QB actual + $13,896 Weldon purchases pending QB entry
-                    </div>
-                  </div>
+                  </>
                 )}
 
                 {/* Balance Sheet Tab */}
@@ -315,42 +385,47 @@ export default function Financials() {
                   const tot = c => groups[c].reduce((s, r) => s + r.amount, 0)
                   const totA = tot('asset'), totL = tot('liability'), totE = tot('equity')
                   const balanced = Math.abs(totA - totL - totE) < 0.01
-                  const Section = ({ title, rows, total }) => (
-                    <div style={{ background: '#fff', border: '1px solid #E7DECB', borderRadius: '10px', boxShadow: '0 1px 3px rgba(60,45,20,0.05)', padding: '16px' }}>
-                      <div style={{ fontSize: '9px', color: '#888', letterSpacing: '0.15em', marginBottom: '12px', paddingBottom: '8px', borderBottom: '1px solid #F0F0F0', fontFamily: 'Inter, sans-serif' }}>{title}</div>
-                      <table style={{ width: '100%', borderCollapse: 'collapse' }}>
-                        <tbody>
-                          {rows.map(r => (
-                            <tr key={r.account} onMouseEnter={e => e.currentTarget.style.background = '#F5EFE3'} onMouseLeave={e => e.currentTarget.style.background = 'transparent'}>
-                              <td style={cell('left', { color: r.account === 'Net Income' ? '#16a34a' : '#1a1a1a' })}>{r.account}</td>
-                              <td style={cell('right', { color: r.amount >= 0 ? '#1a1a1a' : THEME.accent })}>{fmt(r.amount)}</td>
-                              <td style={cell('right')}>
-                                {r.account !== 'Net Income' && (
-                                  <button onClick={() => setDrillAccount(r.account)} style={{ fontSize: '9px', background: '#F5F5F5', color: THEME.accent, border: '1px solid #E7DECB', padding: '2px 8px', borderRadius: '3px', cursor: 'pointer', fontFamily: 'Inter, sans-serif' }}>DRILL →</button>
-                                )}
-                              </td>
-                            </tr>
-                          ))}
-                          <tr>
-                            <td colSpan={3} style={{ padding: '8px 10px', borderTop: '1px solid #E7DECB', fontFamily: 'Inter, sans-serif', fontSize: '11px', color: '#1a1a1a', fontWeight: '600', textAlign: 'right' }}>
-                              Total {title.charAt(0) + title.slice(1).toLowerCase()}: <span>{fmt(total)}</span>
-                            </td>
-                          </tr>
-                        </tbody>
-                      </table>
-                    </div>
-                  )
+                  // Collapsible section — header shows total + count; click to expand rows.
+                  const Section = ({ title, cat, rows, total }) => {
+                    const open = bsOpen[cat]
+                    return (
+                      <div style={{ ...card, padding: '0', overflow: 'hidden' }}>
+                        <div onClick={() => setBsOpen(s => ({ ...s, [cat]: !s[cat] }))}
+                          onMouseEnter={e => e.currentTarget.style.background = '#FAF6EC'} onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
+                          style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '14px 18px', cursor: 'pointer', userSelect: 'none' }}>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                            <span style={{ fontSize: '10px', color: '#a39a88', transition: 'transform .15s', transform: open ? 'rotate(90deg)' : 'none', display: 'inline-block' }}>▶</span>
+                            <span style={{ fontSize: '10px', color: '#6b6355', letterSpacing: '0.14em', fontWeight: 700, fontFamily: ui }}>{title}</span>
+                            <span style={{ fontSize: '9px', color: '#b8ae9a', fontFamily: ui }}>{rows.length} account{rows.length === 1 ? '' : 's'}</span>
+                          </div>
+                          <span style={{ fontSize: '14px', fontWeight: 700, color: total >= 0 ? '#1a1a1a' : THEME.accent, fontFamily: ui, fontVariantNumeric: 'tabular-nums' }}>{fmt(total)}</span>
+                        </div>
+                        {open && (
+                          <div style={{ borderTop: '1px solid #E7DECB', padding: '6px 8px 10px' }}>
+                            {rows.map(r => (
+                              <div key={r.account} onClick={r.account !== 'Net Income' ? () => setDrillAccount(r.account) : undefined}
+                                onMouseEnter={e => e.currentTarget.style.background = '#F5EFE3'} onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
+                                style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '7px 10px', borderRadius: '5px', cursor: r.account !== 'Net Income' ? 'pointer' : 'default', fontFamily: ui }}>
+                                <span style={{ fontSize: '12px', color: r.account === 'Net Income' ? '#16a34a' : '#4a4438', paddingLeft: '18px' }}>{r.account}</span>
+                                <span style={{ fontSize: '12px', color: r.amount >= 0 ? '#1a1a1a' : THEME.accent, fontVariantNumeric: 'tabular-nums' }}>{fmt(r.amount)}</span>
+                              </div>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+                    )
+                  }
                   if (!bs.length) return <div style={{ color: '#888', fontFamily: 'Inter, sans-serif', fontSize: '12px' }}>No balance sheet data yet — import a General Ledger.</div>
                   return (
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
-                      <Section title="ASSETS" rows={groups.asset} total={totA} />
-                      <Section title="LIABILITIES" rows={groups.liability} total={totL} />
-                      <Section title="EQUITY" rows={groups.equity} total={totE} />
-                      <div style={{ background: balanced ? '#f0fdf4' : '#fef2f2', border: `1px solid ${balanced ? '#bbf7d0' : '#fecaca'}`, borderRadius: '6px', padding: '16px 20px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                        <div style={{ fontSize: '12px', color: balanced ? '#16a34a' : '#991b1b', fontWeight: '600', fontFamily: 'Inter, sans-serif', letterSpacing: '0.08em' }}>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', maxWidth: '660px' }}>
+                      <Section title="ASSETS" cat="asset" rows={groups.asset} total={totA} />
+                      <Section title="LIABILITIES" cat="liability" rows={groups.liability} total={totL} />
+                      <Section title="EQUITY" cat="equity" rows={groups.equity} total={totE} />
+                      <div style={{ background: balanced ? '#f0fdf4' : '#fef2f2', border: `1px solid ${balanced ? '#bbf7d0' : '#fecaca'}`, borderRadius: '9px', padding: '14px 20px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                        <div style={{ fontSize: '12px', color: balanced ? '#16a34a' : '#991b1b', fontWeight: '700', fontFamily: 'Inter, sans-serif', letterSpacing: '0.08em' }}>
                           {balanced ? '✓ IN BALANCE' : '✕ OUT OF BALANCE'}
                         </div>
-                        <div style={{ fontSize: '11px', color: '#555', fontFamily: 'Inter, sans-serif' }}>
+                        <div style={{ fontSize: '11px', color: '#6b6355', fontFamily: 'Inter, sans-serif' }}>
                           Assets {fmt(totA)} &nbsp;=&nbsp; Liabilities + Equity {fmt(totL + totE)}
                         </div>
                       </div>
@@ -373,10 +448,7 @@ export default function Financials() {
                       <tbody>
                         {monthly.map((m, i) => (
                           <tr key={i} onMouseEnter={e => e.currentTarget.style.background = '#F5EFE3'} onMouseLeave={e => e.currentTarget.style.background = 'transparent'}>
-                            <td style={cell('left', { color: '#1a1a1a', fontWeight: '600' })}>
-                              {m.label}
-                              {m.notes && <span style={{ marginLeft: '6px', fontSize: '8px', color: '#92400e' }}>*est</span>}
-                            </td>
+                            <td style={cell('left', { color: '#1a1a1a', fontWeight: '600' })}>{m.label}</td>
                             <td style={cell('right')}>{fmt(m.revenue)}</td>
                             <td style={cell('right', { color: THEME.accent })}>{fmt(m.cogs)}</td>
                             <td style={cell('right', { color: '#16a34a' })}>{fmt(m.revenue - m.cogs)}</td>
@@ -402,9 +474,6 @@ export default function Financials() {
                         </tr>
                       </tbody>
                     </table>
-                    <div style={{ marginTop: '10px', fontSize: '9px', color: '#888', fontFamily: 'Inter, sans-serif' }}>
-                      * May COGS estimated — Weldon $13,896 pending QB entry
-                    </div>
                   </div>
                 )}
 
