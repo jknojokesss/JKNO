@@ -10,7 +10,6 @@ const NAV = [
   { id: 'inventory',  label: 'Sales & Items', href: '/inventory' },
   { id: 'orders',     label: 'Orders',        href: '/orders' },
   { id: 'stock',      label: 'Stock',         href: '/stock' },
-  { id: 'accounts',   label: 'Accounts',      href: '/accounts' },
   { id: 'ai',         label: '✦ Ask AI', href: '/ai' },
 ]
 

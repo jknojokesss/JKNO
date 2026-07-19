@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react'
 import Head from 'next/head'
 import { supabase } from '../lib/supabase'
 import Shell from '../components/Shell'
-import { categorize, parentOf } from '../lib/accountTypes'
+import { categorize } from '../lib/accountTypes'
 
 const fmt = (n) => new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }).format(Math.abs(n))
 const pct = (n) => `${parseFloat(n).toFixed(1)}%`
@@ -10,20 +10,6 @@ const pct = (n) => `${parseFloat(n).toFixed(1)}%`
 const MONTHS = { '01':'JAN','02':'FEB','03':'MAR','04':'APR','05':'MAY','06':'JUN','07':'JUL','08':'AUG','09':'SEP','10':'OCT','11':'NOV','12':'DEC' }
 const monthLabel = (k) => `${MONTHS[k.slice(5, 7)]} ${k.slice(0, 4)}`
 
-// Account classification is shared with the Accounts page (lib/accountTypes).
-const CAT_LABEL = { income: 'Income', expense: 'Expense', asset: 'Asset', liability: 'Liability', equity: 'Equity' }
-
-// Optional friendly descriptions; falls back to category + transaction types.
-const ACCOUNT_DESC = {
-  'Clover Clearing Account':     'Sales deposits cleared through Clover',
-  'TOTAL CHECKING (8059) - 1':   'Primary operating checking account',
-  'BUS COMPLETE CHK (5998) - 1': 'Business checking account',
-  'Bank of America 7875':        'Secondary bank account',
-  'Cost of Goods Sold':          'MAVISX / Weldon tire COGS',
-  'Clover Sales':                'Journal entries from Clover POS',
-  'Katz Chase':                  'Credit card expenses',
-  'Short Term Loans':            'Short term loan activity',
-}
 
 const THEME = { sidebarBg: '#1A1A1A', sidebarBorder: '#2A2A2A', accent: '#CC2222' }
 
@@ -130,6 +116,7 @@ export default function Financials() {
   const [accounts,     setAccounts]     = useState([])
   const [bs,           setBs]           = useState([])
   const [bsOpen,       setBsOpen]       = useState({ asset: true, liability: false, equity: true })
+  const [acctOpen,     setAcctOpen]     = useState({ asset: true, liability: false, equity: false, income: false, expense: false })
   const [loading,      setLoading]      = useState(true)
   const [activeTab,    setActiveTab]    = useState('pl')
   const [drillAccount, setDrillAccount] = useState(null)
@@ -286,7 +273,7 @@ export default function Financials() {
     { id: 'bs',       label: 'Balance Sheet' },
     { id: 'monthly',  label: 'Monthly Table' },
     { id: 'expenses', label: 'Expense Breakdown' },
-    { id: 'accounts', label: 'Accounts' },
+    { id: 'accounts', label: 'Account Balances' },
     ...(isAdmin ? [{ id: 'health', label: 'Data Health' }] : []),
   ]
 
@@ -618,54 +605,56 @@ export default function Financials() {
                   </div>
                 )}
 
-                {/* Accounts Tab */}
-                {activeTab === 'accounts' && (
-                  <div style={{ background: '#fff', border: '1px solid #E7DECB', borderRadius: '10px', boxShadow: '0 1px 3px rgba(60,45,20,0.05)', padding: '16px' }}>
-                    <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', marginBottom: '12px' }}>
-                      <div style={{ fontSize: '9px', color: '#888', letterSpacing: '0.15em', fontFamily: 'Inter, sans-serif' }}>ACCOUNT BALANCES — CLICK TO DRILL DOWN</div>
-                      <div style={{ fontSize: '9px', color: '#888', fontFamily: 'Inter, sans-serif' }}>
-                        {accounts.length} accounts &nbsp;·&nbsp; {accountsTotalTxns.toLocaleString()} txns
+                {/* Accounts Tab — balances grouped by type, collapsible */}
+                {activeTab === 'accounts' && (() => {
+                  if (!accounts.length) return <div style={{ color: '#a39a88', fontFamily: ui, fontSize: '12px' }}>No account data yet — import a General Ledger.</div>
+                  const GROUPS = [
+                    { cat: 'asset', label: 'ASSETS' }, { cat: 'liability', label: 'LIABILITIES' },
+                    { cat: 'equity', label: 'EQUITY' }, { cat: 'income', label: 'INCOME' }, { cat: 'expense', label: 'EXPENSES' },
+                  ].map(g => {
+                    const rows = accounts.filter(a => a.category === g.cat).sort((a, b) => Math.abs(b.total) - Math.abs(a.total))
+                    return { ...g, rows, total: rows.reduce((s, a) => s + a.total, 0) }
+                  }).filter(g => g.rows.length)
+                  return (
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', maxWidth: '660px' }}>
+                      <div style={{ fontSize: '10px', color: '#a39a88', fontFamily: ui }}>
+                        {accounts.length} accounts · {accountsTotalTxns.toLocaleString()} transactions · click any account to see its ledger
                       </div>
+                      {GROUPS.map(g => {
+                        const open = acctOpen[g.cat]
+                        return (
+                          <div key={g.cat} style={{ ...card, padding: '0', overflow: 'hidden' }}>
+                            <div onClick={() => setAcctOpen(s => ({ ...s, [g.cat]: !s[g.cat] }))}
+                              onMouseEnter={e => e.currentTarget.style.background = '#FAF6EC'} onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
+                              style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '14px 18px', cursor: 'pointer', userSelect: 'none' }}>
+                              <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                                <span style={{ fontSize: '10px', color: '#a39a88', transform: open ? 'rotate(90deg)' : 'none', display: 'inline-block', transition: 'transform .15s' }}>▶</span>
+                                <span style={{ fontSize: '10px', color: '#6b6355', letterSpacing: '0.14em', fontWeight: 700, fontFamily: ui }}>{g.label}</span>
+                                <span style={{ fontSize: '9px', color: '#b8ae9a', fontFamily: ui }}>{g.rows.length} account{g.rows.length === 1 ? '' : 's'}</span>
+                              </div>
+                              <span style={{ fontSize: '14px', fontWeight: 700, color: g.total >= 0 ? '#1a1a1a' : THEME.accent, fontFamily: ui, fontVariantNumeric: 'tabular-nums' }}>{fmt(g.total)}</span>
+                            </div>
+                            {open && (
+                              <div style={{ borderTop: '1px solid #E7DECB', padding: '6px 8px 10px' }}>
+                                {g.rows.map(a => (
+                                  <div key={a.name} onClick={() => setDrillAccount(a.name)}
+                                    onMouseEnter={e => e.currentTarget.style.background = '#F5EFE3'} onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
+                                    style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '8px 10px', borderRadius: '5px', cursor: 'pointer', fontFamily: ui }}>
+                                    <div style={{ minWidth: 0 }}>
+                                      <div style={{ fontSize: '12px', color: '#4a4438', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{a.name}</div>
+                                      <div style={{ fontSize: '9px', color: '#a39a88', marginTop: '1px' }}>{a.txns} txns</div>
+                                    </div>
+                                    <span style={{ fontSize: '12px', fontWeight: 600, color: a.total >= 0 ? '#16a34a' : THEME.accent, fontVariantNumeric: 'tabular-nums', flexShrink: 0, paddingLeft: '12px' }}>{fmt(a.total)}</span>
+                                  </div>
+                                ))}
+                              </div>
+                            )}
+                          </div>
+                        )
+                      })}
                     </div>
-                    <table style={{ width: '100%', borderCollapse: 'collapse' }}>
-                      <thead>
-                        <tr>
-                          <th style={hcell('left')}>ACCOUNT</th>
-                          <th style={hcell('left')}>CATEGORY</th>
-                          <th style={hcell('right')}>BALANCE</th>
-                          <th style={hcell('right')}>TXNS</th>
-                          <th style={hcell('right')}>ACTION</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {accounts.map(a => {
-                          const parent = parentOf(a.name)
-                          const sub = parent ? `↳ sub-account of ${parent}` : (ACCOUNT_DESC[a.name] || a.types.slice(0, 3).join(', '))
-                          return (
-                            <tr key={a.name} onClick={() => setDrillAccount(a.name)} style={{ cursor: 'pointer' }}
-                              onMouseEnter={e => e.currentTarget.style.background = '#F5EFE3'}
-                              onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
-                            >
-                              <td style={cell('left', { color: '#1a1a1a' })}>
-                                {a.name}
-                                {sub && <div style={{ fontSize: '9px', color: '#888', marginTop: '2px' }}>{sub}</div>}
-                              </td>
-                              <td style={cell('left', { color: '#888' })}>{CAT_LABEL[a.category]}</td>
-                              <td style={cell('right', { color: a.total >= 0 ? '#16a34a' : THEME.accent })}>{fmt(a.total)}</td>
-                              <td style={cell('right', { color: '#888' })}>{a.txns}</td>
-                              <td style={cell('right')}>
-                                <span style={{ fontSize: '9px', color: THEME.accent, fontFamily: 'Inter, sans-serif' }}>DRILL →</span>
-                              </td>
-                            </tr>
-                          )
-                        })}
-                        {accounts.length === 0 && (
-                          <tr><td colSpan={5} style={{ padding: '20px', color: '#888', fontFamily: 'Inter, sans-serif', fontSize: '11px', textAlign: 'center' }}>No accounts found</td></tr>
-                        )}
-                      </tbody>
-                    </table>
-                  </div>
-                )}
+                  )
+                })()}
 
                 {/* Data Health Tab (admin only) */}
                 {activeTab === 'health' && (() => {
