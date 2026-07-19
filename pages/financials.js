@@ -577,50 +577,71 @@ export default function Financials() {
                 {/* Accounts Tab — balances grouped by type, collapsible */}
                 {activeTab === 'accounts' && (() => {
                   if (!accounts.length) return <div style={{ color: '#9A9284', fontFamily: ui, fontSize: '12px' }}>No account data yet — import a General Ledger.</div>
-                  const GROUPS = [
-                    { cat: 'asset', label: 'ASSETS' }, { cat: 'liability', label: 'LIABILITIES' },
-                    { cat: 'equity', label: 'EQUITY' }, { cat: 'income', label: 'INCOME' }, { cat: 'expense', label: 'EXPENSES' },
-                  ].map(g => {
-                    const rows = accounts.filter(a => a.category === g.cat).sort((a, b) => Math.abs(b.total) - Math.abs(a.total))
+                  // Net Income (current-year earnings) is a balance-sheet equity line, not a
+                  // real GL account — fold it into Equity so this view ties to the Balance Sheet.
+                  const netIncome = (bs.find(r => r.account === 'Net Income')?.amount) ??
+                    (accounts.filter(a => a.category === 'income').reduce((s, a) => s + a.total, 0) -
+                     accounts.filter(a => a.category === 'expense').reduce((s, a) => s + a.total, 0))
+                  const build = (defs) => defs.map(g => {
+                    let rows = accounts.filter(a => a.category === g.cat).sort((a, b) => Math.abs(b.total) - Math.abs(a.total))
+                    if (g.cat === 'equity') rows = [...rows, { name: 'Net Income (current year)', total: netIncome, txns: null, synthetic: true }]
                     return { ...g, rows, total: rows.reduce((s, a) => s + a.total, 0) }
                   }).filter(g => g.rows.length)
+                  const bsGroups = build([{ cat: 'asset', label: 'ASSETS' }, { cat: 'liability', label: 'LIABILITIES' }, { cat: 'equity', label: 'EQUITY' }])
+                  const plGroups = build([{ cat: 'income', label: 'INCOME' }, { cat: 'expense', label: 'EXPENSES' }])
+                  const gTot = c => (bsGroups.find(g => g.cat === c)?.total || 0)
+                  const totA = gTot('asset'), totL = gTot('liability'), totE = gTot('equity')
+                  const balanced = Math.abs(totA - totL - totE) < 1
+
+                  const GroupCard = (g) => {
+                    const open = acctOpen[g.cat]
+                    return (
+                      <div key={g.cat} style={{ ...card, padding: '0', overflow: 'hidden' }}>
+                        <div onClick={() => setAcctOpen(s => ({ ...s, [g.cat]: !s[g.cat] }))}
+                          onMouseEnter={e => e.currentTarget.style.background = '#ECE7DD'} onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
+                          style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '14px 18px', cursor: 'pointer', userSelect: 'none' }}>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                            <span style={{ fontSize: '10px', color: '#9A9284', transform: open ? 'rotate(90deg)' : 'none', display: 'inline-block', transition: 'transform .15s' }}>▶</span>
+                            <span style={{ fontSize: '11px', color: '#6b6355', letterSpacing: '0.1em', fontWeight: 700, fontFamily: "'Barlow Semi Condensed', sans-serif" }}>{g.label}</span>
+                            <span style={{ fontSize: '9px', color: '#b8ae9a', fontFamily: ui }}>{g.rows.length} line{g.rows.length === 1 ? '' : 's'}</span>
+                          </div>
+                          <span style={{ fontSize: '14px', fontWeight: 700, color: g.total >= 0 ? '#1B1815' : THEME.accent, fontFamily: "'IBM Plex Mono', monospace", fontVariantNumeric: 'tabular-nums' }}>{fmt(g.total)}</span>
+                        </div>
+                        {open && (
+                          <div style={{ borderTop: '1px solid #DBD5C7', padding: '6px 8px 10px' }}>
+                            {g.rows.map(a => (
+                              <div key={a.name} onClick={a.synthetic ? undefined : () => setDrillAccount(a.name)}
+                                onMouseEnter={e => { if (!a.synthetic) e.currentTarget.style.background = '#ECE8DF' }} onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
+                                style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '8px 10px', cursor: a.synthetic ? 'default' : 'pointer', fontFamily: ui }}>
+                                <div style={{ minWidth: 0 }}>
+                                  <div style={{ fontSize: '12px', color: a.synthetic ? '#6b6355' : '#4A453C', fontStyle: a.synthetic ? 'italic' : 'normal', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{a.name}</div>
+                                  <div style={{ fontSize: '9px', color: '#9A9284', marginTop: '1px' }}>{a.synthetic ? 'income − expenses, year to date' : `${a.txns} txns`}</div>
+                                </div>
+                                <span style={{ fontSize: '12px', fontWeight: 600, color: a.total >= 0 ? '#1C7A4E' : THEME.accent, fontFamily: "'IBM Plex Mono', monospace", fontVariantNumeric: 'tabular-nums', flexShrink: 0, paddingLeft: '12px' }}>{fmt(a.total)}</span>
+                              </div>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+                    )
+                  }
+
                   return (
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', maxWidth: '660px' }}>
                       <div style={{ fontSize: '10px', color: '#9A9284', fontFamily: ui }}>
                         {accounts.length} accounts · {accountsTotalTxns.toLocaleString()} transactions · click any account to see its ledger
                       </div>
-                      {GROUPS.map(g => {
-                        const open = acctOpen[g.cat]
-                        return (
-                          <div key={g.cat} style={{ ...card, padding: '0', overflow: 'hidden' }}>
-                            <div onClick={() => setAcctOpen(s => ({ ...s, [g.cat]: !s[g.cat] }))}
-                              onMouseEnter={e => e.currentTarget.style.background = '#ECE7DD'} onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
-                              style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '14px 18px', cursor: 'pointer', userSelect: 'none' }}>
-                              <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                                <span style={{ fontSize: '10px', color: '#9A9284', transform: open ? 'rotate(90deg)' : 'none', display: 'inline-block', transition: 'transform .15s' }}>▶</span>
-                                <span style={{ fontSize: '10px', color: '#6b6355', letterSpacing: '0.14em', fontWeight: 700, fontFamily: ui }}>{g.label}</span>
-                                <span style={{ fontSize: '9px', color: '#b8ae9a', fontFamily: ui }}>{g.rows.length} account{g.rows.length === 1 ? '' : 's'}</span>
-                              </div>
-                              <span style={{ fontSize: '14px', fontWeight: 700, color: g.total >= 0 ? '#1B1815' : THEME.accent, fontFamily: ui, fontVariantNumeric: 'tabular-nums' }}>{fmt(g.total)}</span>
-                            </div>
-                            {open && (
-                              <div style={{ borderTop: '1px solid #DBD5C7', padding: '6px 8px 10px' }}>
-                                {g.rows.map(a => (
-                                  <div key={a.name} onClick={() => setDrillAccount(a.name)}
-                                    onMouseEnter={e => e.currentTarget.style.background = '#ECE8DF'} onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
-                                    style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '8px 10px', borderRadius: '0', cursor: 'pointer', fontFamily: ui }}>
-                                    <div style={{ minWidth: 0 }}>
-                                      <div style={{ fontSize: '12px', color: '#4A453C', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{a.name}</div>
-                                      <div style={{ fontSize: '9px', color: '#9A9284', marginTop: '1px' }}>{a.txns} txns</div>
-                                    </div>
-                                    <span style={{ fontSize: '12px', fontWeight: 600, color: a.total >= 0 ? '#1C7A4E' : THEME.accent, fontVariantNumeric: 'tabular-nums', flexShrink: 0, paddingLeft: '12px' }}>{fmt(a.total)}</span>
-                                  </div>
-                                ))}
-                              </div>
-                            )}
-                          </div>
-                        )
-                      })}
+                      {bsGroups.map(GroupCard)}
+                      {/* Balance-sheet identity check */}
+                      <div style={{ background: balanced ? '#EEF3EE' : '#FBF0EE', border: `1px solid ${balanced ? '#C6DECB' : '#E8C6C0'}`, padding: '13px 18px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                        <span style={{ fontSize: '12px', fontWeight: 700, letterSpacing: '0.05em', textTransform: 'uppercase', color: balanced ? '#1C7A4E' : THEME.accent, fontFamily: "'Barlow Semi Condensed', sans-serif" }}>{balanced ? '✓ In balance' : '✕ Out of balance'}</span>
+                        <span style={{ fontSize: '11px', color: '#6b6355', fontFamily: "'IBM Plex Mono', monospace" }}>Assets {fmt(totA)} = Liabilities + Equity {fmt(totL + totE)}</span>
+                      </div>
+                      {/* P&L accounts (behind Net Income) */}
+                      <div style={{ fontSize: '10px', color: '#9A9284', fontFamily: ui, marginTop: '8px' }}>
+                        Profit &amp; loss accounts (year to date) — these net to the <span style={{ fontStyle: 'italic' }}>Net Income</span> shown in Equity above, so they are not part of the balance-sheet total.
+                      </div>
+                      {plGroups.map(GroupCard)}
                     </div>
                   )
                 })()}
