@@ -44,7 +44,9 @@ function stockOnHandValue(sales, weldon, cutoff) {
   const isSpecialOrder = (size, date) => { for (const o of sdPool[size] || []) { const gap = (new Date(date) - new Date(o.date)) / 864e5; if (o.remaining > 0 && gap >= -1 && gap <= 4) { o.remaining--; return true } } return false }
   const tireSales = sales.filter(r => r.date <= cutoff && sizeOf(r.item_name) && !/used/i.test(r.item_name) && !SAME_DAY_ITEMS.has((r.item_name || '').trim().toLowerCase())).map(r => ({ date: r.date, size: sizeOf(r.item_name) })).sort((a, b) => a.date.localeCompare(b.date))
   for (const sale of tireSales) { if (sale.date > STK_AS_OF && isSpecialOrder(sale.size, sale.date)) continue; const pool = bySize[sale.size] || []; for (const L of pool) { if (L.remaining > 0 && L.d <= sale.date) { L.remaining--; break } } }
-  let value = 0, units = 0; layers.forEach(L => { if (L.remaining > 0 && L.d <= cutoff) { value += L.remaining * L.c; units += L.remaining } })
+  // Original layers count as the booked method did (not date-gated); only the new
+  // June restocks are gated to their arrival date so they don't pollute the 5/31 view.
+  let value = 0, units = 0; layers.forEach(L => { if (L.remaining > 0 && (L.d <= STK_AS_OF || L.d <= cutoff)) { value += L.remaining * L.c; units += L.remaining } })
   return { value, units }
 }
 
