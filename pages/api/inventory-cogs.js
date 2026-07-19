@@ -115,6 +115,14 @@ export default async function handler(req, res) {
       total_relief: Math.round((juneInvSales + juneUsed) * 100) / 100,
       cross_check_sale_ledger: months['2026-06']?.inventory_cogs || 0,
     }
-    res.status(200).json({ clover_rows: clover.length, weldon_rows: (weldon || []).length, months: out, stock_onhand_value: onhand, june_relief })
+    // Per-month used-tire relief (Dr COGS-Used / Cr Inventory), computed LIVE from
+    // every /used/i Clover line x $18 x qty. Book the used JE straight from this each
+    // month so it can never drift from a stale/early data pull (the May 2026 miss).
+    const used_tires_by_month = {}
+    Object.keys(months).sort().forEach(mm => {
+      const relief = Math.round((months[mm].by_source?.used_tire_inventory || 0) * 100) / 100
+      if (relief) used_tires_by_month[mm] = { tires: Math.round(relief / 18), relief }
+    })
+    res.status(200).json({ clover_rows: clover.length, weldon_rows: (weldon || []).length, months: out, stock_onhand_value: onhand, june_relief, used_tires_by_month })
   } catch (err) { res.status(500).json({ error: err.message }) }
 }
