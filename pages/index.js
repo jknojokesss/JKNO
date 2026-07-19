@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import { useRouter } from 'next/router'
 import Head from 'next/head'
 import DemoDashboard from '../components/DemoDashboard'
+import LivingSnapshot from '../components/LivingSnapshot'
 import { ALL_DEMOS } from '../lib/industryDemos'
 
 // Calendly booking link for the $25 gift-card offer.
@@ -133,11 +134,9 @@ export default function Landing() {
         body {
           background-color: #F5F1EA;
           background-image:
-            linear-gradient(rgba(26,32,53,0.055) 1px, transparent 1px),
-            linear-gradient(90deg, rgba(26,32,53,0.055) 1px, transparent 1px),
-            radial-gradient(circle at 12% 8%, rgba(201,168,76,0.16), transparent 45%),
-            radial-gradient(circle at 88% 92%, rgba(201,168,76,0.12), transparent 45%);
-          background-size: 38px 38px, 38px 38px, 100% 100%, 100% 100%;
+            linear-gradient(rgba(26,32,53,0.05) 1px, transparent 1px),
+            linear-gradient(90deg, rgba(26,32,53,0.05) 1px, transparent 1px);
+          background-size: 38px 38px, 38px 38px;
           background-attachment: fixed;
           color: #1A1A2E; font-family: 'DM Sans', sans-serif;
         }
@@ -163,12 +162,7 @@ export default function Landing() {
 
         @keyframes shimmer { 0% { background-position: 0% 50%; } 100% { background-position: 200% 50%; } }
         @keyframes floaty { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-7px); } }
-        .gold-shimmer {
-          background: linear-gradient(100deg,#B8943C,#E8D5A3,#C9A84C,#E8D5A3,#B8943C);
-          background-size: 200% auto; background-clip: text; -webkit-background-clip: text;
-          -webkit-text-fill-color: transparent; color: transparent;
-          animation: shimmer 5s linear infinite;
-        }
+        .gold-shimmer { color: #B8943C; }
         .hero-pill-badge {
           display: inline-flex; align-items: center; gap: 9px;
           background: #fff; border: 1px solid #E2D9C5; border-radius: 999px;
@@ -285,16 +279,16 @@ export default function Landing() {
           position: fixed; top: 0; left: 0; right: 0; z-index: 200;
           height: 44px;
           display: flex; align-items: center; justify-content: center; gap: 10px;
-          background: linear-gradient(90deg, #C9A84C 0%, #F0DEAC 50%, #C9A84C 100%);
+          background: #C9A84C;
           color: #1A1A2E; text-decoration: none;
           font-family: 'DM Mono', monospace; font-size: 13px; letter-spacing: 1px;
           white-space: nowrap; overflow: hidden; padding: 0 16px;
           border-bottom: 1px solid rgba(0,0,0,0.12);
         }
-        .promo-bar:hover { background: linear-gradient(90deg, #D4B65E 0%, #F6E7BD 50%, #D4B65E 100%); }
+        .promo-bar:hover { background: #D4B65E; }
         .promo-bar b { font-weight: 700; }
         .promo-book {
-          background: #1A2035; color: #F0DEAC; padding: 4px 12px; border-radius: 20px;
+          background: #1A2035; color: #F0DEAC; padding: 4px 12px; border-radius: 2px;
           font-size: 11px; letter-spacing: 1px; white-space: nowrap;
         }
         .promo-short { display: none; }
@@ -305,6 +299,10 @@ export default function Landing() {
           .promo-book { padding: 4px 10px; font-size: 10px; }
         }
 
+        @media (max-width: 980px) {
+          .hero-grid { grid-template-columns: 1fr !important; }
+          .hero-panel { max-width: 560px !important; margin-top: 8px; }
+        }
         @media (max-width: 768px) {
           .features-grid { grid-template-columns: 1fr !important; }
           .hero-title-text { font-size: 34px !important; }
@@ -325,7 +323,6 @@ export default function Landing() {
 
       {/* PERSISTENT PROMO BAR — always visible at the very top */}
       <a href={BOOKING_URL} target="_blank" rel="noopener noreferrer" className="promo-bar">
-        <span aria-hidden="true">🎁</span>
         <span className="promo-full"><b>FREE $25 gift card</b> + free consultation for new clients</span>
         <span className="promo-short"><b>FREE $25 gift card</b> + free consult</span>
         <span className="promo-book">BOOK NOW →</span>
@@ -391,30 +388,35 @@ export default function Landing() {
 
       {/* HERO — headline + dashboard */}
       <section style={{ padding: 'clamp(100px,11vw,140px) clamp(14px,5vw,48px) clamp(40px,5vw,64px)', background: 'transparent', position: 'relative', overflow: 'hidden' }}>
-        {/* gold glow over the page grid */}
-        <div style={{ position: 'absolute', inset: 0, background: 'radial-gradient(circle at 22% -10%, rgba(201,168,76,0.22), transparent 55%)', pointerEvents: 'none' }} />
+        <div className="hero-grid" style={{ position: 'relative', maxWidth: '1200px', margin: '0 auto 0 clamp(0px,3vw,72px)', display: 'grid', gridTemplateColumns: '1fr 500px', gap: 'clamp(28px,4vw,60px)', alignItems: 'center' }}>
+          {/* left: copy */}
+          <div style={{ textAlign: 'left' }}>
+            <h1 className="hero-title hero-title-text" style={{ fontFamily: "'Space Grotesk', sans-serif", fontWeight: 700, fontSize: 'clamp(30px,4.4vw,54px)', lineHeight: 1.08, color: '#1A2035', letterSpacing: '-1.5px' }}>
+              Understand the <span className="gold-shimmer">Story</span><br />Behind Your Numbers.
+            </h1>
+            <div className="hero-sub" style={{ marginTop: '18px', fontFamily: "'DM Mono', monospace", fontSize: 'clamp(12px,1.4vw,15px)', color: '#B8943C', fontWeight: 500, letterSpacing: '2.5px', textTransform: 'uppercase' }}>
+              Financial Clarity — The JK Way™
+            </div>
+            <p className="hero-sub" style={{ margin: '18px 0 0', maxWidth: '520px', fontSize: 'clamp(14px,1.5vw,16px)', lineHeight: 1.6, color: '#5A6070' }}>
+              Built by finance pros, designed for business owners — every dashboard is <strong style={{ color: '#1A2035', fontWeight: 600 }}>tailored to the way your business actually operates.</strong>
+            </p>
+            <p className="hero-sub" style={{ margin: '14px 0 0', maxWidth: '500px', fontSize: 'clamp(15px,1.7vw,18px)', lineHeight: 1.4, color: '#1A2035', fontWeight: 500 }}>
+              Know where your business stands before making your next decision.
+            </p>
+            <div className="hero-cta" style={{ marginTop: '28px', display: 'flex', gap: '12px', flexWrap: 'wrap', justifyContent: 'flex-start' }}>
+              <button className="cta-btn" onClick={() => document.getElementById('demos')?.scrollIntoView({ behavior: 'smooth' })}>See It in Action ↓</button>
+              <a className="ghost-btn" href={BOOKING_URL} target="_blank" rel="noopener noreferrer" style={{ textDecoration: 'none', display: 'inline-flex', alignItems: 'center' }}>Get Yours Built</a>
+            </div>
+            <div className="hero-pills" style={{ marginTop: '24px', display: 'flex', gap: 'clamp(14px,2.4vw,26px)', justifyContent: 'flex-start', flexWrap: 'wrap' }}>
+              {['✓ Real-time numbers', '✓ Plain English', '✓ No QuickBooks required'].map((t, i) => (
+                <span key={i} className="hero-pill">{t}</span>
+              ))}
+            </div>
+          </div>
 
-        <div style={{ position: 'relative', maxWidth: '1200px', margin: '0 auto 0 clamp(0px,3vw,72px)', textAlign: 'left' }}>
-          <h1 className="hero-title hero-title-text" style={{ fontFamily: "'Space Grotesk', sans-serif", fontWeight: 700, fontSize: 'clamp(33px,6.3vw,78px)', lineHeight: 1.07, color: '#1A2035', letterSpacing: '-2px' }}>
-            Understand the <span className="gold-shimmer">Story</span><br />Behind Your Numbers.
-          </h1>
-          <div className="hero-sub" style={{ marginTop: '20px', fontFamily: "'DM Mono', monospace", fontSize: 'clamp(13px,1.7vw,17px)', color: '#B8943C', fontWeight: 500, letterSpacing: '2.5px', textTransform: 'uppercase' }}>
-            Financial Clarity — The JK Way™
-          </div>
-          <p className="hero-sub" style={{ margin: '20px 0 0', maxWidth: '640px', fontSize: 'clamp(15px,1.7vw,18px)', lineHeight: 1.65, color: '#5A6070' }}>
-            Built by finance pros, designed for business owners — every dashboard is <strong style={{ color: '#1A2035', fontWeight: 600 }}>tailored to the way your business actually operates.</strong>
-          </p>
-          <p className="hero-sub" style={{ margin: '16px 0 0', maxWidth: '600px', fontSize: 'clamp(17px,2vw,21px)', lineHeight: 1.4, color: '#1A2035', fontWeight: 500 }}>
-            Know where your business stands before making your next decision.
-          </p>
-          <div className="hero-cta" style={{ marginTop: '32px', display: 'flex', gap: '12px', flexWrap: 'wrap', justifyContent: 'flex-start' }}>
-            <button className="cta-btn" onClick={() => document.getElementById('demos')?.scrollIntoView({ behavior: 'smooth' })}>See It in Action ↓</button>
-            <a className="ghost-btn" href={BOOKING_URL} target="_blank" rel="noopener noreferrer" style={{ textDecoration: 'none', display: 'inline-flex', alignItems: 'center' }}>Get Yours Built</a>
-          </div>
-          <div className="hero-pills" style={{ marginTop: '26px', display: 'flex', gap: 'clamp(16px,3vw,32px)', justifyContent: 'flex-start', flexWrap: 'wrap' }}>
-            {['✓ Real-time numbers', '✓ Plain English', '✓ No QuickBooks required'].map((t, i) => (
-              <span key={i} className="hero-pill">{t}</span>
-            ))}
+          {/* right: living snapshot — animated sample dashboard */}
+          <div className="hero-panel" style={{ position: 'relative', width: '100%', maxWidth: '500px' }}>
+            <LivingSnapshot />
           </div>
         </div>
 
@@ -444,26 +446,18 @@ export default function Landing() {
                       <button key={idx} onClick={() => pick(idx)} style={{
                         display: 'inline-flex', alignItems: 'center', gap: '7px', cursor: 'pointer',
                         fontFamily: 'DM Sans, sans-serif', fontSize: '13px', color: on ? '#1A1A2E' : '#3A4150',
-                        padding: '9px 15px', borderRadius: '30px',
+                        padding: '9px 15px', borderRadius: '2px',
                         border: on ? '2px solid #C9A84C' : '1px solid #DDD8CE',
                         background: on ? '#FFF8EC' : '#fff', transition: 'all 0.15s',
                       }}>
-                        <span>{d.icon}</span> {idx < FEATURED.length ? d.label : d.sub}
+                        {idx < FEATURED.length ? d.label : d.sub}
                       </button>
                     )
                   })}
                 </div>
 
                 {/* LIVE PREVIEW */}
-                <div id="demo-preview" style={{ background: '#1A2035', borderRadius: '12px', boxShadow: '0 40px 100px rgba(0,0,0,0.25)', overflow: 'hidden' }}>
-                  <div style={{ background: '#0D1120', padding: '12px 16px', display: 'flex', alignItems: 'center', gap: '8px', borderBottom: '1px solid #2E3A5C' }}>
-                    <div style={{ width: 10, height: 10, borderRadius: '50%', background: '#FF5F57' }} />
-                    <div style={{ width: 10, height: 10, borderRadius: '50%', background: '#FFBD2E' }} />
-                    <div style={{ width: 10, height: 10, borderRadius: '50%', background: '#28C840' }} />
-                    <div style={{ flex: 1, margin: '0 12px', background: '#1E2540', borderRadius: '4px', padding: '4px 12px', textAlign: 'center' }}>
-                      <span style={{ fontFamily: 'DM Mono, monospace', fontSize: '11px', color: '#6B7A96' }}>jknojokes.com{active.src}</span>
-                    </div>
-                  </div>
+                <div id="demo-preview" style={{ background: '#1A2035', border: '1px solid #E2D9C5', overflow: 'hidden' }}>
                   {isMobile
                     ? <div style={{ padding: '32px', textAlign: 'center' }}>
                         <div style={{ fontFamily: 'DM Mono, monospace', fontSize: '11px', color: '#6B7A96', marginBottom: '16px', letterSpacing: '1px' }}>DEMO BEST VIEWED ON DESKTOP</div>
@@ -494,7 +488,7 @@ export default function Landing() {
 
           {/* What vs Why cards */}
           <div className="jkway-cards" style={{ display: 'flex', gap: '18px', alignItems: 'stretch', justifyContent: 'center', flexWrap: 'wrap' }}>
-            <div style={{ flex: '1 1 300px', maxWidth: '380px', background: '#fff', border: '1px solid #E6E0D4', borderRadius: '14px', padding: 'clamp(24px,3vw,34px)', textAlign: 'left', boxShadow: '0 10px 30px rgba(26,32,53,0.05)' }}>
+            <div style={{ flex: '1 1 300px', maxWidth: '380px', background: '#fff', border: '1px solid #E6E0D4', padding: 'clamp(24px,3vw,34px)', textAlign: 'left' }}>
               <div style={{ fontFamily: 'DM Mono, monospace', fontSize: '10px', letterSpacing: '2px', color: '#A39A86', marginBottom: '14px' }}>MOST REPORTS</div>
               <div style={{ fontFamily: 'Cormorant Garamond, serif', fontSize: 'clamp(22px,2.6vw,30px)', lineHeight: 1.3, color: '#8A8475' }}>
                 Tell you <span style={{ color: '#1A2035', fontWeight: 600 }}>what</span> happened.
@@ -503,7 +497,7 @@ export default function Landing() {
 
             <div className="jkway-arrow" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#C9A84C', fontSize: '26px', flexShrink: 0 }}>→</div>
 
-            <div style={{ flex: '1 1 300px', maxWidth: '380px', background: 'linear-gradient(165deg, #FFFDF8 0%, #FBF3DF 100%)', border: '1.5px solid #C9A84C', borderRadius: '14px', padding: 'clamp(24px,3vw,34px)', textAlign: 'left', boxShadow: '0 14px 40px rgba(201,168,76,0.18)' }}>
+            <div style={{ flex: '1 1 300px', maxWidth: '380px', background: '#FBF5E6', border: '1.5px solid #C9A84C', padding: 'clamp(24px,3vw,34px)', textAlign: 'left' }}>
               <div style={{ fontFamily: 'DM Mono, monospace', fontSize: '10px', letterSpacing: '2px', color: '#B8943C', marginBottom: '14px' }}>THE JK WAY™</div>
               <div style={{ fontFamily: 'Cormorant Garamond, serif', fontSize: 'clamp(22px,2.6vw,30px)', lineHeight: 1.3, color: '#1A2035' }}>
                 Shows you <span style={{ color: '#B8943C', fontWeight: 700 }}>why</span> — and what to do next.
