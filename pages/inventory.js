@@ -34,10 +34,14 @@ export default function Inventory() {
   useEffect(() => { supabase.auth.getUser().then(({ data: { user } }) => { if (!user) window.location.replace('/login') }) }, [])
   const [items,   setItems]   = useState([])
   const [monthly, setMonthly] = useState([])
+  const [itemMonthly, setItemMonthly] = useState({}) // { 'YYYY-MM': { name: {qty, revenue, orders} } }
   const [loading, setLoading] = useState(true)
   const [search,  setSearch]  = useState('')
   const [sort,    setSort]    = useState('revenue')
   const [tab,     setTab]     = useState('items')
+  const [period,  setPeriod]  = useState('all')
+  const [compareOn,     setCompareOn]     = useState(false)
+  const [comparePeriod, setComparePeriod] = useState(null)
 
   useEffect(() => {
     async function load() {
@@ -61,13 +65,22 @@ export default function Inventory() {
         setItems(Object.values(map))
 
         const mmap = {}
+        const imap = {}
         lineItems.forEach(row => {
           const m = row.date?.slice(0, 7)
           if (!m) return
-          if (!mmap[m]) mmap[m] = { month: m, revenue: 0, orders: 0 }
+          if (!mmap[m]) mmap[m] = { month: m, revenue: 0, orders: 0, qty: 0 }
           mmap[m].revenue += Number(row.revenue)
           mmap[m].orders++
+          mmap[m].qty += Number(row.quantity || 1)
+          const k = normalizeItemName(row.item_name)
+          if (!imap[m]) imap[m] = {}
+          if (!imap[m][k]) imap[m][k] = { name: k, orders: 0, revenue: 0, qty: 0 }
+          imap[m][k].orders++
+          imap[m][k].revenue += Number(row.revenue)
+          imap[m][k].qty += Number(row.quantity || 1)
         })
+        setItemMonthly(imap)
         const MONTHS = { '01':'Jan','02':'Feb','03':'Mar','04':'Apr','05':'May','06':'Jun','07':'Jul','08':'Aug','09':'Sep','10':'Oct','11':'Nov','12':'Dec' }
         setMonthly(
           Object.values(mmap)
@@ -80,19 +93,39 @@ export default function Inventory() {
     load()
   }, [])
 
+  const monthLabel = (k) => (monthly.find(m => m.month === k)?.label) || k
+
+  const itemsForPeriod = (p) => (p === 'all' ? items : Object.values(itemMonthly[p] || {}))
+  const periodItems = itemsForPeriod(period)
+  const cmpActive = compareOn && comparePeriod && period !== 'all'
+  const cmpItems = cmpActive ? itemsForPeriod(comparePeriod) : []
+
   const sorted = useMemo(() => {
-    const filtered = search ? items.filter(i => i.name.toLowerCase().includes(search.toLowerCase())) : items
+    const filtered = search ? periodItems.filter(i => i.name.toLowerCase().includes(search.toLowerCase())) : periodItems
     return [...filtered].sort((a, b) =>
       sort === 'revenue' ? b.revenue - a.revenue :
-      sort === 'orders'  ? b.orders  - a.orders  :
+      sort === 'units'   ? b.qty - a.qty :
       (b.revenue / b.orders) - (a.revenue / a.orders)
     )
-  }, [items, search, sort])
+  }, [periodItems, search, sort])
 
-  const totalRevenue = items.reduce((s, i) => s + i.revenue, 0)
-  const totalOrders  = items.reduce((s, i) => s + i.orders, 0)
+  // Compare: union of items across the two periods, with units + revenue for each.
+  const cmpRows = useMemo(() => {
+    if (!cmpActive) return []
+    const map = {}
+    periodItems.forEach(i => { map[i.name] = { name: i.name, aQty: i.qty, aRev: i.revenue, bQty: 0, bRev: 0 } })
+    cmpItems.forEach(i => { if (!map[i.name]) map[i.name] = { name: i.name, aQty: 0, aRev: 0, bQty: 0, bRev: 0 }; map[i.name].bQty = i.qty; map[i.name].bRev = i.revenue })
+    let arr = Object.values(map)
+    if (search) arr = arr.filter(r => r.name.toLowerCase().includes(search.toLowerCase()))
+    return arr.sort((a, b) => (b.aRev + b.bRev) - (a.aRev + a.bRev))
+  }, [cmpActive, periodItems, cmpItems, search])
+
+  const totalRevenue = periodItems.reduce((s, i) => s + i.revenue, 0)
+  const totalUnits   = periodItems.reduce((s, i) => s + i.qty, 0)
+  const totalOrders  = periodItems.reduce((s, i) => s + i.orders, 0)
   const avgOrder     = totalOrders > 0 ? totalRevenue / totalOrders : 0
-  const maxRevenue   = sorted[0]?.revenue || 1
+  const maxRevenue   = Math.max(...periodItems.map(i => i.revenue), 1)
+  const periodTitle  = period === 'all' ? 'All time' : monthLabel(period)
 
   const tabs = [
     { id: 'items',   label: 'Items Ranked' },
@@ -121,10 +154,10 @@ export default function Inventory() {
                 {/* KPI row */}
                 <div style={{ display: 'flex', gap: '12px', marginBottom: '20px' }}>
                   {[
-                    { label: 'CLOVER REVENUE',  value: fmt(totalRevenue),              sub: 'Jan – May 2026',          sc: '#16a34a' },
-                    { label: 'TOTAL ORDERS',    value: totalOrders.toLocaleString(),   sub: 'line items',              sc: '#888' },
-                    { label: 'UNIQUE ITEMS',    value: items.length.toString(),         sub: 'products & services',     sc: '#888' },
-                    { label: 'AVG ORDER VALUE', value: fmtD(avgOrder),                 sub: 'per line item',           sc: THEME.accent },
+                    { label: 'REVENUE',       value: fmt(totalRevenue),             sub: periodTitle,           sc: '#16a34a' },
+                    { label: 'UNITS SOLD',    value: totalUnits.toLocaleString(),   sub: 'tires & items',       sc: '#888' },
+                    { label: 'UNIQUE ITEMS',  value: periodItems.length.toString(), sub: 'products & services', sc: '#888' },
+                    { label: 'AVG SALE',      value: fmtD(avgOrder),                sub: 'per line item',       sc: THEME.accent },
                   ].map(k => (
                     <div key={k.label} style={{ flex: 1, background: '#fff', border: '1px solid #E7DECB', borderRadius: '10px', boxShadow: '0 1px 3px rgba(60,45,20,0.05)', padding: '14px 16px' }}>
                       <div style={{ fontSize: '9px', color: '#888', letterSpacing: '0.15em', marginBottom: '6px', fontFamily: 'Inter, sans-serif' }}>{k.label}</div>
@@ -148,7 +181,44 @@ export default function Inventory() {
                 </div>
 
                 {/* Items Ranked */}
-                {tab === 'items' && (
+                {tab === 'items' && (() => {
+                  const pill = (on) => ({ padding: '6px 12px', borderRadius: '16px', fontSize: '11px', fontWeight: 600, cursor: 'pointer', fontFamily: 'Inter, sans-serif', border: `1px solid ${on ? '#1a1a1a' : '#E7DECB'}`, background: on ? '#1a1a1a' : '#fff', color: on ? '#fff' : '#8a8378' })
+                  const shortLbl = (k) => monthLabel(k).split(' ')[0]
+                  const dCol = d => d === 0 ? '#a39a88' : d > 0 ? '#16a34a' : '#b0483a'
+                  const dStr = d => d === 0 ? '—' : (d > 0 ? '+' : '−') + Math.abs(d)
+                  return (
+                  <>
+                    {/* Period selector + compare */}
+                    <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap', marginBottom: compareOn ? '10px' : '16px', alignItems: 'center' }}>
+                      <span style={{ fontSize: '9px', color: '#a39a88', letterSpacing: '0.14em', marginRight: '2px', fontFamily: 'Inter, sans-serif', fontWeight: 600 }}>PERIOD</span>
+                      {[{ k: 'all', l: 'All time' }, ...monthly.map(m => ({ k: m.month, l: m.label.split(' ')[0] }))].map(o => (
+                        <button key={o.k} onClick={() => setPeriod(o.k)} style={pill(period === o.k)}>{o.l}</button>
+                      ))}
+                      {monthly.length > 1 && (
+                        <button onClick={() => {
+                          const next = !compareOn
+                          setCompareOn(next)
+                          if (next) {
+                            const keys = monthly.map(m => m.month)
+                            let base = period
+                            if (base === 'all') { base = keys[keys.length - 1]; setPeriod(base) }
+                            if (!comparePeriod || comparePeriod === base) {
+                              const idx = keys.indexOf(base)
+                              setComparePeriod(keys[idx - 1] || keys.find(m => m !== base) || base)
+                            }
+                          }
+                        }} style={{ ...pill(compareOn), marginLeft: '10px' }}>⇄ Compare</button>
+                      )}
+                    </div>
+                    {compareOn && (
+                      <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap', marginBottom: '16px', alignItems: 'center' }}>
+                        <span style={{ fontSize: '9px', color: '#a39a88', letterSpacing: '0.14em', marginRight: '2px', fontFamily: 'Inter, sans-serif', fontWeight: 600 }}>COMPARE&nbsp;TO</span>
+                        {monthly.map(m => (
+                          <button key={m.month} onClick={() => setComparePeriod(m.month)} style={pill(comparePeriod === m.month)}>{m.label.split(' ')[0]}</button>
+                        ))}
+                      </div>
+                    )}
+
                   <div style={{ background: '#fff', border: '1px solid #E7DECB', borderRadius: '10px', boxShadow: '0 1px 3px rgba(60,45,20,0.05)', padding: '16px' }}>
                     <div style={{ display: 'flex', gap: '10px', marginBottom: '16px', alignItems: 'center' }}>
                       <input
@@ -157,7 +227,7 @@ export default function Inventory() {
                         style={{ flex: 1, padding: '7px 12px', background: '#fff', border: '1px solid #E7DECB',
                           borderRadius: '4px', color: '#1a1a1a', fontSize: '11px', fontFamily: 'Inter, sans-serif', outline: 'none' }}
                       />
-                      {[{ key: 'revenue', label: 'REVENUE' }, { key: 'orders', label: 'ORDERS' }, { key: 'avg', label: 'AVG SALE' }].map(s => (
+                      {!cmpActive && [{ key: 'revenue', label: 'REVENUE' }, { key: 'units', label: 'UNITS' }, { key: 'avg', label: 'AVG SALE' }].map(s => (
                         <button key={s.key} onClick={() => setSort(s.key)} style={{
                           padding: '6px 12px', fontSize: '9px', fontFamily: 'Inter, sans-serif',
                           letterSpacing: '0.08em', border: 'none', borderRadius: '4px', cursor: 'pointer',
@@ -167,48 +237,78 @@ export default function Inventory() {
                       ))}
                     </div>
 
-                    <table style={{ width: '100%', borderCollapse: 'collapse' }}>
-                      <thead>
-                        <tr>
-                          <th style={hcell('left')}>#</th>
-                          <th style={hcell('left')}>ITEM</th>
-                          <th style={hcell('right')}>ORDERS</th>
-                          <th style={hcell('right')}>REVENUE</th>
-                          <th style={hcell('right')}>AVG SALE</th>
-                          <th style={hcell('left')}></th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {sorted.map((item, i) => (
-                          <tr key={item.name}
-                            onMouseEnter={e => e.currentTarget.style.background = '#F5EFE3'}
-                            onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
-                          >
-                            <td style={cell('left', { color: '#888', width: '32px' })}>{i + 1}</td>
-                            <td style={cell('left', { color: i < 3 ? '#1a1a1a' : '#333', fontWeight: i < 3 ? '600' : '400', maxWidth: '260px' })}>
-                              {item.name}
-                            </td>
-                            <td style={cell('right', { color: '#888' })}>{item.orders}</td>
-                            <td style={cell('right', { color: i < 3 ? '#16a34a' : '#333', fontWeight: i < 3 ? '600' : '400' })}>
-                              {fmt(item.revenue)}
-                            </td>
-                            <td style={cell('right', { color: '#888' })}>{fmtD(item.revenue / item.orders)}</td>
-                            <td style={{ ...cell('left'), width: '120px' }}>
-                              <div style={{ height: '3px', background: '#E7DECB', borderRadius: '2px' }}>
-                                <div style={{ height: '3px', background: THEME.accent, borderRadius: '2px', width: `${Math.round(item.revenue / maxRevenue * 100)}%`, opacity: 0.7 }} />
-                              </div>
-                            </td>
+                    {cmpActive ? (
+                      /* ── Compare table: units + revenue for two months ── */
+                      <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+                        <thead>
+                          <tr>
+                            <th style={hcell('left')}>ITEM</th>
+                            <th style={hcell('right')}>{shortLbl(period)} units</th>
+                            <th style={hcell('right')}>{shortLbl(comparePeriod)} units</th>
+                            <th style={hcell('right')}>Δ units</th>
+                            <th style={hcell('right')}>{shortLbl(period)} rev</th>
+                            <th style={hcell('right')}>{shortLbl(comparePeriod)} rev</th>
                           </tr>
-                        ))}
-                      </tbody>
-                    </table>
-                    {sorted.length === 0 && (
+                        </thead>
+                        <tbody>
+                          {cmpRows.map(r => (
+                            <tr key={r.name} onMouseEnter={e => e.currentTarget.style.background = '#F5EFE3'} onMouseLeave={e => e.currentTarget.style.background = 'transparent'}>
+                              <td style={cell('left', { color: '#1a1a1a', maxWidth: '240px' })}>{r.name}</td>
+                              <td style={cell('right', { color: '#1a1a1a', fontWeight: '600' })}>{r.aQty}</td>
+                              <td style={cell('right', { color: '#8a8378' })}>{r.bQty}</td>
+                              <td style={cell('right', { color: dCol(r.aQty - r.bQty), fontWeight: '600' })}>{dStr(r.aQty - r.bQty)}</td>
+                              <td style={cell('right', { color: '#16a34a' })}>{fmt(r.aRev)}</td>
+                              <td style={cell('right', { color: '#8a8378' })}>{fmt(r.bRev)}</td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    ) : (
+                      <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+                        <thead>
+                          <tr>
+                            <th style={hcell('left')}>#</th>
+                            <th style={hcell('left')}>ITEM</th>
+                            <th style={hcell('right')}>UNITS</th>
+                            <th style={hcell('right')}>REVENUE</th>
+                            <th style={hcell('right')}>AVG SALE</th>
+                            <th style={hcell('left')}></th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {sorted.map((item, i) => (
+                            <tr key={item.name}
+                              onMouseEnter={e => e.currentTarget.style.background = '#F5EFE3'}
+                              onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
+                            >
+                              <td style={cell('left', { color: '#888', width: '32px' })}>{i + 1}</td>
+                              <td style={cell('left', { color: i < 3 ? '#1a1a1a' : '#333', fontWeight: i < 3 ? '600' : '400', maxWidth: '260px' })}>
+                                {item.name}
+                              </td>
+                              <td style={cell('right', { color: '#1a1a1a', fontWeight: '600' })}>{item.qty.toLocaleString()}</td>
+                              <td style={cell('right', { color: i < 3 ? '#16a34a' : '#333', fontWeight: i < 3 ? '600' : '400' })}>
+                                {fmt(item.revenue)}
+                              </td>
+                              <td style={cell('right', { color: '#888' })}>{fmtD(item.revenue / item.orders)}</td>
+                              <td style={{ ...cell('left'), width: '120px' }}>
+                                <div style={{ height: '3px', background: '#E7DECB', borderRadius: '2px' }}>
+                                  <div style={{ height: '3px', background: THEME.accent, borderRadius: '2px', width: `${Math.round(item.revenue / maxRevenue * 100)}%`, opacity: 0.7 }} />
+                                </div>
+                              </td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    )}
+                    {((cmpActive ? cmpRows.length : sorted.length) === 0) && (
                       <div style={{ padding: '20px', textAlign: 'center', color: '#888', fontFamily: 'Inter, sans-serif', fontSize: '11px' }}>
-                        No items match "{search}"
+                        No items{search ? ` match "${search}"` : ' in this period'}
                       </div>
                     )}
                   </div>
-                )}
+                  </>
+                  )
+                })()}
 
                 {/* By Month */}
                 {tab === 'monthly' && (
@@ -227,8 +327,8 @@ export default function Inventory() {
                           <div style={{ width: '80px', textAlign: 'right', fontSize: '11px', color: '#16a34a', fontFamily: 'Inter, sans-serif', fontWeight: '600', flexShrink: 0 }}>
                             {fmt(m.revenue)}
                           </div>
-                          <div style={{ width: '60px', textAlign: 'right', fontSize: '10px', color: '#888', fontFamily: 'Inter, sans-serif', flexShrink: 0 }}>
-                            {m.orders} orders
+                          <div style={{ width: '72px', textAlign: 'right', fontSize: '10px', color: '#888', fontFamily: 'Inter, sans-serif', flexShrink: 0 }}>
+                            {(m.qty || 0).toLocaleString()} sold
                           </div>
                         </div>
                       ))
