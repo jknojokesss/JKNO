@@ -799,7 +799,6 @@ export default function Gowns() {
                   value={form.orderNo == null ? '' : form.orderNo}
                   onChange={e => setF('orderNo', e.target.value.replace(/[^0-9]/g, ''))}
                   inputMode="numeric"
-                  placeholder="auto"
                   style={{ width: '90px', textAlign: 'right', fontSize: '22px', fontWeight: 800, color: REDNO, letterSpacing: '0.02em', border: 'none', borderBottom: `1.5px solid ${GRID}`, background: 'transparent', fontFamily: 'inherit', padding: '0 0 2px', outline: 'none' }}
                 />
               </div>
