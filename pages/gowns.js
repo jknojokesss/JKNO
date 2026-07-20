@@ -214,7 +214,14 @@ export default function Gowns() {
     if (!form.city.trim()) { alert('Please enter a city.'); return }
     if (!form.state.trim()) { alert('Please enter a state.'); return }
     if (!form.zip.trim()) { alert('Please enter a zip code.'); return }
-    const orderNo = form.orderNo || (orders.reduce((m, o) => Math.max(m, o.orderNo || 0), 1000) + 1)
+    const typedNo = String(form.orderNo ?? '').trim()
+    const orderNo = typedNo
+      ? parseInt(typedNo, 10)
+      : (orders.reduce((m, o) => Math.max(m, o.orderNo || 0), 1000) + 1)
+    // Warn (but don't block) if this invoice number is already used by another order
+    if (typedNo && orders.some(o => o.id !== form.id && o.orderNo === orderNo)) {
+      if (!window.confirm(`Invoice No. ${orderNo} is already used by another order. Save anyway?`)) return
+    }
     let items = form.items.filter(it => it.desc.trim() || it.price)
     if (!items.length) items = [blankRow()]
     const clean = { ...form, orderNo, firstName: form.firstName.trim(), lastName: form.lastName.trim(), name: `${form.firstName.trim()} ${form.lastName.trim()}`, items }
@@ -786,8 +793,15 @@ export default function Gowns() {
             {/* The pad */}
             <div style={{ border: `2px solid ${PAD}`, borderRadius: '6px', background: '#fff', overflow: 'hidden' }}>
               {/* order no */}
-              <div style={{ display: 'flex', justifyContent: 'flex-end', padding: '6px 12px 0' }}>
-                <span style={{ fontSize: '22px', fontWeight: 800, color: REDNO, letterSpacing: '0.02em' }}>No. {form.orderNo || '—'}</span>
+              <div style={{ display: 'flex', justifyContent: 'flex-end', alignItems: 'center', gap: '4px', padding: '6px 12px 0' }}>
+                <span style={{ fontSize: '22px', fontWeight: 800, color: REDNO, letterSpacing: '0.02em' }}>No.</span>
+                <input
+                  value={form.orderNo == null ? '' : form.orderNo}
+                  onChange={e => setF('orderNo', e.target.value.replace(/[^0-9]/g, ''))}
+                  inputMode="numeric"
+                  placeholder="auto"
+                  style={{ width: '90px', textAlign: 'right', fontSize: '22px', fontWeight: 800, color: REDNO, letterSpacing: '0.02em', border: 'none', borderBottom: `1.5px solid ${GRID}`, background: 'transparent', fontFamily: 'inherit', padding: '0 0 2px', outline: 'none' }}
+                />
               </div>
 
               {/* date */}
