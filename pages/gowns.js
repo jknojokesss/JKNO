@@ -48,7 +48,8 @@ const fullName = (o) => o.firstName ? `${o.firstName} ${o.lastName || ''}`.trim(
 const toDB = (o, userId) => ({
   id: o.id, user_id: userId, order_no: o.orderNo || null,
   first_name: o.firstName || '', last_name: o.lastName || '',
-  phone: o.phone || '', address: o.address || '', city: o.city || '',
+  phone: o.phone || '', email: o.email || '', home_phone: o.home || '',
+  address: o.address || '', city: o.city || '',
   state: o.state || 'NY', zip: o.zip || '',
   order_date: o.date || todayStr(),
   items: o.items || [], payments: o.payments || [],
@@ -63,7 +64,8 @@ const fromDB = (r) => ({
   id: r.id, orderNo: r.order_no,
   firstName: r.first_name, lastName: r.last_name,
   name: `${r.first_name} ${r.last_name}`.trim(),
-  phone: r.phone, address: r.address, city: r.city, state: r.state, zip: r.zip,
+  phone: r.phone, email: r.email || '', home: r.home_phone || '',
+  address: r.address, city: r.city, state: r.state, zip: r.zip,
   date: r.order_date, items: r.items || [], payments: r.payments || [],
   alterations: r.alterations, alterationsDone: r.alterations_done,
   alterationsNote: r.alterations_note, alterationsDue: r.alterations_due,
@@ -76,7 +78,7 @@ const blankRow = () => ({ id: uid(), qty: '1', itemNo: '', desc: '', price: '', 
 const blankForm = () => ({
   id: uid(), orderNo: null,
   firstName: '', lastName: '',
-  phone: '', address: '', city: '', state: 'NY', zip: '',
+  phone: '', email: '', home: '', address: '', city: '', state: 'NY', zip: '',
   date: todayStr(),
   items: [blankRow(), blankRow(), blankRow()],
   payments: [], alterations: false, alterationsDone: false,
@@ -207,13 +209,8 @@ export default function Gowns() {
   const removePayment = (id) => setForm(f => ({ ...f, payments: f.payments.filter(p => p.id !== id) }))
 
   const save = async () => {
-    if (!form.firstName.trim()) { alert('Please enter a first name.'); return }
-    if (!form.lastName.trim()) { alert('Please enter a last name.'); return }
-    if (!editing && !form.phone.trim()) { alert('Please enter a phone number.'); return }
-    if (!form.address.trim()) { alert('Please enter an address.'); return }
-    if (!form.city.trim()) { alert('Please enter a city.'); return }
-    if (!form.state.trim()) { alert('Please enter a state.'); return }
-    if (!form.zip.trim()) { alert('Please enter a zip code.'); return }
+    // Cell number is the only required field — everything else is optional.
+    if (!form.phone.trim()) { alert('Please enter a cell number.'); return }
     const typedNo = String(form.orderNo ?? '').trim()
     const orderNo = typedNo
       ? parseInt(typedNo, 10)
@@ -284,10 +281,22 @@ export default function Gowns() {
               </div>
             </div>
 
-            <!-- Phone row -->
+            <!-- Cell / Home row -->
+            <div style="display:flex;border-bottom:1px solid ${GRID_BLUE};">
+              <div style="flex:1;display:flex;align-items:center;padding:10px 18px;border-right:1px solid ${GRID_BLUE};">
+                <span style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;color:${PAD_BLUE};width:44px;">Cell</span>
+                <span style="font-size:17px;border-bottom:1px solid ${PAD_BLUE};flex:1;padding-bottom:3px;">${o.phone || ''}</span>
+              </div>
+              <div style="flex:1;display:flex;align-items:center;padding:10px 18px;">
+                <span style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;color:${PAD_BLUE};width:44px;">Home</span>
+                <span style="font-size:17px;border-bottom:1px solid ${PAD_BLUE};flex:1;padding-bottom:3px;">${o.home || ''}</span>
+              </div>
+            </div>
+
+            <!-- Email row -->
             <div style="display:flex;align-items:center;border-bottom:1px solid ${GRID_BLUE};padding:10px 18px;">
-              <span style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;color:${PAD_BLUE};width:70px;">Phone</span>
-              <span style="font-size:17px;border-bottom:1px solid ${PAD_BLUE};flex:1;padding-bottom:3px;">${o.phone || ''}</span>
+              <span style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;color:${PAD_BLUE};width:70px;">Email</span>
+              <span style="font-size:17px;border-bottom:1px solid ${PAD_BLUE};flex:1;padding-bottom:3px;">${o.email || ''}</span>
             </div>
 
             <!-- Address row -->
@@ -361,7 +370,7 @@ export default function Gowns() {
   const downloadCSV = () => {
     if (!orders.length) { alert('No orders to export yet.'); return }
     const esc = (s) => { const v = String(s == null ? '' : s).replace(/[\r\n]+/g, ' ').trim(); return v.includes(',') || v.includes('"') ? `"${v.replace(/"/g, '""')}"` : v }
-    const headers = ['Order #', 'Date', 'First Name', 'Last Name', 'Phone', 'Address', 'City', 'State', 'Zip', 'Items', 'Subtotal', 'Tax Rate', 'Tax', 'Total', 'Amount Paid', 'Balance', 'Status', 'Payments', 'Alterations', 'Notes']
+    const headers = ['Order #', 'Date', 'First Name', 'Last Name', 'Cell', 'Home', 'Email', 'Address', 'City', 'State', 'Zip', 'Items', 'Subtotal', 'Tax Rate', 'Tax', 'Total', 'Amount Paid', 'Balance', 'Status', 'Payments', 'Alterations', 'Notes']
     const rows = orders.map(o => {
       const sub = sumItems(o.items), tax = calcTax(o.items, o.taxRate), tot = sub + tax, p = sumPaid(o), bal = tot - p
       const itemsSummary = o.items.filter(it => it.desc || lineAmt(it)).map(it => `${it.qty > 1 ? it.qty + 'x ' : ''}${it.desc || ''}${lineAmt(it) ? ' (' + money(lineAmt(it)) + (it.taxable === false ? ' no tax' : '') + ')' : ''}`).join('; ')
@@ -370,7 +379,7 @@ export default function Gowns() {
       const status = isOpen(o) ? 'Open' : 'Completed'
       const fn = o.firstName || (o.name ? o.name.split(' ')[0] : '')
       const ln = o.lastName || (o.name ? o.name.split(' ').slice(1).join(' ') : '')
-      return [o.orderNo || '', o.date || '', fn, ln, o.phone || '', o.address || '', o.city || '', o.state || '', o.zip || '', itemsSummary, sub.toFixed(2), (o.taxRate || 0) + '%', tax.toFixed(2), tot.toFixed(2), p.toFixed(2), bal.toFixed(2), status, payHistory, altNote, o.notes || ''].map(esc).join(',')
+      return [o.orderNo || '', o.date || '', fn, ln, o.phone || '', o.home || '', o.email || '', o.address || '', o.city || '', o.state || '', o.zip || '', itemsSummary, sub.toFixed(2), (o.taxRate || 0) + '%', tax.toFixed(2), tot.toFixed(2), p.toFixed(2), bal.toFixed(2), status, payHistory, altNote, o.notes || ''].map(esc).join(',')
     })
     const csv = [headers.join(','), ...rows].join('\r\n')
     const blob = new Blob([csv], { type: 'text/csv;charset=utf-8' })
@@ -821,10 +830,22 @@ export default function Gowns() {
                 </div>
               </div>
 
-              {/* phone */}
+              {/* cell (required) */}
               <div style={{ display: 'flex', alignItems: 'center', borderBottom: `1px solid ${GRID}`, padding: '4px 10px' }}>
-                <span style={{ ...lbl, width: '62px', flexShrink: 0 }}>Phone</span>
+                <span style={{ ...lbl, width: '62px', flexShrink: 0 }}>Cell</span>
                 <input value={form.phone} onChange={e => setF('phone', e.target.value)} type="tel" placeholder="required" style={cellIn} />
+              </div>
+
+              {/* home phone (optional) */}
+              <div style={{ display: 'flex', alignItems: 'center', borderBottom: `1px solid ${GRID}`, padding: '4px 10px' }}>
+                <span style={{ ...lbl, width: '62px', flexShrink: 0 }}>Home</span>
+                <input value={form.home} onChange={e => setF('home', e.target.value)} type="tel" placeholder="optional" style={cellIn} />
+              </div>
+
+              {/* email (optional) */}
+              <div style={{ display: 'flex', alignItems: 'center', borderBottom: `1px solid ${GRID}`, padding: '4px 10px' }}>
+                <span style={{ ...lbl, width: '62px', flexShrink: 0 }}>Email</span>
+                <input value={form.email} onChange={e => setF('email', e.target.value)} type="email" placeholder="optional" style={cellIn} />
               </div>
 
               {/* address */}
@@ -853,7 +874,8 @@ export default function Gowns() {
                 <div style={{ ...th, width: '44px', textAlign: 'center', borderLeft: `1px solid ${GRID}` }}>Qty</div>
                 <div style={{ ...th, width: '72px', borderLeft: `1px solid ${GRID}` }}>Item #</div>
                 <div style={{ ...th, flex: 1, borderLeft: `1px solid ${GRID}` }}>Description</div>
-                <div style={{ ...th, width: '92px', textAlign: 'right', borderLeft: `1px solid ${GRID}` }}>Price</div>
+                <div style={{ ...th, width: '82px', textAlign: 'right', borderLeft: `1px solid ${GRID}` }}>Price</div>
+                <div style={{ ...th, width: '82px', textAlign: 'right', borderLeft: `1px solid ${GRID}` }}>Amount</div>
                 <div style={{ ...th, width: '38px', textAlign: 'center', borderLeft: `1px solid ${GRID}` }} title="Check = taxable">Tax</div>
                 <div style={{ ...th, width: '26px', padding: '8px 0' }} />
               </div>
@@ -890,7 +912,8 @@ export default function Gowns() {
                       )}
                     </div>
                     <input value={it.desc} onChange={e => setItem(it.id, 'desc', e.target.value)} placeholder={i === 0 ? 'Style, color, details…' : ''} style={{ ...cellIn, flex: 1, borderLeft: `1px solid ${GRID}` }} />
-                    <input value={it.price} onChange={e => setItem(it.id, 'price', e.target.value)} type="number" inputMode="decimal" step="0.01" placeholder="$" style={{ ...cellIn, width: '92px', textAlign: 'right', padding: '12px 8px', borderLeft: `1px solid ${GRID}`, fontWeight: 600 }} />
+                    <input value={it.price} onChange={e => setItem(it.id, 'price', e.target.value)} type="number" inputMode="decimal" step="0.01" placeholder="$" style={{ ...cellIn, width: '82px', textAlign: 'right', padding: '12px 8px', borderLeft: `1px solid ${GRID}`, fontWeight: 600 }} />
+                    <div style={{ width: '82px', textAlign: 'right', padding: '0 8px', borderLeft: `1px solid ${GRID}`, alignSelf: 'stretch', display: 'flex', alignItems: 'center', justifyContent: 'flex-end', fontSize: '15px', fontWeight: 600, color: INK }}>{lineAmt(it) ? money(lineAmt(it)) : ''}</div>
                     <div style={{ width: '38px', display: 'flex', alignItems: 'center', justifyContent: 'center', borderLeft: `1px solid ${GRID}`, alignSelf: 'stretch' }}>
                       <input type="checkbox" className="tax-check" checked={it.taxable !== false} onChange={e => setItem(it.id, 'taxable', e.target.checked)} title="Taxable" />
                     </div>
