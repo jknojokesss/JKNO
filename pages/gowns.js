@@ -38,6 +38,24 @@ const sumItems = (items) => (items || []).reduce((s, i) => s + lineAmt(i), 0)
 const sumPaid = (o) => (o.payments || []).reduce((s, p) => s + (parseFloat(p.amount) || 0), 0)
 const calcTax = (items, rate) => (items || []).filter(it => it.taxable !== false).reduce((s, it) => s + lineAmt(it), 0) * ((parseFloat(rate) || 0) / 100)
 const orderTotal = (o) => sumItems(o.items) + calcTax(o.items, o.taxRate)
+
+// ── Input cleanup: tidy up how people type names, addresses, and phones ──
+const titleCase = (s) => (s || '').trim().replace(/\s+/g, ' ').toLowerCase()
+  .replace(/(^|[\s\-/.])([a-z])/g, (_, sep, ch) => sep + ch.toUpperCase())
+const cleanState = (s) => (s || '').replace(/[^a-zA-Z]/g, '').toUpperCase().slice(0, 2)
+const cleanEmail = (s) => (s || '').trim().toLowerCase()
+const cleanZip = (s) => {
+  const d = (s || '').replace(/\D/g, '')
+  return d.length > 5 ? `${d.slice(0, 5)}-${d.slice(5, 9)}` : d
+}
+// Format a 10-digit US number as (888) 787-9876 (or 1 (888) 787-9876);
+// anything that isn't a standard 10/11-digit number is left as typed.
+const fmtPhone = (s) => {
+  const raw = (s || '').trim()
+  let d = raw.replace(/\D/g, ''), cc = ''
+  if (d.length === 11 && d[0] === '1') { cc = '1 '; d = d.slice(1) }
+  return d.length === 10 ? `${cc}(${d.slice(0, 3)}) ${d.slice(3, 6)}-${d.slice(6)}` : raw
+}
 const balanceOf = (o) => orderTotal(o) - sumPaid(o)
 const isOpen = (o) => balanceOf(o) > 0.005 || (o.alterations && !o.alterationsDone)
 
@@ -227,7 +245,15 @@ export default function Gowns() {
     }
     let items = form.items.filter(it => it.desc.trim() || it.price)
     if (!items.length) items = [blankRow()]
-    const clean = { ...form, orderNo, firstName: form.firstName.trim(), lastName: form.lastName.trim(), name: `${form.firstName.trim()} ${form.lastName.trim()}`, items }
+    // Normalize everything on save so stored data is clean regardless of how it was typed.
+    const fn = titleCase(form.firstName), ln = titleCase(form.lastName)
+    const clean = {
+      ...form, orderNo, items,
+      firstName: fn, lastName: ln, name: `${fn} ${ln}`.trim(),
+      phone: fmtPhone(form.phone), home: fmtPhone(form.home), email: cleanEmail(form.email),
+      address: titleCase(form.address), city: titleCase(form.city),
+      state: cleanState(form.state), zip: cleanZip(form.zip),
+    }
     const { data, error } = await supabase.from('gown_orders').upsert(toDB(clean, user.id)).select().single()
     if (error) { alert('Error saving: ' + error.message); return }
     const saved = fromDB(data)
@@ -828,49 +854,49 @@ export default function Gowns() {
               <div style={{ display: 'flex', borderBottom: `1px solid ${GRID}` }}>
                 <div style={{ display: 'flex', alignItems: 'center', flex: 1, padding: '4px 10px', borderRight: `1px solid ${GRID}` }}>
                   <span style={{ ...lbl, width: '62px', flexShrink: 0 }}>First</span>
-                  <input value={form.firstName} onChange={e => setF('firstName', e.target.value)} placeholder="First name" style={{ ...cellIn, fontSize: '18px', fontWeight: 600 }} />
+                  <input value={form.firstName} onChange={e => setF('firstName', e.target.value)} onBlur={e => setF('firstName', titleCase(e.target.value))} placeholder="First name" style={{ ...cellIn, fontSize: '18px', fontWeight: 600 }} />
                 </div>
                 <div style={{ display: 'flex', alignItems: 'center', flex: 1, padding: '4px 10px' }}>
                   <span style={{ ...lbl, width: '52px', flexShrink: 0 }}>Last</span>
-                  <input value={form.lastName} onChange={e => setF('lastName', e.target.value)} placeholder="Last name" style={{ ...cellIn, fontSize: '18px', fontWeight: 600 }} />
+                  <input value={form.lastName} onChange={e => setF('lastName', e.target.value)} onBlur={e => setF('lastName', titleCase(e.target.value))} placeholder="Last name" style={{ ...cellIn, fontSize: '18px', fontWeight: 600 }} />
                 </div>
               </div>
 
               {/* cell (required) */}
               <div style={{ display: 'flex', alignItems: 'center', borderBottom: `1px solid ${GRID}`, padding: '4px 10px' }}>
                 <span style={{ ...lbl, width: '62px', flexShrink: 0 }}>Cell</span>
-                <input value={form.phone} onChange={e => setF('phone', e.target.value)} type="tel" placeholder="required" style={cellIn} />
+                <input value={form.phone} onChange={e => setF('phone', e.target.value)} onBlur={e => setF('phone', fmtPhone(e.target.value))} type="tel" placeholder="required" style={cellIn} />
               </div>
 
               {/* home phone (optional) */}
               <div style={{ display: 'flex', alignItems: 'center', borderBottom: `1px solid ${GRID}`, padding: '4px 10px' }}>
                 <span style={{ ...lbl, width: '62px', flexShrink: 0 }}>Home</span>
-                <input value={form.home} onChange={e => setF('home', e.target.value)} type="tel" placeholder="optional" style={cellIn} />
+                <input value={form.home} onChange={e => setF('home', e.target.value)} onBlur={e => setF('home', fmtPhone(e.target.value))} type="tel" placeholder="optional" style={cellIn} />
               </div>
 
               {/* email (optional) */}
               <div style={{ display: 'flex', alignItems: 'center', borderBottom: `1px solid ${GRID}`, padding: '4px 10px' }}>
                 <span style={{ ...lbl, width: '62px', flexShrink: 0 }}>Email</span>
-                <input value={form.email} onChange={e => setF('email', e.target.value)} type="email" placeholder="optional" style={cellIn} />
+                <input value={form.email} onChange={e => setF('email', e.target.value)} onBlur={e => setF('email', cleanEmail(e.target.value))} type="email" placeholder="optional" style={cellIn} />
               </div>
 
               {/* address */}
               <div style={{ display: 'flex', alignItems: 'center', borderBottom: `1px solid ${GRID}`, padding: '4px 10px' }}>
                 <span style={{ ...lbl, width: '62px', flexShrink: 0 }}>Address</span>
-                <input value={form.address} onChange={e => setF('address', e.target.value)} placeholder="Street address" style={cellIn} />
+                <input value={form.address} onChange={e => setF('address', e.target.value)} onBlur={e => setF('address', titleCase(e.target.value))} placeholder="Street address" style={cellIn} />
               </div>
 
               {/* city / state / zip */}
               <div style={{ display: 'flex', borderBottom: `1px solid ${GRID}` }}>
                 <div style={{ display: 'flex', alignItems: 'center', flex: 2, padding: '4px 10px', borderRight: `1px solid ${GRID}` }}>
                   <span style={{ ...lbl, width: '32px', flexShrink: 0 }}>City</span>
-                  <input value={form.city} onChange={e => setF('city', e.target.value)} placeholder="City" style={cellIn} />
+                  <input value={form.city} onChange={e => setF('city', e.target.value)} onBlur={e => setF('city', titleCase(e.target.value))} placeholder="City" style={cellIn} />
                 </div>
                 <div style={{ display: 'flex', alignItems: 'center', width: '70px', padding: '4px 8px', borderRight: `1px solid ${GRID}` }}>
-                  <input value={form.state} onChange={e => setF('state', e.target.value)} placeholder="ST" maxLength={2} style={{ ...cellIn, textTransform: 'uppercase', padding: '12px 4px', textAlign: 'center' }} />
+                  <input value={form.state} onChange={e => setF('state', e.target.value)} onBlur={e => setF('state', cleanState(e.target.value))} placeholder="ST" maxLength={2} style={{ ...cellIn, textTransform: 'uppercase', padding: '12px 4px', textAlign: 'center' }} />
                 </div>
                 <div style={{ display: 'flex', alignItems: 'center', width: '100px', padding: '4px 8px' }}>
-                  <input value={form.zip} onChange={e => setF('zip', e.target.value)} placeholder="Zip" maxLength={10} style={{ ...cellIn, padding: '12px 4px' }} />
+                  <input value={form.zip} onChange={e => setF('zip', e.target.value)} onBlur={e => setF('zip', cleanZip(e.target.value))} placeholder="Zip" maxLength={10} style={{ ...cellIn, padding: '12px 4px' }} />
                 </div>
               </div>
 
