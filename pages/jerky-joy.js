@@ -102,14 +102,15 @@ const PNL_ROWS = [
 
 // products sold this month (swap illustrations for real photos anytime)
 const PRODUCTS = [
-  { name: 'BBQ', color: '#9E3B24', week: 22, month: 88 },
-  { name: 'General Tso', color: '#C24A22', week: 16, month: 64 },
-  { name: 'Korean', color: '#97652C', week: 13, month: 50 },
-  { name: 'Spicy', color: '#B2351A', week: 12, month: 46 },
-  { name: 'Sweet & Tangy', color: '#6B4A2A', week: 11, month: 42 },
-  { name: 'Pepper Crusted', color: '#46403A', week: 9, month: 37 },
-  { name: 'Garlic', color: '#B8892F', week: 8, month: 33 },
-  { name: 'Sweet', color: '#5C7C3A', week: 6, month: 25 },
+  { name: 'Full Flavor', color: '#8A2E14', week: 23, month: 92 },
+  { name: 'BBQ', color: '#9E3B24', week: 18, month: 70 },
+  { name: 'General Tso', color: '#C24A22', week: 13, month: 52 },
+  { name: 'Korean', color: '#97652C', week: 11, month: 44 },
+  { name: 'Spicy', color: '#B2351A', week: 10, month: 38 },
+  { name: 'Sweet & Tangy', color: '#6B4A2A', week: 8, month: 32 },
+  { name: 'Pepper Crusted', color: '#46403A', week: 7, month: 26 },
+  { name: 'Garlic', color: '#B8892F', week: 5, month: 18 },
+  { name: 'Sweet', color: '#5C7C3A', week: 3, month: 13 },
 ]
 // per-period sales for the front-page leaderboards (week vs month)
 const STORE_PERF = [
