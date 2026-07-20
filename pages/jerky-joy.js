@@ -43,8 +43,8 @@ const SEED_DIRECT = [
 ]
 // Product lines beyond bags — Jerky Joy also sells premium Jerky Boards ($90–$375
 // charcuterie/gift boxes) and seasonal Camp Packages. Illustrative monthly figures.
-const BOARDS_MONTH = { units: 22, rev: 3685 }
-const CAMP_MONTH = { units: 40, rev: 1680 }
+const BOARDS_MONTH = { units: 22, rev: 3685, cost: 1660 } // ~45% cost (jerky + box + packaging)
+const CAMP_MONTH = { units: 40, rev: 1680, cost: 1010 }   // ~60% cost (bundled snacks + jerky)
 const DIRECT_SOURCES = ['Shopify / online', 'Farmers market', 'Pop-up event', 'Wholesale / bulk', 'Other']
 
 const SEED_ADS = [
@@ -76,25 +76,28 @@ const SEED_EXPENSES = [
 
 // 11 prior months (current month is appended live) for the multi-month P&L
 const MONTH_SERIES = [
-  { m: 'Jul', directRev: 1200, consignRev: 900, cogs: 1450, adSpend: 700, opexNonAd: 480 },
-  { m: 'Aug', directRev: 1320, consignRev: 980, cogs: 1520, adSpend: 780, opexNonAd: 500 },
-  { m: 'Sep', directRev: 1450, consignRev: 1050, cogs: 1600, adSpend: 850, opexNonAd: 510 },
-  { m: 'Oct', directRev: 1600, consignRev: 1150, cogs: 1720, adSpend: 950, opexNonAd: 520 },
-  { m: 'Nov', directRev: 1800, consignRev: 1300, cogs: 1900, adSpend: 1200, opexNonAd: 560 },
-  { m: 'Dec', directRev: 2200, consignRev: 1600, cogs: 2150, adSpend: 1500, opexNonAd: 620 },
-  { m: 'Jan', directRev: 1500, consignRev: 1100, cogs: 1700, adSpend: 900, opexNonAd: 520 },
-  { m: 'Feb', directRev: 1650, consignRev: 1200, cogs: 1780, adSpend: 1050, opexNonAd: 540 },
-  { m: 'Mar', directRev: 1820, consignRev: 1380, cogs: 2050, adSpend: 1350, opexNonAd: 600 },
-  { m: 'Apr', directRev: 1900, consignRev: 1450, cogs: 2180, adSpend: 1500, opexNonAd: 620 },
-  { m: 'May', directRev: 1980, consignRev: 1510, cogs: 2280, adSpend: 1650, opexNonAd: 640 },
+  { m: 'Jul', directRev: 1200, consignRev: 900, cogs: 1450, adSpend: 700, opexNonAd: 480, boardRev: 2800, boardCogs: 1400 },
+  { m: 'Aug', directRev: 1320, consignRev: 980, cogs: 1520, adSpend: 780, opexNonAd: 500, boardRev: 3000, boardCogs: 1500 },
+  { m: 'Sep', directRev: 1450, consignRev: 1050, cogs: 1600, adSpend: 850, opexNonAd: 510, boardRev: 3200, boardCogs: 1600 },
+  { m: 'Oct', directRev: 1600, consignRev: 1150, cogs: 1720, adSpend: 950, opexNonAd: 520, boardRev: 3500, boardCogs: 1750 },
+  { m: 'Nov', directRev: 1800, consignRev: 1300, cogs: 1900, adSpend: 1200, opexNonAd: 560, boardRev: 4200, boardCogs: 2100 },
+  { m: 'Dec', directRev: 2200, consignRev: 1600, cogs: 2150, adSpend: 1500, opexNonAd: 620, boardRev: 5500, boardCogs: 2750 },
+  { m: 'Jan', directRev: 1500, consignRev: 1100, cogs: 1700, adSpend: 900, opexNonAd: 520, boardRev: 3400, boardCogs: 1700 },
+  { m: 'Feb', directRev: 1650, consignRev: 1200, cogs: 1780, adSpend: 1050, opexNonAd: 540, boardRev: 3600, boardCogs: 1800 },
+  { m: 'Mar', directRev: 1820, consignRev: 1380, cogs: 2050, adSpend: 1350, opexNonAd: 600, boardRev: 4000, boardCogs: 2000 },
+  { m: 'Apr', directRev: 1900, consignRev: 1450, cogs: 2180, adSpend: 1500, opexNonAd: 620, boardRev: 4400, boardCogs: 2200 },
+  { m: 'May', directRev: 1980, consignRev: 1510, cogs: 2280, adSpend: 1650, opexNonAd: 640, boardRev: 4800, boardCogs: 2400 },
 ]
 const mLine = (mo) => {
-  const rev = mo.directRev + mo.consignRev, gross = rev - mo.cogs, opex = mo.adSpend + mo.opexNonAd
-  return { m: mo.m, directRev: mo.directRev, consignRev: mo.consignRev, rev, cogs: mo.cogs, gross, ad: mo.adSpend, otherOpex: mo.opexNonAd, opex, net: gross - opex }
+  const boardRev = mo.boardRev || 0, boardCogs = mo.boardCogs || 0
+  const rev = mo.directRev + mo.consignRev + boardRev, cogs = mo.cogs + boardCogs
+  const gross = rev - cogs, opex = mo.adSpend + mo.opexNonAd
+  return { m: mo.m, directRev: mo.directRev, consignRev: mo.consignRev, boardRev, rev, cogs, gross, ad: mo.adSpend, otherOpex: mo.opexNonAd, opex, net: gross - opex }
 }
 const PNL_ROWS = [
   { label: 'Direct sales', key: 'directRev', kind: 'line', cost: false },
   { label: 'Consignment collected', key: 'consignRev', kind: 'line', cost: false },
+  { label: 'Boards & camp packages', key: 'boardRev', kind: 'line', cost: false },
   { label: 'Total revenue', key: 'rev', kind: 'subtotal', cost: false },
   { label: 'Cost of goods sold', key: 'cogs', kind: 'line', cost: true },
   { label: 'Gross profit', key: 'gross', kind: 'subtotal', cost: false },
@@ -282,6 +285,14 @@ export default function JerkyJoy() {
     { line: 'Camp packages', units: CAMP_MONTH.units, unit: 'packages', rev: CAMP_MONTH.rev, color: '#8A5A2B', to: 'direct' },
   ]
   const totalRevenue = productMix.reduce((s, p) => s + p.rev, 0)
+  // P&L totals that include boards + camp (bag vars above stay bag-only for the
+  // consignment/close tabs; board cost is an estimate — tune BOARDS_MONTH/CAMP_MONTH)
+  const boardRevM = BOARDS_MONTH.rev + CAMP_MONTH.rev
+  const boardCogsM = BOARDS_MONTH.cost + CAMP_MONTH.cost
+  const pnlCogs = cogs + boardCogsM
+  const pnlGross = totalRevenue - pnlCogs
+  const pnlNet = pnlGross - totalOpex
+  const pnlPct = (n) => totalRevenue ? Math.round(n / totalRevenue * 100) : 0
 
   // monthly close → QB (Shopify online excluded — it books through Shopify, no double-count)
   const shopifyRev = direct.filter(d => d.source === 'Shopify / online').reduce((s, d) => s + d.rev, 0)
@@ -295,7 +306,7 @@ export default function JerkyJoy() {
 
   // multi-month series — current month appended live so interactivity flows through
   const thisMonth = new Date().toLocaleString('en-US', { month: 'short' })
-  const monthsAll = [...MONTH_SERIES, { m: thisMonth, directRev, consignRev: cashCollected, cogs, adSpend, opexNonAd }]
+  const monthsAll = [...MONTH_SERIES, { m: thisMonth, directRev, consignRev: cashCollected, cogs, adSpend, opexNonAd, boardRev: BOARDS_MONTH.rev + CAMP_MONTH.rev, boardCogs: BOARDS_MONTH.cost + CAMP_MONTH.cost }]
   const lines = monthsAll.slice(-pnlMonths).map(mLine)
   const lastL = lines[lines.length - 1]
   const baseL = lines[0]
@@ -549,9 +560,9 @@ export default function JerkyJoy() {
           {tab === 'pnl' && pnlView === 'single' && (
             <>
               <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap', marginBottom: '16px' }}>
-                <KPI k="Revenue" v={m0(revenue)} sub="direct + consignment" accent={GREEN} />
-                <KPI k="Gross profit" v={m0(grossProfit)} sub={`${pct(grossProfit)}% margin`} accent={KRAFT} />
-                <KPI k={netProfit >= 0 ? 'Net profit' : 'Net loss'} v={m0(netProfit)} sub={netProfit >= 0 ? 'in the black' : 'in the red'} accent={netProfit >= 0 ? GREEN : RED} />
+                <KPI k="Revenue" v={m0(totalRevenue)} sub="bags + boards + camp" accent={GREEN} />
+                <KPI k="Gross profit" v={m0(pnlGross)} sub={`${pnlPct(pnlGross)}% margin`} accent={KRAFT} />
+                <KPI k={pnlNet >= 0 ? 'Net profit' : 'Net loss'} v={m0(pnlNet)} sub={pnlNet >= 0 ? 'in the black' : 'in the red'} accent={pnlNet >= 0 ? GREEN : RED} />
               </div>
 
               <div style={{ ...card }}>
@@ -559,21 +570,23 @@ export default function JerkyJoy() {
                 <div style={{ ...lbl, color: KRAFT, margin: '4px 0' }}>Revenue</div>
                 <Row l="Direct sales" v={m0(directRev)} />
                 <Row l="Consignment (collected)" v={m0(cashCollected)} />
-                <Row l="Total revenue" v={m0(revenue)} bold top />
+                <Row l="Boards & camp packages" v={m0(boardRevM)} />
+                <Row l="Total revenue" v={m0(totalRevenue)} bold top />
                 <div style={{ ...lbl, color: KRAFT, margin: '16px 0 6px' }}>Cost of goods sold</div>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '2px 0 8px', flexWrap: 'wrap' }}>
                   <span style={{ fontSize: '13px', color: MUTED }}>Cost to make one bag:</span>
                   <span style={{ display: 'inline-flex', alignItems: 'center', gap: '3px', color: MUTED }}>$<input value={costPerBag} onChange={e => setCostPerBag(Number(e.target.value) || 0)} type="number" step="0.25" style={{ ...inp, width: '74px', padding: '6px 9px' }} /></span>
                   <span style={{ fontSize: '12px', color: '#A2937A' }}>← estimate, set the real number</span>
                 </div>
-                <Row l={`Cost of goods sold (${soldBags} bags × ${money(costPerBag)})`} v={`−${m0(cogs)}`} />
-                <Row l={`Gross profit  ·  ${pct(grossProfit)}% margin`} v={m0(grossProfit)} bold top />
+                <Row l={`Bag cost of goods (${soldBags} bags × ${money(costPerBag)})`} v={`−${m0(cogs)}`} />
+                <Row l="Boards & camp cost" v={`−${m0(boardCogsM)}`} />
+                <Row l={`Gross profit  ·  ${pnlPct(pnlGross)}% margin`} v={m0(pnlGross)} bold top />
                 <div style={{ ...lbl, color: KRAFT, margin: '16px 0 4px' }}>Operating expenses</div>
                 <Row l="Advertising" v={`−${m0(adSpend)}`} />
                 {[...new Set(expenses.filter(e => !COGS_CATS.includes(e.cat)).map(e => e.cat))].map(cat => { const v = expenses.filter(e => e.cat === cat).reduce((s, e) => s + e.amt, 0); return <Row key={cat} l={cat} v={`−${m0(v)}`} /> })}
                 <Row l="Total operating expenses" v={`−${m0(totalOpex)}`} bold top />
-                <div style={{ marginTop: '12px', padding: '12px 14px', background: netProfit >= 0 ? '#EAF3EC' : '#FBEDE9', borderRadius: '2px' }}>
-                  <Row l={`${netProfit >= 0 ? 'Net profit' : 'Net loss'}  ·  ${pct(netProfit)}% margin`} v={m0(netProfit)} bold neg={netProfit < 0} />
+                <div style={{ marginTop: '12px', padding: '12px 14px', background: pnlNet >= 0 ? '#EAF3EC' : '#FBEDE9', borderRadius: '2px' }}>
+                  <Row l={`${pnlNet >= 0 ? 'Net profit' : 'Net loss'}  ·  ${pnlPct(pnlNet)}% margin`} v={m0(pnlNet)} bold neg={pnlNet < 0} />
                 </div>
               </div>
             </>
