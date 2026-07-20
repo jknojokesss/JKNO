@@ -209,8 +209,14 @@ export default function Gowns() {
   const removePayment = (id) => setForm(f => ({ ...f, payments: f.payments.filter(p => p.id !== id) }))
 
   const save = async () => {
-    // Cell number is the only required field — everything else is optional.
+    // Required: first name, last name, cell, and full address. Home phone + email optional.
+    if (!form.firstName.trim()) { alert('Please enter a first name.'); return }
+    if (!form.lastName.trim()) { alert('Please enter a last name.'); return }
     if (!form.phone.trim()) { alert('Please enter a cell number.'); return }
+    if (!form.address.trim()) { alert('Please enter an address.'); return }
+    if (!form.city.trim()) { alert('Please enter a city.'); return }
+    if (!form.state.trim()) { alert('Please enter a state.'); return }
+    if (!form.zip.trim()) { alert('Please enter a zip code.'); return }
     const typedNo = String(form.orderNo ?? '').trim()
     const orderNo = typedNo
       ? parseInt(typedNo, 10)
