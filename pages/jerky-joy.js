@@ -168,6 +168,8 @@ export default function JerkyJoy() {
   const [pnlView, setPnlView] = useState('single')
   const [period, setPeriod] = useState('month')
   const [costPerBag, setCostPerBag] = useState(4.5)
+  const [boardCost, setBoardCost] = useState(75) // avg cost to make one board (estimate — owner sets real #)
+  const [campCost, setCampCost] = useState(25)   // avg cost per camp package
   const [logoOk, setLogoOk] = useState(true)
   const [addingA, setAddingA] = useState(false)
   const [af, setAf] = useState({ channel: '', spend: '', rev: '', track: '' })
@@ -288,7 +290,7 @@ export default function JerkyJoy() {
   // P&L totals that include boards + camp (bag vars above stay bag-only for the
   // consignment/close tabs; board cost is an estimate — tune BOARDS_MONTH/CAMP_MONTH)
   const boardRevM = BOARDS_MONTH.rev + CAMP_MONTH.rev
-  const boardCogsM = BOARDS_MONTH.cost + CAMP_MONTH.cost
+  const boardCogsM = BOARDS_MONTH.units * boardCost + CAMP_MONTH.units * campCost
   const pnlCogs = cogs + boardCogsM
   const pnlGross = totalRevenue - pnlCogs
   const pnlNet = pnlGross - totalOpex
@@ -306,7 +308,7 @@ export default function JerkyJoy() {
 
   // multi-month series — current month appended live so interactivity flows through
   const thisMonth = new Date().toLocaleString('en-US', { month: 'short' })
-  const monthsAll = [...MONTH_SERIES, { m: thisMonth, directRev, consignRev: cashCollected, cogs, adSpend, opexNonAd, boardRev: BOARDS_MONTH.rev + CAMP_MONTH.rev, boardCogs: BOARDS_MONTH.cost + CAMP_MONTH.cost }]
+  const monthsAll = [...MONTH_SERIES, { m: thisMonth, directRev, consignRev: cashCollected, cogs, adSpend, opexNonAd, boardRev: boardRevM, boardCogs: boardCogsM }]
   const lines = monthsAll.slice(-pnlMonths).map(mLine)
   const lastL = lines[lines.length - 1]
   const baseL = lines[0]
@@ -579,7 +581,14 @@ export default function JerkyJoy() {
                   <span style={{ fontSize: '12px', color: '#A2937A' }}>← estimate, set the real number</span>
                 </div>
                 <Row l={`Bag cost of goods (${soldBags} bags × ${money(costPerBag)})`} v={`−${m0(cogs)}`} />
-                <Row l="Boards & camp cost" v={`−${m0(boardCogsM)}`} />
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '8px 0', flexWrap: 'wrap' }}>
+                  <span style={{ fontSize: '13px', color: MUTED }}>Cost per board:</span>
+                  <span style={{ display: 'inline-flex', alignItems: 'center', gap: '3px', color: MUTED }}>$<input value={boardCost} onChange={e => setBoardCost(Number(e.target.value) || 0)} type="number" step="1" style={{ ...inp, width: '70px', padding: '6px 9px' }} /></span>
+                  <span style={{ fontSize: '13px', color: MUTED, marginLeft: '4px' }}>camp pkg:</span>
+                  <span style={{ display: 'inline-flex', alignItems: 'center', gap: '3px', color: MUTED }}>$<input value={campCost} onChange={e => setCampCost(Number(e.target.value) || 0)} type="number" step="1" style={{ ...inp, width: '70px', padding: '6px 9px' }} /></span>
+                  <span style={{ fontSize: '12px', color: '#A2937A' }}>← set the real numbers</span>
+                </div>
+                <Row l={`Boards & camp cost (${BOARDS_MONTH.units} × ${money(boardCost)} + ${CAMP_MONTH.units} × ${money(campCost)})`} v={`−${m0(boardCogsM)}`} />
                 <Row l={`Gross profit  ·  ${pnlPct(pnlGross)}% margin`} v={m0(pnlGross)} bold top />
                 <div style={{ ...lbl, color: KRAFT, margin: '16px 0 4px' }}>Operating expenses</div>
                 <Row l="Advertising" v={`−${m0(adSpend)}`} />
