@@ -24,7 +24,14 @@ const money0 = (n) => '$' + Math.round(n || 0).toLocaleString()
 const todayStr = () => new Date().toISOString().slice(0, 10)
 const fmtDate = (s) => s ? new Date(s + 'T00:00:00').toLocaleDateString([], { month: 'numeric', day: 'numeric', year: '2-digit' }) : ''
 const fmtShort = (s) => s ? new Date(s + 'T00:00:00').toLocaleDateString([], { month: 'short', day: 'numeric' }) : ''
-const uid = () => Math.random().toString(36).slice(2, 9)
+// Order ids are stored in a Postgres `uuid` column, so they must be valid UUIDs.
+const uid = () =>
+  (typeof crypto !== 'undefined' && crypto.randomUUID)
+    ? crypto.randomUUID()
+    : 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, (c) => {
+        const r = (Math.random() * 16) | 0
+        return (c === 'x' ? r : (r & 0x3) | 0x8).toString(16)
+      })
 
 const lineAmt = (it) => { const v = (parseFloat(it.qty) || 1) * (parseFloat(it.price) || 0); return v || (parseFloat(it.amount) || 0) }
 const sumItems = (items) => (items || []).reduce((s, i) => s + lineAmt(i), 0)
