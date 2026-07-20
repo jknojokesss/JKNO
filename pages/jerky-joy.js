@@ -301,9 +301,9 @@ export default function JerkyJoy() {
   const rangeNet = lines.reduce((s, l) => s + l.net, 0)
   const rangeRev = lines.reduce((s, l) => s + l.rev, 0)
 
-  const card = { background: CARDBG, border: `1px solid ${BORDER}`, borderRadius: '14px', padding: '20px' }
+  const card = { background: CARDBG, border: `1px solid ${BORDER}`, borderRadius: '2px', padding: '20px' }
   const lbl = { fontFamily: "'Inter', sans-serif", fontSize: '11px', fontWeight: 600, letterSpacing: '0.7px', textTransform: 'uppercase', color: '#96866C' }
-  const inp = { padding: '10px 12px', fontSize: '14px', border: `1px solid ${BORDER}`, borderRadius: '9px', background: CREAM, color: INK, outline: 'none', fontFamily: 'inherit' }
+  const inp = { padding: '10px 12px', fontSize: '14px', border: `1px solid ${BORDER}`, borderRadius: '2px', background: CREAM, color: INK, outline: 'none', fontFamily: 'inherit' }
   const big = { fontFamily: "'Inter', sans-serif", fontWeight: 700, letterSpacing: '-0.4px' }
   const btn = { fontFamily: "'Inter', sans-serif", fontWeight: 600, fontSize: '13px', letterSpacing: '0.1px', cursor: 'pointer' }
 
@@ -315,7 +315,7 @@ export default function JerkyJoy() {
     </div>
   )
   const MiniToggle = ({ value, onChange }) => (
-    <div style={{ display: 'inline-flex', border: `1px solid ${BORDER}`, borderRadius: '8px', overflow: 'hidden', flexShrink: 0 }}>
+    <div style={{ display: 'inline-flex', border: `1px solid ${BORDER}`, borderRadius: '2px', overflow: 'hidden', flexShrink: 0 }}>
       {[['week', 'Week'], ['month', 'Month']].map(([p, l]) => (
         <button key={p} onClick={() => onChange(p)} style={{ padding: '4px 11px', border: 'none', background: value === p ? CHAR : 'transparent', color: value === p ? CREAM : MUTED, fontFamily: "'Inter', sans-serif", fontSize: '11px', fontWeight: 600, cursor: 'pointer' }}>{l}</button>
       ))}
@@ -329,7 +329,7 @@ export default function JerkyJoy() {
   )
   const Pill = ({ value, opts, map, onChange }) => (
     <select value={value} onClick={(e) => e.stopPropagation()} onChange={(e) => { e.stopPropagation(); onChange(e.target.value) }}
-      style={{ appearance: 'none', WebkitAppearance: 'none', cursor: 'pointer', padding: '6px 26px 6px 12px', borderRadius: '20px', border: 'none',
+      style={{ appearance: 'none', WebkitAppearance: 'none', cursor: 'pointer', padding: '6px 26px 6px 12px', borderRadius: '2px', border: 'none',
         fontFamily: "'Inter', sans-serif", fontSize: '12px', fontWeight: 600, letterSpacing: '0.1px', color: '#fff',
         background: `${map[value].color} url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='10' height='10' viewBox='0 0 10 10'><path d='M2 3.5L5 6.5L8 3.5' stroke='white' stroke-width='1.4' fill='none'/></svg>") no-repeat right 9px center` }}>
       {opts.map(o => <option key={o.id} value={o.id} style={{ color: INK, background: '#fff' }}>{o.label}</option>)}
@@ -365,10 +365,10 @@ export default function JerkyJoy() {
 .jm-shell{display:flex;min-height:100vh;align-items:stretch}
 .jm-side{width:236px;flex-shrink:0;background:${CHAR};color:${CREAM};display:flex;flex-direction:column;padding:22px 14px;position:sticky;top:0;height:100vh}
 .jm-nav{display:flex;flex-direction:column;gap:3px;flex:1}
-.jm-navbtn{display:block;width:100%;text-align:left;padding:11px 14px;border-radius:10px;border:none;background:transparent;color:#B6A78C;font-family:'Inter',sans-serif;font-size:14px;font-weight:500;cursor:pointer;white-space:nowrap;transition:background .15s}
+.jm-navbtn{display:block;width:100%;text-align:left;padding:11px 14px;border-radius:2px;border:none;background:transparent;color:#B6A78C;font-family:'Inter',sans-serif;font-size:14px;font-weight:500;cursor:pointer;white-space:nowrap;transition:background .15s}
 .jm-navbtn:hover{background:rgba(255,255,255,.08);color:${CREAM}}
 .jm-main{flex:1;min-width:0;max-width:1180px;padding:24px 30px 60px}
-@media(max-width:860px){.jm-shell{flex-direction:column}.jm-side{width:auto;height:auto;position:static;flex-direction:column;padding:14px 12px}.jm-nav{flex-direction:row;overflow-x:auto;gap:6px;padding-bottom:4px}.jm-navbtn{width:auto;padding:8px 15px;border-radius:18px;background:rgba(255,255,255,.07)}.jm-main{padding:18px 16px 52px;max-width:100%}}`}</style>
+@media(max-width:860px){.jm-shell{flex-direction:column}.jm-side{width:auto;height:auto;position:static;flex-direction:column;padding:14px 12px}.jm-nav{flex-direction:row;overflow-x:auto;gap:6px;padding-bottom:4px}.jm-navbtn{width:auto;padding:8px 15px;border-radius:2px;background:rgba(255,255,255,.07)}.jm-main{padding:18px 16px 52px;max-width:100%}}`}</style>
       </Head>
 
       <div className="jm-shell">
@@ -401,7 +401,7 @@ export default function JerkyJoy() {
                   {id === 'quickbooks'
                     ? <span style={{ width: '7px', height: '7px', borderRadius: '50%', background: '#4FbE6A', flexShrink: 0 }} />
                     : id === 'askai'
-                      ? <span style={{ fontSize: '9px', fontWeight: 700, color: '#fff', background: SPICE, padding: '2px 6px', borderRadius: '10px', flexShrink: 0 }}>AI</span>
+                      ? <span style={{ fontSize: '9px', fontWeight: 700, color: '#fff', background: SPICE, padding: '2px 6px', borderRadius: '2px', flexShrink: 0 }}>AI</span>
                       : null}
                 </button>
               )
@@ -431,7 +431,7 @@ export default function JerkyJoy() {
             <>
               <div style={{ display: 'flex', gap: '6px', marginBottom: '16px', flexWrap: 'wrap' }}>
                 {[['week', 'This week'], ['month', 'This month']].map(([v, l]) => (
-                  <button key={v} onClick={() => setPeriod(v)} style={{ padding: '8px 16px', borderRadius: '18px', border: `1px solid ${period === v ? CHAR : BORDER}`, background: period === v ? CHAR : CARDBG, color: period === v ? CREAM : MUTED, ...btn }}>{l}</button>
+                  <button key={v} onClick={() => setPeriod(v)} style={{ padding: '8px 16px', borderRadius: '2px', border: `1px solid ${period === v ? CHAR : BORDER}`, background: period === v ? CHAR : CARDBG, color: period === v ? CREAM : MUTED, ...btn }}>{l}</button>
                 ))}
               </div>
 
@@ -452,7 +452,7 @@ export default function JerkyJoy() {
                         <span style={{ ...big, fontSize: '15px', color: INK }}>{m0(pv(c))}</span>
                       </div>
                       <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                        <div style={{ flex: 1, height: '6px', background: CREAM, borderRadius: '4px', overflow: 'hidden' }}>
+                        <div style={{ flex: 1, height: '6px', background: CREAM, borderRadius: '2px', overflow: 'hidden' }}>
                           <div style={{ width: `${Math.round(pv(c) / max * 100)}%`, height: '100%', background: KRAFT }} />
                         </div>
                         <span style={{ fontSize: '11px', color: MUTED, whiteSpace: 'nowrap' }}>{pb(c)} bags sold</span>
@@ -469,7 +469,7 @@ export default function JerkyJoy() {
                         <span style={{ ...big, fontSize: '15px', color: GREEN }}>{m0(pv(d))}</span>
                       </div>
                       <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                        <div style={{ flex: 1, height: '6px', background: CREAM, borderRadius: '4px', overflow: 'hidden' }}>
+                        <div style={{ flex: 1, height: '6px', background: CREAM, borderRadius: '2px', overflow: 'hidden' }}>
                           <div style={{ width: `${Math.round(pv(d) / max * 100)}%`, height: '100%', background: GREEN }} />
                         </div>
                         <span style={{ fontSize: '11px', color: MUTED, whiteSpace: 'nowrap' }}>{pb(d)} bags · {d.source}</span>
@@ -486,7 +486,7 @@ export default function JerkyJoy() {
                 </div>
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(148px, 1fr))', gap: '12px' }}>
                   {PRODUCTS.slice().sort((a, b) => b[period] - a[period]).map(p => (
-                    <div key={p.name} style={{ border: `1px solid ${BORDER}`, borderRadius: '12px', padding: '16px 12px 14px', textAlign: 'center', background: CREAM }}>
+                    <div key={p.name} style={{ border: `1px solid ${BORDER}`, borderRadius: '2px', padding: '16px 12px 14px', textAlign: 'center', background: CREAM }}>
                       <Bag color={p.color} />
                       <div style={{ fontWeight: 600, color: INK, marginTop: '8px', fontSize: '14px' }}>{p.name}</div>
                       <div style={{ ...big, fontSize: '26px', color: INK, marginTop: '4px' }}>{p[period]}</div>
@@ -503,7 +503,7 @@ export default function JerkyJoy() {
           {tab === 'pnl' && (
             <div style={{ display: 'flex', gap: '6px', marginBottom: '16px', flexWrap: 'wrap' }}>
               {[['single', 'This month'], ['compare', 'Compare months']].map(([v, l]) => (
-                <button key={v} onClick={() => setPnlView(v)} style={{ padding: '8px 16px', borderRadius: '18px', border: `1px solid ${pnlView === v ? CHAR : BORDER}`, background: pnlView === v ? CHAR : CARDBG, color: pnlView === v ? CREAM : MUTED, ...btn }}>{l}</button>
+                <button key={v} onClick={() => setPnlView(v)} style={{ padding: '8px 16px', borderRadius: '2px', border: `1px solid ${pnlView === v ? CHAR : BORDER}`, background: pnlView === v ? CHAR : CARDBG, color: pnlView === v ? CREAM : MUTED, ...btn }}>{l}</button>
               ))}
             </div>
           )}
@@ -534,7 +534,7 @@ export default function JerkyJoy() {
                 <Row l="Advertising" v={`−${m0(adSpend)}`} />
                 {[...new Set(expenses.filter(e => !COGS_CATS.includes(e.cat)).map(e => e.cat))].map(cat => { const v = expenses.filter(e => e.cat === cat).reduce((s, e) => s + e.amt, 0); return <Row key={cat} l={cat} v={`−${m0(v)}`} /> })}
                 <Row l="Total operating expenses" v={`−${m0(totalOpex)}`} bold top />
-                <div style={{ marginTop: '12px', padding: '12px 14px', background: netProfit >= 0 ? '#EAF3EC' : '#FBEDE9', borderRadius: '10px' }}>
+                <div style={{ marginTop: '12px', padding: '12px 14px', background: netProfit >= 0 ? '#EAF3EC' : '#FBEDE9', borderRadius: '2px' }}>
                   <Row l={`${netProfit >= 0 ? 'Net profit' : 'Net loss'}  ·  ${pct(netProfit)}% margin`} v={m0(netProfit)} bold neg={netProfit < 0} />
                 </div>
               </div>
@@ -547,7 +547,7 @@ export default function JerkyJoy() {
               <div style={{ display: 'flex', gap: '8px', marginBottom: '16px', flexWrap: 'wrap', alignItems: 'center' }}>
                 <span style={{ ...lbl }}>Compare</span>
                 {[2, 3, 6, 12].map(n => (
-                  <button key={n} onClick={() => setPnlMonths(n)} style={{ padding: '7px 15px', borderRadius: '18px', border: `1px solid ${pnlMonths === n ? CHAR : BORDER}`, background: pnlMonths === n ? CHAR : CARDBG, color: pnlMonths === n ? CREAM : MUTED, ...btn, fontSize: '13px' }}>{n} mo</button>
+                  <button key={n} onClick={() => setPnlMonths(n)} style={{ padding: '7px 15px', borderRadius: '2px', border: `1px solid ${pnlMonths === n ? CHAR : BORDER}`, background: pnlMonths === n ? CHAR : CARDBG, color: pnlMonths === n ? CREAM : MUTED, ...btn, fontSize: '13px' }}>{n} mo</button>
                 ))}
               </div>
 
@@ -628,7 +628,7 @@ export default function JerkyJoy() {
               )}
 
               {!adding ? (
-                <button onClick={() => setAdding(true)} style={{ width: '100%', background: CHAR, color: CREAM, border: 'none', borderRadius: '11px', padding: '13px', ...btn, marginBottom: '16px' }}>+ Add a consignment partner</button>
+                <button onClick={() => setAdding(true)} style={{ width: '100%', background: CHAR, color: CREAM, border: 'none', borderRadius: '2px', padding: '13px', ...btn, marginBottom: '16px' }}>+ Add a consignment partner</button>
               ) : (
                 <div style={{ ...card, marginBottom: '16px' }}>
                   <div style={{ ...lbl, marginBottom: '12px' }}>New consignment partner</div>
@@ -638,8 +638,8 @@ export default function JerkyJoy() {
                     <input value={cf.sent} onChange={e => setCf({ ...cf, sent: e.target.value })} type="number" placeholder="Units sent" style={{ ...inp, flex: 1, minWidth: '100px' }} />
                   </div>
                   <div style={{ display: 'flex', gap: '8px', marginTop: '12px' }}>
-                    <button onClick={() => setAdding(false)} style={{ flex: 1, background: 'none', border: `1px solid ${BORDER}`, borderRadius: '9px', padding: '11px', ...btn, color: MUTED }}>Cancel</button>
-                    <button onClick={addPartner} style={{ flex: 2, background: SPICE, color: '#fff', border: 'none', borderRadius: '9px', padding: '11px', ...btn }}>+ Add partner</button>
+                    <button onClick={() => setAdding(false)} style={{ flex: 1, background: 'none', border: `1px solid ${BORDER}`, borderRadius: '2px', padding: '11px', ...btn, color: MUTED }}>Cancel</button>
+                    <button onClick={addPartner} style={{ flex: 2, background: SPICE, color: '#fff', border: 'none', borderRadius: '2px', padding: '11px', ...btn }}>+ Add partner</button>
                   </div>
                 </div>
               )}
@@ -658,12 +658,12 @@ export default function JerkyJoy() {
                           </div>
                         </div>
                         <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '6px' }}>
-                          <span style={{ fontFamily: "'Inter', sans-serif", fontSize: '12px', fontWeight: 600, color: '#fff', background: badge.c, padding: '5px 11px', borderRadius: '20px', whiteSpace: 'nowrap' }}>{badge.t}</span>
-                          {c.restock && c.restock !== 'good' && <span style={{ fontSize: '11px', fontWeight: 600, color: RM[c.restock].color, background: RM[c.restock].color + '1A', padding: '3px 10px', borderRadius: '20px', whiteSpace: 'nowrap' }}>{RM[c.restock].label}</span>}
+                          <span style={{ fontFamily: "'Inter', sans-serif", fontSize: '12px', fontWeight: 600, color: '#fff', background: badge.c, padding: '5px 11px', borderRadius: '2px', whiteSpace: 'nowrap' }}>{badge.t}</span>
+                          {c.restock && c.restock !== 'good' && <span style={{ fontSize: '11px', fontWeight: 600, color: RM[c.restock].color, background: RM[c.restock].color + '1A', padding: '3px 10px', borderRadius: '2px', whiteSpace: 'nowrap' }}>{RM[c.restock].label}</span>}
                         </div>
                       </div>
                       {c.variance > 0 && c.diagnosis && (
-                        <div style={{ marginTop: '10px', fontSize: '12.5px', color: c.diagnosis.includes('owes') ? RED : INK, background: c.diagnosis.includes('owes') ? '#FBEDE9' : CREAM, border: `1px solid ${c.diagnosis.includes('owes') ? '#E7C3B8' : BORDER}`, borderRadius: '8px', padding: '8px 11px', display: 'flex', alignItems: 'center', gap: '7px' }}>
+                        <div style={{ marginTop: '10px', fontSize: '12.5px', color: c.diagnosis.includes('owes') ? RED : INK, background: c.diagnosis.includes('owes') ? '#FBEDE9' : CREAM, border: `1px solid ${c.diagnosis.includes('owes') ? '#E7C3B8' : BORDER}`, borderRadius: '2px', padding: '8px 11px', display: 'flex', alignItems: 'center', gap: '7px' }}>
                           <span style={{ width: '7px', height: '7px', borderRadius: '50%', background: c.diagnosis.includes('owes') ? RED : KRAFT, flexShrink: 0 }} />
                           <span>Diagnosed: <b>{c.diagnosis}</b></span>
                         </div>
@@ -673,7 +673,7 @@ export default function JerkyJoy() {
                     {open && (
                       <div style={{ padding: '0 18px 18px', borderTop: `1px solid ${CREAM}` }}>
                         <div style={{ ...lbl, margin: '14px 0 6px' }}>The reconciliation</div>
-                        <div style={{ background: CREAM, borderRadius: '10px', padding: '14px 16px' }}>
+                        <div style={{ background: CREAM, borderRadius: '2px', padding: '14px 16px' }}>
                           <Row l="Units sent out" v={c.sent} />
                           <Row l={`− Paid by checks (${money(c.paid)} ÷ ${money(c.price)})`} v={`−${c.paidUnits}`} />
                           <Row l="− Returned to you" v={`−${c.returned}`} />
@@ -692,7 +692,7 @@ export default function JerkyJoy() {
                               {DIAGNOSES.map(d => <option key={d} value={d}>{d || 'Pick a reason…'}</option>)}
                             </select>
                             {c.diagnosis === 'Sold but not reported (store owes me)' && (
-                              <div style={{ marginTop: '8px', fontSize: '13px', color: RED, background: '#FBEDE9', borderRadius: '8px', padding: '9px 12px' }}>
+                              <div style={{ marginTop: '8px', fontSize: '13px', color: RED, background: '#FBEDE9', borderRadius: '2px', padding: '9px 12px' }}>
                                 Then <b>{c.store}</b> owes you <b>{money(c.varVal)}</b>. Send them an invoice for the {c.variance} units.
                               </div>
                             )}
@@ -703,22 +703,22 @@ export default function JerkyJoy() {
                         <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
                           <div style={{ flex: 1, minWidth: '150px', display: 'flex', gap: '6px' }}>
                             <input value={dv(c.id + '_chk')} onChange={e => setDv(c.id + '_chk', e.target.value)} type="number" placeholder="Check $" style={{ ...inp, flex: 1, minWidth: 0 }} />
-                            <button onClick={() => logCheck(c.id)} style={{ background: GREEN, color: '#fff', border: 'none', borderRadius: '9px', padding: '0 14px', ...btn, fontSize: '12px' }}>Log</button>
+                            <button onClick={() => logCheck(c.id)} style={{ background: GREEN, color: '#fff', border: 'none', borderRadius: '2px', padding: '0 14px', ...btn, fontSize: '12px' }}>Log</button>
                           </div>
                           <div style={{ flex: 1, minWidth: '150px', display: 'flex', gap: '6px' }}>
                             <input value={dv(c.id + '_cnt')} onChange={e => setDv(c.id + '_cnt', e.target.value)} type="number" placeholder="Count on shelf" style={{ ...inp, flex: 1, minWidth: 0 }} />
-                            <button onClick={() => logCount(c.id)} style={{ background: KRAFT, color: '#fff', border: 'none', borderRadius: '9px', padding: '0 14px', ...btn, fontSize: '12px' }}>Log</button>
+                            <button onClick={() => logCount(c.id)} style={{ background: KRAFT, color: '#fff', border: 'none', borderRadius: '2px', padding: '0 14px', ...btn, fontSize: '12px' }}>Log</button>
                           </div>
                           <div style={{ flex: 1, minWidth: '150px', display: 'flex', gap: '6px' }}>
                             <input value={dv(c.id + '_shp')} onChange={e => setDv(c.id + '_shp', e.target.value)} type="number" placeholder="Ship more" style={{ ...inp, flex: 1, minWidth: 0 }} />
-                            <button onClick={() => shipMore(c.id)} style={{ background: CHAR, color: CREAM, border: 'none', borderRadius: '9px', padding: '0 14px', ...btn, fontSize: '12px' }}>Ship</button>
+                            <button onClick={() => shipMore(c.id)} style={{ background: CHAR, color: CREAM, border: 'none', borderRadius: '2px', padding: '0 14px', ...btn, fontSize: '12px' }}>Ship</button>
                           </div>
                         </div>
 
                         <div style={{ ...lbl, margin: '18px 0 8px' }}>Store relationship</div>
                         <div style={{ display: 'flex', gap: '10px', alignItems: 'center', flexWrap: 'wrap', marginBottom: '10px' }}>
                           <span style={{ fontSize: '13px', color: MUTED }}>Last spoke: <b style={{ color: INK }}>{fmtD(c.lastContact)}</b>{c.lastContact ? ` · ${daysSince(c.lastContact)}d ago` : ''}</span>
-                          <button onClick={() => upd(c.id, { lastContact: todayStr }, 'Spoke with the store')} style={{ background: KRAFT, color: '#fff', border: 'none', borderRadius: '20px', padding: '5px 13px', ...btn, fontSize: '11px' }}>Spoke today</button>
+                          <button onClick={() => upd(c.id, { lastContact: todayStr }, 'Spoke with the store')} style={{ background: KRAFT, color: '#fff', border: 'none', borderRadius: '2px', padding: '5px 13px', ...btn, fontSize: '11px' }}>Spoke today</button>
                         </div>
                         <div style={{ display: 'flex', gap: '10px', alignItems: 'center', flexWrap: 'wrap', marginBottom: '10px' }}>
                           <span style={{ fontSize: '13px', color: MUTED }}>Do they need more?</span>
@@ -729,7 +729,7 @@ export default function JerkyJoy() {
                         <textarea value={c.notes || ''} onChange={e => upd(c.id, { notes: e.target.value })} rows={2} placeholder="Notes — who you talk to, what they like, what they said…" style={{ ...inp, width: '100%', resize: 'vertical', fontFamily: 'inherit' }} />
 
                         <div style={{ ...lbl, margin: '18px 0 6px' }}>End of cycle</div>
-                        <button onClick={() => { if (window.confirm(`Close out cycle ${c.cycle || 1} for ${c.store}? This settles the ${c.variance > 0 ? c.variance + ' missing bags' : 'reconciliation'} and starts a fresh cycle from the ${c.counted == null ? 0 : c.counted} bags on the shelf now.`)) closeOut(c.id) }} style={{ width: '100%', background: 'none', color: INK, border: `1px solid ${BORDER}`, borderRadius: '10px', padding: '12px', ...btn }}>Close out this cycle →</button>
+                        <button onClick={() => { if (window.confirm(`Close out cycle ${c.cycle || 1} for ${c.store}? This settles the ${c.variance > 0 ? c.variance + ' missing bags' : 'reconciliation'} and starts a fresh cycle from the ${c.counted == null ? 0 : c.counted} bags on the shelf now.`)) closeOut(c.id) }} style={{ width: '100%', background: 'none', color: INK, border: `1px solid ${BORDER}`, borderRadius: '2px', padding: '12px', ...btn }}>Close out this cycle →</button>
                         <p style={{ fontSize: '12px', color: MUTED, marginTop: '7px', lineHeight: 1.5 }}>
                           {c.variance > 0
                             ? <>Settles the <b>{c.variance} missing</b> {c.diagnosis === 'Sold but not reported (store owes me)' ? <>by <b style={{ color: RED }}>invoicing the store {money(c.varVal)}</b></> : <>as a <b>write-off</b></>}, then resets the count clean for the next delivery — so old gaps never bleed into the new cycle.</>
@@ -764,7 +764,7 @@ export default function JerkyJoy() {
                 <KPI k="Avg $ / unit" v={directUnits ? money(directRev / directUnits) : '—'} sub="$13 retail vs ~$8.5 consignment" accent={KRAFT} />
               </div>
               {!addingD ? (
-                <button onClick={() => setAddingD(true)} style={{ width: '100%', background: CHAR, color: CREAM, border: 'none', borderRadius: '11px', padding: '13px', ...btn, marginBottom: '16px' }}>+ Log a direct sale</button>
+                <button onClick={() => setAddingD(true)} style={{ width: '100%', background: CHAR, color: CREAM, border: 'none', borderRadius: '2px', padding: '13px', ...btn, marginBottom: '16px' }}>+ Log a direct sale</button>
               ) : (
                 <div style={{ ...card, marginBottom: '16px' }}>
                   <div style={{ ...lbl, marginBottom: '12px' }}>New direct sale</div>
@@ -779,8 +779,8 @@ export default function JerkyJoy() {
                     <input value={df.rev} onChange={e => setDf({ ...df, rev: e.target.value })} type="number" placeholder="$ total" style={{ ...inp, flex: 1, minWidth: '100px' }} />
                   </div>
                   <div style={{ display: 'flex', gap: '8px', marginTop: '12px' }}>
-                    <button onClick={() => setAddingD(false)} style={{ flex: 1, background: 'none', border: `1px solid ${BORDER}`, borderRadius: '9px', padding: '11px', ...btn, color: MUTED }}>Cancel</button>
-                    <button onClick={addDirect} style={{ flex: 2, background: SPICE, color: '#fff', border: 'none', borderRadius: '9px', padding: '11px', ...btn }}>+ Log sale</button>
+                    <button onClick={() => setAddingD(false)} style={{ flex: 1, background: 'none', border: `1px solid ${BORDER}`, borderRadius: '2px', padding: '11px', ...btn, color: MUTED }}>Cancel</button>
+                    <button onClick={addDirect} style={{ flex: 2, background: SPICE, color: '#fff', border: 'none', borderRadius: '2px', padding: '11px', ...btn }}>+ Log sale</button>
                   </div>
                 </div>
               )}
@@ -816,8 +816,8 @@ export default function JerkyJoy() {
               {!addingE ? (
                 <>
                   <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', marginBottom: '8px' }}>
-                    <button onClick={() => fileRef.current && fileRef.current.click()} style={{ flex: 2, minWidth: '180px', background: CHAR, color: CREAM, border: 'none', borderRadius: '11px', padding: '13px', ...btn }}>Import expenses (CSV)</button>
-                    <button onClick={() => setAddingE(true)} style={{ flex: 1, minWidth: '150px', background: CARDBG, color: INK, border: `1px solid ${BORDER}`, borderRadius: '11px', padding: '13px', ...btn }}>Add one manually</button>
+                    <button onClick={() => fileRef.current && fileRef.current.click()} style={{ flex: 2, minWidth: '180px', background: CHAR, color: CREAM, border: 'none', borderRadius: '2px', padding: '13px', ...btn }}>Import expenses (CSV)</button>
+                    <button onClick={() => setAddingE(true)} style={{ flex: 1, minWidth: '150px', background: CARDBG, color: INK, border: `1px solid ${BORDER}`, borderRadius: '2px', padding: '13px', ...btn }}>Add one manually</button>
                     <input ref={fileRef} type="file" accept=".csv,text/csv" onChange={importCSV} style={{ display: 'none' }} />
                   </div>
                   <p style={{ fontSize: '12px', color: MUTED, marginBottom: '16px' }}>Drop in your personal-card statement (CSV: vendor, amount, category) and every line loads at once.</p>
@@ -833,8 +833,8 @@ export default function JerkyJoy() {
                     </select>
                   </div>
                   <div style={{ display: 'flex', gap: '8px', marginTop: '12px' }}>
-                    <button onClick={() => setAddingE(false)} style={{ flex: 1, background: 'none', border: `1px solid ${BORDER}`, borderRadius: '9px', padding: '11px', ...btn, color: MUTED }}>Cancel</button>
-                    <button onClick={addExpense} style={{ flex: 2, background: SPICE, color: '#fff', border: 'none', borderRadius: '9px', padding: '11px', ...btn }}>Add expense</button>
+                    <button onClick={() => setAddingE(false)} style={{ flex: 1, background: 'none', border: `1px solid ${BORDER}`, borderRadius: '2px', padding: '11px', ...btn, color: MUTED }}>Cancel</button>
+                    <button onClick={addExpense} style={{ flex: 2, background: SPICE, color: '#fff', border: 'none', borderRadius: '2px', padding: '11px', ...btn }}>Add expense</button>
                   </div>
                 </div>
               )}
@@ -852,7 +852,7 @@ export default function JerkyJoy() {
               ))}
               {personalItems > 0 && (
                 <div style={{ marginTop: '6px' }}>
-                  <button onClick={exportPersonal} style={{ background: 'none', border: `1px solid ${BORDER}`, borderRadius: '9px', padding: '9px 14px', ...btn, color: MUTED }}>⤓ Export for books (CSV)</button>
+                  <button onClick={exportPersonal} style={{ background: 'none', border: `1px solid ${BORDER}`, borderRadius: '2px', padding: '9px 14px', ...btn, color: MUTED }}>⤓ Export for books (CSV)</button>
                   <p style={{ fontSize: '12px', color: MUTED, marginTop: '7px', lineHeight: 1.5 }}>The raw file, for your accountant if they want it — but you don't need this. I post these into QuickBooks for you at close.</p>
                 </div>
               )}
@@ -871,7 +871,7 @@ export default function JerkyJoy() {
                 <b style={{ color: INK }}>How each sale is traced to a channel:</b> a unique promo code per channel (IG10, NJFOODIE), the Meta/Google pixel on your Shopify store, or a “how’d you hear about us?” at checkout. Channels marked <b style={{ color: AMBER }}>“est.”</b> have no code yet — their ROI is a guess.
               </div>
               {!addingA ? (
-                <button onClick={() => setAddingA(true)} style={{ width: '100%', background: CHAR, color: CREAM, border: 'none', borderRadius: '11px', padding: '13px', ...btn, marginBottom: '16px' }}>+ Add a channel</button>
+                <button onClick={() => setAddingA(true)} style={{ width: '100%', background: CHAR, color: CREAM, border: 'none', borderRadius: '2px', padding: '13px', ...btn, marginBottom: '16px' }}>+ Add a channel</button>
               ) : (
                 <div style={{ ...card, marginBottom: '16px' }}>
                   <div style={{ ...lbl, marginBottom: '12px' }}>New ad channel</div>
@@ -884,8 +884,8 @@ export default function JerkyJoy() {
                     <input value={af.rev} onChange={e => setAf({ ...af, rev: e.target.value })} type="number" placeholder="$ sales it drove" style={{ ...inp, flex: 1, minWidth: '120px' }} />
                   </div>
                   <div style={{ display: 'flex', gap: '8px', marginTop: '12px' }}>
-                    <button onClick={() => setAddingA(false)} style={{ flex: 1, background: 'none', border: `1px solid ${BORDER}`, borderRadius: '9px', padding: '11px', ...btn, color: MUTED }}>Cancel</button>
-                    <button onClick={addAd} style={{ flex: 2, background: SPICE, color: '#fff', border: 'none', borderRadius: '9px', padding: '11px', ...btn }}>+ Add channel</button>
+                    <button onClick={() => setAddingA(false)} style={{ flex: 1, background: 'none', border: `1px solid ${BORDER}`, borderRadius: '2px', padding: '11px', ...btn, color: MUTED }}>Cancel</button>
+                    <button onClick={addAd} style={{ flex: 2, background: SPICE, color: '#fff', border: 'none', borderRadius: '2px', padding: '11px', ...btn }}>+ Add channel</button>
                   </div>
                 </div>
               )}
@@ -901,9 +901,9 @@ export default function JerkyJoy() {
                           <div style={{ fontSize: '12.5px', color: MUTED, marginTop: '3px' }}>{m0(a.spend)} spent → {m0(a.rev)} back · <b style={{ color: vd.c }}>{roas.toFixed(1)}x{a.tracked ? '' : ' est.'}</b></div>
                           <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '12px', color: a.tracked ? KRAFT : AMBER, marginTop: '5px' }}><span style={{ width: '6px', height: '6px', borderRadius: '50%', background: a.tracked ? KRAFT : AMBER, flexShrink: 0 }} />{a.track}</div>
                         </div>
-                        <span style={{ fontFamily: "'Inter', sans-serif", fontSize: '12px', fontWeight: 600, color: '#fff', background: vd.c, padding: '5px 12px', borderRadius: '20px' }}>{vd.t}</span>
+                        <span style={{ fontFamily: "'Inter', sans-serif", fontSize: '12px', fontWeight: 600, color: '#fff', background: vd.c, padding: '5px 12px', borderRadius: '2px' }}>{vd.t}</span>
                       </div>
-                      <div style={{ marginTop: '12px', height: '8px', background: CREAM, borderRadius: '5px', overflow: 'hidden', display: 'flex' }}>
+                      <div style={{ marginTop: '12px', height: '8px', background: CREAM, borderRadius: '2px', overflow: 'hidden', display: 'flex' }}>
                         <div style={{ width: `${Math.min(roas / 4 * 100, 100)}%`, background: vd.c }} />
                       </div>
                     </div>
@@ -938,7 +938,7 @@ export default function JerkyJoy() {
             <>
               <div style={{ ...card, marginBottom: '16px' }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '14px', marginBottom: '10px' }}>
-                  <div style={{ width: '44px', height: '44px', borderRadius: '10px', background: '#2CA01C', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', ...big, fontSize: '19px' }}>qb</div>
+                  <div style={{ width: '44px', height: '44px', borderRadius: '2px', background: '#2CA01C', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', ...big, fontSize: '19px' }}>qb</div>
                   <div>
                     <div style={{ ...big, fontSize: '18px', color: INK }}>QuickBooks → your books</div>
                     <div style={{ fontSize: '12.5px', color: MUTED, marginTop: '2px' }}>Export from QuickBooks, drop the files in here.</div>
@@ -961,7 +961,7 @@ export default function JerkyJoy() {
                     </div>
                   </div>
                   <div>
-                    <button onClick={() => b.rf.current && b.rf.current.click()} style={{ background: CARDBG, color: INK, border: `1px solid ${BORDER}`, borderRadius: '10px', padding: '11px 18px', ...btn }}>Drop in / replace</button>
+                    <button onClick={() => b.rf.current && b.rf.current.click()} style={{ background: CARDBG, color: INK, border: `1px solid ${BORDER}`, borderRadius: '2px', padding: '11px 18px', ...btn }}>Drop in / replace</button>
                     <input ref={b.rf} type="file" accept=".csv,.txt" onChange={e => importBook(e, b.setter)} style={{ display: 'none' }} />
                   </div>
                 </div>
@@ -1000,7 +1000,7 @@ export default function JerkyJoy() {
                 <Row l="Invoice stores for sold-not-reported bags" v={m0(closeAR)} bold top />
                 {closeAR === 0 && <p style={{ fontSize: '12px', color: MUTED, marginTop: '4px' }}>None flagged yet — diagnose missing pieces as “sold but not reported” on the Consignment tab to invoice them.</p>}
 
-                <div style={{ marginTop: '16px', padding: '12px 14px', background: CREAM, borderRadius: '10px', border: `1px dashed ${BORDER}` }}>
+                <div style={{ marginTop: '16px', padding: '12px 14px', background: CREAM, borderRadius: '2px', border: `1px dashed ${BORDER}` }}>
                   <div style={{ ...lbl, marginBottom: '4px' }}>Booked elsewhere — do NOT re-enter</div>
                   <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '13px', color: MUTED }}>
                     <span>Shopify online sales <span style={{ color: '#A2937A' }}>(via Shopify → QuickBooks)</span></span>
@@ -1009,7 +1009,7 @@ export default function JerkyJoy() {
                 </div>
               </div>
 
-              <button onClick={exportClose} style={{ marginTop: '14px', background: CHAR, color: CREAM, border: 'none', borderRadius: '11px', padding: '13px 20px', ...btn }}>⤓ Export for QuickBooks (CSV)</button>
+              <button onClick={exportClose} style={{ marginTop: '14px', background: CHAR, color: CREAM, border: 'none', borderRadius: '2px', padding: '13px 20px', ...btn }}>⤓ Export for QuickBooks (CSV)</button>
             </>
           )}
 
@@ -1019,7 +1019,7 @@ export default function JerkyJoy() {
               <div style={{ ...card, marginBottom: '16px', borderColor: 'rgba(200,70,44,.28)' }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '4px' }}>
                   <span style={{ ...big, fontSize: '18px', color: INK }}>Ask your numbers</span>
-                  <span style={{ fontSize: '10px', fontWeight: 700, color: '#fff', background: SPICE, padding: '2px 8px', borderRadius: '10px' }}>PREVIEW</span>
+                  <span style={{ fontSize: '10px', fontWeight: 700, color: '#fff', background: SPICE, padding: '2px 8px', borderRadius: '2px' }}>PREVIEW</span>
                 </div>
                 <div style={{ fontSize: '13.5px', color: MUTED, lineHeight: 1.55 }}>A look at what's coming: ask plain-English questions about your business and get answers straight from your live data. Here are a few samples.</div>
               </div>
@@ -1030,17 +1030,17 @@ export default function JerkyJoy() {
               ].map((m, i) => (
                 <div key={i} style={{ marginBottom: '16px' }}>
                   <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: '8px' }}>
-                    <div style={{ background: CHAR, color: CREAM, padding: '10px 14px', borderRadius: '14px 14px 4px 14px', maxWidth: '80%', fontSize: '14px' }}>{m.q}</div>
+                    <div style={{ background: CHAR, color: CREAM, padding: '10px 14px', borderRadius: '2px 14px 4px 14px', maxWidth: '80%', fontSize: '14px' }}>{m.q}</div>
                   </div>
                   <div style={{ display: 'flex', gap: '10px', alignItems: 'flex-start' }}>
-                    <div style={{ width: '30px', height: '30px', borderRadius: '8px', background: SPICE, color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, ...big, fontSize: '12px' }}>JK</div>
+                    <div style={{ width: '30px', height: '30px', borderRadius: '2px', background: SPICE, color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, ...big, fontSize: '12px' }}>JK</div>
                     <div style={{ ...card, padding: '13px 15px', fontSize: '14px', lineHeight: 1.55, maxWidth: '85%' }}>{m.a}</div>
                   </div>
                 </div>
               ))}
               <div style={{ ...card, display: 'flex', gap: '8px', alignItems: 'center', marginTop: '8px' }}>
                 <input disabled placeholder="Ask anything about your business…" style={{ ...inp, flex: 1, background: '#fff', cursor: 'not-allowed' }} />
-                <button disabled style={{ background: MUTED, color: '#fff', border: 'none', borderRadius: '9px', padding: '11px 18px', ...btn, cursor: 'not-allowed' }}>Send</button>
+                <button disabled style={{ background: MUTED, color: '#fff', border: 'none', borderRadius: '2px', padding: '11px 18px', ...btn, cursor: 'not-allowed' }}>Send</button>
               </div>
               <p style={{ fontSize: '12px', color: MUTED, marginTop: '10px', textAlign: 'center' }}>Live Q&amp;A is on the roadmap — this is a preview of the feature.</p>
             </>
