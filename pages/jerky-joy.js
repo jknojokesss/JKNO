@@ -363,7 +363,7 @@ export default function JerkyJoy() {
   )
 
   const TABS = [['overview', 'Overview'], ['consign', 'Consignment'], ['direct', 'Direct Sales'], ['ads', 'Advertising'], ['pnl', 'P&L']]
-  const EXTRA = [['expenses', 'Import expenses'], ['quickbooks', 'QuickBooks sync'], ['close', 'Monthly close'], ['askai', 'Ask AI']]
+  const EXTRA = [['expenses', 'Import expenses'], ['quickbooks', 'QuickBooks sync'], ['close', 'Monthly close'], ['askai', 'Ask Us']]
   const currentLabel = ([...TABS, ...EXTRA].find(t => t[0] === tab) || ['', ''])[1]
 
   return (
@@ -428,7 +428,7 @@ export default function JerkyJoy() {
                   {id === 'quickbooks'
                     ? <span style={{ width: '7px', height: '7px', borderRadius: '50%', background: '#4FbE6A', flexShrink: 0 }} />
                     : id === 'askai'
-                      ? <span style={{ fontSize: '9px', fontWeight: 700, color: '#fff', background: SPICE, padding: '2px 6px', borderRadius: '2px', flexShrink: 0 }}>AI</span>
+                      ? <span style={{ fontSize: '9px', fontWeight: 700, color: '#fff', background: SPICE, padding: '2px 6px', borderRadius: '2px', flexShrink: 0 }}>NEW</span>
                       : null}
                 </button>
               )
@@ -1073,7 +1073,7 @@ export default function JerkyJoy() {
             </>
           )}
 
-          {/* ===== ASK AI (preview) ===== */}
+          {/* ===== ASK US (preview) ===== */}
           {tab === 'askai' && (
             <>
               <div style={{ ...card, marginBottom: '16px', borderColor: 'rgba(200,70,44,.28)' }}>
