@@ -24,9 +24,9 @@ const recon = (c) => {
 }
 
 const SEED_CONSIGN = [
-  { id: uid(), store: 'Gourmet Glatt North', price: 8.5, sent: 60, returned: 0, paid: 425, counted: 6, countedDate: '2026-06-15', diagnosis: '', cycle: 1, lastContact: '2026-06-15', restock: 'now', notes: 'Manager Yossi reorders every ~2 weeks. Wants more Barbecue.', log: [{ at: 'Jun 15', t: 'Counted 6 on shelf' }, { at: 'Jun 6', t: 'Check received $425' }] },
+  { id: uid(), store: 'Gourmet Glatt North', price: 8.5, sent: 60, returned: 0, paid: 425, counted: 6, countedDate: '2026-06-15', diagnosis: '', cycle: 1, lastContact: '2026-06-15', restock: 'now', notes: 'Manager Yossi reorders every ~2 weeks. Wants more BBQ.', log: [{ at: 'Jun 15', t: 'Counted 6 on shelf' }, { at: 'Jun 6', t: 'Check received $425' }] },
   { id: uid(), store: 'Gourmet Glatt South', price: 8.5, sent: 48, returned: 4, paid: 340, counted: 2, countedDate: '2026-06-15', diagnosis: '', cycle: 1, lastContact: '2026-06-12', restock: 'now', notes: 'Down to 2 bags — promised a delivery this week.', log: [{ at: 'Jun 15', t: 'Counted 2 on shelf' }, { at: 'Jun 5', t: 'Check received $340' }] },
-  { id: uid(), store: 'Seasons', price: 9, sent: 54, returned: 0, paid: 360, counted: 14, countedDate: '2026-06-14', diagnosis: '', cycle: 1, lastContact: '2026-06-14', restock: 'good', notes: 'Steady account. Likes the Maple Bourbon.', log: [{ at: 'Jun 14', t: 'Counted 14 — reconciles clean' }, { at: 'Jun 4', t: 'Check received $360' }] },
+  { id: uid(), store: 'Seasons', price: 9, sent: 54, returned: 0, paid: 360, counted: 14, countedDate: '2026-06-14', diagnosis: '', cycle: 1, lastContact: '2026-06-14', restock: 'good', notes: 'Steady account. Likes the Korean.', log: [{ at: 'Jun 14', t: 'Counted 14 — reconciles clean' }, { at: 'Jun 4', t: 'Check received $360' }] },
   { id: uid(), store: 'Nutmeg', price: 8, sent: 40, returned: 0, paid: 200, counted: 8, countedDate: '2026-06-16', diagnosis: '', cycle: 1, lastContact: '2026-05-26', restock: 'soon', notes: "Haven't spoken in ~3 weeks — check in, and ask about the missing bags.", log: [{ at: 'Jun 16', t: 'Counted 8 on shelf' }, { at: 'Jun 2', t: 'Check received $200' }] },
   { id: uid(), store: 'Aisle 9 Jackson', price: 8.5, sent: 36, returned: 0, paid: 255, counted: 4, countedDate: '2026-06-13', diagnosis: '', cycle: 1, lastContact: '2026-06-13', restock: 'soon', notes: 'New buyer contact — trial going well so far.', log: [{ at: 'Jun 13', t: 'Counted 4 on shelf' }, { at: 'Jun 3', t: 'Check received $255' }] },
   { id: uid(), store: 'Aisle 9 Lakewood', price: 8.5, sent: 44, returned: 0, paid: 340, counted: 4, countedDate: '2026-06-13', diagnosis: '', cycle: 1, lastContact: '2026-06-13', restock: 'good', notes: 'Clean account, always pays on time.', log: [{ at: 'Jun 13', t: 'Counted 4 — reconciles clean' }, { at: 'Jun 3', t: 'Check received $340' }] },
@@ -102,14 +102,14 @@ const PNL_ROWS = [
 
 // products sold this month (swap illustrations for real photos anytime)
 const PRODUCTS = [
-  { name: 'Barbecue', color: '#9E3B24', week: 22, month: 88 },
-  { name: 'Nashville', color: '#C24A22', week: 16, month: 64 },
-  { name: 'Maple Bourbon', color: '#97652C', week: 13, month: 50 },
-  { name: 'FirePopper', color: '#B2351A', week: 12, month: 46 },
-  { name: 'Teriyaki', color: '#6B4A2A', week: 11, month: 42 },
-  { name: 'Sweet Chili', color: '#A8432C', week: 9, month: 37 },
-  { name: 'Cracked Pepper', color: '#46403A', week: 8, month: 33 },
-  { name: 'Jalapeño', color: '#5C7C3A', week: 6, month: 25 },
+  { name: 'BBQ', color: '#9E3B24', week: 22, month: 88 },
+  { name: 'General Tso', color: '#C24A22', week: 16, month: 64 },
+  { name: 'Korean', color: '#97652C', week: 13, month: 50 },
+  { name: 'Spicy', color: '#B2351A', week: 12, month: 46 },
+  { name: 'Sweet & Tangy', color: '#6B4A2A', week: 11, month: 42 },
+  { name: 'Pepper Crusted', color: '#46403A', week: 9, month: 37 },
+  { name: 'Garlic', color: '#B8892F', week: 8, month: 33 },
+  { name: 'Sweet', color: '#5C7C3A', week: 6, month: 25 },
 ]
 // per-period sales for the front-page leaderboards (week vs month)
 const STORE_PERF = [
