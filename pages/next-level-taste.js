@@ -107,6 +107,32 @@ const PNL_ROWS = [
   { label: 'Net profit / loss', key: 'net', kind: 'total', cost: false },
 ]
 
+// Order pipeline — a made-to-order charcuterie shop tracks each order through
+// stages (this replaces bag-on-shelf consignment). Interactive: click to advance.
+const ORDER_STAGES = [
+  { id: 'new', label: 'New', color: '#6B7A8A' },
+  { id: 'prepping', label: 'In prep', color: '#B8894A' },
+  { id: 'ready', label: 'Ready', color: '#3E7C4F' },
+  { id: 'delivered', label: 'Delivered', color: '#950C2F' },
+  { id: 'paid', label: 'Paid', color: '#1A1512' },
+]
+const SM = Object.fromEntries(ORDER_STAGES.map(s => [s.id, s]))
+const fmtDue = (d) => new Date(d + 'T00:00').toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
+const stageBadge = (st) => ({ display: 'inline-block', padding: '3px 9px', borderRadius: '2px', fontSize: '11px', fontWeight: 600, background: (SM[st]?.color || '#888') + '22', color: SM[st]?.color || '#888', whiteSpace: 'nowrap' })
+const SEED_ORDERS = [
+  { id: uid(), customer: 'Weiss — Bar Mitzvah', items: '3-Tier Board + 2 platters', amount: 640, channel: 'Catering', due: '2026-06-22', stage: 'new' },
+  { id: uid(), customer: 'Gourmet Glatt North', items: '6 Classic Meat Boards', amount: 510, channel: 'Wholesale', due: '2026-06-19', stage: 'prepping' },
+  { id: uid(), customer: 'Online — R. Klein', items: 'Charcuterie Board + Kishka', amount: 155, channel: 'Online', due: '2026-06-18', stage: 'prepping' },
+  { id: uid(), customer: 'Friedman Simcha', items: '4 Charcuterie Boards', amount: 460, channel: 'Catering', due: '2026-06-18', stage: 'ready' },
+  { id: uid(), customer: 'Online — S. Berger', items: 'Fish Platter + Yapchik', amount: 135, channel: 'Online', due: '2026-06-17', stage: 'ready' },
+  { id: uid(), customer: 'Seasons Lakewood', items: '8 Classic Boards (weekly)', amount: 640, channel: 'Wholesale', due: '2026-06-16', stage: 'delivered' },
+  { id: uid(), customer: 'Cohen — Sheva Brachos', items: '3-Tier Board', amount: 275, channel: 'Catering', due: '2026-06-15', stage: 'delivered' },
+  { id: uid(), customer: 'Online — M. Stein', items: 'Jerky Sticks ×12', amount: 96, channel: 'Online', due: '2026-06-15', stage: 'delivered' },
+  { id: uid(), customer: 'Evergreen', items: '5 Charcuterie Boards', amount: 575, channel: 'Wholesale', due: '2026-06-13', stage: 'paid' },
+  { id: uid(), customer: 'Online — Y. Gross', items: 'Kishka & Gravy + board', amount: 180, channel: 'Online', due: '2026-06-12', stage: 'paid' },
+  { id: uid(), customer: 'Aisle 9 Jackson', items: '4 Classic Boards', amount: 340, channel: 'Wholesale', due: '2026-06-11', stage: 'paid' },
+]
+
 // products sold this month (swap illustrations for real photos anytime)
 const PRODUCTS = [
   { name: 'Classic Meat Board', color: '#7A1F30', week: 13, month: 52 },
@@ -152,6 +178,7 @@ const MONO = "'IBM Plex Mono', monospace"
 export default function NextLevelTaste() {
   const [tab, setTab] = useState('overview')
   const [consign, setConsign] = useState(SEED_CONSIGN)
+  const [orders, setOrders] = useState(SEED_ORDERS)
   const [direct, setDirect] = useState(SEED_DIRECT)
   const [ads, setAds] = useState(SEED_ADS)
   const [expanded, setExpanded] = useState(null)
@@ -294,6 +321,15 @@ export default function NextLevelTaste() {
   const pnlGross = totalRevenue - pnlCogs
   const pnlNet = pnlGross - totalOpex
   const pnlPct = (n) => totalRevenue ? Math.round(n / totalRevenue * 100) : 0
+  // Order-pipeline metrics (operational view for the Orders tab + Overview)
+  const stageCount = (st) => orders.filter(o => o.stage === st).length
+  const stageVal = (st) => orders.filter(o => o.stage === st).reduce((a, o) => a + o.amount, 0)
+  const pipeOrders = orders.filter(o => ['new', 'prepping', 'ready'].includes(o.stage))
+  const pipeVal = pipeOrders.reduce((a, o) => a + o.amount, 0)
+  const collectOrders = orders.filter(o => o.stage === 'delivered')
+  const collectVal = collectOrders.reduce((a, o) => a + o.amount, 0)
+  const nextStage = (st) => { const i = ORDER_STAGES.findIndex(x => x.id === st); return i < ORDER_STAGES.length - 1 ? ORDER_STAGES[i + 1].id : st }
+  const advanceOrder = (id) => setOrders(os => os.map(o => o.id === id ? { ...o, stage: nextStage(o.stage) } : o))
 
   // monthly close → QB (Shopify online excluded — it books through Shopify, no double-count)
   const shopifyRev = direct.filter(d => d.source === 'Shopify / online').reduce((s, d) => s + d.rev, 0)
@@ -361,7 +397,7 @@ export default function NextLevelTaste() {
     </select>
   )
 
-  const TABS = [['overview', 'Overview'], ['consign', 'Wholesale'], ['direct', 'Direct Sales'], ['ads', 'Advertising'], ['pnl', 'P&L']]
+  const TABS = [['overview', 'Overview'], ['consign', 'Orders'], ['direct', 'Direct Sales'], ['ads', 'Advertising'], ['pnl', 'P&L']]
   const EXTRA = [['expenses', 'Import expenses'], ['quickbooks', 'QuickBooks sync'], ['close', 'Monthly close'], ['askai', 'Ask AI']]
   const currentLabel = ([...TABS, ...EXTRA].find(t => t[0] === tab) || ['', ''])[1]
 
@@ -464,8 +500,8 @@ export default function NextLevelTaste() {
               <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap', marginBottom: '16px' }}>
                 <KPI k="Revenue / mo" v={m0(totalRevenue)} sub="orders, catering & holiday" accent={SPICE} onClick={() => setTab('pnl')} />
                 <KPI k={`Orders this ${period}`} v={bagsPeriod} sub="across all products" accent={INK} onClick={() => setTab('direct')} />
-                <KPI k="At wholesale accounts" v={m0(onShelfVal)} sub={`${bagsOut} units with wholesale accts`} accent={KRAFT} onClick={() => setTab('consign')} />
-                <KPI k="Missing pieces" v={`${missUnits}`} sub={`${m0(missVal)} to investigate`} accent={missUnits ? RED : GREEN} onClick={() => setTab('consign')} />
+                <KPI k="In the pipeline" v={m0(pipeVal)} sub={`${pipeOrders.length} orders in production`} accent={KRAFT} onClick={() => setTab('consign')} />
+                <KPI k="To collect" v={m0(collectVal)} sub={`${collectOrders.length} delivered, awaiting pay`} accent={collectVal ? RED : GREEN} onClick={() => setTab('consign')} />
               </div>
 
               {/* Revenue by product line — bags + boards + camp packages */}
@@ -660,160 +696,55 @@ export default function NextLevelTaste() {
           {/* ===== CONSIGNMENT ===== */}
           {tab === 'consign' && (
             <>
-              <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap', marginBottom: '16px' }}>
-                <KPI k="Partners" v={consign.length} sub="stores carrying you" />
-                <KPI k="Out on shelves" v={R.reduce((s, c) => s + Math.max(c.expected, 0), 0)} sub={`${m0(onShelfVal)} of product`} accent={KRAFT} />
-                <KPI k="Collected" v={m0(cashCollected)} sub="checks in the door" accent={GREEN} />
-                <KPI k="Missing" v={missUnits} sub={`${m0(missVal)} to chase`} accent={missUnits ? RED : GREEN} />
+              <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap', marginBottom: '16px' }}>
+                {ORDER_STAGES.map(s => (
+                  <div key={s.id} style={{ ...card, flex: 1, minWidth: '122px', padding: '14px 15px', borderTop: `3px solid ${s.color}` }}>
+                    <div style={lbl}>{s.label}</div>
+                    <div style={{ ...big, fontSize: '24px', color: INK, marginTop: '4px' }}>{stageCount(s.id)}</div>
+                    <div style={{ fontSize: '12px', color: MUTED }}>{m0(stageVal(s.id))}</div>
+                  </div>
+                ))}
               </div>
 
-              {R.some(c => c.variance > 0) && (
-                <div style={{ ...card, marginBottom: '16px', background: '#FBEDE9', borderColor: '#E7C3B8' }}>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', flexWrap: 'wrap', gap: '8px', marginBottom: '10px' }}>
-                    <div style={{ ...lbl, color: RED }}>Money to collect</div>
-                    <div style={{ fontSize: '13px', color: MUTED }}><b style={{ ...big, fontSize: '18px', color: RED }}>{m0(missVal)}</b> across {R.filter(c => c.variance > 0).length} stores</div>
-                  </div>
-                  {R.filter(c => c.variance > 0).sort((a, b) => b.varVal - a.varVal).map((c, i) => (
-                    <div key={c.id} onClick={() => setExpanded(c.id)} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '8px 0', borderTop: i ? '1px solid #F2D2CB' : 'none', cursor: 'pointer', gap: '8px', flexWrap: 'wrap' }}>
-                      <div>
-                        <span style={{ fontWeight: 600, color: INK, fontSize: '14px' }}>{c.store}</span>
-                        <span style={{ fontSize: '12px', color: MUTED }}> · {c.variance} bags · {c.diagnosis ? c.diagnosis : 'needs a diagnosis'}</span>
-                      </div>
-                      <span style={{ ...big, fontSize: '15px', color: RED }}>{money(c.varVal)}</span>
+              <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap', marginBottom: '16px' }}>
+                <div style={{ ...card, flex: 1, minWidth: '260px' }}>
+                  <div style={{ ...lbl, marginBottom: '4px' }}>Coming up · what's due next</div>
+                  {orders.filter(o => o.stage !== 'paid' && o.stage !== 'delivered').sort((a, b) => a.due.localeCompare(b.due)).slice(0, 5).map((o, i) => (
+                    <div key={o.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '8px', padding: '9px 0', borderTop: i ? `1px solid ${CREAM}` : 'none' }}>
+                      <div><div style={{ fontWeight: 600, color: INK, fontSize: '14px' }}>{o.customer}</div><div style={{ fontSize: '12px', color: MUTED }}>{o.items} · due {fmtDue(o.due)}</div></div>
+                      <span style={stageBadge(o.stage)}>{SM[o.stage].label}</span>
                     </div>
                   ))}
-                  <p style={{ fontSize: '12px', color: MUTED, marginTop: '10px', lineHeight: 1.5 }}>Bags gone from shelves you haven't been paid for. Tap a store to diagnose it — then invoice the ones the store sold and didn't report, or write off the rest at close-out.</p>
                 </div>
-              )}
-
-              {!adding ? (
-                <button onClick={() => setAdding(true)} style={{ width: '100%', background: CHAR, color: CREAM, border: 'none', borderRadius: '2px', padding: '13px', ...btn, marginBottom: '16px' }}>+ Add a consignment partner</button>
-              ) : (
-                <div style={{ ...card, marginBottom: '16px' }}>
-                  <div style={{ ...lbl, marginBottom: '12px' }}>New consignment partner</div>
-                  <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
-                    <input value={cf.store} onChange={e => setCf({ ...cf, store: e.target.value })} placeholder="Store name *" style={{ ...inp, flex: 2, minWidth: '160px' }} />
-                    <input value={cf.price} onChange={e => setCf({ ...cf, price: e.target.value })} type="number" placeholder="$ / unit" style={{ ...inp, flex: 1, minWidth: '90px' }} />
-                    <input value={cf.sent} onChange={e => setCf({ ...cf, sent: e.target.value })} type="number" placeholder="Units sent" style={{ ...inp, flex: 1, minWidth: '100px' }} />
-                  </div>
-                  <div style={{ display: 'flex', gap: '8px', marginTop: '12px' }}>
-                    <button onClick={() => setAdding(false)} style={{ flex: 1, background: 'none', border: `1px solid ${BORDER}`, borderRadius: '2px', padding: '11px', ...btn, color: MUTED }}>Cancel</button>
-                    <button onClick={addPartner} style={{ flex: 2, background: SPICE, color: '#fff', border: 'none', borderRadius: '2px', padding: '11px', ...btn }}>+ Add partner</button>
-                  </div>
-                </div>
-              )}
-
-              {R.map(c => {
-                const open = expanded === c.id
-                const badge = c.status === 'reconciled' ? { c: GREEN, t: 'Reconciled' } : c.status === 'short' ? { c: RED, t: `${c.variance} missing` } : c.status === 'over' ? { c: AMBER, t: `${-c.variance} over` } : { c: MUTED, t: 'Not counted' }
-                return (
-                  <div key={c.id} style={{ ...card, padding: 0, marginBottom: '12px', overflow: 'hidden', borderColor: open ? CHAR : (c.status === 'short' ? '#E7C3B8' : BORDER) }}>
-                    <div onClick={() => setExpanded(open ? null : c.id)} style={{ padding: '15px 18px', cursor: 'pointer' }}>
-                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '12px', flexWrap: 'wrap' }}>
-                        <div>
-                          <div style={{ ...big, fontSize: '20px', color: INK }}>{c.store}</div>
-                          <div style={{ fontSize: '12px', color: MUTED, marginTop: '3px' }}>
-                            {money(c.price)}/unit · sent {c.sent} · paid for {c.paidUnits} · {money(c.paid)} collected · cycle {c.cycle || 1}
-                          </div>
-                        </div>
-                        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '6px' }}>
-                          <span style={{ fontFamily: "'Inter', sans-serif", fontSize: '12px', fontWeight: 600, color: '#fff', background: badge.c, padding: '5px 11px', borderRadius: '2px', whiteSpace: 'nowrap' }}>{badge.t}</span>
-                          {c.restock && c.restock !== 'good' && <span style={{ fontSize: '11px', fontWeight: 600, color: RM[c.restock].color, background: RM[c.restock].color + '1A', padding: '3px 10px', borderRadius: '2px', whiteSpace: 'nowrap' }}>{RM[c.restock].label}</span>}
-                        </div>
-                      </div>
-                      {c.variance > 0 && c.diagnosis && (
-                        <div style={{ marginTop: '10px', fontSize: '12.5px', color: c.diagnosis.includes('owes') ? RED : INK, background: c.diagnosis.includes('owes') ? '#FBEDE9' : CREAM, border: `1px solid ${c.diagnosis.includes('owes') ? '#E7C3B8' : BORDER}`, borderRadius: '2px', padding: '8px 11px', display: 'flex', alignItems: 'center', gap: '7px' }}>
-                          <span style={{ width: '7px', height: '7px', borderRadius: '50%', background: c.diagnosis.includes('owes') ? RED : KRAFT, flexShrink: 0 }} />
-                          <span>Diagnosed: <b>{c.diagnosis}</b></span>
-                        </div>
-                      )}
+                <div style={{ ...card, flex: 1, minWidth: '260px' }}>
+                  <div style={{ ...lbl, marginBottom: '2px' }}>To collect · delivered, unpaid</div>
+                  <div style={{ ...big, fontSize: '26px', color: collectVal ? RED : GREEN, margin: '2px 0 8px' }}>{m0(collectVal)}</div>
+                  {collectOrders.map((o, i) => (
+                    <div key={o.id} className="jm-click" onClick={() => advanceOrder(o.id)} style={{ display: 'flex', justifyContent: 'space-between', gap: '8px', padding: '8px', borderTop: i ? `1px solid ${CREAM}` : 'none', cursor: 'pointer', borderRadius: '2px' }}>
+                      <span style={{ fontSize: '13px', color: INK }}>{o.customer}</span>
+                      <span style={{ fontSize: '13px', color: INK, fontWeight: 600 }}>{m0(o.amount)} <span style={{ color: SPICE, fontSize: '11px' }}>→ mark paid</span></span>
                     </div>
+                  ))}
+                  {!collectOrders.length && <div style={{ fontSize: '13px', color: MUTED }}>All delivered orders are paid.</div>}
+                </div>
+              </div>
 
-                    {open && (
-                      <div style={{ padding: '0 18px 18px', borderTop: `1px solid ${CREAM}` }}>
-                        <div style={{ ...lbl, margin: '14px 0 6px' }}>The reconciliation</div>
-                        <div style={{ background: CREAM, borderRadius: '2px', padding: '14px 16px' }}>
-                          <Row l="Units sent out" v={c.sent} />
-                          <Row l={`− Paid by checks (${money(c.paid)} ÷ ${money(c.price)})`} v={`−${c.paidUnits}`} />
-                          <Row l="− Returned to you" v={`−${c.returned}`} />
-                          <Row l="Should still be on the shelf" v={Math.max(c.expected, 0)} bold top />
-                          <Row l={`Actually counted (${fmtD(c.countedDate)})`} v={c.counted == null ? '— not counted' : c.counted} />
-                          <Row
-                            l={c.variance > 0 ? 'Missing — unaccounted for' : c.variance < 0 ? 'Overage — recount' : 'Matches perfectly'}
-                            v={c.variance > 0 ? `${c.variance}  (${money(c.varVal)})` : c.variance < 0 ? `${-c.variance}` : '0'}
-                            neg={c.variance > 0} bold top />
-                        </div>
-
-                        {c.variance > 0 && (
-                          <div style={{ marginTop: '14px' }}>
-                            <div style={{ ...lbl, marginBottom: '6px' }}>Why are {c.variance} missing? (diagnose it)</div>
-                            <select value={c.diagnosis} onChange={e => upd(c.id, { diagnosis: e.target.value }, `Diagnosed missing units: ${e.target.value || 'cleared'}`)} style={{ ...inp, width: '100%', cursor: 'pointer' }}>
-                              {DIAGNOSES.map(d => <option key={d} value={d}>{d || 'Pick a reason…'}</option>)}
-                            </select>
-                            {c.diagnosis === 'Sold but not reported (store owes me)' && (
-                              <div style={{ marginTop: '8px', fontSize: '13px', color: RED, background: '#FBEDE9', borderRadius: '2px', padding: '9px 12px' }}>
-                                Then <b>{c.store}</b> owes you <b>{money(c.varVal)}</b>. Send them an invoice for the {c.variance} units.
-                              </div>
-                            )}
-                          </div>
-                        )}
-
-                        <div style={{ ...lbl, margin: '16px 0 8px' }}>Update this account</div>
-                        <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
-                          <div style={{ flex: 1, minWidth: '150px', display: 'flex', gap: '6px' }}>
-                            <input value={dv(c.id + '_chk')} onChange={e => setDv(c.id + '_chk', e.target.value)} type="number" placeholder="Check $" style={{ ...inp, flex: 1, minWidth: 0 }} />
-                            <button onClick={() => logCheck(c.id)} style={{ background: GREEN, color: '#fff', border: 'none', borderRadius: '2px', padding: '0 14px', ...btn, fontSize: '12px' }}>Log</button>
-                          </div>
-                          <div style={{ flex: 1, minWidth: '150px', display: 'flex', gap: '6px' }}>
-                            <input value={dv(c.id + '_cnt')} onChange={e => setDv(c.id + '_cnt', e.target.value)} type="number" placeholder="Count on shelf" style={{ ...inp, flex: 1, minWidth: 0 }} />
-                            <button onClick={() => logCount(c.id)} style={{ background: KRAFT, color: '#fff', border: 'none', borderRadius: '2px', padding: '0 14px', ...btn, fontSize: '12px' }}>Log</button>
-                          </div>
-                          <div style={{ flex: 1, minWidth: '150px', display: 'flex', gap: '6px' }}>
-                            <input value={dv(c.id + '_shp')} onChange={e => setDv(c.id + '_shp', e.target.value)} type="number" placeholder="Ship more" style={{ ...inp, flex: 1, minWidth: 0 }} />
-                            <button onClick={() => shipMore(c.id)} style={{ background: CHAR, color: CREAM, border: 'none', borderRadius: '2px', padding: '0 14px', ...btn, fontSize: '12px' }}>Ship</button>
-                          </div>
-                        </div>
-
-                        <div style={{ ...lbl, margin: '18px 0 8px' }}>Store relationship</div>
-                        <div style={{ display: 'flex', gap: '10px', alignItems: 'center', flexWrap: 'wrap', marginBottom: '10px' }}>
-                          <span style={{ fontSize: '13px', color: MUTED }}>Last spoke: <b style={{ color: INK }}>{fmtD(c.lastContact)}</b>{c.lastContact ? ` · ${daysSince(c.lastContact)}d ago` : ''}</span>
-                          <button onClick={() => upd(c.id, { lastContact: todayStr }, 'Spoke with the store')} style={{ background: KRAFT, color: '#fff', border: 'none', borderRadius: '2px', padding: '5px 13px', ...btn, fontSize: '11px' }}>Spoke today</button>
-                        </div>
-                        <div style={{ display: 'flex', gap: '10px', alignItems: 'center', flexWrap: 'wrap', marginBottom: '10px' }}>
-                          <span style={{ fontSize: '13px', color: MUTED }}>Do they need more?</span>
-                          <select value={c.restock || 'good'} onChange={e => upd(c.id, { restock: e.target.value })} style={{ ...inp, cursor: 'pointer', maxWidth: '200px' }}>
-                            {RESTOCK.map(r => <option key={r.id} value={r.id}>{r.label}</option>)}
-                          </select>
-                        </div>
-                        <textarea value={c.notes || ''} onChange={e => upd(c.id, { notes: e.target.value })} rows={2} placeholder="Notes — who you talk to, what they like, what they said…" style={{ ...inp, width: '100%', resize: 'vertical', fontFamily: 'inherit' }} />
-
-                        <div style={{ ...lbl, margin: '18px 0 6px' }}>End of cycle</div>
-                        <button onClick={() => { if (window.confirm(`Close out cycle ${c.cycle || 1} for ${c.store}? This settles the ${c.variance > 0 ? c.variance + ' missing bags' : 'reconciliation'} and starts a fresh cycle from the ${c.counted == null ? 0 : c.counted} bags on the shelf now.`)) closeOut(c.id) }} style={{ width: '100%', background: 'none', color: INK, border: `1px solid ${BORDER}`, borderRadius: '2px', padding: '12px', ...btn }}>Close out this cycle →</button>
-                        <p style={{ fontSize: '12px', color: MUTED, marginTop: '7px', lineHeight: 1.5 }}>
-                          {c.variance > 0
-                            ? <>Settles the <b>{c.variance} missing</b> {c.diagnosis === 'Sold but not reported (store owes me)' ? <>by <b style={{ color: RED }}>invoicing the store {money(c.varVal)}</b></> : <>as a <b>write-off</b></>}, then resets the count clean for the next delivery — so old gaps never bleed into the new cycle.</>
-                            : <>Reconciles clean and resets the count for the next delivery — so old numbers never bleed into the new cycle.</>}
-                        </p>
-
-                        {(c.log || []).length > 0 && (
-                          <div style={{ marginTop: '16px', borderTop: `1px solid ${CREAM}`, paddingTop: '12px' }}>
-                            <div style={{ ...lbl, marginBottom: '8px' }}>History</div>
-                            {c.log.map((e, i) => (
-                              <div key={i} style={{ fontSize: '12px', color: MUTED, padding: '3px 0' }}>
-                                <span style={{ color: '#BFB096', fontFamily: MONO, marginRight: '8px' }}>{e.at}</span>{e.t}
-                              </div>
-                            ))}
-                          </div>
-                        )}
-                      </div>
-                    )}
+              <div style={{ ...card }}>
+                <div style={{ ...lbl, marginBottom: '12px' }}>All orders · click a stage badge to move it forward</div>
+                {orders.slice().sort((a, b) => ORDER_STAGES.findIndex(x => x.id === a.stage) - ORDER_STAGES.findIndex(x => x.id === b.stage) || a.due.localeCompare(b.due)).map((o, i) => (
+                  <div key={o.id} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '10px', padding: '10px 0', borderTop: i ? `1px solid ${CREAM}` : 'none', flexWrap: 'wrap' }}>
+                    <div style={{ minWidth: '170px', flex: 1 }}>
+                      <div style={{ fontWeight: 600, color: INK, fontSize: '14px' }}>{o.customer}</div>
+                      <div style={{ fontSize: '12px', color: MUTED }}>{o.items} · {o.channel} · due {fmtDue(o.due)}</div>
+                    </div>
+                    <span style={{ ...big, fontSize: '15px', color: INK, minWidth: '62px', textAlign: 'right' }}>{m0(o.amount)}</span>
+                    <span className="jm-click" onClick={() => advanceOrder(o.id)} title="Advance to next stage" style={{ ...stageBadge(o.stage), cursor: 'pointer' }}>{SM[o.stage].label}{o.stage !== 'paid' ? ' ›' : ''}</span>
                   </div>
-                )
-              })}
+                ))}
+              </div>
             </>
           )}
 
-          {/* ===== DIRECT ===== */}
           {tab === 'direct' && (
             <>
               <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap', marginBottom: '16px' }}>
