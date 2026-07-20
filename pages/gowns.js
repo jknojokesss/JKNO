@@ -513,10 +513,10 @@ export default function Gowns() {
                       </div>
 
                       <div style={{ marginTop: '12px', fontSize: '14px', color: INK }}>
-                        {o.items.filter(it => it.desc.trim() || it.price).slice(0, 3).map(it => (
+                        {o.items.filter(it => it.desc?.trim() || it.price || it.itemNo).slice(0, 3).map(it => (
                           <div key={it.id} style={{ display: 'flex', justifyContent: 'space-between', gap: '10px', padding: '2px 0' }}>
-                            <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{(parseFloat(it.qty) || 1) > 1 ? `${it.qty}× ` : ''}{it.desc || '—'}</span>
-                            <span style={{ color: MUTED, whiteSpace: 'nowrap' }}>{money0(lineAmt(it))}</span>
+                            <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{(parseFloat(it.qty) || 1) > 1 ? `${it.qty}× ` : ''}{it.desc?.trim() || it.itemNo || '—'}</span>
+                            <span style={{ color: MUTED, whiteSpace: 'nowrap' }}>{it.price ? `${money0(it.price)}${(parseFloat(it.qty) || 1) > 1 ? ' ea' : ''}` : ''}</span>
                           </div>
                         ))}
                       </div>
