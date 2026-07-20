@@ -41,6 +41,10 @@ const SEED_DIRECT = [
   { id: uid(), who: 'Acme Corp — office bulk order', source: 'Wholesale / bulk', units: 60, rev: 540 },
   { id: uid(), who: 'Gym pop-up weekend', source: 'Pop-up event', units: 30, rev: 390 },
 ]
+// Product lines beyond bags — Jerky Joy also sells premium Jerky Boards ($90–$375
+// charcuterie/gift boxes) and seasonal Camp Packages. Illustrative monthly figures.
+const BOARDS_MONTH = { units: 22, rev: 3685 }
+const CAMP_MONTH = { units: 40, rev: 1680 }
 const DIRECT_SOURCES = ['Shopify / online', 'Farmers market', 'Pop-up event', 'Wholesale / bulk', 'Other']
 
 const SEED_ADS = [
@@ -271,6 +275,13 @@ export default function JerkyJoy() {
   const netProfit = grossProfit - totalOpex
   const bagsPeriod = PRODUCTS.reduce((s, p) => s + p[period], 0)
   const bagsOut = R.reduce((s, c) => s + Math.max(c.expected, 0), 0)
+  // Revenue by product line: bags (live) + premium boards + camp packages
+  const productMix = [
+    { line: 'Jerky bags', units: bagsPeriod, unit: 'bags', rev: revenue, color: KRAFT, to: 'direct' },
+    { line: 'Jerky boards', units: BOARDS_MONTH.units, unit: 'boards', rev: BOARDS_MONTH.rev, color: SPICE, to: 'direct' },
+    { line: 'Camp packages', units: CAMP_MONTH.units, unit: 'packages', rev: CAMP_MONTH.rev, color: '#8A5A2B', to: 'direct' },
+  ]
+  const totalRevenue = productMix.reduce((s, p) => s + p.rev, 0)
 
   // monthly close → QB (Shopify online excluded — it books through Shopify, no double-count)
   const shopifyRev = direct.filter(d => d.source === 'Shopify / online').reduce((s, d) => s + d.rev, 0)
@@ -308,11 +319,12 @@ export default function JerkyJoy() {
   const big = { fontFamily: "'Inter', sans-serif", fontWeight: 700, letterSpacing: '-0.4px' }
   const btn = { fontFamily: "'Inter', sans-serif", fontWeight: 600, fontSize: '13px', letterSpacing: '0.1px', cursor: 'pointer' }
 
-  const KPI = ({ k, v, sub, accent }) => (
-    <div style={{ ...card, flex: 1, minWidth: '150px', padding: '15px 17px' }}>
+  const KPI = ({ k, v, sub, accent, onClick }) => (
+    <div onClick={onClick} className={onClick ? 'jm-click' : undefined} style={{ ...card, flex: 1, minWidth: '150px', padding: '15px 17px', position: 'relative', ...(onClick ? { cursor: 'pointer' } : {}) }}>
       <div style={lbl}>{k}</div>
       <div style={{ ...big, fontSize: '29px', color: accent || INK, lineHeight: 1.15, marginTop: '4px' }}>{v}</div>
       <div style={{ fontFamily: "'Inter', sans-serif", fontSize: '12px', fontWeight: 400, color: '#A2937A', marginTop: '3px' }}>{sub}</div>
+      {onClick && <span style={{ position: 'absolute', top: '11px', right: '13px', color: '#C6B79A', fontSize: '15px', lineHeight: 1 }}>›</span>}
     </div>
   )
   const MiniToggle = ({ value, onChange }) => (
@@ -369,6 +381,7 @@ export default function JerkyJoy() {
 .jm-navbtn{display:block;width:100%;text-align:left;padding:11px 14px;border-radius:2px;border:none;background:transparent;color:#B6A78C;font-family:'Inter',sans-serif;font-size:14px;font-weight:500;cursor:pointer;white-space:nowrap;transition:background .15s}
 .jm-navbtn:hover{background:rgba(255,255,255,.08);color:${CREAM}}
 .jm-main{flex:1;min-width:0;max-width:1180px;padding:24px 30px 60px}
+.jm-click{transition:box-shadow .12s}.jm-click:hover{box-shadow:inset 0 0 0 1.5px ${SPICE}}
 @media(max-width:860px){.jm-shell{flex-direction:column}.jm-side{width:auto;height:auto;position:static;flex-direction:column;padding:14px 12px}.jm-nav{flex-direction:row;overflow-x:auto;gap:6px;padding-bottom:4px}.jm-navbtn{width:auto;padding:8px 15px;border-radius:2px;background:rgba(255,255,255,.07)}.jm-main{padding:18px 16px 52px;max-width:100%}}`}</style>
       </Head>
 
@@ -437,17 +450,41 @@ export default function JerkyJoy() {
               </div>
 
               <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap', marginBottom: '16px' }}>
-                <KPI k={`Bags sold this ${period}`} v={bagsPeriod} sub="across all flavors" accent={INK} />
-                <KPI k="Revenue / mo" v={m0(revenue)} sub={`${bagsPeriod} bags this ${period}`} accent={SPICE} />
-                <KPI k="Out on consignment" v={m0(onShelfVal)} sub={`${bagsOut} bags sitting in stores`} accent={KRAFT} />
-                <KPI k="Missing pieces" v={`${missUnits}`} sub={`${m0(missVal)} to investigate`} accent={missUnits ? RED : GREEN} />
+                <KPI k="Revenue / mo" v={m0(totalRevenue)} sub="bags, boards & camp" accent={SPICE} onClick={() => setTab('pnl')} />
+                <KPI k={`Bags sold this ${period}`} v={bagsPeriod} sub="across all flavors" accent={INK} onClick={() => setTab('direct')} />
+                <KPI k="Out on consignment" v={m0(onShelfVal)} sub={`${bagsOut} bags sitting in stores`} accent={KRAFT} onClick={() => setTab('consign')} />
+                <KPI k="Missing pieces" v={`${missUnits}`} sub={`${m0(missVal)} to investigate`} accent={missUnits ? RED : GREEN} onClick={() => setTab('consign')} />
+              </div>
+
+              {/* Revenue by product line — bags + boards + camp packages */}
+              <div className="jm-click" onClick={() => setTab('pnl')} style={{ ...card, marginBottom: '16px', cursor: 'pointer', position: 'relative' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', flexWrap: 'wrap', gap: '8px', marginBottom: '12px' }}>
+                  <div style={{ ...lbl }}>Revenue by product line · this month</div>
+                  <div style={{ fontSize: '13px', color: MUTED }}><b style={{ ...big, fontSize: '18px', color: INK }}>{m0(totalRevenue)}</b> total</div>
+                </div>
+                <div style={{ display: 'flex', height: '18px', borderRadius: '2px', overflow: 'hidden', marginBottom: '12px' }}>
+                  {productMix.map(p => (
+                    <div key={p.line} title={`${p.line} · ${m0(p.rev)}`} style={{ width: `${Math.round(p.rev / totalRevenue * 100)}%`, background: p.color }} />
+                  ))}
+                </div>
+                <div style={{ display: 'flex', gap: '22px', flexWrap: 'wrap' }}>
+                  {productMix.map(p => (
+                    <div key={p.line} style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                      <span style={{ width: '11px', height: '11px', background: p.color, borderRadius: '2px', flexShrink: 0 }} />
+                      <span style={{ fontSize: '13px' }}>
+                        <b style={{ color: INK }}>{p.line}</b> <span style={{ color: INK, fontWeight: 600 }}>{m0(p.rev)}</span>
+                        <span style={{ color: MUTED }}> · {p.units} {p.unit} · {Math.round(p.rev / totalRevenue * 100)}%</span>
+                      </span>
+                    </div>
+                  ))}
+                </div>
               </div>
 
               <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap', marginBottom: '16px' }}>
                 <div style={{ ...card, flex: 1, minWidth: '290px' }}>
                   <div style={{ ...lbl, marginBottom: '14px' }}>Top consignment stores · this {period}</div>
                   {(() => { const pv = s => period === 'week' ? s.weekRev : s.monthRev; const pb = s => period === 'week' ? s.week : s.month; const sorted = STORE_PERF.slice().sort((a, b) => pv(b) - pv(a)); const max = pv(sorted[0]) || 1; return sorted.slice(0, 6).map((c, i) => (
-                    <div key={c.store} style={{ padding: '9px 0', borderTop: i ? `1px solid ${CREAM}` : 'none' }}>
+                    <div key={c.store} className="jm-click" onClick={() => setTab('consign')} style={{ padding: '9px 8px', borderTop: i ? `1px solid ${CREAM}` : 'none', cursor: 'pointer', borderRadius: '2px' }}>
                       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', gap: '8px', marginBottom: '6px' }}>
                         <span style={{ fontWeight: 600, color: INK, fontSize: '14px' }}>{c.store}</span>
                         <span style={{ ...big, fontSize: '15px', color: INK }}>{m0(pv(c))}</span>
@@ -464,7 +501,7 @@ export default function JerkyJoy() {
                 <div style={{ ...card, flex: 1, minWidth: '290px' }}>
                   <div style={{ ...lbl, marginBottom: '14px' }}>Top direct sales · this {period}</div>
                   {(() => { const pv = s => period === 'week' ? s.weekRev : s.monthRev; const pb = s => period === 'week' ? s.week : s.month; const sorted = DIRECT_PERF.slice().sort((a, b) => pv(b) - pv(a)); const max = pv(sorted[0]) || 1; return sorted.map((d, i) => (
-                    <div key={d.who} style={{ padding: '9px 0', borderTop: i ? `1px solid ${CREAM}` : 'none' }}>
+                    <div key={d.who} className="jm-click" onClick={() => setTab('direct')} style={{ padding: '9px 8px', borderTop: i ? `1px solid ${CREAM}` : 'none', cursor: 'pointer', borderRadius: '2px' }}>
                       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', gap: '8px', marginBottom: '6px' }}>
                         <span style={{ fontWeight: 600, color: INK, fontSize: '14px' }}>{d.who}</span>
                         <span style={{ ...big, fontSize: '15px', color: GREEN }}>{m0(pv(d))}</span>
