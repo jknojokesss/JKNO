@@ -24,7 +24,14 @@ const money0 = (n) => '$' + Math.round(n || 0).toLocaleString()
 const todayStr = () => new Date().toISOString().slice(0, 10)
 const fmtDate = (s) => s ? new Date(s + 'T00:00:00').toLocaleDateString([], { month: 'numeric', day: 'numeric', year: '2-digit' }) : ''
 const fmtShort = (s) => s ? new Date(s + 'T00:00:00').toLocaleDateString([], { month: 'short', day: 'numeric' }) : ''
-const uid = () => Math.random().toString(36).slice(2, 9)
+// Order ids are stored in a Postgres `uuid` column, so they must be valid UUIDs.
+const uid = () =>
+  (typeof crypto !== 'undefined' && crypto.randomUUID)
+    ? crypto.randomUUID()
+    : 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, (c) => {
+        const r = (Math.random() * 16) | 0
+        return (c === 'x' ? r : (r & 0x3) | 0x8).toString(16)
+      })
 
 const lineAmt = (it) => { const v = (parseFloat(it.qty) || 1) * (parseFloat(it.price) || 0); return v || (parseFloat(it.amount) || 0) }
 const sumItems = (items) => (items || []).reduce((s, i) => s + lineAmt(i), 0)
@@ -207,7 +214,14 @@ export default function Gowns() {
     if (!form.city.trim()) { alert('Please enter a city.'); return }
     if (!form.state.trim()) { alert('Please enter a state.'); return }
     if (!form.zip.trim()) { alert('Please enter a zip code.'); return }
-    const orderNo = form.orderNo || (orders.reduce((m, o) => Math.max(m, o.orderNo || 0), 1000) + 1)
+    const typedNo = String(form.orderNo ?? '').trim()
+    const orderNo = typedNo
+      ? parseInt(typedNo, 10)
+      : (orders.reduce((m, o) => Math.max(m, o.orderNo || 0), 1000) + 1)
+    // Warn (but don't block) if this invoice number is already used by another order
+    if (typedNo && orders.some(o => o.id !== form.id && o.orderNo === orderNo)) {
+      if (!window.confirm(`Invoice No. ${orderNo} is already used by another order. Save anyway?`)) return
+    }
     let items = form.items.filter(it => it.desc.trim() || it.price)
     if (!items.length) items = [blankRow()]
     const clean = { ...form, orderNo, firstName: form.firstName.trim(), lastName: form.lastName.trim(), name: `${form.firstName.trim()} ${form.lastName.trim()}`, items }
@@ -779,8 +793,15 @@ export default function Gowns() {
             {/* The pad */}
             <div style={{ border: `2px solid ${PAD}`, borderRadius: '6px', background: '#fff', overflow: 'hidden' }}>
               {/* order no */}
-              <div style={{ display: 'flex', justifyContent: 'flex-end', padding: '6px 12px 0' }}>
-                <span style={{ fontSize: '22px', fontWeight: 800, color: REDNO, letterSpacing: '0.02em' }}>No. {form.orderNo || '—'}</span>
+              <div style={{ display: 'flex', justifyContent: 'flex-end', alignItems: 'center', gap: '4px', padding: '6px 12px 0' }}>
+                <span style={{ fontSize: '22px', fontWeight: 800, color: REDNO, letterSpacing: '0.02em' }}>No.</span>
+                <input
+                  value={form.orderNo == null ? '' : form.orderNo}
+                  onChange={e => setF('orderNo', e.target.value.replace(/[^0-9]/g, ''))}
+                  inputMode="numeric"
+                  placeholder="auto"
+                  style={{ width: '90px', textAlign: 'right', fontSize: '22px', fontWeight: 800, color: REDNO, letterSpacing: '0.02em', border: 'none', borderBottom: `1.5px solid ${GRID}`, background: 'transparent', fontFamily: 'inherit', padding: '0 0 2px', outline: 'none' }}
+                />
               </div>
 
               {/* date */}
