@@ -448,7 +448,7 @@ export default function JerkyJoy() {
               <h1 style={{ ...big, fontSize: '28px', color: INK, letterSpacing: '0.3px', lineHeight: 1.1 }}>{currentLabel}</h1>
             </div>
             <div style={{ textAlign: 'right' }}>
-              <div style={{ ...big, fontSize: '24px', color: SPICE }}>{m0(revenue)}</div>
+              <div style={{ ...big, fontSize: '24px', color: SPICE }}>{m0(totalRevenue)}</div>
               <div style={{ ...lbl, color: '#9A8868' }}>REVENUE THIS MONTH</div>
             </div>
           </div>
@@ -462,11 +462,27 @@ export default function JerkyJoy() {
                 ))}
               </div>
 
-              <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap', marginBottom: '16px' }}>
-                <KPI k="Revenue / mo" v={m0(totalRevenue)} sub="bags, boards & camp" accent={SPICE} onClick={() => setTab('pnl')} />
-                <KPI k={`Bags sold this ${period}`} v={bagsPeriod} sub="across all flavors" accent={INK} onClick={() => setTab('direct')} />
-                <KPI k="Out on consignment" v={m0(onShelfVal)} sub={`${bagsOut} bags sitting in stores`} accent={KRAFT} onClick={() => setTab('consign')} />
-                <KPI k="Missing pieces" v={`${missUnits}`} sub={`${m0(missVal)} to investigate`} accent={missUnits ? RED : GREEN} onClick={() => setTab('consign')} />
+              <div style={{ ...card, marginBottom: '16px' }}>
+                <div style={{ ...lbl }}>Total revenue · this {period === 'week' ? 'week' : 'month'}</div>
+                <div style={{ ...big, fontSize: 'clamp(38px,6vw,54px)', color: INK, lineHeight: 1, margin: '4px 0 8px' }}>{m0(totalRevenue)}</div>
+                <div style={{ fontFamily: "'Inter', sans-serif", fontSize: '15px', color: MUTED, maxWidth: '640px', lineHeight: 1.5 }}>
+                  {pnlNet >= 0
+                    ? <>Strong {period === 'week' ? 'week' : 'month'} — <b style={{ color: INK }}>{m0(totalRevenue)}</b> across bags, boards &amp; camp orders, at a <b style={{ color: INK }}>{pnlPct(pnlGross)}%</b> gross margin and <b style={{ color: GREEN }}>{m0(pnlNet)}</b> net profit.</>
+                    : <><b style={{ color: INK }}>{m0(totalRevenue)}</b> in revenue, but costs ran ahead — net <b style={{ color: RED }}>{m0(pnlNet)}</b> this {period === 'week' ? 'week' : 'month'}.</>}
+                </div>
+                <div style={{ display: 'flex', gap: 'clamp(18px,4vw,38px)', flexWrap: 'wrap', marginTop: '16px', borderTop: `1px solid ${CREAM}`, paddingTop: '14px' }}>
+                  {[
+                    ['Bags sold', `${bagsPeriod}`, () => setTab('direct')],
+                    ['Gross margin', `${pnlPct(pnlGross)}%`, () => setTab('pnl')],
+                    ['Out on consignment', m0(onShelfVal), () => setTab('consign')],
+                    ['Missing pieces', `${missUnits}`, () => setTab('consign')],
+                  ].map(([k, v, on]) => (
+                    <div key={k} className="jm-click" onClick={on} style={{ cursor: 'pointer', borderRadius: '2px', padding: '2px 4px' }}>
+                      <div style={{ ...big, fontSize: '20px', color: INK }}>{v}</div>
+                      <div style={{ ...lbl, marginTop: '3px', fontSize: '10px' }}>{k}</div>
+                    </div>
+                  ))}
+                </div>
               </div>
 
               {/* Revenue by product line — bags + boards + camp packages */}
