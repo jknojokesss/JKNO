@@ -529,7 +529,7 @@ export default function Gowns() {
               <button onClick={() => { setTab('customers'); setSelectedCustomer(null) }} style={tabBtn(tab === 'customers')}>Customers</button>
             </div>
 
-            {orders.length > 0 && tab !== 'todos' && tab !== 'customers' && (
+            {orders.length > 0 && tab !== 'todos' && !(tab === 'customers' && selectedCustomer) && (
               <input value={search} onChange={e => setSearch(e.target.value)} placeholder="Search by customer name…"
                 style={{ ...fieldIn, fontSize: '18px', marginBottom: '16px' }} />
             )}
@@ -747,7 +747,10 @@ export default function Gowns() {
                 acc[key].orders.push(o)
                 return acc
               }, {})
-              const customers = Object.entries(custMap).sort((a, b) => a[1].name.localeCompare(b[1].name))
+              const q = search.trim().toLowerCase()
+              const customers = Object.entries(custMap)
+                .filter(([, c]) => !q || c.name.toLowerCase().includes(q) || (c.phone || '').toLowerCase().includes(q))
+                .sort((a, b) => a[1].name.localeCompare(b[1].name))
 
               if (selectedCustomer && custMap[selectedCustomer]) {
                 const cust = custMap[selectedCustomer]
@@ -796,8 +799,8 @@ export default function Gowns() {
                   {customers.length === 0 ? (
                     <div className="gw-card" style={{ padding: '44px 24px', textAlign: 'center', color: MUTED }}>
                       <div style={{ fontSize: '32px', marginBottom: '8px' }}>👗</div>
-                      <div style={{ fontSize: '16px', fontWeight: 600, color: INK }}>No customers yet</div>
-                      <div style={{ fontSize: '14px', marginTop: '4px' }}>Customers are built from your orders automatically.</div>
+                      <div style={{ fontSize: '16px', fontWeight: 600, color: INK }}>{q ? 'No matching customers' : 'No customers yet'}</div>
+                      <div style={{ fontSize: '14px', marginTop: '4px' }}>{q ? 'Try a different name.' : 'Customers are built from your orders automatically.'}</div>
                     </div>
                   ) : (
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
