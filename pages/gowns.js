@@ -676,6 +676,7 @@ export default function Gowns() {
               ]
               const open = allTodos.filter(t => !t.done)
               const byPerson = open.reduce((acc, t) => { const k = t.assignedTo || 'Unassigned'; if (!acc[k]) acc[k] = []; acc[k].push(t); return acc }, {})
+              const byCustomer = open.reduce((acc, t) => { const k = t.customerName || '—'; if (!acc[k]) acc[k] = []; acc[k].push(t); return acc }, {})
               const byDate = [...open].sort((a, b) => (a.date || '').localeCompare(b.date || ''))
               const taskRow = (t) => (
                 <div key={t.id} style={{ display: 'grid', gridTemplateColumns: '80px 1fr auto', gap: '10px', alignItems: 'center', padding: '11px 14px', borderBottom: `1px solid ${CREAM}` }}>
@@ -693,15 +694,18 @@ export default function Gowns() {
               return (
                 <div>
                   <div style={{ display: 'flex', gap: '8px', marginBottom: '16px', flexWrap: 'wrap' }}>
-                    {[['person', 'By Person'], ['date', 'By Date']].map(([v, l]) => (
+                    {[['person', 'By Person'], ['customer', 'By Customer'], ['date', 'By Date']].map(([v, l]) => (
                       <button key={v} onClick={() => setTodoView(v)} style={{ ...tabBtn(todoView === v), flex: 'none', padding: '10px 20px' }}>{l}</button>
                     ))}
                     {open.length > 0 && <button onClick={() => {
                       const grouped = todoView === 'person'
                         ? Object.keys(byPerson).sort().map(p => `<div style="margin-bottom:20px;"><div style="font-size:15px;font-weight:700;color:#2A4C9C;border-bottom:2px solid #2A4C9C;padding-bottom:6px;margin-bottom:8px;">${p}</div>${byPerson[p].sort((a,b)=>(a.date||'').localeCompare(b.date||'')).map(t=>`<div style="display:flex;gap:12px;padding:7px 0;border-bottom:1px solid #eee;font-size:13px;"><span style="width:70px;color:#888;flex-shrink:0;">${t.date?fmtShort(t.date):'—'}</span><span style="flex:1;">${t.text}</span><span style="color:#C8322B;font-weight:600;white-space:nowrap;">No. ${t.orderNo}</span><span style="color:#666;margin-left:8px;">${t.customerName}</span></div>`).join('')}</div>`).join('')
+                        : todoView === 'customer'
+                        ? Object.keys(byCustomer).sort().map(c => `<div style="margin-bottom:20px;"><div style="font-size:15px;font-weight:700;color:#2A4C9C;border-bottom:2px solid #2A4C9C;padding-bottom:6px;margin-bottom:8px;">${c}</div>${byCustomer[c].sort((a,b)=>(a.date||'').localeCompare(b.date||'')).map(t=>`<div style="display:flex;gap:12px;padding:7px 0;border-bottom:1px solid #eee;font-size:13px;"><span style="width:70px;color:#888;flex-shrink:0;">${t.date?fmtShort(t.date):'—'}</span><span style="flex:1;">${t.text}</span><span style="color:#8A8A93;">${t.assignedTo||'—'}</span><span style="color:#C8322B;font-weight:600;white-space:nowrap;">No. ${t.orderNo}</span></div>`).join('')}</div>`).join('')
                         : (() => { const gd = byDate.reduce((acc,t)=>{const k=t.date||'No date';if(!acc[k])acc[k]=[];acc[k].push(t);return acc},{});return Object.keys(gd).map(d=>`<div style="margin-bottom:20px;"><div style="font-size:15px;font-weight:700;color:#2A4C9C;border-bottom:2px solid #2A4C9C;padding-bottom:6px;margin-bottom:8px;">${d==='No date'?'No date':fmtDate(d)}</div>${gd[d].map(t=>`<div style="display:flex;gap:12px;padding:7px 0;border-bottom:1px solid #eee;font-size:13px;"><span style="flex:1;">${t.text}</span><span style="color:#8A8A93;">${t.assignedTo||'—'}</span><span style="color:#C8322B;font-weight:600;white-space:nowrap;margin-left:8px;">No. ${t.orderNo}</span><span style="color:#666;margin-left:8px;">${t.customerName}</span></div>`).join('')}</div>`).join('') })()
+                      const viewLabel = todoView === 'person' ? 'By Person' : todoView === 'customer' ? 'By Customer' : 'By Date'
                       const win = window.open('', '_blank')
-                      win.document.write(`<!DOCTYPE html><html><head><title>${BIZ} — Tasks</title></head><body style="font-family:sans-serif;padding:32px;max-width:720px;margin:0 auto;"><div style="display:flex;justify-content:space-between;align-items:baseline;border-bottom:2px solid #2A4C9C;padding-bottom:12px;margin-bottom:24px;"><div style="font-size:22px;font-weight:700;">${BIZ} — Task List</div><div style="font-size:13px;color:#888;">${new Date().toLocaleDateString()} · ${todoView==='person'?'By Person':'By Date'}</div></div>${grouped}</body></html>`)
+                      win.document.write(`<!DOCTYPE html><html><head><title>${BIZ} — Tasks</title></head><body style="font-family:sans-serif;padding:32px;max-width:720px;margin:0 auto;"><div style="display:flex;justify-content:space-between;align-items:baseline;border-bottom:2px solid #2A4C9C;padding-bottom:12px;margin-bottom:24px;"><div style="font-size:22px;font-weight:700;">${BIZ} — Task List</div><div style="font-size:13px;color:#888;">${new Date().toLocaleDateString()} · ${viewLabel}</div></div>${grouped}</body></html>`)
                       win.document.close(); win.focus(); setTimeout(()=>win.print(), 400)
                     }} style={{ flex: 'none', padding: '10px 20px', fontSize: '14px', fontWeight: 600, color: '#fff', background: PAD, border: 'none', borderRadius: '12px', cursor: 'pointer', fontFamily: 'inherit' }}>🖨 Print</button>}
                   </div>
@@ -721,6 +725,16 @@ export default function Gowns() {
                         <span style={{ fontSize: '12px', color: MUTED }}>{byPerson[person].length} task{byPerson[person].length !== 1 ? 's' : ''}</span>
                       </div>
                       {byPerson[person].sort((a, b) => (a.date || '').localeCompare(b.date || '')).map(taskRow)}
+                    </div>
+                  ))}
+
+                  {todoView === 'customer' && Object.keys(byCustomer).sort().map(cust => (
+                    <div key={cust} className="gw-card" style={{ marginBottom: '14px', overflow: 'hidden' }}>
+                      <div style={{ padding: '12px 14px', background: '#F0F4FF', borderBottom: `1px solid ${GRID}`, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                        <span style={{ fontSize: '14px', fontWeight: 700, color: PAD }}>{cust}</span>
+                        <span style={{ fontSize: '12px', color: MUTED }}>{byCustomer[cust].length} task{byCustomer[cust].length !== 1 ? 's' : ''}</span>
+                      </div>
+                      {byCustomer[cust].sort((a, b) => (a.date || '').localeCompare(b.date || '')).map(taskRow)}
                     </div>
                   ))}
 
