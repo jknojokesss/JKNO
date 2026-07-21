@@ -549,17 +549,35 @@ export default function CraveJerky() {
                   <div style={{ ...lbl }}>Sold this {period}, by product</div>
                   <div style={{ fontSize: '13px', color: MUTED }}><b style={{ ...big, fontSize: '18px', color: INK }}>{bagsPeriod}</b> jerky bags · <b style={{ color: INK }}>{period === 'week' ? 20 : 78}</b> liver &amp; gift</div>
                 </div>
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(148px, 1fr))', gap: '12px' }}>
-                  {[...PRODUCTS.map(p => ({ ...p, unit: 'bags' })), { name: 'Fresh Liver', color: '#7A2530', week: 15, month: 60, unit: 'orders' }, { name: 'Gift Box', color: '#A66B3C', week: 5, month: 18, unit: 'orders' }].sort((a, b) => b[period] - a[period]).map(p => (
-                    <div key={p.name} style={{ border: `1px solid ${BORDER}`, borderRadius: '2px', padding: '16px 12px 14px', textAlign: 'center', background: CREAM }}>
-                      <Bag color={p.color} />
-                      <div style={{ fontWeight: 600, color: INK, marginTop: '8px', fontSize: '14px' }}>{p.name}</div>
-                      <div style={{ ...big, fontSize: '26px', color: INK, marginTop: '4px' }}>{p[period]}</div>
-                      <div style={{ fontSize: '11px', color: MUTED }}>{p.unit} this {period}</div>
-                    </div>
-                  ))}
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(168px, 1fr))', gap: '12px' }}>
+                  {(() => {
+                    const bagPrice = bagsPeriod ? revenue / bagsPeriod : 0
+                    const list = [
+                      ...PRODUCTS.map(p => ({ ...p, unit: 'bags', type: 'Jerky', tc: SPICE, price: bagPrice, cost: costPerBag })),
+                      { name: 'Fresh Liver', color: '#7A2530', week: 15, month: 60, unit: 'orders', type: 'Fresh', tc: '#7A2530', price: BOARDS_MONTH.rev / BOARDS_MONTH.units, cost: boardCost },
+                      { name: 'Gift Box', color: '#A66B3C', week: 5, month: 18, unit: 'orders', type: 'Gift', tc: KRAFT, price: CAMP_MONTH.rev / CAMP_MONTH.units, cost: campCost },
+                    ]
+                    const pv = p => p[period] * p.price
+                    return list.sort((a, b) => pv(b) - pv(a)).map(p => {
+                      const rv = pv(p), mgn = p.price ? Math.round((p.price - p.cost) / p.price * 100) : 0
+                      return (
+                        <div key={p.name} style={{ border: `1px solid ${BORDER}`, borderRadius: '2px', overflow: 'hidden', background: CARDBG }}>
+                          <div style={{ height: '4px', background: p.color }} />
+                          <div style={{ padding: '12px 13px 13px' }}>
+                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '7px' }}>
+                              <span style={{ fontSize: '9px', fontWeight: 700, letterSpacing: '0.05em', textTransform: 'uppercase', color: p.tc, background: p.tc + '1E', padding: '2px 7px', borderRadius: '2px' }}>{p.type}</span>
+                              <span style={{ fontSize: '11px', fontWeight: 600, color: mgn >= 50 ? GREEN : KRAFT }}>{mgn}% margin</span>
+                            </div>
+                            <div style={{ fontWeight: 600, color: INK, fontSize: '14px' }}>{p.name}</div>
+                            <div style={{ ...big, fontSize: '23px', color: INK, marginTop: '3px' }}>{m0(rv)}</div>
+                            <div style={{ fontSize: '11px', color: MUTED, marginTop: '2px' }}>{p[period]} {p.unit} this {period}</div>
+                          </div>
+                        </div>
+                      )
+                    })
+                  })()}
                 </div>
-                <p style={{ fontSize: '12px', color: MUTED, marginTop: '14px' }}>These are placeholder illustrations — drop in real product photos whenever you like.</p>
+                <p style={{ fontSize: '12px', color: MUTED, marginTop: '14px' }}>Every product line — units, revenue and margin — jerky flavors, fresh liver and gift boxes side by side.</p>
               </div>
             </>
           )}
