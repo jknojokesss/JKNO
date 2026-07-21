@@ -448,7 +448,7 @@ export default function JerkyJoy() {
               <h1 style={{ ...big, fontSize: '28px', color: INK, letterSpacing: '0.3px', lineHeight: 1.1 }}>{currentLabel}</h1>
             </div>
             <div style={{ textAlign: 'right' }}>
-              <div style={{ ...big, fontSize: '24px', color: SPICE }}>{m0(revenue)}</div>
+              <div style={{ ...big, fontSize: '24px', color: SPICE }}>{m0(totalRevenue)}</div>
               <div style={{ ...lbl, color: '#9A8868' }}>REVENUE THIS MONTH</div>
             </div>
           </div>
@@ -462,11 +462,27 @@ export default function JerkyJoy() {
                 ))}
               </div>
 
-              <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap', marginBottom: '16px' }}>
-                <KPI k="Revenue / mo" v={m0(totalRevenue)} sub="bags, boards & camp" accent={SPICE} onClick={() => setTab('pnl')} />
-                <KPI k={`Bags sold this ${period}`} v={bagsPeriod} sub="across all flavors" accent={INK} onClick={() => setTab('direct')} />
-                <KPI k="Out on consignment" v={m0(onShelfVal)} sub={`${bagsOut} bags sitting in stores`} accent={KRAFT} onClick={() => setTab('consign')} />
-                <KPI k="Missing pieces" v={`${missUnits}`} sub={`${m0(missVal)} to investigate`} accent={missUnits ? RED : GREEN} onClick={() => setTab('consign')} />
+              <div style={{ ...card, marginBottom: '16px' }}>
+                <div style={{ ...lbl }}>Total revenue · this {period === 'week' ? 'week' : 'month'}</div>
+                <div style={{ ...big, fontSize: 'clamp(38px,6vw,54px)', color: INK, lineHeight: 1, margin: '4px 0 8px' }}>{m0(totalRevenue)}</div>
+                <div style={{ fontFamily: "'Inter', sans-serif", fontSize: '15px', color: MUTED, maxWidth: '640px', lineHeight: 1.5 }}>
+                  {pnlNet >= 0
+                    ? <>Strong {period === 'week' ? 'week' : 'month'} — <b style={{ color: INK }}>{m0(totalRevenue)}</b> across bags, boards &amp; camp orders, at a <b style={{ color: INK }}>{pnlPct(pnlGross)}%</b> gross margin and <b style={{ color: GREEN }}>{m0(pnlNet)}</b> net profit.</>
+                    : <><b style={{ color: INK }}>{m0(totalRevenue)}</b> in revenue, but costs ran ahead — net <b style={{ color: RED }}>{m0(pnlNet)}</b> this {period === 'week' ? 'week' : 'month'}.</>}
+                </div>
+                <div style={{ display: 'flex', gap: 'clamp(18px,4vw,38px)', flexWrap: 'wrap', marginTop: '16px', borderTop: `1px solid ${CREAM}`, paddingTop: '14px' }}>
+                  {[
+                    ['Bags sold', `${bagsPeriod}`, () => setTab('direct')],
+                    ['Gross margin', `${pnlPct(pnlGross)}%`, () => setTab('pnl')],
+                    ['Out on consignment', m0(onShelfVal), () => setTab('consign')],
+                    ['Missing pieces', `${missUnits}`, () => setTab('consign')],
+                  ].map(([k, v, on]) => (
+                    <div key={k} className="jm-click" onClick={on} style={{ cursor: 'pointer', borderRadius: '2px', padding: '2px 4px' }}>
+                      <div style={{ ...big, fontSize: '20px', color: INK }}>{v}</div>
+                      <div style={{ ...lbl, marginTop: '3px', fontSize: '10px' }}>{k}</div>
+                    </div>
+                  ))}
+                </div>
               </div>
 
               {/* Revenue by product line — bags + boards + camp packages */}
@@ -506,7 +522,7 @@ export default function JerkyJoy() {
                         <div style={{ flex: 1, height: '6px', background: CREAM, borderRadius: '2px', overflow: 'hidden' }}>
                           <div style={{ width: `${Math.round(pv(c) / max * 100)}%`, height: '100%', background: KRAFT }} />
                         </div>
-                        <span style={{ fontSize: '11px', color: MUTED, whiteSpace: 'nowrap' }}>{pb(c)} bags sold</span>
+                        <span style={{ fontSize: '11px', color: MUTED, whiteSpace: 'nowrap' }}>{pb(c)} units</span>
                       </div>
                     </div>
                   )) })()}
@@ -523,7 +539,7 @@ export default function JerkyJoy() {
                         <div style={{ flex: 1, height: '6px', background: CREAM, borderRadius: '2px', overflow: 'hidden' }}>
                           <div style={{ width: `${Math.round(pv(d) / max * 100)}%`, height: '100%', background: GREEN }} />
                         </div>
-                        <span style={{ fontSize: '11px', color: MUTED, whiteSpace: 'nowrap' }}>{pb(d)} bags · {d.source}</span>
+                        <span style={{ fontSize: '11px', color: MUTED, whiteSpace: 'nowrap' }}>{pb(d)} units · {d.source}</span>
                       </div>
                     </div>
                   )) })()}
@@ -532,16 +548,16 @@ export default function JerkyJoy() {
 
               <div style={{ ...card }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', flexWrap: 'wrap', gap: '8px', marginBottom: '16px' }}>
-                  <div style={{ ...lbl }}>Sold this {period}, by flavor</div>
-                  <div style={{ fontSize: '13px', color: MUTED }}><b style={{ ...big, fontSize: '18px', color: INK }}>{bagsPeriod}</b> bags total</div>
+                  <div style={{ ...lbl }}>Sold this {period}, by product</div>
+                  <div style={{ fontSize: '13px', color: MUTED }}><b style={{ ...big, fontSize: '18px', color: INK }}>{bagsPeriod}</b> bags · <b style={{ color: INK }}>{period === 'week' ? 16 : 62}</b> boards &amp; camp</div>
                 </div>
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(148px, 1fr))', gap: '12px' }}>
-                  {PRODUCTS.slice().sort((a, b) => b[period] - a[period]).map(p => (
+                  {[...PRODUCTS.map(p => ({ ...p, unit: 'bags' })), { name: 'Jerky Boards', color: '#8A2E14', week: 6, month: 22, unit: 'boards' }, { name: 'Camp Packages', color: '#8A5A2B', week: 10, month: 40, unit: 'orders' }].sort((a, b) => b[period] - a[period]).map(p => (
                     <div key={p.name} style={{ border: `1px solid ${BORDER}`, borderRadius: '2px', padding: '16px 12px 14px', textAlign: 'center', background: CREAM }}>
                       <Bag color={p.color} />
                       <div style={{ fontWeight: 600, color: INK, marginTop: '8px', fontSize: '14px' }}>{p.name}</div>
                       <div style={{ ...big, fontSize: '26px', color: INK, marginTop: '4px' }}>{p[period]}</div>
-                      <div style={{ fontSize: '11px', color: MUTED }}>bags this {period}</div>
+                      <div style={{ fontSize: '11px', color: MUTED }}>{p.unit} this {period}</div>
                     </div>
                   ))}
                 </div>
@@ -678,7 +694,7 @@ export default function JerkyJoy() {
                     <div key={c.id} onClick={() => setExpanded(c.id)} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '8px 0', borderTop: i ? '1px solid #F2D2CB' : 'none', cursor: 'pointer', gap: '8px', flexWrap: 'wrap' }}>
                       <div>
                         <span style={{ fontWeight: 600, color: INK, fontSize: '14px' }}>{c.store}</span>
-                        <span style={{ fontSize: '12px', color: MUTED }}> · {c.variance} bags · {c.diagnosis ? c.diagnosis : 'needs a diagnosis'}</span>
+                        <span style={{ fontSize: '12px', color: MUTED }}> · {c.variance} units · {c.diagnosis ? c.diagnosis : 'needs a diagnosis'}</span>
                       </div>
                       <span style={{ ...big, fontSize: '15px', color: RED }}>{money(c.varVal)}</span>
                     </div>

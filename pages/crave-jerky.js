@@ -1,10 +1,11 @@
 import { useState, useRef } from 'react'
 import Head from 'next/head'
 
-const CHAR = '#121212', SPICE = '#950C2F', KRAFT = '#B8894A', CREAM = '#F7F1E7'
-const INK = '#1A1512', MUTED = '#8A8175', GREEN = '#3E7C4F', BORDER = '#E7DFD1', AMBER = '#B8894A', RED = '#C03A22'
+const CHAR = '#121212', SPICE = '#C07C3E', KRAFT = '#A66B3C', CREAM = '#F7F1E7'
+const INK = '#1A1512', MUTED = '#8A8175', GREEN = '#3E7C4F', BORDER = '#E7DFD1', AMBER = '#C07C3E', RED = '#C03A22'
 const CARDBG = '#FFFDF9'
-const BIZ = 'Next Level Taste'
+const PMIX = [{ l: 'Jerky', c: '#C07C3E' }, { l: 'Fresh liver', c: '#7A2530' }, { l: 'Gift', c: '#A66B3C' }]
+const BIZ = 'Crave Kosher'
 
 const money = (n) => '$' + (Math.round(n * 100) / 100).toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 2 })
 const m0 = (n) => '$' + Math.round(n).toLocaleString()
@@ -24,27 +25,27 @@ const recon = (c) => {
 }
 
 const SEED_CONSIGN = [
-  { id: uid(), store: 'Gourmet Glatt North', price: 8.5, sent: 60, returned: 0, paid: 425, counted: 6, countedDate: '2026-06-15', diagnosis: '', cycle: 1, lastContact: '2026-06-15', restock: 'now', notes: 'Manager Yossi reorders every ~2 weeks. Reorders the Classic board weekly.', log: [{ at: 'Jun 15', t: 'Counted 6 on shelf' }, { at: 'Jun 6', t: 'Check received $425' }] },
-  { id: uid(), store: 'Gourmet Glatt South', price: 8.5, sent: 48, returned: 4, paid: 340, counted: 2, countedDate: '2026-06-15', diagnosis: '', cycle: 1, lastContact: '2026-06-12', restock: 'now', notes: 'Down to 2 boards — promised a delivery this week.', log: [{ at: 'Jun 15', t: 'Counted 2 on shelf' }, { at: 'Jun 5', t: 'Check received $340' }] },
-  { id: uid(), store: 'Seasons', price: 9, sent: 54, returned: 0, paid: 360, counted: 14, countedDate: '2026-06-14', diagnosis: '', cycle: 1, lastContact: '2026-06-14', restock: 'good', notes: 'Steady account. Loves the charcuterie boards.', log: [{ at: 'Jun 14', t: 'Counted 14 — reconciles clean' }, { at: 'Jun 4', t: 'Check received $360' }] },
-  { id: uid(), store: 'Nutmeg', price: 8, sent: 40, returned: 0, paid: 200, counted: 8, countedDate: '2026-06-16', diagnosis: '', cycle: 1, lastContact: '2026-05-26', restock: 'soon', notes: "Haven't spoken in ~3 weeks — check in, and ask about the missing units.", log: [{ at: 'Jun 16', t: 'Counted 8 on shelf' }, { at: 'Jun 2', t: 'Check received $200' }] },
+  { id: uid(), store: 'Gourmet Glatt North', price: 8.5, sent: 60, returned: 0, paid: 425, counted: 6, countedDate: '2026-06-15', diagnosis: '', cycle: 1, lastContact: '2026-06-15', restock: 'now', notes: 'Manager Yossi reorders every ~2 weeks. Reorders Original weekly.', log: [{ at: 'Jun 15', t: 'Counted 6 on shelf' }, { at: 'Jun 6', t: 'Check received $425' }] },
+  { id: uid(), store: 'Gourmet Glatt South', price: 8.5, sent: 48, returned: 4, paid: 340, counted: 2, countedDate: '2026-06-15', diagnosis: '', cycle: 1, lastContact: '2026-06-12', restock: 'now', notes: 'Down to 2 bags — promised a delivery this week.', log: [{ at: 'Jun 15', t: 'Counted 2 on shelf' }, { at: 'Jun 5', t: 'Check received $340' }] },
+  { id: uid(), store: 'Seasons', price: 9, sent: 54, returned: 0, paid: 360, counted: 14, countedDate: '2026-06-14', diagnosis: '', cycle: 1, lastContact: '2026-06-14', restock: 'good', notes: 'Steady account. Loves the Honey.', log: [{ at: 'Jun 14', t: 'Counted 14 — reconciles clean' }, { at: 'Jun 4', t: 'Check received $360' }] },
+  { id: uid(), store: 'Nutmeg', price: 8, sent: 40, returned: 0, paid: 200, counted: 8, countedDate: '2026-06-16', diagnosis: '', cycle: 1, lastContact: '2026-05-26', restock: 'soon', notes: "Haven't spoken in ~3 weeks — check in, and ask about the missing bags.", log: [{ at: 'Jun 16', t: 'Counted 8 on shelf' }, { at: 'Jun 2', t: 'Check received $200' }] },
   { id: uid(), store: 'Aisle 9 Jackson', price: 8.5, sent: 36, returned: 0, paid: 255, counted: 4, countedDate: '2026-06-13', diagnosis: '', cycle: 1, lastContact: '2026-06-13', restock: 'soon', notes: 'New buyer contact — trial going well so far.', log: [{ at: 'Jun 13', t: 'Counted 4 on shelf' }, { at: 'Jun 3', t: 'Check received $255' }] },
   { id: uid(), store: 'Aisle 9 Lakewood', price: 8.5, sent: 44, returned: 0, paid: 340, counted: 4, countedDate: '2026-06-13', diagnosis: '', cycle: 1, lastContact: '2026-06-13', restock: 'good', notes: 'Clean account, always pays on time.', log: [{ at: 'Jun 13', t: 'Counted 4 — reconciles clean' }, { at: 'Jun 3', t: 'Check received $340' }] },
-  { id: uid(), store: 'Foodex', price: 8, sent: 30, returned: 0, paid: 160, counted: 9, countedDate: '2026-06-12', diagnosis: '', cycle: 1, lastContact: '2026-06-05', restock: 'soon', notes: 'Slower mover — suggest a standing weekly board order.', log: [{ at: 'Jun 12', t: 'Counted 9 on shelf' }, { at: 'Jun 1', t: 'Check received $160' }] },
+  { id: uid(), store: 'Foodex', price: 8, sent: 30, returned: 0, paid: 160, counted: 9, countedDate: '2026-06-12', diagnosis: '', cycle: 1, lastContact: '2026-06-05', restock: 'soon', notes: 'Slower mover — try a sampler display by the register.', log: [{ at: 'Jun 12', t: 'Counted 9 on shelf' }, { at: 'Jun 1', t: 'Check received $160' }] },
   { id: uid(), store: 'Superstop', price: 8, sent: 36, returned: 0, paid: 0, counted: 36, countedDate: '2026-06-10', diagnosis: '', cycle: 1, lastContact: '2026-06-10', restock: 'good', notes: 'First delivery just landed — follow up in 2 weeks.', log: [{ at: 'Jun 10', t: 'Shipped 36 units — first delivery' }] },
   { id: uid(), store: 'Evergreen', price: 9, sent: 40, returned: 0, paid: 270, counted: 8, countedDate: '2026-06-16', diagnosis: '', cycle: 1, lastContact: '2026-06-16', restock: 'now', notes: 'Reorders fast — strong location, push more here.', log: [{ at: 'Jun 16', t: 'Counted 8 on shelf' }, { at: 'Jun 5', t: 'Check received $270' }] },
 ]
 
 const SEED_DIRECT = [
   { id: uid(), who: 'Online store (Shopify)', source: 'Shopify / online', units: 120, rev: 1560 },
-  { id: uid(), who: 'Catering — Simcha halls', source: 'Catering / events', units: 45, rev: 585 },
-  { id: uid(), who: 'Corporate gift orders', source: 'Wholesale / bulk', units: 60, rev: 540 },
-  { id: uid(), who: 'Yom Tov pre-orders', source: 'Holiday / seasonal', units: 30, rev: 390 },
+  { id: uid(), who: 'Local delivery — Lakewood', source: 'Local delivery', units: 45, rev: 585 },
+  { id: uid(), who: 'Wholesale — kosher stores', source: 'Wholesale / bulk', units: 60, rev: 540 },
+  { id: uid(), who: 'Shipped nationwide', source: 'Online / shipped', units: 30, rev: 390 },
 ]
-// Revenue streams beyond standard online orders — catering/event boards and
-// seasonal holiday (Yom Tov / Simchas Torah) boxes. Illustrative monthly figures.
-const BOARDS_MONTH = { units: 22, rev: 3685, cost: 1660 } // catering & events (~45% cost)
-const CAMP_MONTH = { units: 40, rev: 1680, cost: 1010 }   // holiday / Yom Tov boxes (~60% cost)
+// Revenue beyond jerky bags — Crave also sells fresh liver and gift / bulk
+// (holiday & wholesale) orders. Illustrative monthly figures.
+const BOARDS_MONTH = { units: 60, rev: 1140, cost: 620 }  // fresh liver (~54% cost)
+const CAMP_MONTH = { units: 18, rev: 1440, cost: 780 }    // gift & bulk orders (~54% cost)
 const DIRECT_SOURCES = ['Shopify / online', 'Farmers market', 'Pop-up event', 'Wholesale / bulk', 'Other']
 
 const SEED_ADS = [
@@ -96,8 +97,8 @@ const mLine = (mo) => {
 }
 const PNL_ROWS = [
   { label: 'Direct sales', key: 'directRev', kind: 'line', cost: false },
-  { label: 'Wholesale collected', key: 'consignRev', kind: 'line', cost: false },
-  { label: 'Catering Boards & camp packages holiday', key: 'boardRev', kind: 'line', cost: false },
+  { label: 'Consignment collected', key: 'consignRev', kind: 'line', cost: false },
+  { label: 'Fresh liver & gift/bulk', key: 'boardRev', kind: 'line', cost: false },
   { label: 'Total revenue', key: 'rev', kind: 'subtotal', cost: false },
   { label: 'Cost of goods sold', key: 'cogs', kind: 'line', cost: true },
   { label: 'Gross profit', key: 'gross', kind: 'subtotal', cost: false },
@@ -107,60 +108,34 @@ const PNL_ROWS = [
   { label: 'Net profit / loss', key: 'net', kind: 'total', cost: false },
 ]
 
-// Order pipeline — a made-to-order charcuterie shop tracks each order through
-// stages (this replaces bag-on-shelf consignment). Interactive: click to advance.
-const ORDER_STAGES = [
-  { id: 'new', label: 'New', color: '#6B7A8A' },
-  { id: 'prepping', label: 'In prep', color: '#B8894A' },
-  { id: 'ready', label: 'Ready', color: '#3E7C4F' },
-  { id: 'delivered', label: 'Delivered', color: '#950C2F' },
-  { id: 'paid', label: 'Paid', color: '#1A1512' },
-]
-const SM = Object.fromEntries(ORDER_STAGES.map(s => [s.id, s]))
-const fmtDue = (d) => new Date(d + 'T00:00').toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
-const stageBadge = (st) => ({ display: 'inline-block', padding: '3px 9px', borderRadius: '2px', fontSize: '11px', fontWeight: 600, background: (SM[st]?.color || '#888') + '22', color: SM[st]?.color || '#888', whiteSpace: 'nowrap' })
-const SEED_ORDERS = [
-  { id: uid(), customer: 'Weiss — Bar Mitzvah', items: '3-Tier Board + 2 platters', amount: 640, channel: 'Catering', due: '2026-06-22', stage: 'new' },
-  { id: uid(), customer: 'Gourmet Glatt North', items: '6 Classic Meat Boards', amount: 510, channel: 'Wholesale', due: '2026-06-19', stage: 'prepping' },
-  { id: uid(), customer: 'Online — R. Klein', items: 'Charcuterie Board + Kishka', amount: 155, channel: 'Online', due: '2026-06-18', stage: 'prepping' },
-  { id: uid(), customer: 'Friedman Simcha', items: '4 Charcuterie Boards', amount: 460, channel: 'Catering', due: '2026-06-18', stage: 'ready' },
-  { id: uid(), customer: 'Online — S. Berger', items: 'Fish Platter + Yapchik', amount: 135, channel: 'Online', due: '2026-06-17', stage: 'ready' },
-  { id: uid(), customer: 'Seasons Lakewood', items: '8 Classic Boards (weekly)', amount: 640, channel: 'Wholesale', due: '2026-06-16', stage: 'delivered' },
-  { id: uid(), customer: 'Cohen — Sheva Brachos', items: '3-Tier Board', amount: 275, channel: 'Catering', due: '2026-06-15', stage: 'delivered' },
-  { id: uid(), customer: 'Online — M. Stein', items: 'Jerky Sticks ×12', amount: 96, channel: 'Online', due: '2026-06-15', stage: 'delivered' },
-  { id: uid(), customer: 'Evergreen', items: '5 Charcuterie Boards', amount: 575, channel: 'Wholesale', due: '2026-06-13', stage: 'paid' },
-  { id: uid(), customer: 'Online — Y. Gross', items: 'Kishka & Gravy + board', amount: 180, channel: 'Online', due: '2026-06-12', stage: 'paid' },
-  { id: uid(), customer: 'Aisle 9 Jackson', items: '4 Classic Boards', amount: 340, channel: 'Wholesale', due: '2026-06-11', stage: 'paid' },
-]
-
 // products sold this month (swap illustrations for real photos anytime)
 const PRODUCTS = [
-  { name: 'Classic Meat Board', color: '#7A1F30', week: 13, month: 52 },
-  { name: 'Jerky Sticks', color: '#8A4A2A', week: 12, month: 46 },
-  { name: 'Charcuterie Board', color: '#95402F', week: 10, month: 40 },
-  { name: 'Kishka', color: '#8A6A3A', week: 9, month: 34 },
-  { name: 'Fish Platter', color: '#6B7A8A', week: 8, month: 30 },
-  { name: '3-Tier Board', color: '#5C1220', week: 6, month: 24 },
-  { name: 'Yapchik', color: '#6B4A2A', week: 5, month: 20 },
-  { name: 'Kishka & Gravy', color: '#5A4030', week: 4, month: 16 },
+  { name: 'Original', color: '#6B3A1E', week: 22, month: 88 },
+  { name: 'Honey', color: '#C08A2E', week: 16, month: 64 },
+  { name: 'Sweet Teriyaki', color: '#7A3A1A', week: 13, month: 52 },
+  { name: 'Spicy', color: '#B2351A', week: 12, month: 46 },
+  { name: 'Sweet Chili', color: '#A8432C', week: 10, month: 38 },
+  { name: 'Garlic', color: '#8A7A4A', week: 8, month: 30 },
+  { name: 'Peppered', color: '#46403A', week: 6, month: 22 },
 ]
 // per-period sales for the front-page leaderboards (week vs month)
+// mix = share of that account's revenue by product [jerky, fresh liver, gift]
 const STORE_PERF = [
-  { store: 'Gourmet Glatt North', week: 13, weekRev: 110, month: 50, monthRev: 425 },
-  { store: 'Gourmet Glatt South', week: 10, weekRev: 85, month: 40, monthRev: 340 },
-  { store: 'Seasons', week: 11, weekRev: 99, month: 40, monthRev: 360 },
-  { store: 'Aisle 9 Lakewood', week: 10, weekRev: 85, month: 40, monthRev: 340 },
-  { store: 'Evergreen', week: 9, weekRev: 81, month: 30, monthRev: 270 },
-  { store: 'Aisle 9 Jackson', week: 8, weekRev: 68, month: 30, monthRev: 255 },
-  { store: 'Nutmeg', week: 7, weekRev: 56, month: 25, monthRev: 200 },
-  { store: 'Foodex', week: 6, weekRev: 48, month: 20, monthRev: 160 },
-  { store: 'Superstop', week: 7, weekRev: 56, month: 18, monthRev: 144 },
+  { store: 'Gourmet Glatt North', week: 13, weekRev: 110, month: 50, monthRev: 425, mix: [0.65, 0.25, 0.10] },
+  { store: 'Gourmet Glatt South', week: 10, weekRev: 85, month: 40, monthRev: 340, mix: [0.70, 0.20, 0.10] },
+  { store: 'Seasons', week: 11, weekRev: 99, month: 40, monthRev: 360, mix: [0.75, 0.15, 0.10] },
+  { store: 'Aisle 9 Lakewood', week: 10, weekRev: 85, month: 40, monthRev: 340, mix: [0.80, 0.15, 0.05] },
+  { store: 'Evergreen', week: 9, weekRev: 81, month: 30, monthRev: 270, mix: [0.65, 0.35, 0.00] },
+  { store: 'Aisle 9 Jackson', week: 8, weekRev: 68, month: 30, monthRev: 255, mix: [0.85, 0.10, 0.05] },
+  { store: 'Nutmeg', week: 7, weekRev: 56, month: 25, monthRev: 200, mix: [0.90, 0.10, 0.00] },
+  { store: 'Foodex', week: 6, weekRev: 48, month: 20, monthRev: 160, mix: [1.00, 0.00, 0.00] },
+  { store: 'Superstop', week: 7, weekRev: 56, month: 18, monthRev: 144, mix: [0.80, 0.20, 0.00] },
 ]
 const DIRECT_PERF = [
-  { who: 'Online store (Shopify)', source: 'Shopify / online', week: 31, weekRev: 403, month: 120, monthRev: 1560 },
-  { who: 'Yom Tov pre-orders', source: 'Holiday / seasonal', week: 30, weekRev: 390, month: 30, monthRev: 390 },
-  { who: 'Catering — Simcha halls', source: 'Catering / events', week: 20, weekRev: 260, month: 45, monthRev: 585 },
-  { who: 'Acme Corp — office bulk', source: 'Wholesale / bulk', week: 0, weekRev: 0, month: 60, monthRev: 540 },
+  { who: 'Online store (Shopify)', source: 'Shopify / online', week: 31, weekRev: 403, month: 120, monthRev: 1560, mix: [0.55, 0.20, 0.25] },
+  { who: 'Shipped nationwide', source: 'Online / shipped', week: 30, weekRev: 390, month: 30, monthRev: 390, mix: [0.55, 0.10, 0.35] },
+  { who: 'Local delivery — Lakewood', source: 'Local delivery', week: 20, weekRev: 260, month: 45, monthRev: 585, mix: [0.55, 0.35, 0.10] },
+  { who: 'Wholesale — kosher stores', source: 'Wholesale / bulk', week: 0, weekRev: 0, month: 60, monthRev: 540, mix: [0.85, 0.15, 0.00] },
 ]
 const Bag = ({ color }) => (
   <svg width="58" height="58" viewBox="0 0 64 64" style={{ display: 'block', margin: '0 auto' }}>
@@ -175,10 +150,9 @@ const Bag = ({ color }) => (
 
 const MONO = "'IBM Plex Mono', monospace"
 
-export default function NextLevelTaste() {
+export default function CraveJerky() {
   const [tab, setTab] = useState('overview')
   const [consign, setConsign] = useState(SEED_CONSIGN)
-  const [orders, setOrders] = useState(SEED_ORDERS)
   const [direct, setDirect] = useState(SEED_DIRECT)
   const [ads, setAds] = useState(SEED_ADS)
   const [expanded, setExpanded] = useState(null)
@@ -194,8 +168,8 @@ export default function NextLevelTaste() {
   const [pnlView, setPnlView] = useState('single')
   const [period, setPeriod] = useState('month')
   const [costPerBag, setCostPerBag] = useState(4.5)
-  const [boardCost, setBoardCost] = useState(75) // avg cost to make one board (estimate — owner sets real #)
-  const [campCost, setCampCost] = useState(25)   // avg cost per camp package
+  const [boardCost, setBoardCost] = useState(10) // avg cost to make one board (estimate — owner sets real #)
+  const [campCost, setCampCost] = useState(43)   // avg cost per camp package
   const [logoOk, setLogoOk] = useState(true)
   const [addingA, setAddingA] = useState(false)
   const [af, setAf] = useState({ channel: '', spend: '', rev: '', track: '' })
@@ -239,7 +213,7 @@ export default function NextLevelTaste() {
   }
   const exportClose = () => {
     const rows = [['Account', 'Amount'],
-      ['Wholesale income', cashCollected],
+      ['Consignment income', cashCollected],
       ['Direct income (non-Shopify)', offlineDirectRev],
       ['Cost of goods sold', -closeCogs],
       ['AR — invoice stores (sold-not-reported)', closeAR],
@@ -308,9 +282,9 @@ export default function NextLevelTaste() {
   const bagsOut = R.reduce((s, c) => s + Math.max(c.expected, 0), 0)
   // Revenue by product line: bags (live) + premium boards + camp packages
   const productMix = [
-    { line: 'Online orders', units: bagsPeriod, unit: 'orders', rev: revenue, color: SPICE, to: 'direct' },
-    { line: 'Catering & events', units: BOARDS_MONTH.units, unit: 'events', rev: BOARDS_MONTH.rev, color: '#6B7A8A', to: 'direct' },
-    { line: 'Holiday / Yom Tov boxes', units: CAMP_MONTH.units, unit: 'boxes', rev: CAMP_MONTH.rev, color: KRAFT, to: 'direct' },
+    { line: 'Jerky bags', units: bagsPeriod, unit: 'bags', rev: revenue, color: SPICE, to: 'direct' },
+    { line: 'Fresh liver', units: BOARDS_MONTH.units, unit: 'orders', rev: BOARDS_MONTH.rev, color: '#7A2530', to: 'direct' },
+    { line: 'Gift & bulk', units: CAMP_MONTH.units, unit: 'orders', rev: CAMP_MONTH.rev, color: KRAFT, to: 'direct' },
   ]
   const totalRevenue = productMix.reduce((s, p) => s + p.rev, 0)
   // P&L totals that include boards + camp (bag vars above stay bag-only for the
@@ -321,15 +295,6 @@ export default function NextLevelTaste() {
   const pnlGross = totalRevenue - pnlCogs
   const pnlNet = pnlGross - totalOpex
   const pnlPct = (n) => totalRevenue ? Math.round(n / totalRevenue * 100) : 0
-  // Order-pipeline metrics (operational view for the Orders tab + Overview)
-  const stageCount = (st) => orders.filter(o => o.stage === st).length
-  const stageVal = (st) => orders.filter(o => o.stage === st).reduce((a, o) => a + o.amount, 0)
-  const pipeOrders = orders.filter(o => ['new', 'prepping', 'ready'].includes(o.stage))
-  const pipeVal = pipeOrders.reduce((a, o) => a + o.amount, 0)
-  const collectOrders = orders.filter(o => o.stage === 'delivered')
-  const collectVal = collectOrders.reduce((a, o) => a + o.amount, 0)
-  const nextStage = (st) => { const i = ORDER_STAGES.findIndex(x => x.id === st); return i < ORDER_STAGES.length - 1 ? ORDER_STAGES[i + 1].id : st }
-  const advanceOrder = (id) => setOrders(os => os.map(o => o.id === id ? { ...o, stage: nextStage(o.stage) } : o))
 
   // monthly close → QB (Shopify online excluded — it books through Shopify, no double-count)
   const shopifyRev = direct.filter(d => d.source === 'Shopify / online').reduce((s, d) => s + d.rev, 0)
@@ -349,7 +314,7 @@ export default function NextLevelTaste() {
   const baseL = lines[0]
   const tMovers = [
     { label: 'direct sales', key: 'directRev', cost: false },
-    { label: 'wholesale', key: 'consignRev', cost: false },
+    { label: 'consignment', key: 'consignRev', cost: false },
     { label: 'cost of goods', key: 'cogs', cost: true },
     { label: 'advertising', key: 'ad', cost: true },
     { label: 'other operating costs', key: 'otherOpex', cost: true },
@@ -397,7 +362,7 @@ export default function NextLevelTaste() {
     </select>
   )
 
-  const TABS = [['overview', 'Overview'], ['consign', 'Orders'], ['direct', 'Direct Sales'], ['ads', 'Advertising'], ['pnl', 'P&L']]
+  const TABS = [['overview', 'Overview'], ['consign', 'Consignment'], ['direct', 'Direct Sales'], ['ads', 'Advertising'], ['pnl', 'P&L']]
   const EXTRA = [['expenses', 'Import expenses'], ['quickbooks', 'QuickBooks sync'], ['close', 'Monthly close'], ['askai', 'Ask Us']]
   const currentLabel = ([...TABS, ...EXTRA].find(t => t[0] === tab) || ['', ''])[1]
 
@@ -405,21 +370,21 @@ export default function NextLevelTaste() {
     <>
       <Head>
         <title>{`${BIZ} — Dashboard`}</title>
-        <meta name="description" content="Every order, every account, your real profit — one screen." />
-        <meta property="og:title" content="Next Level Taste — Dashboard" />
-        <meta property="og:description" content="Every order, every account, your real profit — one screen." />
+        <meta name="description" content="Every consignment store, every sale, your real profit — one screen." />
+        <meta property="og:title" content="Crave Kosher — Dashboard" />
+        <meta property="og:description" content="Every consignment store, every sale, your real profit — one screen." />
         <meta property="og:type" content="website" />
-        <meta property="og:url" content="https://www.jknojokes.com/next-level-taste" />
+        <meta property="og:url" content="https://www.jknojokes.com/crave-jerky" />
         <meta name="twitter:card" content="summary" />
-        <meta name="twitter:title" content="Next Level Taste — Dashboard" />
-        <meta name="twitter:description" content="Every order, every account, your real profit — one screen." />
+        <meta name="twitter:title" content="Crave Kosher — Dashboard" />
+        <meta name="twitter:description" content="Every consignment store, every sale, your real profit — one screen." />
         <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-        <link rel="manifest" href="/next-level-taste.webmanifest" />
+        <link rel="manifest" href="/crave-jerky.webmanifest" />
         <meta name="theme-color" content="#2B2018" />
         <meta name="apple-mobile-web-app-capable" content="yes" />
         <meta name="mobile-web-app-capable" content="yes" />
         <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
-        <meta name="apple-mobile-web-app-title" content="Next Level Taste" />
+        <meta name="apple-mobile-web-app-title" content="Crave Kosher" />
         <link rel="apple-touch-icon" href="/jerky-icon.svg" />
         <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
         <style>{`*{box-sizing:border-box;margin:0;padding:0}html{-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale;text-rendering:optimizeLegibility}body{background:${CREAM};font-family:'Inter',sans-serif;color:${INK}}::placeholder{color:#A99A82}
@@ -438,9 +403,9 @@ export default function NextLevelTaste() {
         <aside className="jm-side">
           <div style={{ padding: '2px 8px 16px' }}>
             <div style={{ ...big, fontSize: '25px', letterSpacing: '-0.5px', lineHeight: 1 }}>
-              <span style={{ color: CREAM }}>Next Level</span> <span style={{ color: '#C9A24B' }}>Taste</span>
+              <span style={{ color: '#D8A566' }}>Crave</span> <span style={{ color: CREAM }}>Kosher</span>
             </div>
-            <div style={{ ...lbl, color: '#9C8F86', marginTop: '6px', fontSize: '9px', letterSpacing: '0.04em' }}>Kosher charcuterie · boards · nationwide</div>
+            <div style={{ ...lbl, color: '#9C8F86', marginTop: '6px', fontSize: '9px', letterSpacing: '0.04em' }}>Small-batch kosher jerky · Lakewood · nationwide</div>
             <div style={{ ...lbl, color: '#B6A78C', marginTop: '4px' }}>Dashboard</div>
           </div>
           <nav className="jm-nav">
@@ -479,7 +444,7 @@ export default function NextLevelTaste() {
           {/* Top bar */}
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '10px', marginBottom: '22px' }}>
             <div>
-              <div style={{ ...lbl, color: SPICE }}>Next Level Taste</div>
+              <div style={{ ...lbl, color: SPICE }}>Crave Kosher</div>
               <h1 style={{ ...big, fontSize: '28px', color: INK, letterSpacing: '0.3px', lineHeight: 1.1 }}>{currentLabel}</h1>
             </div>
             <div style={{ textAlign: 'right' }}>
@@ -502,15 +467,15 @@ export default function NextLevelTaste() {
                 <div style={{ ...big, fontSize: 'clamp(38px,6vw,54px)', color: INK, lineHeight: 1, margin: '4px 0 8px' }}>{m0(totalRevenue)}</div>
                 <div style={{ fontFamily: "'Inter', sans-serif", fontSize: '15px', color: MUTED, maxWidth: '640px', lineHeight: 1.5 }}>
                   {pnlNet >= 0
-                    ? <>Strong {period === 'week' ? 'week' : 'month'} — <b style={{ color: INK }}>{m0(totalRevenue)}</b> across online orders, catering &amp; holiday, at a <b style={{ color: INK }}>{pnlPct(pnlGross)}%</b> gross margin and <b style={{ color: GREEN }}>{m0(pnlNet)}</b> net profit.</>
+                    ? <>Strong {period === 'week' ? 'week' : 'month'} — <b style={{ color: INK }}>{m0(totalRevenue)}</b> across jerky, fresh liver &amp; gift orders, at a <b style={{ color: INK }}>{pnlPct(pnlGross)}%</b> gross margin and <b style={{ color: GREEN }}>{m0(pnlNet)}</b> net profit.</>
                     : <><b style={{ color: INK }}>{m0(totalRevenue)}</b> in revenue, but costs ran ahead — net <b style={{ color: RED }}>{m0(pnlNet)}</b> this {period === 'week' ? 'week' : 'month'}.</>}
                 </div>
                 <div style={{ display: 'flex', gap: 'clamp(18px,4vw,38px)', flexWrap: 'wrap', marginTop: '16px', borderTop: `1px solid ${CREAM}`, paddingTop: '14px' }}>
                   {[
-                    ['Orders', `${bagsPeriod}`, () => setTab('direct')],
+                    ['Bags sold', `${bagsPeriod}`, () => setTab('direct')],
                     ['Gross margin', `${pnlPct(pnlGross)}%`, () => setTab('pnl')],
-                    ['In the pipeline', m0(pipeVal), () => setTab('consign')],
-                    ['To collect', m0(collectVal), () => setTab('consign')],
+                    ['Out on consignment', m0(onShelfVal), () => setTab('consign')],
+                    ['Missing pieces', `${missUnits}`, () => setTab('consign')],
                   ].map(([k, v, on]) => (
                     <div key={k} className="jm-click" onClick={on} style={{ cursor: 'pointer', borderRadius: '2px', padding: '2px 4px' }}>
                       <div style={{ ...big, fontSize: '20px', color: INK }}>{v}</div>
@@ -544,9 +509,17 @@ export default function NextLevelTaste() {
                 </div>
               </div>
 
+              <div style={{ display: 'flex', gap: '16px', flexWrap: 'wrap', marginBottom: '10px', paddingLeft: '2px' }}>
+                {PMIX.map(m => (
+                  <span key={m.l} style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '11px', color: MUTED }}>
+                    <span style={{ width: '10px', height: '10px', borderRadius: '2px', background: m.c }} /> {m.l}
+                  </span>
+                ))}
+                <span style={{ fontSize: '11px', color: '#B0A48F' }}>— each bar split by product</span>
+              </div>
               <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap', marginBottom: '16px' }}>
                 <div style={{ ...card, flex: 1, minWidth: '290px' }}>
-                  <div style={{ ...lbl, marginBottom: '14px' }}>Top wholesale accounts · this {period}</div>
+                  <div style={{ ...lbl, marginBottom: '14px' }}>Top consignment stores · this {period}</div>
                   {(() => { const pv = s => period === 'week' ? s.weekRev : s.monthRev; const pb = s => period === 'week' ? s.week : s.month; const sorted = STORE_PERF.slice().sort((a, b) => pv(b) - pv(a)); const max = pv(sorted[0]) || 1; return sorted.slice(0, 6).map((c, i) => (
                     <div key={c.store} className="jm-click" onClick={() => setTab('consign')} style={{ padding: '9px 8px', borderTop: i ? `1px solid ${CREAM}` : 'none', cursor: 'pointer', borderRadius: '2px' }}>
                       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', gap: '8px', marginBottom: '6px' }}>
@@ -554,8 +527,10 @@ export default function NextLevelTaste() {
                         <span style={{ ...big, fontSize: '15px', color: INK }}>{m0(pv(c))}</span>
                       </div>
                       <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                        <div style={{ flex: 1, height: '6px', background: CREAM, borderRadius: '2px', overflow: 'hidden' }}>
-                          <div style={{ width: `${Math.round(pv(c) / max * 100)}%`, height: '100%', background: KRAFT }} />
+                        <div style={{ flex: 1, height: '7px', background: CREAM, borderRadius: '2px', overflow: 'hidden', display: 'flex' }}>
+                          <div style={{ width: `${Math.round(pv(c) / max * 100)}%`, height: '100%', display: 'flex' }}>
+                            {PMIX.map((m, mi) => <div key={mi} title={`${m.l} ${Math.round((c.mix ? c.mix[mi] : 0) * 100)}%`} style={{ width: `${(c.mix ? c.mix[mi] : (mi === 0 ? 1 : 0)) * 100}%`, background: m.c }} />)}
+                          </div>
                         </div>
                         <span style={{ fontSize: '11px', color: MUTED, whiteSpace: 'nowrap' }}>{pb(c)} units</span>
                       </div>
@@ -571,8 +546,10 @@ export default function NextLevelTaste() {
                         <span style={{ ...big, fontSize: '15px', color: GREEN }}>{m0(pv(d))}</span>
                       </div>
                       <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                        <div style={{ flex: 1, height: '6px', background: CREAM, borderRadius: '2px', overflow: 'hidden' }}>
-                          <div style={{ width: `${Math.round(pv(d) / max * 100)}%`, height: '100%', background: GREEN }} />
+                        <div style={{ flex: 1, height: '7px', background: CREAM, borderRadius: '2px', overflow: 'hidden', display: 'flex' }}>
+                          <div style={{ width: `${Math.round(pv(d) / max * 100)}%`, height: '100%', display: 'flex' }}>
+                            {PMIX.map((m, mi) => <div key={mi} title={`${m.l} ${Math.round((d.mix ? d.mix[mi] : 0) * 100)}%`} style={{ width: `${(d.mix ? d.mix[mi] : (mi === 0 ? 1 : 0)) * 100}%`, background: m.c }} />)}
+                          </div>
                         </div>
                         <span style={{ fontSize: '11px', color: MUTED, whiteSpace: 'nowrap' }}>{pb(d)} units · {d.source}</span>
                       </div>
@@ -583,20 +560,38 @@ export default function NextLevelTaste() {
 
               <div style={{ ...card }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', flexWrap: 'wrap', gap: '8px', marginBottom: '16px' }}>
-                  <div style={{ ...lbl }}>Sold this {period}, by flavor</div>
-                  <div style={{ fontSize: '13px', color: MUTED }}><b style={{ ...big, fontSize: '18px', color: INK }}>{bagsPeriod}</b> orders total</div>
+                  <div style={{ ...lbl }}>Sold this {period}, by product</div>
+                  <div style={{ fontSize: '13px', color: MUTED }}><b style={{ ...big, fontSize: '18px', color: INK }}>{bagsPeriod}</b> jerky bags · <b style={{ color: INK }}>{period === 'week' ? 20 : 78}</b> liver &amp; gift</div>
                 </div>
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(148px, 1fr))', gap: '12px' }}>
-                  {PRODUCTS.slice().sort((a, b) => b[period] - a[period]).map(p => (
-                    <div key={p.name} style={{ border: `1px solid ${BORDER}`, borderRadius: '2px', padding: '16px 12px 14px', textAlign: 'center', background: CREAM }}>
-                      <Bag color={p.color} />
-                      <div style={{ fontWeight: 600, color: INK, marginTop: '8px', fontSize: '14px' }}>{p.name}</div>
-                      <div style={{ ...big, fontSize: '26px', color: INK, marginTop: '4px' }}>{p[period]}</div>
-                      <div style={{ fontSize: '11px', color: MUTED }}>this {period}</div>
-                    </div>
-                  ))}
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(168px, 1fr))', gap: '12px' }}>
+                  {(() => {
+                    const bagPrice = bagsPeriod ? revenue / bagsPeriod : 0
+                    const list = [
+                      ...PRODUCTS.map(p => ({ ...p, unit: 'bags', type: 'Jerky', tc: SPICE, price: bagPrice, cost: costPerBag })),
+                      { name: 'Fresh Liver', color: '#7A2530', week: 15, month: 60, unit: 'orders', type: 'Fresh', tc: '#7A2530', price: BOARDS_MONTH.rev / BOARDS_MONTH.units, cost: boardCost },
+                      { name: 'Gift Box', color: '#A66B3C', week: 5, month: 18, unit: 'orders', type: 'Gift', tc: KRAFT, price: CAMP_MONTH.rev / CAMP_MONTH.units, cost: campCost },
+                    ]
+                    const pv = p => p[period] * p.price
+                    return list.sort((a, b) => pv(b) - pv(a)).map(p => {
+                      const rv = pv(p), mgn = p.price ? Math.round((p.price - p.cost) / p.price * 100) : 0
+                      return (
+                        <div key={p.name} style={{ border: `1px solid ${BORDER}`, borderRadius: '2px', overflow: 'hidden', background: CARDBG }}>
+                          <div style={{ height: '4px', background: p.color }} />
+                          <div style={{ padding: '12px 13px 13px' }}>
+                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '7px' }}>
+                              <span style={{ fontSize: '9px', fontWeight: 700, letterSpacing: '0.05em', textTransform: 'uppercase', color: p.tc, background: p.tc + '1E', padding: '2px 7px', borderRadius: '2px' }}>{p.type}</span>
+                              <span style={{ fontSize: '11px', fontWeight: 600, color: mgn >= 50 ? GREEN : KRAFT }}>{mgn}% margin</span>
+                            </div>
+                            <div style={{ fontWeight: 600, color: INK, fontSize: '14px' }}>{p.name}</div>
+                            <div style={{ ...big, fontSize: '23px', color: INK, marginTop: '3px' }}>{m0(rv)}</div>
+                            <div style={{ fontSize: '11px', color: MUTED, marginTop: '2px' }}>{p[period]} {p.unit} this {period}</div>
+                          </div>
+                        </div>
+                      )
+                    })
+                  })()}
                 </div>
-                <p style={{ fontSize: '12px', color: MUTED, marginTop: '14px' }}>These are placeholder illustrations — drop in real product photos whenever you like.</p>
+                <p style={{ fontSize: '12px', color: MUTED, marginTop: '14px' }}>Every product line — units, revenue and margin — jerky flavors, fresh liver and gift boxes side by side.</p>
               </div>
             </>
           )}
@@ -613,7 +608,7 @@ export default function NextLevelTaste() {
           {tab === 'pnl' && pnlView === 'single' && (
             <>
               <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap', marginBottom: '16px' }}>
-                <KPI k="Revenue" v={m0(totalRevenue)} sub="orders + catering & holiday" accent={GREEN} />
+                <KPI k="Revenue" v={m0(totalRevenue)} sub="bags + liver + gift" accent={GREEN} />
                 <KPI k="Gross profit" v={m0(pnlGross)} sub={`${pnlPct(pnlGross)}% margin`} accent={KRAFT} />
                 <KPI k={pnlNet >= 0 ? 'Net profit' : 'Net loss'} v={m0(pnlNet)} sub={pnlNet >= 0 ? 'in the black' : 'in the red'} accent={pnlNet >= 0 ? GREEN : RED} />
               </div>
@@ -622,24 +617,24 @@ export default function NextLevelTaste() {
                 <div style={{ ...lbl, marginBottom: '14px' }}>Profit &amp; loss — this month (cash basis)</div>
                 <div style={{ ...lbl, color: KRAFT, margin: '4px 0' }}>Revenue</div>
                 <Row l="Direct sales" v={m0(directRev)} />
-                <Row l="Wholesale (collected)" v={m0(cashCollected)} />
-                <Row l="Catering Boards & camp packages holiday" v={m0(boardRevM)} />
+                <Row l="Consignment (collected)" v={m0(cashCollected)} />
+                <Row l="Fresh liver & gift/bulk" v={m0(boardRevM)} />
                 <Row l="Total revenue" v={m0(totalRevenue)} bold top />
                 <div style={{ ...lbl, color: KRAFT, margin: '16px 0 6px' }}>Cost of goods sold</div>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '2px 0 8px', flexWrap: 'wrap' }}>
-                  <span style={{ fontSize: '13px', color: MUTED }}>Cost per online order:</span>
+                  <span style={{ fontSize: '13px', color: MUTED }}>Cost to make one bag:</span>
                   <span style={{ display: 'inline-flex', alignItems: 'center', gap: '3px', color: MUTED }}>$<input value={costPerBag} onChange={e => setCostPerBag(Number(e.target.value) || 0)} type="number" step="0.25" style={{ ...inp, width: '74px', padding: '6px 9px' }} /></span>
                   <span style={{ fontSize: '12px', color: '#A2937A' }}>← estimate, set the real number</span>
                 </div>
-                <Row l={`Order cost of goods (${soldBags} orders × ${money(costPerBag)})`} v={`−${m0(cogs)}`} />
+                <Row l={`Bag cost of goods (${soldBags} bags × ${money(costPerBag)})`} v={`−${m0(cogs)}`} />
                 <div style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '8px 0', flexWrap: 'wrap' }}>
-                  <span style={{ fontSize: '13px', color: MUTED }}>Cost per catering order:</span>
+                  <span style={{ fontSize: '13px', color: MUTED }}>Cost per liver order:</span>
                   <span style={{ display: 'inline-flex', alignItems: 'center', gap: '3px', color: MUTED }}>$<input value={boardCost} onChange={e => setBoardCost(Number(e.target.value) || 0)} type="number" step="1" style={{ ...inp, width: '70px', padding: '6px 9px' }} /></span>
-                  <span style={{ fontSize: '13px', color: MUTED, marginLeft: '4px' }}>holiday box:</span>
+                  <span style={{ fontSize: '13px', color: MUTED, marginLeft: '4px' }}>gift order:</span>
                   <span style={{ display: 'inline-flex', alignItems: 'center', gap: '3px', color: MUTED }}>$<input value={campCost} onChange={e => setCampCost(Number(e.target.value) || 0)} type="number" step="1" style={{ ...inp, width: '70px', padding: '6px 9px' }} /></span>
                   <span style={{ fontSize: '12px', color: '#A2937A' }}>← set the real numbers</span>
                 </div>
-                <Row l={`Catering Boards & camp cost holiday cost (${BOARDS_MONTH.units} × ${money(boardCost)} + ${CAMP_MONTH.units} × ${money(campCost)})`} v={`−${m0(boardCogsM)}`} />
+                <Row l={`Liver & gift cost (${BOARDS_MONTH.units} × ${money(boardCost)} + ${CAMP_MONTH.units} × ${money(campCost)})`} v={`−${m0(boardCogsM)}`} />
                 <Row l={`Gross profit  ·  ${pnlPct(pnlGross)}% margin`} v={m0(pnlGross)} bold top />
                 <div style={{ ...lbl, color: KRAFT, margin: '16px 0 4px' }}>Operating expenses</div>
                 <Row l="Advertising" v={`−${m0(adSpend)}`} />
@@ -712,55 +707,160 @@ export default function NextLevelTaste() {
           {/* ===== CONSIGNMENT ===== */}
           {tab === 'consign' && (
             <>
-              <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap', marginBottom: '16px' }}>
-                {ORDER_STAGES.map(s => (
-                  <div key={s.id} style={{ ...card, flex: 1, minWidth: '122px', padding: '14px 15px', borderTop: `3px solid ${s.color}` }}>
-                    <div style={lbl}>{s.label}</div>
-                    <div style={{ ...big, fontSize: '24px', color: INK, marginTop: '4px' }}>{stageCount(s.id)}</div>
-                    <div style={{ fontSize: '12px', color: MUTED }}>{m0(stageVal(s.id))}</div>
-                  </div>
-                ))}
-              </div>
-
               <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap', marginBottom: '16px' }}>
-                <div style={{ ...card, flex: 1, minWidth: '260px' }}>
-                  <div style={{ ...lbl, marginBottom: '4px' }}>Coming up · what's due next</div>
-                  {orders.filter(o => o.stage !== 'paid' && o.stage !== 'delivered').sort((a, b) => a.due.localeCompare(b.due)).slice(0, 5).map((o, i) => (
-                    <div key={o.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '8px', padding: '9px 0', borderTop: i ? `1px solid ${CREAM}` : 'none' }}>
-                      <div><div style={{ fontWeight: 600, color: INK, fontSize: '14px' }}>{o.customer}</div><div style={{ fontSize: '12px', color: MUTED }}>{o.items} · due {fmtDue(o.due)}</div></div>
-                      <span style={stageBadge(o.stage)}>{SM[o.stage].label}</span>
-                    </div>
-                  ))}
-                </div>
-                <div style={{ ...card, flex: 1, minWidth: '260px' }}>
-                  <div style={{ ...lbl, marginBottom: '2px' }}>To collect · delivered, unpaid</div>
-                  <div style={{ ...big, fontSize: '26px', color: collectVal ? RED : GREEN, margin: '2px 0 8px' }}>{m0(collectVal)}</div>
-                  {collectOrders.map((o, i) => (
-                    <div key={o.id} className="jm-click" onClick={() => advanceOrder(o.id)} style={{ display: 'flex', justifyContent: 'space-between', gap: '8px', padding: '8px', borderTop: i ? `1px solid ${CREAM}` : 'none', cursor: 'pointer', borderRadius: '2px' }}>
-                      <span style={{ fontSize: '13px', color: INK }}>{o.customer}</span>
-                      <span style={{ fontSize: '13px', color: INK, fontWeight: 600 }}>{m0(o.amount)} <span style={{ color: SPICE, fontSize: '11px' }}>→ mark paid</span></span>
-                    </div>
-                  ))}
-                  {!collectOrders.length && <div style={{ fontSize: '13px', color: MUTED }}>All delivered orders are paid.</div>}
-                </div>
+                <KPI k="Partners" v={consign.length} sub="stores carrying you" />
+                <KPI k="Out on shelves" v={R.reduce((s, c) => s + Math.max(c.expected, 0), 0)} sub={`${m0(onShelfVal)} of product`} accent={KRAFT} />
+                <KPI k="Collected" v={m0(cashCollected)} sub="checks in the door" accent={GREEN} />
+                <KPI k="Missing" v={missUnits} sub={`${m0(missVal)} to chase`} accent={missUnits ? RED : GREEN} />
               </div>
 
-              <div style={{ ...card }}>
-                <div style={{ ...lbl, marginBottom: '12px' }}>All orders · click a stage badge to move it forward</div>
-                {orders.slice().sort((a, b) => ORDER_STAGES.findIndex(x => x.id === a.stage) - ORDER_STAGES.findIndex(x => x.id === b.stage) || a.due.localeCompare(b.due)).map((o, i) => (
-                  <div key={o.id} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '10px', padding: '10px 0', borderTop: i ? `1px solid ${CREAM}` : 'none', flexWrap: 'wrap' }}>
-                    <div style={{ minWidth: '170px', flex: 1 }}>
-                      <div style={{ fontWeight: 600, color: INK, fontSize: '14px' }}>{o.customer}</div>
-                      <div style={{ fontSize: '12px', color: MUTED }}>{o.items} · {o.channel} · due {fmtDue(o.due)}</div>
-                    </div>
-                    <span style={{ ...big, fontSize: '15px', color: INK, minWidth: '62px', textAlign: 'right' }}>{m0(o.amount)}</span>
-                    <span className="jm-click" onClick={() => advanceOrder(o.id)} title="Advance to next stage" style={{ ...stageBadge(o.stage), cursor: 'pointer' }}>{SM[o.stage].label}{o.stage !== 'paid' ? ' ›' : ''}</span>
+              {R.some(c => c.variance > 0) && (
+                <div style={{ ...card, marginBottom: '16px', background: '#FBEDE9', borderColor: '#E7C3B8' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', flexWrap: 'wrap', gap: '8px', marginBottom: '10px' }}>
+                    <div style={{ ...lbl, color: RED }}>Money to collect</div>
+                    <div style={{ fontSize: '13px', color: MUTED }}><b style={{ ...big, fontSize: '18px', color: RED }}>{m0(missVal)}</b> across {R.filter(c => c.variance > 0).length} stores</div>
                   </div>
-                ))}
-              </div>
+                  {R.filter(c => c.variance > 0).sort((a, b) => b.varVal - a.varVal).map((c, i) => (
+                    <div key={c.id} onClick={() => setExpanded(c.id)} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '8px 0', borderTop: i ? '1px solid #F2D2CB' : 'none', cursor: 'pointer', gap: '8px', flexWrap: 'wrap' }}>
+                      <div>
+                        <span style={{ fontWeight: 600, color: INK, fontSize: '14px' }}>{c.store}</span>
+                        <span style={{ fontSize: '12px', color: MUTED }}> · {c.variance} units · {c.diagnosis ? c.diagnosis : 'needs a diagnosis'}</span>
+                      </div>
+                      <span style={{ ...big, fontSize: '15px', color: RED }}>{money(c.varVal)}</span>
+                    </div>
+                  ))}
+                  <p style={{ fontSize: '12px', color: MUTED, marginTop: '10px', lineHeight: 1.5 }}>Bags gone from shelves you haven't been paid for. Tap a store to diagnose it — then invoice the ones the store sold and didn't report, or write off the rest at close-out.</p>
+                </div>
+              )}
+
+              {!adding ? (
+                <button onClick={() => setAdding(true)} style={{ width: '100%', background: CHAR, color: CREAM, border: 'none', borderRadius: '2px', padding: '13px', ...btn, marginBottom: '16px' }}>+ Add a consignment partner</button>
+              ) : (
+                <div style={{ ...card, marginBottom: '16px' }}>
+                  <div style={{ ...lbl, marginBottom: '12px' }}>New consignment partner</div>
+                  <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+                    <input value={cf.store} onChange={e => setCf({ ...cf, store: e.target.value })} placeholder="Store name *" style={{ ...inp, flex: 2, minWidth: '160px' }} />
+                    <input value={cf.price} onChange={e => setCf({ ...cf, price: e.target.value })} type="number" placeholder="$ / unit" style={{ ...inp, flex: 1, minWidth: '90px' }} />
+                    <input value={cf.sent} onChange={e => setCf({ ...cf, sent: e.target.value })} type="number" placeholder="Units sent" style={{ ...inp, flex: 1, minWidth: '100px' }} />
+                  </div>
+                  <div style={{ display: 'flex', gap: '8px', marginTop: '12px' }}>
+                    <button onClick={() => setAdding(false)} style={{ flex: 1, background: 'none', border: `1px solid ${BORDER}`, borderRadius: '2px', padding: '11px', ...btn, color: MUTED }}>Cancel</button>
+                    <button onClick={addPartner} style={{ flex: 2, background: SPICE, color: '#fff', border: 'none', borderRadius: '2px', padding: '11px', ...btn }}>+ Add partner</button>
+                  </div>
+                </div>
+              )}
+
+              {R.map(c => {
+                const open = expanded === c.id
+                const badge = c.status === 'reconciled' ? { c: GREEN, t: 'Reconciled' } : c.status === 'short' ? { c: RED, t: `${c.variance} missing` } : c.status === 'over' ? { c: AMBER, t: `${-c.variance} over` } : { c: MUTED, t: 'Not counted' }
+                return (
+                  <div key={c.id} style={{ ...card, padding: 0, marginBottom: '12px', overflow: 'hidden', borderColor: open ? CHAR : (c.status === 'short' ? '#E7C3B8' : BORDER) }}>
+                    <div onClick={() => setExpanded(open ? null : c.id)} style={{ padding: '15px 18px', cursor: 'pointer' }}>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '12px', flexWrap: 'wrap' }}>
+                        <div>
+                          <div style={{ ...big, fontSize: '20px', color: INK }}>{c.store}</div>
+                          <div style={{ fontSize: '12px', color: MUTED, marginTop: '3px' }}>
+                            {money(c.price)}/unit · sent {c.sent} · paid for {c.paidUnits} · {money(c.paid)} collected · cycle {c.cycle || 1}
+                          </div>
+                        </div>
+                        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '6px' }}>
+                          <span style={{ fontFamily: "'Inter', sans-serif", fontSize: '12px', fontWeight: 600, color: '#fff', background: badge.c, padding: '5px 11px', borderRadius: '2px', whiteSpace: 'nowrap' }}>{badge.t}</span>
+                          {c.restock && c.restock !== 'good' && <span style={{ fontSize: '11px', fontWeight: 600, color: RM[c.restock].color, background: RM[c.restock].color + '1A', padding: '3px 10px', borderRadius: '2px', whiteSpace: 'nowrap' }}>{RM[c.restock].label}</span>}
+                        </div>
+                      </div>
+                      {c.variance > 0 && c.diagnosis && (
+                        <div style={{ marginTop: '10px', fontSize: '12.5px', color: c.diagnosis.includes('owes') ? RED : INK, background: c.diagnosis.includes('owes') ? '#FBEDE9' : CREAM, border: `1px solid ${c.diagnosis.includes('owes') ? '#E7C3B8' : BORDER}`, borderRadius: '2px', padding: '8px 11px', display: 'flex', alignItems: 'center', gap: '7px' }}>
+                          <span style={{ width: '7px', height: '7px', borderRadius: '50%', background: c.diagnosis.includes('owes') ? RED : KRAFT, flexShrink: 0 }} />
+                          <span>Diagnosed: <b>{c.diagnosis}</b></span>
+                        </div>
+                      )}
+                    </div>
+
+                    {open && (
+                      <div style={{ padding: '0 18px 18px', borderTop: `1px solid ${CREAM}` }}>
+                        <div style={{ ...lbl, margin: '14px 0 6px' }}>The reconciliation</div>
+                        <div style={{ background: CREAM, borderRadius: '2px', padding: '14px 16px' }}>
+                          <Row l="Units sent out" v={c.sent} />
+                          <Row l={`− Paid by checks (${money(c.paid)} ÷ ${money(c.price)})`} v={`−${c.paidUnits}`} />
+                          <Row l="− Returned to you" v={`−${c.returned}`} />
+                          <Row l="Should still be on the shelf" v={Math.max(c.expected, 0)} bold top />
+                          <Row l={`Actually counted (${fmtD(c.countedDate)})`} v={c.counted == null ? '— not counted' : c.counted} />
+                          <Row
+                            l={c.variance > 0 ? 'Missing — unaccounted for' : c.variance < 0 ? 'Overage — recount' : 'Matches perfectly'}
+                            v={c.variance > 0 ? `${c.variance}  (${money(c.varVal)})` : c.variance < 0 ? `${-c.variance}` : '0'}
+                            neg={c.variance > 0} bold top />
+                        </div>
+
+                        {c.variance > 0 && (
+                          <div style={{ marginTop: '14px' }}>
+                            <div style={{ ...lbl, marginBottom: '6px' }}>Why are {c.variance} missing? (diagnose it)</div>
+                            <select value={c.diagnosis} onChange={e => upd(c.id, { diagnosis: e.target.value }, `Diagnosed missing units: ${e.target.value || 'cleared'}`)} style={{ ...inp, width: '100%', cursor: 'pointer' }}>
+                              {DIAGNOSES.map(d => <option key={d} value={d}>{d || 'Pick a reason…'}</option>)}
+                            </select>
+                            {c.diagnosis === 'Sold but not reported (store owes me)' && (
+                              <div style={{ marginTop: '8px', fontSize: '13px', color: RED, background: '#FBEDE9', borderRadius: '2px', padding: '9px 12px' }}>
+                                Then <b>{c.store}</b> owes you <b>{money(c.varVal)}</b>. Send them an invoice for the {c.variance} units.
+                              </div>
+                            )}
+                          </div>
+                        )}
+
+                        <div style={{ ...lbl, margin: '16px 0 8px' }}>Update this account</div>
+                        <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+                          <div style={{ flex: 1, minWidth: '150px', display: 'flex', gap: '6px' }}>
+                            <input value={dv(c.id + '_chk')} onChange={e => setDv(c.id + '_chk', e.target.value)} type="number" placeholder="Check $" style={{ ...inp, flex: 1, minWidth: 0 }} />
+                            <button onClick={() => logCheck(c.id)} style={{ background: GREEN, color: '#fff', border: 'none', borderRadius: '2px', padding: '0 14px', ...btn, fontSize: '12px' }}>Log</button>
+                          </div>
+                          <div style={{ flex: 1, minWidth: '150px', display: 'flex', gap: '6px' }}>
+                            <input value={dv(c.id + '_cnt')} onChange={e => setDv(c.id + '_cnt', e.target.value)} type="number" placeholder="Count on shelf" style={{ ...inp, flex: 1, minWidth: 0 }} />
+                            <button onClick={() => logCount(c.id)} style={{ background: KRAFT, color: '#fff', border: 'none', borderRadius: '2px', padding: '0 14px', ...btn, fontSize: '12px' }}>Log</button>
+                          </div>
+                          <div style={{ flex: 1, minWidth: '150px', display: 'flex', gap: '6px' }}>
+                            <input value={dv(c.id + '_shp')} onChange={e => setDv(c.id + '_shp', e.target.value)} type="number" placeholder="Ship more" style={{ ...inp, flex: 1, minWidth: 0 }} />
+                            <button onClick={() => shipMore(c.id)} style={{ background: CHAR, color: CREAM, border: 'none', borderRadius: '2px', padding: '0 14px', ...btn, fontSize: '12px' }}>Ship</button>
+                          </div>
+                        </div>
+
+                        <div style={{ ...lbl, margin: '18px 0 8px' }}>Store relationship</div>
+                        <div style={{ display: 'flex', gap: '10px', alignItems: 'center', flexWrap: 'wrap', marginBottom: '10px' }}>
+                          <span style={{ fontSize: '13px', color: MUTED }}>Last spoke: <b style={{ color: INK }}>{fmtD(c.lastContact)}</b>{c.lastContact ? ` · ${daysSince(c.lastContact)}d ago` : ''}</span>
+                          <button onClick={() => upd(c.id, { lastContact: todayStr }, 'Spoke with the store')} style={{ background: KRAFT, color: '#fff', border: 'none', borderRadius: '2px', padding: '5px 13px', ...btn, fontSize: '11px' }}>Spoke today</button>
+                        </div>
+                        <div style={{ display: 'flex', gap: '10px', alignItems: 'center', flexWrap: 'wrap', marginBottom: '10px' }}>
+                          <span style={{ fontSize: '13px', color: MUTED }}>Do they need more?</span>
+                          <select value={c.restock || 'good'} onChange={e => upd(c.id, { restock: e.target.value })} style={{ ...inp, cursor: 'pointer', maxWidth: '200px' }}>
+                            {RESTOCK.map(r => <option key={r.id} value={r.id}>{r.label}</option>)}
+                          </select>
+                        </div>
+                        <textarea value={c.notes || ''} onChange={e => upd(c.id, { notes: e.target.value })} rows={2} placeholder="Notes — who you talk to, what they like, what they said…" style={{ ...inp, width: '100%', resize: 'vertical', fontFamily: 'inherit' }} />
+
+                        <div style={{ ...lbl, margin: '18px 0 6px' }}>End of cycle</div>
+                        <button onClick={() => { if (window.confirm(`Close out cycle ${c.cycle || 1} for ${c.store}? This settles the ${c.variance > 0 ? c.variance + ' missing bags' : 'reconciliation'} and starts a fresh cycle from the ${c.counted == null ? 0 : c.counted} bags on the shelf now.`)) closeOut(c.id) }} style={{ width: '100%', background: 'none', color: INK, border: `1px solid ${BORDER}`, borderRadius: '2px', padding: '12px', ...btn }}>Close out this cycle →</button>
+                        <p style={{ fontSize: '12px', color: MUTED, marginTop: '7px', lineHeight: 1.5 }}>
+                          {c.variance > 0
+                            ? <>Settles the <b>{c.variance} missing</b> {c.diagnosis === 'Sold but not reported (store owes me)' ? <>by <b style={{ color: RED }}>invoicing the store {money(c.varVal)}</b></> : <>as a <b>write-off</b></>}, then resets the count clean for the next delivery — so old gaps never bleed into the new cycle.</>
+                            : <>Reconciles clean and resets the count for the next delivery — so old numbers never bleed into the new cycle.</>}
+                        </p>
+
+                        {(c.log || []).length > 0 && (
+                          <div style={{ marginTop: '16px', borderTop: `1px solid ${CREAM}`, paddingTop: '12px' }}>
+                            <div style={{ ...lbl, marginBottom: '8px' }}>History</div>
+                            {c.log.map((e, i) => (
+                              <div key={i} style={{ fontSize: '12px', color: MUTED, padding: '3px 0' }}>
+                                <span style={{ color: '#BFB096', fontFamily: MONO, marginRight: '8px' }}>{e.at}</span>{e.t}
+                              </div>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+                    )}
+                  </div>
+                )
+              })}
             </>
           )}
 
+          {/* ===== DIRECT ===== */}
           {tab === 'direct' && (
             <>
               <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap', marginBottom: '16px' }}>
@@ -989,18 +1089,18 @@ export default function NextLevelTaste() {
 
               <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap', marginBottom: '16px' }}>
                 <KPI k="Income to post" v={m0(closeIncome)} sub="consignment + offline direct" accent={GREEN} />
-                <KPI k="COGS to post" v={m0(closeCogs)} sub={`${closeUnits} orders × ${money(costPerBag)}`} accent={KRAFT} />
+                <KPI k="COGS to post" v={m0(closeCogs)} sub={`${closeUnits} bags × ${money(costPerBag)}`} accent={KRAFT} />
                 <KPI k="AR to invoice" v={m0(closeAR)} sub="stores that owe you" accent={closeAR ? RED : MUTED} />
               </div>
 
               <div style={{ ...card }}>
                 <div style={{ ...lbl, color: KRAFT, margin: '2px 0 4px' }}>Income to post</div>
-                <Row l="Wholesale collected" v={m0(cashCollected)} />
+                <Row l="Consignment collected" v={m0(cashCollected)} />
                 <Row l="Direct sales — non-Shopify (market, pop-up, cash, wholesale)" v={m0(offlineDirectRev)} />
                 <Row l="Total income to post" v={m0(closeIncome)} bold top />
 
                 <div style={{ ...lbl, color: KRAFT, margin: '16px 0 4px' }}>Cost of goods sold</div>
-                <Row l={`${closeUnits} orders × ${money(costPerBag)}/order`} v={`−${m0(closeCogs)}`} bold top />
+                <Row l={`${closeUnits} bags sold × ${money(costPerBag)}/bag`} v={`−${m0(closeCogs)}`} bold top />
 
                 <div style={{ ...lbl, color: KRAFT, margin: '16px 0 4px' }}>Accounts receivable</div>
                 <Row l="Invoice stores for sold-not-reported bags" v={m0(closeAR)} bold top />
