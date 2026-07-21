@@ -122,7 +122,7 @@ export default function Gowns() {
   const [form, setForm] = useState(blankForm())
   const [editing, setEditing] = useState(false)
   const [search, setSearch] = useState('')
-  const [pay, setPay] = useState({ amount: '', method: '', date: todayStr() })
+  const [pay, setPay] = useState({ amount: '', method: '', date: todayStr(), checkNo: '' })
   const [suggest, setSuggest] = useState(null)
   const [catalog, setCatalog] = useState(DEFAULT_ITEMS)
   const [newItem, setNewItem] = useState(null)
@@ -229,10 +229,12 @@ export default function Gowns() {
     const a = parseFloat(amt != null ? amt : pay.amount)
     if (!a || a <= 0) { alert('Enter a payment amount.'); return }
     if (!pay.method) { alert('Choose a payment type (Cash, Check, Card…).'); return }
-    setForm(f => ({ ...f, payments: [...(f.payments || []), { id: uid(), amount: a, method: pay.method, date: pay.date || todayStr() }] }))
-    setPay({ amount: '', method: '', date: todayStr() })
+    setForm(f => ({ ...f, payments: [...(f.payments || []), { id: uid(), amount: a, method: pay.method, date: pay.date || todayStr(), checkNo: pay.method === 'Check' ? (pay.checkNo || '').trim() : '' }] }))
+    setPay({ amount: '', method: '', date: todayStr(), checkNo: '' })
   }
-  const setPaymentMethod = (id, method) => setForm(f => ({ ...f, payments: f.payments.map(p => p.id === id ? { ...p, method } : p) }))
+  // Clear the check # if the method is changed away from Check
+  const setPaymentMethod = (id, method) => setForm(f => ({ ...f, payments: f.payments.map(p => p.id === id ? { ...p, method, checkNo: method === 'Check' ? (p.checkNo || '') : '' } : p) }))
+  const setPaymentCheckNo = (id, checkNo) => setForm(f => ({ ...f, payments: f.payments.map(p => p.id === id ? { ...p, checkNo } : p) }))
   const removePayment = (id) => setForm(f => ({ ...f, payments: f.payments.filter(p => p.id !== id) }))
 
   const save = async () => {
@@ -292,7 +294,7 @@ export default function Gowns() {
       // blank filler rows to make it look like the pad
       const fillerCount = Math.max(0, 6 - o.items.filter(it => it.desc?.trim() || lineAmt(it)).length)
       const fillerRows = Array(fillerCount).fill(`<tr><td style="border-right:1px solid ${GRID_BLUE};padding:12px 6px;"> </td><td style="border-right:1px solid ${GRID_BLUE};padding:12px 6px;"> </td><td style="border-right:1px solid ${GRID_BLUE};padding:12px 6px;"> </td><td style="border-right:1px solid ${GRID_BLUE};padding:12px 6px;"> </td><td style="padding:12px 6px;"> </td></tr>`).join('')
-      const payLines = (o.payments||[]).map(pmt => `<div style="font-size:12px;color:#2E7D46;margin-top:3px;">✓ ${money(pmt.amount)}${pmt.method ? ' · '+pmt.method : ''}${pmt.date ? ' · '+fmtDate(pmt.date) : ''}</div>`).join('')
+      const payLines = (o.payments||[]).map(pmt => `<div style="font-size:12px;color:#2E7D46;margin-top:3px;">✓ ${money(pmt.amount)}${pmt.method ? ' · '+pmt.method : ''}${pmt.method === 'Check' && pmt.checkNo ? ' #'+pmt.checkNo : ''}${pmt.date ? ' · '+fmtDate(pmt.date) : ''}</div>`).join('')
       return `
         <div style="page-break-after:always;padding:28px 32px;font-family:'Arial',sans-serif;width:100%;">
           <!-- Pad border -->
@@ -451,7 +453,7 @@ export default function Gowns() {
     const rows = orders.map(o => {
       const sub = sumItems(o.items), tax = calcTax(o.items, o.taxRate), tot = sub + tax, p = sumPaid(o), bal = tot - p
       const itemsSummary = o.items.filter(it => it.desc || lineAmt(it)).map(it => `${it.qty > 1 ? it.qty + 'x ' : ''}${it.desc || ''}${lineAmt(it) ? ' (' + money(lineAmt(it)) + (it.taxable === false ? ' no tax' : '') + ')' : ''}`).join('; ')
-      const payHistory = (o.payments || []).map(p => `${money(p.amount)}${p.method ? ' ' + p.method : ''}${p.date ? ' ' + fmtDate(p.date) : ''}`).join('; ')
+      const payHistory = (o.payments || []).map(p => `${money(p.amount)}${p.method ? ' ' + p.method : ''}${p.method === 'Check' && p.checkNo ? ' #' + p.checkNo : ''}${p.date ? ' ' + fmtDate(p.date) : ''}`).join('; ')
       const altNote = o.alterations ? `${o.alterationsDone ? 'Done' : 'Pending'}${o.alterationsDue ? ' (due ' + fmtDate(o.alterationsDue) + ')' : ''}${o.alterationsNote ? ': ' + o.alterationsNote : ''}` : ''
       const status = isOpen(o) ? 'Open' : 'Completed'
       const fn = o.firstName || (o.name ? o.name.split(' ')[0] : '')
@@ -609,7 +611,7 @@ export default function Gowns() {
                         <div style={{ marginTop: '8px', fontSize: '13px', color: GREEN }}>
                           {o.payments.map(pmt => (
                             <div key={pmt.id} style={{ display: 'flex', justifyContent: 'space-between', gap: '8px' }}>
-                              <span>✓ {money(pmt.amount)}{pmt.method ? ` · ${pmt.method}` : ''}</span>
+                              <span>✓ {money(pmt.amount)}{pmt.method ? ` · ${pmt.method}` : ''}{pmt.method === 'Check' && pmt.checkNo ? ` #${pmt.checkNo}` : ''}</span>
                               <span style={{ color: MUTED }}>{fmtShort(pmt.date)}</span>
                             </div>
                           ))}
@@ -1104,6 +1106,10 @@ export default function Gowns() {
                           <option value="">— choose type —</option>
                           {METHODS.map(m => <option key={m} value={m}>{m}</option>)}
                         </select>
+                        {pmt.method === 'Check' && (
+                          <input value={pmt.checkNo || ''} onChange={e => setPaymentCheckNo(pmt.id, e.target.value)} inputMode="numeric" placeholder="Check #"
+                            style={{ width: '90px', fontSize: '14px', border: '1.5px solid #D6E5DC', borderRadius: '8px', padding: '4px 8px', background: '#fff', fontFamily: 'inherit', outline: 'none' }} />
+                        )}
                         <span style={{ fontSize: '14px', color: MUTED }}>{fmtShort(pmt.date)}</span>
                       </div>
                       <button onClick={() => removePayment(pmt.id)} style={{ border: 'none', background: 'none', color: '#C7B7B1', fontSize: '18px', cursor: 'pointer', lineHeight: 1 }}>×</button>
@@ -1133,6 +1139,12 @@ export default function Gowns() {
                   )
                 })}
               </div>
+              {pay.method === 'Check' && (
+                <div style={{ marginTop: '10px' }}>
+                  <div style={{ fontSize: '12px', color: MUTED, marginBottom: '5px' }}>Check #</div>
+                  <input value={pay.checkNo} onChange={e => setPay(p => ({ ...p, checkNo: e.target.value }))} inputMode="numeric" placeholder="Check number" style={fieldIn} />
+                </div>
+              )}
               <div style={{ display: 'flex', gap: '10px', marginTop: '12px', flexWrap: 'wrap' }}>
                 <button className="gw-press" onClick={() => addPayment()} style={{ ...primaryBtn, flex: 1, padding: '13px' }}>+ Add payment</button>
                 {balance > 0.005 && <button className="gw-press" onClick={() => addPayment(balance.toFixed(2))} style={{ ...ghostBtn, width: 'auto', padding: '13px 16px', whiteSpace: 'nowrap' }}>Pay balance {money(balance)}</button>}
