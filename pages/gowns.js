@@ -224,9 +224,11 @@ export default function Gowns() {
   const addPayment = (amt) => {
     const a = parseFloat(amt != null ? amt : pay.amount)
     if (!a || a <= 0) { alert('Enter a payment amount.'); return }
-    setForm(f => ({ ...f, payments: [...(f.payments || []), { id: uid(), amount: a, method: pay.method || '', date: pay.date || todayStr() }] }))
+    if (!pay.method) { alert('Choose a payment type (Cash, Check, Card…).'); return }
+    setForm(f => ({ ...f, payments: [...(f.payments || []), { id: uid(), amount: a, method: pay.method, date: pay.date || todayStr() }] }))
     setPay({ amount: '', method: '', date: todayStr() })
   }
+  const setPaymentMethod = (id, method) => setForm(f => ({ ...f, payments: f.payments.map(p => p.id === id ? { ...p, method } : p) }))
   const removePayment = (id) => setForm(f => ({ ...f, payments: f.payments.filter(p => p.id !== id) }))
 
   const save = async () => {
@@ -512,7 +514,7 @@ export default function Gowns() {
       </Head>
 
       <div className="gw-wrap">
-        <div className="gw-header">
+        <div className="gw-header" onClick={() => { setView('list'); setTab('open'); setSelectedCustomer(null); setSearch(''); window.scrollTo(0, 0) }} style={{ cursor: 'pointer' }} title="Back to home">
           <div style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: '34px', fontWeight: 700, color: '#fff', lineHeight: 1.1, letterSpacing: '0.01em' }}>{BIZ}</div>
           <div style={{ fontSize: '11px', letterSpacing: '0.22em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.45)', marginTop: '5px', fontWeight: 600 }}>Order Book</div>
         </div>
@@ -1017,7 +1019,14 @@ export default function Gowns() {
                   {form.payments.map(pmt => (
                     <div key={pmt.id} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '10px', padding: '10px 12px', background: '#F2F8F4', borderRadius: '10px' }}>
                       <span style={{ fontSize: '15px', fontWeight: 600, color: GREEN }}>{money(pmt.amount)}</span>
-                      <span style={{ fontSize: '14px', color: MUTED, flex: 1 }}>{pmt.method || '—'} · {fmtShort(pmt.date)}</span>
+                      <div style={{ flex: 1, display: 'flex', alignItems: 'center', gap: '8px' }}>
+                        <select value={pmt.method || ''} onChange={e => setPaymentMethod(pmt.id, e.target.value)}
+                          style={{ fontSize: '14px', fontWeight: pmt.method ? 400 : 600, color: pmt.method ? INK : REDNO, border: `1.5px solid ${pmt.method ? '#D6E5DC' : REDNO}`, borderRadius: '8px', padding: '4px 8px', background: '#fff', fontFamily: 'inherit', outline: 'none', cursor: 'pointer' }}>
+                          <option value="">— choose type —</option>
+                          {METHODS.map(m => <option key={m} value={m}>{m}</option>)}
+                        </select>
+                        <span style={{ fontSize: '14px', color: MUTED }}>{fmtShort(pmt.date)}</span>
+                      </div>
                       <button onClick={() => removePayment(pmt.id)} style={{ border: 'none', background: 'none', color: '#C7B7B1', fontSize: '18px', cursor: 'pointer', lineHeight: 1 }}>×</button>
                     </div>
                   ))}
