@@ -214,9 +214,11 @@ export default function Gowns() {
     setSuggest(null)
   }
   const saveNewItem = async () => {
-    if (!newItem || !newItem.no.trim() || !newItem.desc.trim()) return
+    if (!newItem || !newItem.no.trim()) { alert('Enter an item #.'); return }
+    if (!newItem.desc.trim()) { alert('Enter a description.'); return }
     const item = { no: newItem.no.trim().toUpperCase(), desc: newItem.desc.trim(), taxable: newItem.taxable, alteration: newItem.alteration }
-    await supabase.from('gown_catalog').upsert({ user_id: user.id, item_no: item.no, description: item.desc, taxable: item.taxable, alteration: item.alteration }, { onConflict: 'user_id,item_no' })
+    const { error } = await supabase.from('gown_catalog').upsert({ user_id: user.id, item_no: item.no, description: item.desc, taxable: item.taxable, alteration: item.alteration }, { onConflict: 'user_id,item_no' })
+    if (error) { alert('Could not save item: ' + error.message); return }
     setCatalog(prev => [...prev.filter(c => c.no !== item.no), item])
     pickItem(newItem.rowId, item)
     setNewItem(null)
@@ -1248,7 +1250,7 @@ export default function Gowns() {
               <input value={newItem.no} onChange={e => setNewItem(n => ({ ...n, no: e.target.value.toUpperCase() }))} style={{ width: '100%', padding: '12px 14px', fontSize: '17px', border: '1.5px solid #E2D7D1', borderRadius: '10px', fontFamily: 'inherit', fontWeight: 700, color: PAD, outline: 'none' }} />
             </div>
             <div style={{ marginBottom: '16px' }}>
-              <div style={{ fontSize: '12px', fontWeight: 600, color: MUTED, marginBottom: '5px', textTransform: 'uppercase', letterSpacing: '0.04em' }}>Description</div>
+              <div style={{ fontSize: '12px', fontWeight: 600, color: MUTED, marginBottom: '5px', textTransform: 'uppercase', letterSpacing: '0.04em' }}>Description <span style={{ color: '#B3A8A2', fontWeight: 500, textTransform: 'none', letterSpacing: 0 }}>· required</span></div>
               <input value={newItem.desc} onChange={e => setNewItem(n => ({ ...n, desc: e.target.value }))} placeholder="What is this item?" autoFocus style={{ width: '100%', padding: '12px 14px', fontSize: '17px', border: '1.5px solid #E2D7D1', borderRadius: '10px', fontFamily: 'inherit', color: INK, outline: 'none' }} />
             </div>
 
