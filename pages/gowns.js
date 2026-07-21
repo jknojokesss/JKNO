@@ -508,7 +508,7 @@ export default function Gowns() {
               <button onClick={() => setTab('open')} style={tabBtn(tab === 'open')}>Open ({openList.length})</button>
               <button onClick={() => setTab('completed')} style={tabBtn(tab === 'completed')}>Completed ({doneList.length})</button>
               <button onClick={() => setTab('all')} style={tabBtn(tab === 'all')}>All ({orders.length})</button>
-              <button onClick={() => setTab('todos')} style={tabBtn(tab === 'todos')}>Tasks ({orders.reduce((s, o) => s + (o.todos || []).filter(t => !t.done).length, 0)})</button>
+              <button onClick={() => setTab('todos')} style={tabBtn(tab === 'todos')}>Tasks ({orders.reduce((s, o) => s + (o.todos || []).filter(t => !t.done).length + (o.alterations && !o.alterationsDone ? 1 : 0), 0)})</button>
               <button onClick={() => { setTab('customers'); setSelectedCustomer(null) }} style={tabBtn(tab === 'customers')}>Customers</button>
             </div>
 
@@ -644,7 +644,17 @@ export default function Gowns() {
 
             {/* ===== TASKS TAB ===== */}
             {tab === 'todos' && (() => {
-              const allTodos = orders.flatMap(o => (o.todos || []).map(t => ({ ...t, orderId: o.id, orderNo: o.orderNo, customerName: fullName(o) })))
+              // Alterations show up as tasks automatically (due date + note), alongside manual to-dos.
+              const altTasks = orders.filter(o => o.alterations).map(o => ({
+                id: 'alt-' + o.id, isAlteration: true,
+                text: o.alterationsNote?.trim() ? `✂ Alterations — ${o.alterationsNote.trim()}` : '✂ Alterations',
+                assignedTo: '', date: o.alterationsDue || '', done: !!o.alterationsDone,
+                orderId: o.id, orderNo: o.orderNo, customerName: fullName(o),
+              }))
+              const allTodos = [
+                ...altTasks,
+                ...orders.flatMap(o => (o.todos || []).map(t => ({ ...t, orderId: o.id, orderNo: o.orderNo, customerName: fullName(o) }))),
+              ]
               const open = allTodos.filter(t => !t.done)
               const byPerson = open.reduce((acc, t) => { const k = t.assignedTo || 'Unassigned'; if (!acc[k]) acc[k] = []; acc[k].push(t); return acc }, {})
               const byDate = [...open].sort((a, b) => (a.date || '').localeCompare(b.date || ''))
@@ -658,7 +668,7 @@ export default function Gowns() {
                       {' · '}{t.customerName}
                     </div>
                   </div>
-                  <input type="checkbox" checked={false} onChange={() => toggleTodo(t.orderId, t.id)} style={{ width: '17px', height: '17px', accentColor: PAD, cursor: 'pointer' }} />
+                  <input type="checkbox" checked={false} onChange={() => t.isAlteration ? patchOrder(t.orderId, { alterationsDone: true }) : toggleTodo(t.orderId, t.id)} style={{ width: '17px', height: '17px', accentColor: PAD, cursor: 'pointer' }} />
                 </div>
               )
               return (
