@@ -115,6 +115,8 @@ export default function Gowns() {
   const [loginBusy, setLoginBusy] = useState(false)
 
   const [orders, setOrders] = useState([])
+  const [tasks, setTasks] = useState([])
+  const [newTask, setNewTask] = useState({ text: '', assignee: '', date: '', orderId: '' })
   const [view, setView] = useState('list')
   const [tab, setTab] = useState('open')
   const [form, setForm] = useState(blankForm())
@@ -137,7 +139,7 @@ export default function Gowns() {
       setAuthLoading(false)
     })
     const { data: l } = supabase.auth.onAuthStateChange((_, s) => {
-      if (!s) { setUser(null); setOrders([]); setCatalog(DEFAULT_ITEMS) }
+      if (!s) { setUser(null); setOrders([]); setTasks([]); setCatalog(DEFAULT_ITEMS) }
     })
     return () => l.subscription.unsubscribe()
   }, [])
@@ -168,11 +170,13 @@ export default function Gowns() {
       }
     } catch (e) {}
 
-    const [{ data: orderRows }, { data: catRows }] = await Promise.all([
+    const [{ data: orderRows }, { data: catRows }, { data: taskRows }] = await Promise.all([
       supabase.from('gown_orders').select('*').order('created_at', { ascending: false }),
       supabase.from('gown_catalog').select('*'),
+      supabase.from('gown_tasks').select('*').order('created_at', { ascending: false }),
     ])
     setOrders((orderRows || []).map(fromDB))
+    setTasks(taskRows || [])
     const customItems = (catRows || []).map(r => ({ no: r.item_no, desc: r.description, taxable: r.taxable, alteration: r.alteration }))
     setCatalog([...DEFAULT_ITEMS, ...customItems.filter(c => !DEFAULT_ITEMS.find(d => d.no === c.no))])
     setLoaded(true)
@@ -417,6 +421,29 @@ export default function Gowns() {
   const toggleFormTodo = (id) => setForm(f => ({ ...f, todos: (f.todos || []).map(t => t.id === id ? { ...t, done: !t.done } : t) }))
   const removeFormTodo = (id) => setForm(f => ({ ...f, todos: (f.todos || []).filter(t => t.id !== id) }))
 
+  // Standalone tasks (Tasks page) — may be linked to an order via order_id, or free-standing.
+  const addTask = async () => {
+    if (!newTask.text.trim()) { alert('Enter a task.'); return }
+    const row = { user_id: user.id, text: newTask.text.trim(), assignee: titleCase(newTask.assignee), due_date: newTask.date || null, done: false, order_id: newTask.orderId || null }
+    const { data, error } = await supabase.from('gown_tasks').insert(row).select().single()
+    if (error) { alert('Could not add task: ' + error.message); return }
+    setTasks(prev => [data, ...prev])
+    setNewTask({ text: '', assignee: '', date: '', orderId: '' })
+  }
+  const toggleTask = async (id) => {
+    const tk = tasks.find(t => t.id === id); if (!tk) return
+    const done = !tk.done
+    setTasks(prev => prev.map(t => t.id === id ? { ...t, done } : t))
+    const { error } = await supabase.from('gown_tasks').update({ done }).eq('id', id)
+    if (error) { alert('Could not update task: ' + error.message); setTasks(prev => prev.map(t => t.id === id ? { ...t, done: !done } : t)) }
+  }
+  const removeTask = async (id) => {
+    const prev = tasks
+    setTasks(p => p.filter(t => t.id !== id))
+    const { error } = await supabase.from('gown_tasks').delete().eq('id', id)
+    if (error) { alert('Could not delete task: ' + error.message); setTasks(prev) }
+  }
+
   const downloadCSV = () => {
     if (!orders.length) { alert('No orders to export yet.'); return }
     const esc = (s) => { const v = String(s == null ? '' : s).replace(/[\r\n]+/g, ' ').trim(); return v.includes(',') || v.includes('"') ? `"${v.replace(/"/g, '""')}"` : v }
@@ -527,7 +554,7 @@ export default function Gowns() {
               <button onClick={() => setTab('open')} style={tabBtn(tab === 'open')}>Open ({openList.length})</button>
               <button onClick={() => setTab('completed')} style={tabBtn(tab === 'completed')}>Completed ({doneList.length})</button>
               <button onClick={() => setTab('all')} style={tabBtn(tab === 'all')}>All ({orders.length})</button>
-              <button onClick={() => setTab('todos')} style={tabBtn(tab === 'todos')}>Tasks ({orders.reduce((s, o) => s + (o.todos || []).filter(t => !t.done).length + (o.alterations && !o.alterationsDone ? 1 : 0), 0)})</button>
+              <button onClick={() => setTab('todos')} style={tabBtn(tab === 'todos')}>Tasks ({orders.reduce((s, o) => s + (o.todos || []).filter(t => !t.done).length + (o.alterations && !o.alterationsDone ? 1 : 0), 0) + tasks.filter(t => !t.done).length})</button>
               <button onClick={() => { setTab('customers'); setSelectedCustomer(null) }} style={tabBtn(tab === 'customers')}>Customers</button>
             </div>
 
@@ -670,13 +697,23 @@ export default function Gowns() {
                 assignedTo: o.alterationsAssignee || '', date: o.alterationsDue || '', done: !!o.alterationsDone,
                 orderId: o.id, orderNo: o.orderNo, customerName: fullName(o),
               }))
+              // Standalone tasks from the Tasks page (may be linked to an order).
+              const standalone = tasks.map(tk => {
+                const o = tk.order_id ? orders.find(x => x.id === tk.order_id) : null
+                return {
+                  id: 'st-' + tk.id, taskId: tk.id, isStandalone: true,
+                  text: tk.text, assignedTo: tk.assignee || '', date: tk.due_date || '', done: tk.done,
+                  orderId: o ? o.id : null, orderNo: o ? o.orderNo : null, customerName: o ? fullName(o) : '',
+                }
+              })
               const allTodos = [
                 ...altTasks,
+                ...standalone,
                 ...orders.flatMap(o => (o.todos || []).map(t => ({ ...t, orderId: o.id, orderNo: o.orderNo, customerName: fullName(o) }))),
               ]
               const open = allTodos.filter(t => !t.done)
               const byPerson = open.reduce((acc, t) => { const k = t.assignedTo || 'Unassigned'; if (!acc[k]) acc[k] = []; acc[k].push(t); return acc }, {})
-              const byCustomer = open.reduce((acc, t) => { const k = t.customerName || '—'; if (!acc[k]) acc[k] = []; acc[k].push(t); return acc }, {})
+              const byCustomer = open.reduce((acc, t) => { const k = t.customerName || 'General (no order)'; if (!acc[k]) acc[k] = []; acc[k].push(t); return acc }, {})
               const byDate = [...open].sort((a, b) => (a.date || '').localeCompare(b.date || ''))
               const taskRow = (t) => (
                 <div key={t.id} style={{ display: 'grid', gridTemplateColumns: '80px 1fr auto', gap: '10px', alignItems: 'center', padding: '11px 14px', borderBottom: `1px solid ${CREAM}` }}>
@@ -684,25 +721,53 @@ export default function Gowns() {
                   <div>
                     <div style={{ fontSize: '14px', color: INK, fontWeight: 500 }}>{t.text}</div>
                     <div style={{ fontSize: '12px', color: MUTED, marginTop: '2px' }}>
-                      <span style={{ color: REDNO, fontWeight: 600, cursor: 'pointer' }} onClick={() => { const o = orders.find(x => x.id === t.orderId); if (o) openOrder(o) }}>No. {t.orderNo}</span>
-                      {' · '}{t.customerName}
+                      {t.orderNo != null
+                        ? <><span style={{ color: REDNO, fontWeight: 600, cursor: 'pointer' }} onClick={() => { const o = orders.find(x => x.id === t.orderId); if (o) openOrder(o) }}>No. {t.orderNo}</span>{t.customerName ? ` · ${t.customerName}` : ''}</>
+                        : <span style={{ fontStyle: 'italic' }}>General task</span>}
                     </div>
                   </div>
-                  <input type="checkbox" checked={false} onChange={() => t.isAlteration ? patchOrder(t.orderId, { alterationsDone: true }) : toggleTodo(t.orderId, t.id)} style={{ width: '17px', height: '17px', accentColor: PAD, cursor: 'pointer' }} />
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    <input type="checkbox" checked={false} onChange={() => t.isAlteration ? patchOrder(t.orderId, { alterationsDone: true }) : t.isStandalone ? toggleTask(t.taskId) : toggleTodo(t.orderId, t.id)} style={{ width: '17px', height: '17px', accentColor: PAD, cursor: 'pointer' }} />
+                    {t.isStandalone && <button onClick={() => removeTask(t.taskId)} title="Delete task" style={{ border: 'none', background: 'none', color: '#D0C5BF', fontSize: '16px', cursor: 'pointer', lineHeight: 1 }}>×</button>}
+                  </div>
                 </div>
               )
               return (
                 <div>
+                  {/* Add a standalone task (optionally linked to an order) */}
+                  <div className="gw-card" style={{ padding: '16px 18px', marginBottom: '16px' }}>
+                    <div style={{ fontSize: '13px', fontWeight: 700, color: MUTED, marginBottom: '10px', textTransform: 'uppercase', letterSpacing: '0.04em' }}>New task</div>
+                    <input value={newTask.text} onChange={e => setNewTask(p => ({ ...p, text: e.target.value }))} onKeyDown={e => { if (e.key === 'Enter') addTask() }} placeholder="What needs to get done?" style={{ ...fieldIn, marginBottom: '8px' }} />
+                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px', marginBottom: '8px' }}>
+                      <div>
+                        <div style={{ fontSize: '12px', color: MUTED, marginBottom: '4px' }}>Person</div>
+                        <input value={newTask.assignee} onChange={e => setNewTask(p => ({ ...p, assignee: e.target.value }))} onBlur={e => setNewTask(p => ({ ...p, assignee: titleCase(e.target.value) }))} placeholder="Who's on it" style={fieldIn} />
+                      </div>
+                      <div>
+                        <div style={{ fontSize: '12px', color: MUTED, marginBottom: '4px' }}>Due</div>
+                        <input type="date" value={newTask.date} onChange={e => setNewTask(p => ({ ...p, date: e.target.value }))} style={fieldIn} />
+                      </div>
+                    </div>
+                    <div style={{ marginBottom: '10px' }}>
+                      <div style={{ fontSize: '12px', color: MUTED, marginBottom: '4px' }}>Link to order (optional)</div>
+                      <select value={newTask.orderId} onChange={e => setNewTask(p => ({ ...p, orderId: e.target.value }))} style={{ ...fieldIn, cursor: 'pointer' }}>
+                        <option value="">— none (standalone task) —</option>
+                        {orders.map(o => <option key={o.id} value={o.id}>No. {o.orderNo} — {fullName(o)}</option>)}
+                      </select>
+                    </div>
+                    <button onClick={addTask} className="gw-press" style={{ ...primaryBtn, width: '100%', padding: '12px' }}>+ Add task</button>
+                  </div>
+
                   <div style={{ display: 'flex', gap: '8px', marginBottom: '16px', flexWrap: 'wrap' }}>
                     {[['person', 'By Person'], ['customer', 'By Customer'], ['date', 'By Date']].map(([v, l]) => (
                       <button key={v} onClick={() => setTodoView(v)} style={{ ...tabBtn(todoView === v), flex: 'none', padding: '10px 20px' }}>{l}</button>
                     ))}
                     {open.length > 0 && <button onClick={() => {
                       const grouped = todoView === 'person'
-                        ? Object.keys(byPerson).sort().map(p => `<div style="margin-bottom:20px;"><div style="font-size:15px;font-weight:700;color:#2A4C9C;border-bottom:2px solid #2A4C9C;padding-bottom:6px;margin-bottom:8px;">${p}</div>${byPerson[p].sort((a,b)=>(a.date||'').localeCompare(b.date||'')).map(t=>`<div style="display:flex;gap:12px;padding:7px 0;border-bottom:1px solid #eee;font-size:13px;"><span style="width:70px;color:#888;flex-shrink:0;">${t.date?fmtShort(t.date):'—'}</span><span style="flex:1;">${t.text}</span><span style="color:#C8322B;font-weight:600;white-space:nowrap;">No. ${t.orderNo}</span><span style="color:#666;margin-left:8px;">${t.customerName}</span></div>`).join('')}</div>`).join('')
+                        ? Object.keys(byPerson).sort().map(p => `<div style="margin-bottom:20px;"><div style="font-size:15px;font-weight:700;color:#2A4C9C;border-bottom:2px solid #2A4C9C;padding-bottom:6px;margin-bottom:8px;">${p}</div>${byPerson[p].sort((a,b)=>(a.date||'').localeCompare(b.date||'')).map(t=>`<div style="display:flex;gap:12px;padding:7px 0;border-bottom:1px solid #eee;font-size:13px;"><span style="width:70px;color:#888;flex-shrink:0;">${t.date?fmtShort(t.date):'—'}</span><span style="flex:1;">${t.text}</span><span style="color:#C8322B;font-weight:600;white-space:nowrap;">${t.orderNo != null ? 'No. ' + t.orderNo : 'General'}</span><span style="color:#666;margin-left:8px;">${t.customerName}</span></div>`).join('')}</div>`).join('')
                         : todoView === 'customer'
-                        ? Object.keys(byCustomer).sort().map(c => `<div style="margin-bottom:20px;"><div style="font-size:15px;font-weight:700;color:#2A4C9C;border-bottom:2px solid #2A4C9C;padding-bottom:6px;margin-bottom:8px;">${c}</div>${byCustomer[c].sort((a,b)=>(a.date||'').localeCompare(b.date||'')).map(t=>`<div style="display:flex;gap:12px;padding:7px 0;border-bottom:1px solid #eee;font-size:13px;"><span style="width:70px;color:#888;flex-shrink:0;">${t.date?fmtShort(t.date):'—'}</span><span style="flex:1;">${t.text}</span><span style="color:#8A8A93;">${t.assignedTo||'—'}</span><span style="color:#C8322B;font-weight:600;white-space:nowrap;">No. ${t.orderNo}</span></div>`).join('')}</div>`).join('')
-                        : (() => { const gd = byDate.reduce((acc,t)=>{const k=t.date||'No date';if(!acc[k])acc[k]=[];acc[k].push(t);return acc},{});return Object.keys(gd).map(d=>`<div style="margin-bottom:20px;"><div style="font-size:15px;font-weight:700;color:#2A4C9C;border-bottom:2px solid #2A4C9C;padding-bottom:6px;margin-bottom:8px;">${d==='No date'?'No date':fmtDate(d)}</div>${gd[d].map(t=>`<div style="display:flex;gap:12px;padding:7px 0;border-bottom:1px solid #eee;font-size:13px;"><span style="flex:1;">${t.text}</span><span style="color:#8A8A93;">${t.assignedTo||'—'}</span><span style="color:#C8322B;font-weight:600;white-space:nowrap;margin-left:8px;">No. ${t.orderNo}</span><span style="color:#666;margin-left:8px;">${t.customerName}</span></div>`).join('')}</div>`).join('') })()
+                        ? Object.keys(byCustomer).sort().map(c => `<div style="margin-bottom:20px;"><div style="font-size:15px;font-weight:700;color:#2A4C9C;border-bottom:2px solid #2A4C9C;padding-bottom:6px;margin-bottom:8px;">${c}</div>${byCustomer[c].sort((a,b)=>(a.date||'').localeCompare(b.date||'')).map(t=>`<div style="display:flex;gap:12px;padding:7px 0;border-bottom:1px solid #eee;font-size:13px;"><span style="width:70px;color:#888;flex-shrink:0;">${t.date?fmtShort(t.date):'—'}</span><span style="flex:1;">${t.text}</span><span style="color:#8A8A93;">${t.assignedTo||'—'}</span><span style="color:#C8322B;font-weight:600;white-space:nowrap;">${t.orderNo != null ? 'No. ' + t.orderNo : 'General'}</span></div>`).join('')}</div>`).join('')
+                        : (() => { const gd = byDate.reduce((acc,t)=>{const k=t.date||'No date';if(!acc[k])acc[k]=[];acc[k].push(t);return acc},{});return Object.keys(gd).map(d=>`<div style="margin-bottom:20px;"><div style="font-size:15px;font-weight:700;color:#2A4C9C;border-bottom:2px solid #2A4C9C;padding-bottom:6px;margin-bottom:8px;">${d==='No date'?'No date':fmtDate(d)}</div>${gd[d].map(t=>`<div style="display:flex;gap:12px;padding:7px 0;border-bottom:1px solid #eee;font-size:13px;"><span style="flex:1;">${t.text}</span><span style="color:#8A8A93;">${t.assignedTo||'—'}</span><span style="color:#C8322B;font-weight:600;white-space:nowrap;margin-left:8px;">${t.orderNo != null ? 'No. ' + t.orderNo : 'General'}</span><span style="color:#666;margin-left:8px;">${t.customerName}</span></div>`).join('')}</div>`).join('') })()
                       const viewLabel = todoView === 'person' ? 'By Person' : todoView === 'customer' ? 'By Customer' : 'By Date'
                       const win = window.open('', '_blank')
                       win.document.write(`<!DOCTYPE html><html><head><title>${BIZ} — Tasks</title></head><body style="font-family:sans-serif;padding:32px;max-width:720px;margin:0 auto;"><div style="display:flex;justify-content:space-between;align-items:baseline;border-bottom:2px solid #2A4C9C;padding-bottom:12px;margin-bottom:24px;"><div style="font-size:22px;font-weight:700;">${BIZ} — Task List</div><div style="font-size:13px;color:#888;">${new Date().toLocaleDateString()} · ${viewLabel}</div></div>${grouped}</body></html>`)
