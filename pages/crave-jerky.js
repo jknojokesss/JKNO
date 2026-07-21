@@ -4,6 +4,7 @@ import Head from 'next/head'
 const CHAR = '#121212', SPICE = '#C07C3E', KRAFT = '#A66B3C', CREAM = '#F7F1E7'
 const INK = '#1A1512', MUTED = '#8A8175', GREEN = '#3E7C4F', BORDER = '#E7DFD1', AMBER = '#C07C3E', RED = '#C03A22'
 const CARDBG = '#FFFDF9'
+const PMIX = [{ l: 'Jerky', c: '#C07C3E' }, { l: 'Fresh liver', c: '#7A2530' }, { l: 'Gift', c: '#A66B3C' }]
 const BIZ = 'Crave Kosher'
 
 const money = (n) => '$' + (Math.round(n * 100) / 100).toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 2 })
@@ -118,22 +119,23 @@ const PRODUCTS = [
   { name: 'Peppered', color: '#46403A', week: 6, month: 22 },
 ]
 // per-period sales for the front-page leaderboards (week vs month)
+// mix = share of that account's revenue by product [jerky, fresh liver, gift]
 const STORE_PERF = [
-  { store: 'Gourmet Glatt North', week: 13, weekRev: 110, month: 50, monthRev: 425 },
-  { store: 'Gourmet Glatt South', week: 10, weekRev: 85, month: 40, monthRev: 340 },
-  { store: 'Seasons', week: 11, weekRev: 99, month: 40, monthRev: 360 },
-  { store: 'Aisle 9 Lakewood', week: 10, weekRev: 85, month: 40, monthRev: 340 },
-  { store: 'Evergreen', week: 9, weekRev: 81, month: 30, monthRev: 270 },
-  { store: 'Aisle 9 Jackson', week: 8, weekRev: 68, month: 30, monthRev: 255 },
-  { store: 'Nutmeg', week: 7, weekRev: 56, month: 25, monthRev: 200 },
-  { store: 'Foodex', week: 6, weekRev: 48, month: 20, monthRev: 160 },
-  { store: 'Superstop', week: 7, weekRev: 56, month: 18, monthRev: 144 },
+  { store: 'Gourmet Glatt North', week: 13, weekRev: 110, month: 50, monthRev: 425, mix: [0.65, 0.25, 0.10] },
+  { store: 'Gourmet Glatt South', week: 10, weekRev: 85, month: 40, monthRev: 340, mix: [0.70, 0.20, 0.10] },
+  { store: 'Seasons', week: 11, weekRev: 99, month: 40, monthRev: 360, mix: [0.75, 0.15, 0.10] },
+  { store: 'Aisle 9 Lakewood', week: 10, weekRev: 85, month: 40, monthRev: 340, mix: [0.80, 0.15, 0.05] },
+  { store: 'Evergreen', week: 9, weekRev: 81, month: 30, monthRev: 270, mix: [0.65, 0.35, 0.00] },
+  { store: 'Aisle 9 Jackson', week: 8, weekRev: 68, month: 30, monthRev: 255, mix: [0.85, 0.10, 0.05] },
+  { store: 'Nutmeg', week: 7, weekRev: 56, month: 25, monthRev: 200, mix: [0.90, 0.10, 0.00] },
+  { store: 'Foodex', week: 6, weekRev: 48, month: 20, monthRev: 160, mix: [1.00, 0.00, 0.00] },
+  { store: 'Superstop', week: 7, weekRev: 56, month: 18, monthRev: 144, mix: [0.80, 0.20, 0.00] },
 ]
 const DIRECT_PERF = [
-  { who: 'Online store (Shopify)', source: 'Shopify / online', week: 31, weekRev: 403, month: 120, monthRev: 1560 },
-  { who: 'Shipped nationwide', source: 'Online / shipped', week: 30, weekRev: 390, month: 30, monthRev: 390 },
-  { who: 'Local delivery — Lakewood', source: 'Local delivery', week: 20, weekRev: 260, month: 45, monthRev: 585 },
-  { who: 'Wholesale — kosher stores', source: 'Wholesale / bulk', week: 0, weekRev: 0, month: 60, monthRev: 540 },
+  { who: 'Online store (Shopify)', source: 'Shopify / online', week: 31, weekRev: 403, month: 120, monthRev: 1560, mix: [0.55, 0.20, 0.25] },
+  { who: 'Shipped nationwide', source: 'Online / shipped', week: 30, weekRev: 390, month: 30, monthRev: 390, mix: [0.55, 0.10, 0.35] },
+  { who: 'Local delivery — Lakewood', source: 'Local delivery', week: 20, weekRev: 260, month: 45, monthRev: 585, mix: [0.55, 0.35, 0.10] },
+  { who: 'Wholesale — kosher stores', source: 'Wholesale / bulk', week: 0, weekRev: 0, month: 60, monthRev: 540, mix: [0.85, 0.15, 0.00] },
 ]
 const Bag = ({ color }) => (
   <svg width="58" height="58" viewBox="0 0 64 64" style={{ display: 'block', margin: '0 auto' }}>
@@ -507,6 +509,14 @@ export default function CraveJerky() {
                 </div>
               </div>
 
+              <div style={{ display: 'flex', gap: '16px', flexWrap: 'wrap', marginBottom: '10px', paddingLeft: '2px' }}>
+                {PMIX.map(m => (
+                  <span key={m.l} style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '11px', color: MUTED }}>
+                    <span style={{ width: '10px', height: '10px', borderRadius: '2px', background: m.c }} /> {m.l}
+                  </span>
+                ))}
+                <span style={{ fontSize: '11px', color: '#B0A48F' }}>— each bar split by product</span>
+              </div>
               <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap', marginBottom: '16px' }}>
                 <div style={{ ...card, flex: 1, minWidth: '290px' }}>
                   <div style={{ ...lbl, marginBottom: '14px' }}>Top consignment stores · this {period}</div>
@@ -517,8 +527,10 @@ export default function CraveJerky() {
                         <span style={{ ...big, fontSize: '15px', color: INK }}>{m0(pv(c))}</span>
                       </div>
                       <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                        <div style={{ flex: 1, height: '6px', background: CREAM, borderRadius: '2px', overflow: 'hidden' }}>
-                          <div style={{ width: `${Math.round(pv(c) / max * 100)}%`, height: '100%', background: KRAFT }} />
+                        <div style={{ flex: 1, height: '7px', background: CREAM, borderRadius: '2px', overflow: 'hidden', display: 'flex' }}>
+                          <div style={{ width: `${Math.round(pv(c) / max * 100)}%`, height: '100%', display: 'flex' }}>
+                            {PMIX.map((m, mi) => <div key={mi} title={`${m.l} ${Math.round((c.mix ? c.mix[mi] : 0) * 100)}%`} style={{ width: `${(c.mix ? c.mix[mi] : (mi === 0 ? 1 : 0)) * 100}%`, background: m.c }} />)}
+                          </div>
                         </div>
                         <span style={{ fontSize: '11px', color: MUTED, whiteSpace: 'nowrap' }}>{pb(c)} units</span>
                       </div>
@@ -534,8 +546,10 @@ export default function CraveJerky() {
                         <span style={{ ...big, fontSize: '15px', color: GREEN }}>{m0(pv(d))}</span>
                       </div>
                       <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                        <div style={{ flex: 1, height: '6px', background: CREAM, borderRadius: '2px', overflow: 'hidden' }}>
-                          <div style={{ width: `${Math.round(pv(d) / max * 100)}%`, height: '100%', background: GREEN }} />
+                        <div style={{ flex: 1, height: '7px', background: CREAM, borderRadius: '2px', overflow: 'hidden', display: 'flex' }}>
+                          <div style={{ width: `${Math.round(pv(d) / max * 100)}%`, height: '100%', display: 'flex' }}>
+                            {PMIX.map((m, mi) => <div key={mi} title={`${m.l} ${Math.round((d.mix ? d.mix[mi] : 0) * 100)}%`} style={{ width: `${(d.mix ? d.mix[mi] : (mi === 0 ? 1 : 0)) * 100}%`, background: m.c }} />)}
+                          </div>
                         </div>
                         <span style={{ fontSize: '11px', color: MUTED, whiteSpace: 'nowrap' }}>{pb(d)} units · {d.source}</span>
                       </div>
