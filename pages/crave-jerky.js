@@ -520,7 +520,7 @@ export default function CraveJerky() {
                         <div style={{ flex: 1, height: '6px', background: CREAM, borderRadius: '2px', overflow: 'hidden' }}>
                           <div style={{ width: `${Math.round(pv(c) / max * 100)}%`, height: '100%', background: KRAFT }} />
                         </div>
-                        <span style={{ fontSize: '11px', color: MUTED, whiteSpace: 'nowrap' }}>{pb(c)} bags sold</span>
+                        <span style={{ fontSize: '11px', color: MUTED, whiteSpace: 'nowrap' }}>{pb(c)} units</span>
                       </div>
                     </div>
                   )) })()}
@@ -537,7 +537,7 @@ export default function CraveJerky() {
                         <div style={{ flex: 1, height: '6px', background: CREAM, borderRadius: '2px', overflow: 'hidden' }}>
                           <div style={{ width: `${Math.round(pv(d) / max * 100)}%`, height: '100%', background: GREEN }} />
                         </div>
-                        <span style={{ fontSize: '11px', color: MUTED, whiteSpace: 'nowrap' }}>{pb(d)} bags · {d.source}</span>
+                        <span style={{ fontSize: '11px', color: MUTED, whiteSpace: 'nowrap' }}>{pb(d)} units · {d.source}</span>
                       </div>
                     </div>
                   )) })()}
@@ -546,16 +546,16 @@ export default function CraveJerky() {
 
               <div style={{ ...card }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', flexWrap: 'wrap', gap: '8px', marginBottom: '16px' }}>
-                  <div style={{ ...lbl }}>Sold this {period}, by flavor</div>
-                  <div style={{ fontSize: '13px', color: MUTED }}><b style={{ ...big, fontSize: '18px', color: INK }}>{bagsPeriod}</b> bags total</div>
+                  <div style={{ ...lbl }}>Sold this {period}, by product</div>
+                  <div style={{ fontSize: '13px', color: MUTED }}><b style={{ ...big, fontSize: '18px', color: INK }}>{bagsPeriod}</b> jerky bags · <b style={{ color: INK }}>{period === 'week' ? 20 : 78}</b> liver &amp; gift</div>
                 </div>
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(148px, 1fr))', gap: '12px' }}>
-                  {PRODUCTS.slice().sort((a, b) => b[period] - a[period]).map(p => (
+                  {[...PRODUCTS.map(p => ({ ...p, unit: 'bags' })), { name: 'Fresh Liver', color: '#7A2530', week: 15, month: 60, unit: 'orders' }, { name: 'Gift Box', color: '#A66B3C', week: 5, month: 18, unit: 'orders' }].sort((a, b) => b[period] - a[period]).map(p => (
                     <div key={p.name} style={{ border: `1px solid ${BORDER}`, borderRadius: '2px', padding: '16px 12px 14px', textAlign: 'center', background: CREAM }}>
                       <Bag color={p.color} />
                       <div style={{ fontWeight: 600, color: INK, marginTop: '8px', fontSize: '14px' }}>{p.name}</div>
                       <div style={{ ...big, fontSize: '26px', color: INK, marginTop: '4px' }}>{p[period]}</div>
-                      <div style={{ fontSize: '11px', color: MUTED }}>bags this {period}</div>
+                      <div style={{ fontSize: '11px', color: MUTED }}>{p.unit} this {period}</div>
                     </div>
                   ))}
                 </div>
@@ -692,7 +692,7 @@ export default function CraveJerky() {
                     <div key={c.id} onClick={() => setExpanded(c.id)} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '8px 0', borderTop: i ? '1px solid #F2D2CB' : 'none', cursor: 'pointer', gap: '8px', flexWrap: 'wrap' }}>
                       <div>
                         <span style={{ fontWeight: 600, color: INK, fontSize: '14px' }}>{c.store}</span>
-                        <span style={{ fontSize: '12px', color: MUTED }}> · {c.variance} bags · {c.diagnosis ? c.diagnosis : 'needs a diagnosis'}</span>
+                        <span style={{ fontSize: '12px', color: MUTED }}> · {c.variance} units · {c.diagnosis ? c.diagnosis : 'needs a diagnosis'}</span>
                       </div>
                       <span style={{ ...big, fontSize: '15px', color: RED }}>{money(c.varVal)}</span>
                     </div>
