@@ -73,6 +73,7 @@ const toDB = (o, userId) => ({
   items: o.items || [], payments: o.payments || [],
   alterations: o.alterations || false, alterations_done: o.alterationsDone || false,
   alterations_note: o.alterationsNote || '',
+  alterations_assignee: o.alterationsAssignee || '',
   alterations_due: o.alterationsDue || null,
   notes: o.notes || '', tax_rate: o.taxRate || DEFAULT_TAX_RATE,
   follow_up_date: o.followUpDate || null, todos: o.todos || [],
@@ -86,7 +87,8 @@ const fromDB = (r) => ({
   address: r.address, city: r.city, state: r.state, zip: r.zip,
   date: r.order_date, items: r.items || [], payments: r.payments || [],
   alterations: r.alterations, alterationsDone: r.alterations_done,
-  alterationsNote: r.alterations_note, alterationsDue: r.alterations_due,
+  alterationsNote: r.alterations_note, alterationsAssignee: r.alterations_assignee || '',
+  alterationsDue: r.alterations_due,
   notes: r.notes, taxRate: r.tax_rate,
   followUpDate: r.follow_up_date, todos: r.todos || [],
   savedAt: new Date(r.saved_at).getTime(),
@@ -100,8 +102,8 @@ const blankForm = () => ({
   date: todayStr(),
   items: [blankRow(), blankRow(), blankRow()],
   payments: [], alterations: false, alterationsDone: false,
-  alterationsNote: '', alterationsDue: '', notes: '',
-  taxRate: DEFAULT_TAX_RATE,
+  alterationsNote: '', alterationsAssignee: '', alterationsDue: '', notes: '',
+  todos: [], taxRate: DEFAULT_TAX_RATE,
 })
 
 export default function Gowns() {
@@ -123,6 +125,7 @@ export default function Gowns() {
   const [catalog, setCatalog] = useState(DEFAULT_ITEMS)
   const [newItem, setNewItem] = useState(null)
   const [todoInput, setTodoInput] = useState({})
+  const [formTodo, setFormTodo] = useState({ text: '', assignee: '', date: '' })
   const [todoView, setTodoView] = useState('person')
   const [selectedCustomer, setSelectedCustomer] = useState(null)
   const [loaded, setLoaded] = useState(false)
@@ -181,14 +184,14 @@ export default function Gowns() {
   const paid = sumPaid(form)
   const balance = total - paid
 
-  const startNew = () => { setForm(blankForm()); setPay({ amount: '', method: '', date: todayStr() }); setEditing(false); setView('form'); window.scrollTo(0, 0) }
+  const startNew = () => { setForm(blankForm()); setPay({ amount: '', method: '', date: todayStr() }); setFormTodo({ text: '', assignee: '', date: '' }); setEditing(false); setView('form'); window.scrollTo(0, 0) }
   const openOrder = (o) => {
     const items = (o.items && o.items.length ? o.items : [blankRow()]).map(it => ({ taxable: true, qty: '1', ...it, price: it.price || String(it.amount || '') }))
     // migrate old single `name` field to firstName/lastName
     const firstName = o.firstName || (o.name ? o.name.split(' ')[0] : '')
     const lastName = o.lastName || (o.name ? o.name.split(' ').slice(1).join(' ') : '')
     setForm({ ...blankForm(), ...o, firstName, lastName, items, payments: o.payments || [], taxRate: o.taxRate ?? DEFAULT_TAX_RATE })
-    setPay({ amount: '', method: '', date: todayStr() }); setEditing(true); setView('form'); window.scrollTo(0, 0)
+    setPay({ amount: '', method: '', date: todayStr() }); setFormTodo({ text: '', assignee: '', date: '' }); setEditing(true); setView('form'); window.scrollTo(0, 0)
   }
   const setF = (k, v) => setForm(f => ({ ...f, [k]: v }))
   const setItem = (id, k, v) => setForm(f => ({ ...f, items: f.items.map(it => it.id === id ? { ...it, [k]: v } : it) }))
@@ -387,7 +390,11 @@ export default function Gowns() {
     const updated = orders.find(o => o.id === id); if (!updated) return
     const newOrder = { ...updated, ...patch }
     setOrders(prev => prev.map(o => o.id === id ? newOrder : o))
-    await supabase.from('gown_orders').update(toDB(newOrder, user.id)).eq('id', id)
+    const { error } = await supabase.from('gown_orders').update(toDB(newOrder, user.id)).eq('id', id)
+    if (error) {
+      alert('Could not save change: ' + error.message)
+      setOrders(prev => prev.map(o => o.id === id ? updated : o))  // roll back on failure
+    }
   }
   const addTodo = (orderId) => {
     const inp = todoInput[orderId] || {}
@@ -398,6 +405,15 @@ export default function Gowns() {
   }
   const toggleTodo = (orderId, todoId) => { const o = orders.find(x => x.id === orderId); if (!o) return; patchOrder(orderId, { todos: o.todos.map(t => t.id === todoId ? { ...t, done: !t.done } : t) }) }
   const removeTodo = (orderId, todoId) => { const o = orders.find(x => x.id === orderId); if (!o) return; patchOrder(orderId, { todos: o.todos.filter(t => t.id !== todoId) }) }
+  // Tasks edited directly on the order form (saved with the order, so they work on brand-new orders too)
+  const addFormTodo = () => {
+    if (!formTodo.text.trim()) return
+    const todo = { id: uid(), text: formTodo.text.trim(), assignedTo: formTodo.assignee.trim(), date: formTodo.date || '', done: false }
+    setForm(f => ({ ...f, todos: [...(f.todos || []), todo] }))
+    setFormTodo({ text: '', assignee: formTodo.assignee, date: '' })
+  }
+  const toggleFormTodo = (id) => setForm(f => ({ ...f, todos: (f.todos || []).map(t => t.id === id ? { ...t, done: !t.done } : t) }))
+  const removeFormTodo = (id) => setForm(f => ({ ...f, todos: (f.todos || []).filter(t => t.id !== id) }))
 
   const downloadCSV = () => {
     if (!orders.length) { alert('No orders to export yet.'); return }
@@ -424,7 +440,8 @@ export default function Gowns() {
   const openList = orders.filter(isOpen)
   const doneList = orders.filter(o => !isOpen(o))
   const base = tab === 'open' ? openList : tab === 'completed' ? doneList : orders
-  const filtered = base.filter(o => !search || fullName(o).toLowerCase().includes(search.toLowerCase()))
+  // When searching, look across ALL orders (not just the current tab) so a name always finds its customer.
+  const filtered = (search ? orders : base).filter(o => !search || fullName(o).toLowerCase().includes(search.toLowerCase()))
 
   // ── styles ──────────────────────────────────────────────────────────────────
   const lbl = { fontSize: '9px', fontWeight: 700, letterSpacing: '0.04em', textTransform: 'uppercase', color: PAD }
@@ -579,7 +596,7 @@ export default function Gowns() {
                       {o.alterations && (
                         <div style={{ marginTop: '10px', padding: '10px 12px', borderRadius: '10px', background: needsAlt ? '#FBEAF0' : '#EFEAF3', border: `1px solid ${needsAlt ? '#F1D5E0' : '#E2DAE8'}` }}>
                           <div style={{ fontSize: '13px', fontWeight: 700, color: needsAlt ? ROSE_DK : MUTED }}>
-                            ✂ Alterations {needsAlt ? '— in progress' : '— done ✓'}{o.alterationsDue ? ` · due ${fmtShort(o.alterationsDue)}` : ''}
+                            ✂ Alterations {needsAlt ? '— in progress' : '— done ✓'}{o.alterationsDue ? ` · due ${fmtShort(o.alterationsDue)}` : ''}{o.alterationsAssignee ? ` · ${o.alterationsAssignee}` : ''}
                           </div>
                           {o.alterationsNote && <div style={{ fontSize: '14px', color: INK, marginTop: '3px', lineHeight: 1.4 }}>{o.alterationsNote}</div>}
                         </div>
@@ -648,7 +665,7 @@ export default function Gowns() {
               const altTasks = orders.filter(o => o.alterations).map(o => ({
                 id: 'alt-' + o.id, isAlteration: true,
                 text: o.alterationsNote?.trim() ? `✂ Alterations — ${o.alterationsNote.trim()}` : '✂ Alterations',
-                assignedTo: '', date: o.alterationsDue || '', done: !!o.alterationsDone,
+                assignedTo: o.alterationsAssignee || '', date: o.alterationsDue || '', done: !!o.alterationsDone,
                 orderId: o.id, orderNo: o.orderNo, customerName: fullName(o),
               }))
               const allTodos = [
@@ -1054,9 +1071,15 @@ export default function Gowns() {
                   <div style={{ fontSize: '12px', fontWeight: 700, color: ROSE_DK, textTransform: 'uppercase', letterSpacing: '0.04em', marginBottom: '8px' }}>✂ Alterations — what&apos;s needed</div>
                   <textarea value={form.alterationsNote} onChange={e => setF('alterationsNote', e.target.value)} rows={2} placeholder="Hem, take in, add bustle…"
                     style={{ ...fieldIn, resize: 'vertical', lineHeight: 1.5 }} />
-                  <div style={{ marginTop: '10px' }}>
-                    <div style={{ fontSize: '12px', fontWeight: 600, color: ROSE_DK, marginBottom: '5px' }}>Alterations due</div>
-                    <input type="date" value={form.alterationsDue} onChange={e => setF('alterationsDue', e.target.value)} style={fieldIn} />
+                  <div style={{ display: 'flex', gap: '10px', marginTop: '10px', flexWrap: 'wrap' }}>
+                    <div style={{ flex: '1 1 140px' }}>
+                      <div style={{ fontSize: '12px', fontWeight: 600, color: ROSE_DK, marginBottom: '5px' }}>Alterations due</div>
+                      <input type="date" value={form.alterationsDue} onChange={e => setF('alterationsDue', e.target.value)} style={fieldIn} />
+                    </div>
+                    <div style={{ flex: '1 1 140px' }}>
+                      <div style={{ fontSize: '12px', fontWeight: 600, color: ROSE_DK, marginBottom: '5px' }}>Done by</div>
+                      <input value={form.alterationsAssignee} onChange={e => setF('alterationsAssignee', e.target.value)} onBlur={e => setF('alterationsAssignee', titleCase(e.target.value))} placeholder="Who's doing it" style={fieldIn} />
+                    </div>
                   </div>
                   <button onClick={() => setF('alterationsDone', !form.alterationsDone)} className="gw-press" style={{
                     width: '100%', display: 'flex', alignItems: 'center', gap: '12px', padding: '12px 14px', marginTop: '12px',
@@ -1072,6 +1095,37 @@ export default function Gowns() {
               <div style={{ fontSize: '13px', fontWeight: 600, color: MUTED, margin: '16px 0 7px', textTransform: 'uppercase', letterSpacing: '0.04em' }}>Notes</div>
               <textarea value={form.notes} onChange={e => setF('notes', e.target.value)} rows={2} placeholder="Pickup Thursday, etc."
                 style={{ ...fieldIn, resize: 'vertical', lineHeight: 1.5 }} />
+            </div>
+
+            {/* Tasks */}
+            <div className="gw-card" style={{ padding: '16px 18px', marginTop: '14px', marginBottom: '20px' }}>
+              <div style={{ fontSize: '13px', fontWeight: 700, color: MUTED, marginBottom: '10px', textTransform: 'uppercase', letterSpacing: '0.04em' }}>Tasks</div>
+
+              {(form.todos || []).length > 0 && (
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '6px', marginBottom: '12px' }}>
+                  {form.todos.map(t => (
+                    <div key={t.id} style={{ display: 'grid', gridTemplateColumns: '78px 1fr auto auto', gap: '8px', alignItems: 'center', padding: '8px 10px', background: t.done ? '#F8F6F3' : '#F0F4FF', borderRadius: '10px' }}>
+                      <span style={{ fontSize: '12px', color: MUTED, fontWeight: 500 }}>{t.date ? fmtShort(t.date) : '—'}</span>
+                      <span style={{ fontSize: '14px', color: t.done ? MUTED : INK, textDecoration: t.done ? 'line-through' : 'none', lineHeight: 1.3 }}>
+                        {t.text}{t.assignedTo ? <span style={{ display: 'block', fontSize: '11px', color: ROSE_DK, fontWeight: 600, marginTop: '1px' }}>{t.assignedTo}</span> : null}
+                      </span>
+                      <input type="checkbox" checked={t.done} onChange={() => toggleFormTodo(t.id)} style={{ width: '16px', height: '16px', accentColor: PAD, cursor: 'pointer' }} />
+                      <button onClick={() => removeFormTodo(t.id)} style={{ background: 'none', border: 'none', color: '#D0C5BF', fontSize: '16px', cursor: 'pointer', lineHeight: 1 }}>×</button>
+                    </div>
+                  ))}
+                </div>
+              )}
+
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '7px' }}>
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '7px' }}>
+                  <input type="date" value={formTodo.date} onChange={e => setFormTodo(p => ({ ...p, date: e.target.value }))} style={fieldIn} />
+                  <input value={formTodo.assignee} onChange={e => setFormTodo(p => ({ ...p, assignee: e.target.value }))} onBlur={e => setFormTodo(p => ({ ...p, assignee: titleCase(e.target.value) }))} placeholder="Assigned to…" style={fieldIn} />
+                </div>
+                <div style={{ display: 'flex', gap: '7px' }}>
+                  <input value={formTodo.text} onChange={e => setFormTodo(p => ({ ...p, text: e.target.value }))} onKeyDown={e => { if (e.key === 'Enter') { e.preventDefault(); addFormTodo() } }} placeholder="Add a task…" style={{ ...fieldIn, flex: 1 }} />
+                  <button onClick={addFormTodo} className="gw-press" style={{ padding: '0 18px', fontSize: '14px', fontWeight: 600, background: PAD, color: '#fff', border: 'none', borderRadius: '10px', cursor: 'pointer', fontFamily: 'inherit', whiteSpace: 'nowrap' }}>Add</button>
+                </div>
+              </div>
             </div>
 
             <button className="gw-press" onClick={save} style={{ ...primaryBtn, width: '100%' }}>{editing ? 'Save changes' : 'Save order'}</button>
