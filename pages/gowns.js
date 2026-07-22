@@ -57,7 +57,7 @@ const fmtPhone = (s) => {
   return d.length === 10 ? `${cc}(${d.slice(0, 3)}) ${d.slice(3, 6)}-${d.slice(6)}` : raw
 }
 const balanceOf = (o) => orderTotal(o) - sumPaid(o)
-const isOpen = (o) => balanceOf(o) > 0.005 || (o.alterations && !o.alterationsDone)
+const isOpen = (o) => balanceOf(o) > 0.005 || (o.alterationsList || []).some(a => !a.done)
 
 // backward-compat: old orders have a single `name` field
 const fullName = (o) => o.firstName ? `${o.firstName} ${o.lastName || ''}`.trim() : (o.name || '')
@@ -71,10 +71,13 @@ const toDB = (o, userId) => ({
   state: o.state || 'NY', zip: o.zip || '',
   order_date: o.date || todayStr(),
   items: o.items || [], payments: o.payments || [],
-  alterations: o.alterations || false, alterations_done: o.alterationsDone || false,
-  alterations_note: o.alterationsNote || '',
-  alterations_assignee: o.alterationsAssignee || '',
-  alterations_due: o.alterationsDue || null,
+  alterations: (o.alterationsList || []).length > 0,
+  alterations_list: o.alterationsList || [],
+  // legacy single columns kept in rough sync (first entry) for backward-compat
+  alterations_done: (o.alterationsList || []).length ? (o.alterationsList || []).every(a => a.done) : false,
+  alterations_note: (o.alterationsList || [])[0]?.note || '',
+  alterations_assignee: (o.alterationsList || [])[0]?.assignee || '',
+  alterations_due: (o.alterationsList || [])[0]?.due || null,
   notes: o.notes || '', tax_rate: o.taxRate || DEFAULT_TAX_RATE,
   follow_up_date: o.followUpDate || null, todos: o.todos || [],
   saved_at: new Date().toISOString(),
@@ -86,9 +89,10 @@ const fromDB = (r) => ({
   phone: r.phone, email: r.email || '', home: r.home_phone || '',
   address: r.address, city: r.city, state: r.state, zip: r.zip,
   date: r.order_date, items: r.items || [], payments: r.payments || [],
-  alterations: r.alterations, alterationsDone: r.alterations_done,
-  alterationsNote: r.alterations_note, alterationsAssignee: r.alterations_assignee || '',
-  alterationsDue: r.alterations_due,
+  alterations: r.alterations,
+  alterationsList: (Array.isArray(r.alterations_list) && r.alterations_list.length)
+    ? r.alterations_list
+    : (r.alterations ? [{ id: uid(), note: r.alterations_note || '', due: r.alterations_due || '', assignee: r.alterations_assignee || '', done: !!r.alterations_done }] : []),
   notes: r.notes, taxRate: r.tax_rate,
   followUpDate: r.follow_up_date, todos: r.todos || [],
   savedAt: new Date(r.saved_at).getTime(),
@@ -101,8 +105,7 @@ const blankForm = () => ({
   phone: '', email: '', home: '', address: '', city: '', state: 'NY', zip: '',
   date: todayStr(),
   items: [blankRow(), blankRow(), blankRow()],
-  payments: [], alterations: false, alterationsDone: false,
-  alterationsNote: '', alterationsAssignee: '', alterationsDue: '', notes: '',
+  payments: [], alterations: false, alterationsList: [], notes: '',
   todos: [], taxRate: DEFAULT_TAX_RATE,
 })
 
@@ -211,7 +214,7 @@ export default function Gowns() {
     }
   }
   const pickItem = (rowId, item) => {
-    setForm(f => ({ ...f, items: f.items.map(it => it.id === rowId ? { ...it, itemNo: item.no, desc: item.desc, taxable: item.taxable !== false } : it), ...(item.alteration ? { alterations: true } : {}) }))
+    setForm(f => ({ ...f, items: f.items.map(it => it.id === rowId ? { ...it, itemNo: item.no, desc: item.desc, taxable: item.taxable !== false } : it), ...(item.alteration ? { alterations: true, alterationsList: (f.alterationsList?.length ? f.alterationsList : [{ id: uid(), note: '', due: '', assignee: '', done: false }]) } : {}) }))
     setSuggest(null)
   }
   const saveNewItem = async () => {
@@ -267,6 +270,11 @@ export default function Gowns() {
   // Clear the check # if the method is changed away from Check
   const setPaymentMethod = (id, method) => setForm(f => ({ ...f, payments: f.payments.map(p => p.id === id ? { ...p, method, checkNo: method === 'Check' ? (p.checkNo || '') : '' } : p) }))
   const setPaymentCheckNo = (id, checkNo) => setForm(f => ({ ...f, payments: f.payments.map(p => p.id === id ? { ...p, checkNo } : p) }))
+
+  // Multiple alterations per order
+  const addAlteration = () => setForm(f => ({ ...f, alterations: true, alterationsList: [...(f.alterationsList || []), { id: uid(), note: '', due: '', assignee: '', done: false }] }))
+  const setAlterationField = (id, k, v) => setForm(f => ({ ...f, alterationsList: (f.alterationsList || []).map(a => a.id === id ? { ...a, [k]: v } : a) }))
+  const removeAlteration = (id) => setForm(f => { const list = (f.alterationsList || []).filter(a => a.id !== id); return { ...f, alterationsList: list, alterations: list.length > 0 } })
   const removePayment = (id) => setForm(f => ({ ...f, payments: f.payments.filter(p => p.id !== id) }))
 
   const save = async () => {
@@ -412,7 +420,7 @@ export default function Gowns() {
             </div>
 
             <!-- Alterations -->
-            ${o.alterations ? `<div style="padding:12px 18px;background:#FBEAF0;border-bottom:${o.notes?'1px solid '+GRID_BLUE:'none'};font-size:15px;"><b style="color:#8E3B54;">✂ Alterations${o.alterationsDone?' — done ✓':' — in progress'}${o.alterationsDue?' · due '+fmtDate(o.alterationsDue):''}</b>${o.alterationsNote?'<br><span style="font-size:15px;">'+o.alterationsNote+'</span>':''}</div>` : ''}
+            ${(o.alterationsList && o.alterationsList.length) ? `<div style="padding:12px 18px;background:#FBEAF0;border-bottom:${o.notes?'1px solid '+GRID_BLUE:'none'};font-size:15px;"><b style="color:#8E3B54;">✂ Alterations</b>${o.alterationsList.map(a => `<div style="margin-top:4px;">${a.done ? '✓ ' : '• '}${a.note || 'Alteration'}${a.due ? ' · due ' + fmtDate(a.due) : ''}${a.assignee ? ' · ' + a.assignee : ''}</div>`).join('')}</div>` : ''}
 
             <!-- Notes -->
             ${o.notes ? `<div style="padding:12px 18px;font-size:15px;color:#555;"><b>Notes:</b> ${o.notes}</div>` : ''}
@@ -486,7 +494,7 @@ export default function Gowns() {
       const sub = sumItems(o.items), tax = calcTax(o.items, o.taxRate), tot = sub + tax, p = sumPaid(o), bal = tot - p
       const itemsSummary = o.items.filter(it => it.desc || lineAmt(it)).map(it => `${it.qty > 1 ? it.qty + 'x ' : ''}${it.desc || ''}${lineAmt(it) ? ' (' + money(lineAmt(it)) + (it.taxable === false ? ' no tax' : '') + ')' : ''}`).join('; ')
       const payHistory = (o.payments || []).map(p => `${money(p.amount)}${p.method ? ' ' + p.method : ''}${p.method === 'Check' && p.checkNo ? ' #' + p.checkNo : ''}${p.date ? ' ' + fmtDate(p.date) : ''}`).join('; ')
-      const altNote = o.alterations ? `${o.alterationsDone ? 'Done' : 'Pending'}${o.alterationsDue ? ' (due ' + fmtDate(o.alterationsDue) + ')' : ''}${o.alterationsNote ? ': ' + o.alterationsNote : ''}` : ''
+      const altNote = (o.alterationsList || []).map(a => `${a.done ? 'Done' : 'Pending'}${a.due ? ' (due ' + fmtDate(a.due) + ')' : ''}${a.note ? ': ' + a.note : ''}${a.assignee ? ' [' + a.assignee + ']' : ''}`).join(' | ')
       const status = isOpen(o) ? 'Open' : 'Completed'
       const fn = o.firstName || (o.name ? o.name.split(' ')[0] : '')
       const ln = o.lastName || (o.name ? o.name.split(' ').slice(1).join(' ') : '')
@@ -588,7 +596,7 @@ export default function Gowns() {
               <button onClick={() => setTab('open')} style={tabBtn(tab === 'open')}>Open ({openList.length})</button>
               <button onClick={() => setTab('completed')} style={tabBtn(tab === 'completed')}>Completed ({doneList.length})</button>
               <button onClick={() => setTab('all')} style={tabBtn(tab === 'all')}>All ({orders.length})</button>
-              <button onClick={() => setTab('todos')} style={tabBtn(tab === 'todos')}>Tasks ({orders.reduce((s, o) => s + (o.todos || []).filter(t => !t.done).length + (o.alterations && !o.alterationsDone ? 1 : 0), 0) + tasks.filter(t => !t.done).length})</button>
+              <button onClick={() => setTab('todos')} style={tabBtn(tab === 'todos')}>Tasks ({orders.reduce((s, o) => s + (o.todos || []).filter(t => !t.done).length + (o.alterationsList || []).filter(a => !a.done).length, 0) + tasks.filter(t => !t.done).length})</button>
               <button onClick={() => { setTab('customers'); setSelectedCustomer(null) }} style={tabBtn(tab === 'customers')}>Customers</button>
               <button onClick={() => setTab('catalog')} style={tabBtn(tab === 'catalog')}>Catalog</button>
             </div>
@@ -608,7 +616,7 @@ export default function Gowns() {
               <div className="gw-grid">
                 {filtered.map(o => {
                   const sub = sumItems(o.items), tax = calcTax(o.items, o.taxRate), tot = sub + tax, p = sumPaid(o), bal = tot - p
-                  const needsAlt = o.alterations && !o.alterationsDone
+                  const needsAlt = (o.alterationsList || []).some(a => !a.done)
                   return (
                     <div key={o.id} className="gw-card gw-card-click gw-press" onClick={() => openOrder(o)} style={{ padding: '16px 18px', cursor: 'pointer', display: 'flex', flexDirection: 'column', borderLeft: `4px solid ${isOpen(o) ? ROSE : GREEN}`, borderRadius: '18px' }}>
                       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '10px' }}>
@@ -657,12 +665,14 @@ export default function Gowns() {
                           : <span style={{ fontSize: '14px', fontWeight: 700, color: GREEN, background: '#E7F4EC', padding: '5px 12px', borderRadius: '20px' }}>Paid in full ✓</span>}
                       </div>
 
-                      {o.alterations && (
+                      {(o.alterationsList || []).length > 0 && (
                         <div style={{ marginTop: '10px', padding: '10px 12px', borderRadius: '10px', background: needsAlt ? '#FBEAF0' : '#EFEAF3', border: `1px solid ${needsAlt ? '#F1D5E0' : '#E2DAE8'}` }}>
-                          <div style={{ fontSize: '13px', fontWeight: 700, color: needsAlt ? ROSE_DK : MUTED }}>
-                            ✂ Alterations {needsAlt ? '— in progress' : '— done ✓'}{o.alterationsDue ? ` · due ${fmtShort(o.alterationsDue)}` : ''}{o.alterationsAssignee ? ` · ${o.alterationsAssignee}` : ''}
-                          </div>
-                          {o.alterationsNote && <div style={{ fontSize: '14px', color: INK, marginTop: '3px', lineHeight: 1.4 }}>{o.alterationsNote}</div>}
+                          <div style={{ fontSize: '13px', fontWeight: 700, color: needsAlt ? ROSE_DK : MUTED, marginBottom: '2px' }}>✂ Alterations {needsAlt ? '— in progress' : '— all done ✓'}</div>
+                          {o.alterationsList.map(a => (
+                            <div key={a.id} style={{ fontSize: '13px', color: INK, marginTop: '3px', lineHeight: 1.4 }}>
+                              {a.done ? '✓ ' : '• '}{a.note || 'Alteration'}{a.due ? ` · due ${fmtShort(a.due)}` : ''}{a.assignee ? ` · ${a.assignee}` : ''}
+                            </div>
+                          ))}
                         </div>
                       )}
                       {o.notes && (
@@ -726,12 +736,12 @@ export default function Gowns() {
             {/* ===== TASKS TAB ===== */}
             {tab === 'todos' && (() => {
               // Alterations show up as tasks automatically (due date + note), alongside manual to-dos.
-              const altTasks = orders.filter(o => o.alterations).map(o => ({
-                id: 'alt-' + o.id, isAlteration: true,
-                text: o.alterationsNote?.trim() ? `✂ Alterations — ${o.alterationsNote.trim()}` : '✂ Alterations',
-                assignedTo: o.alterationsAssignee || '', date: o.alterationsDue || '', done: !!o.alterationsDone,
+              const altTasks = orders.flatMap(o => (o.alterationsList || []).map(a => ({
+                id: 'alt-' + a.id, isAlteration: true, alterationId: a.id,
+                text: a.note?.trim() ? `✂ ${a.note.trim()}` : '✂ Alteration',
+                assignedTo: a.assignee || '', date: a.due || '', done: !!a.done,
                 orderId: o.id, orderNo: o.orderNo, customerName: fullName(o),
-              }))
+              })))
               // Standalone tasks from the Tasks page (may be linked to an order).
               const standalone = tasks.map(tk => {
                 const o = tk.order_id ? orders.find(x => x.id === tk.order_id) : null
@@ -762,7 +772,11 @@ export default function Gowns() {
                     </div>
                   </div>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                    <input type="checkbox" checked={false} onChange={() => t.isAlteration ? patchOrder(t.orderId, { alterationsDone: true }) : t.isStandalone ? toggleTask(t.taskId) : toggleTodo(t.orderId, t.id)} style={{ width: '17px', height: '17px', accentColor: PAD, cursor: 'pointer' }} />
+                    <input type="checkbox" checked={false} onChange={() => {
+                      if (t.isAlteration) { const o = orders.find(x => x.id === t.orderId); if (o) patchOrder(t.orderId, { alterationsList: (o.alterationsList || []).map(a => a.id === t.alterationId ? { ...a, done: true } : a) }) }
+                      else if (t.isStandalone) toggleTask(t.taskId)
+                      else toggleTodo(t.orderId, t.id)
+                    }} style={{ width: '17px', height: '17px', accentColor: PAD, cursor: 'pointer' }} />
                     {t.isStandalone && <button onClick={() => removeTask(t.taskId)} title="Delete task" style={{ border: 'none', background: 'none', color: '#D0C5BF', fontSize: '16px', cursor: 'pointer', lineHeight: 1 }}>×</button>}
                   </div>
                 </div>
@@ -1249,7 +1263,7 @@ export default function Gowns() {
 
             {/* Alterations + notes */}
             <div className="gw-card" style={{ padding: '16px 18px', marginTop: '14px', marginBottom: '20px' }}>
-              <button onClick={() => setF('alterations', !form.alterations)} className="gw-press" style={{
+              <button onClick={() => { if (form.alterations) { setForm(f => ({ ...f, alterations: false })) } else { setForm(f => ({ ...f, alterations: true, alterationsList: f.alterationsList?.length ? f.alterationsList : [{ id: uid(), note: '', due: '', assignee: '', done: false }] })) } }} className="gw-press" style={{
                 width: '100%', display: 'flex', alignItems: 'center', gap: '12px', padding: '13px 14px',
                 border: `1.5px solid ${form.alterations ? ROSE : '#E2D7D1'}`, background: form.alterations ? '#FBEAF0' : '#fff',
                 borderRadius: '12px', cursor: 'pointer', fontFamily: 'inherit',
@@ -1259,28 +1273,35 @@ export default function Gowns() {
               </button>
 
               {form.alterations && (
-                <div style={{ marginTop: '12px', padding: '14px', background: '#FBEAF0', border: '1px solid #F1D5E0', borderRadius: '12px' }}>
-                  <div style={{ fontSize: '12px', fontWeight: 700, color: ROSE_DK, textTransform: 'uppercase', letterSpacing: '0.04em', marginBottom: '8px' }}>✂ Alterations — what&apos;s needed</div>
-                  <textarea value={form.alterationsNote} onChange={e => setF('alterationsNote', e.target.value)} rows={2} placeholder="Hem, take in, add bustle…"
-                    style={{ ...fieldIn, resize: 'vertical', lineHeight: 1.5 }} />
-                  <div style={{ display: 'flex', gap: '10px', marginTop: '10px', flexWrap: 'wrap' }}>
-                    <div style={{ flex: '1 1 140px' }}>
-                      <div style={{ fontSize: '12px', fontWeight: 600, color: ROSE_DK, marginBottom: '5px' }}>Alterations due</div>
-                      <input type="date" value={form.alterationsDue} onChange={e => setF('alterationsDue', e.target.value)} style={fieldIn} />
+                <div style={{ marginTop: '12px' }}>
+                  {(form.alterationsList || []).map((a, idx) => (
+                    <div key={a.id} style={{ marginBottom: '10px', padding: '14px', background: '#FBEAF0', border: '1px solid #F1D5E0', borderRadius: '12px' }}>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
+                        <span style={{ fontSize: '12px', fontWeight: 700, color: ROSE_DK, textTransform: 'uppercase', letterSpacing: '0.04em' }}>✂ Alteration {idx + 1}</span>
+                        <button onClick={() => removeAlteration(a.id)} title="Remove" style={{ border: 'none', background: 'none', color: '#B07C90', fontSize: '18px', cursor: 'pointer', lineHeight: 1 }}>×</button>
+                      </div>
+                      <textarea value={a.note} onChange={e => setAlterationField(a.id, 'note', e.target.value)} rows={2} placeholder="Hem, take in, add bustle…"
+                        style={{ ...fieldIn, resize: 'vertical', lineHeight: 1.5 }} />
+                      <div style={{ display: 'flex', gap: '10px', marginTop: '10px', flexWrap: 'wrap' }}>
+                        <div style={{ flex: '1 1 140px' }}>
+                          <div style={{ fontSize: '12px', fontWeight: 600, color: ROSE_DK, marginBottom: '5px' }}>Due</div>
+                          <input type="date" value={a.due || ''} onChange={e => setAlterationField(a.id, 'due', e.target.value)} style={fieldIn} />
+                        </div>
+                        <div style={{ flex: '1 1 140px' }}>
+                          <div style={{ fontSize: '12px', fontWeight: 600, color: ROSE_DK, marginBottom: '5px' }}>Done by</div>
+                          <input value={a.assignee || ''} onChange={e => setAlterationField(a.id, 'assignee', e.target.value)} onBlur={e => setAlterationField(a.id, 'assignee', titleCase(e.target.value))} placeholder="Who's doing it" style={fieldIn} />
+                        </div>
+                      </div>
+                      <button onClick={() => setAlterationField(a.id, 'done', !a.done)} className="gw-press" style={{
+                        width: '100%', display: 'flex', alignItems: 'center', gap: '12px', padding: '10px 14px', marginTop: '10px',
+                        border: `1.5px solid ${a.done ? GREEN : '#E2D7D1'}`, background: a.done ? '#E7F4EC' : '#fff', borderRadius: '12px', cursor: 'pointer', fontFamily: 'inherit',
+                      }}>
+                        <span style={{ width: '22px', height: '22px', borderRadius: '7px', border: `2px solid ${a.done ? GREEN : '#CDBFBA'}`, background: a.done ? GREEN : '#fff', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '14px', flexShrink: 0 }}>{a.done ? '✓' : ''}</span>
+                        <span style={{ fontSize: '15px', fontWeight: 600, color: a.done ? GREEN : INK }}>Done</span>
+                      </button>
                     </div>
-                    <div style={{ flex: '1 1 140px' }}>
-                      <div style={{ fontSize: '12px', fontWeight: 600, color: ROSE_DK, marginBottom: '5px' }}>Done by</div>
-                      <input value={form.alterationsAssignee} onChange={e => setF('alterationsAssignee', e.target.value)} onBlur={e => setF('alterationsAssignee', titleCase(e.target.value))} placeholder="Who's doing it" style={fieldIn} />
-                    </div>
-                  </div>
-                  <button onClick={() => setF('alterationsDone', !form.alterationsDone)} className="gw-press" style={{
-                    width: '100%', display: 'flex', alignItems: 'center', gap: '12px', padding: '12px 14px', marginTop: '12px',
-                    border: `1.5px solid ${form.alterationsDone ? GREEN : '#E2D7D1'}`, background: form.alterationsDone ? '#E7F4EC' : '#fff',
-                    borderRadius: '12px', cursor: 'pointer', fontFamily: 'inherit',
-                  }}>
-                    <span style={{ width: '24px', height: '24px', borderRadius: '7px', border: `2px solid ${form.alterationsDone ? GREEN : '#CDBFBA'}`, background: form.alterationsDone ? GREEN : '#fff', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '15px', flexShrink: 0 }}>{form.alterationsDone ? '✓' : ''}</span>
-                    <span style={{ fontSize: '16px', fontWeight: 600, color: form.alterationsDone ? GREEN : INK }}>Alterations complete</span>
-                  </button>
+                  ))}
+                  <button onClick={addAlteration} className="gw-press" style={{ width: '100%', padding: '11px', fontSize: '14px', fontWeight: 600, color: ROSE_DK, background: '#fff', border: `1.5px dashed ${ROSE}`, borderRadius: '12px', cursor: 'pointer', fontFamily: 'inherit' }}>+ Add another alteration</button>
                 </div>
               )}
 
