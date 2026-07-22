@@ -207,7 +207,7 @@ export default function Gowns() {
     setItem(id, 'itemNo', val)
     if (val.trim()) {
       const q = val.trim().toLowerCase()
-      const matches = catalog.filter(it => it.no.toLowerCase().includes(q))
+      const matches = catalog.filter(it => it.no.toLowerCase().includes(q) || (it.desc || '').toLowerCase().includes(q))
       setSuggest({ id, matches, query: val.trim() })
     } else {
       setSuggest(null)
@@ -219,7 +219,6 @@ export default function Gowns() {
   }
   const saveNewItem = async () => {
     if (!newItem || !newItem.no.trim()) { alert('Enter an item #.'); return }
-    if (!newItem.desc.trim()) { alert('Enter a description.'); return }
     const item = { no: newItem.no.trim().toUpperCase(), desc: newItem.desc.trim(), taxable: newItem.taxable, alteration: newItem.alteration }
     const { error } = await supabase.from('gown_catalog').upsert({ user_id: user.id, item_no: item.no, description: item.desc, taxable: item.taxable, alteration: item.alteration }, { onConflict: 'user_id,item_no' })
     if (error) { alert('Could not save item: ' + error.message); return }
@@ -238,7 +237,6 @@ export default function Gowns() {
   const addCatalogItem = async () => {
     const no = (newCatalogItem.no || '').trim().toUpperCase()
     if (!no) { alert('Enter an item #.'); return }
-    if (!newCatalogItem.desc.trim()) { alert('Enter a description.'); return }
     if (catalog.some(c => c.no === no)) { alert(`Item ${no} already exists.`); return }
     const item = { no, desc: newCatalogItem.desc.trim(), taxable: newCatalogItem.taxable, alteration: newCatalogItem.alteration }
     if (!(await saveCatalogItem(item))) return
@@ -883,7 +881,7 @@ export default function Gowns() {
                       <input value={newCatalogItem.no} onChange={e => setNewCatalogItem(p => ({ ...p, no: e.target.value.toUpperCase() }))} placeholder="e.g. DRF" style={{ ...fieldIn, fontWeight: 700, color: PAD }} />
                     </div>
                     <div style={{ flex: '1 1 160px' }}>
-                      <div style={{ fontSize: '12px', color: MUTED, marginBottom: '4px' }}>Description</div>
+                      <div style={{ fontSize: '12px', color: MUTED, marginBottom: '4px' }}>Description <span style={{ color: '#B3A8A2' }}>· optional</span></div>
                       <input value={newCatalogItem.desc} onChange={e => setNewCatalogItem(p => ({ ...p, desc: e.target.value }))} onKeyDown={e => { if (e.key === 'Enter') addCatalogItem() }} placeholder="What is this item?" style={fieldIn} />
                     </div>
                   </div>
@@ -1266,7 +1264,7 @@ export default function Gowns() {
               <input value={newItem.no} onChange={e => setNewItem(n => ({ ...n, no: e.target.value.toUpperCase() }))} style={{ width: '100%', padding: '12px 14px', fontSize: '17px', border: '1.5px solid #E2D7D1', borderRadius: '10px', fontFamily: 'inherit', fontWeight: 700, color: PAD, outline: 'none' }} />
             </div>
             <div style={{ marginBottom: '16px' }}>
-              <div style={{ fontSize: '12px', fontWeight: 600, color: MUTED, marginBottom: '5px', textTransform: 'uppercase', letterSpacing: '0.04em' }}>Description <span style={{ color: '#B3A8A2', fontWeight: 500, textTransform: 'none', letterSpacing: 0 }}>· required</span></div>
+              <div style={{ fontSize: '12px', fontWeight: 600, color: MUTED, marginBottom: '5px', textTransform: 'uppercase', letterSpacing: '0.04em' }}>Description <span style={{ color: '#B3A8A2', fontWeight: 500, textTransform: 'none', letterSpacing: 0 }}>· optional</span></div>
               <input value={newItem.desc} onChange={e => setNewItem(n => ({ ...n, desc: e.target.value }))} placeholder="What is this item?" autoFocus style={{ width: '100%', padding: '12px 14px', fontSize: '17px', border: '1.5px solid #E2D7D1', borderRadius: '10px', fontFamily: 'inherit', color: INK, outline: 'none' }} />
             </div>
 
