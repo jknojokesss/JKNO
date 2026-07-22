@@ -613,119 +613,27 @@ export default function Gowns() {
                 <div style={{ fontSize: '15px' }}>{orders.length ? (search ? 'Try a different name.' : 'Nothing here right now.') : 'Tap "+ New Order" to write your first one.'}</div>
               </div>
             ) : tab !== 'todos' && tab !== 'customers' && tab !== 'catalog' ? (
-              <div className="gw-grid">
+              <div className="gw-card" style={{ overflow: 'hidden', padding: 0 }}>
                 {filtered.map(o => {
-                  const sub = sumItems(o.items), tax = calcTax(o.items, o.taxRate), tot = sub + tax, p = sumPaid(o), bal = tot - p
+                  const tot = orderTotal(o), bal = balanceOf(o)
                   const needsAlt = (o.alterationsList || []).some(a => !a.done)
+                  const openTasks = (o.todos || []).filter(t => !t.done).length
                   return (
-                    <div key={o.id} className="gw-card gw-card-click gw-press" onClick={() => openOrder(o)} style={{ padding: '16px 18px', cursor: 'pointer', display: 'flex', flexDirection: 'column', borderLeft: `4px solid ${isOpen(o) ? ROSE : GREEN}`, borderRadius: '18px' }}>
-                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '10px' }}>
-                        <div>
-                          <div style={{ fontSize: '20px', fontWeight: 700, lineHeight: 1.15 }}>{fullName(o)}</div>
-                          <div style={{ fontSize: '13px', color: MUTED, marginTop: '2px' }}>{fmtDate(o.date)}{o.phone ? ` · ${o.phone}` : ''}{o.city ? ` · ${o.city}` : ''}</div>
+                    <div key={o.id} className="gw-press" onClick={() => openOrder(o)} style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '11px 14px', cursor: 'pointer', borderLeft: `4px solid ${isOpen(o) ? ROSE : GREEN}`, borderBottom: `1px solid ${CREAM}`, background: '#fff' }}>
+                      <div style={{ minWidth: 0, flex: 1 }}>
+                        <div style={{ display: 'flex', alignItems: 'baseline', gap: '8px' }}>
+                          <span style={{ fontSize: '16px', fontWeight: 700, color: INK, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{fullName(o) || '—'}</span>
+                          <span style={{ fontSize: '12px', fontWeight: 800, color: REDNO, whiteSpace: 'nowrap', flexShrink: 0 }}>No. {o.orderNo}</span>
                         </div>
-                        <div style={{ fontSize: '17px', fontWeight: 800, color: REDNO, whiteSpace: 'nowrap' }}>No. {o.orderNo}</div>
-                      </div>
-
-                      <div style={{ marginTop: '12px', fontSize: '14px', color: INK }}>
-                        {o.items.filter(it => it.desc?.trim() || it.price || it.itemNo).slice(0, 3).map(it => (
-                          <div key={it.id} style={{ display: 'flex', justifyContent: 'space-between', gap: '10px', padding: '2px 0' }}>
-                            <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{(parseFloat(it.qty) || 1) > 1 ? `${it.qty}× ` : ''}{it.desc?.trim() || it.itemNo || '—'}</span>
-                            <span style={{ color: MUTED, whiteSpace: 'nowrap' }}>{it.price ? `${money0(it.price)}${(parseFloat(it.qty) || 1) > 1 ? ' ea' : ''}` : ''}</span>
-                          </div>
-                        ))}
-                      </div>
-
-                      <div style={{ marginTop: '8px', paddingTop: '8px', borderTop: '1px solid #F0E9E3' }}>
-                        {tax > 0 && (
-                          <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '12px', color: MUTED, marginBottom: '4px' }}>
-                            <span>Tax ({o.taxRate}%)</span><span>{money(tax)}</span>
-                          </div>
-                        )}
-                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline' }}>
-                          <span style={{ fontSize: '13px', fontWeight: 600, color: MUTED, textTransform: 'uppercase', letterSpacing: '0.04em' }}>Total</span>
-                          <span style={{ fontSize: '20px', fontWeight: 800 }}>{money(tot)}</span>
+                        <div style={{ fontSize: '12px', color: MUTED, marginTop: '2px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                          {fmtDate(o.date)}{o.phone ? ` · ${o.phone}` : ''}{needsAlt ? ' · ✂ alt' : ''}{openTasks ? ` · ${openTasks} task${openTasks > 1 ? 's' : ''}` : ''}
                         </div>
                       </div>
-
-                      {(o.payments || []).length > 0 && (
-                        <div style={{ marginTop: '8px', fontSize: '13px', color: GREEN }}>
-                          {o.payments.map(pmt => (
-                            <div key={pmt.id} style={{ display: 'flex', justifyContent: 'space-between', gap: '8px' }}>
-                              <span>✓ {money(pmt.amount)}{pmt.method ? ` · ${pmt.method}` : ''}{pmt.method === 'Check' && pmt.checkNo ? ` #${pmt.checkNo}` : ''}</span>
-                              <span style={{ color: MUTED }}>{fmtShort(pmt.date)}</span>
-                            </div>
-                          ))}
-                        </div>
-                      )}
-
-                      <div style={{ marginTop: '10px' }}>
+                      <div style={{ textAlign: 'right', flexShrink: 0 }}>
+                        <div style={{ fontSize: '15px', fontWeight: 800, color: INK }}>{money(tot)}</div>
                         {bal > 0.005
-                          ? <span style={{ fontSize: '14px', fontWeight: 700, color: AMBER, background: '#FBF1DD', padding: '5px 12px', borderRadius: '20px' }}>Balance {money(bal)}</span>
-                          : <span style={{ fontSize: '14px', fontWeight: 700, color: GREEN, background: '#E7F4EC', padding: '5px 12px', borderRadius: '20px' }}>Paid in full ✓</span>}
-                      </div>
-
-                      {(o.alterationsList || []).length > 0 && (
-                        <div style={{ marginTop: '10px', padding: '10px 12px', borderRadius: '10px', background: needsAlt ? '#FBEAF0' : '#EFEAF3', border: `1px solid ${needsAlt ? '#F1D5E0' : '#E2DAE8'}` }}>
-                          <div style={{ fontSize: '13px', fontWeight: 700, color: needsAlt ? ROSE_DK : MUTED, marginBottom: '2px' }}>✂ Alterations {needsAlt ? '— in progress' : '— all done ✓'}</div>
-                          {o.alterationsList.map(a => (
-                            <div key={a.id} style={{ fontSize: '13px', color: INK, marginTop: '3px', lineHeight: 1.4 }}>
-                              {a.done ? '✓ ' : '• '}{a.note || 'Alteration'}{a.due ? ` · due ${fmtShort(a.due)}` : ''}{a.assignee ? ` · ${a.assignee}` : ''}
-                            </div>
-                          ))}
-                        </div>
-                      )}
-                      {o.notes && (
-                        <div style={{ marginTop: '10px', fontSize: '13px', color: MUTED, lineHeight: 1.4 }}><span style={{ fontWeight: 600, color: INK }}>Note:</span> {o.notes}</div>
-                      )}
-
-                      {/* ── To-do section ── */}
-                      <div onClick={e => e.stopPropagation()} style={{ marginTop: '12px', paddingTop: '12px', borderTop: '1px solid #F0E9E3' }}>
-                        <div style={{ fontSize: '11px', fontWeight: 700, letterSpacing: '0.06em', textTransform: 'uppercase', color: PAD, marginBottom: '8px' }}>Tasks</div>
-
-                        {/* Existing todos */}
-                        {(o.todos || []).length > 0 && (
-                          <div style={{ marginBottom: '8px', display: 'flex', flexDirection: 'column', gap: '5px' }}>
-                            {(o.todos || []).map(t => (
-                              <div key={t.id} style={{ display: 'grid', gridTemplateColumns: '80px 1fr auto auto', gap: '6px', alignItems: 'center', padding: '5px 8px', background: t.done ? '#F8F6F3' : '#F0F4FF', borderRadius: '8px' }}>
-                                <span style={{ fontSize: '12px', color: MUTED, fontWeight: 500 }}>{t.date ? fmtShort(t.date) : '—'}</span>
-                                <span style={{ fontSize: '13px', color: t.done ? MUTED : INK, textDecoration: t.done ? 'line-through' : 'none', lineHeight: 1.3 }}>
-                                  {t.text}
-                                  {t.assignedTo ? <span style={{ display: 'block', fontSize: '11px', color: ROSE_DK, fontWeight: 600, marginTop: '1px' }}>{t.assignedTo}</span> : null}
-                                </span>
-                                <input type="checkbox" checked={t.done} onChange={() => toggleTodo(o.id, t.id)} style={{ width: '15px', height: '15px', accentColor: PAD, cursor: 'pointer' }} />
-                                <button onClick={() => removeTodo(o.id, t.id)} style={{ background: 'none', border: 'none', color: '#D0C5BF', fontSize: '15px', cursor: 'pointer', lineHeight: 1 }}>×</button>
-                              </div>
-                            ))}
-                          </div>
-                        )}
-
-                        {/* Add todo row */}
-                        <div style={{ display: 'flex', flexDirection: 'column', gap: '5px' }}>
-                          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '5px' }}>
-                            <input type="date" value={(todoInput[o.id] || {}).date || ''}
-                              onChange={e => setTodoInput(p => ({ ...p, [o.id]: { ...(p[o.id] || {}), date: e.target.value } }))}
-                              style={{ fontSize: '13px', border: '1.5px solid #E2D7D1', borderRadius: '8px', padding: '6px 8px', fontFamily: 'inherit', color: INK, outline: 'none', background: '#fff' }} />
-                            <input value={(todoInput[o.id] || {}).assignee || ''}
-                              onChange={e => setTodoInput(p => ({ ...p, [o.id]: { ...(p[o.id] || {}), assignee: e.target.value } }))}
-                              placeholder="Assigned to…"
-                              style={{ fontSize: '13px', border: '1.5px solid #E2D7D1', borderRadius: '8px', padding: '6px 8px', fontFamily: 'inherit', color: INK, outline: 'none', background: '#fff' }} />
-                          </div>
-                          <div style={{ display: 'flex', gap: '5px' }}>
-                            <input value={(todoInput[o.id] || {}).text || ''}
-                              onChange={e => setTodoInput(p => ({ ...p, [o.id]: { ...(p[o.id] || {}), text: e.target.value } }))}
-                              onKeyDown={e => { if (e.key === 'Enter') addTodo(o.id) }}
-                              placeholder="Task…"
-                              style={{ flex: 1, fontSize: '13px', border: '1.5px solid #E2D7D1', borderRadius: '8px', padding: '6px 8px', fontFamily: 'inherit', color: INK, outline: 'none', background: '#fff' }} />
-                            <button onClick={() => addTodo(o.id)} style={{ padding: '6px 12px', fontSize: '13px', fontWeight: 600, background: PAD, color: '#fff', border: 'none', borderRadius: '8px', cursor: 'pointer', fontFamily: 'inherit' }}>Add</button>
-                          </div>
-                        </div>
-                      </div>
-
-                      <div style={{ marginTop: '12px' }}>
-                        {isOpen(o)
-                          ? <span style={{ fontSize: '12px', fontWeight: 700, color: AMBER, letterSpacing: '0.05em', textTransform: 'uppercase' }}>● Open</span>
-                          : <span style={{ fontSize: '12px', fontWeight: 700, color: GREEN, letterSpacing: '0.05em', textTransform: 'uppercase' }}>● Completed</span>}
+                          ? <div style={{ fontSize: '12px', fontWeight: 700, color: AMBER }}>Owes {money(bal)}</div>
+                          : <div style={{ fontSize: '12px', fontWeight: 700, color: GREEN }}>Paid ✓</div>}
                       </div>
                     </div>
                   )
