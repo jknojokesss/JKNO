@@ -251,8 +251,8 @@ export default function Gowns() {
     setCatalog(prev => prev.map(c => c.no === no ? item : c))
     await saveCatalogItem(item)
   }
-  const deleteCatalogItem = async (no) => {
-    if (!window.confirm(`Delete item ${no} from the catalog?`)) return
+  const deleteCatalogItem = async (no, desc) => {
+    if (!window.confirm(`Delete "${no}${desc ? ' — ' + desc : ''}" from the catalog? This can't be undone.`)) return
     setCatalog(prev => prev.filter(c => c.no !== no))
     await supabase.from('gown_catalog').delete().eq('user_id', user.id).eq('item_no', no)
   }
@@ -918,8 +918,8 @@ export default function Gowns() {
                           <input type="checkbox" disabled={builtIn} checked={!!item.alteration} onChange={e => updateCatalogItem(item.no, { alteration: e.target.checked, taxable: e.target.checked ? false : item.taxable })} style={{ accentColor: ROSE }} /> Alt
                         </label>
                         {builtIn
-                          ? <span style={{ width: '20px', flexShrink: 0, fontSize: '10px', color: MUTED, textAlign: 'center' }} title="Built-in item">•</span>
-                          : <button onClick={() => deleteCatalogItem(item.no)} title="Delete" style={{ width: '20px', flexShrink: 0, border: 'none', background: 'none', color: '#C7B7B1', fontSize: '17px', cursor: 'pointer', lineHeight: 1 }}>×</button>}
+                          ? <span style={{ width: '58px', flexShrink: 0, fontSize: '10px', color: MUTED, textAlign: 'center' }} title="Built-in item — can't be deleted">built-in</span>
+                          : <button onClick={() => deleteCatalogItem(item.no, item.desc)} className="gw-press" title="Delete item" style={{ width: '58px', flexShrink: 0, border: '1.5px solid #E3B7B7', background: '#FCF1F1', color: '#C0504C', fontSize: '12px', fontWeight: 700, padding: '5px 0', borderRadius: '8px', cursor: 'pointer', fontFamily: 'inherit' }}>Delete</button>}
                       </div>
                     )
                   })}
