@@ -126,6 +126,7 @@ export default function Gowns() {
   const [suggest, setSuggest] = useState(null)
   const [catalog, setCatalog] = useState(DEFAULT_ITEMS)
   const [newItem, setNewItem] = useState(null)
+  const [newCatalogItem, setNewCatalogItem] = useState({ no: '', desc: '', taxable: true, alteration: false })
   const [todoInput, setTodoInput] = useState({})
   const [formTodo, setFormTodo] = useState({ text: '', assignee: '', date: '' })
   const [todoView, setTodoView] = useState('person')
@@ -222,6 +223,35 @@ export default function Gowns() {
     setCatalog(prev => [...prev.filter(c => c.no !== item.no), item])
     pickItem(newItem.rowId, item)
     setNewItem(null)
+  }
+
+  // ── Catalog management (Catalog tab) ──
+  const isBuiltIn = (no) => DEFAULT_ITEMS.some(d => d.no === no)
+  const saveCatalogItem = async (item) => {
+    const { error } = await supabase.from('gown_catalog').upsert({ user_id: user.id, item_no: item.no, description: item.desc, taxable: item.taxable !== false, alteration: !!item.alteration }, { onConflict: 'user_id,item_no' })
+    if (error) { alert('Could not save item: ' + error.message); return false }
+    return true
+  }
+  const addCatalogItem = async () => {
+    const no = (newCatalogItem.no || '').trim().toUpperCase()
+    if (!no) { alert('Enter an item #.'); return }
+    if (!newCatalogItem.desc.trim()) { alert('Enter a description.'); return }
+    if (catalog.some(c => c.no === no)) { alert(`Item ${no} already exists.`); return }
+    const item = { no, desc: newCatalogItem.desc.trim(), taxable: newCatalogItem.taxable, alteration: newCatalogItem.alteration }
+    if (!(await saveCatalogItem(item))) return
+    setCatalog(prev => [...prev, item])
+    setNewCatalogItem({ no: '', desc: '', taxable: true, alteration: false })
+  }
+  const updateCatalogItem = async (no, patch) => {
+    const current = catalog.find(c => c.no === no); if (!current) return
+    const item = { ...current, ...patch }
+    setCatalog(prev => prev.map(c => c.no === no ? item : c))
+    await saveCatalogItem(item)
+  }
+  const deleteCatalogItem = async (no) => {
+    if (!window.confirm(`Delete item ${no} from the catalog?`)) return
+    setCatalog(prev => prev.filter(c => c.no !== no))
+    await supabase.from('gown_catalog').delete().eq('user_id', user.id).eq('item_no', no)
   }
 
   const addRow = () => setForm(f => ({ ...f, items: [...f.items, blankRow()] }))
@@ -560,20 +590,21 @@ export default function Gowns() {
               <button onClick={() => setTab('all')} style={tabBtn(tab === 'all')}>All ({orders.length})</button>
               <button onClick={() => setTab('todos')} style={tabBtn(tab === 'todos')}>Tasks ({orders.reduce((s, o) => s + (o.todos || []).filter(t => !t.done).length + (o.alterations && !o.alterationsDone ? 1 : 0), 0) + tasks.filter(t => !t.done).length})</button>
               <button onClick={() => { setTab('customers'); setSelectedCustomer(null) }} style={tabBtn(tab === 'customers')}>Customers</button>
+              <button onClick={() => setTab('catalog')} style={tabBtn(tab === 'catalog')}>Catalog</button>
             </div>
 
-            {orders.length > 0 && tab !== 'todos' && !(tab === 'customers' && selectedCustomer) && (
+            {orders.length > 0 && tab !== 'todos' && tab !== 'catalog' && !(tab === 'customers' && selectedCustomer) && (
               <input value={search} onChange={e => setSearch(e.target.value)} placeholder="Search by customer name…"
                 style={{ ...fieldIn, fontSize: '18px', marginBottom: '16px' }} />
             )}
 
-            {tab !== 'todos' && tab !== 'customers' && filtered.length === 0 ? (
+            {tab !== 'todos' && tab !== 'customers' && tab !== 'catalog' && filtered.length === 0 ? (
               <div className="gw-card" style={{ padding: '44px 24px', textAlign: 'center', color: MUTED }}>
                 <div style={{ fontSize: '40px', marginBottom: '10px' }}>🪡</div>
                 <div style={{ fontSize: '17px', color: INK, fontWeight: 600, marginBottom: '4px' }}>{orders.length ? `No ${tab === 'all' ? '' : tab + ' '}orders` : 'No orders yet'}</div>
                 <div style={{ fontSize: '15px' }}>{orders.length ? (search ? 'Try a different name.' : 'Nothing here right now.') : 'Tap "+ New Order" to write your first one.'}</div>
               </div>
-            ) : tab !== 'todos' && tab !== 'customers' ? (
+            ) : tab !== 'todos' && tab !== 'customers' && tab !== 'catalog' ? (
               <div className="gw-grid">
                 {filtered.map(o => {
                   const sub = sumItems(o.items), tax = calcTax(o.items, o.taxRate), tot = sub + tax, p = sumPaid(o), bal = tot - p
@@ -918,7 +949,63 @@ export default function Gowns() {
               )
             })()}
 
-            {orders.length > 0 && tab !== 'todos' && tab !== 'customers' && (
+            {/* ===== CATALOG TAB ===== */}
+            {tab === 'catalog' && (
+              <div>
+                {/* Add item */}
+                <div className="gw-card" style={{ padding: '16px 18px', marginBottom: '16px' }}>
+                  <div style={{ fontSize: '13px', fontWeight: 700, color: MUTED, marginBottom: '10px', textTransform: 'uppercase', letterSpacing: '0.04em' }}>Add item</div>
+                  <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', alignItems: 'flex-end' }}>
+                    <div style={{ flex: '0 0 110px' }}>
+                      <div style={{ fontSize: '12px', color: MUTED, marginBottom: '4px' }}>Item #</div>
+                      <input value={newCatalogItem.no} onChange={e => setNewCatalogItem(p => ({ ...p, no: e.target.value.toUpperCase() }))} placeholder="e.g. DRF" style={{ ...fieldIn, fontWeight: 700, color: PAD }} />
+                    </div>
+                    <div style={{ flex: '1 1 160px' }}>
+                      <div style={{ fontSize: '12px', color: MUTED, marginBottom: '4px' }}>Description</div>
+                      <input value={newCatalogItem.desc} onChange={e => setNewCatalogItem(p => ({ ...p, desc: e.target.value }))} onKeyDown={e => { if (e.key === 'Enter') addCatalogItem() }} placeholder="What is this item?" style={fieldIn} />
+                    </div>
+                  </div>
+                  <div style={{ display: 'flex', gap: '18px', margin: '12px 0' }}>
+                    <label style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer', fontSize: '14px', fontWeight: 600 }}>
+                      <input type="checkbox" checked={newCatalogItem.taxable} onChange={e => setNewCatalogItem(p => ({ ...p, taxable: e.target.checked }))} style={{ width: '18px', height: '18px', accentColor: PAD }} /> Taxable
+                    </label>
+                    <label style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer', fontSize: '14px', fontWeight: 600 }}>
+                      <input type="checkbox" checked={newCatalogItem.alteration} onChange={e => setNewCatalogItem(p => ({ ...p, alteration: e.target.checked, taxable: e.target.checked ? false : p.taxable }))} style={{ width: '18px', height: '18px', accentColor: ROSE }} /> Alteration
+                    </label>
+                  </div>
+                  <button onClick={addCatalogItem} className="gw-press" style={{ ...primaryBtn, width: '100%', padding: '12px' }}>+ Add item</button>
+                </div>
+
+                {/* Item list */}
+                <div className="gw-card" style={{ overflow: 'hidden' }}>
+                  <div style={{ padding: '12px 14px', background: '#F0F4FF', borderBottom: `1px solid ${GRID}`, fontSize: '13px', fontWeight: 700, color: PAD }}>
+                    {catalog.length} item{catalog.length !== 1 ? 's' : ''}
+                  </div>
+                  {[...catalog].sort((a, b) => a.no.localeCompare(b.no)).map(item => {
+                    const builtIn = isBuiltIn(item.no)
+                    return (
+                      <div key={item.no} style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '10px 14px', borderBottom: `1px solid ${CREAM}` }}>
+                        <span style={{ width: '80px', flexShrink: 0, fontSize: '15px', fontWeight: 700, color: PAD, letterSpacing: '0.02em' }}>{item.no}</span>
+                        {builtIn
+                          ? <span style={{ flex: 1, fontSize: '14px', color: INK }}>{item.desc}</span>
+                          : <input value={item.desc} onChange={e => setCatalog(prev => prev.map(c => c.no === item.no ? { ...c, desc: e.target.value } : c))} onBlur={e => updateCatalogItem(item.no, { desc: e.target.value })} style={{ flex: 1, minWidth: 0, fontSize: '14px', border: '1px solid #EDE6E0', borderRadius: '6px', padding: '5px 7px', fontFamily: 'inherit', color: INK, outline: 'none', background: '#FAF8F5' }} />}
+                        <label title="Taxable" style={{ display: 'flex', alignItems: 'center', gap: '3px', fontSize: '12px', color: MUTED, cursor: builtIn ? 'default' : 'pointer' }}>
+                          <input type="checkbox" disabled={builtIn} checked={item.taxable !== false} onChange={e => updateCatalogItem(item.no, { taxable: e.target.checked })} style={{ accentColor: PAD }} /> Tax
+                        </label>
+                        <label title="Alteration" style={{ display: 'flex', alignItems: 'center', gap: '3px', fontSize: '12px', color: MUTED, cursor: builtIn ? 'default' : 'pointer' }}>
+                          <input type="checkbox" disabled={builtIn} checked={!!item.alteration} onChange={e => updateCatalogItem(item.no, { alteration: e.target.checked, taxable: e.target.checked ? false : item.taxable })} style={{ accentColor: ROSE }} /> Alt
+                        </label>
+                        {builtIn
+                          ? <span style={{ width: '20px', flexShrink: 0, fontSize: '10px', color: MUTED, textAlign: 'center' }} title="Built-in item">•</span>
+                          : <button onClick={() => deleteCatalogItem(item.no)} title="Delete" style={{ width: '20px', flexShrink: 0, border: 'none', background: 'none', color: '#C7B7B1', fontSize: '17px', cursor: 'pointer', lineHeight: 1 }}>×</button>}
+                      </div>
+                    )
+                  })}
+                </div>
+              </div>
+            )}
+
+            {orders.length > 0 && tab !== 'todos' && tab !== 'customers' && tab !== 'catalog' && (
               <>
                 <div style={{ display: 'flex', gap: '10px', marginTop: '26px' }}>
                   <button onClick={downloadCSV} style={{ flex: 1, padding: '14px', fontSize: '14px', fontWeight: 600, color: PAD, background: '#fff', border: `1.5px solid ${GRID}`, borderRadius: '12px', cursor: 'pointer', fontFamily: 'inherit' }}>
