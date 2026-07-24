@@ -39,6 +39,16 @@ const SEED_INVOICES = [
   { id: uid(), invNo: 'INV-005', customer: 'Fifth Ave Eyewear', brand: 'Ray-Ban', units: 30, unitPrice: 95, total: 2850, date: '2026-06-23', due: '2026-07-23', paid: false, paidDate: null, notes: 'Pre-sold — goods in transit' },
 ]
 
+// 12-month P&L history (Jun matches the live invoices/POs total)
+const MONTH_PL = [
+  { m: 'Jul', rev: 14200, cogs: 8900 },  { m: 'Aug', rev: 15800, cogs: 9700 },
+  { m: 'Sep', rev: 13600, cogs: 8600 },  { m: 'Oct', rev: 17400, cogs: 10600 },
+  { m: 'Nov', rev: 19200, cogs: 11800 }, { m: 'Dec', rev: 22600, cogs: 13900 },
+  { m: 'Jan', rev: 15100, cogs: 9400 },  { m: 'Feb', rev: 16300, cogs: 10100 },
+  { m: 'Mar', rev: 18900, cogs: 11600 }, { m: 'Apr', rev: 20400, cogs: 12500 },
+  { m: 'May', rev: 21300, cogs: 13100 }, { m: 'Jun', rev: 16980, cogs: 8280 },
+]
+
 const TABS = [['overview', 'Overview'], ['pos', "PO's & Bills"], ['invoices', 'Invoices'], ['pnl', 'P&L'], ['quickbooks', 'QuickBooks']]
 
 export default function MNETrading() {
@@ -52,6 +62,8 @@ export default function MNETrading() {
   const [lcForm, setLcForm] = useState({}) // { poId: { type, amount } }
   const [addingLC, setAddingLC] = useState(null) // poId
   const [invf, setInvf] = useState({ customer: '', brand: BRANDS[0], units: '', unitPrice: '', due: '', notes: '' })
+  const [rngStart, setRngStart] = useState(0)
+  const [rngEnd, setRngEnd] = useState(99)
 
   // aggregates
   const arrivedPOs = pos.filter(p => p.status === 'arrived')
@@ -74,6 +86,18 @@ export default function MNETrading() {
     const units_sold = invoices.filter(i => i.brand === b).reduce((s, i) => s + i.units, 0)
     return { brand: b, cost, rev, profit: rev - cost, units_bought, units_sold }
   }).filter(b => b.cost > 0 || b.rev > 0)
+
+  // month-by-month P&L + date-range aggregation
+  const ytdRevM = MONTH_PL.reduce((s, m) => s + m.rev, 0)
+  const ytdCogsM = MONTH_PL.reduce((s, m) => s + m.cogs, 0)
+  const rA = Math.min(rngStart, MONTH_PL.length - 1)
+  const rB = Math.min(Math.max(rngEnd, rA), MONTH_PL.length - 1)
+  const rSel = MONTH_PL.slice(rA, rB + 1)
+  const rRev = rSel.reduce((s, m) => s + m.rev, 0)
+  const rCogs = rSel.reduce((s, m) => s + m.cogs, 0)
+  const rGp = rRev - rCogs
+  const rLabel = `${MONTH_PL[rA].m}–${MONTH_PL[rB].m}`
+  const rCount = rB - rA + 1
 
   const addPO = () => {
     if (!pof.supplier.trim() || !pof.brand) return
@@ -515,6 +539,54 @@ export default function MNETrading() {
                     <span style={{ fontFamily: MONO, fontSize: '13px', fontWeight: r.bold ? 600 : 400, color: r.neg ? RED : (r.bold ? INK : MUTED) }}>{r.v}</span>
                   </div>
                 ))}
+              </div>
+
+              <div style={{ ...card, marginBottom: '16px' }}>
+                <div style={{ display:'flex', gap:'10px', alignItems:'center', flexWrap:'wrap', marginBottom:'14px' }}>
+                  <span style={{ ...lbl }}>Date range</span>
+                  <select value={rA} onChange={e=>{const v=Number(e.target.value); setRngStart(v); if(v>rB) setRngEnd(v)}} style={{ padding:'7px 10px', border:`1px solid ${BORDER}`, borderRadius:'4px', fontFamily:MONO, fontSize:'13px', cursor:'pointer', background:'#fff', color:INK }}>
+                    {MONTH_PL.map((m,i)=><option key={i} value={i}>{m.m}</option>)}
+                  </select>
+                  <span style={{ fontSize:'12px', color:MUTED }}>to</span>
+                  <select value={rB} onChange={e=>{const v=Number(e.target.value); setRngEnd(v); if(v<rA) setRngStart(v)}} style={{ padding:'7px 10px', border:`1px solid ${BORDER}`, borderRadius:'4px', fontFamily:MONO, fontSize:'13px', cursor:'pointer', background:'#fff', color:INK }}>
+                    {MONTH_PL.map((m,i)=><option key={i} value={i}>{m.m}</option>)}
+                  </select>
+                  <span style={{ fontSize:'13px', color:MUTED }}>{rCount} month{rCount>1?'s':''} combined</span>
+                </div>
+                <div style={{ display:'flex', gap:'12px', flexWrap:'wrap' }}>
+                  <KPI k={`Revenue · ${rLabel}`} v={m0(rRev)} sub={`${rCount} months combined`} accent={GREEN} />
+                  <KPI k="Cost of goods" v={m0(rCogs)} sub="landed cost" accent={RED} />
+                  <KPI k="Gross profit" v={m0(rGp)} sub={rRev?Math.round(rGp/rRev*100)+'% margin':'—'} accent={rGp>=0?GREEN:RED} />
+                </div>
+              </div>
+
+              <div style={{ ...card, marginBottom: '16px' }}>
+                <div style={{ ...lbl, marginBottom: '12px' }}>P&amp;L — month by month</div>
+                <div style={{ overflowX:'auto' }}>
+                  <table style={{ width:'100%', borderCollapse:'collapse', fontSize:'13px', minWidth:'480px' }}>
+                    <thead><tr style={{ borderBottom:`2px solid ${BORDER}` }}>
+                      {['Month','Revenue','COGS','Gross Profit','Margin'].map(h=>(
+                        <th key={h} style={{ padding:'8px 10px', textAlign:h==='Month'?'left':'right', fontSize:'10px', fontWeight:700, textTransform:'uppercase', letterSpacing:'0.05em', color:MUTED }}>{h}</th>
+                      ))}
+                    </tr></thead>
+                    <tbody>{[...MONTH_PL].reverse().map((m,i)=>{ const gp=m.rev-m.cogs; return (
+                      <tr key={m.m} style={{ borderTop:i?`1px solid ${CREAM}`:'none' }}>
+                        <td style={{ padding:'9px 10px', fontWeight:600 }}>{m.m}</td>
+                        <td style={{ padding:'9px 10px', textAlign:'right', fontFamily:MONO }}>{m0(m.rev)}</td>
+                        <td style={{ padding:'9px 10px', textAlign:'right', fontFamily:MONO, color:MUTED }}>{m0(m.cogs)}</td>
+                        <td style={{ padding:'9px 10px', textAlign:'right', fontFamily:MONO, fontWeight:600, color:GREEN }}>{m0(gp)}</td>
+                        <td style={{ padding:'9px 10px', textAlign:'right', fontWeight:600, color:MUTED }}>{m.rev?Math.round(gp/m.rev*100)+'%':'—'}</td>
+                      </tr>
+                    )})}</tbody>
+                    <tfoot><tr style={{ borderTop:`2px solid ${BORDER}` }}>
+                      <td style={{ padding:'9px 10px', fontWeight:700 }}>YTD Total</td>
+                      <td style={{ padding:'9px 10px', textAlign:'right', fontFamily:MONO, fontWeight:700 }}>{m0(ytdRevM)}</td>
+                      <td style={{ padding:'9px 10px', textAlign:'right', fontFamily:MONO, color:MUTED }}>{m0(ytdCogsM)}</td>
+                      <td style={{ padding:'9px 10px', textAlign:'right', fontFamily:MONO, fontWeight:700, color:GREEN }}>{m0(ytdRevM-ytdCogsM)}</td>
+                      <td style={{ padding:'9px 10px', textAlign:'right', fontWeight:700, color:MUTED }}>{ytdRevM?Math.round((ytdRevM-ytdCogsM)/ytdRevM*100)+'%':'—'}</td>
+                    </tr></tfoot>
+                  </table>
+                </div>
               </div>
 
               <div style={{ ...card }}>
