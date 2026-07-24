@@ -9,7 +9,11 @@ const GRID = '#AEBFE3'
 const REDNO = '#C8322B'
 const ROSE = '#B14D6A', ROSE_DK = '#8E3B54', GREEN = '#2E7D46', AMBER = '#9C6B12'
 
-const BIZ = 'The Gown Studio'
+const BIZ = 'LEW Imports'
+const BIZ_ADDR = '1342 51st Street, Brooklyn NY 11219'
+const BIZ_TEL = '718-851-1___'   // TODO: confirm full telephone number
+const BIZ_FAX = '718-851-0847'
+const BIZ_EMAIL = 'Info@lewimports.com'
 const METHODS = ['Cash', 'Check', 'Card', 'On Acct.', 'Zelle']
 const DEFAULT_TAX_RATE = 8.875   // NYC rate — editable per order
 
@@ -80,6 +84,7 @@ const toDB = (o, userId) => ({
   alterations_due: (o.alterationsList || [])[0]?.due || null,
   notes: o.notes || '', tax_rate: o.taxRate || DEFAULT_TAX_RATE,
   follow_up_date: o.followUpDate || null, todos: o.todos || [],
+  sales_order: o.salesOrder || {},
   saved_at: new Date().toISOString(),
 })
 const fromDB = (r) => ({
@@ -95,6 +100,7 @@ const fromDB = (r) => ({
     : (r.alterations ? [{ id: uid(), note: r.alterations_note || '', due: r.alterations_due || '', assignee: r.alterations_assignee || '', done: !!r.alterations_done }] : []),
   notes: r.notes, taxRate: r.tax_rate,
   followUpDate: r.follow_up_date, todos: r.todos || [],
+  salesOrder: r.sales_order || {},
   savedAt: new Date(r.saved_at).getTime(),
 })
 
@@ -106,7 +112,7 @@ const blankForm = () => ({
   date: todayStr(),
   items: [blankRow(), blankRow(), blankRow()],
   payments: [], alterations: false, alterationsList: [], notes: '',
-  todos: [], taxRate: DEFAULT_TAX_RATE,
+  todos: [], taxRate: DEFAULT_TAX_RATE, salesOrder: {},
 })
 
 export default function Gowns() {
@@ -130,6 +136,7 @@ export default function Gowns() {
   const [catalog, setCatalog] = useState(DEFAULT_ITEMS)
   const [newItem, setNewItem] = useState(null)
   const [newCatalogItem, setNewCatalogItem] = useState({ no: '', desc: '', taxable: true, alteration: false })
+  const [showSales, setShowSales] = useState(false)
   const [todoInput, setTodoInput] = useState({})
   const [formTodo, setFormTodo] = useState({ text: '', assignee: '', date: '' })
   const [todoView, setTodoView] = useState('person')
@@ -202,6 +209,8 @@ export default function Gowns() {
     setPay({ amount: '', method: '', date: todayStr() }); setFormTodo({ text: '', assignee: '', date: '' }); setEditing(true); setView('form'); window.scrollTo(0, 0)
   }
   const setF = (k, v) => setForm(f => ({ ...f, [k]: v }))
+  const setSales = (k, v) => setForm(f => ({ ...f, salesOrder: { ...(f.salesOrder || {}), [k]: v } }))
+  const soLbl = { fontSize: '12px', fontWeight: 600, color: MUTED, marginBottom: '4px' }
   const setItem = (id, k, v) => setForm(f => ({ ...f, items: f.items.map(it => it.id === id ? { ...it, [k]: v } : it) }))
   const onItemNo = (id, val) => {
     setItem(id, 'itemNo', val)
@@ -431,6 +440,58 @@ export default function Gowns() {
     win.document.close()
     win.focus()
     setTimeout(() => win.print(), 400)
+  }
+
+  const printSalesOrder = (o) => {
+    const s = o.salesOrder || {}
+    const custName = `${o.firstName || ''} ${o.lastName || ''}`.trim()
+    const today = s.todayDate ? fmtDate(s.todayDate) : fmtDate(todayStr())
+    const LINE = '#222'
+    const fld = (label, val, opts = {}) => `<div style="display:flex;align-items:flex-end;${opts.wrap ? '' : 'flex:' + (opts.flex || 1) + ';'}${opts.style || ''}"><span style="font-size:12px;color:#000;white-space:nowrap;margin-right:5px;padding-bottom:2px;">${label}</span><span style="flex:1;border-bottom:1px solid ${LINE};min-height:19px;font-size:15px;font-weight:600;padding:0 4px 2px;">${val || ''}</span></div>`
+    const box = `
+      <div style="border:2px solid #000;padding:22px 26px;font-family:'Georgia',serif;max-width:760px;margin:0 auto;">
+        <div style="text-align:center;font-size:34px;font-weight:800;letter-spacing:3px;font-family:'Georgia',serif;">LEW <span style="font-weight:400;font-size:20px;letter-spacing:1px;">IMPORTS</span></div>
+        <div style="display:flex;justify-content:space-between;font-size:12px;font-style:italic;color:#333;margin-top:2px;">
+          <div>1342 51st Street<br>Brooklyn NY 11219</div>
+          <div style="text-align:right;">Telephone: ${BIZ_TEL}<br>Fax: ${BIZ_FAX}<br>${BIZ_EMAIL}</div>
+        </div>
+        <div style="text-align:center;font-size:20px;font-weight:700;text-decoration:underline;margin:14px 0 16px;">Sales Order</div>
+
+        <div style="display:flex;gap:24px;margin-bottom:6px;">
+          <div style="flex:1;">${fld("Today's Date:", today)}</div>
+          <div style="flex:1;">${fld('Receipt book No.:', s.receiptBookNo)}</div>
+        </div>
+        <div style="display:flex;gap:24px;margin-bottom:10px;">
+          <div style="flex:1;">${fld('Date Requested:', s.dateRequested ? fmtDate(s.dateRequested) : '')}</div>
+          <div style="flex:1;display:flex;align-items:center;font-size:13px;">Fitting: &nbsp;<span style="font-size:15px;">${s.fitting === 'yes' ? '☑' : '☐'} Yes &nbsp; ${s.fitting === 'no' ? '☑' : '☐'} No</span></div>
+        </div>
+
+        <div style="display:flex;gap:20px;margin-bottom:6px;">${fld("Customer's Name:", custName, { flex: 2 })}${fld('Tel:', o.phone, { flex: 1 })}</div>
+        <div style="margin-bottom:6px;">${fld('Model Name:', s.modelName)}</div>
+        <div style="display:flex;gap:20px;margin-bottom:6px;">${fld('Designer/Vendor:', s.designerVendor, { flex: 1 })}${fld('Vendor Model #:', s.vendorModelNo, { flex: 1 })}</div>
+        <div style="display:flex;gap:20px;margin-bottom:6px;">${fld('Fabric:', s.fabric, { flex: 1 })}${fld('Color:', s.color, { flex: 1 })}</div>
+        <div style="margin-bottom:6px;">${fld('Description:', s.description)}</div>
+        <div style="margin-bottom:10px;">${fld('Note:', s.note)}</div>
+
+        <div style="font-size:13px;font-weight:700;font-style:italic;text-decoration:underline;margin:8px 0 4px;">Size/Measurements:</div>
+        <div style="font-size:14px;font-weight:700;margin-bottom:4px;">Standard:</div>
+        <div style="display:flex;gap:16px;margin-bottom:10px;">${fld('Jacket Size:', s.jacketSize)}${fld('Skirt Size:', s.skirtSize)}${fld('Dress Size:', s.dressSize)}</div>
+
+        <div style="display:flex;gap:20px;">
+          <div style="flex:1;">
+            <div style="font-size:14px;font-weight:700;margin-bottom:4px;">Custom:</div>
+            ${['Bust:|bust', 'Bust to Bust:|bustToBust', 'Waist:|waist', 'Hip- higher:|hipHigher', 'lower:|hipLower', 'Shoulder to shoulder:|shoulderToShoulder', 'Shoulder to Bust:|shoulderToBust', 'Neck to Waist:|neckToWaist', 'Length of sleeves:|sleeves', 'Muscle:|muscle', 'Length of jacket:|lengthJacket', 'Length of skirt:|lengthSkirt', 'Length of dress:|lengthDress'].map(p => { const [lab, key] = p.split('|'); return `<div style="margin-bottom:5px;">${fld(lab, s[key])}</div>` }).join('')}
+          </div>
+          <div style="width:230px;flex-shrink:0;align-self:flex-end;">
+            <div style="border:1px solid #000;padding:12px 14px;">
+              ${[['Standard Price:', s.standardPrice], ['Fabric Cost:', s.fabricCost], ['Additional:', s.additional], ['Total:', s.total]].map(([lab, val]) => `<div style="margin-bottom:10px;">${fld(lab, val)}</div>`).join('')}
+            </div>
+          </div>
+        </div>
+      </div>`
+    const win = window.open('', '_blank')
+    win.document.write(`<!DOCTYPE html><html><head><title>${BIZ} — Sales Order</title><style>*{box-sizing:border-box}@media print{body{margin:0}}</style></head><body style="padding:24px;">${box}</body></html>`)
+    win.document.close(); win.focus(); setTimeout(() => win.print(), 400)
   }
   const patchOrder = async (id, patch) => {
     const updated = orders.find(o => o.id === id); if (!updated) return
@@ -1245,6 +1306,62 @@ export default function Gowns() {
                   <button onClick={addFormTodo} className="gw-press" style={{ padding: '0 18px', fontSize: '14px', fontWeight: 600, background: PAD, color: '#fff', border: 'none', borderRadius: '10px', cursor: 'pointer', fontFamily: 'inherit', whiteSpace: 'nowrap' }}>Add</button>
                 </div>
               </div>
+            </div>
+
+            {/* Sales Order — to vendor */}
+            <div className="gw-card" style={{ padding: '16px 18px', marginBottom: '20px' }}>
+              <button onClick={() => setShowSales(v => !v)} className="gw-press" style={{ width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '12px 14px', border: `1.5px solid ${PAD}`, background: '#F6F9FE', borderRadius: '12px', cursor: 'pointer', fontFamily: 'inherit' }}>
+                <span style={{ fontSize: '16px', fontWeight: 700, color: PAD }}>📋 Sales Order — to vendor</span>
+                <span style={{ fontSize: '14px', color: PAD }}>{showSales ? '▲' : '▼'}</span>
+              </button>
+
+              {showSales && (
+                <div style={{ marginTop: '14px' }}>
+                  <div style={{ fontSize: '12px', color: MUTED, marginBottom: '12px' }}>Customer: <b style={{ color: INK }}>{fullName(form) || '—'}</b>{form.phone ? ` · ${form.phone}` : ''} <span style={{ color: '#B3A8A2' }}>(from the order)</span></div>
+
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
+                    <div><div style={soLbl}>Date requested</div><input type="date" value={form.salesOrder?.dateRequested || ''} onChange={e => setSales('dateRequested', e.target.value)} style={fieldIn} /></div>
+                    <div><div style={soLbl}>Receipt book No.</div><input value={form.salesOrder?.receiptBookNo || ''} onChange={e => setSales('receiptBookNo', e.target.value)} style={fieldIn} /></div>
+                  </div>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '10px', margin: '10px 0' }}>
+                    <span style={{ ...soLbl, marginBottom: 0 }}>Fitting:</span>
+                    {['yes', 'no'].map(v => (
+                      <button key={v} onClick={() => setSales('fitting', form.salesOrder?.fitting === v ? '' : v)} className="gw-press" style={{ padding: '6px 16px', borderRadius: '8px', border: `1.5px solid ${form.salesOrder?.fitting === v ? ROSE : '#E2D7D1'}`, background: form.salesOrder?.fitting === v ? ROSE : '#fff', color: form.salesOrder?.fitting === v ? '#fff' : INK, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit', textTransform: 'capitalize' }}>{v}</button>
+                    ))}
+                  </div>
+
+                  {[['Model name', 'modelName'], ['Designer / Vendor', 'designerVendor'], ['Vendor Model #', 'vendorModelNo'], ['Fabric', 'fabric'], ['Color', 'color'], ['Description', 'description'], ['Note', 'note']].map(([lab, key]) => (
+                    <div key={key} style={{ marginBottom: '8px' }}>
+                      <div style={soLbl}>{lab}</div>
+                      <input value={form.salesOrder?.[key] || ''} onChange={e => setSales(key, e.target.value)} style={fieldIn} />
+                    </div>
+                  ))}
+
+                  <div style={{ fontSize: '12px', fontWeight: 700, color: ROSE_DK, textTransform: 'uppercase', letterSpacing: '0.04em', margin: '12px 0 6px' }}>Standard sizes</div>
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '8px' }}>
+                    {[['Jacket', 'jacketSize'], ['Skirt', 'skirtSize'], ['Dress', 'dressSize']].map(([lab, key]) => (
+                      <div key={key}><div style={soLbl}>{lab}</div><input value={form.salesOrder?.[key] || ''} onChange={e => setSales(key, e.target.value)} style={fieldIn} /></div>
+                    ))}
+                  </div>
+
+                  <div style={{ fontSize: '12px', fontWeight: 700, color: ROSE_DK, textTransform: 'uppercase', letterSpacing: '0.04em', margin: '12px 0 6px' }}>Custom measurements</div>
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px' }}>
+                    {[['Bust', 'bust'], ['Bust to bust', 'bustToBust'], ['Waist', 'waist'], ['Hip — higher', 'hipHigher'], ['Hip — lower', 'hipLower'], ['Shoulder to shoulder', 'shoulderToShoulder'], ['Shoulder to bust', 'shoulderToBust'], ['Neck to waist', 'neckToWaist'], ['Length of sleeves', 'sleeves'], ['Muscle', 'muscle'], ['Length of jacket', 'lengthJacket'], ['Length of skirt', 'lengthSkirt'], ['Length of dress', 'lengthDress']].map(([lab, key]) => (
+                      <div key={key}><div style={soLbl}>{lab}</div><input value={form.salesOrder?.[key] || ''} onChange={e => setSales(key, e.target.value)} style={fieldIn} /></div>
+                    ))}
+                  </div>
+
+                  <div style={{ fontSize: '12px', fontWeight: 700, color: ROSE_DK, textTransform: 'uppercase', letterSpacing: '0.04em', margin: '12px 0 6px' }}>Pricing</div>
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px' }}>
+                    {[['Standard price', 'standardPrice'], ['Fabric cost', 'fabricCost'], ['Additional', 'additional'], ['Total', 'total']].map(([lab, key]) => (
+                      <div key={key}><div style={soLbl}>{lab}</div><input value={form.salesOrder?.[key] || ''} onChange={e => setSales(key, e.target.value)} inputMode="decimal" style={fieldIn} /></div>
+                    ))}
+                  </div>
+
+                  <button onClick={() => printSalesOrder(form)} className="gw-press" style={{ ...primaryBtn, width: '100%', marginTop: '14px' }}>🖨 Print sales order</button>
+                  <div style={{ fontSize: '12px', color: MUTED, textAlign: 'center', marginTop: '6px' }}>Tip: save the order so these entries are stored.</div>
+                </div>
+              )}
             </div>
 
             <button className="gw-press" onClick={save} style={{ ...primaryBtn, width: '100%' }}>{editing ? 'Save changes' : 'Save order'}</button>
