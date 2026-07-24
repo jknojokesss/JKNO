@@ -105,6 +105,8 @@ export default function RiversideTires() {
   const [aiQ, setAiQ]   = useState('')
   const [aiA, setAiA]   = useState('')
   const [aiLoading, setAiLoading] = useState(false)
+  const [rngStart, setRngStart] = useState(0)
+  const [rngEnd, setRngEnd] = useState(99)
 
   const sortedItems = [...ITEMS].sort((a, b) => b[sort] - a[sort])
   const totalRev  = ITEMS.reduce((s, i) => s + i.rev, 0)
@@ -113,6 +115,15 @@ export default function RiversideTires() {
   const ytdRev    = MONTH_REV.reduce((s, m) => s + m.rev, 0)
   const ytdCogs   = MONTH_REV.reduce((s, m) => s + m.cogs, 0)
   const ytdGP     = ytdRev - ytdCogs
+  // date-range aggregation over MONTH_REV
+  const rA = Math.min(rngStart, MONTH_REV.length - 1)
+  const rB = Math.min(Math.max(rngEnd, rA), MONTH_REV.length - 1)
+  const rSel = MONTH_REV.slice(rA, rB + 1)
+  const rRev = rSel.reduce((s, m) => s + m.rev, 0)
+  const rCogs = rSel.reduce((s, m) => s + m.cogs, 0)
+  const rGp = rRev - rCogs
+  const rLabel = `${MONTH_REV[rA].m}–${MONTH_REV[rB].m}`
+  const rCount = rB - rA + 1
 
   const hcell = (align = 'left') => ({ padding: '7px 12px', fontSize: '9px', color: MUTED, background: '#FAFAFA', fontWeight: 400, letterSpacing: '0.1em', textTransform: 'uppercase', borderBottom: `1px solid ${BORDER}`, fontFamily: ui, textAlign: align })
   const cell  = (align = 'left', extra = {}) => ({ padding: '9px 12px', borderBottom: `1px solid #F5F5F5`, color: INK, fontSize: '12px', fontFamily: ui, textAlign: align, ...extra })
@@ -254,6 +265,24 @@ export default function RiversideTires() {
               <Kpi k="YTD COGS"     v={fmt(ytdCogs)} sub="cost of tires sold" color={RED} />
               <Kpi k="Gross Profit" v={fmt(ytdGP)}   sub={pct((ytdGP/ytdRev)*100)+' margin'} color={GREEN} />
             </div>
+            <Card title="P&L — Date range">
+              <div style={{ display:'flex', gap:'10px', alignItems:'center', flexWrap:'wrap', marginBottom:'14px' }}>
+                <span style={{ fontSize:'11px', fontWeight:600, color:MUTED, textTransform:'uppercase', letterSpacing:'0.08em' }}>From</span>
+                <select value={rA} onChange={e=>{const v=Number(e.target.value); setRngStart(v); if(v>rB) setRngEnd(v)}} style={{ padding:'7px 10px', border:`1px solid ${BORDER}`, borderRadius:'6px', fontFamily:mono, fontSize:'13px', cursor:'pointer', background:'#fff', color:INK }}>
+                  {MONTH_REV.map((m,i)=><option key={i} value={i}>{m.m}</option>)}
+                </select>
+                <span style={{ fontSize:'11px', fontWeight:600, color:MUTED, textTransform:'uppercase', letterSpacing:'0.08em' }}>to</span>
+                <select value={rB} onChange={e=>{const v=Number(e.target.value); setRngEnd(v); if(v<rA) setRngStart(v)}} style={{ padding:'7px 10px', border:`1px solid ${BORDER}`, borderRadius:'6px', fontFamily:mono, fontSize:'13px', cursor:'pointer', background:'#fff', color:INK }}>
+                  {MONTH_REV.map((m,i)=><option key={i} value={i}>{m.m}</option>)}
+                </select>
+                <span style={{ fontSize:'13px', color:MUTED }}>{rCount} month{rCount>1?'s':''} combined</span>
+              </div>
+              <div className="kpi-row">
+                <Kpi k={`Revenue · ${rLabel}`} v={fmt(rRev)} sub={`${rCount} months combined`} />
+                <Kpi k="COGS" v={fmt(rCogs)} sub="cost of tires sold" color={RED} />
+                <Kpi k="Gross Profit" v={fmt(rGp)} sub={rRev?pct((rGp/rRev)*100)+' margin':'—'} color={GREEN} />
+              </div>
+            </Card>
             <Card title="P&L — Month by Month">
               <table style={{ width:'100%', borderCollapse:'collapse' }}>
                 <thead><tr><th style={hcell()}>Month</th><th style={hcell('right')}>Revenue</th><th style={hcell('right')}>COGS</th><th style={hcell('right')}>Gross Profit</th><th style={hcell('right')}>Margin</th></tr></thead>
