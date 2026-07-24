@@ -1,5 +1,6 @@
-import { useState, useRef } from 'react'
+import { useState, useRef, useEffect } from 'react'
 import Head from 'next/head'
+import { jerkySupabase } from '../lib/supabaseJerky'
 
 const CHAR = '#2B2018', SPICE = '#C8462C', KRAFT = '#A9763A', CREAM = '#F6F0E6'
 const INK = '#2B2018', MUTED = '#8A7A66', GREEN = '#3E7C4F', BORDER = '#E6DBC8', AMBER = '#C98A2A', RED = '#C03A22'
@@ -9,7 +10,6 @@ const BIZ = 'Jerky Munch'
 const money = (n) => '$' + (Math.round(n * 100) / 100).toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 2 })
 const m0 = (n) => '$' + Math.round(n).toLocaleString()
 const sgn = (n) => (n < 0 ? '-$' : '$') + Math.abs(Math.round(n)).toLocaleString()
-const uid = () => Math.random().toString(36).slice(2, 9)
 const todayStr = new Date().toISOString().slice(0, 10)
 const fmtD = (s) => s ? new Date(s + 'T00:00:00').toLocaleDateString([], { month: 'short', day: 'numeric' }) : '—'
 const daysSince = (s) => s ? Math.round((Date.now() - new Date(s + 'T00:00:00')) / 86400000) : null
@@ -23,34 +23,8 @@ const recon = (c) => {
     status: c.counted == null ? 'uncounted' : variance === 0 ? 'reconciled' : variance > 0 ? 'short' : 'over' }
 }
 
-const SEED_CONSIGN = [
-  { id: uid(), store: 'Gourmet Glatt North', price: 8.5, sent: 60, returned: 0, paid: 425, counted: 6, countedDate: '2026-06-15', diagnosis: '', cycle: 1, lastContact: '2026-06-15', restock: 'now', notes: 'Manager Yossi reorders every ~2 weeks. Wants more Barbecue.', log: [{ at: 'Jun 15', t: 'Counted 6 on shelf' }, { at: 'Jun 6', t: 'Check received $425' }] },
-  { id: uid(), store: 'Gourmet Glatt South', price: 8.5, sent: 48, returned: 4, paid: 340, counted: 2, countedDate: '2026-06-15', diagnosis: '', cycle: 1, lastContact: '2026-06-12', restock: 'now', notes: 'Down to 2 bags — promised a delivery this week.', log: [{ at: 'Jun 15', t: 'Counted 2 on shelf' }, { at: 'Jun 5', t: 'Check received $340' }] },
-  { id: uid(), store: 'Seasons', price: 9, sent: 54, returned: 0, paid: 360, counted: 14, countedDate: '2026-06-14', diagnosis: '', cycle: 1, lastContact: '2026-06-14', restock: 'good', notes: 'Steady account. Likes the Maple Bourbon.', log: [{ at: 'Jun 14', t: 'Counted 14 — reconciles clean' }, { at: 'Jun 4', t: 'Check received $360' }] },
-  { id: uid(), store: 'Nutmeg', price: 8, sent: 40, returned: 0, paid: 200, counted: 8, countedDate: '2026-06-16', diagnosis: '', cycle: 1, lastContact: '2026-05-26', restock: 'soon', notes: "Haven't spoken in ~3 weeks — check in, and ask about the missing bags.", log: [{ at: 'Jun 16', t: 'Counted 8 on shelf' }, { at: 'Jun 2', t: 'Check received $200' }] },
-  { id: uid(), store: 'Aisle 9 Jackson', price: 8.5, sent: 36, returned: 0, paid: 255, counted: 4, countedDate: '2026-06-13', diagnosis: '', cycle: 1, lastContact: '2026-06-13', restock: 'soon', notes: 'New buyer contact — trial going well so far.', log: [{ at: 'Jun 13', t: 'Counted 4 on shelf' }, { at: 'Jun 3', t: 'Check received $255' }] },
-  { id: uid(), store: 'Aisle 9 Lakewood', price: 8.5, sent: 44, returned: 0, paid: 340, counted: 4, countedDate: '2026-06-13', diagnosis: '', cycle: 1, lastContact: '2026-06-13', restock: 'good', notes: 'Clean account, always pays on time.', log: [{ at: 'Jun 13', t: 'Counted 4 — reconciles clean' }, { at: 'Jun 3', t: 'Check received $340' }] },
-  { id: uid(), store: 'Foodex', price: 8, sent: 30, returned: 0, paid: 160, counted: 9, countedDate: '2026-06-12', diagnosis: '', cycle: 1, lastContact: '2026-06-05', restock: 'soon', notes: 'Slower mover — try a sampler display by the register.', log: [{ at: 'Jun 12', t: 'Counted 9 on shelf' }, { at: 'Jun 1', t: 'Check received $160' }] },
-  { id: uid(), store: 'Superstop', price: 8, sent: 36, returned: 0, paid: 0, counted: 36, countedDate: '2026-06-10', diagnosis: '', cycle: 1, lastContact: '2026-06-10', restock: 'good', notes: 'First delivery just landed — follow up in 2 weeks.', log: [{ at: 'Jun 10', t: 'Shipped 36 units — first delivery' }] },
-  { id: uid(), store: 'Evergreen', price: 9, sent: 40, returned: 0, paid: 270, counted: 8, countedDate: '2026-06-16', diagnosis: '', cycle: 1, lastContact: '2026-06-16', restock: 'now', notes: 'Reorders fast — strong location, push more here.', log: [{ at: 'Jun 16', t: 'Counted 8 on shelf' }, { at: 'Jun 5', t: 'Check received $270' }] },
-]
-
-const SEED_DIRECT = [
-  { id: uid(), who: 'Online store (Shopify)', source: 'Shopify / online', units: 120, rev: 1560 },
-  { id: uid(), who: 'Farmers Market — Toms River', source: 'Farmers market', units: 45, rev: 585 },
-  { id: uid(), who: 'Acme Corp — office bulk order', source: 'Wholesale / bulk', units: 60, rev: 540 },
-  { id: uid(), who: 'Gym pop-up weekend', source: 'Pop-up event', units: 30, rev: 390 },
-]
 const DIRECT_SOURCES = ['Shopify / online', 'Farmers market', 'Pop-up event', 'Wholesale / bulk', 'Other']
 
-const SEED_ADS = [
-  { id: uid(), channel: 'Instagram Ads', spend: 600, rev: 2400, track: 'Meta pixel + code IG10', tracked: true },
-  { id: uid(), channel: 'Influencer — @njfoodie', spend: 400, rev: 1600, track: 'Promo code NJFOODIE', tracked: true },
-  { id: uid(), channel: 'Google Search', spend: 300, rev: 900, track: 'Google conversion tag', tracked: true },
-  { id: uid(), channel: 'Facebook Ads', spend: 450, rev: 180, track: 'Meta pixel', tracked: true },
-  { id: uid(), channel: 'Local 5K Sponsorship', spend: 250, rev: 150, track: 'Estimated — needs a promo code', tracked: false },
-  { id: uid(), channel: 'Flyers / print', spend: 120, rev: 90, track: 'Estimated — needs a promo code', tracked: false },
-]
 const COGS_CATS = ['Ingredients', 'Packaging']
 const EXP_CATS = ['Ingredients', 'Packaging', 'Marketing', 'Fees', 'Equipment', 'Travel', 'Other']
 const DIAGNOSES = ['', 'Sold but not reported (store owes me)', 'Theft / shrinkage', 'Damaged or expired', 'Free samples given out', 'Miscount — recount needed', 'Unknown — investigating']
@@ -60,30 +34,7 @@ const verdict = (roas) => roas >= 2 ? { c: GREEN, t: 'Scale' } : roas >= 1 ? { c
 
 const PAY = [{ id: 'business', label: 'Business acct', color: MUTED }, { id: 'personal', label: 'Personal CC', color: RED }]
 const PAYM = Object.fromEntries(PAY.map(p => [p.id, p]))
-const SEED_EXPENSES = [
-  { id: uid(), vendor: 'Beef supplier — Sysco', cat: 'Ingredients', amt: 1850, pay: 'business' },
-  { id: uid(), vendor: 'Packaging & bags', cat: 'Packaging', amt: 420, pay: 'personal' },
-  { id: uid(), vendor: 'Spices & cure', cat: 'Ingredients', amt: 260, pay: 'personal' },
-  { id: uid(), vendor: 'Farmers market booth fee', cat: 'Fees', amt: 150, pay: 'personal' },
-  { id: uid(), vendor: 'Dehydrator repair', cat: 'Equipment', amt: 180, pay: 'business' },
-  { id: uid(), vendor: 'Gas & deliveries', cat: 'Travel', amt: 220, pay: 'personal' },
-  { id: uid(), vendor: 'Labels — Vistaprint', cat: 'Packaging', amt: 95, pay: 'personal' },
-]
 
-// 11 prior months (current month is appended live) for the multi-month P&L
-const MONTH_SERIES = [
-  { m: 'Jul', directRev: 1200, consignRev: 900, cogs: 1450, adSpend: 700, opexNonAd: 480 },
-  { m: 'Aug', directRev: 1320, consignRev: 980, cogs: 1520, adSpend: 780, opexNonAd: 500 },
-  { m: 'Sep', directRev: 1450, consignRev: 1050, cogs: 1600, adSpend: 850, opexNonAd: 510 },
-  { m: 'Oct', directRev: 1600, consignRev: 1150, cogs: 1720, adSpend: 950, opexNonAd: 520 },
-  { m: 'Nov', directRev: 1800, consignRev: 1300, cogs: 1900, adSpend: 1200, opexNonAd: 560 },
-  { m: 'Dec', directRev: 2200, consignRev: 1600, cogs: 2150, adSpend: 1500, opexNonAd: 620 },
-  { m: 'Jan', directRev: 1500, consignRev: 1100, cogs: 1700, adSpend: 900, opexNonAd: 520 },
-  { m: 'Feb', directRev: 1650, consignRev: 1200, cogs: 1780, adSpend: 1050, opexNonAd: 540 },
-  { m: 'Mar', directRev: 1820, consignRev: 1380, cogs: 2050, adSpend: 1350, opexNonAd: 600 },
-  { m: 'Apr', directRev: 1900, consignRev: 1450, cogs: 2180, adSpend: 1500, opexNonAd: 620 },
-  { m: 'May', directRev: 1980, consignRev: 1510, cogs: 2280, adSpend: 1650, opexNonAd: 640 },
-]
 const mLine = (mo) => {
   const rev = mo.directRev + mo.consignRev, gross = rev - mo.cogs, opex = mo.adSpend + mo.opexNonAd
   return { m: mo.m, directRev: mo.directRev, consignRev: mo.consignRev, rev, cogs: mo.cogs, gross, ad: mo.adSpend, otherOpex: mo.opexNonAd, opex, net: gross - opex }
@@ -100,18 +51,8 @@ const PNL_ROWS = [
   { label: 'Net profit / loss', key: 'net', kind: 'total', cost: false },
 ]
 
-// products sold this month (swap illustrations for real photos anytime)
-const PRODUCTS = [
-  { name: 'Barbecue', color: '#9E3B24', week: 22, month: 88 },
-  { name: 'Nashville', color: '#C24A22', week: 16, month: 64 },
-  { name: 'Maple Bourbon', color: '#97652C', week: 13, month: 50 },
-  { name: 'FirePopper', color: '#B2351A', week: 12, month: 46 },
-  { name: 'Teriyaki', color: '#6B4A2A', week: 11, month: 42 },
-  { name: 'Sweet Chili', color: '#A8432C', week: 9, month: 37 },
-  { name: 'Cracked Pepper', color: '#46403A', week: 8, month: 33 },
-  { name: 'Jalapeño', color: '#5C7C3A', week: 6, month: 25 },
-]
 // per-period sales for the front-page leaderboards (week vs month)
+// display-only, not yet backed by a sales table
 const STORE_PERF = [
   { store: 'Gourmet Glatt North', week: 13, weekRev: 110, month: 50, monthRev: 425 },
   { store: 'Gourmet Glatt South', week: 10, weekRev: 85, month: 40, monthRev: 340 },
@@ -123,6 +64,7 @@ const STORE_PERF = [
   { store: 'Foodex', week: 6, weekRev: 48, month: 20, monthRev: 160 },
   { store: 'Superstop', week: 7, weekRev: 56, month: 18, monthRev: 144 },
 ]
+// display-only, not yet backed by a sales table
 const DIRECT_PERF = [
   { who: 'Online store (Shopify)', source: 'Shopify / online', week: 31, weekRev: 403, month: 120, monthRev: 1560 },
   { who: 'Gym pop-up weekend', source: 'Pop-up event', week: 30, weekRev: 390, month: 30, monthRev: 390 },
@@ -144,14 +86,16 @@ const MONO = "'IBM Plex Mono', monospace"
 
 export default function JerkyMunch() {
   const [tab, setTab] = useState('overview')
-  const [consign, setConsign] = useState(SEED_CONSIGN)
-  const [direct, setDirect] = useState(SEED_DIRECT)
-  const [ads, setAds] = useState(SEED_ADS)
+  const [consign, setConsign] = useState([])
+  const [direct, setDirect] = useState([])
+  const [ads, setAds] = useState([])
+  const [PRODUCTS, setPRODUCTS] = useState([])
+  const [MONTH_SERIES, setMONTH_SERIES] = useState([])
   const [expanded, setExpanded] = useState(null)
   const [draft, setDraft] = useState({})
   const [adding, setAdding] = useState(false)
   const [cf, setCf] = useState({ store: '', price: '', sent: '' })
-  const [expenses, setExpenses] = useState(SEED_EXPENSES)
+  const [expenses, setExpenses] = useState([])
   const [addingE, setAddingE] = useState(false)
   const [ef, setEf] = useState({ vendor: '', amt: '', cat: 'Other', pay: 'personal' })
   const [addingD, setAddingD] = useState(false)
@@ -169,15 +113,123 @@ export default function JerkyMunch() {
   const coaRef = useRef(null)
   const glRef = useRef(null)
 
+  // ── auth gate ──────────────────────────────────────────────────────
+  const [session, setSession] = useState(null)
+  const [authChecked, setAuthChecked] = useState(false)
+  const [dataLoaded, setDataLoaded] = useState(false)
+  const [loginEmail, setLoginEmail] = useState('')
+  const [loginPassword, setLoginPassword] = useState('')
+  const [loginError, setLoginError] = useState('')
+
+  // ── data loaders (Supabase → the UI object shapes the page already uses) ──
+  const loadConsign = async () => {
+    try {
+      const [{ data: partners }, { data: logs }] = await Promise.all([
+        jerkySupabase.from('consignment_partners').select('*').order('store'),
+        jerkySupabase.from('consignment_log').select('*').order('at', { ascending: false }),
+      ])
+      const byPartner = {}
+      ;(logs || []).forEach(l => { (byPartner[l.partner_id] = byPartner[l.partner_id] || []).push(l) })
+      setConsign((partners || []).map(p => ({
+        id: p.id, store: p.store, price: p.price, sent: p.sent, returned: p.returned, paid: p.paid,
+        counted: p.counted, countedDate: p.counted_date || '', diagnosis: p.diagnosis || '',
+        cycle: p.cycle, lastContact: p.last_contact, restock: p.restock, notes: p.notes,
+        log: (byPartner[p.id] || []).map(l => ({ at: fmtD(l.at), t: l.note })),
+      })))
+    } catch (e) { console.error('loadConsign failed', e) }
+  }
+  const loadDirect = async () => {
+    try {
+      const { data } = await jerkySupabase.from('direct_sales').select('*').order('sale_date', { ascending: false })
+      setDirect((data || []).map(d => ({ id: d.id, who: d.who, source: d.source, units: d.units, rev: d.rev })))
+    } catch (e) { console.error('loadDirect failed', e) }
+  }
+  const loadAds = async () => {
+    try {
+      const { data } = await jerkySupabase.from('ad_channels').select('*')
+      setAds((data || []).map(a => ({ id: a.id, channel: a.channel, spend: a.spend, rev: a.rev, track: a.track, tracked: a.tracked })))
+    } catch (e) { console.error('loadAds failed', e) }
+  }
+  const loadExpenses = async () => {
+    try {
+      const { data } = await jerkySupabase.from('expenses').select('*').order('exp_date', { ascending: false })
+      setExpenses((data || []).map(e => ({ id: e.id, vendor: e.vendor, cat: e.cat, amt: e.amt, pay: e.pay })))
+    } catch (e) { console.error('loadExpenses failed', e) }
+  }
+  const loadProducts = async () => {
+    try {
+      const { data } = await jerkySupabase.from('products').select('*').eq('line', 'bags').order('sort')
+      setPRODUCTS((data || []).map(p => ({ name: p.name, color: p.color, week: p.week_units, month: p.month_units })))
+    } catch (e) { console.error('loadProducts failed', e) }
+  }
+  const loadMonthSeries = async () => {
+    try {
+      const { data } = await jerkySupabase.from('monthly_financials').select('*').order('sort').order('period')
+      setMONTH_SERIES((data || []).map(m => ({ m: m.label, directRev: m.direct_rev, consignRev: m.consign_rev, cogs: m.cogs, adSpend: m.ad_spend, opexNonAd: m.opex_non_ad })))
+    } catch (e) { console.error('loadMonthSeries failed', e) }
+  }
+  const loadSettings = async () => {
+    try {
+      const { data } = await jerkySupabase.from('settings').select('*').eq('key', 'cost_per_bag').maybeSingle()
+      setCostPerBag(data ? Number(data.value) : 4.5)
+    } catch (e) { console.error('loadSettings failed', e) }
+  }
+  const loadAll = async () => {
+    await Promise.all([loadConsign(), loadDirect(), loadAds(), loadExpenses(), loadProducts(), loadMonthSeries(), loadSettings()])
+    setDataLoaded(true)
+  }
+
+  useEffect(() => {
+    jerkySupabase.auth.getSession().then(({ data }) => { setSession(data.session); setAuthChecked(true) })
+    const { data: sub } = jerkySupabase.auth.onAuthStateChange((_evt, s) => { setSession(s) })
+    return () => { sub.subscription.unsubscribe() }
+  }, [])
+  useEffect(() => {
+    if (session) loadAll()
+    else setDataLoaded(false)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [session])
+
+  const doLogin = async () => {
+    setLoginError('')
+    const { error } = await jerkySupabase.auth.signInWithPassword({ email: loginEmail.trim(), password: loginPassword })
+    if (error) setLoginError('Incorrect email or password.')
+  }
+  const doSignOut = async () => { try { await jerkySupabase.auth.signOut() } catch (e) { console.error('signOut failed', e) } }
+
   const dv = (k) => draft[k] || ''
   const setDv = (k, v) => setDraft({ ...draft, [k]: v })
-  const upd = (id, patch, logEntry) => setConsign(consign.map(c => c.id === id
-    ? { ...c, ...patch, log: logEntry ? [{ at: new Date().toLocaleDateString([], { month: 'short', day: 'numeric' }), t: logEntry }, ...(c.log || [])] : c.log } : c))
+  // core consignment mutation — optimistic setState, then persist to Supabase.
+  // Column-name translation for the two camelCase UI keys; everything else maps 1:1.
+  const upd = async (id, patch, logEntry) => {
+    setConsign(prev => prev.map(c => c.id === id
+      ? { ...c, ...patch, log: logEntry ? [{ at: new Date().toLocaleDateString([], { month: 'short', day: 'numeric' }), t: logEntry }, ...(c.log || [])] : c.log } : c))
+    try {
+      const colMap = { countedDate: 'counted_date', lastContact: 'last_contact' }
+      const dbPatch = {}
+      Object.keys(patch || {}).forEach(k => { dbPatch[colMap[k] || k] = patch[k] })
+      if (Object.keys(dbPatch).length) await jerkySupabase.from('consignment_partners').update(dbPatch).eq('id', id)
+      if (logEntry) {
+        await jerkySupabase.from('consignment_log').insert({ partner_id: id, note: logEntry })
+        await loadConsign()   // refresh from source of truth (skipped for silent field edits so typing stays smooth)
+      }
+    } catch (e) { console.error('upd failed', e) }
+  }
 
   const logCheck = (id) => { const a = Number(dv(id + '_chk')); if (a > 0) { const c = consign.find(x => x.id === id); upd(id, { paid: c.paid + a }, `Check received ${m0(a)}`); setDv(id + '_chk', '') } }
   const logCount = (id) => { const n = dv(id + '_cnt'); if (n !== '') { upd(id, { counted: Number(n), countedDate: todayStr }, `Counted ${n} on shelf`); setDv(id + '_cnt', '') } }
   const shipMore = (id) => { const n = Number(dv(id + '_shp')); if (n > 0) { const c = consign.find(x => x.id === id); upd(id, { sent: c.sent + n }, `Shipped ${n} more units`); setDv(id + '_shp', '') } }
-  const addPartner = () => { if (!cf.store.trim()) return; setConsign([{ id: uid(), store: cf.store.trim(), price: Number(cf.price) || 0, sent: Number(cf.sent) || 0, returned: 0, paid: 0, counted: null, countedDate: '', diagnosis: '', cycle: 1, log: [{ at: new Date().toLocaleDateString([], { month: 'short', day: 'numeric' }), t: 'Added consignment partner' }] }, ...consign]); setCf({ store: '', price: '', sent: '' }); setAdding(false) }
+  const addPartner = async () => {
+    if (!cf.store.trim()) return
+    const row = { store: cf.store.trim(), price: Number(cf.price) || 0, sent: Number(cf.sent) || 0, returned: 0, paid: 0, counted: null, cycle: 1, restock: 'good' }
+    setCf({ store: '', price: '', sent: '' }); setAdding(false)
+    try {
+      const { data, error } = await jerkySupabase.from('consignment_partners').insert(row).select().single()
+      if (error) throw error
+      if (data) await jerkySupabase.from('consignment_log').insert({ partner_id: data.id, note: 'Added consignment partner' })
+      await loadConsign()
+    } catch (e) { console.error('addPartner failed', e) }
+  }
   const closeOut = (id) => {
     const c = consign.find(x => x.id === id); if (!c) return
     const { variance, varVal } = recon(c)
@@ -190,8 +242,13 @@ export default function JerkyMunch() {
     upd(id, { sent: shelf, paid: 0, returned: 0, counted: shelf, diagnosis: '', cycle: (c.cycle || 1) + 1 }, note)
     setExpanded(null)
   }
-  const addExpense = () => { if (!ef.vendor.trim()) return; setExpenses([{ id: uid(), vendor: ef.vendor.trim(), cat: ef.cat || 'Other', amt: Number(ef.amt) || 0, pay: 'personal' }, ...expenses]); setEf({ vendor: '', amt: '', cat: 'Other', pay: 'personal' }); setAddingE(false) }
-  const removeExpense = (id) => setExpenses(expenses.filter(e => e.id !== id))
+  const addExpense = async () => {
+    if (!ef.vendor.trim()) return
+    const row = { vendor: ef.vendor.trim(), cat: ef.cat || 'Other', amt: Number(ef.amt) || 0, pay: 'personal' }
+    setEf({ vendor: '', amt: '', cat: 'Other', pay: 'personal' }); setAddingE(false)
+    try { await jerkySupabase.from('expenses').insert(row); await loadExpenses() } catch (e) { console.error('addExpense failed', e) }
+  }
+  const removeExpense = async (id) => { try { await jerkySupabase.from('expenses').delete().eq('id', id); await loadExpenses() } catch (e) { console.error('removeExpense failed', e) } }
   const exportPersonal = () => {
     const rows = [['Vendor', 'Category', 'Amount', 'Paid with']]
     expenses.filter(e => e.pay === 'personal').forEach(e => rows.push([e.vendor, e.cat, e.amt, 'Personal card']))
@@ -217,7 +274,7 @@ export default function JerkyMunch() {
   const importCSV = (e) => {
     const file = e.target.files && e.target.files[0]; if (!file) return
     const reader = new FileReader()
-    reader.onload = (ev) => {
+    reader.onload = async (ev) => {
       const rows = String(ev.target.result || '').split(/\r?\n/).map(r => r.trim()).filter(Boolean)
       const out = []
       rows.forEach((r, i) => {
@@ -225,19 +282,42 @@ export default function JerkyMunch() {
         if (i === 0 && /vendor|name|descr|item/i.test(cols[0] || '')) return
         const vendor = cols[0], amt = Number((cols[1] || '').replace(/[$,]/g, ''))
         if (!vendor || !amt) return
-        out.push({ id: uid(), vendor, cat: cols[2] || 'Other', amt, pay: 'personal' })
+        out.push({ vendor, cat: cols[2] || 'Other', amt, pay: 'personal' })
       })
-      if (out.length) setExpenses(prev => [...out, ...prev])
+      if (out.length) { try { await jerkySupabase.from('expenses').insert(out); await loadExpenses() } catch (err) { console.error('importCSV failed', err) } }
       e.target.value = ''
     }
     reader.readAsText(file)
   }
   const importBook = (e, setter) => { const file = e.target.files && e.target.files[0]; if (!file) return; const reader = new FileReader(); reader.onload = ev => { const rows = String(ev.target.result || '').split(/\r?\n/).filter(r => r.trim()).length; setter({ name: file.name, rows: Math.max(rows - 1, 0) }) }; reader.readAsText(file); e.target.value = '' }
-  const addDirect = () => { if (!df.who.trim()) return; setDirect([{ id: uid(), who: df.who.trim(), source: df.source, units: Number(df.units) || 0, rev: Number(df.rev) || 0 }, ...direct]); setDf({ who: '', source: 'Shopify / online', units: '', rev: '' }); setAddingD(false) }
-  const removeDirect = (id) => setDirect(direct.filter(d => d.id !== id))
-  const addAd = () => { if (!af.channel.trim()) return; const tr = af.track.trim(); setAds([{ id: uid(), channel: af.channel.trim(), spend: Number(af.spend) || 0, rev: Number(af.rev) || 0, track: tr || 'Estimated — needs a promo code', tracked: !!tr }, ...ads]); setAf({ channel: '', spend: '', rev: '', track: '' }); setAddingA(false) }
-  const removeAd = (id) => setAds(ads.filter(a => a.id !== id))
-  const setAdField = (id, f, v) => setAds(ads.map(a => a.id !== id ? a : (f === 'track' ? { ...a, track: v, tracked: v.trim().length > 0 } : { ...a, [f]: Number(v) || 0 })))
+  const addDirect = async () => {
+    if (!df.who.trim()) return
+    const row = { who: df.who.trim(), source: df.source, units: Number(df.units) || 0, rev: Number(df.rev) || 0 }
+    setDf({ who: '', source: 'Shopify / online', units: '', rev: '' }); setAddingD(false)
+    try { await jerkySupabase.from('direct_sales').insert(row); await loadDirect() } catch (e) { console.error('addDirect failed', e) }
+  }
+  const removeDirect = async (id) => { try { await jerkySupabase.from('direct_sales').delete().eq('id', id); await loadDirect() } catch (e) { console.error('removeDirect failed', e) } }
+  const addAd = async () => {
+    if (!af.channel.trim()) return
+    const tr = af.track.trim()
+    const row = { channel: af.channel.trim(), spend: Number(af.spend) || 0, rev: Number(af.rev) || 0, track: tr || 'Estimated — needs a promo code', tracked: !!tr }
+    setAf({ channel: '', spend: '', rev: '', track: '' }); setAddingA(false)
+    try { await jerkySupabase.from('ad_channels').insert(row); await loadAds() } catch (e) { console.error('addAd failed', e) }
+  }
+  const removeAd = async (id) => { try { await jerkySupabase.from('ad_channels').delete().eq('id', id); await loadAds() } catch (e) { console.error('removeAd failed', e) } }
+  const changeCostPerBag = async (v) => {
+    const n = Number(v) || 0
+    setCostPerBag(n)
+    try { await jerkySupabase.from('settings').upsert({ key: 'cost_per_bag', value: n }, { onConflict: 'key' }) } catch (e) { console.error('changeCostPerBag failed', e) }
+  }
+  // optimistic field edit on keystroke — persist without a reload so the input keeps focus/caret
+  const setAdField = async (id, f, v) => {
+    setAds(prev => prev.map(a => a.id !== id ? a : (f === 'track' ? { ...a, track: v, tracked: v.trim().length > 0 } : { ...a, [f]: Number(v) || 0 })))
+    try {
+      const patch = f === 'track' ? { track: v, tracked: v.trim().length > 0 } : { [f]: Number(v) || 0 }
+      await jerkySupabase.from('ad_channels').update(patch).eq('id', id)
+    } catch (e) { console.error('setAdField failed', e) }
+  }
 
   // aggregates
   const R = consign.map(c => ({ ...c, ...recon(c) }))
@@ -306,6 +386,38 @@ export default function JerkyMunch() {
   const inp = { padding: '10px 12px', fontSize: '14px', border: `1px solid ${BORDER}`, borderRadius: '2px', background: CREAM, color: INK, outline: 'none', fontFamily: 'inherit' }
   const big = { fontFamily: "'Inter', sans-serif", fontWeight: 700, letterSpacing: '-0.4px' }
   const btn = { fontFamily: "'Inter', sans-serif", fontWeight: 600, fontSize: '13px', letterSpacing: '0.1px', cursor: 'pointer' }
+
+  // ── auth gate render paths ─────────────────────────────────────────
+  const centered = { minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: "'Inter', sans-serif" }
+  const FontHead = (
+    <Head>
+      <title>{`${BIZ} — Dashboard`}</title>
+      <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+      <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+    </Head>
+  )
+  if (!authChecked) return (<>{FontHead}<div style={{ ...centered, background: CREAM, color: MUTED }}>Loading…</div></>)
+  if (!session) return (
+    <>
+      {FontHead}
+      <div style={{ ...centered, background: CHAR, padding: '20px' }}>
+        <div style={{ width: '100%', maxWidth: '360px', background: CARDBG, border: `1px solid ${BORDER}`, borderRadius: '2px', padding: '32px 28px' }}>
+          <div style={{ ...big, fontSize: '28px', letterSpacing: '-0.5px', lineHeight: 1 }}>
+            <span style={{ color: SPICE }}>Jerky</span> <span style={{ color: '#E0863A' }}>Munch</span>
+          </div>
+          <div style={{ ...lbl, color: '#96866C', marginTop: '9px' }}>Sign in to your dashboard</div>
+          <div style={{ marginTop: '22px', display: 'flex', flexDirection: 'column', gap: '10px' }}>
+            <input value={loginEmail} onChange={e => setLoginEmail(e.target.value)} onKeyDown={e => { if (e.key === 'Enter') doLogin() }} type="email" placeholder="Email" autoComplete="email" style={{ ...inp, width: '100%' }} />
+            <input value={loginPassword} onChange={e => setLoginPassword(e.target.value)} onKeyDown={e => { if (e.key === 'Enter') doLogin() }} type="password" placeholder="Password" autoComplete="current-password" style={{ ...inp, width: '100%' }} />
+            {loginError && <div style={{ color: RED, fontSize: '13px' }}>{loginError}</div>}
+            <button onClick={doLogin} style={{ background: SPICE, color: '#fff', border: 'none', borderRadius: '2px', padding: '12px', ...btn, marginTop: '4px' }}>Sign in</button>
+          </div>
+          <div style={{ fontFamily: MONO, fontSize: '10px', color: '#8A7A66', marginTop: '22px', lineHeight: 1.6 }}>Built &amp; maintained by <span style={{ color: SPICE, fontWeight: 600 }}>JK No Jokes Financials</span></div>
+        </div>
+      </div>
+    </>
+  )
+  if (!dataLoaded) return (<>{FontHead}<div style={{ ...centered, background: CREAM, color: MUTED }}>Loading your data…</div></>)
 
   const KPI = ({ k, v, sub, accent }) => (
     <div style={{ ...card, flex: 1, minWidth: '150px', padding: '15px 17px' }}>
@@ -408,6 +520,10 @@ export default function JerkyMunch() {
           </nav>
           <div style={{ padding: '12px 10px 0', borderTop: '1px solid rgba(255,255,255,.1)', marginTop: '8px' }}>
             <div style={{ fontFamily: MONO, fontSize: '10px', color: '#8A7A66', lineHeight: 1.6 }}>Built &amp; maintained by<br /><span style={{ color: SPICE, fontWeight: 600 }}>JK No Jokes Financials</span></div>
+            <div style={{ fontFamily: MONO, fontSize: '10px', color: '#8A7A66', lineHeight: 1.5, marginTop: '10px' }}>
+              <span style={{ wordBreak: 'break-all' }}>{session?.user?.email}</span>
+              <button onClick={doSignOut} style={{ display: 'block', marginTop: '4px', background: 'none', border: 'none', color: SPICE, fontFamily: "'Inter', sans-serif", fontSize: '11px', fontWeight: 600, cursor: 'pointer', padding: 0 }}>Sign out</button>
+            </div>
           </div>
         </aside>
 
@@ -524,7 +640,7 @@ export default function JerkyMunch() {
                 <div style={{ ...lbl, color: KRAFT, margin: '16px 0 6px' }}>Cost of goods sold</div>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '2px 0 8px', flexWrap: 'wrap' }}>
                   <span style={{ fontSize: '13px', color: MUTED }}>Cost to make one bag:</span>
-                  <span style={{ display: 'inline-flex', alignItems: 'center', gap: '3px', color: MUTED }}>$<input value={costPerBag} onChange={e => setCostPerBag(Number(e.target.value) || 0)} type="number" step="0.25" style={{ ...inp, width: '74px', padding: '6px 9px' }} /></span>
+                  <span style={{ display: 'inline-flex', alignItems: 'center', gap: '3px', color: MUTED }}>$<input value={costPerBag} onChange={e => changeCostPerBag(e.target.value)} type="number" step="0.25" style={{ ...inp, width: '74px', padding: '6px 9px' }} /></span>
                   <span style={{ fontSize: '12px', color: '#A2937A' }}>← estimate, set the real number</span>
                 </div>
                 <Row l={`Cost of goods sold (${soldBags} bags × ${money(costPerBag)})`} v={`−${m0(cogs)}`} />
