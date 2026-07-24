@@ -128,6 +128,10 @@ export default function JerkyMunch() {
   const [loginEmail, setLoginEmail] = useState('')
   const [loginPassword, setLoginPassword] = useState('')
   const [loginError, setLoginError] = useState('')
+  const [showChangePw, setShowChangePw] = useState(false)
+  const [newPw, setNewPw] = useState('')
+  const [newPw2, setNewPw2] = useState('')
+  const [changePwMsg, setChangePwMsg] = useState('')
 
   // ── data loaders (Supabase → the UI object shapes the page already uses) ──
   const loadConsign = async () => {
@@ -212,6 +216,17 @@ export default function JerkyMunch() {
     if (error) setLoginError('Incorrect email or password.')
   }
   const doSignOut = async () => { try { await jerkySupabase.auth.signOut() } catch (e) { console.error('signOut failed', e) } }
+  const doChangePw = async () => {
+    setChangePwMsg('')
+    if ((newPw || '').length < 6) { setChangePwMsg('Use at least 6 characters.'); return }
+    if (newPw !== newPw2) { setChangePwMsg('Passwords do not match.'); return }
+    try {
+      const { error } = await jerkySupabase.auth.updateUser({ password: newPw })
+      if (error) { setChangePwMsg(error.message); return }
+      setChangePwMsg('Password updated ✓'); setNewPw(''); setNewPw2('')
+      setTimeout(() => { setShowChangePw(false); setChangePwMsg('') }, 1800)
+    } catch (e) { setChangePwMsg('Something went wrong — try again.') }
+  }
 
   const dv = (k) => draft[k] || ''
   const setDv = (k, v) => setDraft({ ...draft, [k]: v })
@@ -579,6 +594,15 @@ export default function JerkyMunch() {
             <div style={{ fontFamily: MONO, fontSize: '10px', color: '#8A7A66', lineHeight: 1.5, marginTop: '10px' }}>
               <span style={{ wordBreak: 'break-all' }}>{session?.user?.email}</span>
               <button onClick={doSignOut} style={{ display: 'block', marginTop: '4px', background: 'none', border: 'none', color: SPICE, fontFamily: "'Inter', sans-serif", fontSize: '11px', fontWeight: 600, cursor: 'pointer', padding: 0 }}>Sign out</button>
+              <button onClick={() => { setShowChangePw(v => !v); setChangePwMsg(''); setNewPw(''); setNewPw2('') }} style={{ display: 'block', marginTop: '8px', background: 'none', border: 'none', color: '#8A7A66', fontFamily: "'Inter', sans-serif", fontSize: '11px', fontWeight: 600, cursor: 'pointer', padding: 0 }}>{showChangePw ? 'Cancel' : 'Change password'}</button>
+              {showChangePw && (
+                <div style={{ marginTop: '6px', display: 'flex', flexDirection: 'column', gap: '5px' }}>
+                  <input type="password" value={newPw} onChange={e => setNewPw(e.target.value)} placeholder="New password" style={{ background: 'rgba(255,255,255,.08)', border: '1px solid rgba(255,255,255,.15)', borderRadius: '2px', color: CREAM, padding: '6px 8px', fontSize: '11px', outline: 'none', fontFamily: 'inherit' }} />
+                  <input type="password" value={newPw2} onChange={e => setNewPw2(e.target.value)} onKeyDown={e => { if (e.key === 'Enter') doChangePw() }} placeholder="Confirm new password" style={{ background: 'rgba(255,255,255,.08)', border: '1px solid rgba(255,255,255,.15)', borderRadius: '2px', color: CREAM, padding: '6px 8px', fontSize: '11px', outline: 'none', fontFamily: 'inherit' }} />
+                  <button onClick={doChangePw} style={{ background: SPICE, color: '#fff', border: 'none', borderRadius: '2px', padding: '7px', fontFamily: "'Inter', sans-serif", fontSize: '11px', fontWeight: 600, cursor: 'pointer' }}>Save new password</button>
+                  {changePwMsg && <div style={{ fontSize: '10px', color: changePwMsg.includes('✓') ? '#7FB389' : '#E8927C', fontFamily: MONO, lineHeight: 1.4 }}>{changePwMsg}</div>}
+                </div>
+              )}
             </div>
           </div>
         </aside>
