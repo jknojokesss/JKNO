@@ -36,12 +36,16 @@ const PAY = [{ id: 'business', label: 'Business acct', color: MUTED }, { id: 'pe
 const PAYM = Object.fromEntries(PAY.map(p => [p.id, p]))
 
 const mLine = (mo) => {
-  const rev = mo.directRev + mo.consignRev, gross = rev - mo.cogs, opex = mo.adSpend + mo.opexNonAd
-  return { m: mo.m, directRev: mo.directRev, consignRev: mo.consignRev, rev, cogs: mo.cogs, gross, ad: mo.adSpend, otherOpex: mo.opexNonAd, opex, net: gross - opex }
+  const boardRev = mo.boardRev || 0, campRev = mo.campRev || 0, boardCogs = mo.boardCogs || 0, campCogs = mo.campCogs || 0
+  const bcRev = boardRev + campRev, bcCogs = boardCogs + campCogs
+  const rev = mo.directRev + mo.consignRev + bcRev, cogs = mo.cogs + bcCogs
+  const gross = rev - cogs, opex = mo.adSpend + mo.opexNonAd
+  return { m: mo.m, directRev: mo.directRev, consignRev: mo.consignRev, boardRev, campRev, bcRev, rev, cogs, gross, ad: mo.adSpend, otherOpex: mo.opexNonAd, opex, net: gross - opex }
 }
 const PNL_ROWS = [
   { label: 'Direct sales', key: 'directRev', kind: 'line', cost: false },
   { label: 'Consignment collected', key: 'consignRev', kind: 'line', cost: false },
+  { label: 'Boards & camp packages', key: 'bcRev', kind: 'line', cost: false },
   { label: 'Total revenue', key: 'rev', kind: 'subtotal', cost: false },
   { label: 'Cost of goods sold', key: 'cogs', kind: 'line', cost: true },
   { label: 'Gross profit', key: 'gross', kind: 'subtotal', cost: false },
@@ -104,6 +108,10 @@ export default function JerkyMunch() {
   const [pnlView, setPnlView] = useState('single')
   const [period, setPeriod] = useState('month')
   const [costPerBag, setCostPerBag] = useState(4.5)
+  const [boardsProducts, setBoardsProducts] = useState([])
+  const [campProducts, setCampProducts] = useState([])
+  const [boardCost, setBoardCost] = useState(75)
+  const [campCost, setCampCost] = useState(25)
   const [logoOk, setLogoOk] = useState(true)
   const [addingA, setAddingA] = useState(false)
   const [af, setAf] = useState({ channel: '', spend: '', rev: '', track: '' })
@@ -158,20 +166,28 @@ export default function JerkyMunch() {
   }
   const loadProducts = async () => {
     try {
-      const { data } = await jerkySupabase.from('products').select('*').eq('line', 'bags').order('sort')
-      setPRODUCTS((data || []).map(p => ({ name: p.name, color: p.color, week: p.week_units, month: p.month_units })))
+      const { data } = await jerkySupabase.from('products').select('*').order('sort')
+      const rows = data || []
+      const mapP = p => ({ name: p.name, color: p.color, week: p.week_units, month: p.month_units, price: p.price })
+      setPRODUCTS(rows.filter(p => p.line === 'bags').map(mapP))       // flavor grid stays bags-only
+      setBoardsProducts(rows.filter(p => p.line === 'boards').map(mapP))
+      setCampProducts(rows.filter(p => p.line === 'camp').map(mapP))
     } catch (e) { console.error('loadProducts failed', e) }
   }
   const loadMonthSeries = async () => {
     try {
       const { data } = await jerkySupabase.from('monthly_financials').select('*').order('sort').order('period')
-      setMONTH_SERIES((data || []).map(m => ({ m: m.label, directRev: m.direct_rev, consignRev: m.consign_rev, cogs: m.cogs, adSpend: m.ad_spend, opexNonAd: m.opex_non_ad })))
+      setMONTH_SERIES((data || []).map(m => ({ m: m.label, directRev: m.direct_rev, consignRev: m.consign_rev, cogs: m.cogs, adSpend: m.ad_spend, opexNonAd: m.opex_non_ad, boardRev: m.board_rev || 0, campRev: m.camp_rev || 0, boardCogs: m.board_cogs || 0, campCogs: m.camp_cogs || 0 })))
     } catch (e) { console.error('loadMonthSeries failed', e) }
   }
   const loadSettings = async () => {
     try {
-      const { data } = await jerkySupabase.from('settings').select('*').eq('key', 'cost_per_bag').maybeSingle()
-      setCostPerBag(data ? Number(data.value) : 4.5)
+      const { data } = await jerkySupabase.from('settings').select('*')
+      const rows = data || []
+      const num = k => { const r = rows.find(x => x.key === k); return r != null && r.value != null ? Number(r.value) : null }
+      const cpb = num('cost_per_bag'); if (cpb != null) setCostPerBag(cpb)
+      const bc = num('board_cost'); if (bc != null) setBoardCost(bc)
+      const cc = num('camp_cost'); if (cc != null) setCampCost(cc)
     } catch (e) { console.error('loadSettings failed', e) }
   }
   const loadAll = async () => {
@@ -310,6 +326,16 @@ export default function JerkyMunch() {
     setCostPerBag(n)
     try { await jerkySupabase.from('settings').upsert({ key: 'cost_per_bag', value: n }, { onConflict: 'key' }) } catch (e) { console.error('changeCostPerBag failed', e) }
   }
+  const changeBoardCost = async (v) => {
+    const n = Number(v) || 0
+    setBoardCost(n)
+    try { await jerkySupabase.from('settings').upsert({ key: 'board_cost', value: n }, { onConflict: 'key' }) } catch (e) { console.error('changeBoardCost failed', e) }
+  }
+  const changeCampCost = async (v) => {
+    const n = Number(v) || 0
+    setCampCost(n)
+    try { await jerkySupabase.from('settings').upsert({ key: 'camp_cost', value: n }, { onConflict: 'key' }) } catch (e) { console.error('changeCampCost failed', e) }
+  }
   // optimistic field edit on keystroke — persist without a reload so the input keeps focus/caret
   const setAdField = async (id, f, v) => {
     setAds(prev => prev.map(a => a.id !== id ? a : (f === 'track' ? { ...a, track: v, tracked: v.trim().length > 0 } : { ...a, [f]: Number(v) || 0 })))
@@ -351,6 +377,34 @@ export default function JerkyMunch() {
   const bagsPeriod = PRODUCTS.reduce((s, p) => s + p[period], 0)
   const bagsOut = R.reduce((s, c) => s + Math.max(c.expected, 0), 0)
 
+  // ── Boards & Camp product lines (live current-month figures) ──
+  // Revenue = Σ(month_units × price); COGS = Σ(month_units × per-unit cost setting)
+  const boardsUnitsM = boardsProducts.reduce((s, p) => s + (p.month || 0), 0)
+  const campUnitsM = campProducts.reduce((s, p) => s + (p.month || 0), 0)
+  const boardsRevM = boardsProducts.reduce((s, p) => s + (p.month || 0) * (p.price || 0), 0)
+  const campRevM = campProducts.reduce((s, p) => s + (p.month || 0) * (p.price || 0), 0)
+  const boardsCogsM = boardsUnitsM * boardCost
+  const campCogsM = campUnitsM * campCost
+  const bcRevM = boardsRevM + campRevM
+  const bcCogsM = boardsCogsM + campCogsM
+  // period-aware unit counts for the overview product grid header/cards
+  const boardsUnitsP = boardsProducts.reduce((s, p) => s + (p[period] || 0), 0)
+  const campUnitsP = campProducts.reduce((s, p) => s + (p[period] || 0), 0)
+
+  // Revenue by product line: bags (live) + premium boards + camp packages
+  const productMix = [
+    { line: 'Jerky bags', units: bagsPeriod, unit: 'bags', rev: revenue, color: KRAFT, to: 'direct' },
+    { line: 'Jerky boards', units: boardsUnitsM, unit: 'boards', rev: boardsRevM, color: SPICE, to: 'direct' },
+    { line: 'Camp packages', units: campUnitsM, unit: 'packages', rev: campRevM, color: '#8A5A2B', to: 'direct' },
+  ]
+  const totalRevenue = productMix.reduce((s, p) => s + p.rev, 0)   // bags + boards + camp
+  // P&L totals that include boards + camp (bag vars above stay bag-only for the
+  // consignment/close tabs; board & camp per-unit cost are editable settings)
+  const pnlCogs = cogs + bcCogsM
+  const pnlGross = totalRevenue - pnlCogs
+  const pnlNet = pnlGross - totalOpex
+  const pnlPct = (n) => totalRevenue ? Math.round(n / totalRevenue * 100) : 0
+
   // monthly close → QB (Shopify online excluded — it books through Shopify, no double-count)
   const shopifyRev = direct.filter(d => d.source === 'Shopify / online').reduce((s, d) => s + d.rev, 0)
   const offlineDirectRev = direct.filter(d => d.source !== 'Shopify / online').reduce((s, d) => s + d.rev, 0)
@@ -363,7 +417,7 @@ export default function JerkyMunch() {
 
   // multi-month series — current month appended live so interactivity flows through
   const thisMonth = new Date().toLocaleString('en-US', { month: 'short' })
-  const monthsAll = [...MONTH_SERIES, { m: thisMonth, directRev, consignRev: cashCollected, cogs, adSpend, opexNonAd }]
+  const monthsAll = [...MONTH_SERIES, { m: thisMonth, directRev, consignRev: cashCollected, cogs, adSpend, opexNonAd, boardRev: boardsRevM, campRev: campRevM, boardCogs: boardsCogsM, campCogs: campCogsM }]
   const lines = monthsAll.slice(-pnlMonths).map(mLine)
   const lastL = lines[lines.length - 1]
   const baseL = lines[0]
@@ -419,11 +473,12 @@ export default function JerkyMunch() {
   )
   if (!dataLoaded) return (<>{FontHead}<div style={{ ...centered, background: CREAM, color: MUTED }}>Loading your data…</div></>)
 
-  const KPI = ({ k, v, sub, accent }) => (
-    <div style={{ ...card, flex: 1, minWidth: '150px', padding: '15px 17px' }}>
+  const KPI = ({ k, v, sub, accent, onClick }) => (
+    <div onClick={onClick} className={onClick ? 'jm-click' : undefined} style={{ ...card, flex: 1, minWidth: '150px', padding: '15px 17px', position: 'relative', ...(onClick ? { cursor: 'pointer' } : {}) }}>
       <div style={lbl}>{k}</div>
       <div style={{ ...big, fontSize: '29px', color: accent || INK, lineHeight: 1.15, marginTop: '4px' }}>{v}</div>
       <div style={{ fontFamily: "'Inter', sans-serif", fontSize: '12px', fontWeight: 400, color: '#A2937A', marginTop: '3px' }}>{sub}</div>
+      {onClick && <span style={{ position: 'absolute', top: '11px', right: '13px', color: '#C6B79A', fontSize: '15px', lineHeight: 1 }}>›</span>}
     </div>
   )
   const MiniToggle = ({ value, onChange }) => (
@@ -480,6 +535,7 @@ export default function JerkyMunch() {
 .jm-navbtn{display:block;width:100%;text-align:left;padding:11px 14px;border-radius:2px;border:none;background:transparent;color:#B6A78C;font-family:'Inter',sans-serif;font-size:14px;font-weight:500;cursor:pointer;white-space:nowrap;transition:background .15s}
 .jm-navbtn:hover{background:rgba(255,255,255,.08);color:${CREAM}}
 .jm-main{flex:1;min-width:0;max-width:1180px;padding:24px 30px 60px}
+.jm-click{transition:box-shadow .12s}.jm-click:hover{box-shadow:inset 0 0 0 1.5px ${SPICE}}
 @media(max-width:860px){.jm-shell{flex-direction:column}.jm-side{width:auto;height:auto;position:static;flex-direction:column;padding:14px 12px}.jm-nav{flex-direction:row;overflow-x:auto;gap:6px;padding-bottom:4px}.jm-navbtn{width:auto;padding:8px 15px;border-radius:2px;background:rgba(255,255,255,.07)}.jm-main{padding:18px 16px 52px;max-width:100%}}`}</style>
       </Head>
 
@@ -536,7 +592,7 @@ export default function JerkyMunch() {
               <h1 style={{ ...big, fontSize: '28px', color: INK, letterSpacing: '0.3px', lineHeight: 1.1 }}>{currentLabel}</h1>
             </div>
             <div style={{ textAlign: 'right' }}>
-              <div style={{ ...big, fontSize: '24px', color: SPICE }}>{m0(revenue)}</div>
+              <div style={{ ...big, fontSize: '24px', color: SPICE }}>{m0(totalRevenue)}</div>
               <div style={{ ...lbl, color: '#9A8868' }}>REVENUE THIS MONTH</div>
             </div>
           </div>
@@ -550,18 +606,53 @@ export default function JerkyMunch() {
                 ))}
               </div>
 
+              {/* Hero — total revenue + plain-English profit narrative */}
+              <div style={{ ...card, marginBottom: '16px' }}>
+                <div style={{ ...lbl }}>Total revenue · this {period === 'week' ? 'week' : 'month'}</div>
+                <div style={{ ...big, fontSize: 'clamp(38px,6vw,54px)', color: INK, lineHeight: 1, margin: '4px 0 8px' }}>{m0(totalRevenue)}</div>
+                <div style={{ fontFamily: "'Inter', sans-serif", fontSize: '15px', color: MUTED, maxWidth: '640px', lineHeight: 1.5 }}>
+                  {pnlNet >= 0
+                    ? <>Strong {period === 'week' ? 'week' : 'month'} — you're keeping <b style={{ color: GREEN }}>{m0(pnlNet)}</b> of every <b style={{ color: INK }}>{m0(totalRevenue)}</b> across bags, boards &amp; camp orders, at a <b style={{ color: INK }}>{pnlPct(pnlGross)}%</b> gross margin.</>
+                    : <><b style={{ color: INK }}>{m0(totalRevenue)}</b> in revenue, but costs ran ahead — net <b style={{ color: RED }}>{m0(pnlNet)}</b> this {period === 'week' ? 'week' : 'month'}.</>}
+                </div>
+              </div>
+
+              {/* Revenue by product line — bags + boards + camp packages */}
+              <div className="jm-click" onClick={() => setTab('pnl')} style={{ ...card, marginBottom: '16px', cursor: 'pointer', position: 'relative' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', flexWrap: 'wrap', gap: '8px', marginBottom: '12px' }}>
+                  <div style={{ ...lbl }}>Revenue by product line · this month</div>
+                  <div style={{ fontSize: '13px', color: MUTED }}><b style={{ ...big, fontSize: '18px', color: INK }}>{m0(totalRevenue)}</b> total</div>
+                </div>
+                <div style={{ display: 'flex', height: '18px', borderRadius: '2px', overflow: 'hidden', marginBottom: '12px', background: CREAM }}>
+                  {productMix.map(p => (
+                    <div key={p.line} title={`${p.line} · ${m0(p.rev)}`} style={{ width: `${totalRevenue ? Math.round(p.rev / totalRevenue * 100) : 0}%`, background: p.color }} />
+                  ))}
+                </div>
+                <div style={{ display: 'flex', gap: '22px', flexWrap: 'wrap' }}>
+                  {productMix.map(p => (
+                    <div key={p.line} style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                      <span style={{ width: '11px', height: '11px', background: p.color, borderRadius: '2px', flexShrink: 0 }} />
+                      <span style={{ fontSize: '13px' }}>
+                        <b style={{ color: INK }}>{p.line}</b> <span style={{ color: INK, fontWeight: 600 }}>{m0(p.rev)}</span>
+                        <span style={{ color: MUTED }}> · {p.units} {p.unit} · {totalRevenue ? Math.round(p.rev / totalRevenue * 100) : 0}%</span>
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
               <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap', marginBottom: '16px' }}>
-                <KPI k={`Bags sold this ${period}`} v={bagsPeriod} sub="across all flavors" accent={INK} />
-                <KPI k="Revenue / mo" v={m0(revenue)} sub={`${bagsPeriod} bags this ${period}`} accent={SPICE} />
-                <KPI k="Out on consignment" v={m0(onShelfVal)} sub={`${bagsOut} bags sitting in stores`} accent={KRAFT} />
-                <KPI k="Missing pieces" v={`${missUnits}`} sub={`${m0(missVal)} to investigate`} accent={missUnits ? RED : GREEN} />
+                <KPI k={`Bags sold this ${period}`} v={bagsPeriod} sub="across all flavors" accent={INK} onClick={() => setTab('pnl')} />
+                <KPI k="Revenue / mo" v={m0(totalRevenue)} sub={`${bagsPeriod} bags · ${boardsUnitsM + campUnitsM} boards & camp`} accent={SPICE} onClick={() => setTab('pnl')} />
+                <KPI k="Out on consignment" v={m0(onShelfVal)} sub={`${bagsOut} bags sitting in stores`} accent={KRAFT} onClick={() => setTab('consign')} />
+                <KPI k="Missing pieces" v={`${missUnits}`} sub={`${m0(missVal)} to investigate`} accent={missUnits ? RED : GREEN} onClick={() => setTab('consign')} />
               </div>
 
               <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap', marginBottom: '16px' }}>
                 <div style={{ ...card, flex: 1, minWidth: '290px' }}>
                   <div style={{ ...lbl, marginBottom: '14px' }}>Top consignment stores · this {period}</div>
                   {(() => { const pv = s => period === 'week' ? s.weekRev : s.monthRev; const pb = s => period === 'week' ? s.week : s.month; const sorted = STORE_PERF.slice().sort((a, b) => pv(b) - pv(a)); const max = pv(sorted[0]) || 1; return sorted.slice(0, 6).map((c, i) => (
-                    <div key={c.store} style={{ padding: '9px 0', borderTop: i ? `1px solid ${CREAM}` : 'none' }}>
+                    <div key={c.store} className="jm-click" onClick={() => setTab('consign')} style={{ padding: '9px 8px', borderTop: i ? `1px solid ${CREAM}` : 'none', cursor: 'pointer', borderRadius: '2px' }}>
                       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', gap: '8px', marginBottom: '6px' }}>
                         <span style={{ fontWeight: 600, color: INK, fontSize: '14px' }}>{c.store}</span>
                         <span style={{ ...big, fontSize: '15px', color: INK }}>{m0(pv(c))}</span>
@@ -578,7 +669,7 @@ export default function JerkyMunch() {
                 <div style={{ ...card, flex: 1, minWidth: '290px' }}>
                   <div style={{ ...lbl, marginBottom: '14px' }}>Top direct sales · this {period}</div>
                   {(() => { const pv = s => period === 'week' ? s.weekRev : s.monthRev; const pb = s => period === 'week' ? s.week : s.month; const sorted = DIRECT_PERF.slice().sort((a, b) => pv(b) - pv(a)); const max = pv(sorted[0]) || 1; return sorted.map((d, i) => (
-                    <div key={d.who} style={{ padding: '9px 0', borderTop: i ? `1px solid ${CREAM}` : 'none' }}>
+                    <div key={d.who} className="jm-click" onClick={() => setTab('direct')} style={{ padding: '9px 8px', borderTop: i ? `1px solid ${CREAM}` : 'none', cursor: 'pointer', borderRadius: '2px' }}>
                       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', gap: '8px', marginBottom: '6px' }}>
                         <span style={{ fontWeight: 600, color: INK, fontSize: '14px' }}>{d.who}</span>
                         <span style={{ ...big, fontSize: '15px', color: GREEN }}>{m0(pv(d))}</span>
@@ -596,16 +687,20 @@ export default function JerkyMunch() {
 
               <div style={{ ...card }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', flexWrap: 'wrap', gap: '8px', marginBottom: '16px' }}>
-                  <div style={{ ...lbl }}>Sold this {period}, by flavor</div>
-                  <div style={{ fontSize: '13px', color: MUTED }}><b style={{ ...big, fontSize: '18px', color: INK }}>{bagsPeriod}</b> bags total</div>
+                  <div style={{ ...lbl }}>Sold this {period}, by product</div>
+                  <div style={{ fontSize: '13px', color: MUTED }}><b style={{ ...big, fontSize: '18px', color: INK }}>{bagsPeriod}</b> bags · <b style={{ color: INK }}>{boardsUnitsP + campUnitsP}</b> boards &amp; camp</div>
                 </div>
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(148px, 1fr))', gap: '12px' }}>
-                  {PRODUCTS.slice().sort((a, b) => b[period] - a[period]).map(p => (
+                  {[
+                    ...PRODUCTS.map(p => ({ ...p, unit: 'bags' })),
+                    ...(boardsProducts.length ? [{ name: 'Jerky Boards', color: '#8A2E14', week: boardsProducts.reduce((s, p) => s + (p.week || 0), 0), month: boardsUnitsM, unit: 'boards' }] : []),
+                    ...(campProducts.length ? [{ name: 'Camp Packages', color: '#8A5A2B', week: campProducts.reduce((s, p) => s + (p.week || 0), 0), month: campUnitsM, unit: 'orders' }] : []),
+                  ].sort((a, b) => b[period] - a[period]).map(p => (
                     <div key={p.name} style={{ border: `1px solid ${BORDER}`, borderRadius: '2px', padding: '16px 12px 14px', textAlign: 'center', background: CREAM }}>
                       <Bag color={p.color} />
                       <div style={{ fontWeight: 600, color: INK, marginTop: '8px', fontSize: '14px' }}>{p.name}</div>
                       <div style={{ ...big, fontSize: '26px', color: INK, marginTop: '4px' }}>{p[period]}</div>
-                      <div style={{ fontSize: '11px', color: MUTED }}>bags this {period}</div>
+                      <div style={{ fontSize: '11px', color: MUTED }}>{p.unit} this {period}</div>
                     </div>
                   ))}
                 </div>
@@ -626,9 +721,9 @@ export default function JerkyMunch() {
           {tab === 'pnl' && pnlView === 'single' && (
             <>
               <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap', marginBottom: '16px' }}>
-                <KPI k="Revenue" v={m0(revenue)} sub="direct + consignment" accent={GREEN} />
-                <KPI k="Gross profit" v={m0(grossProfit)} sub={`${pct(grossProfit)}% margin`} accent={KRAFT} />
-                <KPI k={netProfit >= 0 ? 'Net profit' : 'Net loss'} v={m0(netProfit)} sub={netProfit >= 0 ? 'in the black' : 'in the red'} accent={netProfit >= 0 ? GREEN : RED} />
+                <KPI k="Revenue" v={m0(totalRevenue)} sub="bags + boards + camp" accent={GREEN} />
+                <KPI k="Gross profit" v={m0(pnlGross)} sub={`${pnlPct(pnlGross)}% margin`} accent={KRAFT} />
+                <KPI k={pnlNet >= 0 ? 'Net profit' : 'Net loss'} v={m0(pnlNet)} sub={pnlNet >= 0 ? 'in the black' : 'in the red'} accent={pnlNet >= 0 ? GREEN : RED} />
               </div>
 
               <div style={{ ...card }}>
@@ -636,21 +731,30 @@ export default function JerkyMunch() {
                 <div style={{ ...lbl, color: KRAFT, margin: '4px 0' }}>Revenue</div>
                 <Row l="Direct sales" v={m0(directRev)} />
                 <Row l="Consignment (collected)" v={m0(cashCollected)} />
-                <Row l="Total revenue" v={m0(revenue)} bold top />
+                <Row l="Boards & camp packages" v={m0(bcRevM)} />
+                <Row l="Total revenue" v={m0(totalRevenue)} bold top />
                 <div style={{ ...lbl, color: KRAFT, margin: '16px 0 6px' }}>Cost of goods sold</div>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '2px 0 8px', flexWrap: 'wrap' }}>
                   <span style={{ fontSize: '13px', color: MUTED }}>Cost to make one bag:</span>
                   <span style={{ display: 'inline-flex', alignItems: 'center', gap: '3px', color: MUTED }}>$<input value={costPerBag} onChange={e => changeCostPerBag(e.target.value)} type="number" step="0.25" style={{ ...inp, width: '74px', padding: '6px 9px' }} /></span>
                   <span style={{ fontSize: '12px', color: '#A2937A' }}>← estimate, set the real number</span>
                 </div>
-                <Row l={`Cost of goods sold (${soldBags} bags × ${money(costPerBag)})`} v={`−${m0(cogs)}`} />
-                <Row l={`Gross profit  ·  ${pct(grossProfit)}% margin`} v={m0(grossProfit)} bold top />
+                <Row l={`Bag cost of goods (${soldBags} bags × ${money(costPerBag)})`} v={`−${m0(cogs)}`} />
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '8px 0', flexWrap: 'wrap' }}>
+                  <span style={{ fontSize: '13px', color: MUTED }}>Cost per board:</span>
+                  <span style={{ display: 'inline-flex', alignItems: 'center', gap: '3px', color: MUTED }}>$<input value={boardCost} onChange={e => changeBoardCost(e.target.value)} type="number" step="1" style={{ ...inp, width: '70px', padding: '6px 9px' }} /></span>
+                  <span style={{ fontSize: '13px', color: MUTED, marginLeft: '4px' }}>camp pkg:</span>
+                  <span style={{ display: 'inline-flex', alignItems: 'center', gap: '3px', color: MUTED }}>$<input value={campCost} onChange={e => changeCampCost(e.target.value)} type="number" step="1" style={{ ...inp, width: '70px', padding: '6px 9px' }} /></span>
+                  <span style={{ fontSize: '12px', color: '#A2937A' }}>← set the real numbers</span>
+                </div>
+                <Row l={`Boards & camp cost (${boardsUnitsM} × ${money(boardCost)} + ${campUnitsM} × ${money(campCost)})`} v={`−${m0(bcCogsM)}`} />
+                <Row l={`Gross profit  ·  ${pnlPct(pnlGross)}% margin`} v={m0(pnlGross)} bold top />
                 <div style={{ ...lbl, color: KRAFT, margin: '16px 0 4px' }}>Operating expenses</div>
                 <Row l="Advertising" v={`−${m0(adSpend)}`} />
                 {[...new Set(expenses.filter(e => !COGS_CATS.includes(e.cat)).map(e => e.cat))].map(cat => { const v = expenses.filter(e => e.cat === cat).reduce((s, e) => s + e.amt, 0); return <Row key={cat} l={cat} v={`−${m0(v)}`} /> })}
                 <Row l="Total operating expenses" v={`−${m0(totalOpex)}`} bold top />
-                <div style={{ marginTop: '12px', padding: '12px 14px', background: netProfit >= 0 ? '#EAF3EC' : '#FBEDE9', borderRadius: '2px' }}>
-                  <Row l={`${netProfit >= 0 ? 'Net profit' : 'Net loss'}  ·  ${pct(netProfit)}% margin`} v={m0(netProfit)} bold neg={netProfit < 0} />
+                <div style={{ marginTop: '12px', padding: '12px 14px', background: pnlNet >= 0 ? '#EAF3EC' : '#FBEDE9', borderRadius: '2px' }}>
+                  <Row l={`${pnlNet >= 0 ? 'Net profit' : 'Net loss'}  ·  ${pnlPct(pnlNet)}% margin`} v={m0(pnlNet)} bold neg={pnlNet < 0} />
                 </div>
               </div>
             </>
