@@ -43,6 +43,40 @@ const sumPaid = (o) => (o.payments || []).reduce((s, p) => s + (parseFloat(p.amo
 const calcTax = (items, rate) => (items || []).filter(it => it.taxable !== false).reduce((s, it) => s + lineAmt(it), 0) * ((parseFloat(rate) || 0) / 100)
 const orderTotal = (o) => sumItems(o.items) + calcTax(o.items, o.taxRate)
 
+// Branded HTML receipt emailed to the customer.
+const buildReceiptHtml = (o) => {
+  const sub = sumItems(o.items), tax = calcTax(o.items, o.taxRate), tot = sub + tax, paid = sumPaid(o), bal = tot - paid
+  const cust = `${o.firstName || ''} ${o.lastName || ''}`.trim()
+  const itemRows = (o.items || []).filter(it => it.desc?.trim() || lineAmt(it) || it.itemNo).map(it => `
+    <tr>
+      <td style="padding:8px 10px;border-bottom:1px solid #eee;font-size:14px;">${(parseFloat(it.qty) || 1) > 1 ? it.qty + '× ' : ''}${it.desc?.trim() || it.itemNo || ''}</td>
+      <td style="padding:8px 10px;border-bottom:1px solid #eee;font-size:14px;text-align:right;">${lineAmt(it) ? money(lineAmt(it)) : ''}</td>
+    </tr>`).join('')
+  const payRows = (o.payments || []).map(p => `<div style="font-size:13px;color:#2E7D46;">✓ ${money(p.amount)}${p.method ? ' · ' + p.method : ''}${p.method === 'Check' && p.checkNo ? ' #' + p.checkNo : ''}${p.date ? ' · ' + fmtDate(p.date) : ''}</div>`).join('')
+  return `
+  <div style="font-family:Arial,Helvetica,sans-serif;max-width:560px;margin:0 auto;color:#23262E;">
+    <div style="text-align:center;border-bottom:2px solid #2A4C9C;padding-bottom:12px;margin-bottom:16px;">
+      <div style="font-size:26px;font-weight:800;letter-spacing:2px;color:#2A4C9C;">${BIZ}</div>
+      <div style="font-size:12px;color:#777;margin-top:4px;">${BIZ_ADDR} · ${BIZ_TEL}</div>
+    </div>
+    <div style="display:flex;justify-content:space-between;font-size:14px;margin-bottom:14px;">
+      <div><b>Receipt</b><br>${cust}</div>
+      <div style="text-align:right;color:#555;">No. ${o.orderNo || ''}<br>${fmtDate(o.date)}</div>
+    </div>
+    <table style="width:100%;border-collapse:collapse;margin-bottom:12px;">${itemRows}</table>
+    <div style="border-top:1px solid #ddd;padding-top:10px;font-size:14px;">
+      <div style="display:flex;justify-content:space-between;"><span>Subtotal</span><span>${money(sub)}</span></div>
+      ${tax > 0 ? `<div style="display:flex;justify-content:space-between;color:#777;"><span>Tax (${o.taxRate || 0}%)</span><span>${money(tax)}</span></div>` : ''}
+      <div style="display:flex;justify-content:space-between;font-weight:800;font-size:17px;margin-top:6px;"><span>Total</span><span>${money(tot)}</span></div>
+    </div>
+    ${payRows ? `<div style="margin-top:12px;">${payRows}</div>` : ''}
+    <div style="margin-top:10px;font-size:15px;font-weight:700;color:${bal > 0.005 ? '#9C6B12' : '#2E7D46'};">
+      ${bal > 0.005 ? 'Balance due: ' + money(bal) : 'Paid in full ✓'}
+    </div>
+    <div style="margin-top:22px;font-size:13px;color:#888;text-align:center;">Thank you! — ${BIZ}</div>
+  </div>`
+}
+
 // ── Input cleanup: tidy up how people type names, addresses, and phones ──
 const titleCase = (s) => (s || '').trim().replace(/\s+/g, ' ').toLowerCase()
   .replace(/(^|[\s\-/.])([a-z])/g, (_, sep, ch) => sep + ch.toUpperCase())
@@ -137,6 +171,8 @@ export default function Gowns() {
   const [newItem, setNewItem] = useState(null)
   const [newCatalogItem, setNewCatalogItem] = useState({ no: '', desc: '', taxable: true, alteration: false })
   const [showSales, setShowSales] = useState(false)
+  const [emailing, setEmailing] = useState(false)
+  const [justSaved, setJustSaved] = useState(false)
   const [todoInput, setTodoInput] = useState({})
   const [formTodo, setFormTodo] = useState({ text: '', assignee: '', date: '' })
   const [todoView, setTodoView] = useState('person')
@@ -284,22 +320,22 @@ export default function Gowns() {
   const removeAlteration = (id) => setForm(f => { const list = (f.alterationsList || []).filter(a => a.id !== id); return { ...f, alterationsList: list, alterations: list.length > 0 } })
   const removePayment = (id) => setForm(f => ({ ...f, payments: f.payments.filter(p => p.id !== id) }))
 
-  const save = async () => {
+  const save = async (stay = false) => {
     // Required: first name, last name, cell, and full address. Home phone + email optional.
-    if (!form.firstName.trim()) { alert('Please enter a first name.'); return }
-    if (!form.lastName.trim()) { alert('Please enter a last name.'); return }
-    if (!form.phone.trim()) { alert('Please enter a cell number.'); return }
-    if (!form.address.trim()) { alert('Please enter an address.'); return }
-    if (!form.city.trim()) { alert('Please enter a city.'); return }
-    if (!form.state.trim()) { alert('Please enter a state.'); return }
-    if (!form.zip.trim()) { alert('Please enter a zip code.'); return }
+    if (!form.firstName.trim()) { alert('Please enter a first name.'); return null }
+    if (!form.lastName.trim()) { alert('Please enter a last name.'); return null }
+    if (!form.phone.trim()) { alert('Please enter a cell number.'); return null }
+    if (!form.address.trim()) { alert('Please enter an address.'); return null }
+    if (!form.city.trim()) { alert('Please enter a city.'); return null }
+    if (!form.state.trim()) { alert('Please enter a state.'); return null }
+    if (!form.zip.trim()) { alert('Please enter a zip code.'); return null }
     const typedNo = String(form.orderNo ?? '').trim()
     const orderNo = typedNo
       ? parseInt(typedNo, 10)
       : (orders.reduce((m, o) => Math.max(m, o.orderNo || 0), 1000) + 1)
     // Warn (but don't block) if this invoice number is already used by another order
     if (typedNo && orders.some(o => o.id !== form.id && o.orderNo === orderNo)) {
-      if (!window.confirm(`Invoice No. ${orderNo} is already used by another order. Save anyway?`)) return
+      if (!window.confirm(`Invoice No. ${orderNo} is already used by another order. Save anyway?`)) return null
     }
     let items = form.items.filter(it => it.desc.trim() || it.price)
     if (!items.length) items = [blankRow()]
@@ -313,10 +349,39 @@ export default function Gowns() {
       state: cleanState(form.state), zip: cleanZip(form.zip),
     }
     const { data, error } = await supabase.from('gown_orders').upsert(toDB(clean, user.id)).select().single()
-    if (error) { alert('Error saving: ' + error.message); return }
+    if (error) { alert('Error saving: ' + error.message); return null }
     const saved = fromDB(data)
     setOrders(prev => prev.some(o => o.id === clean.id) ? prev.map(o => o.id === clean.id ? saved : o) : [saved, ...prev])
-    setView('list'); window.scrollTo(0, 0)
+    if (stay) {
+      // Keep her on the form; reflect the assigned order # and switch to edit mode.
+      setForm(f => ({ ...f, id: saved.id, orderNo: saved.orderNo }))
+      setEditing(true)
+      setJustSaved(true); setTimeout(() => setJustSaved(false), 1800)
+    } else {
+      setView('list'); window.scrollTo(0, 0)
+    }
+    return saved
+  }
+  const emailReceipt = async () => {
+    if (!form.email?.trim()) { alert("Add the customer's email to the order first (the Email field), then try again."); return }
+    const saved = await save(true)   // persist + get assigned order #
+    if (!saved) return
+    setEmailing(true)
+    try {
+      const { data: { session } } = await supabase.auth.getSession()
+      const res = await fetch('/api/send-receipt', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${session?.access_token || ''}` },
+        body: JSON.stringify({ to: saved.email, subject: `Your receipt — ${BIZ} · No. ${saved.orderNo}`, html: buildReceiptHtml(saved) }),
+      })
+      const j = await res.json().catch(() => ({}))
+      if (!res.ok) { alert('Could not send receipt: ' + (j.error || res.status)); return }
+      alert('Receipt emailed to ' + saved.email + ' ✓')
+    } catch (e) {
+      alert('Could not send receipt: ' + e.message)
+    } finally {
+      setEmailing(false)
+    }
   }
   const del = async (id) => {
     if (window.confirm('Delete this order?')) {
@@ -1364,8 +1429,11 @@ export default function Gowns() {
               )}
             </div>
 
-            <button className="gw-press" onClick={save} style={{ ...primaryBtn, width: '100%' }}>{editing ? 'Save changes' : 'Save order'}</button>
-            <button onClick={() => { setView('list'); window.scrollTo(0, 0) }} style={{ ...ghostBtn, marginTop: '10px', border: 'none', color: MUTED }}>Cancel</button>
+            <div style={{ display: 'flex', gap: '10px' }}>
+              <button className="gw-press" onClick={() => save(true)} style={{ ...primaryBtn, flex: 1 }}>{justSaved ? 'Saved ✓' : 'Save'}</button>
+              <button className="gw-press" onClick={emailReceipt} disabled={emailing} style={{ ...primaryBtn, flex: 1, background: emailing ? '#B9A9C6' : '#6D4C8E' }}>{emailing ? 'Sending…' : '✉ Email receipt'}</button>
+            </div>
+            <button onClick={() => { setView('list'); window.scrollTo(0, 0) }} style={{ ...ghostBtn, marginTop: '10px', border: 'none', color: MUTED }}>← Back to all orders</button>
           </div>
         )}
       </div>
