@@ -106,6 +106,8 @@ export default function JerkyMunch() {
   const [df, setDf] = useState({ who: '', source: 'Shopify / online', units: '', rev: '' })
   const [pnlMonths, setPnlMonths] = useState(2)
   const [pnlView, setPnlView] = useState('single')
+  const [rangeStart, setRangeStart] = useState(0)
+  const [rangeEnd, setRangeEnd] = useState(99)
   const [period, setPeriod] = useState('month')
   const [costPerBag, setCostPerBag] = useState(4.5)
   const [boardsProducts, setBoardsProducts] = useState([])
@@ -450,6 +452,16 @@ export default function JerkyMunch() {
   const rangeNet = lines.reduce((s, l) => s + l.net, 0)
   const rangeRev = lines.reduce((s, l) => s + l.rev, 0)
 
+  // date-range aggregation — P&L summed across a chosen month span (e.g. Jan–Mar)
+  const rngA = Math.min(rangeStart, monthsAll.length - 1)
+  const rngB = Math.min(Math.max(rangeEnd, rngA), monthsAll.length - 1)
+  const rngLines = monthsAll.slice(rngA, rngB + 1).map(mLine)
+  const rngAgg = {}
+  PNL_ROWS.forEach(r => { rngAgg[r.key] = rngLines.reduce((s, l) => s + (l[r.key] || 0), 0) })
+  const rngLabel = monthsAll.length ? `${monthsAll[rngA].m}–${monthsAll[rngB].m}` : ''
+  const rngPct = (n) => rngAgg.rev ? Math.round(n / rngAgg.rev * 100) : 0
+  const rngMonthCount = rngB - rngA + 1
+
   const card = { background: CARDBG, border: `1px solid ${BORDER}`, borderRadius: '2px', padding: '20px' }
   const lbl = { fontFamily: "'Inter', sans-serif", fontSize: '11px', fontWeight: 600, letterSpacing: '0.7px', textTransform: 'uppercase', color: '#96866C' }
   const inp = { padding: '10px 12px', fontSize: '14px', border: `1px solid ${BORDER}`, borderRadius: '2px', background: CREAM, color: INK, outline: 'none', fontFamily: 'inherit' }
@@ -736,7 +748,7 @@ export default function JerkyMunch() {
           {/* ===== P&L ===== */}
           {tab === 'pnl' && (
             <div style={{ display: 'flex', gap: '6px', marginBottom: '16px', flexWrap: 'wrap' }}>
-              {[['single', 'This month'], ['compare', 'Compare months']].map(([v, l]) => (
+              {[['single', 'This month'], ['range', 'Date range'], ['compare', 'Compare months']].map(([v, l]) => (
                 <button key={v} onClick={() => setPnlView(v)} style={{ padding: '8px 16px', borderRadius: '2px', border: `1px solid ${pnlView === v ? CHAR : BORDER}`, background: pnlView === v ? CHAR : CARDBG, color: pnlView === v ? CREAM : MUTED, ...btn }}>{l}</button>
               ))}
             </div>
@@ -837,6 +849,38 @@ export default function JerkyMunch() {
                 <>Revenue {tRevDelta >= 0 ? 'climbed' : 'fell'} <b>{sgn(Math.abs(tRevDelta))}</b>{tBest && tBest.delta > 0 ? <> (mostly <b>{tBest.label}</b>, {sgn(tBest.delta)})</> : null}. But <b>{tWorst.label}</b> moved <b>{sgn(tWorst.delta)}</b> against you. {tNetDelta >= 0
                   ? <>Net came out <b>{sgn(tNetDelta)} better</b> — keep pulling the levers that turned green.</>
                   : <>Net came out <b>{sgn(Math.abs(tNetDelta))} worse</b> — that red line is exactly what ate your gains, and exactly what to fix.</>}</>
+              </div>
+            </>
+          )}
+
+          {tab === 'pnl' && pnlView === 'range' && (
+            <>
+              <div style={{ display: 'flex', gap: '10px', marginBottom: '16px', flexWrap: 'wrap', alignItems: 'center' }}>
+                <span style={{ ...lbl }}>From</span>
+                <select value={rngA} onChange={e => { const v = Number(e.target.value); setRangeStart(v); if (v > rngB) setRangeEnd(v) }} style={{ ...inp, padding: '8px 12px', cursor: 'pointer' }}>
+                  {monthsAll.map((m, i) => <option key={i} value={i}>{m.m}</option>)}
+                </select>
+                <span style={{ ...lbl }}>to</span>
+                <select value={rngB} onChange={e => { const v = Number(e.target.value); setRangeEnd(v); if (v < rngA) setRangeStart(v) }} style={{ ...inp, padding: '8px 12px', cursor: 'pointer' }}>
+                  {monthsAll.map((m, i) => <option key={i} value={i}>{m.m}</option>)}
+                </select>
+                <span style={{ fontSize: '13px', color: MUTED }}>{rngMonthCount} month{rngMonthCount > 1 ? 's' : ''} combined</span>
+              </div>
+
+              <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap', marginBottom: '16px' }}>
+                <KPI k={`Revenue · ${rngLabel}`} v={m0(rngAgg.rev)} sub={`${rngMonthCount} months combined`} accent={GREEN} />
+                <KPI k="Gross profit" v={m0(rngAgg.gross)} sub={`${rngPct(rngAgg.gross)}% margin`} accent={KRAFT} />
+                <KPI k={rngAgg.net >= 0 ? 'Net profit' : 'Net loss'} v={m0(rngAgg.net)} sub={rngAgg.net >= 0 ? 'in the black' : 'in the red'} accent={rngAgg.net >= 0 ? GREEN : RED} />
+              </div>
+
+              <div style={{ ...card }}>
+                <div style={{ ...lbl, marginBottom: '14px' }}>Profit &amp; loss — {rngLabel} (combined)</div>
+                {PNL_ROWS.map(row => {
+                  const strong = row.kind === 'subtotal' || row.kind === 'total', isNet = row.kind === 'total'
+                  const v = row.cost ? -rngAgg[row.key] : rngAgg[row.key]
+                  return <Row key={row.key} l={row.label} v={sgn(v)} bold={strong} top={strong} neg={isNet ? rngAgg.net < 0 : false} />
+                })}
+                <p style={{ fontSize: '12px', color: MUTED, marginTop: '12px' }}>Every month from {rngLabel} added together. Costs shown negative.</p>
               </div>
             </>
           )}
