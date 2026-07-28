@@ -56,25 +56,6 @@ const PNL_ROWS = [
 ]
 
 // per-period sales for the front-page leaderboards (week vs month)
-// display-only, not yet backed by a sales table
-const STORE_PERF = [
-  { store: 'Gourmet Glatt North', week: 13, weekRev: 110, month: 50, monthRev: 425 },
-  { store: 'Gourmet Glatt South', week: 10, weekRev: 85, month: 40, monthRev: 340 },
-  { store: 'Seasons', week: 11, weekRev: 99, month: 40, monthRev: 360 },
-  { store: 'Aisle 9 Lakewood', week: 10, weekRev: 85, month: 40, monthRev: 340 },
-  { store: 'Evergreen', week: 9, weekRev: 81, month: 30, monthRev: 270 },
-  { store: 'Aisle 9 Jackson', week: 8, weekRev: 68, month: 30, monthRev: 255 },
-  { store: 'Nutmeg', week: 7, weekRev: 56, month: 25, monthRev: 200 },
-  { store: 'Foodex', week: 6, weekRev: 48, month: 20, monthRev: 160 },
-  { store: 'Superstop', week: 7, weekRev: 56, month: 18, monthRev: 144 },
-]
-// display-only, not yet backed by a sales table
-const DIRECT_PERF = [
-  { who: 'Online store (Shopify)', source: 'Shopify / online', week: 31, weekRev: 403, month: 120, monthRev: 1560 },
-  { who: 'Gym pop-up weekend', source: 'Pop-up event', week: 30, weekRev: 390, month: 30, monthRev: 390 },
-  { who: 'Farmers Market — Toms River', source: 'Farmers market', week: 20, weekRev: 260, month: 45, monthRev: 585 },
-  { who: 'Acme Corp — office bulk', source: 'Wholesale / bulk', week: 0, weekRev: 0, month: 60, monthRev: 540 },
-]
 const Bag = ({ color }) => (
   <svg width="58" height="58" viewBox="0 0 64 64" style={{ display: 'block', margin: '0 auto' }}>
     <rect x="13" y="8" width="38" height="9" rx="2" fill={color} opacity="0.5" />
@@ -686,35 +667,43 @@ export default function JerkyMunch() {
 
               <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap', marginBottom: '16px' }}>
                 <div style={{ ...card, flex: 1, minWidth: '290px' }}>
-                  <div style={{ ...lbl, marginBottom: '14px' }}>Top consignment stores · this {period}</div>
-                  {(() => { const pv = s => period === 'week' ? s.weekRev : s.monthRev; const pb = s => period === 'week' ? s.week : s.month; const sorted = STORE_PERF.slice().sort((a, b) => pv(b) - pv(a)); const max = pv(sorted[0]) || 1; return sorted.slice(0, 6).map((c, i) => (
+                  <div style={{ ...lbl, marginBottom: '14px' }}>Top consignment stores · collected</div>
+                  {(() => {
+                    const rows = consign.map(c => ({ store: c.store, rev: c.paid || 0, units: c.price ? Math.round((c.paid || 0) / c.price) : 0 })).filter(s => s.rev > 0).sort((a, b) => b.rev - a.rev)
+                    if (!rows.length) return <div style={{ fontSize: '13px', color: MUTED, padding: '8px 0' }}>No consignment payments recorded yet.</div>
+                    const max = rows[0].rev || 1
+                    return rows.slice(0, 6).map((c, i) => (
                     <div key={c.store} className="jm-click" onClick={() => setTab('consign')} style={{ padding: '9px 8px', borderTop: i ? `1px solid ${CREAM}` : 'none', cursor: 'pointer', borderRadius: '2px' }}>
                       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', gap: '8px', marginBottom: '6px' }}>
                         <span style={{ fontWeight: 600, color: INK, fontSize: '14px' }}>{c.store}</span>
-                        <span style={{ ...big, fontSize: '15px', color: INK }}>{m0(pv(c))}</span>
+                        <span style={{ ...big, fontSize: '15px', color: INK }}>{m0(c.rev)}</span>
                       </div>
                       <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                         <div style={{ flex: 1, height: '6px', background: CREAM, borderRadius: '2px', overflow: 'hidden' }}>
-                          <div style={{ width: `${Math.round(pv(c) / max * 100)}%`, height: '100%', background: KRAFT }} />
+                          <div style={{ width: `${Math.round(c.rev / max * 100)}%`, height: '100%', background: KRAFT }} />
                         </div>
-                        <span style={{ fontSize: '11px', color: MUTED, whiteSpace: 'nowrap' }}>{pb(c)} bags sold</span>
+                        <span style={{ fontSize: '11px', color: MUTED, whiteSpace: 'nowrap' }}>{c.units} bags paid</span>
                       </div>
                     </div>
                   )) })()}
                 </div>
                 <div style={{ ...card, flex: 1, minWidth: '290px' }}>
-                  <div style={{ ...lbl, marginBottom: '14px' }}>Top direct sales · this {period}</div>
-                  {(() => { const pv = s => period === 'week' ? s.weekRev : s.monthRev; const pb = s => period === 'week' ? s.week : s.month; const sorted = DIRECT_PERF.slice().sort((a, b) => pv(b) - pv(a)); const max = pv(sorted[0]) || 1; return sorted.map((d, i) => (
-                    <div key={d.who} className="jm-click" onClick={() => setTab('direct')} style={{ padding: '9px 8px', borderTop: i ? `1px solid ${CREAM}` : 'none', cursor: 'pointer', borderRadius: '2px' }}>
+                  <div style={{ ...lbl, marginBottom: '14px' }}>Top direct sales</div>
+                  {(() => {
+                    const rows = direct.map(d => ({ who: d.who, source: d.source, rev: d.rev || 0, units: d.units || 0 })).filter(d => d.rev > 0).sort((a, b) => b.rev - a.rev)
+                    if (!rows.length) return <div style={{ fontSize: '13px', color: MUTED, padding: '8px 0' }}>No direct sales recorded yet.</div>
+                    const max = rows[0].rev || 1
+                    return rows.map((d, i) => (
+                    <div key={d.who + i} className="jm-click" onClick={() => setTab('direct')} style={{ padding: '9px 8px', borderTop: i ? `1px solid ${CREAM}` : 'none', cursor: 'pointer', borderRadius: '2px' }}>
                       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', gap: '8px', marginBottom: '6px' }}>
                         <span style={{ fontWeight: 600, color: INK, fontSize: '14px' }}>{d.who}</span>
-                        <span style={{ ...big, fontSize: '15px', color: GREEN }}>{m0(pv(d))}</span>
+                        <span style={{ ...big, fontSize: '15px', color: GREEN }}>{m0(d.rev)}</span>
                       </div>
                       <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                         <div style={{ flex: 1, height: '6px', background: CREAM, borderRadius: '2px', overflow: 'hidden' }}>
-                          <div style={{ width: `${Math.round(pv(d) / max * 100)}%`, height: '100%', background: GREEN }} />
+                          <div style={{ width: `${Math.round(d.rev / max * 100)}%`, height: '100%', background: GREEN }} />
                         </div>
-                        <span style={{ fontSize: '11px', color: MUTED, whiteSpace: 'nowrap' }}>{pb(d)} bags · {d.source}</span>
+                        <span style={{ fontSize: '11px', color: MUTED, whiteSpace: 'nowrap' }}>{d.units} bags · {d.source}</span>
                       </div>
                     </div>
                   )) })()}
