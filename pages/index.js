@@ -403,7 +403,7 @@ export default function Landing() {
             <a className="ghost-btn" href={BOOKING_URL} target="_blank" rel="noopener noreferrer" style={{ textDecoration: 'none', display: 'inline-flex', alignItems: 'center' }}>Get Yours Built</a>
           </div>
           <div className="hero-pills" style={{ marginTop: '26px', display: 'flex', gap: 'clamp(16px,3vw,32px)', justifyContent: 'center', flexWrap: 'wrap' }}>
-            {['✓ Real-time numbers', '✓ Plain English', '✓ No QuickBooks required'].map((t, i) => (
+            {['✓ Real-time numbers', '✓ Plain English', '✓ QuickBooks optional'].map((t, i) => (
               <span key={i} className="hero-pill">{t}</span>
             ))}
           </div>
