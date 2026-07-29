@@ -1166,7 +1166,7 @@ export default function Gowns() {
                 return (
                   <div key={it.id} style={{ display: 'flex', borderBottom: `1px solid ${GRID}`, alignItems: 'center', position: 'relative' }}>
                     <div style={{ width: '26px', textAlign: 'center', fontSize: '11px', color: PAD, fontWeight: 600 }}>{i + 1}</div>
-                    <input value={it.qty} onChange={e => setItem(it.id, 'qty', e.target.value)} type="number" inputMode="numeric" style={{ ...cellIn, width: '44px', textAlign: 'center', padding: '12px 2px', borderLeft: `1px solid ${GRID}` }} />
+                    <input value={it.qty} onChange={e => setItem(it.id, 'qty', e.target.value)} type="text" inputMode="numeric" style={{ ...cellIn, width: '44px', textAlign: 'center', padding: '12px 2px', borderLeft: `1px solid ${GRID}` }} />
                     {/* item # with typeahead */}
                     <div style={{ width: '72px', borderLeft: `1px solid ${GRID}`, position: 'relative', alignSelf: 'stretch', display: 'flex', alignItems: 'center' }}>
                       <input
@@ -1192,7 +1192,7 @@ export default function Gowns() {
                       )}
                     </div>
                     <input value={it.desc} onChange={e => setItem(it.id, 'desc', e.target.value)} placeholder={i === 0 ? 'Style, color, details…' : ''} style={{ ...cellIn, flex: 1, borderLeft: `1px solid ${GRID}` }} />
-                    <input value={it.price} onChange={e => setItem(it.id, 'price', e.target.value)} type="number" inputMode="decimal" step="0.01" placeholder="$" style={{ ...cellIn, width: '82px', textAlign: 'right', padding: '12px 8px', borderLeft: `1px solid ${GRID}`, fontWeight: 600 }} />
+                    <input value={it.price} onChange={e => setItem(it.id, 'price', e.target.value)} type="text" inputMode="decimal" placeholder="$" style={{ ...cellIn, width: '82px', textAlign: 'right', padding: '12px 8px', borderLeft: `1px solid ${GRID}`, fontWeight: 600 }} />
                     <div style={{ width: '82px', textAlign: 'right', padding: '0 8px', borderLeft: `1px solid ${GRID}`, alignSelf: 'stretch', display: 'flex', alignItems: 'center', justifyContent: 'flex-end', fontSize: '15px', fontWeight: 600, color: INK }}>{lineAmt(it) ? money(lineAmt(it)) : ''}</div>
                     <div style={{ width: '38px', display: 'flex', alignItems: 'center', justifyContent: 'center', borderLeft: `1px solid ${GRID}`, alignSelf: 'stretch' }}>
                       <input type="checkbox" className="tax-check" checked={it.taxable !== false} onChange={e => setItem(it.id, 'taxable', e.target.checked)} title="Taxable" />
@@ -1214,7 +1214,7 @@ export default function Gowns() {
                   <span style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '13px', color: MUTED }}>
                     Tax
                     <span style={{ display: 'inline-flex', alignItems: 'center', gap: '2px', fontSize: '13px', color: MUTED }}>
-                      <input value={form.taxRate} onChange={e => setF('taxRate', e.target.value)} type="number" step="0.001" style={{ width: '56px', border: '1px solid #E2D7D1', borderRadius: '6px', padding: '2px 6px', fontSize: '13px', color: INK, background: '#fff', fontFamily: 'inherit', outline: 'none', textAlign: 'right' }} />%
+                      <input value={form.taxRate} onChange={e => setF('taxRate', e.target.value)} type="text" inputMode="decimal" style={{ width: '56px', border: '1px solid #E2D7D1', borderRadius: '6px', padding: '2px 6px', fontSize: '13px', color: INK, background: '#fff', fontFamily: 'inherit', outline: 'none', textAlign: 'right' }} />%
                     </span>
                   </span>
                   <span style={{ fontSize: '15px', fontWeight: 600, color: MUTED }}>{money(taxAmount)}</span>
@@ -1256,7 +1256,7 @@ export default function Gowns() {
               <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap', alignItems: 'flex-end' }}>
                 <div style={{ flex: '1 1 120px' }}>
                   <div style={{ fontSize: '12px', color: MUTED, marginBottom: '5px' }}>Amount</div>
-                  <input value={pay.amount} onChange={e => setPay(p => ({ ...p, amount: e.target.value }))} type="number" inputMode="decimal" step="0.01" placeholder="$" style={fieldIn} />
+                  <input value={pay.amount} onChange={e => setPay(p => ({ ...p, amount: e.target.value }))} type="text" inputMode="decimal" placeholder="$" style={fieldIn} />
                 </div>
                 <div style={{ flex: '1 1 130px' }}>
                   <div style={{ fontSize: '12px', color: MUTED, marginBottom: '5px' }}>Date</div>
