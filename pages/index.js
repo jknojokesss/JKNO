@@ -505,7 +505,7 @@ export default function Landing() {
         padding: '16px 0', background: '#EEEAE2', overflow: 'hidden' }}>
         <div className="ticker-inner" style={{ fontFamily: 'DM Mono, monospace',
           fontSize: '12px', letterSpacing: '2px', color: '#7A8090', whiteSpace: 'nowrap' }}>
-          {Array(4).fill('CUSTOM DASHBOARDS · REAL-TIME FINANCIALS · NO QUICKBOOKS · DRILL-DOWN REPORTING · POS INTEGRATION · PLAIN ENGLISH BOOKS · BUILT FOR YOUR BUSINESS ·').join('')}
+          {Array(4).fill('CUSTOM DASHBOARDS · REAL-TIME FINANCIALS · QUICKBOOKS OPTIONAL · DRILL-DOWN REPORTING · POS INTEGRATION · PLAIN ENGLISH BOOKS · BUILT FOR YOUR BUSINESS ·').join('')}
         </div>
       </div>
 
