@@ -2,7 +2,6 @@ import { useState, useEffect } from 'react'
 import { useRouter } from 'next/router'
 import Head from 'next/head'
 import DemoDashboard from '../components/DemoDashboard'
-import LivingSnapshot from '../components/LivingSnapshot'
 import { ALL_DEMOS } from '../lib/industryDemos'
 
 // Calendly booking link for the $25 gift-card offer.
@@ -300,8 +299,6 @@ export default function Landing() {
         }
 
         @media (max-width: 980px) {
-          .hero-grid { grid-template-columns: 1fr !important; }
-          .hero-panel { max-width: 560px !important; margin-top: 8px; }
         }
         @media (max-width: 768px) {
           .features-grid { grid-template-columns: 1fr !important; }
@@ -388,35 +385,27 @@ export default function Landing() {
 
       {/* HERO — headline + dashboard */}
       <section style={{ padding: 'clamp(100px,11vw,140px) clamp(14px,5vw,48px) clamp(40px,5vw,64px)', background: 'transparent', position: 'relative', overflow: 'hidden' }}>
-        <div className="hero-grid" style={{ position: 'relative', maxWidth: '1200px', margin: '0 auto 0 clamp(0px,3vw,72px)', display: 'grid', gridTemplateColumns: '1fr 500px', gap: 'clamp(28px,4vw,60px)', alignItems: 'center' }}>
-          {/* left: copy */}
-          <div style={{ textAlign: 'left' }}>
-            <h1 className="hero-title hero-title-text" style={{ fontFamily: "'Space Grotesk', sans-serif", fontWeight: 700, fontSize: 'clamp(30px,4.4vw,54px)', lineHeight: 1.08, color: '#1A2035', letterSpacing: '-1.5px' }}>
-              Understand the <span className="gold-shimmer">Story</span><br />Behind Your Numbers.
-            </h1>
-            <div className="hero-sub" style={{ marginTop: '18px', fontFamily: "'DM Mono', monospace", fontSize: 'clamp(12px,1.4vw,15px)', color: '#B8943C', fontWeight: 500, letterSpacing: '2.5px', textTransform: 'uppercase' }}>
-              Financial Clarity — The JK Way™
-            </div>
-            <p className="hero-sub" style={{ margin: '18px 0 0', maxWidth: '520px', fontSize: 'clamp(14px,1.5vw,16px)', lineHeight: 1.6, color: '#5A6070' }}>
-              Built by finance pros, designed for business owners — every dashboard is <strong style={{ color: '#1A2035', fontWeight: 600 }}>tailored to the way your business actually operates.</strong>
-            </p>
-            <p className="hero-sub" style={{ margin: '14px 0 0', maxWidth: '500px', fontSize: 'clamp(15px,1.7vw,18px)', lineHeight: 1.4, color: '#1A2035', fontWeight: 500 }}>
-              Know where your business stands before making your next decision.
-            </p>
-            <div className="hero-cta" style={{ marginTop: '28px', display: 'flex', gap: '12px', flexWrap: 'wrap', justifyContent: 'flex-start' }}>
-              <button className="cta-btn" onClick={() => document.getElementById('demos')?.scrollIntoView({ behavior: 'smooth' })}>See It in Action ↓</button>
-              <a className="ghost-btn" href={BOOKING_URL} target="_blank" rel="noopener noreferrer" style={{ textDecoration: 'none', display: 'inline-flex', alignItems: 'center' }}>Get Yours Built</a>
-            </div>
-            <div className="hero-pills" style={{ marginTop: '24px', display: 'flex', gap: 'clamp(14px,2.4vw,26px)', justifyContent: 'flex-start', flexWrap: 'wrap' }}>
-              {['✓ Real-time numbers', '✓ Plain English', '✓ No QuickBooks required'].map((t, i) => (
-                <span key={i} className="hero-pill">{t}</span>
-              ))}
-            </div>
+        <div style={{ position: 'relative', maxWidth: '1200px', margin: '0 auto', textAlign: 'center' }}>
+          <h1 className="hero-title hero-title-text" style={{ fontFamily: "'Space Grotesk', sans-serif", fontWeight: 700, fontSize: 'clamp(34px,5.4vw,66px)', lineHeight: 1.08, color: '#1A2035', letterSpacing: '-1.5px' }}>
+            Understand the <span className="gold-shimmer">Story</span><br />Behind Your Numbers.
+          </h1>
+          <div className="hero-sub" style={{ marginTop: '20px', fontFamily: "'DM Mono', monospace", fontSize: 'clamp(12px,1.5vw,16px)', color: '#B8943C', fontWeight: 500, letterSpacing: '2.5px', textTransform: 'uppercase' }}>
+            Financial Clarity — The JK Way™
           </div>
-
-          {/* right: living snapshot — animated sample dashboard */}
-          <div className="hero-panel" style={{ position: 'relative', width: '100%', maxWidth: '500px' }}>
-            <LivingSnapshot />
+          <p className="hero-sub" style={{ margin: '22px auto 0', maxWidth: '760px', fontSize: 'clamp(15px,1.7vw,18px)', lineHeight: 1.65, color: '#5A6070' }}>
+            Built by finance pros, designed for business owners — every dashboard is <strong style={{ color: '#1A2035', fontWeight: 600 }}>tailored to the way your business actually operates.</strong>
+          </p>
+          <p className="hero-sub" style={{ margin: '16px auto 0', maxWidth: '680px', fontSize: 'clamp(17px,2vw,21px)', lineHeight: 1.4, color: '#1A2035', fontWeight: 500 }}>
+            Know where your business stands before making your next decision.
+          </p>
+          <div className="hero-cta" style={{ marginTop: '32px', display: 'flex', gap: '14px', flexWrap: 'wrap', justifyContent: 'center' }}>
+            <button className="cta-btn" onClick={() => document.getElementById('demos')?.scrollIntoView({ behavior: 'smooth' })}>See It in Action ↓</button>
+            <a className="ghost-btn" href={BOOKING_URL} target="_blank" rel="noopener noreferrer" style={{ textDecoration: 'none', display: 'inline-flex', alignItems: 'center' }}>Get Yours Built</a>
+          </div>
+          <div className="hero-pills" style={{ marginTop: '26px', display: 'flex', gap: 'clamp(16px,3vw,32px)', justifyContent: 'center', flexWrap: 'wrap' }}>
+            {['✓ Real-time numbers', '✓ Plain English', '✓ No QuickBooks required'].map((t, i) => (
+              <span key={i} className="hero-pill">{t}</span>
+            ))}
           </div>
         </div>
 
