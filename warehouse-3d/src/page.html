@@ -1,8 +1,8 @@
 <title>Adar Warehouse — 3D Finder</title>
 <style>
   :root {
-    --bg: #14161a; --panel: #1d2026; --panel2: #23262d; --line: #2e333b;
-    --text: #e8eaed; --muted: #9aa1ab; --amber: #ffb020; --amber-dim: #ffb02026;
+    --bg: #e9eef4; --panel: #ffffff; --panel2: #f1f4f8; --line: #d3d9e1;
+    --text: #22262c; --muted: #66707e; --amber: #d97e06; --amber-dim: #d97e0626;
     --mono: ui-monospace, "SF Mono", "Cascadia Mono", Menlo, Consolas, monospace;
     --sans: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
   }
@@ -17,6 +17,7 @@
     display: flex; gap: 10px; align-items: flex-start; pointer-events: none; z-index: 10;
   }
   #brand {
+    box-shadow: 0 1px 8px #1a2b4218;
     pointer-events: auto; background: var(--panel); border: 1px solid var(--line);
     padding: 9px 13px; line-height: 1.15; flex-shrink: 0;
   }
@@ -24,6 +25,7 @@
   #brand span { font-size: 9.5px; color: var(--muted); letter-spacing: 0.14em; text-transform: uppercase; }
   #searchwrap { pointer-events: auto; position: relative; flex: 1; max-width: 430px; }
   #q {
+    box-shadow: 0 1px 8px #1a2b4218;
     width: 100%; box-sizing: border-box; background: var(--panel); color: var(--text);
     border: 1px solid var(--line); outline: none; padding: 12px 14px; font-size: 14px;
     font-family: var(--sans);
@@ -31,6 +33,7 @@
   #q:focus { border-color: var(--amber); box-shadow: 0 0 0 3px var(--amber-dim); }
   #q::placeholder { color: var(--muted); }
   #results {
+    box-shadow: 0 1px 8px #1a2b4218;
     display: none; position: absolute; top: calc(100% + 4px); left: 0; right: 0;
     background: var(--panel); border: 1px solid var(--line); max-height: 46vh; overflow-y: auto;
   }
@@ -47,6 +50,7 @@
   /* ── right controls + legend ─────────────────────────────── */
   #controls { position: fixed; top: 12px; right: 14px; display: flex; flex-direction: column; align-items: flex-end; gap: 8px; z-index: 10; }
   .ctl {
+    box-shadow: 0 1px 8px #1a2b4218;
     background: var(--panel); border: 1px solid var(--line); color: var(--muted);
     font-size: 10px; letter-spacing: 0.12em; text-transform: uppercase; font-family: var(--sans);
     padding: 9px 12px; cursor: pointer;
@@ -57,6 +61,7 @@
   #legend { display: none; flex-direction: column; gap: 4px; align-items: stretch; }
   #legend.open { display: flex; }
   .chip {
+    box-shadow: 0 1px 8px #1a2b4218;
     display: flex; align-items: center; gap: 8px; background: var(--panel); border: 1px solid var(--line);
     color: var(--text); font-size: 11.5px; padding: 7px 11px; cursor: pointer; font-family: var(--sans); text-align: left;
   }
@@ -65,6 +70,7 @@
 
   /* ── bottom info panel (thumb-reachable sheet) ───────────── */
   #panel {
+    box-shadow: 0 -2px 14px #1a2b421f;
     position: fixed; left: 0; right: 0; bottom: 0; z-index: 11;
     background: var(--panel); border-top: 1px solid var(--line);
     padding: 14px 16px calc(14px + env(safe-area-inset-bottom));
@@ -88,7 +94,7 @@
   /* ── footer note ─────────────────────────────────────────── */
   #note {
     position: fixed; left: 14px; bottom: calc(10px + env(safe-area-inset-bottom)); z-index: 9;
-    font-size: 10px; color: var(--muted); background: #14161acc; padding: 5px 9px; max-width: 60vw;
+    font-size: 10px; color: var(--muted); background: #ffffffcc; padding: 5px 9px; max-width: 60vw;
   }
   #note b { color: var(--amber); font-weight: 600; }
 

@@ -48,12 +48,12 @@ const AISLE_OF_FACE = { R1: 1, R2a: 1, R2b: 2, R3a: 2, R3b: 3, C: 3 }
 
 // Categories — placeholder zones; swap for real ones (later: Supabase).
 const CATEGORIES = {
-  gowns:    { name: 'Gowns',              color: 0xc77f9e },
-  fabric:   { name: 'Fabric rolls',       color: 0x7fa6c9 },
-  boxes:    { name: 'Shipping boxes',     color: 0xc9a46f },
-  labels:   { name: 'Labels & packaging', color: 0x8fbf8f },
-  supplies: { name: 'Supplies',           color: 0x9a8fc9 },
-  returns:  { name: 'Returns / staging',  color: 0xc97f72 },
+  gowns:    { name: 'Gowns',              color: 0xd4649b },
+  fabric:   { name: 'Fabric rolls',       color: 0x4a90d9 },
+  boxes:    { name: 'Shipping boxes',     color: 0xdb9b3f },
+  labels:   { name: 'Labels & packaging', color: 0x53b168 },
+  supplies: { name: 'Supplies',           color: 0x8a6fd4 },
+  returns:  { name: 'Returns / staging',  color: 0xd96a55 },
 }
 function categoryOf(faceId, bay) {
   if (faceId === 'R1' || faceId === 'R2a') return 'gowns'
@@ -75,11 +75,12 @@ const ITEMS = [
   ['RMA 2211 — awaiting check', 'C-02-1'], ['RMA 2216 — restock', 'C-04-2'],
 ]
 
-// ── palette ────────────────────────────────────────────────────────────────
+// ── palette: bright daylight warehouse ─────────────────────────────────────
 const COL = {
-  floor: 0x3a3e45, floorLine: 0x50555e, wall: 0x24272d,
-  upright: 0x3e6c9e, beam: 0xc96f2e, bin: 0x8a8578, binEdge: 0x1a1c20,
-  amber: 0xffb020, path: 0xffb020, dock: 0x566171, door: 0x6fbf73,
+  sky: 0xe9eef4, floor: 0xb6bac0, floorLine: 0x9aa0a8, wall: 0xd4d8dd,
+  upright: 0x2e6db4, beam: 0xe8842a, bin: 0xc8a97e, binEdge: 0x1a1c20,
+  amber: 0xffb020, path: 0xf59e0b, dock: 0x8b95a1, door: 0x4caf6e,
+  lane: 0xe8c62a,
 }
 
 // ═══ scene ═════════════════════════════════════════════════════════════════
@@ -88,8 +89,8 @@ const renderer = new THREE.WebGLRenderer({ antialias: true })
 renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2))
 canvasHost.appendChild(renderer.domElement)
 const scene = new THREE.Scene()
-scene.background = new THREE.Color(0x14161a)
-scene.fog = new THREE.Fog(0x14161a, 40, 90)
+scene.background = new THREE.Color(COL.sky)
+scene.fog = new THREE.Fog(COL.sky, 45, 110)
 
 const camera = new THREE.PerspectiveCamera(55, 1, 0.1, 200)
 camera.position.set(W * 1.15, 14, D * 1.25)
@@ -101,11 +102,11 @@ controls.maxPolarAngle = Math.PI / 2.05
 controls.minDistance = 3
 controls.maxDistance = 60
 
-scene.add(new THREE.HemisphereLight(0xbfd0e4, 0x2a2620, 0.85))
-const sun = new THREE.DirectionalLight(0xfff2dd, 1.1)
+scene.add(new THREE.HemisphereLight(0xffffff, 0xcfc4b0, 1.05))
+const sun = new THREE.DirectionalLight(0xfff6e5, 1.35)
 sun.position.set(-10, 22, 14)
 scene.add(sun)
-const fill = new THREE.DirectionalLight(0x9db4d4, 0.35)
+const fill = new THREE.DirectionalLight(0xdfe9f5, 0.5)
 fill.position.set(20, 10, -10)
 scene.add(fill)
 
@@ -153,6 +154,17 @@ dockStripe.rotation.x = -Math.PI / 2
 dockStripe.position.set((DOCK.x0 + DOCK.x1) / 2, 0.02, 1.2)
 scene.add(dockStripe)
 
+// safety-yellow lane markings along each aisle
+const laneMat = new THREE.MeshBasicMaterial({ color: COL.lane, transparent: true, opacity: 0.85 })
+for (const [x0, x1] of [X.a1, X.a2, X.a3]) {
+  for (const lx of [x0 + 0.14, x1 - 0.14]) {
+    const lane = new THREE.Mesh(new THREE.PlaneGeometry(0.09, D - RACK_Z0 - 1.2), laneMat)
+    lane.rotation.x = -Math.PI / 2
+    lane.position.set(lx, 0.015, RACK_Z0 + (D - RACK_Z0 - 1.2) / 2)
+    scene.add(lane)
+  }
+}
+
 // entrance marker (front-right)
 const entMark = new THREE.Mesh(
   new THREE.PlaneGeometry(entW, 1.2),
@@ -190,7 +202,7 @@ for (const [rk, [x0, x1]] of Object.entries(rackSpans)) {
     }
     const deck = new THREE.Mesh(
       new THREE.BoxGeometry(depth - 0.1, 0.04, RACK_LEN),
-      new THREE.MeshStandardMaterial({ color: 0x565b63, roughness: 0.85 })
+      new THREE.MeshStandardMaterial({ color: 0x9ba1a9, roughness: 0.85 })
     )
     deck.position.set(cx, y - 0.04, (RACK_Z0 + RACK_Z1) / 2)
     scene.add(deck)
@@ -330,7 +342,7 @@ function showPanel(bin) {
   $('#p-code').textContent = bin.id
   $('#p-cat').textContent = c.name
   $('#p-cat').style.background = '#' + c.color.toString(16).padStart(6, '0') + '33'
-  $('#p-cat').style.color = '#' + new THREE.Color(c.color).offsetHSL(0, 0, 0.18).getHexString()
+  $('#p-cat').style.color = '#' + new THREE.Color(c.color).offsetHSL(0, 0.05, -0.18).getHexString()
   $('#p-where').textContent = `${bin.face.label} · aisle ${AISLE_OF_FACE[bin.face.id]} · bay ${bin.bay} · level ${bin.level}`
   $('#p-items').innerHTML = items.length
     ? items.map(i => `<div class="p-item">${i}</div>`).join('')
@@ -339,8 +351,8 @@ function showPanel(bin) {
 }
 $('#p-close').addEventListener('click', () => { panel.classList.remove('open'); clearFocus() })
 
-// category overlay
-let tinted = false
+// category overlay — ON by default (the colorful view is the home view)
+let tinted = true
 const legend = $('#legend')
 for (const [key, c] of Object.entries(CATEGORIES)) {
   const chip = document.createElement('button')
@@ -364,10 +376,15 @@ $('#tint').addEventListener('click', () => {
   legend.classList.toggle('open', tinted)
 })
 $('#reset').addEventListener('click', () => {
-  clearFocus(); panel.classList.remove('open'); tinted = false
-  applyTint(false, null); $('#tint').classList.remove('on'); legend.classList.remove('open')
+  clearFocus(); panel.classList.remove('open'); tinted = true
+  applyTint(true, null); $('#tint').classList.add('on')
   flyTo(new THREE.Vector3(W * 1.15, 14, D * 1.25), new THREE.Vector3(W / 2, 1.2, D / 2))
 })
+
+// initial state: categories tinted, legend visible on wide screens
+applyTint(true, null)
+$('#tint').classList.add('on')
+if (window.innerWidth > 560) legend.classList.add('open')
 
 // tap / click select (with drag threshold so orbiting doesn't select)
 const ray = new THREE.Raycaster(), ptr = new THREE.Vector2()
