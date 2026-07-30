@@ -1,0 +1,130 @@
+<title>Adar Warehouse — 3D Finder</title>
+<style>
+  :root {
+    --bg: #14161a; --panel: #1d2026; --panel2: #23262d; --line: #2e333b;
+    --text: #e8eaed; --muted: #9aa1ab; --amber: #ffb020; --amber-dim: #ffb02026;
+    --mono: ui-monospace, "SF Mono", "Cascadia Mono", Menlo, Consolas, monospace;
+    --sans: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  }
+  html, body { height: 100%; }
+  body { margin: 0; background: var(--bg); color: var(--text); font-family: var(--sans); overflow: hidden; }
+  #scene { position: fixed; inset: 0; }
+  #scene canvas { display: block; }
+
+  /* ── top bar: brand + search ─────────────────────────────── */
+  #topbar {
+    position: fixed; top: 0; left: 0; right: 0; padding: 12px 14px;
+    display: flex; gap: 10px; align-items: flex-start; pointer-events: none; z-index: 10;
+  }
+  #brand {
+    pointer-events: auto; background: var(--panel); border: 1px solid var(--line);
+    padding: 9px 13px; line-height: 1.15; flex-shrink: 0;
+  }
+  #brand b { font-size: 13px; letter-spacing: 0.04em; display: block; }
+  #brand span { font-size: 9.5px; color: var(--muted); letter-spacing: 0.14em; text-transform: uppercase; }
+  #searchwrap { pointer-events: auto; position: relative; flex: 1; max-width: 430px; }
+  #q {
+    width: 100%; box-sizing: border-box; background: var(--panel); color: var(--text);
+    border: 1px solid var(--line); outline: none; padding: 12px 14px; font-size: 14px;
+    font-family: var(--sans);
+  }
+  #q:focus { border-color: var(--amber); box-shadow: 0 0 0 3px var(--amber-dim); }
+  #q::placeholder { color: var(--muted); }
+  #results {
+    display: none; position: absolute; top: calc(100% + 4px); left: 0; right: 0;
+    background: var(--panel); border: 1px solid var(--line); max-height: 46vh; overflow-y: auto;
+  }
+  .result {
+    display: flex; width: 100%; justify-content: space-between; gap: 10px; align-items: baseline;
+    background: none; border: 0; border-bottom: 1px solid var(--line); color: var(--text);
+    padding: 11px 13px; font-size: 13px; cursor: pointer; text-align: left; font-family: var(--sans);
+  }
+  .result:last-child { border-bottom: 0; }
+  .result:hover, .result:focus-visible { background: var(--panel2); outline: none; }
+  .r-label { font-weight: 600; }
+  .r-sub { font-family: var(--mono); font-size: 11px; color: var(--muted); white-space: nowrap; }
+
+  /* ── right controls + legend ─────────────────────────────── */
+  #controls { position: fixed; top: 12px; right: 14px; display: flex; flex-direction: column; align-items: flex-end; gap: 8px; z-index: 10; }
+  .ctl {
+    background: var(--panel); border: 1px solid var(--line); color: var(--muted);
+    font-size: 10px; letter-spacing: 0.12em; text-transform: uppercase; font-family: var(--sans);
+    padding: 9px 12px; cursor: pointer;
+  }
+  .ctl:hover { color: var(--text); }
+  .ctl.on { color: var(--amber); border-color: var(--amber); }
+  .ctl:focus-visible { outline: 2px solid var(--amber); outline-offset: 1px; }
+  #legend { display: none; flex-direction: column; gap: 4px; align-items: stretch; }
+  #legend.open { display: flex; }
+  .chip {
+    display: flex; align-items: center; gap: 8px; background: var(--panel); border: 1px solid var(--line);
+    color: var(--text); font-size: 11.5px; padding: 7px 11px; cursor: pointer; font-family: var(--sans); text-align: left;
+  }
+  .chip:hover { background: var(--panel2); }
+  .chip i { width: 10px; height: 10px; flex-shrink: 0; display: inline-block; }
+
+  /* ── bottom info panel (thumb-reachable sheet) ───────────── */
+  #panel {
+    position: fixed; left: 0; right: 0; bottom: 0; z-index: 11;
+    background: var(--panel); border-top: 1px solid var(--line);
+    padding: 14px 16px calc(14px + env(safe-area-inset-bottom));
+    transform: translateY(105%); transition: transform 0.22s ease;
+  }
+  @media (prefers-reduced-motion: reduce) { #panel { transition: none; } }
+  #panel.open { transform: translateY(0); }
+  #panel .row { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+  #p-code { font-family: var(--mono); font-size: 22px; font-weight: 700; letter-spacing: 0.02em; }
+  #p-cat { font-size: 10.5px; letter-spacing: 0.1em; text-transform: uppercase; padding: 4px 9px; }
+  #p-close {
+    margin-left: auto; background: none; border: 1px solid var(--line); color: var(--muted);
+    font-size: 12px; padding: 6px 11px; cursor: pointer; font-family: var(--sans);
+  }
+  #p-close:hover { color: var(--text); }
+  #p-where { color: var(--muted); font-size: 12.5px; margin-top: 6px; }
+  #p-items { margin-top: 10px; display: flex; flex-direction: column; gap: 5px; max-height: 22vh; overflow-y: auto; }
+  .p-item { font-size: 13px; padding: 7px 10px; background: var(--panel2); border-left: 2px solid var(--amber); }
+  .p-item.p-empty { border-left-color: var(--line); color: var(--muted); }
+
+  /* ── footer note ─────────────────────────────────────────── */
+  #note {
+    position: fixed; left: 14px; bottom: calc(10px + env(safe-area-inset-bottom)); z-index: 9;
+    font-size: 10px; color: var(--muted); background: #14161acc; padding: 5px 9px; max-width: 60vw;
+  }
+  #note b { color: var(--amber); font-weight: 600; }
+
+  @media (max-width: 560px) {
+    #brand span { display: none; }
+    #brand b { font-size: 12px; }
+    #note { display: none; }
+  }
+</style>
+
+<div id="scene"></div>
+
+<div id="topbar">
+  <div id="brand"><b>ADAR WAREHOUSE</b><span>3D finder</span></div>
+  <div id="searchwrap">
+    <input id="q" type="search" placeholder="Find item, category, or bin — try “gowns” or R2b-04-2" autocomplete="off" />
+    <div id="results"></div>
+  </div>
+</div>
+
+<div id="controls">
+  <button class="ctl" id="tint">Categories</button>
+  <button class="ctl" id="reset">Reset view</button>
+  <div id="legend"></div>
+</div>
+
+<div id="panel">
+  <div class="row">
+    <div id="p-code">—</div>
+    <div id="p-cat">—</div>
+    <button id="p-close">Close</button>
+  </div>
+  <div id="p-where">—</div>
+  <div id="p-items"></div>
+</div>
+
+<div id="note">Drag to orbit · scroll/pinch to zoom · tap a bin to inspect. <b>3 levels × 8 bays</b> — bay count is a placeholder, one number to change.</div>
+
+<script>/*__BUNDLE__*/</script>
