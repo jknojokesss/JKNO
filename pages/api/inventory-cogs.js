@@ -36,8 +36,33 @@ const JUNE_LAYERS = [
   {s:"235/65/17",l:"235/65/17 MileageMax",q:5,c:72,d:"2026-06-16"},{s:"245/60/18",l:"245/60/18 Paraller",q:4,c:78,d:"2026-06-16"},
   {s:"255/40/20",l:"255/40/20 Grand Sport",q:2,c:90,d:"2026-06-16"},{s:"255/45/19",l:"255/45/19 Agility",q:3,c:96,d:"2026-06-16"},
 ]
+// July stock: 7/6 + 7/14 stock runs (consecutive web_ids, house brands) plus the
+// sell→reorder replenishment groups confirmed against Clover (sold same/prior day,
+// trickled out after). No POs in July — classified by order timing + Clover pattern.
+const JULY_LAYERS = [
+  {s:"235/60/17",l:"235/60/17 MileageMax",q:6,c:70,d:"2026-07-06"},{s:"235/65/17",l:"235/65/17 MileageMax",q:6,c:72,d:"2026-07-06"},
+  {s:"235/45/18",l:"235/45/18 Grand Sport",q:6,c:68,d:"2026-07-06"},{s:"235/60/18",l:"235/60/18 Street-H",q:4,c:77,d:"2026-07-06"},
+  {s:"235/65/16",l:"235/65/16 Ridgecrawler",q:4,c:91,d:"2026-07-06"},{s:"235/55/19",l:"235/55/19 Agility",q:2,c:80,d:"2026-07-06"},
+  {s:"235/65/16",l:"235/65/16 Ridgecrawler",q:2,c:92,d:"2026-07-09"},{s:"235/65/16",l:"235/65/16 Ridgecrawler",q:3,c:92,d:"2026-07-09"},
+  {s:"235/60/18",l:"235/60/18 Street-H",q:3,c:79,d:"2026-07-09"},
+  {s:"255/65/18",l:"255/65/18 Agility SUV",q:4,c:99,d:"2026-07-10"},{s:"235/65/17",l:"235/65/17 Vitron",q:4,c:78,d:"2026-07-10"},
+  {s:"235/55/19",l:"235/55/19 Racing Trac",q:2,c:76,d:"2026-07-10"},
+  {s:"235/65/16",l:"235/65/16 Ridgecrawler",q:4,c:92,d:"2026-07-12"},{s:"235/60/17",l:"235/60/17 MileageMax",q:4,c:71,d:"2026-07-12"},
+  {s:"205/55/16",l:"205/55/16 Racing Trac",q:2,c:48,d:"2026-07-14"},{s:"215/60/16",l:"215/60/16 Street-H",q:4,c:62,d:"2026-07-14"},
+  {s:"215/65/16",l:"215/65/16 Force HP",q:4,c:63,d:"2026-07-14"},{s:"215/55/17",l:"215/55/17 Street-H",q:6,c:65,d:"2026-07-14"},
+  {s:"235/60/17",l:"235/60/17 MileageMax",q:6,c:65,d:"2026-07-14"},{s:"235/65/17",l:"235/65/17 MileageMax",q:6,c:72,d:"2026-07-14"},
+  {s:"235/60/18",l:"235/60/18 Eco Pro",q:6,c:75,d:"2026-07-14"},{s:"235/45/18",l:"235/45/18 Grand Sport",q:4,c:62,d:"2026-07-14"},
+  {s:"235/55/19",l:"235/55/19 RapidDragon",q:6,c:76,d:"2026-07-14"},{s:"255/45/19",l:"255/45/19 Agility",q:2,c:89,d:"2026-07-14"},
+  {s:"235/65/16",l:"235/65/16 Ridgecrawler",q:6,c:85,d:"2026-07-14"},
+  {s:"205/65/16",l:"205/65/16 Street-H",q:4,c:65,d:"2026-07-20"},{s:"235/60/17",l:"235/60/17 MileageMax",q:4,c:70,d:"2026-07-20"},
+  {s:"235/60/17",l:"235/60/17 MileageMax",q:2,c:70,d:"2026-07-27"},{s:"235/60/17",l:"235/60/17 MileageMax",q:2,c:70,d:"2026-07-27"},
+  {s:"215/55/17",l:"215/55/17 Street-H",q:4,c:70,d:"2026-07-27"},
+  {s:"215/55/17",l:"215/55/17 Lion Sport",q:2,c:67,d:"2026-07-28"},{s:"235/65/17",l:"235/65/17 Capricorn",q:4,c:80,d:"2026-07-28"},
+  {s:"235/60/17",l:"235/60/17 MileageMax",q:4,c:70,d:"2026-07-28"},
+  {s:"235/60/17",l:"235/60/17 RapidDragon",q:4,c:81,d:"2026-07-31"},{s:"215/55/17",l:"215/55/17 Lion Sport",q:2,c:64,d:"2026-07-31"},
+]
 function stockOnHandValue(sales, weldon, cutoff) {
-  const layers = LAYERS.concat(JUNE_LAYERS).map(L => ({ ...L, remaining: L.q }))
+  const layers = LAYERS.concat(JUNE_LAYERS, JULY_LAYERS).map(L => ({ ...L, remaining: L.q }))
   RETURNS.forEach(({ s, q, c }) => { let pool = layers.filter(L => L.s === s && L.c === c && L.remaining > 0); if (!pool.length) pool = layers.filter(L => L.s === s).sort((a, b) => a.c - b.c); let need = q; for (const L of pool) { if (need <= 0) break; const t = Math.min(L.remaining, need); L.remaining -= t; need -= t } })
   const bySize = {}; layers.forEach(L => { (bySize[L.s] = bySize[L.s] || []).push(L) }); Object.values(bySize).forEach(a => a.sort((x, y) => x.d.localeCompare(y.d) || x.c - y.c))
   const sdPool = {}; (weldon || []).forEach(o => { if (Number(o.qty) > 4) return; (sdPool[o.size] = sdPool[o.size] || []).push({ date: o.order_date, remaining: Number(o.qty) }) })
@@ -102,6 +127,7 @@ export default async function handler(req, res) {
       '2026-04-30': stockOnHandValue(clover, weldon, '2026-04-30'),
       '2026-05-31': stockOnHandValue(clover, weldon, '2026-05-31'),
       '2026-06-30': stockOnHandValue(clover, weldon, '2026-06-30'),
+      '2026-07-31': stockOnHandValue(clover, weldon, '2026-07-31'),
     }
     const JUNE_STOCK_PURCHASES = 4450 // June 6/16 Weldon STOCK restocks (added to JUNE_LAYERS)
     const juneUsed = Math.round((months['2026-06']?.by_source?.used_tire_inventory || 0) * 100) / 100
@@ -115,6 +141,21 @@ export default async function handler(req, res) {
       total_relief: Math.round((juneInvSales + juneUsed) * 100) / 100,
       cross_check_sale_ledger: months['2026-06']?.inventory_cogs || 0,
     }
+    // July Weldon stock purchases (JULY_LAYERS): $10,237 arrived in July, of which
+    // $452 (the 7/31 orders) posts on the CC in early Aug — only $9,785 is booked to
+    // Inventory Asset in July's GL, so the GL 7/31 balance runs $452 light vs end_7_31.
+    const JULY_STOCK_PURCHASES = 10237
+    const julyUsed = Math.round((months['2026-07']?.by_source?.used_tire_inventory || 0) * 100) / 100
+    const julyInvSales = Math.round((onhand['2026-06-30'].value + JULY_STOCK_PURCHASES - onhand['2026-07-31'].value) * 100) / 100
+    const july_relief = {
+      begin_6_30: onhand['2026-06-30'].value,
+      july_stock_purchases: JULY_STOCK_PURCHASES,
+      end_7_31: onhand['2026-07-31'].value,
+      inventory_sales: julyInvSales,           // Dr COGS / Cr Inventory  (movement method)
+      used_tires: julyUsed,                    // Dr COGS / Cr Inventory  (used)
+      total_relief: Math.round((julyInvSales + julyUsed) * 100) / 100,
+      cross_check_sale_ledger: months['2026-07']?.inventory_cogs || 0,
+    }
     // Per-month used-tire relief (Dr COGS-Used / Cr Inventory), computed LIVE from
     // every /used/i Clover line x $18 x qty. Book the used JE straight from this each
     // month so it can never drift from a stale/early data pull (the May 2026 miss).
@@ -123,6 +164,6 @@ export default async function handler(req, res) {
       const relief = Math.round((months[mm].by_source?.used_tire_inventory || 0) * 100) / 100
       if (relief) used_tires_by_month[mm] = { tires: Math.round(relief / 18), relief }
     })
-    res.status(200).json({ clover_rows: clover.length, weldon_rows: (weldon || []).length, months: out, stock_onhand_value: onhand, june_relief, used_tires_by_month })
+    res.status(200).json({ clover_rows: clover.length, weldon_rows: (weldon || []).length, months: out, stock_onhand_value: onhand, june_relief, july_relief, used_tires_by_month })
   } catch (err) { res.status(500).json({ error: err.message }) }
 }
