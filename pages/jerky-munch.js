@@ -129,6 +129,7 @@ export default function JerkyMunch() {
         id: p.id, store: p.store, price: p.price, sent: p.sent, returned: p.returned, paid: p.paid,
         counted: p.counted, countedDate: p.counted_date || '', diagnosis: p.diagnosis || '',
         cycle: p.cycle, lastContact: p.last_contact, restock: p.restock, notes: p.notes,
+        type: p.type || 'consignment', region: p.region || '',
         log: (byPartner[p.id] || []).map(l => ({ at: fmtD(l.at), t: l.note })),
       })))
     } catch (e) { console.error('loadConsign failed', e) }
@@ -344,7 +345,8 @@ export default function JerkyMunch() {
   }
 
   // aggregates
-  const R = consign.map(c => ({ ...c, ...recon(c) }))
+  const R = consign.filter(c => (c.type || 'consignment') === 'consignment').map(c => ({ ...c, ...recon(c) }))
+    .sort((a, b) => (a.region || '').localeCompare(b.region || '') || (a.store || '').localeCompare(b.store || ''))
   const cashCollected = consign.reduce((s, c) => s + c.paid, 0)
   const onShelfVal = R.reduce((s, c) => s + Math.max(c.expected, 0) * c.price, 0)
   const missUnits = R.reduce((s, c) => s + (c.variance > 0 ? c.variance : 0), 0)
@@ -669,7 +671,7 @@ export default function JerkyMunch() {
                 <div style={{ ...card, flex: 1, minWidth: '290px' }}>
                   <div style={{ ...lbl, marginBottom: '14px' }}>Top consignment stores · collected</div>
                   {(() => {
-                    const rows = consign.map(c => ({ store: c.store, rev: c.paid || 0, units: c.price ? Math.round((c.paid || 0) / c.price) : 0 })).filter(s => s.rev > 0).sort((a, b) => b.rev - a.rev)
+                    const rows = consign.filter(c => (c.type || 'consignment') === 'consignment').map(c => ({ store: c.store, rev: c.paid || 0, units: c.price ? Math.round((c.paid || 0) / c.price) : 0 })).filter(s => s.rev > 0).sort((a, b) => b.rev - a.rev)
                     if (!rows.length) return <div style={{ fontSize: '13px', color: MUTED, padding: '8px 0' }}>No consignment payments recorded yet.</div>
                     const max = rows[0].rev || 1
                     return rows.slice(0, 6).map((c, i) => (
