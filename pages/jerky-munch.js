@@ -189,6 +189,11 @@ export default function JerkyMunch() {
     return () => { sub.subscription.unsubscribe() }
   }, [])
   useEffect(() => {
+    if (typeof navigator !== 'undefined' && 'serviceWorker' in navigator) {
+      navigator.serviceWorker.register('/sw.js', { scope: '/jerky-munch' }).catch(() => {})
+    }
+  }, [])
+  useEffect(() => {
     if (session) loadAll()
     else setDataLoaded(false)
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -458,6 +463,14 @@ export default function JerkyMunch() {
       <title>{`${BIZ} — Dashboard`}</title>
       <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
       <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+      <link rel="manifest" href="/jerky-munch.webmanifest" />
+      <meta name="theme-color" content="#2B2018" />
+      <meta name="mobile-web-app-capable" content="yes" />
+      <meta name="apple-mobile-web-app-capable" content="yes" />
+      <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+      <meta name="apple-mobile-web-app-title" content="Jerky Munch" />
+      <link rel="apple-touch-icon" href="/jerky-icon.svg" />
+      <link rel="icon" href="/jerky-icon.svg" />
     </Head>
   )
   if (!authChecked) return (<>{FontHead}<div style={{ ...centered, background: CREAM, color: MUTED }}>Loading…</div></>)
