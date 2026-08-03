@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from 'react'
+import { useState, useRef, useEffect, Fragment } from 'react'
 import Head from 'next/head'
 import { jerkySupabase } from '../lib/supabaseJerky'
 
@@ -526,7 +526,7 @@ export default function JerkyMunch() {
     </select>
   )
 
-  const TABS = [['overview', 'Overview'], ['consign', 'Consignment'], ['direct', 'Direct Sales'], ['ads', 'Advertising'], ['pnl', 'P&L']]
+  const TABS = [['overview', 'Overview'], ['consign', 'Consignment'], ['invoices', 'Invoice stores'], ['direct', 'Direct Sales'], ['ads', 'Advertising'], ['pnl', 'P&L']]
   const EXTRA = [['expenses', 'Import expenses'], ['quickbooks', 'QuickBooks sync'], ['close', 'Monthly close'], ['askai', 'Ask Us']]
   const currentLabel = ([...TABS, ...EXTRA].find(t => t[0] === tab) || ['', ''])[1]
 
@@ -935,11 +935,14 @@ export default function JerkyMunch() {
                 </div>
               )}
 
-              {R.map(c => {
+              {R.map((c, idx) => {
                 const open = expanded === c.id
+                const showHeader = idx === 0 || (R[idx - 1] && R[idx - 1].region !== c.region)
                 const badge = c.status === 'reconciled' ? { c: GREEN, t: 'Reconciled' } : c.status === 'short' ? { c: RED, t: `${c.variance} missing` } : c.status === 'over' ? { c: AMBER, t: `${-c.variance} over` } : { c: MUTED, t: 'Not counted' }
                 return (
-                  <div key={c.id} style={{ ...card, padding: 0, marginBottom: '12px', overflow: 'hidden', borderColor: open ? CHAR : (c.status === 'short' ? '#E7C3B8' : BORDER) }}>
+                  <Fragment key={c.id}>
+                  {showHeader && <div style={{ ...lbl, color: SPICE, fontSize: '12px', margin: idx === 0 ? '2px 0 10px' : '24px 0 10px', display: 'flex', alignItems: 'center', gap: '10px' }}>{c.region || 'Other'}<span style={{ flex: 1, height: '1px', background: BORDER }} /></div>}
+                  <div style={{ ...card, padding: 0, marginBottom: '12px', overflow: 'hidden', borderColor: open ? CHAR : (c.status === 'short' ? '#E7C3B8' : BORDER) }}>
                     <div onClick={() => setExpanded(open ? null : c.id)} style={{ padding: '15px 18px', cursor: 'pointer' }}>
                       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '12px', flexWrap: 'wrap' }}>
                         <div>
@@ -1040,8 +1043,35 @@ export default function JerkyMunch() {
                       </div>
                     )}
                   </div>
+                  </Fragment>
                 )
               })}
+            </>
+          )}
+
+          {/* ===== INVOICE STORES ===== */}
+          {tab === 'invoices' && (
+            <>
+              <div style={{ ...card, marginBottom: '16px', background: CREAM }}>
+                <div style={{ ...lbl, marginBottom: '6px' }}>Invoice accounts</div>
+                <div style={{ fontSize: '13px', color: MUTED, lineHeight: 1.6 }}>These stores you <b>invoice per delivery</b> (not consignment). The full invoice flow — deliver → send invoice → track paid — is coming; for now, here's the account list by location.</div>
+              </div>
+              {(() => {
+                const inv = consign.filter(c => c.type === 'invoice').slice().sort((a, b) => (a.region || '').localeCompare(b.region || '') || (a.store || '').localeCompare(b.store || ''))
+                if (!inv.length) return <div style={{ ...card, color: MUTED, fontSize: '13px' }}>No invoice accounts yet.</div>
+                return inv.map((c, idx) => {
+                  const showHeader = idx === 0 || inv[idx - 1].region !== c.region
+                  return (
+                    <Fragment key={c.id}>
+                      {showHeader && <div style={{ ...lbl, color: SPICE, fontSize: '12px', margin: idx === 0 ? '2px 0 10px' : '24px 0 10px', display: 'flex', alignItems: 'center', gap: '10px' }}>{c.region || 'Other'}<span style={{ flex: 1, height: '1px', background: BORDER }} /></div>}
+                      <div style={{ ...card, padding: '15px 18px', marginBottom: '10px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '10px' }}>
+                        <div style={{ ...big, fontSize: '17px', color: INK }}>{c.store}</div>
+                        <span style={{ fontSize: '11px', fontWeight: 600, color: KRAFT, background: KRAFT + '1A', padding: '4px 11px', borderRadius: '2px', whiteSpace: 'nowrap' }}>Invoice</span>
+                      </div>
+                    </Fragment>
+                  )
+                })
+              })()}
             </>
           )}
 
