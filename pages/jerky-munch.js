@@ -81,6 +81,7 @@ export default function JerkyMunch() {
   const [adding, setAdding] = useState(false)
   const [cf, setCf] = useState({ store: '', price: '', sent: '' })
   const [expenses, setExpenses] = useState([])
+  const [storeInvoices, setStoreInvoices] = useState([])
   const [addingE, setAddingE] = useState(false)
   const [ef, setEf] = useState({ vendor: '', amt: '', cat: 'Other', pay: 'personal' })
   const [addingD, setAddingD] = useState(false)
@@ -152,6 +153,12 @@ export default function JerkyMunch() {
       setExpenses((data || []).map(e => ({ id: e.id, vendor: e.vendor, cat: e.cat, amt: e.amt, pay: e.pay })))
     } catch (e) { console.error('loadExpenses failed', e) }
   }
+  const loadInvoices = async () => {
+    try {
+      const { data } = await jerkySupabase.from('store_invoices').select('*').order('inv_date', { ascending: false })
+      setStoreInvoices((data || []).map(i => ({ id: i.id, partnerId: i.partner_id, date: i.inv_date, units: i.units, unitPrice: i.unit_price, amount: Number(i.amount) || 0, description: i.description || '', dueDate: i.due_date, status: i.status, paidDate: i.paid_date })))
+    } catch (e) { console.error('loadInvoices failed', e); setStoreInvoices([]) }
+  }
   const loadProducts = async () => {
     try {
       const { data } = await jerkySupabase.from('products').select('*').order('sort')
@@ -179,7 +186,7 @@ export default function JerkyMunch() {
     } catch (e) { console.error('loadSettings failed', e) }
   }
   const loadAll = async () => {
-    await Promise.all([loadConsign(), loadDirect(), loadAds(), loadExpenses(), loadProducts(), loadMonthSeries(), loadSettings()])
+    await Promise.all([loadConsign(), loadDirect(), loadAds(), loadExpenses(), loadInvoices(), loadProducts(), loadMonthSeries(), loadSettings()])
     setDataLoaded(true)
   }
 
@@ -269,6 +276,22 @@ export default function JerkyMunch() {
     try { await jerkySupabase.from('expenses').insert(row); await loadExpenses() } catch (e) { console.error('addExpense failed', e) }
   }
   const removeExpense = async (id) => { try { await jerkySupabase.from('expenses').delete().eq('id', id); await loadExpenses() } catch (e) { console.error('removeExpense failed', e) } }
+  const addInvoice = async (partnerId) => {
+    const amt = Number(dv(`inv_${partnerId}_amt`)) || 0
+    const units = Number(dv(`inv_${partnerId}_units`)) || 0
+    const price = Number(dv(`inv_${partnerId}_price`)) || 0
+    const date = dv(`inv_${partnerId}_date`)
+    const due = dv(`inv_${partnerId}_due`)
+    const desc = dv(`inv_${partnerId}_desc`)
+    const amount = amt > 0 ? amt : ((units && price) ? units * price : 0)
+    if (amount <= 0) return
+    const row = { partner_id: partnerId, inv_date: date || todayStr, units: units || null, unit_price: price || null, amount, description: desc || '', due_date: due || null }
+    setDraft(d => { const n = { ...d }; [`inv_${partnerId}_amt`, `inv_${partnerId}_units`, `inv_${partnerId}_price`, `inv_${partnerId}_date`, `inv_${partnerId}_due`, `inv_${partnerId}_desc`].forEach(k => delete n[k]); return n })
+    try { await jerkySupabase.from('store_invoices').insert(row); await loadInvoices() } catch (e) { console.error('addInvoice failed', e) }
+  }
+  const markInvoicePaid = async (id, paid) => {
+    try { await jerkySupabase.from('store_invoices').update({ status: paid ? 'paid' : 'unpaid', paid_date: paid ? todayStr : null }).eq('id', id); await loadInvoices() } catch (e) { console.error('markInvoicePaid failed', e) }
+  }
   const exportPersonal = () => {
     const rows = [['Vendor', 'Category', 'Amount', 'Paid with']]
     expenses.filter(e => e.pay === 'personal').forEach(e => rows.push([e.vendor, e.cat, e.amt, 'Personal card']))
@@ -353,6 +376,11 @@ export default function JerkyMunch() {
   const R = consign.filter(c => (c.type || 'consignment') === 'consignment').map(c => ({ ...c, ...recon(c) }))
     .sort((a, b) => (a.region || '').localeCompare(b.region || '') || (a.store || '').localeCompare(b.store || ''))
   const cashCollected = consign.reduce((s, c) => s + c.paid, 0)
+  const invUnpaid = storeInvoices.filter(i => i.status === 'unpaid')
+  const isOverdue = (i) => i.status === 'unpaid' && i.dueDate && i.dueDate < todayStr
+  const totalAR = invUnpaid.reduce((s, i) => s + i.amount, 0)
+  const overdueAR = storeInvoices.filter(isOverdue).reduce((s, i) => s + i.amount, 0)
+  const collectedAR = storeInvoices.filter(i => i.status === 'paid').reduce((s, i) => s + i.amount, 0)
   const onShelfVal = R.reduce((s, c) => s + Math.max(c.expected, 0) * c.price, 0)
   const missUnits = R.reduce((s, c) => s + (c.variance > 0 ? c.variance : 0), 0)
   const missVal = R.reduce((s, c) => s + (c.variance > 0 ? c.varVal : 0), 0)
@@ -1049,24 +1077,90 @@ export default function JerkyMunch() {
             </>
           )}
 
-          {/* ===== INVOICE STORES ===== */}
+          {/* ===== INVOICE STORES (A/R ledger) ===== */}
           {tab === 'invoices' && (
             <>
-              <div style={{ ...card, marginBottom: '16px', background: CREAM }}>
-                <div style={{ ...lbl, marginBottom: '6px' }}>Invoice accounts</div>
-                <div style={{ fontSize: '13px', color: MUTED, lineHeight: 1.6 }}>These stores you <b>invoice per delivery</b> (not consignment). The full invoice flow — deliver → send invoice → track paid — is coming; for now, here's the account list by location.</div>
+              <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap', marginBottom: '16px' }}>
+                <KPI k="Outstanding (A/R)" v={m0(totalAR)} sub={`${invUnpaid.length} open invoices`} accent={KRAFT} />
+                <KPI k="Overdue" v={m0(overdueAR)} sub="past due date" accent={overdueAR > 0 ? RED : GREEN} />
+                <KPI k="Collected" v={m0(collectedAR)} sub="invoices paid" accent={GREEN} />
               </div>
+
               {(() => {
                 const inv = consign.filter(c => c.type === 'invoice').slice().sort((a, b) => (a.region || '').localeCompare(b.region || '') || (a.store || '').localeCompare(b.store || ''))
                 if (!inv.length) return <div style={{ ...card, color: MUTED, fontSize: '13px' }}>No invoice accounts yet.</div>
                 return inv.map((c, idx) => {
+                  const open = expanded === c.id
                   const showHeader = idx === 0 || inv[idx - 1].region !== c.region
+                  const mine = storeInvoices.filter(i => i.partnerId === c.id).slice().sort((a, b) => (b.date || '').localeCompare(a.date || ''))
+                  const balance = mine.filter(i => i.status === 'unpaid').reduce((s, i) => s + i.amount, 0)
+                  const anyOverdue = mine.some(isOverdue)
+                  const uUnits = Number(dv(`inv_${c.id}_units`)) || 0
+                  const uPrice = Number(dv(`inv_${c.id}_price`)) || 0
+                  const uAmt = Number(dv(`inv_${c.id}_amt`)) || 0
+                  const preview = uAmt > 0 ? uAmt : ((uUnits && uPrice) ? uUnits * uPrice : 0)
                   return (
                     <Fragment key={c.id}>
                       {showHeader && <div style={{ ...lbl, color: SPICE, fontSize: '12px', margin: idx === 0 ? '2px 0 10px' : '24px 0 10px', display: 'flex', alignItems: 'center', gap: '10px' }}>{c.region || 'Other'}<span style={{ flex: 1, height: '1px', background: BORDER }} /></div>}
-                      <div style={{ ...card, padding: '15px 18px', marginBottom: '10px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '10px' }}>
-                        <div style={{ ...big, fontSize: '17px', color: INK }}>{c.store}</div>
-                        <span style={{ fontSize: '11px', fontWeight: 600, color: KRAFT, background: KRAFT + '1A', padding: '4px 11px', borderRadius: '2px', whiteSpace: 'nowrap' }}>Invoice</span>
+                      <div style={{ ...card, padding: 0, marginBottom: '12px', overflow: 'hidden', borderColor: open ? CHAR : (anyOverdue ? '#E7C3B8' : BORDER) }}>
+                        <div onClick={() => setExpanded(open ? null : c.id)} style={{ padding: '15px 18px', cursor: 'pointer', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '12px', flexWrap: 'wrap' }}>
+                          <div>
+                            <div style={{ ...big, fontSize: '20px', color: INK }}>{c.store}</div>
+                            <div style={{ fontSize: '12px', color: MUTED, marginTop: '3px' }}>{mine.length} invoice{mine.length === 1 ? '' : 's'} · {mine.filter(i => i.status === 'unpaid').length} open</div>
+                          </div>
+                          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '6px' }}>
+                            <div style={{ ...big, fontSize: '20px', color: balance > 0 ? KRAFT : GREEN }}>{m0(balance)}</div>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                              <span style={{ fontSize: '11px', color: MUTED }}>outstanding</span>
+                              {anyOverdue && <span style={{ fontSize: '11px', fontWeight: 600, color: '#fff', background: RED, padding: '3px 9px', borderRadius: '2px', whiteSpace: 'nowrap' }}>Overdue</span>}
+                            </div>
+                          </div>
+                        </div>
+
+                        {open && (
+                          <div style={{ padding: '0 18px 18px', borderTop: `1px solid ${CREAM}` }}>
+                            <div style={{ ...lbl, margin: '14px 0 8px' }}>Invoices</div>
+                            {mine.length === 0
+                              ? <div style={{ fontSize: '13px', color: MUTED, padding: '4px 0 6px' }}>No invoices yet.</div>
+                              : mine.map((i, ii) => {
+                                const od = isOverdue(i)
+                                const pill = i.status === 'paid' ? { c: GREEN, t: 'Paid' } : od ? { c: RED, t: 'Overdue' } : { c: AMBER, t: 'Unpaid' }
+                                return (
+                                  <div key={i.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '10px', flexWrap: 'wrap', padding: '10px 0', borderTop: ii ? `1px solid ${CREAM}` : 'none' }}>
+                                    <div style={{ minWidth: '140px' }}>
+                                      <div style={{ fontWeight: 600, color: INK, fontSize: '14px' }}>{m0(i.amount)}<span style={{ fontFamily: MONO, fontSize: '11px', color: '#BFB096', marginLeft: '8px' }}>{fmtD(i.date)}</span></div>
+                                      <div style={{ fontSize: '12px', color: MUTED, marginTop: '2px' }}>{i.description || (i.units && i.unitPrice ? `${i.units} × ${money(i.unitPrice)}` : '—')}{i.dueDate ? ` · due ${fmtD(i.dueDate)}` : ''}</div>
+                                    </div>
+                                    <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                                      <span style={{ fontFamily: "'Inter', sans-serif", fontSize: '11px', fontWeight: 600, color: '#fff', background: pill.c, padding: '4px 10px', borderRadius: '2px', whiteSpace: 'nowrap' }}>{pill.t}</span>
+                                      <button onClick={() => markInvoicePaid(i.id, i.status !== 'paid')} style={{ background: i.status === 'paid' ? 'none' : GREEN, color: i.status === 'paid' ? MUTED : '#fff', border: i.status === 'paid' ? `1px solid ${BORDER}` : 'none', borderRadius: '2px', padding: '6px 12px', ...btn, fontSize: '12px' }}>{i.status === 'paid' ? 'Mark unpaid' : 'Mark paid'}</button>
+                                    </div>
+                                  </div>
+                                )
+                              })}
+
+                            <div style={{ ...lbl, margin: '18px 0 8px' }}>Add invoice</div>
+                            <div style={{ background: CREAM, borderRadius: '2px', padding: '14px 16px' }}>
+                              <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+                                <input value={dv(`inv_${c.id}_units`)} onChange={e => setDv(`inv_${c.id}_units`, e.target.value)} type="number" placeholder="Units" style={{ ...inp, flex: 1, minWidth: '90px' }} />
+                                <input value={dv(`inv_${c.id}_price`)} onChange={e => setDv(`inv_${c.id}_price`, e.target.value)} type="number" placeholder="$ / unit" style={{ ...inp, flex: 1, minWidth: '90px' }} />
+                                <input value={dv(`inv_${c.id}_amt`)} onChange={e => setDv(`inv_${c.id}_amt`, e.target.value)} type="number" placeholder="or $ amount" style={{ ...inp, flex: 1, minWidth: '110px' }} />
+                              </div>
+                              <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', marginTop: '8px' }}>
+                                <input value={dv(`inv_${c.id}_date`)} onChange={e => setDv(`inv_${c.id}_date`, e.target.value)} type="date" placeholder="Invoice date" style={{ ...inp, flex: 1, minWidth: '130px' }} />
+                                <input value={dv(`inv_${c.id}_due`)} onChange={e => setDv(`inv_${c.id}_due`, e.target.value)} type="date" placeholder="Due date" style={{ ...inp, flex: 1, minWidth: '130px' }} />
+                              </div>
+                              <input value={dv(`inv_${c.id}_desc`)} onChange={e => setDv(`inv_${c.id}_desc`, e.target.value)} placeholder="Description (optional)" style={{ ...inp, width: '100%', marginTop: '8px' }} />
+                              <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap', marginTop: '10px' }}>
+                                <span style={{ fontSize: '12px', color: MUTED }}>
+                                  {uAmt > 0 ? <>Amount: <b style={{ color: INK }}>{m0(uAmt)}</b> (manual)</> : (uUnits && uPrice) ? <><b style={{ color: INK }}>{uUnits} × {money(uPrice)}</b> = <b style={{ color: INK }}>{m0(preview)}</b></> : <>Enter units × price, or a manual amount</>}
+                                </span>
+                                <button onClick={() => addInvoice(c.id)} style={{ marginLeft: 'auto', background: SPICE, color: '#fff', border: 'none', borderRadius: '2px', padding: '10px 18px', ...btn }}>Add invoice</button>
+                              </div>
+                              <p style={{ fontSize: '11px', color: '#A2937A', marginTop: '8px', lineHeight: 1.5 }}>Amount uses the manual $ if you enter one; otherwise units × price. Invoice date defaults to today.</p>
+                            </div>
+                          </div>
+                        )}
                       </div>
                     </Fragment>
                   )
