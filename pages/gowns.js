@@ -1575,8 +1575,9 @@ export default function Gowns() {
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
                   {orderList.map(({ o, pending, total }) => (
                     <div key={o.id} className="gw-card" style={{ padding: '14px 16px', borderLeft: `4px solid ${pending > 0 ? ROSE : (total > 0 ? GREEN : '#D9CFC8')}` }}>
-                      <div className="gw-press" onClick={() => openOrder(o)} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '10px', cursor: 'pointer' }}>
-                        <div style={{ minWidth: 0 }}>
+                      <div className="gw-press" onClick={() => openOrder(o)} style={{ display: 'flex', alignItems: 'flex-start', gap: '10px', cursor: 'pointer' }}>
+                        {o.photos?.length > 0 && <img src={o.photos[0].url} alt="" style={{ width: '48px', height: '48px', objectFit: 'cover', borderRadius: '8px', flexShrink: 0, border: `1px solid ${GRID}` }} />}
+                        <div style={{ minWidth: 0, flex: 1 }}>
                           <div style={{ fontSize: '17px', fontWeight: 700, color: INK }}>{fullName(o) || '—'} <span style={{ fontSize: '12px', fontWeight: 800, color: REDNO }}>No. {o.orderNo}</span></div>
                           <div style={{ fontSize: '12px', color: MUTED, marginTop: '2px' }}>{fmtDate(o.date)}{o.phone ? ` · ${o.phone}` : ''}</div>
                         </div>
