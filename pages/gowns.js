@@ -1573,15 +1573,17 @@ export default function Gowns() {
               ) : (
                 <div className="gw-card" style={{ overflow: 'hidden', padding: 0 }}>
                   {orderList.map(({ o, pending, total }) => (
-                    <div key={o.id} className="gw-press" onClick={() => openOrder(o)} style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '12px 14px', cursor: 'pointer', borderLeft: `4px solid ${pending > 0 ? ROSE : (total > 0 ? GREEN : '#D9CFC8')}`, borderBottom: `1px solid ${CREAM}`, background: '#fff' }}>
+                    <div key={o.id} className="gw-press" onClick={() => openOrder(o)} style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '11px 14px', cursor: 'pointer', borderLeft: `4px solid ${pending > 0 ? ROSE : (total > 0 ? GREEN : '#D9CFC8')}`, borderBottom: `1px solid ${CREAM}`, background: '#fff' }}>
                       <div style={{ minWidth: 0, flex: 1 }}>
                         <div style={{ display: 'flex', alignItems: 'baseline', gap: '8px' }}>
                           <span style={{ fontSize: '16px', fontWeight: 700, color: INK, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{fullName(o) || '—'}</span>
                           <span style={{ fontSize: '12px', fontWeight: 800, color: REDNO, whiteSpace: 'nowrap' }}>No. {o.orderNo}</span>
                         </div>
-                        <div style={{ fontSize: '12px', color: MUTED, marginTop: '2px' }}>{total === 0 ? 'No alterations yet' : `${total} alteration${total > 1 ? 's' : ''} · ${total - pending} done`}</div>
+                        <div style={{ fontSize: '12px', color: MUTED, marginTop: '2px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{fmtDate(o.date)}{o.phone ? ` · ${o.phone}` : ''}{total > 0 ? ` · ✂ ${total}` : ''}</div>
                       </div>
-                      <span style={{ fontSize: '12px', fontWeight: 700, color: pending > 0 ? AMBER : GREEN, whiteSpace: 'nowrap' }}>{pending > 0 ? `${pending} to do` : (total > 0 ? 'All done ✓' : '—')}</span>
+                      <div style={{ textAlign: 'right', flexShrink: 0 }}>
+                        <div style={{ fontSize: '13px', fontWeight: 700, color: pending > 0 ? AMBER : GREEN }}>{pending > 0 ? `${pending} to do` : (total > 0 ? 'All done ✓' : '—')}</div>
+                      </div>
                     </div>
                   ))}
                 </div>
