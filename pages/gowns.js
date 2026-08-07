@@ -362,6 +362,11 @@ export default function Gowns() {
     }
     return saved
   }
+  const printReceipt = (o) => {
+    const win = window.open('', '_blank')
+    win.document.write(`<!DOCTYPE html><html><head><title>${BIZ} — Receipt${o.orderNo ? ' No. ' + o.orderNo : ''}</title><style>*{box-sizing:border-box}@media print{body{margin:0}}</style></head><body style="padding:24px;">${buildReceiptHtml(o)}</body></html>`)
+    win.document.close(); win.focus(); setTimeout(() => win.print(), 400)
+  }
   const emailReceipt = async () => {
     if (!form.email?.trim()) { alert("Add the customer's email to the order first (the Email field), then try again."); return }
     const saved = await save(true)   // persist + get assigned order #
@@ -1429,8 +1434,9 @@ export default function Gowns() {
               )}
             </div>
 
-            <div style={{ display: 'flex', gap: '10px' }}>
-              <button className="gw-press" onClick={() => save(true)} style={{ ...primaryBtn, flex: 1 }}>{justSaved ? 'Saved ✓' : 'Save'}</button>
+            <button className="gw-press" onClick={() => save(true)} style={{ ...primaryBtn, width: '100%' }}>{justSaved ? 'Saved ✓' : 'Save'}</button>
+            <div style={{ display: 'flex', gap: '10px', marginTop: '10px' }}>
+              <button className="gw-press" onClick={() => printReceipt(form)} style={{ ...primaryBtn, flex: 1, background: '#fff', color: PAD, border: `1.5px solid ${PAD}` }}>🖨 Print receipt</button>
               <button className="gw-press" onClick={emailReceipt} disabled={emailing} style={{ ...primaryBtn, flex: 1, background: emailing ? '#B9A9C6' : '#6D4C8E' }}>{emailing ? 'Sending…' : '✉ Email receipt'}</button>
             </div>
             <button onClick={() => { setView('list'); window.scrollTo(0, 0) }} style={{ ...ghostBtn, marginTop: '10px', border: 'none', color: MUTED }}>← Back to all orders</button>
