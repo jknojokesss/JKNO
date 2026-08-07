@@ -122,6 +122,7 @@ const toDB = (o, userId) => ({
   notes: o.notes || '', tax_rate: o.taxRate || DEFAULT_TAX_RATE,
   follow_up_date: o.followUpDate || null, todos: o.todos || [],
   sales_order: o.salesOrder || {},
+  photos: o.photos || [],
   saved_at: new Date().toISOString(),
 })
 const fromDB = (r) => ({
@@ -138,6 +139,7 @@ const fromDB = (r) => ({
   notes: r.notes, taxRate: r.tax_rate,
   followUpDate: r.follow_up_date, todos: r.todos || [],
   salesOrder: r.sales_order || {},
+  photos: r.photos || [],
   savedAt: new Date(r.saved_at).getTime(),
 })
 
@@ -149,7 +151,7 @@ const blankForm = () => ({
   date: todayStr(),
   items: [blankRow(), blankRow(), blankRow()],
   payments: [], alterations: false, alterationsList: [], notes: '',
-  todos: [], taxRate: DEFAULT_TAX_RATE, salesOrder: {},
+  todos: [], taxRate: DEFAULT_TAX_RATE, salesOrder: {}, photos: [],
 })
 
 export default function Gowns() {
@@ -177,6 +179,7 @@ export default function Gowns() {
   const [newCatalogItem, setNewCatalogItem] = useState({ no: '', desc: '', taxable: true, alteration: false })
   const [showSales, setShowSales] = useState(false)
   const [emailing, setEmailing] = useState(false)
+  const [uploading, setUploading] = useState(false)
   const [justSaved, setJustSaved] = useState(false)
   const [todoInput, setTodoInput] = useState({})
   const [formTodo, setFormTodo] = useState({ text: '', assignee: '', date: '' })
@@ -258,6 +261,40 @@ export default function Gowns() {
   const setF = (k, v) => setForm(f => ({ ...f, [k]: v }))
   const setSales = (k, v) => setForm(f => ({ ...f, salesOrder: { ...(f.salesOrder || {}), [k]: v } }))
   const soLbl = { fontSize: '12px', fontWeight: 600, color: MUTED, marginBottom: '4px' }
+
+  // ── Photo upload (Supabase Storage) ──
+  const uploadPhoto = async (file) => {
+    if (!file) return null
+    setUploading(true)
+    try {
+      const ext = (file.name.split('.').pop() || 'jpg').toLowerCase().replace(/[^a-z0-9]/g, '') || 'jpg'
+      const path = `${form.id || 'misc'}/${uid()}.${ext}`
+      const { error } = await supabase.storage.from('gown-photos').upload(path, file, { cacheControl: '3600', upsert: false })
+      if (error) { alert('Photo upload failed: ' + error.message); return null }
+      const { data } = supabase.storage.from('gown-photos').getPublicUrl(path)
+      return { path, url: data.publicUrl }
+    } catch (e) { alert('Photo upload failed: ' + e.message); return null }
+    finally { setUploading(false) }
+  }
+  // Reusable thumbnail strip + add-photo button. `onChange` receives the new photo array.
+  const photoStrip = (photos, onChange) => (
+    <div>
+      {(photos || []).length > 0 && (
+        <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', marginBottom: '8px' }}>
+          {(photos || []).map(p => (
+            <div key={p.path} style={{ position: 'relative' }}>
+              <a href={p.url} target="_blank" rel="noreferrer"><img src={p.url} alt="" style={{ width: '68px', height: '68px', objectFit: 'cover', borderRadius: '8px', border: `1px solid ${GRID}` }} /></a>
+              <button onClick={() => onChange((photos || []).filter(x => x.path !== p.path))} title="Remove" style={{ position: 'absolute', top: '-7px', right: '-7px', width: '20px', height: '20px', borderRadius: '50%', border: 'none', background: '#C0504C', color: '#fff', fontSize: '12px', cursor: 'pointer', lineHeight: 1 }}>×</button>
+            </div>
+          ))}
+        </div>
+      )}
+      <label className="gw-press" style={{ display: 'inline-block', padding: '8px 14px', fontSize: '13px', fontWeight: 600, color: PAD, background: '#F6F9FE', border: `1.5px solid ${PAD}`, borderRadius: '10px', cursor: uploading ? 'wait' : 'pointer' }}>
+        {uploading ? 'Uploading…' : '📷 Add photo'}
+        <input type="file" accept="image/*" disabled={uploading} style={{ display: 'none' }} onChange={async e => { const f = e.target.files?.[0]; e.target.value = ''; const ph = await uploadPhoto(f); if (ph) onChange([...(photos || []), ph]) }} />
+      </label>
+    </div>
+  )
   const setItem = (id, k, v) => setForm(f => ({ ...f, items: f.items.map(it => it.id === id ? { ...it, [k]: v } : it) }))
   const onItemNo = (id, val) => {
     setItem(id, 'itemNo', val)
@@ -1369,6 +1406,10 @@ export default function Gowns() {
                         <div style={{ fontSize: '12px', fontWeight: 600, color: ROSE_DK, marginBottom: '5px' }}>Due</div>
                         <input type="date" value={a.due || ''} onChange={e => setAlterationField(a.id, 'due', e.target.value)} style={fieldIn} />
                       </div>
+                      <div style={{ marginTop: '10px' }}>
+                        <div style={{ fontSize: '12px', fontWeight: 600, color: ROSE_DK, marginBottom: '5px' }}>Photos</div>
+                        {photoStrip(a.photos, (p) => setAlterationField(a.id, 'photos', p))}
+                      </div>
                       {(a.assignee || a.hours) && (
                         <div style={{ fontSize: '12px', color: MUTED, marginTop: '8px' }}>
                           {a.assignee ? `Worker: ${a.assignee}` : ''}{a.assignee && a.hours ? ' · ' : ''}{a.hours ? `${a.hours} hrs` : ''}
@@ -1390,6 +1431,12 @@ export default function Gowns() {
               <div style={{ fontSize: '13px', fontWeight: 600, color: MUTED, margin: '16px 0 7px', textTransform: 'uppercase', letterSpacing: '0.04em' }}>Notes</div>
               <textarea value={form.notes} onChange={e => setF('notes', e.target.value)} rows={2} placeholder="Pickup Thursday, etc."
                 style={{ ...fieldIn, resize: 'vertical', lineHeight: 1.5 }} />
+            </div>
+
+            {/* Photos */}
+            <div className="gw-card" style={{ padding: '16px 18px', marginTop: '14px' }}>
+              <div style={{ fontSize: '13px', fontWeight: 700, color: MUTED, marginBottom: '10px', textTransform: 'uppercase', letterSpacing: '0.04em' }}>Photos</div>
+              {photoStrip(form.photos, (p) => setF('photos', p))}
             </div>
 
             {/* Tasks */}
@@ -1611,6 +1658,11 @@ export default function Gowns() {
                 </div>
               )}
 
+              <div className="gw-card" style={{ padding: '16px 18px', marginBottom: '14px' }}>
+                <div style={{ fontSize: '13px', fontWeight: 700, color: MUTED, marginBottom: '10px', textTransform: 'uppercase', letterSpacing: '0.04em' }}>Photos</div>
+                {photoStrip(form.photos, (p) => setF('photos', p))}
+              </div>
+
               <div className="gw-card" style={{ padding: '16px 18px', marginBottom: '16px' }}>
                 <div style={{ fontSize: '13px', fontWeight: 700, color: ROSE_DK, textTransform: 'uppercase', letterSpacing: '0.04em', marginBottom: '10px' }}>✂ Alterations</div>
                 {(form.alterationsList || []).length === 0 && <div style={{ fontSize: '13px', color: MUTED, marginBottom: '10px' }}>None yet. Add one below — including for garments the customer brought in.</div>}
@@ -1641,6 +1693,10 @@ export default function Gowns() {
                         <div style={{ fontSize: '12px', fontWeight: 600, color: ROSE_DK, marginBottom: '5px' }}>Due</div>
                         <input type="date" value={a.due || ''} onChange={e => setAlterationField(a.id, 'due', e.target.value)} style={fieldIn} />
                       </div>
+                    </div>
+                    <div style={{ marginTop: '10px' }}>
+                      <div style={{ fontSize: '12px', fontWeight: 600, color: ROSE_DK, marginBottom: '5px' }}>Photos</div>
+                      {photoStrip(a.photos, (p) => setAlterationField(a.id, 'photos', p))}
                     </div>
                     <button onClick={() => setAlterationField(a.id, 'done', !a.done)} className="gw-press" style={{ width: '100%', display: 'flex', alignItems: 'center', gap: '12px', padding: '10px 14px', marginTop: '10px', border: `1.5px solid ${a.done ? GREEN : '#E2D7D1'}`, background: a.done ? '#E7F4EC' : '#fff', borderRadius: '12px', cursor: 'pointer', fontFamily: 'inherit' }}>
                       <span style={{ width: '22px', height: '22px', borderRadius: '7px', border: `2px solid ${a.done ? GREEN : '#CDBFBA'}`, background: a.done ? GREEN : '#fff', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '14px', flexShrink: 0 }}>{a.done ? '✓' : ''}</span>
