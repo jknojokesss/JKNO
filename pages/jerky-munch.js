@@ -656,7 +656,7 @@ export default function JerkyMunch() {
     </select>
   )
 
-  const TABS = [['overview', 'Overview'], ['consign', 'Consignment'], ['invoices', 'Invoice Stores'], ['ads', 'Advertising'], ['quickbooks', 'QuickBooks'], ['financials', 'Financials']]
+  const TABS = [['overview', 'Overview'], ['consign', 'Consignment'], ['invoices', 'Invoice Stores'], ['ads', 'Advertising'], ['financials', 'Financials']]
   const EXTRA = [['expenses', 'Import expenses'], ['quickbooks', 'QuickBooks sync'], ['close', 'Monthly close'], ['askai', 'Ask Us']]
   const currentLabel = ([...TABS, ...EXTRA].find(t => t[0] === tab) || ['', ''])[1]
 
