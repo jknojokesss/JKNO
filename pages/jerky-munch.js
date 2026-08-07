@@ -71,7 +71,7 @@ const Bag = ({ color }) => (
 const MONO = "'IBM Plex Mono', monospace"
 
 export default function JerkyMunch() {
-  const [tab, setTab] = useState('quickbooks')   // Books (QuickBooks) is the financial home
+  const [tab, setTab] = useState('overview')
   const [consign, setConsign] = useState([])
   const [direct, setDirect] = useState([])
   const [ads, setAds] = useState([])
@@ -629,7 +629,7 @@ export default function JerkyMunch() {
     </select>
   )
 
-  const TABS = [['quickbooks', 'Books'], ['overview', 'Overview'], ['consign', 'Consignment'], ['invoices', 'Invoice stores'], ['direct', 'Direct Sales'], ['ads', 'Advertising']]
+  const TABS = [['overview', 'Overview'], ['quickbooks', 'Books'], ['consign', 'Consignment'], ['invoices', 'Invoice stores'], ['direct', 'Direct Sales'], ['ads', 'Advertising']]
   const EXTRA = [['expenses', 'Import expenses'], ['quickbooks', 'QuickBooks sync'], ['close', 'Monthly close'], ['askai', 'Ask Us']]
   const currentLabel = ([...TABS, ...EXTRA].find(t => t[0] === tab) || ['', ''])[1]
 
