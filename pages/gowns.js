@@ -280,11 +280,12 @@ export default function Gowns() {
   const photoStrip = (photos, onChange) => (
     <div>
       {(photos || []).length > 0 && (
-        <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', marginBottom: '8px' }}>
+        <div style={{ display: 'flex', gap: '14px', flexWrap: 'wrap', marginBottom: '8px' }}>
           {(photos || []).map(p => (
-            <div key={p.path} style={{ position: 'relative' }}>
-              <a href={p.url} target="_blank" rel="noreferrer"><img src={p.url} alt="" style={{ width: '68px', height: '68px', objectFit: 'cover', borderRadius: '8px', border: `1px solid ${GRID}` }} /></a>
-              <button onClick={() => onChange((photos || []).filter(x => x.path !== p.path))} title="Remove" style={{ position: 'absolute', top: '-7px', right: '-7px', width: '20px', height: '20px', borderRadius: '50%', border: 'none', background: '#C0504C', color: '#fff', fontSize: '12px', cursor: 'pointer', lineHeight: 1 }}>×</button>
+            <div key={p.path} style={{ position: 'relative', width: '72px' }}>
+              <img src={p.url} alt="" onClick={() => window.open(p.url, '_blank')} style={{ width: '72px', height: '72px', objectFit: 'cover', borderRadius: '8px', border: `1px solid ${GRID}`, display: 'block', cursor: 'pointer' }} />
+              <button type="button" onClick={(e) => { e.preventDefault(); e.stopPropagation(); onChange((photos || []).filter(x => x.path !== p.path)) }} title="Remove photo"
+                style={{ position: 'absolute', top: '-9px', right: '-9px', width: '28px', height: '28px', borderRadius: '50%', border: '2px solid #fff', background: '#C0504C', color: '#fff', fontSize: '16px', fontWeight: 700, cursor: 'pointer', lineHeight: 1, zIndex: 3, display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 1px 4px rgba(0,0,0,0.3)' }}>×</button>
             </div>
           ))}
         </div>
