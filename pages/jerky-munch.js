@@ -192,8 +192,17 @@ export default function JerkyMunch() {
   }
   const loadGL = async () => {
     try {
-      const { data } = await jerkySupabase.from('gl_transactions').select('*').order('txn_date')
-      setGlTx(data || [])
+      // Supabase caps a select at 1000 rows — page through until exhausted.
+      const all = []
+      const size = 1000
+      for (let from = 0; ; from += size) {
+        const { data, error } = await jerkySupabase
+          .from('gl_transactions').select('*').order('txn_date').range(from, from + size - 1)
+        if (error) throw error
+        all.push(...(data || []))
+        if (!data || data.length < size) break
+      }
+      setGlTx(all)
     } catch (e) { console.error('loadGL failed', e); setGlTx([]) }
   }
   const loadCoA = async () => {
