@@ -1571,19 +1571,31 @@ export default function Gowns() {
               {workView === 'orders' && (orderList.length === 0 ? (
                 <div className="gw-card" style={{ padding: '40px 24px', textAlign: 'center', color: MUTED }}>{orders.length ? 'No matching customers.' : 'No orders yet.'}</div>
               ) : (
-                <div className="gw-card" style={{ overflow: 'hidden', padding: 0 }}>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
                   {orderList.map(({ o, pending, total }) => (
-                    <div key={o.id} className="gw-press" onClick={() => openOrder(o)} style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '11px 14px', cursor: 'pointer', borderLeft: `4px solid ${pending > 0 ? ROSE : (total > 0 ? GREEN : '#D9CFC8')}`, borderBottom: `1px solid ${CREAM}`, background: '#fff' }}>
-                      <div style={{ minWidth: 0, flex: 1 }}>
-                        <div style={{ display: 'flex', alignItems: 'baseline', gap: '8px' }}>
-                          <span style={{ fontSize: '16px', fontWeight: 700, color: INK, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{fullName(o) || '—'}</span>
-                          <span style={{ fontSize: '12px', fontWeight: 800, color: REDNO, whiteSpace: 'nowrap' }}>No. {o.orderNo}</span>
+                    <div key={o.id} className="gw-card" style={{ padding: '14px 16px', borderLeft: `4px solid ${pending > 0 ? ROSE : (total > 0 ? GREEN : '#D9CFC8')}` }}>
+                      <div className="gw-press" onClick={() => openOrder(o)} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '10px', cursor: 'pointer' }}>
+                        <div style={{ minWidth: 0 }}>
+                          <div style={{ fontSize: '17px', fontWeight: 700, color: INK }}>{fullName(o) || '—'} <span style={{ fontSize: '12px', fontWeight: 800, color: REDNO }}>No. {o.orderNo}</span></div>
+                          <div style={{ fontSize: '12px', color: MUTED, marginTop: '2px' }}>{fmtDate(o.date)}{o.phone ? ` · ${o.phone}` : ''}</div>
                         </div>
-                        <div style={{ fontSize: '12px', color: MUTED, marginTop: '2px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{fmtDate(o.date)}{o.phone ? ` · ${o.phone}` : ''}{total > 0 ? ` · ✂ ${total}` : ''}</div>
+                        <span style={{ fontSize: '12px', fontWeight: 700, color: pending > 0 ? AMBER : GREEN, whiteSpace: 'nowrap', flexShrink: 0 }}>{pending > 0 ? `${pending} to do` : (total > 0 ? 'All done ✓' : '—')}</span>
                       </div>
-                      <div style={{ textAlign: 'right', flexShrink: 0 }}>
-                        <div style={{ fontSize: '13px', fontWeight: 700, color: pending > 0 ? AMBER : GREEN }}>{pending > 0 ? `${pending} to do` : (total > 0 ? 'All done ✓' : '—')}</div>
-                      </div>
+                      {total > 0 && (
+                        <div style={{ marginTop: '10px', display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                          {(o.alterationsList || []).map(a => (
+                            <div key={a.id} style={{ display: 'grid', gridTemplateColumns: '1fr auto', gap: '8px', alignItems: 'center', padding: '7px 10px', background: a.done ? '#F5F2EF' : '#FBEAF0', borderRadius: '8px' }}>
+                              <div style={{ minWidth: 0 }}>
+                                <div style={{ fontSize: '13px', color: a.done ? MUTED : INK, textDecoration: a.done ? 'line-through' : 'none' }}>{a.garment ? a.garment + ' — ' : ''}{a.note || 'Alteration'}</div>
+                                <div style={{ fontSize: '11px', color: MUTED, marginTop: '1px' }}>{[a.assignee, a.hours ? `${a.hours}h` : '', a.due ? `due ${fmtShort(a.due)}` : ''].filter(Boolean).join(' · ') || 'unassigned'}</div>
+                              </div>
+                              {a.done
+                                ? <span style={{ fontSize: '12px', color: GREEN, fontWeight: 700 }}>✓</span>
+                                : <input type="checkbox" checked={false} onChange={() => markDone(o.id, a.id)} title="Mark done" style={{ width: '16px', height: '16px', accentColor: PAD, cursor: 'pointer' }} />}
+                            </div>
+                          ))}
+                        </div>
+                      )}
                     </div>
                   ))}
                 </div>
