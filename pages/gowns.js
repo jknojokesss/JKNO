@@ -456,7 +456,7 @@ export default function Gowns() {
       setOrders(prev => [saved, ...prev.filter(o => o.id !== saved.id)])
       setForm(f => ({ ...f, id: saved.id, orderNo: saved.orderNo })); setEditing(true)
     } else {
-      await patchOrder(form.id, { alterationsList: form.alterationsList })
+      await patchOrder(form.id, { alterationsList: form.alterationsList, photos: form.photos })
     }
     setJustSaved(true); setTimeout(() => setJustSaved(false), 1800)
   }
