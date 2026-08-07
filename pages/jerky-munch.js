@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect, Fragment } from 'react'
 import Head from 'next/head'
 import { jerkySupabase } from '../lib/supabaseJerky'
-import { parseGL, parseCoA, buildPnl } from '../lib/jerkyGL'
+import { parseGL, parseCoA, buildPnl, buildBalanceSheet, buildCashFlow } from '../lib/jerkyGL'
 
 const CHAR = '#2B2018', SPICE = '#C8462C', KRAFT = '#A9763A', CREAM = '#F6F0E6'
 const INK = '#2B2018', MUTED = '#8A7A66', GREEN = '#3E7C4F', BORDER = '#E6DBC8', AMBER = '#C98A2A', RED = '#C03A22'
@@ -91,6 +91,11 @@ export default function JerkyMunch() {
   const [pnlView, setPnlView] = useState('single')
   const [rangeStart, setRangeStart] = useState(0)
   const [rangeEnd, setRangeEnd] = useState(99)
+  // Financials tab (real books): which statement + P&L view mode + month pickers
+  const [finView, setFinView] = useState('pnl')       // 'pnl' | 'bs' | 'cf'
+  const [finMode, setFinMode] = useState('monthly')   // 'monthly' | 'compare' | 'range'
+  const [finA, setFinA] = useState(0)                 // month index A (compare/range start)
+  const [finB, setFinB] = useState(0)                 // month index B (compare/range end)
   const [period, setPeriod] = useState('month')
   const [costPerBag, setCostPerBag] = useState(4.5)
   const [boardsProducts, setBoardsProducts] = useState([])
@@ -558,7 +563,20 @@ export default function JerkyMunch() {
 
   // real books, derived from the imported QuickBooks GL + Chart of Accounts
   const glPnl = glTx.length ? buildPnl(glTx, coaTx) : null
+  const glBS = glTx.length ? buildBalanceSheet(glTx, coaTx) : null
+  const glCF = glTx.length ? buildCashFlow(glTx, coaTx) : null
   const glAsOf = glPnl && glPnl.lastDate ? new Date(glPnl.lastDate + 'T00:00:00').toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' }) : ''
+  // clamp the Financials month pickers to the available months
+  const finMonths = glPnl ? glPnl.months : []
+  const fA = Math.min(finA, Math.max(finMonths.length - 1, 0))
+  const fB = Math.min(finB, Math.max(finMonths.length - 1, 0))
+  const finAgg = (a, b) => {
+    const lo = Math.min(a, b), hi = Math.max(a, b)
+    const slice = finMonths.slice(lo, hi + 1)
+    const s = { income: 0, cogs: 0, gross: 0, opex: 0, net: 0 }
+    slice.forEach(m => { s.income += m.income; s.cogs += m.cogs; s.gross += m.gross; s.opex += m.opex; s.net += m.net })
+    return s
+  }
   const rngPct = (n) => rngAgg.rev ? Math.round(n / rngAgg.rev * 100) : 0
   const rngMonthCount = rngB - rngA + 1
 
@@ -638,7 +656,7 @@ export default function JerkyMunch() {
     </select>
   )
 
-  const TABS = [['overview', 'Overview'], ['quickbooks', 'Books'], ['consign', 'Consignment'], ['invoices', 'Invoice Stores'], ['ads', 'Advertising']]
+  const TABS = [['overview', 'Overview'], ['consign', 'Consignment'], ['invoices', 'Invoice Stores'], ['ads', 'Advertising'], ['quickbooks', 'QuickBooks'], ['financials', 'Financials']]
   const EXTRA = [['expenses', 'Import expenses'], ['quickbooks', 'QuickBooks sync'], ['close', 'Monthly close'], ['askai', 'Ask Us']]
   const currentLabel = ([...TABS, ...EXTRA].find(t => t[0] === tab) || ['', ''])[1]
 
@@ -1440,7 +1458,7 @@ export default function JerkyMunch() {
                   <div style={{ width: '44px', height: '44px', borderRadius: '2px', background: '#2CA01C', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', ...big, fontSize: '19px' }}>qb</div>
                   <div>
                     <div style={{ ...big, fontSize: '18px', color: INK }}>Your books, from QuickBooks</div>
-                    <div style={{ fontSize: '12.5px', color: MUTED, marginTop: '2px' }}>Drop the two exports in — the P&amp;L below rebuilds from them.</div>
+                    <div style={{ fontSize: '12.5px', color: MUTED, marginTop: '2px' }}>Drop the two exports in — your statements live on the Financials tab.</div>
                   </div>
                   {glAsOf && (
                     <div style={{ marginLeft: 'auto', textAlign: 'right' }}>
@@ -1482,77 +1500,199 @@ export default function JerkyMunch() {
 
               {glPnl ? (
                 <>
-                  <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap', margin: '4px 0 16px' }}>
-                    <KPI k="Revenue" v={m0(glPnl.annual.income)} sub="all channels, YTD" accent={GREEN} />
-                    <KPI k="Gross profit" v={m0(glPnl.annual.gross)} sub={glPnl.annual.income ? `${Math.round(glPnl.annual.gross / glPnl.annual.income * 100)}% margin` : ''} accent={KRAFT} />
-                    <KPI k="Net profit" v={m0(glPnl.annual.net)} sub="after all costs" accent={glPnl.annual.net >= 0 ? GREEN : RED} />
+                  <div style={{ ...card, background: '#FBF3E7', borderColor: '#EAD9BD', fontSize: '12.5px', color: INK, lineHeight: 1.5, marginBottom: '14px' }}>
+                    Ledger loaded through <b>{glAsOf}</b> · {glPnl.rowCount.toLocaleString()} transactions · {coaTx.length} accounts. Reconciled through <b>June</b> — July and August are partial until QuickBooks is caught up{glPnl.usedCoA ? '' : ' — and no Chart of Accounts is loaded yet, so categorization is best-guess'}.
                   </div>
-
-                  <div style={{ ...card, background: '#FBF3E7', borderColor: '#EAD9BD', fontSize: '12.5px', color: INK, lineHeight: 1.5, marginBottom: '16px' }}>
-                    Ledger loaded through <b>{glAsOf}</b>. Reconciled through <b>June</b> — July and August are partial until QuickBooks is caught up{glPnl.usedCoA ? '' : ' — and no Chart of Accounts is loaded yet, so categorization is best-guess'}.
-                  </div>
-
-                  <div style={{ ...card, marginBottom: '16px', overflowX: 'auto' }}>
-                    <div style={{ ...lbl, color: KRAFT, marginBottom: '8px' }}>Monthly P&amp;L</div>
-                    <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '13px' }}>
-                      <thead>
-                        <tr style={{ color: MUTED, textAlign: 'right' }}>
-                          <th style={{ textAlign: 'left', padding: '4px 6px', fontWeight: 600 }}>Month</th>
-                          <th style={{ padding: '4px 6px', fontWeight: 600 }}>Income</th>
-                          <th style={{ padding: '4px 6px', fontWeight: 600 }}>COGS</th>
-                          <th style={{ padding: '4px 6px', fontWeight: 600 }}>Gross</th>
-                          <th style={{ padding: '4px 6px', fontWeight: 600 }}>OpEx</th>
-                          <th style={{ padding: '4px 6px', fontWeight: 600 }}>Net</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {glPnl.months.map((m) => (
-                          <tr key={m.key} style={{ borderTop: `1px solid ${BORDER}`, fontFamily: MONO, textAlign: 'right' }}>
-                            <td style={{ textAlign: 'left', padding: '6px', fontFamily: 'inherit', color: INK }}>{m.label}</td>
-                            <td style={{ padding: '6px' }}>{m0(m.income)}</td>
-                            <td style={{ padding: '6px', color: MUTED }}>{m0(m.cogs)}</td>
-                            <td style={{ padding: '6px' }}>{m0(m.gross)}</td>
-                            <td style={{ padding: '6px', color: MUTED }}>{m0(m.opex)}</td>
-                            <td style={{ padding: '6px', color: m.net >= 0 ? GREEN : RED, fontWeight: 700 }}>{m0(m.net)}</td>
-                          </tr>
-                        ))}
-                        <tr style={{ borderTop: `2px solid ${CHAR}`, fontFamily: MONO, textAlign: 'right', fontWeight: 700 }}>
-                          <td style={{ textAlign: 'left', padding: '7px 6px', fontFamily: 'inherit', color: INK }}>YTD total</td>
-                          <td style={{ padding: '7px 6px' }}>{m0(glPnl.annual.income)}</td>
-                          <td style={{ padding: '7px 6px' }}>{m0(glPnl.annual.cogs)}</td>
-                          <td style={{ padding: '7px 6px' }}>{m0(glPnl.annual.gross)}</td>
-                          <td style={{ padding: '7px 6px' }}>{m0(glPnl.annual.opex)}</td>
-                          <td style={{ padding: '7px 6px', color: glPnl.annual.net >= 0 ? GREEN : RED }}>{m0(glPnl.annual.net)}</td>
-                        </tr>
-                      </tbody>
-                    </table>
-                  </div>
-
-                  <div style={{ display: 'flex', gap: '16px', flexWrap: 'wrap' }}>
-                    <div style={{ ...card, flex: '1 1 260px' }}>
-                      <div style={{ ...lbl, color: KRAFT, marginBottom: '6px' }}>Revenue by channel</div>
-                      <Row l="Invoiced wholesale" v={m0(glPnl.channels.invoiced)} />
-                      <Row l="Private / Zelle" v={m0(glPnl.channels.private)} />
-                      <Row l="Shopify (online)" v={m0(glPnl.channels.shopify)} />
-                      <Row l="Consignment stores" v={m0(glPnl.channels.consignment)} />
-                      <Row l="Store deposits" v={m0(glPnl.channels.deposits)} />
-                    </div>
-                    <div style={{ ...card, flex: '1 1 260px' }}>
-                      <div style={{ ...lbl, color: KRAFT, marginBottom: '6px' }}>Top expenses</div>
-                      {glPnl.topExpenses.map((x) => <Row key={x.account} l={x.account} v={m0(x.amount)} />)}
-                    </div>
-                  </div>
-
                   {glPnl.unclassified.length > 0 && (
-                    <div style={{ ...card, marginTop: '12px', background: '#FDECEA', borderColor: '#F5C6C0', fontSize: '12.5px', color: INK }}>
+                    <div style={{ ...card, marginBottom: '14px', background: '#FDECEA', borderColor: '#F5C6C0', fontSize: '12.5px', color: INK }}>
                       {glPnl.unclassified.length} account(s) not in the Chart of Accounts — import an updated CoA to categorize them: <span style={{ fontFamily: MONO }}>{glPnl.unclassified.map(u => u.account).join(', ')}</span>
                     </div>
                   )}
+                  <button onClick={() => setTab('financials')} style={{ background: CHAR, color: CREAM, border: 'none', borderRadius: '2px', padding: '13px 20px', ...btn }}>View P&amp;L, Balance Sheet &amp; Cash Flow →</button>
                 </>
               ) : (
                 <div style={{ ...card, background: '#EAF3EC', borderColor: '#CFE4D6', fontSize: '13.5px', color: INK, lineHeight: 1.55 }}>
-                  Import your General Ledger above and your real P&amp;L — monthly, by channel, with net profit — shows up right here.
+                  Drop your Chart of Accounts and General Ledger in above. Your P&amp;L, Balance Sheet, and Cash Flow then live on the <b>Financials</b> tab.
                 </div>
+              )}
+            </>
+          )}
+
+          {/* ===== FINANCIALS (real statements from the GL) ===== */}
+          {tab === 'financials' && (
+            <>
+              {!glPnl ? (
+                <div style={{ ...card, background: '#EAF3EC', borderColor: '#CFE4D6', fontSize: '13.5px', color: INK, lineHeight: 1.55 }}>
+                  No books loaded yet. Import your Chart of Accounts and General Ledger on the <b style={{ cursor: 'pointer', color: SPICE }} onClick={() => setTab('quickbooks')}>QuickBooks</b> tab, then your statements appear here.
+                </div>
+              ) : (
+                <>
+                  <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', marginBottom: '14px' }}>
+                    {[['pnl', 'Profit & Loss'], ['bs', 'Balance Sheet'], ['cf', 'Cash Flow']].map(([id, label]) => (
+                      <button key={id} onClick={() => setFinView(id)} style={{ background: finView === id ? CHAR : CARDBG, color: finView === id ? CREAM : INK, border: `1px solid ${finView === id ? CHAR : BORDER}`, borderRadius: '2px', padding: '9px 16px', ...btn }}>{label}</button>
+                    ))}
+                  </div>
+
+                  <div style={{ ...card, background: '#FBF3E7', borderColor: '#EAD9BD', fontSize: '12px', color: INK, lineHeight: 1.5, marginBottom: '14px' }}>
+                    As of <b>{glAsOf}</b> · reconciled through <b>June</b> (July–August partial).
+                  </div>
+
+                  {/* ---- Profit & Loss ---- */}
+                  {finView === 'pnl' && (
+                    <>
+                      <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', marginBottom: '12px' }}>
+                        {[['monthly', 'Monthly'], ['compare', 'Compare'], ['range', 'Range']].map(([id, label]) => (
+                          <button key={id} onClick={() => setFinMode(id)} style={{ background: finMode === id ? KRAFT : CARDBG, color: finMode === id ? '#fff' : INK, border: `1px solid ${finMode === id ? KRAFT : BORDER}`, borderRadius: '2px', padding: '7px 14px', ...btn, fontSize: '12px' }}>{label}</button>
+                        ))}
+                      </div>
+
+                      {finMode === 'monthly' && (
+                        <div style={{ ...card, overflowX: 'auto' }}>
+                          <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '13px' }}>
+                            <thead>
+                              <tr style={{ color: MUTED, textAlign: 'right' }}>
+                                <th style={{ textAlign: 'left', padding: '4px 6px', fontWeight: 600 }}>Month</th>
+                                <th style={{ padding: '4px 6px', fontWeight: 600 }}>Income</th>
+                                <th style={{ padding: '4px 6px', fontWeight: 600 }}>COGS</th>
+                                <th style={{ padding: '4px 6px', fontWeight: 600 }}>Gross</th>
+                                <th style={{ padding: '4px 6px', fontWeight: 600 }}>OpEx</th>
+                                <th style={{ padding: '4px 6px', fontWeight: 600 }}>Net</th>
+                              </tr>
+                            </thead>
+                            <tbody>
+                              {glPnl.months.map((m) => (
+                                <tr key={m.key} style={{ borderTop: `1px solid ${BORDER}`, fontFamily: MONO, textAlign: 'right' }}>
+                                  <td style={{ textAlign: 'left', padding: '6px', fontFamily: 'inherit', color: INK }}>{m.label}</td>
+                                  <td style={{ padding: '6px' }}>{m0(m.income)}</td>
+                                  <td style={{ padding: '6px', color: MUTED }}>{m0(m.cogs)}</td>
+                                  <td style={{ padding: '6px' }}>{m0(m.gross)}</td>
+                                  <td style={{ padding: '6px', color: MUTED }}>{m0(m.opex)}</td>
+                                  <td style={{ padding: '6px', color: m.net >= 0 ? GREEN : RED, fontWeight: 700 }}>{m0(m.net)}</td>
+                                </tr>
+                              ))}
+                              <tr style={{ borderTop: `2px solid ${CHAR}`, fontFamily: MONO, textAlign: 'right', fontWeight: 700 }}>
+                                <td style={{ textAlign: 'left', padding: '7px 6px', fontFamily: 'inherit', color: INK }}>YTD total</td>
+                                <td style={{ padding: '7px 6px' }}>{m0(glPnl.annual.income)}</td>
+                                <td style={{ padding: '7px 6px' }}>{m0(glPnl.annual.cogs)}</td>
+                                <td style={{ padding: '7px 6px' }}>{m0(glPnl.annual.gross)}</td>
+                                <td style={{ padding: '7px 6px' }}>{m0(glPnl.annual.opex)}</td>
+                                <td style={{ padding: '7px 6px', color: glPnl.annual.net >= 0 ? GREEN : RED }}>{m0(glPnl.annual.net)}</td>
+                              </tr>
+                            </tbody>
+                          </table>
+                          <div style={{ display: 'flex', gap: '16px', flexWrap: 'wrap', marginTop: '16px' }}>
+                            <div style={{ flex: '1 1 240px' }}>
+                              <div style={{ ...lbl, color: KRAFT, marginBottom: '6px' }}>Revenue by channel</div>
+                              <Row l="Invoiced wholesale" v={m0(glPnl.channels.invoiced)} />
+                              <Row l="Private / Zelle" v={m0(glPnl.channels.private)} />
+                              <Row l="Shopify (online)" v={m0(glPnl.channels.shopify)} />
+                              <Row l="Consignment stores" v={m0(glPnl.channels.consignment)} />
+                              <Row l="Store deposits" v={m0(glPnl.channels.deposits)} />
+                            </div>
+                            <div style={{ flex: '1 1 240px' }}>
+                              <div style={{ ...lbl, color: KRAFT, marginBottom: '6px' }}>Top expenses</div>
+                              {glPnl.topExpenses.map((x) => <Row key={x.account} l={x.account} v={m0(x.amount)} />)}
+                            </div>
+                          </div>
+                        </div>
+                      )}
+
+                      {finMode === 'compare' && (() => {
+                        const A = finMonths[fA] || {}, B = finMonths[fB] || {}
+                        const d = (k) => (B[k] || 0) - (A[k] || 0)
+                        return (
+                          <div style={{ ...card }}>
+                            <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap', marginBottom: '14px' }}>
+                              <select value={fA} onChange={e => setFinA(+e.target.value)} style={{ ...inp }}>{finMonths.map((m, i) => <option key={i} value={i}>{m.label}</option>)}</select>
+                              <span style={{ alignSelf: 'center', color: MUTED }}>vs</span>
+                              <select value={fB} onChange={e => setFinB(+e.target.value)} style={{ ...inp }}>{finMonths.map((m, i) => <option key={i} value={i}>{m.label}</option>)}</select>
+                            </div>
+                            {[['income', 'Income'], ['cogs', 'COGS'], ['gross', 'Gross profit'], ['opex', 'Operating expenses'], ['net', 'Net profit']].map(([k, label]) => (
+                              <div key={k} style={{ display: 'flex', justifyContent: 'space-between', padding: '7px 0', borderTop: `1px solid ${BORDER}`, fontSize: '13px' }}>
+                                <span style={{ color: k === 'net' ? INK : MUTED, fontWeight: k === 'net' ? 700 : 400 }}>{label}</span>
+                                <span style={{ display: 'flex', gap: '18px', fontFamily: MONO }}>
+                                  <span style={{ width: '84px', textAlign: 'right', color: MUTED }}>{m0(A[k] || 0)}</span>
+                                  <span style={{ width: '84px', textAlign: 'right', color: INK }}>{m0(B[k] || 0)}</span>
+                                  <span style={{ width: '92px', textAlign: 'right', color: d(k) >= 0 ? GREEN : RED, fontWeight: 700 }}>{d(k) >= 0 ? '+' : ''}{m0(d(k))}</span>
+                                </span>
+                              </div>
+                            ))}
+                            <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '18px', marginTop: '8px', fontSize: '11px', color: MUTED }}>
+                              <span style={{ width: '84px', textAlign: 'right' }}>{A.label}</span>
+                              <span style={{ width: '84px', textAlign: 'right' }}>{B.label}</span>
+                              <span style={{ width: '92px', textAlign: 'right' }}>change</span>
+                            </div>
+                          </div>
+                        )
+                      })()}
+
+                      {finMode === 'range' && (() => {
+                        const agg = finAgg(fA, fB)
+                        const lo = Math.min(fA, fB), hi = Math.max(fA, fB)
+                        return (
+                          <div style={{ ...card }}>
+                            <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap', marginBottom: '14px' }}>
+                              <select value={fA} onChange={e => setFinA(+e.target.value)} style={{ ...inp }}>{finMonths.map((m, i) => <option key={i} value={i}>{m.label}</option>)}</select>
+                              <span style={{ alignSelf: 'center', color: MUTED }}>to</span>
+                              <select value={fB} onChange={e => setFinB(+e.target.value)} style={{ ...inp }}>{finMonths.map((m, i) => <option key={i} value={i}>{m.label}</option>)}</select>
+                            </div>
+                            <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap', marginBottom: '12px' }}>
+                              <KPI k="Revenue" v={m0(agg.income)} sub={`${finMonths[lo] ? finMonths[lo].label : ''} – ${finMonths[hi] ? finMonths[hi].label : ''}`} accent={GREEN} />
+                              <KPI k="Gross profit" v={m0(agg.gross)} sub={agg.income ? `${Math.round(agg.gross / agg.income * 100)}% margin` : ''} accent={KRAFT} />
+                              <KPI k="Net profit" v={m0(agg.net)} sub={`${hi - lo + 1} months`} accent={agg.net >= 0 ? GREEN : RED} />
+                            </div>
+                            <Row l="Income" v={m0(agg.income)} />
+                            <Row l="Cost of goods sold" v={m0(agg.cogs)} />
+                            <Row l="Gross profit" v={m0(agg.gross)} bold top />
+                            <Row l="Operating expenses" v={m0(agg.opex)} />
+                            <Row l="Net profit" v={m0(agg.net)} bold top />
+                          </div>
+                        )
+                      })()}
+                    </>
+                  )}
+
+                  {/* ---- Balance Sheet ---- */}
+                  {finView === 'bs' && glBS && (
+                    <div style={{ ...card }}>
+                      <div style={{ ...lbl, color: KRAFT, marginBottom: '4px' }}>Assets</div>
+                      {glBS.assets.map(a => <Row key={a.account} l={a.account} v={m0(a.amount)} />)}
+                      <Row l="Total assets" v={m0(glBS.totalAssets)} bold top />
+
+                      <div style={{ ...lbl, color: KRAFT, margin: '16px 0 4px' }}>Liabilities</div>
+                      {glBS.liabilities.length ? glBS.liabilities.map(a => <Row key={a.account} l={a.account} v={m0(a.amount)} />) : <div style={{ fontSize: '12.5px', color: MUTED }}>None</div>}
+                      <Row l="Total liabilities" v={m0(glBS.totalLiab)} bold top />
+
+                      <div style={{ ...lbl, color: KRAFT, margin: '16px 0 4px' }}>Equity</div>
+                      {glBS.equity.map(a => <Row key={a.account} l={a.account} v={m0(a.amount)} />)}
+                      <Row l="Net income (current period)" v={m0(glBS.netIncome)} />
+                      <Row l="Total equity" v={m0(glBS.totalEquity)} bold top />
+
+                      <div style={{ marginTop: '14px', borderTop: `2px solid ${CHAR}`, paddingTop: '10px' }}>
+                        <Row l="Total liabilities + equity" v={m0(glBS.totalLiabEquity)} bold />
+                        <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '6px', fontSize: '12px', color: glBS.balanced ? GREEN : RED }}>
+                          <span>{glBS.balanced ? '✓ Balanced (assets = liabilities + equity)' : 'Out of balance — check the ledger'}</span>
+                          {!glBS.balanced && <span style={{ fontFamily: MONO }}>{m0(glBS.check)}</span>}
+                        </div>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* ---- Cash Flow ---- */}
+                  {finView === 'cf' && glCF && (
+                    <div style={{ ...card }}>
+                      <div style={{ ...lbl, color: KRAFT, marginBottom: '4px' }}>Cash flow{glAsOf ? ` — through ${glAsOf}` : ''}</div>
+                      <Row l="Beginning cash" v={m0(glCF.beginningCash)} />
+                      <Row l="Operating (sales, collections, expenses)" v={m0(glCF.operating)} />
+                      {glCF.investing !== 0 && <Row l="Investing (equipment, assets)" v={m0(glCF.investing)} />}
+                      <Row l="Financing (owner funds, card payments)" v={m0(glCF.financing)} />
+                      {glCF.transfer !== 0 && <Row l="Transfers" v={m0(glCF.transfer)} />}
+                      <Row l="Net change in cash" v={m0(glCF.netChange)} bold top />
+                      <Row l="Ending cash" v={m0(glCF.endingCash)} bold top />
+                      <div style={{ marginTop: '10px', fontSize: '11.5px', color: MUTED, lineHeight: 1.5 }}>Cash basis, from the bank account. Ending cash matches your bank balance in the books.</div>
+                    </div>
+                  )}
+                </>
               )}
             </>
           )}
