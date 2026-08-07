@@ -100,6 +100,9 @@ const isOpen = (o) => balanceOf(o) > 0.005 || (o.alterationsList || []).some(a =
 // backward-compat: old orders have a single `name` field
 const fullName = (o) => o.firstName ? `${o.firstName} ${o.lastName || ''}`.trim() : (o.name || '')
 
+// Role by login. Seamstress gets the workroom view; everyone else is owner/admin.
+const roleOf = (u) => ((u?.email || '').toLowerCase() === 'seamstress@lewimports.com' ? 'seamstress' : 'owner')
+
 // ── Supabase row converters ──────────────────────────────────────────────────
 const toDB = (o, userId) => ({
   id: o.id, user_id: userId, order_no: o.orderNo || null,
@@ -131,7 +134,7 @@ const fromDB = (r) => ({
   alterations: r.alterations,
   alterationsList: (Array.isArray(r.alterations_list) && r.alterations_list.length)
     ? r.alterations_list
-    : (r.alterations ? [{ id: uid(), note: r.alterations_note || '', due: r.alterations_due || '', assignee: r.alterations_assignee || '', done: !!r.alterations_done }] : []),
+    : (r.alterations ? [{ id: uid(), garment: '', note: r.alterations_note || '', assignee: r.alterations_assignee || '', hours: '', due: r.alterations_due || '', done: !!r.alterations_done }] : []),
   notes: r.notes, taxRate: r.tax_rate,
   followUpDate: r.follow_up_date, todos: r.todos || [],
   salesOrder: r.sales_order || {},
@@ -157,6 +160,7 @@ export default function Gowns() {
   const [loginErr, setLoginErr] = useState('')
   const [loginBusy, setLoginBusy] = useState(false)
 
+  const [role, setRole] = useState('owner')
   const [orders, setOrders] = useState([])
   const [tasks, setTasks] = useState([])
   const [newTask, setNewTask] = useState({ text: '', assignee: '', date: '', orderId: '' })
@@ -182,20 +186,26 @@ export default function Gowns() {
   // ── auth ────────────────────────────────────────────────────────────────────
   useEffect(() => {
     supabase.auth.getSession().then(({ data }) => {
-      if (data.session) { setUser(data.session.user); loadData(data.session.user) }
+      if (data.session) { setUser(data.session.user); setRole(roleOf(data.session.user)); loadData(data.session.user) }
       setAuthLoading(false)
     })
     const { data: l } = supabase.auth.onAuthStateChange((_, s) => {
-      if (!s) { setUser(null); setOrders([]); setTasks([]); setCatalog(DEFAULT_ITEMS) }
+      if (!s) { setUser(null); setRole('owner'); setOrders([]); setTasks([]); setCatalog(DEFAULT_ITEMS) }
     })
     return () => l.subscription.unsubscribe()
   }, [])
+
+  const signOut = async () => {
+    await supabase.auth.signOut()
+    setUser(null); setRole('owner'); setOrders([]); setTasks([]); setCatalog(DEFAULT_ITEMS)
+    setView('list'); setLoginEmail(''); setLoginPass('')
+  }
 
   const handleLogin = async (e) => {
     e.preventDefault(); setLoginErr(''); setLoginBusy(true)
     const { data, error } = await supabase.auth.signInWithPassword({ email: loginEmail, password: loginPass })
     if (error) { setLoginErr(error.message); setLoginBusy(false); return }
-    setUser(data.user)
+    setUser(data.user); setRole(roleOf(data.user))
     await loadData(data.user)
     setAuthLoading(false); setLoginBusy(false)
   }
@@ -259,7 +269,7 @@ export default function Gowns() {
     }
   }
   const pickItem = (rowId, item) => {
-    setForm(f => ({ ...f, items: f.items.map(it => it.id === rowId ? { ...it, itemNo: item.no, desc: item.desc, taxable: item.taxable !== false } : it), ...(item.alteration ? { alterations: true, alterationsList: (f.alterationsList?.length ? f.alterationsList : [{ id: uid(), note: '', due: '', assignee: '', done: false }]) } : {}) }))
+    setForm(f => ({ ...f, items: f.items.map(it => it.id === rowId ? { ...it, itemNo: item.no, desc: item.desc, taxable: item.taxable !== false } : it), ...(item.alteration ? { alterations: true, alterationsList: (f.alterationsList?.length ? f.alterationsList : [{ id: uid(), garment: '', note: '', assignee: '', hours: '', due: '', done: false }]) } : {}) }))
     setSuggest(null)
   }
   const saveNewItem = async () => {
@@ -315,7 +325,7 @@ export default function Gowns() {
   const setPaymentCheckNo = (id, checkNo) => setForm(f => ({ ...f, payments: f.payments.map(p => p.id === id ? { ...p, checkNo } : p) }))
 
   // Multiple alterations per order
-  const addAlteration = () => setForm(f => ({ ...f, alterations: true, alterationsList: [...(f.alterationsList || []), { id: uid(), note: '', due: '', assignee: '', done: false }] }))
+  const addAlteration = () => setForm(f => ({ ...f, alterations: true, alterationsList: [...(f.alterationsList || []), { id: uid(), garment: '', note: '', assignee: '', hours: '', due: '', done: false }] }))
   const setAlterationField = (id, k, v) => setForm(f => ({ ...f, alterationsList: (f.alterationsList || []).map(a => a.id === id ? { ...a, [k]: v } : a) }))
   const removeAlteration = (id) => setForm(f => { const list = (f.alterationsList || []).filter(a => a.id !== id); return { ...f, alterationsList: list, alterations: list.length > 0 } })
   const removePayment = (id) => setForm(f => ({ ...f, payments: f.payments.filter(p => p.id !== id) }))
@@ -712,13 +722,15 @@ export default function Gowns() {
       </Head>
 
       <div className="gw-wrap">
-        <div className="gw-header" onClick={() => { setView('list'); setTab('open'); setSelectedCustomer(null); setSearch(''); window.scrollTo(0, 0) }} style={{ cursor: 'pointer' }} title="Back to home">
+        <div className="gw-header" onClick={() => { setView('list'); setTab('open'); setSelectedCustomer(null); setSearch(''); window.scrollTo(0, 0) }} style={{ cursor: 'pointer', position: 'relative' }} title="Back to home">
+          <div style={{ position: 'absolute', top: '14px', left: '14px', fontSize: '11px', fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.5)' }}>{role === 'seamstress' ? '✂ Seamstress' : 'Owner'}</div>
+          <button onClick={e => { e.stopPropagation(); signOut() }} style={{ position: 'absolute', top: '11px', right: '12px', background: 'rgba(255,255,255,0.12)', color: '#fff', border: 'none', borderRadius: '8px', padding: '6px 11px', fontSize: '12px', fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit' }}>Sign out</button>
           <div style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: '34px', fontWeight: 700, color: '#fff', lineHeight: 1.1, letterSpacing: '0.01em' }}>{BIZ}</div>
-          <div style={{ fontSize: '11px', letterSpacing: '0.22em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.45)', marginTop: '5px', fontWeight: 600 }}>Order Book</div>
+          <div style={{ fontSize: '11px', letterSpacing: '0.22em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.45)', marginTop: '5px', fontWeight: 600 }}>{role === 'seamstress' ? 'Workroom' : 'Order Book'}</div>
         </div>
 
         {/* ===== LIST ===== */}
-        {view === 'list' && (
+        {role !== 'seamstress' && view === 'list' && (
           <>
             <button className="gw-new-btn gw-press" onClick={startNew}>+ New Order</button>
             <div className="gw-tabs" style={{ marginBottom: '16px' }}>
@@ -1077,7 +1089,7 @@ export default function Gowns() {
         )}
 
         {/* ===== FORM ===== */}
-        {view === 'form' && (
+        {role !== 'seamstress' && view === 'form' && (
           <div style={{ maxWidth: '640px', margin: '0 auto' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '14px' }}>
               <button onClick={() => { setView('list'); window.scrollTo(0, 0) }} style={{ background: 'none', border: 'none', color: ROSE_DK, fontSize: '16px', fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit', padding: '4px 0' }}>← All orders</button>
@@ -1300,7 +1312,7 @@ export default function Gowns() {
 
             {/* Alterations + notes */}
             <div className="gw-card" style={{ padding: '16px 18px', marginTop: '14px', marginBottom: '20px' }}>
-              <button onClick={() => { if (form.alterations) { setForm(f => ({ ...f, alterations: false })) } else { setForm(f => ({ ...f, alterations: true, alterationsList: f.alterationsList?.length ? f.alterationsList : [{ id: uid(), note: '', due: '', assignee: '', done: false }] })) } }} className="gw-press" style={{
+              <button onClick={() => { if (form.alterations) { setForm(f => ({ ...f, alterations: false })) } else { setForm(f => ({ ...f, alterations: true, alterationsList: f.alterationsList?.length ? f.alterationsList : [{ id: uid(), garment: '', note: '', assignee: '', hours: '', due: '', done: false }] })) } }} className="gw-press" style={{
                 width: '100%', display: 'flex', alignItems: 'center', gap: '12px', padding: '13px 14px',
                 border: `1.5px solid ${form.alterations ? ROSE : '#E2D7D1'}`, background: form.alterations ? '#FBEAF0' : '#fff',
                 borderRadius: '12px', cursor: 'pointer', fontFamily: 'inherit',
@@ -1311,24 +1323,32 @@ export default function Gowns() {
 
               {form.alterations && (
                 <div style={{ marginTop: '12px' }}>
-                  {(form.alterationsList || []).map((a, idx) => (
+                  <datalist id="gown-opts">{[...new Set((form.items || []).map(it => it.desc?.trim()).filter(Boolean))].map(g => <option key={g} value={g} />)}</datalist>
+                  {(form.alterationsList || []).map((a, idx) => {
+                    const multiGown = [...new Set((form.items || []).map(it => it.desc?.trim()).filter(Boolean))].length > 1
+                    return (
                     <div key={a.id} style={{ marginBottom: '10px', padding: '14px', background: '#FBEAF0', border: '1px solid #F1D5E0', borderRadius: '12px' }}>
                       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
                         <span style={{ fontSize: '12px', fontWeight: 700, color: ROSE_DK, textTransform: 'uppercase', letterSpacing: '0.04em' }}>✂ Alteration {idx + 1}</span>
                         <button onClick={() => removeAlteration(a.id)} title="Remove" style={{ border: 'none', background: 'none', color: '#B07C90', fontSize: '18px', cursor: 'pointer', lineHeight: 1 }}>×</button>
                       </div>
-                      <textarea value={a.note} onChange={e => setAlterationField(a.id, 'note', e.target.value)} rows={2} placeholder="Hem, take in, add bustle…"
+                      {(multiGown || a.garment) && (
+                        <div style={{ marginBottom: '8px' }}>
+                          <div style={{ fontSize: '12px', fontWeight: 600, color: ROSE_DK, marginBottom: '5px' }}>Which garment</div>
+                          <input value={a.garment || ''} onChange={e => setAlterationField(a.id, 'garment', e.target.value)} list="gown-opts" placeholder="Which gown" style={fieldIn} />
+                        </div>
+                      )}
+                      <textarea value={a.note} onChange={e => setAlterationField(a.id, 'note', e.target.value)} rows={2} placeholder="What's needed — hem, take in, add bustle…"
                         style={{ ...fieldIn, resize: 'vertical', lineHeight: 1.5 }} />
-                      <div style={{ display: 'flex', gap: '10px', marginTop: '10px', flexWrap: 'wrap' }}>
-                        <div style={{ flex: '1 1 140px' }}>
-                          <div style={{ fontSize: '12px', fontWeight: 600, color: ROSE_DK, marginBottom: '5px' }}>Due</div>
-                          <input type="date" value={a.due || ''} onChange={e => setAlterationField(a.id, 'due', e.target.value)} style={fieldIn} />
-                        </div>
-                        <div style={{ flex: '1 1 140px' }}>
-                          <div style={{ fontSize: '12px', fontWeight: 600, color: ROSE_DK, marginBottom: '5px' }}>Done by</div>
-                          <input value={a.assignee || ''} onChange={e => setAlterationField(a.id, 'assignee', e.target.value)} onBlur={e => setAlterationField(a.id, 'assignee', titleCase(e.target.value))} placeholder="Who's doing it" style={fieldIn} />
-                        </div>
+                      <div style={{ marginTop: '10px' }}>
+                        <div style={{ fontSize: '12px', fontWeight: 600, color: ROSE_DK, marginBottom: '5px' }}>Due</div>
+                        <input type="date" value={a.due || ''} onChange={e => setAlterationField(a.id, 'due', e.target.value)} style={fieldIn} />
                       </div>
+                      {(a.assignee || a.hours) && (
+                        <div style={{ fontSize: '12px', color: MUTED, marginTop: '8px' }}>
+                          {a.assignee ? `Worker: ${a.assignee}` : ''}{a.assignee && a.hours ? ' · ' : ''}{a.hours ? `${a.hours} hrs` : ''}
+                        </div>
+                      )}
                       <button onClick={() => setAlterationField(a.id, 'done', !a.done)} className="gw-press" style={{
                         width: '100%', display: 'flex', alignItems: 'center', gap: '12px', padding: '10px 14px', marginTop: '10px',
                         border: `1.5px solid ${a.done ? GREEN : '#E2D7D1'}`, background: a.done ? '#E7F4EC' : '#fff', borderRadius: '12px', cursor: 'pointer', fontFamily: 'inherit',
@@ -1337,7 +1357,7 @@ export default function Gowns() {
                         <span style={{ fontSize: '15px', fontWeight: 600, color: a.done ? GREEN : INK }}>Done</span>
                       </button>
                     </div>
-                  ))}
+                  )})}
                   <button onClick={addAlteration} className="gw-press" style={{ width: '100%', padding: '11px', fontSize: '14px', fontWeight: 600, color: ROSE_DK, background: '#fff', border: `1.5px dashed ${ROSE}`, borderRadius: '12px', cursor: 'pointer', fontFamily: 'inherit' }}>+ Add another alteration</button>
                 </div>
               )}
@@ -1442,6 +1462,117 @@ export default function Gowns() {
             <button onClick={() => { setView('list'); window.scrollTo(0, 0) }} style={{ ...ghostBtn, marginTop: '10px', border: 'none', color: MUTED }}>← Back to all orders</button>
           </div>
         )}
+
+        {/* ===== SEAMSTRESS: DASHBOARD ===== */}
+        {role === 'seamstress' && view === 'list' && (() => {
+          const q = search.trim().toLowerCase()
+          const list = orders
+            .filter(o => !q || fullName(o).toLowerCase().includes(q))
+            .map(o => ({ o, pending: (o.alterationsList || []).filter(a => !a.done).length, total: (o.alterationsList || []).length }))
+            .sort((a, b) => b.pending - a.pending || (b.o.savedAt || 0) - (a.o.savedAt || 0))
+          return (
+            <>
+              <div style={{ fontSize: '20px', fontWeight: 700, color: INK, marginBottom: '3px' }}>Workroom</div>
+              <div style={{ fontSize: '13px', color: MUTED, marginBottom: '14px' }}>Alterations across all orders — tap one to work on it.</div>
+              <input value={search} onChange={e => setSearch(e.target.value)} placeholder="Search by customer name…" style={{ ...fieldIn, fontSize: '18px', marginBottom: '16px' }} />
+              {list.length === 0 ? (
+                <div className="gw-card" style={{ padding: '40px 24px', textAlign: 'center', color: MUTED }}>{orders.length ? 'No matching customers.' : 'No orders yet.'}</div>
+              ) : (
+                <div className="gw-card" style={{ overflow: 'hidden', padding: 0 }}>
+                  {list.map(({ o, pending, total }) => (
+                    <div key={o.id} className="gw-press" onClick={() => openOrder(o)} style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '12px 14px', cursor: 'pointer', borderLeft: `4px solid ${pending > 0 ? ROSE : (total > 0 ? GREEN : '#D9CFC8')}`, borderBottom: `1px solid ${CREAM}`, background: '#fff' }}>
+                      <div style={{ minWidth: 0, flex: 1 }}>
+                        <div style={{ display: 'flex', alignItems: 'baseline', gap: '8px' }}>
+                          <span style={{ fontSize: '16px', fontWeight: 700, color: INK, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{fullName(o) || '—'}</span>
+                          <span style={{ fontSize: '12px', fontWeight: 800, color: REDNO, whiteSpace: 'nowrap' }}>No. {o.orderNo}</span>
+                        </div>
+                        <div style={{ fontSize: '12px', color: MUTED, marginTop: '2px' }}>{total === 0 ? 'No alterations yet' : `${total} alteration${total > 1 ? 's' : ''} · ${total - pending} done`}</div>
+                      </div>
+                      <span style={{ fontSize: '12px', fontWeight: 700, color: pending > 0 ? AMBER : GREEN, whiteSpace: 'nowrap' }}>{pending > 0 ? `${pending} to do` : (total > 0 ? 'All done ✓' : '—')}</span>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </>
+          )
+        })()}
+
+        {/* ===== SEAMSTRESS: ORDER DETAIL ===== */}
+        {role === 'seamstress' && view === 'form' && (() => {
+          const sub = sumItems(form.items), tax = calcTax(form.items, form.taxRate), tot = sub + tax
+          const gownOpts = [...new Set((form.items || []).map(it => it.desc?.trim()).filter(Boolean))]
+          const workerOpts = [...new Set(orders.flatMap(o => (o.alterationsList || []).map(a => a.assignee).filter(Boolean)))]
+          return (
+            <div style={{ maxWidth: '640px', margin: '0 auto' }}>
+              <datalist id="s-gown-opts">{gownOpts.map(g => <option key={g} value={g} />)}</datalist>
+              <datalist id="s-worker-opts">{workerOpts.map(w => <option key={w} value={w} />)}</datalist>
+              <button onClick={() => { setView('list'); window.scrollTo(0, 0) }} style={{ background: 'none', border: 'none', color: ROSE_DK, fontSize: '16px', fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit', padding: '4px 0', marginBottom: '12px' }}>← All orders</button>
+
+              <div className="gw-card" style={{ padding: '16px 18px', marginBottom: '14px' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                  <div>
+                    <div style={{ fontSize: '20px', fontWeight: 700 }}>{fullName(form) || '—'}</div>
+                    <div style={{ fontSize: '13px', color: MUTED, marginTop: '2px' }}>{fmtDate(form.date)}{form.phone ? ` · ${form.phone}` : ''}</div>
+                  </div>
+                  <div style={{ fontSize: '17px', fontWeight: 800, color: REDNO }}>No. {form.orderNo || '—'}</div>
+                </div>
+                <div style={{ marginTop: '12px', paddingTop: '12px', borderTop: `1px solid ${CREAM}` }}>
+                  {(form.items || []).filter(it => it.desc?.trim() || it.itemNo).map(it => (
+                    <div key={it.id} style={{ display: 'flex', justifyContent: 'space-between', fontSize: '14px', padding: '2px 0' }}>
+                      <span>{(parseFloat(it.qty) || 1) > 1 ? `${it.qty}× ` : ''}{it.desc?.trim() || it.itemNo}</span>
+                      <span style={{ color: MUTED }}>{lineAmt(it) ? money(lineAmt(it)) : ''}</span>
+                    </div>
+                  ))}
+                  <div style={{ display: 'flex', justifyContent: 'space-between', fontWeight: 800, fontSize: '15px', marginTop: '6px', paddingTop: '6px', borderTop: `1px solid ${CREAM}` }}><span>Total</span><span>{money(tot)}</span></div>
+                  <div style={{ fontSize: '11px', color: MUTED, marginTop: '4px' }}>Pricing is set by the office — view only.</div>
+                </div>
+              </div>
+
+              <div className="gw-card" style={{ padding: '16px 18px', marginBottom: '16px' }}>
+                <div style={{ fontSize: '13px', fontWeight: 700, color: ROSE_DK, textTransform: 'uppercase', letterSpacing: '0.04em', marginBottom: '10px' }}>✂ Alterations</div>
+                {(form.alterationsList || []).length === 0 && <div style={{ fontSize: '13px', color: MUTED, marginBottom: '10px' }}>None yet. Add one below — including for garments the customer brought in.</div>}
+                {(form.alterationsList || []).map((a, idx) => (
+                  <div key={a.id} style={{ marginBottom: '10px', padding: '14px', background: '#FBEAF0', border: '1px solid #F1D5E0', borderRadius: '12px' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
+                      <span style={{ fontSize: '12px', fontWeight: 700, color: ROSE_DK, textTransform: 'uppercase' }}>✂ Alteration {idx + 1}</span>
+                      <button onClick={() => removeAlteration(a.id)} style={{ border: 'none', background: 'none', color: '#B07C90', fontSize: '18px', cursor: 'pointer', lineHeight: 1 }}>×</button>
+                    </div>
+                    <div style={{ marginBottom: '8px' }}>
+                      <div style={{ fontSize: '12px', fontWeight: 600, color: ROSE_DK, marginBottom: '5px' }}>Garment</div>
+                      <input value={a.garment || ''} onChange={e => setAlterationField(a.id, 'garment', e.target.value)} list="s-gown-opts" placeholder="Gown, or customer's own item" style={fieldIn} />
+                    </div>
+                    <div style={{ marginBottom: '8px' }}>
+                      <div style={{ fontSize: '12px', fontWeight: 600, color: ROSE_DK, marginBottom: '5px' }}>What&apos;s needed</div>
+                      <textarea value={a.note || ''} onChange={e => setAlterationField(a.id, 'note', e.target.value)} rows={2} placeholder="Hem, take in…" style={{ ...fieldIn, resize: 'vertical', lineHeight: 1.5 }} />
+                    </div>
+                    <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
+                      <div style={{ flex: '1 1 120px' }}>
+                        <div style={{ fontSize: '12px', fontWeight: 600, color: ROSE_DK, marginBottom: '5px' }}>Worker</div>
+                        <input value={a.assignee || ''} onChange={e => setAlterationField(a.id, 'assignee', e.target.value)} onBlur={e => setAlterationField(a.id, 'assignee', titleCase(e.target.value))} list="s-worker-opts" placeholder="Assign to…" style={fieldIn} />
+                      </div>
+                      <div style={{ flex: '1 1 70px' }}>
+                        <div style={{ fontSize: '12px', fontWeight: 600, color: ROSE_DK, marginBottom: '5px' }}>Hours</div>
+                        <input value={a.hours || ''} onChange={e => setAlterationField(a.id, 'hours', e.target.value)} inputMode="decimal" placeholder="0" style={fieldIn} />
+                      </div>
+                      <div style={{ flex: '1 1 120px' }}>
+                        <div style={{ fontSize: '12px', fontWeight: 600, color: ROSE_DK, marginBottom: '5px' }}>Due</div>
+                        <input type="date" value={a.due || ''} onChange={e => setAlterationField(a.id, 'due', e.target.value)} style={fieldIn} />
+                      </div>
+                    </div>
+                    <button onClick={() => setAlterationField(a.id, 'done', !a.done)} className="gw-press" style={{ width: '100%', display: 'flex', alignItems: 'center', gap: '12px', padding: '10px 14px', marginTop: '10px', border: `1.5px solid ${a.done ? GREEN : '#E2D7D1'}`, background: a.done ? '#E7F4EC' : '#fff', borderRadius: '12px', cursor: 'pointer', fontFamily: 'inherit' }}>
+                      <span style={{ width: '22px', height: '22px', borderRadius: '7px', border: `2px solid ${a.done ? GREEN : '#CDBFBA'}`, background: a.done ? GREEN : '#fff', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '14px', flexShrink: 0 }}>{a.done ? '✓' : ''}</span>
+                      <span style={{ fontSize: '15px', fontWeight: 600, color: a.done ? GREEN : INK }}>Done</span>
+                    </button>
+                  </div>
+                ))}
+                <button onClick={addAlteration} className="gw-press" style={{ width: '100%', padding: '11px', fontSize: '14px', fontWeight: 600, color: ROSE_DK, background: '#fff', border: `1.5px dashed ${ROSE}`, borderRadius: '12px', cursor: 'pointer', fontFamily: 'inherit' }}>+ Add alteration</button>
+              </div>
+
+              <button className="gw-press" onClick={async () => { await patchOrder(form.id, { alterationsList: form.alterationsList }); setJustSaved(true); setTimeout(() => setJustSaved(false), 1800) }} style={{ ...primaryBtn, width: '100%' }}>{justSaved ? 'Saved ✓' : 'Save'}</button>
+              <button onClick={() => { setView('list'); window.scrollTo(0, 0) }} style={{ ...ghostBtn, marginTop: '10px', border: 'none', color: MUTED }}>← Back</button>
+            </div>
+          )
+        })()}
       </div>
 
       {/* ===== NEW ITEM MODAL ===== */}
