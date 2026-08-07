@@ -399,6 +399,30 @@ export default function Gowns() {
       setEmailing(false)
     }
   }
+  // Seamstress save: create a new order (customer + alterations, no pricing) or
+  // just persist alteration edits on an existing order. Flows to the owner either way.
+  const saveSeamstressOrder = async () => {
+    if (!editing) {
+      if (!form.firstName.trim()) { alert('Please enter a first name.'); return }
+      if (!form.phone.trim()) { alert('Please enter a cell number.'); return }
+      const orderNo = form.orderNo || (orders.reduce((m, o) => Math.max(m, o.orderNo || 0), 1000) + 1)
+      const fn = titleCase(form.firstName), ln = titleCase(form.lastName)
+      const clean = {
+        ...form, orderNo,
+        firstName: fn, lastName: ln, name: `${fn} ${ln}`.trim(),
+        phone: fmtPhone(form.phone), home: fmtPhone(form.home), email: cleanEmail(form.email),
+        address: titleCase(form.address), city: titleCase(form.city), state: cleanState(form.state), zip: cleanZip(form.zip),
+      }
+      const { data, error } = await supabase.from('gown_orders').upsert(toDB(clean, user.id)).select().single()
+      if (error) { alert('Error saving: ' + error.message); return }
+      const saved = fromDB(data)
+      setOrders(prev => [saved, ...prev.filter(o => o.id !== saved.id)])
+      setForm(f => ({ ...f, id: saved.id, orderNo: saved.orderNo })); setEditing(true)
+    } else {
+      await patchOrder(form.id, { alterationsList: form.alterationsList })
+    }
+    setJustSaved(true); setTimeout(() => setJustSaved(false), 1800)
+  }
   const del = async (id) => {
     if (window.confirm('Delete this order?')) {
       await supabase.from('gown_orders').delete().eq('id', id)
@@ -1489,6 +1513,7 @@ export default function Gowns() {
             <>
               <div style={{ fontSize: '20px', fontWeight: 700, color: INK, marginBottom: '3px' }}>Workroom</div>
               <div style={{ fontSize: '13px', color: MUTED, marginBottom: '12px' }}>{pendingAlts.length} alteration{pendingAlts.length !== 1 ? 's' : ''} to do.</div>
+              <button className="gw-new-btn gw-press" onClick={startNew} style={{ marginBottom: '14px' }}>+ New Order</button>
               <div style={{ display: 'flex', gap: '8px', marginBottom: '14px', flexWrap: 'wrap' }}>
                 {[['orders', 'Orders'], ['worker', 'By Worker'], ['date', 'By Date']].map(([v, l]) => (
                   <button key={v} onClick={() => setWorkView(v)} style={{ ...tabBtn(workView === v), flex: 'none', padding: '10px 18px' }}>{l}</button>
@@ -1553,25 +1578,38 @@ export default function Gowns() {
               <datalist id="s-worker-opts">{workerOpts.map(w => <option key={w} value={w} />)}</datalist>
               <button onClick={() => { setView('list'); window.scrollTo(0, 0) }} style={{ background: 'none', border: 'none', color: ROSE_DK, fontSize: '16px', fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit', padding: '4px 0', marginBottom: '12px' }}>← All orders</button>
 
-              <div className="gw-card" style={{ padding: '16px 18px', marginBottom: '14px' }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-                  <div>
-                    <div style={{ fontSize: '20px', fontWeight: 700 }}>{fullName(form) || '—'}</div>
-                    <div style={{ fontSize: '13px', color: MUTED, marginTop: '2px' }}>{fmtDate(form.date)}{form.phone ? ` · ${form.phone}` : ''}</div>
+              {!editing ? (
+                /* New order — Medina enters the customer; Pessi adds pricing later */
+                <div className="gw-card" style={{ padding: '16px 18px', marginBottom: '14px' }}>
+                  <div style={{ fontSize: '13px', fontWeight: 700, color: MUTED, marginBottom: '10px', textTransform: 'uppercase', letterSpacing: '0.04em' }}>New order</div>
+                  <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap', marginBottom: '8px' }}>
+                    <div style={{ flex: '1 1 140px' }}><div style={soLbl}>First name</div><input value={form.firstName} onChange={e => setF('firstName', e.target.value)} onBlur={e => setF('firstName', titleCase(e.target.value))} placeholder="First" style={fieldIn} /></div>
+                    <div style={{ flex: '1 1 140px' }}><div style={soLbl}>Last name</div><input value={form.lastName} onChange={e => setF('lastName', e.target.value)} onBlur={e => setF('lastName', titleCase(e.target.value))} placeholder="Last" style={fieldIn} /></div>
                   </div>
-                  <div style={{ fontSize: '17px', fontWeight: 800, color: REDNO }}>No. {form.orderNo || '—'}</div>
+                  <div style={{ marginBottom: '8px' }}><div style={soLbl}>Cell</div><input value={form.phone} onChange={e => setF('phone', e.target.value)} onBlur={e => setF('phone', fmtPhone(e.target.value))} type="tel" placeholder="required" style={fieldIn} /></div>
+                  <div><div style={soLbl}>Address <span style={{ color: '#B3A8A2' }}>· optional</span></div><input value={form.address} onChange={e => setF('address', e.target.value)} onBlur={e => setF('address', titleCase(e.target.value))} placeholder="Street, city…" style={fieldIn} /></div>
+                  <div style={{ fontSize: '11px', color: MUTED, marginTop: '8px' }}>Pricing is added by the office. Log the garments and alterations below.</div>
                 </div>
-                <div style={{ marginTop: '12px', paddingTop: '12px', borderTop: `1px solid ${CREAM}` }}>
-                  {(form.items || []).filter(it => it.desc?.trim() || it.itemNo).map(it => (
-                    <div key={it.id} style={{ display: 'flex', justifyContent: 'space-between', fontSize: '14px', padding: '2px 0' }}>
-                      <span>{(parseFloat(it.qty) || 1) > 1 ? `${it.qty}× ` : ''}{it.desc?.trim() || it.itemNo}</span>
-                      <span style={{ color: MUTED }}>{lineAmt(it) ? money(lineAmt(it)) : ''}</span>
+              ) : (
+                /* Existing order — read-only customer + garments (no prices for Medina) */
+                <div className="gw-card" style={{ padding: '16px 18px', marginBottom: '14px' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                    <div>
+                      <div style={{ fontSize: '20px', fontWeight: 700 }}>{fullName(form) || '—'}</div>
+                      <div style={{ fontSize: '13px', color: MUTED, marginTop: '2px' }}>{fmtDate(form.date)}{form.phone ? ` · ${form.phone}` : ''}</div>
                     </div>
-                  ))}
-                  <div style={{ display: 'flex', justifyContent: 'space-between', fontWeight: 800, fontSize: '15px', marginTop: '6px', paddingTop: '6px', borderTop: `1px solid ${CREAM}` }}><span>Total</span><span>{money(tot)}</span></div>
-                  <div style={{ fontSize: '11px', color: MUTED, marginTop: '4px' }}>Pricing is set by the office — view only.</div>
+                    <div style={{ fontSize: '17px', fontWeight: 800, color: REDNO }}>No. {form.orderNo || '—'}</div>
+                  </div>
+                  {(form.items || []).filter(it => it.desc?.trim() || it.itemNo).length > 0 && (
+                    <div style={{ marginTop: '12px', paddingTop: '12px', borderTop: `1px solid ${CREAM}` }}>
+                      <div style={{ fontSize: '11px', fontWeight: 700, color: MUTED, textTransform: 'uppercase', letterSpacing: '0.04em', marginBottom: '4px' }}>Gowns / items</div>
+                      {(form.items || []).filter(it => it.desc?.trim() || it.itemNo).map(it => (
+                        <div key={it.id} style={{ fontSize: '14px', padding: '2px 0' }}>{(parseFloat(it.qty) || 1) > 1 ? `${it.qty}× ` : ''}{it.desc?.trim() || it.itemNo}</div>
+                      ))}
+                    </div>
+                  )}
                 </div>
-              </div>
+              )}
 
               <div className="gw-card" style={{ padding: '16px 18px', marginBottom: '16px' }}>
                 <div style={{ fontSize: '13px', fontWeight: 700, color: ROSE_DK, textTransform: 'uppercase', letterSpacing: '0.04em', marginBottom: '10px' }}>✂ Alterations</div>
@@ -1613,7 +1651,7 @@ export default function Gowns() {
                 <button onClick={addAlteration} className="gw-press" style={{ width: '100%', padding: '11px', fontSize: '14px', fontWeight: 600, color: ROSE_DK, background: '#fff', border: `1.5px dashed ${ROSE}`, borderRadius: '12px', cursor: 'pointer', fontFamily: 'inherit' }}>+ Add alteration</button>
               </div>
 
-              <button className="gw-press" onClick={async () => { await patchOrder(form.id, { alterationsList: form.alterationsList }); setJustSaved(true); setTimeout(() => setJustSaved(false), 1800) }} style={{ ...primaryBtn, width: '100%' }}>{justSaved ? 'Saved ✓' : 'Save'}</button>
+              <button className="gw-press" onClick={saveSeamstressOrder} style={{ ...primaryBtn, width: '100%' }}>{justSaved ? 'Saved ✓' : 'Save'}</button>
               <button onClick={() => { setView('list'); window.scrollTo(0, 0) }} style={{ ...ghostBtn, marginTop: '10px', border: 'none', color: MUTED }}>← Back</button>
             </div>
           )
