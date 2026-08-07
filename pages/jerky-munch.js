@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect, Fragment } from 'react'
 import Head from 'next/head'
 import { jerkySupabase } from '../lib/supabaseJerky'
+import { parseGL, parseCoA, buildPnl } from '../lib/jerkyGL'
 
 const CHAR = '#2B2018', SPICE = '#C8462C', KRAFT = '#A9763A', CREAM = '#F6F0E6'
 const INK = '#2B2018', MUTED = '#8A7A66', GREEN = '#3E7C4F', BORDER = '#E6DBC8', AMBER = '#C98A2A', RED = '#C03A22'
@@ -70,7 +71,7 @@ const Bag = ({ color }) => (
 const MONO = "'IBM Plex Mono', monospace"
 
 export default function JerkyMunch() {
-  const [tab, setTab] = useState('overview')
+  const [tab, setTab] = useState('quickbooks')   // Books (QuickBooks) is the financial home
   const [consign, setConsign] = useState([])
   const [direct, setDirect] = useState([])
   const [ads, setAds] = useState([])
@@ -101,6 +102,10 @@ export default function JerkyMunch() {
   const [af, setAf] = useState({ channel: '', spend: '', rev: '', track: '' })
   const [coa, setCoa] = useState({ name: 'chart-of-accounts.csv', rows: 48 })
   const [gl, setGl] = useState({ name: 'general-ledger-jun.csv', rows: 142 })
+  const [glTx, setGlTx] = useState([])          // real QuickBooks GL rows from Supabase
+  const [coaTx, setCoaTx] = useState([])        // real Chart of Accounts rows from Supabase
+  const [glMsg, setGlMsg] = useState('')
+  const [glBusy, setGlBusy] = useState(false)
   const fileRef = useRef(null)
   const coaRef = useRef(null)
   const glRef = useRef(null)
@@ -185,8 +190,20 @@ export default function JerkyMunch() {
       const cc = num('camp_cost'); if (cc != null) setCampCost(cc)
     } catch (e) { console.error('loadSettings failed', e) }
   }
+  const loadGL = async () => {
+    try {
+      const { data } = await jerkySupabase.from('gl_transactions').select('*').order('txn_date')
+      setGlTx(data || [])
+    } catch (e) { console.error('loadGL failed', e); setGlTx([]) }
+  }
+  const loadCoA = async () => {
+    try {
+      const { data } = await jerkySupabase.from('coa_accounts').select('*')
+      setCoaTx(data || [])
+    } catch (e) { console.error('loadCoA failed', e); setCoaTx([]) }
+  }
   const loadAll = async () => {
-    await Promise.all([loadConsign(), loadDirect(), loadAds(), loadExpenses(), loadInvoices(), loadProducts(), loadMonthSeries(), loadSettings()])
+    await Promise.all([loadConsign(), loadDirect(), loadAds(), loadExpenses(), loadInvoices(), loadProducts(), loadMonthSeries(), loadSettings(), loadGL(), loadCoA()])
     setDataLoaded(true)
   }
 
@@ -333,6 +350,60 @@ export default function JerkyMunch() {
     reader.readAsText(file)
   }
   const importBook = (e, setter) => { const file = e.target.files && e.target.files[0]; if (!file) return; const reader = new FileReader(); reader.onload = ev => { const rows = String(ev.target.result || '').split(/\r?\n/).filter(r => r.trim()).length; setter({ name: file.name, rows: Math.max(rows - 1, 0) }) }; reader.readAsText(file); e.target.value = '' }
+  // Real GL import — parse the QuickBooks General Ledger export, replace the
+  // ledger in Efraim's Supabase, and the Books P&L rebuilds from it.
+  const importGL = (e) => {
+    const file = e.target.files && e.target.files[0]; if (!file) return
+    setGlMsg(''); setGlBusy(true)
+    const reader = new FileReader()
+    reader.onload = async (ev) => {
+      try {
+        const { rows, error } = parseGL(String(ev.target.result || ''))
+        if (error) { setGlMsg(error); setGlBusy(false); e.target.value = ''; return }
+        // replace the whole ledger: clear, then insert in chunks (RLS: authenticated)
+        const del = await jerkySupabase.from('gl_transactions').delete().not('id', 'is', null)
+        if (del.error) throw del.error
+        for (let i = 0; i < rows.length; i += 500) {
+          const ins = await jerkySupabase.from('gl_transactions').insert(rows.slice(i, i + 500))
+          if (ins.error) throw ins.error
+        }
+        await loadGL()
+        setGl({ name: file.name, rows: rows.length })
+        setGlMsg(`Imported ${rows.length.toLocaleString()} GL rows ✓`)
+      } catch (err) {
+        console.error('importGL failed', err)
+        setGlMsg('Import failed: ' + (err.message || String(err)))
+      }
+      setGlBusy(false); e.target.value = ''
+    }
+    reader.readAsText(file)
+  }
+  // Chart of Accounts import — drives account classification for the P&L.
+  const importCoA = (e) => {
+    const file = e.target.files && e.target.files[0]; if (!file) return
+    setGlMsg(''); setGlBusy(true)
+    const reader = new FileReader()
+    reader.onload = async (ev) => {
+      try {
+        const { rows, error } = parseCoA(String(ev.target.result || ''))
+        if (error) { setGlMsg(error); setGlBusy(false); e.target.value = ''; return }
+        const del = await jerkySupabase.from('coa_accounts').delete().not('id', 'is', null)
+        if (del.error) throw del.error
+        for (let i = 0; i < rows.length; i += 500) {
+          const ins = await jerkySupabase.from('coa_accounts').insert(rows.slice(i, i + 500))
+          if (ins.error) throw ins.error
+        }
+        await loadCoA()
+        setCoa({ name: file.name, rows: rows.length })
+        setGlMsg(`Imported ${rows.length} accounts ✓`)
+      } catch (err) {
+        console.error('importCoA failed', err)
+        setGlMsg('Import failed: ' + (err.message || String(err)))
+      }
+      setGlBusy(false); e.target.value = ''
+    }
+    reader.readAsText(file)
+  }
   const addDirect = async () => {
     if (!df.who.trim()) return
     const row = { who: df.who.trim(), source: df.source, units: Number(df.units) || 0, rev: Number(df.rev) || 0 }
@@ -475,6 +546,10 @@ export default function JerkyMunch() {
   const rngAgg = {}
   PNL_ROWS.forEach(r => { rngAgg[r.key] = rngLines.reduce((s, l) => s + (l[r.key] || 0), 0) })
   const rngLabel = monthsAll.length ? `${monthsAll[rngA].m}–${monthsAll[rngB].m}` : ''
+
+  // real books, derived from the imported QuickBooks GL + Chart of Accounts
+  const glPnl = glTx.length ? buildPnl(glTx, coaTx) : null
+  const glAsOf = glPnl && glPnl.lastDate ? new Date(glPnl.lastDate + 'T00:00:00').toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' }) : ''
   const rngPct = (n) => rngAgg.rev ? Math.round(n / rngAgg.rev * 100) : 0
   const rngMonthCount = rngB - rngA + 1
 
@@ -554,7 +629,7 @@ export default function JerkyMunch() {
     </select>
   )
 
-  const TABS = [['overview', 'Overview'], ['consign', 'Consignment'], ['invoices', 'Invoice stores'], ['direct', 'Direct Sales'], ['ads', 'Advertising'], ['pnl', 'P&L']]
+  const TABS = [['quickbooks', 'Books'], ['overview', 'Overview'], ['consign', 'Consignment'], ['invoices', 'Invoice stores'], ['direct', 'Direct Sales'], ['ads', 'Advertising']]
   const EXTRA = [['expenses', 'Import expenses'], ['quickbooks', 'QuickBooks sync'], ['close', 'Monthly close'], ['askai', 'Ask Us']]
   const currentLabel = ([...TABS, ...EXTRA].find(t => t[0] === tab) || ['', ''])[1]
 
@@ -678,7 +753,7 @@ export default function JerkyMunch() {
               </div>
 
               {/* Revenue by product line — bags + boards + camp packages */}
-              <div className="jm-click" onClick={() => setTab('pnl')} style={{ ...card, marginBottom: '16px', cursor: 'pointer', position: 'relative' }}>
+              <div className="jm-click" onClick={() => setTab('quickbooks')} style={{ ...card, marginBottom: '16px', cursor: 'pointer', position: 'relative' }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', flexWrap: 'wrap', gap: '8px', marginBottom: '12px' }}>
                   <div style={{ ...lbl }}>Revenue by product line · this month</div>
                   <div style={{ fontSize: '13px', color: MUTED }}><b style={{ ...big, fontSize: '18px', color: INK }}>{m0(totalRevenue)}</b> total</div>
@@ -702,8 +777,8 @@ export default function JerkyMunch() {
               </div>
 
               <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap', marginBottom: '16px' }}>
-                <KPI k={`Bags sold this ${period}`} v={bagsPeriod} sub="across all flavors" accent={INK} onClick={() => setTab('pnl')} />
-                <KPI k="Revenue / mo" v={m0(totalRevenue)} sub={`${bagsPeriod} bags · ${boardsUnitsM + campUnitsM} boards & camp`} accent={SPICE} onClick={() => setTab('pnl')} />
+                <KPI k={`Bags sold this ${period}`} v={bagsPeriod} sub="across all flavors" accent={INK} onClick={() => setTab('quickbooks')} />
+                <KPI k="Revenue / mo" v={m0(totalRevenue)} sub={`${bagsPeriod} bags · ${boardsUnitsM + campUnitsM} boards & camp`} accent={SPICE} onClick={() => setTab('quickbooks')} />
                 <KPI k="Out on consignment" v={m0(onShelfVal)} sub={`${bagsOut} bags sitting in stores`} accent={KRAFT} onClick={() => setTab('consign')} />
                 <KPI k="Missing pieces" v={`${missUnits}`} sub={`${m0(missVal)} to investigate`} accent={missUnits ? RED : GREEN} onClick={() => setTab('consign')} />
               </div>
@@ -1355,36 +1430,121 @@ export default function JerkyMunch() {
                 <div style={{ display: 'flex', alignItems: 'center', gap: '14px', marginBottom: '10px' }}>
                   <div style={{ width: '44px', height: '44px', borderRadius: '2px', background: '#2CA01C', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', ...big, fontSize: '19px' }}>qb</div>
                   <div>
-                    <div style={{ ...big, fontSize: '18px', color: INK }}>QuickBooks → your books</div>
-                    <div style={{ fontSize: '12.5px', color: MUTED, marginTop: '2px' }}>Export from QuickBooks, drop the files in here.</div>
+                    <div style={{ ...big, fontSize: '18px', color: INK }}>Your books, from QuickBooks</div>
+                    <div style={{ fontSize: '12.5px', color: MUTED, marginTop: '2px' }}>Drop the two exports in — the P&amp;L below rebuilds from them.</div>
                   </div>
+                  {glAsOf && (
+                    <div style={{ marginLeft: 'auto', textAlign: 'right' }}>
+                      <div style={{ ...lbl, color: MUTED }}>As of</div>
+                      <div style={{ ...big, fontSize: '15px', color: INK, fontFamily: MONO }}>{glAsOf}</div>
+                    </div>
+                  )}
                 </div>
-                <p style={{ fontSize: '13.5px', color: MUTED, lineHeight: 1.55 }}>Two exports keep everything current — your <b style={{ color: INK }}>Chart of Accounts</b> and your <b style={{ color: INK }}>General Ledger</b>. Drop them in and the dashboard's P&L and balances update. No live connection to babysit — same way I run it for every client.</p>
+                <p style={{ fontSize: '13.5px', color: MUTED, lineHeight: 1.55 }}>Two exports keep everything current — your <b style={{ color: INK }}>Chart of Accounts</b> (sets how each line is categorized) and your <b style={{ color: INK }}>General Ledger</b> (every transaction). Each month you just drop in the fresh GL. No live connection to babysit.</p>
               </div>
 
               {[
-                { title: 'Chart of Accounts', desc: 'Your account list — assets, income, expenses…', st: coa, rf: coaRef, setter: setCoa },
-                { title: 'General Ledger', desc: 'Every transaction, by account and date', st: gl, rf: glRef, setter: setGl },
+                { title: 'Chart of Accounts', desc: 'Account list — sets how each line is categorized', imported: coaTx.length, st: coa, rf: coaRef, onChange: importCoA },
+                { title: 'General Ledger', desc: 'Every transaction, by account and date', imported: glTx.length, st: gl, rf: glRef, onChange: importGL },
               ].map((b, i) => (
                 <div key={i} style={{ ...card, marginBottom: '12px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '12px' }}>
                   <div>
                     <div style={{ fontWeight: 600, color: INK, fontSize: '16px' }}>{b.title}</div>
                     <div style={{ fontSize: '12.5px', color: MUTED, marginTop: '2px' }}>{b.desc}</div>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '7px', fontSize: '12.5px', color: GREEN, marginTop: '9px' }}>
-                      <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: GREEN, flexShrink: 0 }} />
-                      Imported · <span style={{ fontFamily: MONO }}>{b.st.name}</span> · {b.st.rows} rows
-                    </div>
+                    {b.imported > 0 ? (
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '7px', fontSize: '12.5px', color: GREEN, marginTop: '9px' }}>
+                        <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: GREEN, flexShrink: 0 }} />
+                        Imported · {b.imported.toLocaleString()} rows
+                      </div>
+                    ) : (
+                      <div style={{ fontSize: '12.5px', color: MUTED, marginTop: '9px' }}>Not imported yet</div>
+                    )}
                   </div>
                   <div>
-                    <button onClick={() => b.rf.current && b.rf.current.click()} style={{ background: CARDBG, color: INK, border: `1px solid ${BORDER}`, borderRadius: '2px', padding: '11px 18px', ...btn }}>Drop in / replace</button>
-                    <input ref={b.rf} type="file" accept=".csv,.txt" onChange={e => importBook(e, b.setter)} style={{ display: 'none' }} />
+                    <button disabled={glBusy} onClick={() => b.rf.current && b.rf.current.click()} style={{ background: CARDBG, color: INK, border: `1px solid ${BORDER}`, borderRadius: '2px', padding: '11px 18px', ...btn, opacity: glBusy ? 0.5 : 1, cursor: glBusy ? 'wait' : 'pointer' }}>{b.imported > 0 ? 'Replace' : 'Drop in'}</button>
+                    <input ref={b.rf} type="file" accept=".csv,.txt" onChange={b.onChange} style={{ display: 'none' }} />
                   </div>
                 </div>
               ))}
 
-              <div style={{ ...card, background: '#EAF3EC', borderColor: '#CFE4D6', fontSize: '13.5px', color: INK, lineHeight: 1.55 }}>
-                Both files are in, so your P&L, account balances, and this whole dashboard reflect your real books. Each month you just drop in the fresh GL — takes about a minute.
-              </div>
+              {glMsg && (
+                <div style={{ ...card, marginBottom: '12px', fontSize: '13px', color: /fail|check the file|check the/i.test(glMsg) ? RED : GREEN }}>{glBusy ? 'Working…' : glMsg}</div>
+              )}
+
+              {glPnl ? (
+                <>
+                  <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap', margin: '4px 0 16px' }}>
+                    <KPI k="Revenue" v={m0(glPnl.annual.income)} sub="all channels, YTD" accent={GREEN} />
+                    <KPI k="Gross profit" v={m0(glPnl.annual.gross)} sub={glPnl.annual.income ? `${Math.round(glPnl.annual.gross / glPnl.annual.income * 100)}% margin` : ''} accent={KRAFT} />
+                    <KPI k="Net profit" v={m0(glPnl.annual.net)} sub="after all costs" accent={glPnl.annual.net >= 0 ? GREEN : RED} />
+                  </div>
+
+                  <div style={{ ...card, background: '#FBF3E7', borderColor: '#EAD9BD', fontSize: '12.5px', color: INK, lineHeight: 1.5, marginBottom: '16px' }}>
+                    Ledger loaded through <b>{glAsOf}</b>. Reconciled through <b>June</b> — July and August are partial until QuickBooks is caught up{glPnl.usedCoA ? '' : ' — and no Chart of Accounts is loaded yet, so categorization is best-guess'}.
+                  </div>
+
+                  <div style={{ ...card, marginBottom: '16px', overflowX: 'auto' }}>
+                    <div style={{ ...lbl, color: KRAFT, marginBottom: '8px' }}>Monthly P&amp;L</div>
+                    <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '13px' }}>
+                      <thead>
+                        <tr style={{ color: MUTED, textAlign: 'right' }}>
+                          <th style={{ textAlign: 'left', padding: '4px 6px', fontWeight: 600 }}>Month</th>
+                          <th style={{ padding: '4px 6px', fontWeight: 600 }}>Income</th>
+                          <th style={{ padding: '4px 6px', fontWeight: 600 }}>COGS</th>
+                          <th style={{ padding: '4px 6px', fontWeight: 600 }}>Gross</th>
+                          <th style={{ padding: '4px 6px', fontWeight: 600 }}>OpEx</th>
+                          <th style={{ padding: '4px 6px', fontWeight: 600 }}>Net</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {glPnl.months.map((m) => (
+                          <tr key={m.key} style={{ borderTop: `1px solid ${BORDER}`, fontFamily: MONO, textAlign: 'right' }}>
+                            <td style={{ textAlign: 'left', padding: '6px', fontFamily: 'inherit', color: INK }}>{m.label}</td>
+                            <td style={{ padding: '6px' }}>{m0(m.income)}</td>
+                            <td style={{ padding: '6px', color: MUTED }}>{m0(m.cogs)}</td>
+                            <td style={{ padding: '6px' }}>{m0(m.gross)}</td>
+                            <td style={{ padding: '6px', color: MUTED }}>{m0(m.opex)}</td>
+                            <td style={{ padding: '6px', color: m.net >= 0 ? GREEN : RED, fontWeight: 700 }}>{m0(m.net)}</td>
+                          </tr>
+                        ))}
+                        <tr style={{ borderTop: `2px solid ${CHAR}`, fontFamily: MONO, textAlign: 'right', fontWeight: 700 }}>
+                          <td style={{ textAlign: 'left', padding: '7px 6px', fontFamily: 'inherit', color: INK }}>YTD total</td>
+                          <td style={{ padding: '7px 6px' }}>{m0(glPnl.annual.income)}</td>
+                          <td style={{ padding: '7px 6px' }}>{m0(glPnl.annual.cogs)}</td>
+                          <td style={{ padding: '7px 6px' }}>{m0(glPnl.annual.gross)}</td>
+                          <td style={{ padding: '7px 6px' }}>{m0(glPnl.annual.opex)}</td>
+                          <td style={{ padding: '7px 6px', color: glPnl.annual.net >= 0 ? GREEN : RED }}>{m0(glPnl.annual.net)}</td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </div>
+
+                  <div style={{ display: 'flex', gap: '16px', flexWrap: 'wrap' }}>
+                    <div style={{ ...card, flex: '1 1 260px' }}>
+                      <div style={{ ...lbl, color: KRAFT, marginBottom: '6px' }}>Revenue by channel</div>
+                      <Row l="Invoiced wholesale" v={m0(glPnl.channels.invoiced)} />
+                      <Row l="Private / Zelle" v={m0(glPnl.channels.private)} />
+                      <Row l="Shopify (online)" v={m0(glPnl.channels.shopify)} />
+                      <Row l="Consignment stores" v={m0(glPnl.channels.consignment)} />
+                      <Row l="Store deposits" v={m0(glPnl.channels.deposits)} />
+                    </div>
+                    <div style={{ ...card, flex: '1 1 260px' }}>
+                      <div style={{ ...lbl, color: KRAFT, marginBottom: '6px' }}>Top expenses</div>
+                      {glPnl.topExpenses.map((x) => <Row key={x.account} l={x.account} v={m0(x.amount)} />)}
+                    </div>
+                  </div>
+
+                  {glPnl.unclassified.length > 0 && (
+                    <div style={{ ...card, marginTop: '12px', background: '#FDECEA', borderColor: '#F5C6C0', fontSize: '12.5px', color: INK }}>
+                      {glPnl.unclassified.length} account(s) not in the Chart of Accounts — import an updated CoA to categorize them: <span style={{ fontFamily: MONO }}>{glPnl.unclassified.map(u => u.account).join(', ')}</span>
+                    </div>
+                  )}
+                </>
+              ) : (
+                <div style={{ ...card, background: '#EAF3EC', borderColor: '#CFE4D6', fontSize: '13.5px', color: INK, lineHeight: 1.55 }}>
+                  Import your General Ledger above and your real P&amp;L — monthly, by channel, with net profit — shows up right here.
+                </div>
+              )}
             </>
           )}
 
