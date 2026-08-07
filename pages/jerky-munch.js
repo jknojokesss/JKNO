@@ -93,7 +93,7 @@ export default function JerkyMunch() {
   const [rangeEnd, setRangeEnd] = useState(99)
   // Financials tab (real books): which statement + P&L view mode + month pickers
   const [finView, setFinView] = useState('pnl')       // 'pnl' | 'bs' | 'cf'
-  const [finMode, setFinMode] = useState('monthly')   // 'monthly' | 'compare' | 'range'
+  const [finMode, setFinMode] = useState('statement') // 'statement' | 'monthly' | 'compare' | 'range'
   const [finA, setFinA] = useState(0)                 // month index A (compare/range start)
   const [finB, setFinB] = useState(0)                 // month index B (compare/range end)
   const [period, setPeriod] = useState('month')
@@ -1541,10 +1541,36 @@ export default function JerkyMunch() {
                   {finView === 'pnl' && (
                     <>
                       <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', marginBottom: '12px' }}>
-                        {[['monthly', 'Monthly'], ['compare', 'Compare'], ['range', 'Range']].map(([id, label]) => (
+                        {[['statement', 'Statement'], ['monthly', 'Monthly'], ['compare', 'Compare'], ['range', 'Range']].map(([id, label]) => (
                           <button key={id} onClick={() => setFinMode(id)} style={{ background: finMode === id ? KRAFT : CARDBG, color: finMode === id ? '#fff' : INK, border: `1px solid ${finMode === id ? KRAFT : BORDER}`, borderRadius: '2px', padding: '7px 14px', ...btn, fontSize: '12px' }}>{label}</button>
                         ))}
                       </div>
+
+                      {finMode === 'statement' && (
+                        <div style={{ ...card }}>
+                          <div style={{ ...lbl, color: KRAFT, marginBottom: '4px' }}>Income</div>
+                          <Row l="Invoiced wholesale" v={m0(glPnl.channels.invoiced)} />
+                          <Row l="Private / Zelle" v={m0(glPnl.channels.private)} />
+                          <Row l="Shopify (online)" v={m0(glPnl.channels.shopify)} />
+                          <Row l="Consignment stores" v={m0(glPnl.channels.consignment)} />
+                          <Row l="Store deposits" v={m0(glPnl.channels.deposits)} />
+                          <Row l="Total income" v={m0(glPnl.annual.income)} bold top />
+
+                          <div style={{ ...lbl, color: KRAFT, margin: '18px 0 4px' }}>Cost of goods sold</div>
+                          {glPnl.cogsDetail.map(x => <Row key={x.account} l={x.account} v={m0(x.amount)} />)}
+                          <Row l="Total cost of goods sold" v={m0(glPnl.annual.cogs)} bold top />
+                          <Row l="Gross profit" v={m0(glPnl.annual.gross)} bold top />
+
+                          <div style={{ ...lbl, color: KRAFT, margin: '18px 0 4px' }}>Operating expenses</div>
+                          {glPnl.expenseDetail.map(x => <Row key={x.account} l={x.account} v={m0(x.amount)} />)}
+                          <Row l="Total operating expenses" v={m0(glPnl.annual.opex)} bold top />
+
+                          <div style={{ marginTop: '14px', borderTop: `2px solid ${CHAR}`, paddingTop: '10px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                            <span style={{ ...big, fontSize: '15px', color: INK }}>Net income</span>
+                            <span style={{ ...big, fontSize: '17px', fontFamily: MONO, color: glPnl.annual.net >= 0 ? GREEN : RED }}>{m0(glPnl.annual.net)}</span>
+                          </div>
+                        </div>
+                      )}
 
                       {finMode === 'monthly' && (
                         <div style={{ ...card, overflowX: 'auto' }}>
