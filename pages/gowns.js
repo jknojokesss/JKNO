@@ -180,6 +180,7 @@ export default function Gowns() {
   const [showSales, setShowSales] = useState(false)
   const [emailing, setEmailing] = useState(false)
   const [uploading, setUploading] = useState(false)
+  const [lightbox, setLightbox] = useState(null)
   const [justSaved, setJustSaved] = useState(false)
   const [todoInput, setTodoInput] = useState({})
   const [formTodo, setFormTodo] = useState({ text: '', assignee: '', date: '' })
@@ -283,7 +284,7 @@ export default function Gowns() {
         <div style={{ display: 'flex', gap: '14px', flexWrap: 'wrap', marginBottom: '8px' }}>
           {(photos || []).map(p => (
             <div key={p.path} style={{ position: 'relative', width: '72px' }}>
-              <img src={p.url} alt="" onClick={() => window.open(p.url, '_blank')} style={{ width: '72px', height: '72px', objectFit: 'cover', borderRadius: '8px', border: `1px solid ${GRID}`, display: 'block', cursor: 'pointer' }} />
+              <img src={p.url} alt="" onClick={(e) => { e.stopPropagation(); setLightbox(p.url) }} style={{ width: '72px', height: '72px', objectFit: 'cover', borderRadius: '8px', border: `1px solid ${GRID}`, display: 'block', cursor: 'zoom-in' }} />
               <button type="button" onClick={(e) => { e.preventDefault(); e.stopPropagation(); onChange((photos || []).filter(x => x.path !== p.path)) }} title="Remove photo"
                 style={{ position: 'absolute', top: '-9px', right: '-9px', width: '28px', height: '28px', borderRadius: '50%', border: '2px solid #fff', background: '#C0504C', color: '#fff', fontSize: '16px', fontWeight: 700, cursor: 'pointer', lineHeight: 1, zIndex: 3, display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 1px 4px rgba(0,0,0,0.3)' }}>×</button>
             </div>
@@ -1550,7 +1551,7 @@ export default function Gowns() {
           const markDone = (orderId, altId) => { const o = orders.find(x => x.id === orderId); if (o) patchOrder(orderId, { alterationsList: (o.alterationsList || []).map(a => a.id === altId ? { ...a, done: true } : a) }) }
           const altRow = (a, showWorker) => (
             <div key={a.id} style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '11px 14px', borderBottom: `1px solid ${CREAM}` }}>
-              {a.photos?.length > 0 && <a href={a.photos[0].url} target="_blank" rel="noreferrer"><img src={a.photos[0].url} alt="" style={{ width: '44px', height: '44px', objectFit: 'cover', borderRadius: '7px', flexShrink: 0, border: `1px solid ${GRID}` }} /></a>}
+              {a.photos?.length > 0 && <img src={a.photos[0].url} alt="" onClick={(e) => { e.stopPropagation(); setLightbox(a.photos[0].url) }} style={{ width: '44px', height: '44px', objectFit: 'cover', borderRadius: '7px', flexShrink: 0, border: `1px solid ${GRID}`, cursor: 'zoom-in' }} />}
               <div onClick={() => { const o = orders.find(x => x.id === a.orderId); if (o) openOrder(o) }} style={{ cursor: 'pointer', minWidth: 0, flex: 1 }}>
                 <div style={{ fontSize: '14px', fontWeight: 600, color: INK }}>{a.garment ? a.garment + ' — ' : ''}{a.note || 'Alteration'}</div>
                 <div style={{ fontSize: '12px', color: MUTED, marginTop: '2px' }}><span style={{ color: REDNO, fontWeight: 600 }}>No. {a.orderNo}</span> · {a.customer}{showWorker && a.assignee ? ` · ${a.assignee}` : ''}{!showWorker && a.due ? ` · due ${fmtShort(a.due)}` : ''}</div>
@@ -1577,7 +1578,7 @@ export default function Gowns() {
                   {orderList.map(({ o, pending, total }) => (
                     <div key={o.id} className="gw-card" style={{ padding: '14px 16px', borderLeft: `4px solid ${pending > 0 ? ROSE : (total > 0 ? GREEN : '#D9CFC8')}` }}>
                       <div className="gw-press" onClick={() => openOrder(o)} style={{ display: 'flex', alignItems: 'flex-start', gap: '10px', cursor: 'pointer' }}>
-                        {o.photos?.length > 0 && <img src={o.photos[0].url} alt="" style={{ width: '48px', height: '48px', objectFit: 'cover', borderRadius: '8px', flexShrink: 0, border: `1px solid ${GRID}` }} />}
+                        {o.photos?.length > 0 && <img src={o.photos[0].url} alt="" onClick={(e) => { e.stopPropagation(); setLightbox(o.photos[0].url) }} style={{ width: '48px', height: '48px', objectFit: 'cover', borderRadius: '8px', flexShrink: 0, border: `1px solid ${GRID}`, cursor: 'zoom-in' }} />}
                         <div style={{ minWidth: 0, flex: 1 }}>
                           <div style={{ fontSize: '17px', fontWeight: 700, color: INK }}>{fullName(o) || '—'} <span style={{ fontSize: '12px', fontWeight: 800, color: REDNO }}>No. {o.orderNo}</span></div>
                           <div style={{ fontSize: '12px', color: MUTED, marginTop: '2px' }}>{fmtDate(o.date)}{o.phone ? ` · ${o.phone}` : ''}</div>
@@ -1588,7 +1589,7 @@ export default function Gowns() {
                         <div style={{ marginTop: '10px', display: 'flex', flexDirection: 'column', gap: '6px' }}>
                           {(o.alterationsList || []).map(a => (
                             <div key={a.id} style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '7px 10px', background: a.done ? '#F5F2EF' : '#FBEAF0', borderRadius: '8px' }}>
-                              {a.photos?.length > 0 && <a href={a.photos[0].url} target="_blank" rel="noreferrer" onClick={e => e.stopPropagation()}><img src={a.photos[0].url} alt="" style={{ width: '40px', height: '40px', objectFit: 'cover', borderRadius: '6px', flexShrink: 0, border: `1px solid ${GRID}` }} /></a>}
+                              {a.photos?.length > 0 && <img src={a.photos[0].url} alt="" onClick={(e) => { e.stopPropagation(); setLightbox(a.photos[0].url) }} style={{ width: '40px', height: '40px', objectFit: 'cover', borderRadius: '6px', flexShrink: 0, border: `1px solid ${GRID}`, cursor: 'zoom-in' }} />}
                               <div style={{ minWidth: 0, flex: 1 }}>
                                 <div style={{ fontSize: '13px', color: a.done ? MUTED : INK, textDecoration: a.done ? 'line-through' : 'none' }}>{a.garment ? a.garment + ' — ' : ''}{a.note || 'Alteration'}</div>
                                 <div style={{ fontSize: '11px', color: MUTED, marginTop: '1px' }}>{[a.assignee, a.hours ? `${a.hours}h` : '', a.due ? `due ${fmtShort(a.due)}` : ''].filter(Boolean).join(' · ') || 'unassigned'}</div>
@@ -1731,6 +1732,14 @@ export default function Gowns() {
           )
         })()}
       </div>
+
+      {/* ===== PHOTO LIGHTBOX ===== */}
+      {lightbox && (
+        <div onClick={() => setLightbox(null)} style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.88)', zIndex: 300, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '20px', cursor: 'zoom-out' }}>
+          <img src={lightbox} alt="" style={{ maxWidth: '100%', maxHeight: '100%', objectFit: 'contain', borderRadius: '8px' }} />
+          <button onClick={() => setLightbox(null)} aria-label="Close" style={{ position: 'absolute', top: '16px', right: '18px', width: '42px', height: '42px', borderRadius: '50%', border: 'none', background: 'rgba(255,255,255,0.18)', color: '#fff', fontSize: '24px', cursor: 'pointer', lineHeight: 1 }}>×</button>
+        </div>
+      )}
 
       {/* ===== NEW ITEM MODAL ===== */}
       {newItem && (
