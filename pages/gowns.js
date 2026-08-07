@@ -1548,8 +1548,9 @@ export default function Gowns() {
           const byDate = [...pendingAlts].sort((x, y) => (x.due || '9999').localeCompare(y.due || '9999')).reduce((acc, a) => { const k = a.due || 'No date'; (acc[k] = acc[k] || []).push(a); return acc }, {})
           const markDone = (orderId, altId) => { const o = orders.find(x => x.id === orderId); if (o) patchOrder(orderId, { alterationsList: (o.alterationsList || []).map(a => a.id === altId ? { ...a, done: true } : a) }) }
           const altRow = (a, showWorker) => (
-            <div key={a.id} style={{ display: 'grid', gridTemplateColumns: '1fr auto', gap: '10px', alignItems: 'center', padding: '11px 14px', borderBottom: `1px solid ${CREAM}` }}>
-              <div onClick={() => { const o = orders.find(x => x.id === a.orderId); if (o) openOrder(o) }} style={{ cursor: 'pointer', minWidth: 0 }}>
+            <div key={a.id} style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '11px 14px', borderBottom: `1px solid ${CREAM}` }}>
+              {a.photos?.length > 0 && <a href={a.photos[0].url} target="_blank" rel="noreferrer"><img src={a.photos[0].url} alt="" style={{ width: '44px', height: '44px', objectFit: 'cover', borderRadius: '7px', flexShrink: 0, border: `1px solid ${GRID}` }} /></a>}
+              <div onClick={() => { const o = orders.find(x => x.id === a.orderId); if (o) openOrder(o) }} style={{ cursor: 'pointer', minWidth: 0, flex: 1 }}>
                 <div style={{ fontSize: '14px', fontWeight: 600, color: INK }}>{a.garment ? a.garment + ' — ' : ''}{a.note || 'Alteration'}</div>
                 <div style={{ fontSize: '12px', color: MUTED, marginTop: '2px' }}><span style={{ color: REDNO, fontWeight: 600 }}>No. {a.orderNo}</span> · {a.customer}{showWorker && a.assignee ? ` · ${a.assignee}` : ''}{!showWorker && a.due ? ` · due ${fmtShort(a.due)}` : ''}</div>
               </div>
@@ -1584,8 +1585,9 @@ export default function Gowns() {
                       {total > 0 && (
                         <div style={{ marginTop: '10px', display: 'flex', flexDirection: 'column', gap: '6px' }}>
                           {(o.alterationsList || []).map(a => (
-                            <div key={a.id} style={{ display: 'grid', gridTemplateColumns: '1fr auto', gap: '8px', alignItems: 'center', padding: '7px 10px', background: a.done ? '#F5F2EF' : '#FBEAF0', borderRadius: '8px' }}>
-                              <div style={{ minWidth: 0 }}>
+                            <div key={a.id} style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '7px 10px', background: a.done ? '#F5F2EF' : '#FBEAF0', borderRadius: '8px' }}>
+                              {a.photos?.length > 0 && <a href={a.photos[0].url} target="_blank" rel="noreferrer" onClick={e => e.stopPropagation()}><img src={a.photos[0].url} alt="" style={{ width: '40px', height: '40px', objectFit: 'cover', borderRadius: '6px', flexShrink: 0, border: `1px solid ${GRID}` }} /></a>}
+                              <div style={{ minWidth: 0, flex: 1 }}>
                                 <div style={{ fontSize: '13px', color: a.done ? MUTED : INK, textDecoration: a.done ? 'line-through' : 'none' }}>{a.garment ? a.garment + ' — ' : ''}{a.note || 'Alteration'}</div>
                                 <div style={{ fontSize: '11px', color: MUTED, marginTop: '1px' }}>{[a.assignee, a.hours ? `${a.hours}h` : '', a.due ? `due ${fmtShort(a.due)}` : ''].filter(Boolean).join(' · ') || 'unassigned'}</div>
                               </div>
