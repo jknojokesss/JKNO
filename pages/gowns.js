@@ -161,6 +161,7 @@ export default function Gowns() {
   const [loginBusy, setLoginBusy] = useState(false)
 
   const [role, setRole] = useState('owner')
+  const [workView, setWorkView] = useState('orders')
   const [orders, setOrders] = useState([])
   const [tasks, setTasks] = useState([])
   const [newTask, setNewTask] = useState({ text: '', assignee: '', date: '', orderId: '' })
@@ -1466,20 +1467,40 @@ export default function Gowns() {
         {/* ===== SEAMSTRESS: DASHBOARD ===== */}
         {role === 'seamstress' && view === 'list' && (() => {
           const q = search.trim().toLowerCase()
-          const list = orders
-            .filter(o => !q || fullName(o).toLowerCase().includes(q))
+          const matchC = (o) => !q || fullName(o).toLowerCase().includes(q)
+          const orderList = orders
+            .filter(matchC)
             .map(o => ({ o, pending: (o.alterationsList || []).filter(a => !a.done).length, total: (o.alterationsList || []).length }))
             .sort((a, b) => b.pending - a.pending || (b.o.savedAt || 0) - (a.o.savedAt || 0))
+          const pendingAlts = orders.filter(matchC).flatMap(o => (o.alterationsList || []).filter(a => !a.done).map(a => ({ ...a, orderId: o.id, orderNo: o.orderNo, customer: fullName(o) })))
+          const byWorker = pendingAlts.reduce((acc, a) => { const k = a.assignee || 'Unassigned'; (acc[k] = acc[k] || []).push(a); return acc }, {})
+          const byDate = [...pendingAlts].sort((x, y) => (x.due || '9999').localeCompare(y.due || '9999')).reduce((acc, a) => { const k = a.due || 'No date'; (acc[k] = acc[k] || []).push(a); return acc }, {})
+          const markDone = (orderId, altId) => { const o = orders.find(x => x.id === orderId); if (o) patchOrder(orderId, { alterationsList: (o.alterationsList || []).map(a => a.id === altId ? { ...a, done: true } : a) }) }
+          const altRow = (a, showWorker) => (
+            <div key={a.id} style={{ display: 'grid', gridTemplateColumns: '1fr auto', gap: '10px', alignItems: 'center', padding: '11px 14px', borderBottom: `1px solid ${CREAM}` }}>
+              <div onClick={() => { const o = orders.find(x => x.id === a.orderId); if (o) openOrder(o) }} style={{ cursor: 'pointer', minWidth: 0 }}>
+                <div style={{ fontSize: '14px', fontWeight: 600, color: INK }}>{a.garment ? a.garment + ' — ' : ''}{a.note || 'Alteration'}</div>
+                <div style={{ fontSize: '12px', color: MUTED, marginTop: '2px' }}><span style={{ color: REDNO, fontWeight: 600 }}>No. {a.orderNo}</span> · {a.customer}{showWorker && a.assignee ? ` · ${a.assignee}` : ''}{!showWorker && a.due ? ` · due ${fmtShort(a.due)}` : ''}</div>
+              </div>
+              <input type="checkbox" checked={false} onChange={() => markDone(a.orderId, a.id)} title="Mark done" style={{ width: '17px', height: '17px', accentColor: PAD, cursor: 'pointer' }} />
+            </div>
+          )
           return (
             <>
               <div style={{ fontSize: '20px', fontWeight: 700, color: INK, marginBottom: '3px' }}>Workroom</div>
-              <div style={{ fontSize: '13px', color: MUTED, marginBottom: '14px' }}>Alterations across all orders — tap one to work on it.</div>
+              <div style={{ fontSize: '13px', color: MUTED, marginBottom: '12px' }}>{pendingAlts.length} alteration{pendingAlts.length !== 1 ? 's' : ''} to do.</div>
+              <div style={{ display: 'flex', gap: '8px', marginBottom: '14px', flexWrap: 'wrap' }}>
+                {[['orders', 'Orders'], ['worker', 'By Worker'], ['date', 'By Date']].map(([v, l]) => (
+                  <button key={v} onClick={() => setWorkView(v)} style={{ ...tabBtn(workView === v), flex: 'none', padding: '10px 18px' }}>{l}</button>
+                ))}
+              </div>
               <input value={search} onChange={e => setSearch(e.target.value)} placeholder="Search by customer name…" style={{ ...fieldIn, fontSize: '18px', marginBottom: '16px' }} />
-              {list.length === 0 ? (
+
+              {workView === 'orders' && (orderList.length === 0 ? (
                 <div className="gw-card" style={{ padding: '40px 24px', textAlign: 'center', color: MUTED }}>{orders.length ? 'No matching customers.' : 'No orders yet.'}</div>
               ) : (
                 <div className="gw-card" style={{ overflow: 'hidden', padding: 0 }}>
-                  {list.map(({ o, pending, total }) => (
+                  {orderList.map(({ o, pending, total }) => (
                     <div key={o.id} className="gw-press" onClick={() => openOrder(o)} style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '12px 14px', cursor: 'pointer', borderLeft: `4px solid ${pending > 0 ? ROSE : (total > 0 ? GREEN : '#D9CFC8')}`, borderBottom: `1px solid ${CREAM}`, background: '#fff' }}>
                       <div style={{ minWidth: 0, flex: 1 }}>
                         <div style={{ display: 'flex', alignItems: 'baseline', gap: '8px' }}>
@@ -1492,7 +1513,31 @@ export default function Gowns() {
                     </div>
                   ))}
                 </div>
+              ))}
+
+              {workView !== 'orders' && pendingAlts.length === 0 && (
+                <div className="gw-card" style={{ padding: '36px 24px', textAlign: 'center', color: MUTED }}><div style={{ fontSize: '30px', marginBottom: '6px' }}>✓</div>All caught up — nothing to do.</div>
               )}
+
+              {workView === 'worker' && Object.keys(byWorker).sort().map(worker => (
+                <div key={worker} className="gw-card" style={{ marginBottom: '14px', overflow: 'hidden' }}>
+                  <div style={{ padding: '12px 14px', background: '#FBEAF0', borderBottom: `1px solid ${GRID}`, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <span style={{ fontSize: '14px', fontWeight: 700, color: ROSE_DK }}>{worker}</span>
+                    <span style={{ fontSize: '12px', color: MUTED }}>{byWorker[worker].length} to do</span>
+                  </div>
+                  {byWorker[worker].sort((a, b) => (a.due || '9999').localeCompare(b.due || '9999')).map(a => altRow(a, false))}
+                </div>
+              ))}
+
+              {workView === 'date' && Object.keys(byDate).map(date => (
+                <div key={date} className="gw-card" style={{ marginBottom: '14px', overflow: 'hidden' }}>
+                  <div style={{ padding: '12px 14px', background: '#FBEAF0', borderBottom: `1px solid ${GRID}`, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <span style={{ fontSize: '14px', fontWeight: 700, color: ROSE_DK }}>{date === 'No date' ? 'No date' : fmtDate(date)}</span>
+                    <span style={{ fontSize: '12px', color: MUTED }}>{byDate[date].length}</span>
+                  </div>
+                  {byDate[date].map(a => altRow(a, true))}
+                </div>
+              ))}
             </>
           )
         })()}
