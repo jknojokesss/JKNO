@@ -629,7 +629,7 @@ export default function JerkyMunch() {
     </select>
   )
 
-  const TABS = [['overview', 'Overview'], ['quickbooks', 'Books'], ['consign', 'Consignment'], ['invoices', 'Invoice stores'], ['direct', 'Direct Sales'], ['ads', 'Advertising']]
+  const TABS = [['overview', 'Overview'], ['quickbooks', 'Books'], ['consign', 'Consignment'], ['invoices', 'Invoice Stores'], ['ads', 'Advertising']]
   const EXTRA = [['expenses', 'Import expenses'], ['quickbooks', 'QuickBooks sync'], ['close', 'Monthly close'], ['askai', 'Ask Us']]
   const currentLabel = ([...TABS, ...EXTRA].find(t => t[0] === tab) || ['', ''])[1]
 
@@ -812,7 +812,7 @@ export default function JerkyMunch() {
                     if (!rows.length) return <div style={{ fontSize: '13px', color: MUTED, padding: '8px 0' }}>No direct sales recorded yet.</div>
                     const max = rows[0].rev || 1
                     return rows.map((d, i) => (
-                    <div key={d.who + i} className="jm-click" onClick={() => setTab('direct')} style={{ padding: '9px 8px', borderTop: i ? `1px solid ${CREAM}` : 'none', cursor: 'pointer', borderRadius: '2px' }}>
+                    <div key={d.who + i} className="jm-click" onClick={() => setTab('quickbooks')} style={{ padding: '9px 8px', borderTop: i ? `1px solid ${CREAM}` : 'none', cursor: 'pointer', borderRadius: '2px' }}>
                       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', gap: '8px', marginBottom: '6px' }}>
                         <span style={{ fontWeight: 600, color: INK, fontSize: '14px' }}>{d.who}</span>
                         <span style={{ ...big, fontSize: '15px', color: GREEN }}>{m0(d.rev)}</span>
