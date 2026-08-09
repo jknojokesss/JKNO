@@ -28,6 +28,15 @@ const money0 = (n) => '$' + Math.round(n || 0).toLocaleString()
 const todayStr = () => new Date().toISOString().slice(0, 10)
 const fmtDate = (s) => s ? new Date(s + 'T00:00:00').toLocaleDateString([], { month: 'numeric', day: 'numeric', year: '2-digit' }) : ''
 const fmtShort = (s) => s ? new Date(s + 'T00:00:00').toLocaleDateString([], { month: 'short', day: 'numeric' }) : ''
+// Colour/weight for a due date: red if overdue, amber if within 3 days, muted otherwise.
+const dueTone = (due, done) => {
+  if (!due || done) return { color: '#8A8A93', weight: 400 }
+  const today = new Date().toISOString().slice(0, 10)
+  if (due < today) return { color: '#C0504C', weight: 700, overdue: true }
+  const d = new Date(today + 'T00:00:00'); d.setDate(d.getDate() + 3)
+  if (due <= d.toISOString().slice(0, 10)) return { color: '#9C6B12', weight: 700, soon: true }
+  return { color: '#8A8A93', weight: 400 }
+}
 // Order ids are stored in a Postgres `uuid` column, so they must be valid UUIDs.
 const uid = () =>
   (typeof crypto !== 'undefined' && crypto.randomUUID)
@@ -1553,8 +1562,8 @@ export default function Gowns() {
             <div key={a.id} style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '11px 14px', borderBottom: `1px solid ${CREAM}` }}>
               {a.photos?.length > 0 && <img src={a.photos[0].url} alt="" onClick={(e) => { e.stopPropagation(); setLightbox(a.photos[0].url) }} style={{ width: '44px', height: '44px', objectFit: 'cover', borderRadius: '7px', flexShrink: 0, border: `1px solid ${GRID}`, cursor: 'zoom-in' }} />}
               <div onClick={() => { const o = orders.find(x => x.id === a.orderId); if (o) openOrder(o) }} style={{ cursor: 'pointer', minWidth: 0, flex: 1 }}>
-                <div style={{ fontSize: '14px', fontWeight: 600, color: INK }}>{a.garment ? a.garment + ' — ' : ''}{a.note || 'Alteration'}</div>
-                <div style={{ fontSize: '12px', color: MUTED, marginTop: '2px' }}><span style={{ color: REDNO, fontWeight: 600 }}>No. {a.orderNo}</span> · {a.customer}{showWorker && a.assignee ? ` · ${a.assignee}` : ''}{!showWorker && a.due ? ` · due ${fmtShort(a.due)}` : ''}</div>
+                <div style={{ fontSize: '14px' }}>{a.garment ? <span style={{ fontWeight: 800, color: INK }}>{a.garment} — </span> : ''}<span style={{ fontWeight: 600, color: ROSE_DK }}>{a.note || 'Alteration'}</span></div>
+                <div style={{ fontSize: '12px', color: MUTED, marginTop: '2px' }}><span style={{ color: REDNO, fontWeight: 600 }}>No. {a.orderNo}</span> · {a.customer}{showWorker && a.assignee ? ` · ${a.assignee}` : ''}{!showWorker && a.due ? <span style={{ color: dueTone(a.due, false).color, fontWeight: dueTone(a.due, false).weight }}> · {dueTone(a.due, false).overdue ? '⚠ ' : ''}due {fmtShort(a.due)}</span> : ''}</div>
               </div>
               <input type="checkbox" checked={false} onChange={() => markDone(a.orderId, a.id)} title="Mark done" style={{ width: '17px', height: '17px', accentColor: PAD, cursor: 'pointer' }} />
             </div>
@@ -1588,22 +1597,39 @@ export default function Gowns() {
                         </div>
                         <span style={{ fontSize: '12px', fontWeight: 700, color: pending > 0 ? AMBER : GREEN, whiteSpace: 'nowrap', flexShrink: 0 }}>{pending > 0 ? `${pending} to do` : (total > 0 ? 'All done ✓' : '—')}</span>
                       </div>
-                      {total > 0 && (
-                        <div style={{ marginTop: '10px', display: 'flex', flexDirection: 'column', gap: '6px' }}>
-                          {(o.alterationsList || []).map(a => (
-                            <div key={a.id} style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '7px 10px', background: a.done ? '#F5F2EF' : '#FBEAF0', borderRadius: '8px' }}>
-                              {a.photos?.length > 0 && <img src={a.photos[0].url} alt="" onClick={(e) => { e.stopPropagation(); setLightbox(a.photos[0].url) }} style={{ width: '40px', height: '40px', objectFit: 'cover', borderRadius: '6px', flexShrink: 0, border: `1px solid ${GRID}`, cursor: 'zoom-in' }} />}
-                              <div style={{ minWidth: 0, flex: 1 }}>
-                                <div style={{ fontSize: '13px', color: a.done ? MUTED : INK, textDecoration: a.done ? 'line-through' : 'none' }}>{a.garment ? a.garment + ' — ' : ''}{a.note || 'Alteration'}</div>
-                                <div style={{ fontSize: '11px', color: MUTED, marginTop: '1px' }}>{[a.assignee, a.hours ? `${a.hours}h` : '', a.due ? `due ${fmtShort(a.due)}` : ''].filter(Boolean).join(' · ') || 'unassigned'}</div>
+                      {total > 0 && (() => {
+                        const groups = {}
+                        ;(o.alterationsList || []).forEach(a => { const g = a.garment?.trim() || 'Gown'; (groups[g] = groups[g] || []).push(a) })
+                        return (
+                          <div style={{ marginTop: '10px', display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                            {Object.entries(groups).map(([garment, alts]) => (
+                              <div key={garment}>
+                                <div style={{ fontSize: '13px', fontWeight: 800, color: INK, marginBottom: '5px' }}>👗 {garment}</div>
+                                <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                                  {alts.map(a => {
+                                    const dt = dueTone(a.due, a.done)
+                                    return (
+                                      <div key={a.id} style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '7px 10px', background: a.done ? '#F5F2EF' : '#FBEAF0', borderRadius: '8px', borderLeft: dt.overdue ? '3px solid #C0504C' : (dt.soon ? '3px solid #9C6B12' : '3px solid transparent') }}>
+                                        {a.photos?.length > 0 && <img src={a.photos[0].url} alt="" onClick={(e) => { e.stopPropagation(); setLightbox(a.photos[0].url) }} style={{ width: '40px', height: '40px', objectFit: 'cover', borderRadius: '6px', flexShrink: 0, border: `1px solid ${GRID}`, cursor: 'zoom-in' }} />}
+                                        <div style={{ minWidth: 0, flex: 1 }}>
+                                          <div style={{ fontSize: '13px', fontWeight: 600, color: a.done ? MUTED : ROSE_DK, textDecoration: a.done ? 'line-through' : 'none' }}>{a.note || 'Alteration'}</div>
+                                          <div style={{ fontSize: '11px', marginTop: '1px' }}>
+                                            <span style={{ color: MUTED }}>{[a.assignee, a.hours ? `${a.hours}h` : ''].filter(Boolean).join(' · ') || 'unassigned'}</span>
+                                            {a.due && <span style={{ color: dt.color, fontWeight: dt.weight, marginLeft: '6px' }}>{dt.overdue ? '⚠ ' : ''}due {fmtShort(a.due)}</span>}
+                                          </div>
+                                        </div>
+                                        {a.done
+                                          ? <span style={{ fontSize: '12px', color: GREEN, fontWeight: 700 }}>✓</span>
+                                          : <input type="checkbox" checked={false} onChange={() => markDone(o.id, a.id)} title="Mark done" style={{ width: '16px', height: '16px', accentColor: PAD, cursor: 'pointer' }} />}
+                                      </div>
+                                    )
+                                  })}
+                                </div>
                               </div>
-                              {a.done
-                                ? <span style={{ fontSize: '12px', color: GREEN, fontWeight: 700 }}>✓</span>
-                                : <input type="checkbox" checked={false} onChange={() => markDone(o.id, a.id)} title="Mark done" style={{ width: '16px', height: '16px', accentColor: PAD, cursor: 'pointer' }} />}
-                            </div>
-                          ))}
-                        </div>
-                      )}
+                            ))}
+                          </div>
+                        )
+                      })()}
                     </div>
                   ))}
                 </div>
