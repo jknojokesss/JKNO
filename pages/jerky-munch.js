@@ -125,6 +125,7 @@ export default function JerkyMunch() {
   const [session, setSession] = useState(null)
   const [authChecked, setAuthChecked] = useState(false)
   const [dataLoaded, setDataLoaded] = useState(false)
+  const [role, setRole] = useState(null)              // 'owner' | 'counter' (staff shelf-count-only)
   const [loginEmail, setLoginEmail] = useState('')
   const [loginPassword, setLoginPassword] = useState('')
   const [loginError, setLoginError] = useState('')
@@ -222,8 +223,22 @@ export default function JerkyMunch() {
       setCoaTx(data || [])
     } catch (e) { console.error('loadCoA failed', e); setCoaTx([]) }
   }
+  const loadRole = async () => {
+    try {
+      const email = (await jerkySupabase.auth.getUser()).data.user?.email
+      if (!email) { setRole('owner'); return }
+      const { data } = await jerkySupabase.from('user_roles').select('role').ilike('email', email).maybeSingle()
+      setRole(data?.role === 'counter' ? 'counter' : 'owner')
+    } catch (e) { console.error('loadRole failed', e); setRole('owner') }
+  }
+  const saveShelfCount = async (partnerId, count) => {
+    try {
+      await jerkySupabase.rpc('set_shelf_count', { p_partner: partnerId, p_count: Number(count) || 0 })
+      await loadConsign()
+    } catch (e) { console.error('saveShelfCount failed', e) }
+  }
   const loadAll = async () => {
-    await Promise.all([loadConsign(), loadDirect(), loadAds(), loadExpenses(), loadInvoices(), loadProducts(), loadMonthSeries(), loadSettings(), loadGL(), loadCoA()])
+    await Promise.all([loadRole(), loadConsign(), loadDirect(), loadAds(), loadExpenses(), loadInvoices(), loadProducts(), loadMonthSeries(), loadSettings(), loadGL(), loadCoA()])
     setDataLoaded(true)
   }
 
@@ -639,6 +654,47 @@ export default function JerkyMunch() {
     </>
   )
   if (!dataLoaded) return (<>{FontHead}<div style={{ ...centered, background: CREAM, color: MUTED }}>Loading your data…</div></>)
+
+  // ── count-only staff view: shelf counts, nothing else ──
+  if (role === 'counter') {
+    const stores = consign.filter(c => (c.type || 'consignment') === 'consignment')
+      .sort((a, b) => (a.region || 'zz').localeCompare(b.region || 'zz') || a.store.localeCompare(b.store))
+    return (
+      <>
+        {FontHead}
+        <div style={{ minHeight: '100vh', background: CREAM, padding: '20px 16px 60px', maxWidth: '620px', margin: '0 auto' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px' }}>
+            <div style={{ ...big, fontSize: '22px' }}><span style={{ color: SPICE }}>Jerky</span> <span style={{ color: '#E0863A' }}>Munch</span></div>
+            <button onClick={doSignOut} style={{ background: 'none', border: 'none', color: MUTED, fontSize: '12px', fontWeight: 600, cursor: 'pointer' }}>Sign out</button>
+          </div>
+          <div style={{ ...big, fontSize: '18px', color: INK }}>Shelf counts</div>
+          <p style={{ fontSize: '13px', color: MUTED, lineHeight: 1.5, margin: '4px 0 18px' }}>For each store, type how many bags are on the shelf right now and tap Save.</p>
+          {stores.length === 0 && <div style={{ ...card, color: MUTED, fontSize: '13px' }}>No consignment stores yet.</div>}
+          {stores.map((c, i) => {
+            const showHeader = i === 0 || stores[i - 1].region !== c.region
+            const key = 'ct_' + c.id
+            const val = draft[key] !== undefined ? draft[key] : (c.counted == null ? '' : String(c.counted))
+            const saved = draft[key + '_ok']
+            return (
+              <Fragment key={c.id}>
+                {showHeader && <div style={{ ...lbl, color: SPICE, fontSize: '12px', margin: i === 0 ? '2px 0 8px' : '20px 0 8px' }}>{c.region || 'Other'}</div>}
+                <div style={{ ...card, padding: '14px 16px', marginBottom: '10px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '12px', flexWrap: 'wrap' }}>
+                  <div>
+                    <div style={{ fontWeight: 600, color: INK, fontSize: '16px' }}>{c.store}</div>
+                    <div style={{ fontSize: '11.5px', color: MUTED, marginTop: '2px' }}>{c.countedDate ? `last counted ${fmtD(c.countedDate)}` : 'never counted'}</div>
+                  </div>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    <input value={val} onChange={e => setDraft(d => ({ ...d, [key]: e.target.value, [key + '_ok']: false }))} type="number" inputMode="numeric" placeholder="on shelf" style={{ ...inp, width: '92px', textAlign: 'center', fontSize: '16px' }} />
+                    <button onClick={async () => { await saveShelfCount(c.id, val); setDraft(d => ({ ...d, [key + '_ok']: true })) }} style={{ background: saved ? GREEN : CHAR, color: CREAM, border: 'none', borderRadius: '2px', padding: '11px 16px', ...btn }}>{saved ? 'Saved ✓' : 'Save'}</button>
+                  </div>
+                </div>
+              </Fragment>
+            )
+          })}
+        </div>
+      </>
+    )
+  }
 
   const KPI = ({ k, v, sub, accent, onClick }) => (
     <div onClick={onClick} className={onClick ? 'jm-click' : undefined} style={{ ...card, flex: 1, minWidth: '150px', padding: '15px 17px', position: 'relative', ...(onClick ? { cursor: 'pointer' } : {}) }}>
