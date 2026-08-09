@@ -93,8 +93,11 @@ export default function JerkyMunch() {
   const [rangeEnd, setRangeEnd] = useState(99)
   // Financials tab (real books): which statement + P&L view mode + month pickers
   const [finView, setFinView] = useState('pnl')       // 'pnl' | 'bs' | 'cf'
-  const [finPeriod, setFinPeriod] = useState(0)       // 0 = year to date, else month
-  const [finCompare, setFinCompare] = useState(-1)    // -1 = no comparison
+  const [finFrom, setFinFrom] = useState(0)           // P&L range: first month index
+  const [finTo, setFinTo] = useState(99)              // P&L range: last month index (clamped to latest)
+  const [finCmpOn, setFinCmpOn] = useState(false)     // comparison on/off
+  const [finCmpFrom, setFinCmpFrom] = useState(0)     // comparison range start
+  const [finCmpTo, setFinCmpTo] = useState(99)        // comparison range end
   const [finExpand, setFinExpand] = useState({ income: true, cogs: true, expense: true })
   const [period, setPeriod] = useState('month')
   const [costPerBag, setCostPerBag] = useState(4.5)
@@ -568,12 +571,17 @@ export default function JerkyMunch() {
   const glAds = glTx.length ? buildAdSpend(glTx, coaTx) : null
   const glHasOpenings = glTx.some(r => r.txn_type === 'Beginning Balance')
   const glAsOf = glPnl && glPnl.lastDate ? new Date(glPnl.lastDate + 'T00:00:00').toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' }) : ''
-  // Financials P&L: period picker (YTD + each month) with optional comparison
-  const finPeriods = glPnl ? [{ key: null, label: 'Year to date' }, ...glPnl.months.map(m => ({ key: m.key, label: m.label }))] : []
-  const pIdx = Math.min(Math.max(finPeriod, 0), Math.max(finPeriods.length - 1, 0))
-  const cActive = finCompare >= 0 && finCompare < finPeriods.length
-  const stmtA = glPnl ? periodPnl(glTx, coaTx, finPeriods[pIdx] && finPeriods[pIdx].key, finPeriods[pIdx] && finPeriods[pIdx].key) : null
-  const stmtB = (glPnl && cActive) ? periodPnl(glTx, coaTx, finPeriods[finCompare].key, finPeriods[finCompare].key) : null
+  // Financials P&L: pick any month range, optionally compare to another range
+  const finM = glPnl ? glPnl.months : []
+  const finN = finM.length
+  const finClamp = (i) => Math.min(Math.max(i, 0), Math.max(finN - 1, 0))
+  const aFrom = finClamp(finFrom), aTo = finClamp(finTo)
+  const bFrom = finClamp(finCmpFrom), bTo = finClamp(finCmpTo)
+  const finKeys = (i, j) => { const lo = Math.min(i, j), hi = Math.max(i, j); return [finM[lo] && finM[lo].key, finM[hi] && finM[hi].key] }
+  const finRangeLabel = (i, j) => { if (!finN) return ''; const lo = Math.min(i, j), hi = Math.max(i, j); return lo === hi ? finM[lo].label : `${finM[lo].label} – ${finM[hi].label}` }
+  const cmpOn = finCmpOn && finN > 0
+  const stmtA = glPnl ? periodPnl(glTx, coaTx, ...finKeys(aFrom, aTo)) : null
+  const stmtB = (glPnl && cmpOn) ? periodPnl(glTx, coaTx, ...finKeys(bFrom, bTo)) : null
   const rngPct = (n) => rngAgg.rev ? Math.round(n / rngAgg.rev * 100) : 0
   const rngMonthCount = rngB - rngA + 1
 
@@ -1583,20 +1591,28 @@ export default function JerkyMunch() {
                     const expKeys = unionKeys(stmtA.expenses.map, B && B.expenses.map)
                     return (
                       <>
-                        <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap', alignItems: 'center', marginBottom: '14px' }}>
-                          <select value={pIdx} onChange={e => setFinPeriod(+e.target.value)} style={{ ...inp }}>{finPeriods.map((p, i) => <option key={i} value={i}>{p.label}</option>)}</select>
-                          <span style={{ color: MUTED, fontSize: '13px' }}>compare to</span>
-                          <select value={finCompare} onChange={e => setFinCompare(+e.target.value)} style={{ ...inp }}>
-                            <option value={-1}>— none —</option>
-                            {finPeriods.map((p, i) => <option key={i} value={i}>{p.label}</option>)}
-                          </select>
+                        <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', alignItems: 'center', marginBottom: '10px' }}>
+                          <span style={{ fontSize: '13px', color: MUTED }}>P&amp;L for</span>
+                          <select value={aFrom} onChange={e => setFinFrom(+e.target.value)} style={{ ...inp }}>{finM.map((m, i) => <option key={i} value={i}>{m.label}</option>)}</select>
+                          <span style={{ color: MUTED, fontSize: '13px' }}>to</span>
+                          <select value={aTo} onChange={e => setFinTo(+e.target.value)} style={{ ...inp }}>{finM.map((m, i) => <option key={i} value={i}>{m.label}</option>)}</select>
+                        </div>
+                        <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', alignItems: 'center', marginBottom: '14px' }}>
+                          <label style={{ fontSize: '13px', color: MUTED, display: 'flex', alignItems: 'center', gap: '6px', cursor: 'pointer' }}>
+                            <input type="checkbox" checked={finCmpOn} onChange={e => setFinCmpOn(e.target.checked)} /> compare to
+                          </label>
+                          {cmpOn && <>
+                            <select value={bFrom} onChange={e => setFinCmpFrom(+e.target.value)} style={{ ...inp }}>{finM.map((m, i) => <option key={i} value={i}>{m.label}</option>)}</select>
+                            <span style={{ color: MUTED, fontSize: '13px' }}>to</span>
+                            <select value={bTo} onChange={e => setFinCmpTo(+e.target.value)} style={{ ...inp }}>{finM.map((m, i) => <option key={i} value={i}>{m.label}</option>)}</select>
+                          </>}
                         </div>
 
                         <div style={{ ...card }}>
                           {cmp && (
                             <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '14px', fontSize: '11px', color: MUTED, paddingBottom: '2px' }}>
-                              <span style={{ width: '96px', textAlign: 'right' }}>{finPeriods[pIdx].label}</span>
-                              <span style={{ width: '96px', textAlign: 'right' }}>{finPeriods[finCompare].label}</span>
+                              <span style={{ width: '104px', textAlign: 'right' }}>{finRangeLabel(aFrom, aTo)}</span>
+                              <span style={{ width: '104px', textAlign: 'right' }}>{finRangeLabel(bFrom, bTo)}</span>
                               <span style={{ width: '92px', textAlign: 'right' }}>change</span>
                             </div>
                           )}
