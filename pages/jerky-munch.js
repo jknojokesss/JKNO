@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect, Fragment } from 'react'
 import Head from 'next/head'
 import { jerkySupabase } from '../lib/supabaseJerky'
-import { parseGL, parseCoA, buildPnl, buildBalanceSheet, buildCashFlow, periodPnl } from '../lib/jerkyGL'
+import { parseGL, parseCoA, buildPnl, buildBalanceSheet, buildCashFlow, periodPnl, buildAdSpend } from '../lib/jerkyGL'
 
 const CHAR = '#2B2018', SPICE = '#C8462C', KRAFT = '#A9763A', CREAM = '#F6F0E6'
 const INK = '#2B2018', MUTED = '#8A7A66', GREEN = '#3E7C4F', BORDER = '#E6DBC8', AMBER = '#C98A2A', RED = '#C03A22'
@@ -565,6 +565,7 @@ export default function JerkyMunch() {
   const glPnl = glTx.length ? buildPnl(glTx, coaTx) : null
   const glBS = glTx.length ? buildBalanceSheet(glTx, coaTx) : null
   const glCF = glTx.length ? buildCashFlow(glTx, coaTx) : null
+  const glAds = glTx.length ? buildAdSpend(glTx, coaTx) : null
   const glAsOf = glPnl && glPnl.lastDate ? new Date(glPnl.lastDate + 'T00:00:00').toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' }) : ''
   // Financials P&L: period picker (YTD + each month) with optional comparison
   const finPeriods = glPnl ? [{ key: null, label: 'Year to date' }, ...glPnl.months.map(m => ({ key: m.key, label: m.label }))] : []
@@ -1374,6 +1375,20 @@ export default function JerkyMunch() {
           {/* ===== ADVERTISING ===== */}
           {tab === 'ads' && (
             <>
+              {glAds && glAds.total > 0 && (
+                <div style={{ ...card, marginBottom: '16px' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: '8px', flexWrap: 'wrap', gap: '6px' }}>
+                    <div style={{ ...big, fontSize: '16px', color: INK }}>Advertisers — from your books</div>
+                    <div style={{ fontSize: '12px', color: MUTED }}>Total spend <b style={{ color: INK, fontFamily: MONO }}>{m0(glAds.total)}</b> · YTD</div>
+                  </div>
+                  <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', marginBottom: '12px' }}>
+                    {glAds.byCategory.map(c => <span key={c.account} style={{ fontSize: '12px', color: KRAFT, background: CREAM, border: `1px solid ${BORDER}`, borderRadius: '2px', padding: '4px 9px' }}>{c.account} <b style={{ color: INK, fontFamily: MONO }}>{m0(c.amount)}</b></span>)}
+                  </div>
+                  <div style={{ ...lbl, color: KRAFT, marginBottom: '2px' }}>By advertiser</div>
+                  {glAds.vendors.map(v => <Row key={v.name} l={v.name} v={m0(v.amount)} />)}
+                  <div style={{ fontSize: '11.5px', color: MUTED, marginTop: '8px', lineHeight: 1.5 }}>Pulled from your General Ledger (Advertising, Graphics Design, Photography). “Other / uncategorized” are payments whose memo didn’t name a vendor.</div>
+                </div>
+              )}
               <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap', marginBottom: '16px' }}>
                 <KPI k="Ad spend / mo" v={m0(adSpend)} sub="all channels" />
                 <KPI k="Return" v={m0(adRev)} sub={`${(adRev / adSpend).toFixed(1)}x overall`} accent={GREEN} />
