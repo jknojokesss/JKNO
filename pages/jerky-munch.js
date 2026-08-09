@@ -2,6 +2,7 @@ import { useState, useRef, useEffect, Fragment } from 'react'
 import Head from 'next/head'
 import { jerkySupabase } from '../lib/supabaseJerky'
 import { parseGL, parseCoA, buildPnl, buildBalanceSheet, buildCashFlow, periodPnl, buildAdSpend } from '../lib/jerkyGL'
+import { ResponsiveContainer, ComposedChart, Bar, Line, XAxis, YAxis, Tooltip, CartesianGrid, PieChart, Pie, Cell } from 'recharts'
 
 const CHAR = '#2B2018', SPICE = '#C8462C', KRAFT = '#A9763A', CREAM = '#F6F0E6'
 const INK = '#2B2018', MUTED = '#8A7A66', GREEN = '#3E7C4F', BORDER = '#E6DBC8', AMBER = '#C98A2A', RED = '#C03A22'
@@ -798,12 +799,43 @@ export default function JerkyMunch() {
                   </div>
 
                   <div style={{ ...card, marginBottom: '16px' }}>
+                    <div style={{ ...lbl, marginBottom: '12px' }}>Revenue &amp; net profit by month</div>
+                    <div style={{ width: '100%', height: '260px' }}>
+                      <ResponsiveContainer>
+                        <ComposedChart data={glPnl.months.map(mm => ({ name: mm.label.replace(/ \d{4}$/, ''), Revenue: mm.income, Net: mm.net }))} margin={{ top: 6, right: 8, left: 4, bottom: 0 }}>
+                          <CartesianGrid stroke={BORDER} vertical={false} />
+                          <XAxis dataKey="name" tick={{ fontSize: 12, fill: MUTED }} axisLine={{ stroke: BORDER }} tickLine={false} />
+                          <YAxis tickFormatter={(v) => '$' + Math.round(v / 1000) + 'k'} tick={{ fontSize: 11, fill: MUTED }} axisLine={false} tickLine={false} width={44} />
+                          <Tooltip formatter={(v) => m0(v)} contentStyle={{ fontSize: '12px', borderRadius: '2px', border: `1px solid ${BORDER}` }} />
+                          <Bar dataKey="Revenue" fill={KRAFT} radius={[2, 2, 0, 0]} maxBarSize={40} />
+                          <Line dataKey="Net" stroke={GREEN} strokeWidth={2.5} dot={{ r: 3, fill: GREEN }} />
+                        </ComposedChart>
+                      </ResponsiveContainer>
+                    </div>
+                  </div>
+
+                  <div style={{ ...card, marginBottom: '16px' }}>
                     <div style={{ ...lbl, marginBottom: '10px' }}>Revenue by channel · {finRangeLabel(ovF, ovT)}</div>
-                    <Row l="Invoiced wholesale" v={m0(ovStmt.income.channels.invoiced)} />
-                    <Row l="Private / Zelle" v={m0(ovStmt.income.channels.private)} />
-                    <Row l="Shopify (online)" v={m0(ovStmt.income.channels.shopify)} />
-                    <Row l="Consignment stores" v={m0(ovStmt.income.channels.consignment)} />
-                    <Row l="Store deposits" v={m0(ovStmt.income.channels.deposits)} />
+                    <div style={{ display: 'flex', gap: '18px', flexWrap: 'wrap', alignItems: 'center' }}>
+                      <div style={{ width: '180px', height: '180px', flexShrink: 0 }}>
+                        <ResponsiveContainer>
+                          <PieChart>
+                            <Pie data={[['Invoiced wholesale', ovStmt.income.channels.invoiced], ['Private / Zelle', ovStmt.income.channels.private], ['Shopify (online)', ovStmt.income.channels.shopify], ['Consignment stores', ovStmt.income.channels.consignment], ['Store deposits', ovStmt.income.channels.deposits]].filter(d => d[1] > 0).map(d => ({ name: d[0], value: d[1] }))} dataKey="value" nameKey="name" innerRadius={48} outerRadius={80} paddingAngle={2} stroke="none">
+                              {[SPICE, KRAFT, GREEN, AMBER, '#8A5A2B'].map((c, i) => <Cell key={i} fill={c} />)}
+                            </Pie>
+                            <Tooltip formatter={(v) => m0(v)} contentStyle={{ fontSize: '12px', borderRadius: '2px', border: `1px solid ${BORDER}` }} />
+                          </PieChart>
+                        </ResponsiveContainer>
+                      </div>
+                      <div style={{ flex: 1, minWidth: '220px' }}>
+                        {[['Invoiced wholesale', ovStmt.income.channels.invoiced, SPICE], ['Private / Zelle', ovStmt.income.channels.private, KRAFT], ['Shopify (online)', ovStmt.income.channels.shopify, GREEN], ['Consignment stores', ovStmt.income.channels.consignment, AMBER], ['Store deposits', ovStmt.income.channels.deposits, '#8A5A2B']].map(([label, val, col]) => (
+                          <div key={label} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '5px 0', fontSize: '13px' }}>
+                            <span style={{ display: 'flex', alignItems: 'center', gap: '8px', color: INK }}><span style={{ width: '10px', height: '10px', borderRadius: '2px', background: col, flexShrink: 0 }} />{label}</span>
+                            <span style={{ fontFamily: MONO }}>{m0(val)}</span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
                     <div style={{ fontSize: '11.5px', color: MUTED, marginTop: '8px' }}>Figures from your QuickBooks books · reconciled through June (later months fill in as you reconcile).</div>
                   </div>
                 </>
