@@ -1201,12 +1201,9 @@ export default function JerkyMunch() {
                     <div style={{ ...big, fontSize: '16px', color: INK }}>Advertisers — from your books</div>
                     <div style={{ fontSize: '12px', color: MUTED }}>Total spend <b style={{ color: INK, fontFamily: MONO }}>{m0(glAds.total)}</b> · YTD</div>
                   </div>
-                  <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', marginBottom: '12px' }}>
-                    {glAds.byCategory.map(c => <span key={c.account} style={{ fontSize: '12px', color: KRAFT, background: CREAM, border: `1px solid ${BORDER}`, borderRadius: '2px', padding: '4px 9px' }}>{c.account} <b style={{ color: INK, fontFamily: MONO }}>{m0(c.amount)}</b></span>)}
-                  </div>
-                  <div style={{ ...lbl, color: KRAFT, marginBottom: '2px' }}>By advertiser</div>
+                  <div style={{ ...lbl, color: KRAFT, marginBottom: '2px', marginTop: '4px' }}>By advertiser</div>
                   {glAds.vendors.map(v => <Row key={v.name} l={v.name} v={m0(v.amount)} />)}
-                  <div style={{ fontSize: '11.5px', color: MUTED, marginTop: '8px', lineHeight: 1.5 }}>Pulled from your General Ledger (Advertising, Graphics Design, Photography). “Other / uncategorized” are payments whose memo didn’t name a vendor.</div>
+                  <div style={{ fontSize: '11.5px', color: MUTED, marginTop: '8px', lineHeight: 1.5 }}>Pulled from your General Ledger (Advertising/Marketing). “Other / uncategorized” are payments whose memo didn’t name a vendor.</div>
                 </div>
               )}
               <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap', marginBottom: '16px' }}>
@@ -1374,23 +1371,23 @@ export default function JerkyMunch() {
                     // kind: 'income' (money in, dark), 'cost' (subtracts, shown negative in red), 'result' (green/red)
                     const fmtv = (v, kind) => (kind === 'cost' || v < 0) ? `(${m0(Math.abs(v))})` : m0(v)
                     const colv = (v, kind) => kind === 'cost' ? RED : kind === 'result' ? (v >= 0 ? GREEN : RED) : (v < 0 ? RED : INK)
-                    const cells = (a, b, kind) => (
-                      <span style={{ display: 'flex', gap: '14px', fontFamily: MONO, fontSize: '13px' }}>
-                        <span style={{ width: '104px', textAlign: 'right', color: colv(a, kind) }}>{fmtv(a, kind)}</span>
-                        {cmp && <span style={{ width: '104px', textAlign: 'right', color: colv(b, kind) }}>{fmtv(b, kind)}</span>}
+                    const cells = (a, b, kind, strong) => (
+                      <span style={{ display: 'flex', gap: '14px', fontFamily: MONO, fontSize: strong ? '14px' : '13px' }}>
+                        <span style={{ width: '104px', textAlign: 'right', color: colv(a, kind), fontWeight: strong ? 700 : 400 }}>{fmtv(a, kind)}</span>
+                        {cmp && <span style={{ width: '104px', textAlign: 'right', color: colv(b, kind), fontWeight: strong ? 700 : 400 }}>{fmtv(b, kind)}</span>}
                         {cmp && (() => { const chg = b - a; const good = kind === 'cost' ? chg <= 0 : chg >= 0; return <span style={{ width: '92px', textAlign: 'right', color: good ? GREEN : RED, fontWeight: 700 }}>{chg >= 0 ? '+' : '-'}{m0(Math.abs(chg))}</span> })()}
                       </span>
                     )
                     const line = (label, a, b, opts = {}) => (
                       <div key={label} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: opts.indent ? '4px 0 4px 16px' : '6px 0', borderTop: opts.top ? `1px solid ${BORDER}` : 'none' }}>
                         <span style={{ fontSize: '13px', color: opts.indent ? MUTED : INK, fontWeight: opts.bold ? 700 : 400 }}>{label}</span>
-                        {cells(a, b, opts.kind)}
+                        {cells(a, b, opts.kind, opts.bold)}
                       </div>
                     )
                     const catHeader = (key, label, a, b, kind) => (
                       <div onClick={() => setFinExpand(s => ({ ...s, [key]: !s[key] }))} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '9px 0', cursor: 'pointer', borderTop: `2px solid ${BORDER}` }}>
                         <span style={{ ...lbl, color: KRAFT, display: 'flex', alignItems: 'center', gap: '6px' }}><span style={{ fontSize: '9px' }}>{finExpand[key] ? '▼' : '▶'}</span>{label}</span>
-                        {cells(a, b, kind)}
+                        {cells(a, b, kind, true)}
                       </div>
                     )
                     const unionKeys = (ma, mb) => {
@@ -1441,7 +1438,7 @@ export default function JerkyMunch() {
                           <div style={{ marginTop: '12px', borderTop: `2px solid ${CHAR}`, paddingTop: '10px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                             <span style={{ ...big, fontSize: '15px', color: INK }}>Net income</span>
                             {cmp
-                              ? cells(stmtA.net, B.net, 'result')
+                              ? cells(stmtA.net, B.net, 'result', true)
                               : <span style={{ ...big, fontSize: '17px', fontFamily: MONO, color: stmtA.net >= 0 ? GREEN : RED }}>{stmtA.net < 0 ? `(${m0(Math.abs(stmtA.net))})` : m0(stmtA.net)}</span>}
                           </div>
                           <div style={{ marginTop: '10px', fontSize: '11.5px', color: MUTED }}>Amounts in <span style={{ color: RED }}>(red parentheses)</span> reduce profit; income and gross/net profit are shown in the black/green.</div>
