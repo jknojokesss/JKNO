@@ -766,12 +766,6 @@ export default function JerkyMunch() {
               <div style={{ ...lbl, color: SPICE }}>Jerky Munch</div>
               <h1 style={{ ...big, fontSize: '28px', color: INK, letterSpacing: '0.3px', lineHeight: 1.1 }}>{currentLabel}</h1>
             </div>
-            {glPnl && (
-              <div style={{ textAlign: 'right' }}>
-                <div style={{ ...big, fontSize: '24px', color: SPICE }}>{m0(glPnl.annual.income)}</div>
-                <div style={{ ...lbl, color: '#9A8868' }}>Revenue · YTD</div>
-              </div>
-            )}
           </div>
 
           {/* ===== OVERVIEW ===== */}
