@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect, Fragment } from 'react'
 import Head from 'next/head'
 import { jerkySupabase } from '../lib/supabaseJerky'
-import { parseGL, parseCoA, buildPnl, buildBalanceSheet, buildCashFlow } from '../lib/jerkyGL'
+import { parseGL, parseCoA, buildPnl, buildBalanceSheet, buildCashFlow, periodPnl } from '../lib/jerkyGL'
 
 const CHAR = '#2B2018', SPICE = '#C8462C', KRAFT = '#A9763A', CREAM = '#F6F0E6'
 const INK = '#2B2018', MUTED = '#8A7A66', GREEN = '#3E7C4F', BORDER = '#E6DBC8', AMBER = '#C98A2A', RED = '#C03A22'
@@ -93,9 +93,9 @@ export default function JerkyMunch() {
   const [rangeEnd, setRangeEnd] = useState(99)
   // Financials tab (real books): which statement + P&L view mode + month pickers
   const [finView, setFinView] = useState('pnl')       // 'pnl' | 'bs' | 'cf'
-  const [finMode, setFinMode] = useState('statement') // 'statement' | 'monthly' | 'compare' | 'range'
-  const [finA, setFinA] = useState(0)                 // month index A (compare/range start)
-  const [finB, setFinB] = useState(0)                 // month index B (compare/range end)
+  const [finPeriod, setFinPeriod] = useState(0)       // 0 = year to date, else month
+  const [finCompare, setFinCompare] = useState(-1)    // -1 = no comparison
+  const [finExpand, setFinExpand] = useState({ income: true, cogs: true, expense: true })
   const [period, setPeriod] = useState('month')
   const [costPerBag, setCostPerBag] = useState(4.5)
   const [boardsProducts, setBoardsProducts] = useState([])
@@ -566,17 +566,12 @@ export default function JerkyMunch() {
   const glBS = glTx.length ? buildBalanceSheet(glTx, coaTx) : null
   const glCF = glTx.length ? buildCashFlow(glTx, coaTx) : null
   const glAsOf = glPnl && glPnl.lastDate ? new Date(glPnl.lastDate + 'T00:00:00').toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' }) : ''
-  // clamp the Financials month pickers to the available months
-  const finMonths = glPnl ? glPnl.months : []
-  const fA = Math.min(finA, Math.max(finMonths.length - 1, 0))
-  const fB = Math.min(finB, Math.max(finMonths.length - 1, 0))
-  const finAgg = (a, b) => {
-    const lo = Math.min(a, b), hi = Math.max(a, b)
-    const slice = finMonths.slice(lo, hi + 1)
-    const s = { income: 0, cogs: 0, gross: 0, opex: 0, net: 0 }
-    slice.forEach(m => { s.income += m.income; s.cogs += m.cogs; s.gross += m.gross; s.opex += m.opex; s.net += m.net })
-    return s
-  }
+  // Financials P&L: period picker (YTD + each month) with optional comparison
+  const finPeriods = glPnl ? [{ key: null, label: 'Year to date' }, ...glPnl.months.map(m => ({ key: m.key, label: m.label }))] : []
+  const pIdx = Math.min(Math.max(finPeriod, 0), Math.max(finPeriods.length - 1, 0))
+  const cActive = finCompare >= 0 && finCompare < finPeriods.length
+  const stmtA = glPnl ? periodPnl(glTx, coaTx, finPeriods[pIdx] && finPeriods[pIdx].key, finPeriods[pIdx] && finPeriods[pIdx].key) : null
+  const stmtB = (glPnl && cActive) ? periodPnl(glTx, coaTx, finPeriods[finCompare].key, finPeriods[finCompare].key) : null
   const rngPct = (n) => rngAgg.rev ? Math.round(n / rngAgg.rev * 100) : 0
   const rngMonthCount = rngB - rngA + 1
 
@@ -1538,145 +1533,78 @@ export default function JerkyMunch() {
                   </div>
 
                   {/* ---- Profit & Loss ---- */}
-                  {finView === 'pnl' && (
-                    <>
-                      <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', marginBottom: '12px' }}>
-                        {[['statement', 'Statement'], ['monthly', 'Monthly'], ['compare', 'Compare'], ['range', 'Range']].map(([id, label]) => (
-                          <button key={id} onClick={() => setFinMode(id)} style={{ background: finMode === id ? KRAFT : CARDBG, color: finMode === id ? '#fff' : INK, border: `1px solid ${finMode === id ? KRAFT : BORDER}`, borderRadius: '2px', padding: '7px 14px', ...btn, fontSize: '12px' }}>{label}</button>
-                        ))}
+                  {finView === 'pnl' && stmtA && (() => {
+                    const B = stmtB
+                    const cmp = !!B
+                    const cells = (a, b) => (
+                      <span style={{ display: 'flex', gap: '14px', fontFamily: MONO, fontSize: '13px' }}>
+                        <span style={{ width: '96px', textAlign: 'right', color: cmp ? MUTED : INK }}>{m0(a)}</span>
+                        {cmp && <span style={{ width: '96px', textAlign: 'right', color: INK }}>{m0(b)}</span>}
+                        {cmp && <span style={{ width: '92px', textAlign: 'right', color: (b - a) >= 0 ? GREEN : RED, fontWeight: 700 }}>{(b - a) >= 0 ? '+' : ''}{m0(b - a)}</span>}
+                      </span>
+                    )
+                    const line = (label, a, b, opts = {}) => (
+                      <div key={label} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: opts.indent ? '4px 0 4px 16px' : '6px 0', borderTop: opts.top ? `1px solid ${BORDER}` : 'none' }}>
+                        <span style={{ fontSize: '13px', color: opts.indent ? MUTED : INK, fontWeight: opts.bold ? 700 : 400 }}>{label}</span>
+                        {cells(a, b)}
                       </div>
+                    )
+                    const catHeader = (key, label, a, b) => (
+                      <div onClick={() => setFinExpand(s => ({ ...s, [key]: !s[key] }))} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '9px 0', cursor: 'pointer', borderTop: `2px solid ${BORDER}` }}>
+                        <span style={{ ...lbl, color: KRAFT, display: 'flex', alignItems: 'center', gap: '6px' }}><span style={{ fontSize: '9px' }}>{finExpand[key] ? '▼' : '▶'}</span>{label}</span>
+                        {cells(a, b)}
+                      </div>
+                    )
+                    const unionKeys = (ma, mb) => {
+                      const s = new Set([...Object.keys(ma || {}), ...Object.keys(mb || {})])
+                      return [...s].sort((x, y) => Math.abs(ma[y] || 0) - Math.abs(ma[x] || 0))
+                    }
+                    const chanLines = [['invoiced', 'Invoiced wholesale'], ['private', 'Private / Zelle'], ['shopify', 'Shopify (online)'], ['consignment', 'Consignment stores'], ['deposits', 'Store deposits']]
+                    const cogsKeys = unionKeys(stmtA.cogs.map, B && B.cogs.map)
+                    const expKeys = unionKeys(stmtA.expenses.map, B && B.expenses.map)
+                    return (
+                      <>
+                        <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap', alignItems: 'center', marginBottom: '14px' }}>
+                          <select value={pIdx} onChange={e => setFinPeriod(+e.target.value)} style={{ ...inp }}>{finPeriods.map((p, i) => <option key={i} value={i}>{p.label}</option>)}</select>
+                          <span style={{ color: MUTED, fontSize: '13px' }}>compare to</span>
+                          <select value={finCompare} onChange={e => setFinCompare(+e.target.value)} style={{ ...inp }}>
+                            <option value={-1}>— none —</option>
+                            {finPeriods.map((p, i) => <option key={i} value={i}>{p.label}</option>)}
+                          </select>
+                        </div>
 
-                      {finMode === 'statement' && (
                         <div style={{ ...card }}>
-                          <div style={{ ...lbl, color: KRAFT, marginBottom: '4px' }}>Income</div>
-                          <Row l="Invoiced wholesale" v={m0(glPnl.channels.invoiced)} />
-                          <Row l="Private / Zelle" v={m0(glPnl.channels.private)} />
-                          <Row l="Shopify (online)" v={m0(glPnl.channels.shopify)} />
-                          <Row l="Consignment stores" v={m0(glPnl.channels.consignment)} />
-                          <Row l="Store deposits" v={m0(glPnl.channels.deposits)} />
-                          <Row l="Total income" v={m0(glPnl.annual.income)} bold top />
-
-                          <div style={{ ...lbl, color: KRAFT, margin: '18px 0 4px' }}>Cost of goods sold</div>
-                          {glPnl.cogsDetail.map(x => <Row key={x.account} l={x.account} v={m0(x.amount)} />)}
-                          <Row l="Total cost of goods sold" v={m0(glPnl.annual.cogs)} bold top />
-                          <Row l="Gross profit" v={m0(glPnl.annual.gross)} bold top />
-
-                          <div style={{ ...lbl, color: KRAFT, margin: '18px 0 4px' }}>Operating expenses</div>
-                          {glPnl.expenseDetail.map(x => <Row key={x.account} l={x.account} v={m0(x.amount)} />)}
-                          <Row l="Total operating expenses" v={m0(glPnl.annual.opex)} bold top />
-
-                          <div style={{ marginTop: '14px', borderTop: `2px solid ${CHAR}`, paddingTop: '10px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                            <span style={{ ...big, fontSize: '15px', color: INK }}>Net income</span>
-                            <span style={{ ...big, fontSize: '17px', fontFamily: MONO, color: glPnl.annual.net >= 0 ? GREEN : RED }}>{m0(glPnl.annual.net)}</span>
-                          </div>
-                        </div>
-                      )}
-
-                      {finMode === 'monthly' && (
-                        <div style={{ ...card, overflowX: 'auto' }}>
-                          <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '13px' }}>
-                            <thead>
-                              <tr style={{ color: MUTED, textAlign: 'right' }}>
-                                <th style={{ textAlign: 'left', padding: '4px 6px', fontWeight: 600 }}>Month</th>
-                                <th style={{ padding: '4px 6px', fontWeight: 600 }}>Income</th>
-                                <th style={{ padding: '4px 6px', fontWeight: 600 }}>COGS</th>
-                                <th style={{ padding: '4px 6px', fontWeight: 600 }}>Gross</th>
-                                <th style={{ padding: '4px 6px', fontWeight: 600 }}>OpEx</th>
-                                <th style={{ padding: '4px 6px', fontWeight: 600 }}>Net</th>
-                              </tr>
-                            </thead>
-                            <tbody>
-                              {glPnl.months.map((m) => (
-                                <tr key={m.key} style={{ borderTop: `1px solid ${BORDER}`, fontFamily: MONO, textAlign: 'right' }}>
-                                  <td style={{ textAlign: 'left', padding: '6px', fontFamily: 'inherit', color: INK }}>{m.label}</td>
-                                  <td style={{ padding: '6px' }}>{m0(m.income)}</td>
-                                  <td style={{ padding: '6px', color: MUTED }}>{m0(m.cogs)}</td>
-                                  <td style={{ padding: '6px' }}>{m0(m.gross)}</td>
-                                  <td style={{ padding: '6px', color: MUTED }}>{m0(m.opex)}</td>
-                                  <td style={{ padding: '6px', color: m.net >= 0 ? GREEN : RED, fontWeight: 700 }}>{m0(m.net)}</td>
-                                </tr>
-                              ))}
-                              <tr style={{ borderTop: `2px solid ${CHAR}`, fontFamily: MONO, textAlign: 'right', fontWeight: 700 }}>
-                                <td style={{ textAlign: 'left', padding: '7px 6px', fontFamily: 'inherit', color: INK }}>YTD total</td>
-                                <td style={{ padding: '7px 6px' }}>{m0(glPnl.annual.income)}</td>
-                                <td style={{ padding: '7px 6px' }}>{m0(glPnl.annual.cogs)}</td>
-                                <td style={{ padding: '7px 6px' }}>{m0(glPnl.annual.gross)}</td>
-                                <td style={{ padding: '7px 6px' }}>{m0(glPnl.annual.opex)}</td>
-                                <td style={{ padding: '7px 6px', color: glPnl.annual.net >= 0 ? GREEN : RED }}>{m0(glPnl.annual.net)}</td>
-                              </tr>
-                            </tbody>
-                          </table>
-                          <div style={{ display: 'flex', gap: '16px', flexWrap: 'wrap', marginTop: '16px' }}>
-                            <div style={{ flex: '1 1 240px' }}>
-                              <div style={{ ...lbl, color: KRAFT, marginBottom: '6px' }}>Revenue by channel</div>
-                              <Row l="Invoiced wholesale" v={m0(glPnl.channels.invoiced)} />
-                              <Row l="Private / Zelle" v={m0(glPnl.channels.private)} />
-                              <Row l="Shopify (online)" v={m0(glPnl.channels.shopify)} />
-                              <Row l="Consignment stores" v={m0(glPnl.channels.consignment)} />
-                              <Row l="Store deposits" v={m0(glPnl.channels.deposits)} />
-                            </div>
-                            <div style={{ flex: '1 1 240px' }}>
-                              <div style={{ ...lbl, color: KRAFT, marginBottom: '6px' }}>Top expenses</div>
-                              {glPnl.topExpenses.map((x) => <Row key={x.account} l={x.account} v={m0(x.amount)} />)}
-                            </div>
-                          </div>
-                        </div>
-                      )}
-
-                      {finMode === 'compare' && (() => {
-                        const A = finMonths[fA] || {}, B = finMonths[fB] || {}
-                        const d = (k) => (B[k] || 0) - (A[k] || 0)
-                        return (
-                          <div style={{ ...card }}>
-                            <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap', marginBottom: '14px' }}>
-                              <select value={fA} onChange={e => setFinA(+e.target.value)} style={{ ...inp }}>{finMonths.map((m, i) => <option key={i} value={i}>{m.label}</option>)}</select>
-                              <span style={{ alignSelf: 'center', color: MUTED }}>vs</span>
-                              <select value={fB} onChange={e => setFinB(+e.target.value)} style={{ ...inp }}>{finMonths.map((m, i) => <option key={i} value={i}>{m.label}</option>)}</select>
-                            </div>
-                            {[['income', 'Income'], ['cogs', 'COGS'], ['gross', 'Gross profit'], ['opex', 'Operating expenses'], ['net', 'Net profit']].map(([k, label]) => (
-                              <div key={k} style={{ display: 'flex', justifyContent: 'space-between', padding: '7px 0', borderTop: `1px solid ${BORDER}`, fontSize: '13px' }}>
-                                <span style={{ color: k === 'net' ? INK : MUTED, fontWeight: k === 'net' ? 700 : 400 }}>{label}</span>
-                                <span style={{ display: 'flex', gap: '18px', fontFamily: MONO }}>
-                                  <span style={{ width: '84px', textAlign: 'right', color: MUTED }}>{m0(A[k] || 0)}</span>
-                                  <span style={{ width: '84px', textAlign: 'right', color: INK }}>{m0(B[k] || 0)}</span>
-                                  <span style={{ width: '92px', textAlign: 'right', color: d(k) >= 0 ? GREEN : RED, fontWeight: 700 }}>{d(k) >= 0 ? '+' : ''}{m0(d(k))}</span>
-                                </span>
-                              </div>
-                            ))}
-                            <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '18px', marginTop: '8px', fontSize: '11px', color: MUTED }}>
-                              <span style={{ width: '84px', textAlign: 'right' }}>{A.label}</span>
-                              <span style={{ width: '84px', textAlign: 'right' }}>{B.label}</span>
+                          {cmp && (
+                            <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '14px', fontSize: '11px', color: MUTED, paddingBottom: '2px' }}>
+                              <span style={{ width: '96px', textAlign: 'right' }}>{finPeriods[pIdx].label}</span>
+                              <span style={{ width: '96px', textAlign: 'right' }}>{finPeriods[finCompare].label}</span>
                               <span style={{ width: '92px', textAlign: 'right' }}>change</span>
                             </div>
-                          </div>
-                        )
-                      })()}
+                          )}
 
-                      {finMode === 'range' && (() => {
-                        const agg = finAgg(fA, fB)
-                        const lo = Math.min(fA, fB), hi = Math.max(fA, fB)
-                        return (
-                          <div style={{ ...card }}>
-                            <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap', marginBottom: '14px' }}>
-                              <select value={fA} onChange={e => setFinA(+e.target.value)} style={{ ...inp }}>{finMonths.map((m, i) => <option key={i} value={i}>{m.label}</option>)}</select>
-                              <span style={{ alignSelf: 'center', color: MUTED }}>to</span>
-                              <select value={fB} onChange={e => setFinB(+e.target.value)} style={{ ...inp }}>{finMonths.map((m, i) => <option key={i} value={i}>{m.label}</option>)}</select>
-                            </div>
-                            <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap', marginBottom: '12px' }}>
-                              <KPI k="Revenue" v={m0(agg.income)} sub={`${finMonths[lo] ? finMonths[lo].label : ''} – ${finMonths[hi] ? finMonths[hi].label : ''}`} accent={GREEN} />
-                              <KPI k="Gross profit" v={m0(agg.gross)} sub={agg.income ? `${Math.round(agg.gross / agg.income * 100)}% margin` : ''} accent={KRAFT} />
-                              <KPI k="Net profit" v={m0(agg.net)} sub={`${hi - lo + 1} months`} accent={agg.net >= 0 ? GREEN : RED} />
-                            </div>
-                            <Row l="Income" v={m0(agg.income)} />
-                            <Row l="Cost of goods sold" v={m0(agg.cogs)} />
-                            <Row l="Gross profit" v={m0(agg.gross)} bold top />
-                            <Row l="Operating expenses" v={m0(agg.opex)} />
-                            <Row l="Net profit" v={m0(agg.net)} bold top />
+                          {catHeader('income', 'Income', stmtA.income.total, B && B.income.total)}
+                          {finExpand.income && chanLines.map(([k, label]) => line(label, stmtA.income.channels[k], B && B.income.channels[k], { indent: true }))}
+                          {line('Total income', stmtA.income.total, B && B.income.total, { bold: true, top: true })}
+
+                          {catHeader('cogs', 'Cost of goods sold', stmtA.cogs.total, B && B.cogs.total)}
+                          {finExpand.cogs && cogsKeys.map(a => line(a, stmtA.cogs.map[a] || 0, B && (B.cogs.map[a] || 0), { indent: true }))}
+                          {line('Total cost of goods sold', stmtA.cogs.total, B && B.cogs.total, { bold: true, top: true })}
+                          {line('Gross profit', stmtA.gross, B && B.gross, { bold: true, top: true })}
+
+                          {catHeader('expense', 'Operating expenses', stmtA.expenses.total, B && B.expenses.total)}
+                          {finExpand.expense && expKeys.map(a => line(a, stmtA.expenses.map[a] || 0, B && (B.expenses.map[a] || 0), { indent: true }))}
+                          {line('Total operating expenses', stmtA.expenses.total, B && B.expenses.total, { bold: true, top: true })}
+
+                          <div style={{ marginTop: '12px', borderTop: `2px solid ${CHAR}`, paddingTop: '10px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                            <span style={{ ...big, fontSize: '15px', color: INK }}>Net income</span>
+                            {cmp
+                              ? cells(stmtA.net, B.net)
+                              : <span style={{ ...big, fontSize: '17px', fontFamily: MONO, color: stmtA.net >= 0 ? GREEN : RED }}>{m0(stmtA.net)}</span>}
                           </div>
-                        )
-                      })()}
-                    </>
-                  )}
+                        </div>
+                      </>
+                    )
+                  })()}
 
                   {/* ---- Balance Sheet ---- */}
                   {finView === 'bs' && glBS && (
