@@ -1555,7 +1555,7 @@ export default function JerkyMunch() {
                       <span style={{ display: 'flex', gap: '14px', fontFamily: MONO, fontSize: '13px' }}>
                         <span style={{ width: '96px', textAlign: 'right', color: cmp ? MUTED : INK }}>{m0(a)}</span>
                         {cmp && <span style={{ width: '96px', textAlign: 'right', color: INK }}>{m0(b)}</span>}
-                        {cmp && <span style={{ width: '92px', textAlign: 'right', color: (b - a) >= 0 ? GREEN : RED, fontWeight: 700 }}>{(b - a) >= 0 ? '+' : ''}{m0(b - a)}</span>}
+                        {cmp && <span style={{ width: '92px', textAlign: 'right', color: (b - a) >= 0 ? GREEN : RED, fontWeight: 700 }}>{(b - a) >= 0 ? '+' : '-'}{m0(Math.abs(b - a))}</span>}
                       </span>
                     )
                     const line = (label, a, b, opts = {}) => (
@@ -1599,16 +1599,13 @@ export default function JerkyMunch() {
 
                           {catHeader('income', 'Income', stmtA.income.total, B && B.income.total)}
                           {finExpand.income && chanLines.map(([k, label]) => line(label, stmtA.income.channels[k], B && B.income.channels[k], { indent: true }))}
-                          {line('Total income', stmtA.income.total, B && B.income.total, { bold: true, top: true })}
 
                           {catHeader('cogs', 'Cost of goods sold', stmtA.cogs.total, B && B.cogs.total)}
                           {finExpand.cogs && cogsKeys.map(a => line(a, stmtA.cogs.map[a] || 0, B && (B.cogs.map[a] || 0), { indent: true }))}
-                          {line('Total cost of goods sold', stmtA.cogs.total, B && B.cogs.total, { bold: true, top: true })}
                           {line('Gross profit', stmtA.gross, B && B.gross, { bold: true, top: true })}
 
                           {catHeader('expense', 'Operating expenses', stmtA.expenses.total, B && B.expenses.total)}
                           {finExpand.expense && expKeys.map(a => line(a, stmtA.expenses.map[a] || 0, B && (B.expenses.map[a] || 0), { indent: true }))}
-                          {line('Total operating expenses', stmtA.expenses.total, B && B.expenses.total, { bold: true, top: true })}
 
                           <div style={{ marginTop: '12px', borderTop: `2px solid ${CHAR}`, paddingTop: '10px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                             <span style={{ ...big, fontSize: '15px', color: INK }}>Net income</span>
