@@ -99,6 +99,8 @@ export default function JerkyMunch() {
   const [finCmpFrom, setFinCmpFrom] = useState(0)     // comparison range start
   const [finCmpTo, setFinCmpTo] = useState(99)        // comparison range end
   const [finExpand, setFinExpand] = useState({ income: true, cogs: true, expense: true })
+  const [ovFrom, setOvFrom] = useState(null)          // Overview range (null = default to June)
+  const [ovTo, setOvTo] = useState(null)
   const [period, setPeriod] = useState('month')
   const [costPerBag, setCostPerBag] = useState(4.5)
   const [boardsProducts, setBoardsProducts] = useState([])
@@ -582,6 +584,12 @@ export default function JerkyMunch() {
   const cmpOn = finCmpOn && finN > 0
   const stmtA = glPnl ? periodPnl(glTx, coaTx, ...finKeys(aFrom, aTo)) : null
   const stmtB = (glPnl && cmpOn) ? periodPnl(glTx, coaTx, ...finKeys(bFrom, bTo)) : null
+  // Overview range — defaults to the most recent reconciled month (June)
+  const ovJune = finM.findIndex(m => m.key === '2026-06')
+  const ovDefault = ovJune >= 0 ? ovJune : Math.max(finN - 1, 0)
+  const ovF = finClamp(ovFrom == null ? ovDefault : ovFrom)
+  const ovT = finClamp(ovTo == null ? ovDefault : ovTo)
+  const ovStmt = glPnl ? periodPnl(glTx, coaTx, ...finKeys(ovF, ovT)) : null
   const rngPct = (n) => rngAgg.rev ? Math.round(n / rngAgg.rev * 100) : 0
   const rngMonthCount = rngB - rngA + 1
 
@@ -662,7 +670,7 @@ export default function JerkyMunch() {
   )
 
   const TABS = [['overview', 'Overview'], ['consign', 'Consignment'], ['invoices', 'Invoice Stores'], ['ads', 'Advertising'], ['financials', 'Financials']]
-  const EXTRA = [['expenses', 'Import expenses'], ['quickbooks', 'QuickBooks sync'], ['close', 'Monthly close'], ['askai', 'Ask Us']]
+  const EXTRA = [['expenses', 'Import expenses'], ['quickbooks', 'QuickBooks sync']]
   const currentLabel = ([...TABS, ...EXTRA].find(t => t[0] === tab) || ['', ''])[1]
 
   return (
@@ -758,62 +766,58 @@ export default function JerkyMunch() {
               <div style={{ ...lbl, color: SPICE }}>Jerky Munch</div>
               <h1 style={{ ...big, fontSize: '28px', color: INK, letterSpacing: '0.3px', lineHeight: 1.1 }}>{currentLabel}</h1>
             </div>
-            <div style={{ textAlign: 'right' }}>
-              <div style={{ ...big, fontSize: '24px', color: SPICE }}>{m0(totalRevenue)}</div>
-              <div style={{ ...lbl, color: '#9A8868' }}>REVENUE THIS MONTH</div>
-            </div>
+            {glPnl && (
+              <div style={{ textAlign: 'right' }}>
+                <div style={{ ...big, fontSize: '24px', color: SPICE }}>{m0(glPnl.annual.income)}</div>
+                <div style={{ ...lbl, color: '#9A8868' }}>Revenue · YTD</div>
+              </div>
+            )}
           </div>
 
           {/* ===== OVERVIEW ===== */}
           {tab === 'overview' && (
             <>
-              <div style={{ display: 'flex', gap: '6px', marginBottom: '16px', flexWrap: 'wrap' }}>
-                {[['week', 'This week'], ['month', 'This month']].map(([v, l]) => (
-                  <button key={v} onClick={() => setPeriod(v)} style={{ padding: '8px 16px', borderRadius: '2px', border: `1px solid ${period === v ? CHAR : BORDER}`, background: period === v ? CHAR : CARDBG, color: period === v ? CREAM : MUTED, ...btn }}>{l}</button>
-                ))}
-              </div>
+              {glPnl ? (
+                <>
+                  <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', alignItems: 'center', marginBottom: '14px' }}>
+                    <span style={{ ...lbl }}>Showing</span>
+                    <select value={ovF} onChange={e => setOvFrom(+e.target.value)} style={{ ...inp }}>{finM.map((m, i) => <option key={i} value={i}>{m.label}</option>)}</select>
+                    <span style={{ color: MUTED, fontSize: '13px' }}>to</span>
+                    <select value={ovT} onChange={e => setOvTo(+e.target.value)} style={{ ...inp }}>{finM.map((m, i) => <option key={i} value={i}>{m.label}</option>)}</select>
+                    <span style={{ fontSize: '12px', color: MUTED }}>· from your books</span>
+                  </div>
 
-              {/* Hero — total revenue + plain-English profit narrative */}
-              <div style={{ ...card, marginBottom: '16px' }}>
-                <div style={{ ...lbl }}>Total revenue · this {period === 'week' ? 'week' : 'month'}</div>
-                <div style={{ ...big, fontSize: 'clamp(38px,6vw,54px)', color: INK, lineHeight: 1, margin: '4px 0 8px' }}>{m0(totalRevenue)}</div>
-                <div style={{ fontFamily: "'Inter', sans-serif", fontSize: '15px', color: MUTED, maxWidth: '640px', lineHeight: 1.5 }}>
-                  {pnlNet >= 0
-                    ? <>Strong {period === 'week' ? 'week' : 'month'} — you're keeping <b style={{ color: GREEN }}>{m0(pnlNet)}</b> of every <b style={{ color: INK }}>{m0(totalRevenue)}</b> across bags, boards &amp; camp orders, at a <b style={{ color: INK }}>{pnlPct(pnlGross)}%</b> gross margin.</>
-                    : <><b style={{ color: INK }}>{m0(totalRevenue)}</b> in revenue, but costs ran ahead — net <b style={{ color: RED }}>{m0(pnlNet)}</b> this {period === 'week' ? 'week' : 'month'}.</>}
-                </div>
-              </div>
-
-              {/* Revenue by product line — bags + boards + camp packages */}
-              <div className="jm-click" onClick={() => setTab('quickbooks')} style={{ ...card, marginBottom: '16px', cursor: 'pointer', position: 'relative' }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', flexWrap: 'wrap', gap: '8px', marginBottom: '12px' }}>
-                  <div style={{ ...lbl }}>Revenue by product line · this month</div>
-                  <div style={{ fontSize: '13px', color: MUTED }}><b style={{ ...big, fontSize: '18px', color: INK }}>{m0(totalRevenue)}</b> total</div>
-                </div>
-                <div style={{ display: 'flex', height: '18px', borderRadius: '2px', overflow: 'hidden', marginBottom: '12px', background: CREAM }}>
-                  {productMix.map(p => (
-                    <div key={p.line} title={`${p.line} · ${m0(p.rev)}`} style={{ width: `${totalRevenue ? Math.round(p.rev / totalRevenue * 100) : 0}%`, background: p.color }} />
-                  ))}
-                </div>
-                <div style={{ display: 'flex', gap: '22px', flexWrap: 'wrap' }}>
-                  {productMix.map(p => (
-                    <div key={p.line} style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                      <span style={{ width: '11px', height: '11px', background: p.color, borderRadius: '2px', flexShrink: 0 }} />
-                      <span style={{ fontSize: '13px' }}>
-                        <b style={{ color: INK }}>{p.line}</b> <span style={{ color: INK, fontWeight: 600 }}>{m0(p.rev)}</span>
-                        <span style={{ color: MUTED }}> · {p.units} {p.unit} · {totalRevenue ? Math.round(p.rev / totalRevenue * 100) : 0}%</span>
-                      </span>
+                  <div style={{ ...card, marginBottom: '16px' }}>
+                    <div style={{ ...lbl }}>Net profit · {finRangeLabel(ovF, ovT)}</div>
+                    <div style={{ ...big, fontSize: 'clamp(34px,5.5vw,50px)', color: ovStmt.net >= 0 ? GREEN : RED, lineHeight: 1, margin: '4px 0 8px' }}>{ovStmt.net < 0 ? `(${m0(Math.abs(ovStmt.net))})` : m0(ovStmt.net)}</div>
+                    <div style={{ fontSize: '15px', color: MUTED, maxWidth: '640px', lineHeight: 1.5 }}>
+                      On <b style={{ color: INK }}>{m0(ovStmt.income.total)}</b> of revenue you kept <b style={{ color: ovStmt.net >= 0 ? GREEN : RED }}>{ovStmt.net < 0 ? `(${m0(Math.abs(ovStmt.net))})` : m0(ovStmt.net)}</b>, at a <b style={{ color: INK }}>{ovStmt.income.total ? Math.round(ovStmt.gross / ovStmt.income.total * 100) : 0}%</b> gross margin.
                     </div>
-                  ))}
-                </div>
-              </div>
+                  </div>
 
-              <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap', marginBottom: '16px' }}>
-                <KPI k={`Bags sold this ${period}`} v={bagsPeriod} sub="across all flavors" accent={INK} onClick={() => setTab('quickbooks')} />
-                <KPI k="Revenue / mo" v={m0(totalRevenue)} sub={`${bagsPeriod} bags · ${boardsUnitsM + campUnitsM} boards & camp`} accent={SPICE} onClick={() => setTab('quickbooks')} />
-                <KPI k="Out on consignment" v={m0(onShelfVal)} sub={`${bagsOut} bags sitting in stores`} accent={KRAFT} onClick={() => setTab('consign')} />
-                <KPI k="Missing pieces" v={`${missUnits}`} sub={`${m0(missVal)} to investigate`} accent={missUnits ? RED : GREEN} onClick={() => setTab('consign')} />
-              </div>
+                  <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap', marginBottom: '16px' }}>
+                    <KPI k="Revenue" v={m0(ovStmt.income.total)} sub={finRangeLabel(ovF, ovT)} accent={GREEN} onClick={() => setTab('financials')} />
+                    <KPI k="Gross profit" v={m0(ovStmt.gross)} sub={`${ovStmt.income.total ? Math.round(ovStmt.gross / ovStmt.income.total * 100) : 0}% margin`} accent={KRAFT} onClick={() => setTab('financials')} />
+                    <KPI k="Net profit" v={m0(ovStmt.net)} sub="after all costs" accent={ovStmt.net >= 0 ? GREEN : RED} onClick={() => setTab('financials')} />
+                    <KPI k="Out on consignment" v={m0(onShelfVal)} sub={`${bagsOut} bags in stores`} accent={KRAFT} onClick={() => setTab('consign')} />
+                    <KPI k="Missing pieces" v={`${missUnits}`} sub={`${m0(missVal)} to investigate`} accent={missUnits ? RED : GREEN} onClick={() => setTab('consign')} />
+                  </div>
+
+                  <div style={{ ...card, marginBottom: '16px' }}>
+                    <div style={{ ...lbl, marginBottom: '10px' }}>Revenue by channel · {finRangeLabel(ovF, ovT)}</div>
+                    <Row l="Invoiced wholesale" v={m0(ovStmt.income.channels.invoiced)} />
+                    <Row l="Private / Zelle" v={m0(ovStmt.income.channels.private)} />
+                    <Row l="Shopify (online)" v={m0(ovStmt.income.channels.shopify)} />
+                    <Row l="Consignment stores" v={m0(ovStmt.income.channels.consignment)} />
+                    <Row l="Store deposits" v={m0(ovStmt.income.channels.deposits)} />
+                    <div style={{ fontSize: '11.5px', color: MUTED, marginTop: '8px' }}>Figures from your QuickBooks books · reconciled through June (later months fill in as you reconcile).</div>
+                  </div>
+                </>
+              ) : (
+                <div style={{ ...card, marginBottom: '16px', background: '#EAF3EC', borderColor: '#CFE4D6', fontSize: '13.5px', color: INK, lineHeight: 1.55 }}>
+                  Import your books on the <b style={{ cursor: 'pointer', color: SPICE }} onClick={() => setTab('quickbooks')}>QuickBooks</b> tab and your numbers show up here.
+                </div>
+              )}
 
               <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap', marginBottom: '16px' }}>
                 <div style={{ ...card, flex: 1, minWidth: '290px' }}>
@@ -880,146 +884,6 @@ export default function JerkyMunch() {
                   ))}
                 </div>
                 <p style={{ fontSize: '12px', color: MUTED, marginTop: '14px' }}>These are placeholder illustrations — drop in real product photos whenever you like.</p>
-              </div>
-            </>
-          )}
-
-          {/* ===== P&L ===== */}
-          {tab === 'pnl' && (
-            <div style={{ display: 'flex', gap: '6px', marginBottom: '16px', flexWrap: 'wrap' }}>
-              {[['single', 'This month'], ['range', 'Date range'], ['compare', 'Compare months']].map(([v, l]) => (
-                <button key={v} onClick={() => setPnlView(v)} style={{ padding: '8px 16px', borderRadius: '2px', border: `1px solid ${pnlView === v ? CHAR : BORDER}`, background: pnlView === v ? CHAR : CARDBG, color: pnlView === v ? CREAM : MUTED, ...btn }}>{l}</button>
-              ))}
-            </div>
-          )}
-
-          {tab === 'pnl' && pnlView === 'single' && (
-            <>
-              <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap', marginBottom: '16px' }}>
-                <KPI k="Revenue" v={m0(totalRevenue)} sub="bags + boards + camp" accent={GREEN} />
-                <KPI k="Gross profit" v={m0(pnlGross)} sub={`${pnlPct(pnlGross)}% margin`} accent={KRAFT} />
-                <KPI k={pnlNet >= 0 ? 'Net profit' : 'Net loss'} v={m0(pnlNet)} sub={pnlNet >= 0 ? 'in the black' : 'in the red'} accent={pnlNet >= 0 ? GREEN : RED} />
-              </div>
-
-              <div style={{ ...card }}>
-                <div style={{ ...lbl, marginBottom: '14px' }}>Profit &amp; loss — this month (cash basis)</div>
-                <div style={{ ...lbl, color: KRAFT, margin: '4px 0' }}>Revenue</div>
-                <Row l="Direct sales" v={m0(directRev)} />
-                <Row l="Consignment (collected)" v={m0(cashCollected)} />
-                <Row l="Boards & camp packages" v={m0(bcRevM)} />
-                <Row l="Total revenue" v={m0(totalRevenue)} bold top />
-                <div style={{ ...lbl, color: KRAFT, margin: '16px 0 6px' }}>Cost of goods sold</div>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '2px 0 8px', flexWrap: 'wrap' }}>
-                  <span style={{ fontSize: '13px', color: MUTED }}>Cost to make one bag:</span>
-                  <span style={{ display: 'inline-flex', alignItems: 'center', gap: '3px', color: MUTED }}>$<input value={costPerBag} onChange={e => changeCostPerBag(e.target.value)} type="number" step="0.25" style={{ ...inp, width: '74px', padding: '6px 9px' }} /></span>
-                  <span style={{ fontSize: '12px', color: '#A2937A' }}>← estimate, set the real number</span>
-                </div>
-                <Row l={`Bag cost of goods (${soldBags} bags × ${money(costPerBag)})`} v={`−${m0(cogs)}`} />
-                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '8px 0', flexWrap: 'wrap' }}>
-                  <span style={{ fontSize: '13px', color: MUTED }}>Cost per board:</span>
-                  <span style={{ display: 'inline-flex', alignItems: 'center', gap: '3px', color: MUTED }}>$<input value={boardCost} onChange={e => changeBoardCost(e.target.value)} type="number" step="1" style={{ ...inp, width: '70px', padding: '6px 9px' }} /></span>
-                  <span style={{ fontSize: '13px', color: MUTED, marginLeft: '4px' }}>camp pkg:</span>
-                  <span style={{ display: 'inline-flex', alignItems: 'center', gap: '3px', color: MUTED }}>$<input value={campCost} onChange={e => changeCampCost(e.target.value)} type="number" step="1" style={{ ...inp, width: '70px', padding: '6px 9px' }} /></span>
-                  <span style={{ fontSize: '12px', color: '#A2937A' }}>← set the real numbers</span>
-                </div>
-                <Row l={`Boards & camp cost (${boardsUnitsM} × ${money(boardCost)} + ${campUnitsM} × ${money(campCost)})`} v={`−${m0(bcCogsM)}`} />
-                <Row l={`Gross profit  ·  ${pnlPct(pnlGross)}% margin`} v={m0(pnlGross)} bold top />
-                <div style={{ ...lbl, color: KRAFT, margin: '16px 0 4px' }}>Operating expenses</div>
-                <Row l="Advertising" v={`−${m0(adSpend)}`} />
-                {[...new Set(expenses.filter(e => !COGS_CATS.includes(e.cat)).map(e => e.cat))].map(cat => { const v = expenses.filter(e => e.cat === cat).reduce((s, e) => s + e.amt, 0); return <Row key={cat} l={cat} v={`−${m0(v)}`} /> })}
-                <Row l="Total operating expenses" v={`−${m0(totalOpex)}`} bold top />
-                <div style={{ marginTop: '12px', padding: '12px 14px', background: pnlNet >= 0 ? '#EAF3EC' : '#FBEDE9', borderRadius: '2px' }}>
-                  <Row l={`${pnlNet >= 0 ? 'Net profit' : 'Net loss'}  ·  ${pnlPct(pnlNet)}% margin`} v={m0(pnlNet)} bold neg={pnlNet < 0} />
-                </div>
-              </div>
-            </>
-          )}
-
-          {/* ===== MONTHS COMPARED (sub-view of P&L) ===== */}
-          {tab === 'pnl' && pnlView === 'compare' && (
-            <>
-              <div style={{ display: 'flex', gap: '8px', marginBottom: '16px', flexWrap: 'wrap', alignItems: 'center' }}>
-                <span style={{ ...lbl }}>Compare</span>
-                {[2, 3, 6, 12].map(n => (
-                  <button key={n} onClick={() => setPnlMonths(n)} style={{ padding: '7px 15px', borderRadius: '2px', border: `1px solid ${pnlMonths === n ? CHAR : BORDER}`, background: pnlMonths === n ? CHAR : CARDBG, color: pnlMonths === n ? CREAM : MUTED, ...btn, fontSize: '13px' }}>{n} mo</button>
-                ))}
-              </div>
-
-              <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap', marginBottom: '16px' }}>
-                {pnlMonths === 2 ? <>
-                  <KPI k={`${baseL.m} net`} v={sgn(baseL.net)} sub="earlier month" accent={baseL.net >= 0 ? GREEN : RED} />
-                  <KPI k={`${lastL.m} net`} v={sgn(lastL.net)} sub="latest month" accent={lastL.net >= 0 ? GREEN : RED} />
-                  <KPI k="Change" v={`${tNetDelta >= 0 ? '+' : ''}${sgn(tNetDelta)}`} sub={tNetDelta >= 0 ? 'more profit' : 'less profit'} accent={tNetDelta >= 0 ? GREEN : RED} />
-                </> : <>
-                  <KPI k={`${pnlMonths}-mo revenue`} v={m0(rangeRev)} sub={`${baseL.m}–${lastL.m}`} accent={KRAFT} />
-                  <KPI k={`${pnlMonths}-mo net`} v={sgn(rangeNet)} sub="total profit" accent={rangeNet >= 0 ? GREEN : RED} />
-                  <KPI k="Avg net / mo" v={sgn(rangeNet / lines.length)} sub="across the range" accent={rangeNet >= 0 ? GREEN : RED} />
-                </>}
-              </div>
-
-              <div style={{ ...card }}>
-                <div style={{ ...lbl, marginBottom: '12px' }}>Profit &amp; loss — {baseL.m} → {lastL.m}</div>
-                <div style={{ overflowX: 'auto' }}>
-                  <div style={{ minWidth: 'max-content' }}>
-                    <div style={{ display: 'flex', alignItems: 'center', paddingBottom: '8px', borderBottom: `1px solid ${BORDER}` }}>
-                      <span style={{ ...lbl, width: '162px', flexShrink: 0, position: 'sticky', left: 0, background: CARDBG }} />
-                      {lines.map((l, i) => <span key={l.m + i} style={{ ...lbl, width: '74px', flexShrink: 0, textAlign: 'right', color: i === lines.length - 1 ? INK : '#A99A82' }}>{l.m}</span>)}
-                      {pnlMonths === 2 && <span style={{ ...lbl, width: '66px', flexShrink: 0, textAlign: 'right' }}>Δ</span>}
-                    </div>
-                    {PNL_ROWS.map(row => {
-                      const strong = row.kind === 'subtotal' || row.kind === 'total', isNet = row.kind === 'total'
-                      const val = (l) => row.cost ? -l[row.key] : l[row.key]
-                      const delta = val(lastL) - val(baseL)
-                      return (
-                        <div key={row.key} style={{ display: 'flex', alignItems: 'center', padding: isNet ? '10px 0 2px' : '6px 0', borderTop: strong ? `1px solid ${BORDER}` : `1px solid ${CREAM}` }}>
-                          <span style={{ width: '162px', flexShrink: 0, position: 'sticky', left: 0, background: CARDBG, fontSize: isNet ? '14px' : '13px', color: strong ? INK : MUTED, fontWeight: strong ? 700 : 400 }}>{row.label}</span>
-                          {lines.map((l, i) => { const cv = val(l); return <span key={l.m + i} style={{ width: '74px', flexShrink: 0, textAlign: 'right', fontFamily: MONO, fontSize: '12px', fontWeight: strong ? 600 : 400, color: isNet ? (cv >= 0 ? GREEN : RED) : (strong ? INK : '#5C5040') }}>{sgn(cv)}</span> })}
-                          {pnlMonths === 2 && <span style={{ width: '66px', flexShrink: 0, textAlign: 'right', fontFamily: MONO, fontSize: '12px', fontWeight: 600, color: delta === 0 ? '#A99A82' : (delta >= 0 ? GREEN : RED) }}>{delta === 0 ? '—' : (delta > 0 ? '+' : '') + sgn(delta)}</span>}
-                        </div>
-                      )
-                    })}
-                  </div>
-                </div>
-                <p style={{ fontSize: '12px', color: MUTED, marginTop: '12px' }}>Costs shown negative. {pnlMonths === 2 ? 'Δ green = better for profit, red = worse.' : 'Scroll sideways for the full range.'}</p>
-              </div>
-
-              <div style={{ ...card, marginTop: '16px', background: CHAR, borderColor: CHAR, color: CREAM, fontSize: '14px', lineHeight: 1.6 }}>
-                <div style={{ ...lbl, color: '#E8A07F', marginBottom: '8px' }}>Why the net moved {tNetDelta >= 0 ? '+' : ''}{sgn(tNetDelta)} ({baseL.m} → {lastL.m})</div>
-                <>Revenue {tRevDelta >= 0 ? 'climbed' : 'fell'} <b>{sgn(Math.abs(tRevDelta))}</b>{tBest && tBest.delta > 0 ? <> (mostly <b>{tBest.label}</b>, {sgn(tBest.delta)})</> : null}. But <b>{tWorst.label}</b> moved <b>{sgn(tWorst.delta)}</b> against you. {tNetDelta >= 0
-                  ? <>Net came out <b>{sgn(tNetDelta)} better</b> — keep pulling the levers that turned green.</>
-                  : <>Net came out <b>{sgn(Math.abs(tNetDelta))} worse</b> — that red line is exactly what ate your gains, and exactly what to fix.</>}</>
-              </div>
-            </>
-          )}
-
-          {tab === 'pnl' && pnlView === 'range' && (
-            <>
-              <div style={{ display: 'flex', gap: '10px', marginBottom: '16px', flexWrap: 'wrap', alignItems: 'center' }}>
-                <span style={{ ...lbl }}>From</span>
-                <select value={rngA} onChange={e => { const v = Number(e.target.value); setRangeStart(v); if (v > rngB) setRangeEnd(v) }} style={{ ...inp, padding: '8px 12px', cursor: 'pointer' }}>
-                  {monthsAll.map((m, i) => <option key={i} value={i}>{m.m}</option>)}
-                </select>
-                <span style={{ ...lbl }}>to</span>
-                <select value={rngB} onChange={e => { const v = Number(e.target.value); setRangeEnd(v); if (v < rngA) setRangeStart(v) }} style={{ ...inp, padding: '8px 12px', cursor: 'pointer' }}>
-                  {monthsAll.map((m, i) => <option key={i} value={i}>{m.m}</option>)}
-                </select>
-                <span style={{ fontSize: '13px', color: MUTED }}>{rngMonthCount} month{rngMonthCount > 1 ? 's' : ''} combined</span>
-              </div>
-
-              <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap', marginBottom: '16px' }}>
-                <KPI k={`Revenue · ${rngLabel}`} v={m0(rngAgg.rev)} sub={`${rngMonthCount} months combined`} accent={GREEN} />
-                <KPI k="Gross profit" v={m0(rngAgg.gross)} sub={`${rngPct(rngAgg.gross)}% margin`} accent={KRAFT} />
-                <KPI k={rngAgg.net >= 0 ? 'Net profit' : 'Net loss'} v={m0(rngAgg.net)} sub={rngAgg.net >= 0 ? 'in the black' : 'in the red'} accent={rngAgg.net >= 0 ? GREEN : RED} />
-              </div>
-
-              <div style={{ ...card }}>
-                <div style={{ ...lbl, marginBottom: '14px' }}>Profit &amp; loss — {rngLabel} (combined)</div>
-                {PNL_ROWS.map(row => {
-                  const strong = row.kind === 'subtotal' || row.kind === 'total', isNet = row.kind === 'total'
-                  const v = row.cost ? -rngAgg[row.key] : rngAgg[row.key]
-                  return <Row key={row.key} l={row.label} v={sgn(v)} bold={strong} top={strong} neg={isNet ? rngAgg.net < 0 : false} />
-                })}
-                <p style={{ fontSize: '12px', color: MUTED, marginTop: '12px' }}>Every month from {rngLabel} added together. Costs shown negative.</p>
               </div>
             </>
           )}
@@ -1273,53 +1137,6 @@ export default function JerkyMunch() {
                   )
                 })
               })()}
-            </>
-          )}
-
-          {/* ===== DIRECT ===== */}
-          {tab === 'direct' && (
-            <>
-              <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap', marginBottom: '16px' }}>
-                <KPI k="Direct revenue" v={m0(directRev)} sub="cash in hand" accent={GREEN} />
-                <KPI k="Direct profit" v={m0(directProfit)} sub={`after $${costPerBag}/bag cost`} accent={SPICE} />
-                <KPI k="Units sold" v={directUnits} sub="direct channel" />
-                <KPI k="Avg $ / unit" v={directUnits ? money(directRev / directUnits) : '—'} sub="$13 retail vs ~$8.5 consignment" accent={KRAFT} />
-              </div>
-              {!addingD ? (
-                <button onClick={() => setAddingD(true)} style={{ width: '100%', background: CHAR, color: CREAM, border: 'none', borderRadius: '2px', padding: '13px', ...btn, marginBottom: '16px' }}>+ Log a direct sale</button>
-              ) : (
-                <div style={{ ...card, marginBottom: '16px' }}>
-                  <div style={{ ...lbl, marginBottom: '12px' }}>New direct sale</div>
-                  <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
-                    <input value={df.who} onChange={e => setDf({ ...df, who: e.target.value })} placeholder="Customer / event *" style={{ ...inp, flex: 2, minWidth: '160px' }} />
-                    <select value={df.source} onChange={e => setDf({ ...df, source: e.target.value })} style={{ ...inp, flex: 1, minWidth: '150px', cursor: 'pointer' }}>
-                      {DIRECT_SOURCES.map(s => <option key={s}>{s}</option>)}
-                    </select>
-                  </div>
-                  <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', marginTop: '8px' }}>
-                    <input value={df.units} onChange={e => setDf({ ...df, units: e.target.value })} type="number" placeholder="Units" style={{ ...inp, flex: 1, minWidth: '100px' }} />
-                    <input value={df.rev} onChange={e => setDf({ ...df, rev: e.target.value })} type="number" placeholder="$ total" style={{ ...inp, flex: 1, minWidth: '100px' }} />
-                  </div>
-                  <div style={{ display: 'flex', gap: '8px', marginTop: '12px' }}>
-                    <button onClick={() => setAddingD(false)} style={{ flex: 1, background: 'none', border: `1px solid ${BORDER}`, borderRadius: '2px', padding: '11px', ...btn, color: MUTED }}>Cancel</button>
-                    <button onClick={addDirect} style={{ flex: 2, background: SPICE, color: '#fff', border: 'none', borderRadius: '2px', padding: '11px', ...btn }}>+ Log sale</button>
-                  </div>
-                </div>
-              )}
-              {direct.map(d => (
-                <div key={d.id} style={{ ...card, marginBottom: '10px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '8px' }}>
-                  <div>
-                    <div style={{ ...big, fontSize: '18px', color: INK }}>{d.who}</div>
-                    <div style={{ fontSize: '12px', color: MUTED, marginTop: '2px' }}>
-                      <span style={{ fontWeight: 600, color: KRAFT }}>{d.source}</span> · {d.units} units · {d.units ? money(d.rev / d.units) : '$0'}/unit · <span style={{ color: GREEN, fontWeight: 600 }}>{m0(d.rev - d.units * costPerBag)} profit</span>
-                    </div>
-                  </div>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                    <span style={{ ...big, fontSize: '22px', color: GREEN }}>{m0(d.rev)}</span>
-                    <button onClick={() => removeDirect(d.id)} style={{ background: 'none', border: 'none', color: '#C9BBA0', fontSize: '18px', cursor: 'pointer', lineHeight: 1 }}>×</button>
-                  </div>
-                </div>
-              ))}
             </>
           )}
 
@@ -1683,79 +1500,6 @@ export default function JerkyMunch() {
                   )}
                 </>
               )}
-            </>
-          )}
-
-          {/* ===== MONTHLY CLOSE → QB ===== */}
-          {tab === 'close' && (
-            <>
-              <div style={{ ...card, marginBottom: '16px' }}>
-                <div style={{ ...big, fontSize: '18px', color: INK, marginBottom: '6px' }}>Monthly close → QuickBooks</div>
-                <p style={{ fontSize: '13.5px', color: MUTED, lineHeight: 1.55 }}>Exactly what to post to QuickBooks this month. <b style={{ color: INK }}>Shopify online sales aren't in here</b> — they book through Shopify, so nothing doubles up. This is everything Shopify can't see, already categorized.</p>
-              </div>
-
-              <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap', marginBottom: '16px' }}>
-                <KPI k="Income to post" v={m0(closeIncome)} sub="consignment + offline direct" accent={GREEN} />
-                <KPI k="COGS to post" v={m0(closeCogs)} sub={`${closeUnits} bags × ${money(costPerBag)}`} accent={KRAFT} />
-                <KPI k="AR to invoice" v={m0(closeAR)} sub="stores that owe you" accent={closeAR ? RED : MUTED} />
-              </div>
-
-              <div style={{ ...card }}>
-                <div style={{ ...lbl, color: KRAFT, margin: '2px 0 4px' }}>Income to post</div>
-                <Row l="Consignment collected" v={m0(cashCollected)} />
-                <Row l="Direct sales — non-Shopify (market, pop-up, cash, wholesale)" v={m0(offlineDirectRev)} />
-                <Row l="Total income to post" v={m0(closeIncome)} bold top />
-
-                <div style={{ ...lbl, color: KRAFT, margin: '16px 0 4px' }}>Cost of goods sold</div>
-                <Row l={`${closeUnits} bags sold × ${money(costPerBag)}/bag`} v={`−${m0(closeCogs)}`} bold top />
-
-                <div style={{ ...lbl, color: KRAFT, margin: '16px 0 4px' }}>Accounts receivable</div>
-                <Row l="Invoice stores for sold-not-reported bags" v={m0(closeAR)} bold top />
-                {closeAR === 0 && <p style={{ fontSize: '12px', color: MUTED, marginTop: '4px' }}>None flagged yet — diagnose missing pieces as “sold but not reported” on the Consignment tab to invoice them.</p>}
-
-                <div style={{ marginTop: '16px', padding: '12px 14px', background: CREAM, borderRadius: '2px', border: `1px dashed ${BORDER}` }}>
-                  <div style={{ ...lbl, marginBottom: '4px' }}>Booked elsewhere — do NOT re-enter</div>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '13px', color: MUTED }}>
-                    <span>Shopify online sales <span style={{ color: '#A2937A' }}>(via Shopify → QuickBooks)</span></span>
-                    <span style={{ fontFamily: MONO }}>{m0(shopifyRev)}</span>
-                  </div>
-                </div>
-              </div>
-
-              <button onClick={exportClose} style={{ marginTop: '14px', background: CHAR, color: CREAM, border: 'none', borderRadius: '2px', padding: '13px 20px', ...btn }}>⤓ Export for QuickBooks (CSV)</button>
-            </>
-          )}
-
-          {/* ===== ASK US (preview) ===== */}
-          {tab === 'askai' && (
-            <>
-              <div style={{ ...card, marginBottom: '16px', borderColor: 'rgba(200,70,44,.28)' }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '4px' }}>
-                  <span style={{ ...big, fontSize: '18px', color: INK }}>Ask your numbers</span>
-                  <span style={{ fontSize: '10px', fontWeight: 700, color: '#fff', background: SPICE, padding: '2px 8px', borderRadius: '2px' }}>PREVIEW</span>
-                </div>
-                <div style={{ fontSize: '13.5px', color: MUTED, lineHeight: 1.55 }}>A look at what's coming: ask plain-English questions about your business and get answers straight from your live data. Here are a few samples.</div>
-              </div>
-              {[
-                { q: 'Which store owes me the most right now?', a: <>Your counts show <b>Nutmeg</b> has the biggest gap: <b>7 bags missing</b> (~$56), most likely sold-but-unreported. Across all stores you're owed about <b>{m0(missVal)}</b> — I'd invoice the worst offenders.</> },
-                { q: 'Where am I wasting ad money?', a: <>Three channels are underwater — <b>Facebook, the 5K, and flyers</b>. Together they cost <b>{m0(wastedSpend)}/mo</b> and return only <b>{m0(wastedReturn)}</b>. Move that budget to Instagram and your influencer (both ~4x).</> },
-                { q: 'Did I actually make money this month?', a: <>Revenue is <b>{m0(revenue)}</b>, but after costs your net is <b>{m0(netProfit)}</b>. The two drags are ad waste and uncollected consignment money — fix both and you flip positive without selling a single extra bag.</> },
-              ].map((m, i) => (
-                <div key={i} style={{ marginBottom: '16px' }}>
-                  <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: '8px' }}>
-                    <div style={{ background: CHAR, color: CREAM, padding: '10px 14px', borderRadius: '2px 14px 4px 14px', maxWidth: '80%', fontSize: '14px' }}>{m.q}</div>
-                  </div>
-                  <div style={{ display: 'flex', gap: '10px', alignItems: 'flex-start' }}>
-                    <div style={{ width: '30px', height: '30px', borderRadius: '2px', background: SPICE, color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, ...big, fontSize: '12px' }}>JK</div>
-                    <div style={{ ...card, padding: '13px 15px', fontSize: '14px', lineHeight: 1.55, maxWidth: '85%' }}>{m.a}</div>
-                  </div>
-                </div>
-              ))}
-              <div style={{ ...card, display: 'flex', gap: '8px', alignItems: 'center', marginTop: '8px' }}>
-                <input disabled placeholder="Ask anything about your business…" style={{ ...inp, flex: 1, background: '#fff', cursor: 'not-allowed' }} />
-                <button disabled style={{ background: MUTED, color: '#fff', border: 'none', borderRadius: '2px', padding: '11px 18px', ...btn, cursor: 'not-allowed' }}>Send</button>
-              </div>
-              <p style={{ fontSize: '12px', color: MUTED, marginTop: '10px', textAlign: 'center' }}>Live Q&amp;A is on the roadmap — this is a preview of the feature.</p>
             </>
           )}
 
