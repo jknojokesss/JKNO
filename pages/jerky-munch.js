@@ -1551,23 +1551,26 @@ export default function JerkyMunch() {
                   {finView === 'pnl' && stmtA && (() => {
                     const B = stmtB
                     const cmp = !!B
-                    const cells = (a, b) => (
+                    // kind: 'income' (money in, dark), 'cost' (subtracts, shown negative in red), 'result' (green/red)
+                    const fmtv = (v, kind) => (kind === 'cost' || v < 0) ? `(${m0(Math.abs(v))})` : m0(v)
+                    const colv = (v, kind) => kind === 'cost' ? RED : kind === 'result' ? (v >= 0 ? GREEN : RED) : (v < 0 ? RED : INK)
+                    const cells = (a, b, kind) => (
                       <span style={{ display: 'flex', gap: '14px', fontFamily: MONO, fontSize: '13px' }}>
-                        <span style={{ width: '96px', textAlign: 'right', color: cmp ? MUTED : INK }}>{m0(a)}</span>
-                        {cmp && <span style={{ width: '96px', textAlign: 'right', color: INK }}>{m0(b)}</span>}
+                        <span style={{ width: '104px', textAlign: 'right', color: colv(a, kind) }}>{fmtv(a, kind)}</span>
+                        {cmp && <span style={{ width: '104px', textAlign: 'right', color: colv(b, kind) }}>{fmtv(b, kind)}</span>}
                         {cmp && <span style={{ width: '92px', textAlign: 'right', color: (b - a) >= 0 ? GREEN : RED, fontWeight: 700 }}>{(b - a) >= 0 ? '+' : '-'}{m0(Math.abs(b - a))}</span>}
                       </span>
                     )
                     const line = (label, a, b, opts = {}) => (
                       <div key={label} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: opts.indent ? '4px 0 4px 16px' : '6px 0', borderTop: opts.top ? `1px solid ${BORDER}` : 'none' }}>
                         <span style={{ fontSize: '13px', color: opts.indent ? MUTED : INK, fontWeight: opts.bold ? 700 : 400 }}>{label}</span>
-                        {cells(a, b)}
+                        {cells(a, b, opts.kind)}
                       </div>
                     )
-                    const catHeader = (key, label, a, b) => (
+                    const catHeader = (key, label, a, b, kind) => (
                       <div onClick={() => setFinExpand(s => ({ ...s, [key]: !s[key] }))} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '9px 0', cursor: 'pointer', borderTop: `2px solid ${BORDER}` }}>
                         <span style={{ ...lbl, color: KRAFT, display: 'flex', alignItems: 'center', gap: '6px' }}><span style={{ fontSize: '9px' }}>{finExpand[key] ? '▼' : '▶'}</span>{label}</span>
-                        {cells(a, b)}
+                        {cells(a, b, kind)}
                       </div>
                     )
                     const unionKeys = (ma, mb) => {
@@ -1597,22 +1600,23 @@ export default function JerkyMunch() {
                             </div>
                           )}
 
-                          {catHeader('income', 'Income', stmtA.income.total, B && B.income.total)}
-                          {finExpand.income && chanLines.map(([k, label]) => line(label, stmtA.income.channels[k], B && B.income.channels[k], { indent: true }))}
+                          {catHeader('income', 'Income', stmtA.income.total, B && B.income.total, 'income')}
+                          {finExpand.income && chanLines.map(([k, label]) => line(label, stmtA.income.channels[k], B && B.income.channels[k], { indent: true, kind: 'income' }))}
 
-                          {catHeader('cogs', 'Cost of goods sold', stmtA.cogs.total, B && B.cogs.total)}
-                          {finExpand.cogs && cogsKeys.map(a => line(a, stmtA.cogs.map[a] || 0, B && (B.cogs.map[a] || 0), { indent: true }))}
-                          {line('Gross profit', stmtA.gross, B && B.gross, { bold: true, top: true })}
+                          {catHeader('cogs', 'Cost of goods sold', stmtA.cogs.total, B && B.cogs.total, 'cost')}
+                          {finExpand.cogs && cogsKeys.map(a => line(a, stmtA.cogs.map[a] || 0, B && (B.cogs.map[a] || 0), { indent: true, kind: 'cost' }))}
+                          {line('Gross profit', stmtA.gross, B && B.gross, { bold: true, top: true, kind: 'result' })}
 
-                          {catHeader('expense', 'Operating expenses', stmtA.expenses.total, B && B.expenses.total)}
-                          {finExpand.expense && expKeys.map(a => line(a, stmtA.expenses.map[a] || 0, B && (B.expenses.map[a] || 0), { indent: true }))}
+                          {catHeader('expense', 'Operating expenses', stmtA.expenses.total, B && B.expenses.total, 'cost')}
+                          {finExpand.expense && expKeys.map(a => line(a, stmtA.expenses.map[a] || 0, B && (B.expenses.map[a] || 0), { indent: true, kind: 'cost' }))}
 
                           <div style={{ marginTop: '12px', borderTop: `2px solid ${CHAR}`, paddingTop: '10px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                             <span style={{ ...big, fontSize: '15px', color: INK }}>Net income</span>
                             {cmp
-                              ? cells(stmtA.net, B.net)
-                              : <span style={{ ...big, fontSize: '17px', fontFamily: MONO, color: stmtA.net >= 0 ? GREEN : RED }}>{m0(stmtA.net)}</span>}
+                              ? cells(stmtA.net, B.net, 'result')
+                              : <span style={{ ...big, fontSize: '17px', fontFamily: MONO, color: stmtA.net >= 0 ? GREEN : RED }}>{stmtA.net < 0 ? `(${m0(Math.abs(stmtA.net))})` : m0(stmtA.net)}</span>}
                           </div>
+                          <div style={{ marginTop: '10px', fontSize: '11.5px', color: MUTED }}>Amounts in <span style={{ color: RED }}>(red parentheses)</span> reduce profit; income and gross/net profit are shown in the black/green.</div>
                         </div>
                       </>
                     )
