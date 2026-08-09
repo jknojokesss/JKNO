@@ -163,7 +163,7 @@ export default function Gowns() {
   const [loginBusy, setLoginBusy] = useState(false)
 
   const [role, setRole] = useState('owner')
-  const [workView, setWorkView] = useState('orders')
+  const [workView, setWorkView] = useState('current')
   const [orders, setOrders] = useState([])
   const [tasks, setTasks] = useState([])
   const [newTask, setNewTask] = useState({ text: '', assignee: '', date: '', orderId: '' })
@@ -1565,17 +1565,20 @@ export default function Gowns() {
               <div style={{ fontSize: '13px', color: MUTED, marginBottom: '12px' }}>{pendingAlts.length} alteration{pendingAlts.length !== 1 ? 's' : ''} to do.</div>
               <button className="gw-new-btn gw-press" onClick={startNew} style={{ marginBottom: '14px' }}>+ New Order</button>
               <div style={{ display: 'flex', gap: '8px', marginBottom: '14px', flexWrap: 'wrap' }}>
-                {[['orders', 'Orders'], ['worker', 'By Worker'], ['date', 'By Date']].map(([v, l]) => (
-                  <button key={v} onClick={() => setWorkView(v)} style={{ ...tabBtn(workView === v), flex: 'none', padding: '10px 18px' }}>{l}</button>
+                {[['current', 'Current'], ['history', 'History'], ['worker', 'By Worker'], ['date', 'By Date']].map(([v, l]) => (
+                  <button key={v} onClick={() => setWorkView(v)} style={{ ...tabBtn(workView === v), flex: 'none', padding: '10px 16px' }}>{l}</button>
                 ))}
               </div>
               <input value={search} onChange={e => setSearch(e.target.value)} placeholder="Search by customer name…" style={{ ...fieldIn, fontSize: '18px', marginBottom: '16px' }} />
 
-              {workView === 'orders' && (orderList.length === 0 ? (
-                <div className="gw-card" style={{ padding: '40px 24px', textAlign: 'center', color: MUTED }}>{orders.length ? 'No matching customers.' : 'No orders yet.'}</div>
-              ) : (
+              {(workView === 'current' || workView === 'history') && (() => {
+                const shown = orderList.filter(({ pending, total }) => workView === 'history' ? (total > 0 && pending === 0) : !(total > 0 && pending === 0))
+                if (shown.length === 0) return (
+                  <div className="gw-card" style={{ padding: '40px 24px', textAlign: 'center', color: MUTED }}>{workView === 'history' ? 'No completed orders yet.' : (orders.length ? 'Nothing in progress.' : 'No orders yet.')}</div>
+                )
+                return (
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-                  {orderList.map(({ o, pending, total }) => (
+                  {shown.map(({ o, pending, total }) => (
                     <div key={o.id} className="gw-card" style={{ padding: '14px 16px', borderLeft: `4px solid ${pending > 0 ? ROSE : (total > 0 ? GREEN : '#D9CFC8')}` }}>
                       <div className="gw-press" onClick={() => openOrder(o)} style={{ display: 'flex', alignItems: 'flex-start', gap: '10px', cursor: 'pointer' }}>
                         {o.photos?.length > 0 && <img src={o.photos[0].url} alt="" onClick={(e) => { e.stopPropagation(); setLightbox(o.photos[0].url) }} style={{ width: '48px', height: '48px', objectFit: 'cover', borderRadius: '8px', flexShrink: 0, border: `1px solid ${GRID}`, cursor: 'zoom-in' }} />}
@@ -1604,9 +1607,10 @@ export default function Gowns() {
                     </div>
                   ))}
                 </div>
-              ))}
+                )
+              })()}
 
-              {workView !== 'orders' && pendingAlts.length === 0 && (
+              {(workView === 'worker' || workView === 'date') && pendingAlts.length === 0 && (
                 <div className="gw-card" style={{ padding: '36px 24px', textAlign: 'center', color: MUTED }}><div style={{ fontSize: '30px', marginBottom: '6px' }}>✓</div>All caught up — nothing to do.</div>
               )}
 
