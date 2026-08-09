@@ -566,6 +566,7 @@ export default function JerkyMunch() {
   const glBS = glTx.length ? buildBalanceSheet(glTx, coaTx) : null
   const glCF = glTx.length ? buildCashFlow(glTx, coaTx) : null
   const glAds = glTx.length ? buildAdSpend(glTx, coaTx) : null
+  const glHasOpenings = glTx.some(r => r.txn_type === 'Beginning Balance')
   const glAsOf = glPnl && glPnl.lastDate ? new Date(glPnl.lastDate + 'T00:00:00').toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' }) : ''
   // Financials P&L: period picker (YTD + each month) with optional comparison
   const finPeriods = glPnl ? [{ key: null, label: 'Year to date' }, ...glPnl.months.map(m => ({ key: m.key, label: m.label }))] : []
@@ -1558,7 +1559,7 @@ export default function JerkyMunch() {
                       <span style={{ display: 'flex', gap: '14px', fontFamily: MONO, fontSize: '13px' }}>
                         <span style={{ width: '104px', textAlign: 'right', color: colv(a, kind) }}>{fmtv(a, kind)}</span>
                         {cmp && <span style={{ width: '104px', textAlign: 'right', color: colv(b, kind) }}>{fmtv(b, kind)}</span>}
-                        {cmp && <span style={{ width: '92px', textAlign: 'right', color: (b - a) >= 0 ? GREEN : RED, fontWeight: 700 }}>{(b - a) >= 0 ? '+' : '-'}{m0(Math.abs(b - a))}</span>}
+                        {cmp && (() => { const chg = b - a; const good = kind === 'cost' ? chg <= 0 : chg >= 0; return <span style={{ width: '92px', textAlign: 'right', color: good ? GREEN : RED, fontWeight: 700 }}>{chg >= 0 ? '+' : '-'}{m0(Math.abs(chg))}</span> })()}
                       </span>
                     )
                     const line = (label, a, b, opts = {}) => (
@@ -1625,6 +1626,7 @@ export default function JerkyMunch() {
                   {/* ---- Balance Sheet ---- */}
                   {finView === 'bs' && glBS && (
                     <div style={{ ...card }}>
+                      {!glHasOpenings && <div style={{ marginBottom: '10px', padding: '8px 10px', background: '#FDECEA', border: '1px solid #F5C6C0', borderRadius: '2px', fontSize: '12px', color: INK, lineHeight: 1.5 }}>Opening balances aren't loaded yet, so this Balance Sheet is incomplete. Re-import the General Ledger on the <b style={{ cursor: 'pointer', color: SPICE }} onClick={() => setTab('quickbooks')}>QuickBooks</b> tab.</div>}
                       <div style={{ ...lbl, color: KRAFT, marginBottom: '4px' }}>Assets</div>
                       {glBS.assets.map(a => <Row key={a.account} l={a.account} v={m0(a.amount)} />)}
                       <Row l="Total assets" v={m0(glBS.totalAssets)} bold top />
@@ -1651,6 +1653,7 @@ export default function JerkyMunch() {
                   {/* ---- Cash Flow ---- */}
                   {finView === 'cf' && glCF && (
                     <div style={{ ...card }}>
+                      {!glHasOpenings && <div style={{ marginBottom: '10px', padding: '8px 10px', background: '#FDECEA', border: '1px solid #F5C6C0', borderRadius: '2px', fontSize: '12px', color: INK, lineHeight: 1.5 }}>Beginning cash shows $0 because opening balances aren't loaded. Re-import the General Ledger on the <b style={{ cursor: 'pointer', color: SPICE }} onClick={() => setTab('quickbooks')}>QuickBooks</b> tab.</div>}
                       <div style={{ ...lbl, color: KRAFT, marginBottom: '4px' }}>Cash flow{glAsOf ? ` — through ${glAsOf}` : ''}</div>
                       <Row l="Beginning cash" v={m0(glCF.beginningCash)} />
                       <Row l="Operating (sales, collections, expenses)" v={m0(glCF.operating)} />
