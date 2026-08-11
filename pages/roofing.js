@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from 'react'
+import React, { useState, useEffect, useMemo } from 'react'
 import Head from 'next/head'
 import { supabase } from '../lib/supabase'
 
@@ -116,6 +116,11 @@ export default function RoofingPortal() {
         .flag{display:inline-block;background:${SIGNAL};color:${WHITE};font-size:10px;font-weight:700;letter-spacing:.05em;padding:2px 7px;border-radius:2px;white-space:nowrap}
         .ghost{border:1px solid ${STONE};background:${WHITE};color:${SLATE};font-size:10.5px;font-weight:600;letter-spacing:.06em;padding:4px 10px;border-radius:2px;cursor:pointer}
         .ghost:hover{border-color:${SLATE}}
+        .clickable:hover{border-color:${SLATE}}
+        .chev{display:inline-block;width:14px;color:${MUTED};font-size:10px}
+        .bucket{cursor:pointer}
+        .bucket:hover{background:#FBFAF7}
+        .bucket.on{background:#EFECE4}
         .print-only{display:none}
         @media(max-width:820px){.side{display:none}.main{padding:18px 14px}}
         @media print{
@@ -237,7 +242,7 @@ function buildModel(raw) {
   // 13-week cash forecast
   const weeks = []
   const monday = addDays(AS_OF, -((AS_OF.getUTCDay() + 6) % 7))
-  for (let k = 0; k < 13; k++) weeks.push({ start: addDays(monday, k * 7), coll: 0, ap: 0, payroll: 0 })
+  for (let k = 0; k < 13; k++) weeks.push({ start: addDays(monday, k * 7), coll: 0, ap: 0, payroll: 0, items: [] })
   const wkIdx = (d) => Math.floor(daysBetween(monday, d) / 7)
   // Deep past-due balances are a workout, not a forecast — excluded and disclosed.
   let excludedAR = 0
@@ -248,13 +253,26 @@ function buildModel(raw) {
     else if (i.job && i.job.type !== 'residential') exp = addDays(exp, 14)
     if (exp < AS_OF) exp = addDays(AS_OF, 5 + (n % 4) * 7) // overdue: assume collected over the next month
     const k = wkIdx(exp)
-    if (k >= 0 && k < 13) weeks[k].coll += Number(i.amount)
+    if (k >= 0 && k < 13) {
+      weeks[k].coll += Number(i.amount)
+      weeks[k].items.push({
+        kind: 'in', amt: Number(i.amount),
+        label: `${i.job && i.job.cust ? i.job.cust.name : 'Customer'} · ${i.invoice_no}`,
+        why: i.claim_status === 'adjuster_review' ? 'claim in adjuster review — modeled at due + 45d'
+          : i.is_insurance ? 'insurance draft — modeled at due + 21d'
+          : i.pastDue > 0 ? `${i.pastDue}d past due — assumed collected` : `due ${fmtD(i.due_date)}`,
+      })
+    }
   })
   for (const b of raw.apBills.filter((b) => b.status === 'open')) {
     let d = dt(b.due_date)
     if (d < AS_OF) d = addDays(AS_OF, 3)
     const k = wkIdx(d)
-    if (k >= 0 && k < 13) weeks[k].ap += Number(b.amount)
+    if (k >= 0 && k < 13) {
+      weeks[k].ap += Number(b.amount)
+      const bj = jobs.find((j) => j.id === b.job_id)
+      weeks[k].items.push({ kind: 'out', amt: Number(b.amount), label: `${b.vendor} · ${bj ? bj.job_no : ''}`, why: `${b.category} · due ${fmtD(b.due_date)}` })
+    }
   }
   const lastGlMonth = raw.gl.map((g) => g.month).sort().slice(-1)[0]
   const officeMonthly = -raw.gl.filter((g) => g.month === lastGlMonth && g.category === 'opex').reduce((s, g) => s + Number(g.amount), 0)
@@ -307,6 +325,7 @@ function buildModel(raw) {
   const revByClass = {}
   const revByState = {}
   const revByCust = {}
+  const custJobs = {}
   for (const i of raw.invoices.filter((i) => last12.includes(mkey(i.date)))) {
     const j = jobs.find((x) => x.id === i.job_id)
     if (!j) continue
@@ -314,6 +333,9 @@ function buildModel(raw) {
     revByState[j.state] = (revByState[j.state] || 0) + Number(i.amount)
     const cn = j.cust ? j.cust.name : '—'
     revByCust[cn] = (revByCust[cn] || 0) + Number(i.amount)
+    if (!custJobs[cn]) custJobs[cn] = {}
+    if (!custJobs[cn][j.job_no]) custJobs[cn][j.job_no] = { job: j, amt: 0 }
+    custJobs[cn][j.job_no].amt += Number(i.amount)
   }
   const invoicedT12 = Object.values(revByCust).reduce((s, v) => s + v, 0)
   const topCust = Object.entries(revByCust).sort((a, b) => b[1] - a[1]).slice(0, 10)
@@ -338,7 +360,7 @@ function buildModel(raw) {
     raw, jobs, open, backlog, wip, wipTotals, openInvoices, aging, arTotal, claimsTotal, claimsInReview,
     weeks, STARTING_CASH, excludedAR, t12, retainage, retainageTotal, openAp, apTotal, deposits, depositTotal, unbilledSupps, suppTotal,
     revT12, netIncome, interest, depreciation, ebitda, addbackTotal, adjEbitda,
-    revByClass, revByState, topCust, invoicedT12, wcTrend,
+    revByClass, revByState, topCust, custJobs, invoicedT12, wcTrend,
   }
 }
 
@@ -366,13 +388,66 @@ function Header({ q, sub }) {
   )
 }
 
-function Kpi({ k, v, sub, big }) {
+function Kpi({ k, v, sub, big, onClick }) {
   return (
-    <div className="card" style={{ padding: '14px 18px', flex: 1, minWidth: '150px' }}>
+    <div className={'card' + (onClick ? ' clickable' : '')} onClick={onClick} style={{ padding: '14px 18px', flex: 1, minWidth: '150px', cursor: onClick ? 'pointer' : 'default' }}>
       <div style={{ fontSize: '9.5px', letterSpacing: '.1em', color: MUTED, fontWeight: 600, marginBottom: '6px' }}>{k}</div>
       <div style={{ fontFamily: serif, fontSize: big ? '30px' : '25px', fontWeight: 700, color: INK, fontVariantNumeric: 'tabular-nums', lineHeight: 1 }}>{v}</div>
       {sub && <div style={{ fontSize: '11px', color: MUTED, marginTop: '5px' }}>{sub}</div>}
     </div>
+  )
+}
+
+function Modal({ title, onClose, children }) {
+  return (
+    <div onClick={onClose} style={{ position: 'fixed', inset: 0, background: 'rgba(26,30,36,.45)', zIndex: 50, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '20px' }}>
+      <div onClick={(e) => e.stopPropagation()} className="card" style={{ maxWidth: '540px', width: '100%', boxShadow: '0 24px 64px rgba(26,30,36,.3)' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', padding: '14px 20px', borderBottom: `1px solid ${RULE}` }}>
+          <h2 style={{ fontSize: '17px' }}>{title}</h2>
+          <button onClick={onClose} style={{ border: 'none', background: 'none', fontSize: '15px', cursor: 'pointer', color: MUTED }}>✕</button>
+        </div>
+        {children}
+      </div>
+    </div>
+  )
+}
+
+// Demo-only invoice draft. Nothing posts — the point is showing that the
+// number is already computed and the invoice is one click, not one afternoon.
+function DraftInvoice({ d, onClose }) {
+  const [prepared, setPrepared] = useState(false)
+  return (
+    <Modal title="Draft invoice — prepared from job records" onClose={onClose}>
+      <div style={{ padding: '18px 20px' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '14px' }}>
+          <div>
+            <div style={{ fontSize: '10px', letterSpacing: '.1em', color: MUTED, fontWeight: 700 }}>BILL TO</div>
+            <div style={{ color: INK, fontWeight: 600, fontSize: '13.5px', marginTop: '3px' }}>{d.billTo}</div>
+            <div style={{ fontSize: '12px', color: SLATE }}>{d.jobLabel}</div>
+          </div>
+          <div style={{ textAlign: 'right' }}>
+            <div style={{ fontSize: '10px', letterSpacing: '.1em', color: MUTED, fontWeight: 700 }}>TERMS</div>
+            <div style={{ fontSize: '12.5px', color: SLATE, marginTop: '3px' }}>Net 30 · due {fmtD(addDays(AS_OF, 30).toISOString().slice(0, 10))}</div>
+          </div>
+        </div>
+        <table>
+          <thead><tr><th className="th">Line</th><th className="th r">Amount</th></tr></thead>
+          <tbody>
+            <tr><td className="td" style={{ whiteSpace: 'normal' }}>{d.line}</td><td className="td r ink" style={{ fontWeight: 700 }}>{money0(d.amount)}</td></tr>
+            <tr style={{ background: '#EFECE4' }}><td className="td ink" style={{ fontWeight: 700 }}>Total due</td><td className="td r ink" style={{ fontWeight: 700, fontFamily: serif, fontSize: '16px' }}>{money0(d.amount)}</td></tr>
+          </tbody>
+        </table>
+        <div style={{ fontSize: '11px', color: MUTED, lineHeight: 1.6, margin: '12px 0 16px' }}>
+          Demo — nothing posts from this screen. In production this draft lands in AccuLynx as the invoice record and syncs to QuickBooks, which stays the book of record.
+        </div>
+        <div style={{ display: 'flex', gap: '10px', justifyContent: 'flex-end' }}>
+          <button className="ghost" onClick={onClose}>CANCEL</button>
+          <button className="ghost" style={{ background: INK, color: WHITE, border: 'none', padding: '7px 16px' }} onClick={() => setPrepared(true)} disabled={prepared}>
+            {prepared ? '✓ PREPARED (DEMO)' : 'PREPARE INVOICE'}
+          </button>
+        </div>
+      </div>
+    </Modal>
   )
 }
 
@@ -404,9 +479,9 @@ function JobMargin({ M, groupBy, setGroupBy, jobFilter, setJobFilter, expanded, 
     <div>
       <Header q="Which jobs are losing money?" sub="Estimated vs. actual cost on every job, projected to completion at the current run rate — flagged while the job is still open, not three months after closeout." />
       <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap', marginBottom: '18px' }}>
-        <Kpi k="OPEN JOBS" v={M.open.length} sub={money0(M.open.reduce((s, j) => s + j.cwc, 0)) + ' under contract'} />
-        <Kpi k="FLAGGED OPEN JOBS" v={openFlagged.length} sub="pacing >5 pts under estimate" />
-        <Kpi k="MARGIN AT RISK" v={moneyK(marginAtRisk)} sub="if flagged jobs keep pacing" />
+        <Kpi k="OPEN JOBS" v={M.open.length} sub={money0(M.open.reduce((s, j) => s + j.cwc, 0)) + ' under contract'} onClick={() => setJobFilter('open')} />
+        <Kpi k="FLAGGED OPEN JOBS" v={openFlagged.length} sub="pacing >5 pts under estimate" onClick={() => setJobFilter('flagged')} />
+        <Kpi k="MARGIN AT RISK" v={moneyK(marginAtRisk)} sub="if flagged jobs keep pacing" onClick={() => setJobFilter('flagged')} />
         <Kpi k="AVG PROJECTED MARGIN" v={M.open.length ? pct1(M.open.reduce((s, j) => s + j.projMargin, 0) / M.open.length) : '—'} sub={M.open.length ? `estimated ${pct1(M.open.reduce((s, j) => s + j.estMargin, 0) / M.open.length)} at signing` : ''} />
       </div>
 
@@ -459,7 +534,7 @@ function JobRow({ j, expanded, setExpanded }) {
   return (
     <>
       <tr className="rowbtn" onClick={() => setExpanded(isOpen ? null : j.id)}>
-        <td className="td ink" style={{ fontWeight: 600 }}>{j.job_no}</td>
+        <td className="td ink" style={{ fontWeight: 600 }}><span className="chev">{isOpen ? '▾' : '▸'}</span>{j.job_no}</td>
         <td className="td" style={{ maxWidth: '250px', overflow: 'hidden', textOverflow: 'ellipsis' }}>{j.name}</td>
         <td className="td">{j.state}</td>
         <td className="td">{TYPE_LABEL[j.type]}</td>
@@ -529,6 +604,12 @@ function DrillIn({ j }) {
 function Wip({ M }) {
   const t = M.wipTotals
   const actionable = M.wip.filter((j) => j.under > 5000)
+  const [openRow, setOpenRow] = useState(null)
+  const [draft, setDraft] = useState(null)
+  const draftFor = (j) => setDraft({
+    billTo: j.cust ? j.cust.name : '', jobLabel: `${j.job_no} — ${j.name}`, amount: j.under,
+    line: `Progress billing — ${pct0(j.pct)} complete: earned to date ${money0(j.earned)}, less previously billed ${money0(j.billed)}`,
+  })
   return (
     <div>
       <Header q="What have we earned that we haven't billed?" sub="Standard percentage-of-completion across every open job. The two totals below are the balance-sheet entries a buyer's diligence team asks about first." />
@@ -552,14 +633,14 @@ function Wip({ M }) {
         <div className="card" style={{ marginBottom: '18px' }}>
           <SectionTitle t={`${actionable.length} jobs have earned revenue you haven't invoiced`} right={<span style={{ fontSize: '11px', color: MUTED }}>worth {money0(actionable.reduce((s, j) => s + j.under, 0))}</span>} />
           {actionable.map((j) => (
-            <div key={j.id} style={{ display: 'flex', alignItems: 'center', gap: '14px', padding: '9px 16px', borderTop: `1px solid ${RULE}` }}>
+            <div key={j.id} className="rowbtn" onClick={() => draftFor(j)} style={{ display: 'flex', alignItems: 'center', gap: '14px', padding: '9px 16px', borderTop: `1px solid ${RULE}`, cursor: 'pointer' }}>
               <div style={{ flex: 1, minWidth: 0 }}>
                 <span style={{ color: INK, fontWeight: 600, fontSize: '12.5px' }}>{j.job_no}</span>
                 <span style={{ color: SLATE, fontSize: '12.5px' }}> — {j.name}</span>
                 <span style={{ color: MUTED, fontSize: '11.5px' }}> · {pct0(j.pct)} complete, billed {pct0(j.billed / Math.max(1, j.earned))} of earned</span>
               </div>
               <div style={{ fontVariantNumeric: 'tabular-nums', color: INK, fontWeight: 700, fontSize: '13px' }}>{money0(j.under)}</div>
-              <button className="ghost no-print">DRAFT INVOICE</button>
+              <button className="ghost no-print" onClick={(e) => { e.stopPropagation(); draftFor(j) }}>DRAFT INVOICE</button>
             </div>
           ))}
         </div>
@@ -574,17 +655,7 @@ function Wip({ M }) {
           </tr></thead>
           <tbody>
             {M.wip.map((j) => (
-              <tr key={j.id}>
-                <td className="td ink" style={{ fontWeight: 600, maxWidth: '250px', overflow: 'hidden', textOverflow: 'ellipsis' }}>{j.job_no} · {j.name}</td>
-                <td className="td r">{money0(j.cwc)}</td>
-                <td className="td r">{money0(j.actTotal)}</td>
-                <td className="td r">{money0(j.estToComplete)}</td>
-                <td className="td r">{pct0(j.pct)}</td>
-                <td className="td r ink">{money0(j.earned)}</td>
-                <td className="td r">{money0(j.billed)}</td>
-                <td className="td r">{j.over > 0 ? money0(j.over) : '—'}</td>
-                <td className="td r" style={{ fontWeight: j.under > 5000 ? 700 : 400, color: INK }}>{j.under > 0 ? money0(j.under) : '—'}</td>
-              </tr>
+              <WipRow key={j.id} j={j} isOpen={openRow === j.id} toggle={() => setOpenRow(openRow === j.id ? null : j.id)} />
             ))}
             <tr style={{ background: '#EFECE4' }}>
               <td className="td ink" style={{ fontWeight: 700 }}>Totals</td>
@@ -600,7 +671,27 @@ function Wip({ M }) {
           </tbody>
         </table>
       </div>
+      {draft && <DraftInvoice d={draft} onClose={() => setDraft(null)} />}
     </div>
+  )
+}
+
+function WipRow({ j, isOpen, toggle }) {
+  return (
+    <>
+      <tr className="rowbtn" onClick={toggle}>
+        <td className="td ink" style={{ fontWeight: 600, maxWidth: '250px', overflow: 'hidden', textOverflow: 'ellipsis' }}><span className="chev">{isOpen ? '▾' : '▸'}</span>{j.job_no} · {j.name}</td>
+        <td className="td r">{money0(j.cwc)}</td>
+        <td className="td r">{money0(j.actTotal)}</td>
+        <td className="td r">{money0(j.estToComplete)}</td>
+        <td className="td r">{pct0(j.pct)}</td>
+        <td className="td r ink">{money0(j.earned)}</td>
+        <td className="td r">{money0(j.billed)}</td>
+        <td className="td r">{j.over > 0 ? money0(j.over) : '—'}</td>
+        <td className="td r" style={{ fontWeight: j.under > 5000 ? 700 : 400, color: INK }}>{j.under > 0 ? money0(j.under) : '—'}</td>
+      </tr>
+      {isOpen && <tr><td colSpan={9} style={{ padding: 0, borderBottom: `1px solid ${RULE}` }}><DrillIn j={j} /></td></tr>}
+    </>
   )
 }
 
@@ -608,6 +699,12 @@ function Wip({ M }) {
 
 function Cash({ M }) {
   const buckets = ['Current', '1–30', '31–60', '61–90', '90+']
+  const [wk, setWk] = useState(null)
+  const [sel, setSel] = useState(null) // {row: 'trade'|'claims', b: 0..4}
+  const bucketOf = (d) => (d <= 0 ? 0 : d <= 30 ? 1 : d <= 60 ? 2 : d <= 90 ? 3 : 4)
+  const listed = sel
+    ? M.openInvoices.filter((i) => (sel.row === 'claims') === !!i.is_insurance && bucketOf(i.pastDue) === sel.b).sort((a, b) => Number(b.amount) - Number(a.amount))
+    : M.openInvoices.filter((i) => !i.is_insurance && i.pastDue > 30).slice(0, 5)
   const wMax = Math.max(...M.weeks.map((w) => Math.max(w.coll, w.ap + w.payroll)), 1)
   const cumMin = Math.min(...M.weeks.map((w) => w.cum), M.STARTING_CASH)
   const cumMax = Math.max(...M.weeks.map((w) => w.cum), M.STARTING_CASH)
@@ -630,11 +727,13 @@ function Cash({ M }) {
               const x = 20 + i * 58
               const collH = (w.coll / wMax) * 92
               const outH = ((w.ap + w.payroll) / wMax) * 92
+              const on = wk === i
               return (
-                <g key={i}>
-                  <rect x={x} y={118 - collH} width={20} height={collH} fill={SLATE} />
+                <g key={i} onClick={() => setWk(on ? null : i)} style={{ cursor: 'pointer' }}>
+                  <rect x={x - 4} y={16} width={51} height={134} fill={on ? '#EFECE4' : 'transparent'} />
+                  <rect x={x} y={118 - collH} width={20} height={collH} fill={on ? INK : SLATE} />
                   <rect x={x + 23} y={118 - outH} width={20} height={outH} fill={STONE} />
-                  <text x={x + 21} y={132} textAnchor="middle" fontSize="9.5" fill={MUTED} fontFamily={sans}>{w.start.toLocaleDateString('en-US', { month: 'numeric', day: 'numeric', timeZone: 'UTC' })}</text>
+                  <text x={x + 21} y={132} textAnchor="middle" fontSize="9.5" fill={on ? INK : MUTED} fontWeight={on ? '700' : '400'} fontFamily={sans}>{w.start.toLocaleDateString('en-US', { month: 'numeric', day: 'numeric', timeZone: 'UTC' })}</text>
                   <text x={x + 21} y={146} textAnchor="middle" fontSize="9.5" fontWeight="600" fill={w.net < 0 ? INK : MUTED} fontFamily={sans}>{moneyK(w.net)}</text>
                 </g>
               )
@@ -647,8 +746,44 @@ function Cash({ M }) {
             <text x={20} y={170} fontSize="9.5" fill={MUTED} fontFamily={sans}>cash balance →</text>
           </svg>
           <div style={{ fontSize: '11px', color: MUTED, marginTop: '4px' }}>
-            Dark bars: expected collections (AR aging + claim timing). Stone bars: committed AP + payroll. Net printed under each week; line is the running balance. Insurance claims in adjuster review are modeled at due + 45 days — they do not behave like trade AR.{M.excludedAR > 0 && <> {moneyK(M.excludedAR)} of deep past-due balances is excluded — that&rsquo;s a workout, not a forecast.</>}
+            Dark bars: expected collections (AR aging + claim timing). Stone bars: committed AP + payroll. Net printed under each week; line is the running balance. <b style={{ color: SLATE }}>Click a week to see what lands in it.</b> Insurance claims in adjuster review are modeled at due + 45 days — they do not behave like trade AR.{M.excludedAR > 0 && <> {moneyK(M.excludedAR)} of deep past-due balances is excluded — that&rsquo;s a workout, not a forecast.</>}
           </div>
+          {wk != null && (() => {
+            const w = M.weeks[wk]
+            const ins = w.items.filter((x) => x.kind === 'in').sort((a, b) => b.amt - a.amt)
+            const outs = w.items.filter((x) => x.kind === 'out').sort((a, b) => b.amt - a.amt)
+            return (
+              <div style={{ marginTop: '12px', borderTop: `1px solid ${RULE}`, paddingTop: '12px', display: 'flex', gap: '28px', flexWrap: 'wrap' }}>
+                <div style={{ flex: '1 1 320px' }}>
+                  <div style={{ fontSize: '10px', letterSpacing: '.1em', color: MUTED, fontWeight: 700, marginBottom: '8px' }}>
+                    WEEK OF {w.start.toLocaleDateString('en-US', { month: 'short', day: 'numeric', timeZone: 'UTC' }).toUpperCase()} — EXPECTED IN · {money0(w.coll)}
+                  </div>
+                  {ins.length === 0 && <div style={{ fontSize: '12px', color: MUTED }}>Nothing expected this week.</div>}
+                  {ins.map((x, i2) => (
+                    <div key={i2} style={{ display: 'flex', justifyContent: 'space-between', gap: '12px', fontSize: '12px', padding: '4px 0', borderBottom: `1px solid ${RULE}` }}>
+                      <span style={{ minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}><span style={{ color: INK, fontWeight: 600 }}>{x.label}</span> <span style={{ color: MUTED }}>· {x.why}</span></span>
+                      <span style={{ fontVariantNumeric: 'tabular-nums', color: INK, fontWeight: 600, whiteSpace: 'nowrap' }}>{money0(x.amt)}</span>
+                    </div>
+                  ))}
+                </div>
+                <div style={{ flex: '1 1 320px' }}>
+                  <div style={{ fontSize: '10px', letterSpacing: '.1em', color: MUTED, fontWeight: 700, marginBottom: '8px' }}>
+                    GOING OUT · {money0(w.ap + w.payroll)}
+                  </div>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '12px', padding: '4px 0', borderBottom: `1px solid ${RULE}` }}>
+                    <span style={{ color: SLATE }}>Payroll — office + field run-rate</span>
+                    <span style={{ fontVariantNumeric: 'tabular-nums', color: INK, fontWeight: 600 }}>{money0(w.payroll)}</span>
+                  </div>
+                  {outs.map((x, i2) => (
+                    <div key={i2} style={{ display: 'flex', justifyContent: 'space-between', gap: '12px', fontSize: '12px', padding: '4px 0', borderBottom: `1px solid ${RULE}` }}>
+                      <span style={{ minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}><span style={{ color: INK, fontWeight: 600 }}>{x.label}</span> <span style={{ color: MUTED }}>· {x.why}</span></span>
+                      <span style={{ fontVariantNumeric: 'tabular-nums', color: INK, fontWeight: 600, whiteSpace: 'nowrap' }}>{money0(x.amt)}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )
+          })()}
         </div>
       </div>
 
@@ -685,12 +820,18 @@ function Cash({ M }) {
             <tbody>
               <tr>
                 <td className="td ink" style={{ fontWeight: 600 }}>Trade AR</td>
-                {M.aging.trade.map((v, i) => <td key={i} className="td r" style={{ fontWeight: i >= 3 && v > 0 ? 700 : 400, color: i >= 3 && v > 0 ? INK : SLATE }}>{v > 0 ? moneyK(v) : '—'}</td>)}
+                {M.aging.trade.map((v, i) => {
+                  const on = sel && sel.row === 'trade' && sel.b === i
+                  return <td key={i} className={'td r' + (v > 0 ? ' bucket' : '') + (on ? ' on' : '')} onClick={() => v > 0 && setSel(on ? null : { row: 'trade', b: i })} style={{ fontWeight: (i >= 3 && v > 0) || on ? 700 : 400, color: i >= 3 && v > 0 ? INK : SLATE }}>{v > 0 ? moneyK(v) : '—'}</td>
+                })}
                 <td className="td r ink" style={{ fontWeight: 700 }}>{moneyK(M.aging.trade.reduce((a, b) => a + b, 0))}</td>
               </tr>
               <tr>
                 <td className="td ink" style={{ fontWeight: 600 }}>Insurance claims</td>
-                {M.aging.claims.map((v, i) => <td key={i} className="td r">{v > 0 ? moneyK(v) : '—'}</td>)}
+                {M.aging.claims.map((v, i) => {
+                  const on = sel && sel.row === 'claims' && sel.b === i
+                  return <td key={i} className={'td r' + (v > 0 ? ' bucket' : '') + (on ? ' on' : '')} onClick={() => v > 0 && setSel(on ? null : { row: 'claims', b: i })} style={{ fontWeight: on ? 700 : 400 }}>{v > 0 ? moneyK(v) : '—'}</td>
+                })}
                 <td className="td r ink" style={{ fontWeight: 700 }}>{moneyK(M.aging.claims.reduce((a, b) => a + b, 0))}</td>
               </tr>
             </tbody>
@@ -699,13 +840,16 @@ function Cash({ M }) {
             A claim in adjuster review isn&rsquo;t &ldquo;past due&rdquo; the way an unpaid GC invoice is — chasing it like one wastes calls, and aging it like one overstates your problem. {moneyK(M.claimsInReview)} of the claim balance is in review right now.
           </div>
           <div style={{ borderTop: `1px solid ${RULE}` }}>
-            {M.openInvoices.filter((i) => !i.is_insurance && i.pastDue > 30).slice(0, 5).map((i) => (
+            {sel && <div style={{ padding: '8px 16px 0', fontSize: '10.5px', color: SLATE, fontWeight: 600 }}>
+              {sel.row === 'claims' ? 'Insurance claims' : 'Trade AR'} · {buckets[sel.b]}{sel.b > 0 ? ' days past due' : ''} · {listed.length} invoices
+            </div>}
+            {listed.map((i) => (
               <div key={i.id} style={{ display: 'flex', justifyContent: 'space-between', gap: '10px', padding: '7px 16px', borderBottom: `1px solid ${RULE}`, fontSize: '12px' }}>
-                <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{i.job ? i.job.name : ''}</span>
-                <span style={{ color: INK, fontWeight: 600, whiteSpace: 'nowrap' }}>{money0(Number(i.amount))} · {i.pastDue}d past</span>
+                <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{i.job ? i.job.name : ''}{i.claim_status === 'adjuster_review' && <span style={{ color: MUTED }}> · in review</span>}</span>
+                <span style={{ color: INK, fontWeight: 600, whiteSpace: 'nowrap' }}>{money0(Number(i.amount))} · {i.pastDue > 0 ? `${i.pastDue}d past` : 'current'}</span>
               </div>
             ))}
-            <div style={{ padding: '8px 16px', fontSize: '10.5px', color: MUTED }}>Oldest trade balances — these five are worth a phone call this week.</div>
+            <div style={{ padding: '8px 16px', fontSize: '10.5px', color: MUTED }}>{sel ? 'Click the bucket again to clear the filter.' : 'Oldest trade balances — worth a phone call this week. Click any aging bucket above to drill in.'}</div>
           </div>
         </div>
       </div>
@@ -717,6 +861,7 @@ function Cash({ M }) {
 
 function Liabilities({ M }) {
   const block = { flex: '1 1 420px', minWidth: '360px' }
+  const [draft, setDraft] = useState(null)
   return (
     <div>
       <Header q="What's committed, held, or owed that no report shows?" sub="None of these four numbers appears on a standard P&L — and every one of them is a diligence question. Total exposure below is what a buyer's quality-of-earnings team will find; better that you see it first." />
@@ -781,16 +926,20 @@ function Liabilities({ M }) {
           <table>
             <thead><tr><th className="th">Job / description</th><th className="th r">Amount</th><th className="th r">Approved</th></tr></thead>
             <tbody>{M.unbilledSupps.map((s) => (
-              <tr key={s.id}>
+              <tr key={s.id} className="rowbtn" onClick={() => setDraft({
+                billTo: s.job && s.job.cust ? s.job.cust.name : '', jobLabel: s.job ? `${s.job.job_no} — ${s.job.name}` : '',
+                amount: Number(s.amount), line: `Approved supplement — ${s.description} (carrier approved ${s.age != null ? s.age + ' days ago' : ''})`,
+              })}>
                 <td className="td" style={{ maxWidth: '280px', overflow: 'hidden', textOverflow: 'ellipsis' }}><span style={{ color: INK, fontWeight: 600 }}>{s.job ? s.job.job_no : ''}</span> — {s.description}</td>
                 <td className="td r ink" style={{ fontWeight: 600 }}>{money0(Number(s.amount))}</td>
                 <td className="td r">{s.age != null ? s.age + 'd ago' : '—'}</td>
               </tr>
             ))}</tbody>
           </table>
-          <div style={{ padding: '10px 16px 14px', fontSize: '11px', color: MUTED }}>The carrier already said yes to every line on this list. It&rsquo;s not a collections problem — it&rsquo;s an invoicing problem, and it&rsquo;s free money.</div>
+          <div style={{ padding: '10px 16px 14px', fontSize: '11px', color: MUTED }}>The carrier already said yes to every line on this list. It&rsquo;s not a collections problem — it&rsquo;s an invoicing problem, and it&rsquo;s free money. Click a line to draft the invoice.</div>
         </div>
       </div>
+      {draft && <DraftInvoice d={draft} onClose={() => setDraft(null)} />}
     </div>
   )
 }
@@ -805,6 +954,7 @@ function Buyer({ M }) {
   const backlogTotal = M.backlog.reduce((s, j) => s + Number(j.contract_value), 0)
   const backlogMargin = M.backlog.reduce((s, j) => s + (Number(j.contract_value) - j.estTotal), 0)
   const wcMax = Math.max(...M.wcTrend.map((w) => w.ar), 1)
+  const [custOpen, setCustOpen] = useState(null)
   let cum = 0
   return (
     <div>
@@ -870,13 +1020,27 @@ function Buyer({ M }) {
             <thead><tr><th className="th">Customer</th><th className="th r">Revenue</th><th className="th r">%</th><th className="th r">Cum.</th></tr></thead>
             <tbody>{M.topCust.map(([name, v]) => {
               cum += v
+              const isOpen = custOpen === name
+              const jobsFor = Object.values(M.custJobs[name] || {}).sort((a, b) => b.amt - a.amt)
               return (
-                <tr key={name}>
-                  <td className="td ink" style={{ fontWeight: 600, maxWidth: '200px', overflow: 'hidden', textOverflow: 'ellipsis' }}>{name}</td>
-                  <td className="td r">{moneyK(v)}</td>
-                  <td className="td r">{pct1(v / Math.max(1, M.invoicedT12))}</td>
-                  <td className="td r">{pct0(cum / Math.max(1, M.invoicedT12))}</td>
-                </tr>
+                <React.Fragment key={name}>
+                  <tr className="rowbtn" onClick={() => setCustOpen(isOpen ? null : name)}>
+                    <td className="td ink" style={{ fontWeight: 600, maxWidth: '200px', overflow: 'hidden', textOverflow: 'ellipsis' }}><span className="chev">{isOpen ? '▾' : '▸'}</span>{name}</td>
+                    <td className="td r">{moneyK(v)}</td>
+                    <td className="td r">{pct1(v / Math.max(1, M.invoicedT12))}</td>
+                    <td className="td r">{pct0(cum / Math.max(1, M.invoicedT12))}</td>
+                  </tr>
+                  {isOpen && (
+                    <tr><td colSpan={4} style={{ padding: '4px 14px 10px 24px', borderBottom: `1px solid ${RULE}`, background: '#FBFAF7' }}>
+                      {jobsFor.map((x) => (
+                        <div key={x.job.job_no} style={{ display: 'flex', justifyContent: 'space-between', gap: '10px', fontSize: '11.5px', padding: '3px 0' }}>
+                          <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', color: SLATE }}>{x.job.job_no} · {x.job.name.split('—')[1] || x.job.name} <span style={{ color: MUTED }}>· {x.job.status.replace('_', ' ')}</span></span>
+                          <span style={{ fontVariantNumeric: 'tabular-nums', color: INK, fontWeight: 600, whiteSpace: 'nowrap' }}>{moneyK(x.amt)}</span>
+                        </div>
+                      ))}
+                    </td></tr>
+                  )}
+                </React.Fragment>
               )
             })}</tbody>
           </table>
