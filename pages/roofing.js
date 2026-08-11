@@ -279,7 +279,10 @@ function buildModel(raw) {
   }))
 
   // liabilities
-  const retainage = jobs.filter((j) => Number(j.retainage_pct) > 0 && j.billed > 0 && j.status !== 'not_started').map((j) => {
+  // retainage on long-closed jobs is assumed released; recent completions and
+  // open jobs are what's actually still held
+  const retainage = jobs.filter((j) => Number(j.retainage_pct) > 0 && j.billed > 0 && j.status !== 'not_started'
+    && !(j.status === 'completed' && daysBetween(dt(j.completion_date), AS_OF) > 210)).map((j) => {
     const relDate = j.status === 'completed' ? addDays(dt(j.completion_date), 60) : null
     return {
       job: j, held: j.billed * Number(j.retainage_pct) / 100,
