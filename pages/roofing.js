@@ -146,7 +146,14 @@ export default function RoofingPortal() {
         .bucket:hover{background:#FBFAF7}
         .bucket.on{background:#EFECE4}
         .print-only{display:none}
-        @media(max-width:820px){.side{display:none}.main{padding:18px 14px}}
+        .mobilenav{display:none}
+        @media(max-width:820px){
+          .side{display:none}
+          .main{padding:14px 14px 40px}
+          .mobilenav{display:flex;position:sticky;top:34px;z-index:9;background:${INK};overflow-x:auto;gap:2px;padding:0 8px}
+          .mobilenav button{flex-shrink:0;border:none;background:transparent;color:#9aa0a8;font-size:12px;font-weight:600;padding:11px 10px;cursor:pointer;border-bottom:3px solid transparent}
+          .mobilenav button.on{color:${WHITE};border-bottom-color:${SIGNAL}}
+        }
         @media print{
           .no-print{display:none!important}
           .print-only{display:block!important}
@@ -164,12 +171,22 @@ export default function RoofingPortal() {
         <span style={{ fontWeight: 500, letterSpacing: '.08em' }}>DEMO · SYNTHETIC DATA · AS OF AUG 11, 2026</span>
       </div>
 
+      <div className="mobilenav no-print">
+        <button onClick={() => setIntro(true)} style={{ fontFamily: serif, fontStyle: 'italic' }}>The 4 questions</button>
+        {NAV.map((n) => (
+          <button key={n.id} className={tab === n.id ? 'on' : ''} onClick={() => { setTab(n.id); setExpanded(null) }}>{n.label}</button>
+        ))}
+        <button className={tab === 'buyer' ? 'on' : ''} onClick={() => setTab('buyer')}>Buyer Package</button>
+      </div>
+
       <div className="shell">
         <aside className="side no-print">
-          <div style={{ padding: '0 24px 22px', borderBottom: '1px solid rgba(201,196,184,.15)', marginBottom: '14px' }}>
+          <div style={{ padding: '0 24px 18px', borderBottom: '1px solid rgba(201,196,184,.15)', marginBottom: '10px' }}>
             <div style={{ fontFamily: serif, fontSize: '19px', fontWeight: 700, color: WHITE, lineHeight: 1.25 }}>Summit Ridge<br />Roofing Co.</div>
             <div style={{ fontSize: '9.5px', color: STONE, letterSpacing: '.14em', marginTop: '7px' }}>NASHVILLE · TN / KY / AL / GA</div>
           </div>
+          <button className="nbtn" onClick={() => setIntro(true)} style={{ fontFamily: serif, fontSize: '13.5px', fontStyle: 'italic' }}>The four questions ↺</button>
+          <div style={{ margin: '8px 24px 10px', borderTop: '1px solid rgba(201,196,184,.15)' }} />
           {NAV.map((n) => (
             <button key={n.id} className={'nbtn' + (tab === n.id ? ' on' : '')} onClick={() => { setTab(n.id); setExpanded(null) }}>{n.label}</button>
           ))}
