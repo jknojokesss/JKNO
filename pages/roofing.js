@@ -56,13 +56,30 @@ const NAV = [
 
 const TABLES = ['roof_customers', 'roof_jobs', 'roof_worksheets', 'roof_change_orders', 'roof_supplements', 'roof_invoices', 'roof_payments', 'roof_ap_bills', 'roof_gl_summary', 'roof_addbacks']
 
+const NEXT = {
+  jobs: { id: 'wip', q: "What have we earned that we haven't billed?" },
+  wip: { id: 'cash', q: 'When does the money actually land?' },
+  cash: { id: 'liab', q: "What's committed, held, or owed that no report shows?" },
+  liab: { id: 'buyer', q: "What does the buyer's first meeting look like?" },
+}
+
 export default function RoofingPortal() {
   const [tab, setTab] = useState('jobs')
   const [raw, setRaw] = useState(null)
   const [err, setErr] = useState(null)
   const [groupBy, setGroupBy] = useState('none')
-  const [jobFilter, setJobFilter] = useState('open')
+  const [jobFilter, setJobFilter] = useState('flagged')
   const [expanded, setExpanded] = useState(null)
+  const [intro, setIntro] = useState(false)
+
+  useEffect(() => {
+    try { if (!window.localStorage.getItem('roof-intro-seen')) setIntro(true) } catch (e) { setIntro(true) }
+  }, [])
+  const closeIntro = (target) => {
+    try { window.localStorage.setItem('roof-intro-seen', '1') } catch (e) {}
+    setIntro(false)
+    if (target) setTab(target)
+  }
 
   useEffect(() => {
     let alive = true
@@ -79,6 +96,13 @@ export default function RoofingPortal() {
   }, [])
 
   const M = useMemo(() => raw && buildModel(raw), [raw])
+
+  // open the worst flagged job by default so the drill-in shows itself
+  useEffect(() => {
+    if (!M) return
+    const worst = M.open.filter((j) => j.flagged).sort((a, b) => b.slipPts - a.slipPts)[0]
+    if (worst) setExpanded((e) => (e === null ? worst.id : e))
+  }, [M])
 
   return (
     <>
@@ -157,6 +181,7 @@ export default function RoofingPortal() {
         </aside>
 
         <main className="main">
+          {intro && M && <Intro M={M} onClose={closeIntro} />}
           {err && <div className="card" style={{ padding: '28px', color: INK }}>Couldn&rsquo;t load demo data: {err}</div>}
           {!err && !M && <div style={{ padding: '60px 0', color: MUTED, fontSize: '13px' }}>Loading job data…</div>}
           {M && tab === 'jobs' && <JobMargin M={M} groupBy={groupBy} setGroupBy={setGroupBy} jobFilter={jobFilter} setJobFilter={setJobFilter} expanded={expanded} setExpanded={setExpanded} />}
@@ -164,8 +189,14 @@ export default function RoofingPortal() {
           {M && tab === 'cash' && <Cash M={M} />}
           {M && tab === 'liab' && <Liabilities M={M} />}
           {M && tab === 'buyer' && <Buyer M={M} />}
-          {M && <div className="no-print" style={{ marginTop: '34px', paddingTop: '14px', borderTop: `1px solid ${RULE}`, fontSize: '11px', color: MUTED, lineHeight: 1.7 }}>
-            No journal entries, no chart of accounts, no posting happens here. QuickBooks remains the book of record and AccuLynx remains the job subledger — this portal reconciles and reports across both. That boundary is the point.
+          {M && NEXT[tab] && (
+            <div className="no-print" onClick={() => setTab(NEXT[tab].id)} style={{ marginTop: '28px', border: `1px solid ${RULE}`, background: WHITE, borderRadius: '3px', padding: '13px 18px', display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', gap: '12px', cursor: 'pointer' }}>
+              <span style={{ fontSize: '10px', letterSpacing: '.12em', color: MUTED, fontWeight: 700 }}>NEXT QUESTION</span>
+              <span style={{ fontFamily: serif, fontSize: '16px', fontWeight: 600, color: INK }}>{NEXT[tab].q} →</span>
+            </div>
+          )}
+          {M && <div className="no-print" style={{ marginTop: '20px', paddingTop: '14px', borderTop: `1px solid ${RULE}`, fontSize: '11px', color: MUTED, lineHeight: 1.7 }}>
+            Nothing is typed into this portal and nothing posts from it. It reads AccuLynx (the job records) and QuickBooks (the books) and answers questions across both. That boundary is the point.
           </div>}
         </main>
       </div>
@@ -379,11 +410,49 @@ function openInvoicesAndPaid(raw, payByInv, jobs) {
 
 // ── shared bits ──────────────────────────────────────────────────────────
 
-function Header({ q, sub }) {
+function Header({ q, lead, sub }) {
   return (
     <div style={{ marginBottom: '20px' }}>
       <h1 style={{ fontSize: '27px', letterSpacing: '-0.01em' }}>{q}</h1>
+      {lead && <div style={{ color: INK, fontSize: '15px', fontWeight: 600, marginTop: '8px', maxWidth: '640px', lineHeight: 1.5 }}>{lead}</div>}
       {sub && <div style={{ color: MUTED, fontSize: '13px', marginTop: '6px', maxWidth: '640px', lineHeight: 1.6 }}>{sub}</div>}
+    </div>
+  )
+}
+
+// First-visit framing. The demo may be viewed cold, with nobody narrating —
+// this is the narration.
+function Intro({ M, onClose }) {
+  const liabTotal = M.retainageTotal + M.apTotal + M.depositTotal + M.suppTotal
+  const flagged = M.open.filter((j) => j.flagged)
+  const QS = [
+    { id: 'jobs', q: 'Which jobs are losing money?', hook: `${flagged.length} open jobs are pacing below estimate right now — caught mid-job, not at closeout.` },
+    { id: 'wip', q: "What have we earned that we haven't billed?", hook: `${money0(M.wipTotals.under)} of finished work has never been invoiced.` },
+    { id: 'cash', q: 'When does the money actually land?', hook: `${moneyK(M.arTotal)} is owed to you. A 13-week view of when it arrives — claims treated like claims.` },
+    { id: 'liab', q: "What's held, committed, or owed off the books?", hook: `${moneyK(liabTotal)} sits in retainage, committed AP, deposits, and approved-but-unbilled supplements.` },
+  ]
+  return (
+    <div style={{ position: 'fixed', inset: 0, background: 'rgba(26,30,36,.55)', zIndex: 60, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '18px', overflowY: 'auto' }}>
+      <div className="card" style={{ maxWidth: '680px', width: '100%', padding: '30px 34px 26px', boxShadow: '0 24px 64px rgba(26,30,36,.35)' }}>
+        <div style={{ fontSize: '10px', letterSpacing: '.16em', color: MUTED, fontWeight: 700, marginBottom: '12px' }}>SUMMIT RIDGE ROOFING CO. — A WORKING DEMO, SYNTHETIC DATA</div>
+        <h1 style={{ fontSize: '25px', lineHeight: 1.25, marginBottom: '10px' }}>Four questions your software can&rsquo;t answer.</h1>
+        <p style={{ fontSize: '13.5px', color: SLATE, lineHeight: 1.65, marginBottom: '18px', maxWidth: '560px' }}>
+          AccuLynx runs your jobs. QuickBooks keeps your books. Both are doing their job — and neither one can answer the four questions below, because the answers live across both.
+          This portal reads the two systems and answers them. <b style={{ color: INK }}>Nobody types anything in here.</b>
+        </p>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '10px', marginBottom: '18px' }}>
+          {QS.map((x, i) => (
+            <div key={x.id} className="card clickable" onClick={() => onClose(x.id)} style={{ padding: '14px 16px', cursor: 'pointer' }}>
+              <div style={{ fontFamily: serif, fontSize: '15.5px', fontWeight: 700, color: INK, marginBottom: '6px' }}>{i + 1}. {x.q}</div>
+              <div style={{ fontSize: '12px', color: SLATE, lineHeight: 1.55 }}>{x.hook}</div>
+            </div>
+          ))}
+        </div>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '12px', flexWrap: 'wrap' }}>
+          <div style={{ fontSize: '11.5px', color: MUTED }}>Then the fifth screen: the package you&rsquo;d hand a buyer. Click anything — it&rsquo;s all live.</div>
+          <button className="ghost" style={{ background: INK, color: WHITE, border: 'none', padding: '9px 18px', fontSize: '11px' }} onClick={() => onClose('jobs')}>START WITH QUESTION 1 →</button>
+        </div>
+      </div>
     </div>
   )
 }
@@ -465,7 +534,7 @@ function SectionTitle({ t, right }) {
 const GROUPS = [['none', 'All jobs'], ['crew', 'By crew'], ['pm', 'By PM'], ['type', 'By type'], ['state', 'By state']]
 
 function JobMargin({ M, groupBy, setGroupBy, jobFilter, setJobFilter, expanded, setExpanded }) {
-  const pool = M.jobs.filter((j) => jobFilter === 'open' ? j.status === 'in_progress' : jobFilter === 'flagged' ? j.flagged : j.status !== 'not_started')
+  const pool = M.jobs.filter((j) => jobFilter === 'open' ? j.status === 'in_progress' : jobFilter === 'flagged' ? (j.flagged && j.status === 'in_progress') : j.status !== 'not_started')
   const rows = [...pool].sort((a, b) => (b.flagged - a.flagged) || (b.slipPts - a.slipPts))
   const openFlagged = M.open.filter((j) => j.flagged)
   const marginAtRisk = openFlagged.reduce((s, j) => s + (j.estMargin - j.projMargin) * j.cwc, 0)
@@ -477,7 +546,9 @@ function JobMargin({ M, groupBy, setGroupBy, jobFilter, setJobFilter, expanded, 
 
   return (
     <div>
-      <Header q="Which jobs are losing money?" sub="Estimated vs. actual cost on every job, projected to completion at the current run rate — flagged while the job is still open, not three months after closeout." />
+      <Header q="Which jobs are losing money?"
+        lead={`${openFlagged.length} of your ${M.open.length} open jobs are pacing below estimate — ${moneyK(marginAtRisk)} of margin, still catchable.`}
+        sub="Estimated vs. actual cost, projected to completion at the current run rate — flagged while the job is still open, not three months after closeout." />
       <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap', marginBottom: '18px' }}>
         <Kpi k="OPEN JOBS" v={M.open.length} sub={money0(M.open.reduce((s, j) => s + j.cwc, 0)) + ' under contract'} onClick={() => setJobFilter('open')} />
         <Kpi k="FLAGGED OPEN JOBS" v={openFlagged.length} sub="pacing >5 pts under estimate" onClick={() => setJobFilter('flagged')} />
@@ -487,7 +558,7 @@ function JobMargin({ M, groupBy, setGroupBy, jobFilter, setJobFilter, expanded, 
 
       <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap', alignItems: 'center', marginBottom: '12px' }}>
         <div className="seg">{GROUPS.map(([id, label]) => <button key={id} className={groupBy === id ? 'on' : ''} onClick={() => setGroupBy(id)}>{label}</button>)}</div>
-        <div className="seg">{[['open', 'Open'], ['all', 'Open + closed'], ['flagged', 'Flagged only']].map(([id, label]) => <button key={id} className={jobFilter === id ? 'on' : ''} onClick={() => setJobFilter(id)}>{label}</button>)}</div>
+        <div className="seg">{[['flagged', 'Flagged only'], ['open', 'All open'], ['all', 'Open + closed']].map(([id, label]) => <button key={id} className={jobFilter === id ? 'on' : ''} onClick={() => setJobFilter(id)}>{label}</button>)}</div>
         <div style={{ fontSize: '11px', color: MUTED }}>{rows.length} jobs · click a row for the cost breakdown</div>
       </div>
 
@@ -606,13 +677,16 @@ function Wip({ M }) {
   const actionable = M.wip.filter((j) => j.under > 5000)
   const [openRow, setOpenRow] = useState(null)
   const [draft, setDraft] = useState(null)
+  const [showSchedule, setShowSchedule] = useState(false)
   const draftFor = (j) => setDraft({
     billTo: j.cust ? j.cust.name : '', jobLabel: `${j.job_no} — ${j.name}`, amount: j.under,
     line: `Progress billing — ${pct0(j.pct)} complete: earned to date ${money0(j.earned)}, less previously billed ${money0(j.billed)}`,
   })
   return (
     <div>
-      <Header q="What have we earned that we haven't billed?" sub="Standard percentage-of-completion across every open job. The two totals below are the balance-sheet entries a buyer's diligence team asks about first." />
+      <Header q="What have we earned that we haven't billed?"
+        lead={`${money0(t.under)} of completed work has never been invoiced. The list below is where it is.`}
+        sub="Standard percentage-of-completion across every open job. The two totals below are the balance-sheet entries a buyer's diligence team asks about first." />
       {/* SIGNAL use 3 of 3 (shared with the variance flag): the over/under-billed totals */}
       <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap', marginBottom: '18px' }}>
         <div className="card" style={{ padding: '14px 18px', flex: 1, minWidth: '190px', borderTop: `3px solid ${SIGNAL}` }}>
@@ -647,8 +721,15 @@ function Wip({ M }) {
       )}
 
       <div className="card" style={{ overflowX: 'auto' }}>
-        <SectionTitle t="WIP schedule — open jobs" right={<span style={{ fontSize: '11px', color: MUTED }}>percentage-of-completion, cost basis</span>} />
-        <table>
+        <SectionTitle t={`WIP schedule — ${M.wip.length} open jobs`} right={
+          <button className="ghost no-print" onClick={() => setShowSchedule(!showSchedule)}>{showSchedule ? 'COLLAPSE' : 'SHOW THE FULL SCHEDULE'}</button>
+        } />
+        {!showSchedule && (
+          <div style={{ padding: '0 16px 14px', fontSize: '12px', color: MUTED }}>
+            The full percentage-of-completion schedule — contract, cost, earned, billed, over/under per job — is one click away. The accountant version, when you want it.
+          </div>
+        )}
+        {showSchedule && <table>
           <thead><tr>
             <th className="th">Job</th><th className="th r">Contract + COs</th><th className="th r">Cost incurred</th><th className="th r">Est. to complete</th>
             <th className="th r">% comp</th><th className="th r">Earned</th><th className="th r">Billed</th><th className="th r">Over-billed</th><th className="th r">Under-billed</th>
@@ -669,7 +750,7 @@ function Wip({ M }) {
               <td className="td r" style={{ fontWeight: 700, color: SIGNAL }}>{money0(t.under)}</td>
             </tr>
           </tbody>
-        </table>
+        </table>}
       </div>
       {draft && <DraftInvoice d={draft} onClose={() => setDraft(null)} />}
     </div>
@@ -711,7 +792,9 @@ function Cash({ M }) {
   const tMax = Math.max(...M.t12.flatMap((r) => [r.contracted, r.invoiced, r.collected]), 1)
   return (
     <div>
-      <Header q="When does the money actually land?" sub="Commercial progress billing plus insurance claims means the P&L and the bank account tell different stories. This is the bank-account story, thirteen weeks out." />
+      <Header q="When does the money actually land?"
+        lead={`${moneyK(M.arTotal)} is owed to you — and ${moneyK(M.claimsInReview)} of it is a claim sitting with an adjuster, not a customer ignoring you.`}
+        sub="Commercial progress billing plus insurance claims means the P&L and the bank account tell different stories. This is the bank-account story, thirteen weeks out." />
       <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap', marginBottom: '18px' }}>
         <Kpi k="OPEN RECEIVABLES" v={moneyK(M.arTotal)} sub={`${M.openInvoices.length} open invoices`} />
         <Kpi k="OF WHICH INSURANCE CLAIMS" v={moneyK(M.claimsTotal)} sub={`${moneyK(M.claimsInReview)} still in adjuster review`} />
@@ -864,7 +947,9 @@ function Liabilities({ M }) {
   const [draft, setDraft] = useState(null)
   return (
     <div>
-      <Header q="What's committed, held, or owed that no report shows?" sub="None of these four numbers appears on a standard P&L — and every one of them is a diligence question. Total exposure below is what a buyer's quality-of-earnings team will find; better that you see it first." />
+      <Header q="What's committed, held, or owed that no report shows?"
+        lead={`${moneyK(M.retainageTotal + M.apTotal + M.depositTotal + M.suppTotal)} is sitting in four places a P&L never mentions.`}
+        sub="Every one of these four numbers is a diligence question. A buyer's quality-of-earnings team will find them — better that you see them first." />
       <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap', marginBottom: '18px' }}>
         <Kpi k="RETAINAGE HELD BY CUSTOMERS" v={moneyK(M.retainageTotal)} sub="your money, on their schedule" />
         <Kpi k="AP COMMITTED TO OPEN JOBS" v={moneyK(M.apTotal)} sub="material + subs, unpaid" />
@@ -877,7 +962,7 @@ function Liabilities({ M }) {
           <SectionTitle t="Retainage held, by customer" right={<b style={{ fontVariantNumeric: 'tabular-nums' }}>{money0(M.retainageTotal)}</b>} />
           <table>
             <thead><tr><th className="th">Customer / job</th><th className="th r">%</th><th className="th r">Held</th><th className="th">Expected release</th></tr></thead>
-            <tbody>{M.retainage.map((r) => (
+            <tbody>{M.retainage.slice(0, 9).map((r) => (
               <tr key={r.job.id}>
                 <td className="td" style={{ maxWidth: '230px', overflow: 'hidden', textOverflow: 'ellipsis' }}><span style={{ color: INK, fontWeight: 600 }}>{r.job.cust.name}</span> · {r.job.job_no}</td>
                 <td className="td r">{Number(r.job.retainage_pct)}%</td>
@@ -886,6 +971,7 @@ function Liabilities({ M }) {
               </tr>
             ))}</tbody>
           </table>
+          {M.retainage.length > 9 && <div style={{ padding: '8px 16px', fontSize: '11px', color: MUTED }}>+ {M.retainage.length - 9} more jobs holding {money0(M.retainage.slice(9).reduce((s, r) => s + r.held, 0))}</div>}
         </div>
 
         <div className="card" style={block}>
@@ -959,7 +1045,9 @@ function Buyer({ M }) {
   return (
     <div>
       <div className="no-print" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '16px' }}>
-        <Header q="What does the buyer's first meeting look like?" sub="The package a deal team actually reads: normalized earnings with every add-back justified, revenue quality, concentration, footprint, backlog, and working capital. Exportable — a package that only lives in a browser never reaches the deal team." />
+        <Header q="What does the buyer's first meeting look like?"
+          lead={`${moneyK(M.adjEbitda)} adjusted EBITDA on ${moneyK(M.revT12)} of revenue — documented line by line, ready to hand over.`}
+          sub="The package a deal team actually reads: normalized earnings with every add-back justified, revenue quality, concentration, footprint, backlog, and working capital. Exportable — a package that only lives in a browser never reaches the deal team." />
         <button className="ghost" style={{ background: INK, color: WHITE, border: 'none', padding: '9px 18px', fontSize: '11px' }} onClick={() => window.print()}>EXPORT PDF</button>
       </div>
       <div className="print-only" style={{ marginBottom: '18px' }}>
