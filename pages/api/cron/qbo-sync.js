@@ -110,11 +110,56 @@ export default async function handler(req, res) {
       const { rows, months, columns } = await fetchGeneralLedgerRows(env, token, c.realm_id, { months: glMonths })
       await db.from('qbo_gl_txns').delete().eq('client_slug', c.client_slug).in('month', months)
       await insertChunked(db, 'qbo_gl_txns', rows.map((x) => ({ client_slug: c.client_slug, ...x })))
-      r.gl = { rows: rows.length, months: months.length }
+      // window covered by this pull, used by the portal mirror below
+      const lastMonth = months[months.length - 1]
+      const lastEnd = new Date(Date.UTC(Number(lastMonth.slice(0, 4)), Number(lastMonth.slice(5, 7)), 0))
+      r.gl = {
+        rows: rows.length, months: months.length,
+        from: months[0], to: lastEnd.toISOString().slice(0, 10),
+      }
       // A zero-row GL pull is a parsing problem, not an empty book — surface
       // the response's actual column shape so it can be fixed.
       if (rows.length === 0) r.gl.columnsSeen = columns
     } catch (e) { r.errors.push(`GeneralLedger: ${String(e.message || e)}`) }
+
+    // Mirror the pulled GL into gl_transactions so the existing financials
+    // portal reads live QuickBooks data without any page changes. Only for
+    // connections that name a portal client, and only for clients whose data
+    // lives in the main project (that's where gl_transactions is).
+    if (c.portal_client_id && db === supabaseAdmin && r.gl && r.gl.rows > 0) {
+      try {
+        const from = r.gl.from, to = r.gl.to
+        if (!from || !to) throw new Error('missing mirror window')
+
+        // Snapshot what we're about to replace, so a bad run is reversible.
+        const { data: existing, error: exErr } = await supabaseAdmin
+          .from('gl_transactions')
+          .select('client_id, date, account, type, description, split_account, amount, source')
+          .eq('client_id', c.portal_client_id).gte('date', from).lte('date', to)
+        if (exErr) throw new Error(exErr.message)
+        if (existing && existing.length) await insertChunked(supabaseAdmin, 'gl_mirror_backup', existing)
+
+        await supabaseAdmin.from('gl_transactions').delete()
+          .eq('client_id', c.portal_client_id).gte('date', from).lte('date', to)
+
+        const { data: pulled, error: pErr } = await supabaseAdmin
+          .from('qbo_gl_txns')
+          .select('txn_date, account, txn_type, memo, split_account, amount')
+          .eq('client_slug', c.client_slug).gte('txn_date', from).lte('txn_date', to)
+        if (pErr) throw new Error(pErr.message)
+        await insertChunked(supabaseAdmin, 'gl_transactions', (pulled || []).map((x) => ({
+          client_id: c.portal_client_id,
+          date: x.txn_date,
+          account: x.account,
+          type: x.txn_type,
+          description: x.memo,
+          split_account: x.split_account,
+          amount: x.amount,
+          source: 'quickbooks_api',
+        })))
+        r.mirrored = { rows: (pulled || []).length, replaced: (existing || []).length, from, to }
+      } catch (e) { r.errors.push(`mirror: ${String(e.message || e)}`) }
+    }
 
     const companyName = await fetchCompanyName(env, token, c.realm_id).catch(() => c.company_name)
     await supabaseAdmin.from('qbo_connections').update({
