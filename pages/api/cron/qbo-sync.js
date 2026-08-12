@@ -107,10 +107,13 @@ export default async function handler(req, res) {
 
     // General Ledger — replace only the months in this window
     try {
-      const { rows, months } = await fetchGeneralLedgerRows(env, token, c.realm_id, { months: glMonths })
+      const { rows, months, columns } = await fetchGeneralLedgerRows(env, token, c.realm_id, { months: glMonths })
       await db.from('qbo_gl_txns').delete().eq('client_slug', c.client_slug).in('month', months)
       await insertChunked(db, 'qbo_gl_txns', rows.map((x) => ({ client_slug: c.client_slug, ...x })))
       r.gl = { rows: rows.length, months: months.length }
+      // A zero-row GL pull is a parsing problem, not an empty book — surface
+      // the response's actual column shape so it can be fixed.
+      if (rows.length === 0) r.gl.columnsSeen = columns
     } catch (e) { r.errors.push(`GeneralLedger: ${String(e.message || e)}`) }
 
     const companyName = await fetchCompanyName(env, token, c.realm_id).catch(() => c.company_name)
