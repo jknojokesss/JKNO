@@ -151,8 +151,11 @@ export default async function handler(req, res) {
           throw new Error(`read back ${pulled.length} of ${r.gl.rows} pulled rows — refusing to replace the ledger with a partial set`)
         }
 
+        // Undated rows too: legacy CSV imports left "Beginning Balance" rows
+        // with a null date, which a range filter can never match — and which
+        // double-count once the pulled ledger reaches back to inception.
         const { error: delErr } = await db.from(mir.table).delete()
-          .gte(mir.dateColumn, from).lte(mir.dateColumn, to)
+          .or(`${mir.dateColumn}.is.null,and(${mir.dateColumn}.gte.${from},${mir.dateColumn}.lte.${to})`)
         if (delErr) throw new Error(delErr.message)
 
         await insertChunked(db, mir.table, pulled.map((x) => {
