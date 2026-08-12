@@ -51,10 +51,13 @@ export default async function handler(req, res) {
       const dead = e.code === 'invalid_grant'
       await supabaseAdmin.from('qbo_connections').update({
         status: dead ? 'reauth_needed' : 'error',
+        // message already carries Intuit's tid when they returned one
         last_error: String(e.message || e).slice(0, 500),
+        last_intuit_tid: e.intuitTid || null,
+        last_error_at: new Date().toISOString(),
         updated_at: new Date().toISOString(),
       }).eq('client_slug', c.client_slug)
-      results[c.client_slug] = { ok: false, error: String(e.message || e) }
+      results[c.client_slug] = { ok: false, error: String(e.message || e), intuit_tid: e.intuitTid || null }
     }
   }
   return res.status(200).json({ synced: Object.keys(results).length, results })
