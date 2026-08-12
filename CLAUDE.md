@@ -72,6 +72,23 @@ via `lib/supabaseAdmin.js`. Intuit rotates refresh tokens on every refresh;
 Intuit app's redirect URIs). `status='reauth_needed'` on a connection means the
 refresh token died (revoked or 100-day idle) and someone must click connect again.
 
+Each sync pulls three reports independently (one failing doesn't cost the
+others): P&L → `qbo_gl_summary`, Balance Sheet → `qbo_bs_summary` (both full
+replace, 24 months), General Ledger detail → `qbo_gl_txns` (trailing 3 months
+by default, replacing only those months so history accumulates). GL is fetched
+one month per request — long ranges hit Intuit's report timeout — and its
+columns are located by ColKey, not position. Manual run:
+`/api/cron/qbo-sync?key=<CRON_SECRET>` plus optional `&client=<slug>` and
+`&gl=<months>` for a backfill.
+
+**Where the data lands**: `lib/qboTargets.js`. Most clients write to the main
+project; clients with their own isolated Supabase project are listed in
+`ISOLATED` there (Jerky Munch → `JERKY_SUPABASE_SERVICE_ROLE_KEY`) and their
+books are written to their own project instead. Tokens always stay in the main
+project. An isolated client whose key is missing errors rather than falling
+back — its books must never land in the shared DB. Any receiving project needs
+`supabase-qbo-tables.sql` applied first.
+
 ## Conventions
 
 - Bespoke demo pages are single files with inline styles; match that.
