@@ -6,10 +6,13 @@ import { supabaseAdmin } from '../../../lib/supabaseAdmin'
 // anything that could fail), pull trailing-24-month P&L by month, replace
 // that client's rows in qbo_gl_summary.
 export default async function handler(req, res) {
+  // Vercel's scheduler sends the bearer header; ?key= is the manual escape
+  // hatch so a sync can be kicked off from a browser without waiting for
+  // the nightly run. Both check the same secret.
+  const secret = process.env.CRON_SECRET
   const auth = req.headers.authorization || ''
-  if (!process.env.CRON_SECRET || auth !== `Bearer ${process.env.CRON_SECRET}`) {
-    return res.status(401).json({ error: 'Unauthorized' })
-  }
+  const ok = secret && (auth === `Bearer ${secret}` || req.query.key === secret)
+  if (!ok) return res.status(401).json({ error: 'Unauthorized' })
   const env = qboEnv()
   if (!env) return res.status(500).json({ error: 'QBO not configured' })
 
