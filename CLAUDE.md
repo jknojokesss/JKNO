@@ -56,6 +56,22 @@ invisible liabilities, books not sale-ready.
   Everything else is stone `#C9C4B8` / slate `#444C56` / ink `#1A1E24` on paper
   `#F6F6F6`. Charter serif headings, Inter with tabular numerals.
 
+## QuickBooks Online read pipe
+
+One Intuit app ("PL Pull", workspace "JK No Jokes" on developer.intuit.com)
+serves all clients. Read-only accounting scope. Flow: visit
+`/api/qbo/connect?client=<slug>` (we can click it ourselves with an accountant
+login and pick the client's company), callback stores realm + tokens in
+`qbo_connections`, and the nightly cron (`/api/cron/qbo-sync`, vercel.json)
+refreshes tokens and replaces that client's trailing-24-month monthly P&L in
+`qbo_gl_summary`. Both tables are RLS-on with no policies — service-role only,
+via `lib/supabaseAdmin.js`. Intuit rotates refresh tokens on every refresh;
+`lib/qbo.js` persists the new one before doing anything else. Env: `QBO_CLIENT_ID`,
+`QBO_CLIENT_SECRET`, `QBO_ENV` (sandbox|production), optional `QBO_REDIRECT_URI`
+(defaults to https://jknojokes.com/api/qbo/callback — must be registered in the
+Intuit app's redirect URIs). `status='reauth_needed'` on a connection means the
+refresh token died (revoked or 100-day idle) and someone must click connect again.
+
 ## Conventions
 
 - Bespoke demo pages are single files with inline styles; match that.
