@@ -42,6 +42,21 @@ export default async function handler(req, res) {
     }
   }
 
+  // PostgREST caps a select at 1000 rows. Anything that reads a whole table
+  // slice MUST page, or it silently truncates — which, paired with an
+  // unbounded delete, destroys data.
+  const selectAll = async (db, table, columns, applyFilters) => {
+    const out = []
+    const PAGE = 1000
+    for (let from = 0; ; from += PAGE) {
+      const { data, error: selErr } = await applyFilters(db.from(table).select(columns))
+        .range(from, from + PAGE - 1)
+      if (selErr) throw new Error(`${table}: ${selErr.message}`)
+      out.push(...(data || []))
+      if (!data || data.length < PAGE) return out
+    }
+  }
+
   const results = {}
   for (const c of conns || []) {
     const r = { pl: null, bs: null, gl: null, errors: [] }
@@ -131,23 +146,26 @@ export default async function handler(req, res) {
         const from = r.gl.from, to = r.gl.to
         if (!from || !to) throw new Error('missing mirror window')
 
+        // Read the replacement rows FIRST. If this comes back short or empty,
+        // nothing has been deleted yet and the mirror aborts intact.
+        const pulled = await selectAll(supabaseAdmin, 'qbo_gl_txns',
+          'txn_date, account, txn_type, memo, split_account, amount',
+          (q) => q.eq('client_slug', c.client_slug).gte('txn_date', from).lte('txn_date', to))
+        if (pulled.length !== r.gl.rows) {
+          throw new Error(`read back ${pulled.length} of ${r.gl.rows} pulled rows — refusing to replace the portal with a partial set`)
+        }
+
         // Snapshot what we're about to replace, so a bad run is reversible.
-        const { data: existing, error: exErr } = await supabaseAdmin
-          .from('gl_transactions')
-          .select('client_id, date, account, type, description, split_account, amount, source')
-          .eq('client_id', c.portal_client_id).gte('date', from).lte('date', to)
-        if (exErr) throw new Error(exErr.message)
-        if (existing && existing.length) await insertChunked(supabaseAdmin, 'gl_mirror_backup', existing)
+        const existing = await selectAll(supabaseAdmin, 'gl_transactions',
+          'client_id, date, account, type, description, split_account, amount, source',
+          (q) => q.eq('client_id', c.portal_client_id).gte('date', from).lte('date', to))
+        if (existing.length) await insertChunked(supabaseAdmin, 'gl_mirror_backup', existing)
 
-        await supabaseAdmin.from('gl_transactions').delete()
+        const { error: delErr } = await supabaseAdmin.from('gl_transactions').delete()
           .eq('client_id', c.portal_client_id).gte('date', from).lte('date', to)
+        if (delErr) throw new Error(delErr.message)
 
-        const { data: pulled, error: pErr } = await supabaseAdmin
-          .from('qbo_gl_txns')
-          .select('txn_date, account, txn_type, memo, split_account, amount')
-          .eq('client_slug', c.client_slug).gte('txn_date', from).lte('txn_date', to)
-        if (pErr) throw new Error(pErr.message)
-        await insertChunked(supabaseAdmin, 'gl_transactions', (pulled || []).map((x) => ({
+        await insertChunked(supabaseAdmin, 'gl_transactions', pulled.map((x) => ({
           client_id: c.portal_client_id,
           date: x.txn_date,
           account: x.account,
@@ -157,7 +175,17 @@ export default async function handler(req, res) {
           amount: x.amount,
           source: 'quickbooks_api',
         })))
-        r.mirrored = { rows: (pulled || []).length, replaced: (existing || []).length, from, to }
+
+        // Verify the portal ended up with what we intended.
+        const { count: finalCount, error: cErr } = await supabaseAdmin
+          .from('gl_transactions')
+          .select('*', { count: 'exact', head: true })
+          .eq('client_id', c.portal_client_id).gte('date', from).lte('date', to)
+        if (cErr) throw new Error(cErr.message)
+        r.mirrored = { rows: pulled.length, replaced: existing.length, finalCount, from, to }
+        if (finalCount !== pulled.length) {
+          throw new Error(`portal has ${finalCount} rows after mirroring ${pulled.length} — restore from gl_mirror_backup`)
+        }
       } catch (e) { r.errors.push(`mirror: ${String(e.message || e)}`) }
     }
 
