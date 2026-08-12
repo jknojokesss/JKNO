@@ -10,6 +10,8 @@ const nextConfig = {
     // Host-scoped so this NEVER fires when saratogashteibel.org is (even
     // briefly, mid-propagation) served by this project — avoids a self-loop.
     return [
+      // Roofing demo moved to its named route when it got the SRL branding.
+      { source: '/roofing', destination: '/srl', permanent: false },
       {
         source: '/shul-vote',
         has: [{ type: 'host', value: 'jknojokes.com' }],

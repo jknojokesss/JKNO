@@ -3,13 +3,13 @@ import Head from 'next/head'
 import { supabase } from '../lib/supabase'
 
 // ─────────────────────────────────────────────────────────────────────────
-// Summit Ridge Roofing — management portal demo.
+// Southeastern Roofing Logistics — management portal demo.
 // Synthetic data seeded in Supabase (roof_* tables, AccuLynx-shaped).
 // QuickBooks stays the book of record; AccuLynx stays the job subledger.
 // This portal is the management layer that reads across both.
 // ─────────────────────────────────────────────────────────────────────────
 
-const BIZ = 'Summit Ridge Roofing Co.'
+const BIZ = 'Southeastern Roofing Logistics'
 
 // Palette sampled from the prospect's site. SIGNAL appears in exactly three
 // places: the top bar, the active nav state, and the variance flag /
@@ -182,7 +182,7 @@ export default function RoofingPortal() {
       <div className="shell">
         <aside className="side no-print">
           <div style={{ padding: '0 24px 18px', borderBottom: '1px solid rgba(201,196,184,.15)', marginBottom: '10px' }}>
-            <div style={{ fontFamily: serif, fontSize: '19px', fontWeight: 700, color: WHITE, lineHeight: 1.25 }}>Summit Ridge<br />Roofing Co.</div>
+            <div style={{ fontFamily: serif, fontSize: '18px', fontWeight: 700, color: WHITE, lineHeight: 1.3 }}>Southeastern<br />Roofing Logistics</div>
             <div style={{ fontSize: '9.5px', color: STONE, letterSpacing: '.14em', marginTop: '7px' }}>NASHVILLE · TN / KY / AL / GA</div>
           </div>
           <button className="nbtn" onClick={() => setIntro(true)} style={{ fontFamily: serif, fontSize: '13.5px', fontStyle: 'italic' }}>The four questions ↺</button>
@@ -451,11 +451,14 @@ function Intro({ M, onClose }) {
   return (
     <div style={{ position: 'fixed', inset: 0, background: 'rgba(26,30,36,.55)', zIndex: 60, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '18px', overflowY: 'auto' }}>
       <div className="card" style={{ maxWidth: '680px', width: '100%', padding: '30px 34px 26px', boxShadow: '0 24px 64px rgba(26,30,36,.35)' }}>
-        <div style={{ fontSize: '10px', letterSpacing: '.16em', color: MUTED, fontWeight: 700, marginBottom: '12px' }}>SUMMIT RIDGE ROOFING CO. — A WORKING DEMO, SYNTHETIC DATA</div>
+        <div style={{ fontSize: '10px', letterSpacing: '.16em', color: MUTED, fontWeight: 700, marginBottom: '12px' }}>{BIZ.toUpperCase()} — A WORKING DEMO</div>
         <h1 style={{ fontSize: '25px', lineHeight: 1.25, marginBottom: '10px' }}>Four questions your software can&rsquo;t answer.</h1>
         <p style={{ fontSize: '13.5px', color: SLATE, lineHeight: 1.65, marginBottom: '18px', maxWidth: '560px' }}>
           AccuLynx runs your jobs. QuickBooks keeps your books. Both are doing their job — and neither one can answer the four questions below, because the answers live across both.
           This portal reads the two systems and answers them. <b style={{ color: INK }}>Nobody types anything in here.</b>
+        </p>
+        <p style={{ fontSize: '11.5px', color: MUTED, lineHeight: 1.6, marginBottom: '18px', maxWidth: '560px' }}>
+          Built as a demo for {BIZ} — every number on these screens is invented. The questions aren&rsquo;t.
         </p>
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '10px', marginBottom: '18px' }}>
           {QS.map((x, i) => (
