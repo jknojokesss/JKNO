@@ -45,11 +45,17 @@ export default async function handler(req, res) {
   // PostgREST caps a select at 1000 rows. Anything that reads a whole table
   // slice MUST page, or it silently truncates — which, paired with an
   // unbounded delete, destroys data.
-  const selectAll = async (db, table, columns, applyFilters) => {
+  //
+  // Paging also REQUIRES a stable sort. Without an explicit order Postgres
+  // makes no promise that row order is the same between requests, so pages
+  // overlap and skip: the row count comes out right while individual rows are
+  // duplicated and others dropped. Order by the primary key.
+  const selectAll = async (db, table, columns, applyFilters, orderBy = 'id') => {
     const out = []
     const PAGE = 1000
     for (let from = 0; ; from += PAGE) {
       const { data, error: selErr } = await applyFilters(db.from(table).select(columns))
+        .order(orderBy, { ascending: true })
         .range(from, from + PAGE - 1)
       if (selErr) throw new Error(`${table}: ${selErr.message}`)
       out.push(...(data || []))
