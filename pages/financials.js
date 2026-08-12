@@ -324,10 +324,9 @@ export default function Financials() {
                     <div style={{ fontSize: '12px', color: '#9A9284', fontFamily: ui, marginTop: '4px' }}>Reydel Tire &amp; Auto · profit &amp; loss, balance sheet and accounts</div>
                   </div>
                   {isAdmin && (
-                    <button onClick={() => { window.location.href = '/admin/financials' }}
-                      style={{ fontSize: '10px', fontFamily: ui, letterSpacing: '0.08em', color: '#fff', background: THEME.accent, border: 'none', borderRadius: '0', padding: '9px 14px', cursor: 'pointer' }}>
-                      ↑ IMPORT GL FROM QUICKBOOKS
-                    </button>
+                    <div style={{ fontSize: '10px', fontFamily: ui, letterSpacing: '0.08em', color: '#9A9284', border: '1px solid #DBD5C7', padding: '9px 14px' }}>
+                      SYNCED NIGHTLY FROM QUICKBOOKS
+                    </div>
                   )}
                 </div>
                 {/* Tabs */}
