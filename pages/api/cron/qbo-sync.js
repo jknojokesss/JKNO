@@ -3,6 +3,7 @@ import {
   fetchProfitAndLossRows, fetchBalanceSheetRows, fetchGeneralLedgerRows,
 } from '../../../lib/qbo'
 import { supabaseAdmin } from '../../../lib/supabaseAdmin'
+import { targetFor } from '../../../lib/qboTargets'
 
 // Nightly QBO pull (vercel.json cron). Per connected client:
 //   1. refresh tokens — Intuit ROTATES the refresh token, so the new one is
@@ -34,9 +35,9 @@ export default async function handler(req, res) {
   const { data: conns, error } = await q
   if (error) return res.status(500).json({ error: error.message })
 
-  const insertChunked = async (table, rows) => {
+  const insertChunked = async (db, table, rows) => {
     for (let i = 0; i < rows.length; i += 500) {
-      const { error: insErr } = await supabaseAdmin.from(table).insert(rows.slice(i, i + 500))
+      const { error: insErr } = await db.from(table).insert(rows.slice(i, i + 500))
       if (insErr) throw new Error(`${table}: ${insErr.message}`)
     }
   }
@@ -45,6 +46,23 @@ export default async function handler(req, res) {
   for (const c of conns || []) {
     const r = { pl: null, bs: null, gl: null, errors: [] }
     let token
+
+    // Where this client's books get written — their own project when they
+    // have one. Tokens stay in the main project either way.
+    let db, target
+    try {
+      const t = targetFor(c.client_slug)
+      db = t.db
+      target = t.label
+    } catch (e) {
+      await supabaseAdmin.from('qbo_connections').update({
+        status: 'error', last_error: String(e.message || e).slice(0, 500),
+        last_error_at: new Date().toISOString(), updated_at: new Date().toISOString(),
+      }).eq('client_slug', c.client_slug)
+      results[c.client_slug] = { ok: false, stage: 'target', error: String(e.message || e) }
+      continue
+    }
+    r.target = target
     try {
       const tokens = await refreshTokens(env, c.refresh_token)
       token = tokens.access_token
@@ -74,24 +92,24 @@ export default async function handler(req, res) {
     // Profit & Loss — full replace
     try {
       const rows = await fetchProfitAndLossRows(env, token, c.realm_id, { months: 24 })
-      await supabaseAdmin.from('qbo_gl_summary').delete().eq('client_slug', c.client_slug)
-      await insertChunked('qbo_gl_summary', rows.map((x) => ({ client_slug: c.client_slug, ...x })))
+      await db.from('qbo_gl_summary').delete().eq('client_slug', c.client_slug)
+      await insertChunked(db, 'qbo_gl_summary', rows.map((x) => ({ client_slug: c.client_slug, ...x })))
       r.pl = rows.length
     } catch (e) { r.errors.push(`P&L: ${String(e.message || e)}`) }
 
     // Balance Sheet — full replace
     try {
       const rows = await fetchBalanceSheetRows(env, token, c.realm_id, { months: 24 })
-      await supabaseAdmin.from('qbo_bs_summary').delete().eq('client_slug', c.client_slug)
-      await insertChunked('qbo_bs_summary', rows.map((x) => ({ client_slug: c.client_slug, ...x })))
+      await db.from('qbo_bs_summary').delete().eq('client_slug', c.client_slug)
+      await insertChunked(db, 'qbo_bs_summary', rows.map((x) => ({ client_slug: c.client_slug, ...x })))
       r.bs = rows.length
     } catch (e) { r.errors.push(`BalanceSheet: ${String(e.message || e)}`) }
 
     // General Ledger — replace only the months in this window
     try {
       const { rows, months } = await fetchGeneralLedgerRows(env, token, c.realm_id, { months: glMonths })
-      await supabaseAdmin.from('qbo_gl_txns').delete().eq('client_slug', c.client_slug).in('month', months)
-      await insertChunked('qbo_gl_txns', rows.map((x) => ({ client_slug: c.client_slug, ...x })))
+      await db.from('qbo_gl_txns').delete().eq('client_slug', c.client_slug).in('month', months)
+      await insertChunked(db, 'qbo_gl_txns', rows.map((x) => ({ client_slug: c.client_slug, ...x })))
       r.gl = { rows: rows.length, months: months.length }
     } catch (e) { r.errors.push(`GeneralLedger: ${String(e.message || e)}`) }
 
