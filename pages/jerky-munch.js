@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect, Fragment } from 'react'
 import Head from 'next/head'
 import { jerkySupabase } from '../lib/supabaseJerky'
-import { parseGL, parseCoA, buildPnl, buildBalanceSheet, buildCashFlow, periodPnl, buildAdSpend } from '../lib/jerkyGL'
+import { buildPnl, buildBalanceSheet, buildCashFlow, periodPnl, buildAdSpend } from '../lib/jerkyGL'
 import { ResponsiveContainer, ComposedChart, Bar, Line, XAxis, YAxis, Tooltip, CartesianGrid, PieChart, Pie, Cell } from 'recharts'
 
 const CHAR = '#2B2018', SPICE = '#C8462C', KRAFT = '#A9763A', CREAM = '#F6F0E6'
@@ -111,15 +111,9 @@ export default function JerkyMunch() {
   const [logoOk, setLogoOk] = useState(true)
   const [addingA, setAddingA] = useState(false)
   const [af, setAf] = useState({ channel: '', spend: '', rev: '', track: '' })
-  const [coa, setCoa] = useState({ name: 'chart-of-accounts.csv', rows: 48 })
-  const [gl, setGl] = useState({ name: 'general-ledger-jun.csv', rows: 142 })
   const [glTx, setGlTx] = useState([])          // real QuickBooks GL rows from Supabase
   const [coaTx, setCoaTx] = useState([])        // real Chart of Accounts rows from Supabase
-  const [glMsg, setGlMsg] = useState('')
-  const [glBusy, setGlBusy] = useState(false)
   const fileRef = useRef(null)
-  const coaRef = useRef(null)
-  const glRef = useRef(null)
 
   // ── auth gate ──────────────────────────────────────────────────────
   const [session, setSession] = useState(null)
@@ -385,60 +379,6 @@ export default function JerkyMunch() {
     reader.readAsText(file)
   }
   const importBook = (e, setter) => { const file = e.target.files && e.target.files[0]; if (!file) return; const reader = new FileReader(); reader.onload = ev => { const rows = String(ev.target.result || '').split(/\r?\n/).filter(r => r.trim()).length; setter({ name: file.name, rows: Math.max(rows - 1, 0) }) }; reader.readAsText(file); e.target.value = '' }
-  // Real GL import — parse the QuickBooks General Ledger export, replace the
-  // ledger in Efraim's Supabase, and the Books P&L rebuilds from it.
-  const importGL = (e) => {
-    const file = e.target.files && e.target.files[0]; if (!file) return
-    setGlMsg(''); setGlBusy(true)
-    const reader = new FileReader()
-    reader.onload = async (ev) => {
-      try {
-        const { rows, error } = parseGL(String(ev.target.result || ''))
-        if (error) { setGlMsg(error); setGlBusy(false); e.target.value = ''; return }
-        // replace the whole ledger: clear, then insert in chunks (RLS: authenticated)
-        const del = await jerkySupabase.from('gl_transactions').delete().not('id', 'is', null)
-        if (del.error) throw del.error
-        for (let i = 0; i < rows.length; i += 500) {
-          const ins = await jerkySupabase.from('gl_transactions').insert(rows.slice(i, i + 500))
-          if (ins.error) throw ins.error
-        }
-        await loadGL()
-        setGl({ name: file.name, rows: rows.length })
-        setGlMsg(`Imported ${rows.length.toLocaleString()} GL rows ✓`)
-      } catch (err) {
-        console.error('importGL failed', err)
-        setGlMsg('Import failed: ' + (err.message || String(err)))
-      }
-      setGlBusy(false); e.target.value = ''
-    }
-    reader.readAsText(file)
-  }
-  // Chart of Accounts import — drives account classification for the P&L.
-  const importCoA = (e) => {
-    const file = e.target.files && e.target.files[0]; if (!file) return
-    setGlMsg(''); setGlBusy(true)
-    const reader = new FileReader()
-    reader.onload = async (ev) => {
-      try {
-        const { rows, error } = parseCoA(String(ev.target.result || ''))
-        if (error) { setGlMsg(error); setGlBusy(false); e.target.value = ''; return }
-        const del = await jerkySupabase.from('coa_accounts').delete().not('id', 'is', null)
-        if (del.error) throw del.error
-        for (let i = 0; i < rows.length; i += 500) {
-          const ins = await jerkySupabase.from('coa_accounts').insert(rows.slice(i, i + 500))
-          if (ins.error) throw ins.error
-        }
-        await loadCoA()
-        setCoa({ name: file.name, rows: rows.length })
-        setGlMsg(`Imported ${rows.length} accounts ✓`)
-      } catch (err) {
-        console.error('importCoA failed', err)
-        setGlMsg('Import failed: ' + (err.message || String(err)))
-      }
-      setGlBusy(false); e.target.value = ''
-    }
-    reader.readAsText(file)
-  }
   const addDirect = async () => {
     if (!df.who.trim()) return
     const row = { who: df.who.trim(), source: df.source, units: Number(df.units) || 0, rev: Number(df.rev) || 0 }
@@ -1373,7 +1313,7 @@ export default function JerkyMunch() {
                   <div style={{ width: '44px', height: '44px', borderRadius: '2px', background: '#2CA01C', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', ...big, fontSize: '19px' }}>qb</div>
                   <div>
                     <div style={{ ...big, fontSize: '18px', color: INK }}>Your books, from QuickBooks</div>
-                    <div style={{ fontSize: '12.5px', color: MUTED, marginTop: '2px' }}>Drop the two exports in — your statements live on the Financials tab.</div>
+                    <div style={{ fontSize: '12.5px', color: MUTED, marginTop: '2px' }}>Read straight from QuickBooks — your statements live on the Financials tab.</div>
                   </div>
                   {glAsOf && (
                     <div style={{ marginLeft: 'auto', textAlign: 'right' }}>
@@ -1382,36 +1322,19 @@ export default function JerkyMunch() {
                     </div>
                   )}
                 </div>
-                <p style={{ fontSize: '13.5px', color: MUTED, lineHeight: 1.55 }}>Two exports keep everything current — your <b style={{ color: INK }}>Chart of Accounts</b> (sets how each line is categorized) and your <b style={{ color: INK }}>General Ledger</b> (every transaction). Each month you just drop in the fresh GL. No live connection to babysit.</p>
+                <p style={{ fontSize: '13.5px', color: MUTED, lineHeight: 1.55 }}>Your <b style={{ color: INK }}>General Ledger</b> and <b style={{ color: INK }}>Chart of Accounts</b> are read directly from QuickBooks every night — nothing to export, nothing to upload. Whatever your bookkeeper posts shows up here the next morning.</p>
               </div>
 
-              {[
-                { title: 'Chart of Accounts', desc: 'Account list — sets how each line is categorized', imported: coaTx.length, st: coa, rf: coaRef, onChange: importCoA },
-                { title: 'General Ledger', desc: 'Every transaction, by account and date', imported: glTx.length, st: gl, rf: glRef, onChange: importGL },
-              ].map((b, i) => (
-                <div key={i} style={{ ...card, marginBottom: '12px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '12px' }}>
-                  <div>
-                    <div style={{ fontWeight: 600, color: INK, fontSize: '16px' }}>{b.title}</div>
-                    <div style={{ fontSize: '12.5px', color: MUTED, marginTop: '2px' }}>{b.desc}</div>
-                    {b.imported > 0 ? (
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '7px', fontSize: '12.5px', color: GREEN, marginTop: '9px' }}>
-                        <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: GREEN, flexShrink: 0 }} />
-                        Imported · {b.imported.toLocaleString()} rows
-                      </div>
-                    ) : (
-                      <div style={{ fontSize: '12.5px', color: MUTED, marginTop: '9px' }}>Not imported yet</div>
-                    )}
-                  </div>
-                  <div>
-                    <button disabled={glBusy} onClick={() => b.rf.current && b.rf.current.click()} style={{ background: CARDBG, color: INK, border: `1px solid ${BORDER}`, borderRadius: '2px', padding: '11px 18px', ...btn, opacity: glBusy ? 0.5 : 1, cursor: glBusy ? 'wait' : 'pointer' }}>{b.imported > 0 ? 'Replace' : 'Drop in'}</button>
-                    <input ref={b.rf} type="file" accept=".csv,.txt" onChange={b.onChange} style={{ display: 'none' }} />
+              <div style={{ ...card, marginBottom: '12px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '12px' }}>
+                <div>
+                  <div style={{ fontWeight: 600, color: INK, fontSize: '16px' }}>QuickBooks Online</div>
+                  <div style={{ fontSize: '12.5px', color: MUTED, marginTop: '2px' }}>Connected — reads your ledger and chart of accounts every night</div>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '7px', fontSize: '12.5px', color: GREEN, marginTop: '9px' }}>
+                    <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: GREEN, flexShrink: 0 }} />
+                    {glTx.length.toLocaleString()} transactions · {coaTx.length} accounts
                   </div>
                 </div>
-              ))}
-
-              {glMsg && (
-                <div style={{ ...card, marginBottom: '12px', fontSize: '13px', color: /fail|check the file|check the/i.test(glMsg) ? RED : GREEN }}>{glBusy ? 'Working…' : glMsg}</div>
-              )}
+              </div>
 
               {glPnl ? (
                 <>
