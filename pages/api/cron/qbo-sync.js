@@ -1,9 +1,9 @@
 import {
-  qboEnv, refreshTokens, fetchCompanyName,
+  qboEnv, refreshTokens, fetchCompanyName, fetchAccounts,
   fetchProfitAndLossRows, fetchBalanceSheetRows, fetchGeneralLedgerRows,
 } from '../../../lib/qbo'
 import { supabaseAdmin } from '../../../lib/supabaseAdmin'
-import { targetFor } from '../../../lib/qboTargets'
+import { targetFor, mirrorFor } from '../../../lib/qboTargets'
 
 // Nightly QBO pull (vercel.json cron). Per connected client:
 //   1. refresh tokens — Intuit ROTATES the refresh token, so the new one is
@@ -137,11 +137,54 @@ export default async function handler(req, res) {
       if (rows.length === 0) r.gl.columnsSeen = columns
     } catch (e) { r.errors.push(`GeneralLedger: ${String(e.message || e)}`) }
 
-    // Mirror the pulled GL into gl_transactions so the existing financials
-    // portal reads live QuickBooks data without any page changes. Only for
-    // connections that name a portal client, and only for clients whose data
-    // lives in the main project (that's where gl_transactions is).
-    if (c.portal_client_id && db === supabaseAdmin && r.gl && r.gl.rows > 0) {
+    // Mirror into an app's own ledger table (its column names), so that app's
+    // existing screens serve live QuickBooks data. Chart of accounts comes
+    // along too, since it drives their P&L classification.
+    const mir = mirrorFor(c.client_slug)
+    if (mir && r.gl && r.gl.rows > 0) {
+      try {
+        const { from, to } = r.gl
+        const pulled = await selectAll(db, 'qbo_gl_txns',
+          Object.keys(mir.map).join(', '),
+          (q) => q.eq('client_slug', c.client_slug).gte('txn_date', from).lte('txn_date', to))
+        if (pulled.length !== r.gl.rows) {
+          throw new Error(`read back ${pulled.length} of ${r.gl.rows} pulled rows — refusing to replace the ledger with a partial set`)
+        }
+
+        const { error: delErr } = await db.from(mir.table).delete()
+          .gte(mir.dateColumn, from).lte(mir.dateColumn, to)
+        if (delErr) throw new Error(delErr.message)
+
+        await insertChunked(db, mir.table, pulled.map((x) => {
+          const row = { ...(mir.constant || {}) }
+          for (const [src, dest] of Object.entries(mir.map)) row[dest] = x[src]
+          return row
+        }))
+
+        const { count: finalCount, error: cErr } = await db.from(mir.table)
+          .select('*', { count: 'exact', head: true })
+          .gte(mir.dateColumn, from).lte(mir.dateColumn, to)
+        if (cErr) throw new Error(cErr.message)
+        r.mirrored = { table: mir.table, rows: pulled.length, finalCount, from, to }
+        if (finalCount !== pulled.length) {
+          throw new Error(`${mir.table} has ${finalCount} rows after mirroring ${pulled.length}`)
+        }
+
+        // Chart of accounts — replaces the CoA CSV upload.
+        if (mir.accountsTable) {
+          const accounts = await fetchAccounts(env, token, c.realm_id)
+          if (accounts.length) {
+            const { error: adErr } = await db.from(mir.accountsTable).delete().not('account', 'is', null)
+            if (adErr) throw new Error(adErr.message)
+            await insertChunked(db, mir.accountsTable, accounts.map(({ active, ...a }) => a))
+            r.accounts = accounts.length
+          }
+        }
+      } catch (e) { r.errors.push(`mirror: ${String(e.message || e)}`) }
+    }
+
+    // Legacy path: main-project portal clients keyed by client_id.
+    if (!mir && c.portal_client_id && db === supabaseAdmin && r.gl && r.gl.rows > 0) {
       try {
         const from = r.gl.from, to = r.gl.to
         if (!from || !to) throw new Error('missing mirror window')
