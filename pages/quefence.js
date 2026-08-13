@@ -422,6 +422,16 @@ function seedQbo(jobs, stock) {
   const out = []
   const parents = {}
   const invIds = {}
+  const vendorIds = {}
+  VENDORS.forEach((v) => {
+    const id = nextQid()
+    vendorIds[v] = id
+    out.push({
+      key: 'vend-' + id, type: 'Vendor', qid: id, status: 'synced', date: '2026-06-30',
+      title: v, sub: 'Supplier', amount: null,
+      payload: { Vendor: { Id: id, DisplayName: v, Active: true, SyncToken: '0' } },
+    })
+  })
   SEED_RECEIPTS.forEach((r) => out.push({ ...billEntity(nextQid(), r), status: 'synced' }))
   CUSTOMERS.forEach((c) => {
     const id = nextQid()
@@ -514,7 +524,7 @@ function seedQbo(jobs, stock) {
       out.push({ ...paymentEntity(yid, py, job.name, jid, invIds[job.invoices[0] && job.invoices[0].id]), status: 'synced' })
     })
   })
-  return { entities: out, parents }
+  return { entities: out, parents, vendorIds }
 }
 
 /* Buying stock for the yard uses ITEM based lines, not account based.
@@ -661,6 +671,7 @@ const QB_NAV = [
     { id: 'inventory', label: 'Products & services', title: 'Products and services', sub: 'Inventory quantity on hand' },
   ] },
   { group: 'Expenses', items: [
+    { id: 'Vendor', label: 'Vendors', title: 'Vendors' },
     { id: 'Bill', label: 'Bills', title: 'Bills', sub: 'Stock bought into the yard' },
     { id: 'Purchase', label: 'Expenses', title: 'Expense transactions' },
   ] },
@@ -743,12 +754,30 @@ const Line = ({ label, value, color, bold, sub }) => (
 
 export default function QueFenceDemo() {
   const [stock, setStock] = useState(STOCK_SEED)
+  const [customers, setCustomers] = useState(CUSTOMERS)
+  const [vendors, setVendors] = useState(VENDORS)
   const seed = useMemo(() => seedQbo(SEED_JOBS, STOCK_SEED), [])
   const [jobs, setJobs] = useState(SEED_JOBS)
   const [qbo, setQbo] = useState(seed.entities)
   const parents = useRef(seed.parents)
+  const vendorIds = useRef(seed.vendorIds)
   const counter = useRef(0)
   const uid = (p) => `${p}${++counter.current}`
+
+  // A name typed for the first time becomes a real record, not a string.
+  const ensureVendor = (name) => {
+    if (!name || vendorIds.current[name]) return []
+    const id = nextQid()
+    vendorIds.current[name] = id
+    setVendors((prev) => (prev.includes(name) ? prev : [...prev, name]))
+    return [{
+      key: 'vend-' + id, type: 'Vendor', qid: id, date: today,
+      title: name, sub: 'Supplier', amount: null,
+      payload: { Vendor: { Id: id, DisplayName: name, Active: true, SyncToken: '0' } },
+    }]
+  }
+  const rememberCustomer = (name) =>
+    setCustomers((prev) => (prev.includes(name) ? prev : [...prev, name]))
 
   const [view, setView] = useState({ screen: 'list' })
   const [qtab, setQtab] = useState('Customer')
@@ -790,6 +819,7 @@ export default function QueFenceDemo() {
 
   const createJob = ({ customer, name, address, picked }) => {
     const id = uid('job')
+    rememberCustomer(customer)
     setJobs((prev) => [{
       id, name, customer, address, status: 'Working on it', assemblies: picked,
       labor: [], pulls: [], deliveries: [], changes: [], invoices: [], payments: [],
@@ -844,13 +874,14 @@ export default function QueFenceDemo() {
       return l ? { ...s, onHand: +(s.onHand + l.qty).toFixed(1) } : s
     }))
     markTouched(lines.map((l) => l.name))
-    push([billEntity(nextQid(), { id: uid('r'), date, vendor, ref, lines })], 'Bill')
+    push([...ensureVendor(vendor), billEntity(nextQid(), { id: uid('r'), date, vendor, ref, lines })], 'Bill')
     setView({ screen: 'list' })
     flash(`${fmt(lines.reduce((s, l) => s + l.qty * l.cost, 0))} on the shelf`)
   }
 
   const sellFromYard = ({ customer, lines }) => {
     const id = uid('job')
+    rememberCustomer(customer)
     const label = `${customer.split(' ')[0]} — counter sale`
     const revenue = lines.reduce((s, l) => s + l.qty * l.price, 0)
     const sale = {
@@ -934,7 +965,7 @@ export default function QueFenceDemo() {
   const saveDelivery = (entry) => {
     const d = { ...entry, id: uid('d') }
     updateJob(job.id, (j) => ({ ...j, deliveries: [...j.deliveries, d] }))
-    push([purchaseEntity(nextQid(), d, job.name, parents.current[job.name])], 'Purchase')
+    push([...ensureVendor(entry.vendor), purchaseEntity(nextQid(), d, job.name, parents.current[job.name])], 'Purchase')
     flash('Delivery logged against this job')
     go('job')
   }
@@ -1037,15 +1068,15 @@ export default function QueFenceDemo() {
                   onReceive={() => setView({ screen: 'receive' })} />
               )}
               {view.screen === 'receive' && (
-                <ReceiveStock stock={stock} shortfall={yardShortfall(jobs, stock)} today={today}
+                <ReceiveStock stock={stock} vendors={vendors} shortfall={yardShortfall(jobs, stock)} today={today}
                   onBack={() => setView({ screen: 'list' })} onSave={receiveStock} />
               )}
-              {view.screen === 'new' && <NewJob stock={stock} onCancel={() => setView({ screen: 'list' })} onSave={createJob} onSell={sellFromYard} />}
+              {view.screen === 'new' && <NewJob stock={stock} customers={customers} onCancel={() => setView({ screen: 'list' })} onSave={createJob} onSell={sellFromYard} />}
               {job && !['list', 'new', 'receive'].includes(view.screen) && (
                 <JobShell job={job} stock={stock} screen={view.screen} go={go} onBack={() => setView({ screen: 'list' })}>
                   {view.screen === 'job' && <JobHome job={job} stock={stock} go={go} />}
                   {view.screen === 'labor' && <LaborScreen job={job} today={today} onSave={saveLabor} />}
-                  {view.screen === 'materials' && <MaterialsScreen job={job} stock={stock} today={today} onPull={savePull} onDelivery={saveDelivery} />}
+                  {view.screen === 'materials' && <MaterialsScreen job={job} stock={stock} vendors={vendors} today={today} onPull={savePull} onDelivery={saveDelivery} />}
                   {view.screen === 'extra' && <ExtraWork job={job} onSave={saveChange} />}
                   {view.screen === 'billing' && <Billing job={job} stock={stock} onInvoice={saveInvoice} onPayment={savePayment} />}
                 </JobShell>
@@ -1251,7 +1282,7 @@ function JobList({ jobs, stock, onOpen, onNew, onReceive }) {
 
 /* ─── New job ─────────────────────────────────────────────────────────── */
 
-function NewJob({ stock, onCancel, onSave, onSell }) {
+function NewJob({ stock, customers, onCancel, onSave, onSell }) {
   const [kind, setKind] = useState(null)
   const [step, setStep] = useState(1)
   const [customer, setCustomer] = useState('')
@@ -1300,7 +1331,7 @@ function NewJob({ stock, onCancel, onSave, onSell }) {
   }
 
   if (kind === 'wholesale') {
-    return <CounterSale stock={stock} onBack={() => setKind(null)} onSave={onSell} />
+    return <CounterSale stock={stock} customers={customers} onBack={() => setKind(null)} onSave={onSell} />
   }
 
   return (
@@ -1315,7 +1346,7 @@ function NewJob({ stock, onCancel, onSave, onSell }) {
           <Ask>Who is the customer?</Ask>
           <select style={{ ...inputStyle, marginBottom: 9 }} value={customer} onChange={(e) => setCustomer(e.target.value)}>
             <option value="">Tap to choose…</option>
-            {CUSTOMERS.map((c) => <option key={c} value={c}>{c}</option>)}
+            {customers.map((c) => <option key={c} value={c}>{c}</option>)}
             <option value="__new">Somebody new</option>
           </select>
           {customer === '__new' && <input style={{ ...inputStyle, marginBottom: 9 }} placeholder="Their name" value={newCustomer} onChange={(e) => setNewCustomer(e.target.value)} />}
@@ -1416,9 +1447,11 @@ function NewJob({ stock, onCancel, onSave, onSell }) {
 
 /* ─── Stock coming in from the supplier ───────────────────────────────── */
 
-function ReceiveStock({ stock, shortfall, today, onBack, onSave }) {
+function ReceiveStock({ stock, vendors, shortfall, today, onBack, onSave }) {
   const [vendor, setVendor] = useState('')
+  const [newVendor, setNewVendor] = useState('')
   const [ref, setRef] = useState('')
+  const vend = vendor === '__new' ? newVendor.trim() : vendor
   const [qtys, setQtys] = useState(() => ({ ...shortfall }))
   const [costs, setCosts] = useState(() => Object.fromEntries(stock.map((s) => [s.name, String(s.cost)])))
   const [search, setSearch] = useState('')
@@ -1456,10 +1489,15 @@ function ReceiveStock({ stock, shortfall, today, onBack, onSave }) {
       )}
 
       <Ask>Who did you buy it from?</Ask>
-      <select style={{ ...inputStyle, marginBottom: 16 }} value={vendor} onChange={(e) => setVendor(e.target.value)}>
+      <select style={{ ...inputStyle, marginBottom: vendor === '__new' ? 9 : 16 }} value={vendor} onChange={(e) => setVendor(e.target.value)}>
         <option value="">Tap to choose…</option>
-        {VENDORS.map((v) => <option key={v} value={v}>{v}</option>)}
+        {vendors.map((v) => <option key={v} value={v}>{v}</option>)}
+        <option value="__new">A new supplier</option>
       </select>
+      {vendor === '__new' && (
+        <input style={{ ...inputStyle, marginBottom: 16 }} placeholder="Supplier name" value={newVendor}
+          onChange={(e) => setNewVendor(e.target.value)} />
+      )}
 
       <Ask>Order or invoice number</Ask>
       <input style={{ ...inputStyle, marginBottom: 18 }} placeholder="PO-1862 (optional)" value={ref} onChange={(e) => setRef(e.target.value)} />
@@ -1519,7 +1557,7 @@ function ReceiveStock({ stock, shortfall, today, onBack, onSave }) {
         </Card>
       )}
 
-      <Btn full disabled={!vendor || !lines.length} onClick={() => onSave({ vendor, ref: ref.trim() || 'No ref', date: today, lines })}>
+      <Btn full disabled={!vend || !lines.length} onClick={() => onSave({ vendor: vend, ref: ref.trim() || 'No ref', date: today, lines })}>
         {lines.length ? `Put it on the shelf — ${fmt(total)}` : 'Pick what came in'}
       </Btn>
       <p style={{ fontSize: 12.5, color: FAINT, textAlign: 'center', marginTop: 10 }}>
@@ -1531,7 +1569,7 @@ function ReceiveStock({ stock, shortfall, today, onBack, onSave }) {
 
 /* ─── Counter sale: sell off the shelf, only what's on the shelf ──────── */
 
-function CounterSale({ stock, onBack, onSave }) {
+function CounterSale({ stock, customers, onBack, onSave }) {
   const [customer, setCustomer] = useState('')
   const [newCustomer, setNewCustomer] = useState('')
   const [qtys, setQtys] = useState({})
@@ -1562,7 +1600,7 @@ function CounterSale({ stock, onBack, onSave }) {
       <Ask>Who's buying?</Ask>
       <select style={{ ...inputStyle, marginBottom: 9 }} value={customer} onChange={(e) => setCustomer(e.target.value)}>
         <option value="">Tap to choose…</option>
-        {CUSTOMERS.map((c) => <option key={c} value={c}>{c}</option>)}
+        {customers.map((c) => <option key={c} value={c}>{c}</option>)}
         <option value="__new">Somebody new</option>
       </select>
       {customer === '__new' && <input style={{ ...inputStyle, marginBottom: 9 }} placeholder="Their name" value={newCustomer} onChange={(e) => setNewCustomer(e.target.value)} />}
@@ -1845,17 +1883,19 @@ const stepBtn = { width: 66, border: `1px solid ${BORDER}`, background: '#fff', 
 
 /* ─── Materials: off the shelf, or delivered ──────────────────────────── */
 
-function MaterialsScreen({ job, stock, today, onPull, onDelivery }) {
+function MaterialsScreen({ job, stock, vendors, today, onPull, onDelivery }) {
   const [mode, setMode] = useState(null)
   const needed = useMemo(() => stillNeeded(job, stock), [job, stock])
   const [qtys, setQtys] = useState(() => Object.fromEntries(needed.map((n) => [n.name, n.suggest])))
   const [showAll, setShowAll] = useState(false)
 
   const [vendor, setVendor] = useState('')
+  const [newVendor, setNewVendor] = useState('')
   const [desc, setDesc] = useState('')
   const [amount, setAmount] = useState('')
   const [photo, setPhoto] = useState(null)
   const [photoUrl, setPhotoUrl] = useState(null)
+  const vend = vendor === '__new' ? newVendor.trim() : vendor
 
   // You cannot take what isn't there. Every stepper stops at on-hand.
   const bump = (name, d, whole, onHand) => setQtys((q) => {
@@ -1982,17 +2022,22 @@ function MaterialsScreen({ job, stock, today, onPull, onDelivery }) {
     )
   }
 
-  const ready = vendor && desc.trim() && parseFloat(amount) > 0
+  const ready = vend && desc.trim() && parseFloat(amount) > 0
   return (
     <div>
       <Btn kind="quiet" small onClick={() => setMode(null)}>← Not that</Btn>
       <div style={{ height: 14 }} />
 
       <Ask>Who delivered it?</Ask>
-      <select style={{ ...inputStyle, marginBottom: 18 }} value={vendor} onChange={(e) => setVendor(e.target.value)}>
+      <select style={{ ...inputStyle, marginBottom: vendor === '__new' ? 9 : 18 }} value={vendor} onChange={(e) => setVendor(e.target.value)}>
         <option value="">Tap to choose…</option>
-        {VENDORS.map((v) => <option key={v} value={v}>{v}</option>)}
+        {vendors.map((v) => <option key={v} value={v}>{v}</option>)}
+        <option value="__new">A new supplier</option>
       </select>
+      {vendor === '__new' && (
+        <input style={{ ...inputStyle, marginBottom: 18 }} placeholder="Supplier name" value={newVendor}
+          onChange={(e) => setNewVendor(e.target.value)} />
+      )}
 
       <Ask>What came in?</Ask>
       <input style={{ ...inputStyle, marginBottom: 18 }} placeholder="Cedar panels and posts" value={desc} onChange={(e) => setDesc(e.target.value)} />
@@ -2012,7 +2057,7 @@ function MaterialsScreen({ job, stock, today, onPull, onDelivery }) {
           : <span style={{ fontSize: 15, color: MUTED, fontWeight: 500 }}>Take a picture</span>}
       </label>
 
-      <Btn full disabled={!ready} onClick={() => onDelivery({ vendor, date: today, desc: desc.trim(), amount: parseFloat(amount), photo })}>Save it</Btn>
+      <Btn full disabled={!ready} onClick={() => onDelivery({ vendor: vend, date: today, desc: desc.trim(), amount: parseFloat(amount), photo })}>Save it</Btn>
     </div>
   )
 }
@@ -2176,7 +2221,7 @@ function Billing({ job, stock, onInvoice, onPayment }) {
 const COLS = '78px 96px 1fr 106px 96px 56px'
 const TYPE_LABEL = {
   Customer: 'Customer', Estimate: 'Estimate', Invoice: 'Invoice', Payment: 'Payment',
-  Purchase: 'Expense', TimeActivity: 'Time', JournalEntry: 'Journal', Bill: 'Bill',
+  Purchase: 'Expense', TimeActivity: 'Time', JournalEntry: 'Journal', Bill: 'Bill', Vendor: 'Vendor',
 }
 
 function QboList({ rows, type, open, setOpen }) {
@@ -2187,7 +2232,9 @@ function QboList({ rows, type, open, setOpen }) {
       </div>
     )
   }
-  const nameCol = type === 'Customer' ? 'Customer' : type === 'Purchase' ? 'Payee' : type === 'TimeActivity' ? 'Employee' : 'Customer'
+  const nameCol = type === 'Vendor' ? 'Vendor' : type === 'Purchase' || type === 'Bill' ? 'Payee'
+    : type === 'TimeActivity' ? 'Employee' : 'Customer'
+  const idCol = type === 'Customer' || type === 'Vendor'
   const th = { fontSize: 11, fontWeight: 700, letterSpacing: '.05em', textTransform: 'uppercase', color: '#6B6C72' }
 
   return (
@@ -2198,8 +2245,8 @@ function QboList({ rows, type, open, setOpen }) {
       </div>
 
       <div style={{ display: 'grid', gridTemplateColumns: COLS, gap: 10, padding: '9px 16px', borderBottom: `1px solid ${QBLINE}`, background: '#FAFAFB' }}>
-        <span style={th}>{type === 'Customer' ? 'Id' : 'Date'}</span>
-        <span style={th}>{type === 'Customer' ? 'Type' : 'Type'}</span>
+        <span style={th}>{idCol ? 'Id' : 'Date'}</span>
+        <span style={th}>Type</span>
         <span style={th}>{nameCol}</span>
         <span style={{ ...th, textAlign: 'right' }}>{type === 'TimeActivity' ? 'Hours' : 'Amount'}</span>
         <span style={{ ...th, textAlign: 'right' }}>Status</span>
@@ -2212,7 +2259,7 @@ function QboList({ rows, type, open, setOpen }) {
           <div key={r.key} className={r.fresh ? 'fresh qbrow' : 'qbrow'} style={{ borderBottom: `1px solid #EDEEF1` }}>
             <div style={{ display: 'grid', gridTemplateColumns: COLS, gap: 10, padding: '12px 16px', alignItems: 'center' }}>
               <span className="num" style={{ fontSize: 13, color: '#393A3D' }}>
-                {type === 'Customer' ? r.qid : dshort(r.date)}
+                {idCol ? r.qid : dshort(r.date)}
               </span>
               <span style={{ fontSize: 13, color: '#6B6C72' }}>{TYPE_LABEL[r.type]}</span>
               <div style={{ minWidth: 0 }}>
