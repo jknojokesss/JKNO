@@ -4,8 +4,14 @@ import Head from 'next/head'
 /* ─── QueFence job entry portal — demo scaffold ───────────────────────────
    UI only. The QuickBooks pane on the right is a simulation of what the
    push would produce; swap it for the live sandbox company at demo time.
-   Every screen lives inside a job. There is no path to an entry that
-   does not begin with choosing a job.
+
+   Two rules for the left side:
+   1. Every screen lives inside a job. There is no path to an entry that
+      does not begin with choosing a job.
+   2. No accounting words. Ever. "Estimate" is "the price we quoted",
+      "invoice" is "bill", "variance" is "over by $366". The accounting
+      vocabulary lives on the right side, in QuickBooks. That is the pitch:
+      plain English goes in, accounting comes out.
    ────────────────────────────────────────────────────────────────────── */
 
 const BIZ = 'QueFence'
@@ -13,10 +19,10 @@ const BIZ = 'QueFence'
 // neutral shell — brand colors drop in here once their site is sampled
 const INK = '#16181C', BG = '#F4F5F7', CARD = '#FFFFFF', BORDER = '#E3E5E9'
 const MUTED = '#6B7280', FAINT = '#9AA1AC', SOFT = '#F8F9FB'
-// the one accent family: variance only
+// the one accent family: money flags only
 const GREEN = '#1E7A3A', AMBER = '#C2761E', RED = '#C0392B'
-// the other system
-const QB = '#2CA01C', QBDARK = '#0D6B0D'
+// the other system — Intuit green, and QuickBooks' own charcoal nav
+const QB = '#2CA01C', QBDARK = '#0D6B0D', QBINK = '#393A3D', QBLINE = '#D4D7DC'
 
 const head = "'Charter','Bitstream Charter','Sitka Text','Iowan Old Style',Georgia,serif"
 const ui = "'Inter', -apple-system, BlinkMacSystemFont, sans-serif"
@@ -25,104 +31,129 @@ const LABOR_RATE = 42 // burdened crew hour
 
 const fmt = (n) => '$' + Math.round(n).toLocaleString()
 const fmt2 = (n) => '$' + Number(n).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })
-const hrs = (n) => Number(n).toFixed(1) + ' hr'
-const pct = (n) => (n > 0 ? '+' : '') + n.toFixed(0) + '%'
 const dshort = (iso) => {
   if (!iso) return ''
-  const [y, m, d] = iso.split('-')
+  const [, m, d] = iso.split('-')
   return ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'][+m - 1] + ' ' + +d
 }
 
-/* ─── Reference data (assemblies are DATA, not code — roofing is a row) ── */
+/* ─── Assemblies: data, not code. Roofing is a new row. ───────────────── */
 
 const ASSEMBLIES = [
   {
     id: 'cedar6', name: "6' cedar privacy fence", unit: 'LF', price: 48,
     lines: [
-      { item: '4x4x8 cedar post', type: 'material', per: 0.125, u: 'ea', cost: 26 },
-      { item: "6'x8' cedar privacy panel", type: 'material', per: 0.125, u: 'ea', cost: 92 },
-      { item: 'Concrete mix, 60 lb bag', type: 'material', per: 0.25, u: 'bag', cost: 7 },
-      { item: 'Cedar post cap', type: 'material', per: 0.125, u: 'ea', cost: 5 },
-      { item: 'Fence screws & hardware', type: 'material', per: 1, u: 'LF', cost: 0.95 },
-      { item: 'Install labor', type: 'labor', per: 0.20, u: 'hr', cost: LABOR_RATE },
+      { item: '4x4x8 cedar post', type: 'material', per: 0.125 },
+      { item: "6'x8' cedar privacy panel", type: 'material', per: 0.125 },
+      { item: 'Concrete mix, 60 lb bag', type: 'material', per: 0.25 },
+      { item: 'Cedar post cap', type: 'material', per: 0.125 },
+      { item: 'Fence screws, 5 lb box', type: 'material', per: 0.02 },
+      { item: 'Install labor', type: 'labor', per: 0.20 },
     ],
   },
   {
     id: 'vinyl6', name: "6' vinyl privacy fence, white", unit: 'LF', price: 62,
     lines: [
-      { item: 'Vinyl line post, 5x5', type: 'material', per: 0.125, u: 'ea', cost: 42 },
-      { item: "6'x8' vinyl panel kit", type: 'material', per: 0.125, u: 'ea', cost: 155 },
-      { item: 'Vinyl post cap', type: 'material', per: 0.125, u: 'ea', cost: 9 },
-      { item: 'Concrete mix, 60 lb bag', type: 'material', per: 0.25, u: 'bag', cost: 7 },
-      { item: 'Install labor', type: 'labor', per: 0.18, u: 'hr', cost: LABOR_RATE },
+      { item: 'Vinyl line post, 5x5', type: 'material', per: 0.125 },
+      { item: "6'x8' vinyl panel kit", type: 'material', per: 0.125 },
+      { item: 'Vinyl post cap', type: 'material', per: 0.125 },
+      { item: 'Concrete mix, 60 lb bag', type: 'material', per: 0.25 },
+      { item: 'Install labor', type: 'labor', per: 0.18 },
     ],
   },
   {
     id: 'chain4', name: "4' chain link, galvanized", unit: 'LF', price: 28,
     lines: [
-      { item: '1-3/8" line post', type: 'material', per: 0.10, u: 'ea', cost: 18 },
-      { item: 'Top rail', type: 'material', per: 1, u: 'LF', cost: 2.10 },
-      { item: "4' galvanized mesh", type: 'material', per: 1, u: 'LF', cost: 4.60 },
-      { item: 'Tension & brace hardware', type: 'material', per: 1, u: 'LF', cost: 0.85 },
-      { item: 'Concrete mix, 60 lb bag', type: 'material', per: 0.20, u: 'bag', cost: 7 },
-      { item: 'Install labor', type: 'labor', per: 0.12, u: 'hr', cost: LABOR_RATE },
+      { item: '1-3/8" line post', type: 'material', per: 0.10 },
+      { item: "Top rail, 10' stick", type: 'material', per: 0.10 },
+      { item: "4' galvanized mesh", type: 'material', per: 1 },
+      { item: 'Tension & brace kit', type: 'material', per: 0.02 },
+      { item: 'Concrete mix, 60 lb bag', type: 'material', per: 0.20 },
+      { item: 'Install labor', type: 'labor', per: 0.12 },
     ],
   },
   {
     id: 'alum4', name: "4' aluminum ornamental, black", unit: 'LF', price: 68,
     lines: [
-      { item: 'Aluminum line post', type: 'material', per: 0.125, u: 'ea', cost: 62 },
-      { item: "4'x6' aluminum panel", type: 'material', per: 0.167, u: 'ea', cost: 148 },
-      { item: 'Bracket kit', type: 'material', per: 0.167, u: 'set', cost: 12 },
-      { item: 'Concrete mix, 60 lb bag', type: 'material', per: 0.25, u: 'bag', cost: 7 },
-      { item: 'Install labor', type: 'labor', per: 0.16, u: 'hr', cost: LABOR_RATE },
+      { item: 'Aluminum line post', type: 'material', per: 0.125 },
+      { item: "4'x6' aluminum panel", type: 'material', per: 0.167 },
+      { item: 'Bracket kit', type: 'material', per: 0.167 },
+      { item: 'Concrete mix, 60 lb bag', type: 'material', per: 0.25 },
+      { item: 'Install labor', type: 'labor', per: 0.16 },
     ],
   },
   {
     id: 'gate1', name: "Walk gate, 4' cedar", unit: 'EA', price: 625,
     lines: [
-      { item: 'Gate frame kit', type: 'material', per: 1, u: 'ea', cost: 95 },
-      { item: 'Cedar pickets, gate', type: 'material', per: 1, u: 'set', cost: 70 },
-      { item: 'Hinges & latch', type: 'material', per: 1, u: 'set', cost: 58 },
-      { item: '4x4 gate posts', type: 'material', per: 2, u: 'ea', cost: 26 },
-      { item: 'Install labor', type: 'labor', per: 2.5, u: 'hr', cost: LABOR_RATE },
+      { item: 'Gate frame kit', type: 'material', per: 1 },
+      { item: 'Cedar pickets, gate', type: 'material', per: 1 },
+      { item: 'Hinges & latch set', type: 'material', per: 1 },
+      { item: '4x4 gate post', type: 'material', per: 2 },
+      { item: 'Install labor', type: 'labor', per: 2.5 },
     ],
   },
   {
     id: 'gate2', name: "Drive gate, 10' double cedar", unit: 'EA', price: 1650,
     lines: [
-      { item: 'Heavy gate frame kit', type: 'material', per: 1, u: 'ea', cost: 260 },
-      { item: 'Cedar pickets, drive gate', type: 'material', per: 1, u: 'set', cost: 165 },
-      { item: 'Drop rod & cane bolt', type: 'material', per: 1, u: 'set', cost: 85 },
-      { item: 'Heavy hinges & latch', type: 'material', per: 1, u: 'set', cost: 140 },
-      { item: '6x6 gate posts', type: 'material', per: 2, u: 'ea', cost: 68 },
-      { item: 'Install labor', type: 'labor', per: 6, u: 'hr', cost: LABOR_RATE },
+      { item: 'Heavy gate frame kit', type: 'material', per: 1 },
+      { item: 'Cedar pickets, drive gate', type: 'material', per: 1 },
+      { item: 'Drop rod & cane bolt', type: 'material', per: 1 },
+      { item: 'Heavy hinges & latch', type: 'material', per: 1 },
+      { item: '6x6 gate post', type: 'material', per: 2 },
+      { item: 'Install labor', type: 'labor', per: 6 },
     ],
   },
   {
-    id: 'tearout', name: 'Tear-out & haul away existing fence', unit: 'LF', price: 9,
+    id: 'tearout', name: 'Tear out & haul away the old fence', unit: 'LF', price: 9,
     lines: [
-      { item: 'Dump fees', type: 'material', per: 1, u: 'LF', cost: 1.20 },
-      { item: 'Demo labor', type: 'labor', per: 0.08, u: 'hr', cost: LABOR_RATE },
+      { item: 'Dump fees', type: 'fee', per: 1, cost: 1.20 },
+      { item: 'Demo labor', type: 'labor', per: 0.08 },
     ],
   },
 ]
 
-const CREW = ['Miguel R.', 'Danny T.', 'Junior P.', 'Wes K.', 'Tomás A.']
+/* ─── What's in the yard. Assembly line items resolve against this. ───── */
 
-const VENDORS = ['Master Halco', 'Cedar Supply Co.', 'Ready-Mix Supply', 'Fastenal', 'Home Depot Pro', 'County Transfer Station']
-
-const CUSTOMERS = [
-  'Ana Delgado', 'Northview Townhomes HOA', 'Robert Callahan',
-  'Peter Marchetti', 'Grace Oyelaran', 'Sunrise Property Mgmt.',
+// `sell` + `price` = also sold over the counter to other contractors.
+const STOCK_SEED = [
+  { name: '4x4x8 cedar post', unit: 'ea', onHand: 64, cost: 26, whole: true, sell: true, price: 36 },
+  { name: "6'x8' cedar privacy panel", unit: 'ea', onHand: 12, cost: 92, whole: true, sell: true, price: 128 },
+  { name: 'Cedar post cap', unit: 'ea', onHand: 96, cost: 5, whole: true, sell: true, price: 8 },
+  { name: 'Fence screws, 5 lb box', unit: 'box', onHand: 14, cost: 47.50, whole: true, sell: true, price: 66 },
+  { name: 'Concrete mix, 60 lb bag', unit: 'bag', onHand: 180, cost: 7, whole: true },
+  { name: 'Vinyl line post, 5x5', unit: 'ea', onHand: 22, cost: 42, whole: true, sell: true, price: 58 },
+  { name: "6'x8' vinyl panel kit", unit: 'ea', onHand: 9, cost: 155, whole: true, sell: true, price: 215 },
+  { name: 'Vinyl post cap', unit: 'ea', onHand: 30, cost: 9, whole: true, sell: true, price: 14 },
+  { name: '1-3/8" line post', unit: 'ea', onHand: 78, cost: 18, whole: true, sell: true, price: 26 },
+  { name: "Top rail, 10' stick", unit: 'ea', onHand: 44, cost: 21, whole: true, sell: true, price: 30 },
+  { name: "4' galvanized mesh", unit: 'LF', onHand: 320, cost: 4.60, sell: true, price: 6.40 },
+  { name: 'Tension & brace kit', unit: 'kit', onHand: 6, cost: 42.50, whole: true, sell: true, price: 59 },
+  { name: 'Aluminum line post', unit: 'ea', onHand: 18, cost: 62, whole: true, sell: true, price: 86 },
+  { name: "4'x6' aluminum panel", unit: 'ea', onHand: 11, cost: 148, whole: true, sell: true, price: 205 },
+  { name: 'Bracket kit', unit: 'kit', onHand: 24, cost: 12, whole: true, sell: true, price: 18 },
+  { name: 'Gate frame kit', unit: 'ea', onHand: 4, cost: 95, whole: true, sell: true, price: 132 },
+  { name: 'Cedar pickets, gate', unit: 'set', onHand: 6, cost: 70, whole: true, sell: true, price: 98 },
+  { name: 'Hinges & latch set', unit: 'set', onHand: 7, cost: 58, whole: true, sell: true, price: 80 },
+  { name: '4x4 gate post', unit: 'ea', onHand: 26, cost: 26, whole: true, sell: true, price: 36 },
+  { name: 'Heavy gate frame kit', unit: 'ea', onHand: 3, cost: 260, whole: true, sell: true, price: 360 },
+  { name: 'Cedar pickets, drive gate', unit: 'set', onHand: 4, cost: 165, whole: true, sell: true, price: 229 },
+  { name: 'Drop rod & cane bolt', unit: 'set', onHand: 5, cost: 85, whole: true, sell: true, price: 118 },
+  { name: 'Heavy hinges & latch', unit: 'set', onHand: 4, cost: 140, whole: true, sell: true, price: 194 },
+  { name: '6x6 gate post', unit: 'ea', onHand: 8, cost: 68, whole: true, sell: true, price: 94 },
 ]
 
-/* ─── Seed jobs (Smith residence is created live in the demo) ─────────── */
+const stockOf = (list, name) => list.find((s) => s.name === name)
+
+const CREW = ['Miguel R.', 'Danny T.', 'Junior P.', 'Wes K.', 'Tomás A.']
+const VENDORS = ['Master Halco', 'Cedar Supply Co.', 'Ready-Mix Supply', 'Fastenal', 'Home Depot Pro', 'County Transfer Station']
+const CUSTOMERS = ['Ana Delgado', 'Northview Townhomes HOA', 'Robert Callahan', 'Peter Marchetti', 'Grace Oyelaran', 'Sunrise Property Mgmt.']
+
+/* ─── Seed jobs. Smith residence is created live in the demo. ─────────── */
 
 const SEED_JOBS = [
   {
     id: 'j1', name: 'Delgado backyard', customer: 'Ana Delgado',
-    address: '412 Ridgeway Ave', status: 'In progress',
+    address: '412 Ridgeway Ave', status: 'Working on it',
     assemblies: [
       { assemblyId: 'vinyl6', qty: 96, price: 62 },
       { assemblyId: 'gate2', qty: 1, price: 1650 },
@@ -131,16 +162,26 @@ const SEED_JOBS = [
       { id: 'l1', date: '2026-08-04', crew: ['Miguel R.', 'Danny T.'], hours: 8 },
       { id: 'l2', date: '2026-08-05', crew: ['Miguel R.', 'Danny T.'], hours: 7 },
     ],
-    materials: [
-      { id: 'm1', date: '2026-07-30', vendor: 'Master Halco', desc: 'Vinyl posts + panel kits, 96 LF', amount: 2890, photo: null },
-      { id: 'm2', date: '2026-08-04', vendor: 'Ready-Mix Supply', desc: 'Concrete, 24 bags', amount: 168, photo: null },
-      { id: 'm3', date: '2026-08-05', vendor: 'Cedar Supply Co.', desc: 'Drive gate hardware + 6x6 posts', amount: 452, photo: null },
+    pulls: [
+      {
+        id: 'p1', date: '2026-07-30', lines: [
+          { name: 'Vinyl line post, 5x5', qty: 12, cost: 42 },
+          { name: "6'x8' vinyl panel kit", qty: 12, cost: 155 },
+          { name: 'Vinyl post cap', qty: 12, cost: 9 },
+          { name: 'Concrete mix, 60 lb bag', qty: 24, cost: 7 },
+        ],
+      },
+    ],
+    deliveries: [
+      { id: 'd1', date: '2026-08-05', vendor: 'Cedar Supply Co.', desc: 'Drive gate frame, hardware and 6x6 posts', amount: 870, photo: null },
     ],
     changes: [],
+    invoices: [{ id: 'i1', date: '2026-07-30', amount: 3000, memo: 'Deposit' }],
+    payments: [{ id: 'y1', date: '2026-08-01', amount: 3000, method: 'Check 2214' }],
   },
   {
     id: 'j2', name: 'Northview Townhomes — phase 1', customer: 'Northview Townhomes HOA',
-    address: '1900 Northview Dr', status: 'In progress',
+    address: '1900 Northview Dr', status: 'Working on it',
     assemblies: [
       { assemblyId: 'chain4', qty: 420, price: 28 },
       { assemblyId: 'tearout', qty: 420, price: 9 },
@@ -151,19 +192,30 @@ const SEED_JOBS = [
       { id: 'l5', date: '2026-07-28', crew: ['Miguel R.', 'Junior P.', 'Wes K.'], hours: 8 },
       { id: 'l6', date: '2026-08-06', crew: ['Tomás A.', 'Junior P.'], hours: 6 },
     ],
-    materials: [
-      { id: 'm4', date: '2026-07-21', vendor: 'Master Halco', desc: 'Chain link mesh 420 LF + line posts', amount: 4180, photo: null },
-      { id: 'm5', date: '2026-07-22', vendor: 'Ready-Mix Supply', desc: 'Concrete, 84 bags', amount: 588, photo: null },
-      { id: 'm6', date: '2026-07-28', vendor: 'Master Halco', desc: 'Top rail + tension hardware', amount: 890, photo: null },
-      { id: 'm7', date: '2026-08-06', vendor: 'County Transfer Station', desc: 'Dump fees — old fence haul away', amount: 582, photo: null },
+    pulls: [
+      {
+        id: 'p2', date: '2026-07-21', lines: [
+          { name: '1-3/8" line post', qty: 42, cost: 18 },
+          { name: "Top rail, 10' stick", qty: 42, cost: 21 },
+          { name: "4' galvanized mesh", qty: 420, cost: 4.60 },
+          { name: 'Tension & brace kit', qty: 9, cost: 42.50 },
+          { name: 'Concrete mix, 60 lb bag', qty: 84, cost: 7 },
+        ],
+      },
+    ],
+    deliveries: [
+      { id: 'd2', date: '2026-07-28', vendor: 'Master Halco', desc: 'Extra mesh and posts for the east line', amount: 1120, photo: null },
+      { id: 'd3', date: '2026-08-06', vendor: 'County Transfer Station', desc: 'Dump fees, old fence haul away', amount: 582, photo: null },
     ],
     changes: [
-      { id: 'c1', desc: 'Add 60 LF along east property line — board request', amount: 2240, approved: true, billed: false },
+      { id: 'c1', desc: 'Add 60 more feet along the east property line', amount: 2240, approved: true, billed: false },
     ],
+    invoices: [{ id: 'i2', date: '2026-07-25', amount: 8000, memo: 'Progress billing' }],
+    payments: [{ id: 'y2', date: '2026-08-03', amount: 5000, method: 'ACH' }],
   },
   {
     id: 'j3', name: 'Callahan property', customer: 'Robert Callahan',
-    address: '77 Old Mill Rd', status: 'Complete',
+    address: '77 Old Mill Rd', status: 'Done',
     assemblies: [
       { assemblyId: 'cedar6', qty: 210, price: 48 },
       { assemblyId: 'gate1', qty: 1, price: 625 },
@@ -172,85 +224,169 @@ const SEED_JOBS = [
       { id: 'l7', date: '2026-07-08', crew: ['Miguel R.', 'Danny T.', 'Junior P.'], hours: 8 },
       { id: 'l8', date: '2026-07-09', crew: ['Miguel R.', 'Danny T.'], hours: 9 },
     ],
-    materials: [
-      { id: 'm8', date: '2026-07-08', vendor: 'Cedar Supply Co.', desc: 'Cedar panels + posts, 210 LF', amount: 3180, photo: null },
-      { id: 'm9', date: '2026-07-09', vendor: 'Ready-Mix Supply', desc: 'Concrete, 53 bags', amount: 371, photo: null },
-      { id: 'm10', date: '2026-07-14', vendor: 'Fastenal', desc: 'Fence screws, caps, gate hardware', amount: 389, photo: null },
+    pulls: [
+      {
+        id: 'p3', date: '2026-07-08', lines: [
+          { name: '4x4x8 cedar post', qty: 27, cost: 26 },
+          { name: "6'x8' cedar privacy panel", qty: 27, cost: 92 },
+          { name: 'Cedar post cap', qty: 27, cost: 5 },
+          { name: 'Concrete mix, 60 lb bag', qty: 53, cost: 7 },
+          { name: 'Fence screws, 5 lb box', qty: 5, cost: 47.50 },
+        ],
+      },
+      {
+        id: 'p4', date: '2026-07-09', lines: [
+          { name: 'Gate frame kit', qty: 1, cost: 95 },
+          { name: 'Cedar pickets, gate', qty: 1, cost: 70 },
+          { name: 'Hinges & latch set', qty: 1, cost: 58 },
+          { name: '4x4 gate post', qty: 2, cost: 26 },
+        ],
+      },
     ],
+    deliveries: [],
     changes: [
-      { id: 'c2', desc: 'Relocate gate to south side after walkthrough', amount: 340, approved: true, billed: true },
+      { id: 'c2', desc: 'Move the gate to the south side after the walkthrough', amount: 340, approved: true, billed: true },
     ],
+    invoices: [
+      { id: 'i3', date: '2026-07-06', amount: 4000, memo: 'Deposit' },
+      { id: 'i4', date: '2026-07-15', amount: 7045, memo: 'Final bill' },
+    ],
+    payments: [
+      { id: 'y3', date: '2026-07-07', amount: 4000, method: 'Check 1180' },
+      { id: 'y4', date: '2026-07-24', amount: 4045, method: 'Check 1206' },
+    ],
+  },
+  {
+    id: 'j4', kind: 'wholesale', name: 'Marchetti Fencing — counter sale', customer: 'Peter Marchetti',
+    address: 'Picked up at the yard', status: 'Picked up',
+    assemblies: [],
+    saleLines: [
+      { name: "6'x8' cedar privacy panel", qty: 6, cost: 92, price: 128 },
+      { name: '4x4x8 cedar post', qty: 12, cost: 26, price: 36 },
+      { name: 'Hinges & latch set', qty: 2, cost: 58, price: 80 },
+    ],
+    labor: [],
+    pulls: [{
+      id: 'p5', date: '2026-08-10', lines: [
+        { name: "6'x8' cedar privacy panel", qty: 6, cost: 92 },
+        { name: '4x4x8 cedar post', qty: 12, cost: 26 },
+        { name: 'Hinges & latch set', qty: 2, cost: 58 },
+      ],
+    }],
+    deliveries: [],
+    changes: [],
+    invoices: [{ id: 'i5', date: '2026-08-10', amount: 1360, memo: 'Counter sale' }],
+    payments: [],
   },
 ]
 
-/* ─── Costing helpers ─────────────────────────────────────────────────── */
+/* ─── Costing ─────────────────────────────────────────────────────────── */
 
 const asmById = (id) => ASSEMBLIES.find((a) => a.id === id)
 
-function explode(assemblyId, qty) {
+// What a quantity of an assembly needs, resolved against the stock list.
+function explode(assemblyId, qty, stock) {
   const a = asmById(assemblyId)
-  if (!a) return { materials: [], laborHours: 0 }
+  if (!a) return { materials: [], laborHours: 0, fees: 0 }
   const materials = []
-  let laborHours = 0
+  let laborHours = 0, fees = 0
   a.lines.forEach((l) => {
     const units = l.per * qty
-    if (l.type === 'labor') laborHours += units
-    else materials.push({ name: l.item, qty: units, u: l.u, unitCost: l.cost, cost: units * l.cost })
+    if (l.type === 'labor') { laborHours += units; return }
+    if (l.type === 'fee') { fees += units * l.cost; return }
+    const s = stockOf(stock, l.item)
+    if (!s) return
+    materials.push({ name: l.item, qty: units, unit: s.unit, cost: units * s.cost, whole: s.whole })
   })
-  return { materials, laborHours }
+  return { materials, laborHours, fees }
 }
 
-function jobBudget(job) {
+function jobBudget(job, stock) {
+  // A counter sale has no crew and no assemblies — cost is what left the shelf.
+  if (job.kind === 'wholesale') {
+    const mat = job.saleLines.reduce((s, l) => s + l.qty * l.cost, 0)
+    const contract = job.saleLines.reduce((s, l) => s + l.qty * l.price, 0)
+    return { materials: mat, laborHours: 0, labor: 0, total: mat, contract, baseContract: contract, need: [] }
+  }
   let mat = 0, laborHours = 0, contract = 0
-  const lines = []
+  const need = []
   job.assemblies.forEach((ja) => {
-    const e = explode(ja.assemblyId, ja.qty)
+    const e = explode(ja.assemblyId, ja.qty, stock)
     e.materials.forEach((m) => {
       mat += m.cost
-      const found = lines.find((x) => x.name === m.name)
-      if (found) { found.qty += m.qty; found.cost += m.cost }
-      else lines.push({ ...m })
+      const f = need.find((x) => x.name === m.name)
+      if (f) { f.qty += m.qty; f.cost += m.cost } else need.push({ ...m })
     })
+    mat += e.fees
     laborHours += e.laborHours
     contract += ja.price * ja.qty
   })
   const changeContract = job.changes.filter((c) => c.approved).reduce((s, c) => s + c.amount, 0)
   return {
-    materials: mat,
-    laborHours,
-    labor: laborHours * LABOR_RATE,
+    materials: mat, laborHours, labor: laborHours * LABOR_RATE,
     total: mat + laborHours * LABOR_RATE,
-    contract: contract + changeContract,
-    baseContract: contract,
-    lines,
+    contract: contract + changeContract, baseContract: contract, need,
   }
 }
 
+const pullTotal = (p) => p.lines.reduce((s, l) => s + l.qty * l.cost, 0)
+
 function jobActual(job) {
-  const materials = job.materials.reduce((s, m) => s + m.amount, 0)
+  const fromStock = job.pulls.reduce((s, p) => s + pullTotal(p), 0)
+  const delivered = job.deliveries.reduce((s, d) => s + d.amount, 0)
   const laborHours = job.labor.reduce((s, l) => s + l.crew.length * l.hours, 0)
-  return { materials, laborHours, labor: laborHours * LABOR_RATE, total: materials + laborHours * LABOR_RATE }
+  return {
+    fromStock, delivered, materials: fromStock + delivered,
+    laborHours, labor: laborHours * LABOR_RATE,
+    total: fromStock + delivered + laborHours * LABOR_RATE,
+  }
 }
 
-function jobFlag(job) {
-  const b = jobBudget(job), a = jobActual(job)
-  const unbilled = job.changes.some((c) => c.approved && !c.billed)
+function jobMoney(job, stock) {
+  const b = jobBudget(job, stock)
+  const billed = job.invoices.reduce((s, i) => s + i.amount, 0)
+  const paid = job.payments.reduce((s, p) => s + p.amount, 0)
+  return { contract: b.contract, billed, paid, owed: billed - paid, toBill: b.contract - billed }
+}
+
+function jobFlag(job, stock) {
+  const b = jobBudget(job, stock), a = jobActual(job)
+  if (job.changes.some((c) => c.approved && !c.billed)) return 'red'
   const over = b.total > 0 ? (a.total - b.total) / b.total : 0
-  if (unbilled || over > 0.10) return 'red'
+  if (over > 0.10) return 'red'
   if (over > 0.02) return 'amber'
   return 'green'
 }
 const FLAG_COLOR = { green: GREEN, amber: AMBER, red: RED }
-const FLAG_LABEL = { green: 'On budget', amber: 'Watch', red: 'Over' }
+
+// How much of each item this job still needs, for the stock-pull prefill.
+function stillNeeded(job, stock) {
+  const b = jobBudget(job, stock)
+  const already = {}
+  job.pulls.forEach((p) => p.lines.forEach((l) => { already[l.name] = (already[l.name] || 0) + l.qty }))
+  return b.need.map((n) => {
+    const want = n.whole ? Math.ceil(n.qty) : Math.round(n.qty * 10) / 10
+    const left = Math.max(0, +(want - (already[n.name] || 0)).toFixed(1))
+    const s = stockOf(stock, n.name)
+    const onHand = s ? s.onHand : 0
+    return {
+      name: n.name, unit: n.unit, cost: s ? s.cost : 0, onHand, whole: n.whole,
+      wanted: left,                          // what the job still calls for
+      suggest: Math.min(left, onHand),       // never suggest more than is on the shelf
+      short: Math.max(0, +(left - onHand).toFixed(1)),
+    }
+  }).sort((x, y) => y.wanted - x.wanted)
+}
 
 /* ─── QuickBooks mock ─────────────────────────────────────────────────── */
 
 let QID = 100
 const nextQid = () => String(++QID)
 
-function seedQbo(jobs) {
+function seedQbo(jobs, stock) {
   const out = []
   const parents = {}
+  const invIds = {}
   CUSTOMERS.forEach((c) => {
     const id = nextQid()
     parents[c] = id
@@ -261,12 +397,12 @@ function seedQbo(jobs) {
     })
   })
   jobs.forEach((job) => {
-    const b = jobBudget(job)
+    const b = jobBudget(job, stock)
     const jid = nextQid()
     parents[job.name] = jid
     out.push({
-      key: 'job-' + jid, type: 'Customer', qid: jid, status: 'synced', date: '2026-07-01',
-      title: job.name, sub: 'Sub-customer of ' + job.customer, amount: null, isJob: true,
+      key: 'job-' + jid, type: 'Customer', qid: jid, status: 'synced', date: '2026-07-01', isJob: true,
+      title: job.name, sub: 'Sub-customer of ' + job.customer, amount: null,
       payload: {
         Customer: {
           Id: jid, DisplayName: job.name, Job: true,
@@ -275,15 +411,19 @@ function seedQbo(jobs) {
         },
       },
     })
+    if (job.kind === 'wholesale') {
+      // Invoice with inventory items — no estimate, no journal entry.
+      job.invoices.forEach((iv) => out.push({ ...wholesaleInvoiceEntity(nextQid(), iv, job, jid), status: 'synced' }))
+      return
+    }
     const eid = nextQid()
     out.push({
       key: 'est-' + eid, type: 'Estimate', qid: eid, status: 'synced', date: '2026-07-01',
-      title: job.name, sub: job.assemblies.map((ja) => `${ja.qty} ${asmById(ja.assemblyId).unit} ${asmById(ja.assemblyId).name}`).join(' · '),
-      amount: b.baseContract,
+      title: job.name, amount: b.baseContract,
+      sub: job.assemblies.map((ja) => `${ja.qty} ${asmById(ja.assemblyId).unit} ${asmById(ja.assemblyId).name}`).join(' · '),
       payload: {
         Estimate: {
-          Id: eid, SyncToken: '0', CustomerRef: { value: jid, name: job.name },
-          TotalAmt: b.baseContract,
+          Id: eid, SyncToken: '0', CustomerRef: { value: jid, name: job.name }, TotalAmt: b.baseContract,
           Line: job.assemblies.map((ja) => ({
             DetailType: 'SalesItemLineDetail', Amount: ja.qty * ja.price,
             SalesItemLineDetail: { ItemRef: { name: asmById(ja.assemblyId).name }, Qty: ja.qty, UnitPrice: ja.price },
@@ -291,99 +431,254 @@ function seedQbo(jobs) {
         },
       },
     })
-    job.labor.forEach((l) => {
-      l.crew.forEach((person) => {
-        const tid = nextQid()
-        out.push({
-          key: 'time-' + tid, type: 'TimeActivity', qid: tid, status: 'synced', date: l.date,
-          title: person, sub: job.name, amount: null, hours: l.hours,
-          payload: {
-            TimeActivity: {
-              Id: tid, SyncToken: '0', NameOf: 'Employee', TxnDate: l.date,
-              EmployeeRef: { name: person }, CustomerRef: { value: jid, name: job.name },
-              ItemRef: { name: 'Fence install labor' }, BillableStatus: 'Billable',
-              Hours: Math.floor(l.hours), Minutes: Math.round((l.hours % 1) * 60),
-            },
-          },
-        })
-      })
-    })
-    job.materials.forEach((m) => {
-      const pid = nextQid()
+    job.changes.filter((c) => c.approved).forEach((c) => {
+      const cid = nextQid()
       out.push({
-        key: 'pur-' + pid, type: 'Purchase', qid: pid, status: 'synced', date: m.date,
-        title: m.vendor, sub: m.desc + ' — ' + job.name, amount: m.amount,
+        key: 'est-' + cid, type: 'Estimate', qid: cid, status: 'synced', date: '2026-07-20',
+        title: job.name + ' — extra work', sub: c.desc, amount: c.amount,
         payload: {
-          Purchase: {
-            Id: pid, SyncToken: '0', PaymentType: 'CreditCard', TxnDate: m.date,
-            EntityRef: { name: m.vendor, type: 'Vendor' }, TotalAmt: m.amount,
-            Line: [{
-              DetailType: 'AccountBasedExpenseLineDetail', Amount: m.amount, Description: m.desc,
-              AccountBasedExpenseLineDetail: {
-                AccountRef: { name: 'Job Materials' },
-                CustomerRef: { value: jid, name: job.name },
-                BillableStatus: 'Billable',
-              },
-            }],
+          Estimate: {
+            Id: cid, SyncToken: '0', CustomerRef: { value: jid, name: job.name }, TotalAmt: c.amount,
+            Line: [{ DetailType: 'SalesItemLineDetail', Amount: c.amount, Description: c.desc,
+              SalesItemLineDetail: { ItemRef: { name: 'Change order' }, Qty: 1, UnitPrice: c.amount } }],
           },
         },
       })
+    })
+    job.labor.forEach((l) => l.crew.forEach((person) => {
+      const tid = nextQid()
+      out.push({
+        key: 'time-' + tid, type: 'TimeActivity', qid: tid, status: 'synced', date: l.date,
+        title: person, sub: job.name, hours: l.hours, amount: null,
+        payload: {
+          TimeActivity: {
+            Id: tid, SyncToken: '0', NameOf: 'Employee', TxnDate: l.date,
+            EmployeeRef: { name: person }, CustomerRef: { value: jid, name: job.name },
+            ItemRef: { name: 'Fence install labor' }, BillableStatus: 'Billable',
+            Hours: Math.floor(l.hours), Minutes: Math.round((l.hours % 1) * 60),
+          },
+        },
+      })
+    }))
+    job.pulls.forEach((p) => {
+      const gid = nextQid()
+      out.push({ ...jeEntity(gid, p, job.name, jid), status: 'synced' })
+    })
+    job.deliveries.forEach((d) => {
+      const pid = nextQid()
+      out.push({ ...purchaseEntity(pid, d, job.name, jid), status: 'synced' })
+    })
+    job.invoices.forEach((iv) => {
+      const iid = nextQid()
+      invIds[iv.id] = iid
+      out.push({ ...invoiceEntity(iid, iv, job, jid), status: 'synced' })
+    })
+    job.payments.forEach((py) => {
+      const yid = nextQid()
+      out.push({ ...paymentEntity(yid, py, job.name, jid, invIds[job.invoices[0] && job.invoices[0].id]), status: 'synced' })
     })
   })
   return { entities: out, parents }
 }
 
-const QBO_TABS = [
-  { id: 'Customer', label: 'Customers' },
-  { id: 'Estimate', label: 'Estimates' },
-  { id: 'TimeActivity', label: 'Time' },
-  { id: 'Purchase', label: 'Expenses' },
-  { id: 'report', label: 'Job profitability' },
+/* Stock going out to a job is not a purchase — it is inventory relieved to
+   job cost. A journal entry, with the job on the debit line. */
+function jeEntity(gid, pull, jobName, jid) {
+  const total = pullTotal(pull)
+  return {
+    key: 'je-' + gid, type: 'JournalEntry', qid: gid, date: pull.date,
+    title: jobName, sub: pull.lines.map((l) => `${l.qty} ${l.name}`).join(' · '), amount: total,
+    payload: {
+      JournalEntry: {
+        Id: gid, SyncToken: '0', TxnDate: pull.date, TotalAmt: total,
+        PrivateNote: 'Materials pulled from stock to job',
+        Line: [
+          {
+            DetailType: 'JournalEntryLineDetail', Amount: total, Description: 'Materials used on ' + jobName,
+            JournalEntryLineDetail: {
+              PostingType: 'Debit', AccountRef: { name: 'Job Materials (COGS)' },
+              Entity: { Type: 'Customer', EntityRef: { value: jid, name: jobName } },
+            },
+          },
+          {
+            DetailType: 'JournalEntryLineDetail', Amount: total, Description: 'Relieve inventory',
+            JournalEntryLineDetail: { PostingType: 'Credit', AccountRef: { name: 'Inventory Asset' } },
+          },
+        ],
+      },
+    },
+  }
+}
+
+function purchaseEntity(pid, d, jobName, jid) {
+  return {
+    key: 'pur-' + pid, type: 'Purchase', qid: pid, date: d.date,
+    title: d.vendor, sub: d.desc + ' — ' + jobName, amount: d.amount,
+    payload: {
+      Purchase: {
+        Id: pid, SyncToken: '0', PaymentType: 'CreditCard', TxnDate: d.date,
+        EntityRef: { name: d.vendor, type: 'Vendor' }, TotalAmt: d.amount,
+        Line: [{
+          DetailType: 'AccountBasedExpenseLineDetail', Amount: d.amount, Description: d.desc,
+          AccountBasedExpenseLineDetail: {
+            AccountRef: { name: 'Job Materials' },
+            CustomerRef: { value: jid, name: jobName }, BillableStatus: 'Billable',
+          },
+        }],
+        ...(d.photo ? { AttachableRef: [{ FileName: d.photo }] } : {}),
+      },
+    },
+  }
+}
+
+function invoiceEntity(iid, iv, job, jid) {
+  const paid = job.payments.reduce((s, p) => s + p.amount, 0)
+  const bal = Math.max(0, iv.amount - Math.max(0, paid - (job.invoices
+    .slice(0, job.invoices.findIndex((x) => x.id === iv.id))
+    .reduce((s, x) => s + x.amount, 0))))
+  return {
+    key: 'inv-' + iid, type: 'Invoice', qid: iid, date: iv.date,
+    title: job.name, sub: iv.memo + (bal > 0 ? ` · ${fmt(bal)} open` : ' · paid in full'), amount: iv.amount,
+    payload: {
+      Invoice: {
+        Id: iid, SyncToken: '0', TxnDate: iv.date, CustomerRef: { value: jid, name: job.name },
+        TotalAmt: iv.amount, Balance: bal,
+        Line: [{
+          DetailType: 'SalesItemLineDetail', Amount: iv.amount, Description: iv.memo,
+          SalesItemLineDetail: { ItemRef: { name: 'Fence installation' }, Qty: 1, UnitPrice: iv.amount },
+        }],
+      },
+    },
+  }
+}
+
+/* A counter sale needs no journal entry — the invoice carries inventory
+   items, so QuickBooks relieves stock and posts COGS on its own. */
+function wholesaleInvoiceEntity(iid, iv, sale, sid) {
+  return {
+    key: 'inv-' + iid, type: 'Invoice', qid: iid, date: iv.date,
+    title: sale.name, sub: `Counter sale · ${sale.saleLines.length} items · ${fmt(iv.amount)} open`, amount: iv.amount,
+    payload: {
+      Invoice: {
+        Id: iid, SyncToken: '0', TxnDate: iv.date,
+        CustomerRef: { value: sid, name: sale.name },
+        TotalAmt: iv.amount, Balance: iv.amount,
+        PrivateNote: 'Material sold over the counter — inventory items relieve COGS automatically',
+        Line: sale.saleLines.map((l) => ({
+          DetailType: 'SalesItemLineDetail', Amount: l.qty * l.price, Description: l.name,
+          SalesItemLineDetail: {
+            ItemRef: { name: l.name, type: 'Inventory' }, Qty: l.qty, UnitPrice: l.price,
+          },
+        })),
+      },
+    },
+  }
+}
+
+function paymentEntity(yid, py, jobName, jid, linkedInvoiceId) {
+  return {
+    key: 'pay-' + yid, type: 'Payment', qid: yid, date: py.date,
+    title: jobName, sub: 'Payment received · ' + py.method, amount: py.amount, isPayment: true,
+    payload: {
+      Payment: {
+        Id: yid, SyncToken: '0', TxnDate: py.date, CustomerRef: { value: jid, name: jobName },
+        TotalAmt: py.amount,
+        Line: [{ Amount: py.amount, LinkedTxn: [{ TxnId: linkedInvoiceId || '—', TxnType: 'Invoice' }] }],
+      },
+    },
+  }
+}
+
+/* QuickBooks Online chrome. Nav groups and page titles use Intuit's own
+   wording so the split screen reads as one familiar product, not a mock. */
+const QB_NAV = [
+  { group: 'Sales', items: [
+    { id: 'Customer', label: 'Customers', title: 'Customers', sub: 'Sub-customers are jobs' },
+    { id: 'Estimate', label: 'Estimates', title: 'Estimates' },
+    { id: 'money', label: 'Invoices', title: 'Invoices & payments' },
+  ] },
+  { group: 'Expenses', items: [
+    { id: 'Purchase', label: 'Expenses', title: 'Expense transactions' },
+  ] },
+  { group: 'Payroll', items: [
+    { id: 'TimeActivity', label: 'Time', title: 'Time activities' },
+  ] },
+  { group: 'Accounting', items: [
+    { id: 'JournalEntry', label: 'Journal entries', title: 'Journal entries' },
+  ] },
+  { group: 'Reports', items: [
+    { id: 'report', label: 'Reports', title: 'Job profitability by customer' },
+  ] },
 ]
+const QB_ITEMS = QB_NAV.flatMap((g) => g.items)
+const qbItem = (id) => QB_ITEMS.find((i) => i.id === id) || QB_ITEMS[0]
+
+// QBO shows a status, not a sync state. These are the real ones.
+function qbStatus(r) {
+  if (r.type === 'Invoice') return r.sub && r.sub.includes('paid in full') ? { t: 'Paid', c: QB } : { t: 'Open', c: '#6B6C72' }
+  if (r.type === 'Payment') return { t: 'Deposited', c: QB }
+  if (r.type === 'Estimate') return { t: 'Pending', c: '#8A6D1F' }
+  if (r.type === 'Purchase') return { t: 'Paid', c: QB }
+  if (r.type === 'TimeActivity') return { t: 'Billable', c: '#1B6AC9' }
+  if (r.type === 'JournalEntry') return { t: 'Posted', c: QB }
+  return { t: 'Active', c: QB }
+}
 
 /* ─── UI atoms ────────────────────────────────────────────────────────── */
 
 const Btn = ({ children, onClick, kind = 'primary', full, disabled, small }) => {
-  const base = {
-    fontFamily: ui, fontWeight: 600, fontSize: small ? 13 : 15, cursor: disabled ? 'not-allowed' : 'pointer',
-    borderRadius: 10, padding: small ? '8px 14px' : '15px 20px', width: full ? '100%' : 'auto',
-    border: '1px solid transparent', transition: 'opacity .12s', opacity: disabled ? 0.4 : 1,
-  }
   const kinds = {
     primary: { background: INK, color: '#fff' },
-    ghost: { background: 'transparent', color: INK, border: `1px solid ${BORDER}` },
+    ghost: { background: '#fff', color: INK, border: `1px solid ${BORDER}` },
     quiet: { background: 'transparent', color: MUTED, padding: small ? '6px 8px' : '10px 12px' },
   }
-  return <button style={{ ...base, ...kinds[kind] }} onClick={disabled ? undefined : onClick} disabled={disabled}>{children}</button>
+  return (
+    <button
+      onClick={disabled ? undefined : onClick} disabled={disabled}
+      style={{
+        fontFamily: ui, fontWeight: 600, fontSize: small ? 13 : 16, cursor: disabled ? 'not-allowed' : 'pointer',
+        borderRadius: 11, padding: small ? '8px 14px' : '17px 20px', width: full ? '100%' : 'auto',
+        border: '1px solid transparent', opacity: disabled ? 0.35 : 1, ...kinds[kind],
+      }}
+    >{children}</button>
+  )
 }
 
-const Field = ({ label, children }) => (
-  <label style={{ display: 'block', marginBottom: 16 }}>
-    <div style={{ fontSize: 12, fontWeight: 600, letterSpacing: '.04em', textTransform: 'uppercase', color: MUTED, marginBottom: 7 }}>{label}</div>
-    {children}
-  </label>
-)
-
 const inputStyle = {
-  width: '100%', fontFamily: ui, fontSize: 16, padding: '13px 14px', borderRadius: 10,
+  width: '100%', fontFamily: ui, fontSize: 17, padding: '15px 14px', borderRadius: 11,
   border: `1px solid ${BORDER}`, background: '#fff', color: INK, outline: 'none',
 }
 
+const Ask = ({ children }) => (
+  <div style={{ fontFamily: head, fontSize: 19, fontWeight: 600, marginBottom: 10, letterSpacing: '-.01em' }}>{children}</div>
+)
+
 const Chip = ({ on, children, onClick }) => (
   <button onClick={onClick} style={{
-    fontFamily: ui, fontSize: 15, fontWeight: on ? 600 : 500, padding: '13px 16px', borderRadius: 10, cursor: 'pointer',
-    border: `1.5px solid ${on ? INK : BORDER}`, background: on ? INK : '#fff', color: on ? '#fff' : INK,
+    fontFamily: ui, fontSize: 16, fontWeight: on ? 600 : 500, padding: '15px 16px', borderRadius: 11, cursor: 'pointer',
+    border: `1.5px solid ${on ? INK : BORDER}`, background: on ? INK : '#fff', color: on ? '#fff' : INK, width: '100%',
   }}>{children}</button>
 )
 
-const Dot = ({ flag }) => (
-  <span style={{ display: 'inline-block', width: 8, height: 8, borderRadius: 4, background: FLAG_COLOR[flag] }} />
+const Card = ({ children, style }) => (
+  <div style={{ background: CARD, border: `1px solid ${BORDER}`, borderRadius: 13, padding: 16, ...style }}>{children}</div>
+)
+
+const Line = ({ label, value, color, bold, sub }) => (
+  <div style={{ padding: '7px 0' }}>
+    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', gap: 10 }}>
+      <span style={{ fontSize: 14.5, color: bold ? INK : MUTED, fontWeight: bold ? 600 : 400 }}>{label}</span>
+      <span className="num" style={{ fontSize: bold ? 17 : 15, fontWeight: bold ? 700 : 600, color: color || INK }}>{value}</span>
+    </div>
+    {sub && <div style={{ fontSize: 12.5, color: FAINT, marginTop: 2 }}>{sub}</div>}
+  </div>
 )
 
 /* ─── Page ────────────────────────────────────────────────────────────── */
 
 export default function QueFenceDemo() {
-  const seed = useMemo(() => seedQbo(SEED_JOBS), [])
+  const [stock, setStock] = useState(STOCK_SEED)
+  const seed = useMemo(() => seedQbo(SEED_JOBS, STOCK_SEED), [])
   const [jobs, setJobs] = useState(SEED_JOBS)
   const [qbo, setQbo] = useState(seed.entities)
   const parents = useRef(seed.parents)
@@ -391,7 +686,6 @@ export default function QueFenceDemo() {
   const uid = (p) => `${p}${++counter.current}`
 
   const [view, setView] = useState({ screen: 'list' })
-  const [tab, setTab] = useState('overview')
   const [qtab, setQtab] = useState('Customer')
   const [pane, setPane] = useState('portal')
   const [today, setToday] = useState('2026-08-13')
@@ -402,39 +696,33 @@ export default function QueFenceDemo() {
   useEffect(() => {
     const d = new Date()
     setToday(`${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`)
-    try { if (!localStorage.getItem('qf_intro')) setIntro(true) } catch (e) { setIntro(true) }
+    try { if (!localStorage.getItem('qf_intro2')) setIntro(true) } catch (e) { setIntro(true) }
   }, [])
 
-  const closeIntro = () => {
-    setIntro(false)
-    try { localStorage.setItem('qf_intro', '1') } catch (e) {}
-  }
-
+  const closeIntro = () => { setIntro(false); try { localStorage.setItem('qf_intro2', '1') } catch (e) {} }
   const job = jobs.find((j) => j.id === view.jobId)
+  const flash = (msg) => { setToast(msg); setTimeout(() => setToast(null), 2800) }
 
-  const flash = (msg) => { setToast(msg); setTimeout(() => setToast(null), 2600) }
-
-  // Write to the portal first, then queue the push. Never block on Intuit.
+  // Save locally first, then queue the push. Never block on Intuit.
   const push = (entities, landOn) => {
     const staged = entities.map((e) => ({ ...e, status: 'queued', fresh: true }))
     setQbo((prev) => [...staged, ...prev])
     if (landOn) setQtab(landOn)
-    setTimeout(() => {
-      setQbo((prev) => prev.map((e) => (staged.find((s) => s.key === e.key) ? { ...e, status: 'synced' } : e)))
-    }, 850)
-    setTimeout(() => {
-      setQbo((prev) => prev.map((e) => (staged.find((s) => s.key === e.key) ? { ...e, fresh: false } : e)))
-    }, 6000)
+    setTimeout(() => setQbo((prev) => prev.map((e) => (staged.find((s) => s.key === e.key) ? { ...e, status: 'synced' } : e))), 850)
+    setTimeout(() => setQbo((prev) => prev.map((e) => (staged.find((s) => s.key === e.key) ? { ...e, fresh: false } : e))), 6000)
   }
 
   const updateJob = (id, fn) => setJobs((prev) => prev.map((j) => (j.id === id ? fn(j) : j)))
+  const go = (screen) => setView((v) => ({ ...v, screen }))
 
   /* ── actions ── */
 
   const createJob = ({ customer, name, address, picked }) => {
     const id = uid('job')
-    const newJob = { id, name, customer, address, status: 'In progress', assemblies: picked, labor: [], materials: [], changes: [] }
-    setJobs((prev) => [newJob, ...prev])
+    setJobs((prev) => [{
+      id, name, customer, address, status: 'Working on it', assemblies: picked,
+      labor: [], pulls: [], deliveries: [], changes: [], invoices: [], payments: [],
+    }, ...prev])
 
     let parentId = parents.current[customer]
     const out = []
@@ -442,7 +730,7 @@ export default function QueFenceDemo() {
       parentId = nextQid()
       parents.current[customer] = parentId
       out.push({
-        key: 'cust-' + parentId, type: 'Customer', qid: parentId, status: 'queued', date: today,
+        key: 'cust-' + parentId, type: 'Customer', qid: parentId, date: today,
         title: customer, sub: 'Top-level customer', amount: null,
         payload: { Customer: { Id: parentId, DisplayName: customer, Job: false, SyncToken: '0' } },
       })
@@ -450,21 +738,19 @@ export default function QueFenceDemo() {
     const jid = nextQid()
     parents.current[name] = jid
     out.push({
-      key: 'job-' + jid, type: 'Customer', qid: jid, status: 'queued', date: today, isJob: true,
+      key: 'job-' + jid, type: 'Customer', qid: jid, date: today, isJob: true,
       title: name, sub: 'Sub-customer of ' + customer, amount: null,
       payload: {
         Customer: {
           Id: jid, DisplayName: name, Job: true,
-          ParentRef: { value: parentId, name: customer },
-          BillAddr: { Line1: address }, SyncToken: '0',
+          ParentRef: { value: parentId, name: customer }, BillAddr: { Line1: address }, SyncToken: '0',
         },
       },
     })
     const contract = picked.reduce((s, p) => s + p.qty * p.price, 0)
     const eid = nextQid()
     out.push({
-      key: 'est-' + eid, type: 'Estimate', qid: eid, status: 'queued', date: today,
-      title: name, amount: contract,
+      key: 'est-' + eid, type: 'Estimate', qid: eid, date: today, title: name, amount: contract,
       sub: picked.map((p) => `${p.qty} ${asmById(p.assemblyId).unit} ${asmById(p.assemblyId).name}`).join(' · '),
       payload: {
         Estimate: {
@@ -478,8 +764,53 @@ export default function QueFenceDemo() {
     })
     push(out, 'Customer')
     setView({ screen: 'job', jobId: id })
-    setTab('overview')
-    flash('Job created · pushed to QuickBooks')
+    flash('Job started. It is in QuickBooks already.')
+  }
+
+  const sellFromYard = ({ customer, lines }) => {
+    const id = uid('job')
+    const label = `${customer.split(' ')[0]} — counter sale`
+    const revenue = lines.reduce((s, l) => s + l.qty * l.price, 0)
+    const sale = {
+      id, kind: 'wholesale', name: label, customer, address: 'Picked up at the yard',
+      status: 'Picked up', assemblies: [], saleLines: lines, labor: [],
+      pulls: [{ id: uid('p'), date: today, lines: lines.map(({ name, qty, cost }) => ({ name, qty, cost })) }],
+      deliveries: [], changes: [],
+      invoices: [{ id: uid('i'), date: today, amount: revenue, memo: 'Counter sale' }], payments: [],
+    }
+    setJobs((prev) => [sale, ...prev])
+    setStock((prev) => prev.map((s) => {
+      const l = lines.find((x) => x.name === s.name)
+      return l ? { ...s, onHand: +(s.onHand - l.qty).toFixed(1) } : s
+    }))
+
+    let parentId = parents.current[customer]
+    const out = []
+    if (!parentId) {
+      parentId = nextQid()
+      parents.current[customer] = parentId
+      out.push({
+        key: 'cust-' + parentId, type: 'Customer', qid: parentId, date: today,
+        title: customer, sub: 'Top-level customer', amount: null,
+        payload: { Customer: { Id: parentId, DisplayName: customer, Job: false, SyncToken: '0' } },
+      })
+    }
+    const sid = nextQid()
+    parents.current[label] = sid
+    out.push({
+      key: 'job-' + sid, type: 'Customer', qid: sid, date: today, isJob: true,
+      title: label, sub: 'Sub-customer of ' + customer, amount: null,
+      payload: {
+        Customer: {
+          Id: sid, DisplayName: label, Job: true,
+          ParentRef: { value: parentId, name: customer }, SyncToken: '0',
+        },
+      },
+    })
+    out.push(wholesaleInvoiceEntity(nextQid(), sale.invoices[0], sale, sid))
+    push(out, 'money')
+    setView({ screen: 'job', jobId: id })
+    flash(`${fmt(revenue)} rung up. Stock came down.`)
   }
 
   const saveLabor = (entry) => {
@@ -488,7 +819,7 @@ export default function QueFenceDemo() {
     push(entry.crew.map((person) => {
       const tid = nextQid()
       return {
-        key: 'time-' + tid, type: 'TimeActivity', qid: tid, status: 'queued', date: entry.date,
+        key: 'time-' + tid, type: 'TimeActivity', qid: tid, date: entry.date,
         title: person, sub: job.name, hours: entry.hours, amount: null,
         payload: {
           TimeActivity: {
@@ -500,60 +831,72 @@ export default function QueFenceDemo() {
         },
       }
     }), 'TimeActivity')
-    flash(`${entry.crew.length * entry.hours} hours saved`)
+    flash(`${entry.crew.length * entry.hours} hours on ${job.name}`)
+    go('job')
   }
 
-  const saveMaterial = (entry) => {
-    updateJob(job.id, (j) => ({ ...j, materials: [...j.materials, { ...entry, id: uid('m') }] }))
-    const jid = parents.current[job.name]
-    const pid = nextQid()
-    push([{
-      key: 'pur-' + pid, type: 'Purchase', qid: pid, status: 'queued', date: entry.date,
-      title: entry.vendor, sub: entry.desc + ' — ' + job.name, amount: entry.amount,
-      payload: {
-        Purchase: {
-          Id: pid, SyncToken: '0', PaymentType: 'CreditCard', TxnDate: entry.date,
-          EntityRef: { name: entry.vendor, type: 'Vendor' }, TotalAmt: entry.amount,
-          Line: [{
-            DetailType: 'AccountBasedExpenseLineDetail', Amount: entry.amount, Description: entry.desc,
-            AccountBasedExpenseLineDetail: {
-              AccountRef: { name: 'Job Materials' },
-              CustomerRef: { value: jid, name: job.name },
-              BillableStatus: 'Billable',
-            },
-          }],
-          ...(entry.photo ? { AttachableRef: [{ FileName: entry.photo }] } : {}),
-        },
-      },
-    }], 'Purchase')
-    flash('Delivery saved · coded to ' + job.name)
+  const savePull = (lines) => {
+    const pull = { id: uid('p'), date: today, lines }
+    updateJob(job.id, (j) => ({ ...j, pulls: [...j.pulls, pull] }))
+    setStock((prev) => prev.map((s) => {
+      const l = lines.find((x) => x.name === s.name)
+      return l ? { ...s, onHand: +(s.onHand - l.qty).toFixed(1) } : s
+    }))
+    push([jeEntity(nextQid(), pull, job.name, parents.current[job.name])], 'JournalEntry')
+    flash(`${fmt(pullTotal(pull))} of stock moved onto this job`)
+    go('job')
+  }
+
+  const saveDelivery = (entry) => {
+    const d = { ...entry, id: uid('d') }
+    updateJob(job.id, (j) => ({ ...j, deliveries: [...j.deliveries, d] }))
+    push([purchaseEntity(nextQid(), d, job.name, parents.current[job.name])], 'Purchase')
+    flash('Delivery logged against this job')
+    go('job')
   }
 
   const saveChange = (entry) => {
-    updateJob(job.id, (j) => ({ ...j, changes: [...j.changes, { ...entry, id: uid('c'), billed: false }] }))
+    const c = { ...entry, id: uid('c'), billed: false }
+    updateJob(job.id, (j) => ({ ...j, changes: [...j.changes, c] }))
     if (entry.approved) {
-      const jid = parents.current[job.name]
       const eid = nextQid()
       push([{
-        key: 'est-' + eid, type: 'Estimate', qid: eid, status: 'queued', date: today,
-        title: job.name + ' — change order', sub: entry.desc, amount: entry.amount,
+        key: 'est-' + eid, type: 'Estimate', qid: eid, date: today,
+        title: job.name + ' — extra work', sub: entry.desc, amount: entry.amount,
         payload: {
           Estimate: {
-            Id: eid, SyncToken: '0', CustomerRef: { value: jid, name: job.name }, TotalAmt: entry.amount,
-            Line: [{
-              DetailType: 'SalesItemLineDetail', Amount: entry.amount, Description: entry.desc,
-              SalesItemLineDetail: { ItemRef: { name: 'Change order' }, Qty: 1, UnitPrice: entry.amount },
-            }],
+            Id: eid, SyncToken: '0', CustomerRef: { value: parents.current[job.name], name: job.name }, TotalAmt: entry.amount,
+            Line: [{ DetailType: 'SalesItemLineDetail', Amount: entry.amount, Description: entry.desc,
+              SalesItemLineDetail: { ItemRef: { name: 'Change order' }, Qty: 1, UnitPrice: entry.amount } }],
           },
         },
       }], 'Estimate')
     }
-    flash('Change order saved')
+    flash('Extra work saved. Now it cannot be forgotten.')
+    go('job')
   }
 
-  const markBilled = (cid) => updateJob(job.id, (j) => ({ ...j, changes: j.changes.map((c) => (c.id === cid ? { ...c, billed: true } : c)) }))
+  const saveInvoice = (amount, memo) => {
+    const iv = { id: uid('i'), date: today, amount, memo }
+    updateJob(job.id, (j) => ({
+      ...j, invoices: [...j.invoices, iv],
+      changes: j.changes.map((c) => (c.approved && !c.billed ? { ...c, billed: true } : c)),
+    }))
+    push([invoiceEntity(nextQid(), iv, job, parents.current[job.name])], 'money')
+    flash(`Bill sent for ${fmt(amount)}`)
+    go('job')
+  }
+
+  const savePayment = (amount, method) => {
+    const py = { id: uid('y'), date: today, amount, method }
+    updateJob(job.id, (j) => ({ ...j, payments: [...j.payments, py] }))
+    push([paymentEntity(nextQid(), py, job.name, parents.current[job.name], null)], 'money')
+    flash(`${fmt(amount)} recorded`)
+    go('job')
+  }
 
   const queued = qbo.filter((e) => e.status === 'queued').length
+  const moneyRows = qbo.filter((e) => e.type === 'Invoice' || e.type === 'Payment')
 
   return (
     <>
@@ -569,12 +912,13 @@ export default function QueFenceDemo() {
         input,select,textarea,button{font-family:${ui}}
         input:focus,select:focus,textarea:focus{border-color:${INK}!important}
         .num{font-variant-numeric:tabular-nums}
-        .split{display:flex;gap:0;min-height:100vh}
+        .split{display:flex;min-height:100vh}
         .paneL{flex:0 0 520px;border-right:1px solid ${BORDER};background:${BG};display:flex;flex-direction:column}
         .paneR{flex:1;background:#fff;display:flex;flex-direction:column;min-width:0}
         .switcher{display:none}
-        .fresh{animation:pop .5s ease}
-        @keyframes pop{from{background:#EAF7E6}to{background:transparent}}
+        .fresh{animation:pop 1.6s ease}
+        @keyframes pop{0%{background:#DCF2D6}70%{background:#EAF7E6}100%{background:transparent}}
+        .qbrow:hover{background:#F4F5F8}
         @media (max-width:940px){
           .split{display:block}
           .paneL,.paneR{flex:none;width:100%;border-right:none}
@@ -582,111 +926,134 @@ export default function QueFenceDemo() {
           .split.show-portal .paneR{display:none}
           .split.show-qbo .paneL{display:none}
         }
+        @media (max-width:620px){ .qbnav{display:none} }
       `}</style>
 
       <div className={`split show-${pane}`}>
-        {/* ── LEFT: the portal ──────────────────────────────────────── */}
         <div className="paneL">
           <div style={{ padding: '14px 18px', borderBottom: `1px solid ${BORDER}`, display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: '#fff' }}>
             <div style={{ display: 'flex', alignItems: 'baseline', gap: 10 }}>
               <div style={{ fontFamily: head, fontSize: 20, fontWeight: 700, letterSpacing: '-.01em' }}>{BIZ}</div>
-              <button onClick={() => setIntro(true)} style={{ border: 'none', background: 'none', padding: 0, color: FAINT, fontSize: 12.5, cursor: 'pointer' }}>
-                Why this exists
-              </button>
+              <button onClick={() => setIntro(true)} style={{ border: 'none', background: 'none', padding: 0, color: FAINT, fontSize: 12.5, cursor: 'pointer' }}>Why this exists</button>
             </div>
             <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-              <span style={{ fontSize: 12, color: queued ? AMBER : MUTED, fontWeight: 600 }}>
-                {queued ? `${queued} syncing…` : 'All synced'}
-              </span>
+              <span style={{ fontSize: 12, color: queued ? AMBER : MUTED, fontWeight: 600 }}>{queued ? `${queued} sending…` : 'All sent'}</span>
               <div className="switcher">
-                <button onClick={() => setPane('qbo')} style={{ fontSize: 12, fontWeight: 600, padding: '7px 11px', borderRadius: 8, border: `1px solid ${BORDER}`, background: '#fff', color: INK, cursor: 'pointer' }}>
-                  QuickBooks →
-                </button>
+                <button onClick={() => setPane('qbo')} style={{ fontSize: 12, fontWeight: 600, padding: '7px 11px', borderRadius: 8, border: `1px solid ${BORDER}`, background: '#fff', color: INK, cursor: 'pointer' }}>QuickBooks →</button>
               </div>
             </div>
           </div>
 
           <div style={{ flex: 1, overflowY: 'auto' }}>
-            <div style={{ maxWidth: 460, margin: '0 auto', padding: '20px 18px 60px' }}>
+            <div style={{ maxWidth: 460, margin: '0 auto', padding: '20px 18px 70px' }}>
               {view.screen === 'list' && (
-                <JobList jobs={jobs} onOpen={(id) => { setView({ screen: 'job', jobId: id }); setTab('overview') }} onNew={() => setView({ screen: 'new' })} />
+                <JobList jobs={jobs} stock={stock}
+                  onOpen={(id) => setView({ screen: 'job', jobId: id })}
+                  onNew={() => setView({ screen: 'new' })} />
               )}
-              {view.screen === 'new' && (
-                <NewJob onCancel={() => setView({ screen: 'list' })} onSave={createJob} />
-              )}
-              {view.screen === 'job' && job && (
-                <JobContainer
-                  job={job} tab={tab} setTab={setTab}
-                  onBack={() => setView({ screen: 'list' })}
-                  today={today}
-                  onLabor={saveLabor} onMaterial={saveMaterial} onChange={saveChange} onBill={markBilled}
-                />
+              {view.screen === 'new' && <NewJob stock={stock} onCancel={() => setView({ screen: 'list' })} onSave={createJob} onSell={sellFromYard} />}
+              {job && view.screen !== 'list' && view.screen !== 'new' && (
+                <JobShell job={job} stock={stock} screen={view.screen} go={go} onBack={() => setView({ screen: 'list' })}>
+                  {view.screen === 'job' && <JobHome job={job} stock={stock} go={go} />}
+                  {view.screen === 'labor' && <LaborScreen job={job} today={today} onSave={saveLabor} />}
+                  {view.screen === 'materials' && <MaterialsScreen job={job} stock={stock} today={today} onPull={savePull} onDelivery={saveDelivery} />}
+                  {view.screen === 'extra' && <ExtraWork job={job} onSave={saveChange} />}
+                  {view.screen === 'billing' && <Billing job={job} stock={stock} onInvoice={saveInvoice} onPayment={savePayment} />}
+                </JobShell>
               )}
             </div>
           </div>
         </div>
 
-        {/* ── RIGHT: QuickBooks ─────────────────────────────────────── */}
         <div className="paneR">
-          <div style={{ background: QB, color: '#fff', padding: '13px 20px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-              <div style={{ width: 22, height: 22, borderRadius: 11, background: '#fff', color: QB, fontWeight: 700, fontSize: 13, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>qb</div>
-              <span style={{ fontWeight: 600, fontSize: 15 }}>QuickBooks Online</span>
-              <span style={{ fontSize: 12, opacity: .8 }}>Sandbox company · QueFence Inc.</span>
+          {/* QBO top bar */}
+          <div style={{ background: QBINK, color: '#fff', padding: '0 16px', height: 48, display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexShrink: 0 }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+              <span style={{ fontWeight: 700, fontSize: 15, letterSpacing: '-.01em' }}>
+                <span style={{ color: QB }}>quickbooks</span>
+              </span>
+              <span style={{ width: 1, height: 20, background: 'rgba(255,255,255,.22)' }} />
+              <span style={{ fontSize: 13.5 }}>QueFence Inc.</span>
+              <span style={{ fontSize: 10.5, fontWeight: 700, letterSpacing: '.06em', textTransform: 'uppercase', border: '1px solid rgba(255,255,255,.35)', borderRadius: 4, padding: '2px 6px', opacity: .85 }}>Sandbox</span>
             </div>
-            <div className="switcher">
-              <button onClick={() => setPane('portal')} style={{ fontSize: 12, fontWeight: 600, padding: '7px 11px', borderRadius: 8, border: '1px solid rgba(255,255,255,.4)', background: 'transparent', color: '#fff', cursor: 'pointer' }}>
-                ← Portal
-              </button>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
+              <span style={{ fontSize: 15, opacity: .75 }}>⚙</span>
+              <span style={{ fontSize: 15, opacity: .75 }}>?</span>
+              <div style={{ width: 26, height: 26, borderRadius: 13, background: QB, fontSize: 11, fontWeight: 700, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>QF</div>
+              <div className="switcher">
+                <button onClick={() => setPane('portal')} style={{ fontSize: 12, fontWeight: 600, padding: '6px 10px', borderRadius: 6, border: '1px solid rgba(255,255,255,.4)', background: 'transparent', color: '#fff', cursor: 'pointer' }}>← Portal</button>
+              </div>
             </div>
           </div>
 
-          <div style={{ display: 'flex', gap: 2, padding: '0 20px', borderBottom: `1px solid ${BORDER}`, background: SOFT, overflowX: 'auto' }}>
-            {QBO_TABS.map((t) => {
-              const on = qtab === t.id
-              const n = t.id === 'report' ? null : qbo.filter((e) => e.type === t.id).length
-              return (
-                <button key={t.id} onClick={() => setQtab(t.id)} style={{
-                  padding: '13px 14px', border: 'none', background: 'transparent', cursor: 'pointer', whiteSpace: 'nowrap',
-                  fontSize: 13.5, fontWeight: on ? 600 : 500, color: on ? QBDARK : MUTED,
-                  borderBottom: `2px solid ${on ? QB : 'transparent'}`,
-                }}>
-                  {t.label}{n !== null && <span className="num" style={{ marginLeft: 6, color: FAINT, fontWeight: 500 }}>{n}</span>}
-                </button>
-              )
-            })}
-          </div>
+          <div style={{ flex: 1, display: 'flex', minHeight: 0 }}>
+            {/* QBO left nav */}
+            <nav className="qbnav" style={{ width: 176, flexShrink: 0, background: QBINK, padding: '14px 0 30px', overflowY: 'auto' }}>
+              <div style={{ padding: '0 12px 14px' }}>
+                <div style={{ background: QB, color: '#fff', fontWeight: 700, fontSize: 13.5, textAlign: 'center', padding: '9px 0', borderRadius: 4 }}>+ New</div>
+              </div>
+              {QB_NAV.map((g) => (
+                <div key={g.group} style={{ marginBottom: 2 }}>
+                  <div style={{ color: 'rgba(255,255,255,.55)', fontSize: 12.5, padding: '9px 16px 5px', fontWeight: 500 }}>{g.group}</div>
+                  {g.items.map((it) => {
+                    const on = qtab === it.id
+                    return (
+                      <button key={it.id} onClick={() => setQtab(it.id)} style={{
+                        display: 'block', width: '100%', textAlign: 'left', border: 'none', cursor: 'pointer',
+                        padding: '8px 16px 8px 26px', fontSize: 13.5, fontWeight: on ? 700 : 400,
+                        color: on ? '#fff' : 'rgba(255,255,255,.82)',
+                        background: on ? 'rgba(255,255,255,.13)' : 'transparent',
+                        boxShadow: on ? `inset 3px 0 0 ${QB}` : 'none',
+                      }}>{it.label}</button>
+                    )
+                  })}
+                </div>
+              ))}
+            </nav>
 
-          <div style={{ flex: 1, overflowY: 'auto', padding: 20 }}>
-            {qtab === 'report'
-              ? <Profitability jobs={jobs} />
-              : <QboList rows={qbo.filter((e) => e.type === qtab)} type={qtab} open={openPayload} setOpen={setOpenPayload} />}
+            {/* QBO content */}
+            <div style={{ flex: 1, minWidth: 0, background: '#F4F5F8', overflowY: 'auto' }}>
+              <div style={{ padding: '20px 24px 40px' }}>
+                <div style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between', gap: 12, marginBottom: 16 }}>
+                  <div>
+                    <h1 style={{ fontSize: 25, fontWeight: 400, color: QBINK, letterSpacing: '-.01em' }}>{qbItem(qtab).title}</h1>
+                    {qbItem(qtab).sub && <div style={{ fontSize: 13, color: '#6B6C72', marginTop: 2 }}>{qbItem(qtab).sub}</div>}
+                  </div>
+                  {qtab !== 'report' && (
+                    <div style={{ background: QB, color: '#fff', fontWeight: 600, fontSize: 13.5, padding: '9px 16px', borderRadius: 4, whiteSpace: 'nowrap' }}>
+                      New {qtab === 'Customer' ? 'customer' : qtab === 'money' ? 'invoice' : 'transaction'}
+                    </div>
+                  )}
+                </div>
+
+                {qtab === 'report'
+                  ? <Profitability jobs={jobs} stock={stock} />
+                  : <QboList rows={qtab === 'money' ? moneyRows : qbo.filter((e) => e.type === qtab)} type={qtab} open={openPayload} setOpen={setOpenPayload} />}
+              </div>
+            </div>
           </div>
         </div>
       </div>
 
-      {intro && <Intro jobs={jobs} onClose={closeIntro} />}
+      {intro && <Intro jobs={jobs} stock={stock} onClose={closeIntro} />}
 
       {toast && (
         <div style={{
-          position: 'fixed', bottom: 22, left: '50%', transform: 'translateX(-50%)', zIndex: 50,
-          background: INK, color: '#fff', padding: '12px 20px', borderRadius: 10, fontSize: 14, fontWeight: 500,
-          boxShadow: '0 8px 28px rgba(0,0,0,.22)',
+          position: 'fixed', bottom: 22, left: '50%', transform: 'translateX(-50%)', zIndex: 60,
+          background: INK, color: '#fff', padding: '13px 22px', borderRadius: 11, fontSize: 14.5, fontWeight: 500,
+          boxShadow: '0 8px 28px rgba(0,0,0,.22)', maxWidth: '92vw', textAlign: 'center',
         }}>{toast}</div>
       )}
     </>
   )
 }
 
-/* ─── First-visit intro ───────────────────────────────────────────────── */
+/* ─── Intro ───────────────────────────────────────────────────────────── */
 
-function Intro({ jobs, onClose }) {
-  const worst = jobs
-    .map((j) => ({ j, b: jobBudget(j), a: jobActual(j) }))
-    .sort((x, y) => (y.a.total - y.b.total) - (x.a.total - x.b.total))[0]
-  const hours = jobs.reduce((s, j) => s + jobActual(j).laborHours, 0)
-  const unbilled = jobs.flatMap((j) => j.changes).filter((c) => c.approved && !c.billed)
-    .reduce((s, c) => s + c.amount, 0)
+function Intro({ jobs, stock, onClose }) {
+  const owed = jobs.reduce((s, j) => s + jobMoney(j, stock).owed, 0)
+  const toBill = jobs.reduce((s, j) => s + jobMoney(j, stock).toBill, 0)
+  const unbilled = jobs.flatMap((j) => j.changes).filter((c) => c.approved && !c.billed).reduce((s, c) => s + c.amount, 0)
 
   const Q = ({ q, a }) => (
     <div style={{ padding: '11px 0', borderTop: `1px solid ${BORDER}` }}>
@@ -696,375 +1063,493 @@ function Intro({ jobs, onClose }) {
   )
 
   return (
-    <div onClick={onClose} style={{
-      position: 'fixed', inset: 0, zIndex: 100, background: 'rgba(16,24,40,.55)',
-      display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 20, overflowY: 'auto',
-    }}>
-      <div onClick={(e) => e.stopPropagation()} style={{
-        background: CARD, borderRadius: 14, maxWidth: 560, width: '100%', padding: 28,
-        boxShadow: '0 20px 60px rgba(16,24,40,.28)',
-      }}>
-        <div style={{ fontSize: 12, fontWeight: 600, letterSpacing: '.06em', textTransform: 'uppercase', color: MUTED, marginBottom: 8 }}>
-          QueFence · job entry portal
-        </div>
+    <div onClick={onClose} style={{ position: 'fixed', inset: 0, zIndex: 100, background: 'rgba(16,24,40,.55)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 20, overflowY: 'auto' }}>
+      <div onClick={(e) => e.stopPropagation()} style={{ background: CARD, borderRadius: 14, maxWidth: 580, width: '100%', padding: 28, boxShadow: '0 20px 60px rgba(16,24,40,.28)' }}>
+        <div style={{ fontSize: 12, fontWeight: 600, letterSpacing: '.06em', textTransform: 'uppercase', color: MUTED, marginBottom: 8 }}>QueFence · job entry portal</div>
         <h2 style={{ fontFamily: head, fontSize: 25, fontWeight: 700, lineHeight: 1.22, letterSpacing: '-.015em', marginBottom: 10 }}>
           QuickBooks has always been able to do job costing. Nothing has ever fed it correctly.
         </h2>
         <p style={{ fontSize: 14.5, color: MUTED, lineHeight: 1.55, marginBottom: 16 }}>
-          This is the funnel that makes correct data the only kind that gets in. There is no screen
-          here that exists outside a job — so a cost can't land on the wrong one, or on none at all.
+          This is the funnel that makes correct data the only kind that gets in. There is no screen here
+          that exists outside a job, so a cost cannot land on the wrong one — or on none at all.
         </p>
-
-        <Q q="What is this job actually costing me?" a={`${worst.j.name} — ${fmt(worst.a.total)} spent against a ${fmt(worst.b.total)} budget`} />
-        <Q q="How many hours went into the work?" a={`${hours.toFixed(0)} hours entered, every one attached to a job and a customer`} />
-        <Q q="What did we do and never charge for?" a={`${fmt(unbilled)} in approved change orders still unbilled`} />
-
+        <Q q="What did we take out of the yard for this job?" a="Materials come off the shelf, not off a receipt — stock drops and the job gets charged, same tap" />
+        <Q q="What have we billed, and what came back?" a={`${fmt(toBill)} of sold work not billed yet · ${fmt(owed)} billed and still owed`} />
+        <Q q="What did we do and never charge for?" a={`${fmt(unbilled)} in approved extra work sitting unbilled`} />
         <p style={{ fontSize: 14.5, color: MUTED, lineHeight: 1.55, margin: '18px 0 16px', paddingTop: 16, borderTop: `1px solid ${BORDER}` }}>
-          The left side is the crew entering a day's work in ten seconds. The right side is
-          QuickBooks. Your reports, your CPA, your tax return, your bank feeds — all unchanged.
+          The left side has no accounting words in it anywhere — it is built for the guy in the truck.
+          The right side is QuickBooks. Your reports, your CPA, your tax return, your bank feeds, unchanged.
           I'm not replacing your QuickBooks reports. I'm making them finally work.
         </p>
-
         <Btn full onClick={onClose}>Open the portal</Btn>
-
         <p style={{ fontSize: 12, color: FAINT, lineHeight: 1.5, marginTop: 14 }}>
-          Sample jobs and numbers, built for this walkthrough. The QuickBooks panel is a simulation
-          of the sandbox company, so you can click through it without logging in anywhere.
+          Sample jobs and numbers, built for this walkthrough. The QuickBooks panel is a simulation of the
+          sandbox company, so you can click through it without logging in anywhere.
         </p>
       </div>
     </div>
   )
 }
 
-/* ─── 4.1 Job list ────────────────────────────────────────────────────── */
+/* ─── Job list ────────────────────────────────────────────────────────── */
 
-function JobList({ jobs, onOpen, onNew }) {
+function JobList({ jobs, stock, onOpen, onNew }) {
   return (
     <div>
-      <h1 style={{ fontFamily: head, fontSize: 27, fontWeight: 700, letterSpacing: '-.015em', marginBottom: 4 }}>Jobs</h1>
-      <p style={{ color: MUTED, fontSize: 14, marginBottom: 20 }}>Pick a job to enter labor, materials, or a change order.</p>
+      <h1 style={{ fontFamily: head, fontSize: 27, fontWeight: 700, letterSpacing: '-.015em', marginBottom: 4 }}>Your jobs</h1>
+      <p style={{ color: MUTED, fontSize: 14.5, marginBottom: 20 }}>Tap the one you were working on.</p>
 
       <div style={{ display: 'grid', gap: 10, marginBottom: 20 }}>
         {jobs.map((j) => {
-          const b = jobBudget(j), a = jobActual(j)
-          const flag = jobFlag(j)
-          const usedPct = b.total ? Math.min((a.total / b.total) * 100, 100) : 0
+          const b = jobBudget(j, stock), a = jobActual(j), m = jobMoney(j, stock)
+          const flag = jobFlag(j, stock)
+          const used = b.total ? Math.min((a.total / b.total) * 100, 100) : 0
           const unbilled = j.changes.some((c) => c.approved && !c.billed)
           return (
-            <button key={j.id} onClick={() => onOpen(j.id)} style={{
-              textAlign: 'left', background: CARD, border: `1px solid ${BORDER}`, borderRadius: 12,
-              padding: 16, cursor: 'pointer', display: 'block', width: '100%',
-            }}>
+            <button key={j.id} onClick={() => onOpen(j.id)} style={{ textAlign: 'left', background: CARD, border: `1px solid ${BORDER}`, borderRadius: 13, padding: 16, cursor: 'pointer', width: '100%' }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 10 }}>
                 <div style={{ minWidth: 0 }}>
-                  <div style={{ fontSize: 16, fontWeight: 600, marginBottom: 2 }}>{j.name}</div>
-                  <div style={{ fontSize: 13, color: MUTED }}>{j.customer}</div>
+                  <div style={{ fontSize: 16.5, fontWeight: 600, marginBottom: 2 }}>
+                    {j.name}
+                    {j.kind === 'wholesale' && (
+                      <span style={{ marginLeft: 8, fontSize: 11, fontWeight: 600, letterSpacing: '.04em', textTransform: 'uppercase', color: MUTED, border: `1px solid ${BORDER}`, borderRadius: 5, padding: '2px 6px', verticalAlign: 'middle' }}>
+                        Off the shelf
+                      </span>
+                    )}
+                  </div>
+                  <div style={{ fontSize: 13.5, color: MUTED }}>{j.customer} · {j.status}</div>
                 </div>
                 <div style={{ textAlign: 'right', flexShrink: 0 }}>
-                  <div className="num" style={{ fontSize: 15, fontWeight: 600 }}>{fmt(b.contract)}</div>
-                  <div style={{ fontSize: 12, color: FAINT }}>{j.status}</div>
+                  <div className="num" style={{ fontSize: 15.5, fontWeight: 700 }}>{fmt(m.contract)}</div>
+                  <div style={{ fontSize: 12, color: FAINT }}>{j.kind === 'wholesale' ? 'sale' : 'job price'}</div>
                 </div>
               </div>
               <div style={{ marginTop: 13, height: 5, background: '#EDEFF2', borderRadius: 3, overflow: 'hidden' }}>
-                <div style={{ width: usedPct + '%', height: '100%', background: FLAG_COLOR[flag] }} />
+                <div style={{ width: used + '%', height: '100%', background: FLAG_COLOR[flag] }} />
               </div>
-              <div style={{ marginTop: 8, display: 'flex', alignItems: 'center', gap: 7, fontSize: 12.5 }}>
-                <Dot flag={flag} />
-                <span style={{ color: FLAG_COLOR[flag], fontWeight: 600 }}>{FLAG_LABEL[flag]}</span>
-                <span className="num" style={{ color: MUTED }}>{fmt(a.total)} of {fmt(b.total)} cost</span>
-                {unbilled && <span style={{ marginLeft: 'auto', color: RED, fontWeight: 600 }}>Unbilled change order</span>}
+              <div className="num" style={{ marginTop: 8, display: 'flex', flexWrap: 'wrap', gap: '4px 12px', fontSize: 12.5, color: MUTED }}>
+                <span>{fmt(a.total)} spent of {fmt(b.total)}</span>
+                {m.owed > 0 && <span style={{ color: RED, fontWeight: 600 }}>{fmt(m.owed)} owed to you</span>}
+                {unbilled && <span style={{ color: RED, fontWeight: 600 }}>extra work not billed</span>}
               </div>
             </button>
           )
         })}
       </div>
-
-      <Btn full onClick={onNew}>New job</Btn>
+      <Btn full onClick={onNew}>Start something new</Btn>
     </div>
   )
 }
 
-/* ─── 4.2 New job ─────────────────────────────────────────────────────── */
+/* ─── New job ─────────────────────────────────────────────────────────── */
 
-function NewJob({ onCancel, onSave }) {
+function NewJob({ stock, onCancel, onSave, onSell }) {
+  const [kind, setKind] = useState(null)
+  const [step, setStep] = useState(1)
   const [customer, setCustomer] = useState('')
   const [newCustomer, setNewCustomer] = useState('')
   const [name, setName] = useState('')
   const [address, setAddress] = useState('')
-  const [asmId, setAsmId] = useState(ASSEMBLIES[0].id)
+  const [asmId, setAsmId] = useState(null)
   const [qty, setQty] = useState('')
-  const [price, setPrice] = useState(String(ASSEMBLIES[0].price))
+  const [price, setPrice] = useState('')
   const [picked, setPicked] = useState([])
   const [showLines, setShowLines] = useState(false)
 
-  const asm = asmById(asmId)
   const cust = customer === '__new' ? newCustomer.trim() : customer
+  const asm = asmId ? asmById(asmId) : null
+  const preview = useMemo(
+    () => jobBudget({ assemblies: picked, labor: [], pulls: [], deliveries: [], changes: [], invoices: [], payments: [] }, stock),
+    [picked, stock]
+  )
 
-  const pickAsm = (id) => { setAsmId(id); setPrice(String(asmById(id).price)) }
-
+  const pickAsm = (id) => { setAsmId(id); setPrice(String(asmById(id).price)); setQty('') }
   const add = () => {
-    const q = parseFloat(qty)
-    const p = parseFloat(price)
+    const q = parseFloat(qty), p = parseFloat(price)
     if (!q || q <= 0 || !p) return
     setPicked((prev) => [...prev, { assemblyId: asmId, qty: q, price: p }])
-    setQty('')
+    setAsmId(null); setQty(''); setPrice('')
   }
 
-  const preview = useMemo(() => jobBudget({ assemblies: picked, labor: [], materials: [], changes: [] }), [picked])
-  const ready = cust && name.trim() && picked.length > 0
+  if (kind === null) {
+    return (
+      <div>
+        <Btn kind="quiet" small onClick={onCancel}>← Back</Btn>
+        <h1 style={{ fontFamily: head, fontSize: 25, fontWeight: 700, letterSpacing: '-.015em', margin: '10px 0 4px' }}>What is this?</h1>
+        <p style={{ color: MUTED, fontSize: 14.5, marginBottom: 18 }}>Two different things, two different screens.</p>
+        <div style={{ display: 'grid', gap: 10 }}>
+          <button onClick={() => setKind('install')} style={bigChoice}>
+            <div style={{ fontSize: 17, fontWeight: 600, marginBottom: 3 }}>We're building a fence</div>
+            <div style={{ fontSize: 13.5, color: MUTED }}>Crew goes out, materials get used, you bill the homeowner.</div>
+          </button>
+          <button onClick={() => setKind('wholesale')} style={bigChoice}>
+            <div style={{ fontSize: 17, fontWeight: 600, marginBottom: 3 }}>Somebody's buying material from us</div>
+            <div style={{ fontSize: 13.5, color: MUTED }}>Another contractor picks it up at the yard. No crew, no install.</div>
+          </button>
+        </div>
+      </div>
+    )
+  }
+
+  if (kind === 'wholesale') {
+    return <CounterSale stock={stock} onBack={() => setKind(null)} onSave={onSell} />
+  }
 
   return (
     <div>
-      <Btn kind="quiet" small onClick={onCancel}>← Jobs</Btn>
-      <h1 style={{ fontFamily: head, fontSize: 27, fontWeight: 700, letterSpacing: '-.015em', margin: '10px 0 20px' }}>New job</h1>
+      <Btn kind="quiet" small onClick={step === 1 ? () => setKind(null) : () => setStep(step - 1)}>← Back</Btn>
+      <div style={{ fontSize: 12, fontWeight: 600, letterSpacing: '.05em', textTransform: 'uppercase', color: FAINT, margin: '10px 0 6px' }}>Step {step} of 2</div>
 
-      <Field label="Customer">
-        <select style={inputStyle} value={customer} onChange={(e) => setCustomer(e.target.value)}>
-          <option value="">Select a customer…</option>
-          {CUSTOMERS.map((c) => <option key={c} value={c}>{c}</option>)}
-          <option value="__new">+ Add a new customer</option>
-        </select>
-        {customer === '__new' && (
-          <input style={{ ...inputStyle, marginTop: 9 }} placeholder="Customer name" value={newCustomer} onChange={(e) => setNewCustomer(e.target.value)} />
-        )}
-      </Field>
+      {step === 1 && (
+        <div>
+          <h1 style={{ fontFamily: head, fontSize: 25, fontWeight: 700, letterSpacing: '-.015em', marginBottom: 18 }}>Who is it for, and where?</h1>
 
-      <Field label="Job name">
-        <input style={inputStyle} placeholder="e.g. Smith residence" value={name} onChange={(e) => setName(e.target.value)} />
-      </Field>
+          <Ask>Who is the customer?</Ask>
+          <select style={{ ...inputStyle, marginBottom: 9 }} value={customer} onChange={(e) => setCustomer(e.target.value)}>
+            <option value="">Tap to choose…</option>
+            {CUSTOMERS.map((c) => <option key={c} value={c}>{c}</option>)}
+            <option value="__new">Somebody new</option>
+          </select>
+          {customer === '__new' && <input style={{ ...inputStyle, marginBottom: 9 }} placeholder="Their name" value={newCustomer} onChange={(e) => setNewCustomer(e.target.value)} />}
 
-      <Field label="Address">
-        <input style={inputStyle} placeholder="Street address" value={address} onChange={(e) => setAddress(e.target.value)} />
-      </Field>
+          <div style={{ height: 12 }} />
+          <Ask>What do you call this job?</Ask>
+          <input style={{ ...inputStyle, marginBottom: 16 }} placeholder="Smith residence" value={name} onChange={(e) => setName(e.target.value)} />
 
-      <div style={{ background: CARD, border: `1px solid ${BORDER}`, borderRadius: 12, padding: 16, marginBottom: 16 }}>
-        <div style={{ fontSize: 12, fontWeight: 600, letterSpacing: '.04em', textTransform: 'uppercase', color: MUTED, marginBottom: 11 }}>What are you building</div>
+          <Ask>Where is it?</Ask>
+          <input style={{ ...inputStyle, marginBottom: 20 }} placeholder="Street address" value={address} onChange={(e) => setAddress(e.target.value)} />
 
-        <select style={{ ...inputStyle, marginBottom: 9 }} value={asmId} onChange={(e) => pickAsm(e.target.value)}>
-          {ASSEMBLIES.map((a) => <option key={a.id} value={a.id}>{a.name}</option>)}
-        </select>
-
-        <div style={{ display: 'flex', gap: 9, marginBottom: 10 }}>
-          <div style={{ flex: 1 }}>
-            <div style={{ fontSize: 11, color: FAINT, marginBottom: 4 }}>Quantity ({asm.unit})</div>
-            <input className="num" style={inputStyle} inputMode="decimal" placeholder="0" value={qty} onChange={(e) => setQty(e.target.value)} />
-          </div>
-          <div style={{ flex: 1 }}>
-            <div style={{ fontSize: 11, color: FAINT, marginBottom: 4 }}>Price per {asm.unit}</div>
-            <input className="num" style={inputStyle} inputMode="decimal" value={price} onChange={(e) => setPrice(e.target.value)} />
-          </div>
-        </div>
-
-        <Btn kind="ghost" full small onClick={add}>Add to job</Btn>
-
-        {picked.length > 0 && (
-          <div style={{ marginTop: 14, borderTop: `1px solid ${BORDER}`, paddingTop: 12 }}>
-            {picked.map((p, i) => (
-              <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '7px 0', fontSize: 14 }}>
-                <div style={{ flex: 1 }}>
-                  <span className="num" style={{ fontWeight: 600 }}>{p.qty} {asmById(p.assemblyId).unit}</span>{' '}
-                  {asmById(p.assemblyId).name}
-                </div>
-                <span className="num" style={{ fontWeight: 600 }}>{fmt(p.qty * p.price)}</span>
-                <button onClick={() => setPicked((prev) => prev.filter((_, x) => x !== i))} style={{ border: 'none', background: 'none', color: FAINT, cursor: 'pointer', fontSize: 17, lineHeight: 1 }}>×</button>
-              </div>
-            ))}
-          </div>
-        )}
-      </div>
-
-      {picked.length > 0 && (
-        <div style={{ background: CARD, border: `1px solid ${BORDER}`, borderRadius: 12, padding: 16, marginBottom: 18 }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: 12 }}>
-            <span style={{ fontSize: 12, fontWeight: 600, letterSpacing: '.04em', textTransform: 'uppercase', color: MUTED }}>Budget</span>
-            <span className="num" style={{ fontFamily: head, fontSize: 22, fontWeight: 700 }}>{fmt(preview.contract)}</span>
-          </div>
-          <Row label="Materials" value={fmt(preview.materials)} />
-          <Row label="Labor" value={`${hrs(preview.laborHours)} · ${fmt(preview.labor)}`} />
-          <Row label="Gross margin" value={pct(((preview.contract - preview.total) / preview.contract) * 100).replace('+', '')} bold />
-
-          <button onClick={() => setShowLines(!showLines)} style={{ marginTop: 10, border: 'none', background: 'none', padding: 0, color: MUTED, fontSize: 13, fontWeight: 600, cursor: 'pointer' }}>
-            {showLines ? '▾' : '▸'} What this includes
-          </button>
-          {showLines && (
-            <div style={{ marginTop: 9, borderTop: `1px solid ${BORDER}`, paddingTop: 9 }}>
-              {preview.lines.map((l, i) => (
-                <div key={i} style={{ display: 'flex', justifyContent: 'space-between', fontSize: 13, color: MUTED, padding: '3px 0' }}>
-                  <span><span className="num">{l.qty % 1 === 0 ? l.qty : l.qty.toFixed(1)} {l.u}</span> · {l.name}</span>
-                  <span className="num">{fmt(l.cost)}</span>
-                </div>
-              ))}
-              <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 13, color: MUTED, padding: '3px 0' }}>
-                <span><span className="num">{preview.laborHours.toFixed(1)} hr</span> · Install labor</span>
-                <span className="num">{fmt(preview.labor)}</span>
-              </div>
-            </div>
-          )}
+          <Btn full disabled={!cust || !name.trim()} onClick={() => setStep(2)}>Next</Btn>
         </div>
       )}
 
-      <Btn full disabled={!ready} onClick={() => ready && onSave({ customer: cust, name: name.trim(), address: address.trim(), picked })}>
-        Save job
+      {step === 2 && (
+        <div>
+          <h1 style={{ fontFamily: head, fontSize: 25, fontWeight: 700, letterSpacing: '-.015em', marginBottom: 4 }}>What are you building?</h1>
+          <p style={{ color: MUTED, fontSize: 14, marginBottom: 16 }}>Pick the fence. We know what goes into it.</p>
+
+          {!asm && (
+            <div style={{ display: 'grid', gap: 8, marginBottom: 16 }}>
+              {ASSEMBLIES.map((a) => (
+                <button key={a.id} onClick={() => pickAsm(a.id)} style={{ textAlign: 'left', background: CARD, border: `1px solid ${BORDER}`, borderRadius: 11, padding: '15px 16px', cursor: 'pointer', width: '100%' }}>
+                  <div style={{ fontSize: 15.5, fontWeight: 600 }}>{a.name}</div>
+                  <div className="num" style={{ fontSize: 13, color: MUTED }}>{fmt(a.price)} per {a.unit === 'LF' ? 'foot' : 'one'}</div>
+                </button>
+              ))}
+            </div>
+          )}
+
+          {asm && (
+            <Card style={{ marginBottom: 16 }}>
+              <div style={{ fontSize: 15.5, fontWeight: 600, marginBottom: 12 }}>{asm.name}</div>
+              <Ask>{asm.unit === 'LF' ? 'How many feet?' : 'How many?'}</Ask>
+              <input className="num" style={{ ...inputStyle, fontSize: 24, fontWeight: 700, marginBottom: 14 }} inputMode="decimal" placeholder="0" value={qty} onChange={(e) => setQty(e.target.value)} autoFocus />
+              <Ask>Price {asm.unit === 'LF' ? 'per foot' : 'each'}</Ask>
+              <input className="num" style={{ ...inputStyle, marginBottom: 8 }} inputMode="decimal" value={price} onChange={(e) => setPrice(e.target.value)} />
+              <p style={{ fontSize: 12.5, color: FAINT, marginBottom: 14 }}>Already filled in. Change it only if you quoted something else.</p>
+              <div style={{ display: 'flex', gap: 8 }}>
+                <div style={{ flex: 1 }}><Btn kind="ghost" full onClick={() => setAsmId(null)}>Cancel</Btn></div>
+                <div style={{ flex: 2 }}><Btn full disabled={!parseFloat(qty)} onClick={add}>Add it</Btn></div>
+              </div>
+            </Card>
+          )}
+
+          {picked.length > 0 && (
+            <Card style={{ marginBottom: 16 }}>
+              {picked.map((p, i) => (
+                <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '8px 0', fontSize: 14.5, borderBottom: i < picked.length - 1 ? `1px solid ${BORDER}` : 'none' }}>
+                  <div style={{ flex: 1 }}>
+                    <span className="num" style={{ fontWeight: 600 }}>{p.qty}{asmById(p.assemblyId).unit === 'LF' ? ' ft' : ''}</span> {asmById(p.assemblyId).name}
+                  </div>
+                  <span className="num" style={{ fontWeight: 600 }}>{fmt(p.qty * p.price)}</span>
+                  <button onClick={() => setPicked((prev) => prev.filter((_, x) => x !== i))} style={{ border: 'none', background: 'none', color: FAINT, cursor: 'pointer', fontSize: 18, lineHeight: 1 }}>×</button>
+                </div>
+              ))}
+              {!asm && <div style={{ marginTop: 10 }}><Btn kind="ghost" full small onClick={() => setAsmId(ASSEMBLIES[0].id)}>Add something else</Btn></div>}
+            </Card>
+          )}
+
+          {picked.length > 0 && (
+            <Card style={{ marginBottom: 18 }}>
+              <Line label="You're charging" value={fmt(preview.contract)} bold />
+              <Line label="Materials it takes" value={fmt(preview.materials)} />
+              <Line label="Crew time it takes" value={`${preview.laborHours.toFixed(0)} hours`} sub={fmt(preview.labor)} />
+              <div style={{ borderTop: `1px solid ${BORDER}`, marginTop: 6, paddingTop: 6 }}>
+                <Line label="What you keep if it goes to plan" value={fmt(preview.contract - preview.total)} bold color={GREEN} />
+              </div>
+              <button onClick={() => setShowLines(!showLines)} style={{ marginTop: 10, border: 'none', background: 'none', padding: 0, color: MUTED, fontSize: 13.5, fontWeight: 600, cursor: 'pointer' }}>
+                {showLines ? '▾' : '▸'} Everything this needs
+              </button>
+              {showLines && (
+                <div style={{ marginTop: 9, borderTop: `1px solid ${BORDER}`, paddingTop: 9 }}>
+                  {preview.need.map((l, i) => (
+                    <div key={i} style={{ display: 'flex', justifyContent: 'space-between', fontSize: 13.5, color: MUTED, padding: '3px 0' }}>
+                      <span><span className="num">{l.whole ? Math.ceil(l.qty) : l.qty.toFixed(1)} {l.unit}</span> · {l.name}</span>
+                      <span className="num">{fmt(l.cost)}</span>
+                    </div>
+                  ))}
+                  <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 13.5, color: MUTED, padding: '3px 0' }}>
+                    <span><span className="num">{preview.laborHours.toFixed(0)} hr</span> · Crew time</span>
+                    <span className="num">{fmt(preview.labor)}</span>
+                  </div>
+                </div>
+              )}
+            </Card>
+          )}
+
+          <Btn full disabled={!picked.length} onClick={() => onSave({ customer: cust, name: name.trim(), address: address.trim(), picked })}>
+            Start the job
+          </Btn>
+        </div>
+      )}
+    </div>
+  )
+}
+
+/* ─── Counter sale: sell off the shelf, only what's on the shelf ──────── */
+
+function CounterSale({ stock, onBack, onSave }) {
+  const [customer, setCustomer] = useState('')
+  const [newCustomer, setNewCustomer] = useState('')
+  const [qtys, setQtys] = useState({})
+  const [search, setSearch] = useState('')
+
+  const cust = customer === '__new' ? newCustomer.trim() : customer
+  // Only things that are actually sellable AND actually on the shelf.
+  const sellable = stock.filter((s) => s.sell && s.onHand > 0)
+  const shown = search.trim()
+    ? sellable.filter((s) => s.name.toLowerCase().includes(search.trim().toLowerCase()))
+    : sellable
+
+  const bump = (s, d) => setQtys((q) => {
+    const step = s.whole ? 1 : 5
+    return { ...q, [s.name]: +Math.min(s.onHand, Math.max(0, (q[s.name] || 0) + d * step)).toFixed(1) }
+  })
+
+  const lines = sellable.filter((s) => (qtys[s.name] || 0) > 0)
+    .map((s) => ({ name: s.name, qty: qtys[s.name], cost: s.cost, price: s.price }))
+  const revenue = lines.reduce((s, l) => s + l.qty * l.price, 0)
+  const cost = lines.reduce((s, l) => s + l.qty * l.cost, 0)
+
+  return (
+    <div>
+      <Btn kind="quiet" small onClick={onBack}>← Back</Btn>
+      <h1 style={{ fontFamily: head, fontSize: 25, fontWeight: 700, letterSpacing: '-.015em', margin: '10px 0 18px' }}>Selling off the shelf</h1>
+
+      <Ask>Who's buying?</Ask>
+      <select style={{ ...inputStyle, marginBottom: 9 }} value={customer} onChange={(e) => setCustomer(e.target.value)}>
+        <option value="">Tap to choose…</option>
+        {CUSTOMERS.map((c) => <option key={c} value={c}>{c}</option>)}
+        <option value="__new">Somebody new</option>
+      </select>
+      {customer === '__new' && <input style={{ ...inputStyle, marginBottom: 9 }} placeholder="Their name" value={newCustomer} onChange={(e) => setNewCustomer(e.target.value)} />}
+
+      <div style={{ height: 14 }} />
+      <Ask>What are they taking?</Ask>
+      <p style={{ fontSize: 13.5, color: MUTED, marginBottom: 10 }}>
+        Only what's on the shelf shows up here, and you can't go past what's there.
+      </p>
+      <input style={{ ...inputStyle, marginBottom: 10 }} placeholder="Search the yard…" value={search} onChange={(e) => setSearch(e.target.value)} />
+
+      <div style={{ display: 'grid', gap: 8, marginBottom: 16, maxHeight: 420, overflowY: 'auto' }}>
+        {shown.map((s) => {
+          const q = qtys[s.name] || 0
+          const maxed = q >= s.onHand
+          return (
+            <Card key={s.name} style={{ padding: '12px 14px', borderColor: q > 0 ? INK : BORDER }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <div style={{ fontSize: 15, fontWeight: 600 }}>{s.name}</div>
+                  <div className="num" style={{ fontSize: 12.5, color: FAINT }}>
+                    {fmt2(s.price)} each · {s.onHand} {s.unit} on the shelf
+                  </div>
+                </div>
+                <button onClick={() => bump(s, -1)} style={miniBtn}>−</button>
+                <span className="num" style={{ minWidth: 42, textAlign: 'center', fontSize: 19, fontWeight: 700 }}>{q}</span>
+                <button onClick={() => bump(s, 1)} disabled={maxed}
+                  style={{ ...miniBtn, opacity: maxed ? 0.3 : 1, cursor: maxed ? 'not-allowed' : 'pointer' }}>+</button>
+              </div>
+              {maxed && <div style={{ fontSize: 12, color: AMBER, fontWeight: 600, marginTop: 6 }}>That's all of them</div>}
+            </Card>
+          )
+        })}
+        {shown.length === 0 && <div style={{ fontSize: 14, color: FAINT, padding: 20, textAlign: 'center' }}>Nothing on the shelf matches that.</div>}
+      </div>
+
+      {lines.length > 0 && (
+        <Card style={{ marginBottom: 16 }}>
+          {lines.map((l) => (
+            <div key={l.name} style={{ display: 'flex', justifyContent: 'space-between', fontSize: 14, padding: '3px 0' }}>
+              <span><span className="num" style={{ fontWeight: 600 }}>{l.qty}</span> · {l.name}</span>
+              <span className="num" style={{ fontWeight: 600 }}>{fmt(l.qty * l.price)}</span>
+            </div>
+          ))}
+          <div style={{ borderTop: `1px solid ${BORDER}`, marginTop: 8, paddingTop: 4 }}>
+            <Line label="They pay" value={fmt(revenue)} bold />
+            <Line label="What you keep" value={fmt(revenue - cost)} color={GREEN} bold />
+          </div>
+        </Card>
+      )}
+
+      <Btn full disabled={!cust || !lines.length} onClick={() => onSave({ customer: cust, lines })}>
+        {lines.length ? `Ring it up — ${fmt(revenue)}` : 'Pick what they’re taking'}
       </Btn>
       <p style={{ fontSize: 12.5, color: FAINT, textAlign: 'center', marginTop: 10 }}>
-        Creates the job in QuickBooks as a sub-customer with an estimate.
+        Stock comes down and the bill goes out, same tap.
       </p>
     </div>
   )
 }
 
-const Row = ({ label, value, bold }) => (
-  <div style={{ display: 'flex', justifyContent: 'space-between', padding: '5px 0', fontSize: 14 }}>
-    <span style={{ color: MUTED }}>{label}</span>
-    <span className="num" style={{ fontWeight: bold ? 700 : 600 }}>{value}</span>
-  </div>
-)
+/* ─── Job shell: the persistent header ────────────────────────────────── */
 
-/* ─── The job container + persistent header ───────────────────────────── */
+const SCREEN_TITLE = {
+  labor: "Who worked today?", materials: 'Materials', extra: 'Extra work', billing: 'Billing',
+}
 
-const JOB_TABS = [
-  { id: 'overview', label: 'Job' },
-  { id: 'labor', label: 'Labor' },
-  { id: 'materials', label: 'Materials' },
-  { id: 'changes', label: 'Changes' },
-]
-
-function JobContainer({ job, tab, setTab, onBack, today, onLabor, onMaterial, onChange, onBill }) {
-  const b = jobBudget(job), a = jobActual(job)
-  const flag = jobFlag(job)
-  const usedPct = b.total ? Math.min((a.total / b.total) * 100, 100) : 0
+function JobShell({ job, stock, screen, go, onBack, children }) {
+  const b = jobBudget(job, stock), a = jobActual(job), m = jobMoney(job, stock)
+  const flag = jobFlag(job, stock)
+  const used = b.total ? Math.min((a.total / b.total) * 100, 100) : 0
 
   return (
     <div>
-      <Btn kind="quiet" small onClick={onBack}>← Jobs</Btn>
+      <Btn kind="quiet" small onClick={screen === 'job' ? onBack : () => go('job')}>
+        {screen === 'job' ? '← All jobs' : '← ' + job.name}
+      </Btn>
 
-      {/* persistent job header — visible on every screen inside the job */}
-      <div style={{
-        position: 'sticky', top: 0, zIndex: 5, marginTop: 8,
-        background: CARD, border: `1px solid ${BORDER}`, borderRadius: 12, padding: '14px 16px',
-        boxShadow: '0 2px 10px rgba(16,24,40,.05)',
-      }}>
+      <div style={{ position: 'sticky', top: 0, zIndex: 5, marginTop: 8, background: CARD, border: `1px solid ${BORDER}`, borderRadius: 13, padding: '14px 16px', boxShadow: '0 2px 10px rgba(16,24,40,.05)' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 10 }}>
           <div style={{ minWidth: 0 }}>
             <div style={{ fontFamily: head, fontSize: 19, fontWeight: 700, letterSpacing: '-.01em' }}>{job.name}</div>
             <div style={{ fontSize: 13, color: MUTED }}>{job.customer}{job.address ? ' · ' + job.address : ''}</div>
           </div>
           <div style={{ textAlign: 'right', flexShrink: 0 }}>
-            <div className="num" style={{ fontSize: 15, fontWeight: 700 }}>{fmt(b.contract)}</div>
-            <div style={{ fontSize: 11.5, color: FAINT }}>contract</div>
+            <div className="num" style={{ fontSize: 15.5, fontWeight: 700 }}>{fmt(m.contract)}</div>
+            <div style={{ fontSize: 11.5, color: FAINT }}>{job.kind === 'wholesale' ? 'sale' : 'job price'}</div>
           </div>
         </div>
         <div style={{ marginTop: 11, height: 6, background: '#EDEFF2', borderRadius: 3, overflow: 'hidden' }}>
-          <div style={{ width: usedPct + '%', height: '100%', background: FLAG_COLOR[flag], transition: 'width .4s' }} />
+          <div style={{ width: used + '%', height: '100%', background: FLAG_COLOR[flag], transition: 'width .4s' }} />
         </div>
-        <div className="num" style={{ marginTop: 7, fontSize: 12.5, display: 'flex', alignItems: 'center', gap: 7 }}>
-          <Dot flag={flag} />
-          <span style={{ color: MUTED }}>{fmt(a.total)} spent of {fmt(b.total)} budget</span>
-          <span style={{ marginLeft: 'auto', color: FLAG_COLOR[flag], fontWeight: 600 }}>
-            {b.total ? pct(((a.total - b.total) / b.total) * 100) : '—'}
+        <div className="num" style={{ marginTop: 7, fontSize: 12.5, display: 'flex', justifyContent: 'space-between', gap: 8 }}>
+          <span style={{ color: MUTED }}>
+            {job.kind === 'wholesale' ? `${fmt(a.total)} of stock went out` : `${fmt(a.total)} spent of ${fmt(b.total)}`}
+          </span>
+          <span style={{ color: m.owed > 0 ? RED : MUTED, fontWeight: m.owed > 0 ? 600 : 400 }}>
+            {m.owed > 0 ? `${fmt(m.owed)} owed to you` : 'nothing owed'}
           </span>
         </div>
       </div>
 
-      <div style={{ display: 'flex', gap: 4, margin: '14px 0 18px', background: '#EDEFF2', padding: 4, borderRadius: 10 }}>
-        {JOB_TABS.map((t) => {
-          const on = tab === t.id
-          return (
-            <button key={t.id} onClick={() => setTab(t.id)} style={{
-              flex: 1, padding: '10px 6px', border: 'none', borderRadius: 7, cursor: 'pointer',
-              background: on ? '#fff' : 'transparent', color: on ? INK : MUTED, fontWeight: on ? 600 : 500, fontSize: 14,
-              boxShadow: on ? '0 1px 3px rgba(16,24,40,.10)' : 'none',
-            }}>{t.label}</button>
-          )
-        })}
-      </div>
-
-      {tab === 'overview' && <Overview job={job} b={b} a={a} onBill={onBill} onGoChanges={() => setTab('changes')} />}
-      {tab === 'labor' && <LaborScreen job={job} today={today} onSave={onLabor} />}
-      {tab === 'materials' && <MaterialScreen job={job} today={today} onSave={onMaterial} />}
-      {tab === 'changes' && <ChangeScreen job={job} onSave={onChange} onBill={onBill} />}
+      {screen !== 'job' && (
+        <h2 style={{ fontFamily: head, fontSize: 22, fontWeight: 700, letterSpacing: '-.015em', margin: '18px 0 14px' }}>
+          {SCREEN_TITLE[screen]}
+        </h2>
+      )}
+      <div style={{ marginTop: screen === 'job' ? 14 : 0 }}>{children}</div>
     </div>
   )
 }
 
-/* ─── 4.6 Job view — the proof screen ─────────────────────────────────── */
+/* ─── Job home: the money picture and four big buttons ────────────────── */
 
-function Overview({ job, b, a, onBill, onGoChanges }) {
-  const rows = [
-    { label: 'Materials', budget: b.materials, actual: a.materials },
-    { label: 'Labor', budget: b.labor, actual: a.labor, sub: `${b.laborHours.toFixed(1)} hr budgeted · ${a.laborHours.toFixed(1)} hr worked` },
-    { label: 'Total cost', budget: b.total, actual: a.total, bold: true },
-  ]
+function JobHome({ job, stock, go }) {
+  const b = jobBudget(job, stock), a = jobActual(job), m = jobMoney(job, stock)
+  const over = a.total - b.total
   const unbilled = job.changes.filter((c) => c.approved && !c.billed)
+  const keeping = m.contract - a.total
+
+  const Action = ({ title, note, onClick }) => (
+    <button onClick={onClick} style={{ textAlign: 'left', width: '100%', background: CARD, border: `1px solid ${BORDER}`, borderRadius: 13, padding: '17px 18px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 12 }}>
+      <div style={{ flex: 1 }}>
+        <div style={{ fontSize: 16.5, fontWeight: 600, marginBottom: 2 }}>{title}</div>
+        <div style={{ fontSize: 13, color: MUTED }}>{note}</div>
+      </div>
+      <span style={{ color: FAINT, fontSize: 20, lineHeight: 1 }}>›</span>
+    </button>
+  )
+
+  if (job.kind === 'wholesale') {
+    return (
+      <div>
+        <Card style={{ marginBottom: 12 }}>
+          <div style={{ fontSize: 12, fontWeight: 600, letterSpacing: '.05em', textTransform: 'uppercase', color: MUTED, marginBottom: 8 }}>What they took</div>
+          {job.saleLines.map((l) => (
+            <div key={l.name} style={{ display: 'flex', justifyContent: 'space-between', fontSize: 14.5, padding: '4px 0' }}>
+              <span><span className="num" style={{ fontWeight: 600 }}>{l.qty}</span> · {l.name}</span>
+              <span className="num" style={{ fontWeight: 600 }}>{fmt(l.qty * l.price)}</span>
+            </div>
+          ))}
+          <div style={{ borderTop: `1px solid ${BORDER}`, marginTop: 8, paddingTop: 4 }}>
+            <Line label="They pay" value={fmt(m.contract)} bold />
+            <Line label="Cost off the shelf" value={fmt(a.fromStock)} />
+            <Line label="What you keep" value={fmt(keeping)} bold color={GREEN} />
+          </div>
+        </Card>
+
+        <Card style={{ marginBottom: 12 }}>
+          <Line label="Billed" value={fmt(m.billed)} />
+          <Line label="They've paid" value={fmt(m.paid)} color={GREEN} />
+          <div style={{ borderTop: `1px solid ${BORDER}`, marginTop: 6, paddingTop: 6 }}>
+            <Line label="Still owes you" value={fmt(m.owed)} bold color={m.owed > 0 ? RED : GREEN} />
+          </div>
+        </Card>
+
+        <Action title="Billing" note="Write down a payment when it comes in" onClick={() => go('billing')} />
+      </div>
+    )
+  }
 
   return (
     <div>
       {unbilled.length > 0 && (
-        <button onClick={onGoChanges} style={{
-          width: '100%', textAlign: 'left', background: '#FDF1EF', border: `1px solid #F3CFC9`, borderRadius: 12,
-          padding: 14, marginBottom: 14, cursor: 'pointer',
-        }}>
-          <div style={{ fontSize: 14, fontWeight: 700, color: RED, marginBottom: 3 }}>
-            {unbilled.length} approved change order{unbilled.length > 1 ? 's' : ''} not billed
-          </div>
-          <div className="num" style={{ fontSize: 13, color: '#8C4438' }}>
-            {fmt(unbilled.reduce((s, c) => s + c.amount, 0))} of work you did and haven't charged for.
+        <button onClick={() => go('billing')} style={{ width: '100%', textAlign: 'left', background: '#FDF1EF', border: '1px solid #F3CFC9', borderRadius: 13, padding: 15, marginBottom: 12, cursor: 'pointer' }}>
+          <div style={{ fontSize: 15, fontWeight: 700, color: RED, marginBottom: 3 }}>You haven't charged for the extra work</div>
+          <div className="num" style={{ fontSize: 13.5, color: '#8C4438' }}>
+            {fmt(unbilled.reduce((s, c) => s + c.amount, 0))} the customer approved and nobody billed. Tap to bill it.
           </div>
         </button>
       )}
 
-      <div style={{ background: CARD, border: `1px solid ${BORDER}`, borderRadius: 12, overflow: 'hidden', marginBottom: 14 }}>
-        <div style={{ display: 'grid', gridTemplateColumns: '1.1fr .9fr .9fr .8fr', padding: '11px 16px', background: SOFT, borderBottom: `1px solid ${BORDER}`, fontSize: 11, fontWeight: 600, letterSpacing: '.04em', textTransform: 'uppercase', color: MUTED }}>
-          <span></span><span style={{ textAlign: 'right' }}>Budget</span><span style={{ textAlign: 'right' }}>Actual</span><span style={{ textAlign: 'right' }}>Variance</span>
+      <Card style={{ marginBottom: 12 }}>
+        <div style={{ fontSize: 12, fontWeight: 600, letterSpacing: '.05em', textTransform: 'uppercase', color: MUTED, marginBottom: 6 }}>The customer</div>
+        <Line label="Job price" value={fmt(m.contract)} bold />
+        <Line label="Billed so far" value={fmt(m.billed)} />
+        <Line label="They've paid" value={fmt(m.paid)} color={GREEN} />
+        <div style={{ borderTop: `1px solid ${BORDER}`, marginTop: 6, paddingTop: 6 }}>
+          <Line label="Still owes you" value={fmt(m.owed)} bold color={m.owed > 0 ? RED : GREEN} />
+          <Line label="Not billed yet" value={fmt(m.toBill)} sub={m.toBill > 0 ? 'work you sold and can still bill for' : 'everything sold has been billed'} />
         </div>
-        {rows.map((r) => {
-          const v = r.actual - r.budget
-          const p = r.budget ? (v / r.budget) * 100 : 0
-          const c = v > r.budget * 0.10 ? RED : v > r.budget * 0.02 ? AMBER : GREEN
-          return (
-            <div key={r.label} style={{ borderBottom: `1px solid ${BORDER}`, padding: '12px 16px' }}>
-              <div style={{ display: 'grid', gridTemplateColumns: '1.1fr .9fr .9fr .8fr', alignItems: 'baseline' }}>
-                <span style={{ fontSize: 14, fontWeight: r.bold ? 700 : 500 }}>{r.label}</span>
-                <span className="num" style={{ textAlign: 'right', fontSize: 14, color: MUTED }}>{fmt(r.budget)}</span>
-                <span className="num" style={{ textAlign: 'right', fontSize: 14, fontWeight: 600 }}>{fmt(r.actual)}</span>
-                <span className="num" style={{ textAlign: 'right', fontSize: 14, fontWeight: 600, color: c }}>{pct(p)}</span>
-              </div>
-              {r.sub && <div className="num" style={{ fontSize: 12, color: FAINT, marginTop: 3 }}>{r.sub}</div>}
-            </div>
-          )
-        })}
-        <div style={{ display: 'grid', gridTemplateColumns: '1.1fr 1.7fr .8fr', padding: '13px 16px', background: SOFT }}>
-          <span style={{ fontSize: 14, fontWeight: 700 }}>Gross profit</span>
-          <span className="num" style={{ textAlign: 'right', fontSize: 14, color: MUTED }}>{fmt(b.contract)} contract</span>
-          <span className="num" style={{ textAlign: 'right', fontSize: 15, fontWeight: 700 }}>{fmt(b.contract - a.total)}</span>
+      </Card>
+
+      <Card style={{ marginBottom: 12 }}>
+        <div style={{ fontSize: 12, fontWeight: 600, letterSpacing: '.05em', textTransform: 'uppercase', color: MUTED, marginBottom: 6 }}>The job</div>
+        <Line label="Should cost" value={fmt(b.total)} />
+        <Line label="Spent so far" value={fmt(a.total)} bold
+          color={over > b.total * 0.10 ? RED : over > b.total * 0.02 ? AMBER : GREEN}
+          sub={over > 0 ? `over by ${fmt(over)}` : `under by ${fmt(-over)}`} />
+        <div style={{ marginTop: 4, paddingLeft: 0 }}>
+          <Line label="Materials off the shelf" value={fmt(a.fromStock)} />
+          <Line label="Delivered to the job" value={fmt(a.delivered)} />
+          <Line label={`Crew time · ${a.laborHours.toFixed(0)} hours`} value={fmt(a.labor)} />
         </div>
-      </div>
+        <div style={{ borderTop: `1px solid ${BORDER}`, marginTop: 6, paddingTop: 6 }}>
+          <Line label="What you keep" value={fmt(keeping)} bold color={keeping > 0 ? GREEN : RED} />
+        </div>
+      </Card>
 
-      <div style={{ background: CARD, border: `1px solid ${BORDER}`, borderRadius: 12, padding: 16 }}>
-        <div style={{ fontSize: 12, fontWeight: 600, letterSpacing: '.04em', textTransform: 'uppercase', color: MUTED, marginBottom: 10 }}>Change orders</div>
-        {job.changes.length === 0 && <div style={{ fontSize: 14, color: FAINT }}>None on this job.</div>}
-        {job.changes.map((c) => (
-          <div key={c.id} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '8px 0', borderTop: `1px solid ${BORDER}` }}>
-            <div style={{ flex: 1, minWidth: 0 }}>
-              <div style={{ fontSize: 14 }}>{c.desc}</div>
-              <div style={{ fontSize: 12, color: c.billed ? GREEN : c.approved ? RED : FAINT, fontWeight: 600 }}>
-                {!c.approved ? 'Not approved' : c.billed ? 'Billed' : 'Approved · not billed'}
-              </div>
-            </div>
-            <span className="num" style={{ fontWeight: 600, fontSize: 14 }}>{fmt(c.amount)}</span>
-            {c.approved && !c.billed && <Btn kind="ghost" small onClick={() => onBill(c.id)}>Bill it</Btn>}
-          </div>
-        ))}
+      <div style={{ display: 'grid', gap: 9 }}>
+        <Action title="Log today's work" note="Who was out there and for how long" onClick={() => go('labor')} />
+        <Action title="Materials" note="Took it off the shelf, or it got delivered" onClick={() => go('materials')} />
+        <Action title="Extra work" note="Customer asked for something not in the price" onClick={() => go('extra')} />
+        <Action title="Billing" note="Send a bill, or write down a payment" onClick={() => go('billing')} />
       </div>
-
-      <p style={{ fontSize: 12.5, color: FAINT, textAlign: 'center', marginTop: 14 }}>
-        {job.labor.reduce((s, l) => s + l.crew.length, 0)} time entries · {job.materials.length} expenses · all coded to this job in QuickBooks
-      </p>
     </div>
   )
 }
 
-/* ─── 4.3 Daily labor — the fast one ──────────────────────────────────── */
+/* ─── Labor ───────────────────────────────────────────────────────────── */
 
 function LaborScreen({ job, today, onSave }) {
   const last = job.labor[job.labor.length - 1]
@@ -1073,321 +1558,541 @@ function LaborScreen({ job, today, onSave }) {
   const [hours, setHours] = useState(8)
 
   useEffect(() => { setDate(today) }, [today])
-
   const toggle = (p) => setCrew((prev) => (prev.includes(p) ? prev.filter((x) => x !== p) : [...prev, p]))
-  const total = crew.length * hours
-
-  const save = () => {
-    if (!crew.length || !hours) return
-    onSave({ date, crew, hours })
-    setHours(8)
-  }
 
   return (
     <div>
-      <Field label="Date">
-        <input type="date" style={inputStyle} value={date} onChange={(e) => setDate(e.target.value)} />
-      </Field>
+      {last && crew.length > 0 && (
+        <p style={{ fontSize: 13.5, color: MUTED, marginBottom: 14 }}>Same crew as last time is already picked. Change it if it's different.</p>
+      )}
 
-      <Field label="Who worked">
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
-          {CREW.map((p) => <Chip key={p} on={crew.includes(p)} onClick={() => toggle(p)}>{p}</Chip>)}
+      <div style={{ display: 'grid', gap: 8, marginBottom: 20 }}>
+        {CREW.map((p) => <Chip key={p} on={crew.includes(p)} onClick={() => toggle(p)}>{p}</Chip>)}
+      </div>
+
+      <Ask>How long were they out there?</Ask>
+      <div style={{ display: 'flex', gap: 8, marginBottom: 9 }}>
+        <button onClick={() => setHours((h) => Math.max(0.5, +(h - 0.5).toFixed(1)))} style={stepBtn}>−</button>
+        <div className="num" style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', border: `1px solid ${BORDER}`, borderRadius: 11, background: '#fff', padding: '10px 0' }}>
+          <span style={{ fontSize: 30, fontWeight: 700, lineHeight: 1.1 }}>{hours}</span>
+          <span style={{ fontSize: 12, color: FAINT }}>hours each</span>
         </div>
-      </Field>
-
-      <Field label="Hours each">
-        <div style={{ display: 'flex', gap: 8, alignItems: 'stretch' }}>
-          <button onClick={() => setHours((h) => Math.max(0.5, +(h - 0.5).toFixed(1)))} style={stepBtn}>−</button>
-          <div className="num" style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', border: `1px solid ${BORDER}`, borderRadius: 10, background: '#fff', fontSize: 24, fontWeight: 700 }}>
-            {hours}
-          </div>
-          <button onClick={() => setHours((h) => +(h + 0.5).toFixed(1))} style={stepBtn}>+</button>
-        </div>
-        <div style={{ display: 'flex', gap: 8, marginTop: 8 }}>
-          {[4, 6, 8, 10].map((h) => (
-            <button key={h} onClick={() => setHours(h)} style={{
-              flex: 1, padding: '9px 0', borderRadius: 8, cursor: 'pointer', fontSize: 14, fontWeight: 600,
-              border: `1px solid ${hours === h ? INK : BORDER}`, background: hours === h ? '#EDEFF2' : '#fff', color: INK,
-            }}>{h}</button>
-          ))}
-        </div>
-      </Field>
-
-      <Btn full disabled={!crew.length} onClick={save}>
-        Save labor{total ? ` · ${total} hours` : ''}
-      </Btn>
-
-      <div style={{ marginTop: 22 }}>
-        <div style={{ fontSize: 12, fontWeight: 600, letterSpacing: '.04em', textTransform: 'uppercase', color: MUTED, marginBottom: 9 }}>Entered so far</div>
-        {job.labor.length === 0 && <div style={{ fontSize: 14, color: FAINT }}>Nothing yet. Pick the crew and hit save — it takes a few seconds.</div>}
-        {[...job.labor].reverse().map((l) => (
-          <div key={l.id} style={{ background: CARD, border: `1px solid ${BORDER}`, borderRadius: 10, padding: '11px 14px', marginBottom: 7, display: 'flex', gap: 10 }}>
-            <div style={{ flex: 1, minWidth: 0 }}>
-              <div style={{ fontSize: 14, fontWeight: 600 }}>{dshort(l.date)}</div>
-              <div style={{ fontSize: 13, color: MUTED }}>{l.crew.join(', ')}</div>
-            </div>
-            <div className="num" style={{ textAlign: 'right' }}>
-              <div style={{ fontSize: 14, fontWeight: 600 }}>{l.crew.length * l.hours} hr</div>
-              <div style={{ fontSize: 12, color: FAINT }}>{fmt(l.crew.length * l.hours * LABOR_RATE)}</div>
-            </div>
-          </div>
+        <button onClick={() => setHours((h) => +(h + 0.5).toFixed(1))} style={stepBtn}>+</button>
+      </div>
+      <div style={{ display: 'flex', gap: 8, marginBottom: 20 }}>
+        {[4, 6, 8, 10].map((h) => (
+          <button key={h} onClick={() => setHours(h)} style={{
+            flex: 1, padding: '11px 0', borderRadius: 9, cursor: 'pointer', fontSize: 15, fontWeight: 600,
+            border: `1px solid ${hours === h ? INK : BORDER}`, background: hours === h ? '#EDEFF2' : '#fff', color: INK,
+          }}>{h}</button>
         ))}
       </div>
+
+      <details style={{ marginBottom: 20 }}>
+        <summary style={{ fontSize: 13.5, color: MUTED, cursor: 'pointer' }}>Not today? Pick the day</summary>
+        <input type="date" style={{ ...inputStyle, marginTop: 9 }} value={date} onChange={(e) => setDate(e.target.value)} />
+      </details>
+
+      <Btn full disabled={!crew.length} onClick={() => onSave({ date, crew, hours })}>
+        {crew.length ? `Save — ${crew.length} ${crew.length === 1 ? 'guy' : 'guys'}, ${crew.length * hours} hours` : 'Pick who worked'}
+      </Btn>
+
+      {job.labor.length > 0 && (
+        <div style={{ marginTop: 24 }}>
+          <div style={{ fontSize: 12, fontWeight: 600, letterSpacing: '.05em', textTransform: 'uppercase', color: MUTED, marginBottom: 9 }}>Already logged</div>
+          {[...job.labor].reverse().map((l) => (
+            <div key={l.id} style={{ background: CARD, border: `1px solid ${BORDER}`, borderRadius: 10, padding: '11px 14px', marginBottom: 7, display: 'flex', gap: 10 }}>
+              <div style={{ flex: 1, minWidth: 0 }}>
+                <div style={{ fontSize: 14.5, fontWeight: 600 }}>{dshort(l.date)}</div>
+                <div style={{ fontSize: 13, color: MUTED }}>{l.crew.join(', ')}</div>
+              </div>
+              <div className="num" style={{ textAlign: 'right' }}>
+                <div style={{ fontSize: 14.5, fontWeight: 600 }}>{l.crew.length * l.hours} hr</div>
+                <div style={{ fontSize: 12, color: FAINT }}>{fmt(l.crew.length * l.hours * LABOR_RATE)}</div>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
     </div>
   )
 }
 
-const stepBtn = {
-  width: 62, border: `1px solid ${BORDER}`, background: '#fff', borderRadius: 10,
-  fontSize: 26, color: INK, cursor: 'pointer', lineHeight: 1,
-}
+const stepBtn = { width: 66, border: `1px solid ${BORDER}`, background: '#fff', borderRadius: 11, fontSize: 28, color: INK, cursor: 'pointer', lineHeight: 1 }
 
-/* ─── 4.4 Materials ───────────────────────────────────────────────────── */
+/* ─── Materials: off the shelf, or delivered ──────────────────────────── */
 
-function MaterialScreen({ job, today, onSave }) {
+function MaterialsScreen({ job, stock, today, onPull, onDelivery }) {
+  const [mode, setMode] = useState(null)
+  const needed = useMemo(() => stillNeeded(job, stock), [job, stock])
+  const [qtys, setQtys] = useState(() => Object.fromEntries(needed.map((n) => [n.name, n.suggest])))
+  const [showAll, setShowAll] = useState(false)
+
   const [vendor, setVendor] = useState('')
-  const [date, setDate] = useState(today)
   const [desc, setDesc] = useState('')
   const [amount, setAmount] = useState('')
   const [photo, setPhoto] = useState(null)
   const [photoUrl, setPhotoUrl] = useState(null)
 
-  useEffect(() => { setDate(today) }, [today])
+  // You cannot take what isn't there. Every stepper stops at on-hand.
+  const bump = (name, d, whole, onHand) => setQtys((q) => {
+    const step = whole ? 1 : 5
+    const next = (q[name] || 0) + d * step
+    return { ...q, [name]: +Math.min(onHand, Math.max(0, next)).toFixed(1) }
+  })
 
-  const pickPhoto = (e) => {
-    const f = e.target.files && e.target.files[0]
-    if (!f) return
-    setPhoto(f.name)
-    setPhotoUrl(URL.createObjectURL(f))
+  const lines = needed.filter((n) => (qtys[n.name] || 0) > 0).map((n) => ({ name: n.name, qty: qtys[n.name], cost: n.cost }))
+  const total = lines.reduce((s, l) => s + l.qty * l.cost, 0)
+  const short = needed.filter((n) => n.short > 0)
+  const visible = showAll ? needed : needed.filter((n) => n.wanted > 0 || (qtys[n.name] || 0) > 0)
+
+  if (mode === null) {
+    return (
+      <div>
+        <p style={{ fontSize: 14.5, color: MUTED, marginBottom: 16 }}>Which one was it?</p>
+        <div style={{ display: 'grid', gap: 10 }}>
+          <button onClick={() => setMode('stock')} style={bigChoice}>
+            <div style={{ fontSize: 17, fontWeight: 600, marginBottom: 3 }}>We took it from the yard</div>
+            <div style={{ fontSize: 13.5, color: MUTED }}>Off our own shelf. We already know what this job needs.</div>
+          </button>
+          <button onClick={() => setMode('delivery')} style={bigChoice}>
+            <div style={{ fontSize: 17, fontWeight: 600, marginBottom: 3 }}>A truck dropped it off</div>
+            <div style={{ fontSize: 13.5, color: MUTED }}>Ordered straight to the job. Snap the ticket.</div>
+          </button>
+        </div>
+
+        {(job.pulls.length > 0 || job.deliveries.length > 0) && (
+          <div style={{ marginTop: 24 }}>
+            <div style={{ fontSize: 12, fontWeight: 600, letterSpacing: '.05em', textTransform: 'uppercase', color: MUTED, marginBottom: 9 }}>Already on this job</div>
+            {job.pulls.map((p) => (
+              <div key={p.id} style={{ background: CARD, border: `1px solid ${BORDER}`, borderRadius: 10, padding: '11px 14px', marginBottom: 7 }}>
+                <div style={{ display: 'flex', gap: 10 }}>
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    <div style={{ fontSize: 14.5, fontWeight: 600 }}>Taken from the yard</div>
+                    <div style={{ fontSize: 12.5, color: MUTED }}>{p.lines.map((l) => `${l.qty} ${l.name}`).join(' · ')}</div>
+                  </div>
+                  <div className="num" style={{ textAlign: 'right' }}>
+                    <div style={{ fontSize: 14.5, fontWeight: 600 }}>{fmt(pullTotal(p))}</div>
+                    <div style={{ fontSize: 12, color: FAINT }}>{dshort(p.date)}</div>
+                  </div>
+                </div>
+              </div>
+            ))}
+            {job.deliveries.map((d) => (
+              <div key={d.id} style={{ background: CARD, border: `1px solid ${BORDER}`, borderRadius: 10, padding: '11px 14px', marginBottom: 7, display: 'flex', gap: 10 }}>
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <div style={{ fontSize: 14.5, fontWeight: 600 }}>{d.vendor}</div>
+                  <div style={{ fontSize: 12.5, color: MUTED }}>{d.desc}</div>
+                </div>
+                <div className="num" style={{ textAlign: 'right' }}>
+                  <div style={{ fontSize: 14.5, fontWeight: 600 }}>{fmt2(d.amount)}</div>
+                  <div style={{ fontSize: 12, color: FAINT }}>{dshort(d.date)}</div>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+    )
+  }
+
+  if (mode === 'stock') {
+    return (
+      <div>
+        <Btn kind="quiet" small onClick={() => setMode(null)}>← Not that</Btn>
+        <p style={{ fontSize: 14.5, color: MUTED, margin: '8px 0 16px' }}>
+          This is what the job still needs, already counted for you. Fix anything that's different.
+        </p>
+
+        <div style={{ display: 'grid', gap: 8, marginBottom: 14 }}>
+          {visible.map((n) => {
+            const q = qtys[n.name] || 0
+            const maxed = q >= n.onHand
+            return (
+              <Card key={n.name} style={{ padding: '12px 14px', borderColor: n.short > 0 ? '#F3CFC9' : BORDER }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    <div style={{ fontSize: 15, fontWeight: 600 }}>{n.name}</div>
+                    <div className="num" style={{ fontSize: 12.5, color: n.short > 0 ? RED : FAINT, fontWeight: n.short > 0 ? 600 : 400 }}>
+                      {n.short > 0
+                        ? `job needs ${n.wanted} — only ${n.onHand} on the shelf`
+                        : `${n.onHand} ${n.unit} on the shelf`}
+                    </div>
+                  </div>
+                  <button onClick={() => bump(n.name, -1, n.whole, n.onHand)} style={miniBtn}>−</button>
+                  <span className="num" style={{ minWidth: 42, textAlign: 'center', fontSize: 19, fontWeight: 700 }}>{q}</span>
+                  <button onClick={() => bump(n.name, 1, n.whole, n.onHand)} disabled={maxed}
+                    style={{ ...miniBtn, opacity: maxed ? 0.3 : 1, cursor: maxed ? 'not-allowed' : 'pointer' }}>+</button>
+                </div>
+              </Card>
+            )
+          })}
+        </div>
+
+        <button onClick={() => setShowAll(!showAll)} style={{ border: 'none', background: 'none', padding: 0, color: MUTED, fontSize: 13.5, fontWeight: 600, cursor: 'pointer', marginBottom: 16 }}>
+          {showAll ? '▾ Just what this job needs' : '▸ Show everything on the shelf for this job'}
+        </button>
+
+        {short.length > 0 && (
+          <div style={{ background: '#FDF1EF', border: '1px solid #F3CFC9', borderRadius: 11, padding: 14, marginBottom: 14 }}>
+            <div style={{ fontSize: 14.5, fontWeight: 700, color: RED, marginBottom: 4 }}>
+              The yard is short on {short.length === 1 ? 'one thing' : `${short.length} things`}
+            </div>
+            {short.map((n) => (
+              <div key={n.name} className="num" style={{ fontSize: 13.5, color: '#8C4438' }}>
+                {n.name} — {n.short} more {n.unit} needed
+              </div>
+            ))}
+            <div style={{ fontSize: 13.5, color: '#8C4438', marginTop: 5 }}>
+              Take what's there. Log the rest as a delivery when it shows up.
+            </div>
+          </div>
+        )}
+
+        <Card style={{ marginBottom: 16 }}>
+          <Line label="Coming off the shelf" value={fmt(total)} bold />
+          <div style={{ fontSize: 12.5, color: FAINT, marginTop: 2 }}>Charged straight to this job.</div>
+        </Card>
+
+        <Btn full disabled={!lines.length} onClick={() => onPull(lines)}>Take it out of stock</Btn>
+      </div>
+    )
   }
 
   const ready = vendor && desc.trim() && parseFloat(amount) > 0
-  const save = () => {
-    if (!ready) return
-    onSave({ vendor, date, desc: desc.trim(), amount: parseFloat(amount), photo })
-    setDesc(''); setAmount(''); setPhoto(null); setPhotoUrl(null)
-  }
-
   return (
     <div>
-      <Field label="Vendor">
-        <select style={inputStyle} value={vendor} onChange={(e) => setVendor(e.target.value)}>
-          <option value="">Select a vendor…</option>
-          {VENDORS.map((v) => <option key={v} value={v}>{v}</option>)}
-        </select>
-      </Field>
+      <Btn kind="quiet" small onClick={() => setMode(null)}>← Not that</Btn>
+      <div style={{ height: 14 }} />
 
-      <Field label="Date">
-        <input type="date" style={inputStyle} value={date} onChange={(e) => setDate(e.target.value)} />
-      </Field>
+      <Ask>Who delivered it?</Ask>
+      <select style={{ ...inputStyle, marginBottom: 18 }} value={vendor} onChange={(e) => setVendor(e.target.value)}>
+        <option value="">Tap to choose…</option>
+        {VENDORS.map((v) => <option key={v} value={v}>{v}</option>)}
+      </select>
 
-      <Field label="What came in">
-        <input style={inputStyle} placeholder="e.g. Cedar panels + posts" value={desc} onChange={(e) => setDesc(e.target.value)} />
-      </Field>
+      <Ask>What came in?</Ask>
+      <input style={{ ...inputStyle, marginBottom: 18 }} placeholder="Cedar panels and posts" value={desc} onChange={(e) => setDesc(e.target.value)} />
 
-      <Field label="Amount">
-        <input className="num" style={{ ...inputStyle, fontSize: 22, fontWeight: 700 }} inputMode="decimal" placeholder="0.00" value={amount} onChange={(e) => setAmount(e.target.value)} />
-      </Field>
+      <Ask>What's on the ticket?</Ask>
+      <input className="num" style={{ ...inputStyle, fontSize: 26, fontWeight: 700, marginBottom: 18 }} inputMode="decimal" placeholder="$0.00" value={amount} onChange={(e) => setAmount(e.target.value)} />
 
-      <Field label="Delivery ticket">
-        <label style={{
-          display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 9, cursor: 'pointer',
-          border: `1.5px dashed ${BORDER}`, borderRadius: 10, padding: photoUrl ? 10 : '20px 14px', background: '#fff',
-        }}>
-          <input type="file" accept="image/*" capture="environment" onChange={pickPhoto} style={{ display: 'none' }} />
-          {photoUrl
-            ? <><img src={photoUrl} alt="" style={{ width: 46, height: 46, objectFit: 'cover', borderRadius: 7 }} /><span style={{ fontSize: 14, color: MUTED, flex: 1 }}>{photo}</span></>
-            : <span style={{ fontSize: 14, color: MUTED, fontWeight: 500 }}>Take a photo of the ticket</span>}
-        </label>
-      </Field>
+      <Ask>Snap the ticket</Ask>
+      <label style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10, cursor: 'pointer', border: `1.5px dashed ${BORDER}`, borderRadius: 11, padding: photoUrl ? 10 : '24px 14px', background: '#fff', marginBottom: 20 }}>
+        <input type="file" accept="image/*" capture="environment" style={{ display: 'none' }} onChange={(e) => {
+          const f = e.target.files && e.target.files[0]
+          if (!f) return
+          setPhoto(f.name); setPhotoUrl(URL.createObjectURL(f))
+        }} />
+        {photoUrl
+          ? <><img src={photoUrl} alt="" style={{ width: 48, height: 48, objectFit: 'cover', borderRadius: 8 }} /><span style={{ fontSize: 14, color: MUTED, flex: 1 }}>{photo}</span></>
+          : <span style={{ fontSize: 15, color: MUTED, fontWeight: 500 }}>Take a picture</span>}
+      </label>
 
-      <Btn full disabled={!ready} onClick={save}>Save delivery</Btn>
-
-      <div style={{ marginTop: 22 }}>
-        <div style={{ fontSize: 12, fontWeight: 600, letterSpacing: '.04em', textTransform: 'uppercase', color: MUTED, marginBottom: 9 }}>On this job</div>
-        {job.materials.length === 0 && <div style={{ fontSize: 14, color: FAINT }}>No deliveries logged yet.</div>}
-        {[...job.materials].reverse().map((m) => (
-          <div key={m.id} style={{ background: CARD, border: `1px solid ${BORDER}`, borderRadius: 10, padding: '11px 14px', marginBottom: 7, display: 'flex', gap: 10 }}>
-            <div style={{ flex: 1, minWidth: 0 }}>
-              <div style={{ fontSize: 14, fontWeight: 600 }}>{m.vendor}</div>
-              <div style={{ fontSize: 13, color: MUTED }}>{m.desc}</div>
-            </div>
-            <div className="num" style={{ textAlign: 'right' }}>
-              <div style={{ fontSize: 14, fontWeight: 600 }}>{fmt2(m.amount)}</div>
-              <div style={{ fontSize: 12, color: FAINT }}>{dshort(m.date)}</div>
-            </div>
-          </div>
-        ))}
-      </div>
+      <Btn full disabled={!ready} onClick={() => onDelivery({ vendor, date: today, desc: desc.trim(), amount: parseFloat(amount), photo })}>Save it</Btn>
     </div>
   )
 }
 
-/* ─── 4.5 Change orders ───────────────────────────────────────────────── */
+const bigChoice = { textAlign: 'left', width: '100%', background: CARD, border: `1px solid ${BORDER}`, borderRadius: 13, padding: '20px 18px', cursor: 'pointer' }
+const miniBtn = { width: 44, height: 44, flexShrink: 0, border: `1px solid ${BORDER}`, background: '#fff', borderRadius: 9, fontSize: 22, color: INK, cursor: 'pointer', lineHeight: 1 }
 
-function ChangeScreen({ job, onSave, onBill }) {
+/* ─── Extra work ──────────────────────────────────────────────────────── */
+
+function ExtraWork({ job, onSave }) {
   const [desc, setDesc] = useState('')
   const [amount, setAmount] = useState('')
   const [approved, setApproved] = useState(true)
-
   const ready = desc.trim() && parseFloat(amount) > 0
-  const save = () => {
-    if (!ready) return
-    onSave({ desc: desc.trim(), amount: parseFloat(amount), approved })
-    setDesc(''); setAmount('')
-  }
 
   return (
     <div>
-      <Field label="What changed">
-        <input style={inputStyle} placeholder="e.g. Add 40 LF along the driveway" value={desc} onChange={(e) => setDesc(e.target.value)} />
-      </Field>
+      <p style={{ fontSize: 14.5, color: MUTED, marginBottom: 18 }}>
+        Anything the customer asked for that wasn't in the price. Write it here and it can't get forgotten.
+      </p>
 
-      <Field label="Amount">
-        <input className="num" style={{ ...inputStyle, fontSize: 22, fontWeight: 700 }} inputMode="decimal" placeholder="0.00" value={amount} onChange={(e) => setAmount(e.target.value)} />
-      </Field>
+      <Ask>What did they ask for?</Ask>
+      <input style={{ ...inputStyle, marginBottom: 18 }} placeholder="Add 40 more feet along the driveway" value={desc} onChange={(e) => setDesc(e.target.value)} />
 
-      <Field label="Did the customer approve it">
-        <div style={{ display: 'flex', gap: 8 }}>
-          <div style={{ flex: 1 }}><Chip on={approved} onClick={() => setApproved(true)}>Yes</Chip></div>
-          <div style={{ flex: 1 }}><Chip on={!approved} onClick={() => setApproved(false)}>Not yet</Chip></div>
-        </div>
-      </Field>
+      <Ask>What are you charging for it?</Ask>
+      <input className="num" style={{ ...inputStyle, fontSize: 26, fontWeight: 700, marginBottom: 18 }} inputMode="decimal" placeholder="$0.00" value={amount} onChange={(e) => setAmount(e.target.value)} />
 
-      <Btn full disabled={!ready} onClick={save}>Save change order</Btn>
-
-      <div style={{ marginTop: 22 }}>
-        <div style={{ fontSize: 12, fontWeight: 600, letterSpacing: '.04em', textTransform: 'uppercase', color: MUTED, marginBottom: 9 }}>On this job</div>
-        {job.changes.length === 0 && <div style={{ fontSize: 14, color: FAINT }}>None yet.</div>}
-        {[...job.changes].reverse().map((c) => (
-          <div key={c.id} style={{
-            background: CARD, borderRadius: 10, padding: '12px 14px', marginBottom: 7, display: 'flex', alignItems: 'center', gap: 10,
-            border: `1px solid ${c.approved && !c.billed ? '#F3CFC9' : BORDER}`,
-          }}>
-            <div style={{ flex: 1, minWidth: 0 }}>
-              <div style={{ fontSize: 14 }}>{c.desc}</div>
-              <div style={{ fontSize: 12, fontWeight: 600, color: c.billed ? GREEN : c.approved ? RED : FAINT }}>
-                {!c.approved ? 'Waiting on approval' : c.billed ? 'Billed' : 'Approved · not billed'}
-              </div>
-            </div>
-            <span className="num" style={{ fontWeight: 600, fontSize: 14 }}>{fmt(c.amount)}</span>
-            {c.approved && !c.billed && <Btn kind="ghost" small onClick={() => onBill(c.id)}>Bill it</Btn>}
-          </div>
-        ))}
+      <Ask>Did they say yes?</Ask>
+      <div style={{ display: 'flex', gap: 8, marginBottom: 20 }}>
+        <Chip on={approved} onClick={() => setApproved(true)}>Yes, they agreed</Chip>
+        <Chip on={!approved} onClick={() => setApproved(false)}>Not yet</Chip>
       </div>
+
+      <Btn full disabled={!ready} onClick={() => onSave({ desc: desc.trim(), amount: parseFloat(amount), approved })}>Save it</Btn>
+
+      {job.changes.length > 0 && (
+        <div style={{ marginTop: 24 }}>
+          <div style={{ fontSize: 12, fontWeight: 600, letterSpacing: '.05em', textTransform: 'uppercase', color: MUTED, marginBottom: 9 }}>On this job already</div>
+          {[...job.changes].reverse().map((c) => (
+            <div key={c.id} style={{ background: CARD, borderRadius: 10, padding: '12px 14px', marginBottom: 7, display: 'flex', alignItems: 'center', gap: 10, border: `1px solid ${c.approved && !c.billed ? '#F3CFC9' : BORDER}` }}>
+              <div style={{ flex: 1, minWidth: 0 }}>
+                <div style={{ fontSize: 14.5 }}>{c.desc}</div>
+                <div style={{ fontSize: 12.5, fontWeight: 600, color: c.billed ? GREEN : c.approved ? RED : FAINT }}>
+                  {!c.approved ? 'Waiting on them' : c.billed ? 'Billed' : 'They said yes — not billed'}
+                </div>
+              </div>
+              <span className="num" style={{ fontWeight: 600, fontSize: 14.5 }}>{fmt(c.amount)}</span>
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  )
+}
+
+/* ─── Billing: what we charged, what came back ────────────────────────── */
+
+function Billing({ job, stock, onInvoice, onPayment }) {
+  const m = jobMoney(job, stock)
+  const unbilled = job.changes.filter((c) => c.approved && !c.billed)
+  const [mode, setMode] = useState(null)
+  const [amount, setAmount] = useState('')
+  const [memo, setMemo] = useState('Progress billing')
+  const [method, setMethod] = useState('Check')
+
+  const startBill = () => { setAmount(String(Math.round(m.toBill))); setMode('bill') }
+  const startPay = () => { setAmount(String(Math.round(m.owed))); setMode('pay') }
+
+  if (mode === null) {
+    return (
+      <div>
+        <Card style={{ marginBottom: 14 }}>
+          <Line label="Job price" value={fmt(m.contract)} bold />
+          <Line label="Billed so far" value={fmt(m.billed)} />
+          <Line label="They've paid" value={fmt(m.paid)} color={GREEN} />
+          <div style={{ borderTop: `1px solid ${BORDER}`, marginTop: 6, paddingTop: 6 }}>
+            <Line label="Still owes you" value={fmt(m.owed)} bold color={m.owed > 0 ? RED : GREEN} />
+            <Line label="Not billed yet" value={fmt(m.toBill)} />
+          </div>
+        </Card>
+
+        {unbilled.length > 0 && (
+          <div style={{ background: '#FDF1EF', border: '1px solid #F3CFC9', borderRadius: 11, padding: 14, marginBottom: 14 }}>
+            <div style={{ fontSize: 14.5, fontWeight: 700, color: RED, marginBottom: 4 }}>Extra work in that number</div>
+            {unbilled.map((c) => (
+              <div key={c.id} className="num" style={{ fontSize: 13.5, color: '#8C4438', display: 'flex', justifyContent: 'space-between', gap: 10 }}>
+                <span>{c.desc}</span><span>{fmt(c.amount)}</span>
+              </div>
+            ))}
+          </div>
+        )}
+
+        <div style={{ display: 'grid', gap: 10 }}>
+          <button onClick={startBill} disabled={m.toBill <= 0} style={{ ...bigChoice, opacity: m.toBill <= 0 ? 0.4 : 1, cursor: m.toBill <= 0 ? 'not-allowed' : 'pointer' }}>
+            <div style={{ fontSize: 17, fontWeight: 600, marginBottom: 3 }}>Send them a bill</div>
+            <div className="num" style={{ fontSize: 13.5, color: MUTED }}>{m.toBill > 0 ? `Up to ${fmt(m.toBill)} is billable right now` : 'Everything sold is already billed'}</div>
+          </button>
+          <button onClick={startPay} disabled={m.owed <= 0} style={{ ...bigChoice, opacity: m.owed <= 0 ? 0.4 : 1, cursor: m.owed <= 0 ? 'not-allowed' : 'pointer' }}>
+            <div style={{ fontSize: 17, fontWeight: 600, marginBottom: 3 }}>They paid me</div>
+            <div className="num" style={{ fontSize: 13.5, color: MUTED }}>{m.owed > 0 ? `${fmt(m.owed)} is still open` : 'Nothing is open'}</div>
+          </button>
+        </div>
+
+        {(job.invoices.length > 0 || job.payments.length > 0) && (
+          <div style={{ marginTop: 24 }}>
+            <div style={{ fontSize: 12, fontWeight: 600, letterSpacing: '.05em', textTransform: 'uppercase', color: MUTED, marginBottom: 9 }}>History</div>
+            {[...job.invoices.map((i) => ({ ...i, kind: 'bill' })), ...job.payments.map((p) => ({ ...p, kind: 'paid' }))]
+              .sort((a, b) => (a.date < b.date ? 1 : -1))
+              .map((r) => (
+                <div key={r.kind + r.id} style={{ background: CARD, border: `1px solid ${BORDER}`, borderRadius: 10, padding: '11px 14px', marginBottom: 7, display: 'flex', gap: 10 }}>
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    <div style={{ fontSize: 14.5, fontWeight: 600 }}>{r.kind === 'bill' ? 'You billed them' : 'They paid'}</div>
+                    <div style={{ fontSize: 12.5, color: MUTED }}>{r.memo || r.method} · {dshort(r.date)}</div>
+                  </div>
+                  <span className="num" style={{ fontSize: 15, fontWeight: 600, color: r.kind === 'paid' ? GREEN : INK }}>
+                    {r.kind === 'paid' ? '+' : ''}{fmt(r.amount)}
+                  </span>
+                </div>
+              ))}
+          </div>
+        )}
+      </div>
+    )
+  }
+
+  const val = parseFloat(amount)
+  const ready = val > 0
+  return (
+    <div>
+      <Btn kind="quiet" small onClick={() => setMode(null)}>← Back</Btn>
+      <div style={{ height: 14 }} />
+      <Ask>{mode === 'bill' ? 'How much are you billing them?' : 'How much did they pay?'}</Ask>
+      <input className="num" style={{ ...inputStyle, fontSize: 30, fontWeight: 700, marginBottom: 8 }} inputMode="decimal" value={amount} onChange={(e) => setAmount(e.target.value)} autoFocus />
+      <p style={{ fontSize: 13, color: FAINT, marginBottom: 18 }}>
+        {mode === 'bill' ? `Filled in with everything you can bill right now. Lower it for a partial bill.` : `Filled in with what's still open.`}
+      </p>
+
+      {mode === 'bill' ? (
+        <>
+          <Ask>What's it for?</Ask>
+          <select style={{ ...inputStyle, marginBottom: 20 }} value={memo} onChange={(e) => setMemo(e.target.value)}>
+            <option>Progress billing</option><option>Deposit</option><option>Final bill</option><option>Extra work</option>
+          </select>
+          <Btn full disabled={!ready} onClick={() => onInvoice(val, memo)}>Send the bill for {fmt(val || 0)}</Btn>
+        </>
+      ) : (
+        <>
+          <Ask>How did it come in?</Ask>
+          <select style={{ ...inputStyle, marginBottom: 20 }} value={method} onChange={(e) => setMethod(e.target.value)}>
+            <option>Check</option><option>ACH</option><option>Credit card</option><option>Cash</option>
+          </select>
+          <Btn full disabled={!ready} onClick={() => onPayment(val, method)}>Write down {fmt(val || 0)}</Btn>
+        </>
+      )}
     </div>
   )
 }
 
 /* ─── QuickBooks pane ─────────────────────────────────────────────────── */
 
+const COLS = '78px 96px 1fr 106px 96px 56px'
+const TYPE_LABEL = {
+  Customer: 'Customer', Estimate: 'Estimate', Invoice: 'Invoice', Payment: 'Payment',
+  Purchase: 'Expense', TimeActivity: 'Time', JournalEntry: 'Journal',
+}
+
 function QboList({ rows, type, open, setOpen }) {
   if (rows.length === 0) {
-    return <div style={{ color: FAINT, fontSize: 14, padding: 30, textAlign: 'center' }}>Nothing here yet.</div>
-  }
-  return (
-    <div style={{ border: `1px solid ${BORDER}`, borderRadius: 10, overflow: 'hidden' }}>
-      <div style={{ display: 'grid', gridTemplateColumns: '84px 1fr 130px 96px 88px', gap: 10, padding: '10px 14px', background: SOFT, borderBottom: `1px solid ${BORDER}`, fontSize: 11, fontWeight: 600, letterSpacing: '.04em', textTransform: 'uppercase', color: MUTED }}>
-        <span>Id</span><span>{type === 'Customer' ? 'Name' : type === 'Purchase' ? 'Payee' : type === 'TimeActivity' ? 'Employee' : 'Customer'}</span>
-        <span>Date</span><span style={{ textAlign: 'right' }}>{type === 'TimeActivity' ? 'Hours' : 'Amount'}</span><span style={{ textAlign: 'right' }}>Status</span>
+    return (
+      <div style={{ background: '#fff', border: `1px solid ${QBLINE}`, borderRadius: 3, padding: 40, textAlign: 'center', color: '#6B6C72', fontSize: 14 }}>
+        No transactions yet.
       </div>
-      {rows.map((r) => (
-        <div key={r.key} className={r.fresh ? 'fresh' : ''} style={{ borderBottom: `1px solid ${BORDER}` }}>
-          <div style={{ display: 'grid', gridTemplateColumns: '84px 1fr 130px 96px 88px', gap: 10, padding: '11px 14px', alignItems: 'center' }}>
-            <button onClick={() => setOpen(open === r.key ? null : r.key)} className="num" style={{ border: 'none', background: 'none', padding: 0, textAlign: 'left', color: QBDARK, fontWeight: 600, fontSize: 13, cursor: 'pointer' }}>
-              {open === r.key ? '▾' : '▸'} {r.qid}
-            </button>
-            <div style={{ minWidth: 0 }}>
-              <div style={{ fontSize: 14, fontWeight: r.isJob ? 600 : 500, paddingLeft: r.isJob ? 14 : 0 }}>
-                {r.isJob && <span style={{ color: FAINT, marginLeft: -14, marginRight: 4 }}>└</span>}{r.title}
+    )
+  }
+  const nameCol = type === 'Customer' ? 'Customer' : type === 'Purchase' ? 'Payee' : type === 'TimeActivity' ? 'Employee' : 'Customer'
+  const th = { fontSize: 11, fontWeight: 700, letterSpacing: '.05em', textTransform: 'uppercase', color: '#6B6C72' }
+
+  return (
+    <div style={{ background: '#fff', border: `1px solid ${QBLINE}`, borderRadius: 3 }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '12px 16px', borderBottom: `1px solid ${QBLINE}` }}>
+        <div style={{ flex: 1, border: `1px solid ${QBLINE}`, borderRadius: 3, padding: '6px 10px', fontSize: 13, color: '#9096A0', maxWidth: 240 }}>Search…</div>
+        <span className="num" style={{ fontSize: 12.5, color: '#6B6C72' }}>{rows.length} of {rows.length}</span>
+      </div>
+
+      <div style={{ display: 'grid', gridTemplateColumns: COLS, gap: 10, padding: '9px 16px', borderBottom: `1px solid ${QBLINE}`, background: '#FAFAFB' }}>
+        <span style={th}>{type === 'Customer' ? 'Id' : 'Date'}</span>
+        <span style={th}>{type === 'Customer' ? 'Type' : 'Type'}</span>
+        <span style={th}>{nameCol}</span>
+        <span style={{ ...th, textAlign: 'right' }}>{type === 'TimeActivity' ? 'Hours' : 'Amount'}</span>
+        <span style={{ ...th, textAlign: 'right' }}>Status</span>
+        <span style={{ ...th, textAlign: 'right' }}>Action</span>
+      </div>
+
+      {rows.map((r) => {
+        const st = qbStatus(r)
+        return (
+          <div key={r.key} className={r.fresh ? 'fresh qbrow' : 'qbrow'} style={{ borderBottom: `1px solid #EDEEF1` }}>
+            <div style={{ display: 'grid', gridTemplateColumns: COLS, gap: 10, padding: '12px 16px', alignItems: 'center' }}>
+              <span className="num" style={{ fontSize: 13, color: '#393A3D' }}>
+                {type === 'Customer' ? r.qid : dshort(r.date)}
+              </span>
+              <span style={{ fontSize: 13, color: '#6B6C72' }}>{TYPE_LABEL[r.type]}</span>
+              <div style={{ minWidth: 0 }}>
+                <div style={{ fontSize: 13.5, color: '#0077C5', fontWeight: r.isJob ? 600 : 400, paddingLeft: r.isJob ? 16 : 0 }}>
+                  {r.isJob && <span style={{ color: '#9096A0', marginLeft: -16, marginRight: 5 }}>└</span>}{r.title}
+                </div>
+                {r.sub && <div style={{ fontSize: 12, color: '#6B6C72', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', paddingLeft: r.isJob ? 16 : 0 }}>{r.sub}</div>}
               </div>
-              {r.sub && <div style={{ fontSize: 12, color: FAINT, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', paddingLeft: r.isJob ? 14 : 0 }}>{r.sub}</div>}
+              <span className="num" style={{ fontSize: 13.5, textAlign: 'right', color: '#393A3D' }}>
+                {r.type === 'TimeActivity' ? r.hours + ':00' : r.amount != null ? fmt2(r.amount) : ''}
+              </span>
+              <span style={{ textAlign: 'right' }}>
+                {r.status === 'queued'
+                  ? <span style={{ fontSize: 11.5, fontWeight: 600, color: '#8A6D1F' }}>Saving…</span>
+                  : <span style={{ fontSize: 11.5, fontWeight: 700, color: st.c }}>{st.t}</span>}
+              </span>
+              <button onClick={() => setOpen(open === r.key ? null : r.key)} title="Show the API payload"
+                style={{ justifySelf: 'end', border: `1px solid ${QBLINE}`, background: open === r.key ? '#EDEEF1' : '#fff', borderRadius: 3, padding: '3px 7px', fontSize: 11, color: '#6B6C72', cursor: 'pointer', fontFamily: 'ui-monospace, monospace' }}>
+                {'{ }'}
+              </button>
             </div>
-            <span className="num" style={{ fontSize: 13, color: MUTED }}>{dshort(r.date)}</span>
-            <span className="num" style={{ fontSize: 13.5, textAlign: 'right', fontWeight: 600 }}>
-              {r.type === 'TimeActivity' ? r.hours + ' hr' : r.amount != null ? fmt2(r.amount) : '—'}
-            </span>
-            <span style={{ textAlign: 'right', fontSize: 12, fontWeight: 600, color: r.status === 'synced' ? QB : AMBER }}>
-              {r.status === 'synced' ? '✓ synced' : 'queued…'}
-            </span>
+            {open === r.key && (
+              <div style={{ borderTop: `1px solid ${QBLINE}` }}>
+                <div style={{ padding: '7px 16px', background: '#FAFAFB', fontSize: 11.5, color: '#6B6C72' }}>
+                  What the portal sent to the QuickBooks API
+                </div>
+                <pre style={{ margin: 0, padding: '12px 16px 16px', background: '#0F1720', color: '#CFE9C4', fontSize: 11.5, lineHeight: 1.55, overflowX: 'auto', fontFamily: 'ui-monospace, SFMono-Regular, Menlo, monospace' }}>
+                  {JSON.stringify(r.payload, null, 2)}
+                </pre>
+              </div>
+            )}
           </div>
-          {open === r.key && (
-            <pre style={{
-              margin: 0, padding: '12px 16px 16px', background: '#0F1720', color: '#CFE9C4', fontSize: 11.5, lineHeight: 1.55,
-              overflowX: 'auto', fontFamily: 'ui-monospace, SFMono-Regular, Menlo, monospace',
-            }}>{JSON.stringify(r.payload, null, 2)}</pre>
-          )}
-        </div>
-      ))}
+        )
+      })}
     </div>
   )
 }
 
-function Profitability({ jobs }) {
-  const totals = jobs.reduce((t, j) => {
-    const b = jobBudget(j), a = jobActual(j)
-    t.contract += b.contract; t.mat += a.materials; t.lab += a.labor; t.est += b.total
-    return t
-  }, { contract: 0, mat: 0, lab: 0, est: 0 })
-
-  const cell = { padding: '11px 12px', fontSize: 13.5, textAlign: 'right' }
-  const th = { ...cell, fontSize: 11, fontWeight: 600, letterSpacing: '.04em', textTransform: 'uppercase', color: MUTED }
+function Profitability({ jobs, stock }) {
+  const cell = { padding: '10px 12px', fontSize: 13, textAlign: 'right', color: QBINK }
+  const th = { ...cell, fontSize: 11, fontWeight: 700, letterSpacing: '.05em', textTransform: 'uppercase', color: '#6B6C72' }
+  const t = jobs.reduce((s, j) => {
+    const a = jobActual(j), m = jobMoney(j, stock)
+    s.contract += m.contract; s.billed += m.billed; s.paid += m.paid
+    s.mat += a.materials; s.lab += a.labor
+    return s
+  }, { contract: 0, billed: 0, paid: 0, mat: 0, lab: 0 })
 
   return (
-    <div>
-      <div style={{ marginBottom: 14 }}>
-        <div style={{ fontFamily: head, fontSize: 20, fontWeight: 700 }}>Job profitability by customer</div>
-        <div style={{ fontSize: 13, color: MUTED }}>QueFence Inc. · all dates · costs coded from the portal, nothing keyed by hand</div>
+    <div style={{ background: '#fff', border: `1px solid ${QBLINE}`, borderRadius: 3, padding: '22px 20px' }}>
+      <div style={{ textAlign: 'center', marginBottom: 18 }}>
+        <div style={{ fontSize: 17, fontWeight: 700, color: QBINK }}>QueFence Inc.</div>
+        <div style={{ fontSize: 15, color: QBINK }}>Job Profitability Summary</div>
+        <div style={{ fontSize: 12.5, color: '#6B6C72' }}>All Dates</div>
       </div>
-      <div style={{ border: `1px solid ${BORDER}`, borderRadius: 10, overflow: 'auto' }}>
-        <table style={{ width: '100%', borderCollapse: 'collapse', minWidth: 640 }}>
+      <div style={{ overflow: 'auto' }}>
+        <table style={{ width: '100%', borderCollapse: 'collapse', minWidth: 800 }}>
           <thead>
-            <tr style={{ background: SOFT, borderBottom: `1px solid ${BORDER}` }}>
+            <tr style={{ borderBottom: `2px solid ${QBINK}` }}>
               <th style={{ ...th, textAlign: 'left' }}>Customer : Job</th>
-              <th style={th}>Contract</th>
-              <th style={th}>Material cost</th>
-              <th style={th}>Labor cost</th>
-              <th style={th}>Total cost</th>
-              <th style={th}>Gross profit</th>
-              <th style={th}>Margin</th>
+              <th style={th}>Contract</th><th style={th}>Invoiced</th><th style={th}>Received</th>
+              <th style={th}>Materials</th><th style={th}>Labor</th><th style={th}>Gross profit</th><th style={th}>Margin</th>
             </tr>
           </thead>
           <tbody>
             {jobs.map((j) => {
-              const b = jobBudget(j), a = jobActual(j)
-              const gp = b.contract - a.total
-              const m = b.contract ? (gp / b.contract) * 100 : 0
+              const a = jobActual(j), m = jobMoney(j, stock)
+              const gp = m.contract - a.total
+              const mg = m.contract ? (gp / m.contract) * 100 : 0
               return (
-                <tr key={j.id} style={{ borderBottom: `1px solid ${BORDER}` }}>
+                <tr key={j.id} style={{ borderBottom: `1px solid #EDEEF1` }}>
                   <td style={{ ...cell, textAlign: 'left' }}>
-                    <div style={{ color: MUTED, fontSize: 12 }}>{j.customer}</div>
+                    <div style={{ color: '#6B6C72', fontSize: 12 }}>{j.customer}</div>
                     <div style={{ fontWeight: 600 }}>{j.name}</div>
                   </td>
-                  <td className="num" style={cell}>{fmt(b.contract)}</td>
+                  <td className="num" style={cell}>{fmt(m.contract)}</td>
+                  <td className="num" style={cell}>{fmt(m.billed)}</td>
+                  <td className="num" style={{ ...cell, color: m.owed > 0 ? RED : INK }}>{fmt(m.paid)}</td>
                   <td className="num" style={cell}>{fmt(a.materials)}</td>
                   <td className="num" style={cell}>{fmt(a.labor)}</td>
-                  <td className="num" style={cell}>{fmt(a.total)}</td>
                   <td className="num" style={{ ...cell, fontWeight: 600 }}>{fmt(gp)}</td>
-                  <td className="num" style={{ ...cell, fontWeight: 600, color: m < 25 ? RED : m < 35 ? AMBER : GREEN }}>{m.toFixed(0)}%</td>
+                  <td className="num" style={{ ...cell, fontWeight: 600, color: mg < 25 ? RED : mg < 35 ? AMBER : GREEN }}>{mg.toFixed(0)}%</td>
                 </tr>
               )
             })}
-            <tr style={{ background: SOFT }}>
+            <tr style={{ borderTop: `2px solid ${QBINK}` }}>
               <td style={{ ...cell, textAlign: 'left', fontWeight: 700 }}>Total</td>
-              <td className="num" style={{ ...cell, fontWeight: 700 }}>{fmt(totals.contract)}</td>
-              <td className="num" style={{ ...cell, fontWeight: 700 }}>{fmt(totals.mat)}</td>
-              <td className="num" style={{ ...cell, fontWeight: 700 }}>{fmt(totals.lab)}</td>
-              <td className="num" style={{ ...cell, fontWeight: 700 }}>{fmt(totals.mat + totals.lab)}</td>
-              <td className="num" style={{ ...cell, fontWeight: 700 }}>{fmt(totals.contract - totals.mat - totals.lab)}</td>
+              <td className="num" style={{ ...cell, fontWeight: 700 }}>{fmt(t.contract)}</td>
+              <td className="num" style={{ ...cell, fontWeight: 700 }}>{fmt(t.billed)}</td>
+              <td className="num" style={{ ...cell, fontWeight: 700 }}>{fmt(t.paid)}</td>
+              <td className="num" style={{ ...cell, fontWeight: 700 }}>{fmt(t.mat)}</td>
+              <td className="num" style={{ ...cell, fontWeight: 700 }}>{fmt(t.lab)}</td>
+              <td className="num" style={{ ...cell, fontWeight: 700 }}>{fmt(t.contract - t.mat - t.lab)}</td>
               <td className="num" style={{ ...cell, fontWeight: 700 }}>
-                {totals.contract ? (((totals.contract - totals.mat - totals.lab) / totals.contract) * 100).toFixed(0) : 0}%
+                {t.contract ? (((t.contract - t.mat - t.lab) / t.contract) * 100).toFixed(0) : 0}%
               </td>
             </tr>
           </tbody>
         </table>
       </div>
-      <p style={{ fontSize: 12.5, color: FAINT, marginTop: 12 }}>
-        Every row here came from a QuickBooks object the portal created. No one in the office made a judgment call about which job a cost belonged to.
+      <p style={{ fontSize: 12, color: '#6B6C72', marginTop: 14, textAlign: 'center' }}>
+        Materials are inventory relieved to the job plus what was delivered to it.
+        Nobody in the office decided which job a cost belonged to.
       </p>
     </div>
   )
