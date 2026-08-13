@@ -280,6 +280,29 @@ const SEED_JOBS = [
   },
 ]
 
+/* Stock bought for the yard. Not a job cost — it sits in inventory until
+   a job pulls it or somebody buys it over the counter. */
+const SEED_RECEIPTS = [
+  {
+    id: 'r1', date: '2026-07-14', vendor: 'Master Halco', ref: 'PO-1841',
+    lines: [
+      { name: '1-3/8" line post', qty: 60, cost: 18 },
+      { name: "4' galvanized mesh", qty: 500, cost: 4.60 },
+      { name: "Top rail, 10' stick", qty: 60, cost: 21 },
+    ],
+  },
+  {
+    id: 'r2', date: '2026-07-27', vendor: 'Cedar Supply Co.', ref: 'PO-1858',
+    lines: [
+      { name: "6'x8' cedar privacy panel", qty: 40, cost: 92 },
+      { name: '4x4x8 cedar post', qty: 80, cost: 26 },
+      { name: 'Cedar post cap', qty: 120, cost: 5 },
+    ],
+  },
+]
+
+const receiptTotal = (r) => r.lines.reduce((s, l) => s + l.qty * l.cost, 0)
+
 /* ─── Costing ─────────────────────────────────────────────────────────── */
 
 const asmById = (id) => ASSEMBLIES.find((a) => a.id === id)
@@ -359,6 +382,18 @@ function jobFlag(job, stock) {
 }
 const FLAG_COLOR = { green: GREEN, amber: AMBER, red: RED }
 
+// Everything the open jobs need that the yard cannot cover. Drives the
+// "stock came in" prefill, so buying closes the loop the crew opened.
+function yardShortfall(jobs, stock) {
+  const acc = {}
+  jobs.filter((j) => j.kind !== 'wholesale' && j.status !== 'Done').forEach((j) => {
+    stillNeeded(j, stock).forEach((n) => {
+      if (n.short > 0) acc[n.name] = +((acc[n.name] || 0) + n.short).toFixed(1)
+    })
+  })
+  return acc
+}
+
 // How much of each item this job still needs, for the stock-pull prefill.
 function stillNeeded(job, stock) {
   const b = jobBudget(job, stock)
@@ -387,6 +422,7 @@ function seedQbo(jobs, stock) {
   const out = []
   const parents = {}
   const invIds = {}
+  SEED_RECEIPTS.forEach((r) => out.push({ ...billEntity(nextQid(), r), status: 'synced' }))
   CUSTOMERS.forEach((c) => {
     const id = nextQid()
     parents[c] = id
@@ -479,6 +515,32 @@ function seedQbo(jobs, stock) {
     })
   })
   return { entities: out, parents }
+}
+
+/* Buying stock for the yard uses ITEM based lines, not account based.
+   Item lines put the material into Inventory Asset. Account lines would
+   expense it on the spot and the yard would never exist in the books.
+   No CustomerRef either — nobody owns this cost yet. */
+function billEntity(bid, r) {
+  const total = receiptTotal(r)
+  return {
+    key: 'bill-' + bid, type: 'Bill', qid: bid, date: r.date,
+    title: r.vendor, sub: `${r.ref} · ${r.lines.length} items into the yard`, amount: total,
+    payload: {
+      Bill: {
+        Id: bid, SyncToken: '0', TxnDate: r.date, DocNumber: r.ref,
+        VendorRef: { name: r.vendor }, TotalAmt: total,
+        PrivateNote: 'Stock received into inventory — not assigned to a job',
+        Line: r.lines.map((l) => ({
+          DetailType: 'ItemBasedExpenseLineDetail', Amount: l.qty * l.cost, Description: l.name,
+          ItemBasedExpenseLineDetail: {
+            ItemRef: { name: l.name, type: 'Inventory' },
+            Qty: l.qty, UnitPrice: l.cost, BillableStatus: 'NotBillable',
+          },
+        })),
+      },
+    },
+  }
 }
 
 /* Stock going out to a job is not a purchase — it is inventory relieved to
@@ -596,8 +658,10 @@ const QB_NAV = [
     { id: 'Customer', label: 'Customers', title: 'Customers', sub: 'Sub-customers are jobs' },
     { id: 'Estimate', label: 'Estimates', title: 'Estimates' },
     { id: 'money', label: 'Invoices', title: 'Invoices & payments' },
+    { id: 'inventory', label: 'Products & services', title: 'Products and services', sub: 'Inventory quantity on hand' },
   ] },
   { group: 'Expenses', items: [
+    { id: 'Bill', label: 'Bills', title: 'Bills', sub: 'Stock bought into the yard' },
     { id: 'Purchase', label: 'Expenses', title: 'Expense transactions' },
   ] },
   { group: 'Payroll', items: [
@@ -619,6 +683,7 @@ function qbStatus(r) {
   if (r.type === 'Payment') return { t: 'Deposited', c: QB }
   if (r.type === 'Estimate') return { t: 'Pending', c: '#8A6D1F' }
   if (r.type === 'Purchase') return { t: 'Paid', c: QB }
+  if (r.type === 'Bill') return { t: 'Open', c: '#6B6C72' }
   if (r.type === 'TimeActivity') return { t: 'Billable', c: '#1B6AC9' }
   if (r.type === 'JournalEntry') return { t: 'Posted', c: QB }
   return { t: 'Active', c: QB }
@@ -692,6 +757,12 @@ export default function QueFenceDemo() {
   const [openPayload, setOpenPayload] = useState(null)
   const [toast, setToast] = useState(null)
   const [intro, setIntro] = useState(false)
+  const [touched, setTouched] = useState([]) // stock rows that just moved, for the flash
+
+  const markTouched = (names) => {
+    setTouched(names)
+    setTimeout(() => setTouched([]), 6000)
+  }
 
   useEffect(() => {
     const d = new Date()
@@ -767,6 +838,17 @@ export default function QueFenceDemo() {
     flash('Job started. It is in QuickBooks already.')
   }
 
+  const receiveStock = ({ vendor, ref, date, lines }) => {
+    setStock((prev) => prev.map((s) => {
+      const l = lines.find((x) => x.name === s.name)
+      return l ? { ...s, onHand: +(s.onHand + l.qty).toFixed(1) } : s
+    }))
+    markTouched(lines.map((l) => l.name))
+    push([billEntity(nextQid(), { id: uid('r'), date, vendor, ref, lines })], 'Bill')
+    setView({ screen: 'list' })
+    flash(`${fmt(lines.reduce((s, l) => s + l.qty * l.cost, 0))} on the shelf`)
+  }
+
   const sellFromYard = ({ customer, lines }) => {
     const id = uid('job')
     const label = `${customer.split(' ')[0]} — counter sale`
@@ -808,6 +890,7 @@ export default function QueFenceDemo() {
       },
     })
     out.push(wholesaleInvoiceEntity(nextQid(), sale.invoices[0], sale, sid))
+    markTouched(lines.map((l) => l.name))
     push(out, 'money')
     setView({ screen: 'job', jobId: id })
     flash(`${fmt(revenue)} rung up. Stock came down.`)
@@ -842,6 +925,7 @@ export default function QueFenceDemo() {
       const l = lines.find((x) => x.name === s.name)
       return l ? { ...s, onHand: +(s.onHand - l.qty).toFixed(1) } : s
     }))
+    markTouched(lines.map((l) => l.name))
     push([jeEntity(nextQid(), pull, job.name, parents.current[job.name])], 'JournalEntry')
     flash(`${fmt(pullTotal(pull))} of stock moved onto this job`)
     go('job')
@@ -949,10 +1033,15 @@ export default function QueFenceDemo() {
               {view.screen === 'list' && (
                 <JobList jobs={jobs} stock={stock}
                   onOpen={(id) => setView({ screen: 'job', jobId: id })}
-                  onNew={() => setView({ screen: 'new' })} />
+                  onNew={() => setView({ screen: 'new' })}
+                  onReceive={() => setView({ screen: 'receive' })} />
+              )}
+              {view.screen === 'receive' && (
+                <ReceiveStock stock={stock} shortfall={yardShortfall(jobs, stock)} today={today}
+                  onBack={() => setView({ screen: 'list' })} onSave={receiveStock} />
               )}
               {view.screen === 'new' && <NewJob stock={stock} onCancel={() => setView({ screen: 'list' })} onSave={createJob} onSell={sellFromYard} />}
-              {job && view.screen !== 'list' && view.screen !== 'new' && (
+              {job && !['list', 'new', 'receive'].includes(view.screen) && (
                 <JobShell job={job} stock={stock} screen={view.screen} go={go} onBack={() => setView({ screen: 'list' })}>
                   {view.screen === 'job' && <JobHome job={job} stock={stock} go={go} />}
                   {view.screen === 'labor' && <LaborScreen job={job} today={today} onSave={saveLabor} />}
@@ -1026,8 +1115,8 @@ export default function QueFenceDemo() {
                   )}
                 </div>
 
-                {qtab === 'report'
-                  ? <Profitability jobs={jobs} stock={stock} />
+                {qtab === 'report' ? <Profitability jobs={jobs} stock={stock} />
+                  : qtab === 'inventory' ? <QboInventory stock={stock} touched={touched} />
                   : <QboList rows={qtab === 'money' ? moneyRows : qbo.filter((e) => e.type === qtab)} type={qtab} open={openPayload} setOpen={setOpenPayload} />}
               </div>
             </div>
@@ -1093,7 +1182,8 @@ function Intro({ jobs, stock, onClose }) {
 
 /* ─── Job list ────────────────────────────────────────────────────────── */
 
-function JobList({ jobs, stock, onOpen, onNew }) {
+function JobList({ jobs, stock, onOpen, onNew, onReceive }) {
+  const shortCount = Object.keys(yardShortfall(jobs, stock)).length
   return (
     <div>
       <h1 style={{ fontFamily: head, fontSize: 27, fontWeight: 700, letterSpacing: '-.015em', marginBottom: 4 }}>Your jobs</h1>
@@ -1137,6 +1227,24 @@ function JobList({ jobs, stock, onOpen, onNew }) {
         })}
       </div>
       <Btn full onClick={onNew}>Start something new</Btn>
+
+      <div style={{ marginTop: 10 }}>
+        <button onClick={onReceive} style={{
+          width: '100%', textAlign: 'left', background: shortCount > 0 ? '#FDF1EF' : CARD,
+          border: `1px solid ${shortCount > 0 ? '#F3CFC9' : BORDER}`, borderRadius: 13,
+          padding: '15px 18px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 12,
+        }}>
+          <div style={{ flex: 1 }}>
+            <div style={{ fontSize: 16, fontWeight: 600, marginBottom: 2, color: shortCount > 0 ? RED : INK }}>Stock came in</div>
+            <div style={{ fontSize: 13, color: shortCount > 0 ? '#8C4438' : MUTED }}>
+              {shortCount > 0
+                ? `Jobs are waiting on ${shortCount} ${shortCount === 1 ? 'thing' : 'things'} you don't have`
+                : 'Material you bought for the yard'}
+            </div>
+          </div>
+          <span style={{ color: FAINT, fontSize: 20, lineHeight: 1 }}>›</span>
+        </button>
+      </div>
     </div>
   )
 }
@@ -1302,6 +1410,121 @@ function NewJob({ stock, onCancel, onSave, onSell }) {
           </Btn>
         </div>
       )}
+    </div>
+  )
+}
+
+/* ─── Stock coming in from the supplier ───────────────────────────────── */
+
+function ReceiveStock({ stock, shortfall, today, onBack, onSave }) {
+  const [vendor, setVendor] = useState('')
+  const [ref, setRef] = useState('')
+  const [qtys, setQtys] = useState(() => ({ ...shortfall }))
+  const [costs, setCosts] = useState(() => Object.fromEntries(stock.map((s) => [s.name, String(s.cost)])))
+  const [search, setSearch] = useState('')
+  const [showAll, setShowAll] = useState(false)
+
+  const bump = (s, d) => setQtys((q) => {
+    const step = s.whole ? 1 : 10
+    return { ...q, [s.name]: +Math.max(0, (q[s.name] || 0) + d * step).toFixed(1) }
+  })
+
+  const matches = (s) => !search.trim() || s.name.toLowerCase().includes(search.trim().toLowerCase())
+  const visible = stock.filter((s) => matches(s) && (showAll || search.trim() || shortfall[s.name] > 0 || (qtys[s.name] || 0) > 0))
+
+  const lines = stock.filter((s) => (qtys[s.name] || 0) > 0)
+    .map((s) => ({ name: s.name, qty: qtys[s.name], cost: parseFloat(costs[s.name]) || s.cost }))
+  const total = lines.reduce((s, l) => s + l.qty * l.cost, 0)
+  const shortCount = Object.keys(shortfall).length
+
+  return (
+    <div>
+      <Btn kind="quiet" small onClick={onBack}>← All jobs</Btn>
+      <h1 style={{ fontFamily: head, fontSize: 25, fontWeight: 700, letterSpacing: '-.015em', margin: '10px 0 4px' }}>Stock came in</h1>
+      <p style={{ color: MUTED, fontSize: 14.5, marginBottom: 18 }}>
+        Material you bought for the yard. This isn't charged to any job — it sits on the shelf until
+        somebody uses it.
+      </p>
+
+      {shortCount > 0 && (
+        <div style={{ background: '#FDF1EF', border: '1px solid #F3CFC9', borderRadius: 11, padding: 14, marginBottom: 16 }}>
+          <div style={{ fontSize: 14.5, fontWeight: 700, color: RED, marginBottom: 4 }}>
+            Jobs are waiting on {shortCount === 1 ? 'one thing' : `${shortCount} things`}
+          </div>
+          <div style={{ fontSize: 13.5, color: '#8C4438' }}>Already filled in below. Change it if you bought more.</div>
+        </div>
+      )}
+
+      <Ask>Who did you buy it from?</Ask>
+      <select style={{ ...inputStyle, marginBottom: 16 }} value={vendor} onChange={(e) => setVendor(e.target.value)}>
+        <option value="">Tap to choose…</option>
+        {VENDORS.map((v) => <option key={v} value={v}>{v}</option>)}
+      </select>
+
+      <Ask>Order or invoice number</Ask>
+      <input style={{ ...inputStyle, marginBottom: 18 }} placeholder="PO-1862 (optional)" value={ref} onChange={(e) => setRef(e.target.value)} />
+
+      <Ask>What came in?</Ask>
+      <input style={{ ...inputStyle, marginBottom: 10 }} placeholder="Search the yard…" value={search} onChange={(e) => setSearch(e.target.value)} />
+
+      <div style={{ display: 'grid', gap: 8, marginBottom: 12, maxHeight: 460, overflowY: 'auto' }}>
+        {visible.map((s) => {
+          const q = qtys[s.name] || 0
+          const wanted = shortfall[s.name] || 0
+          return (
+            <Card key={s.name} style={{ padding: '12px 14px', borderColor: q > 0 ? INK : BORDER }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <div style={{ fontSize: 15, fontWeight: 600 }}>{s.name}</div>
+                  <div className="num" style={{ fontSize: 12.5, color: wanted > 0 ? RED : FAINT, fontWeight: wanted > 0 ? 600 : 400 }}>
+                    {wanted > 0 ? `${s.onHand} on the shelf — jobs need ${wanted} more` : `${s.onHand} ${s.unit} on the shelf`}
+                  </div>
+                </div>
+                <button onClick={() => bump(s, -1)} style={miniBtn}>−</button>
+                <span className="num" style={{ minWidth: 46, textAlign: 'center', fontSize: 19, fontWeight: 700 }}>{q}</span>
+                <button onClick={() => bump(s, 1)} style={miniBtn}>+</button>
+              </div>
+              {q > 0 && (
+                <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginTop: 10, paddingTop: 10, borderTop: `1px solid ${BORDER}` }}>
+                  <span style={{ fontSize: 13, color: MUTED, flex: 1 }}>What you paid each</span>
+                  <input className="num" inputMode="decimal" value={costs[s.name]} onChange={(e) => setCosts((c) => ({ ...c, [s.name]: e.target.value }))}
+                    style={{ ...inputStyle, width: 110, fontSize: 15, padding: '9px 10px', textAlign: 'right' }} />
+                </div>
+              )}
+            </Card>
+          )
+        })}
+        {visible.length === 0 && (
+          <div style={{ fontSize: 14, color: FAINT, padding: 20, textAlign: 'center' }}>
+            {search.trim() ? 'Nothing matches that.' : 'Nothing is short right now.'}
+          </div>
+        )}
+      </div>
+
+      <button onClick={() => setShowAll(!showAll)} style={{ border: 'none', background: 'none', padding: 0, color: MUTED, fontSize: 13.5, fontWeight: 600, cursor: 'pointer', marginBottom: 16 }}>
+        {showAll ? '▾ Just what jobs are waiting on' : '▸ Show everything in the yard'}
+      </button>
+
+      {lines.length > 0 && (
+        <Card style={{ marginBottom: 16 }}>
+          {lines.map((l) => (
+            <div key={l.name} style={{ display: 'flex', justifyContent: 'space-between', fontSize: 14, padding: '3px 0' }}>
+              <span><span className="num" style={{ fontWeight: 600 }}>{l.qty}</span> · {l.name}</span>
+              <span className="num" style={{ fontWeight: 600 }}>{fmt(l.qty * l.cost)}</span>
+            </div>
+          ))}
+          <div style={{ borderTop: `1px solid ${BORDER}`, marginTop: 8, paddingTop: 4 }}>
+            <Line label="The bill" value={fmt(total)} bold />
+          </div>
+        </Card>
+      )}
+
+      <Btn full disabled={!vendor || !lines.length} onClick={() => onSave({ vendor, ref: ref.trim() || 'No ref', date: today, lines })}>
+        {lines.length ? `Put it on the shelf — ${fmt(total)}` : 'Pick what came in'}
+      </Btn>
+      <p style={{ fontSize: 12.5, color: FAINT, textAlign: 'center', marginTop: 10 }}>
+        Goes to QuickBooks as a bill from the supplier and lands in inventory, not on a job.
+      </p>
     </div>
   )
 }
@@ -1953,7 +2176,7 @@ function Billing({ job, stock, onInvoice, onPayment }) {
 const COLS = '78px 96px 1fr 106px 96px 56px'
 const TYPE_LABEL = {
   Customer: 'Customer', Estimate: 'Estimate', Invoice: 'Invoice', Payment: 'Payment',
-  Purchase: 'Expense', TimeActivity: 'Time', JournalEntry: 'Journal',
+  Purchase: 'Expense', TimeActivity: 'Time', JournalEntry: 'Journal', Bill: 'Bill',
 }
 
 function QboList({ rows, type, open, setOpen }) {
@@ -2024,6 +2247,58 @@ function QboList({ rows, type, open, setOpen }) {
           </div>
         )
       })}
+    </div>
+  )
+}
+
+/* The other half of the stock story: QuickBooks' own Products and services
+   list. Pull stock onto a job or ring up a counter sale and these counts
+   come down here too — that is what the journal entry and the inventory
+   invoice are actually doing. */
+function QboInventory({ stock, touched }) {
+  const th = { fontSize: 11, fontWeight: 700, letterSpacing: '.05em', textTransform: 'uppercase', color: '#6B6C72', padding: '9px 12px' }
+  const td = { fontSize: 13, color: QBINK, padding: '11px 12px' }
+  const value = stock.reduce((s, i) => s + i.onHand * i.cost, 0)
+
+  return (
+    <div>
+      <div style={{ background: '#fff', border: `1px solid ${QBLINE}`, borderRadius: 3, marginBottom: 14, overflow: 'auto' }}>
+        <table style={{ width: '100%', borderCollapse: 'collapse', minWidth: 720 }}>
+          <thead>
+            <tr style={{ background: '#FAFAFB', borderBottom: `1px solid ${QBLINE}` }}>
+              <th style={{ ...th, textAlign: 'left' }}>Name</th>
+              <th style={{ ...th, textAlign: 'left' }}>Type</th>
+              <th style={{ ...th, textAlign: 'right' }}>Qty on hand</th>
+              <th style={{ ...th, textAlign: 'right' }}>Cost</th>
+              <th style={{ ...th, textAlign: 'right' }}>Price</th>
+              <th style={{ ...th, textAlign: 'right' }}>Value</th>
+            </tr>
+          </thead>
+          <tbody>
+            {stock.map((i) => (
+              <tr key={i.name} className={touched.includes(i.name) ? 'fresh qbrow' : 'qbrow'} style={{ borderBottom: '1px solid #EDEEF1' }}>
+                <td style={{ ...td, color: '#0077C5' }}>{i.name}</td>
+                <td style={{ ...td, color: '#6B6C72' }}>Inventory</td>
+                <td className="num" style={{ ...td, textAlign: 'right', fontWeight: touched.includes(i.name) ? 700 : 400 }}>
+                  {i.onHand} <span style={{ color: '#9096A0', fontSize: 11.5 }}>{i.unit}</span>
+                </td>
+                <td className="num" style={{ ...td, textAlign: 'right' }}>{fmt2(i.cost)}</td>
+                <td className="num" style={{ ...td, textAlign: 'right', color: i.sell ? QBINK : '#B0B4BB' }}>{i.sell ? fmt2(i.price) : '—'}</td>
+                <td className="num" style={{ ...td, textAlign: 'right' }}>{fmt2(i.onHand * i.cost)}</td>
+              </tr>
+            ))}
+            <tr style={{ borderTop: `2px solid ${QBINK}` }}>
+              <td style={{ ...td, fontWeight: 700 }} colSpan={5}>Inventory Asset</td>
+              <td className="num" style={{ ...td, textAlign: 'right', fontWeight: 700 }}>{fmt2(value)}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <p style={{ fontSize: 12, color: '#6B6C72' }}>
+        Quantities come down here when the crew pulls stock onto a job (the journal entry credits this
+        account) or when material is sold over the counter (the invoice carries these items, so
+        QuickBooks relieves them itself). Inventory tracking requires QuickBooks Online Plus or Advanced.
+      </p>
     </div>
   )
 }
