@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react'
 import Head from 'next/head'
 import { supabase } from '../lib/supabase'
+import { loadQboStatements, balanceSheetAsOf, monthLabel as qboMonthLabel } from '../lib/qboStatements'
 import Shell from '../components/Shell'
 import { categorize } from '../lib/accountTypes'
 
@@ -131,6 +132,7 @@ export default function Financials() {
   const [cfComparePeriod, setCfComparePeriod] = useState(null)
   const [accounts,     setAccounts]     = useState([])
   const [bs,           setBs]           = useState([])
+  const [qbBS, setQbBS] = useState(null)
   const [bsOpen,       setBsOpen]       = useState({ asset: true, liability: false, equity: true })
   const [acctOpen,     setAcctOpen]     = useState({ asset: true, liability: false, equity: false, income: false, expense: false })
   const [loading,      setLoading]      = useState(true)
@@ -198,6 +200,11 @@ export default function Financials() {
       })).sort((a, b) => Math.abs(b.total) - Math.abs(a.total)))
 
       const { data: bData } = await supabase.from('bs_totals').select('account, amount, category')
+      // QuickBooks' own balance sheet, pulled nightly — the derived one below
+      // is reconciled against it so a silent ledger drift becomes visible.
+      loadQboStatements(supabase, 'reydel')
+        .then(res => setQbBS(res.error ? null : balanceSheetAsOf(res.bs)))
+        .catch(() => setQbBS(null))
       if (bData) setBs(bData.map(r => ({ account: r.account, amount: Number(r.amount), category: r.category })))
 
       // Cash-flow source: every GL row that moves a bank/cash account.
@@ -704,9 +711,37 @@ export default function Financials() {
                       </div>
                     )
                   }
-                  if (!bs.length) return <div style={{ color: '#888', fontFamily: 'Inter, sans-serif', fontSize: '12px' }}>No balance sheet data yet — import a General Ledger.</div>
+                  if (!bs.length) return <div style={{ color: '#888', fontFamily: 'Inter, sans-serif', fontSize: '12px' }}>No balance sheet data yet — the nightly QuickBooks sync will populate it.</div>
                   return (
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', maxWidth: '660px' }}>
+                      {qbBS && (
+                        <div style={{ border: '1px solid #DBD5C7', background: '#fff', padding: '16px 20px' }}>
+                          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: '10px' }}>
+                            <div style={{ fontSize: '11px', letterSpacing: '0.08em', color: '#6b6355', fontFamily: 'Inter, sans-serif', fontWeight: 700 }}>
+                              QUICKBOOKS BALANCE SHEET — AS OF {qboMonthLabel(qbBS.month).toUpperCase()}
+                            </div>
+                            <div style={{ fontSize: '10.5px', color: '#9A9284', fontFamily: 'Inter, sans-serif' }}>straight from QuickBooks</div>
+                          </div>
+                          {qbBS.sections.map(sec => (
+                            <div key={sec.group} style={{ marginBottom: '10px' }}>
+                              <div style={{ fontSize: '10.5px', letterSpacing: '0.06em', color: '#9A9284', fontFamily: 'Inter, sans-serif', margin: '8px 0 3px' }}>{sec.group}</div>
+                              {sec.subgroups.map(sg => sg.accounts.map(a => (
+                                <div key={sg.subgroup + a.account} style={{ display: 'flex', justifyContent: 'space-between', fontSize: '12.5px', fontFamily: 'Inter, sans-serif', color: '#3A342B', padding: '2px 0' }}>
+                                  <span>{a.account}</span><span style={{ fontVariantNumeric: 'tabular-nums' }}>{fmt(a.amount)}</span>
+                                </div>
+                              )))}
+                              <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '12.5px', fontWeight: 700, fontFamily: 'Inter, sans-serif', color: '#1B1815', borderTop: '1px solid #DBD5C7', marginTop: '4px', paddingTop: '4px' }}>
+                                <span>Total {sec.group.toLowerCase()}</span><span style={{ fontVariantNumeric: 'tabular-nums' }}>{fmt(sec.total)}</span>
+                              </div>
+                            </div>
+                          ))}
+                          <div style={{ marginTop: '10px', padding: '9px 12px', background: Math.abs(totA - qbBS.totalAssets) < 1 ? '#EEF3EE' : '#fef2f2', border: `1px solid ${Math.abs(totA - qbBS.totalAssets) < 1 ? '#C6DECB' : '#fecaca'}`, fontSize: '11.5px', color: '#3A342B', fontFamily: 'Inter, sans-serif', lineHeight: 1.5 }}>
+                            {Math.abs(totA - qbBS.totalAssets) < 1
+                              ? <>✓ This portal reconciles to QuickBooks exactly — total assets {fmt(qbBS.totalAssets)} on both.</>
+                              : <>Portal shows {fmt(totA)} in assets vs {fmt(qbBS.totalAssets)} in QuickBooks — a difference of <b>{fmt(totA - qbBS.totalAssets)}</b>. The nightly sync will re-pull; if it persists, the ledger needs a look.</>}
+                          </div>
+                        </div>
+                      )}
                       <Section title="ASSETS" cat="asset" rows={groups.asset} total={totA} />
                       <Section title="LIABILITIES" cat="liability" rows={groups.liability} total={totL} />
                       <Section title="EQUITY" cat="equity" rows={groups.equity} total={totE} />

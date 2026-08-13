@@ -2,6 +2,7 @@ import { useState, useRef, useEffect, Fragment } from 'react'
 import Head from 'next/head'
 import { jerkySupabase } from '../lib/supabaseJerky'
 import { buildPnl, buildBalanceSheet, buildCashFlow, periodPnl, buildAdSpend } from '../lib/jerkyGL'
+import { loadQboStatements, balanceSheetAsOf, monthLabel } from '../lib/qboStatements'
 import { ResponsiveContainer, ComposedChart, Bar, Line, XAxis, YAxis, Tooltip, CartesianGrid, PieChart, Pie, Cell } from 'recharts'
 
 const CHAR = '#2B2018', SPICE = '#C8462C', KRAFT = '#A9763A', CREAM = '#F6F0E6'
@@ -113,6 +114,7 @@ export default function JerkyMunch() {
   const [af, setAf] = useState({ channel: '', spend: '', rev: '', track: '' })
   const [glTx, setGlTx] = useState([])          // real QuickBooks GL rows from Supabase
   const [coaTx, setCoaTx] = useState([])        // real Chart of Accounts rows from Supabase
+  const [qbo, setQbo] = useState(null)          // QuickBooks' own P&L + balance sheet
   const fileRef = useRef(null)
 
   // ── auth gate ──────────────────────────────────────────────────────
@@ -217,6 +219,15 @@ export default function JerkyMunch() {
       setCoaTx(data || [])
     } catch (e) { console.error('loadCoA failed', e); setCoaTx([]) }
   }
+  // QuickBooks' own statements, as the nightly sync pulled them. The derived
+  // statements are reconciled against these — a silent drift in the ledger
+  // shows as a mismatch instead of going unnoticed.
+  const loadQbo = async () => {
+    try {
+      const res = await loadQboStatements(jerkySupabase, 'jerky')
+      setQbo(res.error ? null : res)
+    } catch (e) { console.error('loadQbo failed', e); setQbo(null) }
+  }
   const loadRole = async () => {
     try {
       const email = (await jerkySupabase.auth.getUser()).data.user?.email
@@ -232,7 +243,7 @@ export default function JerkyMunch() {
     } catch (e) { console.error('saveShelfCount failed', e) }
   }
   const loadAll = async () => {
-    await Promise.all([loadRole(), loadConsign(), loadDirect(), loadAds(), loadExpenses(), loadInvoices(), loadProducts(), loadMonthSeries(), loadSettings(), loadGL(), loadCoA()])
+    await Promise.all([loadRole(), loadConsign(), loadDirect(), loadAds(), loadExpenses(), loadInvoices(), loadProducts(), loadMonthSeries(), loadSettings(), loadGL(), loadCoA(), loadQbo()])
     setDataLoaded(true)
   }
 
@@ -525,6 +536,7 @@ export default function JerkyMunch() {
   // real books, derived from the imported QuickBooks GL + Chart of Accounts
   const glPnl = glTx.length ? buildPnl(glTx, coaTx) : null
   const glBS = glTx.length ? buildBalanceSheet(glTx, coaTx) : null
+  const qbBS = qbo ? balanceSheetAsOf(qbo.bs) : null
   const glCF = glTx.length ? buildCashFlow(glTx, coaTx) : null
   const glAds = glTx.length ? buildAdSpend(glTx, coaTx) : null
   const glHasOpenings = glTx.some(r => r.txn_type === 'Beginning Balance')
@@ -1462,7 +1474,36 @@ export default function JerkyMunch() {
                   {finView === 'bs' && glBS && (
                     <div style={{ ...card }}>
                       {!glHasOpenings && <div style={{ marginBottom: '10px', padding: '8px 10px', background: '#FDECEA', border: '1px solid #F5C6C0', borderRadius: '2px', fontSize: '12px', color: INK, lineHeight: 1.5 }}>Opening balances aren't loaded yet, so this Balance Sheet is incomplete. Re-import the General Ledger on the <b style={{ cursor: 'pointer', color: SPICE }} onClick={() => setTab('quickbooks')}>QuickBooks</b> tab.</div>}
-                      <div style={{ ...lbl, color: KRAFT, marginBottom: '4px' }}>Assets</div>
+                      {qbBS && (
+                        <div style={{ marginBottom: '16px', paddingBottom: '14px', borderBottom: `1px solid ${BORDER}` }}>
+                          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: '8px' }}>
+                            <div style={{ ...lbl, color: KRAFT }}>QuickBooks balance sheet — as of {monthLabel(qbBS.month)}</div>
+                            <div style={{ fontSize: '11px', color: MUTED }}>straight from QuickBooks</div>
+                          </div>
+                          {qbBS.sections.map(sec => (
+                            <div key={sec.group} style={{ marginBottom: '10px' }}>
+                              <div style={{ ...lbl, color: MUTED, margin: '8px 0 2px' }}>{sec.group}</div>
+                              {sec.subgroups.map(sg => (
+                                <Fragment key={sg.subgroup || 'x'}>
+                                  {sg.subgroup && <div style={{ fontSize: '11.5px', color: MUTED, marginTop: '6px' }}>{sg.subgroup}</div>}
+                                  {sg.accounts.map(a => <Row key={a.account} l={a.account} v={m0(a.amount)} />)}
+                                </Fragment>
+                              ))}
+                              <Row l={`Total ${sec.group.toLowerCase()}`} v={m0(sec.total)} bold top />
+                            </div>
+                          ))}
+                          <div style={{ marginTop: '8px', fontSize: '12px', color: qbBS.balanced ? GREEN : RED }}>
+                            {qbBS.balanced ? '✓ Balanced' : 'Out of balance in QuickBooks'}
+                          </div>
+                          <div style={{ marginTop: '10px', padding: '8px 10px', background: Math.abs(glBS.totalAssets - qbBS.totalAssets) < 1 ? '#F1F7F1' : '#FDECEA', border: `1px solid ${Math.abs(glBS.totalAssets - qbBS.totalAssets) < 1 ? '#CBE3CB' : '#F5C6C0'}`, borderRadius: '2px', fontSize: '12px', color: INK, lineHeight: 1.5 }}>
+                            {Math.abs(glBS.totalAssets - qbBS.totalAssets) < 1
+                              ? <>✓ This portal&rsquo;s ledger reconciles to QuickBooks exactly — total assets {m0(qbBS.totalAssets)} on both.</>
+                              : <>Portal ledger shows {m0(glBS.totalAssets)} in assets vs {m0(qbBS.totalAssets)} in QuickBooks — a difference of <b style={{ fontFamily: MONO }}>{m0(glBS.totalAssets - qbBS.totalAssets)}</b>. The nightly sync will re-pull; if it persists, the ledger needs a look.</>}
+                          </div>
+                        </div>
+                      )}
+
+                      <div style={{ ...lbl, color: KRAFT, marginBottom: '4px' }}>Assets{qbBS ? ' — built from the ledger' : ''}</div>
                       {glBS.assets.map(a => <Row key={a.account} l={a.account} v={m0(a.amount)} />)}
                       <Row l="Total assets" v={m0(glBS.totalAssets)} bold top />
 
