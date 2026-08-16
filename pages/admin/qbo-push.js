@@ -7,7 +7,7 @@ import { supabase } from '../../lib/supabase'
 // Preview always runs first and touches nothing. Posting is a second,
 // separate click on a saved draft.
 
-const INK = '#1A1A1A', BORDER = '#E5E5E5', MUTED = '#777', RED = '#CC2222', GREEN = '#1E7A3A', AMBER = '#C98A2A'
+const INK = '#1A1A1A', BORDER = '#E5E5E5', MUTED = '#777', FAINT = '#9AA1AC', RED = '#CC2222', GREEN = '#1E7A3A', AMBER = '#C98A2A'
 const mono = 'ui-monospace, SFMono-Regular, Menlo, monospace'
 
 const BLANK = [
@@ -254,13 +254,44 @@ export default function QboPush() {
         {batch && (
           <Box color={batch.failed ? AMBER : GREEN} title={`${batch.saved} saved as drafts${batch.failed ? `, ${batch.failed} could not be` : ''}`}>
             {batch.results.map((r) => (
-              <div key={r.index} style={{ display: 'flex', gap: 10, padding: '5px 0', borderBottom: '1px solid #EEE', fontSize: 13 }}>
-                <span style={{ color: MUTED, fontFamily: mono }}>{r.index + 1}</span>
-                <span style={{ flex: 1 }}>{r.docNumber || '(no doc number)'}</span>
-                {r.ok
-                  ? <span style={{ fontFamily: mono, color: MUTED }}>Dr {r.totals.debits.toFixed(2)}</span>
-                  : <span style={{ color: RED, flex: 2 }}>{r.errors.join(' · ')}</span>}
-                <span style={{ fontWeight: 600, color: r.ok ? GREEN : RED }}>{r.ok ? 'ready' : 'no'}</span>
+              <div key={r.index} style={{ borderBottom: '1px solid #EEE', padding: '8px 0' }}>
+                <div style={{ display: 'flex', gap: 10, alignItems: 'baseline', fontSize: 13 }}>
+                  <span style={{ color: MUTED, fontFamily: mono }}>{r.index + 1}</span>
+                  <span style={{ fontWeight: 600 }}>{r.docNumber || '(no doc number)'}</span>
+                  <span style={{ color: MUTED, flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{r.memo || ''}</span>
+                  {r.ok
+                    ? <span style={{ fontFamily: mono, color: MUTED }}>{r.txnDate} · Dr {r.totals.debits.toFixed(2)}</span>
+                    : <span style={{ color: RED, flex: 2 }}>{r.errors.join(' · ')}</span>}
+                  <span style={{ fontWeight: 600, color: r.ok ? GREEN : RED }}>{r.ok ? 'ready' : 'no'}</span>
+                </div>
+
+                {/* The whole point of previewing: see which real account each
+                    written name landed on, before it hits the books. */}
+                {r.ok && r.resolved && (
+                  <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 12.5, marginTop: 6 }}>
+                    <tbody>
+                      {r.resolved.map((l) => (
+                        <tr key={l.line}>
+                          <td style={{ padding: '2px 8px 2px 22px', color: MUTED, whiteSpace: 'nowrap' }}>{l.wrote}</td>
+                          <td style={{ padding: '2px 8px' }}>
+                            {l.matched
+                              ? <>→ {l.matched} <span style={{ color: FAINT, fontFamily: mono }}>#{l.id}</span></>
+                              : <span style={{ color: RED }}>no match</span>}
+                          </td>
+                          <td style={{ padding: '2px 0', textAlign: 'right', fontFamily: mono, whiteSpace: 'nowrap' }}>
+                            {l.debit ? `Dr ${l.debit.toFixed(2)}` : `Cr ${l.credit.toFixed(2)}`}
+                          </td>
+                        </tr>
+                      ))}
+                      <tr>
+                        <td colSpan={2} style={{ padding: '4px 8px 2px 22px', color: MUTED, fontWeight: 600 }}>Balance</td>
+                        <td style={{ padding: '4px 0 2px', textAlign: 'right', fontFamily: mono, fontWeight: 700, color: GREEN }}>
+                          {r.totals.debits.toFixed(2)} = {r.totals.credits.toFixed(2)}
+                        </td>
+                      </tr>
+                    </tbody>
+                  </table>
+                )}
               </div>
             ))}
             {!batch.postResult && batch.saved > 0 && (
