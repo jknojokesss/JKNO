@@ -163,7 +163,11 @@ export default async function handler(req, res) {
           memo: e.memo || null, lines: e.lines, status: 'draft',
         }).select().single()
         if (error) { out.push({ index: i, ok: false, docNumber: e.docNumber, errors: [error.message] }); continue }
-        out.push({ index: i, ok: true, id: data.id, docNumber: e.docNumber, totals: built.totals, payload: built.payload })
+        out.push({
+          index: i, ok: true, id: data.id, docNumber: e.docNumber, memo: e.memo, txnDate: e.txnDate,
+          totals: built.totals, payload: built.payload,
+          resolved: built.resolved, // what each written name matched in the real chart
+        })
       }
       const bad = out.filter((o) => !o.ok).length
       return res.json({ ok: bad === 0, saved: out.length - bad, failed: bad, results: out })
