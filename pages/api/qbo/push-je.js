@@ -1,4 +1,5 @@
 import { supabaseAdmin } from '../../../lib/supabaseAdmin'
+import { requireAdmin } from '../../../lib/requireAdmin'
 import { getLiveToken, QboAuthError } from '../../../lib/qboAuth'
 import {
   fetchAccountRefs, fetchCustomerRefs, buildJournalEntry,
@@ -22,15 +23,44 @@ import {
 //
 // lines: [{ account, debit | credit, description?, customer? }]
 
-const ADMIN_HEADER = 'x-admin-key'
-
-function authed(req) {
-  const key = process.env.ADMIN_API_KEY
-  if (!key) return true // not configured — the page is behind the admin login
-  return req.headers[ADMIN_HEADER] === key
-}
-
 const clean = (s) => String(s || '').toLowerCase().replace(/[^a-z0-9-]/g, '')
+
+/* Post one saved draft. Shared by the single and batch paths so both get the
+   same guards: never post a row that already carries a qbo_id, and always
+   send Intuit the row's own requestid so a retried timeout cannot duplicate. */
+async function postOne(id) {
+  const { data: row, error: selErr } = await supabaseAdmin
+    .from('qbo_journal_entries').select('*').eq('id', id).maybeSingle()
+  if (selErr) throw new Error(selErr.message)
+  if (!row) throw new Error('No such draft.')
+  if (row.qbo_id) throw new Error(`Already in QuickBooks as id ${row.qbo_id}, posted ${row.posted_at}. Not posting again.`)
+
+  const { env, token, realmId } = await getLiveToken(row.client_slug)
+  const { accounts, customers } = await refsFor(env, token, realmId, row.lines)
+  const built = buildJournalEntry({
+    txnDate: row.txn_date, docNumber: row.doc_number, memo: row.memo, lines: row.lines,
+  }, accounts, customers)
+  if (built.errors.length) throw new Error(built.errors.join(' · '))
+
+  try {
+    const out = await postJournalEntry(env, token, realmId, built.payload, row.request_id)
+    const je = out.JournalEntry || {}
+    await supabaseAdmin.from('qbo_journal_entries').update({
+      status: 'posted', qbo_id: je.Id, qbo_sync_token: je.SyncToken,
+      posted_at: new Date().toISOString(), last_error: null, updated_at: new Date().toISOString(),
+    }).eq('id', row.id)
+    return {
+      qboId: je.Id, syncToken: je.SyncToken, docNumber: je.DocNumber,
+      company: env.sandbox ? 'SANDBOX' : 'PRODUCTION', realmId,
+    }
+  } catch (e) {
+    await supabaseAdmin.from('qbo_journal_entries').update({
+      status: 'error', last_error: String(e.message || e).slice(0, 800),
+      last_intuit_tid: e.intuitTid || null, updated_at: new Date().toISOString(),
+    }).eq('id', row.id)
+    throw e
+  }
+}
 
 async function refsFor(env, token, realmId, lines) {
   const needsCustomers = (lines || []).some((l) => l && l.customer)
@@ -43,7 +73,8 @@ async function refsFor(env, token, realmId, lines) {
 
 export default async function handler(req, res) {
   if (req.method !== 'POST') return res.status(405).json({ error: 'POST only' })
-  if (!authed(req)) return res.status(401).json({ error: 'Unauthorized' })
+  const gate = await requireAdmin(req)
+  if (!gate.ok) return res.status(401).json({ error: gate.reason })
 
   const body = req.body || {}
   const action = String(body.action || 'preview')
@@ -98,45 +129,74 @@ export default async function handler(req, res) {
       return res.json({ ok: true, id: data.id, payload: built.payload, totals: built.totals })
     }
 
+    // Several entries in one call. Each is validated and saved as its own
+    // draft; nothing posts here. Returns a row per entry so a bad one can be
+    // fixed without losing the good ones.
+    if (action === 'saveMany') {
+      const client = clean(body.client)
+      if (!client) return res.status(400).json({ error: 'Missing client slug.' })
+      const entries = Array.isArray(body.entries) ? body.entries : []
+      if (!entries.length) return res.status(400).json({ error: 'No entries given.' })
+      if (entries.length > 50) return res.status(400).json({ error: 'Fifty entries at a time, maximum.' })
+
+      const { env, token, realmId } = await getLiveToken(client)
+      const allLines = entries.flatMap((e) => e.lines || [])
+      const { accounts, customers } = await refsFor(env, token, realmId, allLines)
+
+      const out = []
+      for (const [i, e] of entries.entries()) {
+        const built = buildJournalEntry({
+          txnDate: e.txnDate, docNumber: e.docNumber, memo: e.memo, lines: e.lines,
+        }, accounts, customers)
+        if (built.errors.length) { out.push({ index: i, ok: false, docNumber: e.docNumber, errors: built.errors }); continue }
+
+        if (e.docNumber) {
+          const { data: dup } = await supabaseAdmin
+            .from('qbo_journal_entries').select('id, qbo_id')
+            .eq('client_slug', client).eq('doc_number', e.docNumber)
+            .not('qbo_id', 'is', null).maybeSingle()
+          if (dup) { out.push({ index: i, ok: false, docNumber: e.docNumber, errors: [`Already posted as QBO id ${dup.qbo_id}.`] }); continue }
+        }
+
+        const { data, error } = await supabaseAdmin.from('qbo_journal_entries').insert({
+          client_slug: client, txn_date: e.txnDate, doc_number: e.docNumber || null,
+          memo: e.memo || null, lines: e.lines, status: 'draft',
+        }).select().single()
+        if (error) { out.push({ index: i, ok: false, docNumber: e.docNumber, errors: [error.message] }); continue }
+        out.push({ index: i, ok: true, id: data.id, docNumber: e.docNumber, totals: built.totals, payload: built.payload })
+      }
+      const bad = out.filter((o) => !o.ok).length
+      return res.json({ ok: bad === 0, saved: out.length - bad, failed: bad, results: out })
+    }
+
+    // Post a set of already-saved drafts, one at a time so a failure part way
+    // through leaves the earlier ones correctly recorded as posted.
+    if (action === 'postMany') {
+      if (body.confirm !== true) return res.status(400).json({ error: 'Posting requires confirm: true.' })
+      const ids = Array.isArray(body.ids) ? body.ids : []
+      if (!ids.length) return res.status(400).json({ error: 'No ids given.' })
+
+      const out = []
+      for (const id of ids) {
+        try {
+          const r = await postOne(id)
+          out.push({ id, ok: true, qboId: r.qboId, docNumber: r.docNumber })
+        } catch (e) {
+          out.push({ id, ok: false, error: String(e.message || e) })
+        }
+      }
+      const bad = out.filter((o) => !o.ok).length
+      return res.json({ ok: bad === 0, posted: out.length - bad, failed: bad, results: out })
+    }
+
     if (action === 'post') {
       if (body.confirm !== true) return res.status(400).json({ error: 'Posting requires confirm: true.' })
-      const { data: row, error: selErr } = await supabaseAdmin
-        .from('qbo_journal_entries').select('*').eq('id', body.id).maybeSingle()
-      if (selErr) throw new Error(selErr.message)
-      if (!row) return res.status(404).json({ error: 'No such draft.' })
-
-      // The guard that matters: a row with an Id is already in the books.
-      if (row.qbo_id) {
-        return res.status(409).json({ error: `Already in QuickBooks as id ${row.qbo_id}, posted ${row.posted_at}. Not posting again.` })
-      }
-
-      const { env, token, realmId } = await getLiveToken(row.client_slug)
-      const { accounts, customers } = await refsFor(env, token, realmId, row.lines)
-      const built = buildJournalEntry({
-        txnDate: row.txn_date, docNumber: row.doc_number, memo: row.memo, lines: row.lines,
-      }, accounts, customers)
-      if (built.errors.length) return res.status(400).json({ error: 'Entry is not valid.', errors: built.errors })
-
       try {
-        // request_id is Intuit's own idempotency key: if this call times out
-        // but actually landed, retrying with the same id returns that entry
-        // instead of creating a second one.
-        const out = await postJournalEntry(env, token, realmId, built.payload, row.request_id)
-        const je = out.JournalEntry || {}
-        await supabaseAdmin.from('qbo_journal_entries').update({
-          status: 'posted', qbo_id: je.Id, qbo_sync_token: je.SyncToken,
-          posted_at: new Date().toISOString(), last_error: null, updated_at: new Date().toISOString(),
-        }).eq('id', row.id)
-        return res.json({
-          ok: true, qboId: je.Id, syncToken: je.SyncToken, docNumber: je.DocNumber,
-          company: env.sandbox ? 'SANDBOX' : 'PRODUCTION', realmId,
-        })
+        const r = await postOne(body.id)
+        return res.json({ ok: true, ...r })
       } catch (e) {
-        await supabaseAdmin.from('qbo_journal_entries').update({
-          status: 'error', last_error: String(e.message || e).slice(0, 800),
-          last_intuit_tid: e.intuitTid || null, updated_at: new Date().toISOString(),
-        }).eq('id', row.id)
-        return res.status(502).json({ error: String(e.message || e), intuitTid: e.intuitTid || null })
+        const already = /Already in QuickBooks/.test(String(e.message))
+        return res.status(already ? 409 : 502).json({ error: String(e.message || e), intuitTid: e.intuitTid || null })
       }
     }
 
@@ -148,7 +208,19 @@ export default async function handler(req, res) {
       if (!row.qbo_id) return res.status(400).json({ error: 'That entry was never posted.' })
 
       const { env, token, realmId } = await getLiveToken(row.client_slug)
-      await deleteJournalEntry(env, token, realmId, row.qbo_id, row.qbo_sync_token)
+      try {
+        await deleteJournalEntry(env, token, realmId, row.qbo_id, row.qbo_sync_token)
+      } catch (e) {
+        // Somebody may have deleted it inside QuickBooks already. That is the
+        // outcome we wanted, so record it instead of failing.
+        const gone = e.faultCode === '610' || /not found|deleted|stale/i.test(String(e.message))
+        if (!gone) throw e
+        await supabaseAdmin.from('qbo_journal_entries').update({
+          status: 'deleted', last_error: 'Already gone from QuickBooks when undo ran.',
+          updated_at: new Date().toISOString(),
+        }).eq('id', row.id)
+        return res.json({ ok: true, deleted: row.qbo_id, note: 'It was already deleted in QuickBooks — marked it here to match.' })
+      }
       await supabaseAdmin.from('qbo_journal_entries').update({
         status: 'deleted', updated_at: new Date().toISOString(),
       }).eq('id', row.id)

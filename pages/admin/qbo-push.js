@@ -29,6 +29,8 @@ export default function QboPush() {
   const [busy, setBusy] = useState('')
   const [error, setError] = useState(null)
   const [history, setHistory] = useState([])
+  const [closeMonth, setCloseMonth] = useState('2026-07')
+  const [workings, setWorkings] = useState(null)
 
   useEffect(() => {
     supabase.auth.getSession().then(async ({ data: { session } }) => {
@@ -40,9 +42,14 @@ export default function QboPush() {
     setTxnDate(`${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`)
   }, [])
 
-  const call = async (payload) => {
-    const res = await fetch('/api/qbo/push-je', {
-      method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload),
+  // The API fails closed, so every call carries the signed-in admin's token.
+  const call = async (payload, path = '/api/qbo/push-je') => {
+    const { data: { session } } = await supabase.auth.getSession()
+    if (!session) { router.push('/admin'); throw new Error('Signed out — sign in again.') }
+    const res = await fetch(path, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${session.access_token}` },
+      body: JSON.stringify(payload),
     })
     const json = await res.json()
     if (!res.ok) throw new Error(json.errors ? json.errors.join(' · ') : json.error || 'Request failed')
@@ -58,6 +65,19 @@ export default function QboPush() {
       description: l.description.trim() || undefined,
       customer: (l.customer || '').trim() || undefined,
     }))
+
+  const doPrepare = async () => {
+    setBusy('prepare'); setError(null); setPreview(null); setDraftId(null); setPosted(null)
+    try {
+      const r = await call({ client, month: closeMonth }, '/api/qbo/prepare-close')
+      setTxnDate(r.txnDate); setDocNumber(r.docNumber); setMemo(r.memo)
+      setLines(r.lines.map((l) => ({
+        account: l.account, debit: l.debit ? String(l.debit) : '', credit: l.credit ? String(l.credit) : '',
+        description: l.description || '',
+      })))
+      setWorkings(r)
+    } catch (e) { setError(String(e.message)) } finally { setBusy('') }
+  }
 
   const doPreview = async () => {
     setBusy('preview'); setError(null); setPreview(null); setDraftId(null); setPosted(null)
@@ -106,14 +126,69 @@ export default function QboPush() {
   return (
     <>
       <Head><title>Push a journal entry to QuickBooks</title></Head>
-      <div style={{ fontFamily: 'system-ui, -apple-system, sans-serif', maxWidth: 940, margin: '0 auto', padding: '28px 20px 80px', color: INK }}>
+      {/* globals.css paints the body cream in DM Sans and runs Tailwind
+          Preflight. Everything below assumes plain white, so say so. */}
+      <style>{`
+        body { background:#fff !important; }
+        .jepage, .jepage input, .jepage button, .jepage select {
+          font-family: 'Inter', system-ui, -apple-system, sans-serif;
+        }
+        .jepage input { background:#fff; color:${INK}; }
+        .jepage input:focus { border-color:${INK} !important; }
+        @media (max-width: 760px) {
+          .jegrid, .jeline { grid-template-columns: 1fr !important; }
+          .jehead { display: none !important; }
+        }
+      `}</style>
+      <div className="jepage" style={{ maxWidth: 940, margin: '0 auto', padding: '28px 20px 80px', color: INK, background: '#fff' }}>
         <h1 style={{ fontSize: 24, marginBottom: 4 }}>Push a journal entry to QuickBooks</h1>
         <p style={{ color: MUTED, fontSize: 14, marginBottom: 22 }}>
           Preview first — it resolves your account names against the client's real chart of accounts and
           checks the entry balances, without touching anything. Posting is a second click.
         </p>
 
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 12, marginBottom: 14 }}>
+        <div style={{ border: `1px solid ${BORDER}`, borderRadius: 8, padding: 14, marginBottom: 20, background: '#FAFAFA' }}>
+          <div style={{ fontWeight: 700, fontSize: 14, marginBottom: 4 }}>Do the monthly inventory close for me</div>
+          <div style={{ fontSize: 13, color: MUTED, marginBottom: 10 }}>
+            Runs the inventory report, works out what to relieve, and fills the entry in below. It only fills it in.
+          </div>
+          <div style={{ display: 'flex', gap: 10, alignItems: 'center', flexWrap: 'wrap' }}>
+            <select value={closeMonth} onChange={(e) => setCloseMonth(e.target.value)} style={{ ...inp, width: 150 }}>
+              <option value="2026-06">June 2026</option>
+              <option value="2026-07">July 2026</option>
+            </select>
+            <button onClick={doPrepare} disabled={!!busy} style={btn('#2C3E50')}>
+              {busy === 'prepare' ? 'Working it out…' : 'Prepare it'}
+            </button>
+          </div>
+        </div>
+
+        {workings && (
+          <Box color="#2C3E50" title={`How ${closeMonth} was worked out`}>
+            <table style={{ fontSize: 13.5, borderSpacing: 0 }}>
+              <tbody>
+                {[
+                  ['Stock on hand at the start', workings.workings.opening_stock],
+                  ['Stock bought during the month', workings.workings.stock_purchased],
+                  ['Stock on hand at the end', workings.workings.closing_stock],
+                  ['So inventory sold', workings.workings.inventory_sold],
+                  ['Used tires sold', workings.workings.used_tires],
+                  ['Total to relieve', workings.workings.total_relief],
+                ].map(([k, v]) => (
+                  <tr key={k}><td style={{ padding: '3px 16px 3px 0', color: MUTED }}>{k}</td>
+                    <td style={{ fontFamily: mono, textAlign: 'right' }}>${Number(v || 0).toLocaleString(undefined, { minimumFractionDigits: 2 })}</td></tr>
+                ))}
+              </tbody>
+            </table>
+            <div style={{ marginTop: 8, fontSize: 12.5, color: MUTED }}>
+              Sale-ledger cross-check ${Number(workings.workings.sale_ledger_cross_check || 0).toLocaleString()} ·
+              difference ${Number(workings.workings.drift_vs_cross_check || 0).toLocaleString()}
+              {!workings.guessed.allMatched && <b style={{ color: RED }}> · could not find one of the accounts — check the names below.</b>}
+            </div>
+          </Box>
+        )}
+
+        <div className="jegrid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 12, marginBottom: 14 }}>
           <label><div style={lbl}>Client slug</div><input style={inp} value={client} onChange={(e) => setClient(e.target.value)} /></label>
           <label><div style={lbl}>Date</div><input type="date" style={inp} value={txnDate} onChange={(e) => setTxnDate(e.target.value)} /></label>
           <label><div style={lbl}>Doc number</div><input style={inp} placeholder="JK-2026-06-COGS" value={docNumber} onChange={(e) => setDocNumber(e.target.value)} /></label>
@@ -124,15 +199,15 @@ export default function QboPush() {
         </label>
 
         <div style={{ border: `1px solid ${BORDER}`, borderRadius: 8, overflow: 'hidden', marginBottom: 12 }}>
-          <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr 1fr 2fr 40px', gap: 8, padding: '9px 12px', background: '#FAFAFA', borderBottom: `1px solid ${BORDER}`, fontSize: 11, fontWeight: 700, letterSpacing: '.05em', textTransform: 'uppercase', color: MUTED }}>
+          <div className="jehead" style={{ display: 'grid', gridTemplateColumns: '2fr 1fr 1fr 2fr 40px', gap: 8, padding: '9px 12px', background: '#FAFAFA', borderBottom: `1px solid ${BORDER}`, fontSize: 11, fontWeight: 700, letterSpacing: '.05em', textTransform: 'uppercase', color: MUTED }}>
             <span>Account</span><span>Debit</span><span>Credit</span><span>Description</span><span />
           </div>
           {lines.map((l, i) => (
-            <div key={i} style={{ display: 'grid', gridTemplateColumns: '2fr 1fr 1fr 2fr 40px', gap: 8, padding: '8px 12px', borderBottom: `1px solid #F2F2F2`, alignItems: 'center' }}>
-              <input style={inp} placeholder="Cost of Goods Sold" value={l.account} onChange={(e) => setLine(i, 'account', e.target.value)} />
-              <input style={inp} inputMode="decimal" value={l.debit} onChange={(e) => setLine(i, 'debit', e.target.value)} />
-              <input style={inp} inputMode="decimal" value={l.credit} onChange={(e) => setLine(i, 'credit', e.target.value)} />
-              <input style={inp} value={l.description} onChange={(e) => setLine(i, 'description', e.target.value)} />
+            <div key={i} className="jeline" style={{ display: 'grid', gridTemplateColumns: '2fr 1fr 1fr 2fr 40px', gap: 8, padding: '8px 12px', borderBottom: `1px solid #F2F2F2`, alignItems: 'center' }}>
+              <input style={inp} placeholder="Account name" value={l.account} onChange={(e) => setLine(i, 'account', e.target.value)} />
+              <input style={inp} inputMode="decimal" placeholder="Debit" value={l.debit} onChange={(e) => setLine(i, 'debit', e.target.value)} />
+              <input style={inp} inputMode="decimal" placeholder="Credit" value={l.credit} onChange={(e) => setLine(i, 'credit', e.target.value)} />
+              <input style={inp} placeholder="Description" value={l.description} onChange={(e) => setLine(i, 'description', e.target.value)} />
               <button onClick={() => setLines((p) => p.filter((_, x) => x !== i))} style={{ border: 'none', background: 'none', color: MUTED, fontSize: 18, cursor: 'pointer' }}>×</button>
             </div>
           ))}
