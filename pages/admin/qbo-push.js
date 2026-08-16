@@ -31,6 +31,8 @@ export default function QboPush() {
   const [history, setHistory] = useState([])
   const [closeMonth, setCloseMonth] = useState('2026-07')
   const [workings, setWorkings] = useState(null)
+  const [paste, setPaste] = useState('')
+  const [batch, setBatch] = useState(null)
 
   useEffect(() => {
     supabase.auth.getSession().then(async ({ data: { session } }) => {
@@ -51,7 +53,18 @@ export default function QboPush() {
       headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${session.access_token}` },
       body: JSON.stringify(payload),
     })
-    const json = await res.json()
+    // A gateway timeout or crash sends back an HTML page, not JSON. Say what
+    // actually happened instead of surfacing a JSON parse error.
+    const text = await res.text()
+    let json
+    try {
+      json = JSON.parse(text)
+    } catch (e) {
+      if (res.status === 504 || /timed? ?out|FUNCTION_INVOCATION_TIMEOUT/i.test(text)) {
+        throw new Error('The server took too long and gave up. The inventory report is slow — try again.')
+      }
+      throw new Error(`The server returned an error page (HTTP ${res.status}), not data.`)
+    }
     if (!res.ok) throw new Error(json.errors ? json.errors.join(' · ') : json.error || 'Request failed')
     return json
   }
@@ -65,6 +78,63 @@ export default function QboPush() {
       description: l.description.trim() || undefined,
       customer: (l.customer || '').trim() || undefined,
     }))
+
+  // Accepts one entry or a list of them, and is forgiving about key names so
+  // pasted-in JSON does not have to be exactly right.
+  const normEntry = (e) => ({
+    txnDate: e.txnDate || e.date || e.txn_date || '',
+    docNumber: e.docNumber || e.doc || e.doc_number || '',
+    memo: e.memo || e.note || '',
+    lines: (e.lines || e.Line || []).map((l) => ({
+      account: l.account || l.acct || l.accountName || '',
+      debit: Number(l.debit || 0),
+      credit: Number(l.credit || 0),
+      description: l.description || l.memo || '',
+      customer: l.customer || undefined,
+    })),
+  })
+
+  const doPaste = async () => {
+    setError(null); setBatch(null); setPreview(null); setDraftId(null); setPosted(null)
+    let parsed
+    try {
+      parsed = JSON.parse(paste)
+    } catch (e) {
+      setError(`That is not valid JSON — ${e.message}`); return
+    }
+    const list = (Array.isArray(parsed) ? parsed : [parsed]).map(normEntry)
+    if (!list.length || !list[0].lines.length) { setError('No entries with lines in there.'); return }
+
+    if (list.length === 1) {
+      const e = list[0]
+      if (e.txnDate) setTxnDate(e.txnDate)
+      setDocNumber(e.docNumber); setMemo(e.memo)
+      setLines(e.lines.map((l) => ({
+        account: l.account, debit: l.debit ? String(l.debit) : '', credit: l.credit ? String(l.credit) : '',
+        description: l.description || '', customer: l.customer || '',
+      })))
+      setPaste('')
+      return
+    }
+
+    setBusy('paste')
+    try {
+      setBatch(await call({ action: 'saveMany', client, entries: list }))
+    } catch (e) { setError(String(e.message)) } finally { setBusy('') }
+  }
+
+  const doPostAll = async () => {
+    const ids = (batch.results || []).filter((r) => r.ok).map((r) => r.id)
+    if (!ids.length) return
+    const where = 'the real books'
+    if (!confirm(`Post ${ids.length} journal ${ids.length === 1 ? 'entry' : 'entries'} to ${where} for ${client}?`)) return
+    setBusy('postAll'); setError(null)
+    try {
+      const r = await call({ action: 'postMany', ids, confirm: true })
+      setBatch((b) => ({ ...b, postResult: r }))
+      loadHistory()
+    } catch (e) { setError(String(e.message)) } finally { setBusy('') }
+  }
 
   const doPrepare = async () => {
     setBusy('prepare'); setError(null); setPreview(null); setDraftId(null); setPosted(null)
@@ -162,6 +232,54 @@ export default function QboPush() {
             </button>
           </div>
         </div>
+
+        <div style={{ border: `1px solid ${BORDER}`, borderRadius: 8, padding: 14, marginBottom: 20, background: '#FAFAFA' }}>
+          <div style={{ fontWeight: 700, fontSize: 14, marginBottom: 4 }}>Paste entries in</div>
+          <div style={{ fontSize: 13, color: MUTED, marginBottom: 10 }}>
+            Drop in what Claude gives you. One entry fills the form below; several are saved as drafts you can post together.
+          </div>
+          <textarea
+            value={paste} onChange={(e) => setPaste(e.target.value)} rows={5} spellCheck={false}
+            placeholder={'[{"txnDate":"2026-07-31","docNumber":"JK-REYDEL-2026-07-INV","memo":"Inventory relief","lines":[{"account":"Cost of Goods Sold","debit":1000},{"account":"Inventory Asset","credit":1000}]}]'}
+            style={{ width: '100%', padding: '10px 12px', border: `1px solid ${BORDER}`, borderRadius: 6, fontFamily: mono, fontSize: 12, lineHeight: 1.5, outline: 'none', resize: 'vertical' }}
+          />
+          <div style={{ display: 'flex', gap: 10, marginTop: 10 }}>
+            <button onClick={doPaste} disabled={!paste.trim() || !!busy} style={btn('#2C3E50')}>
+              {busy === 'paste' ? 'Reading it…' : 'Load it'}
+            </button>
+            {paste && <button onClick={() => { setPaste(''); setBatch(null) }} style={{ border: `1px solid ${BORDER}`, background: '#fff', borderRadius: 7, padding: '12px 16px', fontSize: 14, cursor: 'pointer' }}>Clear</button>}
+          </div>
+        </div>
+
+        {batch && (
+          <Box color={batch.failed ? AMBER : GREEN} title={`${batch.saved} saved as drafts${batch.failed ? `, ${batch.failed} could not be` : ''}`}>
+            {batch.results.map((r) => (
+              <div key={r.index} style={{ display: 'flex', gap: 10, padding: '5px 0', borderBottom: '1px solid #EEE', fontSize: 13 }}>
+                <span style={{ color: MUTED, fontFamily: mono }}>{r.index + 1}</span>
+                <span style={{ flex: 1 }}>{r.docNumber || '(no doc number)'}</span>
+                {r.ok
+                  ? <span style={{ fontFamily: mono, color: MUTED }}>Dr {r.totals.debits.toFixed(2)}</span>
+                  : <span style={{ color: RED, flex: 2 }}>{r.errors.join(' · ')}</span>}
+                <span style={{ fontWeight: 600, color: r.ok ? GREEN : RED }}>{r.ok ? 'ready' : 'no'}</span>
+              </div>
+            ))}
+            {!batch.postResult && batch.saved > 0 && (
+              <button onClick={doPostAll} disabled={!!busy} style={{ ...btn(RED), marginTop: 12 }}>
+                {busy === 'postAll' ? 'Posting…' : `Post all ${batch.saved} to QuickBooks`}
+              </button>
+            )}
+            {batch.postResult && (
+              <div style={{ marginTop: 12, fontSize: 13 }}>
+                <b>{batch.postResult.posted} posted{batch.postResult.failed ? `, ${batch.postResult.failed} failed` : ''}.</b>
+                {batch.postResult.results.map((r) => (
+                  <div key={r.id} style={{ color: r.ok ? GREEN : RED, fontFamily: mono, fontSize: 12.5 }}>
+                    {r.ok ? `✓ ${r.docNumber || ''} → QBO id ${r.qboId}` : `✗ ${r.error}`}
+                  </div>
+                ))}
+              </div>
+            )}
+          </Box>
+        )}
 
         {workings && (
           <Box color="#2C3E50" title={`How ${closeMonth} was worked out`}>
