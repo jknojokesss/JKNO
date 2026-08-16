@@ -95,13 +95,13 @@ export default function JerkyMunch() {
   const [rangeEnd, setRangeEnd] = useState(99)
   // Financials tab (real books): which statement + P&L view mode + month pickers
   const [finView, setFinView] = useState('pnl')       // 'pnl' | 'bs' | 'cf'
-  const [finFrom, setFinFrom] = useState(0)           // P&L range: first month index
-  const [finTo, setFinTo] = useState(99)              // P&L range: last month index (clamped to latest)
+  const [finFrom, setFinFrom] = useState(null)        // P&L range: first month index (null = last complete month)
+  const [finTo, setFinTo] = useState(null)            // P&L range: last month index (null = last complete month)
   const [finCmpOn, setFinCmpOn] = useState(false)     // comparison on/off
   const [finCmpFrom, setFinCmpFrom] = useState(0)     // comparison range start
   const [finCmpTo, setFinCmpTo] = useState(99)        // comparison range end
   const [finExpand, setFinExpand] = useState({ income: true, cogs: true, expense: true })
-  const [ovFrom, setOvFrom] = useState(null)          // Overview range (null = default to June)
+  const [ovFrom, setOvFrom] = useState(null)          // Overview range (null = default to last complete month)
   const [ovTo, setOvTo] = useState(null)
   const [period, setPeriod] = useState('month')
   const [costPerBag, setCostPerBag] = useState(4.5)
@@ -540,22 +540,25 @@ export default function JerkyMunch() {
   const qbBS = qbo ? balanceSheetAsOf(qbo.bs) : null
   const glCF = glTx.length ? buildCashFlow(glTx, coaTx) : null
   const glAds = glTx.length ? buildAdSpend(glTx, coaTx) : null
-  const glHasOpenings = glTx.some(r => r.txn_type === 'Beginning Balance')
   const glAsOf = glPnl && glPnl.lastDate ? new Date(glPnl.lastDate + 'T00:00:00').toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' }) : ''
   // Financials P&L: pick any month range, optionally compare to another range
   const finM = glPnl ? glPnl.months : []
   const finN = finM.length
   const finClamp = (i) => Math.min(Math.max(i, 0), Math.max(finN - 1, 0))
-  const aFrom = finClamp(finFrom), aTo = finClamp(finTo)
+  // default period = the latest COMPLETE month (skip the current, still-filling month)
+  const nowKey = new Date().toISOString().slice(0, 7)
+  let lastCompleteIdx = Math.max(finN - 1, 0)
+  for (let i = finN - 1; i >= 0; i--) { if (finM[i].key < nowKey) { lastCompleteIdx = i; break } }
+  const lastCompleteLabel = finM[lastCompleteIdx] ? finM[lastCompleteIdx].label : ''
+  const aFrom = finClamp(finFrom == null ? lastCompleteIdx : finFrom), aTo = finClamp(finTo == null ? lastCompleteIdx : finTo)
   const bFrom = finClamp(finCmpFrom), bTo = finClamp(finCmpTo)
   const finKeys = (i, j) => { const lo = Math.min(i, j), hi = Math.max(i, j); return [finM[lo] && finM[lo].key, finM[hi] && finM[hi].key] }
   const finRangeLabel = (i, j) => { if (!finN) return ''; const lo = Math.min(i, j), hi = Math.max(i, j); return lo === hi ? finM[lo].label : `${finM[lo].label} – ${finM[hi].label}` }
   const cmpOn = finCmpOn && finN > 0
   const stmtA = glPnl ? periodPnl(glTx, coaTx, ...finKeys(aFrom, aTo)) : null
   const stmtB = (glPnl && cmpOn) ? periodPnl(glTx, coaTx, ...finKeys(bFrom, bTo)) : null
-  // Overview range — defaults to the most recent reconciled month (June)
-  const ovJune = finM.findIndex(m => m.key === '2026-06')
-  const ovDefault = ovJune >= 0 ? ovJune : Math.max(finN - 1, 0)
+  // Overview range — defaults to the latest complete month
+  const ovDefault = lastCompleteIdx
   const ovF = finClamp(ovFrom == null ? ovDefault : ovFrom)
   const ovT = finClamp(ovTo == null ? ovDefault : ovTo)
   const ovStmt = glPnl ? periodPnl(glTx, coaTx, ...finKeys(ovF, ovT)) : null
@@ -845,7 +848,7 @@ export default function JerkyMunch() {
                         ))}
                       </div>
                     </div>
-                    <div style={{ fontSize: '11.5px', color: MUTED, marginTop: '8px' }}>Figures from your QuickBooks books · reconciled through June (later months fill in as you reconcile).</div>
+                    <div style={{ fontSize: '11.5px', color: MUTED, marginTop: '8px' }}>Figures from your QuickBooks books · synced nightly, current through {glAsOf} (the current month is still filling in).</div>
                   </div>
                 </>
               ) : (
@@ -1352,7 +1355,7 @@ export default function JerkyMunch() {
               {glPnl ? (
                 <>
                   <div style={{ ...card, background: '#FBF3E7', borderColor: '#EAD9BD', fontSize: '12.5px', color: INK, lineHeight: 1.5, marginBottom: '14px' }}>
-                    Ledger loaded through <b>{glAsOf}</b> · {glPnl.rowCount.toLocaleString()} transactions · {coaTx.length} accounts. Reconciled through <b>June</b> — July and August are partial until QuickBooks is caught up{glPnl.usedCoA ? '' : ' — and no Chart of Accounts is loaded yet, so categorization is best-guess'}.
+                    Ledger synced nightly from QuickBooks · current through <b>{glAsOf}</b> · {glPnl.rowCount.toLocaleString()} transactions · {coaTx.length} accounts. The current month is still filling in{glPnl.usedCoA ? '' : ' — and no Chart of Accounts is loaded yet, so categorization is best-guess'}.
                   </div>
                   {glPnl.unclassified.length > 0 && (
                     <div style={{ ...card, marginBottom: '14px', background: '#FDECEA', borderColor: '#F5C6C0', fontSize: '12.5px', color: INK }}>
@@ -1385,7 +1388,7 @@ export default function JerkyMunch() {
                   </div>
 
                   <div style={{ ...card, background: '#FBF3E7', borderColor: '#EAD9BD', fontSize: '12px', color: INK, lineHeight: 1.5, marginBottom: '14px' }}>
-                    As of <b>{glAsOf}</b> · reconciled through <b>June</b> (July–August partial).
+                    As of <b>{glAsOf}</b> · synced nightly from QuickBooks (the current month is still filling in).
                   </div>
 
                   {/* ---- Profit & Loss ---- */}
@@ -1493,7 +1496,7 @@ export default function JerkyMunch() {
                   {/* ---- Balance Sheet ---- */}
                   {finView === 'bs' && glBS && (
                     <div style={{ ...card }}>
-                      {!glHasOpenings && <div style={{ marginBottom: '10px', padding: '8px 10px', background: '#FDECEA', border: '1px solid #F5C6C0', borderRadius: '2px', fontSize: '12px', color: INK, lineHeight: 1.5 }}>Opening balances aren't loaded yet, so this Balance Sheet is incomplete. Re-import the General Ledger on the <b style={{ cursor: 'pointer', color: SPICE }} onClick={() => setTab('quickbooks')}>QuickBooks</b> tab.</div>}
+                      {!glBS.balanced && <div style={{ marginBottom: '10px', padding: '8px 10px', background: '#FDECEA', border: '1px solid #F5C6C0', borderRadius: '2px', fontSize: '12px', color: INK, lineHeight: 1.5 }}>This Balance Sheet is out of balance by <b style={{ fontFamily: MONO }}>{m0(glBS.check)}</b> — the nightly QuickBooks sync will re-pull; if it persists, the ledger needs a look.</div>}
                       {qbBS && (
                         <div style={{ marginBottom: '16px', paddingBottom: '14px', borderBottom: `1px solid ${BORDER}` }}>
                           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: '8px' }}>
@@ -1549,7 +1552,7 @@ export default function JerkyMunch() {
                   {/* ---- Cash Flow ---- */}
                   {finView === 'cf' && glCF && (
                     <div style={{ ...card }}>
-                      {!glHasOpenings && <div style={{ marginBottom: '10px', padding: '8px 10px', background: '#FDECEA', border: '1px solid #F5C6C0', borderRadius: '2px', fontSize: '12px', color: INK, lineHeight: 1.5 }}>Beginning cash shows $0 because opening balances aren't loaded. Re-import the General Ledger on the <b style={{ cursor: 'pointer', color: SPICE }} onClick={() => setTab('quickbooks')}>QuickBooks</b> tab.</div>}
+                      {glBS && !glBS.balanced && <div style={{ marginBottom: '10px', padding: '8px 10px', background: '#FDECEA', border: '1px solid #F5C6C0', borderRadius: '2px', fontSize: '12px', color: INK, lineHeight: 1.5 }}>The ledger is out of balance, so cash flow may be off — the nightly QuickBooks sync will re-pull.</div>}
                       <div style={{ ...lbl, color: KRAFT, marginBottom: '4px' }}>Cash flow{glAsOf ? ` — through ${glAsOf}` : ''}</div>
                       <Row l="Beginning cash" v={m0(glCF.beginningCash)} />
                       <Row l="Operating (sales, collections, expenses)" v={m0(glCF.operating)} />
