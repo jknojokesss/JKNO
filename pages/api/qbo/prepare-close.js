@@ -22,10 +22,18 @@ import { fetchAccountRefs } from '../../../lib/qboWrite'
 // its HTML timeout page, which the browser then tried to parse as JSON.
 export const config = { maxDuration: 60 }
 
+// Call ourselves on the SAME host the browser reached us on.
+//
+// Do not use VERCEL_URL here. That is the *.vercel.app deployment address,
+// which sits behind Vercel's deployment protection: an unauthenticated
+// request to it gets the SSO login page as HTTP 200 text/html. The caller
+// then tries to parse a login page as JSON, which is a confusing way to
+// discover this. The public domain has no such protection.
 function baseUrl(req) {
-  if (process.env.VERCEL_URL) return `https://${process.env.VERCEL_URL}`
-  const proto = req.headers['x-forwarded-proto'] || 'http'
-  return `${proto}://${req.headers.host}`
+  const host = req.headers['x-forwarded-host'] || req.headers.host
+  const proto = req.headers['x-forwarded-proto'] || 'https'
+  if (host) return `${proto}://${host}`
+  return 'https://www.jknojokes.com'
 }
 
 // The report hardcodes a relief block per month it knows how to close.
@@ -69,7 +77,12 @@ export default async function handler(req, res) {
       const text = await r.text()
       let j
       try { j = JSON.parse(text) } catch (e) {
-        throw new Error(`The inventory report did not return data (HTTP ${r.status}). It may have timed out.`)
+        const html = /<!DOCTYPE|<html/i.test(text.slice(0, 200))
+        throw new Error(
+          html
+            ? `The inventory report returned a web page instead of data (HTTP ${r.status}) from ${baseUrl(req)}. That usually means the request was intercepted by deployment protection or a redirect.`
+            : `The inventory report did not return data (HTTP ${r.status}). It may have timed out.`
+        )
       }
       if (!r.ok || j.error) throw new Error(j.error || `inventory-cogs returned ${r.status}`)
       return j
