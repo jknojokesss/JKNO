@@ -61,9 +61,27 @@ export default async function handler(req, res) {
   if (!token) return res.status(500).json({ error: 'WELDON_IMPORT_TOKEN is not set, so the inventory report cannot be read.' })
 
   try {
-    const r = await fetch(`${baseUrl(req)}/api/inventory-cogs?token=${encodeURIComponent(token)}`)
-    const report = await r.json()
-    if (!r.ok || report.error) throw new Error(report.error || `inventory-cogs returned ${r.status}`)
+    // The report and the chart of accounts have nothing to do with each
+    // other, so do not make the second wait on the first — this route is
+    // already close to the function time limit because the report is slow.
+    const reportP = (async () => {
+      const r = await fetch(`${baseUrl(req)}/api/inventory-cogs?token=${encodeURIComponent(token)}`)
+      const text = await r.text()
+      let j
+      try { j = JSON.parse(text) } catch (e) {
+        throw new Error(`The inventory report did not return data (HTTP ${r.status}). It may have timed out.`)
+      }
+      if (!r.ok || j.error) throw new Error(j.error || `inventory-cogs returned ${r.status}`)
+      return j
+    })()
+
+    const accountsP = (async () => {
+      const { env, token: qboToken, realmId } = await getLiveToken(client)
+      return { env, accounts: await fetchAccountRefs(env, qboToken, realmId) }
+    })()
+
+    const [report, acctBundle] = await Promise.all([reportP, accountsP])
+    const { env, accounts } = acctBundle
 
     const relief = report[key]
     if (!relief) throw new Error(`The report had no ${key}.`)
@@ -71,10 +89,6 @@ export default async function handler(req, res) {
     // Last day of the month — the entry belongs at period end.
     const [y, mm] = month.split('-').map(Number)
     const txnDate = new Date(Date.UTC(y, mm, 0)).toISOString().slice(0, 10)
-
-    // Guess the accounts off the client's real chart, then let Preview confirm.
-    const { env, token: qboToken, realmId } = await getLiveToken(client)
-    const accounts = await fetchAccountRefs(env, qboToken, realmId)
 
     const cogs = pick(accounts, [
       (a) => a.type === 'Cost of Goods Sold' && !has(a, 'used'),
