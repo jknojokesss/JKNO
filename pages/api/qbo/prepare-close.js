@@ -132,7 +132,8 @@ export default async function handler(req, res) {
     res.json({
       ok: true,
       txnDate,
-      docNumber: `JK-${client.toUpperCase()}-${month}-INV`,
+      // Must stay within QBO's 21-character DocNumber limit.
+      docNumber: `JK-${client.toUpperCase()}-${month}-INV`.slice(0, 21),
       memo: `Inventory relief ${month} — stock movement method`,
       lines,
       guessed: {
