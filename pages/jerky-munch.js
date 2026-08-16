@@ -122,6 +122,7 @@ export default function JerkyMunch() {
   const [authChecked, setAuthChecked] = useState(false)
   const [dataLoaded, setDataLoaded] = useState(false)
   const [role, setRole] = useState(null)              // 'owner' | 'counter' (staff shelf-count-only)
+  const [drill, setDrill] = useState(null)            // P&L drill-down: { title, rows, total }
   const [loginEmail, setLoginEmail] = useState('')
   const [loginPassword, setLoginPassword] = useState('')
   const [loginError, setLoginError] = useState('')
@@ -1401,12 +1402,25 @@ export default function JerkyMunch() {
                         {cmp && (() => { const chg = b - a; const good = kind === 'cost' ? chg <= 0 : chg >= 0; return <span style={{ width: '92px', textAlign: 'right', color: good ? GREEN : RED, fontWeight: 700 }}>{chg >= 0 ? '+' : '-'}{m0(Math.abs(chg))}</span> })()}
                       </span>
                     )
-                    const line = (label, a, b, opts = {}) => (
-                      <div key={label} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: opts.indent ? '4px 0 4px 16px' : '6px 0', borderTop: opts.top ? `1px solid ${BORDER}` : 'none' }}>
-                        <span style={{ fontSize: '13px', color: opts.indent ? MUTED : INK, fontWeight: opts.bold ? 700 : 400 }}>{label}</span>
-                        {cells(a, b, opts.kind, opts.bold)}
-                      </div>
-                    )
+                    const [dFK, dTK] = finKeys(aFrom, aTo)
+                    const consignAccts = (coaTx && coaTx.length)
+                      ? coaTx.filter(c => /^Consignment Sales:/.test(c.account)).map(c => c.leaf || c.account.split(':').pop().trim())
+                      : ['Aisle 9 Jackson', 'Aisle 9 Lakewood', 'Chick Chock', 'Evergreen Lakewood', 'Evergreen Monsey - 59', 'Evergreen Pomona', 'Gourmet Glatt Jackson', 'Gourmet Glatt South', "Khasky's - Snackify Deal", 'Nutmeg', 'The Cookie Corner', 'The Fishing Line', 'Vineyard North - Madison']
+                    const openDrill = (title, accts) => {
+                      const set = new Set(accts)
+                      const rows = glTx.filter(r => r.txn_date && set.has(r.account) && r.txn_date.slice(0, 7) >= (dFK || '0') && r.txn_date.slice(0, 7) <= (dTK || '9'))
+                        .sort((x, y) => x.txn_date < y.txn_date ? -1 : 1)
+                      setDrill({ title, rows, total: rows.reduce((s, r) => s + (Number(r.amount) || 0), 0) })
+                    }
+                    const line = (label, a, b, opts = {}) => {
+                      const drillable = opts.accounts && !cmp
+                      return (
+                        <div key={label} onClick={drillable ? () => openDrill(label, opts.accounts) : undefined} className={drillable ? 'jm-click' : undefined} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: opts.indent ? '4px 6px 4px 16px' : '6px', borderTop: opts.top ? `1px solid ${BORDER}` : 'none', borderRadius: '2px', cursor: drillable ? 'pointer' : 'default' }}>
+                          <span style={{ fontSize: '13px', color: opts.indent ? MUTED : INK, fontWeight: opts.bold ? 700 : 400 }}>{label}{drillable && <span style={{ color: '#C9BBA0', fontSize: '11px' }}> ›</span>}</span>
+                          {cells(a, b, opts.kind, opts.bold)}
+                        </div>
+                      )
+                    }
                     const catHeader = (key, label, a, b, kind) => (
                       <div onClick={() => setFinExpand(s => ({ ...s, [key]: !s[key] }))} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '9px 0', cursor: 'pointer', borderTop: `2px solid ${BORDER}` }}>
                         <span style={{ ...lbl, color: KRAFT, display: 'flex', alignItems: 'center', gap: '6px' }}><span style={{ fontSize: '9px' }}>{finExpand[key] ? '▼' : '▶'}</span>{label}</span>
@@ -1417,7 +1431,13 @@ export default function JerkyMunch() {
                       const s = new Set([...Object.keys(ma || {}), ...Object.keys(mb || {})])
                       return [...s].sort((x, y) => Math.abs(ma[y] || 0) - Math.abs(ma[x] || 0))
                     }
-                    const chanLines = [['invoiced', 'Invoiced wholesale'], ['private', 'Private / Zelle'], ['shopify', 'Shopify (online)'], ['consignment', 'Consignment stores'], ['deposits', 'Store deposits']]
+                    const chanLines = [
+                      ['invoiced', 'Invoiced wholesale', ['Sales']],
+                      ['private', 'Private / Zelle', ['Private Sales', 'Delivery Fee']],
+                      ['shopify', 'Shopify (online)', ['Shopify Sales', 'Shopify Shipping Income', 'Shopify Discount']],
+                      ['consignment', 'Consignment stores', consignAccts],
+                      ['deposits', 'Store deposits', ['Sales of Product Income']],
+                    ]
                     const cogsKeys = unionKeys(stmtA.cogs.map, B && B.cogs.map)
                     const expKeys = unionKeys(stmtA.expenses.map, B && B.expenses.map)
                     return (
@@ -1449,14 +1469,14 @@ export default function JerkyMunch() {
                           )}
 
                           {catHeader('income', 'Income', stmtA.income.total, B && B.income.total, 'income')}
-                          {finExpand.income && chanLines.map(([k, label]) => line(label, stmtA.income.channels[k], B && B.income.channels[k], { indent: true, kind: 'income' }))}
+                          {finExpand.income && chanLines.map(([k, label, accts]) => line(label, stmtA.income.channels[k], B && B.income.channels[k], { indent: true, kind: 'income', accounts: accts }))}
 
                           {catHeader('cogs', 'Cost of goods sold', stmtA.cogs.total, B && B.cogs.total, 'cost')}
-                          {finExpand.cogs && cogsKeys.map(a => line(a, stmtA.cogs.map[a] || 0, B && (B.cogs.map[a] || 0), { indent: true, kind: 'cost' }))}
+                          {finExpand.cogs && cogsKeys.map(a => line(a, stmtA.cogs.map[a] || 0, B && (B.cogs.map[a] || 0), { indent: true, kind: 'cost', accounts: [a] }))}
                           {line('Gross profit', stmtA.gross, B && B.gross, { bold: true, top: true, kind: 'result' })}
 
                           {catHeader('expense', 'Operating expenses', stmtA.expenses.total, B && B.expenses.total, 'cost')}
-                          {finExpand.expense && expKeys.map(a => line(a, stmtA.expenses.map[a] || 0, B && (B.expenses.map[a] || 0), { indent: true, kind: 'cost' }))}
+                          {finExpand.expense && expKeys.map(a => line(a, stmtA.expenses.map[a] || 0, B && (B.expenses.map[a] || 0), { indent: true, kind: 'cost', accounts: [a] }))}
 
                           <div style={{ marginTop: '12px', borderTop: `2px solid ${CHAR}`, paddingTop: '10px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                             <span style={{ ...big, fontSize: '15px', color: INK }}>Net income</span>
@@ -1548,6 +1568,30 @@ export default function JerkyMunch() {
 
         </main>
       </div>
+
+      {drill && (
+        <div onClick={() => setDrill(null)} style={{ position: 'fixed', inset: 0, background: 'rgba(43,32,24,.45)', display: 'flex', alignItems: 'flex-start', justifyContent: 'center', padding: '40px 16px', zIndex: 60, overflowY: 'auto' }}>
+          <div onClick={e => e.stopPropagation()} style={{ background: CARDBG, borderRadius: '2px', maxWidth: '640px', width: '100%', padding: '20px', boxShadow: '0 12px 44px rgba(0,0,0,.28)' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', gap: '10px' }}>
+              <div style={{ ...big, fontSize: '17px', color: INK }}>{drill.title}</div>
+              <button onClick={() => setDrill(null)} style={{ background: 'none', border: 'none', fontSize: '22px', color: MUTED, cursor: 'pointer', lineHeight: 1 }}>×</button>
+            </div>
+            <div style={{ fontSize: '12px', color: MUTED, margin: '2px 0 12px' }}>{drill.rows.length} transaction{drill.rows.length === 1 ? '' : 's'} · {finRangeLabel(aFrom, aTo)} · total <b style={{ color: INK, fontFamily: MONO }}>{m0(drill.total)}</b></div>
+            <div style={{ maxHeight: '62vh', overflowY: 'auto' }}>
+              {drill.rows.length === 0 && <div style={{ fontSize: '13px', color: MUTED }}>No transactions in this period.</div>}
+              {drill.rows.map((r, i) => (
+                <div key={i} style={{ display: 'flex', justifyContent: 'space-between', gap: '12px', padding: '8px 0', borderTop: i ? `1px solid ${BORDER}` : 'none' }}>
+                  <div style={{ minWidth: 0 }}>
+                    <div style={{ fontSize: '13px', color: INK }}>{r.name || r.txn_type || '—'}</div>
+                    <div style={{ fontSize: '11px', color: MUTED, marginTop: '1px' }}>{r.txn_date}{r.description ? ' · ' + r.description : ''}</div>
+                  </div>
+                  <div style={{ fontFamily: MONO, fontSize: '13px', whiteSpace: 'nowrap', color: INK }}>{m0(r.amount)}</div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
     </>
   )
 }
