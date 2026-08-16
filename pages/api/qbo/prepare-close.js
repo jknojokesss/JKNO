@@ -16,6 +16,12 @@ import { fetchAccountRefs } from '../../../lib/qboWrite'
 // The report endpoint guards itself with WELDON_IMPORT_TOKEN; we hold that
 // server-side and call ourselves, so the token never reaches the browser.
 
+// The inventory report is slow — it pages every Clover line and runs the FIFO
+// layers. It declares maxDuration 60, and this route waits on it, so it needs
+// at least as long. Without this the default cut it off and Vercel returned
+// its HTML timeout page, which the browser then tried to parse as JSON.
+export const config = { maxDuration: 60 }
+
 function baseUrl(req) {
   if (process.env.VERCEL_URL) return `https://${process.env.VERCEL_URL}`
   const proto = req.headers['x-forwarded-proto'] || 'http'
