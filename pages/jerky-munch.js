@@ -1239,22 +1239,11 @@ export default function JerkyMunch() {
           {/* ===== ADVERTISING ===== */}
           {tab === 'ads' && (
             <>
-              {glAds && glAds.total > 0 && (
-                <div style={{ ...card, marginBottom: '16px' }}>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: '8px', flexWrap: 'wrap', gap: '6px' }}>
-                    <div style={{ ...big, fontSize: '16px', color: INK }}>Advertisers — from your books</div>
-                    <div style={{ fontSize: '12px', color: MUTED }}>Total spend <b style={{ color: INK, fontFamily: MONO }}>{m0(glAds.total)}</b> · YTD</div>
-                  </div>
-                  <div style={{ ...lbl, color: KRAFT, marginBottom: '2px', marginTop: '4px' }}>By advertiser</div>
-                  {glAds.vendors.map(v => <Row key={v.name} l={v.name} v={m0(v.amount)} />)}
-                  <div style={{ fontSize: '11.5px', color: MUTED, marginTop: '8px', lineHeight: 1.5 }}>Pulled from your General Ledger (Advertising/Marketing). “Other / uncategorized” are payments whose memo didn’t name a vendor.</div>
-                </div>
-              )}
               {glAds && glAds.months && glAds.months.length > 1 && (
                 <div style={{ ...card, marginBottom: '16px' }}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: '10px', flexWrap: 'wrap', gap: '6px' }}>
                     <div style={{ ...big, fontSize: '16px', color: INK }}>What you paid each advertiser, by month</div>
-                    <div style={{ fontSize: '11.5px', color: MUTED }}>Tap any amount to see the transactions</div>
+                    <div style={{ fontSize: '11.5px', color: MUTED }}>Total <b style={{ color: INK, fontFamily: MONO }}>{m0(glAds.total)}</b> · tap any amount to see the transactions</div>
                   </div>
                   <div style={{ overflowX: 'auto' }}>
                     <table style={{ borderCollapse: 'collapse', width: '100%', fontSize: '12.5px' }}>
@@ -1292,7 +1281,7 @@ export default function JerkyMunch() {
                       </tbody>
                     </table>
                   </div>
-                  <div style={{ fontSize: '11.5px', color: MUTED, marginTop: '10px', lineHeight: 1.5 }}>“<span style={{ color: GREEN, fontWeight: 600 }}>steady</span>” = same amount every month it appears. A blank (—) means no payment that month. Scan a row across to spot a place whose amount jumps.</div>
+                  <div style={{ fontSize: '11.5px', color: MUTED, marginTop: '10px', lineHeight: 1.5 }}>“<span style={{ color: GREEN, fontWeight: 600 }}>steady</span>” = same amount every month it appears. A blank (—) means no payment that month. Scan a row across to spot a place whose amount jumps. Pulled from your General Ledger (Advertising/Marketing); “Other / uncategorized” are payments whose memo didn’t name a vendor.</div>
                 </div>
               )}
               <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap', marginBottom: '16px' }}>
