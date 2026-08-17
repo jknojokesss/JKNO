@@ -1250,6 +1250,51 @@ export default function JerkyMunch() {
                   <div style={{ fontSize: '11.5px', color: MUTED, marginTop: '8px', lineHeight: 1.5 }}>Pulled from your General Ledger (Advertising/Marketing). “Other / uncategorized” are payments whose memo didn’t name a vendor.</div>
                 </div>
               )}
+              {glAds && glAds.months && glAds.months.length > 1 && (
+                <div style={{ ...card, marginBottom: '16px' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: '10px', flexWrap: 'wrap', gap: '6px' }}>
+                    <div style={{ ...big, fontSize: '16px', color: INK }}>What you paid each advertiser, by month</div>
+                    <div style={{ fontSize: '11.5px', color: MUTED }}>Tap any amount to see the transactions</div>
+                  </div>
+                  <div style={{ overflowX: 'auto' }}>
+                    <table style={{ borderCollapse: 'collapse', width: '100%', fontSize: '12.5px' }}>
+                      <thead>
+                        <tr>
+                          <th style={{ textAlign: 'left', padding: '6px 8px', position: 'sticky', left: 0, background: CARDBG, ...lbl, color: KRAFT }}>Advertiser</th>
+                          {glAds.months.map(m => <th key={m.key} style={{ textAlign: 'right', padding: '6px 8px', ...lbl, color: KRAFT, whiteSpace: 'nowrap' }}>{m.label}</th>)}
+                          <th style={{ textAlign: 'right', padding: '6px 8px', ...lbl, color: INK, whiteSpace: 'nowrap' }}>Total</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {glAds.matrix.map(v => (
+                          <tr key={v.name} style={{ borderTop: `1px solid ${BORDER}` }}>
+                            <td style={{ padding: '6px 8px', position: 'sticky', left: 0, background: CARDBG, color: INK, whiteSpace: 'nowrap' }}>
+                              {v.name}{v.steady && <span style={{ marginLeft: '6px', fontSize: '10px', color: GREEN, fontWeight: 600 }}>steady</span>}
+                            </td>
+                            {glAds.months.map(m => {
+                              const c = v.byMonth[m.key]
+                              return (
+                                <td key={m.key} onClick={c ? () => setDrill({ title: `${v.name} — ${m.label}`, period: `${v.name} · ${m.label}`, rows: c.rows, total: c.amt }) : undefined}
+                                  className={c ? 'jm-click' : undefined}
+                                  style={{ padding: '6px 8px', textAlign: 'right', fontFamily: MONO, color: c ? INK : '#C9BEAD', cursor: c ? 'pointer' : 'default', whiteSpace: 'nowrap' }}>
+                                  {c ? m0(c.amt) : '—'}
+                                </td>
+                              )
+                            })}
+                            <td style={{ padding: '6px 8px', textAlign: 'right', fontFamily: MONO, fontWeight: 700, color: INK, whiteSpace: 'nowrap' }}>{m0(v.total)}</td>
+                          </tr>
+                        ))}
+                        <tr style={{ borderTop: `2px solid ${BORDER}` }}>
+                          <td style={{ padding: '6px 8px', position: 'sticky', left: 0, background: CARDBG, ...lbl, color: INK }}>Monthly total</td>
+                          {glAds.months.map(m => <td key={m.key} style={{ padding: '6px 8px', textAlign: 'right', fontFamily: MONO, fontWeight: 700, color: INK, whiteSpace: 'nowrap' }}>{m0(glAds.monthTotals[m.key] || 0)}</td>)}
+                          <td style={{ padding: '6px 8px', textAlign: 'right', fontFamily: MONO, fontWeight: 700, color: INK }}>{m0(glAds.total)}</td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </div>
+                  <div style={{ fontSize: '11.5px', color: MUTED, marginTop: '10px', lineHeight: 1.5 }}>“<span style={{ color: GREEN, fontWeight: 600 }}>steady</span>” = same amount every month it appears. A blank (—) means no payment that month. Scan a row across to spot a place whose amount jumps.</div>
+                </div>
+              )}
               <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap', marginBottom: '16px' }}>
                 <KPI k="Ad spend / mo" v={m0(adSpend)} sub="all channels" />
                 <KPI k="Return" v={m0(adRev)} sub={`${(adRev / adSpend).toFixed(1)}x overall`} accent={GREEN} />
@@ -1579,7 +1624,7 @@ export default function JerkyMunch() {
               <div style={{ ...big, fontSize: '17px', color: INK }}>{drill.title}</div>
               <button onClick={() => setDrill(null)} style={{ background: 'none', border: 'none', fontSize: '22px', color: MUTED, cursor: 'pointer', lineHeight: 1 }}>×</button>
             </div>
-            <div style={{ fontSize: '12px', color: MUTED, margin: '2px 0 12px' }}>{drill.rows.length} transaction{drill.rows.length === 1 ? '' : 's'} · {finRangeLabel(aFrom, aTo)} · total <b style={{ color: INK, fontFamily: MONO }}>{m0(drill.total)}</b></div>
+            <div style={{ fontSize: '12px', color: MUTED, margin: '2px 0 12px' }}>{drill.rows.length} transaction{drill.rows.length === 1 ? '' : 's'} · {drill.period || finRangeLabel(aFrom, aTo)} · total <b style={{ color: INK, fontFamily: MONO }}>{m0(drill.total)}</b></div>
             <div style={{ maxHeight: '62vh', overflowY: 'auto' }}>
               {drill.rows.length === 0 && <div style={{ fontSize: '13px', color: MUTED }}>No transactions in this period.</div>}
               {drill.rows.map((r, i) => (
