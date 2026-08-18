@@ -19,7 +19,6 @@ const DEFAULT_TAX_RATE = 8.875   // NYC rate — editable per order
 
 // Built-in items — always available. User-added items layer on top from localStorage.
 const DEFAULT_ITEMS = [
-  { no: 'GM92', desc: 'Green Gown' },
   { no: 'ALT',  desc: 'Alterations', taxable: false, alteration: true },
 ]
 
