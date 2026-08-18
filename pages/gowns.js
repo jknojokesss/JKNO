@@ -29,6 +29,8 @@ const todayStr = () => new Date().toISOString().slice(0, 10)
 const fmtDate = (s) => s ? new Date(s + 'T00:00:00').toLocaleDateString([], { month: 'numeric', day: 'numeric', year: '2-digit' }) : ''
 const fmtShort = (s) => s ? new Date(s + 'T00:00:00').toLocaleDateString([], { month: 'short', day: 'numeric' }) : ''
 // Colour/weight for a due date: red if overdue, amber if within 3 days, muted otherwise.
+// What we paid for the item (owner-only info) — '' / invalid → null for the DB.
+const costOrNull = (v) => { const n = parseFloat(v); return Number.isFinite(n) ? n : null }
 const dueTone = (due, done) => {
   if (!due || done) return { color: '#8A8A93', weight: 400 }
   const today = new Date().toISOString().slice(0, 10)
@@ -185,7 +187,7 @@ export default function Gowns() {
   const [suggest, setSuggest] = useState(null)
   const [catalog, setCatalog] = useState(DEFAULT_ITEMS)
   const [newItem, setNewItem] = useState(null)
-  const [newCatalogItem, setNewCatalogItem] = useState({ no: '', desc: '', taxable: true, alteration: false })
+  const [newCatalogItem, setNewCatalogItem] = useState({ no: '', desc: '', taxable: true, alteration: false, cost: '' })
   const [showSales, setShowSales] = useState(false)
   const [emailing, setEmailing] = useState(false)
   const [uploading, setUploading] = useState(false)
@@ -248,8 +250,12 @@ export default function Gowns() {
     ])
     setOrders((orderRows || []).map(fromDB))
     setTasks(taskRows || [])
-    const customItems = (catRows || []).map(r => ({ no: r.item_no, desc: r.description, taxable: r.taxable, alteration: r.alteration }))
-    setCatalog([...DEFAULT_ITEMS, ...customItems.filter(c => !DEFAULT_ITEMS.find(d => d.no === c.no))])
+    const customItems = (catRows || []).map(r => ({ no: r.item_no, desc: r.description, taxable: r.taxable, alteration: r.alteration, cost: r.cost ?? '' }))
+    // Built-ins can still carry a saved cost/description from the DB — merge the DB row over the default.
+    setCatalog([
+      ...DEFAULT_ITEMS.map(d => { const r = customItems.find(c => c.no === d.no); return r ? { ...d, cost: r.cost, desc: r.desc || d.desc } : d }),
+      ...customItems.filter(c => !DEFAULT_ITEMS.find(d => d.no === c.no)),
+    ])
     setLoaded(true)
   }, [])
 
@@ -323,8 +329,8 @@ export default function Gowns() {
   }
   const saveNewItem = async () => {
     if (!newItem || !newItem.no.trim()) { alert('Enter an item #.'); return }
-    const item = { no: newItem.no.trim().toUpperCase(), desc: newItem.desc.trim(), taxable: newItem.taxable, alteration: newItem.alteration }
-    const { error } = await supabase.from('gown_catalog').upsert({ user_id: user.id, item_no: item.no, description: item.desc, taxable: item.taxable, alteration: item.alteration }, { onConflict: 'user_id,item_no' })
+    const item = { no: newItem.no.trim().toUpperCase(), desc: newItem.desc.trim(), taxable: newItem.taxable, alteration: newItem.alteration, cost: newItem.cost }
+    const { error } = await supabase.from('gown_catalog').upsert({ user_id: user.id, item_no: item.no, description: item.desc, taxable: item.taxable, alteration: item.alteration, cost: costOrNull(item.cost) }, { onConflict: 'user_id,item_no' })
     if (error) { alert('Could not save item: ' + error.message); return }
     setCatalog(prev => [...prev.filter(c => c.no !== item.no), item])
     pickItem(newItem.rowId, item)
@@ -334,7 +340,7 @@ export default function Gowns() {
   // ── Catalog management (Catalog tab) ──
   const isBuiltIn = (no) => DEFAULT_ITEMS.some(d => d.no === no)
   const saveCatalogItem = async (item) => {
-    const { error } = await supabase.from('gown_catalog').upsert({ user_id: user.id, item_no: item.no, description: item.desc, taxable: item.taxable !== false, alteration: !!item.alteration }, { onConflict: 'user_id,item_no' })
+    const { error } = await supabase.from('gown_catalog').upsert({ user_id: user.id, item_no: item.no, description: item.desc, taxable: item.taxable !== false, alteration: !!item.alteration, cost: costOrNull(item.cost) }, { onConflict: 'user_id,item_no' })
     if (error) { alert('Could not save item: ' + error.message); return false }
     return true
   }
@@ -342,10 +348,10 @@ export default function Gowns() {
     const no = (newCatalogItem.no || '').trim().toUpperCase()
     if (!no) { alert('Enter an item #.'); return }
     if (catalog.some(c => c.no === no)) { alert(`Item ${no} already exists.`); return }
-    const item = { no, desc: newCatalogItem.desc.trim(), taxable: newCatalogItem.taxable, alteration: newCatalogItem.alteration }
+    const item = { no, desc: newCatalogItem.desc.trim(), taxable: newCatalogItem.taxable, alteration: newCatalogItem.alteration, cost: newCatalogItem.cost }
     if (!(await saveCatalogItem(item))) return
     setCatalog(prev => [...prev, item])
-    setNewCatalogItem({ no: '', desc: '', taxable: true, alteration: false })
+    setNewCatalogItem({ no: '', desc: '', taxable: true, alteration: false, cost: '' })
   }
   const updateCatalogItem = async (no, patch) => {
     const current = catalog.find(c => c.no === no); if (!current) return
@@ -409,6 +415,21 @@ export default function Gowns() {
     }
     const { data, error } = await supabase.from('gown_orders').upsert(toDB(clean, user.id)).select().single()
     if (error) { alert('Error saving: ' + error.message); return null }
+    // The catalog "catches" any item # typed on the order that it doesn't know yet —
+    // no need to tap the dropdown; just type the item and save.
+    const known = new Set(catalog.map(c => c.no.toUpperCase()))
+    const caught = []
+    for (const it of items) {
+      const no = (it.itemNo || '').trim().toUpperCase()
+      if (!no || known.has(no)) continue
+      known.add(no)
+      caught.push({ no, desc: (it.desc || '').trim(), taxable: it.taxable !== false, alteration: false, cost: '' })
+    }
+    if (caught.length) {
+      supabase.from('gown_catalog')
+        .upsert(caught.map(c => ({ user_id: user.id, item_no: c.no, description: c.desc, taxable: c.taxable, alteration: c.alteration })), { onConflict: 'user_id,item_no' })
+        .then(({ error: catErr }) => { if (!catErr) setCatalog(prev => [...prev, ...caught.filter(c => !prev.some(p => p.no === c.no))]) })
+    }
     const saved = fromDB(data)
     setOrders(prev => prev.some(o => o.id === clean.id) ? prev.map(o => o.id === clean.id ? saved : o) : [saved, ...prev])
     if (stay) {
@@ -827,28 +848,61 @@ export default function Gowns() {
                 <div style={{ fontSize: '15px' }}>{orders.length ? (search ? 'Try a different name.' : 'Nothing here right now.') : 'Tap "+ New Order" to write your first one.'}</div>
               </div>
             ) : tab !== 'todos' && tab !== 'customers' && tab !== 'catalog' ? (
-              <div className="gw-card" style={{ overflow: 'hidden', padding: 0 }}>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
                 {filtered.map(o => {
                   const tot = orderTotal(o), bal = balanceOf(o)
-                  const needsAlt = (o.alterationsList || []).some(a => !a.done)
+                  const alts = o.alterationsList || []
+                  const pendingAlts = alts.filter(a => !a.done).length
                   const openTasks = (o.todos || []).filter(t => !t.done).length
+                  const groups = {}
+                  alts.forEach(a => { const g = a.garment?.trim() || 'Gown'; (groups[g] = groups[g] || []).push(a) })
                   return (
-                    <div key={o.id} className="gw-press" onClick={() => openOrder(o)} style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '11px 14px', cursor: 'pointer', borderLeft: `4px solid ${isOpen(o) ? ROSE : GREEN}`, borderBottom: `1px solid ${CREAM}`, background: '#fff' }}>
-                      <div style={{ minWidth: 0, flex: 1 }}>
-                        <div style={{ display: 'flex', alignItems: 'baseline', gap: '8px' }}>
-                          <span style={{ fontSize: '16px', fontWeight: 700, color: INK, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{fullName(o) || '—'}</span>
-                          <span style={{ fontSize: '12px', fontWeight: 800, color: REDNO, whiteSpace: 'nowrap', flexShrink: 0 }}>No. {o.orderNo}</span>
+                    <div key={o.id} className="gw-card" style={{ padding: '13px 15px', borderLeft: `4px solid ${isOpen(o) ? ROSE : GREEN}` }}>
+                      <div className="gw-press" onClick={() => openOrder(o)} style={{ display: 'flex', alignItems: 'flex-start', gap: '10px', cursor: 'pointer' }}>
+                        {o.photos?.length > 0 && <img src={o.photos[0].url} alt="" onClick={(e) => { e.stopPropagation(); setLightbox(o.photos[0].url) }} style={{ width: '48px', height: '48px', objectFit: 'cover', borderRadius: '8px', flexShrink: 0, border: `1px solid ${GRID}`, cursor: 'zoom-in' }} />}
+                        <div style={{ minWidth: 0, flex: 1 }}>
+                          <div style={{ fontSize: '17px', fontWeight: 700, color: INK }}>{fullName(o) || '—'} <span style={{ fontSize: '12px', fontWeight: 800, color: REDNO }}>No. {o.orderNo}</span></div>
+                          <div style={{ fontSize: '12px', color: MUTED, marginTop: '2px' }}>
+                            {fmtDate(o.date)}{o.phone ? ` · ${o.phone}` : ''}{openTasks ? ` · ${openTasks} task${openTasks > 1 ? 's' : ''}` : ''}
+                            {pendingAlts > 0 && <span style={{ color: AMBER, fontWeight: 700 }}> · ✂ {pendingAlts} to do</span>}
+                          </div>
                         </div>
-                        <div style={{ fontSize: '12px', color: MUTED, marginTop: '2px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                          {fmtDate(o.date)}{o.phone ? ` · ${o.phone}` : ''}{needsAlt ? ' · ✂ alt' : ''}{openTasks ? ` · ${openTasks} task${openTasks > 1 ? 's' : ''}` : ''}
+                        <div style={{ textAlign: 'right', flexShrink: 0 }}>
+                          <div style={{ fontSize: '15px', fontWeight: 800, color: INK }}>{money(tot)}</div>
+                          {bal > 0.005
+                            ? <div style={{ fontSize: '12px', fontWeight: 700, color: AMBER }}>Owes {money(bal)}</div>
+                            : <div style={{ fontSize: '12px', fontWeight: 700, color: GREEN }}>Paid ✓</div>}
                         </div>
                       </div>
-                      <div style={{ textAlign: 'right', flexShrink: 0 }}>
-                        <div style={{ fontSize: '15px', fontWeight: 800, color: INK }}>{money(tot)}</div>
-                        {bal > 0.005
-                          ? <div style={{ fontSize: '12px', fontWeight: 700, color: AMBER }}>Owes {money(bal)}</div>
-                          : <div style={{ fontSize: '12px', fontWeight: 700, color: GREEN }}>Paid ✓</div>}
-                      </div>
+                      {alts.length > 0 && (
+                        <div style={{ marginTop: '10px', display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                          {Object.entries(groups).map(([garment, garmentAlts]) => (
+                            <div key={garment}>
+                              <div style={{ fontSize: '13px', fontWeight: 800, color: INK, marginBottom: '5px' }}>👗 {garment}</div>
+                              <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                                {garmentAlts.map(a => {
+                                  const dt = dueTone(a.due, a.done)
+                                  return (
+                                    <div key={a.id} style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '7px 10px', background: a.done ? '#F5F2EF' : '#FBEAF0', borderRadius: '8px', borderLeft: dt.overdue ? '3px solid #C0504C' : (dt.soon ? '3px solid #9C6B12' : '3px solid transparent') }}>
+                                      {a.photos?.length > 0 && <img src={a.photos[0].url} alt="" onClick={(e) => { e.stopPropagation(); setLightbox(a.photos[0].url) }} style={{ width: '40px', height: '40px', objectFit: 'cover', borderRadius: '6px', flexShrink: 0, border: `1px solid ${GRID}`, cursor: 'zoom-in' }} />}
+                                      <div style={{ minWidth: 0, flex: 1 }}>
+                                        <div style={{ fontSize: '13px', fontWeight: 600, color: a.done ? MUTED : ROSE_DK, textDecoration: a.done ? 'line-through' : 'none' }}>{a.note || 'Alteration'}</div>
+                                        <div style={{ fontSize: '11px', marginTop: '1px' }}>
+                                          <span style={{ color: MUTED }}>{[a.assignee, a.hours ? `${a.hours}h` : ''].filter(Boolean).join(' · ') || 'unassigned'}</span>
+                                          {a.due && <span style={{ color: dt.color, fontWeight: dt.weight, marginLeft: '6px' }}>{dt.overdue ? '⚠ ' : ''}due {fmtShort(a.due)}</span>}
+                                        </div>
+                                      </div>
+                                      {a.done
+                                        ? <span style={{ fontSize: '12px', color: GREEN, fontWeight: 700 }}>✓</span>
+                                        : <input type="checkbox" checked={false} onChange={() => patchOrder(o.id, { alterationsList: alts.map(x => x.id === a.id ? { ...x, done: true } : x) })} title="Mark done" style={{ width: '16px', height: '16px', accentColor: PAD, cursor: 'pointer' }} />}
+                                    </div>
+                                  )
+                                })}
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      )}
                     </div>
                   )
                 })}
@@ -1100,6 +1154,10 @@ export default function Gowns() {
                       <div style={{ fontSize: '12px', color: MUTED, marginBottom: '4px' }}>Description <span style={{ color: '#B3A8A2' }}>· optional</span></div>
                       <input value={newCatalogItem.desc} onChange={e => setNewCatalogItem(p => ({ ...p, desc: e.target.value }))} onKeyDown={e => { if (e.key === 'Enter') addCatalogItem() }} placeholder="What is this item?" style={fieldIn} />
                     </div>
+                    <div style={{ flex: '0 0 96px' }}>
+                      <div style={{ fontSize: '12px', color: MUTED, marginBottom: '4px' }}>Cost <span style={{ color: '#B3A8A2' }}>· optional</span></div>
+                      <input value={newCatalogItem.cost} onChange={e => setNewCatalogItem(p => ({ ...p, cost: e.target.value }))} onKeyDown={e => { if (e.key === 'Enter') addCatalogItem() }} type="text" inputMode="decimal" placeholder="$" style={{ ...fieldIn, textAlign: 'right', fontWeight: 600 }} />
+                    </div>
                   </div>
                   <div style={{ display: 'flex', gap: '18px', margin: '12px 0' }}>
                     <label style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer', fontSize: '14px', fontWeight: 600 }}>
@@ -1125,6 +1183,7 @@ export default function Gowns() {
                         {builtIn
                           ? <span style={{ flex: 1, fontSize: '14px', color: INK }}>{item.desc}</span>
                           : <input value={item.desc} onChange={e => setCatalog(prev => prev.map(c => c.no === item.no ? { ...c, desc: e.target.value } : c))} onBlur={e => updateCatalogItem(item.no, { desc: e.target.value })} style={{ flex: 1, minWidth: 0, fontSize: '14px', border: '1px solid #EDE6E0', borderRadius: '6px', padding: '5px 7px', fontFamily: 'inherit', color: INK, outline: 'none', background: '#FAF8F5' }} />}
+                        <input value={item.cost ?? ''} title="Cost (what you paid)" onChange={e => setCatalog(prev => prev.map(c => c.no === item.no ? { ...c, cost: e.target.value } : c))} onBlur={e => updateCatalogItem(item.no, { cost: e.target.value })} type="text" inputMode="decimal" placeholder="Cost $" style={{ width: '68px', flexShrink: 0, fontSize: '13px', textAlign: 'right', border: '1px solid #EDE6E0', borderRadius: '6px', padding: '5px 7px', fontFamily: 'inherit', fontWeight: 600, color: INK, outline: 'none', background: '#FAF8F5' }} />
                         <label title="Taxable" style={{ display: 'flex', alignItems: 'center', gap: '3px', fontSize: '12px', color: MUTED, cursor: builtIn ? 'default' : 'pointer' }}>
                           <input type="checkbox" disabled={builtIn} checked={item.taxable !== false} onChange={e => updateCatalogItem(item.no, { taxable: e.target.checked })} style={{ accentColor: PAD }} /> Tax
                         </label>
@@ -1274,10 +1333,13 @@ export default function Gowns() {
                               <span style={{ color: INK }}>{m.desc}</span>
                             </div>
                           ))}
-                          <div onMouseDown={() => { setSuggest(null); setNewItem({ rowId: it.id, no: suggest.query, desc: '', taxable: true, alteration: false }) }}
-                            style={{ padding: '11px 14px', cursor: 'pointer', fontSize: '13px', fontWeight: 600, color: ROSE_DK, background: '#FDF5F7', display: 'flex', alignItems: 'center', gap: '6px' }}>
-                            <span style={{ fontSize: '16px' }}>＋</span> Save &ldquo;{suggest.query}&rdquo; as new item
-                          </div>
+                          {!suggest.matches.some(m => m.no.toLowerCase() === suggest.query.toLowerCase()) && (
+                            <div onMouseDown={() => { setSuggest(null); setNewItem({ rowId: it.id, no: suggest.query, desc: '', taxable: true, alteration: false, cost: '' }) }}
+                              style={{ padding: '11px 14px', cursor: 'pointer', fontSize: '13px', fontWeight: 600, color: ROSE_DK, background: '#FDF5F7', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                              <span style={{ fontSize: '16px' }}>＋</span>
+                              <span>&ldquo;{suggest.query}&rdquo; is new — saves to catalog automatically <span style={{ fontWeight: 500, color: MUTED }}>(tap to add details)</span></span>
+                            </div>
+                          )}
                         </div>
                       )}
                     </div>
@@ -1784,6 +1846,10 @@ export default function Gowns() {
             <div style={{ marginBottom: '16px' }}>
               <div style={{ fontSize: '12px', fontWeight: 600, color: MUTED, marginBottom: '5px', textTransform: 'uppercase', letterSpacing: '0.04em' }}>Description <span style={{ color: '#B3A8A2', fontWeight: 500, textTransform: 'none', letterSpacing: 0 }}>· optional</span></div>
               <input value={newItem.desc} onChange={e => setNewItem(n => ({ ...n, desc: e.target.value }))} placeholder="What is this item?" autoFocus style={{ width: '100%', padding: '12px 14px', fontSize: '17px', border: '1.5px solid #E2D7D1', borderRadius: '10px', fontFamily: 'inherit', color: INK, outline: 'none' }} />
+            </div>
+            <div style={{ marginBottom: '16px' }}>
+              <div style={{ fontSize: '12px', fontWeight: 600, color: MUTED, marginBottom: '5px', textTransform: 'uppercase', letterSpacing: '0.04em' }}>Cost <span style={{ color: '#B3A8A2', fontWeight: 500, textTransform: 'none', letterSpacing: 0 }}>· what you paid, optional</span></div>
+              <input value={newItem.cost || ''} onChange={e => setNewItem(n => ({ ...n, cost: e.target.value }))} type="text" inputMode="decimal" placeholder="$" style={{ width: '100%', padding: '12px 14px', fontSize: '17px', border: '1.5px solid #E2D7D1', borderRadius: '10px', fontFamily: 'inherit', fontWeight: 600, color: INK, outline: 'none' }} />
             </div>
 
             <div style={{ display: 'flex', gap: '12px', marginBottom: '20px' }}>
