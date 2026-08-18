@@ -249,10 +249,10 @@ export default function Gowns() {
     ])
     setOrders((orderRows || []).map(fromDB))
     setTasks(taskRows || [])
-    const customItems = (catRows || []).map(r => ({ no: r.item_no, desc: r.description, taxable: r.taxable, alteration: r.alteration, cost: r.cost ?? '' }))
+    const customItems = (catRows || []).map(r => ({ no: r.item_no, desc: r.description, taxable: r.taxable, alteration: r.alteration, cost: r.cost ?? '', lastPrice: r.last_price ?? null }))
     // Built-ins can still carry a saved cost/description from the DB — merge the DB row over the default.
     setCatalog([
-      ...DEFAULT_ITEMS.map(d => { const r = customItems.find(c => c.no === d.no); return r ? { ...d, cost: r.cost, desc: r.desc || d.desc } : d }),
+      ...DEFAULT_ITEMS.map(d => { const r = customItems.find(c => c.no === d.no); return r ? { ...d, cost: r.cost, lastPrice: r.lastPrice, desc: r.desc || d.desc } : d }),
       ...customItems.filter(c => !DEFAULT_ITEMS.find(d => d.no === c.no)),
     ])
     setLoaded(true)
@@ -323,7 +323,8 @@ export default function Gowns() {
     }
   }
   const pickItem = (rowId, item) => {
-    setForm(f => ({ ...f, items: f.items.map(it => it.id === rowId ? { ...it, itemNo: item.no, desc: item.desc, taxable: item.taxable !== false } : it), ...(item.alteration ? { alterations: true, alterationsList: (f.alterationsList?.length ? f.alterationsList : [{ id: uid(), garment: '', note: '', assignee: '', hours: '', due: '', done: false }]) } : {}) }))
+    // Prefill the line's price with the last price charged for this item (still editable).
+    setForm(f => ({ ...f, items: f.items.map(it => it.id === rowId ? { ...it, itemNo: item.no, desc: item.desc, taxable: item.taxable !== false, price: it.price || (item.lastPrice != null ? String(item.lastPrice) : '') } : it), ...(item.alteration ? { alterations: true, alterationsList: (f.alterationsList?.length ? f.alterationsList : [{ id: uid(), garment: '', note: '', assignee: '', hours: '', due: '', done: false }]) } : {}) }))
     setSuggest(null)
   }
   const saveNewItem = async () => {
@@ -415,19 +416,35 @@ export default function Gowns() {
     const { data, error } = await supabase.from('gown_orders').upsert(toDB(clean, user.id)).select().single()
     if (error) { alert('Error saving: ' + error.message); return null }
     // The catalog "catches" any item # typed on the order that it doesn't know yet —
-    // no need to tap the dropdown; just type the item and save.
+    // no need to tap the dropdown; just type the item and save. It also remembers
+    // the last price charged for every item on the order (auto, nothing to type).
+    const lastPriceOf = {}
+    for (const it of items) {
+      const no = (it.itemNo || '').trim().toUpperCase()
+      const p = parseFloat(it.price)
+      if (no && Number.isFinite(p) && p > 0) lastPriceOf[no] = p
+    }
     const known = new Set(catalog.map(c => c.no.toUpperCase()))
     const caught = []
     for (const it of items) {
       const no = (it.itemNo || '').trim().toUpperCase()
       if (!no || known.has(no)) continue
       known.add(no)
-      caught.push({ no, desc: (it.desc || '').trim(), taxable: it.taxable !== false, alteration: false, cost: '' })
+      caught.push({ no, desc: (it.desc || '').trim(), taxable: it.taxable !== false, alteration: false, cost: '', lastPrice: lastPriceOf[no] ?? null })
     }
     if (caught.length) {
       supabase.from('gown_catalog')
-        .upsert(caught.map(c => ({ user_id: user.id, item_no: c.no, description: c.desc, taxable: c.taxable, alteration: c.alteration })), { onConflict: 'user_id,item_no' })
+        .upsert(caught.map(c => ({ user_id: user.id, item_no: c.no, description: c.desc, taxable: c.taxable, alteration: c.alteration, last_price: c.lastPrice })), { onConflict: 'user_id,item_no' })
         .then(({ error: catErr }) => { if (!catErr) setCatalog(prev => [...prev, ...caught.filter(c => !prev.some(p => p.no === c.no))]) })
+    }
+    const repriced = Object.keys(lastPriceOf).filter(no => !caught.some(c => c.no === no))
+    if (repriced.length) {
+      const rows = repriced.map(no => {
+        const c = catalog.find(x => x.no.toUpperCase() === no)
+        return { user_id: user.id, item_no: no, description: c?.desc || '', taxable: c ? c.taxable !== false : true, alteration: !!c?.alteration, cost: costOrNull(c?.cost), last_price: lastPriceOf[no] }
+      })
+      supabase.from('gown_catalog').upsert(rows, { onConflict: 'user_id,item_no' })
+        .then(({ error: lpErr }) => { if (!lpErr) setCatalog(prev => prev.map(c => repriced.includes(c.no.toUpperCase()) ? { ...c, lastPrice: lastPriceOf[c.no.toUpperCase()] } : c)) })
     }
     const saved = fromDB(data)
     setOrders(prev => prev.some(o => o.id === clean.id) ? prev.map(o => o.id === clean.id ? saved : o) : [saved, ...prev])
@@ -1183,6 +1200,9 @@ export default function Gowns() {
                           ? <span style={{ flex: 1, fontSize: '14px', color: INK }}>{item.desc}</span>
                           : <input value={item.desc} onChange={e => setCatalog(prev => prev.map(c => c.no === item.no ? { ...c, desc: e.target.value } : c))} onBlur={e => updateCatalogItem(item.no, { desc: e.target.value })} style={{ flex: 1, minWidth: 0, fontSize: '14px', border: '1px solid #EDE6E0', borderRadius: '6px', padding: '5px 7px', fontFamily: 'inherit', color: INK, outline: 'none', background: '#FAF8F5' }} />}
                         <input value={item.cost ?? ''} title="Cost (what you paid)" onChange={e => setCatalog(prev => prev.map(c => c.no === item.no ? { ...c, cost: e.target.value } : c))} onBlur={e => updateCatalogItem(item.no, { cost: e.target.value })} type="text" inputMode="decimal" placeholder="Cost $" style={{ width: '68px', flexShrink: 0, fontSize: '13px', textAlign: 'right', border: '1px solid #EDE6E0', borderRadius: '6px', padding: '5px 7px', fontFamily: 'inherit', fontWeight: 600, color: INK, outline: 'none', background: '#FAF8F5' }} />
+                        <span title="Last price charged to a customer (updates automatically from orders)" style={{ width: '58px', flexShrink: 0, fontSize: '11px', color: item.lastPrice != null ? GREEN : '#C9BFB9', textAlign: 'right', lineHeight: 1.2 }}>
+                          {item.lastPrice != null ? <>last<br /><b>{money(item.lastPrice)}</b></> : 'no sales'}
+                        </span>
                         <label title="Taxable" style={{ display: 'flex', alignItems: 'center', gap: '3px', fontSize: '12px', color: MUTED, cursor: builtIn ? 'default' : 'pointer' }}>
                           <input type="checkbox" disabled={builtIn} checked={item.taxable !== false} onChange={e => updateCatalogItem(item.no, { taxable: e.target.checked })} style={{ accentColor: PAD }} /> Tax
                         </label>
