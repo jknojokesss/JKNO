@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import Head from 'next/head'
+import { MONTH_PL } from '../lib/mnePnl'
 
 // ── Theme ────────────────────────────────────────────────────────────────────
 const NAVY = '#1C2B4A', GOLD = '#B8973A', CREAM = '#F7F5F0'
@@ -39,15 +40,6 @@ const SEED_INVOICES = [
   { id: uid(), invNo: 'INV-005', customer: 'Fifth Ave Eyewear', brand: 'Ray-Ban', units: 30, unitPrice: 95, total: 2850, date: '2026-06-23', due: '2026-07-23', paid: false, paidDate: null, notes: 'Pre-sold — goods in transit' },
 ]
 
-// 12-month P&L history (Jun matches the live invoices/POs total)
-const MONTH_PL = [
-  { m: 'Jul', rev: 14200, cogs: 8900 },  { m: 'Aug', rev: 15800, cogs: 9700 },
-  { m: 'Sep', rev: 13600, cogs: 8600 },  { m: 'Oct', rev: 17400, cogs: 10600 },
-  { m: 'Nov', rev: 19200, cogs: 11800 }, { m: 'Dec', rev: 22600, cogs: 13900 },
-  { m: 'Jan', rev: 15100, cogs: 9400 },  { m: 'Feb', rev: 16300, cogs: 10100 },
-  { m: 'Mar', rev: 18900, cogs: 11600 }, { m: 'Apr', rev: 20400, cogs: 12500 },
-  { m: 'May', rev: 21300, cogs: 13100 }, { m: 'Jun', rev: 16980, cogs: 8280 },
-]
 
 const TABS = [['overview', 'Overview'], ['pos', "PO's & Bills"], ['invoices', 'Invoices'], ['pnl', 'P&L'], ['quickbooks', 'QuickBooks']]
 
@@ -525,6 +517,14 @@ export default function MNETrading() {
                 <KPI k="Revenue" v={m0(totalInvoiced)} sub="total invoiced" accent={GREEN} />
                 <KPI k="Cost of goods" v={m0(totalBilled)} sub="from arrived POs" accent={RED} />
                 <KPI k="Gross profit" v={m0(grossProfit)} sub={`${margin}% margin`} accent={grossProfit >= 0 ? GREEN : RED} />
+              </div>
+
+              <div style={{ ...card, marginBottom: '16px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '12px', flexWrap: 'wrap' }}>
+                <div>
+                  <div style={{ fontSize: '14px', fontWeight: 600, color: INK }}>Profit &amp; loss statement</div>
+                  <div style={{ fontSize: '12px', color: MUTED, marginTop: '2px' }}>Formatted for a lender or landlord — YTD and trailing 12 months, monthly schedule, signature block.</div>
+                </div>
+                <a href="/mne-pl" target="_blank" rel="noreferrer" style={{ ...btn, background: NAVY, color: '#fff', padding: '10px 18px', borderRadius: '9px', textDecoration: 'none', whiteSpace: 'nowrap' }}>Open statement</a>
               </div>
 
               <div style={{ ...card, marginBottom: '16px' }}>
