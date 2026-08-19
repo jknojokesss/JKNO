@@ -186,7 +186,7 @@ export default function Gowns() {
   const [suggest, setSuggest] = useState(null)
   const [catalog, setCatalog] = useState(DEFAULT_ITEMS)
   const [newItem, setNewItem] = useState(null)
-  const [newCatalogItem, setNewCatalogItem] = useState({ no: '', desc: '', taxable: true, alteration: false, cost: '' })
+  const [newCatalogItem, setNewCatalogItem] = useState({ no: '', desc: '', taxable: true, alteration: false, cost: '', company: '' })
   const [showSales, setShowSales] = useState(false)
   const [emailing, setEmailing] = useState(false)
   const [uploading, setUploading] = useState(false)
@@ -249,7 +249,7 @@ export default function Gowns() {
     ])
     setOrders((orderRows || []).map(fromDB))
     setTasks(taskRows || [])
-    const customItems = (catRows || []).map(r => ({ no: r.item_no, desc: r.description, taxable: r.taxable, alteration: r.alteration, cost: r.cost ?? '', lastPrice: r.last_price ?? null }))
+    const customItems = (catRows || []).map(r => ({ no: r.item_no, desc: r.description, taxable: r.taxable, alteration: r.alteration, cost: r.cost ?? '', lastPrice: r.last_price ?? null, company: r.company || '' }))
     // Built-ins can still carry a saved cost/description from the DB — merge the DB row over the default.
     setCatalog([
       ...DEFAULT_ITEMS.map(d => { const r = customItems.find(c => c.no === d.no); return r ? { ...d, cost: r.cost, lastPrice: r.lastPrice, desc: r.desc || d.desc } : d }),
@@ -314,13 +314,8 @@ export default function Gowns() {
   const setItem = (id, k, v) => setForm(f => ({ ...f, items: f.items.map(it => it.id === id ? { ...it, [k]: v } : it) }))
   const onItemNo = (id, val) => {
     setItem(id, 'itemNo', val)
-    if (val.trim()) {
-      const q = val.trim().toLowerCase()
-      const matches = catalog.filter(it => it.no.toLowerCase().includes(q) || (it.desc || '').toLowerCase().includes(q))
-      setSuggest({ id, matches, query: val.trim() })
-    } else {
-      setSuggest(null)
-    }
+    // Keep the dropdown open even when empty — it doubles as a company → gown browser.
+    setSuggest(s => ({ id, query: val.trim(), company: s && s.id === id ? s.company : null }))
   }
   const pickItem = (rowId, item) => {
     // Prefill the line's price with the last price charged for this item (still editable).
@@ -329,8 +324,8 @@ export default function Gowns() {
   }
   const saveNewItem = async () => {
     if (!newItem || !newItem.no.trim()) { alert('Enter an item #.'); return }
-    const item = { no: newItem.no.trim().toUpperCase(), desc: newItem.desc.trim(), taxable: newItem.taxable, alteration: newItem.alteration, cost: newItem.cost }
-    const { error } = await supabase.from('gown_catalog').upsert({ user_id: user.id, item_no: item.no, description: item.desc, taxable: item.taxable, alteration: item.alteration, cost: costOrNull(item.cost) }, { onConflict: 'user_id,item_no' })
+    const item = { no: newItem.no.trim().toUpperCase(), desc: newItem.desc.trim(), taxable: newItem.taxable, alteration: newItem.alteration, cost: newItem.cost, company: (newItem.company || '').trim() }
+    const { error } = await supabase.from('gown_catalog').upsert({ user_id: user.id, item_no: item.no, description: item.desc, taxable: item.taxable, alteration: item.alteration, cost: costOrNull(item.cost), company: item.company || null }, { onConflict: 'user_id,item_no' })
     if (error) { alert('Could not save item: ' + error.message); return }
     setCatalog(prev => [...prev.filter(c => c.no !== item.no), item])
     pickItem(newItem.rowId, item)
@@ -340,7 +335,7 @@ export default function Gowns() {
   // ── Catalog management (Catalog tab) ──
   const isBuiltIn = (no) => DEFAULT_ITEMS.some(d => d.no === no)
   const saveCatalogItem = async (item) => {
-    const { error } = await supabase.from('gown_catalog').upsert({ user_id: user.id, item_no: item.no, description: item.desc, taxable: item.taxable !== false, alteration: !!item.alteration, cost: costOrNull(item.cost) }, { onConflict: 'user_id,item_no' })
+    const { error } = await supabase.from('gown_catalog').upsert({ user_id: user.id, item_no: item.no, description: item.desc, taxable: item.taxable !== false, alteration: !!item.alteration, cost: costOrNull(item.cost), company: (item.company || '').trim() || null }, { onConflict: 'user_id,item_no' })
     if (error) { alert('Could not save item: ' + error.message); return false }
     return true
   }
@@ -348,10 +343,10 @@ export default function Gowns() {
     const no = (newCatalogItem.no || '').trim().toUpperCase()
     if (!no) { alert('Enter an item #.'); return }
     if (catalog.some(c => c.no === no)) { alert(`Item ${no} already exists.`); return }
-    const item = { no, desc: newCatalogItem.desc.trim(), taxable: newCatalogItem.taxable, alteration: newCatalogItem.alteration, cost: newCatalogItem.cost }
+    const item = { no, desc: newCatalogItem.desc.trim(), taxable: newCatalogItem.taxable, alteration: newCatalogItem.alteration, cost: newCatalogItem.cost, company: (newCatalogItem.company || '').trim() }
     if (!(await saveCatalogItem(item))) return
     setCatalog(prev => [...prev, item])
-    setNewCatalogItem({ no: '', desc: '', taxable: true, alteration: false, cost: '' })
+    setNewCatalogItem({ no: '', desc: '', taxable: true, alteration: false, cost: '', company: newCatalogItem.company })
   }
   const updateCatalogItem = async (no, patch) => {
     const current = catalog.find(c => c.no === no); if (!current) return
@@ -363,6 +358,31 @@ export default function Gowns() {
     if (!window.confirm(`Delete "${no}${desc ? ' — ' + desc : ''}" from the catalog? This can't be undone.`)) return
     setCatalog(prev => prev.filter(c => c.no !== no))
     await supabase.from('gown_catalog').delete().eq('user_id', user.id).eq('item_no', no)
+  }
+  const renderCatalogRow = (item) => {
+    const builtIn = isBuiltIn(item.no)
+    return (
+      <div key={item.no} style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap', padding: '10px 14px', borderBottom: `1px solid ${CREAM}` }}>
+        <span style={{ width: '80px', flexShrink: 0, fontSize: '15px', fontWeight: 700, color: PAD, letterSpacing: '0.02em' }}>{item.no}</span>
+        {builtIn
+          ? <span style={{ flex: 1, fontSize: '14px', color: INK }}>{item.desc}</span>
+          : <input value={item.desc} onChange={e => setCatalog(prev => prev.map(c => c.no === item.no ? { ...c, desc: e.target.value } : c))} onBlur={e => updateCatalogItem(item.no, { desc: e.target.value })} style={{ flex: 1, minWidth: '110px', fontSize: '14px', border: '1px solid #EDE6E0', borderRadius: '6px', padding: '5px 7px', fontFamily: 'inherit', color: INK, outline: 'none', background: '#FAF8F5' }} />}
+        <input value={item.company || ''} title="Company (type to move this gown to another company)" list="gown-companies" placeholder="Company" onChange={e => setCatalog(prev => prev.map(c => c.no === item.no ? { ...c, company: e.target.value } : c))} onBlur={e => updateCatalogItem(item.no, { company: e.target.value })} style={{ width: '92px', flexShrink: 0, fontSize: '13px', border: '1px solid #EDE6E0', borderRadius: '6px', padding: '5px 7px', fontFamily: 'inherit', color: INK, outline: 'none', background: '#FAF8F5' }} />
+        <input value={item.cost ?? ''} title="Cost (what you paid)" onChange={e => setCatalog(prev => prev.map(c => c.no === item.no ? { ...c, cost: e.target.value } : c))} onBlur={e => updateCatalogItem(item.no, { cost: e.target.value })} type="text" inputMode="decimal" placeholder="Cost $" style={{ width: '68px', flexShrink: 0, fontSize: '13px', textAlign: 'right', border: '1px solid #EDE6E0', borderRadius: '6px', padding: '5px 7px', fontFamily: 'inherit', fontWeight: 600, color: INK, outline: 'none', background: '#FAF8F5' }} />
+        <span title="Last price charged to a customer (updates automatically from orders)" style={{ width: '58px', flexShrink: 0, fontSize: '11px', color: item.lastPrice != null ? GREEN : '#C9BFB9', textAlign: 'right', lineHeight: 1.2 }}>
+          {item.lastPrice != null ? <>last<br /><b>{money(item.lastPrice)}</b></> : 'no sales'}
+        </span>
+        <label title="Taxable" style={{ display: 'flex', alignItems: 'center', gap: '3px', fontSize: '12px', color: MUTED, cursor: builtIn ? 'default' : 'pointer' }}>
+          <input type="checkbox" disabled={builtIn} checked={item.taxable !== false} onChange={e => updateCatalogItem(item.no, { taxable: e.target.checked })} style={{ accentColor: PAD }} /> Tax
+        </label>
+        <label title="Alteration" style={{ display: 'flex', alignItems: 'center', gap: '3px', fontSize: '12px', color: MUTED, cursor: builtIn ? 'default' : 'pointer' }}>
+          <input type="checkbox" disabled={builtIn} checked={!!item.alteration} onChange={e => updateCatalogItem(item.no, { alteration: e.target.checked, taxable: e.target.checked ? false : item.taxable })} style={{ accentColor: ROSE }} /> Alt
+        </label>
+        {builtIn
+          ? <span style={{ width: '58px', flexShrink: 0, fontSize: '10px', color: MUTED, textAlign: 'center' }} title="Built-in item — can't be deleted">built-in</span>
+          : <button onClick={() => deleteCatalogItem(item.no, item.desc)} className="gw-press" title="Delete item" style={{ width: '58px', flexShrink: 0, border: '1.5px solid #E3B7B7', background: '#FCF1F1', color: '#C0504C', fontSize: '12px', fontWeight: 700, padding: '5px 0', borderRadius: '8px', cursor: 'pointer', fontFamily: 'inherit' }}>Delete</button>}
+      </div>
+    )
   }
 
   const addRow = () => setForm(f => ({ ...f, items: [...f.items, blankRow()] }))
@@ -413,8 +433,21 @@ export default function Gowns() {
       address: titleCase(form.address), city: titleCase(form.city),
       state: cleanState(form.state), zip: cleanZip(form.zip),
     }
-    const { data, error } = await supabase.from('gown_orders').upsert(toDB(clean, user.id)).select().single()
-    if (error) { alert('Error saving: ' + error.message); return null }
+    // Safari reports a dropped connection as "TypeError: Load failed" — retry once
+    // automatically before bothering anyone, and speak human if it still fails.
+    const isNetErr = (e) => /load failed|failed to fetch|network/i.test(e?.message || '')
+    let res = await supabase.from('gown_orders').upsert(toDB(clean, user.id)).select().single()
+    if (res.error && isNetErr(res.error)) {
+      await new Promise(r => setTimeout(r, 1500))
+      res = await supabase.from('gown_orders').upsert(toDB(clean, user.id)).select().single()
+    }
+    const { data, error } = res
+    if (error) {
+      alert(isNetErr(error)
+        ? "Couldn't reach the server — looks like a connection hiccup. Check the internet and tap Save again. Nothing you typed was lost."
+        : 'Error saving: ' + error.message)
+      return null
+    }
     // The catalog "catches" any item # typed on the order that it doesn't know yet —
     // no need to tap the dropdown; just type the item and save. It also remembers
     // the last price charged for every item on the order (auto, nothing to type).
@@ -1161,7 +1194,14 @@ export default function Gowns() {
                 {/* Add item */}
                 <div className="gw-card" style={{ padding: '16px 18px', marginBottom: '16px' }}>
                   <div style={{ fontSize: '13px', fontWeight: 700, color: MUTED, marginBottom: '10px', textTransform: 'uppercase', letterSpacing: '0.04em' }}>Add item</div>
+                  <datalist id="gown-companies">
+                    {[...new Set(catalog.map(c => (c.company || '').trim()).filter(Boolean))].sort().map(co => <option key={co} value={co} />)}
+                  </datalist>
                   <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', alignItems: 'flex-end' }}>
+                    <div style={{ flex: '1 1 130px' }}>
+                      <div style={{ fontSize: '12px', color: MUTED, marginBottom: '4px' }}>Company</div>
+                      <input value={newCatalogItem.company} onChange={e => setNewCatalogItem(p => ({ ...p, company: e.target.value }))} list="gown-companies" placeholder="e.g. Morilee" style={fieldIn} />
+                    </div>
                     <div style={{ flex: '0 0 110px' }}>
                       <div style={{ fontSize: '12px', color: MUTED, marginBottom: '4px' }}>Item #</div>
                       <input value={newCatalogItem.no} onChange={e => setNewCatalogItem(p => ({ ...p, no: e.target.value.toUpperCase() }))} placeholder="e.g. DRF" style={{ ...fieldIn, fontWeight: 700, color: PAD }} />
@@ -1191,30 +1231,21 @@ export default function Gowns() {
                   <div style={{ padding: '12px 14px', background: '#F0F4FF', borderBottom: `1px solid ${GRID}`, fontSize: '13px', fontWeight: 700, color: PAD }}>
                     {catalog.length} item{catalog.length !== 1 ? 's' : ''}
                   </div>
-                  {[...catalog].sort((a, b) => a.no.localeCompare(b.no)).map(item => {
-                    const builtIn = isBuiltIn(item.no)
-                    return (
-                      <div key={item.no} style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '10px 14px', borderBottom: `1px solid ${CREAM}` }}>
-                        <span style={{ width: '80px', flexShrink: 0, fontSize: '15px', fontWeight: 700, color: PAD, letterSpacing: '0.02em' }}>{item.no}</span>
-                        {builtIn
-                          ? <span style={{ flex: 1, fontSize: '14px', color: INK }}>{item.desc}</span>
-                          : <input value={item.desc} onChange={e => setCatalog(prev => prev.map(c => c.no === item.no ? { ...c, desc: e.target.value } : c))} onBlur={e => updateCatalogItem(item.no, { desc: e.target.value })} style={{ flex: 1, minWidth: 0, fontSize: '14px', border: '1px solid #EDE6E0', borderRadius: '6px', padding: '5px 7px', fontFamily: 'inherit', color: INK, outline: 'none', background: '#FAF8F5' }} />}
-                        <input value={item.cost ?? ''} title="Cost (what you paid)" onChange={e => setCatalog(prev => prev.map(c => c.no === item.no ? { ...c, cost: e.target.value } : c))} onBlur={e => updateCatalogItem(item.no, { cost: e.target.value })} type="text" inputMode="decimal" placeholder="Cost $" style={{ width: '68px', flexShrink: 0, fontSize: '13px', textAlign: 'right', border: '1px solid #EDE6E0', borderRadius: '6px', padding: '5px 7px', fontFamily: 'inherit', fontWeight: 600, color: INK, outline: 'none', background: '#FAF8F5' }} />
-                        <span title="Last price charged to a customer (updates automatically from orders)" style={{ width: '58px', flexShrink: 0, fontSize: '11px', color: item.lastPrice != null ? GREEN : '#C9BFB9', textAlign: 'right', lineHeight: 1.2 }}>
-                          {item.lastPrice != null ? <>last<br /><b>{money(item.lastPrice)}</b></> : 'no sales'}
-                        </span>
-                        <label title="Taxable" style={{ display: 'flex', alignItems: 'center', gap: '3px', fontSize: '12px', color: MUTED, cursor: builtIn ? 'default' : 'pointer' }}>
-                          <input type="checkbox" disabled={builtIn} checked={item.taxable !== false} onChange={e => updateCatalogItem(item.no, { taxable: e.target.checked })} style={{ accentColor: PAD }} /> Tax
-                        </label>
-                        <label title="Alteration" style={{ display: 'flex', alignItems: 'center', gap: '3px', fontSize: '12px', color: MUTED, cursor: builtIn ? 'default' : 'pointer' }}>
-                          <input type="checkbox" disabled={builtIn} checked={!!item.alteration} onChange={e => updateCatalogItem(item.no, { alteration: e.target.checked, taxable: e.target.checked ? false : item.taxable })} style={{ accentColor: ROSE }} /> Alt
-                        </label>
-                        {builtIn
-                          ? <span style={{ width: '58px', flexShrink: 0, fontSize: '10px', color: MUTED, textAlign: 'center' }} title="Built-in item — can't be deleted">built-in</span>
-                          : <button onClick={() => deleteCatalogItem(item.no, item.desc)} className="gw-press" title="Delete item" style={{ width: '58px', flexShrink: 0, border: '1.5px solid #E3B7B7', background: '#FCF1F1', color: '#C0504C', fontSize: '12px', fontWeight: 700, padding: '5px 0', borderRadius: '8px', cursor: 'pointer', fontFamily: 'inherit' }}>Delete</button>}
+                  {(() => {
+                    const byCompany = {}
+                    ;[...catalog].sort((a, b) => a.no.localeCompare(b.no)).forEach(item => {
+                      const co = (item.company || '').trim() || '(no company yet)'
+                      ;(byCompany[co] = byCompany[co] || []).push(item)
+                    })
+                    return Object.keys(byCompany).sort((a, b) => (a === '(no company yet)') - (b === '(no company yet)') || a.localeCompare(b)).map(co => (
+                      <div key={co}>
+                        <div style={{ padding: '9px 14px', background: '#FBF7F3', borderBottom: `1px solid ${CREAM}`, fontSize: '13px', fontWeight: 800, color: INK }}>
+                          🏷 {co} <span style={{ fontWeight: 500, color: MUTED }}>· {byCompany[co].length}</span>
+                        </div>
+                        {byCompany[co].map(item => renderCatalogRow(item))}
                       </div>
-                    )
-                  })}
+                    ))
+                  })()}
                 </div>
               </div>
             )}
@@ -1244,7 +1275,10 @@ export default function Gowns() {
           <div style={{ maxWidth: '640px', margin: '0 auto' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '14px' }}>
               <button onClick={() => { setView('list'); window.scrollTo(0, 0) }} style={{ background: 'none', border: 'none', color: ROSE_DK, fontSize: '16px', fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit', padding: '4px 0' }}>← All orders</button>
-              {editing && <button onClick={() => del(form.id)} style={{ background: 'none', border: 'none', color: '#C0504C', fontSize: '15px', cursor: 'pointer', fontFamily: 'inherit' }}>Delete</button>}
+              <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
+                {editing && <button onClick={() => del(form.id)} style={{ background: 'none', border: 'none', color: '#C0504C', fontSize: '15px', cursor: 'pointer', fontFamily: 'inherit' }}>Delete</button>}
+                <button className="gw-press" onClick={() => save(true)} style={{ ...primaryBtn, padding: '10px 28px' }}>{justSaved ? 'Saved ✓' : 'Save'}</button>
+              </div>
             </div>
 
             {/* The pad */}
@@ -1340,27 +1374,49 @@ export default function Gowns() {
                       <input
                         value={it.itemNo || ''}
                         onChange={e => onItemNo(it.id, e.target.value)}
+                        onFocus={() => setSuggest({ id: it.id, query: (it.itemNo || '').trim(), company: null })}
                         onBlur={() => setTimeout(() => setSuggest(null), 150)}
                         placeholder="—"
                         style={{ ...cellIn, width: '100%', fontWeight: 600, letterSpacing: '0.03em', textTransform: 'uppercase' }}
                       />
-                      {showSuggest && (
-                        <div style={{ position: 'absolute', top: '100%', left: 0, zIndex: 99, background: '#fff', border: `2px solid ${PAD}`, borderRadius: '10px', boxShadow: '0 4px 16px rgba(0,0,0,0.13)', minWidth: '220px', overflow: 'hidden' }}>
-                          {suggest.matches.map(m => (
-                            <div key={m.no} onMouseDown={() => pickItem(it.id, m)} style={{ padding: '12px 14px', cursor: 'pointer', fontSize: '15px', borderBottom: `1px solid ${GRID}` }}>
-                              <span style={{ fontWeight: 700, color: PAD, marginRight: '8px' }}>{m.no}</span>
-                              <span style={{ color: INK }}>{m.desc}</span>
-                            </div>
-                          ))}
-                          {!suggest.matches.some(m => m.no.toLowerCase() === suggest.query.toLowerCase()) && (
-                            <div onMouseDown={() => { setSuggest(null); setNewItem({ rowId: it.id, no: suggest.query, desc: '', taxable: true, alteration: false, cost: '' }) }}
-                              style={{ padding: '11px 14px', cursor: 'pointer', fontSize: '13px', fontWeight: 600, color: ROSE_DK, background: '#FDF5F7', display: 'flex', alignItems: 'center', gap: '6px' }}>
-                              <span style={{ fontSize: '16px' }}>＋</span>
-                              <span>&ldquo;{suggest.query}&rdquo; is new — saves to catalog automatically <span style={{ fontWeight: 500, color: MUTED }}>(tap to add details)</span></span>
-                            </div>
-                          )}
-                        </div>
-                      )}
+                      {showSuggest && (() => {
+                        const companies = [...new Set(catalog.map(c => (c.company || '').trim()).filter(Boolean))].sort()
+                        const q = (suggest.query || '').toLowerCase()
+                        let matches = catalog.filter(c => !suggest.company || (c.company || '').trim() === suggest.company)
+                        if (q) matches = matches.filter(c => c.no.toLowerCase().includes(q) || (c.desc || '').toLowerCase().includes(q))
+                        const isNew = !!q && !catalog.some(c => c.no.toLowerCase() === q)
+                        return (
+                          <div style={{ position: 'absolute', top: '100%', left: 0, zIndex: 99, background: '#fff', border: `2px solid ${PAD}`, borderRadius: '10px', boxShadow: '0 4px 16px rgba(0,0,0,0.13)', minWidth: '260px', maxHeight: '320px', overflowY: 'auto' }}>
+                            {companies.length > 0 && (
+                              <div style={{ display: 'flex', flexWrap: 'wrap', gap: '5px', padding: '8px 10px', borderBottom: `1px solid ${GRID}`, background: '#F8F6FB', position: 'sticky', top: 0 }}>
+                                {[null, ...companies].map(co => (
+                                  <button key={co || 'all'} onMouseDown={e => { e.preventDefault(); setSuggest(s => s && ({ ...s, company: co })) }}
+                                    style={{ padding: '5px 11px', fontSize: '12px', fontWeight: 700, borderRadius: '999px', cursor: 'pointer', fontFamily: 'inherit', border: `1.5px solid ${suggest.company === co ? PAD : GRID}`, background: suggest.company === co ? PAD : '#fff', color: suggest.company === co ? '#fff' : INK }}>
+                                    {co || 'All'}
+                                  </button>
+                                ))}
+                              </div>
+                            )}
+                            {matches.slice(0, 30).map(m => (
+                              <div key={m.no} onMouseDown={() => pickItem(it.id, m)} style={{ padding: '12px 14px', cursor: 'pointer', fontSize: '15px', borderBottom: `1px solid ${GRID}` }}>
+                                <span style={{ fontWeight: 700, color: PAD, marginRight: '8px' }}>{m.no}</span>
+                                <span style={{ color: INK }}>{m.desc}</span>
+                                {(m.company || '').trim() && <span style={{ float: 'right', fontSize: '11px', color: MUTED, marginLeft: '10px' }}>{m.company}</span>}
+                              </div>
+                            ))}
+                            {matches.length === 0 && !isNew && (
+                              <div style={{ padding: '12px 14px', fontSize: '13px', color: MUTED }}>No gowns{suggest.company ? ` from ${suggest.company}` : ' yet'}.</div>
+                            )}
+                            {isNew && (
+                              <div onMouseDown={() => { setSuggest(null); setNewItem({ rowId: it.id, no: suggest.query, desc: '', taxable: true, alteration: false, cost: '', company: suggest.company || '' }) }}
+                                style={{ padding: '11px 14px', cursor: 'pointer', fontSize: '13px', fontWeight: 600, color: ROSE_DK, background: '#FDF5F7', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                                <span style={{ fontSize: '16px' }}>＋</span>
+                                <span>&ldquo;{suggest.query}&rdquo; is new — saves to catalog automatically <span style={{ fontWeight: 500, color: MUTED }}>(tap to add details)</span></span>
+                              </div>
+                            )}
+                          </div>
+                        )
+                      })()}
                     </div>
                     <input value={it.desc} onChange={e => setItem(it.id, 'desc', e.target.value)} placeholder={i === 0 ? 'Style, color, details…' : ''} style={{ ...cellIn, flex: 1, borderLeft: `1px solid ${GRID}` }} />
                     <input value={it.price} onChange={e => setItem(it.id, 'price', e.target.value)} type="text" inputMode="decimal" placeholder="$" style={{ ...cellIn, width: '82px', textAlign: 'right', padding: '12px 8px', borderLeft: `1px solid ${GRID}`, fontWeight: 600 }} />
@@ -1861,6 +1917,13 @@ export default function Gowns() {
             <div style={{ marginBottom: '12px' }}>
               <div style={{ fontSize: '12px', fontWeight: 600, color: MUTED, marginBottom: '5px', textTransform: 'uppercase', letterSpacing: '0.04em' }}>Item #</div>
               <input value={newItem.no} onChange={e => setNewItem(n => ({ ...n, no: e.target.value.toUpperCase() }))} style={{ width: '100%', padding: '12px 14px', fontSize: '17px', border: '1.5px solid #E2D7D1', borderRadius: '10px', fontFamily: 'inherit', fontWeight: 700, color: PAD, outline: 'none' }} />
+            </div>
+            <div style={{ marginBottom: '12px' }}>
+              <div style={{ fontSize: '12px', fontWeight: 600, color: MUTED, marginBottom: '5px', textTransform: 'uppercase', letterSpacing: '0.04em' }}>Company <span style={{ color: '#B3A8A2', fontWeight: 500, textTransform: 'none', letterSpacing: 0 }}>· optional</span></div>
+              <datalist id="gown-companies-modal">
+                {[...new Set(catalog.map(c => (c.company || '').trim()).filter(Boolean))].sort().map(co => <option key={co} value={co} />)}
+              </datalist>
+              <input value={newItem.company || ''} onChange={e => setNewItem(n => ({ ...n, company: e.target.value }))} list="gown-companies-modal" placeholder="e.g. Morilee" style={{ width: '100%', padding: '12px 14px', fontSize: '17px', border: '1.5px solid #E2D7D1', borderRadius: '10px', fontFamily: 'inherit', color: INK, outline: 'none' }} />
             </div>
             <div style={{ marginBottom: '16px' }}>
               <div style={{ fontSize: '12px', fontWeight: 600, color: MUTED, marginBottom: '5px', textTransform: 'uppercase', letterSpacing: '0.04em' }}>Description <span style={{ color: '#B3A8A2', fontWeight: 500, textTransform: 'none', letterSpacing: 0 }}>· optional</span></div>
