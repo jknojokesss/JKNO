@@ -1028,12 +1028,14 @@ export default function FenceMakersDemo() {
         input:focus,select:focus,textarea:focus{border-color:${INK}!important}
         .num{font-variant-numeric:tabular-nums}
         .split{display:flex;min-height:100vh}
-        .paneL{flex:0 0 520px;border-right:1px solid ${BORDER};background:${BG};display:flex;flex-direction:column}
-        .paneR{flex:1;background:#fff;display:flex;flex-direction:column;min-width:0}
+        .paneL{flex:1 1 46%;min-width:430px;max-width:660px;border-right:1px solid ${BORDER};background:${BG};display:flex;flex-direction:column}
+        .paneR{flex:1 1 54%;background:#fff;display:flex;flex-direction:column;min-width:0}
         .switcher{display:none}
         .fresh{animation:pop 1.6s ease}
         @keyframes pop{0%{background:#DCF2D6}70%{background:#EAF7E6}100%{background:transparent}}
         .qbrow:hover{background:#F4F5F8}
+        .qbnavi:hover{background:rgba(255,255,255,.08)}
+        @media (max-width:1100px){ .qbsearch{display:none} }
         @media (max-width:940px){
           .split{display:block}
           .paneL,.paneR{flex:none;width:100%;border-right:none}
@@ -1088,18 +1090,24 @@ export default function FenceMakersDemo() {
         <div className="paneR">
           {/* QBO top bar */}
           <div style={{ background: QBINK, color: '#fff', padding: '0 16px', height: 48, display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexShrink: 0 }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-              <span style={{ fontWeight: 700, fontSize: 15, letterSpacing: '-.01em' }}>
-                <span style={{ color: QB }}>quickbooks</span>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 12, minWidth: 0 }}>
+              <span style={{ display: 'flex', alignItems: 'center', gap: 6, fontWeight: 700, fontSize: 15, letterSpacing: '-.01em', whiteSpace: 'nowrap' }}>
+                <span style={{ width: 20, height: 20, borderRadius: 10, background: QB, color: '#fff', fontSize: 11, fontWeight: 800, display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>qb</span>
+                <span style={{ color: '#fff' }}>quickbooks</span>
               </span>
-              <span style={{ width: 1, height: 20, background: 'rgba(255,255,255,.22)' }} />
-              <span style={{ fontSize: 13.5 }}>Fence Makers Inc.</span>
-              <span style={{ fontSize: 10.5, fontWeight: 700, letterSpacing: '.06em', textTransform: 'uppercase', border: '1px solid rgba(255,255,255,.35)', borderRadius: 4, padding: '2px 6px', opacity: .85 }}>Sandbox</span>
+              <span style={{ width: 1, height: 20, background: 'rgba(255,255,255,.22)', flexShrink: 0 }} />
+              <span style={{ fontSize: 13.5, whiteSpace: 'nowrap' }}>Fence Makers Inc.</span>
+              <span style={{ fontSize: 10.5, fontWeight: 700, letterSpacing: '.06em', textTransform: 'uppercase', border: '1px solid rgba(255,255,255,.35)', borderRadius: 4, padding: '2px 6px', opacity: .85, whiteSpace: 'nowrap' }}>Sandbox</span>
             </div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
+            <div className="qbsearch" style={{ flex: '0 1 340px', margin: '0 18px', display: 'flex', alignItems: 'center', gap: 8, background: 'rgba(255,255,255,.13)', border: '1px solid rgba(255,255,255,.28)', borderRadius: 999, padding: '6px 14px', fontSize: 13, color: 'rgba(255,255,255,.75)', minWidth: 0 }}>
+              <span style={{ fontSize: 12 }}>🔍</span>
+              <span style={{ whiteSpace: 'nowrap', overflow: 'hidden' }}>Search transactions</span>
+            </div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 14, flexShrink: 0 }}>
+              <span style={{ fontSize: 15, opacity: .75 }}>🔔</span>
               <span style={{ fontSize: 15, opacity: .75 }}>⚙</span>
               <span style={{ fontSize: 15, opacity: .75 }}>?</span>
-              <div style={{ width: 26, height: 26, borderRadius: 13, background: QB, fontSize: 11, fontWeight: 700, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>QF</div>
+              <div style={{ width: 26, height: 26, borderRadius: 13, background: QB, fontSize: 11, fontWeight: 700, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>FM</div>
               <div className="switcher">
                 <button onClick={() => setPane('portal')} style={{ fontSize: 12, fontWeight: 600, padding: '6px 10px', borderRadius: 6, border: '1px solid rgba(255,255,255,.4)', background: 'transparent', color: '#fff', cursor: 'pointer' }}>← Portal</button>
               </div>
@@ -1110,7 +1118,7 @@ export default function FenceMakersDemo() {
             {/* QBO left nav */}
             <nav className="qbnav" style={{ width: 176, flexShrink: 0, background: QBINK, padding: '14px 0 30px', overflowY: 'auto' }}>
               <div style={{ padding: '0 12px 14px' }}>
-                <div style={{ background: QB, color: '#fff', fontWeight: 700, fontSize: 13.5, textAlign: 'center', padding: '9px 0', borderRadius: 4 }}>+ New</div>
+                <div style={{ background: QB, color: '#fff', fontWeight: 700, fontSize: 13.5, textAlign: 'center', padding: '9px 0', borderRadius: 999, boxShadow: '0 1px 3px rgba(0,0,0,.25)' }}>＋ New</div>
               </div>
               {QB_NAV.map((g) => (
                 <div key={g.group} style={{ marginBottom: 2 }}>
@@ -1118,7 +1126,7 @@ export default function FenceMakersDemo() {
                   {g.items.map((it) => {
                     const on = qtab === it.id
                     return (
-                      <button key={it.id} onClick={() => setQtab(it.id)} style={{
+                      <button key={it.id} className="qbnavi" onClick={() => setQtab(it.id)} style={{
                         display: 'block', width: '100%', textAlign: 'left', border: 'none', cursor: 'pointer',
                         padding: '8px 16px 8px 26px', fontSize: 13.5, fontWeight: on ? 700 : 400,
                         color: on ? '#fff' : 'rgba(255,255,255,.82)',
@@ -1140,8 +1148,8 @@ export default function FenceMakersDemo() {
                     {qbItem(qtab).sub && <div style={{ fontSize: 13, color: '#6B6C72', marginTop: 2 }}>{qbItem(qtab).sub}</div>}
                   </div>
                   {qtab !== 'report' && (
-                    <div style={{ background: QB, color: '#fff', fontWeight: 600, fontSize: 13.5, padding: '9px 16px', borderRadius: 4, whiteSpace: 'nowrap' }}>
-                      New {qtab === 'Customer' ? 'customer' : qtab === 'money' ? 'invoice' : 'transaction'}
+                    <div style={{ background: QB, color: '#fff', fontWeight: 600, fontSize: 13.5, padding: '9px 18px', borderRadius: 999, whiteSpace: 'nowrap' }}>
+                      New {qtab === 'Customer' ? 'customer' : qtab === 'money' ? 'invoice' : 'transaction'} ▾
                     </div>
                   )}
                 </div>
