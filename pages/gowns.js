@@ -30,6 +30,18 @@ const fmtShort = (s) => s ? new Date(s + 'T00:00:00').toLocaleDateString([], { m
 // Colour/weight for a due date: red if overdue, amber if within 3 days, muted otherwise.
 // What we paid for the item (owner-only info) — '' / invalid → null for the DB.
 const costOrNull = (v) => { const n = parseFloat(v); return Number.isFinite(n) ? n : null }
+// Safari reports a dropped connection as "TypeError: Load failed" — recognize it so
+// saves can retry once automatically and speak human if it still fails.
+const isNetErr = (e) => /load failed|failed to fetch|network/i.test(e?.message || '')
+const NET_ERR_MSG = "Couldn't reach the server — looks like a connection hiccup. Check the internet and tap Save again. Nothing you typed was lost."
+const retryOnNetErr = async (run) => {
+  let res = await run()
+  if (res.error && isNetErr(res.error)) {
+    await new Promise(r => setTimeout(r, 1500))
+    res = await run()
+  }
+  return res
+}
 const dueTone = (due, done) => {
   if (!due || done) return { color: '#8A8A93', weight: 400 }
   const today = new Date().toISOString().slice(0, 10)
@@ -433,19 +445,9 @@ export default function Gowns() {
       address: titleCase(form.address), city: titleCase(form.city),
       state: cleanState(form.state), zip: cleanZip(form.zip),
     }
-    // Safari reports a dropped connection as "TypeError: Load failed" — retry once
-    // automatically before bothering anyone, and speak human if it still fails.
-    const isNetErr = (e) => /load failed|failed to fetch|network/i.test(e?.message || '')
-    let res = await supabase.from('gown_orders').upsert(toDB(clean, user.id)).select().single()
-    if (res.error && isNetErr(res.error)) {
-      await new Promise(r => setTimeout(r, 1500))
-      res = await supabase.from('gown_orders').upsert(toDB(clean, user.id)).select().single()
-    }
-    const { data, error } = res
+    const { data, error } = await retryOnNetErr(() => supabase.from('gown_orders').upsert(toDB(clean, user.id)).select().single())
     if (error) {
-      alert(isNetErr(error)
-        ? "Couldn't reach the server — looks like a connection hiccup. Check the internet and tap Save again. Nothing you typed was lost."
-        : 'Error saving: ' + error.message)
+      alert(isNetErr(error) ? NET_ERR_MSG : 'Error saving: ' + error.message)
       return null
     }
     // The catalog "catches" any item # typed on the order that it doesn't know yet —
@@ -531,8 +533,8 @@ export default function Gowns() {
         phone: fmtPhone(form.phone), home: fmtPhone(form.home), email: cleanEmail(form.email),
         address: titleCase(form.address), city: titleCase(form.city), state: cleanState(form.state), zip: cleanZip(form.zip),
       }
-      const { data, error } = await supabase.from('gown_orders').upsert(toDB(clean, user.id)).select().single()
-      if (error) { alert('Error saving: ' + error.message); return }
+      const { data, error } = await retryOnNetErr(() => supabase.from('gown_orders').upsert(toDB(clean, user.id)).select().single())
+      if (error) { alert(isNetErr(error) ? NET_ERR_MSG : 'Error saving: ' + error.message); return }
       const saved = fromDB(data)
       setOrders(prev => [saved, ...prev.filter(o => o.id !== saved.id)])
       setForm(f => ({ ...f, id: saved.id, orderNo: saved.orderNo })); setEditing(true)
@@ -720,9 +722,9 @@ export default function Gowns() {
     const updated = orders.find(o => o.id === id); if (!updated) return
     const newOrder = { ...updated, ...patch }
     setOrders(prev => prev.map(o => o.id === id ? newOrder : o))
-    const { error } = await supabase.from('gown_orders').update(toDB(newOrder, user.id)).eq('id', id)
+    const { error } = await retryOnNetErr(() => supabase.from('gown_orders').update(toDB(newOrder, user.id)).eq('id', id))
     if (error) {
-      alert('Could not save change: ' + error.message)
+      alert(isNetErr(error) ? NET_ERR_MSG : 'Could not save change: ' + error.message)
       setOrders(prev => prev.map(o => o.id === id ? updated : o))  // roll back on failure
     }
   }
