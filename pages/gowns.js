@@ -30,6 +30,8 @@ const fmtShort = (s) => s ? new Date(s + 'T00:00:00').toLocaleDateString([], { m
 // Colour/weight for a due date: red if overdue, amber if within 3 days, muted otherwise.
 // What we paid for the item (owner-only info) — '' / invalid → null for the DB.
 const costOrNull = (v) => { const n = parseFloat(v); return Number.isFinite(n) ? n : null }
+// Videos are stored right alongside photos; tell them apart by file extension.
+const isVideo = (url) => /\.(mp4|mov|m4v|webm|3gp|avi)(\?|$)/i.test(url || '')
 // Safari reports a dropped connection as "TypeError: Load failed" — recognize it so
 // saves can retry once automatically and speak human if it still fails.
 const isNetErr = (e) => /load failed|failed to fetch|network/i.test(e?.message || '')
@@ -290,8 +292,18 @@ export default function Gowns() {
   const soLbl = { fontSize: '12px', fontWeight: 600, color: MUTED, marginBottom: '4px' }
 
   // ── Photo upload (Supabase Storage) ──
+  // Thumbnail that handles both photos and videos (videos get a ▶ badge; tap opens the lightbox).
+  const mediaThumb = (url, px, radius = 8) => isVideo(url)
+    ? (
+      <span onClick={(e) => { e.stopPropagation(); setLightbox(url) }} style={{ position: 'relative', width: px, height: px, flexShrink: 0, display: 'block', cursor: 'zoom-in' }}>
+        <video src={url} preload="metadata" muted playsInline style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: radius, border: `1px solid ${GRID}`, display: 'block', background: '#000' }} />
+        <span style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff', fontSize: Math.max(14, Math.round(px / 3)), textShadow: '0 1px 4px rgba(0,0,0,0.65)', pointerEvents: 'none' }}>▶</span>
+      </span>
+    )
+    : <img src={url} alt="" onClick={(e) => { e.stopPropagation(); setLightbox(url) }} style={{ width: px, height: px, objectFit: 'cover', borderRadius: radius, flexShrink: 0, border: `1px solid ${GRID}`, cursor: 'zoom-in', display: 'block' }} />
   const uploadPhoto = async (file) => {
     if (!file) return null
+    if (file.size > 50 * 1024 * 1024) { alert('That file is too big (over 50MB). For videos, keep clips short — under a minute or so.'); return null }
     setUploading(true)
     try {
       const ext = (file.name.split('.').pop() || 'jpg').toLowerCase().replace(/[^a-z0-9]/g, '') || 'jpg'
@@ -310,7 +322,7 @@ export default function Gowns() {
         <div style={{ display: 'flex', gap: '14px', flexWrap: 'wrap', marginBottom: '8px' }}>
           {(photos || []).map(p => (
             <div key={p.path} style={{ position: 'relative', width: '72px' }}>
-              <img src={p.url} alt="" onClick={(e) => { e.stopPropagation(); setLightbox(p.url) }} style={{ width: '72px', height: '72px', objectFit: 'cover', borderRadius: '8px', border: `1px solid ${GRID}`, display: 'block', cursor: 'zoom-in' }} />
+              {mediaThumb(p.url, 72)}
               <button type="button" onClick={(e) => { e.preventDefault(); e.stopPropagation(); onChange((photos || []).filter(x => x.path !== p.path)) }} title="Remove photo"
                 style={{ position: 'absolute', top: '-9px', right: '-9px', width: '28px', height: '28px', borderRadius: '50%', border: '2px solid #fff', background: '#C0504C', color: '#fff', fontSize: '16px', fontWeight: 700, cursor: 'pointer', lineHeight: 1, zIndex: 3, display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 1px 4px rgba(0,0,0,0.3)' }}>×</button>
             </div>
@@ -318,8 +330,8 @@ export default function Gowns() {
         </div>
       )}
       <label className="gw-press" style={{ display: 'inline-block', padding: '8px 14px', fontSize: '13px', fontWeight: 600, color: PAD, background: '#F6F9FE', border: `1.5px solid ${PAD}`, borderRadius: '10px', cursor: uploading ? 'wait' : 'pointer' }}>
-        {uploading ? 'Uploading…' : '📷 Add photo'}
-        <input type="file" accept="image/*" disabled={uploading} style={{ display: 'none' }} onChange={async e => { const f = e.target.files?.[0]; e.target.value = ''; const ph = await uploadPhoto(f); if (ph) onChange([...(photos || []), ph]) }} />
+        {uploading ? 'Uploading…' : '📷 Add photo / video'}
+        <input type="file" accept="image/*,video/*" disabled={uploading} style={{ display: 'none' }} onChange={async e => { const f = e.target.files?.[0]; e.target.value = ''; const ph = await uploadPhoto(f); if (ph) onChange([...(photos || []), ph]) }} />
       </label>
     </div>
   )
@@ -418,14 +430,10 @@ export default function Gowns() {
   const removePayment = (id) => setForm(f => ({ ...f, payments: f.payments.filter(p => p.id !== id) }))
 
   const save = async (stay = false) => {
-    // Required: first name, last name, cell, and full address. Home phone + email optional.
+    // Required: first name, last name, cell. Everything else (address, email, home) is optional.
     if (!form.firstName.trim()) { alert('Please enter a first name.'); return null }
     if (!form.lastName.trim()) { alert('Please enter a last name.'); return null }
     if (!form.phone.trim()) { alert('Please enter a cell number.'); return null }
-    if (!form.address.trim()) { alert('Please enter an address.'); return null }
-    if (!form.city.trim()) { alert('Please enter a city.'); return null }
-    if (!form.state.trim()) { alert('Please enter a state.'); return null }
-    if (!form.zip.trim()) { alert('Please enter a zip code.'); return null }
     const typedNo = String(form.orderNo ?? '').trim()
     const orderNo = typedNo
       ? parseInt(typedNo, 10)
@@ -910,7 +918,7 @@ export default function Gowns() {
                   return (
                     <div key={o.id} className="gw-card" style={{ padding: '13px 15px', borderLeft: `4px solid ${isOpen(o) ? ROSE : GREEN}` }}>
                       <div className="gw-press" onClick={() => openOrder(o)} style={{ display: 'flex', alignItems: 'flex-start', gap: '10px', cursor: 'pointer' }}>
-                        {o.photos?.length > 0 && <img src={o.photos[0].url} alt="" onClick={(e) => { e.stopPropagation(); setLightbox(o.photos[0].url) }} style={{ width: '48px', height: '48px', objectFit: 'cover', borderRadius: '8px', flexShrink: 0, border: `1px solid ${GRID}`, cursor: 'zoom-in' }} />}
+                        {o.photos?.length > 0 && mediaThumb(o.photos[0].url, 48)}
                         <div style={{ minWidth: 0, flex: 1 }}>
                           <div style={{ fontSize: '17px', fontWeight: 700, color: INK }}>{fullName(o) || '—'} <span style={{ fontSize: '12px', fontWeight: 800, color: REDNO }}>No. {o.orderNo}</span></div>
                           <div style={{ fontSize: '12px', color: MUTED, marginTop: '2px' }}>
@@ -935,7 +943,7 @@ export default function Gowns() {
                                   const dt = dueTone(a.due, a.done)
                                   return (
                                     <div key={a.id} style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '7px 10px', background: a.done ? '#F5F2EF' : '#FBEAF0', borderRadius: '8px', borderLeft: dt.overdue ? '3px solid #C0504C' : (dt.soon ? '3px solid #9C6B12' : '3px solid transparent') }}>
-                                      {a.photos?.length > 0 && <img src={a.photos[0].url} alt="" onClick={(e) => { e.stopPropagation(); setLightbox(a.photos[0].url) }} style={{ width: '40px', height: '40px', objectFit: 'cover', borderRadius: '6px', flexShrink: 0, border: `1px solid ${GRID}`, cursor: 'zoom-in' }} />}
+                                      {a.photos?.length > 0 && mediaThumb(a.photos[0].url, 40, 6)}
                                       <div style={{ minWidth: 0, flex: 1 }}>
                                         <div style={{ fontSize: '13px', fontWeight: 600, color: a.done ? MUTED : ROSE_DK, textDecoration: a.done ? 'line-through' : 'none' }}>{a.note || 'Alteration'}</div>
                                         <div style={{ fontSize: '11px', marginTop: '1px' }}>
@@ -1281,6 +1289,10 @@ export default function Gowns() {
                 {editing && <button onClick={() => del(form.id)} style={{ background: 'none', border: 'none', color: '#C0504C', fontSize: '15px', cursor: 'pointer', fontFamily: 'inherit' }}>Delete</button>}
                 <button className="gw-press" onClick={() => save(true)} style={{ ...primaryBtn, padding: '10px 28px' }}>{justSaved ? 'Saved ✓' : 'Save'}</button>
               </div>
+            </div>
+            <div style={{ display: 'flex', gap: '10px', marginBottom: '14px' }}>
+              <button className="gw-press" onClick={() => printReceipt(form)} style={{ ...primaryBtn, flex: 1, padding: '10px', background: '#fff', color: PAD, border: `1.5px solid ${PAD}` }}>🖨 Print receipt</button>
+              <button className="gw-press" onClick={emailReceipt} disabled={emailing} style={{ ...primaryBtn, flex: 1, padding: '10px', background: emailing ? '#B9A9C6' : '#6D4C8E' }}>{emailing ? 'Sending…' : '✉ Email receipt'}</button>
             </div>
 
             {/* The pad */}
@@ -1699,7 +1711,7 @@ export default function Gowns() {
           const markDone = (orderId, altId) => { const o = orders.find(x => x.id === orderId); if (o) patchOrder(orderId, { alterationsList: (o.alterationsList || []).map(a => a.id === altId ? { ...a, done: true } : a) }) }
           const altRow = (a, showWorker) => (
             <div key={a.id} style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '11px 14px', borderBottom: `1px solid ${CREAM}` }}>
-              {a.photos?.length > 0 && <img src={a.photos[0].url} alt="" onClick={(e) => { e.stopPropagation(); setLightbox(a.photos[0].url) }} style={{ width: '44px', height: '44px', objectFit: 'cover', borderRadius: '7px', flexShrink: 0, border: `1px solid ${GRID}`, cursor: 'zoom-in' }} />}
+              {a.photos?.length > 0 && mediaThumb(a.photos[0].url, 44, 7)}
               <div onClick={() => { const o = orders.find(x => x.id === a.orderId); if (o) openOrder(o) }} style={{ cursor: 'pointer', minWidth: 0, flex: 1 }}>
                 <div style={{ fontSize: '14px' }}>{a.garment ? <span style={{ fontWeight: 800, color: INK }}>{a.garment} — </span> : ''}<span style={{ fontWeight: 600, color: ROSE_DK }}>{a.note || 'Alteration'}</span></div>
                 <div style={{ fontSize: '12px', color: MUTED, marginTop: '2px' }}><span style={{ color: REDNO, fontWeight: 600 }}>No. {a.orderNo}</span> · {a.customer}{showWorker && a.assignee ? ` · ${a.assignee}` : ''}{!showWorker && a.due ? <span style={{ color: dueTone(a.due, false).color, fontWeight: dueTone(a.due, false).weight }}> · {dueTone(a.due, false).overdue ? '⚠ ' : ''}due {fmtShort(a.due)}</span> : ''}</div>
@@ -1729,7 +1741,7 @@ export default function Gowns() {
                   {shown.map(({ o, pending, total }) => (
                     <div key={o.id} className="gw-card" style={{ padding: '14px 16px', borderLeft: `4px solid ${pending > 0 ? ROSE : (total > 0 ? GREEN : '#D9CFC8')}` }}>
                       <div className="gw-press" onClick={() => openOrder(o)} style={{ display: 'flex', alignItems: 'flex-start', gap: '10px', cursor: 'pointer' }}>
-                        {o.photos?.length > 0 && <img src={o.photos[0].url} alt="" onClick={(e) => { e.stopPropagation(); setLightbox(o.photos[0].url) }} style={{ width: '48px', height: '48px', objectFit: 'cover', borderRadius: '8px', flexShrink: 0, border: `1px solid ${GRID}`, cursor: 'zoom-in' }} />}
+                        {o.photos?.length > 0 && mediaThumb(o.photos[0].url, 48)}
                         <div style={{ minWidth: 0, flex: 1 }}>
                           <div style={{ fontSize: '17px', fontWeight: 700, color: INK }}>{fullName(o) || '—'} <span style={{ fontSize: '12px', fontWeight: 800, color: REDNO }}>No. {o.orderNo}</span></div>
                           <div style={{ fontSize: '12px', color: MUTED, marginTop: '2px' }}>{fmtDate(o.date)}{o.phone ? ` · ${o.phone}` : ''}</div>
@@ -1749,7 +1761,7 @@ export default function Gowns() {
                                     const dt = dueTone(a.due, a.done)
                                     return (
                                       <div key={a.id} style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '7px 10px', background: a.done ? '#F5F2EF' : '#FBEAF0', borderRadius: '8px', borderLeft: dt.overdue ? '3px solid #C0504C' : (dt.soon ? '3px solid #9C6B12' : '3px solid transparent') }}>
-                                        {a.photos?.length > 0 && <img src={a.photos[0].url} alt="" onClick={(e) => { e.stopPropagation(); setLightbox(a.photos[0].url) }} style={{ width: '40px', height: '40px', objectFit: 'cover', borderRadius: '6px', flexShrink: 0, border: `1px solid ${GRID}`, cursor: 'zoom-in' }} />}
+                                        {a.photos?.length > 0 && mediaThumb(a.photos[0].url, 40, 6)}
                                         <div style={{ minWidth: 0, flex: 1 }}>
                                           <div style={{ fontSize: '13px', fontWeight: 600, color: a.done ? MUTED : ROSE_DK, textDecoration: a.done ? 'line-through' : 'none' }}>{a.note || 'Alteration'}</div>
                                           <div style={{ fontSize: '11px', marginTop: '1px' }}>
@@ -1905,7 +1917,9 @@ export default function Gowns() {
       {/* ===== PHOTO LIGHTBOX ===== */}
       {lightbox && (
         <div onClick={() => setLightbox(null)} style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.88)', zIndex: 300, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '20px', cursor: 'zoom-out' }}>
-          <img src={lightbox} alt="" style={{ maxWidth: '100%', maxHeight: '100%', objectFit: 'contain', borderRadius: '8px' }} />
+          {isVideo(lightbox)
+            ? <video src={lightbox} controls autoPlay playsInline onClick={e => e.stopPropagation()} style={{ maxWidth: '100%', maxHeight: '100%', borderRadius: '8px', background: '#000' }} />
+            : <img src={lightbox} alt="" style={{ maxWidth: '100%', maxHeight: '100%', objectFit: 'contain', borderRadius: '8px' }} />}
           <button onClick={() => setLightbox(null)} aria-label="Close" style={{ position: 'absolute', top: '16px', right: '18px', width: '42px', height: '42px', borderRadius: '50%', border: 'none', background: 'rgba(255,255,255,0.18)', color: '#fff', fontSize: '24px', cursor: 'pointer', lineHeight: 1 }}>×</button>
         </div>
       )}
