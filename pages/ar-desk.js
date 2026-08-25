@@ -114,7 +114,7 @@ export default function ArDesk() {
             <th className="th r">They owe</th>
             <th className="th r">How late</th>
             <th className="th">Last statement</th>
-            <th className="th" style={{ width: '90px' }}></th>
+            <th className="th" style={{ width: '210px' }}></th>
           </tr></thead>
           <tbody>
             {M.rows.map((c) => (
@@ -124,8 +124,8 @@ export default function ArDesk() {
                     <input type="checkbox" checked={selected.has(c.id)} onChange={() => toggle(c.id)} style={{ width: '15px', height: '15px', accentColor: GREEN, cursor: 'pointer' }} />
                   </td>
                   <td className="td ink" style={{ fontWeight: 600, whiteSpace: 'normal' }}>
-                    {c.name}
-                    {c.bouncing && <div style={{ fontSize: '11px', color: RED, fontWeight: 600 }}>email bouncing — fix address</div>}
+                    <span style={{ display: 'inline-block', width: '16px', color: MUTED, fontSize: '10px' }}>{expanded === c.id ? '▾' : '▸'}</span>{c.name}
+                    {c.bouncing && <div style={{ fontSize: '11px', color: RED, fontWeight: 600, paddingLeft: '16px' }}>email bouncing — fix address</div>}
                   </td>
                   <td className="td r ink" style={{ fontWeight: 700 }}>{money0(c.balance)}</td>
                   <td className="td r" style={{ color: c.oldest > 60 ? RED : SLATE, fontWeight: c.oldest > 60 ? 700 : 400 }}>
@@ -134,7 +134,12 @@ export default function ArDesk() {
                   <td className="td" style={{ color: c.stmtAge == null || c.stmtAge > 60 ? INK : SLATE }}>
                     {c.lastStmt ? `${fmtD(c.lastStmt)} · ${c.stmtAge}d ago` : 'never'}
                   </td>
-                  <td className="td r"><button className="ghost" onClick={(e) => { e.stopPropagation(); setStmtModal(c.id) }}>PREVIEW</button></td>
+                  <td className="td r" style={{ whiteSpace: 'nowrap' }}>
+                    <button className="ghost" style={{ marginRight: '6px' }} onClick={(e) => { e.stopPropagation(); setExpanded(expanded === c.id ? null : c.id) }}>
+                      {c.invs.length} INVOICE{c.invs.length === 1 ? '' : 'S'} {expanded === c.id ? '▴' : '▾'}
+                    </button>
+                    <button className="ghost" onClick={(e) => { e.stopPropagation(); setStmtModal(c.id) }}>STATEMENT</button>
+                  </td>
                 </tr>
                 {expanded === c.id && (
                   <tr><td colSpan={6} style={{ padding: 0, borderBottom: `1px solid ${RULE}` }}>
