@@ -907,61 +907,24 @@ export default function Gowns() {
                 <div style={{ fontSize: '15px' }}>{orders.length ? (search ? 'Try a different name.' : 'Nothing here right now.') : 'Tap "+ New Order" to write your first one.'}</div>
               </div>
             ) : tab !== 'todos' && tab !== 'customers' && tab !== 'catalog' ? (
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+              // Phone-first: one thin line per order. Alteration details live inside the order.
+              <div className="gw-card" style={{ overflow: 'hidden', padding: 0 }}>
                 {filtered.map(o => {
                   const tot = orderTotal(o), bal = balanceOf(o)
-                  const alts = o.alterationsList || []
-                  const pendingAlts = alts.filter(a => !a.done).length
-                  const openTasks = (o.todos || []).filter(t => !t.done).length
-                  const groups = {}
-                  alts.forEach(a => { const g = a.garment?.trim() || 'Gown'; (groups[g] = groups[g] || []).push(a) })
+                  const needsAlt = (o.alterationsList || []).some(a => !a.done)
                   return (
-                    <div key={o.id} className="gw-card" style={{ padding: '13px 15px', borderLeft: `4px solid ${isOpen(o) ? ROSE : GREEN}` }}>
-                      <div className="gw-press" onClick={() => openOrder(o)} style={{ display: 'flex', alignItems: 'flex-start', gap: '10px', cursor: 'pointer' }}>
-                        {o.photos?.length > 0 && mediaThumb(o.photos[0].url, 48)}
-                        <div style={{ minWidth: 0, flex: 1 }}>
-                          <div style={{ fontSize: '17px', fontWeight: 700, color: INK }}>{fullName(o) || '—'} <span style={{ fontSize: '12px', fontWeight: 800, color: REDNO }}>No. {o.orderNo}</span></div>
-                          <div style={{ fontSize: '12px', color: MUTED, marginTop: '2px' }}>
-                            {fmtDate(o.date)}{o.phone ? ` · ${o.phone}` : ''}{openTasks ? ` · ${openTasks} task${openTasks > 1 ? 's' : ''}` : ''}
-                            {pendingAlts > 0 && <span style={{ color: AMBER, fontWeight: 700 }}> · ✂ {pendingAlts} to do</span>}
-                          </div>
-                        </div>
-                        <div style={{ textAlign: 'right', flexShrink: 0 }}>
-                          <div style={{ fontSize: '15px', fontWeight: 800, color: INK }}>{money(tot)}</div>
-                          {bal > 0.005
-                            ? <div style={{ fontSize: '12px', fontWeight: 700, color: AMBER }}>Owes {money(bal)}</div>
-                            : <div style={{ fontSize: '12px', fontWeight: 700, color: GREEN }}>Paid ✓</div>}
-                        </div>
+                    <div key={o.id} className="gw-press" onClick={() => openOrder(o)} style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '9px 12px', cursor: 'pointer', borderLeft: `4px solid ${isOpen(o) ? ROSE : GREEN}`, borderBottom: `1px solid ${CREAM}`, background: '#fff' }}>
+                      <div style={{ minWidth: 0, flex: 1, display: 'flex', alignItems: 'baseline', gap: '7px', whiteSpace: 'nowrap', overflow: 'hidden' }}>
+                        <span style={{ fontSize: '15px', fontWeight: 700, color: INK, overflow: 'hidden', textOverflow: 'ellipsis' }}>{fullName(o) || '—'}</span>
+                        <span style={{ fontSize: '11px', fontWeight: 800, color: REDNO, flexShrink: 0 }}>No. {o.orderNo}</span>
+                        <span style={{ fontSize: '11px', color: MUTED, flexShrink: 0 }}>{fmtShort(o.date)}</span>
+                        {needsAlt && <span title="Alterations to do" style={{ fontSize: '12px', color: ROSE_DK, flexShrink: 0 }}>✂</span>}
                       </div>
-                      {alts.length > 0 && (
-                        <div style={{ marginTop: '10px', display: 'flex', flexDirection: 'column', gap: '10px' }}>
-                          {Object.entries(groups).map(([garment, garmentAlts]) => (
-                            <div key={garment}>
-                              <div style={{ fontSize: '13px', fontWeight: 800, color: INK, marginBottom: '5px' }}>👗 {garment}</div>
-                              <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-                                {garmentAlts.map(a => {
-                                  const dt = dueTone(a.due, a.done)
-                                  return (
-                                    <div key={a.id} style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '7px 10px', background: a.done ? '#F5F2EF' : '#FBEAF0', borderRadius: '8px', borderLeft: dt.overdue ? '3px solid #C0504C' : (dt.soon ? '3px solid #9C6B12' : '3px solid transparent') }}>
-                                      {a.photos?.length > 0 && mediaThumb(a.photos[0].url, 40, 6)}
-                                      <div style={{ minWidth: 0, flex: 1 }}>
-                                        <div style={{ fontSize: '13px', fontWeight: 600, color: a.done ? MUTED : ROSE_DK, textDecoration: a.done ? 'line-through' : 'none' }}>{a.note || 'Alteration'}</div>
-                                        <div style={{ fontSize: '11px', marginTop: '1px' }}>
-                                          <span style={{ color: MUTED }}>{[a.assignee, a.hours ? `${a.hours}h` : ''].filter(Boolean).join(' · ') || 'unassigned'}</span>
-                                          {a.due && <span style={{ color: dt.color, fontWeight: dt.weight, marginLeft: '6px' }}>{dt.overdue ? '⚠ ' : ''}due {fmtShort(a.due)}</span>}
-                                        </div>
-                                      </div>
-                                      {a.done
-                                        ? <span style={{ fontSize: '12px', color: GREEN, fontWeight: 700 }}>✓</span>
-                                        : <input type="checkbox" checked={false} onChange={() => patchOrder(o.id, { alterationsList: alts.map(x => x.id === a.id ? { ...x, done: true } : x) })} title="Mark done" style={{ width: '16px', height: '16px', accentColor: PAD, cursor: 'pointer' }} />}
-                                    </div>
-                                  )
-                                })}
-                              </div>
-                            </div>
-                          ))}
-                        </div>
-                      )}
+                      <div style={{ flexShrink: 0 }}>
+                        {bal > 0.005
+                          ? <span style={{ fontSize: '13px', fontWeight: 700, color: AMBER }}>Owes {money(bal)}</span>
+                          : <span style={{ fontSize: '13px', fontWeight: 700, color: GREEN }}>{tot > 0 ? `${money(tot)} ✓` : 'Paid ✓'}</span>}
+                      </div>
                     </div>
                   )
                 })}
