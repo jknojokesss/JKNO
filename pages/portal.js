@@ -291,14 +291,24 @@ function NewInvoice({ refs, call, onClose, onCreated }) {
         <button onClick={onClose} style={btn(false)}>Close</button>
       </div>
       {!refs && <div style={{ fontSize: '13px', color: MUTED }}>Loading customers and items…</div>}
-      {refs && refs.items.length === 0 && (
-        <div style={{ fontSize: '13px', color: RED, lineHeight: 1.6 }}>
-          Your QuickBooks has no products/services yet — add one in QuickBooks under
-          Sales → Products &amp; services, then reopen this form.
-        </div>
-      )}
-      {refs && refs.items.length > 0 && (
+      {refs && (
         <>
+          {(refs.warnings || []).map((w, k) => (
+            <div key={k} style={{ fontSize: '12.5px', color: RED, lineHeight: 1.6, marginBottom: '10px' }}>{w}</div>
+          ))}
+          {/* Warnings sit above the form; they never replace it, so a company
+              missing one list can still use the rest. */}
+          {refs.items.length === 0 && (
+            <div style={{ fontSize: '12.5px', color: RED, lineHeight: 1.6, marginBottom: '10px' }}>
+              No products/services came back from QuickBooks, and an invoice line needs one.
+              Add one under Sales → Products &amp; services in QuickBooks, then close and reopen this form.
+            </div>
+          )}
+          {refs.customers.length === 0 && (
+            <div style={{ fontSize: '12.5px', color: RED, lineHeight: 1.6, marginBottom: '10px' }}>
+              No active customers came back from QuickBooks. Add a customer there, then close and reopen this form.
+            </div>
+          )}
           <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap', marginBottom: '10px' }}>
             <label style={{ fontSize: '12px', color: MUTED }}>Customer<br />
               <select value={customerId} onChange={(e) => {
@@ -349,6 +359,9 @@ function NewInvoice({ refs, call, onClose, onCreated }) {
                 </React.Fragment>
               )
             })}
+          </div>
+          <div style={{ fontSize: '11px', color: MUTED, marginTop: '8px' }}>
+            Loaded from QuickBooks: {refs.customers.length} customer{refs.customers.length === 1 ? '' : 's'} · {refs.items.length} product{refs.items.length === 1 ? '' : 's'}/service{refs.items.length === 1 ? '' : 's'}
           </div>
           <div style={{ display: 'flex', gap: '10px', alignItems: 'center', marginTop: '10px', flexWrap: 'wrap' }}>
             <button onClick={() => setLines((ls) => [...ls, { itemId: '', description: '', qty: '1', rate: '' }])} style={btn(false)}>+ line</button>

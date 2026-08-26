@@ -322,14 +322,22 @@ function NewInvoice({ client, refs, call, onClose, onCreated }) {
         <button onClick={onClose} style={btn(false)}>Close</button>
       </div>
       {!refs && <div style={{ fontSize: '13px', color: MUTED }}>Loading customers and items…</div>}
-      {refs && refs.items.length === 0 && (
-        <div style={{ fontSize: '13px', color: RED, lineHeight: 1.6 }}>
-          This QuickBooks company has no products/services yet — add one in QBO under
-          Sales → Products &amp; services, then reopen this form. Invoices need an item on each line.
-        </div>
-      )}
-      {refs && refs.items.length > 0 && (
+      {refs && (
         <>
+          {(refs.warnings || []).map((w, k) => (
+            <div key={k} style={{ fontSize: '12.5px', color: RED, lineHeight: 1.6, marginBottom: '10px' }}>{w}</div>
+          ))}
+          {refs.items.length === 0 && (
+            <div style={{ fontSize: '12.5px', color: RED, lineHeight: 1.6, marginBottom: '10px' }}>
+              No products/services came back from QuickBooks, and an invoice line needs one.
+              Add one under Sales → Products &amp; services, then reopen this form.
+            </div>
+          )}
+          {refs.customers.length === 0 && (
+            <div style={{ fontSize: '12.5px', color: RED, lineHeight: 1.6, marginBottom: '10px' }}>
+              No active customers came back from QuickBooks for this company.
+            </div>
+          )}
           <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap', marginBottom: '10px' }}>
             <label style={{ fontSize: '12px', color: MUTED }}>Customer<br />
               <select value={customerId} onChange={(e) => {
@@ -382,6 +390,9 @@ function NewInvoice({ client, refs, call, onClose, onCreated }) {
                 </React.Fragment>
               )
             })}
+          </div>
+          <div style={{ fontSize: '11px', color: MUTED, marginTop: '8px' }}>
+            Loaded from QuickBooks: {refs.customers.length} customers · {refs.items.length} products/services
           </div>
           <div style={{ display: 'flex', gap: '10px', alignItems: 'center', marginTop: '10px', flexWrap: 'wrap' }}>
             <button onClick={() => setLines((ls) => [...ls, { itemId: '', description: '', qty: '1', rate: '' }])} style={btn(false)}>+ line</button>
