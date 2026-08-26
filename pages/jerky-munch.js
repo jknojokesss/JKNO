@@ -1105,6 +1105,13 @@ export default function JerkyMunch() {
 
                     {open && (
                       <div style={{ padding: '0 18px 18px', borderTop: `1px solid ${CREAM}` }}>
+                        <div style={{ ...lbl, margin: '14px 0 6px' }}>Price per bag</div>
+                        <div style={{ display: 'flex', gap: '8px', alignItems: 'center', flexWrap: 'wrap', marginBottom: '14px' }}>
+                          <span style={{ color: MUTED }}>$</span>
+                          <input value={dv(`price_${c.id}`) !== '' ? dv(`price_${c.id}`) : String(c.price)} onChange={e => setDv(`price_${c.id}`, e.target.value)} type="number" inputMode="decimal" style={{ ...inp, width: '110px', fontSize: '16px' }} />
+                          <button onClick={() => { const v = Number(dv(`price_${c.id}`)); if (v > 0 && v !== c.price) { upd(c.id, { price: v }, `Set price to ${money(v)}/bag`); } setDv(`price_${c.id}`, '') }} style={{ background: CHAR, color: CREAM, border: 'none', borderRadius: '2px', padding: '10px 16px', ...btn }}>Save</button>
+                          <span style={{ fontSize: '11.5px', color: MUTED }}>drives what's owed per count</span>
+                        </div>
                         <div style={{ ...lbl, margin: '14px 0 6px' }}>The reconciliation</div>
                         <div style={{ background: CREAM, borderRadius: '2px', padding: '14px 16px' }}>
                           <Row l="Units sent out" v={c.sent} />
