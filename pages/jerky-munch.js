@@ -89,6 +89,8 @@ export default function JerkyMunch() {
   const [invForm, setInvForm] = useState({})          // partnerId -> { txnDate, dueDate, memo, send, lines:[{itemId,item,unitPrice,qty,description}] }
   const [invBusy, setInvBusy] = useState({})          // partnerId -> submitting
   const [invResult, setInvResult] = useState({})      // partnerId -> { ok, msg } | { error }
+  const [qbCustomers, setQbCustomers] = useState(null) // QB customer list for manual mapping
+  const [linkPick, setLinkPick] = useState({})        // partnerId -> typed customer name in the mapping box
   const [addingE, setAddingE] = useState(false)
   const [ef, setEf] = useState({ vendor: '', amt: '', cat: 'Other', pay: 'personal' })
   const [addingD, setAddingD] = useState(false)
@@ -190,8 +192,8 @@ export default function JerkyMunch() {
     })
   }
   // fetch the store's QB customer + last-invoice prices when its panel opens
-  const ensurePricing = async (partnerId, storeName) => {
-    if (pricing[partnerId] && (pricing[partnerId].loading || pricing[partnerId].loaded)) return
+  const ensurePricing = async (partnerId, storeName, force = false) => {
+    if (!force && pricing[partnerId] && (pricing[partnerId].loading || pricing[partnerId].loaded)) return
     setPricing(p => ({ ...p, [partnerId]: { loading: true } }))
     const blank = [{ itemId: '', item: '', unitPrice: '', qty: '', description: '' }]
     try {
@@ -203,6 +205,7 @@ export default function JerkyMunch() {
         return
       }
       setPricing(p => ({ ...p, [partnerId]: { loaded: true, ...j } }))
+      if (!j.customer) loadQbCustomers()   // offer the manual mapping picker
       const lines = (j.last && j.last.lines && j.last.lines.length)
         ? j.last.lines.map(l => ({ itemId: l.itemId || '', item: l.item || '', unitPrice: l.unitPrice != null ? l.unitPrice : '', qty: l.qty != null ? l.qty : '', description: l.description || '' }))
         : blank
@@ -251,6 +254,31 @@ export default function JerkyMunch() {
     const j = await res.json().catch(() => ({}))
     if (!res.ok) { alert(j.error || 'Send failed.'); return }
     await loadInvoices(); alert('Emailed to the store.')
+  }
+  const voidInvoice = async (invId) => {
+    if (!window.confirm('Void this invoice? It will be deleted from QuickBooks (and any payment reversed). This cannot be undone.')) return
+    const res = await jerkyApi('/api/jerky/void-invoice', { method: 'POST', body: { id: invId } })
+    const j = await res.json().catch(() => ({}))
+    if (!res.ok) { alert(j.error || 'Void failed.'); return }
+    await loadInvoices()
+  }
+  // load QB customers once, for mapping a store that didn't auto-match
+  const loadQbCustomers = async () => {
+    if (qbCustomers) return
+    try {
+      const res = await jerkyApi('/api/jerky/customers')
+      const j = await res.json().catch(() => ({}))
+      if (res.ok) setQbCustomers(j.customers || [])
+    } catch (e) { /* leave null; the box shows a retry */ }
+  }
+  const linkCustomer = async (partnerId, storeName) => {
+    const typed = (linkPick[partnerId] || '').trim()
+    const match = (qbCustomers || []).find(c => c.name.toLowerCase() === typed.toLowerCase())
+    if (!match) { alert('Pick a customer from the list.'); return }
+    try {
+      await jerkySupabase.from('consignment_partners').update({ qb_customer_id: match.id }).eq('id', partnerId)
+      await ensurePricing(partnerId, storeName, true)  // re-pull with the mapping in place
+    } catch (e) { alert('Could not save the mapping: ' + (e.message || e)) }
   }
   const loadProducts = async () => {
     try {
@@ -413,8 +441,16 @@ export default function JerkyMunch() {
     try { await jerkySupabase.from('expenses').insert(row); await loadExpenses() } catch (e) { console.error('addExpense failed', e) }
   }
   const removeExpense = async (id) => { try { await jerkySupabase.from('expenses').delete().eq('id', id); await loadExpenses() } catch (e) { console.error('removeExpense failed', e) } }
+  const [payBusy, setPayBusy] = useState({})
   const markInvoicePaid = async (id, paid) => {
-    try { await jerkySupabase.from('store_invoices').update({ status: paid ? 'paid' : 'unpaid', paid_date: paid ? todayStr : null }).eq('id', id); await loadInvoices() } catch (e) { console.error('markInvoicePaid failed', e) }
+    setPayBusy(b => ({ ...b, [id]: true }))
+    try {
+      const res = await jerkyApi('/api/jerky/mark-paid', { method: 'POST', body: { id, paid } })
+      const j = await res.json().catch(() => ({}))
+      if (!res.ok) { alert(j.error || 'Could not update payment.'); return }
+      await loadInvoices()
+    } catch (e) { alert('Could not update payment: ' + (e.message || e)) }
+    finally { setPayBusy(b => ({ ...b, [id]: false })) }
   }
   const exportPersonal = () => {
     const rows = [['Vendor', 'Category', 'Amount', 'Paid with']]
@@ -1207,7 +1243,8 @@ export default function JerkyMunch() {
                                       <span style={{ fontFamily: "'Inter', sans-serif", fontSize: '11px', fontWeight: 600, color: '#fff', background: pill.c, padding: '4px 10px', borderRadius: '2px', whiteSpace: 'nowrap' }}>{pill.t}</span>
                                       {i.qbInvoiceId && <button onClick={() => openInvoicePdf(i.id)} style={{ background: 'none', color: CHAR, border: `1px solid ${BORDER}`, borderRadius: '2px', padding: '6px 10px', ...btn, fontSize: '12px' }}>PDF</button>}
                                       {i.qbInvoiceId && <button onClick={() => emailInvoice(i.id)} style={{ background: 'none', color: CHAR, border: `1px solid ${BORDER}`, borderRadius: '2px', padding: '6px 10px', ...btn, fontSize: '12px' }}>{i.sentAt ? 'Re-email' : 'Email'}</button>}
-                                      <button onClick={() => markInvoicePaid(i.id, i.status !== 'paid')} style={{ background: i.status === 'paid' ? 'none' : GREEN, color: i.status === 'paid' ? MUTED : '#fff', border: i.status === 'paid' ? `1px solid ${BORDER}` : 'none', borderRadius: '2px', padding: '6px 12px', ...btn, fontSize: '12px' }}>{i.status === 'paid' ? 'Mark unpaid' : 'Mark paid'}</button>
+                                      <button disabled={payBusy[i.id]} onClick={() => markInvoicePaid(i.id, i.status !== 'paid')} style={{ background: i.status === 'paid' ? 'none' : GREEN, color: i.status === 'paid' ? MUTED : '#fff', border: i.status === 'paid' ? `1px solid ${BORDER}` : 'none', borderRadius: '2px', padding: '6px 12px', ...btn, fontSize: '12px', cursor: payBusy[i.id] ? 'default' : 'pointer' }}>{payBusy[i.id] ? '…' : (i.status === 'paid' ? 'Mark unpaid' : 'Mark paid')}</button>
+                                      {i.qbInvoiceId && i.status !== 'paid' && <button onClick={() => voidInvoice(i.id)} style={{ background: 'none', color: MUTED, border: `1px solid ${BORDER}`, borderRadius: '2px', padding: '6px 10px', ...btn, fontSize: '12px' }}>Void</button>}
                                     </div>
                                   </div>
                                 )
@@ -1225,7 +1262,14 @@ export default function JerkyMunch() {
                                   <>
                                     {pr.customer
                                       ? <div style={{ fontSize: '12px', color: MUTED, marginBottom: '10px', lineHeight: 1.5 }}>QuickBooks customer: <b style={{ color: INK }}>{pr.customer.name}</b>{pr.last ? <> · prices prefilled from invoice{pr.last.docNumber ? ` #${pr.last.docNumber}` : ''} — just set the qty</> : ' · no prior invoice, pick a product'}</div>
-                                      : <div style={{ fontSize: '12px', color: AMBER, marginBottom: '10px', lineHeight: 1.5 }}>{pr.error || pr.matchError || 'Not matched to a QuickBooks customer'} — creating an invoice needs a matching QB customer.</div>}
+                                      : <div style={{ marginBottom: '12px' }}>
+                                          <div style={{ fontSize: '12px', color: AMBER, marginBottom: '8px', lineHeight: 1.5 }}>{pr.error || pr.matchError || 'Not matched to a QuickBooks customer'} — link this store to its QuickBooks customer once:</div>
+                                          <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+                                            <input list={`qbc_${c.id}`} value={linkPick[c.id] || ''} onChange={e => setLinkPick(v => ({ ...v, [c.id]: e.target.value }))} onFocus={loadQbCustomers} placeholder={qbCustomers ? 'Type a QuickBooks customer…' : 'Loading customers…'} style={{ ...inp, flex: '2 1 180px' }} />
+                                            <datalist id={`qbc_${c.id}`}>{(qbCustomers || []).map(qc => <option key={qc.id} value={qc.name} />)}</datalist>
+                                            <button onClick={() => linkCustomer(c.id, c.store)} style={{ background: CHAR, color: CREAM, border: 'none', borderRadius: '2px', padding: '10px 16px', ...btn }}>Link</button>
+                                          </div>
+                                        </div>}
                                     {form.lines.map((l, idx) => (
                                       <div key={idx} style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', marginBottom: '8px', alignItems: 'center' }}>
                                         {l.itemId && !items.length
