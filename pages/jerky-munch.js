@@ -91,6 +91,8 @@ export default function JerkyMunch() {
   const [invResult, setInvResult] = useState({})      // partnerId -> { ok, msg } | { error }
   const [qbCustomers, setQbCustomers] = useState(null) // QB customer list for manual mapping
   const [linkPick, setLinkPick] = useState({})        // partnerId -> typed customer name in the mapping box
+  const [syncing, setSyncing] = useState(false)
+  const [syncMsg, setSyncMsg] = useState('')
   const [addingE, setAddingE] = useState(false)
   const [ef, setEf] = useState({ vendor: '', amt: '', cat: 'Other', pay: 'personal' })
   const [addingD, setAddingD] = useState(false)
@@ -268,6 +270,19 @@ export default function JerkyMunch() {
     if (!res.ok) { alert(j.error || 'Void failed.'); return }
     await loadInvoices()
   }
+  // pull the truth from QuickBooks: adds QB-made invoices, updates paid/amount, drops deleted ones
+  const syncInvoices = async (silent) => {
+    if (syncing) return
+    setSyncing(true); if (!silent) setSyncMsg('Syncing with QuickBooks…')
+    try {
+      const res = await jerkyApi('/api/jerky/sync-invoices', { method: 'POST', body: {} })
+      const j = await res.json().catch(() => ({}))
+      if (!res.ok) { setSyncMsg(j.error || 'Sync failed.'); return }
+      await loadInvoices()
+      setSyncMsg(`Up to date with QuickBooks${j.removed ? ` · ${j.removed} removed` : ''}${j.unmatched && j.unmatched.length ? ` · not matched: ${j.unmatched.join(', ')}` : ''}`)
+    } catch (e) { setSyncMsg('Sync failed.') }
+    finally { setSyncing(false) }
+  }
   // load QB customers once, for mapping a store that didn't auto-match
   const loadQbCustomers = async () => {
     if (qbCustomers) return
@@ -376,6 +391,15 @@ export default function JerkyMunch() {
     else setDataLoaded(false)
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [session])
+  // reconcile the invoice list with QuickBooks once, when the owner opens the tab
+  const invSyncedRef = useRef(false)
+  useEffect(() => {
+    if (tab === 'invoices' && session && role === 'owner' && !invSyncedRef.current) {
+      invSyncedRef.current = true
+      syncInvoices(true)
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [tab, session, role])
 
   const doLogin = async () => {
     setLoginError('')
@@ -1209,6 +1233,10 @@ export default function JerkyMunch() {
                 <KPI k="Outstanding (A/R)" v={m0(totalAR)} sub={`${invUnpaid.length} open invoices`} accent={KRAFT} />
                 <KPI k="Overdue" v={m0(overdueAR)} sub="past due date" accent={overdueAR > 0 ? RED : GREEN} />
                 <KPI k="Collected" v={m0(collectedAR)} sub="invoices paid" accent={GREEN} />
+              </div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap', marginBottom: '16px' }}>
+                <button disabled={syncing} onClick={() => syncInvoices(false)} style={{ background: 'none', color: CHAR, border: `1px solid ${BORDER}`, borderRadius: '2px', padding: '9px 15px', ...btn, fontSize: '13px', cursor: syncing ? 'default' : 'pointer' }}>{syncing ? 'Syncing…' : '↻ Sync with QuickBooks'}</button>
+                {syncMsg && <span style={{ fontSize: '12px', color: MUTED }}>{syncMsg}</span>}
               </div>
 
               {(() => {

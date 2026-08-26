@@ -4,7 +4,7 @@
 // Creates a real invoice in Efraim's QuickBooks, optionally emails it, and
 // records it in Jerky's store_invoices so the portal's A/R view stays in sync.
 import { getLiveToken } from '../../../lib/qboAuth'
-import { fetchCustomerRefs, resolveCustomer, buildInvoice, postInvoice, fetchInvoicePdf, fetchInvoiceEmailPrefs } from '../../../lib/qboWrite'
+import { fetchCustomerRefs, resolveCustomer, buildInvoice, postInvoice, fetchInvoicePdf, fetchInvoiceEmailPrefs, nextInvoiceNumber } from '../../../lib/qboWrite'
 import { requireJerkyUser } from '../../../lib/requireJerkyUser'
 import { sendInvoiceEmail, jerkyMailerConfigured } from '../../../lib/jerkyMailer'
 
@@ -28,12 +28,19 @@ export default async function handler(req, res) {
     if (!customer && b.storeName) { const r = resolveCustomer(customers, b.storeName); if (r.customer) customer = r.customer }
     if (!customer) return res.status(400).json({ error: `No QuickBooks customer for "${b.storeName || b.customerId}". Set one up in QuickBooks first.` })
 
+    // If QB has "Custom transaction numbers" on, it will NOT auto-number an
+    // API invoice — supply the next sequential number ourselves. (Off = omit,
+    // and QuickBooks numbers it.)
+    const prefs = await fetchInvoiceEmailPrefs(env, token, realmId).catch(() => null)
+    let docNumber = null
+    if (prefs && prefs.customTxnNumbers) docNumber = await nextInvoiceNumber(env, token, realmId).catch(() => null)
+
     // record the store's email on the invoice for the record, but delivery is
-    // via our own SMTP (from orders@jerkymunch.com), not Intuit's mailer
+    // via our own SMTP (from accounting@jerkymunch.com), not Intuit's mailer
     const recipient = b.email || customer.email || null
     const built = buildInvoice({
       customerId: customer.id, customerName: customer.name, txnDate, dueDate: b.dueDate || null,
-      memo: b.memo || null, billEmail: recipient, lines,
+      memo: b.memo || null, billEmail: recipient, lines, docNumber,
     })
     if (built.errors.length) return res.status(400).json({ error: built.errors.join(' ') })
 
@@ -48,7 +55,6 @@ export default async function handler(req, res) {
         if (!jerkyMailerConfigured()) throw new Error("Email isn't set up yet — add the SMTP credentials.")
         if (!recipient) throw new Error('No email address on file for this store.')
         const pdf = await fetchInvoicePdf(env, token, realmId, inv.Id)
-        const prefs = await fetchInvoiceEmailPrefs(env, token, realmId).catch(() => null)
         await sendInvoiceEmail({ to: recipient, storeName: customer.name, docNumber: inv.DocNumber, total: built.total, dueDate: b.dueDate || null, pdf, subject: prefs && prefs.subject, message: prefs && prefs.message })
         sent = true
       } catch (e) { sendError = String(e.message || e) }
