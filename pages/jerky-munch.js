@@ -206,8 +206,10 @@ export default function JerkyMunch() {
       }
       setPricing(p => ({ ...p, [partnerId]: { loaded: true, ...j } }))
       if (!j.customer) loadQbCustomers()   // offer the manual mapping picker
-      const lines = (j.last && j.last.lines && j.last.lines.length)
-        ? j.last.lines.map(l => ({ itemId: l.itemId || '', item: l.item || '', unitPrice: l.unitPrice != null ? l.unitPrice : '', qty: l.qty != null ? l.qty : '', description: l.description || '' }))
+      // one line only — reuse the item + price from the store's last invoice, just enter qty
+      const first = (j.last && j.last.lines && j.last.lines[0]) || null
+      const lines = first
+        ? [{ itemId: first.itemId || '', item: first.item || '', unitPrice: first.unitPrice != null ? first.unitPrice : '', qty: '', description: '' }]
         : blank
       setInvForm(f => ({ ...f, [partnerId]: { txnDate: todayISO(), dueDate: '', memo: '', send: true, lines } }))
     } catch (e) {
@@ -1282,20 +1284,22 @@ export default function JerkyMunch() {
                                             <button onClick={() => linkCustomer(c.id, c.store)} style={{ background: CHAR, color: CREAM, border: 'none', borderRadius: '2px', padding: '10px 16px', ...btn }}>Link</button>
                                           </div>
                                         </div>}
-                                    {form.lines.map((l, idx) => (
-                                      <div key={idx} style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', marginBottom: '8px', alignItems: 'center' }}>
-                                        {l.itemId && !items.length
-                                          ? <div style={{ flex: '2 1 150px', fontWeight: 600, color: INK, fontSize: '14px' }}>{l.item}</div>
-                                          : <select value={l.itemId} onChange={e => { const it = items.find(x => x.id === e.target.value); setLine(c.id, idx, { itemId: e.target.value, item: it ? it.name : '', unitPrice: (l.unitPrice !== '' && l.unitPrice != null) ? l.unitPrice : (it && it.unitPrice != null ? it.unitPrice : '') }) }} style={{ ...inp, flex: '2 1 150px' }}>
-                                              <option value="">Choose product…</option>
-                                              {items.map(it => <option key={it.id} value={it.id}>{it.name}</option>)}
-                                            </select>}
-                                        <input value={l.unitPrice} onChange={e => setLine(c.id, idx, { unitPrice: e.target.value })} type="number" inputMode="decimal" placeholder="$ / unit" style={{ ...inp, flex: '1 1 90px', minWidth: '80px' }} />
-                                        <input value={l.qty} onChange={e => setLine(c.id, idx, { qty: e.target.value })} type="number" inputMode="numeric" placeholder="Qty" style={{ ...inp, flex: '1 1 80px', minWidth: '70px', fontWeight: 600, fontSize: '16px' }} autoFocus={idx === 0} />
-                                        {form.lines.length > 1 && <button onClick={() => setFormField(c.id, { lines: form.lines.filter((_, i) => i !== idx) })} style={{ background: 'none', border: 'none', color: MUTED, cursor: 'pointer', fontSize: '20px', lineHeight: 1 }}>×</button>}
-                                      </div>
-                                    ))}
-                                    <button onClick={() => setFormField(c.id, { lines: [...form.lines, { itemId: '', item: '', unitPrice: '', qty: '', description: '' }] })} style={{ background: 'none', border: 'none', color: SPICE, ...btn, fontSize: '12px', padding: '2px 0', marginBottom: '10px' }}>+ Add another product</button>
+                                    {(() => {
+                                      const l = form.lines[0] || { itemId: '', item: '', unitPrice: '', qty: '' }
+                                      const showLabel = l.item && (l.itemId || !items.length)
+                                      return (
+                                        <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', alignItems: 'center', marginBottom: '10px' }}>
+                                          {showLabel
+                                            ? <div style={{ flex: '2 1 150px', fontWeight: 600, color: INK, fontSize: '14px' }}>{l.item}</div>
+                                            : <select value={l.itemId} onChange={e => { const it = items.find(x => x.id === e.target.value); setLine(c.id, 0, { itemId: e.target.value, item: it ? it.name : '', unitPrice: (l.unitPrice !== '' && l.unitPrice != null) ? l.unitPrice : (it && it.unitPrice != null ? it.unitPrice : '') }) }} style={{ ...inp, flex: '2 1 150px' }}>
+                                                <option value="">Choose product…</option>
+                                                {items.map(it => <option key={it.id} value={it.id}>{it.name}</option>)}
+                                              </select>}
+                                          <input value={l.unitPrice} onChange={e => setLine(c.id, 0, { unitPrice: e.target.value })} type="number" inputMode="decimal" placeholder="$ / bag" style={{ ...inp, flex: '1 1 90px', minWidth: '80px' }} />
+                                          <input value={l.qty} onChange={e => setLine(c.id, 0, { qty: e.target.value })} type="number" inputMode="numeric" placeholder="Qty" style={{ ...inp, flex: '1 1 80px', minWidth: '70px', fontWeight: 600, fontSize: '16px' }} autoFocus />
+                                        </div>
+                                      )
+                                    })()}
                                     <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
                                       <label style={{ flex: '1 1 130px' }}><span style={{ fontSize: '11px', color: MUTED }}>Invoice date</span><input value={form.txnDate} onChange={e => setFormField(c.id, { txnDate: e.target.value })} type="date" style={{ ...inp, width: '100%', marginTop: '2px' }} /></label>
                                       <label style={{ flex: '1 1 130px' }}><span style={{ fontSize: '11px', color: MUTED }}>Due date (optional)</span><input value={form.dueDate} onChange={e => setFormField(c.id, { dueDate: e.target.value })} type="date" style={{ ...inp, width: '100%', marginTop: '2px' }} /></label>
