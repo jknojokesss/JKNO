@@ -66,7 +66,7 @@ export default async function handler(req, res) {
         if (!custId) return res.status(400).json({ error: 'Missing ?id= customer id.' })
         const stmt = await statementFor(env, token, realmId, connection, custId)
         res.setHeader('Content-Type', 'text/html; charset=utf-8')
-        return res.status(200).send(`<!doctype html><body style="background:#F6F5F1;padding:24px">${stmt.html}</body>`)
+        return res.status(200).send(`<!doctype html><html><head><meta charset="utf-8"></head><body style="background:#F6F5F1;padding:24px">${stmt.html}</body></html>`)
       }
 
       if (req.query.action === 'refs') {
