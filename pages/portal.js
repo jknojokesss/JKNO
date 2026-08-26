@@ -380,7 +380,15 @@ function Login() {
     e.preventDefault()
     setBusy(true); setErr(null)
     const { error } = await supabase.auth.signInWithPassword({ email: email.trim(), password })
-    if (error) setErr(error.message === 'Invalid login credentials' ? 'Wrong email or password.' : error.message)
+    // Say something useful for every failure shape: a plain wrong password, a
+    // server-side auth fault (which arrives with no usable message), and
+    // anything else.
+    if (error) {
+      const msg = String(error.message || '').trim()
+      if (/invalid login credentials/i.test(msg)) setErr('Wrong email or password.')
+      else if (!msg || msg === '{}' || error.status >= 500) setErr('The sign-in service had a problem on our end, not yours. Tell JK and it will be fixed — no need to keep retrying.')
+      else setErr(msg)
+    }
     setBusy(false)
   }
   return (
