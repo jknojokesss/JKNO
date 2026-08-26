@@ -252,7 +252,15 @@ function NewInvoice({ client, refs, call, onClose, onCreated }) {
         <>
           <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap', marginBottom: '10px' }}>
             <label style={{ fontSize: '12px', color: MUTED }}>Customer<br />
-              <select value={customerId} onChange={(e) => { setCustomerId(e.target.value); setPreview(null) }} style={input({ minWidth: '220px' })}>
+              <select value={customerId} onChange={(e) => {
+                const picked = refs.customers.find((c) => String(c.id) === e.target.value)
+                setCustomerId(e.target.value)
+                // Fill the bill-to from the customer record; keep a hand-typed
+                // address only if it isn't just the previous customer's email.
+                const prevEmail = cust && cust.email
+                if (picked && (!emailTo || emailTo === prevEmail)) setEmailTo(picked.email || '')
+                setPreview(null)
+              }} style={input({ minWidth: '220px' })}>
                 <option value="">— pick —</option>
                 {refs.customers.map((c) => <option key={c.id} value={c.id}>{c.name}</option>)}
               </select>
