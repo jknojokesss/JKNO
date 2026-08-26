@@ -1,4 +1,5 @@
 import { requireAdmin } from '../../../lib/requireAdmin'
+import { isPortalClient, portalClientRefusal } from '../../../lib/portalAuth'
 import { getLiveToken, QboAuthError } from '../../../lib/qboAuth'
 import { fetchAccountRefs } from '../../../lib/qboWrite'
 
@@ -57,6 +58,12 @@ export default async function handler(req, res) {
   const client = String((req.body && req.body.client) || 'reydel').toLowerCase().replace(/[^a-z0-9-]/g, '')
   const month = String((req.body && req.body.month) || '')
   if (!/^\d{4}-\d{2}$/.test(month)) return res.status(400).json({ error: 'month must be YYYY-MM.' })
+  // Portal clients' books are not reachable from the admin side.
+  try {
+    if (await isPortalClient(client)) return res.status(403).json({ error: portalClientRefusal(client) })
+  } catch (e) {
+    return res.status(500).json({ error: String(e.message || e) })
+  }
 
   const key = RELIEF_KEY[month]
   if (!key) {
