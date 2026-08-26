@@ -55,10 +55,16 @@ export default async function handler(req, res) {
     return res.status(200).send(`<!doctype html><body style="font-family:Georgia,serif;max-width:560px;margin:80px auto;color:#1A1E24">
       <h2>${lookupError ? 'Authorized — but the company lookup failed' : `Connected: ${companyName}`}</h2>
       <p style="font-family:sans-serif;font-size:14px;color:#444C56;line-height:1.6">
-        QuickBooks company <b>${companyName || realmId}</b> is now linked to client
-        <b>${client}</b>, using the <b>${env.sandbox ? 'sandbox' : 'production'}</b> API.
-        ${lookupError ? '' : 'The nightly sync will pull its P&amp;L from here on. If that company name is wrong, run the connect link again and pick the right one — it overwrites this connection.'}
+        ${portalRow
+          ? `Your QuickBooks company <b>${companyName || realmId}</b> is connected. You can close this tab and go back to the portal — your invoices are there now.`
+          : `QuickBooks company <b>${companyName || realmId}</b> is now linked to client <b>${client}</b>, using the <b>${env.sandbox ? 'sandbox' : 'production'}</b> API.`}
+        ${lookupError || portalRow ? '' : 'The nightly sync will pull its P&amp;L from here on.'}
+        ${lookupError ? '' : 'If that company name is wrong, run the connect link again and pick the right one — it overwrites this connection.'}
       </p>
+      ${lookupError || !portalRow ? '' : `<p style="font-family:sans-serif;font-size:13px;color:#444C56;line-height:1.6;background:#F6F6F6;border-left:3px solid #2CA01C;padding:12px 14px">
+        Nothing from your books is copied or stored — the portal reads your QuickBooks live each time you open it,
+        and your P&amp;L is never pulled.
+      </p>`}
       ${lookupError ? `<p style="font-family:sans-serif;font-size:13px;color:#444C56;line-height:1.6;background:#F6F6F6;border-left:3px solid #035CEB;padding:12px 14px">
         Tokens were stored, but reading the company failed:<br><code style="font-size:12px">${lookupError.replace(/</g, '&lt;')}</code><br><br>
         If you connected a real company while <b>QBO_ENV</b> is set to <b>sandbox</b> (or vice versa),
