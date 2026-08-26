@@ -2,7 +2,7 @@
 // Emails an already-created invoice to the store from orders@jerkymunch.com,
 // with the QuickBooks-generated PDF attached (not Intuit's own mailer).
 import { getLiveToken } from '../../../lib/qboAuth'
-import { fetchInvoice, fetchInvoicePdf, fetchCustomerRefs } from '../../../lib/qboWrite'
+import { fetchInvoice, fetchInvoicePdf, fetchCustomerRefs, fetchInvoiceEmailPrefs } from '../../../lib/qboWrite'
 import { sendInvoiceEmail, jerkyMailerConfigured } from '../../../lib/jerkyMailer'
 import { requireJerkyUser } from '../../../lib/requireJerkyUser'
 
@@ -35,7 +35,8 @@ export default async function handler(req, res) {
     if (!to) return res.status(400).json({ error: 'No email address on file for this store.' })
 
     const pdf = await fetchInvoicePdf(env, token, realmId, row.qb_invoice_id)
-    await sendInvoiceEmail({ to, storeName, docNumber: row.qb_doc_number || inv.DocNumber, total: Number(row.amount) || Number(inv.TotalAmt) || 0, dueDate: row.due_date, pdf })
+    const prefs = await fetchInvoiceEmailPrefs(env, token, realmId).catch(() => null)
+    await sendInvoiceEmail({ to, storeName, docNumber: row.qb_doc_number || inv.DocNumber, total: Number(row.amount) || Number(inv.TotalAmt) || 0, dueDate: row.due_date, pdf, subject: prefs && prefs.subject, message: prefs && prefs.message })
 
     await gate.db.from('store_invoices').update({ sent_at: new Date().toISOString() }).eq('id', id)
     return res.status(200).json({ ok: true, to })

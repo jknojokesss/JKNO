@@ -4,7 +4,7 @@
 // Creates a real invoice in Efraim's QuickBooks, optionally emails it, and
 // records it in Jerky's store_invoices so the portal's A/R view stays in sync.
 import { getLiveToken } from '../../../lib/qboAuth'
-import { fetchCustomerRefs, resolveCustomer, buildInvoice, postInvoice, fetchInvoicePdf } from '../../../lib/qboWrite'
+import { fetchCustomerRefs, resolveCustomer, buildInvoice, postInvoice, fetchInvoicePdf, fetchInvoiceEmailPrefs } from '../../../lib/qboWrite'
 import { requireJerkyUser } from '../../../lib/requireJerkyUser'
 import { sendInvoiceEmail, jerkyMailerConfigured } from '../../../lib/jerkyMailer'
 
@@ -48,7 +48,8 @@ export default async function handler(req, res) {
         if (!jerkyMailerConfigured()) throw new Error("Email isn't set up yet — add the SMTP credentials.")
         if (!recipient) throw new Error('No email address on file for this store.')
         const pdf = await fetchInvoicePdf(env, token, realmId, inv.Id)
-        await sendInvoiceEmail({ to: recipient, storeName: customer.name, docNumber: inv.DocNumber, total: built.total, dueDate: b.dueDate || null, pdf })
+        const prefs = await fetchInvoiceEmailPrefs(env, token, realmId).catch(() => null)
+        await sendInvoiceEmail({ to: recipient, storeName: customer.name, docNumber: inv.DocNumber, total: built.total, dueDate: b.dueDate || null, pdf, subject: prefs && prefs.subject, message: prefs && prefs.message })
         sent = true
       } catch (e) { sendError = String(e.message || e) }
     }

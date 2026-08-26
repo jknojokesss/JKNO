@@ -1302,7 +1302,7 @@ export default function JerkyMunch() {
                                     </div>
                                     <label style={{ display: 'flex', alignItems: 'center', gap: '8px', marginTop: '12px', fontSize: '13px', color: INK, cursor: 'pointer' }}>
                                       <input type="checkbox" checked={form.send} onChange={e => setFormField(c.id, { send: e.target.checked })} style={{ width: '16px', height: '16px' }} />
-                                      Email it to the store from orders@jerkymunch.com{pr.customer && pr.customer.email ? ` (${pr.customer.email})` : ''}
+                                      Email it to the store from accounting@jerkymunch.com{pr.customer && pr.customer.email ? ` (${pr.customer.email})` : ''}
                                     </label>
                                     <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap', marginTop: '14px' }}>
                                       <span style={{ fontSize: '14px', color: INK }}>Total <b>{m0(lineTotal)}</b></span>
