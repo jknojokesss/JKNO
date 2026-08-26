@@ -1,7 +1,8 @@
+import crypto from 'crypto'
 import nodemailer from 'nodemailer'
 import { requireAdmin } from '../../../lib/requireAdmin'
 import { getLiveToken, QboAuthError } from '../../../lib/qboAuth'
-import { fetchOpenInvoices, fetchInvoice, fetchInvoicePdf } from '../../../lib/qboAr'
+import { fetchOpenInvoices, fetchInvoice, fetchInvoicePdf, fetchArRefs, buildInvoice, postInvoice } from '../../../lib/qboAr'
 
 // ── Live AR for one client: list, view, and email real invoices ──────────
 //
@@ -38,11 +39,42 @@ export default async function handler(req, res) {
         return res.status(200).send(pdf)
       }
 
+      if (req.query.action === 'refs') {
+        const refs = await fetchArRefs(env, token, realmId)
+        return res.status(200).json(refs)
+      }
+
       const invoices = await fetchOpenInvoices(env, token, realmId)
       return res.status(200).json({
         company: connection.company_name,
         environment: connection.environment,
         invoices,
+      })
+    }
+
+    // ── The one QBO write: create an invoice. Preview first (no write),
+    // then confirm:true with the preview's requestId — Intuit dedupes on
+    // requestid, so a retried confirm cannot create the invoice twice.
+    if (req.method === 'POST' && req.body && req.body.action === 'create') {
+      const { client: rawClient, invoice, requestId, confirm } = req.body
+      const client = clean(rawClient)
+      if (!client || !invoice) return res.status(400).json({ error: 'Missing client / invoice.' })
+
+      const { env, token, realmId } = await getLiveToken(client)
+      const refs = await fetchArRefs(env, token, realmId)
+      const built = buildInvoice(invoice, refs)
+      if (built.errors.length) return res.status(400).json({ error: built.errors.join(' · ') })
+
+      if (!confirm) {
+        return res.status(200).json({ preview: built.summary, payload: built.payload, requestId: crypto.randomUUID() })
+      }
+      if (!requestId) return res.status(400).json({ error: 'Confirm requires the requestId from the preview.' })
+
+      const out = await postInvoice(env, token, realmId, built.payload, String(requestId))
+      const created = out.Invoice || {}
+      return res.status(200).json({
+        ok: true,
+        created: { id: created.Id, doc: created.DocNumber, total: Number(created.TotalAmt || built.total) },
       })
     }
 
