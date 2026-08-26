@@ -397,19 +397,58 @@ function Login() {
   )
 }
 
+function ChangePassword({ onClose }) {
+  const [pw, setPw] = useState('')
+  const [pw2, setPw2] = useState('')
+  const [err, setErr] = useState(null)
+  const [busy, setBusy] = useState(false)
+  const save = async () => {
+    if (pw.length < 8) { setErr('Use at least 8 characters.'); return }
+    if (pw !== pw2) { setErr("The two entries don't match."); return }
+    setBusy(true); setErr(null)
+    const { error } = await supabase.auth.updateUser({ password: pw })
+    setBusy(false)
+    if (error) { setErr(error.message); return }
+    window.alert('Password changed. Use the new one from now on — nobody else knows it.')
+    onClose()
+  }
+  return (
+    <div onClick={onClose} style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,.4)', zIndex: 60, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '18px' }}>
+      <div onClick={(e) => e.stopPropagation()} style={{ background: '#fff', borderRadius: '6px', maxWidth: '380px', width: '100%', padding: '20px' }}>
+        <h3 style={{ fontSize: '16px', marginBottom: '6px' }}>Change password</h3>
+        <p style={{ fontSize: '12px', color: MUTED, lineHeight: 1.6, marginBottom: '12px' }}>
+          Pick your own — once you change it, you&rsquo;re the only person who knows it.
+        </p>
+        <input type="password" value={pw} onChange={(e) => setPw(e.target.value)} placeholder="new password (8+ characters)" autoComplete="new-password" style={input({ width: '100%', marginBottom: '8px', fontFamily: mono })} />
+        <input type="password" value={pw2} onChange={(e) => setPw2(e.target.value)} placeholder="new password again" autoComplete="new-password" style={input({ width: '100%', marginBottom: '12px', fontFamily: mono })} />
+        {err && <div style={{ fontSize: '12.5px', color: RED, marginBottom: '10px' }}>{err}</div>}
+        <div style={{ display: 'flex', gap: '10px', justifyContent: 'flex-end' }}>
+          <button onClick={onClose} style={btn(false)}>Cancel</button>
+          <button onClick={save} disabled={busy} style={btn(true)}>{busy ? 'Saving…' : 'Save password'}</button>
+        </div>
+      </div>
+    </div>
+  )
+}
+
 function Frame({ children, onSignOut }) {
+  const [changePw, setChangePw] = useState(false)
   return (
     <>
       <Head><title>Invoices & Statements</title><meta name="robots" content="noindex" /><meta name="viewport" content="width=device-width, initial-scale=1" /></Head>
       <div style={{ fontFamily: '-apple-system, Segoe UI, sans-serif', color: INK, maxWidth: '980px', margin: '0 auto', padding: '28px 18px 80px' }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: '22px', borderBottom: `1px solid ${BORDER}`, paddingBottom: '14px' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: '22px', borderBottom: `1px solid ${BORDER}`, paddingBottom: '14px', gap: '10px', flexWrap: 'wrap' }}>
           <div>
             <h1 style={{ fontSize: '20px' }}>Invoices &amp; Statements</h1>
             <div style={{ fontSize: '11.5px', color: MUTED, marginTop: '2px' }}>Reads your QuickBooks · emails go out from your own Gmail</div>
           </div>
-          {onSignOut && <button onClick={onSignOut} style={btn(false)}>Sign out</button>}
+          {onSignOut && <span style={{ whiteSpace: 'nowrap' }}>
+            <button onClick={() => setChangePw(true)} style={{ ...btn(false), marginRight: '8px' }}>Change password</button>
+            <button onClick={onSignOut} style={btn(false)}>Sign out</button>
+          </span>}
         </div>
         {children}
+        {changePw && <ChangePassword onClose={() => setChangePw(false)} />}
       </div>
     </>
   )
