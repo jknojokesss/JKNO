@@ -4,8 +4,9 @@
 // Creates a real invoice in Efraim's QuickBooks, optionally emails it, and
 // records it in Jerky's store_invoices so the portal's A/R view stays in sync.
 import { getLiveToken } from '../../../lib/qboAuth'
-import { fetchCustomerRefs, resolveCustomer, buildInvoice, postInvoice, sendInvoice } from '../../../lib/qboWrite'
+import { fetchCustomerRefs, resolveCustomer, buildInvoice, postInvoice, fetchInvoicePdf } from '../../../lib/qboWrite'
 import { requireJerkyUser } from '../../../lib/requireJerkyUser'
+import { sendInvoiceEmail, jerkyMailerConfigured } from '../../../lib/jerkyMailer'
 
 const round2 = (n) => Math.round(Number(n) * 100) / 100
 
@@ -27,10 +28,12 @@ export default async function handler(req, res) {
     if (!customer && b.storeName) { const r = resolveCustomer(customers, b.storeName); if (r.customer) customer = r.customer }
     if (!customer) return res.status(400).json({ error: `No QuickBooks customer for "${b.storeName || b.customerId}". Set one up in QuickBooks first.` })
 
-    const billEmail = b.send ? (b.email || customer.email || null) : null
+    // record the store's email on the invoice for the record, but delivery is
+    // via our own SMTP (from orders@jerkymunch.com), not Intuit's mailer
+    const recipient = b.email || customer.email || null
     const built = buildInvoice({
       customerId: customer.id, customerName: customer.name, txnDate, dueDate: b.dueDate || null,
-      memo: b.memo || null, billEmail, lines,
+      memo: b.memo || null, billEmail: recipient, lines,
     })
     if (built.errors.length) return res.status(400).json({ error: built.errors.join(' ') })
 
@@ -41,8 +44,13 @@ export default async function handler(req, res) {
 
     let sent = false, sendError = null
     if (b.send) {
-      try { await sendInvoice(env, token, realmId, inv.Id, billEmail); sent = true }
-      catch (e) { sendError = String(e.message || e) }
+      try {
+        if (!jerkyMailerConfigured()) throw new Error("Email isn't set up yet — add the SMTP credentials.")
+        if (!recipient) throw new Error('No email address on file for this store.')
+        const pdf = await fetchInvoicePdf(env, token, realmId, inv.Id)
+        await sendInvoiceEmail({ to: recipient, storeName: customer.name, docNumber: inv.DocNumber, total: built.total, dueDate: b.dueDate || null, pdf })
+        sent = true
+      } catch (e) { sendError = String(e.message || e) }
     }
 
     // record locally for the portal's A/R view (service-role, bypasses RLS)

@@ -1302,11 +1302,11 @@ export default function JerkyMunch() {
                                     </div>
                                     <label style={{ display: 'flex', alignItems: 'center', gap: '8px', marginTop: '12px', fontSize: '13px', color: INK, cursor: 'pointer' }}>
                                       <input type="checkbox" checked={form.send} onChange={e => setFormField(c.id, { send: e.target.checked })} style={{ width: '16px', height: '16px' }} />
-                                      Email it to the store from QuickBooks{pr.customer && pr.customer.email ? ` (${pr.customer.email})` : ''}
+                                      Email it to the store from orders@jerkymunch.com{pr.customer && pr.customer.email ? ` (${pr.customer.email})` : ''}
                                     </label>
                                     <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap', marginTop: '14px' }}>
                                       <span style={{ fontSize: '14px', color: INK }}>Total <b>{m0(lineTotal)}</b></span>
-                                      <button disabled={invBusy[c.id]} onClick={() => submitInvoice(c)} style={{ marginLeft: 'auto', background: invBusy[c.id] ? MUTED : SPICE, color: '#fff', border: 'none', borderRadius: '2px', padding: '13px 20px', ...btn, cursor: invBusy[c.id] ? 'default' : 'pointer' }}>{invBusy[c.id] ? 'Creating…' : (form.send ? 'Create & send in QuickBooks' : 'Create in QuickBooks')}</button>
+                                      <button disabled={invBusy[c.id]} onClick={() => submitInvoice(c)} style={{ marginLeft: 'auto', background: invBusy[c.id] ? MUTED : SPICE, color: '#fff', border: 'none', borderRadius: '2px', padding: '13px 20px', ...btn, cursor: invBusy[c.id] ? 'default' : 'pointer' }}>{invBusy[c.id] ? 'Creating…' : (form.send ? 'Create in QuickBooks & email' : 'Create in QuickBooks')}</button>
                                     </div>
                                     {invResult[c.id] && (invResult[c.id].error
                                       ? <div style={{ fontSize: '12.5px', color: RED, marginTop: '10px', lineHeight: 1.5 }}>{invResult[c.id].error}</div>
