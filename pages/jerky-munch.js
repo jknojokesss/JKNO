@@ -85,6 +85,10 @@ export default function JerkyMunch() {
   const [cf, setCf] = useState({ store: '', price: '', sent: '' })
   const [expenses, setExpenses] = useState([])
   const [storeInvoices, setStoreInvoices] = useState([])
+  const [pricing, setPricing] = useState({})          // partnerId -> { loading, loaded, customer, last, items, matchError, error }
+  const [invForm, setInvForm] = useState({})          // partnerId -> { txnDate, dueDate, memo, send, lines:[{itemId,item,unitPrice,qty,description}] }
+  const [invBusy, setInvBusy] = useState({})          // partnerId -> submitting
+  const [invResult, setInvResult] = useState({})      // partnerId -> { ok, msg } | { error }
   const [addingE, setAddingE] = useState(false)
   const [ef, setEf] = useState({ vendor: '', amt: '', cat: 'Other', pay: 'personal' })
   const [addingD, setAddingD] = useState(false)
@@ -170,8 +174,83 @@ export default function JerkyMunch() {
   const loadInvoices = async () => {
     try {
       const { data } = await jerkySupabase.from('store_invoices').select('*').order('inv_date', { ascending: false })
-      setStoreInvoices((data || []).map(i => ({ id: i.id, partnerId: i.partner_id, date: i.inv_date, units: i.units, unitPrice: i.unit_price, amount: Number(i.amount) || 0, description: i.description || '', dueDate: i.due_date, status: i.status, paidDate: i.paid_date })))
+      setStoreInvoices((data || []).map(i => ({ id: i.id, partnerId: i.partner_id, date: i.inv_date, units: i.units, unitPrice: i.unit_price, amount: Number(i.amount) || 0, description: i.description || '', dueDate: i.due_date, status: i.status, paidDate: i.paid_date, qbInvoiceId: i.qb_invoice_id || null, qbDocNumber: i.qb_doc_number || null, sentAt: i.sent_at || null })))
     } catch (e) { console.error('loadInvoices failed', e); setStoreInvoices([]) }
+  }
+
+  // ── QuickBooks invoice pipe (server routes, authorized with the Jerky session) ──
+  const todayISO = () => new Date().toISOString().slice(0, 10)
+  const jerkyApi = async (path, opts = {}) => {
+    const { data: sess } = await jerkySupabase.auth.getSession()
+    const token = sess && sess.session ? sess.session.access_token : ''
+    return fetch(path, {
+      method: opts.method || 'GET',
+      headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+      body: opts.body ? JSON.stringify(opts.body) : undefined,
+    })
+  }
+  // fetch the store's QB customer + last-invoice prices when its panel opens
+  const ensurePricing = async (partnerId, storeName) => {
+    if (pricing[partnerId] && (pricing[partnerId].loading || pricing[partnerId].loaded)) return
+    setPricing(p => ({ ...p, [partnerId]: { loading: true } }))
+    const blank = [{ itemId: '', item: '', unitPrice: '', qty: '', description: '' }]
+    try {
+      const res = await jerkyApi(`/api/jerky/store-pricing?partner=${partnerId}`)
+      const j = await res.json().catch(() => ({}))
+      if (!res.ok) {
+        setPricing(p => ({ ...p, [partnerId]: { loaded: true, error: j.error || 'Could not load pricing.' } }))
+        setInvForm(f => f[partnerId] ? f : ({ ...f, [partnerId]: { txnDate: todayISO(), dueDate: '', memo: '', send: true, lines: blank } }))
+        return
+      }
+      setPricing(p => ({ ...p, [partnerId]: { loaded: true, ...j } }))
+      const lines = (j.last && j.last.lines && j.last.lines.length)
+        ? j.last.lines.map(l => ({ itemId: l.itemId || '', item: l.item || '', unitPrice: l.unitPrice != null ? l.unitPrice : '', qty: l.qty != null ? l.qty : '', description: l.description || '' }))
+        : blank
+      setInvForm(f => ({ ...f, [partnerId]: { txnDate: todayISO(), dueDate: '', memo: '', send: true, lines } }))
+    } catch (e) {
+      setPricing(p => ({ ...p, [partnerId]: { loaded: true, error: String(e.message || e) } }))
+      setInvForm(f => f[partnerId] ? f : ({ ...f, [partnerId]: { txnDate: todayISO(), dueDate: '', memo: '', send: true, lines: blank } }))
+    }
+  }
+  const setLine = (partnerId, idx, patch) => setInvForm(f => {
+    const cur = f[partnerId]; if (!cur) return f
+    const lines = cur.lines.map((l, i) => i === idx ? { ...l, ...patch } : l)
+    return { ...f, [partnerId]: { ...cur, lines } }
+  })
+  const setFormField = (partnerId, patch) => setInvForm(f => ({ ...f, [partnerId]: { ...(f[partnerId] || {}), ...patch } }))
+  const submitInvoice = async (c) => {
+    const form = invForm[c.id]; if (!form) return
+    const lines = form.lines.filter(l => l.itemId && Number(l.qty) > 0).map(l => ({ itemId: l.itemId, item: l.item, unitPrice: Number(l.unitPrice) || 0, qty: Number(l.qty), description: l.description || undefined }))
+    if (!lines.length) { setInvResult(r => ({ ...r, [c.id]: { error: 'Pick an item and enter a quantity.' } })); return }
+    setInvBusy(b => ({ ...b, [c.id]: true })); setInvResult(r => ({ ...r, [c.id]: null }))
+    try {
+      const pr = pricing[c.id] || {}
+      const res = await jerkyApi('/api/jerky/create-invoice', { method: 'POST', body: {
+        partnerId: c.id, storeName: c.store, customerId: (pr.customer && pr.customer.id) || null,
+        txnDate: form.txnDate || todayISO(), dueDate: form.dueDate || null, memo: form.memo || null,
+        send: !!form.send, lines,
+      } })
+      const j = await res.json().catch(() => ({}))
+      if (!res.ok) { setInvResult(r => ({ ...r, [c.id]: { error: j.error || 'Could not create the invoice.' } })); return }
+      setInvResult(r => ({ ...r, [c.id]: { ok: true, msg: `Invoice ${j.docNumber ? '#' + j.docNumber : ''} created in QuickBooks${j.sent ? ' & emailed to the store' : ''}.${j.sendError ? ' (but the email failed: ' + j.sendError + ')' : ''}` } }))
+      await loadInvoices()
+    } catch (e) { setInvResult(r => ({ ...r, [c.id]: { error: String(e.message || e) } })) }
+    finally { setInvBusy(b => ({ ...b, [c.id]: false })) }
+  }
+  const openInvoicePdf = async (invId) => {
+    const w = window.open('', '_blank')
+    try {
+      const res = await jerkyApi(`/api/jerky/invoice-pdf?id=${invId}`)
+      if (!res.ok) { const j = await res.json().catch(() => ({})); if (w) w.close(); alert(j.error || 'Could not load the PDF.'); return }
+      const url = URL.createObjectURL(await res.blob())
+      if (w) w.location = url; else window.location = url
+    } catch (e) { if (w) w.close(); alert('Could not load the PDF.') }
+  }
+  const emailInvoice = async (invId) => {
+    const res = await jerkyApi('/api/jerky/invoice-send', { method: 'POST', body: { id: invId } })
+    const j = await res.json().catch(() => ({}))
+    if (!res.ok) { alert(j.error || 'Send failed.'); return }
+    await loadInvoices(); alert('Emailed to the store.')
   }
   const loadProducts = async () => {
     try {
@@ -334,19 +413,6 @@ export default function JerkyMunch() {
     try { await jerkySupabase.from('expenses').insert(row); await loadExpenses() } catch (e) { console.error('addExpense failed', e) }
   }
   const removeExpense = async (id) => { try { await jerkySupabase.from('expenses').delete().eq('id', id); await loadExpenses() } catch (e) { console.error('removeExpense failed', e) } }
-  const addInvoice = async (partnerId) => {
-    const amt = Number(dv(`inv_${partnerId}_amt`)) || 0
-    const units = Number(dv(`inv_${partnerId}_units`)) || 0
-    const price = Number(dv(`inv_${partnerId}_price`)) || 0
-    const date = dv(`inv_${partnerId}_date`)
-    const due = dv(`inv_${partnerId}_due`)
-    const desc = dv(`inv_${partnerId}_desc`)
-    const amount = amt > 0 ? amt : ((units && price) ? units * price : 0)
-    if (amount <= 0) return
-    const row = { partner_id: partnerId, inv_date: date || todayStr, units: units || null, unit_price: price || null, amount, description: desc || '', due_date: due || null }
-    setDraft(d => { const n = { ...d }; [`inv_${partnerId}_amt`, `inv_${partnerId}_units`, `inv_${partnerId}_price`, `inv_${partnerId}_date`, `inv_${partnerId}_due`, `inv_${partnerId}_desc`].forEach(k => delete n[k]); return n })
-    try { await jerkySupabase.from('store_invoices').insert(row); await loadInvoices() } catch (e) { console.error('addInvoice failed', e) }
-  }
   const markInvoicePaid = async (id, paid) => {
     try { await jerkySupabase.from('store_invoices').update({ status: paid ? 'paid' : 'unpaid', paid_date: paid ? todayStr : null }).eq('id', id); await loadInvoices() } catch (e) { console.error('markInvoicePaid failed', e) }
   }
@@ -1104,15 +1170,11 @@ export default function JerkyMunch() {
                   const mine = storeInvoices.filter(i => i.partnerId === c.id).slice().sort((a, b) => (b.date || '').localeCompare(a.date || ''))
                   const balance = mine.filter(i => i.status === 'unpaid').reduce((s, i) => s + i.amount, 0)
                   const anyOverdue = mine.some(isOverdue)
-                  const uUnits = Number(dv(`inv_${c.id}_units`)) || 0
-                  const uPrice = Number(dv(`inv_${c.id}_price`)) || 0
-                  const uAmt = Number(dv(`inv_${c.id}_amt`)) || 0
-                  const preview = uAmt > 0 ? uAmt : ((uUnits && uPrice) ? uUnits * uPrice : 0)
                   return (
                     <Fragment key={c.id}>
                       {showHeader && <div style={{ ...lbl, color: SPICE, fontSize: '12px', margin: idx === 0 ? '2px 0 10px' : '24px 0 10px', display: 'flex', alignItems: 'center', gap: '10px' }}>{c.region || 'Other'}<span style={{ flex: 1, height: '1px', background: BORDER }} /></div>}
                       <div style={{ ...card, padding: 0, marginBottom: '12px', overflow: 'hidden', borderColor: open ? CHAR : (anyOverdue ? '#E7C3B8' : BORDER) }}>
-                        <div onClick={() => setExpanded(open ? null : c.id)} style={{ padding: '15px 18px', cursor: 'pointer', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '12px', flexWrap: 'wrap' }}>
+                        <div onClick={() => { const willOpen = !open; setExpanded(willOpen ? c.id : null); if (willOpen) ensurePricing(c.id, c.store) }} style={{ padding: '15px 18px', cursor: 'pointer', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '12px', flexWrap: 'wrap' }}>
                           <div>
                             <div style={{ ...big, fontSize: '20px', color: INK }}>{c.store}</div>
                             <div style={{ fontSize: '12px', color: MUTED, marginTop: '3px' }}>{mine.length} invoice{mine.length === 1 ? '' : 's'} · {mine.filter(i => i.status === 'unpaid').length} open</div>
@@ -1140,33 +1202,63 @@ export default function JerkyMunch() {
                                       <div style={{ fontWeight: 600, color: INK, fontSize: '14px' }}>{m0(i.amount)}<span style={{ fontFamily: MONO, fontSize: '11px', color: '#BFB096', marginLeft: '8px' }}>{fmtD(i.date)}</span></div>
                                       <div style={{ fontSize: '12px', color: MUTED, marginTop: '2px' }}>{i.description || (i.units && i.unitPrice ? `${i.units} × ${money(i.unitPrice)}` : '—')}{i.dueDate ? ` · due ${fmtD(i.dueDate)}` : ''}</div>
                                     </div>
-                                    <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+                                      {i.qbDocNumber && <span style={{ fontFamily: MONO, fontSize: '11px', color: '#BFB096' }}>#{i.qbDocNumber}</span>}
                                       <span style={{ fontFamily: "'Inter', sans-serif", fontSize: '11px', fontWeight: 600, color: '#fff', background: pill.c, padding: '4px 10px', borderRadius: '2px', whiteSpace: 'nowrap' }}>{pill.t}</span>
+                                      {i.qbInvoiceId && <button onClick={() => openInvoicePdf(i.id)} style={{ background: 'none', color: CHAR, border: `1px solid ${BORDER}`, borderRadius: '2px', padding: '6px 10px', ...btn, fontSize: '12px' }}>PDF</button>}
+                                      {i.qbInvoiceId && <button onClick={() => emailInvoice(i.id)} style={{ background: 'none', color: CHAR, border: `1px solid ${BORDER}`, borderRadius: '2px', padding: '6px 10px', ...btn, fontSize: '12px' }}>{i.sentAt ? 'Re-email' : 'Email'}</button>}
                                       <button onClick={() => markInvoicePaid(i.id, i.status !== 'paid')} style={{ background: i.status === 'paid' ? 'none' : GREEN, color: i.status === 'paid' ? MUTED : '#fff', border: i.status === 'paid' ? `1px solid ${BORDER}` : 'none', borderRadius: '2px', padding: '6px 12px', ...btn, fontSize: '12px' }}>{i.status === 'paid' ? 'Mark unpaid' : 'Mark paid'}</button>
                                     </div>
                                   </div>
                                 )
                               })}
 
-                            <div style={{ ...lbl, margin: '18px 0 8px' }}>Add invoice</div>
+                            <div style={{ ...lbl, margin: '18px 0 8px' }}>New invoice</div>
                             <div style={{ background: CREAM, borderRadius: '2px', padding: '14px 16px' }}>
-                              <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
-                                <input value={dv(`inv_${c.id}_units`)} onChange={e => setDv(`inv_${c.id}_units`, e.target.value)} type="number" placeholder="Units" style={{ ...inp, flex: 1, minWidth: '90px' }} />
-                                <input value={dv(`inv_${c.id}_price`)} onChange={e => setDv(`inv_${c.id}_price`, e.target.value)} type="number" placeholder="$ / unit" style={{ ...inp, flex: 1, minWidth: '90px' }} />
-                                <input value={dv(`inv_${c.id}_amt`)} onChange={e => setDv(`inv_${c.id}_amt`, e.target.value)} type="number" placeholder="or $ amount" style={{ ...inp, flex: 1, minWidth: '110px' }} />
-                              </div>
-                              <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', marginTop: '8px' }}>
-                                <input value={dv(`inv_${c.id}_date`)} onChange={e => setDv(`inv_${c.id}_date`, e.target.value)} type="date" placeholder="Invoice date" style={{ ...inp, flex: 1, minWidth: '130px' }} />
-                                <input value={dv(`inv_${c.id}_due`)} onChange={e => setDv(`inv_${c.id}_due`, e.target.value)} type="date" placeholder="Due date" style={{ ...inp, flex: 1, minWidth: '130px' }} />
-                              </div>
-                              <input value={dv(`inv_${c.id}_desc`)} onChange={e => setDv(`inv_${c.id}_desc`, e.target.value)} placeholder="Description (optional)" style={{ ...inp, width: '100%', marginTop: '8px' }} />
-                              <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap', marginTop: '10px' }}>
-                                <span style={{ fontSize: '12px', color: MUTED }}>
-                                  {uAmt > 0 ? <>Amount: <b style={{ color: INK }}>{m0(uAmt)}</b> (manual)</> : (uUnits && uPrice) ? <><b style={{ color: INK }}>{uUnits} × {money(uPrice)}</b> = <b style={{ color: INK }}>{m0(preview)}</b></> : <>Enter units × price, or a manual amount</>}
-                                </span>
-                                <button onClick={() => addInvoice(c.id)} style={{ marginLeft: 'auto', background: SPICE, color: '#fff', border: 'none', borderRadius: '2px', padding: '10px 18px', ...btn }}>Add invoice</button>
-                              </div>
-                              <p style={{ fontSize: '11px', color: '#A2937A', marginTop: '8px', lineHeight: 1.5 }}>Amount uses the manual $ if you enter one; otherwise units × price. Invoice date defaults to today.</p>
+                              {(() => {
+                                const pr = pricing[c.id] || {}
+                                const form = invForm[c.id]
+                                if (pr.loading || !form) return <div style={{ fontSize: '13px', color: MUTED }}>Loading this store's last invoice…</div>
+                                const items = pr.items || []
+                                const lineTotal = form.lines.reduce((s, l) => s + (Number(l.qty) || 0) * (Number(l.unitPrice) || 0), 0)
+                                return (
+                                  <>
+                                    {pr.customer
+                                      ? <div style={{ fontSize: '12px', color: MUTED, marginBottom: '10px', lineHeight: 1.5 }}>QuickBooks customer: <b style={{ color: INK }}>{pr.customer.name}</b>{pr.last ? <> · prices prefilled from invoice{pr.last.docNumber ? ` #${pr.last.docNumber}` : ''} — just set the qty</> : ' · no prior invoice, pick a product'}</div>
+                                      : <div style={{ fontSize: '12px', color: AMBER, marginBottom: '10px', lineHeight: 1.5 }}>{pr.error || pr.matchError || 'Not matched to a QuickBooks customer'} — creating an invoice needs a matching QB customer.</div>}
+                                    {form.lines.map((l, idx) => (
+                                      <div key={idx} style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', marginBottom: '8px', alignItems: 'center' }}>
+                                        {l.itemId && !items.length
+                                          ? <div style={{ flex: '2 1 150px', fontWeight: 600, color: INK, fontSize: '14px' }}>{l.item}</div>
+                                          : <select value={l.itemId} onChange={e => { const it = items.find(x => x.id === e.target.value); setLine(c.id, idx, { itemId: e.target.value, item: it ? it.name : '', unitPrice: (l.unitPrice !== '' && l.unitPrice != null) ? l.unitPrice : (it && it.unitPrice != null ? it.unitPrice : '') }) }} style={{ ...inp, flex: '2 1 150px' }}>
+                                              <option value="">Choose product…</option>
+                                              {items.map(it => <option key={it.id} value={it.id}>{it.name}</option>)}
+                                            </select>}
+                                        <input value={l.unitPrice} onChange={e => setLine(c.id, idx, { unitPrice: e.target.value })} type="number" inputMode="decimal" placeholder="$ / unit" style={{ ...inp, flex: '1 1 90px', minWidth: '80px' }} />
+                                        <input value={l.qty} onChange={e => setLine(c.id, idx, { qty: e.target.value })} type="number" inputMode="numeric" placeholder="Qty" style={{ ...inp, flex: '1 1 80px', minWidth: '70px', fontWeight: 600, fontSize: '16px' }} autoFocus={idx === 0} />
+                                        {form.lines.length > 1 && <button onClick={() => setFormField(c.id, { lines: form.lines.filter((_, i) => i !== idx) })} style={{ background: 'none', border: 'none', color: MUTED, cursor: 'pointer', fontSize: '20px', lineHeight: 1 }}>×</button>}
+                                      </div>
+                                    ))}
+                                    <button onClick={() => setFormField(c.id, { lines: [...form.lines, { itemId: '', item: '', unitPrice: '', qty: '', description: '' }] })} style={{ background: 'none', border: 'none', color: SPICE, ...btn, fontSize: '12px', padding: '2px 0', marginBottom: '10px' }}>+ Add another product</button>
+                                    <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+                                      <label style={{ flex: '1 1 130px' }}><span style={{ fontSize: '11px', color: MUTED }}>Invoice date</span><input value={form.txnDate} onChange={e => setFormField(c.id, { txnDate: e.target.value })} type="date" style={{ ...inp, width: '100%', marginTop: '2px' }} /></label>
+                                      <label style={{ flex: '1 1 130px' }}><span style={{ fontSize: '11px', color: MUTED }}>Due date (optional)</span><input value={form.dueDate} onChange={e => setFormField(c.id, { dueDate: e.target.value })} type="date" style={{ ...inp, width: '100%', marginTop: '2px' }} /></label>
+                                    </div>
+                                    <label style={{ display: 'flex', alignItems: 'center', gap: '8px', marginTop: '12px', fontSize: '13px', color: INK, cursor: 'pointer' }}>
+                                      <input type="checkbox" checked={form.send} onChange={e => setFormField(c.id, { send: e.target.checked })} style={{ width: '16px', height: '16px' }} />
+                                      Email it to the store from QuickBooks{pr.customer && pr.customer.email ? ` (${pr.customer.email})` : ''}
+                                    </label>
+                                    <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap', marginTop: '14px' }}>
+                                      <span style={{ fontSize: '14px', color: INK }}>Total <b>{m0(lineTotal)}</b></span>
+                                      <button disabled={invBusy[c.id]} onClick={() => submitInvoice(c)} style={{ marginLeft: 'auto', background: invBusy[c.id] ? MUTED : SPICE, color: '#fff', border: 'none', borderRadius: '2px', padding: '13px 20px', ...btn, cursor: invBusy[c.id] ? 'default' : 'pointer' }}>{invBusy[c.id] ? 'Creating…' : (form.send ? 'Create & send in QuickBooks' : 'Create in QuickBooks')}</button>
+                                    </div>
+                                    {invResult[c.id] && (invResult[c.id].error
+                                      ? <div style={{ fontSize: '12.5px', color: RED, marginTop: '10px', lineHeight: 1.5 }}>{invResult[c.id].error}</div>
+                                      : <div style={{ fontSize: '12.5px', color: GREEN, marginTop: '10px', lineHeight: 1.5 }}>✓ {invResult[c.id].msg}</div>)}
+                                    <p style={{ fontSize: '11px', color: '#A2937A', marginTop: '10px', lineHeight: 1.5 }}>Creates a real invoice in Efraim's QuickBooks and lists it here. “Mark paid” updates this view only — record the actual payment in QuickBooks.</p>
+                                  </>
+                                )
+                              })()}
                             </div>
                           </div>
                         )}
