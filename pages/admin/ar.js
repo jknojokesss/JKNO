@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import React, { useState, useEffect } from 'react'
 import Head from 'next/head'
 import { useRouter } from 'next/router'
 import { supabase } from '../../lib/supabase'
@@ -275,23 +275,34 @@ function NewInvoice({ client, refs, call, onClose, onCreated }) {
               <input value={emailTo} onChange={(e) => { setEmailTo(e.target.value); setPreview(null) }} placeholder={(cust && cust.email) || 'customer email'} style={input({ width: '220px' })} />
             </label>
           </div>
-          {lines.map((l, i) => (
-            <div key={i} style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', alignItems: 'center', marginBottom: '6px' }}>
-              <select value={l.itemId} onChange={(e) => {
-                const item = refs.items.find((x) => String(x.id) === e.target.value)
-                setLine(i, 'itemId', e.target.value)
-                if (item && item.rate && !l.rate) setLine(i, 'rate', String(item.rate))
-                setPreview(null)
-              }} style={input({ minWidth: '180px' })}>
-                <option value="">— product/service —</option>
-                {refs.items.map((x) => <option key={x.id} value={x.id}>{x.name}</option>)}
-              </select>
-              <input value={l.description} onChange={(e) => { setLine(i, 'description', e.target.value); setPreview(null) }} placeholder="description (shows on the invoice)" style={input({ flex: 1, minWidth: '200px' })} />
-              <input value={l.qty} onChange={(e) => { setLine(i, 'qty', e.target.value); setPreview(null) }} placeholder="qty" style={input({ width: '60px', textAlign: 'right' })} />
-              <input value={l.rate} onChange={(e) => { setLine(i, 'rate', e.target.value); setPreview(null) }} placeholder="rate" style={input({ width: '90px', textAlign: 'right' })} />
-              {lines.length > 1 && <button onClick={() => { setLines((ls) => ls.filter((_, n) => n !== i)); setPreview(null) }} style={btn(false)}>×</button>}
-            </div>
-          ))}
+          <div style={{ display: 'grid', gridTemplateColumns: '180px 1fr 60px 90px 100px 30px', gap: '8px', alignItems: 'center', overflowX: 'auto' }}>
+            {['Product / service', 'Description (shows on the invoice)', 'Qty', 'Rate', 'Amount', ''].map((h, k) => (
+              <div key={k} style={{ fontSize: '10.5px', textTransform: 'uppercase', letterSpacing: '.06em', color: MUTED, fontWeight: 600, textAlign: k >= 2 && k <= 4 ? 'right' : 'left' }}>{h}</div>
+            ))}
+            {lines.map((l, i) => {
+              const amount = (parseFloat(l.qty) || 0) * (parseFloat(l.rate) || 0)
+              return (
+                <React.Fragment key={i}>
+                  <select value={l.itemId} onChange={(e) => {
+                    const item = refs.items.find((x) => String(x.id) === e.target.value)
+                    setLine(i, 'itemId', e.target.value)
+                    if (item && item.rate && !l.rate) setLine(i, 'rate', String(item.rate))
+                    setPreview(null)
+                  }} style={input()}>
+                    <option value="">— pick —</option>
+                    {refs.items.map((x) => <option key={x.id} value={x.id}>{x.name}</option>)}
+                  </select>
+                  <input value={l.description} onChange={(e) => { setLine(i, 'description', e.target.value); setPreview(null) }} placeholder="e.g. August bookkeeping" style={input()} />
+                  <input value={l.qty} onChange={(e) => { setLine(i, 'qty', e.target.value); setPreview(null) }} style={input({ textAlign: 'right' })} />
+                  <input value={l.rate} onChange={(e) => { setLine(i, 'rate', e.target.value); setPreview(null) }} style={input({ textAlign: 'right' })} />
+                  <div style={{ fontSize: '13px', fontWeight: 700, textAlign: 'right', fontVariantNumeric: 'tabular-nums' }}>{amount > 0 ? money(amount) : '—'}</div>
+                  {lines.length > 1
+                    ? <button onClick={() => { setLines((ls) => ls.filter((_, n) => n !== i)); setPreview(null) }} style={btn(false)}>×</button>
+                    : <span />}
+                </React.Fragment>
+              )
+            })}
+          </div>
           <div style={{ display: 'flex', gap: '10px', alignItems: 'center', marginTop: '10px', flexWrap: 'wrap' }}>
             <button onClick={() => setLines((ls) => [...ls, { itemId: '', description: '', qty: '1', rate: '' }])} style={btn(false)}>+ line</button>
             <span style={{ fontSize: '13px', fontWeight: 700 }}>Total {money(total)}</span>
