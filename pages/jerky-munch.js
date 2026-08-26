@@ -225,9 +225,13 @@ export default function JerkyMunch() {
     const form = invForm[c.id]; if (!form) return
     const lines = form.lines.filter(l => l.itemId && Number(l.qty) > 0).map(l => ({ itemId: l.itemId, item: l.item, unitPrice: Number(l.unitPrice) || 0, qty: Number(l.qty), description: l.description || undefined }))
     if (!lines.length) { setInvResult(r => ({ ...r, [c.id]: { error: 'Pick an item and enter a quantity.' } })); return }
+    const pr = pricing[c.id] || {}
+    if (form.send) {
+      const to = (pr.customer && pr.customer.email) || 'the store\'s QuickBooks email'
+      if (!window.confirm(`This will EMAIL the invoice to ${to}.\n\nFor a test, cancel and uncheck "Email it to the store" first.\n\nSend it now?`)) return
+    }
     setInvBusy(b => ({ ...b, [c.id]: true })); setInvResult(r => ({ ...r, [c.id]: null }))
     try {
-      const pr = pricing[c.id] || {}
       const res = await jerkyApi('/api/jerky/create-invoice', { method: 'POST', body: {
         partnerId: c.id, storeName: c.store, customerId: (pr.customer && pr.customer.id) || null,
         txnDate: form.txnDate || todayISO(), dueDate: form.dueDate || null, memo: form.memo || null,
@@ -817,7 +821,8 @@ export default function JerkyMunch() {
 .jm-navbtn:hover{background:rgba(255,255,255,.08);color:${CREAM}}
 .jm-main{flex:1;min-width:0;max-width:1180px;padding:24px 30px 60px}
 .jm-click{transition:box-shadow .12s}.jm-click:hover{box-shadow:inset 0 0 0 1.5px ${SPICE}}
-@media(max-width:860px){.jm-shell{flex-direction:column}.jm-side{width:auto;height:auto;position:static;flex-direction:column;padding:14px 12px}.jm-nav{flex-direction:row;overflow-x:auto;gap:6px;padding-bottom:4px}.jm-navbtn{width:auto;padding:8px 15px;border-radius:2px;background:rgba(255,255,255,.07)}.jm-main{padding:18px 16px 52px;max-width:100%}}`}</style>
+@media(max-width:860px){.jm-shell{flex-direction:column}.jm-side{width:auto;height:auto;position:static;flex-direction:column;padding:14px 12px}.jm-nav{flex-direction:row;overflow-x:auto;gap:6px;padding-bottom:4px}.jm-navbtn{width:auto;padding:8px 15px;border-radius:2px;background:rgba(255,255,255,.07)}.jm-main{padding:18px 16px 52px;max-width:100%}}
+@media(max-width:600px){input,select,textarea{font-size:16px!important}button{min-height:40px}}`}</style>
       </Head>
 
       <div className="jm-shell">
