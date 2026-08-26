@@ -2,7 +2,7 @@ import crypto from 'crypto'
 import nodemailer from 'nodemailer'
 import { requireAdmin } from '../../../lib/requireAdmin'
 import { getLiveToken, QboAuthError } from '../../../lib/qboAuth'
-import { fetchOpenInvoices, fetchInvoice, fetchInvoicePdf, fetchArRefs, buildInvoice, postInvoice, nextDocNumber } from '../../../lib/qboAr'
+import { fetchOpenInvoices, fetchInvoice, fetchInvoicePdf, fetchArRefs, buildInvoice, postInvoice, nextDocNumber, setInvoiceDocNumber } from '../../../lib/qboAr'
 
 // ── Live AR for one client: list, view, and email real invoices ──────────
 //
@@ -81,6 +81,17 @@ export default async function handler(req, res) {
         ok: true,
         created: { id: created.Id, doc: created.DocNumber || docNumber, total: Number(created.TotalAmt || built.total) },
       })
+    }
+
+    // Heal an invoice that landed with a blank number: stamp the next one.
+    if (req.method === 'POST' && req.body && req.body.action === 'renumber') {
+      const client = clean(req.body.client)
+      const id = String(req.body.invoiceId || '').replace(/[^0-9]/g, '')
+      if (!client || !id) return res.status(400).json({ error: 'Missing client / invoiceId.' })
+      const { env, token, realmId } = await getLiveToken(client)
+      const doc = await nextDocNumber(env, token, realmId)
+      const updated = await setInvoiceDocNumber(env, token, realmId, id, doc)
+      return res.status(200).json({ ok: true, doc: updated.DocNumber || doc })
     }
 
     if (req.method === 'POST') {

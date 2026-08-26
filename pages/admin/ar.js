@@ -157,7 +157,17 @@ export default function ArAdmin() {
                   const sent = sentByInv[inv.id]
                   return (
                     <tr key={inv.id}>
-                      <td style={td()}><b>#{inv.doc}</b></td>
+                      <td style={td()}>
+                        {inv.doc ? <b>#{inv.doc}</b> : (
+                          <button onClick={async () => {
+                            setBusy('num' + inv.id); setError(null)
+                            try { await call('/api/qbo/ar', { method: 'POST', body: JSON.stringify({ action: 'renumber', client, invoiceId: inv.id }) }); load() }
+                            catch (e) { setError(String(e.message || e)) } finally { setBusy('') }
+                          }} disabled={busy === 'num' + inv.id} style={btn(false)} title="This invoice has no number — stamp the next one">
+                            {busy === 'num' + inv.id ? '…' : 'Assign #'}
+                          </button>
+                        )}
+                      </td>
                       <td style={td()}>{inv.customer}</td>
                       <td style={td()}>{inv.date || '—'}</td>
                       <td style={td()}>{inv.due || '—'}</td>
