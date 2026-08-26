@@ -2,7 +2,7 @@ import crypto from 'crypto'
 import nodemailer from 'nodemailer'
 import { requireAdmin } from '../../../lib/requireAdmin'
 import { getLiveToken, QboAuthError } from '../../../lib/qboAuth'
-import { fetchOpenInvoices, fetchInvoice, fetchInvoicePdf, fetchArRefs, buildInvoice, postInvoice, nextDocNumber, setInvoiceDocNumber } from '../../../lib/qboAr'
+import { fetchOpenInvoices, fetchInvoice, fetchInvoicePdf, fetchArRefs, buildInvoice, postInvoice, nextDocNumber, setInvoiceDocNumber, fetchRecentPayments, buildStatementHtml } from '../../../lib/qboAr'
 
 // ── Live AR for one client: list, view, and email real invoices ──────────
 //
@@ -19,6 +19,28 @@ import { fetchOpenInvoices, fetchInvoice, fetchInvoicePdf, fetchArRefs, buildInv
 
 const clean = (s) => String(s || '').toLowerCase().replace(/[^a-z0-9-]/g, '')
 const money = (n) => '$' + Number(n || 0).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
+
+// One customer's statement, from live QBO: their open invoices + their
+// payments over the last 60 days, rendered as email-safe HTML.
+async function statementFor(env, token, realmId, connection, customerId) {
+  const asOf = new Date().toISOString().slice(0, 10)
+  const since = new Date(Date.now() - 60 * 86400000).toISOString().slice(0, 10)
+  const [allOpen, allPays] = await Promise.all([
+    fetchOpenInvoices(env, token, realmId),
+    fetchRecentPayments(env, token, realmId, since),
+  ])
+  const invoices = allOpen.filter((i) => String(i.customerId) === String(customerId))
+  if (!invoices.length) throw new Error('That customer has no open invoices — nothing to put on a statement.')
+  const payments = allPays.filter((p) => String(p.customerId) === String(customerId))
+  const customerName = invoices[0].customer
+  const fromEmail = process.env.SMTP_USER || process.env.GMAIL_USER || ''
+  const html = buildStatementHtml({
+    companyName: connection.company_name || 'JK No Jokes',
+    fromEmail, customerName, invoices, payments, asOf,
+  })
+  const total = invoices.reduce((s, i) => s + i.balance, 0)
+  return { html, customerName, total, email: invoices.find((i) => i.email)?.email || null, asOf }
+}
 
 export default async function handler(req, res) {
   const gate = await requireAdmin(req)
@@ -37,6 +59,14 @@ export default async function handler(req, res) {
         res.setHeader('Content-Type', 'application/pdf')
         res.setHeader('Content-Disposition', `inline; filename="invoice-${id}.pdf"`)
         return res.status(200).send(pdf)
+      }
+
+      if (req.query.action === 'statement') {
+        const custId = String(req.query.id || '').replace(/[^0-9]/g, '')
+        if (!custId) return res.status(400).json({ error: 'Missing ?id= customer id.' })
+        const stmt = await statementFor(env, token, realmId, connection, custId)
+        res.setHeader('Content-Type', 'text/html; charset=utf-8')
+        return res.status(200).send(`<!doctype html><body style="background:#F6F5F1;padding:24px">${stmt.html}</body>`)
       }
 
       if (req.query.action === 'refs') {
@@ -81,6 +111,43 @@ export default async function handler(req, res) {
         ok: true,
         created: { id: created.Id, doc: created.DocNumber || docNumber, total: Number(created.TotalAmt || built.total) },
       })
+    }
+
+    // Email one customer's statement — same SMTP transport as invoice sends.
+    if (req.method === 'POST' && req.body && req.body.action === 'send-statement') {
+      const client = clean(req.body.client)
+      const custId = String(req.body.customerId || '').replace(/[^0-9]/g, '')
+      const to = req.body.to
+      if (!client || !custId) return res.status(400).json({ error: 'Missing client / customerId.' })
+      if (!to || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(String(to))) {
+        return res.status(400).json({ error: 'A valid "to" email address is required.' })
+      }
+      const SMTP_USER = process.env.SMTP_USER || process.env.GMAIL_USER
+      const SMTP_PASS = process.env.SMTP_PASS || process.env.GMAIL_APP_PASSWORD
+      const SMTP_HOST = process.env.SMTP_HOST || 'smtp.gmail.com'
+      const SMTP_PORT = Number(process.env.SMTP_PORT || 465)
+      if (!SMTP_USER || !SMTP_PASS) {
+        return res.status(503).json({ error: 'Email is not set up — set SMTP_USER / SMTP_PASS in the environment.' })
+      }
+
+      const { env, token, realmId, connection } = await getLiveToken(client)
+      const stmt = await statementFor(env, token, realmId, connection, custId)
+      const monthYear = new Date().toLocaleDateString('en-US', { month: 'long', year: 'numeric' })
+      const companyName = connection.company_name || 'JK No Jokes'
+
+      const transporter = nodemailer.createTransport({
+        host: SMTP_HOST, port: SMTP_PORT, secure: SMTP_PORT === 465,
+        auth: { user: SMTP_USER, pass: SMTP_PASS },
+      })
+      const info = await transporter.sendMail({
+        from: process.env.SMTP_FROM || `JK No Jokes <${SMTP_USER}>`,
+        replyTo: SMTP_USER,
+        to: String(to),
+        subject: `Statement of account — ${monthYear} — ${companyName}`,
+        text: `Your statement of account as of ${stmt.asOf}: amount due ${money(stmt.total)}. Reply to this email with any questions.`,
+        html: stmt.html,
+      })
+      return res.status(200).json({ ok: true, sent: { to, customer: stmt.customerName, total: stmt.total, messageId: info.messageId } })
     }
 
     // Heal an invoice that landed with a blank number: stamp the next one.
