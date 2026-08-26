@@ -21,6 +21,8 @@ export default function ArAdmin() {
   const [sentByInv, setSentByInv] = useState({})
   const [showNew, setShowNew] = useState(false)
   const [refs, setRefs] = useState(null)
+  const [stmtTo, setStmtTo] = useState({})
+  const [stmtSent, setStmtSent] = useState({})
 
   useEffect(() => {
     supabase.auth.getSession().then(async ({ data: { session } }) => {
@@ -191,9 +193,77 @@ export default function ArAdmin() {
           </div>
         )}
 
+        {data && data.invoices.length > 0 && (() => {
+          const byCust = {}
+          for (const inv of data.invoices) {
+            if (!inv.customerId) continue
+            const g = byCust[inv.customerId] || (byCust[inv.customerId] = { id: inv.customerId, name: inv.customer, count: 0, balance: 0, email: null })
+            g.count++; g.balance += inv.balance
+            if (!g.email && inv.email) g.email = inv.email
+          }
+          const groups = Object.values(byCust).sort((a, b) => b.balance - a.balance)
+          const openStmt = async (g) => {
+            setBusy('stmt' + g.id); setError(null)
+            try {
+              const res = await call(`/api/qbo/ar?client=${encodeURIComponent(client)}&action=statement&id=${g.id}`, { raw: true })
+              if (!res.ok) { const j = await res.json().catch(() => ({})); throw new Error(j.error || `Statement failed (HTTP ${res.status})`) }
+              const blob = await res.blob()
+              window.open(URL.createObjectURL(blob), '_blank')
+            } catch (e) { setError(String(e.message || e)) } finally { setBusy('') }
+          }
+          const sendStmt = async (g) => {
+            const to = (stmtTo[g.id] ?? g.email ?? '').trim()
+            if (!to) { setError(`Fill in the "send to" address for ${g.name} first.`); return }
+            if (!window.confirm(`Email ${g.name}'s statement (${g.count} open invoice${g.count === 1 ? '' : 's'}, ${money(g.balance)}) to ${to}?`)) return
+            setBusy('sendstmt' + g.id); setError(null)
+            try {
+              await call('/api/qbo/ar', { method: 'POST', body: JSON.stringify({ action: 'send-statement', client, customerId: g.id, to }) })
+              setStmtSent((s) => ({ ...s, [g.id]: to }))
+            } catch (e) { setError(String(e.message || e)) } finally { setBusy('') }
+          }
+          return (
+            <div style={{ marginTop: '26px' }}>
+              <h2 style={{ fontSize: '17px', marginBottom: '4px' }}>Statements — by customer</h2>
+              <p style={{ fontSize: '12.5px', color: MUTED, lineHeight: 1.6, marginBottom: '12px', maxWidth: '640px' }}>
+                The statement is built live from QuickBooks — open invoices, payments from the last 60 days,
+                and an aging strip — and emails from your address. QuickBooks has no button for this; this is it.
+              </p>
+              <div style={{ border: `1px solid ${BORDER}`, borderRadius: '4px', overflowX: 'auto' }}>
+                <table style={{ borderCollapse: 'collapse', width: '100%', fontSize: '13px', fontVariantNumeric: 'tabular-nums' }}>
+                  <thead><tr>
+                    {['Customer', 'Open', 'Balance', 'Send to', ''].map((h, k) => (
+                      <th key={k} style={{ textAlign: k === 1 || k === 2 ? 'right' : 'left', padding: '8px 10px', borderBottom: `1px solid ${INK}`, fontSize: '11px', textTransform: 'uppercase', letterSpacing: '.06em', color: MUTED, whiteSpace: 'nowrap' }}>{h}</th>
+                    ))}
+                  </tr></thead>
+                  <tbody>
+                    {groups.map((g) => (
+                      <tr key={g.id}>
+                        <td style={td()}><b>{g.name}</b></td>
+                        <td style={{ ...td(), textAlign: 'right' }}>{g.count}</td>
+                        <td style={{ ...td(), textAlign: 'right', fontWeight: 700 }}>{money(g.balance)}</td>
+                        <td style={td()}>
+                          <input value={stmtTo[g.id] ?? g.email ?? ''} onChange={(e) => setStmtTo((s) => ({ ...s, [g.id]: e.target.value }))}
+                            placeholder="email address" style={{ fontFamily: mono, fontSize: '12px', padding: '5px 7px', border: `1px solid ${BORDER}`, borderRadius: '4px', width: '210px' }} />
+                        </td>
+                        <td style={{ ...td(), whiteSpace: 'nowrap' }}>
+                          <button onClick={() => openStmt(g)} disabled={busy === 'stmt' + g.id} style={btn(false)}>{busy === 'stmt' + g.id ? '…' : 'Preview'}</button>{' '}
+                          {stmtSent[g.id]
+                            ? <span style={{ color: GREEN, fontWeight: 600 }}>sent ✓</span>
+                            : <button onClick={() => sendStmt(g)} disabled={busy === 'sendstmt' + g.id} style={btn(true)}>{busy === 'sendstmt' + g.id ? 'Sending…' : 'Send statement'}</button>}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          )
+        })()}
+
         <p style={{ fontSize: '12px', color: MUTED, lineHeight: 1.6, marginTop: '18px', maxWidth: '640px' }}>
           The PDF is the one QuickBooks generates — template, logo and all. Emails send from{' '}
           the site&rsquo;s own mailbox (SMTP_USER) with the PDF attached, so replies come back to that inbox.
+          Statements are our own document, built live from the books.
         </p>
       </div>
     </>
