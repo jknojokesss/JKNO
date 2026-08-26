@@ -2,7 +2,7 @@ import crypto from 'crypto'
 import nodemailer from 'nodemailer'
 import { requireAdmin } from '../../../lib/requireAdmin'
 import { getLiveToken, QboAuthError } from '../../../lib/qboAuth'
-import { fetchOpenInvoices, fetchInvoice, fetchInvoicePdf, fetchArRefs, buildInvoice, postInvoice, nextDocNumber, setInvoiceDocNumber, fetchRecentPayments, buildStatementHtml } from '../../../lib/qboAr'
+import { fetchOpenInvoices, fetchInvoice, fetchInvoicePdf, fetchArRefs, buildInvoice, postInvoice, nextDocNumber, setInvoiceDocNumber, statementFor } from '../../../lib/qboAr'
 
 // ── Live AR for one client: list, view, and email real invoices ──────────
 //
@@ -20,27 +20,10 @@ import { fetchOpenInvoices, fetchInvoice, fetchInvoicePdf, fetchArRefs, buildInv
 const clean = (s) => String(s || '').toLowerCase().replace(/[^a-z0-9-]/g, '')
 const money = (n) => '$' + Number(n || 0).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
 
-// One customer's statement, from live QBO: their open invoices + their
-// payments over the last 60 days, rendered as email-safe HTML.
-async function statementFor(env, token, realmId, connection, customerId) {
-  const asOf = new Date().toISOString().slice(0, 10)
-  const since = new Date(Date.now() - 60 * 86400000).toISOString().slice(0, 10)
-  const [allOpen, allPays] = await Promise.all([
-    fetchOpenInvoices(env, token, realmId),
-    fetchRecentPayments(env, token, realmId, since),
-  ])
-  const invoices = allOpen.filter((i) => String(i.customerId) === String(customerId))
-  if (!invoices.length) throw new Error('That customer has no open invoices — nothing to put on a statement.')
-  const payments = allPays.filter((p) => String(p.customerId) === String(customerId))
-  const customerName = invoices[0].customer
-  const fromEmail = process.env.SMTP_USER || process.env.GMAIL_USER || ''
-  const html = buildStatementHtml({
-    companyName: connection.company_name || 'JK No Jokes',
-    fromEmail, customerName, invoices, payments, asOf,
-  })
-  const total = invoices.reduce((s, i) => s + i.balance, 0)
-  return { html, customerName, total, email: invoices.find((i) => i.email)?.email || null, asOf }
-}
+const stmtOpts = (connection) => ({
+  companyName: connection.company_name || 'JK No Jokes',
+  fromEmail: process.env.SMTP_USER || process.env.GMAIL_USER || '',
+})
 
 export default async function handler(req, res) {
   const gate = await requireAdmin(req)
@@ -64,7 +47,7 @@ export default async function handler(req, res) {
       if (req.query.action === 'statement') {
         const custId = String(req.query.id || '').replace(/[^0-9]/g, '')
         if (!custId) return res.status(400).json({ error: 'Missing ?id= customer id.' })
-        const stmt = await statementFor(env, token, realmId, connection, custId)
+        const stmt = await statementFor(env, token, realmId, stmtOpts(connection), custId)
         res.setHeader('Content-Type', 'text/html; charset=utf-8')
         return res.status(200).send(`<!doctype html><html><head><meta charset="utf-8"></head><body style="background:#F6F5F1;padding:24px">${stmt.html}</body></html>`)
       }
@@ -131,7 +114,7 @@ export default async function handler(req, res) {
       }
 
       const { env, token, realmId, connection } = await getLiveToken(client)
-      const stmt = await statementFor(env, token, realmId, connection, custId)
+      const stmt = await statementFor(env, token, realmId, stmtOpts(connection), custId)
       const monthYear = new Date().toLocaleDateString('en-US', { month: 'long', year: 'numeric' })
       const companyName = connection.company_name || 'JK No Jokes'
 

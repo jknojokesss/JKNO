@@ -30,8 +30,14 @@ export default async function handler(req, res) {
       lookupError = String(e.message || e)
     }
 
+    // Portal-only clients (mapped in portal_users) never sync their books
+    // into the shared DB — the portal reads live and stores only tokens.
+    const { data: portalRow } = await supabaseAdmin
+      .from('portal_users').select('email').eq('client_slug', client).limit(1).maybeSingle()
+
     const { error: dbErr } = await supabaseAdmin.from('qbo_connections').upsert({
       client_slug: client,
+      sync_books: !portalRow,
       realm_id: String(realmId),
       environment: env.sandbox ? 'sandbox' : 'production',
       refresh_token: tokens.refresh_token,

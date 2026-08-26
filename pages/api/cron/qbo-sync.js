@@ -30,7 +30,9 @@ export default async function handler(req, res) {
   const glMonths = Math.min(36, Math.max(1, parseInt(req.query.gl, 10) || 3))
   const only = req.query.client ? String(req.query.client).toLowerCase() : null
 
-  let q = supabaseAdmin.from('qbo_connections').select('*').neq('status', 'disabled')
+  // sync_books=false marks portal-only clients whose books stay out of the
+  // shared DB entirely — the portal reads their QuickBooks live.
+  let q = supabaseAdmin.from('qbo_connections').select('*').neq('status', 'disabled').neq('sync_books', false)
   if (only) q = q.eq('client_slug', only)
   const { data: conns, error } = await q
   if (error) return res.status(500).json({ error: error.message })
