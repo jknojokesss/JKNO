@@ -1,9 +1,17 @@
 import { qboEnv, exchangeCode, fetchCompanyName } from '../../../lib/qbo'
+import { verifyState, clearStateCookie } from '../../../lib/qboState'
 import { supabaseAdmin } from '../../../lib/supabaseAdmin'
 
 // OAuth landing: verify state, swap the code for tokens, confirm which
 // company file we actually got, and store the connection. Shows the company
 // name back so a wrong-file connect is caught on the spot.
+const page = (title, body, extra = '') => `<!doctype html><html><head><meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1"><title>${title}</title></head>
+  <body style="font-family:Georgia,serif;max-width:560px;margin:80px auto;padding:0 20px;color:#1A1E24">
+  <h2>${title}</h2>
+  <p style="font-family:sans-serif;font-size:14px;color:#444C56;line-height:1.6">${body}</p>${extra}
+  </body></html>`
+
 export default async function handler(req, res) {
   const env = qboEnv()
   if (!env) return res.status(500).send('QBO is not configured.')
@@ -13,10 +21,22 @@ export default async function handler(req, res) {
   if (!code || !state || !realmId) return res.status(400).send('Missing code/state/realmId on callback.')
 
   const cookieState = ((req.headers.cookie || '').match(/(?:^|;\s*)qbo_oauth_state=([^;]+)/) || [])[1]
-  if (!cookieState || cookieState !== state) {
-    return res.status(400).send('State mismatch — start again from /api/qbo/connect?client=…')
+  const check = verifyState(state, cookieState)
+  if (!check.ok) {
+    // Usually a revisited or expired link, not an attack — and the person
+    // reading this is a client, so don't hand them a stack trace. Says
+    // nothing about which company is or isn't connected.
+    console.warn('[qbo/callback] state rejected:', check.reason)
+    res.setHeader('Content-Type', 'text/html; charset=utf-8')
+    return res.status(400).send(page(
+      'This connect link has already been used',
+      `Nothing is wrong with your account — a connect link only works once, and expires if it sits
+       unused. If you already saw a "Connected" message, you're set: close this tab and go back to
+       the portal. If not, open the portal and click <b>Connect QuickBooks</b> again.`,
+      '<p style="margin-top:18px"><a href="/portal" style="font-family:sans-serif;font-size:14px;color:#1A1E24;font-weight:600">Back to the portal →</a></p>'
+    ))
   }
-  const client = state.split('.')[0]
+  const client = check.client
 
   try {
     const tokens = await exchangeCode(env, code)
@@ -50,7 +70,7 @@ export default async function handler(req, res) {
     }, { onConflict: 'client_slug' })
     if (dbErr) throw new Error(dbErr.message)
 
-    res.setHeader('Set-Cookie', 'qbo_oauth_state=; HttpOnly; Secure; Path=/api/qbo; Max-Age=0')
+    res.setHeader('Set-Cookie', clearStateCookie(req.headers.host))
     res.setHeader('Content-Type', 'text/html; charset=utf-8')
     return res.status(200).send(`<!doctype html><body style="font-family:Georgia,serif;max-width:560px;margin:80px auto;color:#1A1E24">
       <h2>${lookupError ? 'Authorized — but the company lookup failed' : `Connected: ${companyName}`}</h2>
@@ -72,6 +92,22 @@ export default async function handler(req, res) {
       </p>` : ''}
       </body>`)
   } catch (e) {
-    return res.status(500).send(`Connect failed: ${String(e.message || e)}`)
+    const { data: existing } = await supabaseAdmin
+      .from('qbo_connections').select('company_name, status').eq('client_slug', client).maybeSingle()
+    res.setHeader('Content-Type', 'text/html; charset=utf-8')
+    if (existing && existing.status === 'connected') {
+      return res.status(200).send(page(
+        `Already connected: ${existing.company_name || 'your company'}`,
+        `This link was already used to connect ${existing.company_name || 'your company'}, so there was
+         nothing left to do. You're all set — close this tab and go back to the portal.`,
+        '<p style="margin-top:18px"><a href="/portal" style="font-family:sans-serif;font-size:14px;color:#1A1E24;font-weight:600">Back to the portal →</a></p>'
+      ))
+    }
+    console.error('[qbo/callback] connect failed:', e)
+    return res.status(500).send(page(
+      'That connection did not go through',
+      `Please open the portal and click <b>Connect QuickBooks</b> again. If it keeps failing, send this
+       message on: <code style="font-size:12px">${String(e.message || e).replace(/</g, '&lt;').slice(0, 300)}</code>`
+    ))
   }
 }

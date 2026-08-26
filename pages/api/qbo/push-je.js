@@ -1,5 +1,6 @@
 import { supabaseAdmin } from '../../../lib/supabaseAdmin'
 import { requireAdmin } from '../../../lib/requireAdmin'
+import { isPortalClient, portalClientRefusal } from '../../../lib/portalAuth'
 import { getLiveToken, QboAuthError } from '../../../lib/qboAuth'
 import {
   fetchAccountRefs, fetchCustomerRefs, buildJournalEntry,
@@ -34,6 +35,8 @@ async function postOne(id) {
   if (selErr) throw new Error(selErr.message)
   if (!row) throw new Error('No such draft.')
   if (row.qbo_id) throw new Error(`Already in QuickBooks as id ${row.qbo_id}, posted ${row.posted_at}. Not posting again.`)
+  // A draft can name its client, so the slug check belongs here too.
+  if (await isPortalClient(row.client_slug)) throw new Error(portalClientRefusal(row.client_slug))
 
   const { env, token, realmId } = await getLiveToken(row.client_slug)
   const { accounts, customers } = await refsFor(env, token, realmId, row.lines)
@@ -80,6 +83,12 @@ export default async function handler(req, res) {
   const action = String(body.action || 'preview')
 
   try {
+    // Portal clients' books are not reachable from the admin side.
+    const requested = clean(body.client)
+    if (requested && await isPortalClient(requested)) {
+      return res.status(403).json({ error: portalClientRefusal(requested) })
+    }
+
     if (action === 'list') {
       const { data, error } = await supabaseAdmin
         .from('qbo_journal_entries').select('*')

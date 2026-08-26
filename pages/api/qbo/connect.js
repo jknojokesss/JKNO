@@ -1,5 +1,5 @@
-import crypto from 'crypto'
 import { qboEnv, authorizeUrl } from '../../../lib/qbo'
+import { makeState, stateCookie } from '../../../lib/qboState'
 
 // Starts the QBO connect flow for one client:
 //   /api/qbo/connect?client=reydel
@@ -13,7 +13,7 @@ export default function handler(req, res) {
   const client = String(req.query.client || '').toLowerCase().replace(/[^a-z0-9-]/g, '')
   if (!client) return res.status(400).send('Missing ?client= slug (e.g. /api/qbo/connect?client=reydel).')
 
-  const state = `${client}.${crypto.randomBytes(16).toString('hex')}`
-  res.setHeader('Set-Cookie', `qbo_oauth_state=${state}; HttpOnly; Secure; Path=/api/qbo; Max-Age=600; SameSite=Lax`)
+  const state = makeState(client)
+  res.setHeader('Set-Cookie', stateCookie(req.headers.host, state))
   res.redirect(302, authorizeUrl(env, state))
 }

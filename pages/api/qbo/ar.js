@@ -1,6 +1,7 @@
 import crypto from 'crypto'
 import nodemailer from 'nodemailer'
 import { requireAdmin } from '../../../lib/requireAdmin'
+import { isPortalClient, portalClientRefusal } from '../../../lib/portalAuth'
 import { getLiveToken, QboAuthError } from '../../../lib/qboAuth'
 import { fetchOpenInvoices, fetchInvoice, fetchInvoicePdf, fetchArRefs, buildInvoice, postInvoice, nextDocNumber, setInvoiceDocNumber, statementFor } from '../../../lib/qboAr'
 
@@ -30,6 +31,12 @@ export default async function handler(req, res) {
   if (!gate.ok) return res.status(401).json({ error: gate.reason })
 
   try {
+    // Portal clients are off-limits from here — see lib/portalAuth.
+    const requested = clean(req.query.client || (req.body && req.body.client))
+    if (requested && await isPortalClient(requested)) {
+      return res.status(403).json({ error: portalClientRefusal(requested) })
+    }
+
     if (req.method === 'GET') {
       const client = clean(req.query.client)
       if (!client) return res.status(400).json({ error: 'Missing ?client= slug.' })
