@@ -164,7 +164,7 @@ export default function ArAdmin() {
 
         <p style={{ fontSize: '12px', color: MUTED, lineHeight: 1.6, marginTop: '18px', maxWidth: '640px' }}>
           The PDF is the one QuickBooks generates — template, logo and all. Emails send from{' '}
-          the site&rsquo;s Gmail (GMAIL_USER) with the PDF attached, so replies come back to that inbox.
+          the site&rsquo;s own mailbox (SMTP_USER) with the PDF attached, so replies come back to that inbox.
         </p>
       </div>
     </>

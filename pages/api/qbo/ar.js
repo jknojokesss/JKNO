@@ -7,12 +7,13 @@ import { fetchOpenInvoices, fetchInvoice, fetchInvoicePdf } from '../../../lib/q
 //
 //   GET  /api/qbo/ar?client=jkno                → open invoices, live from QBO
 //   GET  /api/qbo/ar?client=jkno&action=pdf&id= → the invoice PDF, as QBO makes it
-//   POST /api/qbo/ar { client, invoiceId, to }  → emails that PDF from GMAIL_USER
+//   POST /api/qbo/ar { client, invoiceId, to }  → emails that PDF from SMTP_USER
 //
 // Read-only against QuickBooks — nothing here posts to the books. The one
-// write is the email send, which goes out through our own Gmail (the same
-// GMAIL_USER / GMAIL_APP_PASSWORD transport send-receipt uses), so the
-// message comes from our address and replies land in our inbox.
+// write is the email send, through whatever SMTP mailbox is configured
+// (SMTP_HOST/USER/PASS — Zoho, Gmail, anything; falls back to the GMAIL_*
+// pair send-receipt uses), so the message comes from our own address and
+// replies land in our inbox.
 // Admin-gated and fails closed, like every QBO endpoint.
 
 const clean = (s) => String(s || '').toLowerCase().replace(/[^a-z0-9-]/g, '')
@@ -54,10 +55,15 @@ export default async function handler(req, res) {
         return res.status(400).json({ error: 'A valid "to" email address is required.' })
       }
 
-      const GMAIL_USER = process.env.GMAIL_USER
-      const GMAIL_APP_PASSWORD = process.env.GMAIL_APP_PASSWORD
-      if (!GMAIL_USER || !GMAIL_APP_PASSWORD) {
-        return res.status(503).json({ error: 'Email is not set up — GMAIL_USER / GMAIL_APP_PASSWORD are missing.' })
+      // Any SMTP mailbox works — Zoho, Google Workspace, Outlook. Generic
+      // SMTP_* vars win; the GMAIL_* pair (used by send-receipt) is the
+      // fallback so a Gmail-configured site needs nothing new.
+      const SMTP_USER = process.env.SMTP_USER || process.env.GMAIL_USER
+      const SMTP_PASS = process.env.SMTP_PASS || process.env.GMAIL_APP_PASSWORD
+      const SMTP_HOST = process.env.SMTP_HOST || 'smtp.gmail.com'
+      const SMTP_PORT = Number(process.env.SMTP_PORT || 465)
+      if (!SMTP_USER || !SMTP_PASS) {
+        return res.status(503).json({ error: 'Email is not set up — set SMTP_USER / SMTP_PASS (and SMTP_HOST, e.g. smtp.zoho.com) in the environment.' })
       }
 
       const { env, token, realmId } = await getLiveToken(client)
@@ -69,10 +75,10 @@ export default async function handler(req, res) {
       const pdf = await fetchInvoicePdf(env, token, realmId, id)
 
       const transporter = nodemailer.createTransport({
-        host: 'smtp.gmail.com',
-        port: 465,
-        secure: true,
-        auth: { user: GMAIL_USER, pass: GMAIL_APP_PASSWORD },
+        host: SMTP_HOST,
+        port: SMTP_PORT,
+        secure: SMTP_PORT === 465,
+        auth: { user: SMTP_USER, pass: SMTP_PASS },
       })
 
       const subject = `Invoice ${doc} from JK No Jokes`
@@ -86,8 +92,8 @@ export default async function handler(req, res) {
         `JK No Jokes`,
       ]
       const info = await transporter.sendMail({
-        from: `JK No Jokes <${GMAIL_USER}>`,
-        replyTo: GMAIL_USER,
+        from: process.env.SMTP_FROM || `JK No Jokes <${SMTP_USER}>`,
+        replyTo: SMTP_USER,
         to: String(to),
         subject,
         text: bodyLines.join('\n'),
