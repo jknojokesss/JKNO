@@ -311,7 +311,7 @@ function NewInvoice({ client, refs, call, onClose, onCreated }) {
             {preview && (
               <>
                 <span style={{ fontSize: '12.5px', color: GREEN }}>
-                  Ready: {preview.preview.customer} · {money(preview.preview.total)}{preview.preview.email ? ` · bill-to ${preview.preview.email}` : ''}
+                  Ready: {preview.preview.doc ? `invoice #${preview.preview.doc} · ` : ''}{preview.preview.customer} · {money(preview.preview.total)}{preview.preview.email ? ` · bill-to ${preview.preview.email}` : ''}
                 </span>
                 <button onClick={doCreate} disabled={busy === 'create'} style={btn(true)}>{busy === 'create' ? 'Creating…' : 'Create in QuickBooks'}</button>
               </>

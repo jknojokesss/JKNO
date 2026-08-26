@@ -2,7 +2,7 @@ import crypto from 'crypto'
 import nodemailer from 'nodemailer'
 import { requireAdmin } from '../../../lib/requireAdmin'
 import { getLiveToken, QboAuthError } from '../../../lib/qboAuth'
-import { fetchOpenInvoices, fetchInvoice, fetchInvoicePdf, fetchArRefs, buildInvoice, postInvoice } from '../../../lib/qboAr'
+import { fetchOpenInvoices, fetchInvoice, fetchInvoicePdf, fetchArRefs, buildInvoice, postInvoice, nextDocNumber } from '../../../lib/qboAr'
 
 // ── Live AR for one client: list, view, and email real invoices ──────────
 //
@@ -62,7 +62,12 @@ export default async function handler(req, res) {
 
       const { env, token, realmId } = await getLiveToken(client)
       const refs = await fetchArRefs(env, token, realmId)
-      const built = buildInvoice(invoice, refs)
+      // QBO with custom transaction numbers on does not auto-number API
+      // invoices, so assign the next number ourselves. Recomputed on confirm
+      // (not carried from the preview) so a number claimed in between never
+      // collides.
+      const docNumber = invoice.docNumber || await nextDocNumber(env, token, realmId)
+      const built = buildInvoice({ ...invoice, docNumber }, refs)
       if (built.errors.length) return res.status(400).json({ error: built.errors.join(' · ') })
 
       if (!confirm) {
@@ -74,7 +79,7 @@ export default async function handler(req, res) {
       const created = out.Invoice || {}
       return res.status(200).json({
         ok: true,
-        created: { id: created.Id, doc: created.DocNumber, total: Number(created.TotalAmt || built.total) },
+        created: { id: created.Id, doc: created.DocNumber || docNumber, total: Number(created.TotalAmt || built.total) },
       })
     }
 
