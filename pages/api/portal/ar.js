@@ -57,7 +57,13 @@ export default async function handler(req, res) {
 
       // Every customer with a balance, one per printed page.
       if (req.query.action === 'statements-all') {
-        const all = await statementsForAll(env, token, realmId, opts)
+        let all = await statementsForAll(env, token, realmId, opts)
+        // ?ids= narrows the run to the customers ticked in the portal.
+        const ids = String(req.query.ids || '').split(',').map((x) => x.replace(/[^0-9]/g, '')).filter(Boolean)
+        if (ids.length) {
+          const keep = new Set(ids)
+          all = all.filter((a) => keep.has(String(a.customerId)))
+        }
         if (!all.length) {
           res.setHeader('Content-Type', 'text/html; charset=utf-8')
           return res.status(200).send(statementPage(
