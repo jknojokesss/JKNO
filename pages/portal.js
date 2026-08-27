@@ -25,7 +25,7 @@ const input = (extra = {}) => ({ fontSize: '14px', padding: '8px 10px', border: 
 
 const DEFAULT_INVOICE_BODY = 'Hi,\n\nYour invoice is attached.\n\nAny questions, just reply to this email.\n\nThank you!'
 const DEFAULT_INVOICES_BODY = 'Hi,\n\nYour invoices are attached:\n{list}\n\nTotal due: {total}\n\nAny questions, just reply to this email.\n\nThank you!'
-const DEFAULT_STATEMENT_BODY = 'Hi,\n\nHere is your current statement of account:\n{link}\n\nAny questions, just reply to this email.\n\nThank you!'
+const DEFAULT_STATEMENT_BODY = 'Hi,\n\nYour statement of account is attached.\n\nAny questions, just reply to this email.\n\nThank you!'
 
 export default function Portal() {
   const [session, setSession] = useState(undefined) // undefined = checking
@@ -143,7 +143,7 @@ export default function Portal() {
   const startCompose = (kind, id, name, to, subjectDefault, doc, customerId) => {
     let saved = null
     try { saved = window.localStorage.getItem('portal-body-' + kind) } catch (e) {}
-    const attach = kind === 'invoice'
+    const attach = true // both kinds attach a PDF now; the link is opt-in
     setCompose({
       kind, id, name, doc, to: to || '', customerId: customerId != null ? customerId : (kind === 'statement' ? id : null),
       subject: subjectDefault,
@@ -161,9 +161,14 @@ export default function Portal() {
   const prepare = (kind, id, attach) => {
     const settle = (patch) => setCompose((c) => (c && String(c.id) === String(id) ? { ...c, ...patch } : c))
     if (attach) {
-      call(`/api/portal/ar?action=pdf&id=${id}`, { raw: true })
+      const path = kind === 'statement'
+        ? `/api/portal/ar?action=statement-pdf&id=${id}`   // drawn by us
+        : `/api/portal/ar?action=pdf&id=${id}`             // Intuit's own
+      call(path, { raw: true })
         .then(async (res) => {
-          if (!res.ok) throw new Error('QuickBooks did not return a PDF for this invoice.')
+          if (!res.ok) throw new Error(kind === 'statement'
+            ? 'The statement PDF could not be built.'
+            : 'QuickBooks did not return a PDF for this invoice.')
           settle({ ready: await res.blob() })
         })
         .catch((e) => settle({ readyErr: String(e.message || e) }))
@@ -192,7 +197,9 @@ export default function Portal() {
       body = body.replaceAll('{link}', '').trim()
       const a = document.createElement('a')
       a.href = URL.createObjectURL(c.ready)
-      a.download = `Invoice-${c.doc || c.id}.pdf`
+      a.download = c.kind === 'statement'
+        ? `Statement-${String(c.name || 'customer').replace(/[^A-Za-z0-9]+/g, '-')}.pdf`
+        : `Invoice-${c.doc || c.id}.pdf`
       document.body.appendChild(a); a.click(); a.remove()
     } else {
       body = body.includes('{link}') ? body.replaceAll('{link}', c.ready) : body + '\n\n' + c.ready
@@ -547,10 +554,10 @@ export default function Portal() {
               {compose.kind === 'invoices'
                 ? <>All {compose.docs.length} QuickBooks PDFs download at the same time — <b>drag them into the Gmail window</b> before sending. Your browser may ask once whether to allow multiple files.</>
                 : compose.attach
-                ? <>The QuickBooks invoice PDF downloads at the same time — <b>drag it into the Gmail window</b> before sending. Nothing in the email points anywhere but you.</>
+                ? <>The {compose.kind === 'statement' ? 'statement' : 'QuickBooks invoice'} PDF downloads at the same time — <b>drag it into the Gmail window</b> before sending. Nothing in the email points anywhere but you.</>
                 : <><code style={{ fontFamily: mono, fontSize: '11px' }}>{'{link}'}</code> becomes a secure link to the live statement, which always shows current numbers.</>}
             </p>
-            {compose.kind === 'invoice' && (
+            {(compose.kind === 'invoice' || compose.kind === 'statement') && (
               <label style={{ fontSize: '12px', color: MUTED, display: 'flex', gap: '7px', alignItems: 'center', marginBottom: '10px' }}>
                 <input type="checkbox" checked={!compose.attach}
                   onChange={(e) => {

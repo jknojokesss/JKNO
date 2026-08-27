@@ -1,6 +1,7 @@
 import crypto from 'crypto'
 import { requirePortalUser } from '../../../lib/portalAuth'
 import { supabaseAdmin } from '../../../lib/supabaseAdmin'
+import { buildStatementPdf } from '../../../lib/statementPdf'
 import { getLiveToken, QboAuthError } from '../../../lib/qboAuth'
 import { fetchOpenInvoices, fetchInvoicePdf, fetchArRefs, buildInvoice, postInvoice, nextDocNumber, statementFor, statementsForAll, statementPage, invalidateAr } from '../../../lib/qboAr'
 
@@ -44,6 +45,25 @@ export default async function handler(req, res) {
       }
 
       const opts = { companyName: connection.company_name || 'Your company', fromEmail: '' }
+
+      // The statement as a real PDF, so it can be attached like an invoice
+      // instead of travelling as a link to our domain.
+      if (req.query.action === 'statement-pdf') {
+        const custId = String(req.query.id || '').replace(/[^0-9]/g, '')
+        if (!custId) return res.status(400).json({ error: 'Missing ?id=.' })
+        const stmt = await statementFor(env, token, realmId, opts, custId)
+        const pdf = await buildStatementPdf({
+          companyName: opts.companyName,
+          customerName: stmt.customerName,
+          customerEmail: stmt.email,
+          invoices: stmt.invoices,
+          payments: stmt.payments,
+          asOf: stmt.asOf,
+        })
+        res.setHeader('Content-Type', 'application/pdf')
+        res.setHeader('Content-Disposition', `inline; filename="Statement-${stmt.customerName.replace(/[^A-Za-z0-9]+/g, '-')}.pdf"`)
+        return res.status(200).send(pdf)
+      }
 
       if (req.query.action === 'statement') {
         const custId = String(req.query.id || '').replace(/[^0-9]/g, '')
