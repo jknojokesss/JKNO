@@ -23,15 +23,20 @@ const th = (right) => ({
   fontSize: '11px', textTransform: 'uppercase', letterSpacing: '.06em', whiteSpace: 'nowrap',
 })
 
-export default function WorkQueue({ rows, onStatement, onPreview, busy, onSeeAll, onInvoicePdf, onInvoiceEmail, onPrintAll, toolbar }) {
+// `f` holds the filters a saved view can capture, owned by the page so a
+// view can restore this screen as well as the invoice one. Everything else
+// here — what is expanded, how far down, what is ticked — is ephemeral and
+// stays local.
+export default function WorkQueue({ rows, onStatement, onPreview, busy, onSeeAll, onInvoicePdf, onInvoiceEmail, onPrintAll, toolbar, f, setF }) {
   const [show, setShow] = useState(20)
+  const { wq, only, staleOnly, sort, dir } = f
+  const setWq = (v) => setF({ wq: v })
+  const setOnly = (v) => setF({ only: v })
+  const setStaleOnly = (v) => setF({ staleOnly: v })
+  const setSort = (v) => setF({ sort: v })
+  const setDir = (v) => setF({ dir: typeof v === 'function' ? v(dir) : v })
   const [open, setOpen] = useState(null)
-  const [staleOnly, setStaleOnly] = useState(false)
-  const [wq, setWq] = useState('')
   const [picked, setPicked] = useState(new Set())
-  const [sort, setSort] = useState('pastDue')
-  const [dir, setDir] = useState('desc')
-  const [only, setOnly] = useState('all')   // all | pastdue | current | never
   const phone = useIsPhone()
   const [showFilters, setShowFilters] = useState(false)
 
@@ -41,16 +46,9 @@ export default function WorkQueue({ rows, onStatement, onPreview, busy, onSeeAll
     const v = loadView('portal-queue')
     if (!v) return
     if (v.open) setOpen(v.open)
-    if (v.only) setOnly(v.only)
-    if (v.staleOnly) setStaleOnly(true)
-    if (v.sort) setSort(v.sort)
-    if (v.dir) setDir(v.dir)
-    if (v.wq) setWq(v.wq)
     if (v.show) setShow(v.show)
   }, [])
-  useEffect(() => {
-    saveView('portal-queue', { open, only, staleOnly, sort, dir, wq, show })
-  }, [open, only, staleOnly, sort, dir, wq, show])
+  useEffect(() => { saveView('portal-queue', { open, show }) }, [open, show])
 
   const list = useMemo(() => {
     const needle = wq.trim().toLowerCase()
