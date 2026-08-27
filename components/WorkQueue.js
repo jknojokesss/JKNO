@@ -22,6 +22,7 @@ export default function WorkQueue({ rows, onStatement, onPreview, busy, onSeeAll
   const [open, setOpen] = useState(null)
   const [staleOnly, setStaleOnly] = useState(false)
   const [wq, setWq] = useState('')
+  const [picked, setPicked] = useState(new Set())
 
   const list = useMemo(() => {
     const needle = wq.trim().toLowerCase()
@@ -63,6 +64,25 @@ export default function WorkQueue({ rows, onStatement, onPreview, busy, onSeeAll
           {busy === 'stmtall' ? 'Building…' : `Print ${list.length.toLocaleString()} statement${list.length === 1 ? '' : 's'}`}
         </button>
       </div>
+
+      {picked.size > 0 && (() => {
+        const rowsPicked = list.filter((r) => picked.has(r.id))
+        const total = rowsPicked.reduce((t, r) => t + r.balance, 0)
+        return (
+          <div style={{ display: 'flex', gap: '10px', alignItems: 'center', flexWrap: 'wrap',
+                        border: `1px solid ${INK}`, borderRadius: '4px', padding: '10px 12px', marginBottom: '10px' }}>
+            <b style={{ fontSize: '13px' }}>{rowsPicked.length} customer{rowsPicked.length === 1 ? '' : 's'} selected · {money(total)}</b>
+            <span style={{ flex: 1 }} />
+            <span style={{ fontSize: '12px', color: MUTED }}>
+              Emailing a batch at once needs one-click send — for now, print these or send them one at a time.
+            </span>
+            <button onClick={() => setPicked(new Set())} style={btn(false)}>Clear</button>
+            <button onClick={() => onPrintAll(rowsPicked.map((r) => r.id))} disabled={busy === 'stmtall'} style={btn(true)}>
+              {busy === 'stmtall' ? 'Building…' : `Print ${rowsPicked.length} statement${rowsPicked.length === 1 ? '' : 's'}`}
+            </button>
+          </div>
+        )
+      })()}
       <p style={{ fontSize: '12.5px', color: MUTED, lineHeight: 1.6, marginBottom: '12px', maxWidth: '640px' }}>
         Worst first, by how much is actually late.{neverChased > 0 && <> {neverChased} of them {neverChased === 1 ? 'has' : 'have'} never been sent a statement from here.</>}
       </p>
@@ -70,6 +90,15 @@ export default function WorkQueue({ rows, onStatement, onPreview, busy, onSeeAll
       <div style={{ border: `1px solid ${BORDER}`, borderRadius: '4px', overflowX: 'auto' }}>
         <table style={{ borderCollapse: 'collapse', width: '100%', fontSize: '13px', fontVariantNumeric: 'tabular-nums' }}>
           <thead><tr>
+            <th style={{ borderBottom: `1px solid ${INK}`, padding: '8px 6px 8px 10px', width: '28px' }}>
+              <input type="checkbox"
+                checked={list.length > 0 && list.slice(0, show).every((r) => picked.has(r.id))}
+                onChange={(e) => {
+                  const next = new Set(picked)
+                  for (const r of list.slice(0, show)) e.target.checked ? next.add(r.id) : next.delete(r.id)
+                  setPicked(next)
+                }} />
+            </th>
             {['Customer', 'Past due', 'Total open', 'Oldest', 'Last chased', ''].map((h, k) => (
               <th key={k} style={{ textAlign: k === 1 || k === 2 || k === 3 ? 'right' : 'left', padding: '8px 10px', borderBottom: `1px solid ${INK}`, fontSize: '11px', textTransform: 'uppercase', letterSpacing: '.06em', color: MUTED, whiteSpace: 'nowrap' }}>{h}</th>
             ))}
@@ -80,7 +109,14 @@ export default function WorkQueue({ rows, onStatement, onPreview, busy, onSeeAll
               const isOpen = open === r.id
               return (
                 <React.Fragment key={r.id}>
-                <tr onClick={() => setOpen(isOpen ? null : r.id)} style={{ cursor: 'pointer' }}>
+                <tr onClick={() => setOpen(isOpen ? null : r.id)} style={{ cursor: 'pointer', background: picked.has(r.id) ? '#F5F7FA' : undefined }}>
+                  <td style={{ ...td(), padding: '9px 6px 9px 10px' }} onClick={(e) => e.stopPropagation()}>
+                    <input type="checkbox" checked={picked.has(r.id)} onChange={() => {
+                      const next = new Set(picked)
+                      next.has(r.id) ? next.delete(r.id) : next.add(r.id)
+                      setPicked(next)
+                    }} />
+                  </td>
                   <td style={td()}>
                     <span style={{ display: 'inline-block', width: '16px', color: MUTED, fontSize: '10px' }}>{isOpen ? '▾' : '▸'}</span>
                     <b>{r.name}</b>
@@ -106,7 +142,7 @@ export default function WorkQueue({ rows, onStatement, onPreview, busy, onSeeAll
                 </tr>
                 {isOpen && (
                   <tr>
-                    <td colSpan={6} style={{ padding: 0, borderBottom: `1px solid ${BORDER}`, background: '#FAFAF8' }}>
+                    <td colSpan={7} style={{ padding: 0, borderBottom: `1px solid ${BORDER}`, background: '#FAFAF8' }}>
                       <div style={{ padding: '10px 14px 14px' }}>
                         <div style={{ fontSize: '10.5px', letterSpacing: '.08em', color: MUTED, fontWeight: 700, margin: '2px 0 8px' }}>
                           THEIR OPEN INVOICES — OLDEST FIRST

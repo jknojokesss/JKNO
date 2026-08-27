@@ -24,6 +24,7 @@ const btn = (primary) => ({
 const input = (extra = {}) => ({ fontSize: '14px', padding: '8px 10px', border: `1px solid ${BORDER}`, borderRadius: '4px', ...extra })
 
 const DEFAULT_INVOICE_BODY = 'Hi,\n\nYour invoice is attached.\n\nAny questions, just reply to this email.\n\nThank you!'
+const DEFAULT_INVOICES_BODY = 'Hi,\n\nYour invoices are attached:\n{list}\n\nTotal due: {total}\n\nAny questions, just reply to this email.\n\nThank you!'
 const DEFAULT_STATEMENT_BODY = 'Hi,\n\nHere is your current statement of account:\n{link}\n\nAny questions, just reply to this email.\n\nThank you!'
 
 export default function Portal() {
@@ -42,6 +43,7 @@ export default function Portal() {
   const [limit, setLimit] = useState(50)
   const [tab, setTab] = useState('chase')
   const [minBal, setMinBal] = useState('')
+  const [sel, setSel] = useState(new Set())
   const [views, setViews] = useState([])
 
   // Saved views live in the browser: they are one person's working habits,
@@ -111,6 +113,33 @@ export default function Portal() {
   // Send click itself is synchronous: the download starts and Gmail opens in
   // the same gesture. Doing the fetch on click instead meant either a popup
   // the browser blocked, or a blank tab sitting there looking broken.
+  // Several invoices for one customer, one email. Each PDF is fetched and
+  // downloaded; the browser asks once about multiple files.
+  const startComposeMany = (invoices) => {
+    const first = invoices[0]
+    const total = invoices.reduce((t, i) => t + i.balance, 0)
+    let saved = null
+    try { saved = window.localStorage.getItem('portal-body-invoices') } catch (e) {}
+    setCompose({
+      kind: 'invoices', id: first.id, ids: invoices.map((i) => i.id),
+      docs: invoices.map((i) => i.doc || i.id),
+      name: first.customer, customerId: first.customerId, to: first.email || '',
+      subject: `Invoices from ${data.company || 'us'}`,
+      body: saved || DEFAULT_INVOICES_BODY,
+      listText: invoices.map((i) => `  ${i.doc ? '#' + i.doc : 'Invoice'} — ${money(i.balance)}${i.due ? ` (due ${i.due})` : ''}`).join('\n'),
+      totalText: money(total),
+      saveDefault: false, attach: true, ready: null, readyErr: null,
+    })
+    Promise.all(invoices.map((inv) =>
+      call(`/api/portal/ar?action=pdf&id=${inv.id}`, { raw: true }).then(async (res) => {
+        if (!res.ok) throw new Error(`QuickBooks did not return a PDF for ${inv.doc ? '#' + inv.doc : 'one invoice'}.`)
+        return { blob: await res.blob(), doc: inv.doc || inv.id }
+      })
+    ))
+      .then((files) => setCompose((c) => (c && c.kind === 'invoices' ? { ...c, ready: files } : c)))
+      .catch((e) => setCompose((c) => (c && c.kind === 'invoices' ? { ...c, readyErr: String(e.message || e) } : c)))
+  }
+
   const startCompose = (kind, id, name, to, subjectDefault, doc, customerId) => {
     let saved = null
     try { saved = window.localStorage.getItem('portal-body-' + kind) } catch (e) {}
@@ -151,7 +180,15 @@ export default function Portal() {
     const c = compose
     if (!c || !c.ready) return
     let body = c.body
-    if (c.attach) {
+    if (c.kind === 'invoices') {
+      body = body.replaceAll('{list}', c.listText).replaceAll('{total}', c.totalText).replaceAll('{link}', '').trim()
+      for (const f of c.ready) {
+        const a = document.createElement('a')
+        a.href = URL.createObjectURL(f.blob)
+        a.download = `Invoice-${f.doc}.pdf`
+        document.body.appendChild(a); a.click(); a.remove()
+      }
+    } else if (c.attach) {
       body = body.replaceAll('{link}', '').trim()
       const a = document.createElement('a')
       a.href = URL.createObjectURL(c.ready)
@@ -161,6 +198,7 @@ export default function Portal() {
       body = body.includes('{link}') ? body.replaceAll('{link}', c.ready) : body + '\n\n' + c.ready
     }
     if (c.saveDefault) { try { window.localStorage.setItem('portal-body-' + c.kind, c.body) } catch (e) {} }
+    setSel(new Set())
     // Fire-and-forget: a failed log must never cost her the email.
     call('/api/portal/ar', { method: 'POST', body: JSON.stringify({
       action: 'log-send', kind: c.kind, customerId: c.customerId, customerName: c.name, doc: c.doc, to: c.to,
@@ -416,9 +454,43 @@ export default function Portal() {
                 )
               })}
             </div>
+            {sel.size > 0 && (() => {
+              const picked = shown.filter((i) => sel.has(i.id))
+              const names = new Set(picked.map((i) => i.customerId))
+              const total = picked.reduce((t, i) => t + i.balance, 0)
+              const oneCustomer = names.size === 1
+              return (
+                <div style={{ display: 'flex', gap: '10px', alignItems: 'center', flexWrap: 'wrap',
+                              border: `1px solid ${INK}`, borderRadius: '4px', padding: '10px 12px', marginBottom: '10px' }}>
+                  <b style={{ fontSize: '13px' }}>{picked.length} selected · {money(total)}</b>
+                  <span style={{ fontSize: '12.5px', color: MUTED }}>
+                    {oneCustomer ? picked[0].customer : `${names.size} different customers`}
+                  </span>
+                  <span style={{ flex: 1 }} />
+                  {!oneCustomer && (
+                    <span style={{ fontSize: '12px', color: MUTED }}>
+                      Pick invoices from one customer to email them together.
+                    </span>
+                  )}
+                  <button onClick={() => setSel(new Set())} style={btn(false)}>Clear</button>
+                  <button onClick={() => startComposeMany(picked)} disabled={!oneCustomer} style={btn(oneCustomer)}>
+                    Email {picked.length} together →
+                  </button>
+                </div>
+              )
+            })()}
             <div style={{ border: `1px solid ${BORDER}`, borderRadius: '4px', overflowX: 'auto', marginBottom: '26px' }}>
               <table style={{ borderCollapse: 'collapse', width: '100%', fontSize: '13px', fontVariantNumeric: 'tabular-nums' }}>
                 <thead><tr>
+                  <th style={{ borderBottom: `1px solid ${INK}`, padding: '8px 6px 8px 10px', width: '28px' }}>
+                    <input type="checkbox"
+                      checked={shown.length > 0 && shown.slice(0, limit).every((i) => sel.has(i.id))}
+                      onChange={(e) => {
+                        const next = new Set(sel)
+                        for (const i of shown.slice(0, limit)) e.target.checked ? next.add(i.id) : next.delete(i.id)
+                        setSel(next)
+                      }} />
+                  </th>
                   <SortH field="doc" label="Invoice" />
                   <SortH field="customer" label="Customer" />
                   <SortH field="date" label="Date" />
@@ -428,7 +500,14 @@ export default function Portal() {
                 </tr></thead>
                 <tbody>
                   {shown.slice(0, limit).map((inv) => (
-                    <tr key={inv.id}>
+                    <tr key={inv.id} style={sel.has(inv.id) ? { background: '#F5F7FA' } : undefined}>
+                      <td style={{ ...td(), padding: '8px 6px 8px 10px' }}>
+                        <input type="checkbox" checked={sel.has(inv.id)} onChange={() => {
+                          const next = new Set(sel)
+                          next.has(inv.id) ? next.delete(inv.id) : next.add(inv.id)
+                          setSel(next)
+                        }} />
+                      </td>
                       <td style={td()}><b>{inv.doc ? '#' + inv.doc : '(no number)'}</b></td>
                       <td style={td()}>{inv.customer}</td>
                       <td style={td()}>{inv.date || '—'}</td>
@@ -465,7 +544,9 @@ export default function Portal() {
             <p style={{ fontSize: '12px', color: MUTED, lineHeight: 1.6, marginBottom: '14px' }}>
               This opens Gmail with everything filled in — you hit Send there, so the email comes from
               <b> your</b> address.{' '}
-              {compose.attach
+              {compose.kind === 'invoices'
+                ? <>All {compose.docs.length} QuickBooks PDFs download at the same time — <b>drag them into the Gmail window</b> before sending. Your browser may ask once whether to allow multiple files.</>
+                : compose.attach
                 ? <>The QuickBooks invoice PDF downloads at the same time — <b>drag it into the Gmail window</b> before sending. Nothing in the email points anywhere but you.</>
                 : <><code style={{ fontFamily: mono, fontSize: '11px' }}>{'{link}'}</code> becomes a secure link to the live statement, which always shows current numbers.</>}
             </p>
