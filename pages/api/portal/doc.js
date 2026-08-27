@@ -1,6 +1,6 @@
 import crypto from 'crypto'
 import { getLiveToken } from '../../../lib/qboAuth'
-import { fetchInvoicePdf, statementFor } from '../../../lib/qboAr'
+import { fetchInvoicePdf, statementFor, statementPage } from '../../../lib/qboAr'
 
 // ── Public, signed document links ────────────────────────────────────────
 // The portal's Gmail-compose flow can't attach files, so emails carry a
@@ -36,7 +36,10 @@ export default async function handler(req, res) {
     }
     const stmt = await statementFor(env, token, realmId, { companyName: connection.company_name || 'Statement', fromEmail: '' }, id)
     res.setHeader('Content-Type', 'text/html; charset=utf-8')
-    return res.status(200).send(`<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Statement</title></head><body style="background:#F6F5F1;padding:24px 12px">${stmt.html}</body></html>`)
+    return res.status(200).send(statementPage(`<div class="stmt">${stmt.html}</div>`, {
+      title: `Statement — ${stmt.customerName}`,
+      bar: `<b>${stmt.customerName}</b><span>as of ${stmt.asOf}</span>`,
+    }))
   } catch (err) {
     // A statement whose customer has since paid everything off is good news,
     // not an error page.

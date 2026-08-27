@@ -212,7 +212,12 @@ function Statements({ data, openBlob, busy, startCompose }) {
   const monthYear = new Date().toLocaleDateString('en-US', { month: 'long', year: 'numeric' })
   return (
     <div>
-      <h2 style={{ fontSize: '17px', marginBottom: '4px' }}>Statements — by customer</h2>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', gap: '10px', flexWrap: 'wrap' }}>
+        <h2 style={{ fontSize: '17px', marginBottom: '4px' }}>Statements — by customer</h2>
+        <button onClick={() => openBlob('/api/portal/ar?action=statements-all', 'stmtall')} disabled={busy === 'stmtall'} style={btn(false)}>
+          {busy === 'stmtall' ? 'Building…' : `Print all ${groups.length} statements`}
+        </button>
+      </div>
       <p style={{ fontSize: '12.5px', color: MUTED, lineHeight: 1.6, marginBottom: '12px', maxWidth: '620px' }}>
         Built fresh from QuickBooks every time — open invoices, recent payments, and aging. The email
         carries a live link, so your customer always sees current numbers, even if they open it next week.
