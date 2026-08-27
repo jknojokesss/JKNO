@@ -16,6 +16,10 @@ const btn = (primary) => ({
 const td = () => ({ padding: '9px 10px', borderBottom: `1px solid ${BORDER}`, verticalAlign: 'middle' })
 
 const daysSince = (iso) => Math.floor((Date.now() - Date.parse(iso)) / 86400000)
+const th = (right) => ({
+  textAlign: right ? 'right' : 'left', padding: '8px 10px', borderBottom: `1px solid ${INK}`,
+  fontSize: '11px', textTransform: 'uppercase', letterSpacing: '.06em', whiteSpace: 'nowrap',
+})
 
 export default function WorkQueue({ rows, onStatement, onPreview, busy, onSeeAll, onInvoicePdf, onInvoiceEmail, onPrintAll, toolbar }) {
   const [show, setShow] = useState(20)
@@ -23,14 +27,28 @@ export default function WorkQueue({ rows, onStatement, onPreview, busy, onSeeAll
   const [staleOnly, setStaleOnly] = useState(false)
   const [wq, setWq] = useState('')
   const [picked, setPicked] = useState(new Set())
+  const [sort, setSort] = useState('pastDue')
+  const [dir, setDir] = useState('desc')
+  const [only, setOnly] = useState('all')   // all | pastdue | current | never
 
   const list = useMemo(() => {
     const needle = wq.trim().toLowerCase()
     let out = needle ? rows.filter((r) => r.name.toLowerCase().includes(needle)) : rows
     if (staleOnly) out = out.filter((r) => !r.lastSent || daysSince(r.lastSent.at) >= 30)
-    // Worst first: most money that is actually late.
-    return [...out].sort((a, b) => b.pastDue - a.pastDue || b.balance - a.balance)
-  }, [rows, staleOnly, wq])
+    if (only === 'pastdue') out = out.filter((r) => r.pastDue > 0)
+    if (only === 'current') out = out.filter((r) => r.pastDue === 0)
+    if (only === 'never') out = out.filter((r) => !r.lastSent)
+    const cmp = {
+      name: (a, b) => a.name.localeCompare(b.name),
+      pastDue: (a, b) => a.pastDue - b.pastDue || a.balance - b.balance,
+      balance: (a, b) => a.balance - b.balance,
+      oldest: (a, b) => a.oldestDays - b.oldestDays,
+      // Never chased sorts as infinitely stale, so it leads on 'longest since'.
+      chased: (a, b) => (a.lastSent ? daysSince(a.lastSent.at) : 1e9) - (b.lastSent ? daysSince(b.lastSent.at) : 1e9),
+    }
+    const base = cmp[sort] || cmp.pastDue
+    return [...out].sort((a, b) => (dir === 'asc' ? base(a, b) : -base(a, b)))
+  }, [rows, staleOnly, wq, sort, dir, only])
 
   const totalPastDue = list.reduce((t, r) => t + r.pastDue, 0)
   const neverChased = rows.filter((r) => !r.lastSent).length
@@ -55,6 +73,13 @@ export default function WorkQueue({ rows, onStatement, onPreview, busy, onSeeAll
         <input value={wq} onChange={(e) => { setWq(e.target.value); setShow(20) }} placeholder="Search customer"
           style={{ fontSize: '14px', padding: '8px 10px', border: `1px solid ${BORDER}`, borderRadius: '4px', width: '230px' }} />
         {toolbar}
+        {[['all', 'Everyone'], ['pastdue', 'Past due'], ['current', 'Not yet due'], ['never', 'Never chased']].map(([k, label]) => (
+          <button key={k} onClick={() => { setOnly(k); setShow(20) }} style={{
+            fontSize: '12px', padding: '6px 11px', borderRadius: '14px', cursor: 'pointer',
+            border: `1px solid ${only === k ? INK : BORDER}`, background: only === k ? INK : '#fff',
+            color: only === k ? '#fff' : INK, fontWeight: only === k ? 700 : 500,
+          }}>{label}</button>
+        ))}
         <label style={{ fontSize: '12.5px', color: MUTED, display: 'flex', gap: '6px', alignItems: 'center' }}>
           <input type="checkbox" checked={staleOnly} onChange={(e) => { setStaleOnly(e.target.checked); setShow(20) }} />
           Not chased in 30 days
@@ -99,9 +124,17 @@ export default function WorkQueue({ rows, onStatement, onPreview, busy, onSeeAll
                   setPicked(next)
                 }} />
             </th>
-            {['Customer', 'Past due', 'Total open', 'Oldest', 'Last chased', ''].map((h, k) => (
-              <th key={k} style={{ textAlign: k === 1 || k === 2 || k === 3 ? 'right' : 'left', padding: '8px 10px', borderBottom: `1px solid ${INK}`, fontSize: '11px', textTransform: 'uppercase', letterSpacing: '.06em', color: MUTED, whiteSpace: 'nowrap' }}>{h}</th>
+            {[['name', 'Customer', false], ['pastDue', 'Past due', true], ['balance', 'Total open', true],
+              ['oldest', 'Oldest', true], ['chased', 'Last chased', false]].map(([field, label, right]) => (
+              <th key={field} onClick={() => {
+                if (sort === field) { setDir((d) => (d === 'asc' ? 'desc' : 'asc')); return }
+                setSort(field); setDir(field === 'name' ? 'asc' : 'desc'); setShow(20)
+              }} title="Sort by this column"
+                style={{ ...th(right), color: sort === field ? INK : MUTED, cursor: 'pointer', userSelect: 'none' }}>
+                {label}{sort === field ? (dir === 'asc' ? ' ▲' : ' ▼') : ''}
+              </th>
             ))}
+            <th style={{ borderBottom: `1px solid ${INK}` }}></th>
           </tr></thead>
           <tbody>
             {list.slice(0, show).map((r) => {
