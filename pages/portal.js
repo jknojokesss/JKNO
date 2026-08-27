@@ -742,9 +742,22 @@ function NewInvoice({ refs, call, onClose, onCreated }) {
               return (
                 <React.Fragment key={i}>
                   <select value={l.itemId} onChange={(e) => {
+                    // Carry the item's rate and description onto the line, the
+                    // way QuickBooks does. A value the user typed is kept; one
+                    // that merely came from the previous item is replaced.
+                    const prev = refs.items.find((x) => String(x.id) === String(l.itemId))
                     const item = refs.items.find((x) => String(x.id) === e.target.value)
-                    setLine(i, 'itemId', e.target.value)
-                    if (item && item.rate && !l.rate) setLine(i, 'rate', String(item.rate))
+                    setLines((ls) => ls.map((row, n) => {
+                      if (n !== i) return row
+                      const next = { ...row, itemId: e.target.value }
+                      if (item) {
+                        const rateWasTheirs = row.rate && !(prev && String(prev.rate) === String(row.rate))
+                        const descWasTheirs = row.description && !(prev && prev.description === row.description)
+                        if (!rateWasTheirs) next.rate = item.rate != null ? String(item.rate) : ''
+                        if (!descWasTheirs) next.description = item.description || ''
+                      }
+                      return next
+                    }))
                     setPreview(null)
                   }} style={input()}>
                     <option value="">— pick —</option>
