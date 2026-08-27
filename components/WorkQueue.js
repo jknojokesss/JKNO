@@ -17,18 +17,19 @@ const td = () => ({ padding: '9px 10px', borderBottom: `1px solid ${BORDER}`, ve
 
 const daysSince = (iso) => Math.floor((Date.now() - Date.parse(iso)) / 86400000)
 
-export default function WorkQueue({ rows, onStatement, onPreview, busy, onSeeAll, onInvoicePdf, onInvoiceEmail }) {
+export default function WorkQueue({ rows, onStatement, onPreview, busy, onSeeAll, onInvoicePdf, onInvoiceEmail, onPrintAll, toolbar }) {
   const [show, setShow] = useState(20)
   const [open, setOpen] = useState(null)
   const [staleOnly, setStaleOnly] = useState(false)
+  const [wq, setWq] = useState('')
 
   const list = useMemo(() => {
-    const out = staleOnly
-      ? rows.filter((r) => !r.lastSent || daysSince(r.lastSent.at) >= 30)
-      : rows
+    const needle = wq.trim().toLowerCase()
+    let out = needle ? rows.filter((r) => r.name.toLowerCase().includes(needle)) : rows
+    if (staleOnly) out = out.filter((r) => !r.lastSent || daysSince(r.lastSent.at) >= 30)
     // Worst first: most money that is actually late.
     return [...out].sort((a, b) => b.pastDue - a.pastDue || b.balance - a.balance)
-  }, [rows, staleOnly])
+  }, [rows, staleOnly, wq])
 
   const totalPastDue = list.reduce((t, r) => t + r.pastDue, 0)
   const neverChased = rows.filter((r) => !r.lastSent).length
@@ -46,11 +47,21 @@ export default function WorkQueue({ rows, onStatement, onPreview, busy, onSeeAll
           {list.length.toLocaleString()} customer{list.length === 1 ? '' : 's'} owe you {money(totalPastDue)} past due
         </h2>
         <span style={{ flex: 1 }} />
+        <button onClick={onSeeAll} style={btn(false)}>See every invoice</button>
+      </div>
+
+      <div style={{ display: 'flex', gap: '8px', alignItems: 'center', flexWrap: 'wrap', marginBottom: '10px' }}>
+        <input value={wq} onChange={(e) => { setWq(e.target.value); setShow(20) }} placeholder="Search customer"
+          style={{ fontSize: '14px', padding: '8px 10px', border: `1px solid ${BORDER}`, borderRadius: '4px', width: '230px' }} />
+        {toolbar}
         <label style={{ fontSize: '12.5px', color: MUTED, display: 'flex', gap: '6px', alignItems: 'center' }}>
           <input type="checkbox" checked={staleOnly} onChange={(e) => { setStaleOnly(e.target.checked); setShow(20) }} />
           Not chased in 30 days
         </label>
-        <button onClick={onSeeAll} style={btn(false)}>See every invoice</button>
+        <span style={{ flex: 1 }} />
+        <button onClick={() => onPrintAll(list.map((r) => r.id))} disabled={busy === 'stmtall' || !list.length} style={btn(false)}>
+          {busy === 'stmtall' ? 'Building…' : `Print ${list.length.toLocaleString()} statement${list.length === 1 ? '' : 's'}`}
+        </button>
       </div>
       <p style={{ fontSize: '12.5px', color: MUTED, lineHeight: 1.6, marginBottom: '12px', maxWidth: '640px' }}>
         Worst first, by how much is actually late.{neverChased > 0 && <> {neverChased} of them {neverChased === 1 ? 'has' : 'have'} never been sent a statement from here.</>}
