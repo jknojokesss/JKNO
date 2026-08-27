@@ -229,16 +229,22 @@ export default function Portal() {
       if (excluded.has(i.customerId)) continue
       if (minBal && i.balance < Number(minBal)) continue
       const g = m.get(i.customerId) || {
-        id: i.customerId, name: i.customer, balance: 0, pastDue: 0, oldestDays: 0, email: null,
+        id: i.customerId, name: i.customer, balance: 0, pastDue: 0, oldestDays: 0, email: null, invoices: [],
       }
       g.balance += i.balance
+      g.invoices.push(i)
       const days = i.due ? Math.floor((Date.parse(todayISO) - Date.parse(i.due)) / 86400000) : 0
       if (days > 0) { g.pastDue += i.balance; g.oldestDays = Math.max(g.oldestDays, days) }
       if (!g.email && i.email) g.email = i.email
       m.set(i.customerId, g)
     }
     const sends = (data && data.sends) || {}
-    return [...m.values()].map((g) => ({ ...g, lastSent: sends[g.id] || null }))
+    return [...m.values()].map((g) => ({
+      ...g,
+      // Oldest first inside a customer: that is the one being chased.
+      invoices: [...g.invoices].sort((a, b) => String(a.due || '9999').localeCompare(String(b.due || '9999'))),
+      lastSent: sends[g.id] || null,
+    }))
   }, [data, excluded, minBal, todayISO])
 
   const shown = useMemo(() => {
@@ -339,6 +345,9 @@ export default function Portal() {
               onStatement={(r) => startCompose('statement', r.id, r.name, r.email,
                 `Statement of account — ${new Date().toLocaleDateString('en-US', { month: 'long', year: 'numeric' })} — ${data.company || ''}`.trim(),
                 null, r.id)}
+              onInvoicePdf={(inv) => openBlob(`/api/portal/ar?action=pdf&id=${inv.id}`, 'pdf' + inv.id)}
+              onInvoiceEmail={(inv) => startCompose('invoice', inv.id, inv.customer, inv.email,
+                `Invoice ${inv.doc || ''} from ${data.company || 'us'}`.replace('  ', ' '), inv.doc, inv.customerId)}
             />
           )}
 

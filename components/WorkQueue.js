@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react'
+import React, { useState, useMemo } from 'react'
 
 // ── Who to chase today ───────────────────────────────────────────────────
 // The front door for a book too big to read. Not 7,000 invoices — a short
@@ -17,8 +17,9 @@ const td = () => ({ padding: '9px 10px', borderBottom: `1px solid ${BORDER}`, ve
 
 const daysSince = (iso) => Math.floor((Date.now() - Date.parse(iso)) / 86400000)
 
-export default function WorkQueue({ rows, onStatement, onPreview, busy, onSeeAll }) {
+export default function WorkQueue({ rows, onStatement, onPreview, busy, onSeeAll, onInvoicePdf, onInvoiceEmail }) {
   const [show, setShow] = useState(20)
+  const [open, setOpen] = useState(null)
   const [staleOnly, setStaleOnly] = useState(false)
 
   const list = useMemo(() => {
@@ -65,11 +66,15 @@ export default function WorkQueue({ rows, onStatement, onPreview, busy, onSeeAll
           <tbody>
             {list.slice(0, show).map((r) => {
               const chased = r.lastSent ? daysSince(r.lastSent.at) : null
+              const isOpen = open === r.id
               return (
-                <tr key={r.id}>
+                <React.Fragment key={r.id}>
+                <tr onClick={() => setOpen(isOpen ? null : r.id)} style={{ cursor: 'pointer' }}>
                   <td style={td()}>
+                    <span style={{ display: 'inline-block', width: '16px', color: MUTED, fontSize: '10px' }}>{isOpen ? '▾' : '▸'}</span>
                     <b>{r.name}</b>
-                    {!r.email && <div style={{ fontSize: '11px', color: RED }}>no email on file</div>}
+                    <span style={{ color: MUTED, fontWeight: 400 }}> · {r.invoices.length} invoice{r.invoices.length === 1 ? '' : 's'}</span>
+                    {!r.email && <div style={{ fontSize: '11px', color: RED, paddingLeft: '16px' }}>no email on file</div>}
                   </td>
                   <td style={{ ...td(), textAlign: 'right', fontWeight: 700, color: r.pastDue > 0 ? INK : MUTED }}>
                     {r.pastDue > 0 ? money(r.pastDue) : '—'}
@@ -81,13 +86,48 @@ export default function WorkQueue({ rows, onStatement, onPreview, busy, onSeeAll
                   <td style={{ ...td(), color: chased === null ? RED : chased >= 30 ? INK : GREEN }}>
                     {chased === null ? 'never' : chased === 0 ? 'today' : `${chased}d ago`}
                   </td>
-                  <td style={{ ...td(), whiteSpace: 'nowrap', textAlign: 'right' }}>
+                  <td style={{ ...td(), whiteSpace: 'nowrap', textAlign: 'right' }} onClick={(e) => e.stopPropagation()}>
                     <button onClick={() => onPreview(r)} disabled={busy === 'stmt' + r.id} style={btn(false)}>
                       {busy === 'stmt' + r.id ? '…' : 'Preview'}
                     </button>{' '}
                     <button onClick={() => onStatement(r)} style={btn(true)}>Send statement →</button>
                   </td>
                 </tr>
+                {isOpen && (
+                  <tr>
+                    <td colSpan={6} style={{ padding: 0, borderBottom: `1px solid ${BORDER}`, background: '#FAFAF8' }}>
+                      <div style={{ padding: '10px 14px 14px' }}>
+                        <div style={{ fontSize: '10.5px', letterSpacing: '.08em', color: MUTED, fontWeight: 700, margin: '2px 0 8px' }}>
+                          THEIR OPEN INVOICES — OLDEST FIRST
+                        </div>
+                        <table style={{ borderCollapse: 'collapse', width: '100%', fontSize: '12.5px', fontVariantNumeric: 'tabular-nums' }}>
+                          <tbody>
+                            {r.invoices.map((inv) => {
+                              const late = inv.due ? Math.floor((Date.now() - Date.parse(inv.due)) / 86400000) : 0
+                              return (
+                                <tr key={inv.id}>
+                                  <td style={{ ...td(), fontWeight: 600 }}>{inv.doc ? '#' + inv.doc : '(no number)'}</td>
+                                  <td style={td()}>{inv.date || '—'}</td>
+                                  <td style={{ ...td(), color: late > 0 ? RED : MUTED }}>
+                                    {inv.due ? (late > 0 ? `${late}d late` : `due ${inv.due}`) : 'no due date'}
+                                  </td>
+                                  <td style={{ ...td(), textAlign: 'right', fontWeight: 700 }}>{money(inv.balance)}</td>
+                                  <td style={{ ...td(), textAlign: 'right', whiteSpace: 'nowrap' }}>
+                                    <button onClick={() => onInvoicePdf(inv)} disabled={busy === 'pdf' + inv.id} style={btn(false)}>
+                                      {busy === 'pdf' + inv.id ? '…' : 'PDF / print'}
+                                    </button>{' '}
+                                    <button onClick={() => onInvoiceEmail(inv)} style={btn(true)}>Email →</button>
+                                  </td>
+                                </tr>
+                              )
+                            })}
+                          </tbody>
+                        </table>
+                      </div>
+                    </td>
+                  </tr>
+                )}
+                </React.Fragment>
               )
             })}
           </tbody>
