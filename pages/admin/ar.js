@@ -486,8 +486,11 @@ function NewInvoice({ client, refs, call, onClose, onCreated }) {
                   </select>
                   <input value={l.description} onChange={(e) => { setLine(i, 'description', e.target.value); setPreview(null) }} placeholder="e.g. August bookkeeping" style={input()} />
                   <input value={l.qty} onChange={(e) => { setLine(i, 'qty', e.target.value); setPreview(null) }} style={input({ textAlign: 'right' })} />
-                  <input value={l.rate} onChange={(e) => { setLine(i, 'rate', e.target.value); setPreview(null) }} style={input({ textAlign: 'right' })} />
-                  <div style={{ fontSize: '13px', fontWeight: 700, textAlign: 'right', fontVariantNumeric: 'tabular-nums' }}>{amount > 0 ? money(amount) : '—'}</div>
+                  <input value={l.rate} onChange={(e) => { setLine(i, 'rate', e.target.value.replace(/[^0-9.-]/g, '')); setPreview(null) }}
+                    placeholder="0.00" title="A credit or discount goes in as a negative rate" style={input({ textAlign: 'right' })} />
+                  <div style={{ fontSize: '13px', fontWeight: 700, textAlign: 'right', fontVariantNumeric: 'tabular-nums', color: amount < 0 ? RED : undefined }}>
+                    {amount ? (amount < 0 ? '−' + money(Math.abs(amount)) : money(amount)) : '—'}
+                  </div>
                   {lines.length > 1
                     ? <button onClick={() => { setLines((ls) => ls.filter((_, n) => n !== i)); setPreview(null) }} style={btn(false)}>×</button>
                     : <span />}
