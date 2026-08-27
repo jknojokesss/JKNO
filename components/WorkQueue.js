@@ -1,4 +1,5 @@
 import React, { useState, useMemo } from 'react'
+import useIsPhone from './useIsPhone'
 
 // ── Who to chase today ───────────────────────────────────────────────────
 // The front door for a book too big to read. Not 7,000 invoices — a short
@@ -30,6 +31,8 @@ export default function WorkQueue({ rows, onStatement, onPreview, busy, onSeeAll
   const [sort, setSort] = useState('pastDue')
   const [dir, setDir] = useState('desc')
   const [only, setOnly] = useState('all')   // all | pastdue | current | never
+  const phone = useIsPhone()
+  const [showFilters, setShowFilters] = useState(false)
 
   const list = useMemo(() => {
     const needle = wq.trim().toLowerCase()
@@ -66,12 +69,23 @@ export default function WorkQueue({ rows, onStatement, onPreview, busy, onSeeAll
           {list.length.toLocaleString()} customer{list.length === 1 ? '' : 's'} owe you {money(totalPastDue)} past due
         </h2>
         <span style={{ flex: 1 }} />
-        <button onClick={onSeeAll} style={btn(false)}>See every invoice</button>
+        {/* The tabs already lead to the invoice list; on a phone that button
+            is a row of screen for nothing. */}
+        {!phone && <button onClick={onSeeAll} style={btn(false)}>See every invoice</button>}
       </div>
 
-      <div style={{ display: 'flex', gap: '8px', alignItems: 'center', flexWrap: 'wrap', marginBottom: '10px' }}>
+      <div style={{ display: 'flex', gap: '8px', alignItems: 'center', marginBottom: '10px' }}>
         <input value={wq} onChange={(e) => { setWq(e.target.value); setShow(20) }} placeholder="Search customer"
-          style={{ fontSize: '14px', padding: '8px 10px', border: `1px solid ${BORDER}`, borderRadius: '4px', width: '230px' }} />
+          style={{ fontSize: '14px', padding: '8px 10px', border: `1px solid ${BORDER}`, borderRadius: '4px', flex: 1, minWidth: 0 }} />
+        {phone && (
+          <button onClick={() => setShowFilters((f) => !f)} style={{ ...btn(false), whiteSpace: 'nowrap' }}>
+            Filters{(only !== 'all' || staleOnly) ? ' •' : ''}
+          </button>
+        )}
+      </div>
+
+      <div style={{ display: (phone && !showFilters) ? 'none' : 'flex', gap: '8px', alignItems: 'center',
+                    flexWrap: 'wrap', marginBottom: '10px' }}>
         {toolbar}
         {[['all', 'Everyone'], ['pastdue', 'Past due'], ['current', 'Not yet due'], ['never', 'Never chased']].map(([k, label]) => (
           <button key={k} onClick={() => { setOnly(k); setShow(20) }} style={{
@@ -112,6 +126,84 @@ export default function WorkQueue({ rows, onStatement, onPreview, busy, onSeeAll
         Worst first, by how much is actually late.{neverChased > 0 && <> {neverChased} of them {neverChased === 1 ? 'has' : 'have'} never been sent a statement from here.</>}
       </p>
 
+      {phone ? (
+        <div>
+          {list.slice(0, show).map((r) => {
+            const chased = r.lastSent ? daysSince(r.lastSent.at) : null
+            const isOpen = open === r.id
+            return (
+              <div key={r.id} style={{
+                border: `1px solid ${picked.has(r.id) ? INK : BORDER}`, borderRadius: '6px',
+                padding: '12px', marginBottom: '8px', background: picked.has(r.id) ? '#F5F7FA' : '#fff',
+              }}>
+                <div style={{ display: 'flex', alignItems: 'flex-start', gap: '10px' }}>
+                  <input type="checkbox" checked={picked.has(r.id)} onChange={() => {
+                    const next = new Set(picked)
+                    next.has(r.id) ? next.delete(r.id) : next.add(r.id)
+                    setPicked(next)
+                  }} style={{ marginTop: '3px' }} />
+                  <div style={{ flex: 1, minWidth: 0 }} onClick={() => setOpen(isOpen ? null : r.id)}>
+                    <div style={{ fontWeight: 700, fontSize: '15px' }}>{r.name}</div>
+                    {/* One compact meta line: on a 390px card, three facts
+                        spelled out in full wrap into three rows. */}
+                    <div style={{ fontSize: '12.5px', color: MUTED, marginTop: '3px' }}>
+                      {r.invoices.length} inv · {money(r.balance)}
+                      {r.oldestDays > 0 && <span style={{ color: r.oldestDays > 60 ? RED : MUTED }}> · {r.oldestDays}d late</span>}
+                    </div>
+                    <div style={{ fontSize: '12.5px', marginTop: '3px', color: chased === null ? RED : chased >= 30 ? INK : GREEN }}>
+                      {chased === null ? 'never chased' : chased === 0 ? 'chased today' : `chased ${chased}d ago`}
+                      {!r.email && <span style={{ color: RED }}> · no email</span>}
+                    </div>
+                  </div>
+                  <div style={{ textAlign: 'right', whiteSpace: 'nowrap' }}>
+                    <div style={{ fontSize: '10px', color: MUTED, fontWeight: 700, letterSpacing: '.05em' }}>PAST DUE</div>
+                    <div style={{ fontWeight: 700, fontSize: '16px' }}>{r.pastDue > 0 ? money(r.pastDue) : '—'}</div>
+                  </div>
+                </div>
+                <div style={{ display: 'flex', gap: '8px', marginTop: '10px' }}>
+                  <button onClick={() => setOpen(isOpen ? null : r.id)} style={{ ...btn(false), flex: 1 }}>
+                    {isOpen ? 'Hide' : 'Invoices'}
+                  </button>
+                  <button onClick={() => onPreview(r)} disabled={busy === 'stmt' + r.id} style={{ ...btn(false), flex: 1 }}>
+                    {busy === 'stmt' + r.id ? '…' : 'Preview'}
+                  </button>
+                  <button onClick={() => onStatement(r)} style={{ ...btn(true), flex: 2 }}>Send →</button>
+                </div>
+                {isOpen && (
+                  <div style={{ marginTop: '10px', borderTop: `1px solid ${BORDER}`, paddingTop: '8px' }}>
+                    {r.invoices.map((inv) => {
+                      const late = inv.due ? Math.floor((Date.now() - Date.parse(inv.due)) / 86400000) : 0
+                      return (
+                        <div key={inv.id} style={{ padding: '8px 0', borderBottom: `1px solid ${BORDER}` }}>
+                          <div style={{ display: 'flex', justifyContent: 'space-between', gap: '8px' }}>
+                            <span style={{ fontWeight: 600, fontSize: '13px' }}>{inv.doc ? '#' + inv.doc : '(no number)'}</span>
+                            <span style={{ fontWeight: 700, fontSize: '13px' }}>{money(inv.balance)}</span>
+                          </div>
+                          <div style={{ fontSize: '12px', color: late > 0 ? RED : MUTED, margin: '2px 0 6px' }}>
+                            {inv.due ? (late > 0 ? `${late} days late` : `due ${inv.due}`) : 'no due date'}
+                          </div>
+                          <div style={{ display: 'flex', gap: '8px' }}>
+                            <button onClick={() => onInvoicePdf(inv)} disabled={busy === 'pdf' + inv.id} style={{ ...btn(false), flex: 1 }}>
+                              {busy === 'pdf' + inv.id ? '…' : 'PDF'}
+                            </button>
+                            <button onClick={() => onInvoiceEmail(inv)} style={{ ...btn(true), flex: 2 }}>Email →</button>
+                          </div>
+                        </div>
+                      )
+                    })}
+                  </div>
+                )}
+              </div>
+            )
+          })}
+          {list.length > show && (
+            <button onClick={() => setShow((n) => n + 40)} style={{ ...btn(false), width: '100%' }}>
+              Show 40 more ({(list.length - show).toLocaleString()} left)
+            </button>
+          )}
+          {list.length === 0 && <div style={{ fontSize: '13px', color: MUTED, padding: '8px 2px' }}>Nobody matches that.</div>}
+        </div>
+      ) : (
       <div style={{ border: `1px solid ${BORDER}`, borderRadius: '4px', overflowX: 'auto' }}>
         <table style={{ borderCollapse: 'collapse', width: '100%', fontSize: '13px', fontVariantNumeric: 'tabular-nums' }}>
           <thead><tr>
@@ -225,6 +317,7 @@ export default function WorkQueue({ rows, onStatement, onPreview, busy, onSeeAll
           </div>
         )}
       </div>
+      )}
     </div>
   )
 }

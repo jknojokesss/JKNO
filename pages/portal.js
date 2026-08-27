@@ -3,6 +3,7 @@ import Head from 'next/head'
 import { supabase } from '../lib/supabase'
 import CustomerFilter from '../components/CustomerFilter'
 import WorkQueue from '../components/WorkQueue'
+import useIsPhone from '../components/useIsPhone'
 
 // ── Client portal: invoices & statements, sent from YOUR OWN Gmail ───────
 // A portal login is mapped server-side to exactly one QuickBooks company;
@@ -44,6 +45,7 @@ export default function Portal() {
   const [tab, setTab] = useState('chase')
   const [minBal, setMinBal] = useState('')
   const [sel, setSel] = useState(new Set())
+  const phone = useIsPhone()
   const [views, setViews] = useState([])
 
   // Saved views live in the browser: they are one person's working habits,
@@ -357,9 +359,11 @@ export default function Portal() {
 
       {data && !data.needsConnect && (
         <>
-          <div style={{ display: 'flex', gap: '10px', alignItems: 'baseline', flexWrap: 'wrap', marginBottom: '16px' }}>
-            <h2 style={{ fontSize: '18px' }}>{data.company || 'Your company'}</h2>
-            <span style={{ fontSize: '12.5px', color: MUTED }}>{data.invoices.length} open invoice{data.invoices.length === 1 ? '' : 's'} · live from QuickBooks</span>
+          <div style={{ display: 'flex', gap: phone ? '6px' : '10px', alignItems: 'baseline', flexWrap: 'wrap', marginBottom: phone ? '10px' : '16px' }}>
+            <h2 style={{ fontSize: phone ? '16px' : '18px' }}>{data.company || 'Your company'}</h2>
+            <span style={{ fontSize: '12.5px', color: MUTED }}>
+              {data.invoices.length} open{phone ? '' : ` invoice${data.invoices.length === 1 ? '' : 's'} · live from QuickBooks`}
+            </span>
             <span style={{ flex: 1 }} />
             <button onClick={() => load(true)} disabled={busy === 'load'} style={btn(false)}>{busy === 'load' ? 'Refreshing…' : 'Refresh'}</button>
             <button onClick={async () => {
@@ -486,6 +490,52 @@ export default function Portal() {
                 </div>
               )
             })()}
+            {phone ? (
+              <div style={{ marginBottom: '26px' }}>
+                {shown.slice(0, limit).map((inv) => {
+                  const late = inv.due ? Math.floor((Date.parse(todayISO) - Date.parse(inv.due)) / 86400000) : 0
+                  return (
+                    <div key={inv.id} style={{
+                      border: `1px solid ${sel.has(inv.id) ? INK : BORDER}`, borderRadius: '6px',
+                      padding: '12px', marginBottom: '8px', background: sel.has(inv.id) ? '#F5F7FA' : '#fff',
+                    }}>
+                      <div style={{ display: 'flex', alignItems: 'flex-start', gap: '10px' }}>
+                        <input type="checkbox" checked={sel.has(inv.id)} onChange={() => {
+                          const next = new Set(sel)
+                          next.has(inv.id) ? next.delete(inv.id) : next.add(inv.id)
+                          setSel(next)
+                        }} style={{ marginTop: '3px' }} />
+                        <div style={{ flex: 1, minWidth: 0 }}>
+                          <div style={{ fontWeight: 700, fontSize: '15px' }}>{inv.customer}</div>
+                          <div style={{ fontSize: '12.5px', color: MUTED, marginTop: '2px' }}>
+                            {inv.doc ? '#' + inv.doc : '(no number)'} · {inv.date || '—'}
+                          </div>
+                          <div style={{ fontSize: '12.5px', color: late > 0 ? RED : MUTED, marginTop: '2px' }}>
+                            {inv.due ? (late > 0 ? `${late} days late` : `due ${inv.due}`) : 'no due date'}
+                          </div>
+                        </div>
+                        <div style={{ fontWeight: 700, fontSize: '16px', whiteSpace: 'nowrap' }}>{money(inv.balance)}</div>
+                      </div>
+                      <div style={{ display: 'flex', gap: '8px', marginTop: '10px' }}>
+                        <button onClick={() => openBlob(`/api/portal/ar?action=pdf&id=${inv.id}`, 'pdf' + inv.id)}
+                          disabled={busy === 'pdf' + inv.id} style={{ ...btn(false), flex: 1 }}>
+                          {busy === 'pdf' + inv.id ? '…' : 'PDF'}
+                        </button>
+                        <button onClick={() => startCompose('invoice', inv.id, inv.customer, inv.email,
+                          `Invoice ${inv.doc || ''} from ${data.company || 'us'}`.replace('  ', ' '), inv.doc, inv.customerId)}
+                          style={{ ...btn(true), flex: 2 }}>Email →</button>
+                      </div>
+                    </div>
+                  )
+                })}
+                {shown.length > limit && (
+                  <button onClick={() => setLimit((n) => n + 100)} style={{ ...btn(false), width: '100%' }}>
+                    Show 100 more ({(shown.length - limit).toLocaleString()} left)
+                  </button>
+                )}
+                {shown.length === 0 && <div style={{ fontSize: '13px', color: MUTED, padding: '8px 2px' }}>Nothing matches that search.</div>}
+              </div>
+            ) : (
             <div style={{ border: `1px solid ${BORDER}`, borderRadius: '4px', overflowX: 'auto', marginBottom: '26px' }}>
               <table style={{ borderCollapse: 'collapse', width: '100%', fontSize: '13px', fontVariantNumeric: 'tabular-nums' }}>
                 <thead><tr>
@@ -539,14 +589,19 @@ export default function Portal() {
                 <div style={{ padding: '16px', fontSize: '13px', color: MUTED }}>Nothing matches that search.</div>
               )}
             </div>
+            )}
             </>
           )}
         </>
       )}
 
       {compose && (
-        <div onClick={() => setCompose(null)} style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,.4)', zIndex: 50, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '18px' }}>
-          <div onClick={(e) => e.stopPropagation()} style={{ background: '#fff', borderRadius: '6px', maxWidth: '560px', width: '100%', padding: '20px', maxHeight: '90vh', overflowY: 'auto' }}>
+        <div onClick={() => setCompose(null)} style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,.4)', zIndex: 50, display: 'flex', alignItems: phone ? 'flex-start' : 'center', justifyContent: 'center', padding: phone ? '0' : '18px' }}>
+          <div onClick={(e) => e.stopPropagation()} style={{
+            background: '#fff', borderRadius: phone ? '0' : '6px', maxWidth: '560px', width: '100%',
+            padding: phone ? '16px' : '20px', maxHeight: phone ? '100vh' : '90vh', minHeight: phone ? '100vh' : 'auto',
+            overflowY: 'auto',
+          }}>
             <h3 style={{ fontSize: '16px', marginBottom: '4px' }}>Email {compose.kind === 'statement' ? 'statement' : 'invoice'} — {compose.name}</h3>
             <p style={{ fontSize: '12px', color: MUTED, lineHeight: 1.6, marginBottom: '14px' }}>
               This opens Gmail with everything filled in — you hit Send there, so the email comes from
@@ -574,7 +629,7 @@ export default function Portal() {
                 {compose.readyErr}
               </div>
             )}
-            <div style={{ display: 'flex', gap: '10px', justifyContent: 'flex-end' }}>
+            <div style={{ display: 'flex', gap: '10px', justifyContent: 'flex-end', flexDirection: phone ? 'column-reverse' : 'row' }}>
               <button onClick={() => setCompose(null)} style={btn(false)}>Cancel</button>
               <button onClick={openGmail} disabled={!compose.to || !compose.ready} style={btn(true)}>
                 {compose.readyErr ? 'Unavailable'
@@ -800,19 +855,46 @@ function ChangePassword({ onClose }) {
 
 function Frame({ children, onSignOut }) {
   const [changePw, setChangePw] = useState(false)
+  const phone = useIsPhone()
   return (
     <>
-      <Head><title>Invoices & Statements</title><meta name="robots" content="noindex" /><meta name="viewport" content="width=device-width, initial-scale=1" /></Head>
-      <div style={{ fontFamily: '-apple-system, Segoe UI, sans-serif', color: INK, maxWidth: '980px', margin: '0 auto', padding: '28px 18px 80px' }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: '22px', borderBottom: `1px solid ${BORDER}`, paddingBottom: '14px', gap: '10px', flexWrap: 'wrap' }}>
-          <div>
-            <h1 style={{ fontSize: '20px' }}>Invoices &amp; Statements</h1>
-            <div style={{ fontSize: '11.5px', color: MUTED, marginTop: '2px' }}>Reads your QuickBooks · emails go out from your own Gmail</div>
+      <Head>
+        <title>Invoices &amp; Statements</title>
+        <meta name="robots" content="noindex" />
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+      </Head>
+      {/* 16px inputs stop iOS zooming the page on focus; 40px is the smallest
+          comfortable tap target. Cheaper to fix globally than per control. */}
+      <style>{`
+        html, body { margin: 0; padding: 0; -webkit-text-size-adjust: 100%; }
+        @media (max-width: 700px) {
+          input:not([type=checkbox]), select, textarea { font-size: 16px !important; }
+          button { min-height: 40px; }
+          input[type=checkbox] { width: 18px; height: 18px; }
+        }
+      `}</style>
+      <div style={{ fontFamily: '-apple-system, Segoe UI, sans-serif', color: INK, maxWidth: '980px', margin: '0 auto', padding: 'clamp(14px, 3vw, 28px) clamp(12px, 3vw, 18px) 80px' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: phone ? 'center' : 'baseline',
+                      marginBottom: phone ? '14px' : '22px', borderBottom: `1px solid ${BORDER}`,
+                      paddingBottom: phone ? '10px' : '14px', gap: '10px' }}>
+          <div style={{ minWidth: 0 }}>
+            <h1 style={{ fontSize: phone ? '17px' : '20px' }}>Invoices &amp; Statements</h1>
+            {!phone && <div style={{ fontSize: '11.5px', color: MUTED, marginTop: '2px' }}>Reads your QuickBooks · emails go out from your own Gmail</div>}
           </div>
-          {onSignOut && <span style={{ whiteSpace: 'nowrap' }}>
-            <button onClick={() => setChangePw(true)} style={{ ...btn(false), marginRight: '8px' }}>Change password</button>
-            <button onClick={onSignOut} style={btn(false)}>Sign out</button>
-          </span>}
+          {onSignOut && (phone ? (
+            // Two small links instead of two buttons: the header is not where
+            // a phone screen should spend its height.
+            <span style={{ whiteSpace: 'nowrap', fontSize: '12.5px' }}>
+              <a onClick={() => setChangePw(true)} style={{ color: MUTED, cursor: 'pointer' }}>Password</a>
+              <span style={{ color: BORDER, margin: '0 7px' }}>|</span>
+              <a onClick={onSignOut} style={{ color: MUTED, cursor: 'pointer' }}>Sign out</a>
+            </span>
+          ) : (
+            <span style={{ whiteSpace: 'nowrap' }}>
+              <button onClick={() => setChangePw(true)} style={{ ...btn(false), marginRight: '8px' }}>Change password</button>
+              <button onClick={onSignOut} style={btn(false)}>Sign out</button>
+            </span>
+          ))}
         </div>
         {children}
         {changePw && <ChangePassword onClose={() => setChangePw(false)} />}
