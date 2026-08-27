@@ -152,7 +152,10 @@ export default async function handler(req, res) {
       if (!linkSecret()) return res.status(503).json({ error: 'Document links are not configured (no signing secret).' })
       const exp = Date.now() + 60 * 86400000 // 60 days
       const sig = signDoc(client, kind, id, exp)
-      const base = process.env.PORTAL_BASE_URL || 'https://jknojokes.com'
+      // Derived from the request, never hardcoded: point any domain at this
+      // deployment and the links follow it, with our name nowhere in them.
+      const proto = String(req.headers['x-forwarded-proto'] || 'https').split(',')[0]
+      const base = process.env.PORTAL_BASE_URL || `${proto}://${req.headers.host}`
       return res.status(200).json({ url: `${base}/api/portal/doc?c=${encodeURIComponent(client)}&k=${kind}&i=${id}&e=${exp}&s=${sig}` })
     }
 

@@ -552,22 +552,10 @@ export default function Portal() {
               This opens Gmail with everything filled in — you hit Send there, so the email comes from
               <b> your</b> address.{' '}
               {compose.kind === 'invoices'
-                ? <>All {compose.docs.length} QuickBooks PDFs download at the same time — <b>drag them into the Gmail window</b> before sending. Your browser may ask once whether to allow multiple files.</>
-                : compose.attach
-                ? <>The {compose.kind === 'statement' ? 'statement' : 'QuickBooks invoice'} PDF downloads at the same time — <b>drag it into the Gmail window</b> before sending. Nothing in the email points anywhere but you.</>
-                : <><code style={{ fontFamily: mono, fontSize: '11px' }}>{'{link}'}</code> becomes a secure link to the live statement, which always shows current numbers.</>}
+                ? <>All {compose.docs.length} PDFs download at the same time — <b>drag them into the Gmail window</b> before sending. Your browser may ask once whether to allow multiple files.</>
+                : <>The {compose.kind === 'statement' ? 'statement' : 'invoice'} PDF downloads at the same time — <b>drag it into the Gmail window</b> before sending. The email contains nothing but your own words and your own document.</>}
             </p>
-            {(compose.kind === 'invoice' || compose.kind === 'statement') && (
-              <label style={{ fontSize: '12px', color: MUTED, display: 'flex', gap: '7px', alignItems: 'center', marginBottom: '10px' }}>
-                <input type="checkbox" checked={!compose.attach}
-                  onChange={(e) => {
-                    const attach = !e.target.checked
-                    setCompose((c) => ({ ...c, attach, ready: null, readyErr: null }))
-                    prepare(compose.kind, compose.id, attach)
-                  }} />
-                Send a link instead of attaching the PDF
-              </label>
-            )}
+
             <label style={{ fontSize: '12px', color: MUTED, display: 'block', marginBottom: '10px' }}>To<br />
               <input value={compose.to} onChange={(e) => setCompose((c) => ({ ...c, to: e.target.value }))} placeholder="customer@email.com" style={input({ width: '100%', fontFamily: mono })} />
             </label>
@@ -583,7 +571,7 @@ export default function Portal() {
             </label>
             {compose.readyErr && (
               <div style={{ fontSize: '12.5px', color: RED, lineHeight: 1.6, marginBottom: '10px' }}>
-                {compose.readyErr}{compose.attach ? ' — tick the box above to send a link instead.' : ''}
+                {compose.readyErr}
               </div>
             )}
             <div style={{ display: 'flex', gap: '10px', justifyContent: 'flex-end' }}>
