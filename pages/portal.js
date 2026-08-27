@@ -78,47 +78,66 @@ export default function Portal() {
   // here for the sender to drag in — a customer-facing email should carry
   // the sender's document, not a link to somebody else's domain. Statements
   // have no PDF, so those still travel as a signed link.
+  //
+  // Whatever the message needs is fetched WHILE the sender reads it, so the
+  // Send click itself is synchronous: the download starts and Gmail opens in
+  // the same gesture. Doing the fetch on click instead meant either a popup
+  // the browser blocked, or a blank tab sitting there looking broken.
   const startCompose = (kind, id, name, to, subjectDefault, doc) => {
     let saved = null
     try { saved = window.localStorage.getItem('portal-body-' + kind) } catch (e) {}
+    const attach = kind === 'invoice'
     setCompose({
       kind, id, name, doc, to: to || '',
       subject: subjectDefault,
       body: saved || (kind === 'statement' ? DEFAULT_STATEMENT_BODY : DEFAULT_INVOICE_BODY),
       saveDefault: false,
-      attach: kind === 'invoice',
+      attach,
+      ready: null,      // the blob (attach) or the link (statement)
+      readyErr: null,
     })
+    prepare(kind, id, attach)
   }
-  const openGmail = async () => {
-    setBusy('gmail'); setError(null)
-    // The tab must be opened synchronously inside the click. Fetching the
-    // PDF first and calling window.open afterwards puts it outside the user
-    // gesture, which browsers block as a popup — the Gmail window then just
-    // never appears and it looks like the button did nothing.
-    const win = window.open('', '_blank')
-    try {
-      let body = compose.body
-      if (compose.attach) {
-        const res = await call(`/api/portal/ar?action=pdf&id=${compose.id}`, { raw: true })
-        if (!res.ok) throw new Error('Could not get the invoice PDF from QuickBooks.')
-        const a = document.createElement('a')
-        a.href = URL.createObjectURL(await res.blob())
-        a.download = `Invoice-${compose.doc || compose.id}.pdf`
-        document.body.appendChild(a); a.click(); a.remove()
-        body = body.replaceAll('{link}', '').trim()
-      } else {
-        const { url } = await call('/api/portal/ar', { method: 'POST', body: JSON.stringify({ action: 'link', kind: compose.kind, id: compose.id }) })
-        body = body.includes('{link}') ? body.replaceAll('{link}', url) : body + '\n\n' + url
-      }
-      if (compose.saveDefault) { try { window.localStorage.setItem('portal-body-' + compose.kind, compose.body) } catch (e) {} }
-      const gmail = `https://mail.google.com/mail/?view=cm&fs=1&to=${encodeURIComponent(compose.to)}&su=${encodeURIComponent(compose.subject)}&body=${encodeURIComponent(body)}`
-      if (win && !win.closed) win.location.href = gmail
-      else window.location.href = gmail // popups blocked: use this tab rather than silently doing nothing
-      setCompose(null)
-    } catch (e) {
-      if (win && !win.closed) win.close()
-      setError(String(e.message || e))
-    } finally { setBusy('') }
+
+  // Fetch the attachment or mint the link in the background. Keyed by id so a
+  // late response for a closed or replaced modal is discarded.
+  const prepare = (kind, id, attach) => {
+    const settle = (patch) => setCompose((c) => (c && String(c.id) === String(id) ? { ...c, ...patch } : c))
+    if (attach) {
+      call(`/api/portal/ar?action=pdf&id=${id}`, { raw: true })
+        .then(async (res) => {
+          if (!res.ok) throw new Error('QuickBooks did not return a PDF for this invoice.')
+          settle({ ready: await res.blob() })
+        })
+        .catch((e) => settle({ readyErr: String(e.message || e) }))
+    } else {
+      call('/api/portal/ar', { method: 'POST', body: JSON.stringify({ action: 'link', kind, id }) })
+        .then((r) => settle({ ready: r.url }))
+        .catch((e) => settle({ readyErr: String(e.message || e) }))
+    }
+  }
+
+  // Everything below runs inside the click — no awaits, so no popup block
+  // and no empty tab.
+  const openGmail = () => {
+    const c = compose
+    if (!c || !c.ready) return
+    let body = c.body
+    if (c.attach) {
+      body = body.replaceAll('{link}', '').trim()
+      const a = document.createElement('a')
+      a.href = URL.createObjectURL(c.ready)
+      a.download = `Invoice-${c.doc || c.id}.pdf`
+      document.body.appendChild(a); a.click(); a.remove()
+    } else {
+      body = body.includes('{link}') ? body.replaceAll('{link}', c.ready) : body + '\n\n' + c.ready
+    }
+    if (c.saveDefault) { try { window.localStorage.setItem('portal-body-' + c.kind, c.body) } catch (e) {} }
+    window.open(
+      `https://mail.google.com/mail/?view=cm&fs=1&to=${encodeURIComponent(c.to)}&su=${encodeURIComponent(c.subject)}&body=${encodeURIComponent(body)}`,
+      '_blank'
+    )
+    setCompose(null)
   }
 
   // A real book can run to thousands of open invoices, so the list is
@@ -262,7 +281,11 @@ export default function Portal() {
             {compose.kind === 'invoice' && (
               <label style={{ fontSize: '12px', color: MUTED, display: 'flex', gap: '7px', alignItems: 'center', marginBottom: '10px' }}>
                 <input type="checkbox" checked={!compose.attach}
-                  onChange={(e) => setCompose((c) => ({ ...c, attach: !e.target.checked }))} />
+                  onChange={(e) => {
+                    const attach = !e.target.checked
+                    setCompose((c) => ({ ...c, attach, ready: null, readyErr: null }))
+                    prepare(compose.kind, compose.id, attach)
+                  }} />
                 Send a link instead of attaching the PDF
               </label>
             )}
@@ -279,9 +302,18 @@ export default function Portal() {
               <input type="checkbox" checked={compose.saveDefault} onChange={(e) => setCompose((c) => ({ ...c, saveDefault: e.target.checked }))} />
               Remember this wording as my default
             </label>
+            {compose.readyErr && (
+              <div style={{ fontSize: '12.5px', color: RED, lineHeight: 1.6, marginBottom: '10px' }}>
+                {compose.readyErr}{compose.attach ? ' — tick the box above to send a link instead.' : ''}
+              </div>
+            )}
             <div style={{ display: 'flex', gap: '10px', justifyContent: 'flex-end' }}>
               <button onClick={() => setCompose(null)} style={btn(false)}>Cancel</button>
-              <button onClick={openGmail} disabled={busy === 'gmail' || !compose.to} style={btn(true)}>{busy === 'gmail' ? 'Preparing…' : 'Open in Gmail →'}</button>
+              <button onClick={openGmail} disabled={!compose.to || !compose.ready} style={btn(true)}>
+                {compose.readyErr ? 'Unavailable'
+                  : !compose.ready ? (compose.attach ? 'Getting the PDF…' : 'Preparing…')
+                  : 'Open in Gmail →'}
+              </button>
             </div>
           </div>
         </div>
