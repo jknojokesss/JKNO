@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useMemo } from 'react'
 import Head from 'next/head'
 import { useRouter } from 'next/router'
 import { supabase } from '../../lib/supabase'
@@ -23,6 +23,10 @@ export default function ArAdmin() {
   const [refs, setRefs] = useState(null)
   const [stmtTo, setStmtTo] = useState({})
   const [stmtSent, setStmtSent] = useState({})
+  const [q, setQ] = useState('')
+  const [sort, setSort] = useState('due')
+  const [overdueOnly, setOverdueOnly] = useState(false)
+  const [limit, setLimit] = useState(50)
 
   useEffect(() => {
     supabase.auth.getSession().then(async ({ data: { session } }) => {
@@ -91,6 +95,25 @@ export default function ArAdmin() {
     } catch (e) { setError(String(e.message || e)) } finally { setBusy('') }
   }
 
+  const todayISO = new Date().toISOString().slice(0, 10)
+  const shown = useMemo(() => {
+    const all = (data && data.invoices) || []
+    const needle = q.trim().toLowerCase()
+    let out = needle
+      ? all.filter((i) => String(i.customer || '').toLowerCase().includes(needle)
+                       || String(i.doc || '').toLowerCase().includes(needle))
+      : all
+    if (overdueOnly) out = out.filter((i) => i.due && i.due < todayISO)
+    const by = {
+      due: (a, b) => String(a.due || '9999-99-99').localeCompare(String(b.due || '9999-99-99')),
+      newest: (a, b) => String(b.date || '').localeCompare(String(a.date || '')),
+      customer: (a, b) => String(a.customer || '').localeCompare(String(b.customer || '')),
+      biggest: (a, b) => b.balance - a.balance,
+    }
+    return [...out].sort(by[sort] || by.due)
+  }, [data, q, sort, overdueOnly, todayISO])
+  const shownTotal = shown.reduce((t, i) => t + i.balance, 0)
+
   return (
     <>
       <Head><title>AR — live invoices</title><meta name="robots" content="noindex" /></Head>
@@ -147,6 +170,28 @@ export default function ArAdmin() {
         )}
 
         {data && data.invoices.length > 0 && (
+          <div style={{ display: 'flex', gap: '8px', alignItems: 'center', flexWrap: 'wrap', marginBottom: '10px' }}>
+            <input value={q} onChange={(e) => { setQ(e.target.value); setLimit(50) }} placeholder="Search customer or invoice #"
+              style={{ fontSize: '13px', padding: '7px 9px', border: `1px solid ${BORDER}`, borderRadius: '4px', width: '250px' }} />
+            <select value={sort} onChange={(e) => setSort(e.target.value)} style={{ fontSize: '13px', padding: '7px 9px', border: `1px solid ${BORDER}`, borderRadius: '4px' }}>
+              <option value="due">Oldest due first</option>
+              <option value="newest">Newest invoice first</option>
+              <option value="customer">Customer A–Z</option>
+              <option value="biggest">Biggest balance first</option>
+            </select>
+            <label style={{ fontSize: '12.5px', color: MUTED, display: 'flex', gap: '6px', alignItems: 'center' }}>
+              <input type="checkbox" checked={overdueOnly} onChange={(e) => { setOverdueOnly(e.target.checked); setLimit(50) }} />
+              Past due only
+            </label>
+            {(q || overdueOnly) && <button onClick={() => { setQ(''); setOverdueOnly(false); setLimit(50) }} style={btn(false)}>Clear</button>}
+            <span style={{ flex: 1 }} />
+            <span style={{ fontSize: '12.5px', color: MUTED }}>
+              {shown.length.toLocaleString()} of {data.invoices.length.toLocaleString()} · {money(shownTotal)}
+            </span>
+          </div>
+        )}
+
+        {data && data.invoices.length > 0 && (
           <div style={{ border: `1px solid ${BORDER}`, borderRadius: '4px', overflowX: 'auto' }}>
             <table style={{ borderCollapse: 'collapse', width: '100%', fontSize: '13px', fontVariantNumeric: 'tabular-nums' }}>
               <thead><tr>
@@ -155,7 +200,7 @@ export default function ArAdmin() {
                 ))}
               </tr></thead>
               <tbody>
-                {data.invoices.map((inv) => {
+                {shown.slice(0, limit).map((inv) => {
                   const sent = sentByInv[inv.id]
                   return (
                     <tr key={inv.id}>
