@@ -91,6 +91,11 @@ export default function Portal() {
   }
   const openGmail = async () => {
     setBusy('gmail'); setError(null)
+    // The tab must be opened synchronously inside the click. Fetching the
+    // PDF first and calling window.open afterwards puts it outside the user
+    // gesture, which browsers block as a popup — the Gmail window then just
+    // never appears and it looks like the button did nothing.
+    const win = window.open('', '_blank')
     try {
       let body = compose.body
       if (compose.attach) {
@@ -107,9 +112,13 @@ export default function Portal() {
       }
       if (compose.saveDefault) { try { window.localStorage.setItem('portal-body-' + compose.kind, compose.body) } catch (e) {} }
       const gmail = `https://mail.google.com/mail/?view=cm&fs=1&to=${encodeURIComponent(compose.to)}&su=${encodeURIComponent(compose.subject)}&body=${encodeURIComponent(body)}`
-      window.open(gmail, '_blank')
+      if (win && !win.closed) win.location.href = gmail
+      else window.location.href = gmail // popups blocked: use this tab rather than silently doing nothing
       setCompose(null)
-    } catch (e) { setError(String(e.message || e)) } finally { setBusy('') }
+    } catch (e) {
+      if (win && !win.closed) win.close()
+      setError(String(e.message || e))
+    } finally { setBusy('') }
   }
 
   // A real book can run to thousands of open invoices, so the list is
