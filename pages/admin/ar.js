@@ -23,6 +23,8 @@ export default function ArAdmin() {
   const [refs, setRefs] = useState(null)
   const [stmtTo, setStmtTo] = useState({})
   const [stmtSent, setStmtSent] = useState({})
+  const [csort, setCsort] = useState('balance')
+  const [cdir, setCdir] = useState('desc')
   const [q, setQ] = useState('')
   const [sort, setSort] = useState('due')
   const [dir, setDir] = useState('asc')
@@ -268,7 +270,26 @@ export default function ArAdmin() {
             g.count++; g.balance += inv.balance
             if (!g.email && inv.email) g.email = inv.email
           }
-          const groups = Object.values(byCust).sort((a, b) => b.balance - a.balance)
+          const cmpC = {
+            name: (a, b) => a.name.localeCompare(b.name),
+            count: (a, b) => a.count - b.count,
+            balance: (a, b) => a.balance - b.balance,
+          }
+          const baseC = cmpC[csort] || cmpC.balance
+          const groups = Object.values(byCust).sort((a, b) => (cdir === 'asc' ? baseC(a, b) : -baseC(a, b)))
+          const sortC = (field) => {
+            if (csort === field) { setCdir((d) => (d === 'asc' ? 'desc' : 'asc')); return }
+            setCsort(field)
+            setCdir(field === 'name' ? 'asc' : 'desc')
+          }
+          const SortC = ({ field, label, right }) => (
+            <th onClick={() => sortC(field)} title="Sort by this column"
+              style={{ textAlign: right ? 'right' : 'left', padding: '8px 10px', borderBottom: `1px solid ${INK}`,
+                       fontSize: '11px', textTransform: 'uppercase', letterSpacing: '.06em',
+                       color: csort === field ? INK : MUTED, whiteSpace: 'nowrap', cursor: 'pointer', userSelect: 'none' }}>
+              {label}{csort === field ? (cdir === 'asc' ? ' ▲' : ' ▼') : ''}
+            </th>
+          )
           const openStmt = async (g) => {
             setBusy('stmt' + g.id); setError(null)
             try {
@@ -298,8 +319,11 @@ export default function ArAdmin() {
               <div style={{ border: `1px solid ${BORDER}`, borderRadius: '4px', overflowX: 'auto' }}>
                 <table style={{ borderCollapse: 'collapse', width: '100%', fontSize: '13px', fontVariantNumeric: 'tabular-nums' }}>
                   <thead><tr>
-                    {['Customer', 'Open', 'Balance', 'Send to', ''].map((h, k) => (
-                      <th key={k} style={{ textAlign: k === 1 || k === 2 ? 'right' : 'left', padding: '8px 10px', borderBottom: `1px solid ${INK}`, fontSize: '11px', textTransform: 'uppercase', letterSpacing: '.06em', color: MUTED, whiteSpace: 'nowrap' }}>{h}</th>
+                    <SortC field="name" label="Customer" />
+                    <SortC field="count" label="Open" right />
+                    <SortC field="balance" label="Balance" right />
+                    {['Send to', ''].map((h, k) => (
+                      <th key={k} style={{ textAlign: 'left', padding: '8px 10px', borderBottom: `1px solid ${INK}`, fontSize: '11px', textTransform: 'uppercase', letterSpacing: '.06em', color: MUTED, whiteSpace: 'nowrap' }}>{h}</th>
                     ))}
                   </tr></thead>
                   <tbody>

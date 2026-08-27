@@ -345,6 +345,8 @@ export default function Portal() {
 function Statements({ data, openBlob, busy, startCompose }) {
   const [cq, setCq] = useState('')
   const [climit, setClimit] = useState(50)
+  const [csort, setCsort] = useState('balance')
+  const [cdir, setCdir] = useState('desc')
   const byCust = {}
   for (const inv of data.invoices) {
     if (!inv.customerId) continue
@@ -352,10 +354,29 @@ function Statements({ data, openBlob, busy, startCompose }) {
     g.count++; g.balance += inv.balance
     if (!g.email && inv.email) g.email = inv.email
   }
-  const allGroups = Object.values(byCust).sort((a, b) => b.balance - a.balance)
+  const cmpC = {
+    name: (a, b) => a.name.localeCompare(b.name),
+    count: (a, b) => a.count - b.count,
+    balance: (a, b) => a.balance - b.balance,
+  }
+  const baseC = cmpC[csort] || cmpC.balance
+  const allGroups = Object.values(byCust).sort((a, b) => (cdir === 'asc' ? baseC(a, b) : -baseC(a, b)))
   const needle = cq.trim().toLowerCase()
   const groups = needle ? allGroups.filter((g) => g.name.toLowerCase().includes(needle)) : allGroups
   const monthYear = new Date().toLocaleDateString('en-US', { month: 'long', year: 'numeric' })
+  const sortC = (field) => {
+    if (csort === field) { setCdir((d) => (d === 'asc' ? 'desc' : 'asc')); return }
+    setCsort(field)
+    setCdir(field === 'name' ? 'asc' : 'desc')
+  }
+  const SortC = ({ field, label, right }) => (
+    <th onClick={() => sortC(field)} title="Sort by this column"
+      style={{ textAlign: right ? 'right' : 'left', padding: '8px 10px', borderBottom: `1px solid ${INK}`,
+               fontSize: '11px', textTransform: 'uppercase', letterSpacing: '.06em',
+               color: csort === field ? INK : MUTED, whiteSpace: 'nowrap', cursor: 'pointer', userSelect: 'none' }}>
+      {label}{csort === field ? (cdir === 'asc' ? ' ▲' : ' ▼') : ''}
+    </th>
+  )
   return (
     <div>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', gap: '10px', flexWrap: 'wrap' }}>
@@ -376,9 +397,10 @@ function Statements({ data, openBlob, busy, startCompose }) {
       <div style={{ border: `1px solid ${BORDER}`, borderRadius: '4px', overflowX: 'auto' }}>
         <table style={{ borderCollapse: 'collapse', width: '100%', fontSize: '13px', fontVariantNumeric: 'tabular-nums' }}>
           <thead><tr>
-            {['Customer', 'Open', 'Balance', ''].map((h, k) => (
-              <th key={k} style={{ textAlign: k === 1 || k === 2 ? 'right' : 'left', padding: '8px 10px', borderBottom: `1px solid ${INK}`, fontSize: '11px', textTransform: 'uppercase', letterSpacing: '.06em', color: MUTED, whiteSpace: 'nowrap' }}>{h}</th>
-            ))}
+            <SortC field="name" label="Customer" />
+            <SortC field="count" label="Open" right />
+            <SortC field="balance" label="Balance" right />
+            <th style={{ borderBottom: `1px solid ${INK}` }}></th>
           </tr></thead>
           <tbody>
             {groups.slice(0, climit).map((g) => (
