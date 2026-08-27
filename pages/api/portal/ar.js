@@ -1,7 +1,8 @@
 import crypto from 'crypto'
 import { requirePortalUser } from '../../../lib/portalAuth'
+import { supabaseAdmin } from '../../../lib/supabaseAdmin'
 import { getLiveToken, QboAuthError } from '../../../lib/qboAuth'
-import { fetchOpenInvoices, fetchInvoicePdf, fetchArRefs, buildInvoice, postInvoice, nextDocNumber, statementFor, statementsForAll, statementPage } from '../../../lib/qboAr'
+import { fetchOpenInvoices, fetchInvoicePdf, fetchArRefs, buildInvoice, postInvoice, nextDocNumber, statementFor, statementsForAll, statementPage, invalidateAr } from '../../../lib/qboAr'
 
 // ── The client portal's API ──────────────────────────────────────────────
 // Same live-QBO reads and the guarded invoice create as /api/qbo/ar, but:
@@ -90,8 +91,36 @@ export default async function handler(req, res) {
         return res.status(200).json(await fetchArRefs(env, token, realmId))
       }
 
-      const invoices = await fetchOpenInvoices(env, token, realmId)
-      return res.status(200).json({ company: connection.company_name, invoices })
+      const invoices = await fetchOpenInvoices(env, token, realmId, { fresh: req.query.fresh === '1' })
+
+      // Who has already been chased, newest first per customer. QuickBooks
+      // has no record of this — it is the portal's own log.
+      const sends = {}
+      const { data: rows } = await supabaseAdmin
+        .from('portal_sends').select('customer_id, kind, sent_at')
+        .eq('client_slug', client).order('sent_at', { ascending: false }).limit(2000)
+      for (const r of rows || []) {
+        if (r.customer_id && !sends[r.customer_id]) sends[r.customer_id] = { at: r.sent_at, kind: r.kind }
+      }
+      return res.status(200).json({ company: connection.company_name, invoices, sends })
+    }
+
+    if (req.method === 'POST' && req.body && req.body.action === 'log-send') {
+      // Logged when the message is handed to Gmail. We cannot see the Send
+      // click inside Gmail, so this records "chased", not "delivered" — which
+      // is what a follow-up pass actually needs to know.
+      const { kind, customerId, customerName, doc, to } = req.body
+      const { error } = await supabaseAdmin.from('portal_sends').insert({
+        client_slug: client,
+        customer_id: customerId ? String(customerId) : null,
+        customer_name: customerName || null,
+        kind: kind === 'invoice' ? 'invoice' : 'statement',
+        doc: doc ? String(doc) : null,
+        to_email: to || null,
+        sent_by: gate.email,
+      })
+      if (error) return res.status(500).json({ error: error.message })
+      return res.status(200).json({ ok: true })
     }
 
     if (req.method === 'POST' && req.body && req.body.action === 'link') {
@@ -120,6 +149,7 @@ export default async function handler(req, res) {
       }
       if (!requestId) return res.status(400).json({ error: 'Confirm requires the requestId from the preview.' })
       const out = await postInvoice(env, token, realmId, built.payload, String(requestId))
+      invalidateAr(realmId) // the list must show what we just created
       const created = out.Invoice || {}
       return res.status(200).json({ ok: true, created: { id: created.Id, doc: created.DocNumber || docNumber, total: Number(created.TotalAmt || built.total) } })
     }

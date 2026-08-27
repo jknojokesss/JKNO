@@ -2,6 +2,7 @@ import React, { useState, useEffect, useMemo } from 'react'
 import Head from 'next/head'
 import { supabase } from '../lib/supabase'
 import CustomerFilter from '../components/CustomerFilter'
+import WorkQueue from '../components/WorkQueue'
 
 // ── Client portal: invoices & statements, sent from YOUR OWN Gmail ───────
 // A portal login is mapped server-side to exactly one QuickBooks company;
@@ -39,6 +40,30 @@ export default function Portal() {
   const [aging, setAging] = useState('all')
   const [excluded, setExcluded] = useState(new Set())
   const [limit, setLimit] = useState(50)
+  const [tab, setTab] = useState('chase')
+  const [minBal, setMinBal] = useState('')
+  const [views, setViews] = useState([])
+
+  // Saved views live in the browser: they are one person's working habits,
+  // not company data, and they must survive nothing more than this laptop.
+  useEffect(() => {
+    try { setViews(JSON.parse(window.localStorage.getItem('portal-views') || '[]')) } catch (e) {}
+  }, [])
+  const persistViews = (next) => {
+    setViews(next)
+    try { window.localStorage.setItem('portal-views', JSON.stringify(next)) } catch (e) {}
+  }
+  const saveView = () => {
+    const name = window.prompt('Name this view (e.g. "90+ over $500")')
+    if (!name) return
+    const v = { name, q, sort, dir, aging, minBal, excluded: [...excluded] }
+    persistViews([...views.filter((x) => x.name !== name), v])
+  }
+  const applyView = (v) => {
+    setQ(v.q || ''); setSort(v.sort || 'due'); setDir(v.dir || 'asc')
+    setAging(v.aging || 'all'); setMinBal(v.minBal || '')
+    setExcluded(new Set(v.excluded || [])); setLimit(50); setTab('invoices')
+  }
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => setSession(session))
@@ -61,9 +86,9 @@ export default function Portal() {
     return json
   }
 
-  const load = async () => {
+  const load = async (fresh) => {
     setBusy('load'); setError(null)
-    try { setData(await call('/api/portal/ar')) }
+    try { setData(await call('/api/portal/ar' + (fresh ? '?fresh=1' : ''))) }
     catch (e) { setError(String(e.message || e)) } finally { setBusy('') }
   }
   useEffect(() => { if (session) load() }, [!!session]) // eslint-disable-line react-hooks/exhaustive-deps
@@ -86,12 +111,12 @@ export default function Portal() {
   // Send click itself is synchronous: the download starts and Gmail opens in
   // the same gesture. Doing the fetch on click instead meant either a popup
   // the browser blocked, or a blank tab sitting there looking broken.
-  const startCompose = (kind, id, name, to, subjectDefault, doc) => {
+  const startCompose = (kind, id, name, to, subjectDefault, doc, customerId) => {
     let saved = null
     try { saved = window.localStorage.getItem('portal-body-' + kind) } catch (e) {}
     const attach = kind === 'invoice'
     setCompose({
-      kind, id, name, doc, to: to || '',
+      kind, id, name, doc, to: to || '', customerId: customerId != null ? customerId : (kind === 'statement' ? id : null),
       subject: subjectDefault,
       body: saved || (kind === 'statement' ? DEFAULT_STATEMENT_BODY : DEFAULT_INVOICE_BODY),
       saveDefault: false,
@@ -136,6 +161,10 @@ export default function Portal() {
       body = body.includes('{link}') ? body.replaceAll('{link}', c.ready) : body + '\n\n' + c.ready
     }
     if (c.saveDefault) { try { window.localStorage.setItem('portal-body-' + c.kind, c.body) } catch (e) {} }
+    // Fire-and-forget: a failed log must never cost her the email.
+    call('/api/portal/ar', { method: 'POST', body: JSON.stringify({
+      action: 'log-send', kind: c.kind, customerId: c.customerId, customerName: c.name, doc: c.doc, to: c.to,
+    }) }).then(() => load()).catch(() => {})
     window.open(
       `https://mail.google.com/mail/?view=cm&fs=1&to=${encodeURIComponent(c.to)}&su=${encodeURIComponent(c.subject)}&body=${encodeURIComponent(body)}`,
       '_blank'
@@ -193,6 +222,25 @@ export default function Portal() {
     return t
   }, [data, excluded, todayISO]) // eslint-disable-line react-hooks/exhaustive-deps
 
+  const queue = useMemo(() => {
+    const m = new Map()
+    for (const i of (data && data.invoices) || []) {
+      if (!i.customerId) continue
+      if (excluded.has(i.customerId)) continue
+      if (minBal && i.balance < Number(minBal)) continue
+      const g = m.get(i.customerId) || {
+        id: i.customerId, name: i.customer, balance: 0, pastDue: 0, oldestDays: 0, email: null,
+      }
+      g.balance += i.balance
+      const days = i.due ? Math.floor((Date.parse(todayISO) - Date.parse(i.due)) / 86400000) : 0
+      if (days > 0) { g.pastDue += i.balance; g.oldestDays = Math.max(g.oldestDays, days) }
+      if (!g.email && i.email) g.email = i.email
+      m.set(i.customerId, g)
+    }
+    const sends = (data && data.sends) || {}
+    return [...m.values()].map((g) => ({ ...g, lastSent: sends[g.id] || null }))
+  }, [data, excluded, minBal, todayISO])
+
   const shown = useMemo(() => {
     const all = (data && data.invoices) || []
     const needle = q.trim().toLowerCase()
@@ -202,6 +250,7 @@ export default function Portal() {
       : all
     if (excluded.size) out = out.filter((i) => !excluded.has(i.customerId))
     if (aging !== 'all') out = out.filter((i) => bucketOf(i) === aging)
+    if (minBal) out = out.filter((i) => i.balance >= Number(minBal))
     const cmp = {
       doc: (a, b) => {
         const na = Number(a.doc), nb = Number(b.doc)
@@ -216,7 +265,7 @@ export default function Portal() {
     }
     const base = cmp[sort] || cmp.due
     return [...out].sort((a, b) => (dir === 'asc' ? base(a, b) : -base(a, b)))
-  }, [data, q, sort, dir, aging, excluded, todayISO]) // eslint-disable-line react-hooks/exhaustive-deps
+  }, [data, q, sort, dir, aging, excluded, minBal, todayISO]) // eslint-disable-line react-hooks/exhaustive-deps
   const shownTotal = shown.reduce((t, i) => t + i.balance, 0)
   // Click a column to sort by it; click it again to reverse. Amounts and
   // dates open on the end people actually want: biggest, and oldest-due.
@@ -261,15 +310,37 @@ export default function Portal() {
             <h2 style={{ fontSize: '18px' }}>{data.company || 'Your company'}</h2>
             <span style={{ fontSize: '12.5px', color: MUTED }}>{data.invoices.length} open invoice{data.invoices.length === 1 ? '' : 's'} · live from QuickBooks</span>
             <span style={{ flex: 1 }} />
-            <button onClick={load} disabled={busy === 'load'} style={btn(false)}>{busy === 'load' ? 'Refreshing…' : 'Refresh'}</button>
+            <button onClick={() => load(true)} disabled={busy === 'load'} style={btn(false)}>{busy === 'load' ? 'Refreshing…' : 'Refresh'}</button>
             <button onClick={async () => {
               setShowNew(true)
               if (!refs) { try { setRefs(await call('/api/portal/ar?action=refs')) } catch (e) { setError(String(e.message || e)); setShowNew(false) } }
             }} style={btn(true)}>+ New invoice</button>
           </div>
 
+          <div style={{ display: 'flex', gap: '4px', borderBottom: `1px solid ${BORDER}`, marginBottom: '16px' }}>
+            {[['chase', 'To chase'], ['invoices', 'Invoices'], ['statements', 'Statements']].map(([k, label]) => (
+              <button key={k} onClick={() => setTab(k)} style={{
+                fontSize: '13px', fontWeight: tab === k ? 700 : 500, padding: '8px 14px', cursor: 'pointer',
+                border: 'none', background: 'none', color: tab === k ? INK : MUTED,
+                borderBottom: `2px solid ${tab === k ? INK : 'transparent'}`, marginBottom: '-1px',
+              }}>{label}</button>
+            ))}
+          </div>
+
           {showNew && <NewInvoice refs={refs} call={call} onClose={() => setShowNew(false)}
             onCreated={(created) => { setShowNew(false); load(); window.alert(`Created invoice #${created.doc} for ${money(created.total)} in QuickBooks.`) }} />}
+
+          {tab === 'chase' && data.invoices.length > 0 && (
+            <WorkQueue
+              rows={queue}
+              busy={busy}
+              onSeeAll={() => setTab('invoices')}
+              onPreview={(r) => openBlob(`/api/portal/ar?action=statement&id=${r.id}`, 'stmt' + r.id)}
+              onStatement={(r) => startCompose('statement', r.id, r.name, r.email,
+                `Statement of account — ${new Date().toLocaleDateString('en-US', { month: 'long', year: 'numeric' })} — ${data.company || ''}`.trim(),
+                null, r.id)}
+            />
+          )}
 
           {data.invoices.length === 0 && (
             <div style={{ border: `1px solid ${BORDER}`, borderRadius: '4px', padding: '16px', fontSize: '13px', color: MUTED }}>
@@ -277,7 +348,7 @@ export default function Portal() {
             </div>
           )}
 
-          {data.invoices.length > 0 && (
+          {tab === 'invoices' && data.invoices.length > 0 && (
             <>
             <div style={{ display: 'flex', gap: '8px', alignItems: 'center', flexWrap: 'wrap', marginBottom: '10px' }}>
               <input value={q} onChange={(e) => { setQ(e.target.value); setLimit(50) }}
@@ -285,8 +356,21 @@ export default function Portal() {
                 style={input({ width: '260px' })} />
               <CustomerFilter customers={customers} excluded={excluded}
                 onChange={(next) => { setExcluded(next); setLimit(50) }} />
-              {(q || aging !== 'all' || excluded.size > 0) && (
-                <button onClick={() => { setQ(''); setAging('all'); setExcluded(new Set()); setLimit(50) }} style={btn(false)}>Clear</button>
+              <label style={{ fontSize: '12.5px', color: MUTED, display: 'flex', gap: '5px', alignItems: 'center' }}>
+                over $
+                <input value={minBal} onChange={(e) => { setMinBal(e.target.value.replace(/[^0-9.]/g, '')); setLimit(50) }}
+                  placeholder="0" style={input({ width: '70px', padding: '7px 8px' })} />
+              </label>
+              {(q || aging !== 'all' || excluded.size > 0 || minBal) && (
+                <button onClick={() => { setQ(''); setAging('all'); setExcluded(new Set()); setMinBal(''); setLimit(50) }} style={btn(false)}>Clear</button>
+              )}
+              <button onClick={saveView} style={btn(false)}>Save view</button>
+              {views.length > 0 && (
+                <select value="" onChange={(e) => { const v = views.find((x) => x.name === e.target.value); if (v) applyView(v) }}
+                  style={input({ padding: '7px 8px' })}>
+                  <option value="">Saved views…</option>
+                  {views.map((v) => <option key={v.name} value={v.name}>{v.name}</option>)}
+                </select>
               )}
               <span style={{ flex: 1 }} />
               <span style={{ fontSize: '12.5px', color: MUTED }}>
@@ -329,7 +413,7 @@ export default function Portal() {
                       <td style={{ ...td(), textAlign: 'right', fontWeight: 700 }}>{money(inv.balance)}</td>
                       <td style={{ ...td(), whiteSpace: 'nowrap' }}>
                         <button onClick={() => openBlob(`/api/portal/ar?action=pdf&id=${inv.id}`, 'pdf' + inv.id)} disabled={busy === 'pdf' + inv.id} style={btn(false)}>{busy === 'pdf' + inv.id ? '…' : 'PDF'}</button>{' '}
-                        <button onClick={() => startCompose('invoice', inv.id, inv.customer, inv.email, `Invoice ${inv.doc || ''} from ${data.company || 'us'}`.replace('  ', ' '), inv.doc)} style={btn(true)}>Email →</button>
+                        <button onClick={() => startCompose('invoice', inv.id, inv.customer, inv.email, `Invoice ${inv.doc || ''} from ${data.company || 'us'}`.replace('  ', ' '), inv.doc, inv.customerId)} style={btn(true)}>Email →</button>
                       </td>
                     </tr>
                   ))}
@@ -349,7 +433,7 @@ export default function Portal() {
             </>
           )}
 
-          {data.invoices.length > 0 && <Statements data={data} openBlob={openBlob} busy={busy} startCompose={startCompose} excluded={excluded} />}
+          {tab === 'statements' && data.invoices.length > 0 && <Statements data={data} openBlob={openBlob} busy={busy} startCompose={startCompose} excluded={excluded} />}
         </>
       )}
 
