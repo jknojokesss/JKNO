@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useMemo } from 'react'
 import Head from 'next/head'
 import { supabase } from '../lib/supabase'
+import CustomerFilter from '../components/CustomerFilter'
 
 // ── Client portal: invoices & statements, sent from YOUR OWN Gmail ───────
 // A portal login is mapped server-side to exactly one QuickBooks company;
@@ -35,7 +36,8 @@ export default function Portal() {
   const [q, setQ] = useState('')
   const [sort, setSort] = useState('due')
   const [dir, setDir] = useState('asc')
-  const [overdueOnly, setOverdueOnly] = useState(false)
+  const [aging, setAging] = useState('all')
+  const [excluded, setExcluded] = useState(new Set())
   const [limit, setLimit] = useState(50)
 
   useEffect(() => {
@@ -144,6 +146,53 @@ export default function Portal() {
   // A real book can run to thousands of open invoices, so the list is
   // searched and paged rather than dumped.
   const todayISO = new Date().toISOString().slice(0, 10)
+
+  // Aging is how anyone chasing money actually thinks about a book this
+  // size: not 7,000 rows, but "what is 90+ days old".
+  const AGING = [
+    { key: 'all', label: 'All' },
+    { key: 'current', label: 'Not yet due' },
+    { key: '1-30', label: '1–30 days' },
+    { key: '31-60', label: '31–60' },
+    { key: '61-90', label: '61–90' },
+    { key: '90+', label: '90+ days' },
+  ]
+  const bucketOf = (inv) => {
+    if (!inv.due) return 'current'
+    const days = Math.floor((Date.parse(todayISO) - Date.parse(inv.due)) / 86400000)
+    if (days <= 0) return 'current'
+    if (days <= 30) return '1-30'
+    if (days <= 60) return '31-60'
+    if (days <= 90) return '61-90'
+    return '90+'
+  }
+
+  // Every customer in the book, for the tick-list.
+  const customers = useMemo(() => {
+    const m = new Map()
+    for (const i of (data && data.invoices) || []) {
+      if (!i.customerId) continue
+      const g = m.get(i.customerId) || { id: i.customerId, name: i.customer, count: 0 }
+      g.count++
+      m.set(i.customerId, g)
+    }
+    return [...m.values()].sort((a, b) => a.name.localeCompare(b.name))
+  }, [data])
+
+  // Bucket tallies are computed before the aging filter, so the chips keep
+  // showing what each one holds while one of them is selected.
+  const tallies = useMemo(() => {
+    const t = {}
+    for (const k of AGING.map((a) => a.key)) t[k] = { n: 0, amt: 0 }
+    for (const i of (data && data.invoices) || []) {
+      if (excluded.has(i.customerId)) continue
+      const b = bucketOf(i)
+      t[b].n++; t[b].amt += i.balance
+      t.all.n++; t.all.amt += i.balance
+    }
+    return t
+  }, [data, excluded, todayISO]) // eslint-disable-line react-hooks/exhaustive-deps
+
   const shown = useMemo(() => {
     const all = (data && data.invoices) || []
     const needle = q.trim().toLowerCase()
@@ -151,7 +200,8 @@ export default function Portal() {
       ? all.filter((i) => String(i.customer || '').toLowerCase().includes(needle)
                        || String(i.doc || '').toLowerCase().includes(needle))
       : all
-    if (overdueOnly) out = out.filter((i) => i.due && i.due < todayISO)
+    if (excluded.size) out = out.filter((i) => !excluded.has(i.customerId))
+    if (aging !== 'all') out = out.filter((i) => bucketOf(i) === aging)
     const cmp = {
       doc: (a, b) => {
         const na = Number(a.doc), nb = Number(b.doc)
@@ -166,7 +216,7 @@ export default function Portal() {
     }
     const base = cmp[sort] || cmp.due
     return [...out].sort((a, b) => (dir === 'asc' ? base(a, b) : -base(a, b)))
-  }, [data, q, sort, dir, overdueOnly, todayISO])
+  }, [data, q, sort, dir, aging, excluded, todayISO]) // eslint-disable-line react-hooks/exhaustive-deps
   const shownTotal = shown.reduce((t, i) => t + i.balance, 0)
   // Click a column to sort by it; click it again to reverse. Amounts and
   // dates open on the end people actually want: biggest, and oldest-due.
@@ -233,15 +283,31 @@ export default function Portal() {
               <input value={q} onChange={(e) => { setQ(e.target.value); setLimit(50) }}
                 placeholder="Search customer or invoice #"
                 style={input({ width: '260px' })} />
-              <label style={{ fontSize: '12.5px', color: MUTED, display: 'flex', gap: '6px', alignItems: 'center' }}>
-                <input type="checkbox" checked={overdueOnly} onChange={(e) => { setOverdueOnly(e.target.checked); setLimit(50) }} />
-                Past due only
-              </label>
-              {(q || overdueOnly) && <button onClick={() => { setQ(''); setOverdueOnly(false); setLimit(50) }} style={btn(false)}>Clear</button>}
+              <CustomerFilter customers={customers} excluded={excluded}
+                onChange={(next) => { setExcluded(next); setLimit(50) }} />
+              {(q || aging !== 'all' || excluded.size > 0) && (
+                <button onClick={() => { setQ(''); setAging('all'); setExcluded(new Set()); setLimit(50) }} style={btn(false)}>Clear</button>
+              )}
               <span style={{ flex: 1 }} />
               <span style={{ fontSize: '12.5px', color: MUTED }}>
                 {shown.length.toLocaleString()} of {data.invoices.length.toLocaleString()} · {money(shownTotal)}
               </span>
+            </div>
+            <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap', marginBottom: '12px' }}>
+              {AGING.map((a) => {
+                const on = aging === a.key
+                const t = tallies[a.key] || { n: 0, amt: 0 }
+                return (
+                  <button key={a.key} onClick={() => { setAging(a.key); setLimit(50) }}
+                    style={{
+                      fontSize: '12px', padding: '6px 11px', borderRadius: '14px', cursor: 'pointer',
+                      border: `1px solid ${on ? INK : BORDER}`, background: on ? INK : '#fff',
+                      color: on ? '#fff' : (t.n ? INK : MUTED), fontWeight: on ? 700 : 500,
+                    }}>
+                    {a.label} <span style={{ opacity: .75 }}>{t.n.toLocaleString()} · {money(t.amt)}</span>
+                  </button>
+                )
+              })}
             </div>
             <div style={{ border: `1px solid ${BORDER}`, borderRadius: '4px', overflowX: 'auto', marginBottom: '26px' }}>
               <table style={{ borderCollapse: 'collapse', width: '100%', fontSize: '13px', fontVariantNumeric: 'tabular-nums' }}>
@@ -283,7 +349,7 @@ export default function Portal() {
             </>
           )}
 
-          {data.invoices.length > 0 && <Statements data={data} openBlob={openBlob} busy={busy} startCompose={startCompose} />}
+          {data.invoices.length > 0 && <Statements data={data} openBlob={openBlob} busy={busy} startCompose={startCompose} excluded={excluded} />}
         </>
       )}
 
@@ -342,7 +408,7 @@ export default function Portal() {
   )
 }
 
-function Statements({ data, openBlob, busy, startCompose }) {
+function Statements({ data, openBlob, busy, startCompose, excluded }) {
   const [cq, setCq] = useState('')
   const [climit, setClimit] = useState(50)
   const [csort, setCsort] = useState('balance')
@@ -350,6 +416,7 @@ function Statements({ data, openBlob, busy, startCompose }) {
   const byCust = {}
   for (const inv of data.invoices) {
     if (!inv.customerId) continue
+    if (excluded && excluded.has(inv.customerId)) continue
     const g = byCust[inv.customerId] || (byCust[inv.customerId] = { id: inv.customerId, name: inv.customer, count: 0, balance: 0, email: null })
     g.count++; g.balance += inv.balance
     if (!g.email && inv.email) g.email = inv.email
@@ -381,7 +448,9 @@ function Statements({ data, openBlob, busy, startCompose }) {
     <div>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', gap: '10px', flexWrap: 'wrap' }}>
         <h2 style={{ fontSize: '17px', marginBottom: '4px' }}>Statements — by customer</h2>
-        <button onClick={() => openBlob('/api/portal/ar?action=statements-all', 'stmtall')} disabled={busy === 'stmtall'} style={btn(false)}>
+        <button onClick={() => openBlob(
+            '/api/portal/ar?action=statements-all' + (excluded && excluded.size ? `&ids=${allGroups.map((g) => g.id).join(',')}` : ''),
+            'stmtall')} disabled={busy === 'stmtall'} style={btn(false)}>
           {busy === 'stmtall' ? 'Building…' : `Print all ${allGroups.length} statements`}
         </button>
       </div>
