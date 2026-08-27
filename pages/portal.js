@@ -324,7 +324,7 @@ export default function Portal() {
           </div>
 
           <div style={{ display: 'flex', gap: '4px', borderBottom: `1px solid ${BORDER}`, marginBottom: '16px' }}>
-            {[['chase', 'To chase'], ['invoices', 'Invoices'], ['statements', 'Statements']].map(([k, label]) => (
+            {[['chase', 'To chase'], ['invoices', 'Invoices']].map(([k, label]) => (
               <button key={k} onClick={() => setTab(k)} style={{
                 fontSize: '13px', fontWeight: tab === k ? 700 : 500, padding: '8px 14px', cursor: 'pointer',
                 border: 'none', background: 'none', color: tab === k ? INK : MUTED,
@@ -348,6 +348,20 @@ export default function Portal() {
               onInvoicePdf={(inv) => openBlob(`/api/portal/ar?action=pdf&id=${inv.id}`, 'pdf' + inv.id)}
               onInvoiceEmail={(inv) => startCompose('invoice', inv.id, inv.customer, inv.email,
                 `Invoice ${inv.doc || ''} from ${data.company || 'us'}`.replace('  ', ' '), inv.doc, inv.customerId)}
+              onPrintAll={(ids) => openBlob(
+                '/api/portal/ar?action=statements-all' + (ids.length && ids.length < queue.length ? `&ids=${ids.join(',')}` : ''),
+                'stmtall')}
+              toolbar={<>
+                <CustomerFilter customers={customers} excluded={excluded} onChange={setExcluded} />
+                <label style={{ fontSize: '12.5px', color: MUTED, display: 'flex', gap: '5px', alignItems: 'center' }}>
+                  over $
+                  <input value={minBal} onChange={(e) => setMinBal(e.target.value.replace(/[^0-9.]/g, ''))}
+                    placeholder="0" style={input({ width: '70px', padding: '7px 8px' })} />
+                </label>
+                {(excluded.size > 0 || minBal) && (
+                  <button onClick={() => { setExcluded(new Set()); setMinBal('') }} style={btn(false)}>Clear</button>
+                )}
+              </>}
             />
           )}
 
@@ -441,8 +455,6 @@ export default function Portal() {
             </div>
             </>
           )}
-
-          {tab === 'statements' && data.invoices.length > 0 && <Statements data={data} openBlob={openBlob} busy={busy} startCompose={startCompose} excluded={excluded} />}
         </>
       )}
 
@@ -498,95 +510,6 @@ export default function Portal() {
         </div>
       )}
     </Frame>
-  )
-}
-
-function Statements({ data, openBlob, busy, startCompose, excluded }) {
-  const [cq, setCq] = useState('')
-  const [climit, setClimit] = useState(50)
-  const [csort, setCsort] = useState('balance')
-  const [cdir, setCdir] = useState('desc')
-  const byCust = {}
-  for (const inv of data.invoices) {
-    if (!inv.customerId) continue
-    if (excluded && excluded.has(inv.customerId)) continue
-    const g = byCust[inv.customerId] || (byCust[inv.customerId] = { id: inv.customerId, name: inv.customer, count: 0, balance: 0, email: null })
-    g.count++; g.balance += inv.balance
-    if (!g.email && inv.email) g.email = inv.email
-  }
-  const cmpC = {
-    name: (a, b) => a.name.localeCompare(b.name),
-    count: (a, b) => a.count - b.count,
-    balance: (a, b) => a.balance - b.balance,
-  }
-  const baseC = cmpC[csort] || cmpC.balance
-  const allGroups = Object.values(byCust).sort((a, b) => (cdir === 'asc' ? baseC(a, b) : -baseC(a, b)))
-  const needle = cq.trim().toLowerCase()
-  const groups = needle ? allGroups.filter((g) => g.name.toLowerCase().includes(needle)) : allGroups
-  const monthYear = new Date().toLocaleDateString('en-US', { month: 'long', year: 'numeric' })
-  const sortC = (field) => {
-    if (csort === field) { setCdir((d) => (d === 'asc' ? 'desc' : 'asc')); return }
-    setCsort(field)
-    setCdir(field === 'name' ? 'asc' : 'desc')
-  }
-  const SortC = ({ field, label, right }) => (
-    <th onClick={() => sortC(field)} title="Sort by this column"
-      style={{ textAlign: right ? 'right' : 'left', padding: '8px 10px', borderBottom: `1px solid ${INK}`,
-               fontSize: '11px', textTransform: 'uppercase', letterSpacing: '.06em',
-               color: csort === field ? INK : MUTED, whiteSpace: 'nowrap', cursor: 'pointer', userSelect: 'none' }}>
-      {label}{csort === field ? (cdir === 'asc' ? ' ▲' : ' ▼') : ''}
-    </th>
-  )
-  return (
-    <div>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', gap: '10px', flexWrap: 'wrap' }}>
-        <h2 style={{ fontSize: '17px', marginBottom: '4px' }}>Statements — by customer</h2>
-        <button onClick={() => openBlob(
-            '/api/portal/ar?action=statements-all' + (excluded && excluded.size ? `&ids=${allGroups.map((g) => g.id).join(',')}` : ''),
-            'stmtall')} disabled={busy === 'stmtall'} style={btn(false)}>
-          {busy === 'stmtall' ? 'Building…' : `Print all ${allGroups.length} statements`}
-        </button>
-      </div>
-      <p style={{ fontSize: '12.5px', color: MUTED, lineHeight: 1.6, marginBottom: '12px', maxWidth: '620px' }}>
-        Built fresh from QuickBooks every time — open invoices, recent payments, and aging. The email
-        carries a live link, so your customer always sees current numbers, even if they open it next week.
-      </p>
-      <div style={{ display: 'flex', gap: '8px', alignItems: 'center', flexWrap: 'wrap', marginBottom: '10px' }}>
-        <input value={cq} onChange={(e) => { setCq(e.target.value); setClimit(50) }} placeholder="Search customer" style={input({ width: '260px' })} />
-        <span style={{ flex: 1 }} />
-        <span style={{ fontSize: '12.5px', color: MUTED }}>{groups.length.toLocaleString()} of {allGroups.length.toLocaleString()} customers</span>
-      </div>
-      <div style={{ border: `1px solid ${BORDER}`, borderRadius: '4px', overflowX: 'auto' }}>
-        <table style={{ borderCollapse: 'collapse', width: '100%', fontSize: '13px', fontVariantNumeric: 'tabular-nums' }}>
-          <thead><tr>
-            <SortC field="name" label="Customer" />
-            <SortC field="count" label="Open" right />
-            <SortC field="balance" label="Balance" right />
-            <th style={{ borderBottom: `1px solid ${INK}` }}></th>
-          </tr></thead>
-          <tbody>
-            {groups.slice(0, climit).map((g) => (
-              <tr key={g.id}>
-                <td style={td()}><b>{g.name}</b></td>
-                <td style={{ ...td(), textAlign: 'right' }}>{g.count}</td>
-                <td style={{ ...td(), textAlign: 'right', fontWeight: 700 }}>{money(g.balance)}</td>
-                <td style={{ ...td(), whiteSpace: 'nowrap' }}>
-                  <button onClick={() => openBlob(`/api/portal/ar?action=statement&id=${g.id}`, 'stmt' + g.id)} disabled={busy === 'stmt' + g.id} style={btn(false)}>{busy === 'stmt' + g.id ? '…' : 'Preview'}</button>{' '}
-                  <button onClick={() => startCompose('statement', g.id, g.name, g.email, `Statement of account — ${monthYear} — ${data.company || ''}`.trim())} style={btn(true)}>Email →</button>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-        {groups.length > climit && (
-          <div style={{ padding: '10px 12px', borderTop: `1px solid ${BORDER}` }}>
-            <button onClick={() => setClimit((n) => n + 100)} style={btn(false)}>
-              Show 100 more ({(groups.length - climit).toLocaleString()} left)
-            </button>
-          </div>
-        )}
-      </div>
-    </div>
   )
 }
 
