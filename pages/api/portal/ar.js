@@ -64,12 +64,19 @@ export default async function handler(req, res) {
             '<p style="font-family:-apple-system,Arial,sans-serif;color:#4A5158;max-width:640px;margin:40px auto">No customer has an open balance right now, so there are no statements to print.</p>',
             { title: 'Statements' }))
         }
+        // A large book can hold hundreds of customers; a single page of all
+        // of them stops being printable. Cap it, and say so rather than
+        // quietly dropping the tail.
+        const CAP = 300
+        const page = all.slice(0, CAP)
+        const dropped = all.length - page.length
         res.setHeader('Content-Type', 'text/html; charset=utf-8')
         return res.status(200).send(statementPage(
-          all.map((a) => `<div class="stmt">${a.html}</div>`).join(''),
+          page.map((a) => `<div class="stmt">${a.html}</div>`).join(''),
           {
-            title: `Statements — ${all.length} customers`,
-            bar: `<b>${all.length} statement${all.length === 1 ? '' : 's'}</b><span>one per page · biggest balance first</span>`,
+            title: `Statements — ${page.length} customers`,
+            bar: `<b>${page.length} statement${page.length === 1 ? '' : 's'}</b><span>one per page · biggest balance first` +
+                 (dropped ? ` · ${dropped} more not shown (largest ${CAP} balances only)` : '') + `</span>`,
           }))
       }
 

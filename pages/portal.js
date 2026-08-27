@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useMemo } from 'react'
 import Head from 'next/head'
 import { supabase } from '../lib/supabase'
 
@@ -21,7 +21,7 @@ const btn = (primary) => ({
 })
 const input = (extra = {}) => ({ fontSize: '14px', padding: '8px 10px', border: `1px solid ${BORDER}`, borderRadius: '4px', ...extra })
 
-const DEFAULT_INVOICE_BODY = 'Hi,\n\nYour invoice is ready — you can view it here:\n{link}\n\nAny questions, just reply to this email.\n\nThank you!'
+const DEFAULT_INVOICE_BODY = 'Hi,\n\nYour invoice is attached.\n\nAny questions, just reply to this email.\n\nThank you!'
 const DEFAULT_STATEMENT_BODY = 'Hi,\n\nHere is your current statement of account:\n{link}\n\nAny questions, just reply to this email.\n\nThank you!'
 
 export default function Portal() {
@@ -32,6 +32,10 @@ export default function Portal() {
   const [busy, setBusy] = useState('')
   const [showNew, setShowNew] = useState(false)
   const [compose, setCompose] = useState(null) // { kind, id, name, to, subject, body }
+  const [q, setQ] = useState('')
+  const [sort, setSort] = useState('due')
+  const [overdueOnly, setOverdueOnly] = useState(false)
+  const [limit, setLimit] = useState(50)
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => setSession(session))
@@ -70,28 +74,64 @@ export default function Portal() {
     } catch (e) { setError(String(e.message || e)) } finally { setBusy('') }
   }
 
-  // Compose flow: mint the signed doc link, fill the template, open Gmail.
-  const startCompose = (kind, id, name, to, subjectDefault) => {
+  // Compose flow. An invoice goes out as QuickBooks' own PDF, downloaded
+  // here for the sender to drag in — a customer-facing email should carry
+  // the sender's document, not a link to somebody else's domain. Statements
+  // have no PDF, so those still travel as a signed link.
+  const startCompose = (kind, id, name, to, subjectDefault, doc) => {
     let saved = null
     try { saved = window.localStorage.getItem('portal-body-' + kind) } catch (e) {}
     setCompose({
-      kind, id, name, to: to || '',
+      kind, id, name, doc, to: to || '',
       subject: subjectDefault,
       body: saved || (kind === 'statement' ? DEFAULT_STATEMENT_BODY : DEFAULT_INVOICE_BODY),
       saveDefault: false,
+      attach: kind === 'invoice',
     })
   }
   const openGmail = async () => {
     setBusy('gmail'); setError(null)
     try {
-      const { url } = await call('/api/portal/ar', { method: 'POST', body: JSON.stringify({ action: 'link', kind: compose.kind, id: compose.id }) })
-      const body = compose.body.includes('{link}') ? compose.body.replaceAll('{link}', url) : compose.body + '\n\n' + url
+      let body = compose.body
+      if (compose.attach) {
+        const res = await call(`/api/portal/ar?action=pdf&id=${compose.id}`, { raw: true })
+        if (!res.ok) throw new Error('Could not get the invoice PDF from QuickBooks.')
+        const a = document.createElement('a')
+        a.href = URL.createObjectURL(await res.blob())
+        a.download = `Invoice-${compose.doc || compose.id}.pdf`
+        document.body.appendChild(a); a.click(); a.remove()
+        body = body.replaceAll('{link}', '').trim()
+      } else {
+        const { url } = await call('/api/portal/ar', { method: 'POST', body: JSON.stringify({ action: 'link', kind: compose.kind, id: compose.id }) })
+        body = body.includes('{link}') ? body.replaceAll('{link}', url) : body + '\n\n' + url
+      }
       if (compose.saveDefault) { try { window.localStorage.setItem('portal-body-' + compose.kind, compose.body) } catch (e) {} }
       const gmail = `https://mail.google.com/mail/?view=cm&fs=1&to=${encodeURIComponent(compose.to)}&su=${encodeURIComponent(compose.subject)}&body=${encodeURIComponent(body)}`
       window.open(gmail, '_blank')
       setCompose(null)
     } catch (e) { setError(String(e.message || e)) } finally { setBusy('') }
   }
+
+  // A real book can run to thousands of open invoices, so the list is
+  // searched and paged rather than dumped.
+  const todayISO = new Date().toISOString().slice(0, 10)
+  const shown = useMemo(() => {
+    const all = (data && data.invoices) || []
+    const needle = q.trim().toLowerCase()
+    let out = needle
+      ? all.filter((i) => String(i.customer || '').toLowerCase().includes(needle)
+                       || String(i.doc || '').toLowerCase().includes(needle))
+      : all
+    if (overdueOnly) out = out.filter((i) => i.due && i.due < todayISO)
+    const by = {
+      due: (a, b) => String(a.due || '9999-99-99').localeCompare(String(b.due || '9999-99-99')),
+      newest: (a, b) => String(b.date || '').localeCompare(String(a.date || '')),
+      customer: (a, b) => String(a.customer || '').localeCompare(String(b.customer || '')),
+      biggest: (a, b) => b.balance - a.balance,
+    }
+    return [...out].sort(by[sort] || by.due)
+  }, [data, q, sort, overdueOnly, todayISO])
+  const shownTotal = shown.reduce((t, i) => t + i.balance, 0)
 
   if (session === undefined) return <Frame><p style={{ color: MUTED }}>Loading…</p></Frame>
   if (!session) return <Frame><Login /></Frame>
@@ -137,6 +177,27 @@ export default function Portal() {
           )}
 
           {data.invoices.length > 0 && (
+            <>
+            <div style={{ display: 'flex', gap: '8px', alignItems: 'center', flexWrap: 'wrap', marginBottom: '10px' }}>
+              <input value={q} onChange={(e) => { setQ(e.target.value); setLimit(50) }}
+                placeholder="Search customer or invoice #"
+                style={input({ width: '260px' })} />
+              <select value={sort} onChange={(e) => setSort(e.target.value)} style={input()}>
+                <option value="due">Oldest due first</option>
+                <option value="newest">Newest invoice first</option>
+                <option value="customer">Customer A–Z</option>
+                <option value="biggest">Biggest balance first</option>
+              </select>
+              <label style={{ fontSize: '12.5px', color: MUTED, display: 'flex', gap: '6px', alignItems: 'center' }}>
+                <input type="checkbox" checked={overdueOnly} onChange={(e) => { setOverdueOnly(e.target.checked); setLimit(50) }} />
+                Past due only
+              </label>
+              {(q || overdueOnly) && <button onClick={() => { setQ(''); setOverdueOnly(false); setLimit(50) }} style={btn(false)}>Clear</button>}
+              <span style={{ flex: 1 }} />
+              <span style={{ fontSize: '12.5px', color: MUTED }}>
+                {shown.length.toLocaleString()} of {data.invoices.length.toLocaleString()} · {money(shownTotal)}
+              </span>
+            </div>
             <div style={{ border: `1px solid ${BORDER}`, borderRadius: '4px', overflowX: 'auto', marginBottom: '26px' }}>
               <table style={{ borderCollapse: 'collapse', width: '100%', fontSize: '13px', fontVariantNumeric: 'tabular-nums' }}>
                 <thead><tr>
@@ -145,7 +206,7 @@ export default function Portal() {
                   ))}
                 </tr></thead>
                 <tbody>
-                  {data.invoices.map((inv) => (
+                  {shown.slice(0, limit).map((inv) => (
                     <tr key={inv.id}>
                       <td style={td()}><b>{inv.doc ? '#' + inv.doc : '(no number)'}</b></td>
                       <td style={td()}>{inv.customer}</td>
@@ -154,13 +215,24 @@ export default function Portal() {
                       <td style={{ ...td(), textAlign: 'right', fontWeight: 700 }}>{money(inv.balance)}</td>
                       <td style={{ ...td(), whiteSpace: 'nowrap' }}>
                         <button onClick={() => openBlob(`/api/portal/ar?action=pdf&id=${inv.id}`, 'pdf' + inv.id)} disabled={busy === 'pdf' + inv.id} style={btn(false)}>{busy === 'pdf' + inv.id ? '…' : 'PDF'}</button>{' '}
-                        <button onClick={() => startCompose('invoice', inv.id, inv.customer, inv.email, `Invoice ${inv.doc || ''} from ${data.company || 'us'}`.replace('  ', ' '))} style={btn(true)}>Email →</button>
+                        <button onClick={() => startCompose('invoice', inv.id, inv.customer, inv.email, `Invoice ${inv.doc || ''} from ${data.company || 'us'}`.replace('  ', ' '), inv.doc)} style={btn(true)}>Email →</button>
                       </td>
                     </tr>
                   ))}
                 </tbody>
               </table>
+              {shown.length > limit && (
+                <div style={{ padding: '10px 12px', borderTop: `1px solid ${BORDER}` }}>
+                  <button onClick={() => setLimit((n) => n + 100)} style={btn(false)}>
+                    Show 100 more ({(shown.length - limit).toLocaleString()} left)
+                  </button>
+                </div>
+              )}
+              {shown.length === 0 && (
+                <div style={{ padding: '16px', fontSize: '13px', color: MUTED }}>Nothing matches that search.</div>
+              )}
             </div>
+            </>
           )}
 
           {data.invoices.length > 0 && <Statements data={data} openBlob={openBlob} busy={busy} startCompose={startCompose} />}
@@ -172,10 +244,19 @@ export default function Portal() {
           <div onClick={(e) => e.stopPropagation()} style={{ background: '#fff', borderRadius: '6px', maxWidth: '560px', width: '100%', padding: '20px', maxHeight: '90vh', overflowY: 'auto' }}>
             <h3 style={{ fontSize: '16px', marginBottom: '4px' }}>Email {compose.kind === 'statement' ? 'statement' : 'invoice'} — {compose.name}</h3>
             <p style={{ fontSize: '12px', color: MUTED, lineHeight: 1.6, marginBottom: '14px' }}>
-              This opens Gmail with everything filled in — you just hit Send there, so the email comes from
-              <b> your</b> address. <code style={{ fontFamily: mono, fontSize: '11px' }}>{'{link}'}</code> becomes a
-              secure link to the {compose.kind === 'statement' ? 'live statement' : 'invoice PDF'}.
+              This opens Gmail with everything filled in — you hit Send there, so the email comes from
+              <b> your</b> address.{' '}
+              {compose.attach
+                ? <>The QuickBooks invoice PDF downloads at the same time — <b>drag it into the Gmail window</b> before sending. Nothing in the email points anywhere but you.</>
+                : <><code style={{ fontFamily: mono, fontSize: '11px' }}>{'{link}'}</code> becomes a secure link to the live statement, which always shows current numbers.</>}
             </p>
+            {compose.kind === 'invoice' && (
+              <label style={{ fontSize: '12px', color: MUTED, display: 'flex', gap: '7px', alignItems: 'center', marginBottom: '10px' }}>
+                <input type="checkbox" checked={!compose.attach}
+                  onChange={(e) => setCompose((c) => ({ ...c, attach: !e.target.checked }))} />
+                Send a link instead of attaching the PDF
+              </label>
+            )}
             <label style={{ fontSize: '12px', color: MUTED, display: 'block', marginBottom: '10px' }}>To<br />
               <input value={compose.to} onChange={(e) => setCompose((c) => ({ ...c, to: e.target.value }))} placeholder="customer@email.com" style={input({ width: '100%', fontFamily: mono })} />
             </label>
@@ -201,6 +282,8 @@ export default function Portal() {
 }
 
 function Statements({ data, openBlob, busy, startCompose }) {
+  const [cq, setCq] = useState('')
+  const [climit, setClimit] = useState(50)
   const byCust = {}
   for (const inv of data.invoices) {
     if (!inv.customerId) continue
@@ -208,20 +291,27 @@ function Statements({ data, openBlob, busy, startCompose }) {
     g.count++; g.balance += inv.balance
     if (!g.email && inv.email) g.email = inv.email
   }
-  const groups = Object.values(byCust).sort((a, b) => b.balance - a.balance)
+  const allGroups = Object.values(byCust).sort((a, b) => b.balance - a.balance)
+  const needle = cq.trim().toLowerCase()
+  const groups = needle ? allGroups.filter((g) => g.name.toLowerCase().includes(needle)) : allGroups
   const monthYear = new Date().toLocaleDateString('en-US', { month: 'long', year: 'numeric' })
   return (
     <div>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', gap: '10px', flexWrap: 'wrap' }}>
         <h2 style={{ fontSize: '17px', marginBottom: '4px' }}>Statements — by customer</h2>
         <button onClick={() => openBlob('/api/portal/ar?action=statements-all', 'stmtall')} disabled={busy === 'stmtall'} style={btn(false)}>
-          {busy === 'stmtall' ? 'Building…' : `Print all ${groups.length} statements`}
+          {busy === 'stmtall' ? 'Building…' : `Print all ${allGroups.length} statements`}
         </button>
       </div>
       <p style={{ fontSize: '12.5px', color: MUTED, lineHeight: 1.6, marginBottom: '12px', maxWidth: '620px' }}>
         Built fresh from QuickBooks every time — open invoices, recent payments, and aging. The email
         carries a live link, so your customer always sees current numbers, even if they open it next week.
       </p>
+      <div style={{ display: 'flex', gap: '8px', alignItems: 'center', flexWrap: 'wrap', marginBottom: '10px' }}>
+        <input value={cq} onChange={(e) => { setCq(e.target.value); setClimit(50) }} placeholder="Search customer" style={input({ width: '260px' })} />
+        <span style={{ flex: 1 }} />
+        <span style={{ fontSize: '12.5px', color: MUTED }}>{groups.length.toLocaleString()} of {allGroups.length.toLocaleString()} customers</span>
+      </div>
       <div style={{ border: `1px solid ${BORDER}`, borderRadius: '4px', overflowX: 'auto' }}>
         <table style={{ borderCollapse: 'collapse', width: '100%', fontSize: '13px', fontVariantNumeric: 'tabular-nums' }}>
           <thead><tr>
@@ -230,7 +320,7 @@ function Statements({ data, openBlob, busy, startCompose }) {
             ))}
           </tr></thead>
           <tbody>
-            {groups.map((g) => (
+            {groups.slice(0, climit).map((g) => (
               <tr key={g.id}>
                 <td style={td()}><b>{g.name}</b></td>
                 <td style={{ ...td(), textAlign: 'right' }}>{g.count}</td>
@@ -243,6 +333,13 @@ function Statements({ data, openBlob, busy, startCompose }) {
             ))}
           </tbody>
         </table>
+        {groups.length > climit && (
+          <div style={{ padding: '10px 12px', borderTop: `1px solid ${BORDER}` }}>
+            <button onClick={() => setClimit((n) => n + 100)} style={btn(false)}>
+              Show 100 more ({(groups.length - climit).toLocaleString()} left)
+            </button>
+          </div>
+        )}
       </div>
     </div>
   )
