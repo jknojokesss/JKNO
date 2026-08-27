@@ -4,6 +4,7 @@ import { supabase } from '../lib/supabase'
 import CustomerFilter from '../components/CustomerFilter'
 import WorkQueue from '../components/WorkQueue'
 import useIsPhone from '../components/useIsPhone'
+import { loadView, saveView as rememberView, trackScroll } from '../components/viewState'
 
 // ── Client portal: invoices & statements, sent from YOUR OWN Gmail ───────
 // A portal login is mapped server-side to exactly one QuickBooks company;
@@ -68,6 +69,35 @@ export default function Portal() {
     setAging(v.aging || 'all'); setMinBal(v.minBal || '')
     setExcluded(new Set(v.excluded || [])); setLimit(50); setTab('invoices')
   }
+
+  // Restore the view she left behind, and keep it current from then on.
+  const restoredScroll = React.useRef(false)
+  useEffect(() => {
+    const v = loadView('portal-ui')
+    if (v) {
+      if (v.tab) setTab(v.tab)
+      if (v.q) setQ(v.q)
+      if (v.sort) setSort(v.sort)
+      if (v.dir) setDir(v.dir)
+      if (v.aging) setAging(v.aging)
+      if (v.minBal) setMinBal(v.minBal)
+      if (Array.isArray(v.excluded)) setExcluded(new Set(v.excluded))
+      if (v.limit) setLimit(v.limit)
+    }
+    return trackScroll('portal-ui')
+  }, [])
+
+  useEffect(() => {
+    rememberView('portal-ui', { tab, q, sort, dir, aging, minBal, excluded: [...excluded], limit })
+  }, [tab, q, sort, dir, aging, minBal, excluded, limit])
+
+  // Scroll last, once the list it belongs to actually exists.
+  useEffect(() => {
+    if (!data || restoredScroll.current) return
+    restoredScroll.current = true
+    const y = (loadView('portal-ui') || {}).scrollY
+    if (y) requestAnimationFrame(() => window.scrollTo(0, y))
+  }, [data])
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => setSession(session))
@@ -208,10 +238,16 @@ export default function Portal() {
     }
     if (c.saveDefault) { try { window.localStorage.setItem('portal-body-' + c.kind, c.body) } catch (e) {} }
     setSel(new Set())
+    // Mark it chased immediately, in place. Re-fetching the whole book after
+    // every send re-rendered the list, threw away her position, and cost
+    // seven calls to Intuit for one row that changed.
+    if (c.customerId) {
+      setData((d) => (d ? { ...d, sends: { ...(d.sends || {}), [c.customerId]: { at: new Date().toISOString(), kind: c.kind } } } : d))
+    }
     // Fire-and-forget: a failed log must never cost her the email.
     call('/api/portal/ar', { method: 'POST', body: JSON.stringify({
       action: 'log-send', kind: c.kind, customerId: c.customerId, customerName: c.name, doc: c.doc, to: c.to,
-    }) }).then(() => load()).catch(() => {})
+    }) }).catch(() => {})
     window.open(
       `https://mail.google.com/mail/?view=cm&fs=1&to=${encodeURIComponent(c.to)}&su=${encodeURIComponent(c.subject)}&body=${encodeURIComponent(body)}`,
       '_blank'

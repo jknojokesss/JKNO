@@ -1,5 +1,6 @@
-import React, { useState, useMemo } from 'react'
+import React, { useState, useMemo, useEffect } from 'react'
 import useIsPhone from './useIsPhone'
+import { loadView, saveView } from './viewState'
 
 // ── Who to chase today ───────────────────────────────────────────────────
 // The front door for a book too big to read. Not 7,000 invoices — a short
@@ -33,6 +34,23 @@ export default function WorkQueue({ rows, onStatement, onPreview, busy, onSeeAll
   const [only, setOnly] = useState('all')   // all | pastdue | current | never
   const phone = useIsPhone()
   const [showFilters, setShowFilters] = useState(false)
+
+  // The queue's own view: which customer was open, how far down the list she
+  // had gone, what she had filtered to.
+  useEffect(() => {
+    const v = loadView('portal-queue')
+    if (!v) return
+    if (v.open) setOpen(v.open)
+    if (v.only) setOnly(v.only)
+    if (v.staleOnly) setStaleOnly(true)
+    if (v.sort) setSort(v.sort)
+    if (v.dir) setDir(v.dir)
+    if (v.wq) setWq(v.wq)
+    if (v.show) setShow(v.show)
+  }, [])
+  useEffect(() => {
+    saveView('portal-queue', { open, only, staleOnly, sort, dir, wq, show })
+  }, [open, only, staleOnly, sort, dir, wq, show])
 
   const list = useMemo(() => {
     const needle = wq.trim().toLowerCase()
