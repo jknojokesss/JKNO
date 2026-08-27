@@ -1,7 +1,7 @@
 import crypto from 'crypto'
 import { requirePortalUser } from '../../../lib/portalAuth'
 import { getLiveToken, QboAuthError } from '../../../lib/qboAuth'
-import { fetchOpenInvoices, fetchInvoicePdf, fetchArRefs, buildInvoice, postInvoice, nextDocNumber, statementFor } from '../../../lib/qboAr'
+import { fetchOpenInvoices, fetchInvoicePdf, fetchArRefs, buildInvoice, postInvoice, nextDocNumber, statementFor, statementsForAll, statementPage } from '../../../lib/qboAr'
 
 // ── The client portal's API ──────────────────────────────────────────────
 // Same live-QBO reads and the guarded invoice create as /api/qbo/ar, but:
@@ -42,12 +42,35 @@ export default async function handler(req, res) {
         return res.status(200).send(pdf)
       }
 
+      const opts = { companyName: connection.company_name || 'Your company', fromEmail: '' }
+
       if (req.query.action === 'statement') {
         const custId = String(req.query.id || '').replace(/[^0-9]/g, '')
         if (!custId) return res.status(400).json({ error: 'Missing ?id=.' })
-        const stmt = await statementFor(env, token, realmId, { companyName: connection.company_name || 'Your company', fromEmail: '' }, custId)
+        const stmt = await statementFor(env, token, realmId, opts, custId)
         res.setHeader('Content-Type', 'text/html; charset=utf-8')
-        return res.status(200).send(`<!doctype html><html><head><meta charset="utf-8"></head><body style="background:#F6F5F1;padding:24px">${stmt.html}</body></html>`)
+        return res.status(200).send(statementPage(`<div class="stmt">${stmt.html}</div>`, {
+          title: `Statement — ${stmt.customerName}`,
+          bar: `<b>${stmt.customerName}</b><span>as of ${stmt.asOf}</span>`,
+        }))
+      }
+
+      // Every customer with a balance, one per printed page.
+      if (req.query.action === 'statements-all') {
+        const all = await statementsForAll(env, token, realmId, opts)
+        if (!all.length) {
+          res.setHeader('Content-Type', 'text/html; charset=utf-8')
+          return res.status(200).send(statementPage(
+            '<p style="font-family:-apple-system,Arial,sans-serif;color:#4A5158;max-width:640px;margin:40px auto">No customer has an open balance right now, so there are no statements to print.</p>',
+            { title: 'Statements' }))
+        }
+        res.setHeader('Content-Type', 'text/html; charset=utf-8')
+        return res.status(200).send(statementPage(
+          all.map((a) => `<div class="stmt">${a.html}</div>`).join(''),
+          {
+            title: `Statements — ${all.length} customers`,
+            bar: `<b>${all.length} statement${all.length === 1 ? '' : 's'}</b><span>one per page · biggest balance first</span>`,
+          }))
       }
 
       if (req.query.action === 'refs') {
