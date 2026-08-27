@@ -4,6 +4,7 @@ import { supabase } from '../lib/supabase'
 import CustomerFilter from '../components/CustomerFilter'
 import WorkQueue from '../components/WorkQueue'
 import useIsPhone from '../components/useIsPhone'
+import { loadView, saveView as rememberView, trackScroll } from '../components/viewState'
 
 // ── Client portal: invoices & statements, sent from YOUR OWN Gmail ───────
 // A portal login is mapped server-side to exactly one QuickBooks company;
@@ -45,6 +46,9 @@ export default function Portal() {
   const [tab, setTab] = useState('chase')
   const [minBal, setMinBal] = useState('')
   const [sel, setSel] = useState(new Set())
+  // The queue's savable filters live here so a view can capture both screens.
+  const [qf, setQf] = useState({ wq: '', only: 'all', staleOnly: false, sort: 'pastDue', dir: 'desc' })
+  const patchQf = (patch) => setQf((f) => ({ ...f, ...patch }))
   const phone = useIsPhone()
   const [views, setViews] = useState([])
 
@@ -60,14 +64,62 @@ export default function Portal() {
   const saveView = () => {
     const name = window.prompt('Name this view (e.g. "90+ over $500")')
     if (!name) return
-    const v = { name, q, sort, dir, aging, minBal, excluded: [...excluded] }
+    // Capture the whole screen, including which tab it was saved from, so
+    // applying it puts her back exactly where she was working.
+    const v = { name, tab, q, sort, dir, aging, minBal, excluded: [...excluded], qf }
     persistViews([...views.filter((x) => x.name !== name), v])
   }
   const applyView = (v) => {
     setQ(v.q || ''); setSort(v.sort || 'due'); setDir(v.dir || 'asc')
     setAging(v.aging || 'all'); setMinBal(v.minBal || '')
-    setExcluded(new Set(v.excluded || [])); setLimit(50); setTab('invoices')
+    setExcluded(new Set(v.excluded || [])); setLimit(50)
+    setQf({ wq: '', only: 'all', staleOnly: false, sort: 'pastDue', dir: 'desc', ...(v.qf || {}) })
+    setTab(v.tab || 'invoices')   // older saved views predate the tab field
   }
+
+  // The same control on both tabs.
+  const ViewControls = () => (
+    <>
+      <button onClick={saveView} style={btn(false)}>Save view</button>
+      {views.length > 0 && (
+        <select value="" onChange={(e) => { const v = views.find((x) => x.name === e.target.value); if (v) applyView(v) }}
+          style={input({ padding: '7px 8px' })}>
+          <option value="">Saved views…</option>
+          {views.map((v) => <option key={v.name} value={v.name}>{v.name}</option>)}
+        </select>
+      )}
+    </>
+  )
+
+  // Restore the view she left behind, and keep it current from then on.
+  const restoredScroll = React.useRef(false)
+  useEffect(() => {
+    const v = loadView('portal-ui')
+    if (v) {
+      if (v.tab) setTab(v.tab)
+      if (v.q) setQ(v.q)
+      if (v.sort) setSort(v.sort)
+      if (v.dir) setDir(v.dir)
+      if (v.aging) setAging(v.aging)
+      if (v.minBal) setMinBal(v.minBal)
+      if (Array.isArray(v.excluded)) setExcluded(new Set(v.excluded))
+      if (v.limit) setLimit(v.limit)
+      if (v.qf) setQf((f) => ({ ...f, ...v.qf }))
+    }
+    return trackScroll('portal-ui')
+  }, [])
+
+  useEffect(() => {
+    rememberView('portal-ui', { tab, q, sort, dir, aging, minBal, excluded: [...excluded], limit, qf })
+  }, [tab, q, sort, dir, aging, minBal, excluded, limit, qf])
+
+  // Scroll last, once the list it belongs to actually exists.
+  useEffect(() => {
+    if (!data || restoredScroll.current) return
+    restoredScroll.current = true
+    const y = (loadView('portal-ui') || {}).scrollY
+    if (y) requestAnimationFrame(() => window.scrollTo(0, y))
+  }, [data])
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => setSession(session))
@@ -208,10 +260,16 @@ export default function Portal() {
     }
     if (c.saveDefault) { try { window.localStorage.setItem('portal-body-' + c.kind, c.body) } catch (e) {} }
     setSel(new Set())
+    // Mark it chased immediately, in place. Re-fetching the whole book after
+    // every send re-rendered the list, threw away her position, and cost
+    // seven calls to Intuit for one row that changed.
+    if (c.customerId) {
+      setData((d) => (d ? { ...d, sends: { ...(d.sends || {}), [c.customerId]: { at: new Date().toISOString(), kind: c.kind } } } : d))
+    }
     // Fire-and-forget: a failed log must never cost her the email.
     call('/api/portal/ar', { method: 'POST', body: JSON.stringify({
       action: 'log-send', kind: c.kind, customerId: c.customerId, customerName: c.name, doc: c.doc, to: c.to,
-    }) }).then(() => load()).catch(() => {})
+    }) }).catch(() => {})
     window.open(
       `https://mail.google.com/mail/?view=cm&fs=1&to=${encodeURIComponent(c.to)}&su=${encodeURIComponent(c.subject)}&body=${encodeURIComponent(body)}`,
       '_blank'
@@ -389,6 +447,8 @@ export default function Portal() {
             <WorkQueue
               rows={queue}
               busy={busy}
+              f={qf}
+              setF={patchQf}
               onSeeAll={() => setTab('invoices')}
               onPreview={(r) => openBlob(`/api/portal/ar?action=statement&id=${r.id}`, 'stmt' + r.id)}
               onStatement={(r) => startCompose('statement', r.id, r.name, r.email,
@@ -410,6 +470,7 @@ export default function Portal() {
                 {(excluded.size > 0 || minBal) && (
                   <button onClick={() => { setExcluded(new Set()); setMinBal('') }} style={btn(false)}>Clear</button>
                 )}
+                <ViewControls />
               </>}
             />
           )}
@@ -436,14 +497,7 @@ export default function Portal() {
               {(q || aging !== 'all' || excluded.size > 0 || minBal) && (
                 <button onClick={() => { setQ(''); setAging('all'); setExcluded(new Set()); setMinBal(''); setLimit(50) }} style={btn(false)}>Clear</button>
               )}
-              <button onClick={saveView} style={btn(false)}>Save view</button>
-              {views.length > 0 && (
-                <select value="" onChange={(e) => { const v = views.find((x) => x.name === e.target.value); if (v) applyView(v) }}
-                  style={input({ padding: '7px 8px' })}>
-                  <option value="">Saved views…</option>
-                  {views.map((v) => <option key={v.name} value={v.name}>{v.name}</option>)}
-                </select>
-              )}
+              <ViewControls />
               <span style={{ flex: 1 }} />
               <span style={{ fontSize: '12.5px', color: MUTED }}>
                 {shown.length.toLocaleString()} of {data.invoices.length.toLocaleString()} · {money(shownTotal)}
