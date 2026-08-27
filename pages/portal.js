@@ -34,6 +34,7 @@ export default function Portal() {
   const [compose, setCompose] = useState(null) // { kind, id, name, to, subject, body }
   const [q, setQ] = useState('')
   const [sort, setSort] = useState('due')
+  const [dir, setDir] = useState('asc')
   const [overdueOnly, setOverdueOnly] = useState(false)
   const [limit, setLimit] = useState(50)
 
@@ -151,15 +152,37 @@ export default function Portal() {
                        || String(i.doc || '').toLowerCase().includes(needle))
       : all
     if (overdueOnly) out = out.filter((i) => i.due && i.due < todayISO)
-    const by = {
-      due: (a, b) => String(a.due || '9999-99-99').localeCompare(String(b.due || '9999-99-99')),
-      newest: (a, b) => String(b.date || '').localeCompare(String(a.date || '')),
+    const cmp = {
+      doc: (a, b) => {
+        const na = Number(a.doc), nb = Number(b.doc)
+        if (a.doc && b.doc && !isNaN(na) && !isNaN(nb)) return na - nb
+        return String(a.doc || '').localeCompare(String(b.doc || ''))
+      },
       customer: (a, b) => String(a.customer || '').localeCompare(String(b.customer || '')),
-      biggest: (a, b) => b.balance - a.balance,
+      date: (a, b) => String(a.date || '').localeCompare(String(b.date || '')),
+      // No due date sorts last rather than first, either direction.
+      due: (a, b) => String(a.due || '9999-99-99').localeCompare(String(b.due || '9999-99-99')),
+      balance: (a, b) => a.balance - b.balance,
     }
-    return [...out].sort(by[sort] || by.due)
-  }, [data, q, sort, overdueOnly, todayISO])
+    const base = cmp[sort] || cmp.due
+    return [...out].sort((a, b) => (dir === 'asc' ? base(a, b) : -base(a, b)))
+  }, [data, q, sort, dir, overdueOnly, todayISO])
   const shownTotal = shown.reduce((t, i) => t + i.balance, 0)
+  // Click a column to sort by it; click it again to reverse. Amounts and
+  // dates open on the end people actually want: biggest, and oldest-due.
+  const sortBy = (field) => {
+    if (sort === field) { setDir((d) => (d === 'asc' ? 'desc' : 'asc')); return }
+    setSort(field)
+    setDir(field === 'balance' ? 'desc' : 'asc')
+  }
+  const SortH = ({ field, label, right }) => (
+    <th onClick={() => sortBy(field)} title="Sort by this column"
+      style={{ textAlign: right ? 'right' : 'left', padding: '8px 10px', borderBottom: `1px solid ${INK}`,
+               fontSize: '11px', textTransform: 'uppercase', letterSpacing: '.06em',
+               color: sort === field ? INK : MUTED, whiteSpace: 'nowrap', cursor: 'pointer', userSelect: 'none' }}>
+      {label}{sort === field ? (dir === 'asc' ? ' ▲' : ' ▼') : ''}
+    </th>
+  )
 
   if (session === undefined) return <Frame><p style={{ color: MUTED }}>Loading…</p></Frame>
   if (!session) return <Frame><Login /></Frame>
@@ -210,12 +233,6 @@ export default function Portal() {
               <input value={q} onChange={(e) => { setQ(e.target.value); setLimit(50) }}
                 placeholder="Search customer or invoice #"
                 style={input({ width: '260px' })} />
-              <select value={sort} onChange={(e) => setSort(e.target.value)} style={input()}>
-                <option value="due">Oldest due first</option>
-                <option value="newest">Newest invoice first</option>
-                <option value="customer">Customer A–Z</option>
-                <option value="biggest">Biggest balance first</option>
-              </select>
               <label style={{ fontSize: '12.5px', color: MUTED, display: 'flex', gap: '6px', alignItems: 'center' }}>
                 <input type="checkbox" checked={overdueOnly} onChange={(e) => { setOverdueOnly(e.target.checked); setLimit(50) }} />
                 Past due only
@@ -229,9 +246,12 @@ export default function Portal() {
             <div style={{ border: `1px solid ${BORDER}`, borderRadius: '4px', overflowX: 'auto', marginBottom: '26px' }}>
               <table style={{ borderCollapse: 'collapse', width: '100%', fontSize: '13px', fontVariantNumeric: 'tabular-nums' }}>
                 <thead><tr>
-                  {['Invoice', 'Customer', 'Date', 'Due', 'Balance', ''].map((h, k) => (
-                    <th key={k} style={{ textAlign: k === 4 ? 'right' : 'left', padding: '8px 10px', borderBottom: `1px solid ${INK}`, fontSize: '11px', textTransform: 'uppercase', letterSpacing: '.06em', color: MUTED, whiteSpace: 'nowrap' }}>{h}</th>
-                  ))}
+                  <SortH field="doc" label="Invoice" />
+                  <SortH field="customer" label="Customer" />
+                  <SortH field="date" label="Date" />
+                  <SortH field="due" label="Due" />
+                  <SortH field="balance" label="Balance" right />
+                  <th style={{ borderBottom: `1px solid ${INK}` }}></th>
                 </tr></thead>
                 <tbody>
                   {shown.slice(0, limit).map((inv) => (
