@@ -6,11 +6,12 @@ import WorkQueue from '../components/WorkQueue'
 import useIsPhone from '../components/useIsPhone'
 import { loadView, saveView as rememberView, trackScroll } from '../components/viewState'
 
-// ── Client portal: invoices & statements, sent from YOUR OWN Gmail ───────
+// ── Client portal: invoices & statements, sent from HER OWN mailbox ──────
 // A portal login is mapped server-side to exactly one QuickBooks company;
-// the page never chooses a client. Emailing opens the user's Gmail with
-// to / subject / body prefilled (body includes a secure link to the
-// document) — the mail goes out from their account when they hit send.
+// the page never chooses a client. Emailing opens her mail app (or Gmail on
+// the web) with to / subject / body prefilled and the PDF downloaded to
+// attach — the message leaves from her account when she hits send, and
+// carries nothing but her own words and her own document.
 // Nothing here emails on its own, and only invoice creation writes to QBO.
 
 const INK = '#1A1A1A', BORDER = '#E5E5E5', MUTED = '#777', RED = '#CC2222', GREEN = '#1E7A3A'
@@ -46,6 +47,11 @@ export default function Portal() {
   const [tab, setTab] = useState('chase')
   const [minBal, setMinBal] = useState('')
   const [sel, setSel] = useState(new Set())
+  // Gmail's ?view=cm compose link is a desktop-web thing. On a phone it lands
+  // in Gmail mobile web, which drops the prefilled body or errors outright,
+  // especially with several Google accounts signed in. mailto hands off to
+  // whatever mail app she actually uses, so phones default to that.
+  const [via, setVia] = useState(null)   // 'gmail' | 'mail' | null = pick by device
   // The queue's savable filters live here so a view can capture both screens.
   const [qf, setQf] = useState({ wq: '', only: 'all', staleOnly: false, sort: 'pastDue', dir: 'desc' })
   const patchQf = (patch) => setQf((f) => ({ ...f, ...patch }))
@@ -94,6 +100,7 @@ export default function Portal() {
   // Restore the view she left behind, and keep it current from then on.
   const restoredScroll = React.useRef(false)
   useEffect(() => {
+    try { const w = window.localStorage.getItem('portal-send-via'); if (w) setVia(w) } catch (e) {}
     const v = loadView('portal-ui')
     if (v) {
       if (v.tab) setTab(v.tab)
@@ -260,6 +267,17 @@ export default function Portal() {
     }
     if (c.saveDefault) { try { window.localStorage.setItem('portal-body-' + c.kind, c.body) } catch (e) {} }
     setSel(new Set())
+
+    const useMailApp = (via || (phone ? 'mail' : 'gmail')) === 'mail'
+    if (useMailApp) {
+      // A real link click, not window.open: opening mailto in a new window
+      // leaves a blank tab behind on most browsers.
+      const a = document.createElement('a')
+      a.href = `mailto:${encodeURIComponent(c.to)}?subject=${encodeURIComponent(c.subject)}&body=${encodeURIComponent(body)}`
+      document.body.appendChild(a); a.click(); a.remove()
+      setCompose(null)
+      return
+    }
     // Mark it chased immediately, in place. Re-fetching the whole book after
     // every send re-rendered the list, threw away her position, and cost
     // seven calls to Intuit for one row that changed.
@@ -658,8 +676,8 @@ export default function Portal() {
           }}>
             <h3 style={{ fontSize: '16px', marginBottom: '4px' }}>Email {compose.kind === 'statement' ? 'statement' : 'invoice'} — {compose.name}</h3>
             <p style={{ fontSize: '12px', color: MUTED, lineHeight: 1.6, marginBottom: '14px' }}>
-              This opens Gmail with everything filled in — you hit Send there, so the email comes from
-              <b> your</b> address.{' '}
+              This opens {(via || (phone ? 'mail' : 'gmail')) === 'mail' ? 'your mail app' : 'Gmail'} with everything
+              filled in — you hit Send there, so the email comes from <b>your</b> address.{' '}
               {compose.kind === 'invoices'
                 ? <>All {compose.docs.length} PDFs download at the same time — <b>drag them into the Gmail window</b> before sending. Your browser may ask once whether to allow multiple files.</>
                 : <>The {compose.kind === 'statement' ? 'statement' : 'invoice'} PDF downloads at the same time — <b>drag it into the Gmail window</b> before sending. The email contains nothing but your own words and your own document.</>}
@@ -674,10 +692,22 @@ export default function Portal() {
             <label style={{ fontSize: '12px', color: MUTED, display: 'block', marginBottom: '10px' }}>Message<br />
               <textarea value={compose.body} onChange={(e) => setCompose((c) => ({ ...c, body: e.target.value }))} rows={7} style={input({ width: '100%', fontFamily: 'inherit', lineHeight: 1.5 })} />
             </label>
-            <label style={{ fontSize: '12px', color: MUTED, display: 'flex', gap: '7px', alignItems: 'center', marginBottom: '14px' }}>
+            <label style={{ fontSize: '12px', color: MUTED, display: 'flex', gap: '7px', alignItems: 'center', marginBottom: '10px' }}>
               <input type="checkbox" checked={compose.saveDefault} onChange={(e) => setCompose((c) => ({ ...c, saveDefault: e.target.checked }))} />
               Remember this wording as my default
             </label>
+            <div style={{ fontSize: '12px', color: MUTED, display: 'flex', gap: '8px', alignItems: 'center', flexWrap: 'wrap', marginBottom: '14px' }}>
+              Open in:
+              {[['mail', 'My mail app'], ['gmail', 'Gmail on the web']].map(([k, label]) => {
+                const on = (via || (phone ? 'mail' : 'gmail')) === k
+                return (
+                  <button key={k} onClick={() => { setVia(k); try { window.localStorage.setItem('portal-send-via', k) } catch (e) {} }}
+                    style={{ fontSize: '12px', padding: '5px 10px', borderRadius: '13px', cursor: 'pointer',
+                             border: `1px solid ${on ? INK : BORDER}`, background: on ? INK : '#fff',
+                             color: on ? '#fff' : INK, fontWeight: on ? 700 : 500 }}>{label}</button>
+                )
+              })}
+            </div>
             {compose.readyErr && (
               <div style={{ fontSize: '12.5px', color: RED, lineHeight: 1.6, marginBottom: '10px' }}>
                 {compose.readyErr}
@@ -688,7 +718,7 @@ export default function Portal() {
               <button onClick={openGmail} disabled={!compose.to || !compose.ready} style={btn(true)}>
                 {compose.readyErr ? 'Unavailable'
                   : !compose.ready ? (compose.attach ? 'Getting the PDF…' : 'Preparing…')
-                  : 'Open in Gmail →'}
+                  : (via || (phone ? 'mail' : 'gmail')) === 'mail' ? 'Open in my mail app →' : 'Open in Gmail →'}
               </button>
             </div>
           </div>
