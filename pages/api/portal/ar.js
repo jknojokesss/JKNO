@@ -136,7 +136,12 @@ export default async function handler(req, res) {
       // and unlike a per-invoice checkout it works on a statement too.
       const payZelle = (client === payOwner && process.env.PAY_ZELLE) ? process.env.PAY_ZELLE : null
 
-      return res.status(200).json({ company: connection.company_name, invoices, sends, payBase, payZelle })
+      // Whether this is the company that owns payments at all — so the UI can
+      // tell "not configured yet" apart from "not yours to offer".
+      return res.status(200).json({
+        company: connection.company_name, invoices, sends,
+        payBase, payZelle, payOwner: client === payOwner,
+      })
     }
 
     if (req.method === 'POST' && req.body && req.body.action === 'log-send') {
