@@ -1,6 +1,3 @@
-import { getLiveToken } from '../../lib/qboAuth'
-import { fetchInvoiceByDoc } from '../../lib/qboAr'
-
 // ── A short, branded pay link ────────────────────────────────────────────
 // Stripe's own URLs are long and anonymous — not what belongs in a
 // customer's inbox next to an invoice. This is the short one you send:
@@ -20,8 +17,6 @@ import { fetchInvoiceByDoc } from '../../lib/qboAr'
 // Env: STRIPE_SECRET_KEY (per-invoice), STRIPE_LINKS / STRIPE_PAYMENT_LINK
 // (flat), STRIPE_PAY_CLIENT (which QuickBooks company, default 'jkno').
 
-const money = (n) => '$' + Number(n || 0).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
-
 function flatLink(name) {
   let links = {}
   try { links = JSON.parse(process.env.STRIPE_LINKS || '{}') } catch (e) { /* fall through */ }
@@ -39,6 +34,11 @@ export async function getServerSideProps({ params, query, req }) {
   if (inv && process.env.STRIPE_SECRET_KEY) {
     try {
       const client = process.env.STRIPE_PAY_CLIENT || 'jkno'
+      // Imported here, not at module scope: these reach for the service-role
+      // key, and Next evaluates page modules at build time when that key is
+      // not present. A top-level import fails the whole build.
+      const { getLiveToken } = await import('../../lib/qboAuth')
+      const { fetchInvoiceByDoc } = await import('../../lib/qboAr')
       const { env, token, realmId } = await getLiveToken(client)
       const found = await fetchInvoiceByDoc(env, token, realmId, inv)
 
