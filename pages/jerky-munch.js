@@ -716,7 +716,8 @@ export default function JerkyMunch() {
       <meta name="apple-mobile-web-app-capable" content="yes" />
       <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
       <meta name="apple-mobile-web-app-title" content="Jerky Munch" />
-      <link rel="apple-touch-icon" href="/jerky-icon.svg" />
+      <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+      <link rel="icon" type="image/png" sizes="192x192" href="/jerky-icon-192.png" />
       <link rel="icon" href="/jerky-icon.svg" />
     </Head>
   )
@@ -837,7 +838,7 @@ export default function JerkyMunch() {
         <meta name="mobile-web-app-capable" content="yes" />
         <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
         <meta name="apple-mobile-web-app-title" content="Jerky Munch" />
-        <link rel="apple-touch-icon" href="/jerky-icon.svg" />
+        <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
         <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
         <style>{`*{box-sizing:border-box;margin:0;padding:0}html{-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale;text-rendering:optimizeLegibility}body{background:${CREAM};font-family:'Inter',sans-serif;color:${INK}}::placeholder{color:#A99A82}
 .jm-shell{display:flex;min-height:100vh;align-items:stretch}
