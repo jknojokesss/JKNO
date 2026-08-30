@@ -725,6 +725,25 @@ export default function Portal() {
               <input type="checkbox" checked={compose.saveDefault} onChange={(e) => setCompose((c) => ({ ...c, saveDefault: e.target.checked }))} />
               Remember this wording as my default
             </label>
+            {/* A saved default is used verbatim, so wording saved before payment
+                options existed will never grow the line by itself. Say so, and
+                offer the way out. */}
+            {data && (data.payBase || data.payZelle) && !compose.body.includes('{pay}') && !compose.body.includes('{zelle}') && (
+              <div style={{ fontSize: '12px', color: MUTED, marginBottom: '10px', lineHeight: 1.5 }}>
+                This is your saved wording, from before payment options were set up — so it has no pay
+                line.{' '}
+                <button onClick={() => {
+                  try { window.localStorage.removeItem('portal-body-' + compose.kind) } catch (e) {}
+                  setCompose((c) => ({ ...c, body: defaultBody(c.kind, data) }))
+                }} style={{ ...btn(false), padding: '3px 8px' }}>Use the default again</button>
+              </div>
+            )}
+            {data && data.payOwner && !data.payBase && !data.payZelle && compose.kind !== 'statement' && (
+              <div style={{ fontSize: '12px', color: RED, marginBottom: '10px', lineHeight: 1.5 }}>
+                No payment options are set up, so there is no pay line to add. Set STRIPE_SECRET_KEY
+                (card) or PAY_ZELLE (Zelle) in the environment and redeploy.
+              </div>
+            )}
             {data && (data.payBase || data.payZelle) && compose.kind !== 'statement' && (
               <div style={{ fontSize: '12px', color: MUTED, marginBottom: '10px', lineHeight: 1.5 }}>
                 <code style={{ fontFamily: mono, fontSize: '11px' }}>{'{pay}'}</code> becomes a link that charges
