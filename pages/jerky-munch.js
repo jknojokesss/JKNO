@@ -30,7 +30,7 @@ const DIRECT_SOURCES = ['Shopify / online', 'Farmers market', 'Pop-up event', 'W
 
 const COGS_CATS = ['Ingredients', 'Packaging']
 const EXP_CATS = ['Ingredients', 'Packaging', 'Marketing', 'Fees', 'Equipment', 'Travel', 'Other']
-const DIAGNOSES = ['', 'Sold but not reported (store owes me)', 'Theft / shrinkage', 'Damaged or expired', 'Free samples given out', 'Miscount — recount needed', 'Unknown — investigating']
+const DIAGNOSES = ['', 'Sold but not reported (store owes me)', 'Theft or loss', 'Damaged or expired', 'Free samples given out', 'Miscount — recount needed', 'Unknown — still checking']
 const RESTOCK = [{ id: 'good', label: 'Stocked', color: GREEN }, { id: 'soon', label: 'Order soon', color: AMBER }, { id: 'now', label: 'Needs more now', color: RED }]
 const RM = Object.fromEntries(RESTOCK.map(r => [r.id, r]))
 const verdict = (roas) => roas >= 2 ? { c: GREEN, t: 'Scale' } : roas >= 1 ? { c: AMBER, t: 'Watch' } : { c: RED, t: 'Cut' }
@@ -458,9 +458,9 @@ export default function JerkyMunch() {
     const shelf = c.counted == null ? 0 : c.counted
     let note
     if (variance > 0) note = c.diagnosis === 'Sold but not reported (store owes me)'
-      ? `Closed cycle — invoiced ${money(varVal)} for ${variance} sold-not-reported bags. New cycle opens at ${shelf} on the shelf.`
+      ? `Closed cycle — invoiced ${money(varVal)} for ${variance} bags the store sold but didn't report. New cycle opens at ${shelf} on the shelf.`
       : `Closed cycle — wrote off ${variance} bags (${money(varVal)})${c.diagnosis ? ` as ${c.diagnosis.toLowerCase()}` : ''}. New cycle opens at ${shelf} on the shelf.`
-    else note = `Closed cycle — reconciled clean. New cycle opens at ${shelf} on the shelf.`
+    else note = `Closed cycle — counts matched. New cycle opens at ${shelf} on the shelf.`
     upd(id, { sent: shelf, paid: 0, returned: 0, counted: shelf, diagnosis: '', cycle: (c.cycle || 1) + 1 }, note)
     setExpanded(null)
   }
@@ -496,7 +496,7 @@ export default function JerkyMunch() {
       ['Consignment income', cashCollected],
       ['Direct income (non-Shopify)', offlineDirectRev],
       ['Cost of goods sold', -closeCogs],
-      ['AR — invoice stores (sold-not-reported)', closeAR],
+      ['Invoice stores owe you (sold, not reported)', closeAR],
       ['(Shopify online — booked via Shopify, do NOT re-enter)', shopifyRev]]
     const csv = rows.map(r => r.map(x => `"${String(x).replace(/"/g, '""')}"`).join(',')).join('\n')
     const a = document.createElement('a')
@@ -1085,7 +1085,7 @@ export default function JerkyMunch() {
                       <span style={{ ...big, fontSize: '15px', color: RED }}>{money(c.varVal)}</span>
                     </div>
                   ))}
-                  <p style={{ fontSize: '12px', color: MUTED, marginTop: '10px', lineHeight: 1.5 }}>Bags gone from shelves you haven't been paid for. Tap a store to diagnose it — then invoice the ones the store sold and didn't report, or write off the rest at close-out.</p>
+                  <p style={{ fontSize: '12px', color: MUTED, marginTop: '10px', lineHeight: 1.5 }}>Bags gone from shelves you haven't been paid for. Tap a store to find out why — then invoice the ones the store sold and didn't report, or write off the rest at close-out.</p>
                 </div>
               )}
 
@@ -1109,7 +1109,7 @@ export default function JerkyMunch() {
               {R.map((c, idx) => {
                 const open = expanded === c.id
                 const showHeader = idx === 0 || (R[idx - 1] && R[idx - 1].region !== c.region)
-                const badge = c.status === 'reconciled' ? { c: GREEN, t: 'Reconciled' } : c.status === 'short' ? { c: RED, t: `${c.variance} missing` } : c.status === 'over' ? { c: AMBER, t: `${-c.variance} over` } : { c: MUTED, t: 'Not counted' }
+                const badge = c.status === 'reconciled' ? { c: GREEN, t: 'Matches' } : c.status === 'short' ? { c: RED, t: `${c.variance} missing` } : c.status === 'over' ? { c: AMBER, t: `${-c.variance} over` } : { c: MUTED, t: 'Not counted' }
                 return (
                   <Fragment key={c.id}>
                   {showHeader && <div style={{ ...lbl, color: SPICE, fontSize: '12px', margin: idx === 0 ? '2px 0 10px' : '24px 0 10px', display: 'flex', alignItems: 'center', gap: '10px' }}>{c.region || 'Other'}<span style={{ flex: 1, height: '1px', background: BORDER }} /></div>}
@@ -1144,7 +1144,7 @@ export default function JerkyMunch() {
                           <button onClick={() => { const v = Number(dv(`price_${c.id}`)); if (v > 0 && v !== c.price) { upd(c.id, { price: v }, `Set price to ${money(v)}/bag`); } setDv(`price_${c.id}`, '') }} style={{ background: CHAR, color: CREAM, border: 'none', borderRadius: '2px', padding: '10px 16px', ...btn }}>Save</button>
                           <span style={{ fontSize: '11.5px', color: MUTED }}>drives what's owed per count</span>
                         </div>
-                        <div style={{ ...lbl, margin: '14px 0 6px' }}>The reconciliation</div>
+                        <div style={{ ...lbl, margin: '14px 0 6px' }}>Where the bags went</div>
                         <div style={{ background: CREAM, borderRadius: '2px', padding: '14px 16px' }}>
                           <Row l="Units sent out" v={c.sent} />
                           <Row l={`− Paid by checks (${money(c.paid)} ÷ ${money(c.price)})`} v={`−${c.paidUnits}`} />
@@ -1159,7 +1159,7 @@ export default function JerkyMunch() {
 
                         {c.variance > 0 && (
                           <div style={{ marginTop: '14px' }}>
-                            <div style={{ ...lbl, marginBottom: '6px' }}>Why are {c.variance} missing? (diagnose it)</div>
+                            <div style={{ ...lbl, marginBottom: '6px' }}>Why are {c.variance} missing?</div>
                             <select value={c.diagnosis} onChange={e => upd(c.id, { diagnosis: e.target.value }, `Diagnosed missing units: ${e.target.value || 'cleared'}`)} style={{ ...inp, width: '100%', cursor: 'pointer' }}>
                               {DIAGNOSES.map(d => <option key={d} value={d}>{d || 'Pick a reason…'}</option>)}
                             </select>
@@ -1201,7 +1201,7 @@ export default function JerkyMunch() {
                         <textarea value={c.notes || ''} onChange={e => upd(c.id, { notes: e.target.value })} rows={2} placeholder="Notes — who you talk to, what they like, what they said…" style={{ ...inp, width: '100%', resize: 'vertical', fontFamily: 'inherit' }} />
 
                         <div style={{ ...lbl, margin: '18px 0 6px' }}>End of cycle</div>
-                        <button onClick={() => { if (window.confirm(`Close out cycle ${c.cycle || 1} for ${c.store}? This settles the ${c.variance > 0 ? c.variance + ' missing bags' : 'reconciliation'} and starts a fresh cycle from the ${c.counted == null ? 0 : c.counted} bags on the shelf now.`)) closeOut(c.id) }} style={{ width: '100%', background: 'none', color: INK, border: `1px solid ${BORDER}`, borderRadius: '2px', padding: '12px', ...btn }}>Close out this cycle →</button>
+                        <button onClick={() => { if (window.confirm(`Close out cycle ${c.cycle || 1} for ${c.store}? This settles the ${c.variance > 0 ? c.variance + ' missing bags' : 'count'} and starts a fresh cycle from the ${c.counted == null ? 0 : c.counted} bags on the shelf now.`)) closeOut(c.id) }} style={{ width: '100%', background: 'none', color: INK, border: `1px solid ${BORDER}`, borderRadius: '2px', padding: '12px', ...btn }}>Close out this cycle →</button>
                         <p style={{ fontSize: '12px', color: MUTED, marginTop: '7px', lineHeight: 1.5 }}>
                           {c.variance > 0
                             ? <>Settles the <b>{c.variance} missing</b> {c.diagnosis === 'Sold but not reported (store owes me)' ? <>by <b style={{ color: RED }}>invoicing the store {money(c.varVal)}</b></> : <>as a <b>write-off</b></>}, then resets the count clean for the next delivery — so old gaps never bleed into the new cycle.</>
@@ -1231,7 +1231,7 @@ export default function JerkyMunch() {
           {tab === 'invoices' && (
             <>
               <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap', marginBottom: '16px' }}>
-                <KPI k="Outstanding (A/R)" v={m0(totalAR)} sub={`${invUnpaid.length} open invoices`} accent={KRAFT} />
+                <KPI k="Owed to you" v={m0(totalAR)} sub={`${invUnpaid.length} unpaid invoices`} accent={KRAFT} />
                 <KPI k="Overdue" v={m0(overdueAR)} sub="past due date" accent={overdueAR > 0 ? RED : GREEN} />
                 <KPI k="Collected" v={m0(collectedAR)} sub="invoices paid" accent={GREEN} />
               </div>
