@@ -132,7 +132,11 @@ export default async function handler(req, res) {
         ? `${process.env.PORTAL_BASE_URL || `${proto}://${req.headers.host}`}/pay`
         : null
 
-      return res.status(200).json({ company: connection.company_name, invoices, sends, payBase })
+      // Zelle costs nothing in fees, so it rides alongside the card link —
+      // and unlike a per-invoice checkout it works on a statement too.
+      const payZelle = (client === payOwner && process.env.PAY_ZELLE) ? process.env.PAY_ZELLE : null
+
+      return res.status(200).json({ company: connection.company_name, invoices, sends, payBase, payZelle })
     }
 
     if (req.method === 'POST' && req.body && req.body.action === 'log-send') {

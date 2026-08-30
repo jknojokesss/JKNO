@@ -26,12 +26,25 @@ const btn = (primary) => ({
 })
 const input = (extra = {}) => ({ fontSize: '14px', padding: '8px 10px', border: `1px solid ${BORDER}`, borderRadius: '4px', ...extra })
 
-const DEFAULT_INVOICE_BODY = 'Hi,\n\nYour invoice is attached.\n\nAny questions, just reply to this email.\n\nThank you!'
-// Used when a pay link is available for this company. {pay} becomes a link
-// that charges exactly this invoice's balance.
-const DEFAULT_INVOICE_BODY_PAY = 'Hi,\n\nYour invoice is attached.\n\nPay online: {pay}\n\nAny questions, just reply to this email.\n\nThank you!'
-const DEFAULT_INVOICES_BODY = 'Hi,\n\nYour invoices are attached:\n{list}\n\nTotal due: {total}\n\nAny questions, just reply to this email.\n\nThank you!'
-const DEFAULT_STATEMENT_BODY = 'Hi,\n\nYour statement of account is attached.\n\nAny questions, just reply to this email.\n\nThank you!'
+// The default wording is assembled from what this company can actually
+// accept: a card link that charges one invoice, Zelle, both, or neither.
+// {pay} and {zelle} are expanded on send, and a line whose placeholder has
+// no value is dropped rather than left dangling.
+function defaultBody(kind, { payBase, payZelle } = {}) {
+  const opening = kind === 'statement' ? 'Your statement of account is attached.'
+    : kind === 'invoices' ? 'Your invoices are attached:\n{list}\n\nTotal due: {total}'
+    : 'Your invoice is attached.'
+
+  const ways = []
+  // A per-invoice checkout only makes sense for a single invoice.
+  if (payBase && kind === 'invoice') ways.push('- Card or bank: {pay}')
+  if (payZelle) ways.push('- Zelle: {zelle}')
+
+  return ['Hi,', '', opening, '']
+    .concat(ways.length ? ['To pay:'].concat(ways).concat(['']) : [])
+    .concat(['Any questions, just reply to this email.', '', 'Thank you!'])
+    .join('\n')
+}
 
 export default function Portal() {
   const [session, setSession] = useState(undefined) // undefined = checking
@@ -189,7 +202,7 @@ export default function Portal() {
       docs: invoices.map((i) => i.doc || i.id),
       name: first.customer, customerId: first.customerId, to: first.email || '',
       subject: `Invoices from ${data.company || 'us'}`,
-      body: saved || DEFAULT_INVOICES_BODY,
+      body: saved || defaultBody('invoices', data),
       listText: invoices.map((i) => `  ${i.doc ? '#' + i.doc : 'Invoice'} — ${money(i.balance)}${i.due ? ` (due ${i.due})` : ''}`).join('\n'),
       totalText: money(total),
       saveDefault: false, attach: true, ready: null, readyErr: null,
@@ -211,8 +224,7 @@ export default function Portal() {
     setCompose({
       kind, id, name, doc, to: to || '', customerId: customerId != null ? customerId : (kind === 'statement' ? id : null),
       subject: subjectDefault,
-      body: saved || (kind === 'statement' ? DEFAULT_STATEMENT_BODY
-        : (data && data.payBase && doc) ? DEFAULT_INVOICE_BODY_PAY : DEFAULT_INVOICE_BODY),
+      body: saved || defaultBody(kind, data),
       saveDefault: false,
       attach,
       ready: null,      // the blob (attach) or the link (statement)
@@ -255,10 +267,13 @@ export default function Portal() {
     // the whole line goes rather than leaving a dangling label.
     const payUrl = (data && data.payBase && c.kind === 'invoice' && c.doc)
       ? `${data.payBase}?inv=${encodeURIComponent(c.doc)}` : ''
+    const zelle = (data && data.payZelle) || ''
     body = body.split('\n')
-      .filter((line) => payUrl || !line.includes('{pay}'))
-      .map((line) => line.replaceAll('{pay}', payUrl))
+      .filter((line) => (payUrl || !line.includes('{pay}')) && (zelle || !line.includes('{zelle}')))
+      .map((line) => line.replaceAll('{pay}', payUrl).replaceAll('{zelle}', zelle))
       .join('\n')
+    // 'To pay:' with nothing under it reads worse than no offer at all.
+    body = body.replace(/To pay:\n(?!\s*-)/, '')
 
     if (c.kind === 'invoices') {
       body = body.replaceAll('{list}', c.listText).replaceAll('{total}', c.totalText).replaceAll('{link}', '').trim()
@@ -710,10 +725,11 @@ export default function Portal() {
               <input type="checkbox" checked={compose.saveDefault} onChange={(e) => setCompose((c) => ({ ...c, saveDefault: e.target.checked }))} />
               Remember this wording as my default
             </label>
-            {data && data.payBase && compose.kind === 'invoice' && (
+            {data && (data.payBase || data.payZelle) && compose.kind !== 'statement' && (
               <div style={{ fontSize: '12px', color: MUTED, marginBottom: '10px', lineHeight: 1.5 }}>
-                <code style={{ fontFamily: mono, fontSize: '11px' }}>{'{pay}'}</code> becomes a link that
-                charges exactly this invoice&rsquo;s balance. Delete the line if you don&rsquo;t want to offer it.
+                <code style={{ fontFamily: mono, fontSize: '11px' }}>{'{pay}'}</code> becomes a link that charges
+                exactly this invoice&rsquo;s balance{data.payZelle ? <>, and <code style={{ fontFamily: mono, fontSize: '11px' }}>{'{zelle}'}</code> your Zelle address</> : ''}.
+                Delete a line if you don&rsquo;t want to offer it.
               </div>
             )}
             <div style={{ fontSize: '12px', color: MUTED, display: 'flex', gap: '8px', alignItems: 'center', flexWrap: 'wrap', marginBottom: '14px' }}>
