@@ -122,7 +122,17 @@ export default async function handler(req, res) {
       for (const r of rows || []) {
         if (r.customer_id && !sends[r.customer_id]) sends[r.customer_id] = { at: r.sent_at, kind: r.kind }
       }
-      return res.status(200).json({ company: connection.company_name, invoices, sends })
+      // Only the company that owns the Stripe account gets a pay link. A
+      // client whose books merely pass through here must never send their
+      // customers to our domain.
+      const payOwner = process.env.STRIPE_PAY_CLIENT || 'jkno'
+      const payConfigured = !!(process.env.STRIPE_SECRET_KEY || process.env.STRIPE_PAYMENT_LINK || process.env.STRIPE_LINKS)
+      const proto = String(req.headers['x-forwarded-proto'] || 'https').split(',')[0]
+      const payBase = (client === payOwner && payConfigured)
+        ? `${process.env.PORTAL_BASE_URL || `${proto}://${req.headers.host}`}/pay`
+        : null
+
+      return res.status(200).json({ company: connection.company_name, invoices, sends, payBase })
     }
 
     if (req.method === 'POST' && req.body && req.body.action === 'log-send') {

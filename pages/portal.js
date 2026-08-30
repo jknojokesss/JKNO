@@ -27,6 +27,9 @@ const btn = (primary) => ({
 const input = (extra = {}) => ({ fontSize: '14px', padding: '8px 10px', border: `1px solid ${BORDER}`, borderRadius: '4px', ...extra })
 
 const DEFAULT_INVOICE_BODY = 'Hi,\n\nYour invoice is attached.\n\nAny questions, just reply to this email.\n\nThank you!'
+// Used when a pay link is available for this company. {pay} becomes a link
+// that charges exactly this invoice's balance.
+const DEFAULT_INVOICE_BODY_PAY = 'Hi,\n\nYour invoice is attached.\n\nPay online: {pay}\n\nAny questions, just reply to this email.\n\nThank you!'
 const DEFAULT_INVOICES_BODY = 'Hi,\n\nYour invoices are attached:\n{list}\n\nTotal due: {total}\n\nAny questions, just reply to this email.\n\nThank you!'
 const DEFAULT_STATEMENT_BODY = 'Hi,\n\nYour statement of account is attached.\n\nAny questions, just reply to this email.\n\nThank you!'
 
@@ -208,7 +211,8 @@ export default function Portal() {
     setCompose({
       kind, id, name, doc, to: to || '', customerId: customerId != null ? customerId : (kind === 'statement' ? id : null),
       subject: subjectDefault,
-      body: saved || (kind === 'statement' ? DEFAULT_STATEMENT_BODY : DEFAULT_INVOICE_BODY),
+      body: saved || (kind === 'statement' ? DEFAULT_STATEMENT_BODY
+        : (data && data.payBase && doc) ? DEFAULT_INVOICE_BODY_PAY : DEFAULT_INVOICE_BODY),
       saveDefault: false,
       attach,
       ready: null,      // the blob (attach) or the link (statement)
@@ -246,6 +250,16 @@ export default function Portal() {
     const c = compose
     if (!c || !c.ready) return
     let body = c.body
+    // {pay} → a link that charges exactly this invoice. With no link to give
+    // (a statement, several invoices at once, or a company without Stripe),
+    // the whole line goes rather than leaving a dangling label.
+    const payUrl = (data && data.payBase && c.kind === 'invoice' && c.doc)
+      ? `${data.payBase}?inv=${encodeURIComponent(c.doc)}` : ''
+    body = body.split('\n')
+      .filter((line) => payUrl || !line.includes('{pay}'))
+      .map((line) => line.replaceAll('{pay}', payUrl))
+      .join('\n')
+
     if (c.kind === 'invoices') {
       body = body.replaceAll('{list}', c.listText).replaceAll('{total}', c.totalText).replaceAll('{link}', '').trim()
       for (const f of c.ready) {
@@ -696,6 +710,12 @@ export default function Portal() {
               <input type="checkbox" checked={compose.saveDefault} onChange={(e) => setCompose((c) => ({ ...c, saveDefault: e.target.checked }))} />
               Remember this wording as my default
             </label>
+            {data && data.payBase && compose.kind === 'invoice' && (
+              <div style={{ fontSize: '12px', color: MUTED, marginBottom: '10px', lineHeight: 1.5 }}>
+                <code style={{ fontFamily: mono, fontSize: '11px' }}>{'{pay}'}</code> becomes a link that
+                charges exactly this invoice&rsquo;s balance. Delete the line if you don&rsquo;t want to offer it.
+              </div>
+            )}
             <div style={{ fontSize: '12px', color: MUTED, display: 'flex', gap: '8px', alignItems: 'center', flexWrap: 'wrap', marginBottom: '14px' }}>
               Open in:
               {[['mail', 'My mail app'], ['gmail', 'Gmail on the web']].map(([k, label]) => {
