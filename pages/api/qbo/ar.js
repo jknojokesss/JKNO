@@ -21,6 +21,21 @@ import { fetchOpenInvoices, fetchInvoice, fetchInvoicePdf, fetchArRefs, buildInv
 const clean = (s) => String(s || '').toLowerCase().replace(/[^a-z0-9-]/g, '')
 const money = (n) => '$' + Number(n || 0).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
 
+// How this company takes money, in the words the customer reads. Scoped to
+// the company that owns the accounts, so a client whose books pass through
+// here never points their customers at us.
+function payLines(client, doc) {
+  const owner = process.env.STRIPE_PAY_CLIENT || 'jkno'
+  if (client !== owner) return []
+  const configured = !!(process.env.STRIPE_SECRET_KEY || process.env.STRIPE_PAYMENT_LINK || process.env.STRIPE_LINKS)
+  const base = process.env.PORTAL_BASE_URL || 'https://jknojokes.com'
+  const ways = []
+  // A per-invoice checkout needs an invoice; a statement covers many.
+  if (configured && doc) ways.push(`- Card or bank: ${base}/pay?inv=${encodeURIComponent(doc)}`)
+  if (process.env.PAY_ZELLE) ways.push(`- Zelle: ${process.env.PAY_ZELLE}`)
+  return ways.length ? ['To pay:'].concat(ways).concat(['']) : []
+}
+
 const stmtOpts = (connection) => ({
   companyName: connection.company_name || 'JK No Jokes',
   fromEmail: process.env.SMTP_USER || process.env.GMAIL_USER || '',
@@ -134,8 +149,17 @@ export default async function handler(req, res) {
         replyTo: SMTP_USER,
         to: String(to),
         subject: `Statement of account — ${monthYear} — ${companyName}`,
-        text: `Your statement of account as of ${stmt.asOf}: amount due ${money(stmt.total)}. Reply to this email with any questions.`,
-        html: stmt.html,
+        text: [
+          `Your statement of account as of ${stmt.asOf}: amount due ${money(stmt.total)}.`,
+          ``,
+        ].concat(payLines(client, null)).concat([
+          `Reply to this email with any questions.`,
+        ]).join('\n'),
+        html: stmt.html + (payLines(client, null).length
+          ? `<div style="max-width:640px;margin:14px auto 0;font-family:-apple-system,Arial,sans-serif;font-size:13px;color:#4A5158;line-height:1.7">`
+            + payLines(client, null).filter(Boolean).map((l) => l.replace(/^- /, '&bull; ')).join('<br>')
+            + `</div>`
+          : ''),
       })
       return res.status(200).json({ ok: true, sent: { to, customer: stmt.customerName, total: stmt.total, messageId: info.messageId } })
     }
@@ -192,10 +216,11 @@ export default async function handler(req, res) {
         ``,
         `Invoice ${doc}${balance != null ? ` for ${money(balance)}` : ''} is attached${dueDate ? `, due ${dueDate}` : ''}.`,
         ``,
+      ].concat(payLines(client, doc)).concat([
         `Any questions, just reply to this email.`,
         ``,
         `JK No Jokes`,
-      ]
+      ])
       const info = await transporter.sendMail({
         from: process.env.SMTP_FROM || `JK No Jokes <${SMTP_USER}>`,
         replyTo: SMTP_USER,
