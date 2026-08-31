@@ -256,9 +256,6 @@ OAuth state — it used to be cookie-only, which stranded users across apex/www.
 Two tables in the main project have RLS **off**: `shul_board_status` and
 `outreach_contacts` — anyone with the anon key can read/modify them. Don't
 copy that pattern onto client books.
-Two tables in the main project have RLS **off**: `shul_board_status` and
-`outreach_contacts` — anyone with the anon key can read/modify them. Don't
-copy that pattern onto client books.
 
 ## Conventions
 
