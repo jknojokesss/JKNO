@@ -82,6 +82,14 @@ on the same account is Heller personal (due-from-owner / skip, not P&L).
 money, he pays the card from there. Transfers to 5402 are not Heller CC
 payments. Map: `lib/accountTypes.js` (`Heller CC` = liability).
 
+**Hart Tire is two things.** (1) The `Hart` liability — old pre-2026 balance,
+paid down in $200 hits (checking through April; 8/19 Heller CC $200 is the
+same payoff, currently misposted to Inventory Asset — reclass Dr Hart / Cr
+Inventory, do not add a layer). (2) New tire buys on Heller CC: 8/19 $474
+invoice 323947 (6× 235/60/17 MileageMax @ $79) and 8/21 $238 of the $283
+invoice 324134 (2× 265/45/20 Travelstar @ $119) are STOCK. The leftover $45
+on the $283 is still unexplained. Don't confuse (1) with (2).
+
 **Used tires** are a separate pile from new-tire `LAYERS`. Ben Tire purchases
 go to Inventory Asset; Clover used-tire sales relieve at **$18/unit**. Don't
 FIFO them against Weldon stock.
