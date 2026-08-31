@@ -12,9 +12,11 @@ were one of them.
 
 ## Live client: Reydel Tire
 
-Lakewood, NJ tire & auto shop. Real Clover POS + Weldon invoices + QuickBooks
-— not synthetic. Auth is email/password via `/login`; unauthenticated visits
-to portal pages bounce there. Shell: `components/Shell.js`.
+Owner **Thomas Reydel**. Anchor JK No Jokes client — Lakewood, NJ tire & auto
+shop. Real Clover POS + Weldon invoices + QuickBooks, not synthetic. The
+product he uses is the profit-per-order view (`order_profit` in Supabase:
+matched tire sales with revenue/cost/margin). Auth is email/password via
+`/login`; unauthenticated visits bounce there. Shell: `components/Shell.js`.
 
 **Screens** (accent `#B0281C` in at most the wordmark block, active nav, and
 key numbers; paper `#F2F0EA` / ink `#1B1815` / graphite sidebar `#1E1C19`;
