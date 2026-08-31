@@ -452,6 +452,11 @@ export default function Orders() {
   const flaggedRows = filtered.filter(r => rowFlag(r))
   const shown = flaggedOnly ? flaggedRows : filtered
   const flaggedCount = flaggedRows.length
+  const clearFlagged = () => {
+    setFlaggedOnly(false)
+    // Hide-est + flagged often leaves the same 8 rows — show estimates too so the list actually opens.
+    if (flaggedRows.length === filtered.length) setShowEst(true)
+  }
 
   const matched     = rows.filter(r => !r.isEstimated)
   const invCount     = shown.filter(r => r.costSource === 'inventory').length
@@ -562,6 +567,17 @@ export default function Orders() {
                   ))}
                 </div>
 
+                {flaggedOnly && (
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '12px', marginBottom: '12px', padding: '10px 14px', background: '#FEF9E7', border: '1px solid #f59e0b' }}>
+                    <div style={{ fontSize: '12px', color: '#92400e', fontFamily: 'Inter, sans-serif' }}>
+                      Showing {flaggedCount} flagged {flaggedCount === 1 ? 'row' : 'rows'} — cost looks off
+                    </div>
+                    <button type="button" onClick={clearFlagged} style={{
+                      padding: '7px 14px', fontSize: '10px', fontFamily: 'Inter, sans-serif', letterSpacing: '0.08em',
+                      border: 'none', cursor: 'pointer', background: '#1B1815', color: '#fff',
+                    }}>SHOW ALL ROWS</button>
+                  </div>
+                )}
                 {/* Controls */}
                 <div style={{ display: 'flex', gap: '10px', marginBottom: '16px', alignItems: 'center', flexWrap: 'wrap' }}>
                   {[{ k: 'all', l: 'ALL' }, { k: '2026-05-31', l: 'THRU 5/31' }, { k: '2026-06-30', l: 'THRU 6/30' }, { k: '2026-07-31', l: 'THRU 7/31' }].map(o => (
@@ -615,7 +631,7 @@ export default function Orders() {
                   }}>
                     {showEst ? 'HIDE EST.' : 'SHOW EST.'}
                   </button>
-                  <button type="button" onClick={() => setFlaggedOnly(on => !on)} title={flaggedOnly ? 'Click to show all rows' : 'Show only rows whose cost looks suspicious'} style={{
+                  <button type="button" onClick={() => flaggedOnly ? clearFlagged() : setFlaggedOnly(true)} title={flaggedOnly ? 'Show all rows' : 'Show only rows whose cost looks suspicious'} style={{
                     padding: '7px 12px', fontSize: '9px', fontFamily: 'Inter, sans-serif', letterSpacing: '0.08em',
                     border: 'none', borderRadius: '0', cursor: 'pointer',
                     background: flaggedOnly ? '#f59e0b' : '#E6E1D6', color: flaggedOnly ? '#fff' : '#888',
