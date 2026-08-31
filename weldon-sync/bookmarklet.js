@@ -3,7 +3,9 @@
 // Runs in the user's own browser on weldontire.net (already past Cloudflare and
 // logged in), scrapes the invoiced + open order pages, fills any blank costs
 // from the order-detail page, and POSTs everything to /api/weldon-import, which
-// inserts only the new web_ids. The minified javascript: version (with the real
+// inserts only the new web_ids, backfills blank costs / PO#s, and drops
+// in-window orders that disappeared from Weldon (canceled). The minified
+// javascript: version (with the real
 // APP domain + token baked in) is what gets saved as a browser bookmark.
 //
 // Read-only on Weldon — it only GETs order pages; the only write is to our own DB.
@@ -76,11 +78,14 @@
     const res = await fetch(`${APP}/api/weldon-import`, {
       method: 'POST',
       headers: { 'content-type': 'application/json', 'x-import-token': TOKEN },
-      body: JSON.stringify({ orders: rows }),
+      body: JSON.stringify({ orders: rows, seen: rows.map((r) => r.web_id) }),
     })
     const j = await res.json()
     if (!res.ok) throw new Error(j.error || res.status)
-    alert(`Weldon sync ✓  scanned ${j.received} orders, added ${j.inserted} new, filled ${j.backfilled || 0} costs.`)
+    const extra = j.cancel_skipped
+      ? ` — ${j.cancel_skipped} missing, left them (scrape looked short)`
+      : (j.canceled ? `, dropped ${j.canceled} canceled` : '')
+    alert(`Weldon sync ✓  scanned ${j.received} orders, added ${j.inserted} new, filled ${j.backfilled || 0} costs, tagged ${j.po_tagged || 0} PO#s${extra}`)
   } catch (e) {
     alert('Weldon sync failed: ' + (e.message || e))
   }
