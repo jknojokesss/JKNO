@@ -194,7 +194,9 @@ back — its books must never land in the shared DB. Any receiving project needs
   match a demo.
 - Bespoke demo pages are single files with inline styles; match that.
 - `.env.local` (gitignored) needs the two `NEXT_PUBLIC_SUPABASE_*` vars for
-  `next build` to pass locally — values are the main project's URL + anon key.
-- This sandbox's network policy blocks supabase.co and jknojokes.com; verify
-  pages by serving fixtures through Playwright route interception (the seed
-  generator can emit a fixtures JSON).
+  `next build` / `next dev` on this VM — URL + anon key for the main project
+  (`cpvscxqrdhbccngfnhdz`). Pull them with the Supabase MCP
+  (`get_publishable_keys`); do not commit the file.
+- This VM can reach supabase.co and jknojokes.com. Query and migrate the live
+  DB through the Supabase MCP (`execute_sql` / `apply_migration`). Don't invent
+  a network block.
