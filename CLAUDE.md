@@ -161,6 +161,14 @@ back — its books must never land in the shared DB. Any receiving project needs
 
 ## Conventions
 
+- Working style: blunt, short, make the call. Verify numbers against data
+  before stating them; if you didn't check, say so. Voice-to-text is normal
+  (phonetic spellings, mid-thought cutoffs). Keep Adar, HOA, and personal
+  material out of this repo.
+- Other clients vs demos: Jerky Munch is live (isolated Supabase). MNE Trading
+  (`/mne-trading`) and QueFence (`/quefence`) are seeded demos even when they
+  are real prospects — don't mix them with Reydel books or restyle Reydel to
+  match a demo.
 - Bespoke demo pages are single files with inline styles; match that.
 - `.env.local` (gitignored) needs the two `NEXT_PUBLIC_SUPABASE_*` vars for
   `next build` to pass locally — values are the main project's URL + anon key.
