@@ -49,7 +49,28 @@ Weldon Restock"). `q × c` of every new layer must equal the Inventory Asset
 hit in QB. Special-orders (small Weldon POs, qty ≤ 4) are matched from
 `weldon_orders` on the LIVE view only; the 5/31 book snapshot stays the
 accounting anchor. Bookmarklet: `weldon-sync/bookmarklet.js` →
-`/api/weldon-import` (`WELDON_IMPORT_TOKEN`).
+`/api/weldon-import` (`WELDON_IMPORT_TOKEN`). Running it inserts **new
+`web_id`s into `weldon_orders` only** — it does not add `LAYERS` or post to
+QuickBooks.
+
+**What goes to Inventory Asset vs expense** (the order-date / STOCK recon —
+lives in `pages/orders.js` + `pages/api/inventory-cogs.js`, not in a chat):
+
+- From **4/27** Weldon `PO# STOCK` = shelf restock → capitalize (add a
+  `LAYERS` row, Dr Inventory Asset). A named/blank PO# = customer special
+  order → expense, matched to a Clover sale of that size within ~3 days.
+  Before 4/27 the PO# field is unreliable.
+- May is a **closed** period. PO#-based reclass starts **6/1**
+  (`RECLASS_FROM`) so posted May JEs don't move.
+- Qty ≥ 5 on the stock page is always a restock (never auto-matched as
+  same-day). Qty ≤ 4 near a sale date is same-day and does not pull the shelf.
+- July had no PO#s — restocks were classified by consecutive `web_id`s +
+  Clover sell→reorder timing (`JULY_LAYERS` in `inventory-cogs.js`).
+- Month-end relief is movement method: begin + stock purchases − end =
+  Dr COGS / Cr Inventory. Engine: `/api/inventory-cogs`; preview JE:
+  `/api/qbo/prepare-close`. June purchases $4,450; July $10,237 (of which
+  $452 is the 7/31 CC that hits August's GL). A new month needs new layers
+  in `inventory-cogs.js` before close will run.
 
 Do not: invent Reydel rows, drop them into an isolated Supabase project, or
 "clean up" `LAYERS` / `RETURNS` / `SAME_DAY_ITEMS` without tying the dollars
