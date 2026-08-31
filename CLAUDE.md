@@ -31,10 +31,14 @@ numerals):
 
 - `/dashboard` — monthly P&L from `monthly_summary` + mix from Clover lines
 - `/financials` — QBO statements (`loadQboStatements(..., 'reydel')`) reconciled
-  against `gl_transactions`; cash views cap at `RECONCILED_THROUGH`
+  against `gl_transactions`; cash views cap at `RECONCILED_THROUGH` (last
+  **closed** month, currently July). Unsigned bank rec does not hide a closed
+  month. August is the open close.
 - `/inventory` — Clover items ranked by revenue
-- `/orders` — order history with Weldon-matched cost / profit
-- `/stock` — on-hand from dated Weldon `LAYERS` minus FIFO sales
+- `/orders` — order history with Weldon-matched cost / profit. Live matching
+  is heuristic; `order_profit` is a snapshot through May, not the books.
+- `/stock` — on-hand from dated Weldon `LAYERS` (through July) minus FIFO sales.
+  Default as-of is Jul 31. August layers are not in yet.
 - `/ai` — Ask preview only (`COMING SOON`); do not wire a live model here
   unless asked
 
@@ -97,7 +101,8 @@ lives in `pages/orders.js` + `pages/api/inventory-cogs.js`, not in a chat):
 - Qty ≥ 5 on the stock page is always a restock (never auto-matched as
   same-day). Qty ≤ 4 near a sale date is same-day and does not pull the shelf.
 - July had no PO#s — restocks were classified by consecutive `web_id`s +
-  Clover sell→reorder timing (`JULY_LAYERS` in `inventory-cogs.js`).
+  Clover sell→reorder timing (`JULY_LAYERS` in `inventory-cogs.js` and
+  `pages/stock.js`). The /stock default as-of is Jul 31.
 - Month-end relief is movement method: begin + stock purchases − end =
   Dr COGS / Cr Inventory. Engine: `/api/inventory-cogs`; preview JE:
   `/api/qbo/prepare-close`. June purchases $4,450; July $10,237 (of which

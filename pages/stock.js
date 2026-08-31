@@ -36,9 +36,36 @@ const LAYERS = [{"s":"205/55/16","l":"205/55/16 Cooper","q":4,"c":96,"d":"2026-0
 
 const RETURNS = [{"s":"205/55/16","q":8,"c":48},{"s":"215/60/16","q":2,"c":98},{"s":"215/65/16","q":10,"c":61},{"s":"215/65/16","q":2,"c":102},{"s":"225/50/17","q":2,"c":128},{"s":"225/50/17","q":8,"c":58},{"s":"225/65/17","q":2,"c":115},{"s":"225/65/17","q":8,"c":69},{"s":"235/65/16","q":8,"c":85},{"s":"255/40/20","q":2,"c":200},{"s":"255/40/20","q":10,"c":90},{"s":"285/45/22","q":10,"c":105},{"s":"285/45/22","q":2,"c":105},{"s":"285/45/22","q":2,"c":189}]
 
+// July stock: same list as JULY_LAYERS in pages/api/inventory-cogs.js (the close).
+// 7/6 + 7/14 stock runs (consecutive web_ids, house brands) plus sell→reorder
+// replenishment. No POs in July. Do not add August until that close is locked.
+const JULY_LAYERS = [
+  {s:"235/60/17",l:"235/60/17 MileageMax",q:6,c:70,d:"2026-07-06"},{s:"235/65/17",l:"235/65/17 MileageMax",q:6,c:72,d:"2026-07-06"},
+  {s:"235/45/18",l:"235/45/18 Grand Sport",q:6,c:68,d:"2026-07-06"},{s:"235/60/18",l:"235/60/18 Street-H",q:4,c:77,d:"2026-07-06"},
+  {s:"235/65/16",l:"235/65/16 Ridgecrawler",q:4,c:91,d:"2026-07-06"},{s:"235/55/19",l:"235/55/19 Agility",q:2,c:80,d:"2026-07-06"},
+  {s:"235/65/16",l:"235/65/16 Ridgecrawler",q:2,c:92,d:"2026-07-09"},{s:"235/65/16",l:"235/65/16 Ridgecrawler",q:3,c:92,d:"2026-07-09"},
+  {s:"235/60/18",l:"235/60/18 Street-H",q:3,c:79,d:"2026-07-09"},
+  {s:"255/65/18",l:"255/65/18 Agility SUV",q:4,c:99,d:"2026-07-10"},{s:"235/65/17",l:"235/65/17 Vitron",q:4,c:78,d:"2026-07-10"},
+  {s:"235/55/19",l:"235/55/19 Racing Trac",q:2,c:76,d:"2026-07-10"},
+  {s:"235/65/16",l:"235/65/16 Ridgecrawler",q:4,c:92,d:"2026-07-12"},{s:"235/60/17",l:"235/60/17 MileageMax",q:4,c:71,d:"2026-07-12"},
+  {s:"205/55/16",l:"205/55/16 Racing Trac",q:2,c:48,d:"2026-07-14"},{s:"215/60/16",l:"215/60/16 Street-H",q:4,c:62,d:"2026-07-14"},
+  {s:"215/65/16",l:"215/65/16 Force HP",q:4,c:63,d:"2026-07-14"},{s:"215/55/17",l:"215/55/17 Street-H",q:6,c:65,d:"2026-07-14"},
+  {s:"235/60/17",l:"235/60/17 MileageMax",q:6,c:65,d:"2026-07-14"},{s:"235/65/17",l:"235/65/17 MileageMax",q:6,c:72,d:"2026-07-14"},
+  {s:"235/60/18",l:"235/60/18 Eco Pro",q:6,c:75,d:"2026-07-14"},{s:"235/45/18",l:"235/45/18 Grand Sport",q:4,c:62,d:"2026-07-14"},
+  {s:"235/55/19",l:"235/55/19 RapidDragon",q:6,c:76,d:"2026-07-14"},{s:"255/45/19",l:"255/45/19 Agility",q:2,c:89,d:"2026-07-14"},
+  {s:"235/65/16",l:"235/65/16 Ridgecrawler",q:6,c:85,d:"2026-07-14"},
+  {s:"205/65/16",l:"205/65/16 Street-H",q:4,c:65,d:"2026-07-20"},{s:"235/60/17",l:"235/60/17 MileageMax",q:4,c:70,d:"2026-07-20"},
+  {s:"235/60/17",l:"235/60/17 MileageMax",q:2,c:70,d:"2026-07-27"},{s:"235/60/17",l:"235/60/17 MileageMax",q:2,c:70,d:"2026-07-27"},
+  {s:"215/55/17",l:"215/55/17 Street-H",q:4,c:70,d:"2026-07-27"},
+  {s:"215/55/17",l:"215/55/17 Lion Sport",q:2,c:67,d:"2026-07-28"},{s:"235/65/17",l:"235/65/17 Capricorn",q:4,c:80,d:"2026-07-28"},
+  {s:"235/60/17",l:"235/60/17 MileageMax",q:4,c:70,d:"2026-07-28"},
+  {s:"235/60/17",l:"235/60/17 RapidDragon",q:4,c:81,d:"2026-07-31"},{s:"215/55/17",l:"215/55/17 Lion Sport",q:2,c:64,d:"2026-07-31"},
+]
+
 const STOCK_START = '2026-04-15'
 const AS_OF = '2026-05-31'
 const AS_OF_JUNE = '2026-06-30'
+const AS_OF_JULY = '2026-07-31'
 const asOfLabel = (d) => { const [y, m, day] = d.split('-'); return `${+m}/${+day}/${y}` }
 
 // Confirmed same-day special orders — premium tires Weldon ordered for a specific
@@ -63,8 +90,8 @@ async function fetchSales() {
 // Time-aware FIFO: returns + chronological sales consumed from the size's
 // layers (only layers that have arrived by the sale date), cheapest/oldest
 // first. Whatever remains is on-hand.
-function computeOnHand(sales, weldon = []) {
-  const layers = LAYERS.map(L => ({ ...L, remaining: L.q }))
+function computeOnHand(sales, weldon = [], cutoff = '9999-12-31') {
+  const layers = LAYERS.concat(JULY_LAYERS).map(L => ({ ...L, remaining: L.q }))
 
   RETURNS.forEach(({ s, q, c }) => {
     let pool = layers.filter(L => L.s === s && L.c === c && L.remaining > 0)
@@ -111,7 +138,7 @@ function computeOnHand(sales, weldon = []) {
 
   const agg = {}
   layers.forEach(L => {
-    if (L.remaining <= 0) return
+    if (L.remaining <= 0 || L.d > cutoff) return
     const k = L.l + '|' + L.c
     agg[k] = agg[k] || { label: L.l, unitCost: L.c, qty: 0 }
     agg[k].qty += L.remaining
@@ -126,7 +153,7 @@ export default function Stock() {
   const [loading, setLoading] = useState(true)
   const [search,  setSearch]  = useState('')
   const [sort,    setSort]    = useState('value') // value | qty | size
-  const [asOf,    setAsOf]    = useState(AS_OF_JUNE) // month-end date key | 'live'
+  const [asOf,    setAsOf]    = useState(AS_OF_JULY) // month-end date key | 'live'
   const [weldon,  setWeldon]  = useState([])
 
   // Month-end snapshot options: April through the last completed month, auto-grows.
@@ -156,7 +183,7 @@ export default function Stock() {
   // LIVE additionally skips post-5/31 special-orders (matched to small Weldon orders).
   const rows = useMemo(() => {
     const cutoff = asOf === 'live' ? '9999-12-31' : asOf
-    return computeOnHand(allSales.filter(r => r.date <= cutoff), weldon)
+    return computeOnHand(allSales.filter(r => r.date <= cutoff), weldon, cutoff)
   }, [allSales, weldon, asOf])
 
   const filtered = useMemo(() => {
@@ -191,7 +218,7 @@ export default function Stock() {
     <>
       <Head><title>Reydel Tire — Stock</title></Head>
       <Shell active="stock" right={
-          <div style={{ fontSize: '10px', color: '#888', fontFamily: 'Inter, sans-serif' }}>{asOf === 'live' ? 'live on-hand · current' : `on-hand · as of ${asOfLabel(asOf)}${asOf === AS_OF ? ' (books)' : ''}`} · FIFO</div>
+          <div style={{ fontSize: '10px', color: '#888', fontFamily: 'Inter, sans-serif' }}>{asOf === 'live' ? 'live on-hand · current (August layers not in yet)' : `on-hand · as of ${asOfLabel(asOf)}${asOf === AS_OF_JULY ? ' (books)' : asOf === AS_OF_JUNE ? ' (June books)' : asOf === AS_OF ? ' (May books)' : ''}`} · FIFO</div>
         }>
 
         <div style={{ padding: '26px 30px', maxWidth: '1160px' }}>
@@ -201,7 +228,7 @@ export default function Stock() {
               <>
                 <div style={{ marginBottom: '20px' }}>
                   <div style={{ fontSize: '23px', fontWeight: 700, color: '#1B1815', fontFamily: "'Barlow Semi Condensed', sans-serif", letterSpacing: '0.02em', textTransform: 'uppercase' }}>Stock on Hand</div>
-                  <div style={{ fontSize: '12px', color: '#9A9284', fontFamily: 'Inter, sans-serif', marginTop: '4px' }}>Reydel Tire &amp; Auto · live tire inventory, FIFO cost</div>
+                  <div style={{ fontSize: '12px', color: '#9A9284', fontFamily: 'Inter, sans-serif', marginTop: '4px' }}>Reydel Tire &amp; Auto · FIFO on-hand through July. August restocks are not in yet.</div>
                 </div>
                 <div style={{ display: 'flex', gap: '12px', marginBottom: '20px' }}>
                   {[

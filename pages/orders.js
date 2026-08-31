@@ -100,7 +100,7 @@ export default function Orders() {
   const [srcFilter,  setSrcFilter]  = useState('all') // filter by cost source / match status
   const [sizeFilter, setSizeFilter] = useState('all') // filter by tire size
   const [flaggedOnly, setFlaggedOnly] = useState(false) // show only suspicious-cost rows
-  const [asOf,       setAsOf]       = useState('all') // 'all' | '2026-05-31' (book period)
+  const [asOf,       setAsOf]       = useState('all') // 'all' | month-end cutoff
   const [view,       setView]       = useState('live') // 'live' | 'precomputed'
   const [opRows,     setOpRows]     = useState([])
   const [opLoading,  setOpLoading]  = useState(false)
@@ -534,7 +534,7 @@ export default function Orders() {
             {/* Page header */}
             <div style={{ marginBottom: '20px' }}>
               <div style={{ fontSize: '23px', fontWeight: 700, color: '#1B1815', fontFamily: "'Barlow Semi Condensed', sans-serif", letterSpacing: '0.02em', textTransform: 'uppercase' }}>Orders</div>
-              <div style={{ fontSize: '12px', color: '#9A9284', fontFamily: 'Inter, sans-serif', marginTop: '4px' }}>Reydel Tire &amp; Auto · order history with cost &amp; profit</div>
+              <div style={{ fontSize: '12px', color: '#9A9284', fontFamily: 'Inter, sans-serif', marginTop: '4px' }}>Reydel Tire &amp; Auto · live Clover × Weldon match (heuristic — not the books)</div>
             </div>
             {(loading ? (
               <div style={{ color: '#888', fontFamily: 'Inter, sans-serif', fontSize: '12px' }}>Loading...</div>
@@ -562,7 +562,7 @@ export default function Orders() {
 
                 {/* Controls */}
                 <div style={{ display: 'flex', gap: '10px', marginBottom: '16px', alignItems: 'center', flexWrap: 'wrap' }}>
-                  {[{ k: 'all', l: 'ALL' }, { k: '2026-05-31', l: 'THRU 5/31' }].map(o => (
+                  {[{ k: 'all', l: 'ALL' }, { k: '2026-05-31', l: 'THRU 5/31' }, { k: '2026-06-30', l: 'THRU 6/30' }, { k: '2026-07-31', l: 'THRU 7/31' }].map(o => (
                     <button key={o.k} onClick={() => setAsOf(o.k)} style={{
                       padding: '7px 12px', fontSize: '9px', fontFamily: 'Inter, sans-serif', letterSpacing: '0.08em',
                       border: '1px solid #DBD5C7', borderRadius: '0', cursor: 'pointer',
