@@ -6,6 +6,53 @@ Project") reached through `lib/supabase.js` via `NEXT_PUBLIC_SUPABASE_URL` /
 `NEXT_PUBLIC_SUPABASE_ANON_KEY`. Jerky Munch uses its own isolated project
 (`lib/supabaseJerky.js`) — don't mix them.
 
+The live client portal is **Reydel Tire** (login → `/dashboard`). Demos and
+Jerky are separate products; don't restyle, reseed, or isolate Reydel as if it
+were one of them. `/riverside-tires` is the generic tire *demo*, not the shop.
+
+## Live client: Reydel Tire
+
+Lakewood, NJ tire & auto shop. Real Clover POS + Weldon invoices + QuickBooks
+— not synthetic. Auth is email/password via `/login`; unauthenticated visits
+to portal pages bounce there. Shell: `components/Shell.js`.
+
+**Screens** (accent `#B0281C` in at most the wordmark block, active nav, and
+key numbers; paper `#F2F0EA` / ink `#1B1815` / graphite sidebar `#1E1C19`;
+Barlow Semi Condensed headings, Inter body, IBM Plex Mono labels, tabular
+numerals):
+
+- `/dashboard` — monthly P&L from `monthly_summary` + mix from Clover lines
+- `/financials` — QBO statements (`loadQboStatements(..., 'reydel')`) reconciled
+  against `gl_transactions`; cash views cap at `RECONCILED_THROUGH`
+- `/inventory` — Clover items ranked by revenue
+- `/orders` — order history with Weldon-matched cost / profit
+- `/stock` — on-hand from dated Weldon `LAYERS` minus FIFO sales
+- `/ai` — Ask preview only (`COMING SOON`); do not wire a live model here
+  unless asked
+
+**QBO slug `reydel`.** Books stay in the main project (not `ISOLATED`). Nightly
+sync mirrors GL into `gl_transactions` when the connection has
+`portal_client_id` set. Connect: `/api/qbo/connect?client=reydel`. Chart
+classification: `lib/accountTypes.js` (loans vs owner's personal vs operating).
+
+**Clover.** `lib/cloverSync.js`, hardcoded `CLIENT_ID`. Nightly cron
+`/api/cron/clover-sync` (07:00 UTC, last 7 days, delete-by-`order_id` then
+insert). Manual: `/admin/sync` → `/api/clover-sync`. Env:
+`CLOVER_API_TOKEN`, `CLOVER_MERCHANT_ID`. Pages that read `clover_line_items`
+must page past PostgREST's 1000-row cap (`.range`).
+
+**Weldon / stock.** Purchases are the `LAYERS` array in `pages/stock.js`, not
+a table. Restocks are a 30-second edit — procedure in `SETUP.md` ("Adding a
+Weldon Restock"). `q × c` of every new layer must equal the Inventory Asset
+hit in QB. Special-orders (small Weldon POs, qty ≤ 4) are matched from
+`weldon_orders` on the LIVE view only; the 5/31 book snapshot stays the
+accounting anchor. Bookmarklet: `weldon-sync/bookmarklet.js` →
+`/api/weldon-import` (`WELDON_IMPORT_TOKEN`).
+
+Do not: invent Reydel rows, drop them into an isolated Supabase project, or
+"clean up" `LAYERS` / `RETURNS` / `SAME_DAY_ITEMS` without tying the dollars
+back to QuickBooks.
+
 ## Demos
 
 Two kinds:
