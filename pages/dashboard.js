@@ -4,6 +4,7 @@ import Head from 'next/head'
 import { Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Line, ComposedChart } from 'recharts'
 import { supabase } from '../lib/supabase'
 import Shell from '../components/Shell'
+import { priceLines } from '../lib/orderCost'
 
 const fmt = (n) => new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }).format(Math.abs(n))
 const pct = (n) => `${parseFloat(n).toFixed(1)}%`
@@ -70,17 +71,24 @@ export default function Dashboard() {
   useEffect(() => { supabase.auth.getUser().then(({ data: { user } }) => { if (!user) window.location.replace('/login') }) }, [])
   const [monthly, setMonthly] = useState([])
   const [clover, setClover] = useState([])
+  const [weldon, setWeldon] = useState([])
   const [loading, setLoading] = useState(true)
+  const [period, setPeriod] = useState('month')
   const router = useRouter()
 
   useEffect(() => {
     async function load() {
-      const { data } = await supabase.from('monthly_summary').select('*').order('month')
+      const [{ data }, cloverRows, w] = await Promise.all([
+        supabase.from('monthly_summary').select('*').order('month'),
+        fetchAllClover(),
+        supabase.from('weldon_orders').select('order_date, size, qty, unit_cost, description, po_number'),
+      ])
       if (data) setMonthly(data.map(r => ({
         month: r.month.slice(0, 7), label: MONTHS[r.month.slice(5, 7)] || r.month.slice(5, 7),
         revenue: parseFloat(r.revenue), expenses: parseFloat(r.expenses), profit: parseFloat(r.profit), cogs: parseFloat(r.cogs),
       })))
-      setClover(await fetchAllClover())
+      setClover(cloverRows)
+      setWeldon(w.data || [])
       setLoading(false)
     }
     load()
@@ -106,8 +114,27 @@ export default function Dashboard() {
   const isRecord = last && closed.every(m => m.revenue <= last.revenue)
   const growthPhrase = momRev != null ? (momRev >= 0 ? `up ${Math.round(momRev)}% over ${prev.label}` : `down ${Math.round(Math.abs(momRev))}% from ${prev.label}`) : ''
 
-  // chart data in $K for compact axis
-  const chartData = closed.map(m => ({ label: m.label, rev: m.revenue / 1000, exp: m.expenses / 1000, profit: m.profit / 1000 }))
+  const now = new Date()
+  const monthStart = `${curKey}-01`
+  const wd = new Date(now); wd.setDate(now.getDate() - 6)
+  const weekStart = `${wd.getFullYear()}-${String(wd.getMonth() + 1).padStart(2, '0')}-${String(wd.getDate()).padStart(2, '0')}`
+  const startStr = period === 'week' ? weekStart : monthStart
+  const openLabel = period === 'week' ? 'last 7 days' : now.toLocaleDateString([], { month: 'long' }) + ' so far'
+
+  const register = useMemo(() => {
+    const lines = clover.filter(r => r.date && r.date >= startStr)
+    const priced = priceLines(lines, weldon)
+    const sale = priced.reduce((s, r) => s + r.sale, 0)
+    const cost = priced.reduce((s, r) => s + r.cost, 0)
+    const tickets = new Set(priced.map(r => r.orderId).filter(Boolean)).size
+    const units = priced.reduce((s, r) => s + (Number(r.qty) || 1), 0)
+    return {
+      sale, cost, profit: sale - cost,
+      margin: sale > 0 ? (sale - cost) / sale * 100 : 0,
+      tickets, units, n: priced.length,
+      avg: tickets ? sale / tickets : 0,
+    }
+  }, [clover, weldon, startStr])
 
   const lastMonth = last?.month
   const lastRows = lastMonth ? clover.filter(r => r.date && r.date.slice(0, 7) === lastMonth) : []
@@ -128,6 +155,8 @@ export default function Dashboard() {
     rows.forEach(r => { if (saleCategory(r.item_name) !== 'new_tire') return; const k = normalizeItemName(r.item_name); if (!map[k]) map[k] = { name: k, revenue: 0, units: 0 }; map[k].revenue += Number(r.revenue || 0); map[k].units += Number(r.quantity || 1) })
     return Object.values(map).sort((a, b) => b.revenue - a.revenue).slice(0, 6)
   }, [clover, lastMonth])
+
+  const chartData = closed.map(m => ({ label: m.label, rev: m.revenue / 1000, exp: m.expenses / 1000, profit: m.profit / 1000 }))
 
   const panel = { background: C.card, border: `1px solid ${C.hair}`, padding: '18px 20px' }
   const secTitle = { fontFamily: head, fontSize: 15, fontWeight: 700, color: C.ink, letterSpacing: '0.04em', textTransform: 'uppercase', paddingBottom: 8, borderBottom: `1px solid ${C.hair}`, marginBottom: 12 }
@@ -150,7 +179,37 @@ export default function Dashboard() {
             <div style={{ color: C.muted, fontFamily: ui, fontSize: 13 }}>No closed months yet.</div>
           ) : (
             <>
-              {/* HERO */}
+              {/* This month at the register — Clover tickets, Weldon cost. Not the books. */}
+              <div style={{ ...panel, marginBottom: 32, cursor: 'pointer' }} onClick={() => router.push('/orders')}>
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 }}>
+                  <div>
+                    <div style={{ fontFamily: head, fontSize: 13, fontWeight: 700, color: C.ink, letterSpacing: '0.08em', textTransform: 'uppercase' }}>{now.toLocaleDateString([], { month: 'long' })} · At the register</div>
+                    <div style={{ fontFamily: ui, fontSize: 11, color: C.muted, marginTop: 3 }}>Clover sales · Weldon cost · not closed books</div>
+                  </div>
+                  <div style={{ display: 'flex' }}>
+                    {[['week', '7 days'], ['month', 'This month']].map(([p, l]) => (
+                      <button key={p} onClick={e => { e.stopPropagation(); setPeriod(p) }} style={{ fontFamily: mono, fontSize: 10, letterSpacing: '0.05em', padding: '5px 12px', cursor: 'pointer', border: `1px solid ${C.hair}`, background: period === p ? C.ink : C.card, color: period === p ? '#fff' : C.muted, textTransform: 'uppercase' }}>{l}</button>
+                    ))}
+                  </div>
+                </div>
+                <div style={{ display: 'flex' }}>
+                  {[
+                    ['Sales', fmt(register.sale)],
+                    ['Est. cost', fmt(register.cost)],
+                    ['Est. gross', fmt(register.profit)],
+                    ['Margin', register.sale ? `${Math.round(register.margin)}%` : '—'],
+                    ['Tickets', register.tickets.toLocaleString()],
+                  ].map(([l, v], i) => (
+                    <div key={l} style={{ flex: 1, padding: '10px 14px', borderLeft: i ? `1px solid ${C.line}` : 'none' }}>
+                      <div style={{ fontFamily: ui, fontSize: 10.5, color: C.muted }}>{l}</div>
+                      <div style={{ fontFamily: mono, fontSize: 16, color: l === 'Est. gross' ? C.green : C.ink, fontWeight: 500, marginTop: 4 }}>{v}</div>
+                      <div style={{ fontFamily: ui, fontSize: 9, color: C.muted, marginTop: 2 }}>{openLabel}</div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* HERO — last closed month */}
               <div style={{ fontFamily: head, fontSize: 13, fontWeight: 600, color: C.red, letterSpacing: '0.18em', textTransform: 'uppercase' }}>Net Profit · {fullMonth} {year}</div>
               <div style={{ fontFamily: head, fontSize: 72, fontWeight: 700, color: C.ink, lineHeight: 1, margin: '6px 0 12px' }}>{fmt(last.profit)}</div>
               <div style={{ fontFamily: ui, fontSize: 16, color: C.sub, maxWidth: 640, lineHeight: 1.5 }}>
