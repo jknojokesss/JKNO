@@ -12,11 +12,12 @@ were one of them.
 
 ## Live client: Reydel Tire
 
-Owner **Thomas Reydel**. Anchor JK No Jokes client — Lakewood, NJ tire & auto
-shop. Real Clover POS + Weldon invoices + QuickBooks, not synthetic. The
-product he uses is the profit-per-order view (`order_profit` in Supabase:
-matched tire sales with revenue/cost/margin). Auth is email/password via
-`/login`; unauthenticated visits bounce there. Shell: `components/Shell.js`.
+Owner **Thomas Reydel**. Portal login `thomashart1984@gmail.com`. Anchor JK No
+Jokes client — Lakewood, NJ tire & auto shop. Real Clover POS + Weldon
+invoices + QuickBooks, not synthetic. The product he uses is the
+profit-per-order view (`order_profit` in Supabase: matched tire sales with
+revenue/cost/margin). Auth is email/password via `/login`; unauthenticated
+visits bounce there. Shell: `components/Shell.js`.
 
 **Screens** (accent `#B0281C` in at most the wordmark block, active nav, and
 key numbers; paper `#F2F0EA` / ink `#1B1815` / graphite sidebar `#1E1C19`;
@@ -41,17 +42,36 @@ classification: `lib/accountTypes.js` (loans vs owner's personal vs operating).
 `/api/cron/clover-sync` (07:00 UTC, last 7 days, delete-by-`order_id` then
 insert). Manual: `/admin/sync` → `/api/clover-sync`. Env:
 `CLOVER_API_TOKEN`, `CLOVER_MERCHANT_ID`. Pages that read `clover_line_items`
-must page past PostgREST's 1000-row cap (`.range`).
+must page past PostgREST's 1000-row cap (`.range`). Clover's basic plan only
+pushes payment-type totals into QBO — no items, no COGS. That's why this
+portal matches Weldon to Clover itself; don't "fix" that with Synder /
+Commerce Sync / a Clover plan upgrade unless asked. Clover Clearing should
+zero after each business day via documented JEs with statements attached,
+not an auto-reconcile.
 
-**Weldon / stock.** Purchases are the `LAYERS` array in `pages/stock.js`, not
-a table. Restocks are a 30-second edit — procedure in `SETUP.md` ("Adding a
-Weldon Restock"). `q × c` of every new layer must equal the Inventory Asset
-hit in QB. Special-orders (small Weldon POs, qty ≤ 4) are matched from
-`weldon_orders` on the LIVE view only; the 5/31 book snapshot stays the
-accounting anchor. Bookmarklet: `weldon-sync/bookmarklet.js` →
-`/api/weldon-import` (`WELDON_IMPORT_TOKEN`). Running it inserts **new
-`web_id`s into `weldon_orders` only** — it does not add `LAYERS` or post to
-QuickBooks.
+**Weldon / stock.** Weldon is Mavis (MAVISX). Store 776 (`MAVIS00776`) is the
+stock warehouse; 796 (`MAVIS00091`) is same-day. Purchases are the `LAYERS`
+array in `pages/stock.js`, not a table. Restocks are a 30-second edit —
+procedure in `SETUP.md` ("Adding a Weldon Restock"). `q × c` of every new
+layer must equal the Inventory Asset hit in QB. Special-orders (small Weldon
+POs, qty ≤ 4) are matched from `weldon_orders` on the LIVE view only; the
+5/31 book snapshot stays the accounting anchor. Bookmarklet:
+`weldon-sync/bookmarklet.js` → `/api/weldon-import` (`WELDON_IMPORT_TOKEN`).
+Running it inserts **new `web_id`s into `weldon_orders` only** — it does not
+add `LAYERS` or post to QuickBooks.
+
+**Heller CC (Capital One 9618).** That's the card for Mavis / Eastern
+Warehouse / Ben Tire. "Plain VISA" and "online VISA (9618)" are the same
+card. The QBO Heller CC register is intentionally those three vendors only —
+don't "complete" it with the rest of the Capital One activity. Card **8738**
+on the same account is Heller personal (due-from-owner / skip, not P&L).
+**CHK 5402** is Heller's personal checking, not Reydel's: Reydel sends him
+money, he pays the card from there. Transfers to 5402 are not Heller CC
+payments. Map: `lib/accountTypes.js` (`Heller CC` = liability).
+
+**Used tires** are a separate pile from new-tire `LAYERS`. Ben Tire purchases
+go to Inventory Asset; Clover used-tire sales relieve at **$18/unit**. Don't
+FIFO them against Weldon stock.
 
 **What goes to Inventory Asset vs expense** (the order-date / STOCK recon —
 lives in `pages/orders.js` + `pages/api/inventory-cogs.js`, not in a chat):
@@ -59,7 +79,10 @@ lives in `pages/orders.js` + `pages/api/inventory-cogs.js`, not in a chat):
 - From **4/27** Weldon `PO# STOCK` = shelf restock → capitalize (add a
   `LAYERS` row, Dr Inventory Asset). A named/blank PO# = customer special
   order → expense, matched to a Clover sale of that size within ~3 days.
-  Before 4/27 the PO# field is unreliable.
+  Before 4/27 the PO# field is unreliable — the first big shelf fill is the
+  **April 15–17** stock-up (and the May 15 Matthew Campbell batch), classified
+  by size and session, not PO#. Don't revert to "qty 6+ = inventory" as a
+  standing rule; that's the pre-PO# heuristic only.
 - May is a **closed** period. PO#-based reclass starts **6/1**
   (`RECLASS_FROM`) so posted May JEs don't move.
 - Qty ≥ 5 on the stock page is always a restock (never auto-matched as
