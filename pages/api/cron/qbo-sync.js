@@ -4,6 +4,7 @@ import {
 } from '../../../lib/qbo'
 import { supabaseAdmin } from '../../../lib/supabaseAdmin'
 import { targetFor, mirrorFor } from '../../../lib/qboTargets'
+import { rebuildMonthlySummary } from '../../../lib/rebuildFinancials'
 
 // Nightly QBO pull (vercel.json cron). Per connected client:
 //   1. refresh tokens — Intuit ROTATES the refresh token, so the new one is
@@ -241,6 +242,13 @@ export default async function handler(req, res) {
           throw new Error(`portal has ${finalCount} rows after mirroring ${pulled.length} — restore from gl_mirror_backup`)
         }
       } catch (e) { r.errors.push(`mirror: ${String(e.message || e)}`) }
+    }
+
+    // Keep dashboard / Ask on the same closed-month P&L as the Financials tab.
+    if (c.portal_client_id && r.mirrored) {
+      try {
+        r.monthly = await rebuildMonthlySummary(c.portal_client_id)
+      } catch (e) { r.errors.push(`monthly: ${String(e.message || e)}`) }
     }
 
     const companyName = await fetchCompanyName(env, token, c.realm_id).catch(() => c.company_name)
