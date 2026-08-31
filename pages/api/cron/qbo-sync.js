@@ -66,6 +66,17 @@ export default async function handler(req, res) {
     }
   }
 
+  const logQbo = async (slug, { ok, rows = 0, message }) => {
+    try {
+      await supabaseAdmin.from('sync_log').insert({
+        source: `qbo:${slug}`,
+        ok,
+        rows,
+        message: String(message || '').slice(0, 300),
+      })
+    } catch (_) {}
+  }
+
   const results = {}
   for (const c of conns || []) {
     const r = { pl: null, bs: null, gl: null, errors: [] }
@@ -83,7 +94,9 @@ export default async function handler(req, res) {
         status: 'error', last_error: String(e.message || e).slice(0, 500),
         last_error_at: new Date().toISOString(), updated_at: new Date().toISOString(),
       }).eq('client_slug', c.client_slug)
-      results[c.client_slug] = { ok: false, stage: 'target', error: String(e.message || e) }
+      const err = String(e.message || e)
+      await logQbo(c.client_slug, { ok: false, message: `target: ${err}` })
+      results[c.client_slug] = { ok: false, stage: 'target', error: err }
       continue
     }
     r.target = target
@@ -109,7 +122,9 @@ export default async function handler(req, res) {
         last_error_at: new Date().toISOString(),
         updated_at: new Date().toISOString(),
       }).eq('client_slug', c.client_slug)
-      results[c.client_slug] = { ok: false, stage: 'token', error: String(e.message || e) }
+      const err = String(e.message || e)
+      await logQbo(c.client_slug, { ok: false, message: `token: ${err}` })
+      results[c.client_slug] = { ok: false, stage: 'token', error: err }
       continue
     }
 
@@ -260,6 +275,16 @@ export default async function handler(req, res) {
       last_error_at: r.errors.length ? new Date().toISOString() : null,
       updated_at: new Date().toISOString(),
     }).eq('client_slug', c.client_slug)
+
+    // Portal Data Health reads this — qbo_connections is service-role only
+    // (it holds tokens), so last_synced_at is invisible to the browser.
+    await logQbo(c.client_slug, {
+      ok: r.errors.length === 0,
+      rows: r.gl?.rows || 0,
+      message: r.errors.length
+        ? r.errors.join(' | ')
+        : `pl=${r.pl} bs=${r.bs} gl=${r.gl?.rows || 0} ${r.gl?.from || ''}→${r.gl?.to || ''}`,
+    })
 
     results[c.client_slug] = { ok: r.errors.length === 0, ...r }
   }

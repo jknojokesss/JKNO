@@ -110,7 +110,7 @@ function DrillModal({ account, onClose }) {
 
 export default function Financials() {
   // Require sign-in: send anonymous visitors to /login before any data renders.
-  // Also flag admins (JK No Jokes) so the GL import control shows only to them.
+  // Also flag admins (JK No Jokes) so Data Health shows only to them.
   useEffect(() => {
     supabase.auth.getUser().then(async ({ data: { user } }) => {
       if (!user) { window.location.replace('/login'); return }
@@ -218,19 +218,21 @@ export default function Financials() {
       }
       setCashRows(cRows)
 
-      // Data-health: freshness + Clover sync status (reconciliation is computed from data already loaded)
-      const [cpt, wf, li, sl] = await Promise.all([
+      // Data-health: freshness + Clover / QBO sync status.
+      // Books come from the nightly QuickBooks pull, not a CSV/XLSX import —
+      // import_log is leftover from that era and is not a freshness signal.
+      const [cpt, wf, sl, qbo] = await Promise.all([
         supabase.from('clover_pos_total').select('*').maybeSingle(),
         supabase.from('weldon_orders').select('created_at').order('created_at', { ascending: false }).limit(1),
-        supabase.from('import_log').select('imported_at, kind').order('imported_at', { ascending: false }).limit(1),
         supabase.from('sync_log').select('ran_at, ok').eq('source', 'clover').order('ran_at', { ascending: false }).limit(1),
+        supabase.from('sync_log').select('ran_at, ok, message, rows').eq('source', 'qbo:reydel').order('ran_at', { ascending: false }).limit(1),
       ])
       setHealth({
         cloverPos: cpt.data ? Number(cpt.data.total) : null,
         cloverLastSynced: cpt.data?.last_synced || null,
         weldonLastAdded: wf.data?.[0]?.created_at || null,
-        lastImport: li.data?.[0] || null,
         lastCloverSync: sl.data?.[0] || null,
+        lastQboSync: qbo.data?.[0] || null,
       })
 
       setLoading(false)
@@ -496,7 +498,7 @@ export default function Financials() {
 
                 {/* Cash Flow Tab — direct method from cash-account activity */}
                 {activeTab === 'cashflow' && (() => {
-                  if (!cashRows.length) return <div style={{ color: '#9A9284', fontFamily: ui, fontSize: '12px' }}>No cash data yet — import a General Ledger.</div>
+                  if (!cashRows.length) return <div style={{ color: '#9A9284', fontFamily: ui, fontSize: '12px' }}>No cash data yet.</div>
                   const headF = "'Barlow Semi Condensed', sans-serif", monoF = "'IBM Plex Mono', monospace"
                   const cashSet = new Set(CASH_ACCTS)
                   const acctCat = {}
@@ -817,7 +819,7 @@ export default function Financials() {
 
                 {/* Accounts Tab — balances grouped by type, collapsible */}
                 {activeTab === 'accounts' && (() => {
-                  if (!accounts.length) return <div style={{ color: '#9A9284', fontFamily: ui, fontSize: '12px' }}>No account data yet — import a General Ledger.</div>
+                  if (!accounts.length) return <div style={{ color: '#9A9284', fontFamily: ui, fontSize: '12px' }}>No account data yet.</div>
                   // Net Income (current-year earnings) is a balance-sheet equity line, not a
                   // real GL account — fold it into Equity so this view ties to the Balance Sheet.
                   const netIncome = (bs.find(r => r.account === 'Net Income')?.amount) ??
@@ -889,7 +891,13 @@ export default function Financials() {
 
                 {/* Data Health Tab (admin only) */}
                 {activeTab === 'health' && (() => {
-                  const glClover = (plTotals.income.find(r => r.label === 'Clover Sales')?.amount) || 0
+                  // Live GL, not the stale all-time pl_totals snapshot. That
+                  // snapshot still stops at the last closed month; Clover
+                  // tickets are all-time, so comparing the two looked like
+                  // an $80k miss when the nightly QBO pull was fine.
+                  const glClover = plMonths.length
+                    ? plMonths.reduce((s, m) => s + (plByMonth[m]?.['Clover Sales'] || 0), 0)
+                    : ((plTotals.income.find(r => r.label === 'Clover Sales')?.amount) || 0)
                   const cloverPos = health?.cloverPos
                   const posVar = cloverPos != null ? cloverPos - glClover : null
                   const bsAssets = bs.filter(r => r.category === 'asset').reduce((s, r) => s + r.amount, 0)
@@ -900,6 +908,10 @@ export default function Financials() {
                   const ago = (ts) => { if (!ts) return '—'; const h = (Date.now() - new Date(ts)) / 36e5; return h < 1 ? `${Math.round(h * 60)} min ago` : h < 48 ? `${Math.round(h)} h ago` : `${Math.round(h / 24)} d ago` }
                   const cloverStale = health?.cloverLastSynced ? (Date.now() - new Date(health.cloverLastSynced)) / 36e5 > 36 : true
                   const cloverFailed = health?.lastCloverSync?.ok === false
+                  const qboSync = health?.lastQboSync
+                  const qboFailed = qboSync?.ok === false
+                  const qboStale = qboSync?.ran_at ? (Date.now() - new Date(qboSync.ran_at)) / 36e5 > 36 : false
+                  const glThrough = plMonths.length ? plMonths[plMonths.length - 1] : null
                   const Row = ({ k, v, sub, bad }) => (
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', padding: '9px 0', borderBottom: '1px solid #E6E1D6' }}>
                       <div style={{ fontSize: '11px', color: '#333', fontFamily: 'Inter, sans-serif' }}>{k}{sub && <span style={{ color: '#aaa', marginLeft: '8px' }}>{sub}</span>}</div>
@@ -926,7 +938,14 @@ export default function Financials() {
                         <Row k="Clover sales" v={ago(health?.cloverLastSynced)} sub={health?.cloverLastSynced ? new Date(health.cloverLastSynced).toLocaleString() : ''} bad={cloverStale} />
                         <Row k="Last Clover sync" v={health?.lastCloverSync ? (health.lastCloverSync.ok ? 'OK' : 'FAILED') : '—'} sub={health?.lastCloverSync ? ago(health.lastCloverSync.ran_at) : ''} bad={cloverFailed} />
                         <Row k="Weldon orders" v={ago(health?.weldonLastAdded)} sub={health?.weldonLastAdded ? new Date(health.weldonLastAdded).toLocaleString() : ''} />
-                        <Row k="Financials" v={health?.lastImport ? ago(health.lastImport.imported_at) : '—'} sub={health?.lastImport ? `last ${health.lastImport.kind} import` : ''} />
+                        <Row
+                          k="QuickBooks"
+                          v={qboFailed ? 'FAILED' : (qboSync || glThrough) ? 'OK' : '—'}
+                          sub={qboSync
+                            ? `${ago(qboSync.ran_at)}${glThrough ? ` · GL through ${monthLabel(glThrough)}` : ''}`
+                            : (glThrough ? `GL through ${monthLabel(glThrough)}` : '')}
+                          bad={qboFailed || qboStale}
+                        />
                       </div>
                       <div style={{ background: '#fff', border: '1px solid #DBD5C7', borderRadius: '0', boxShadow: 'none', padding: '16px' }}>
                         <div style={{ fontSize: '9px', color: '#888', letterSpacing: '0.15em', marginBottom: '8px', fontFamily: 'Inter, sans-serif' }}>RECONCILIATION</div>
