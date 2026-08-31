@@ -253,6 +253,19 @@ export default async function handler(req, res) {
       updated_at: new Date().toISOString(),
     }).eq('client_slug', c.client_slug)
 
+    // Portal Data Health reads this — qbo_connections is service-role only
+    // (it holds tokens), so last_synced_at is invisible to the browser.
+    try {
+      await supabaseAdmin.from('sync_log').insert({
+        source: `qbo:${c.client_slug}`,
+        ok: r.errors.length === 0,
+        rows: r.gl?.rows || 0,
+        message: r.errors.length
+          ? r.errors.join(' | ').slice(0, 300)
+          : `pl=${r.pl} bs=${r.bs} gl=${r.gl?.rows || 0} ${r.gl?.from || ''}→${r.gl?.to || ''}`,
+      })
+    } catch (_) {}
+
     results[c.client_slug] = { ok: r.errors.length === 0, ...r }
   }
   return res.status(200).json({ synced: Object.keys(results).length, glMonths, results })
