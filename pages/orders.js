@@ -423,8 +423,7 @@ export default function Orders() {
     let r = rows
     if (asOf !== 'all') r = r.filter(x => x.date <= asOf)
     if (search) r = r.filter(r => r.item.toLowerCase().includes(search.toLowerCase()))
-    if (!showEst) r = r.filter(r => !r.isEstimated)
-    if (flaggedOnly) r = r.filter(x => !!rowFlag(x))
+    if (!showEst) r = r.filter(x => !x.isEstimated)
     if (sizeFilter !== 'all') r = r.filter(x => x.normalizedSize === sizeFilter)
     if (srcFilter !== 'all') r = r.filter(x => {
       const sdMatched = x.matchedSameDay
@@ -448,16 +447,19 @@ export default function Orders() {
       if (sort === 'sale')   return mul * (a.sale - b.sale)
       return 0
     })
-  }, [rows, search, sort, sortDir, showEst, asOf, srcFilter, sizeFilter, flaggedOnly])
+  }, [rows, search, sort, sortDir, showEst, asOf, srcFilter, sizeFilter])
+
+  const flaggedRows = filtered.filter(r => rowFlag(r))
+  const shown = flaggedOnly ? flaggedRows : filtered
+  const flaggedCount = flaggedRows.length
 
   const matched     = rows.filter(r => !r.isEstimated)
-  const invCount     = filtered.filter(r => r.costSource === 'inventory').length
-  const sameDayCount = filtered.filter(r => r.costSource === 'weldon_same_day').length
-  const sameDayMatched = filtered.filter(r => r.matchedSameDay).length
+  const invCount     = shown.filter(r => r.costSource === 'inventory').length
+  const sameDayCount = shown.filter(r => r.costSource === 'weldon_same_day').length
+  const sameDayMatched = shown.filter(r => r.matchedSameDay).length
   const sameDayProxy   = sameDayCount - sameDayMatched
-  const flaggedCount   = filtered.filter(r => rowFlag(r)).length
-  const totalProfit = filtered.reduce((s, r) => s + r.profit, 0)
-  const totalRev    = filtered.reduce((s, r) => s + r.sale, 0)
+  const totalProfit = shown.reduce((s, r) => s + r.profit, 0)
+  const totalRev    = shown.reduce((s, r) => s + r.sale, 0)
   const avgMargin   = totalRev > 0 ? (totalProfit / totalRev) * 100 : 0
 
   // Per-tire economics, split new vs used. Both exclude service lines (mounting/
@@ -468,8 +470,8 @@ export default function Orders() {
     const rev    = arr.reduce((s, r) => s + r.sale, 0)
     return { units, avg: units > 0 ? profit / units : 0, margin: rev > 0 ? (profit / rev) * 100 : 0 }
   }
-  const newT  = perTire(filtered.filter(r => r.costSource === 'inventory' || r.costSource === 'weldon_same_day'))
-  const usedT = perTire(filtered.filter(r => r.costSource === 'used_tire_inventory'))
+  const newT  = perTire(shown.filter(r => r.costSource === 'inventory' || r.costSource === 'weldon_same_day'))
+  const usedT = perTire(shown.filter(r => r.costSource === 'used_tire_inventory'))
 
   // Export the shown orders (respects filter/sort/as-of) to CSV.
   const downloadCSV = () => {
@@ -480,7 +482,7 @@ export default function Orders() {
       return { inventory: 'Inventory', used_tire_inventory: 'Used', service: 'Service', parts: 'Parts' }[r.costSource] || r.costSource
     }
     const csv = [['Date', 'Item', 'Source', 'Qty', 'Sale', 'Cost', 'Profit', 'Margin %'].map(esc).join(',')]
-    filtered.forEach(r => csv.push([r.date, r.item, srcLabel(r), r.qty, r.sale.toFixed(2), r.cost.toFixed(2), r.profit.toFixed(2), r.margin.toFixed(1)].map(esc).join(',')))
+    shown.forEach(r => csv.push([r.date, r.item, srcLabel(r), r.qty, r.sale.toFixed(2), r.cost.toFixed(2), r.profit.toFixed(2), r.margin.toFixed(1)].map(esc).join(',')))
     csv.push(['TOTAL', '', '', '', totalRev.toFixed(2), (totalRev - totalProfit).toFixed(2), totalProfit.toFixed(2), avgMargin.toFixed(1)].map(esc).join(','))
     const blob = new Blob([csv.join('\n')], { type: 'text/csv;charset=utf-8;' })
     const url = URL.createObjectURL(blob)
@@ -543,7 +545,7 @@ export default function Orders() {
                 {/* KPI cards */}
                 <div style={{ display: 'flex', gap: '12px', marginBottom: '20px' }}>
                   {[
-                    { label: 'TOTAL ORDERS',      value: filtered.length.toLocaleString(),    sub: 'line items shown',           sc: '#888' },
+                    { label: 'TOTAL ORDERS',      value: shown.length.toLocaleString(),    sub: 'line items shown',           sc: '#888' },
                     { label: 'PROFIT / NEW TIRE',  value: fmtC(newT.avg),  sub: `${newT.margin.toFixed(1)}% · ${newT.units} sold`, sc: '#1C7A4E' },
                     { label: 'PROFIT / USED TIRE', value: fmtC(usedT.avg), sub: usedT.units ? `${usedT.margin.toFixed(1)}% · ${usedT.units} sold` : 'none sold', sc: '#1C7A4E' },
                     { label: 'BEST MARGIN SIZE',
@@ -613,11 +615,11 @@ export default function Orders() {
                   }}>
                     {showEst ? 'HIDE EST.' : 'SHOW EST.'}
                   </button>
-                  <button onClick={() => setFlaggedOnly(f => !f)} title="Show only rows whose cost looks suspicious" style={{
+                  <button type="button" onClick={() => setFlaggedOnly(on => !on)} title={flaggedOnly ? 'Click to show all rows' : 'Show only rows whose cost looks suspicious'} style={{
                     padding: '7px 12px', fontSize: '9px', fontFamily: 'Inter, sans-serif', letterSpacing: '0.08em',
                     border: 'none', borderRadius: '0', cursor: 'pointer',
                     background: flaggedOnly ? '#f59e0b' : '#E6E1D6', color: flaggedOnly ? '#fff' : '#888',
-                  }}>⚠ FLAGGED{flaggedCount ? ` (${flaggedCount})` : ''}</button>
+                  }}>{flaggedOnly ? `✕ CLEAR FLAGGED (${flaggedCount})` : `⚠ FLAGGED${flaggedCount ? ` (${flaggedCount})` : ''}`}</button>
                   <button onClick={downloadCSV} style={{
                     padding: '7px 12px', fontSize: '9px', fontFamily: 'Inter, sans-serif', letterSpacing: '0.08em',
                     border: 'none', borderRadius: '0', cursor: 'pointer', background: '#1C7A4E', color: '#fff',
@@ -640,7 +642,7 @@ export default function Orders() {
                       </tr>
                     </thead>
                     <tbody>
-                      {filtered.map((r, i) => { const flag = rowFlag(r); return (
+                      {shown.map((r, i) => { const flag = rowFlag(r); return (
                         <tr key={i}
                           onMouseEnter={e => e.currentTarget.style.background = flag ? '#FCEFC7' : '#ECE8DF'}
                           onMouseLeave={e => e.currentTarget.style.background = flag ? '#FEF9E7' : 'transparent'}
@@ -699,7 +701,7 @@ export default function Orders() {
                     </tbody>
                   </table>
 
-                  {filtered.length === 0 && (
+                  {shown.length === 0 && (
                     <div style={{ padding: '24px', textAlign: 'center', color: '#888', fontFamily: 'Inter, sans-serif', fontSize: '11px' }}>
                       No items match
                     </div>
@@ -707,7 +709,7 @@ export default function Orders() {
 
                   <div style={{ padding: '10px 16px', borderTop: '2px solid #DBD5C7', background: '#ECE7DD', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                     <div style={{ fontSize: '10px', color: '#888', fontFamily: 'Inter, sans-serif' }}>
-                      {filtered.length.toLocaleString()} rows &nbsp;·&nbsp; {invCount.toLocaleString()} inventory &nbsp;·&nbsp; {sameDayCount.toLocaleString()} same-day ({sameDayMatched} matched · {sameDayProxy} est.) &nbsp;·&nbsp; <span style={{ color: flaggedCount ? '#b45309' : '#888' }}>⚠ {flaggedCount} flagged</span> &nbsp;·&nbsp; * = estimated cost
+                      {shown.length.toLocaleString()} rows &nbsp;·&nbsp; {invCount.toLocaleString()} inventory &nbsp;·&nbsp; {sameDayCount.toLocaleString()} same-day ({sameDayMatched} matched · {sameDayProxy} est.) &nbsp;·&nbsp; <span style={{ color: flaggedCount ? '#b45309' : '#888' }}>⚠ {flaggedCount} flagged</span> &nbsp;·&nbsp; * = estimated cost
                     </div>
                     <div style={{ fontSize: '11px', color: '#1C7A4E', fontFamily: 'Inter, sans-serif', fontWeight: '600' }}>
                       {fmt0(totalProfit)} est. profit shown
