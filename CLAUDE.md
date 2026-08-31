@@ -41,8 +41,9 @@ numerals):
   is heuristic; `order_profit` is a snapshot through May, not the books.
 - `/stock` — on-hand from dated Weldon `LAYERS` (through July) minus FIFO sales.
   Default as-of is Jul 31. August layers are not in yet.
-- `/ai` — Ask preview only (`COMING SOON`); do not wire a live model here
-  unless asked
+- `/ai` — Ask. Answers computed from `monthly_summary` / Clover / `bs_totals`
+  (`lib/askAnswer.js`). No model, no Anthropic bill. Do not wire a paid API
+  here unless asked.
 
 **QBO slug `reydel`.** Books stay in the main project (not `ISOLATED`). Nightly
 sync mirrors GL into `gl_transactions` when the connection has
