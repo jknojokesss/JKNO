@@ -2,8 +2,9 @@ import { supabaseAdmin } from '../../lib/supabaseAdmin'
 
 // Receives scraped Weldon orders from the browser bookmarklet (which runs on
 // the user's real, Cloudflare-cleared Weldon session) and inserts only the new
-// web_ids, backfills blank costs / PO#s, and drops in-window orders that
-// disappeared from Weldon (canceled). Protected by a shared token; CORS-enabled
+// web_ids, backfills blank costs / PO#s, and drops orders missing inside this
+// scrape's date span (cancels). Orders older than the oldest scraped date
+// aged off Weldon's page — leave them. Protected by a shared token; CORS-enabled
 // so the bookmarklet on weldontire.net can POST here.
 
 const CORS = {
@@ -118,11 +119,14 @@ export default async function handler(req, res) {
     if (!pErr) po_tagged++
   }
 
-  // 5) Drop in-window orders the bookmarklet did not see. The invoiced page
-  //    only goes back ~6 months; anything in that window missing from this
-  //    scrape was canceled (or otherwise gone) on Weldon. Older rows fall off
-  //    the page even when still real — leave them alone. If too many are
-  //    missing, the scrape was incomplete: don't mass-delete.
+  // 5) Drop orders the bookmarklet did not see — but only ones on/after the
+  //    oldest date this scrape actually returned. Weldon's invoiced page is
+  //    ~6 months; the oldest week ages off even when the POs were real (the
+  //    2026-08-31 sync ate 8 real 3/4 orders that way). A missing row *inside*
+  //    the scrape's date span is a cancel. Older than the scrape's oldest date
+  //    just fell off the page — leave it. If too many are missing, the scrape
+  //    was incomplete: don't mass-delete. Always return/log the dropped rows
+  //    so a hard-delete is reconstructable.
   const seen = new Set(
     (Array.isArray(req.body?.seen) ? req.body.seen : dbRows.map((r) => r.web_id))
       .map((id) => String(id || '').trim())
@@ -130,24 +134,28 @@ export default async function handler(req, res) {
   )
   let canceled = 0
   let cancel_skipped = 0
-  if (seen.size) {
-    const since = new Date()
-    since.setUTCMonth(since.getUTCMonth() - 6)
-    const sinceStr = since.toISOString().slice(0, 10)
-    const { data: inWindow } = await supabaseAdmin
+  let canceled_rows = []
+  const oldestSeen = dbRows.map((r) => r.order_date).filter(Boolean).sort()[0]
+  if (seen.size && oldestSeen) {
+    const { data: inSpan } = await supabaseAdmin
       .from('weldon_orders')
-      .select('web_id')
-      .gte('order_date', sinceStr)
-    const gone = (inWindow || []).map((r) => r.web_id).filter((id) => !seen.has(id))
+      .select('web_id, order_date, size, qty, unit_cost, description, po_number')
+      .gte('order_date', oldestSeen)
+    const gone = (inSpan || []).filter((r) => !seen.has(r.web_id))
     if (gone.length > 15) {
       cancel_skipped = gone.length
     } else if (gone.length) {
+      const ids = gone.map((r) => r.web_id)
+      console.log('weldon-import canceling', JSON.stringify(gone))
       const { error: cErr, data: dropped } = await supabaseAdmin
         .from('weldon_orders')
         .delete()
-        .in('web_id', gone)
-        .select('web_id')
-      if (!cErr) canceled = (dropped || []).length
+        .in('web_id', ids)
+        .select('web_id, order_date, size, qty, unit_cost, description, po_number')
+      if (!cErr) {
+        canceled_rows = dropped || gone
+        canceled = canceled_rows.length
+      }
     }
   }
 
@@ -158,6 +166,7 @@ export default async function handler(req, res) {
     backfilled,
     po_tagged,
     canceled,
+    ...(canceled_rows.length ? { canceled_ids: canceled_rows.map((r) => r.web_id), canceled_rows } : {}),
     ...(cancel_skipped ? { cancel_skipped, cancel_note: 'Too many missing for a cancel — scrape looks incomplete, left them.' } : {}),
   })
 }

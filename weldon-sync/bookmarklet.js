@@ -4,7 +4,9 @@
 // logged in), scrapes the invoiced + open order pages, fills any blank costs
 // from the order-detail page, and POSTs everything to /api/weldon-import, which
 // inserts only the new web_ids, backfills blank costs / PO#s, and drops
-// in-window orders that disappeared from Weldon (canceled). The minified
+// orders missing *inside this scrape's date span* (cancels). Rows older than
+// the oldest date the bookmarklet actually saw are left alone — they aged off
+// Weldon's ~6-month invoiced page, they were not canceled. The minified
 // javascript: version (with the real
 // APP domain + token baked in) is what gets saved as a browser bookmark.
 //
@@ -84,7 +86,7 @@
     if (!res.ok) throw new Error(j.error || res.status)
     const extra = j.cancel_skipped
       ? ` — ${j.cancel_skipped} missing, left them (scrape looked short)`
-      : (j.canceled ? `, dropped ${j.canceled} canceled` : '')
+      : (j.canceled ? `, dropped ${j.canceled} canceled${j.canceled_ids?.length ? ` (${j.canceled_ids.join(', ')})` : ''}` : '')
     alert(`Weldon sync ✓  scanned ${j.received} orders, added ${j.inserted} new, filled ${j.backfilled || 0} costs, tagged ${j.po_tagged || 0} PO#s${extra}`)
   } catch (e) {
     alert('Weldon sync failed: ' + (e.message || e))

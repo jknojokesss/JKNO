@@ -62,8 +62,12 @@ layer must equal the Inventory Asset hit in QB. Special-orders (small Weldon
 POs, qty ≤ 4) are matched from `weldon_orders` on the LIVE view only; the
 5/31 book snapshot stays the accounting anchor. Bookmarklet:
 `weldon-sync/bookmarklet.js` → `/api/weldon-import` (`WELDON_IMPORT_TOKEN`).
-Running it inserts **new `web_id`s into `weldon_orders` only** — it does not
-add `LAYERS` or post to QuickBooks.
+Running it inserts new `web_id`s, backfills cost/PO#, and drops rows missing
+**inside the scrape's own date span** (real cancels). It does **not** delete
+orders older than the oldest date this scrape returned — those just aged off
+Weldon's ~6-month invoiced page (the 8/31/2026 sync ate eight real 3/4 POs
+that way). It does not add `LAYERS` or post to QuickBooks. The API returns
+`canceled_ids` so a drop is reconstructable.
 
 **Heller CC (Capital One 9618).** That's the card for Mavis / Eastern
 Warehouse / Ben Tire. "Plain VISA" and "online VISA (9618)" are the same
