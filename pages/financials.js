@@ -17,11 +17,11 @@ const monthLabel = (k) => `${MONTHS[k.slice(5, 7)]} ${k.slice(0, 4)}`
 // IS a cash movement; its `split_account` tells us why (operating/investing/financing).
 const CASH_ACCTS = ['TOTAL CHECKING (8059) - 1','BUS COMPLETE CHK (5998) - 1','Bank of America 7875','BOA Savings','Savings 1651']
 
-// Bank rec is complete through this month; later (in-progress) months have
-// payments recorded but deposits still clearing, so cash views cap here to
-// avoid showing a misleadingly-low un-reconciled mid-month balance.
-const RECONCILED_THROUGH = '2026-06'
-const RECONCILED_LABEL = 'Jun 30, 2026'
+// Last closed month on the books. Cash views cap here so an in-progress month
+// (payments in, deposits still clearing) can't be read as a full month.
+// Bank rec unsigned does NOT hide a closed month — July INV/FEE/CSH are posted.
+const RECONCILED_THROUGH = '2026-07'
+const RECONCILED_LABEL = 'Jul 31, 2026'
 
 
 const THEME = { sidebarBg: '#1A1A1A', sidebarBorder: '#2A2A2A', accent: '#B0281C' }
@@ -568,7 +568,7 @@ export default function Financials() {
                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', borderBottom: '1px solid #DBD5C7', paddingBottom: '12px', marginBottom: '4px' }}>
                           <div>
                             <div style={{ fontSize: '15px', fontWeight: 700, color: '#1B1815', fontFamily: headF, letterSpacing: '0.02em', textTransform: 'uppercase' }}>Statement of Cash Flows</div>
-                            <div style={{ fontSize: '10px', color: '#1C7A4E', marginTop: '3px', fontFamily: monoF }}>✓ Reconciled through {RECONCILED_LABEL}</div>
+                            <div style={{ fontSize: '10px', color: '#6b6355', marginTop: '3px', fontFamily: monoF }}>Books through {RECONCILED_LABEL} · bank rec still open</div>
                           </div>
                           <div style={{ fontSize: '12px', color: '#6b6355', fontFamily: ui, fontWeight: 500 }}>
                             {cfCmp ? `${monthLabel(cfPeriod)} vs ${monthLabel(cfComparePeriod)}` : (cfPeriod === 'all' ? 'All time' : monthLabel(cfPeriod))}
@@ -664,7 +664,7 @@ export default function Financials() {
                               <div style={{ display: 'flex', justifyContent: 'space-between', padding: '7px 2px', fontFamily: ui, fontSize: '12.5px', color: '#1B1815', fontWeight: 600, borderTop: '1px solid #E6E1D6' }}><span>Cash at end of period</span><span style={{ fontFamily: monoF }}>{fmt(cfView.end)}</span></div>
                             </div>
                             <div style={{ fontSize: '9px', color: '#a39a88', fontFamily: ui, marginTop: '10px' }}>
-                              Direct method — every bank/cash movement, grouped by purpose, through the last reconciled month ({RECONCILED_LABEL}).
+                              Direct method — every bank/cash movement, grouped by purpose, through the last closed month ({RECONCILED_LABEL}). Bank rec unsigned does not hide July.
                             </div>
                           </>
                         )}
@@ -932,9 +932,9 @@ export default function Financials() {
                         <div style={{ fontSize: '9px', color: '#888', letterSpacing: '0.15em', marginBottom: '8px', fontFamily: 'Inter, sans-serif' }}>RECONCILIATION</div>
                         <Check ok={bsBalanced} label="Balance sheet balances" detail={`${fmt(bsAssets)} = ${fmt(bsLE)}`} />
                         <Check ok={niTie} label="Net income ties P&L → Balance Sheet" detail={`${fmt(plNetIncome)} / ${fmt(niBs)}`} />
-                        <Check ok={posVar != null && glClover > 0 && Math.abs(posVar) < glClover * 0.05} label="Clover POS ≈ booked Clover Sales" detail={cloverPos != null ? `POS ${fmt(cloverPos)} vs GL ${fmt(glClover)} (Δ ${fmt(posVar)})` : '—'} />
+                        <Row k="Clover tickets vs booked Clover Sales" v={cloverPos != null ? `tickets ${fmt(cloverPos)} · GL ${fmt(glClover)}` : '—'} sub={posVar != null ? `Δ ${fmt(posVar)} — not supposed to match (Synder/tips/tax/clearing)` : ''} />
                         <div style={{ fontSize: '9px', color: '#aaa', marginTop: '8px', fontFamily: 'Inter, sans-serif' }}>
-                          POS vs booked won't be exact — timing, refunds, tax/tips differ. Large gaps are the signal.
+                          Ticket totals and QBO Clover Sales are different things. A gap is not a fail.
                         </div>
                       </div>
                     </div>
