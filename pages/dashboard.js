@@ -71,7 +71,6 @@ export default function Dashboard() {
   const [monthly, setMonthly] = useState([])
   const [clover, setClover] = useState([])
   const [loading, setLoading] = useState(true)
-  const [period, setPeriod] = useState('month')
   const router = useRouter()
 
   useEffect(() => {
@@ -110,35 +109,25 @@ export default function Dashboard() {
   // chart data in $K for compact axis
   const chartData = closed.map(m => ({ label: m.label, rev: m.revenue / 1000, exp: m.expenses / 1000, profit: m.profit / 1000 }))
 
-  // Live current-month / week stats.
-  const now = new Date()
-  const monthStart = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-01`
-  const wd = new Date(now); wd.setDate(now.getDate() - 6)
-  const weekStart = `${wd.getFullYear()}-${String(wd.getMonth() + 1).padStart(2, '0')}-${String(wd.getDate()).padStart(2, '0')}`
-  const startStr = period === 'week' ? weekStart : monthStart
-  const periodLabel = period === 'week' ? 'last 7 days' : now.toLocaleDateString([], { month: 'long' }) + ' so far'
-  const periodRows = clover.filter(r => r.date && r.date >= startStr)
-  const pRevenue = periodRows.reduce((s, r) => s + Number(r.revenue || 0), 0)
-  const pUnits = periodRows.reduce((s, r) => s + Number(r.quantity || 1), 0)
-  const pOrders = new Set(periodRows.map(r => r.order_id)).size
-  const pAvg = pOrders ? pRevenue / pOrders : 0
-
-  const lastRows = last ? clover.filter(r => r.date && r.date.slice(0, 7) === last.month) : []
+  const lastMonth = last?.month
+  const lastRows = lastMonth ? clover.filter(r => r.date && r.date.slice(0, 7) === lastMonth) : []
   const lastUnits = lastRows.reduce((s, r) => s + Number(r.quantity || 1), 0)
 
   const mix = useMemo(() => {
+    const rows = lastMonth ? clover.filter(r => r.date && r.date.slice(0, 7) === lastMonth) : []
     const cats = {}
-    clover.forEach(r => { const c = saleCategory(r.item_name); if (c === 'tips') return; const k = MIX_META[c] ? c : 'other'; cats[k] = (cats[k] || 0) + Number(r.revenue || 0) })
+    rows.forEach(r => { const c = saleCategory(r.item_name); if (c === 'tips') return; const k = MIX_META[c] ? c : 'other'; cats[k] = (cats[k] || 0) + Number(r.revenue || 0) })
     const total = Object.values(cats).reduce((s, v) => s + v, 0)
     return { list: Object.entries(cats).map(([k, rev]) => ({ ...MIX_META[k], rev })).sort((a, b) => b.rev - a.rev), total }
-  }, [clover])
+  }, [clover, lastMonth])
   const tireShare = mix.total ? Math.round((mix.list.find(c => c.label === 'New Tires')?.rev || 0) / mix.total * 100) : 0
 
   const topSizes = useMemo(() => {
+    const rows = lastMonth ? clover.filter(r => r.date && r.date.slice(0, 7) === lastMonth) : []
     const map = {}
-    clover.forEach(r => { if (saleCategory(r.item_name) !== 'new_tire') return; const k = normalizeItemName(r.item_name); if (!map[k]) map[k] = { name: k, revenue: 0, units: 0 }; map[k].revenue += Number(r.revenue || 0); map[k].units += Number(r.quantity || 1) })
+    rows.forEach(r => { if (saleCategory(r.item_name) !== 'new_tire') return; const k = normalizeItemName(r.item_name); if (!map[k]) map[k] = { name: k, revenue: 0, units: 0 }; map[k].revenue += Number(r.revenue || 0); map[k].units += Number(r.quantity || 1) })
     return Object.values(map).sort((a, b) => b.revenue - a.revenue).slice(0, 6)
-  }, [clover])
+  }, [clover, lastMonth])
 
   const panel = { background: C.card, border: `1px solid ${C.hair}`, padding: '18px 20px' }
   const secTitle = { fontFamily: head, fontSize: 15, fontWeight: 700, color: C.ink, letterSpacing: '0.04em', textTransform: 'uppercase', paddingBottom: 8, borderBottom: `1px solid ${C.hair}`, marginBottom: 12 }
@@ -151,7 +140,7 @@ export default function Dashboard() {
         {/* status bar */}
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderBottom: `1px solid ${C.hair}`, padding: '12px 34px' }}>
           <span style={{ fontFamily: mono, fontSize: 11, color: C.muted, letterSpacing: '0.05em' }}>REYDEL TIRE &amp; AUTO · LAKEWOOD, NJ</span>
-          <span style={{ fontFamily: mono, fontSize: 11, color: C.green }}>● LIVE{last ? ` · THROUGH ${last.label} ${year}` : ''}</span>
+          <span style={{ fontFamily: mono, fontSize: 11, color: C.muted }}>{last ? `BOOKS THROUGH ${last.label} ${year}` : ''}</span>
         </div>
 
         <div style={{ padding: '32px 34px', maxWidth: 1040 }}>
@@ -233,7 +222,7 @@ export default function Dashboard() {
               <div style={{ display: 'grid', gridTemplateColumns: '1.25fr 1fr', gap: 24, marginTop: 24 }}>
                 <div style={panel}>
                   <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', ...secTitle }}>
-                    <span>Sales Mix</span>
+                    <span>Sales Mix · {last.label}</span>
                     <button onClick={() => router.push('/inventory')} style={{ fontFamily: mono, fontSize: 10, color: C.red, background: 'none', border: 'none', cursor: 'pointer', letterSpacing: '0.05em' }}>ITEMS →</button>
                   </div>
                   {/* one 100% bar, split by category */}
@@ -271,7 +260,7 @@ export default function Dashboard() {
 
                 <div style={panel}>
                   <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', ...secTitle }}>
-                    <span>Top Tire Sizes</span>
+                    <span>Top Tire Sizes · {last.label}</span>
                     <button onClick={() => router.push('/inventory')} style={{ fontFamily: mono, fontSize: 10, color: C.red, background: 'none', border: 'none', cursor: 'pointer', letterSpacing: '0.05em' }}>ALL →</button>
                   </div>
                   {topSizes.map((t, i) => (
@@ -284,29 +273,6 @@ export default function Dashboard() {
                         <div style={{ fontFamily: mono, fontSize: 9.5, color: C.muted }}>{t.units.toLocaleString()} sold</div>
                       </div>
                       <div style={{ fontFamily: mono, fontSize: 12.5, fontWeight: 600, color: C.ink }}>{fmt(t.revenue)}</div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-
-              {/* live — this period so far */}
-              <div style={{ ...panel, marginTop: 24 }}>
-                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 }}>
-                  <span style={{ fontFamily: head, fontSize: 13, fontWeight: 700, color: C.sub, letterSpacing: '0.08em', textTransform: 'uppercase' }}>{now.toLocaleDateString([], { month: 'long' })} · In Progress</span>
-                  <div style={{ display: 'flex' }}>
-                    {[['week', '7 days'], ['month', 'This month']].map(([p, l]) => (
-                      <button key={p} onClick={() => setPeriod(p)} style={{ fontFamily: mono, fontSize: 10, letterSpacing: '0.05em', padding: '5px 12px', cursor: 'pointer', border: `1px solid ${C.hair}`, background: period === p ? C.ink : C.card, color: period === p ? '#fff' : C.muted, textTransform: 'uppercase' }}>{l}</button>
-                    ))}
-                  </div>
-                </div>
-                <div style={{ display: 'flex' }}>
-                  {[['Revenue', fmt(pRevenue)], ['Tickets', pOrders.toLocaleString()], ['Tires sold', pUnits.toLocaleString()], ['Avg ticket', fmt(pAvg)]].map(([l, v], i) => (
-                    <div key={l} onClick={() => router.push('/orders')}
-                      onMouseEnter={e => e.currentTarget.style.background = C.paper} onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
-                      style={{ flex: 1, padding: '10px 14px', borderLeft: i ? `1px solid ${C.line}` : 'none', cursor: 'pointer' }}>
-                      <div style={{ fontFamily: ui, fontSize: 10.5, color: C.muted }}>{l}</div>
-                      <div style={{ fontFamily: mono, fontSize: 16, color: C.ink, fontWeight: 500, marginTop: 4 }}>{v}</div>
-                      <div style={{ fontFamily: ui, fontSize: 9, color: C.muted, marginTop: 2 }}>{periodLabel}</div>
                     </div>
                   ))}
                 </div>

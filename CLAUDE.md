@@ -29,7 +29,8 @@ key numbers; paper `#F2F0EA` / ink `#1B1815` / graphite sidebar `#1E1C19`;
 Barlow Semi Condensed headings, Inter body, IBM Plex Mono labels, tabular
 numerals):
 
-- `/dashboard` — monthly P&L from `monthly_summary` + mix from Clover lines
+- `/dashboard` — last **closed** month only (`monthly_summary` + Clover mix/sizes
+  for that month). No in-progress August. Not "LIVE."
 - `/financials` — QBO statements (`loadQboStatements(..., 'reydel')`) reconciled
   against `gl_transactions`; cash views cap at `RECONCILED_THROUGH` (last
   **closed** month, currently July). Unsigned bank rec does not hide a closed
