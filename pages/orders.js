@@ -536,7 +536,7 @@ export default function Orders() {
             {/* Page header */}
             <div style={{ marginBottom: '20px' }}>
               <div style={{ fontSize: '23px', fontWeight: 700, color: '#1B1815', fontFamily: "'Barlow Semi Condensed', sans-serif", letterSpacing: '0.02em', textTransform: 'uppercase' }}>Orders</div>
-              <div style={{ fontSize: '12px', color: '#9A9284', fontFamily: 'Inter, sans-serif', marginTop: '4px' }}>Reydel Tire &amp; Auto · live Clover × Weldon match (heuristic — not the books)</div>
+              <div style={{ fontSize: '12px', color: '#9A9284', fontFamily: 'Inter, sans-serif', marginTop: '4px' }}>Reydel Tire &amp; Auto · register tickets matched to Weldon invoices. A best guess — not what&apos;s in QuickBooks.</div>
             </div>
             {(loading ? (
               <div style={{ color: '#888', fontFamily: 'Inter, sans-serif', fontSize: '12px' }}>Loading...</div>
