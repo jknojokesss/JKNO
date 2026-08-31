@@ -8,7 +8,7 @@ Project") reached through `lib/supabase.js` via `NEXT_PUBLIC_SUPABASE_URL` /
 
 The live client portal is **Reydel Tire** (login → `/dashboard`). Demos and
 Jerky are separate products; don't restyle, reseed, or isolate Reydel as if it
-were one of them. `/riverside-tires` is the generic tire *demo*, not the shop.
+were one of them.
 
 ## Live client: Reydel Tire
 
