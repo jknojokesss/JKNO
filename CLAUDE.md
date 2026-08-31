@@ -1,12 +1,17 @@
 # JK No Jokes — site + demos
 
 Next.js (pages router) on Vercel, production = `main`, domain jknojokes.com.
+This repo is three things at once: a marketing site, ~26 demo dashboards, and
+**real production software for paying clients**. Do not assume a page is a
+demo. `/srl` is a demo; `/portal` and `/admin/ar` move real money; Reydel's
+live login is `/dashboard`.
+
 Data lives in one Supabase project (`cpvscxqrdhbccngfnhdz`, "jk@jknojokes.com's
 Project") reached through `lib/supabase.js` via `NEXT_PUBLIC_SUPABASE_URL` /
 `NEXT_PUBLIC_SUPABASE_ANON_KEY`. Jerky Munch uses its own isolated project
 (`lib/supabaseJerky.js`) — don't mix them.
 
-The live client portal is **Reydel Tire** (login → `/dashboard`). Demos and
+The live tire-shop product is **Reydel Tire** (login → `/dashboard`). Demos and
 Jerky are separate products; don't restyle, reseed, or isolate Reydel as if it
 were one of them.
 
@@ -95,6 +100,15 @@ lives in `pages/orders.js` + `pages/api/inventory-cogs.js`, not in a chat):
   $452 is the 7/31 CC that hits August's GL). A new month needs new layers
   in `inventory-cogs.js` before close will run.
 
+CSV/XLSX **book** import paths were deliberately removed (PRs #19, #20) —
+`/admin/financials`, `/api/gl-import`, `/api/coa-import`, `/api/gl-restore`.
+Ledger and CoA come from the QBO API. Don't rebuild a hand-upload that can
+overwrite a nightly sync. (Export-to-CSV on `/stock` and `/orders` is fine.)
+
+Stock on-hand is the dated `LAYERS` snapshot minus FIFO sales, not a live
+`stock_purchases → Clover` rebuild. That live version drifted (pre-4/15
+carryover, reconstructed costs). Don't bring it back.
+
 Do not: invent Reydel rows, drop them into an isolated Supabase project, or
 "clean up" `LAYERS` / `RETURNS` / `SAME_DAY_ITEMS` without tying the dollars
 back to QuickBooks.
@@ -149,21 +163,25 @@ invisible liabilities, books not sale-ready.
   Everything else is stone `#C9C4B8` / slate `#444C56` / ink `#1A1E24` on paper
   `#F6F6F6`. Charter serif headings, Inter with tabular numerals.
 
-## QuickBooks Online read pipe
+## QuickBooks Online pipe
 
 One Intuit app ("PL Pull", workspace "JK No Jokes" on developer.intuit.com)
-serves all clients. Read-only accounting scope. Flow: visit
-`/api/qbo/connect?client=<slug>` (we can click it ourselves with an accountant
-login and pick the client's company), callback stores realm + tokens in
-`qbo_connections`, and the nightly cron (`/api/cron/qbo-sync`, vercel.json)
-refreshes tokens and replaces that client's trailing-24-month monthly P&L in
-`qbo_gl_summary`. Both tables are RLS-on with no policies — service-role only,
-via `lib/supabaseAdmin.js`. Intuit rotates refresh tokens on every refresh;
-`lib/qbo.js` persists the new one before doing anything else. Env: `QBO_CLIENT_ID`,
-`QBO_CLIENT_SECRET`, `QBO_ENV` (sandbox|production), optional `QBO_REDIRECT_URI`
-(defaults to https://jknojokes.com/api/qbo/callback — must be registered in the
-Intuit app's redirect URIs). `status='reauth_needed'` on a connection means the
-refresh token died (revoked or 100-day idle) and someone must click connect again.
+serves all clients. Scope `com.intuit.quickbooks.accounting` covers **reads and
+writes** — Intuit has no separate read-only scope, so clients do not re-auth
+when write features ship. Flow: visit `/api/qbo/connect?client=<slug>` (we can
+click it ourselves with an accountant login and pick the client's company),
+callback stores realm + tokens in `qbo_connections`, and the nightly cron
+(`/api/cron/qbo-sync`, vercel.json) refreshes tokens and replaces that client's
+trailing-24-month monthly P&L in `qbo_gl_summary`. `qbo_connections` and
+`qbo_gl_summary` are RLS-on with **no policies** — service-role only, via
+`lib/supabaseAdmin.js`. Intuit rotates refresh tokens on every refresh;
+`lib/qboAuth.js` (and the cron's inline refresh) persist the new one **before**
+doing anything else. New code that refreshes must go through `qboAuth` or the
+next caller gets `invalid_grant`. Env: `QBO_CLIENT_ID`, `QBO_CLIENT_SECRET`,
+`QBO_ENV` (sandbox|production), optional `QBO_REDIRECT_URI` (defaults to
+https://jknojokes.com/api/qbo/callback — must be registered in the Intuit app's
+redirect URIs). `status='reauth_needed'` on a connection means the refresh
+token died (revoked or 100-day idle) and someone must click connect again.
 
 Each sync pulls three reports independently (one failing doesn't cost the
 others): P&L → `qbo_gl_summary`, Balance Sheet → `qbo_bs_summary` (both full
@@ -182,17 +200,87 @@ project. An isolated client whose key is missing errors rather than falling
 back — its books must never land in the shared DB. Any receiving project needs
 `supabase-qbo-tables.sql` applied first.
 
+**Writes** (`lib/qboWrite.js`, `/api/qbo/push-je`, `/api/qbo/prepare-close`)
+are gated by `lib/requireAdmin.js`, which **fails closed**. An earlier version
+returned true when `ADMIN_API_KEY` was missing; don't reintroduce that. Month-
+end inventory JE: `/api/inventory-cogs` (same engine as `/orders`) →
+`/api/qbo/prepare-close` (Dr COGS / Cr Inventory) → `/admin/qbo-push` posts.
+
+**Gotchas that were each a bug once** — don't regress:
+- Persist the rotated refresh token before any later work that can fail.
+- GL one month per request; columns by ColKey, not position.
+- The P&L "Total" column is not a month (`Date.parse("Total 1")` → 2001-01-01).
+- Paged Supabase reads need a stable `ORDER BY` or rows duplicate/vanish
+  across pages while counts still match.
+- Default PostgREST cap is 1000 rows; page past it.
+- Null-dated leftover CSV "Beginning Balance" rows survive range deletes —
+  mirror deletes must catch those too. Row-count matching is not reconciliation;
+  QuickBooks' own statement is the independent check.
+
+Official QBO statements live in `lib/qboStatements.js`. Ledger-derived figures
+(`lib/jerkyGL.js`, `/financials`) are reconstructions. Show both and reconcile;
+don't drop the official figure.
+
+## AR desk and client portal (live money)
+
+`/admin/ar` pulls a client's real open invoices from QBO and emails the
+QBO-generated invoice PDF. Read-only against the books; the only side effect
+is email. QBO has no statement API, so `lib/statementPdf.js` draws one.
+
+`/portal` maps a login **server-side** to exactly one QBO company
+(`lib/portalAuth.js`). The page never chooses a client; a portal login can
+never name a slug, so it can never see another client's books. Fails closed.
+Portal clients are blocked from admin access; `portal_users.protect_from_admin`
+has an exception so our own books can be a self-test.
+
+`/admin/ar` and `/portal` implement the same AR logic twice. If you touch AR
+behavior, check whether both paths need it. PR #47 was one attempt to
+converge them.
+
+## Security — fail closed
+
+Four modules fail closed because of a specific past hole:
+
+| Module | Guards |
+|---|---|
+| `lib/requireAdmin.js` | QBO write endpoints. False when unconfigured. |
+| `lib/requireJerkyUser.js` | Jerky invoice endpoints (create real invoices). |
+| `lib/portalAuth.js` | Forces one `client_slug`; a portal user can't name a client. |
+| `lib/qboTargets.js` | Errors rather than writing an isolated client's books to the shared DB. |
+
+`lib/supabaseAdmin.js` uses the service-role key and **bypasses RLS** — never
+import it into anything that runs in the browser. The Jerky anon key is public
+by design (it ships in the bundle); **RLS** protects that data, not the key.
+Cron routes require `CRON_SECRET`. `lib/qboState.js` is CSRF protection for
+OAuth state — it used to be cookie-only, which stranded users across apex/www.
+Two tables in the main project have RLS **off**: `shul_board_status` and
+`outreach_contacts` — anyone with the anon key can read/modify them. Don't
+copy that pattern onto client books.
+Two tables in the main project have RLS **off**: `shul_board_status` and
+`outreach_contacts` — anyone with the anon key can read/modify them. Don't
+copy that pattern onto client books.
+
 ## Conventions
 
 - Working style: blunt, short, make the call. Verify numbers against data
   before stating them; if you didn't check, say so. Voice-to-text is normal
   (phonetic spellings, mid-thought cutoffs). Keep Adar, HOA, and personal
-  material out of this repo.
+  material out of this repo. Don't dump raw chat transcripts or other-repo
+  sessions (MNE's `mne-trading-app`, Lew Imports, etc.) into this git tree —
+  distill durable JKNO rules here.
 - Other clients vs demos: Jerky Munch is live (isolated Supabase). MNE Trading
   (`/mne-trading`) and QueFence (`/quefence`) are seeded demos even when they
   are real prospects — don't mix them with Reydel books or restyle Reydel to
-  match a demo.
+  match a demo. Jerky's new-invoice form is one line on purpose; the
+  multi-flavor product builder was removed because Efraim doesn't use it —
+  don't rebuild it.
 - Bespoke demo pages are single files with inline styles; match that.
+  `pages/quefence.js` is thousands of lines on purpose.
+- Nearly every `lib/*.js` opens with a comment explaining not just what it
+  does but **what went wrong before it looked like this**. Read that header
+  before changing the module.
+- Commit messages and PR titles describe the user-visible outcome in plain
+  English, not the mechanism.
 - `.env.local` (gitignored) needs the two `NEXT_PUBLIC_SUPABASE_*` vars for
   `next build` / `next dev` on this VM — URL + anon key for the main project
   (`cpvscxqrdhbccngfnhdz`). Pull them with the Supabase MCP
