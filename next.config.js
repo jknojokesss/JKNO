@@ -12,6 +12,26 @@ const nextConfig = {
     return [
       // Roofing demo moved to its named route when it got the SRL branding.
       { source: '/roofing', destination: '/srl', permanent: false },
+      // Reydel portal lives in jknojokesss/reydel (Vercel project `reydel`).
+      // QBO nightly pull + Clover cron + Weldon import stay here so tokens
+      // and the Intuit callback don't move. Swap the host when
+      // reydel.jknojokes.com is attached. Leave /reset-password here —
+      // recovery tokens sit in the URL hash and a redirect would drop them.
+      ...[
+        '/login',
+        '/dashboard',
+        '/financials',
+        '/inventory',
+        '/orders',
+        '/stock',
+        '/ai',
+        '/admin/sync',
+        '/admin/qbo-push',
+      ].map((source) => ({
+        source,
+        destination: `https://reydel.vercel.app${source}`,
+        permanent: false,
+      })),
       {
         source: '/shul-vote',
         has: [{ type: 'host', value: 'jknojokes.com' }],
