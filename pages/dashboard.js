@@ -6,6 +6,9 @@ import { supabase } from '../lib/supabase'
 import Shell from '../components/Shell'
 import { priceLines } from '../lib/orderCost'
 
+// MOVED: this page is served from jknojokesss/reydel (https://reydel.vercel.app).
+// next.config.js redirects /dashboard there. Edits in this file do not reach Thomas.
+
 const fmt = (n) => new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }).format(Math.abs(n))
 const pct = (n) => `${parseFloat(n).toFixed(1)}%`
 

@@ -1,21 +1,26 @@
 # JK No Jokes — site + demos
 
 Next.js (pages router) on Vercel, production = `main`, domain jknojokes.com.
-This repo is three things at once: a marketing site, ~26 demo dashboards, and
-**real production software for paying clients**. Do not assume a page is a
-demo. `/srl` is a demo; `/portal` and `/admin/ar` move real money; Reydel's
-live login is `/dashboard`.
+This repo is the marketing site, demo dashboards, Jerky Munch, and the shared
+QuickBooks nightly pull. **Reydel's portal UI is its own repo** —
+[`jknojokesss/reydel`](https://github.com/jknojokesss/reydel), live at
+https://reydel.vercel.app. jknojokes.com `/login` `/dashboard` `/financials`
+`/inventory` `/orders` `/stock` `/ai` redirect there. Do not edit those pages
+here; a change will never reach Thomas.
 
 Data lives in one Supabase project (`cpvscxqrdhbccngfnhdz`, "jk@jknojokes.com's
 Project") reached through `lib/supabase.js` via `NEXT_PUBLIC_SUPABASE_URL` /
 `NEXT_PUBLIC_SUPABASE_ANON_KEY`. Jerky Munch uses its own isolated project
-(`lib/supabaseJerky.js`) — don't mix them.
+(`lib/supabaseJerky.js`) — don't mix them. Reydel's books stay in this same
+project (not isolated) even though the UI moved.
 
-The live tire-shop product is **Reydel Tire** (login → `/dashboard`). Demos and
-Jerky are separate products; don't restyle, reseed, or isolate Reydel as if it
-were one of them.
+`/srl` is a demo; `/portal` and `/admin/ar` move real money.
 
 ## Live client: Reydel Tire
+
+**Portal code: `jknojokesss/reydel`.** This section is the accounting / pipe
+facts that still run from JKNO (QBO nightly pull, Clover cron, Weldon import).
+Portal screens, Ask, stock `LAYERS`, and month-end JE UI are in the other repo.
 
 Owner **Thomas Reydel**. Portal login `thomashart1984@gmail.com`. Anchor JK No
 Jokes client — Lakewood, NJ tire & auto shop. Real Clover POS + Weldon
@@ -24,7 +29,7 @@ profit-per-order view (`order_profit` in Supabase: matched tire sales with
 revenue/cost/margin). Auth is email/password via `/login`; unauthenticated
 visits bounce there. Shell: `components/Shell.js`.
 
-**Screens** (accent `#B0281C` in at most the wordmark block, active nav, and
+**Screens** (implemented in `jknojokesss/reydel`, not this repo — accent `#B0281C` in at most the wordmark block, active nav, and
 key numbers; paper `#F2F0EA` / ink `#1B1815` / graphite sidebar `#1E1C19`;
 Barlow Semi Condensed headings, Inter body, IBM Plex Mono labels, tabular
 numerals):
