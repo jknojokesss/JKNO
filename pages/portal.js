@@ -46,6 +46,40 @@ function defaultBody(kind, { payBase, payZelle } = {}) {
     .join('\n')
 }
 
+// ── Last-known-good snapshot ─────────────────────────────────────────────
+// The portal reads QuickBooks live and stores nothing our side, which is the
+// whole privacy pitch — and also means an Intuit outage takes this page down
+// with it (1 Sep 2026: QBO logins failed for hours, and this screen had
+// nothing to show). So the last successful read is kept in HER OWN browser.
+// Nothing new lands on our side, and when QuickBooks is unreachable she can
+// still see who owes what and draft her chasing.
+//
+// A cached list is stamped with its age and is READ-ONLY: creating an invoice
+// against a list that may have moved underneath is how someone gets billed
+// twice. Storage is best-effort — private mode and a full quota both throw,
+// and neither is worth an error, so a missing cache just means today's
+// behaviour.
+const cacheKey = (uid) => `portal-cache:${uid}`
+function cacheSave(uid, data) {
+  try { window.localStorage.setItem(cacheKey(uid), JSON.stringify({ at: Date.now(), data })) } catch (e) {}
+}
+function cacheLoad(uid) {
+  try {
+    const c = JSON.parse(window.localStorage.getItem(cacheKey(uid)) || 'null')
+    return c && c.data && c.data.invoices ? c : null
+  } catch (e) { return null }
+}
+function cacheClear(uid) {
+  try { window.localStorage.removeItem(cacheKey(uid)) } catch (e) {}
+}
+
+const agoLabel = (at) => {
+  const d = new Date(at)
+  const sameDay = new Date().toDateString() === d.toDateString()
+  const time = d.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' })
+  return sameDay ? time + ' today' : `${d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}, ${time}`
+}
+
 // Nothing on this page may wait on a promise that never settles.
 const withTimeout = (p, ms) => Promise.race([
   p,
@@ -58,6 +92,7 @@ export default function Portal() {
   const [refs, setRefs] = useState(null)
   const [error, setError] = useState(null)
   const [busy, setBusy] = useState('')
+  const [stale, setStale] = useState(null)   // timestamp of a cached read, null = live
   const [showNew, setShowNew] = useState(false)
   const [compose, setCompose] = useState(null) // { kind, id, name, to, subject, body }
   const [q, setQ] = useState('')
@@ -190,8 +225,19 @@ export default function Portal() {
 
   const load = async (fresh) => {
     setBusy('load'); setError(null)
-    try { setData(await call('/api/portal/ar' + (fresh ? '?fresh=1' : ''))) }
-    catch (e) { setError(String(e.message || e)) } finally { setBusy('') }
+    try {
+      const json = await call('/api/portal/ar' + (fresh ? '?fresh=1' : ''))
+      setData(json); setStale(null)
+      if (session && !json.needsConnect) cacheSave(session.user.id, json)
+    } catch (e) {
+      // A failed Refresh must not throw away a good list that is already on
+      // screen — say so and leave it be. With nothing on screen, fall back to
+      // the last good read rather than showing her a dead page.
+      if (data && !stale) { setError(String(e.message || e)); return }
+      const cached = session ? cacheLoad(session.user.id) : null
+      if (cached) { setData(cached.data); setStale(cached.at); setError(null) }
+      else setError(String(e.message || e))
+    } finally { setBusy('') }
   }
   useEffect(() => { if (session) load() }, [!!session]) // eslint-disable-line react-hooks/exhaustive-deps
 
@@ -468,7 +514,7 @@ export default function Portal() {
   if (!session) return <Frame><Login /></Frame>
 
   return (
-    <Frame onSignOut={() => supabase.auth.signOut()}>
+    <Frame onSignOut={() => { if (session) cacheClear(session.user.id); supabase.auth.signOut() }}>
       {error && <div style={{ border: `1px solid ${RED}`, borderRadius: '4px', padding: '12px 14px', fontSize: '13px', color: RED, marginBottom: '16px', lineHeight: 1.5 }}>{error}</div>}
 
       {!data && !error && <p style={{ color: MUTED }}>Loading your invoices…</p>}
@@ -485,19 +531,33 @@ export default function Portal() {
         </div>
       )}
 
+      {stale && (
+        <div style={{ border: `1px solid #E0B500`, background: '#FFFBEA', borderRadius: '4px',
+                      padding: '11px 14px', fontSize: '13px', lineHeight: 1.55, marginBottom: '14px' }}>
+          <strong>QuickBooks is unreachable right now.</strong> Showing your invoices as they were at{' '}
+          <strong>{agoLabel(stale)}</strong> — so you can still see who owes what and get your chasing
+          written. Invoices, statements and new invoices all need QuickBooks itself, so those wait
+          until it is back.
+          <button onClick={() => load(true)} disabled={busy === 'load'}
+            style={{ ...btn(false), marginLeft: '10px' }}>{busy === 'load' ? 'Trying…' : 'Try again'}</button>
+        </div>
+      )}
+
       {data && !data.needsConnect && (
         <>
           <div style={{ display: 'flex', gap: phone ? '6px' : '10px', alignItems: 'baseline', flexWrap: 'wrap', marginBottom: phone ? '10px' : '16px' }}>
             <h2 style={{ fontSize: phone ? '16px' : '18px' }}>{data.company || 'Your company'}</h2>
             <span style={{ fontSize: '12.5px', color: MUTED }}>
-              {data.invoices.length} open{phone ? '' : ` invoice${data.invoices.length === 1 ? '' : 's'} · live from QuickBooks`}
+              {data.invoices.length} open{phone ? '' : ` invoice${data.invoices.length === 1 ? '' : 's'}${stale ? '' : ' · live from QuickBooks'}`}
             </span>
             <span style={{ flex: 1 }} />
             <button onClick={() => load(true)} disabled={busy === 'load'} style={btn(false)}>{busy === 'load' ? 'Refreshing…' : 'Refresh'}</button>
-            <button onClick={async () => {
-              setShowNew(true)
-              if (!refs) { try { setRefs(await call('/api/portal/ar?action=refs')) } catch (e) { setError(String(e.message || e)); setShowNew(false) } }
-            }} style={btn(true)}>+ New invoice</button>
+            {!stale && (
+              <button onClick={async () => {
+                setShowNew(true)
+                if (!refs) { try { setRefs(await call('/api/portal/ar?action=refs')) } catch (e) { setError(String(e.message || e)); setShowNew(false) } }
+              }} style={btn(true)}>+ New invoice</button>
+            )}
           </div>
 
           <div style={{ display: 'flex', gap: '4px', borderBottom: `1px solid ${BORDER}`, marginBottom: '16px' }}>
