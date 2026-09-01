@@ -10,6 +10,12 @@ import { supabase } from '../../lib/supabase'
 const INK = '#1A1A1A', BORDER = '#E5E5E5', MUTED = '#777', RED = '#CC2222', GREEN = '#1E7A3A'
 const mono = 'ui-monospace, SFMono-Regular, Menlo, monospace'
 
+// Nothing on this page may wait on a promise that never settles.
+const withTimeout = (p, ms) => Promise.race([
+  p,
+  new Promise((_, rej) => setTimeout(() => rej(new Error('timeout')), ms)),
+])
+
 export default function ArAdmin() {
   const router = useRouter()
   const [client, setClient] = useState('jkno')
@@ -40,12 +46,30 @@ export default function ArAdmin() {
   }, []) // eslint-disable-line react-hooks/exhaustive-deps
 
   const call = async (path, opts = {}) => {
-    const { data: { session } } = await supabase.auth.getSession()
+    // getSession() waits on any in-flight token refresh, and a stalled
+    // refresh never resolves — that is a spinner that spins for ever with
+    // nothing in the network tab. Treat a stall as signed out.
+    const session = await withTimeout(supabase.auth.getSession(), 15000)
+      .then((r) => r.data.session)
+      .catch(() => null)
     if (!session) { router.push('/admin'); throw new Error('Signed out — sign in again.') }
-    const res = await fetch(path, {
-      ...opts,
-      headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${session.access_token}`, ...(opts.headers || {}) },
-    })
+    // A request that never settles leaves the page saying "Loading…" for
+    // ever, which is worse than an error. Give up after 45s and say so.
+    const ctl = new AbortController()
+    const timer = setTimeout(() => ctl.abort(), 45000)
+    let res
+    try {
+      res = await fetch(path, {
+        ...opts,
+        signal: ctl.signal,
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${session.access_token}`, ...(opts.headers || {}) },
+      })
+    } catch (e) {
+      if (e.name === 'AbortError') {
+        throw new Error('QuickBooks did not answer within 45 seconds. It is usually busy rather than broken — try again, and tell JK if it keeps happening.')
+      }
+      throw e
+    } finally { clearTimeout(timer) }
     if (opts.raw) return res
     const text = await res.text()
     let json

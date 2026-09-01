@@ -46,6 +46,12 @@ function defaultBody(kind, { payBase, payZelle } = {}) {
     .join('\n')
 }
 
+// Nothing on this page may wait on a promise that never settles.
+const withTimeout = (p, ms) => Promise.race([
+  p,
+  new Promise((_, rej) => setTimeout(() => rej(new Error('timeout')), ms)),
+])
+
 export default function Portal() {
   const [session, setSession] = useState(undefined) // undefined = checking
   const [data, setData] = useState(null)
@@ -151,12 +157,29 @@ export default function Portal() {
   }, [])
 
   const call = async (path, opts = {}) => {
-    const { data: { session } } = await supabase.auth.getSession()
+    // A stalled token refresh makes getSession() hang for ever, which shows
+    // up as a spinner with nothing in the network tab. Treat a stall as
+    // signed out rather than waiting.
+    const session = await withTimeout(supabase.auth.getSession(), 15000)
+      .then((r) => r.data.session)
+      .catch(() => null)
     if (!session) throw new Error('Signed out — sign in again.')
-    const res = await fetch(path, {
-      ...opts,
-      headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${session.access_token}`, ...(opts.headers || {}) },
-    })
+    // Never hang on "Loading…": a stalled request errors after 45s.
+    const ctl = new AbortController()
+    const timer = setTimeout(() => ctl.abort(), 45000)
+    let res
+    try {
+      res = await fetch(path, {
+        ...opts,
+        signal: ctl.signal,
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${session.access_token}`, ...(opts.headers || {}) },
+      })
+    } catch (e) {
+      if (e.name === 'AbortError') {
+        throw new Error('QuickBooks did not answer within 45 seconds. Try again — it is usually busy rather than broken.')
+      }
+      throw e
+    } finally { clearTimeout(timer) }
     if (opts.raw) return res
     const text = await res.text()
     let json

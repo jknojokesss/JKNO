@@ -42,6 +42,11 @@ const stmtOpts = (connection) => ({
   fromEmail: process.env.SMTP_USER || process.env.GMAIL_USER || '',
 })
 
+// A 7,000-invoice book is several round trips to Intuit, and the platform's
+// default function budget is short enough to cut one off mid-read — which
+// the browser sees as a page that never finishes rather than an error.
+export const config = { maxDuration: 60 }
+
 export default async function handler(req, res) {
   const gate = await requireAdmin(req)
   if (!gate.ok) return res.status(401).json({ error: gate.reason })
