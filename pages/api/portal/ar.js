@@ -17,6 +17,11 @@ const linkSecret = () => process.env.PORTAL_LINK_SECRET || process.env.CRON_SECR
 const signDoc = (client, kind, id, exp) =>
   crypto.createHmac('sha256', linkSecret()).update(`${client}.${kind}.${id}.${exp}`).digest('base64url')
 
+// A 7,000-invoice book is several round trips to Intuit, and the platform's
+// default function budget is short enough to cut one off mid-read — which
+// the browser sees as a page that never finishes rather than an error.
+export const config = { maxDuration: 60 }
+
 export default async function handler(req, res) {
   const gate = await requirePortalUser(req)
   if (!gate.ok) return res.status(401).json({ error: gate.reason })
