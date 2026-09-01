@@ -231,15 +231,15 @@ export default function JerkyMunch() {
     if (!lines.length) { setInvResult(r => ({ ...r, [c.id]: { error: 'Pick an item and enter a quantity.' } })); return }
     const pr = pricing[c.id] || {}
     if (form.send) {
-      const to = (pr.customer && pr.customer.email) || 'the store\'s QuickBooks email'
-      if (!window.confirm(`This will EMAIL the invoice to ${to}.\n\nFor a test, cancel and uncheck "Email it to the store" first.\n\nSend it now?`)) return
+      const to = form.email || (pr.customer && pr.customer.email) || "the store's QuickBooks email"
+      if (!window.confirm(`This will EMAIL the invoice to ${to}.\n\nFor a test, put your own address in the "Send to" box, or uncheck the email box.\n\nSend it now?`)) return
     }
     setInvBusy(b => ({ ...b, [c.id]: true })); setInvResult(r => ({ ...r, [c.id]: null }))
     try {
       const res = await jerkyApi('/api/jerky/create-invoice', { method: 'POST', body: {
         partnerId: c.id, storeName: c.store, customerId: (pr.customer && pr.customer.id) || null,
         txnDate: form.txnDate || todayISO(), dueDate: form.dueDate || null, memo: form.memo || null,
-        send: !!form.send, lines,
+        send: !!form.send, email: form.email || null, lines,
       } })
       const j = await res.json().catch(() => ({}))
       if (!res.ok) { setInvResult(r => ({ ...r, [c.id]: { error: j.error || 'Could not create the invoice.' } })); return }
@@ -1335,8 +1335,11 @@ export default function JerkyMunch() {
                                     </div>
                                     <label style={{ display: 'flex', alignItems: 'center', gap: '8px', marginTop: '12px', fontSize: '13px', color: INK, cursor: 'pointer' }}>
                                       <input type="checkbox" checked={form.send} onChange={e => setFormField(c.id, { send: e.target.checked })} style={{ width: '16px', height: '16px' }} />
-                                      Email it to the store from accounting@jerkymunch.com{pr.customer && pr.customer.email ? ` (${pr.customer.email})` : ''}
+                                      Email it from accounting@jerkymunch.com{!form.email && pr.customer && pr.customer.email ? ` (to ${pr.customer.email})` : ''}
                                     </label>
+                                    {form.send && (
+                                      <input value={form.email || ''} onChange={e => setFormField(c.id, { email: e.target.value })} type="email" inputMode="email" placeholder="Send to (blank = the store's email) — put your address here to test" style={{ ...inp, width: '100%', marginTop: '8px' }} />
+                                    )}
                                     <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap', marginTop: '14px' }}>
                                       <span style={{ fontSize: '14px', color: INK }}>Total <b>{m0(lineTotal)}</b></span>
                                       <button disabled={invBusy[c.id]} onClick={() => submitInvoice(c)} style={{ marginLeft: 'auto', background: invBusy[c.id] ? MUTED : SPICE, color: '#fff', border: 'none', borderRadius: '2px', padding: '13px 20px', ...btn, cursor: invBusy[c.id] ? 'default' : 'pointer' }}>{invBusy[c.id] ? 'Creating…' : (form.send ? 'Create in QuickBooks & email' : 'Create in QuickBooks')}</button>
