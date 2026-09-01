@@ -1,6 +1,7 @@
 import crypto from 'crypto'
 import nodemailer from 'nodemailer'
 import { requireAdmin } from '../../../lib/requireAdmin'
+import { buildInvoiceEmail } from '../../../lib/invoiceEmail'
 import { isPortalClient, portalClientRefusal } from '../../../lib/portalAuth'
 import { getLiveToken, QboAuthError } from '../../../lib/qboAuth'
 import { fetchOpenInvoices, fetchInvoice, fetchInvoicePdf, fetchArRefs, buildInvoice, postInvoice, nextDocNumber, setInvoiceDocNumber, statementFor } from '../../../lib/qboAr'
@@ -195,7 +196,7 @@ export default async function handler(req, res) {
         return res.status(503).json({ error: 'Email is not set up — set SMTP_USER / SMTP_PASS (and SMTP_HOST, e.g. smtp.zoho.com) in the environment.' })
       }
 
-      const { env, token, realmId } = await getLiveToken(client)
+      const { env, token, realmId, connection } = await getLiveToken(client)
       const inv = await fetchInvoice(env, token, realmId, id)
       const doc = (inv && inv.DocNumber) || id
       const balance = inv && inv.Balance != null ? Number(inv.Balance) : null
@@ -211,23 +212,28 @@ export default async function handler(req, res) {
       })
 
       const subject = `Invoice ${doc} from JK No Jokes`
-      const bodyLines = [
-        `Hi,`,
-        ``,
-        `Invoice ${doc}${balance != null ? ` for ${money(balance)}` : ''} is attached${dueDate ? `, due ${dueDate}` : ''}.`,
-        ``,
-      ].concat(payLines(client, doc)).concat([
-        `Any questions, just reply to this email.`,
-        ``,
-        `JK No Jokes`,
-      ])
+      // A designed email with a real Pay button, not a wall of text with a
+      // URL in it. payLines() still decides WHETHER we can offer payment; this
+      // decides how it looks.
+      const owner = process.env.STRIPE_PAY_CLIENT || 'jkno'
+      const canPay = client === owner
+      const payUrl = (canPay && (process.env.STRIPE_SECRET_KEY || process.env.STRIPE_PAYMENT_LINK || process.env.STRIPE_LINKS))
+        ? `${process.env.PORTAL_BASE_URL || 'https://jknojokes.com'}/pay?inv=${encodeURIComponent(doc)}`
+        : null
+      const mail = buildInvoiceEmail({
+        companyName: connection.company_name || 'JK No Jokes',
+        doc, balance, dueDate,
+        payUrl,
+        zelle: canPay ? (process.env.PAY_ZELLE || null) : null,
+        replyTo: SMTP_USER,
+      })
       const info = await transporter.sendMail({
         from: process.env.SMTP_FROM || `JK No Jokes <${SMTP_USER}>`,
         replyTo: SMTP_USER,
         to: String(to),
         subject,
-        text: bodyLines.join('\n'),
-        html: bodyLines.map((l) => (l ? `<p style="margin:0 0 2px">${l}</p>` : '<br>')).join(''),
+        text: mail.text,
+        html: mail.html,
         attachments: [{ filename: `Invoice-${doc}.pdf`, content: pdf, contentType: 'application/pdf' }],
       })
 
