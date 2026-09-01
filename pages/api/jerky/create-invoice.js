@@ -55,7 +55,7 @@ export default async function handler(req, res) {
         if (!jerkyMailerConfigured()) throw new Error("Email isn't set up yet — add the SMTP credentials.")
         if (!recipient) throw new Error('No email address on file for this store.')
         const pdf = await fetchInvoicePdf(env, token, realmId, inv.Id)
-        await sendInvoiceEmail({ to: recipient, storeName: customer.name, docNumber: inv.DocNumber, total: built.total, dueDate: b.dueDate || null, pdf, subject: prefs && prefs.subject, message: prefs && prefs.message })
+        await sendInvoiceEmail({ to: recipient, storeName: customer.name, docNumber: inv.DocNumber, total: built.total, dueDate: b.dueDate || null, invoiceDate: txnDate, pdf, subject: prefs && prefs.subject, message: prefs && prefs.message })
         sent = true
       } catch (e) { sendError = String(e.message || e) }
     }

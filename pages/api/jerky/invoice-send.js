@@ -18,7 +18,7 @@ export default async function handler(req, res) {
 
   try {
     const { data: row } = await gate.db.from('store_invoices')
-      .select('qb_invoice_id, qb_doc_number, amount, due_date').eq('id', id).maybeSingle()
+      .select('qb_invoice_id, qb_doc_number, amount, due_date, inv_date').eq('id', id).maybeSingle()
     if (!row || !row.qb_invoice_id) return res.status(404).json({ error: 'No QuickBooks invoice on this record.' })
 
     const { env, token, realmId } = await getLiveToken('jerky')
@@ -36,7 +36,7 @@ export default async function handler(req, res) {
 
     const pdf = await fetchInvoicePdf(env, token, realmId, row.qb_invoice_id)
     const prefs = await fetchInvoiceEmailPrefs(env, token, realmId).catch(() => null)
-    await sendInvoiceEmail({ to, storeName, docNumber: row.qb_doc_number || inv.DocNumber, total: Number(row.amount) || Number(inv.TotalAmt) || 0, dueDate: row.due_date, pdf, subject: prefs && prefs.subject, message: prefs && prefs.message })
+    await sendInvoiceEmail({ to, storeName, docNumber: row.qb_doc_number || inv.DocNumber, total: Number(row.amount) || Number(inv.TotalAmt) || 0, dueDate: row.due_date, invoiceDate: row.inv_date, pdf, subject: prefs && prefs.subject, message: prefs && prefs.message })
 
     await gate.db.from('store_invoices').update({ sent_at: new Date().toISOString() }).eq('id', id)
     return res.status(200).json({ ok: true, to })
