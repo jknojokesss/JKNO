@@ -596,112 +596,123 @@ export default function Gowns() {
     }
   }
 
+  // Printed invoice = the on-screen order pad, one per page, for the binder.
   const printOrders = (ordersToPrint) => {
     const PAD_BLUE = '#2A4C9C', GRID_BLUE = '#AEBFE3', RED_NO = '#C8322B'
+    const esc = (s) => String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+    const L = `font-size:9px;font-weight:700;letter-spacing:0.04em;text-transform:uppercase;color:${PAD_BLUE};`
     const rows = ordersToPrint.map(o => {
       const sub = sumItems(o.items), tax = calcTax(o.items, o.taxRate), tot = sub + tax, p = sumPaid(o), bal = tot - p
-      const addr = [o.address, o.city, o.state, o.zip].filter(Boolean).join(', ')
-      const itemLines = o.items.filter(it => it.desc?.trim() || lineAmt(it)).map((it, i) => `
+      const isStock = o.orderKind === 'stock'
+      const live = (o.items || []).filter(it => it.desc?.trim() || lineAmt(it) || it.itemNo)
+      const itemLines = live.map((it, i) => {
+        const extra = [it.company ? esc(it.company) : '', it.source === 'Stock' ? 'In stock' : it.source === 'Order' ? 'To order' : '']
+          .filter(Boolean).join(' &middot; ')
+        return `
         <tr>
-          <td style="width:36px;text-align:center;padding:12px 6px;border-right:1px solid ${GRID_BLUE};color:${PAD_BLUE};font-size:13px;font-weight:600;">${i+1}</td>
-          <td style="width:90px;padding:12px 8px;border-right:1px solid ${GRID_BLUE};font-size:16px;font-weight:700;color:${PAD_BLUE};letter-spacing:0.03em;">${it.itemNo || ''}</td>
-          <td style="width:54px;padding:12px 6px;border-right:1px solid ${GRID_BLUE};text-align:center;font-size:16px;">${(parseFloat(it.qty)||1) > 1 ? it.qty : '1'}</td>
-          <td style="padding:12px 12px;border-right:1px solid ${GRID_BLUE};font-size:16px;">${it.desc || ''}</td>
-          <td style="width:110px;padding:12px 12px;text-align:right;font-size:16px;font-weight:600;">${lineAmt(it) ? money(lineAmt(it)) : ''}</td>
-        </tr>`).join('')
-      // blank filler rows to make it look like the pad
-      const fillerCount = Math.max(0, 6 - o.items.filter(it => it.desc?.trim() || lineAmt(it)).length)
-      const fillerRows = Array(fillerCount).fill(`<tr><td style="border-right:1px solid ${GRID_BLUE};padding:12px 6px;"> </td><td style="border-right:1px solid ${GRID_BLUE};padding:12px 6px;"> </td><td style="border-right:1px solid ${GRID_BLUE};padding:12px 6px;"> </td><td style="border-right:1px solid ${GRID_BLUE};padding:12px 6px;"> </td><td style="padding:12px 6px;"> </td></tr>`).join('')
-      const payLines = (o.payments||[]).map(pmt => `<div style="font-size:12px;color:#2E7D46;margin-top:3px;">✓ ${money(pmt.amount)}${pmt.method ? ' · '+pmt.method : ''}${pmt.method === 'Check' && pmt.checkNo ? ' #'+pmt.checkNo : ''}${pmt.date ? ' · '+fmtDate(pmt.date) : ''}</div>`).join('')
+          <td style="width:26px;text-align:center;padding:9px 4px;border-right:1px solid ${GRID_BLUE};color:${PAD_BLUE};font-size:11px;font-weight:600;">${i + 1}</td>
+          <td style="width:40px;padding:9px 4px;border-right:1px solid ${GRID_BLUE};text-align:center;font-size:15px;">${(parseFloat(it.qty) || 1)}</td>
+          <td style="width:72px;padding:9px 8px;border-right:1px solid ${GRID_BLUE};font-size:15px;font-weight:700;color:${PAD_BLUE};letter-spacing:0.03em;">${esc(it.itemNo || '')}</td>
+          <td style="padding:9px 10px;border-right:1px solid ${GRID_BLUE};font-size:15px;">${esc(it.desc || '')}${extra ? `<div style="font-size:11px;color:#777;margin-top:2px;">${extra}</div>` : ''}</td>
+          <td style="width:78px;padding:9px 8px;border-right:1px solid ${GRID_BLUE};text-align:right;font-size:15px;font-weight:600;">${it.price ? money(parseFloat(it.price)) : ''}</td>
+          <td style="width:78px;padding:9px 8px;border-right:1px solid ${GRID_BLUE};text-align:right;font-size:15px;font-weight:600;">${lineAmt(it) ? money(lineAmt(it)) : ''}</td>
+          <td style="width:34px;padding:9px 4px;text-align:center;font-size:13px;color:#666;">${it.taxable === false ? '' : '&#10003;'}</td>
+        </tr>`
+      }).join('')
+      // blank filler rows so a short order still looks like the pad
+      const fillerCount = Math.max(0, 6 - live.length)
+      const fillerRows = Array(fillerCount).fill(
+        `<tr>${Array(6).fill(`<td style="border-right:1px solid ${GRID_BLUE};padding:9px 6px;">&nbsp;</td>`).join('')}<td style="padding:9px 6px;">&nbsp;</td></tr>`
+      ).join('')
+      const payLines = (o.payments || []).map(pmt => `<div style="font-size:12px;color:#2E7D46;margin-top:3px;">&#10003; ${money(pmt.amount)}${pmt.method ? ' &middot; ' + esc(pmt.method) : ''}${pmt.method === 'Check' && pmt.checkNo ? ' #' + esc(pmt.checkNo) : ''}${pmt.date ? ' &middot; ' + fmtDate(pmt.date) : ''}</div>`).join('')
+      // alterations grouped by garment, exactly like the screen
+      const groups = {}
+      ;(o.alterationsList || []).forEach(a => { const g = (a.garment || '').trim() || 'Gown'; (groups[g] = groups[g] || []).push(a) })
+      const altBlock = Object.keys(groups).length ? `
+        <div style="padding:10px 14px;background:#FBEAF0;border-bottom:1px solid ${GRID_BLUE};">
+          <div style="${L}color:#8E3B54;margin-bottom:6px;">Alterations</div>
+          ${Object.entries(groups).map(([garment, alts]) => `
+            <div style="margin-bottom:7px;">
+              <div style="font-size:13px;font-weight:800;color:#1B1815;">${esc(garment)}</div>
+              ${alts.map(a => {
+                const meta = [a.assignee ? esc(a.assignee) : '', a.hours ? esc(a.hours) + 'h' : '', a.due ? 'due ' + fmtDate(a.due) : ''].filter(Boolean).join(' &middot; ')
+                return `<div style="font-size:13px;margin-top:2px;padding-left:10px;"><span style="color:#8E3B54;font-weight:600;">${a.done ? '&#10003; ' : '&#9744; '}${esc(a.note || 'Alteration')}</span>${meta ? `<span style="color:#777;"> &mdash; ${meta}</span>` : ''}</div>`
+              }).join('')}
+            </div>`).join('')}
+        </div>` : ''
+      const openTodos = (o.todos || []).filter(t => !t.done)
+      const todoBlock = openTodos.length ? `
+        <div style="padding:10px 14px;border-bottom:1px solid ${GRID_BLUE};">
+          <div style="${L}margin-bottom:5px;">To do</div>
+          ${openTodos.map(t => `<div style="font-size:13px;margin-top:2px;">&#9744; ${esc(t.text)}${t.assignedTo ? ` <span style="color:#777;">&mdash; ${esc(t.assignedTo)}</span>` : ''}${t.date ? ` <span style="color:#777;">&middot; ${fmtDate(t.date)}</span>` : ''}</div>`).join('')}
+        </div>` : ''
+      const row = (label, value, width) => `
+        <div style="display:flex;align-items:center;padding:5px 12px;">
+          <span style="${L}width:${width || 58}px;flex-shrink:0;">${label}</span>
+          <span style="font-size:15px;flex:1;">${esc(value || '')}</span>
+        </div>`
       return `
-        <div style="page-break-after:always;padding:28px 32px;font-family:'Arial',sans-serif;width:100%;">
-          <!-- Pad border -->
-          <div style="border:2px solid ${PAD_BLUE};border-radius:4px;overflow:hidden;">
+        <div style="page-break-after:always;padding:22px 26px;font-family:Arial,Helvetica,sans-serif;width:100%;">
+          <div style="border:2px solid ${PAD_BLUE};border-radius:6px;overflow:hidden;">
 
-            <!-- Header: biz name left, order no right -->
-            <div style="display:flex;justify-content:space-between;align-items:center;padding:14px 18px 10px;border-bottom:1px solid ${GRID_BLUE};background:#F6F9FE;">
-              <div style="font-size:26px;font-weight:700;color:${PAD_BLUE};">${BIZ}</div>
-              <div style="font-size:32px;font-weight:800;color:${RED_NO};letter-spacing:0.02em;">No. ${o.orderNo || '—'}</div>
+            <div style="display:flex;justify-content:space-between;align-items:center;padding:10px 14px;border-bottom:1px solid ${GRID_BLUE};background:#F6F9FE;">
+              <div>
+                <div style="font-size:22px;font-weight:700;color:${PAD_BLUE};">${BIZ}</div>
+                <div style="font-size:10px;color:#888;margin-top:2px;">${BIZ_ADDR} &middot; ${BIZ_TEL}</div>
+              </div>
+              <div style="text-align:right;">
+                ${isStock ? `<div style="font-size:10px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:${PAD_BLUE};border:1px solid ${PAD_BLUE};border-radius:3px;padding:1px 6px;display:inline-block;margin-bottom:3px;">Stock order</div>` : ''}
+                <div style="font-size:26px;font-weight:800;color:${RED_NO};">No. ${o.orderNo || '&mdash;'}</div>
+              </div>
             </div>
 
-            <!-- Date row -->
-            <div style="display:flex;align-items:center;border-bottom:1px solid ${GRID_BLUE};padding:10px 18px;">
-              <span style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;color:${PAD_BLUE};width:70px;">Date</span>
-              <span style="font-size:17px;border-bottom:1px solid ${PAD_BLUE};flex:1;padding-bottom:3px;">${fmtDate(o.date)}</span>
-            </div>
+            <div style="border-bottom:1px solid ${GRID_BLUE};">${row('Date', fmtDate(o.date))}</div>
 
-            <!-- First / Last name row -->
             <div style="display:flex;border-bottom:1px solid ${GRID_BLUE};">
-              <div style="flex:1;display:flex;align-items:center;padding:10px 18px;border-right:1px solid ${GRID_BLUE};">
-                <span style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;color:${PAD_BLUE};width:40px;">First</span>
-                <span style="font-size:20px;font-weight:600;border-bottom:1px solid ${PAD_BLUE};flex:1;padding-bottom:3px;">${o.firstName || ''}</span>
-              </div>
-              <div style="flex:1;display:flex;align-items:center;padding:10px 18px;">
-                <span style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;color:${PAD_BLUE};width:36px;">Last</span>
-                <span style="font-size:20px;font-weight:600;border-bottom:1px solid ${PAD_BLUE};flex:1;padding-bottom:3px;">${o.lastName || ''}</span>
-              </div>
+              <div style="flex:1;border-right:1px solid ${GRID_BLUE};">${row('First', o.firstName)}</div>
+              <div style="flex:1;">${row('Last', o.lastName, 48)}</div>
             </div>
 
-            <!-- Cell / Home row -->
-            <div style="display:flex;border-bottom:1px solid ${GRID_BLUE};">
-              <div style="flex:1;display:flex;align-items:center;padding:10px 18px;border-right:1px solid ${GRID_BLUE};">
-                <span style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;color:${PAD_BLUE};width:44px;">Cell</span>
-                <span style="font-size:17px;border-bottom:1px solid ${PAD_BLUE};flex:1;padding-bottom:3px;">${o.phone || ''}</span>
-              </div>
-              <div style="flex:1;display:flex;align-items:center;padding:10px 18px;">
-                <span style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;color:${PAD_BLUE};width:44px;">Home</span>
-                <span style="font-size:17px;border-bottom:1px solid ${PAD_BLUE};flex:1;padding-bottom:3px;">${o.home || ''}</span>
-              </div>
+            <div style="border-bottom:1px solid ${GRID_BLUE};">${row('Cell', o.phone)}</div>
+            <div style="border-bottom:1px solid ${GRID_BLUE};">${row('Home', o.home)}</div>
+            <div style="border-bottom:1px solid ${GRID_BLUE};">${row('Email', o.email)}</div>
+            <div style="border-bottom:1px solid ${GRID_BLUE};">${row('Address', o.address)}</div>
+            <div style="display:flex;border-bottom:2px solid ${PAD_BLUE};">
+              <div style="flex:2;border-right:1px solid ${GRID_BLUE};">${row('City', o.city, 30)}</div>
+              <div style="flex:1;border-right:1px solid ${GRID_BLUE};">${row('State', o.state, 36)}</div>
+              <div style="flex:1;">${row('Zip', o.zip, 26)}</div>
             </div>
 
-            <!-- Email row -->
-            <div style="display:flex;align-items:center;border-bottom:1px solid ${GRID_BLUE};padding:10px 18px;">
-              <span style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;color:${PAD_BLUE};width:70px;">Email</span>
-              <span style="font-size:17px;border-bottom:1px solid ${PAD_BLUE};flex:1;padding-bottom:3px;">${o.email || ''}</span>
-            </div>
-
-            <!-- Address row -->
-            <div style="display:flex;align-items:center;border-bottom:1px solid ${GRID_BLUE};padding:10px 18px;">
-              <span style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;color:${PAD_BLUE};width:70px;">Address</span>
-              <span style="font-size:17px;border-bottom:1px solid ${PAD_BLUE};flex:1;padding-bottom:3px;">${addr}</span>
-            </div>
-
-            <!-- Item table -->
-            <table style="width:100%;border-collapse:collapse;border-bottom:2px solid ${PAD_BLUE};">
+            <table style="width:100%;border-collapse:collapse;">
               <thead>
                 <tr style="background:#EAF0FB;">
-                  <th style="width:36px;padding:10px 6px;border-right:1px solid ${GRID_BLUE};font-size:11px;text-transform:uppercase;letter-spacing:0.04em;color:${PAD_BLUE};text-align:center;">#</th>
-                  <th style="width:90px;padding:10px 8px;border-right:1px solid ${GRID_BLUE};font-size:11px;text-transform:uppercase;letter-spacing:0.04em;color:${PAD_BLUE};text-align:left;">Item #</th>
-                  <th style="width:54px;padding:10px 6px;border-right:1px solid ${GRID_BLUE};font-size:11px;text-transform:uppercase;letter-spacing:0.04em;color:${PAD_BLUE};text-align:center;">Qty</th>
-                  <th style="padding:10px 12px;border-right:1px solid ${GRID_BLUE};font-size:11px;text-transform:uppercase;letter-spacing:0.04em;color:${PAD_BLUE};text-align:left;">Description</th>
-                  <th style="width:110px;padding:10px 12px;font-size:11px;text-transform:uppercase;letter-spacing:0.04em;color:${PAD_BLUE};text-align:right;">Price</th>
+                  <th style="width:26px;padding:7px 4px;border-right:1px solid ${GRID_BLUE};${L}text-align:center;"></th>
+                  <th style="width:40px;padding:7px 4px;border-right:1px solid ${GRID_BLUE};${L}text-align:center;">Qty</th>
+                  <th style="width:72px;padding:7px 8px;border-right:1px solid ${GRID_BLUE};${L}text-align:left;">Item #</th>
+                  <th style="padding:7px 10px;border-right:1px solid ${GRID_BLUE};${L}text-align:left;">Description</th>
+                  <th style="width:78px;padding:7px 8px;border-right:1px solid ${GRID_BLUE};${L}text-align:right;">Price</th>
+                  <th style="width:78px;padding:7px 8px;border-right:1px solid ${GRID_BLUE};${L}text-align:right;">Amount</th>
+                  <th style="width:34px;padding:7px 4px;${L}text-align:center;">Tax</th>
                 </tr>
               </thead>
-              <tbody style="border-bottom:1px solid ${GRID_BLUE};">
-                ${itemLines}${fillerRows}
-              </tbody>
+              <tbody style="border-bottom:1px solid ${GRID_BLUE};">${itemLines}${fillerRows}</tbody>
             </table>
 
-            <!-- Totals -->
-            <div style="padding:12px 18px;display:flex;flex-direction:column;align-items:flex-end;gap:5px;border-bottom:1px solid ${GRID_BLUE};">
-              <div style="font-size:15px;color:#666;">Subtotal: <b>${money(sub)}</b></div>
-              ${tax > 0 ? `<div style="font-size:15px;color:#666;">Tax (${o.taxRate||0}%): <b>${money(tax)}</b></div>` : ''}
-              <div style="font-size:24px;font-weight:800;color:${PAD_BLUE};margin-top:4px;">Total: ${money(tot)}</div>
+            <div style="padding:9px 14px;display:flex;flex-direction:column;align-items:flex-end;gap:3px;border-bottom:1px solid ${GRID_BLUE};border-top:1px solid ${GRID_BLUE};">
+              <div style="font-size:13px;color:#666;">Subtotal: <b style="color:#1B1815;">${money(sub)}</b></div>
+              ${tax > 0 ? `<div style="font-size:13px;color:#666;">Tax (${o.taxRate || 0}%): <b style="color:#1B1815;">${money(tax)}</b></div>` : ''}
+              <div style="font-size:21px;font-weight:800;color:${PAD_BLUE};margin-top:3px;">Total: ${money(tot)}</div>
             </div>
 
-            <!-- Payments + balance -->
-            <div style="padding:12px 18px;border-bottom:${o.alterations||o.notes ? '1px solid '+GRID_BLUE : 'none'};">
+            <div style="padding:10px 14px;border-bottom:${(altBlock || todoBlock || o.notes) ? '1px solid ' + GRID_BLUE : 'none'};">
               ${payLines}
-              <div style="font-size:18px;font-weight:700;margin-top:8px;color:${bal > 0.005 ? '#9C6B12' : '#2E7D46'};">
-                ${bal > 0.005 ? `Balance due: ${money(bal)}` : 'Paid in full ✓'}
+              <div style="font-size:16px;font-weight:700;margin-top:${payLines ? '7' : '0'}px;color:${bal > 0.005 ? '#9C6B12' : '#2E7D46'};">
+                ${bal > 0.005 ? `Balance due: ${money(bal)}` : 'Paid in full &#10003;'}
               </div>
             </div>
 
-            <!-- Alterations -->
-            ${(o.alterationsList && o.alterationsList.length) ? `<div style="padding:12px 18px;background:#FBEAF0;border-bottom:${o.notes?'1px solid '+GRID_BLUE:'none'};font-size:15px;"><b style="color:#8E3B54;">✂ Alterations</b>${o.alterationsList.map(a => `<div style="margin-top:4px;">${a.done ? '✓ ' : '• '}${a.note || 'Alteration'}${a.due ? ' · due ' + fmtDate(a.due) : ''}${a.assignee ? ' · ' + a.assignee : ''}</div>`).join('')}</div>` : ''}
-
-            <!-- Notes -->
-            ${o.notes ? `<div style="padding:12px 18px;font-size:15px;color:#555;"><b>Notes:</b> ${o.notes}</div>` : ''}
+            ${altBlock}${todoBlock}
+            ${o.notes ? `<div style="padding:10px 14px;font-size:13px;color:#555;"><b>Notes:</b> ${esc(o.notes)}</div>` : ''}
 
           </div>
         </div>`
@@ -1279,7 +1290,8 @@ export default function Gowns() {
               </div>
             </div>
             <div style={{ display: 'flex', gap: '10px', marginBottom: '14px' }}>
-              <button className="gw-press" onClick={() => printReceipt(form)} style={{ ...primaryBtn, flex: 1, padding: '10px', background: '#fff', color: PAD, border: `1.5px solid ${PAD}` }}>🖨 Print receipt</button>
+              <button className="gw-press" onClick={() => printOrders([form])} title="Full order sheet for the binder" style={{ ...primaryBtn, flex: 1, padding: '10px', background: PAD, boxShadow: 'none' }}>🖨 Print order</button>
+              <button className="gw-press" onClick={() => printReceipt(form)} title="Short customer receipt" style={{ ...primaryBtn, flex: 1, padding: '10px', background: '#fff', color: PAD, border: `1.5px solid ${PAD}` }}>🖨 Receipt</button>
               <button className="gw-press" onClick={() => emailReceipt(false)} disabled={emailing} style={{ ...primaryBtn, flex: 1, padding: '10px', background: emailing ? '#B9A9C6' : '#6D4C8E' }}>{emailing ? 'Sending…' : '✉ Email receipt'}</button>
               <button className="gw-press" onClick={() => emailReceipt(true)} disabled={emailing} title={`Send to the customer and to ${BIZ_EMAIL}`} style={{ ...primaryBtn, flex: '0 0 auto', padding: '10px 12px', fontSize: '13px', background: '#fff', color: '#6D4C8E', border: '1.5px solid #6D4C8E', boxShadow: 'none' }}>+ me</button>
             </div>
@@ -1719,7 +1731,8 @@ export default function Gowns() {
 
             <button className="gw-press" onClick={() => save(true)} style={{ ...primaryBtn, width: '100%' }}>{justSaved ? 'Saved ✓' : 'Save'}</button>
             <div style={{ display: 'flex', gap: '10px', marginTop: '10px' }}>
-              <button className="gw-press" onClick={() => printReceipt(form)} style={{ ...primaryBtn, flex: 1, background: '#fff', color: PAD, border: `1.5px solid ${PAD}` }}>🖨 Print receipt</button>
+              <button className="gw-press" onClick={() => printOrders([form])} title="Full order sheet for the binder" style={{ ...primaryBtn, flex: 1, background: PAD, boxShadow: 'none' }}>🖨 Print order</button>
+              <button className="gw-press" onClick={() => printReceipt(form)} title="Short customer receipt" style={{ ...primaryBtn, flex: 1, background: '#fff', color: PAD, border: `1.5px solid ${PAD}` }}>🖨 Receipt</button>
               <button className="gw-press" onClick={() => emailReceipt(false)} disabled={emailing} style={{ ...primaryBtn, flex: 1, background: emailing ? '#B9A9C6' : '#6D4C8E' }}>{emailing ? 'Sending…' : '✉ Email receipt'}</button>
               <button className="gw-press" onClick={() => emailReceipt(true)} disabled={emailing} title={`Send to the customer and to ${BIZ_EMAIL}`} style={{ ...primaryBtn, flex: '0 0 auto', padding: '14px 14px', fontSize: '14px', background: '#fff', color: '#6D4C8E', border: '1.5px solid #6D4C8E', boxShadow: 'none' }}>+ me</button>
             </div>
