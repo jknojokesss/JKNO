@@ -14,6 +14,16 @@ const BIZ_ADDR = '1342 51st Street, Brooklyn NY 11219'
 const BIZ_TEL = '718-851-1___'   // TODO: confirm full telephone number
 const BIZ_FAX = '718-851-0847'
 const BIZ_EMAIL = 'Info@lewimports.com'
+// Never print a half-known number: anything with a blank (___) is dropped from
+// letterheads until the real one is filled in above.
+const known = (v) => (v && !v.includes('_') ? v : '')
+// One letterhead for every customer-facing document (receipt, invoice, sales order).
+const bizContactLine = () => [BIZ_ADDR, known(BIZ_TEL) && `Tel ${BIZ_TEL}`, known(BIZ_FAX) && `Fax ${BIZ_FAX}`, BIZ_EMAIL].filter(Boolean).join(' &middot; ')
+const letterheadHtml = (opts = {}) => `
+  <div style="text-align:center;padding-bottom:${opts.tight ? 8 : 12}px;border-bottom:2px solid ${opts.color || '#2A4C9C'};margin-bottom:${opts.tight ? 10 : 14}px;">
+    <div style="font-family:Georgia,'Times New Roman',serif;font-size:${opts.tight ? 26 : 32}px;font-weight:800;letter-spacing:3px;color:${opts.color || '#2A4C9C'};line-height:1.1;">LEW <span style="font-weight:400;font-size:${opts.tight ? 16 : 19}px;letter-spacing:1px;">IMPORTS</span></div>
+    <div style="font-size:10.5px;color:#777;margin-top:4px;">${bizContactLine()}</div>
+  </div>`
 const METHODS = ['Cash', 'Check', 'CC Card', 'On Acct.', 'Zelle']
 const DEFAULT_TAX_RATE = 8.875   // NYC rate — editable per order
 
@@ -79,10 +89,7 @@ const buildReceiptHtml = (o) => {
   const payRows = (o.payments || []).map(p => `<div style="font-size:13px;color:#2E7D46;">✓ ${money(p.amount)}${p.method ? ' · ' + p.method : ''}${p.method === 'Check' && p.checkNo ? ' #' + p.checkNo : ''}${p.date ? ' · ' + fmtDate(p.date) : ''}</div>`).join('')
   return `
   <div style="font-family:Arial,Helvetica,sans-serif;max-width:560px;margin:0 auto;color:#23262E;">
-    <div style="text-align:center;border-bottom:2px solid #2A4C9C;padding-bottom:12px;margin-bottom:16px;">
-      <div style="font-size:26px;font-weight:800;letter-spacing:2px;color:#2A4C9C;">${BIZ}</div>
-      <div style="font-size:12px;color:#777;margin-top:4px;">${BIZ_ADDR} · ${BIZ_TEL}</div>
-    </div>
+    ${letterheadHtml()}
     <div style="display:flex;justify-content:space-between;font-size:14px;margin-bottom:14px;">
       <div><b>Receipt</b><br>${cust}</div>
       <div style="text-align:right;color:#555;">No. ${o.orderNo || ''}<br>${fmtDate(o.date)}</div>
@@ -657,8 +664,8 @@ export default function Gowns() {
 
             <div style="display:flex;justify-content:space-between;align-items:center;padding:10px 14px;border-bottom:1px solid ${GRID_BLUE};background:#F6F9FE;">
               <div>
-                <div style="font-size:22px;font-weight:700;color:${PAD_BLUE};">${BIZ}</div>
-                <div style="font-size:10px;color:#888;margin-top:2px;">${BIZ_ADDR} &middot; ${BIZ_TEL}</div>
+                <div style="font-family:Georgia,'Times New Roman',serif;font-size:24px;font-weight:800;letter-spacing:2px;color:${PAD_BLUE};line-height:1.1;">LEW <span style="font-weight:400;font-size:15px;letter-spacing:1px;">IMPORTS</span></div>
+                <div style="font-size:9.5px;color:#888;margin-top:3px;">${bizContactLine()}</div>
               </div>
               <div style="text-align:right;">
                 ${isStock ? `<div style="font-size:10px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:${PAD_BLUE};border:1px solid ${PAD_BLUE};border-radius:3px;padding:1px 6px;display:inline-block;margin-bottom:3px;">Stock order</div>` : ''}
@@ -735,7 +742,7 @@ export default function Gowns() {
         <div style="text-align:center;font-size:34px;font-weight:800;letter-spacing:3px;font-family:'Georgia',serif;">LEW <span style="font-weight:400;font-size:20px;letter-spacing:1px;">IMPORTS</span></div>
         <div style="display:flex;justify-content:space-between;font-size:12px;font-style:italic;color:#333;margin-top:2px;">
           <div>1342 51st Street<br>Brooklyn NY 11219</div>
-          <div style="text-align:right;">Telephone: ${BIZ_TEL}<br>Fax: ${BIZ_FAX}<br>${BIZ_EMAIL}</div>
+          <div style="text-align:right;">${known(BIZ_TEL) ? `Telephone: ${BIZ_TEL}<br>` : ''}Fax: ${BIZ_FAX}<br>${BIZ_EMAIL}</div>
         </div>
         <div style="text-align:center;font-size:20px;font-weight:700;text-decoration:underline;margin:14px 0 16px;">Sales Order</div>
 
