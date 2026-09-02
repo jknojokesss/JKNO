@@ -259,6 +259,9 @@ export default function Landing() {
         @media (max-width: 980px) {
           .build-grid { grid-template-columns: 1fr !important; }
         }
+        @media (max-width: 760px) {
+          .jkway-grid { grid-template-columns: 1fr !important; }
+        }
         @media (max-width: 768px) {
           .features-grid { grid-template-columns: 1fr !important; }
           .hero-title-text { font-size: 34px !important; }
@@ -487,6 +490,57 @@ export default function Landing() {
               </>
             )
           })()}</div>
+        </div>
+      </section>
+
+      {/* THE JK WAY — why one person doing both jobs is the whole pitch */}
+      <section style={{ background: '#1A2035', padding: 'clamp(60px,8vw,104px) clamp(16px,5vw,48px)', position: 'relative', overflow: 'hidden' }}>
+        <div style={{ position: 'absolute', inset: 0, background: 'radial-gradient(circle at 50% 0%, rgba(201,168,76,0.16), transparent 62%)', pointerEvents: 'none' }} />
+        <div style={{ position: 'relative', maxWidth: '1040px', margin: '0 auto' }}>
+          <div style={{ textAlign: 'center', maxWidth: '780px', margin: '0 auto clamp(38px,5vw,58px)' }}>
+            <div style={{ fontFamily: 'DM Mono, monospace', fontSize: '11px', letterSpacing: '3px', color: '#C9A84C', marginBottom: '18px' }}>— THE JK WAY™</div>
+            <h2 style={{ fontFamily: 'Playfair Display, serif', fontWeight: 700, fontSize: 'clamp(27px,4vw,46px)', color: '#fff', lineHeight: 1.16, marginBottom: '18px' }}>
+              Your bookkeeper can&rsquo;t build this.<br /><span style={{ color: '#C9A84C' }}>Your software vendor can&rsquo;t close your books.</span>
+            </h2>
+            <p style={{ fontSize: 'clamp(14px,1.6vw,16.5px)', color: '#9AA3BD', lineHeight: 1.75 }}>
+              So we do both jobs. Everything below follows from that one decision.
+            </p>
+          </div>
+
+          <div className="jkway-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '1px', background: 'rgba(255,255,255,0.09)', border: '1px solid rgba(255,255,255,0.09)' }}>
+            {[
+              {
+                n: '01',
+                title: 'One person, both jobs',
+                body: 'The person who writes your integration is the person who closes your month. That is why the number on your dashboard is the number in your books — not a lookalike a syncing tool produced on its own.',
+              },
+              {
+                n: '02',
+                title: 'It ships when it ties out',
+                body: 'Nothing goes live until the dollars reconcile to QuickBooks. Matching row counts is not reconciliation — QuickBooks’ own statement is the check, every time.',
+              },
+              {
+                n: '03',
+                title: 'Your business, not your category',
+                body: 'No settings screen, no “choose your industry.” We learn how you actually run — your PO numbers, your vendor’s quirks, which months are closed — and build for that.',
+              },
+              {
+                n: '04',
+                title: 'Fewer subscriptions, not more',
+                body: 'When the gap between your POS and your books can be closed with code, we write the code — instead of selling you another monthly tool to sit in the middle of it.',
+              },
+            ].map((r, i) => (
+              <div key={i} style={{ background: '#1A2035', padding: 'clamp(26px,3.2vw,40px)' }}>
+                <div style={{ fontFamily: 'Playfair Display, serif', fontSize: '52px', fontWeight: 700, color: 'rgba(201,168,76,0.20)', lineHeight: 1, marginBottom: '16px' }}>{r.n}</div>
+                <div style={{ fontFamily: 'Cormorant Garamond, serif', fontSize: 'clamp(21px,2.4vw,27px)', fontWeight: 600, color: '#fff', lineHeight: 1.24, marginBottom: '12px' }}>{r.title}</div>
+                <div style={{ fontSize: '14px', color: '#9AA3BD', lineHeight: 1.78 }}>{r.body}</div>
+              </div>
+            ))}
+          </div>
+
+          <p style={{ marginTop: 'clamp(30px,3.5vw,44px)', textAlign: 'center', fontFamily: 'DM Mono, monospace', fontSize: 'clamp(11px,1.4vw,13.5px)', letterSpacing: '2px', textTransform: 'uppercase', color: '#C9A84C', fontWeight: 500, lineHeight: 1.8 }}>
+            No jokes. The dashboard and the books are the same work.
+          </p>
         </div>
       </section>
 
