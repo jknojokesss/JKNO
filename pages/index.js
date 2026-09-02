@@ -1,32 +1,10 @@
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/router'
 import Head from 'next/head'
-import DemoDashboard from '../components/DemoDashboard'
 import { ALL_DEMOS } from '../lib/industryDemos'
 
-// Calendly booking link for the $25 gift-card offer.
+// Calendly booking link behind every "book a call" CTA.
 const BOOKING_URL = 'https://calendly.com/jk-jknojokes/30min'
-
-function TypingText({ onDone }) {
-  const [displayed, setDisplayed] = useState('')
-  const full = "Closing another month and you have no idea how your business is doing?"
-  useEffect(() => {
-    let i = 0
-    const t = setInterval(() => {
-      i++
-      setDisplayed(full.slice(0, i))
-      if (i >= full.length) { clearInterval(t); setTimeout(onDone, 400) }
-    }, 22)
-    return () => clearInterval(t)
-  }, [])
-  return (
-    <div style={{ fontSize: 'clamp(18px,2.4vw,26px)', fontWeight: 500, color: '#fff', lineHeight: 1.5, fontFamily: 'Cormorant Garamond, serif' }}>
-      {displayed}
-      <span style={{ display: 'inline-block', width: '2px', height: '1em', background: '#C9A84C', verticalAlign: 'text-bottom', marginLeft: '3px', animation: 'blink .7s infinite' }} />
-      <style>{`@keyframes blink{0%,100%{opacity:1}50%{opacity:0}}`}</style>
-    </div>
-  )
-}
 
 export default function Landing() {
   const router = useRouter()
@@ -36,8 +14,6 @@ export default function Landing() {
   const [submitting, setSubmitting] = useState(false)
   const [menuOpen, setMenuOpen] = useState(false)
   const [activeDemo, setActiveDemo] = useState(0)
-  const [typingDone, setTypingDone] = useState(false)
-  const [crossedDays, setCrossedDays] = useState(0)
   const [isMobile, setIsMobile] = useState(false)
 
   useEffect(() => {
@@ -51,17 +27,6 @@ export default function Landing() {
     checkMobile()
     window.addEventListener('resize', checkMobile)
     return () => window.removeEventListener('resize', checkMobile)
-  }, [])
-
-  useEffect(() => {
-    let day = 0
-    const total = 27
-    const t = setInterval(() => {
-      day++
-      setCrossedDays(day)
-      if (day >= total) clearInterval(t)
-    }, 60)
-    return () => clearInterval(t)
   }, [])
 
   const handleSubmit = async () => {
@@ -84,44 +49,55 @@ export default function Landing() {
     setSubmitting(false)
   }
 
-  const features = [
+  // What we actually build, grouped the way a prospect asks about it: the
+  // plumbing, the screen on top of it, and the things we already solved for
+  // somebody else. Every row is tagged LIVE (running for a paying client) or
+  // DEMO (built and clickable, not yet somebody's production books) — if you
+  // add a row here, tag it honestly.
+  const BUILD_STACK = [
     {
-      icon: '◈',
-      title: 'Clear Financial Insights',
-      desc: 'Your financials explained in plain English. No jargon, no confusion — just clear answers about how your business is doing and what to watch.',
+      icon: '◉',
+      kicker: 'THE PIPES',
+      title: 'Integrations we wrote ourselves',
+      blurb: 'Not Zapier, not a $99/mo connector. Real API work against the systems you already run, on a nightly schedule that just works.',
+      items: [
+        { t: 'QuickBooks Online — both directions', d: 'Nightly pull of your P&L, balance sheet, and full general-ledger detail. Month-end journal entries pushed back in.', tag: 'LIVE' },
+        { t: 'Clover POS', d: 'Every ticket and every line item synced each night — items, sizes, and mix your POS never sends to QuickBooks.', tag: 'LIVE' },
+        { t: 'Vendor invoice import', d: 'One click on your supplier\u2019s own portal pulls unit cost and PO number into your books. No re-keying invoices.', tag: 'LIVE' },
+        { t: 'Bank & card activity', d: 'Classified against your chart of accounts — operating vs. loans vs. owner\u2019s personal, so the P&L means something.', tag: 'LIVE' },
+      ],
     },
     {
       icon: '▣',
-      title: 'Custom-Built Dashboards',
-      desc: 'Every client gets a portal built around their business. See your revenue, expenses, and profit at a glance — tailored to what matters to you.',
+      kicker: 'THE DASHBOARD',
+      title: 'Built for one business: yours',
+      blurb: 'No template, no settings screen you have to learn. We build the views your business is actually run on.',
+      items: [
+        { t: 'Profit per order', d: 'Revenue, cost, and margin on every single ticket — matched back to what you paid your vendor for that exact item.', tag: 'LIVE' },
+        { t: 'Inventory that ties out', d: 'Dated purchase layers, FIFO relief, and a month-end COGS entry ready to post. The dollars reconcile to QuickBooks.', tag: 'LIVE' },
+        { t: 'Your own login', d: 'Scoped on the server to exactly one company. A portal user can never name — or see — anybody else\u2019s books.', tag: 'LIVE' },
+        { t: 'Ask it a question', d: 'Plain English in, a real answer out — computed from your own numbers, not guessed at by a chatbot.', tag: 'LIVE' },
+      ],
     },
     {
       icon: '⬡',
-      title: 'QuickBooks Optional',
-      desc: 'Keep QuickBooks or skip it — your call. We can plug into the books you already have, or run everything on our own system. Either way: cleaner data, smarter reporting, no bloat.',
-    },
-    {
-      icon: '◎',
-      title: 'Real-Time Financials',
-      desc: 'Log in any time, from any device, and see exactly where your business stands. Your numbers are always up to date and always accessible.',
-    },
-    {
-      icon: '⬟',
-      title: 'Drill Into Every Number',
-      desc: 'Click any line on your P&L and see every transaction behind it — the vendors, sales, and ad spend that make up the number. Full transparency, no black boxes.',
-    },
-    {
-      icon: '◉',
-      title: 'POS & Bank Integration',
-      desc: 'Using Clover, Square, or another POS? We connect directly to your systems so your sales data flows in automatically. No manual exports.',
+      kicker: 'IDEAS FROM THE FIELD',
+      title: 'Built for one client. Now available to any.',
+      blurb: 'The best features here started as one owner\u2019s specific headache. Once it is built, everybody gets to use it.',
+      items: [
+        { t: 'AR desk', d: 'Reads your open invoices out of QuickBooks and sends every statement in one pass, from your own email address.', tag: 'LIVE', href: '/ar-desk' },
+        { t: 'Ten-second crew log', d: 'The field logs a day from a phone — and it lands in QuickBooks already coded to the job.', tag: 'DEMO', href: '/quefence' },
+        { t: 'WIP schedule & buyer package', d: 'Over/under billing, retainage, normalized EBITDA with add-backs — print-ready for a lender or a buyer.', tag: 'DEMO', href: '/srl' },
+        { t: '13-week cash flow', d: 'What is actually landing in the bank, with slow-paying claims and retainage aged in their own column.', tag: 'DEMO', href: '/srl' },
+      ],
     },
   ]
 
   return (
     <>
       <Head>
-        <title>JK No Jokes Financials — Real-Time Financials for Your Business</title>
-        <meta name="description" content="Custom financials with a client portal. Real-time numbers, plain-English insights, and dashboards built for your business — with or without QuickBooks." />
+        <title>JK No Jokes Financials — Custom Dashboards Wired Into Your Systems</title>
+        <meta name="description" content="We write the integrations ourselves — QuickBooks both directions, Clover POS, vendor invoices, bank activity — then build the dashboard your business is actually run on. Profit per order, inventory that ties out, month-end entries posted for you." />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600;700&family=DM+Sans:wght@300;400;500&family=DM+Mono:wght@400;500&family=Playfair+Display:wght@700&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet" />
@@ -130,6 +106,8 @@ export default function Landing() {
       <style>{`
         * { box-sizing: border-box; margin: 0; padding: 0; }
         html { scroll-behavior: smooth; }
+        /* The nav is fixed, so anchored jumps need clearance underneath it. */
+        #build, #demos, #demo-preview, #contact { scroll-margin-top: 88px; }
         body {
           background-color: #F5F1EA;
           background-image:
@@ -169,6 +147,10 @@ export default function Landing() {
           letter-spacing: 1.5px; color: #1A2035; box-shadow: 0 8px 24px rgba(26,32,53,0.07);
         }
         .hero-pill { font-family: 'DM Mono', monospace; font-size: 13.5px; letter-spacing: 0.5px; color: #3D4456; font-weight: 500; }
+
+        .build-item-link { display: block; }
+        .build-item-link .build-item-title { transition: color 0.15s; }
+        .build-item-link:hover .build-item-title { color: #B8943C; }
 
         .feature-card {
           background: #E8E4DC;
@@ -274,36 +256,15 @@ export default function Landing() {
         }
         @keyframes shine { 0% { left: -60%; } 55%, 100% { left: 140%; } }
 
-        .promo-bar {
-          position: fixed; top: 0; left: 0; right: 0; z-index: 200;
-          height: 44px;
-          display: flex; align-items: center; justify-content: center; gap: 10px;
-          background: #C9A84C;
-          color: #1A1A2E; text-decoration: none;
-          font-family: 'DM Mono', monospace; font-size: 13px; letter-spacing: 1px;
-          white-space: nowrap; overflow: hidden; padding: 0 16px;
-          border-bottom: 1px solid rgba(0,0,0,0.12);
-        }
-        .promo-bar:hover { background: #D4B65E; }
-        .promo-bar b { font-weight: 700; }
-        .promo-book {
-          background: #1A2035; color: #F0DEAC; padding: 4px 12px; border-radius: 2px;
-          font-size: 11px; letter-spacing: 1px; white-space: nowrap;
-        }
-        .promo-short { display: none; }
-        @media (max-width: 600px) {
-          .promo-full { display: none; }
-          .promo-short { display: inline; }
-          .promo-bar { font-size: 11px; letter-spacing: 0.4px; gap: 8px; padding: 0 10px; }
-          .promo-book { padding: 4px 10px; font-size: 10px; }
-        }
-
         @media (max-width: 980px) {
+          .build-grid { grid-template-columns: 1fr !important; }
+        }
+        @media (max-width: 760px) {
+          .jkway-grid { grid-template-columns: 1fr !important; }
         }
         @media (max-width: 768px) {
           .features-grid { grid-template-columns: 1fr !important; }
           .hero-title-text { font-size: 34px !important; }
-          .jkway-arrow { transform: rotate(90deg); }
           .split-section { grid-template-columns: 1fr !important; gap: 32px !important; }
           .offer-btn { padding: 20px 24px !important; font-size: 20px !important; }
           .section-pad { padding: clamp(48px,8vw,120px) clamp(16px,5vw,48px) !important; }
@@ -318,16 +279,9 @@ export default function Landing() {
         }
       `}</style>
 
-      {/* PERSISTENT PROMO BAR — always visible at the very top */}
-      <a href={BOOKING_URL} target="_blank" rel="noopener noreferrer" className="promo-bar">
-        <span className="promo-full"><b>FREE $25 gift card</b> + free consultation for new clients</span>
-        <span className="promo-short"><b>FREE $25 gift card</b> + free consult</span>
-        <span className="promo-book">BOOK NOW →</span>
-      </a>
-
       {/* NAV */}
       <nav style={{
-        position: 'fixed', top: '44px', left: 0, right: 0, zIndex: 100,
+        position: 'fixed', top: 0, left: 0, right: 0, zIndex: 100,
         padding: '20px 32px',
         background: scrolled ? 'rgba(247,244,239,0.97)' : 'transparent',
         backdropFilter: scrolled ? 'blur(12px)' : 'none',
@@ -344,6 +298,7 @@ export default function Landing() {
           </span>
         </div>
         {!isMobile && <div style={{ display: 'flex', gap: '22px', alignItems: 'center' }}>
+          <button className="nav-link" onClick={() => document.getElementById('build')?.scrollIntoView({ behavior: 'smooth' })}>What We Build</button>
           <button className="nav-link" onClick={() => router.push('/demos')}>Demos</button>
           <button className="nav-link" onClick={() => router.push('/how-it-works')}>How It Works</button>
           <button className="nav-link" onClick={() => router.push('/what-we-do')}>What You Get</button>
@@ -363,17 +318,24 @@ export default function Landing() {
 
       {/* Mobile menu */}
       {menuOpen && (
-        <div style={{ position: 'fixed', top: '108px', left: 0, right: 0, zIndex: 99,
+        <div style={{ position: 'fixed', top: '64px', left: 0, right: 0, zIndex: 99,
           background: '#EEEAE2', borderBottom: '1px solid #DDD8CE', padding: '20px' }}>
-          {['Demos', 'Features', 'About', 'Contact'].map(item => (
-            <button key={item} className="nav-link" style={{ display: 'block', padding: '12px 0',
+          {[
+            { label: 'What We Build', to: '#build' },
+            { label: 'Demos', to: '/demos' },
+            { label: 'How It Works', to: '/how-it-works' },
+            { label: 'What You Get', to: '/what-we-do' },
+            { label: 'Who We Are', to: '/about' },
+            { label: 'Contact', to: '#contact' },
+          ].map(item => (
+            <button key={item.label} className="nav-link" style={{ display: 'block', padding: '12px 0',
               width: '100%', textAlign: 'left', fontSize: '14px', color: '#1A1A2E' }}
               onClick={() => {
-                if (item === 'Demos') { router.push('/demos') }
-                else { document.getElementById(item.toLowerCase())?.scrollIntoView({ behavior: 'smooth' }) }
+                if (item.to.startsWith('#')) { document.getElementById(item.to.slice(1))?.scrollIntoView({ behavior: 'smooth' }) }
+                else { router.push(item.to) }
                 setMenuOpen(false)
               }}>
-              {item}
+              {item.label}
             </button>
           ))}
           <button className="cta-btn" style={{ marginTop: '16px', width: '100%', textAlign: 'center' }}
@@ -387,30 +349,92 @@ export default function Landing() {
       <section style={{ padding: 'clamp(100px,11vw,140px) clamp(14px,5vw,48px) clamp(40px,5vw,64px)', background: 'transparent', position: 'relative', overflow: 'hidden' }}>
         <div style={{ position: 'relative', maxWidth: '1200px', margin: '0 auto', textAlign: 'center' }}>
           <h1 className="hero-title hero-title-text" style={{ fontFamily: "'Space Grotesk', sans-serif", fontWeight: 700, fontSize: 'clamp(34px,5.4vw,66px)', lineHeight: 1.08, color: '#1A2035', letterSpacing: '-1.5px' }}>
-            Understand the <span className="gold-shimmer">Story</span><br />Behind Your Numbers.
+            We build the <span className="gold-shimmer">software</span><br />behind your numbers.
           </h1>
           <div className="hero-sub" style={{ marginTop: '20px', fontFamily: "'DM Mono', monospace", fontSize: 'clamp(12px,1.5vw,16px)', color: '#B8943C', fontWeight: 500, letterSpacing: '2.5px', textTransform: 'uppercase' }}>
-            Financial Clarity — The JK Way™
+            APIs · Custom Dashboards · Real Books
           </div>
-          <p className="hero-sub" style={{ margin: '22px auto 0', maxWidth: '760px', fontSize: 'clamp(15px,1.7vw,18px)', lineHeight: 1.65, color: '#5A6070' }}>
-            Built by finance pros, designed for business owners — every dashboard is <strong style={{ color: '#1A2035', fontWeight: 600 }}>tailored to the way your business actually operates.</strong>
+          <p className="hero-sub" style={{ margin: '22px auto 0', maxWidth: '780px', fontSize: 'clamp(15px,1.7vw,18px)', lineHeight: 1.65, color: '#5A6070' }}>
+            QuickBooks, your POS, your vendor portal, your bank — <strong style={{ color: '#1A2035', fontWeight: 600 }}>we write the integrations ourselves</strong>, then build the dashboard your business is actually run on.
           </p>
-          <p className="hero-sub" style={{ margin: '16px auto 0', maxWidth: '680px', fontSize: 'clamp(17px,2vw,21px)', lineHeight: 1.4, color: '#1A2035', fontWeight: 500 }}>
-            Know where your business stands before making your next decision.
+          <p className="hero-sub" style={{ margin: '16px auto 0', maxWidth: '700px', fontSize: 'clamp(17px,2vw,21px)', lineHeight: 1.4, color: '#1A2035', fontWeight: 500 }}>
+            Every idea below started as one client&rsquo;s headache. Now any of them can be yours.
           </p>
           <div className="hero-cta" style={{ marginTop: '32px', display: 'flex', gap: '14px', flexWrap: 'wrap', justifyContent: 'center' }}>
-            <button className="cta-btn" onClick={() => document.getElementById('demos')?.scrollIntoView({ behavior: 'smooth' })}>See It in Action ↓</button>
+            <button className="cta-btn" onClick={() => document.getElementById('build')?.scrollIntoView({ behavior: 'smooth' })}>See What We Build ↓</button>
             <a className="ghost-btn" href={BOOKING_URL} target="_blank" rel="noopener noreferrer" style={{ textDecoration: 'none', display: 'inline-flex', alignItems: 'center' }}>Get Yours Built</a>
           </div>
           <div className="hero-pills" style={{ marginTop: '26px', display: 'flex', gap: 'clamp(16px,3vw,32px)', justifyContent: 'center', flexWrap: 'wrap' }}>
-            {['✓ Real-time numbers', '✓ Plain English', '✓ QuickBooks optional'].map((t, i) => (
+            {['✓ Live API integrations', '✓ Built, not configured', '✓ Writes back to QuickBooks'].map((t, i) => (
               <span key={i} className="hero-pill">{t}</span>
             ))}
           </div>
         </div>
+      </section>
 
-        {/* Large dashboard, immediately below */}
-        <div style={{ maxWidth: '1200px', margin: 'clamp(22px,3vw,38px) auto 0 clamp(0px,3vw,72px)' }}>
+      {/* WHAT WE BUILD — the pipes, the dashboard, the ideas we already solved */}
+      <section id="build" style={{ background: 'linear-gradient(180deg, #FBF9F4 0%, #F4F0E8 100%)', borderTop: '1px solid #EDE8DF', borderBottom: '1px solid #EDE8DF', padding: 'clamp(56px,8vw,96px) clamp(14px,5vw,48px)' }}>
+        <div style={{ maxWidth: '1200px', margin: '0 auto' }}>
+          <div style={{ textAlign: 'center', maxWidth: '760px', margin: '0 auto clamp(36px,5vw,56px)' }}>
+            <div style={{ fontFamily: 'DM Mono, monospace', fontSize: '11px', letterSpacing: '3px', color: '#C9A84C', marginBottom: '16px' }}>— WHAT WE BUILD</div>
+            <h2 style={{ fontFamily: 'Playfair Display, serif', fontWeight: 700, fontSize: 'clamp(28px,4.2vw,48px)', color: '#1A2035', lineHeight: 1.14, marginBottom: '16px' }}>
+              A bookkeeper hands you a report.<br /><span style={{ color: '#B8943C' }}>We hand you a system.</span>
+            </h2>
+            <p style={{ fontSize: 'clamp(14px,1.6vw,16.5px)', color: '#5A6070', lineHeight: 1.7 }}>
+              Three layers, and we do all three: the integrations that move your data, the dashboard that makes sense of it, and the features we already built solving somebody else&rsquo;s version of your problem.
+            </p>
+          </div>
+
+          <div className="build-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '18px', alignItems: 'stretch' }}>
+            {BUILD_STACK.map((col, ci) => (
+              <div key={ci} style={{ background: '#fff', border: '1px solid #E6E0D4', padding: 'clamp(22px,2.4vw,30px)', display: 'flex', flexDirection: 'column' }}>
+                <div style={{ fontSize: '24px', color: '#C9A84C', lineHeight: 1, marginBottom: '16px' }}>{col.icon}</div>
+                <div style={{ fontFamily: 'DM Mono, monospace', fontSize: '10px', letterSpacing: '2px', color: '#B8943C', marginBottom: '10px' }}>{col.kicker}</div>
+                <h3 style={{ fontFamily: 'Cormorant Garamond, serif', fontSize: 'clamp(21px,2.3vw,26px)', fontWeight: 600, color: '#1A2035', lineHeight: 1.24, marginBottom: '12px' }}>{col.title}</h3>
+                <p style={{ fontSize: '13.5px', color: '#5A6070', lineHeight: 1.65, marginBottom: '22px' }}>{col.blurb}</p>
+
+                <div style={{ borderTop: '1px solid #EDE8DF', paddingTop: '4px' }}>
+                  {col.items.map((it, ii) => {
+                    const body = (
+                      <>
+                        <div style={{ display: 'flex', alignItems: 'baseline', gap: '9px', flexWrap: 'wrap', marginBottom: '5px' }}>
+                          <span className="build-item-title" style={{ fontSize: '14.5px', fontWeight: 600, color: '#1A2035' }}>
+                            {it.t}{it.href && <span style={{ color: '#C9A84C', fontFamily: 'DM Mono, monospace', fontSize: '12px' }}> →</span>}
+                          </span>
+                          <span style={{
+                            fontFamily: 'DM Mono, monospace', fontSize: '8.5px', letterSpacing: '1.5px',
+                            padding: '2px 7px', borderRadius: '2px', whiteSpace: 'nowrap',
+                            color: it.tag === 'LIVE' ? '#1A2035' : '#7A8090',
+                            background: it.tag === 'LIVE' ? '#FBF0D4' : '#F1EEE8',
+                            border: it.tag === 'LIVE' ? '1px solid #E2CE96' : '1px solid #E2DDD3',
+                          }}>{it.tag}</span>
+                        </div>
+                        <div style={{ fontSize: '13px', color: '#5A6070', lineHeight: 1.62 }}>{it.d}</div>
+                      </>
+                    )
+                    return (
+                      <div key={ii} style={{ padding: '15px 0', borderBottom: ii === col.items.length - 1 ? 'none' : '1px solid #F1EDE5' }}>
+                        {it.href
+                          ? <a href={it.href} style={{ textDecoration: 'none', display: 'block' }} className="build-item-link">{body}</a>
+                          : body}
+                      </div>
+                    )
+                  })}
+                </div>
+              </div>
+            ))}
+          </div>
+
+          <p style={{ marginTop: 'clamp(26px,3vw,36px)', textAlign: 'center', fontFamily: 'DM Mono, monospace', fontSize: '11.5px', letterSpacing: '1.5px', color: '#7A8090', lineHeight: 1.9 }}>
+            <b style={{ color: '#1A2035' }}>LIVE</b> = running against a real client&rsquo;s books today. &nbsp;·&nbsp; <b style={{ color: '#1A2035' }}>DEMO</b> = built and clickable below.
+            <br />Don&rsquo;t see the thing your business needs? That&rsquo;s usually the conversation.
+          </p>
+        </div>
+      </section>
+
+      {/* SEE IT RUNNING — demo picker + live preview */}
+      <section style={{ padding: 'clamp(48px,6vw,80px) clamp(14px,5vw,48px) clamp(40px,5vw,64px)', overflow: 'hidden' }}>
+        <div style={{ maxWidth: '1200px', margin: '0 auto' }}>
           <div id="demos">{(() => {
             const FEATURED = [
               { label: 'Riverside Bakery', sub: 'Products + Consignment', src: '/demo', icon: '🥐' },
@@ -426,8 +450,11 @@ export default function Landing() {
             return (
               <>
                 {/* ALL DEMOS — one picker, right under the hero */}
-                <div style={{ fontFamily: 'DM Mono, monospace', fontSize: '11px', letterSpacing: '3px', color: '#C9A84C', marginBottom: '6px' }}>— {DEMOS.length} LIVE DEMOS · PICK YOURS</div>
-                <div style={{ fontSize: '13px', color: '#5A6070', marginBottom: '16px' }}>Click any one — a real dashboard loads in the window below. Don't see your industry? We'll build it free.</div>
+                <div style={{ fontFamily: 'DM Mono, monospace', fontSize: '11px', letterSpacing: '3px', color: '#C9A84C', marginBottom: '10px' }}>— SEE IT RUNNING · {DEMOS.length} DASHBOARDS</div>
+                <h2 style={{ fontFamily: 'Playfair Display, serif', fontWeight: 700, fontSize: 'clamp(26px,3.6vw,42px)', color: '#1A2035', lineHeight: 1.15, marginBottom: '12px' }}>
+                  Every one of these was built for a different business.
+                </h2>
+                <div style={{ fontSize: '14px', color: '#5A6070', lineHeight: 1.65, marginBottom: '20px', maxWidth: '760px' }}>Click any one and a working dashboard loads right in the window below — same integrations, same engine, different business underneath. Don&rsquo;t see your industry? We&rsquo;ll build it free.</div>
                 <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', marginBottom: '30px' }}>
                   {DEMOS.map((d, idx) => {
                     const on = activeDemo === idx
@@ -466,36 +493,53 @@ export default function Landing() {
         </div>
       </section>
 
-      {/* WHY THE JK WAY */}
-      <section style={{ background: 'linear-gradient(180deg, #FBF9F4 0%, #F4F0E8 100%)', padding: 'clamp(64px,9vw,104px) clamp(20px,5vw,48px)', position: 'relative', overflow: 'hidden', borderTop: '1px solid #EDE8DF' }}>
-        <div style={{ position: 'relative', maxWidth: '980px', margin: '0 auto', textAlign: 'center' }}>
-          <div style={{ fontFamily: 'DM Mono, monospace', fontSize: '11px', letterSpacing: '3px', color: '#C9A84C', marginBottom: '18px' }}>— THE JK WAY™</div>
-          <h2 style={{ fontFamily: 'Playfair Display, serif', fontWeight: 700, fontSize: 'clamp(30px,4.4vw,52px)', color: '#1A2035', lineHeight: 1.12, marginBottom: '12px' }}>
-            Numbers are easy.<br /><span style={{ color: '#B8943C' }}>The story</span> is everything.
-          </h2>
-          <div style={{ width: '54px', height: '2px', background: '#C9A84C', margin: '26px auto 44px', opacity: 0.8 }} />
-
-          {/* What vs Why cards */}
-          <div className="jkway-cards" style={{ display: 'flex', gap: '18px', alignItems: 'stretch', justifyContent: 'center', flexWrap: 'wrap' }}>
-            <div style={{ flex: '1 1 300px', maxWidth: '380px', background: '#fff', border: '1px solid #E6E0D4', padding: 'clamp(24px,3vw,34px)', textAlign: 'left' }}>
-              <div style={{ fontFamily: 'DM Mono, monospace', fontSize: '10px', letterSpacing: '2px', color: '#A39A86', marginBottom: '14px' }}>MOST REPORTS</div>
-              <div style={{ fontFamily: 'Cormorant Garamond, serif', fontSize: 'clamp(22px,2.6vw,30px)', lineHeight: 1.3, color: '#8A8475' }}>
-                Tell you <span style={{ color: '#1A2035', fontWeight: 600 }}>what</span> happened.
-              </div>
-            </div>
-
-            <div className="jkway-arrow" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#C9A84C', fontSize: '26px', flexShrink: 0 }}>→</div>
-
-            <div style={{ flex: '1 1 300px', maxWidth: '380px', background: '#FBF5E6', border: '1.5px solid #C9A84C', padding: 'clamp(24px,3vw,34px)', textAlign: 'left' }}>
-              <div style={{ fontFamily: 'DM Mono, monospace', fontSize: '10px', letterSpacing: '2px', color: '#B8943C', marginBottom: '14px' }}>THE JK WAY™</div>
-              <div style={{ fontFamily: 'Cormorant Garamond, serif', fontSize: 'clamp(22px,2.6vw,30px)', lineHeight: 1.3, color: '#1A2035' }}>
-                Shows you <span style={{ color: '#B8943C', fontWeight: 700 }}>why</span> — and what to do next.
-              </div>
-            </div>
+      {/* THE JK WAY — why one person doing both jobs is the whole pitch */}
+      <section style={{ background: '#1A2035', padding: 'clamp(60px,8vw,104px) clamp(16px,5vw,48px)', position: 'relative', overflow: 'hidden' }}>
+        <div style={{ position: 'absolute', inset: 0, background: 'radial-gradient(circle at 50% 0%, rgba(201,168,76,0.16), transparent 62%)', pointerEvents: 'none' }} />
+        <div style={{ position: 'relative', maxWidth: '1040px', margin: '0 auto' }}>
+          <div style={{ textAlign: 'center', maxWidth: '780px', margin: '0 auto clamp(38px,5vw,58px)' }}>
+            <div style={{ fontFamily: 'DM Mono, monospace', fontSize: '11px', letterSpacing: '3px', color: '#C9A84C', marginBottom: '18px' }}>— THE JK WAY™</div>
+            <h2 style={{ fontFamily: 'Playfair Display, serif', fontWeight: 700, fontSize: 'clamp(27px,4vw,46px)', color: '#fff', lineHeight: 1.16, marginBottom: '18px' }}>
+              Your bookkeeper can&rsquo;t build this.<br /><span style={{ color: '#C9A84C' }}>Your software vendor can&rsquo;t close your books.</span>
+            </h2>
+            <p style={{ fontSize: 'clamp(14px,1.6vw,16.5px)', color: '#9AA3BD', lineHeight: 1.75 }}>
+              So we do both jobs. Everything below follows from that one decision.
+            </p>
           </div>
 
-          <p style={{ fontFamily: "'DM Mono', monospace", fontSize: 'clamp(12px,1.5vw,15.5px)', letterSpacing: '2px', textTransform: 'uppercase', lineHeight: 1.7, color: '#B8943C', fontWeight: 500, marginTop: '44px' }}>
-            Every business is different. Your financial insights should be too.
+          <div className="jkway-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '1px', background: 'rgba(255,255,255,0.09)', border: '1px solid rgba(255,255,255,0.09)' }}>
+            {[
+              {
+                n: '01',
+                title: 'One person, both jobs',
+                body: 'The person who writes your integration is the person who closes your month. That is why the number on your dashboard is the number in your books — not a lookalike a syncing tool produced on its own.',
+              },
+              {
+                n: '02',
+                title: 'It ships when it ties out',
+                body: 'Nothing goes live until the dollars reconcile to QuickBooks. Matching row counts is not reconciliation — QuickBooks’ own statement is the check, every time.',
+              },
+              {
+                n: '03',
+                title: 'Your business, not your category',
+                body: 'No settings screen, no “choose your industry.” We learn how you actually run — your PO numbers, your vendor’s quirks, which months are closed — and build for that.',
+              },
+              {
+                n: '04',
+                title: 'Fewer subscriptions, not more',
+                body: 'When the gap between your POS and your books can be closed with code, we write the code — instead of selling you another monthly tool to sit in the middle of it.',
+              },
+            ].map((r, i) => (
+              <div key={i} style={{ background: '#1A2035', padding: 'clamp(26px,3.2vw,40px)' }}>
+                <div style={{ fontFamily: 'Playfair Display, serif', fontSize: '52px', fontWeight: 700, color: 'rgba(201,168,76,0.20)', lineHeight: 1, marginBottom: '16px' }}>{r.n}</div>
+                <div style={{ fontFamily: 'Cormorant Garamond, serif', fontSize: 'clamp(21px,2.4vw,27px)', fontWeight: 600, color: '#fff', lineHeight: 1.24, marginBottom: '12px' }}>{r.title}</div>
+                <div style={{ fontSize: '14px', color: '#9AA3BD', lineHeight: 1.78 }}>{r.body}</div>
+              </div>
+            ))}
+          </div>
+
+          <p style={{ marginTop: 'clamp(30px,3.5vw,44px)', textAlign: 'center', fontFamily: 'DM Mono, monospace', fontSize: 'clamp(11px,1.4vw,13.5px)', letterSpacing: '2px', textTransform: 'uppercase', color: '#C9A84C', fontWeight: 500, lineHeight: 1.8 }}>
+            No jokes. The dashboard and the books are the same work.
           </p>
         </div>
       </section>
@@ -505,7 +549,7 @@ export default function Landing() {
         padding: '16px 0', background: '#EEEAE2', overflow: 'hidden' }}>
         <div className="ticker-inner" style={{ fontFamily: 'DM Mono, monospace',
           fontSize: '12px', letterSpacing: '2px', color: '#7A8090', whiteSpace: 'nowrap' }}>
-          {Array(4).fill('CUSTOM DASHBOARDS · REAL-TIME FINANCIALS · QUICKBOOKS OPTIONAL · DRILL-DOWN REPORTING · POS INTEGRATION · PLAIN ENGLISH BOOKS · BUILT FOR YOUR BUSINESS ·').join('')}
+          {Array(4).fill('QUICKBOOKS API — BOTH DIRECTIONS · CLOVER POS SYNC · VENDOR INVOICE IMPORT · MONTH-END ENTRIES POSTED FOR YOU · PROFIT PER ORDER · FIFO INVENTORY THAT TIES OUT · SCOPED CLIENT PORTALS · PLAIN-ENGLISH ANSWERS ·').join('')}
         </div>
       </div>
 
@@ -518,10 +562,10 @@ export default function Landing() {
           </div>
           <h2 style={{ fontFamily: 'Cormorant Garamond, serif', fontSize: 'clamp(28px, 4vw, 48px)',
             fontWeight: '600', letterSpacing: '-1px', lineHeight: 1.1, marginBottom: '16px' }}>
-            Ready to see your books differently?
+            What would you want built first?
           </h2>
           <p style={{ color: '#5A6070', fontSize: '15px', lineHeight: 1.7 }}>
-            Leave your info and we'll reach out to show you what a custom portal looks like for your business.
+            Tell us how your business actually runs and we'll show you the dashboard we'd build for it — and the integrations underneath it.
           </p>
         </div>
 
