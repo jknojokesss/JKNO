@@ -284,6 +284,20 @@ copy that pattern onto client books.
 
 ## Conventions
 
+- **The `JK.` wordmark is fixed.** Playfair Display `JK` with the gold `#C9A84C`
+  period. It is on merch, so it survives every redesign — don't restyle it,
+  respell it, or swap its font, and keep it in the nav and the footer. The
+  palette around it is fair game; the mark is not.
+- **Read the marketing site as a customer, not as an engineer.** Anything on
+  jknojokes.com, a demo, or a client-facing screen gets judged by what a
+  prospect concludes from it — not by whether it is technically accurate.
+  Accuracy is the floor, not the goal. Concretely: never annotate our own
+  product with its weak spots. A LIVE/DEMO badge on the homepage was
+  technically honest and told every prospect which features nobody was using
+  yet; it was removed. Same for hedges, caveats, "coming soon," and internal
+  vocabulary. If a claim can't be made cleanly, cut it or rewrite it — don't
+  ship it wearing a disclaimer. Keep the internal truth in the code comments
+  and the data, where it belongs.
 - Working style: blunt, short, make the call. Verify numbers against data
   before stating them; if you didn't check, say so. Voice-to-text is normal
   (phonetic spellings, mid-thought cutoffs). Keep Adar, HOA, and personal
