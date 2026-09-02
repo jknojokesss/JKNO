@@ -5,9 +5,9 @@ description: Build a bespoke, Supabase-backed sales demo portal for a specific p
 
 # Prospect demo builder
 
-Builds what `/srl` (Southeastern Roofing Logistics) is: a standalone,
+Builds what `/riverstone-roofing` (Riverstone Roofing) is: a standalone,
 click-through management portal seeded with synthetic data engineered so the
-prospect recognizes their own problems in it. Read `pages/srl.js` and
+prospect recognizes their own problems in it. Read `pages/riverstone-roofing.js` and
 `supabase-roofing.sql` as the reference implementation before starting.
 
 ## Ground rules

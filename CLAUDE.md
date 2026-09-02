@@ -14,7 +14,7 @@ Project") reached through `lib/supabase.js` via `NEXT_PUBLIC_SUPABASE_URL` /
 (`lib/supabaseJerky.js`) — don't mix them. Reydel's books stay in this same
 project (not isolated) even though the UI moved.
 
-`/srl` is a demo; `/portal` and `/admin/ar` move real money.
+`/riverstone-roofing` is a demo; `/portal` and `/admin/ar` move real money.
 
 ## Live client: Reydel Tire
 
@@ -145,24 +145,27 @@ Two kinds:
 - **Generic industry demos** — entries in `INDUSTRIES` in `lib/industryDemos.js`,
   rendered by `components/IndustryDemo.js` at `/demos/[slug]`. Data baked into
   the config object.
-- **Bespoke prospect demos** — standalone pages (e.g. `pages/srl.js`,
+- **Bespoke prospect demos** — standalone pages (e.g. `pages/riverstone-roofing.js`,
   `pages/riverfall-gowns.js`), listed in `EXISTING_DEMOS` in
   `lib/industryDemos.js`. May be Supabase-backed.
 
 To build a new bespoke prospect demo, use the `prospect-demo` skill
 (`.claude/skills/prospect-demo/`).
 
-## SRL roofing demo (`/srl`, redirect from `/roofing`)
+## Riverstone roofing demo (`/riverstone-roofing`)
 
-Southeastern Roofing Logistics — commercial roofer on AccuLynx prepping for a
-sale. Five screens: Job Margin (variance flags), WIP Schedule (over/under
+A commercial roofer on AccuLynx prepping for a sale. **The business name and
+location are invented.** This demo and the fencing one were originally named
+after the real prospects they were built for and were live on the public site
+that way — never put a real prospect or client name on a public demo again.
+Old routes `/riverstone-roofing` and `/riverbend-fence` still redirect in. Five screens: Job Margin (variance flags), WIP Schedule (over/under
 billing), Cash Flow (13-week, claims aged separately), Liabilities (retainage /
 AP / deposits / unbilled supplements), Buyer Package (normalized EBITDA with
 add-backs, print-to-PDF). Original build spec lives in the session that built
 it; the four pain points: margin known too late, cash trapped in WIP+AR,
 invisible liabilities, books not sale-ready.
 
-- **Page**: `pages/srl.js`, all math client-side from raw tables. Read-only —
+- **Page**: `pages/riverstone-roofing.js`, all math client-side from raw tables. Read-only —
   the pitch is "nobody types anything in here; it reads AccuLynx + QuickBooks."
 - **Data**: `roof_*` tables (AccuLynx-shaped: jobs, worksheets, invoices,
   payments, change_orders, supplements + QB-side gl_summary, addbacks), seeded
@@ -305,13 +308,13 @@ copy that pattern onto client books.
   sessions (MNE's `mne-trading-app`, Lew Imports, etc.) into this git tree —
   distill durable JKNO rules here.
 - Other clients vs demos: Jerky Munch is live (isolated Supabase). MNE Trading
-  (`/mne-trading`) and QueFence (`/quefence`) are seeded demos even when they
+  (`/mne-trading`) and Riverbend Fence (`/riverbend-fence`) are seeded demos even when they
   are real prospects — don't mix them with Reydel books or restyle Reydel to
   match a demo. Jerky's new-invoice form is one line on purpose; the
   multi-flavor product builder was removed because Efraim doesn't use it —
   don't rebuild it.
 - Bespoke demo pages are single files with inline styles; match that.
-  `pages/quefence.js` is thousands of lines on purpose.
+  `pages/riverbend-fence.js` is thousands of lines on purpose.
 - Nearly every `lib/*.js` opens with a comment explaining not just what it
   does but **what went wrong before it looked like this**. Read that header
   before changing the module.

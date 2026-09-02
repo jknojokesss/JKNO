@@ -10,8 +10,12 @@ const nextConfig = {
     // Host-scoped so this NEVER fires when saratogashteibel.org is (even
     // briefly, mid-propagation) served by this project — avoids a self-loop.
     return [
-      // Roofing demo moved to its named route when it got the SRL branding.
-      { source: '/roofing', destination: '/srl', permanent: false },
+      // The roofing and fencing demos were named after the real prospects they
+      // were built for. Renamed to invented businesses; these keep any link
+      // already sent out working. Delete them once nothing points here.
+      { source: '/roofing', destination: '/riverstone-roofing', permanent: false },
+      { source: '/srl', destination: '/riverstone-roofing', permanent: false },
+      { source: '/quefence', destination: '/riverbend-fence', permanent: false },
       // Reydel portal lives in jknojokesss/reydel (Vercel project `reydel`).
       // QBO nightly pull + Clover cron + Weldon import stay here so tokens
       // and the Intuit callback don't move. Swap the host when

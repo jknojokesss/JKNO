@@ -3,13 +3,14 @@ import Head from 'next/head'
 import { supabase } from '../lib/supabase'
 
 // ─────────────────────────────────────────────────────────────────────────
-// Southeastern Roofing Logistics — management portal demo.
+// Riverstone Roofing — management portal demo. The business name and
+// location are invented; this is a sales demo, not a named prospect.
 // Synthetic data seeded in Supabase (roof_* tables, AccuLynx-shaped).
 // QuickBooks stays the book of record; AccuLynx stays the job subledger.
 // This portal is the management layer that reads across both.
 // ─────────────────────────────────────────────────────────────────────────
 
-const BIZ = 'Southeastern Roofing Logistics'
+const BIZ = 'Riverstone Roofing'
 
 // Palette sampled from the prospect's site. SIGNAL appears in exactly three
 // places: the top bar, the active nav state, and the variance flag /
@@ -182,8 +183,8 @@ export default function RoofingPortal() {
       <div className="shell">
         <aside className="side no-print">
           <div style={{ padding: '0 24px 18px', borderBottom: '1px solid rgba(201,196,184,.15)', marginBottom: '10px' }}>
-            <div style={{ fontFamily: serif, fontSize: '18px', fontWeight: 700, color: WHITE, lineHeight: 1.3 }}>Southeastern<br />Roofing Logistics</div>
-            <div style={{ fontSize: '9.5px', color: STONE, letterSpacing: '.14em', marginTop: '7px' }}>NASHVILLE · TN / KY / AL / GA</div>
+            <div style={{ fontFamily: serif, fontSize: '18px', fontWeight: 700, color: WHITE, lineHeight: 1.3 }}>Riverstone<br />Roofing</div>
+            <div style={{ fontSize: '9.5px', color: STONE, letterSpacing: '.14em', marginTop: '7px' }}>REGIONAL · FOUR-STATE FOOTPRINT</div>
           </div>
           <button className="nbtn" onClick={() => setIntro(true)} style={{ fontFamily: serif, fontSize: '13.5px', fontStyle: 'italic' }}>The four questions ↺</button>
           <div style={{ margin: '8px 24px 10px', borderTop: '1px solid rgba(201,196,184,.15)' }} />

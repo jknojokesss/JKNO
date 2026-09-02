@@ -1,7 +1,8 @@
 import { useState, useEffect, useMemo, useRef } from 'react'
 import Head from 'next/head'
 
-/* ─── QueFence job entry portal — demo scaffold ───────────────────────────
+/* ─── Riverbend Fence job entry portal — demo scaffold ────────────────────
+   Business name is invented; this is a sales demo, not a named prospect.
    UI only. The QuickBooks pane on the right is a simulation of what the
    push would produce; swap it for the live sandbox company at demo time.
 
@@ -14,7 +15,7 @@ import Head from 'next/head'
       plain English goes in, accounting comes out.
    ────────────────────────────────────────────────────────────────────── */
 
-const BIZ = 'QueFence'
+const BIZ = 'Riverbend Fence Co.'
 
 // neutral shell — brand colors drop in here once their site is sampled
 const INK = '#16181C', BG = '#F4F5F7', CARD = '#FFFFFF', BORDER = '#E3E5E9'
@@ -752,7 +753,7 @@ const Line = ({ label, value, color, bold, sub }) => (
 
 /* ─── Page ────────────────────────────────────────────────────────────── */
 
-export default function QueFenceDemo() {
+export default function RiverbendFenceDemo() {
   const [stock, setStock] = useState(STOCK_SEED)
   const [customers, setCustomers] = useState(CUSTOMERS)
   const [vendors, setVendors] = useState(VENDORS)
@@ -1093,7 +1094,7 @@ export default function QueFenceDemo() {
                 <span style={{ color: QB }}>quickbooks</span>
               </span>
               <span style={{ width: 1, height: 20, background: 'rgba(255,255,255,.22)' }} />
-              <span style={{ fontSize: 13.5 }}>QueFence Inc.</span>
+              <span style={{ fontSize: 13.5 }}>Riverbend Fence Co.</span>
               <span style={{ fontSize: 10.5, fontWeight: 700, letterSpacing: '.06em', textTransform: 'uppercase', border: '1px solid rgba(255,255,255,.35)', borderRadius: 4, padding: '2px 6px', opacity: .85 }}>Sandbox</span>
             </div>
             <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
@@ -1185,7 +1186,7 @@ function Intro({ jobs, stock, onClose }) {
   return (
     <div onClick={onClose} style={{ position: 'fixed', inset: 0, zIndex: 100, background: 'rgba(16,24,40,.55)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 20, overflowY: 'auto' }}>
       <div onClick={(e) => e.stopPropagation()} style={{ background: CARD, borderRadius: 14, maxWidth: 580, width: '100%', padding: 28, boxShadow: '0 20px 60px rgba(16,24,40,.28)' }}>
-        <div style={{ fontSize: 12, fontWeight: 600, letterSpacing: '.06em', textTransform: 'uppercase', color: MUTED, marginBottom: 8 }}>QueFence · job entry portal</div>
+        <div style={{ fontSize: 12, fontWeight: 600, letterSpacing: '.06em', textTransform: 'uppercase', color: MUTED, marginBottom: 8 }}>Riverbend Fence · job entry portal</div>
         <h2 style={{ fontFamily: head, fontSize: 25, fontWeight: 700, lineHeight: 1.22, letterSpacing: '-.015em', marginBottom: 10 }}>
           QuickBooks has always been able to do job costing. Nothing has ever fed it correctly.
         </h2>
@@ -2363,7 +2364,7 @@ function Profitability({ jobs, stock }) {
   return (
     <div style={{ background: '#fff', border: `1px solid ${QBLINE}`, borderRadius: 3, padding: '22px 20px' }}>
       <div style={{ textAlign: 'center', marginBottom: 18 }}>
-        <div style={{ fontSize: 17, fontWeight: 700, color: QBINK }}>QueFence Inc.</div>
+        <div style={{ fontSize: 17, fontWeight: 700, color: QBINK }}>Riverbend Fence Co.</div>
         <div style={{ fontSize: 15, color: QBINK }}>Job Profitability Summary</div>
         <div style={{ fontSize: 12.5, color: '#6B6C72' }}>All Dates</div>
       </div>

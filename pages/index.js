@@ -333,8 +333,8 @@ export default function Landing() {
             // Six here; the rest are at /demos. This used to be all 23 in one
             // wall of buttons, which is the first thing a visitor saw.
             const DEMOS = [
-              { label: 'Roofing', src: '/srl' },
-              { label: 'Fencing', src: '/quefence' },
+              { label: 'Roofing', src: '/riverstone-roofing' },
+              { label: 'Fencing', src: '/riverbend-fence' },
               { label: 'Tire shop', src: '/riverside-tires' },
               { label: 'Bakery', src: '/demo' },
               { label: 'Bridal shop', src: '/riverfall-gowns' },
@@ -368,8 +368,8 @@ export default function Landing() {
                     <span style={{ width: 9, height: 9, borderRadius: '50%', background: '#30363D' }} />
                     <span style={{ width: 9, height: 9, borderRadius: '50%', background: '#30363D' }} />
                     <span style={{ width: 9, height: 9, borderRadius: '50%', background: '#30363D' }} />
-                    <span style={{ flex: 1, marginLeft: '8px', background: '#0D1117', border: '1px solid #232B36', borderRadius: '5px', padding: '4px 12px', fontFamily: mono, fontSize: '11px', color: '#6E7681', overflow: 'hidden', whiteSpace: 'nowrap', textOverflow: 'ellipsis' }}>
-                      jknojokes.com{active.src}
+                    <span style={{ marginLeft: '10px', fontFamily: mono, fontSize: '11.5px', color: '#6E7681' }}>
+                      {active.label.toLowerCase()} — client portal
                     </span>
                   </div>
                   {isMobile
@@ -381,7 +381,7 @@ export default function Landing() {
                         </a>
                       </div>
                     : <iframe key={activeDemo} src={active.src} title={`${active.label} dashboard`} loading="lazy"
-                        style={{ display: 'block', width: '100%', height: '620px', border: 'none', borderRadius: '6px', background: '#FBF4EC' }} />
+                        style={{ display: 'block', width: '100%', height: '440px', border: 'none', borderRadius: '6px', background: '#FBF4EC' }} />
                   }
                 </div>
 
