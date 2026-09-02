@@ -72,13 +72,13 @@ export default function Landing() {
         /* The nav is fixed, so anchored jumps need clearance underneath it. */
         #build, #demos, #demo-preview, #contact { scroll-margin-top: 88px; }
         body {
-          background-color: #0B0E14;
+          background-color: #F4F6F9;
           background-image:
-            linear-gradient(rgba(120,140,180,0.055) 1px, transparent 1px),
-            linear-gradient(90deg, rgba(120,140,180,0.055) 1px, transparent 1px);
+            linear-gradient(rgba(30,45,75,0.05) 1px, transparent 1px),
+            linear-gradient(90deg, rgba(30,45,75,0.05) 1px, transparent 1px);
           background-size: 38px 38px, 38px 38px;
           background-attachment: fixed;
-          color: #E6EDF3; font-family: 'DM Sans', sans-serif;
+          color: #0E1420; font-family: 'DM Sans', sans-serif;
         }
 
         @keyframes fadeUp {
@@ -118,14 +118,14 @@ export default function Landing() {
 
 
         .feature-card {
-          background: #111621;
-          border: 1px solid #232B36;
+          background: #fff;
+          border: 1px solid #DFE4EC;
           padding: 32px;
           transition: all 0.25s ease;
           cursor: default;
         }
         .feature-card:hover {
-          background: #111621;
+          background: #fff;
           border-color: #C9A84C;
           transform: translateY(-2px);
         }
@@ -164,9 +164,9 @@ export default function Landing() {
 
         input, textarea {
           width: 100%;
-          background: #111621;
-          border: 1px solid #232B36;
-          color: #E6EDF3;
+          background: #fff;
+          border: 1px solid #DFE4EC;
+          color: #0E1420;
           padding: 14px 16px;
           font-family: 'DM Sans', sans-serif;
           font-size: 14px;
@@ -175,10 +175,10 @@ export default function Landing() {
           border-radius: 0;
         }
         input:focus, textarea:focus { border-color: #C9A84C; }
-        input::placeholder, textarea::placeholder { color: #6E7681; }
+        input::placeholder, textarea::placeholder { color: #97A0B0; }
 
         .nav-link {
-          color: #8B949E;
+          color: #5A6577;
           text-decoration: none;
           font-size: 13px;
           font-family: mono;
@@ -248,17 +248,17 @@ export default function Landing() {
       <nav style={{
         position: 'fixed', top: 0, left: 0, right: 0, zIndex: 100,
         padding: '20px 32px',
-        background: scrolled ? 'rgba(11,14,20,0.92)' : 'transparent',
+        background: scrolled ? 'rgba(244,246,249,0.94)' : 'transparent',
         backdropFilter: scrolled ? 'blur(12px)' : 'none',
-        borderBottom: scrolled ? '1px solid #232B36' : 'none',
+        borderBottom: scrolled ? '1px solid #D9DFE8' : 'none',
         transition: 'all 0.3s ease',
         display: 'flex', alignItems: 'center', justifyContent: 'space-between',
       }}>
         <div style={{ display: 'flex', alignItems: 'baseline', gap: '10px' }}>
-          <span style={{ fontFamily: 'Playfair Display, serif', fontSize: '26px', fontWeight: '700', letterSpacing: '-0.5px', color: '#E6EDF3' }}>
+          <span style={{ fontFamily: 'Playfair Display, serif', fontSize: '26px', fontWeight: '700', letterSpacing: '-0.5px', color: '#0E1420' }}>
             JK<span style={{ color: '#C9A84C' }}>.</span>
           </span>
-          <span className="nav-tagline" style={{ fontFamily: mono, fontSize: '14px', fontWeight: '500', letterSpacing: '6px', color: '#E6EDF3' }}>
+          <span className="nav-tagline" style={{ fontFamily: mono, fontSize: '14px', fontWeight: '500', letterSpacing: '6px', color: '#0E1420' }}>
             NO&nbsp;JOKES&nbsp;FINANCIALS
           </span>
         </div>
@@ -275,7 +275,7 @@ export default function Landing() {
           </button>
         </div>}
         {isMobile && <button style={{ background: 'none',
-          border: 'none', color: '#E6EDF3', fontSize: '24px', cursor: 'pointer', padding: '4px', lineHeight: 1 }}
+          border: 'none', color: '#0E1420', fontSize: '24px', cursor: 'pointer', padding: '4px', lineHeight: 1 }}
           onClick={() => setMenuOpen(!menuOpen)}>
           {menuOpen ? '✕' : '☰'}
         </button>}
@@ -284,7 +284,7 @@ export default function Landing() {
       {/* Mobile menu */}
       {menuOpen && (
         <div style={{ position: 'fixed', top: '64px', left: 0, right: 0, zIndex: 99,
-          background: '#111621', borderBottom: '1px solid #232B36', padding: '20px' }}>
+          background: '#fff', borderBottom: '1px solid #DFE4EC', padding: '20px' }}>
           {[
             { label: 'What We Build', to: '#build' },
             { label: 'Demos', to: '/demos' },
@@ -294,7 +294,7 @@ export default function Landing() {
             { label: 'Contact', to: '#contact' },
           ].map(item => (
             <button key={item.label} className="nav-link" style={{ display: 'block', padding: '12px 0',
-              width: '100%', textAlign: 'left', fontSize: '14px', color: '#E6EDF3' }}
+              width: '100%', textAlign: 'left', fontSize: '14px', color: '#0E1420' }}
               onClick={() => {
                 if (item.to.startsWith('#')) { document.getElementById(item.to.slice(1))?.scrollIntoView({ behavior: 'smooth' }) }
                 else { router.push(item.to) }
@@ -313,10 +313,10 @@ export default function Landing() {
       {/* HERO */}
       <section style={{ padding: 'clamp(96px,9vw,124px) clamp(16px,5vw,48px) clamp(30px,3.5vw,44px)', textAlign: 'center' }}>
         <div style={{ maxWidth: '860px', margin: '0 auto' }}>
-          <h1 className="hero-title hero-title-text" style={{ fontFamily: "'Space Grotesk', sans-serif", fontWeight: 700, fontSize: 'clamp(34px,5.4vw,64px)', lineHeight: 1.08, color: '#E6EDF3', letterSpacing: '-1.5px' }}>
+          <h1 className="hero-title hero-title-text" style={{ fontFamily: "'Space Grotesk', sans-serif", fontWeight: 700, fontSize: 'clamp(34px,5.4vw,64px)', lineHeight: 1.08, color: '#0E1420', letterSpacing: '-1.5px' }}>
             We build the <span className="gold-shimmer">software</span><br />behind your numbers.
           </h1>
-          <p className="hero-sub" style={{ margin: '24px auto 0', maxWidth: '620px', fontSize: 'clamp(16px,1.9vw,20px)', lineHeight: 1.6, color: '#A9B4C4' }}>
+          <p className="hero-sub" style={{ margin: '24px auto 0', maxWidth: '620px', fontSize: 'clamp(16px,1.9vw,20px)', lineHeight: 1.6, color: '#48536A' }}>
             We connect your QuickBooks and your register, then build you one screen that shows what you&rsquo;re actually making.
           </p>
           <div className="hero-cta" style={{ marginTop: '34px', display: 'flex', gap: '16px', flexWrap: 'wrap', justifyContent: 'center', alignItems: 'center' }}>
@@ -351,28 +351,41 @@ export default function Landing() {
                       <button key={idx} onClick={() => pick(idx)} style={{
                         cursor: 'pointer', fontFamily: 'DM Sans, sans-serif', fontSize: '13.5px',
                         color: on ? '#F0DEAC' : '#8B949E', padding: '9px 18px', borderRadius: '2px',
-                        border: on ? '1px solid #C9A84C' : '1px solid #232B36',
-                        background: on ? 'rgba(201,168,76,0.12)' : '#111621', transition: 'all 0.15s',
+                        border: on ? '1px solid #C9A84C' : '1px solid #DFE4EC',
+                        background: on ? '#FFF6E2' : '#fff', transition: 'all 0.15s',
                       }}>{d.label}</button>
                     )
                   })}
                 </div>
 
-                <div id="demo-preview" style={{ background: '#0D1117', border: '1px solid #232B36', overflow: 'hidden' }}>
+                {/* The demo pages are light and always will be — they are the
+                    real product, not artwork we control. Edge-to-edge that
+                    reads as a white slab dropped into a dark page. In a
+                    browser frame the same pixels read as a screen you are
+                    looking at, which is the point of the section. */}
+                <div id="demo-preview" style={{ background: '#161B26', border: '1px solid #2A3340', borderRadius: '10px', padding: 'clamp(8px,1vw,12px)', boxShadow: '0 24px 70px rgba(0,0,0,0.5)' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '7px', padding: '2px 4px 10px' }}>
+                    <span style={{ width: 9, height: 9, borderRadius: '50%', background: '#30363D' }} />
+                    <span style={{ width: 9, height: 9, borderRadius: '50%', background: '#30363D' }} />
+                    <span style={{ width: 9, height: 9, borderRadius: '50%', background: '#30363D' }} />
+                    <span style={{ flex: 1, marginLeft: '8px', background: '#0D1117', border: '1px solid #232B36', borderRadius: '5px', padding: '4px 12px', fontFamily: mono, fontSize: '11px', color: '#6E7681', overflow: 'hidden', whiteSpace: 'nowrap', textOverflow: 'ellipsis' }}>
+                      jknojokes.com{active.src}
+                    </span>
+                  </div>
                   {isMobile
-                    ? <div style={{ padding: '32px', textAlign: 'center' }}>
+                    ? <div style={{ padding: '32px', textAlign: 'center', background: '#0D1117', borderRadius: '6px' }}>
                         <div style={{ fontFamily: mono, fontSize: '11px', color: '#6B7A96', marginBottom: '16px', letterSpacing: '1px' }}>BEST VIEWED ON DESKTOP</div>
                         <a href={active.src} target="_blank" rel="noopener noreferrer"
-                          style={{ display: 'inline-block', background: '#C9A84C', color: '#E6EDF3', textDecoration: 'none', padding: '14px 28px', fontFamily: mono, fontSize: '12px', letterSpacing: '2px', borderRadius: '4px' }}>
+                          style={{ display: 'inline-block', background: '#C9A84C', color: '#0B0E14', textDecoration: 'none', padding: '14px 28px', fontFamily: mono, fontSize: '12px', letterSpacing: '2px', borderRadius: '4px' }}>
                           OPEN THE {active.label.toUpperCase()} DASHBOARD →
                         </a>
                       </div>
                     : <iframe key={activeDemo} src={active.src} title={`${active.label} dashboard`} loading="lazy"
-                        style={{ display: 'block', width: '100%', height: '640px', border: 'none', background: '#FBF4EC' }} />
+                        style={{ display: 'block', width: '100%', height: '620px', border: 'none', borderRadius: '6px', background: '#FBF4EC' }} />
                   }
                 </div>
 
-                <div style={{ marginTop: '18px', textAlign: 'center', fontSize: '13.5px', color: '#8B949E' }}>
+                <div style={{ marginTop: '18px', textAlign: 'center', fontSize: '13.5px', color: '#5A6577' }}>
                   Real screens, not pictures of screens. <button onClick={() => router.push('/demos')} style={{ background: 'none', border: 'none', padding: 0, cursor: 'pointer', color: '#B8943C', fontSize: '13.5px', textDecoration: 'underline', textUnderlineOffset: '3px', fontFamily: 'inherit' }}>See the rest</button>
                 </div>
               </>
@@ -411,7 +424,7 @@ export default function Landing() {
               <span style={{ color: '#C9A84C' }}>{'>'}</span> your books close themselves overnight<span className="caret" />
             </div>
           </div>
-          <p style={{ marginTop: '20px', textAlign: 'center', fontSize: '15px', color: '#8B949E', lineHeight: 1.75, maxWidth: '600px', marginLeft: 'auto', marginRight: 'auto' }}>
+          <p style={{ marginTop: '20px', textAlign: 'center', fontSize: '15px', color: '#5A6577', lineHeight: 1.75, maxWidth: '600px', marginLeft: 'auto', marginRight: 'auto' }}>
             Nothing goes live until it ties out to QuickBooks. That is the whole product.
           </p>
         </div>
@@ -422,10 +435,10 @@ export default function Landing() {
         <div style={{ maxWidth: '1080px', margin: '0 auto' }}>
           <div className="build-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '18px' }}>
             {BUILD_STACK.map((col, ci) => (
-              <div key={ci} style={{ background: '#111621', border: '1px solid #232B36', padding: 'clamp(24px,2.6vw,32px)' }}>
+              <div key={ci} style={{ background: '#fff', border: '1px solid #DFE4EC', padding: 'clamp(24px,2.6vw,32px)' }}>
                 <div style={{ fontSize: '22px', color: '#C9A84C', lineHeight: 1, marginBottom: '16px' }}>{col.icon}</div>
-                <h3 style={{ fontFamily: 'Cormorant Garamond, serif', fontSize: 'clamp(20px,2.2vw,25px)', fontWeight: 600, color: '#E6EDF3', lineHeight: 1.25, marginBottom: '10px' }}>{col.title}</h3>
-                <p style={{ fontSize: '14px', color: '#8B949E', lineHeight: 1.7 }}>{col.blurb}</p>
+                <h3 style={{ fontFamily: 'Cormorant Garamond, serif', fontSize: 'clamp(20px,2.2vw,25px)', fontWeight: 600, color: '#0E1420', lineHeight: 1.25, marginBottom: '10px' }}>{col.title}</h3>
+                <p style={{ fontSize: '14px', color: '#5A6577', lineHeight: 1.7 }}>{col.blurb}</p>
               </div>
             ))}
           </div>
@@ -446,7 +459,7 @@ export default function Landing() {
             fontWeight: '600', letterSpacing: '-1px', lineHeight: 1.1, marginBottom: '16px' }}>
             What would you want built first?
           </h2>
-          <p style={{ color: '#8B949E', fontSize: '15px', lineHeight: 1.7 }}>
+          <p style={{ color: '#5A6577', fontSize: '15px', lineHeight: 1.7 }}>
             Tell us how your business actually runs and we'll show you the dashboard we'd build for it — and the integrations underneath it.
           </p>
         </div>
@@ -457,7 +470,7 @@ export default function Landing() {
             <div style={{ fontSize: '32px', marginBottom: '16px' }}>◈</div>
             <div style={{ fontFamily: 'Cormorant Garamond, serif', fontSize: '24px',
               fontWeight: '700', marginBottom: '12px' }}>We'll be in touch.</div>
-            <div style={{ color: '#8B949E', fontSize: '14px' }}>
+            <div style={{ color: '#5A6577', fontSize: '14px' }}>
               Thanks for reaching out. Expect to hear from us within 24 hours.
             </div>
           </div>
@@ -465,21 +478,21 @@ export default function Landing() {
           <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
             <div>
               <label style={{ display: 'block', fontFamily: mono,
-                fontSize: '10px', letterSpacing: '2px', color: '#8B949E',
+                fontSize: '10px', letterSpacing: '2px', color: '#5A6577',
                 marginBottom: '8px' }}>YOUR NAME</label>
               <input type="text" placeholder="John Smith"
                 value={form.name} onChange={e => setForm({ ...form, name: e.target.value })} />
             </div>
             <div>
               <label style={{ display: 'block', fontFamily: mono,
-                fontSize: '10px', letterSpacing: '2px', color: '#8B949E',
+                fontSize: '10px', letterSpacing: '2px', color: '#5A6577',
                 marginBottom: '8px' }}>EMAIL ADDRESS</label>
               <input type="email" placeholder="you@company.com"
                 value={form.email} onChange={e => setForm({ ...form, email: e.target.value })} />
             </div>
             <div style={{ marginBottom: '8px' }}>
               <label style={{ display: 'block', fontFamily: mono,
-                fontSize: '10px', letterSpacing: '2px', color: '#8B949E',
+                fontSize: '10px', letterSpacing: '2px', color: '#5A6577',
                 marginBottom: '8px' }}>BUSINESS NAME</label>
               <input type="text" placeholder="Acme Corp"
                 value={form.business} onChange={e => setForm({ ...form, business: e.target.value })} />
@@ -491,7 +504,7 @@ export default function Landing() {
               disabled={submitting || !form.name || !form.email || !form.business}>
               {submitting ? 'SENDING...' : 'SEND MESSAGE →'}
             </button>
-            <p style={{ textAlign: 'center', fontSize: '12px', color: '#8B949E',
+            <p style={{ textAlign: 'center', fontSize: '12px', color: '#5A6577',
               fontFamily: mono, marginTop: '8px' }}>
               Or email directly: jk@jknojokes.com
             </p>
@@ -500,7 +513,7 @@ export default function Landing() {
       </section>
 
       {/* FOOTER */}
-      <footer className="footer-pad" style={{ borderTop: '1px solid #232B36', padding: '32px 48px',
+      <footer className="footer-pad" style={{ borderTop: '1px solid #DFE4EC', padding: '32px 48px',
         display: 'flex', flexDirection: 'column', gap: '16px' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '16px' }}>
           <div style={{ fontFamily: 'Playfair Display, serif', fontSize: '20px',
@@ -512,13 +525,13 @@ export default function Landing() {
             CLIENT LOGIN →
           </button>
         </div>
-        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '10px', paddingTop: '16px', borderTop: '1px solid #1B2230' }}>
-          <div style={{ fontFamily: mono, fontSize: '11px', color: '#8B949E', letterSpacing: '1px' }}>
+        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '10px', paddingTop: '16px', borderTop: '1px solid #E7EBF1' }}>
+          <div style={{ fontFamily: mono, fontSize: '11px', color: '#5A6577', letterSpacing: '1px' }}>
             © {new Date().getFullYear()} JK NO JOKES FINANCIALS
           </div>
           <div style={{ display: 'flex', gap: '24px', justifyContent: 'center' }}>
-            <button onClick={() => router.push('/privacy')} style={{ background: 'none', border: 'none', cursor: 'pointer', fontFamily: mono, fontSize: '10px', color: '#8B949E', letterSpacing: '1px' }}>PRIVACY POLICY</button>
-            <button onClick={() => router.push('/terms')} style={{ background: 'none', border: 'none', cursor: 'pointer', fontFamily: mono, fontSize: '10px', color: '#8B949E', letterSpacing: '1px' }}>TERMS OF SERVICE</button>
+            <button onClick={() => router.push('/privacy')} style={{ background: 'none', border: 'none', cursor: 'pointer', fontFamily: mono, fontSize: '10px', color: '#5A6577', letterSpacing: '1px' }}>PRIVACY POLICY</button>
+            <button onClick={() => router.push('/terms')} style={{ background: 'none', border: 'none', cursor: 'pointer', fontFamily: mono, fontSize: '10px', color: '#5A6577', letterSpacing: '1px' }}>TERMS OF SERVICE</button>
           </div>
         </div>
       </footer>
