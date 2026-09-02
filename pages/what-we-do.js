@@ -1,16 +1,8 @@
 import Head from 'next/head'
 import { useRouter } from 'next/router'
+import { BUILD_STACK } from '../lib/buildStack'
 
 const BOOKING_URL = 'https://calendly.com/jk-jknojokes/30min'
-
-const features = [
-  { icon: '◉', title: 'Integrations We Wrote Ourselves', desc: 'QuickBooks Online in both directions, Clover POS, your vendor portal, your bank. Real API work on a nightly schedule — not a $99/mo connector that drops half your line items.' },
-  { icon: '▣', title: 'Custom-Built Dashboards', desc: 'Every client gets a portal built around their business — your income streams, your reports, your language. Not a template with your logo on it.' },
-  { icon: '⬟', title: 'Profit Per Order', desc: 'Revenue, cost, and margin on every single ticket — matched back to what you actually paid your vendor for that exact item. Most POS systems will never tell you this.' },
-  { icon: '◈', title: 'Inventory That Ties Out', desc: 'Dated purchase layers, FIFO relief, and a month-end COGS journal entry ready to post. The dollars reconcile to QuickBooks — that is the whole point.' },
-  { icon: '◎', title: 'Real-Time, Drill-Down Numbers', desc: 'Log in any time, from any device. Click any line on your P&L and see every transaction behind it — the vendors, sales, and ad spend that make up the number.' },
-  { icon: '⬡', title: 'Ideas From Other Clients', desc: 'An AR desk that emails every statement in one pass. A crew log that lands in QuickBooks coded to the job. A WIP schedule and buyer package. Built once, available to you.' },
-]
 
 export default function WhatWeDo() {
   const router = useRouter()
@@ -30,8 +22,9 @@ export default function WhatWeDo() {
         .ghost-btn:hover{background:#C9A84C;color:#fff}
         .feature-card{background:#E8E4DC;border:1px solid #DDD8CE;padding:32px;transition:all .25s}
         .feature-card:hover{border-color:#C9A84C;transform:translateY(-2px)}
-        .features-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:#DDD8CE;border:1px solid #DDD8CE}
-        @media(max-width:768px){.features-grid{grid-template-columns:1fr !important}}
+        .build-cols{display:grid;grid-template-columns:repeat(3,1fr);gap:18px;align-items:start}
+        .bi-link:hover .bi-title{color:#B8943C}
+        @media(max-width:980px){.build-cols{grid-template-columns:1fr !important}}
       `}</style>
 
       {/* Nav */}
@@ -57,18 +50,36 @@ export default function WhatWeDo() {
           The JK Way™ — built around your business.
         </div>
         <p style={{ fontSize:'17px', color:'#5A6070', lineHeight:1.7, maxWidth:'520px', margin:'0 auto' }}>
-          Every client gets a fully custom portal, wired into the systems you already run. Here's what's inside.
+          Every client gets a fully custom portal, wired into the systems you already run. Here is everything that goes into one.
         </p>
       </section>
 
       {/* Feature grid */}
       <section style={{ padding:'0 clamp(16px,5vw,48px) clamp(64px,9vw,100px)', maxWidth:'1200px', margin:'0 auto' }}>
-        <div className="features-grid">
-          {features.map((f, i) => (
-            <div key={i} className="feature-card">
-              <div style={{ fontSize:'28px', color:'#C9A84C', marginBottom:'20px' }}>{f.icon}</div>
-              <h3 style={{ fontFamily:'Cormorant Garamond,serif', fontSize:'22px', fontWeight:600, marginBottom:'12px' }}>{f.title}</h3>
-              <p style={{ fontSize:'14px', color:'#5A6070', lineHeight:1.7 }}>{f.desc}</p>
+        <div className="build-cols">
+          {BUILD_STACK.map((col, i) => (
+            <div key={i} className="feature-card" style={{ background:'#fff', textAlign:'left' }}>
+              <div style={{ fontSize:'26px', color:'#C9A84C', marginBottom:'16px', lineHeight:1 }}>{col.icon}</div>
+              <div style={{ fontFamily:'DM Mono,monospace', fontSize:'10px', letterSpacing:'2px', color:'#B8943C', marginBottom:'10px' }}>{col.kicker}</div>
+              <h3 style={{ fontFamily:'Cormorant Garamond,serif', fontSize:'24px', fontWeight:600, marginBottom:'12px', lineHeight:1.25 }}>{col.title}</h3>
+              <p style={{ fontSize:'14px', color:'#5A6070', lineHeight:1.7, marginBottom:'22px' }}>{col.blurb}</p>
+              <div style={{ borderTop:'1px solid #EDE8DF' }}>
+                {col.items.map((it, j) => {
+                  const body = (
+                    <>
+                      <div className="bi-title" style={{ fontSize:'15px', fontWeight:600, color:'#1A2035', marginBottom:'5px', transition:'color .15s' }}>
+                        {it.t}{it.href && <span style={{ color:'#C9A84C', fontFamily:'DM Mono,monospace', fontSize:'12px' }}> →</span>}
+                      </div>
+                      <div style={{ fontSize:'13.5px', color:'#5A6070', lineHeight:1.65 }}>{it.d}</div>
+                    </>
+                  )
+                  return (
+                    <div key={j} style={{ padding:'15px 0', borderBottom: j === col.items.length - 1 ? 'none' : '1px solid #F1EDE5' }}>
+                      {it.href ? <a className="bi-link" href={it.href} style={{ textDecoration:'none', display:'block' }}>{body}</a> : body}
+                    </div>
+                  )
+                })}
+              </div>
             </div>
           ))}
         </div>

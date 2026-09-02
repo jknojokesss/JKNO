@@ -131,7 +131,11 @@ export default function JerkyMunch() {
   const [dataLoaded, setDataLoaded] = useState(false)
   const [role, setRole] = useState(null)              // 'owner' | 'counter' (staff shelf-count-only)
   const [drill, setDrill] = useState(null)            // P&L drill-down: { title, rows, total }
-  const [loginEmail, setLoginEmail] = useState('')
+  // /login already asked for the email; carry it over so it is typed once.
+  const [loginEmail, setLoginEmail] = useState(() => {
+    if (typeof window === 'undefined') return ''
+    return new URLSearchParams(window.location.search).get('email') || ''
+  })
   const [loginPassword, setLoginPassword] = useState('')
   const [loginError, setLoginError] = useState('')
   const [showChangePw, setShowChangePw] = useState(false)
