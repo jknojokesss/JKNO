@@ -14,7 +14,7 @@ const BIZ_ADDR = '1342 51st Street, Brooklyn NY 11219'
 const BIZ_TEL = '718-851-1___'   // TODO: confirm full telephone number
 const BIZ_FAX = '718-851-0847'
 const BIZ_EMAIL = 'Info@lewimports.com'
-const METHODS = ['Cash', 'Check', 'Card', 'On Acct.', 'Zelle']
+const METHODS = ['Cash', 'Check', 'CC Card', 'On Acct.', 'Zelle']
 const DEFAULT_TAX_RATE = 8.875   // NYC rate — editable per order
 
 // Built-in items — always available. User-added items layer on top from localStorage.
@@ -101,6 +101,29 @@ const buildReceiptHtml = (o) => {
   </div>`
 }
 
+// Open-work list, shared by the Tasks print button and the daily owner email.
+const buildTaskListHtml = (rows) => {
+  if (!rows.length) return '<div style="font-size:15px;color:#2E7D46;">Nothing open — all caught up ✓</div>'
+  const today = new Date().toISOString().slice(0, 10)
+  return `<table style="width:100%;border-collapse:collapse;font-size:13px;">
+    <tr style="background:#F0F4FF;">
+      <th style="text-align:left;padding:7px 8px;color:#2A4C9C;font-size:11px;text-transform:uppercase;">Due</th>
+      <th style="text-align:left;padding:7px 8px;color:#2A4C9C;font-size:11px;text-transform:uppercase;">What's needed</th>
+      <th style="text-align:left;padding:7px 8px;color:#2A4C9C;font-size:11px;text-transform:uppercase;">Who</th>
+      <th style="text-align:left;padding:7px 8px;color:#2A4C9C;font-size:11px;text-transform:uppercase;">Order</th>
+    </tr>
+    ${rows.map(t => {
+      const late = t.date && t.date < today
+      return `<tr style="border-bottom:1px solid #eee;">
+        <td style="padding:7px 8px;white-space:nowrap;color:${late ? '#C0504C' : '#666'};font-weight:${late ? 700 : 400};">${t.date ? (late ? '⚠ ' : '') + fmtShort(t.date) : '—'}</td>
+        <td style="padding:7px 8px;">${t.garment ? `<b>${t.garment}</b> — ` : ''}${t.text}${t.hours ? ` <span style="color:#888;">(${t.hours}h)</span>` : ''}</td>
+        <td style="padding:7px 8px;color:#666;">${t.assignedTo || 'unassigned'}</td>
+        <td style="padding:7px 8px;white-space:nowrap;"><span style="color:#C8322B;font-weight:600;">${t.orderNo != null ? 'No. ' + t.orderNo : 'General'}</span>${t.customerName ? ` <span style="color:#666;">${t.customerName}</span>` : ''}</td>
+      </tr>`
+    }).join('')}
+  </table>`
+}
+
 // ── Input cleanup: tidy up how people type names, addresses, and phones ──
 const titleCase = (s) => (s || '').trim().replace(/\s+/g, ' ').toLowerCase()
   .replace(/(^|[\s\-/.])([a-z])/g, (_, sep, ch) => sep + ch.toUpperCase())
@@ -119,7 +142,8 @@ const fmtPhone = (s) => {
   return d.length === 10 ? `${cc}(${d.slice(0, 3)}) ${d.slice(3, 6)}-${d.slice(6)}` : raw
 }
 const balanceOf = (o) => orderTotal(o) - sumPaid(o)
-const isOpen = (o) => balanceOf(o) > 0.005 || (o.alterationsList || []).some(a => !a.done)
+// An order with nothing billed yet (just a name) is still open — never "completed".
+const isOpen = (o) => orderTotal(o) <= 0.005 || balanceOf(o) > 0.005 || (o.alterationsList || []).some(a => !a.done)
 
 // backward-compat: old orders have a single `name` field
 const fullName = (o) => o.firstName ? `${o.firstName} ${o.lastName || ''}`.trim() : (o.name || '')
@@ -147,6 +171,7 @@ const toDB = (o, userId) => ({
   follow_up_date: o.followUpDate || null, todos: o.todos || [],
   sales_order: o.salesOrder || {},
   photos: o.photos || [],
+  order_kind: o.orderKind === 'stock' ? 'stock' : 'customer',
   saved_at: new Date().toISOString(),
 })
 const fromDB = (r) => ({
@@ -155,7 +180,9 @@ const fromDB = (r) => ({
   name: `${r.first_name} ${r.last_name}`.trim(),
   phone: r.phone, email: r.email || '', home: r.home_phone || '',
   address: r.address, city: r.city, state: r.state, zip: r.zip,
-  date: r.order_date, items: r.items || [], payments: r.payments || [],
+  date: r.order_date, items: r.items || [],
+  // Older payments were saved with method 'Card' before the rename to 'CC Card'.
+  payments: (r.payments || []).map(p => p.method === 'Card' ? { ...p, method: 'CC Card' } : p),
   alterations: r.alterations,
   alterationsList: (Array.isArray(r.alterations_list) && r.alterations_list.length)
     ? r.alterations_list
@@ -164,6 +191,7 @@ const fromDB = (r) => ({
   followUpDate: r.follow_up_date, todos: r.todos || [],
   salesOrder: r.sales_order || {},
   photos: r.photos || [],
+  orderKind: r.order_kind === 'stock' ? 'stock' : 'customer',
   savedAt: new Date(r.saved_at).getTime(),
 })
 
@@ -176,6 +204,7 @@ const blankForm = () => ({
   items: [blankRow(), blankRow(), blankRow()],
   payments: [], alterations: false, alterationsList: [], notes: '',
   todos: [], taxRate: DEFAULT_TAX_RATE, salesOrder: {}, photos: [],
+  orderKind: 'customer',   // 'customer' = a sales order for a person; 'stock' = buying gowns for the shop
 })
 
 export default function Gowns() {
@@ -278,7 +307,13 @@ export default function Gowns() {
   const paid = sumPaid(form)
   const balance = total - paid
 
-  const startNew = () => { setForm(blankForm()); setPay({ amount: '', method: '', date: todayStr() }); setFormTodo({ text: '', assignee: '', date: '' }); setEditing(false); setView('form'); window.scrollTo(0, 0) }
+  const startNew = (orderKind = 'customer') => {
+    // A stock order is the shop buying gowns for itself — the "customer" is the shop.
+    const base = blankForm()
+    setForm(orderKind === 'stock' ? { ...base, orderKind, firstName: 'Stock', lastName: 'Order' } : base)
+    setPay({ amount: '', method: '', date: todayStr() }); setFormTodo({ text: '', assignee: '', date: '' })
+    setEditing(false); setView('form'); window.scrollTo(0, 0)
+  }
   const openOrder = (o) => {
     const items = (o.items && o.items.length ? o.items : [blankRow()]).map(it => ({ taxable: true, qty: '1', ...it, price: it.price || String(it.amount || '') }))
     // migrate old single `name` field to firstName/lastName
@@ -342,8 +377,8 @@ export default function Gowns() {
     setSuggest(s => ({ id, query: val.trim(), company: s && s.id === id ? s.company : null }))
   }
   const pickItem = (rowId, item) => {
-    // Prefill the line's price with the last price charged for this item (still editable).
-    setForm(f => ({ ...f, items: f.items.map(it => it.id === rowId ? { ...it, itemNo: item.no, desc: item.desc, taxable: item.taxable !== false, price: it.price || (item.lastPrice != null ? String(item.lastPrice) : '') } : it), ...(item.alteration ? { alterations: true, alterationsList: (f.alterationsList?.length ? f.alterationsList : [{ id: uid(), garment: '', note: '', assignee: '', hours: '', due: '', done: false }]) } : {}) }))
+    // Prefill the line's price with the last price charged, and the company from the catalog.
+    setForm(f => ({ ...f, items: f.items.map(it => it.id === rowId ? { ...it, itemNo: item.no, desc: item.desc, taxable: item.taxable !== false, company: item.company || it.company || '', price: it.price || (item.lastPrice != null ? String(item.lastPrice) : '') } : it), ...(item.alteration ? { alterations: true, alterationsList: (f.alterationsList?.length ? f.alterationsList : [{ id: uid(), garment: '', note: '', assignee: '', hours: '', due: '', done: false }]) } : {}) }))
     setSuggest(null)
   }
   const saveNewItem = async () => {
@@ -506,21 +541,24 @@ export default function Gowns() {
     win.document.write(`<!DOCTYPE html><html><head><title>${BIZ} — Receipt${o.orderNo ? ' No. ' + o.orderNo : ''}</title><style>*{box-sizing:border-box}@media print{body{margin:0}}</style></head><body style="padding:24px;">${buildReceiptHtml(o)}</body></html>`)
     win.document.close(); win.focus(); setTimeout(() => win.print(), 400)
   }
-  const emailReceipt = async () => {
-    if (!form.email?.trim()) { alert("Add the customer's email to the order first (the Email field), then try again."); return }
+  // copyToOwner: also send the shop its own copy (BIZ_EMAIL).
+  const emailReceipt = async (copyToOwner = false) => {
+    if (!copyToOwner && !form.email?.trim()) { alert("Add the customer's email to the order first (the Email field), then try again."); return }
     const saved = await save(true)   // persist + get assigned order #
     if (!saved) return
+    const to = [saved.email?.trim(), copyToOwner ? BIZ_EMAIL : null].filter(Boolean).join(', ')
+    if (!to) { alert('No email address to send to.'); return }
     setEmailing(true)
     try {
       const { data: { session } } = await supabase.auth.getSession()
       const res = await fetch('/api/send-receipt', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${session?.access_token || ''}` },
-        body: JSON.stringify({ to: saved.email, subject: `Your receipt — ${BIZ} · No. ${saved.orderNo}`, html: buildReceiptHtml(saved) }),
+        body: JSON.stringify({ to, subject: `Your receipt — ${BIZ} · No. ${saved.orderNo}`, html: buildReceiptHtml(saved) }),
       })
       const j = await res.json().catch(() => ({}))
       if (!res.ok) { alert('Could not send receipt: ' + (j.error || res.status)); return }
-      alert('Receipt emailed to ' + saved.email + ' ✓')
+      alert('Receipt emailed to ' + to + ' ✓')
     } catch (e) {
       alert('Could not send receipt: ' + e.message)
     } finally {
@@ -778,11 +816,12 @@ export default function Gowns() {
     if (error) { alert('Could not delete task: ' + error.message); setTasks(prev) }
   }
 
-  const downloadCSV = () => {
-    if (!orders.length) { alert('No orders to export yet.'); return }
+  const downloadCSV = (which) => {
+    const list = which && which.length ? which : orders
+    if (!list.length) { alert('No orders to export yet.'); return }
     const esc = (s) => { const v = String(s == null ? '' : s).replace(/[\r\n]+/g, ' ').trim(); return v.includes(',') || v.includes('"') ? `"${v.replace(/"/g, '""')}"` : v }
-    const headers = ['Order #', 'Date', 'First Name', 'Last Name', 'Cell', 'Home', 'Email', 'Address', 'City', 'State', 'Zip', 'Items', 'Subtotal', 'Tax Rate', 'Tax', 'Total', 'Amount Paid', 'Balance', 'Status', 'Payments', 'Alterations', 'Notes']
-    const rows = orders.map(o => {
+    const headers = ['Order #', 'Type', 'Date', 'First Name', 'Last Name', 'Cell', 'Home', 'Email', 'Address', 'City', 'State', 'Zip', 'Items', 'Subtotal', 'Tax Rate', 'Tax', 'Total', 'Amount Paid', 'Balance', 'Status', 'Payments', 'Alterations', 'Notes']
+    const rows = list.map(o => {
       const sub = sumItems(o.items), tax = calcTax(o.items, o.taxRate), tot = sub + tax, p = sumPaid(o), bal = tot - p
       const itemsSummary = o.items.filter(it => it.desc || lineAmt(it)).map(it => `${it.qty > 1 ? it.qty + 'x ' : ''}${it.desc || ''}${lineAmt(it) ? ' (' + money(lineAmt(it)) + (it.taxable === false ? ' no tax' : '') + ')' : ''}`).join('; ')
       const payHistory = (o.payments || []).map(p => `${money(p.amount)}${p.method ? ' ' + p.method : ''}${p.method === 'Check' && p.checkNo ? ' #' + p.checkNo : ''}${p.date ? ' ' + fmtDate(p.date) : ''}`).join('; ')
@@ -790,7 +829,8 @@ export default function Gowns() {
       const status = isOpen(o) ? 'Open' : 'Completed'
       const fn = o.firstName || (o.name ? o.name.split(' ')[0] : '')
       const ln = o.lastName || (o.name ? o.name.split(' ').slice(1).join(' ') : '')
-      return [o.orderNo || '', o.date || '', fn, ln, o.phone || '', o.home || '', o.email || '', o.address || '', o.city || '', o.state || '', o.zip || '', itemsSummary, sub.toFixed(2), (o.taxRate || 0) + '%', tax.toFixed(2), tot.toFixed(2), p.toFixed(2), bal.toFixed(2), status, payHistory, altNote, o.notes || ''].map(esc).join(',')
+      const kind = o.orderKind === 'stock' ? 'Stock' : 'Customer'
+      return [o.orderNo || '', kind, o.date || '', fn, ln, o.phone || '', o.home || '', o.email || '', o.address || '', o.city || '', o.state || '', o.zip || '', itemsSummary, sub.toFixed(2), (o.taxRate || 0) + '%', tax.toFixed(2), tot.toFixed(2), p.toFixed(2), bal.toFixed(2), status, payHistory, altNote, o.notes || ''].map(esc).join(',')
     })
     const csv = [headers.join(','), ...rows].join('\r\n')
     const blob = new Blob([csv], { type: 'text/csv;charset=utf-8' })
@@ -885,7 +925,10 @@ export default function Gowns() {
         {/* ===== LIST ===== */}
         {role !== 'seamstress' && view === 'list' && (
           <>
-            <button className="gw-new-btn gw-press" onClick={startNew}>+ New Order</button>
+            <div style={{ display: 'flex', gap: '8px', marginBottom: '14px' }}>
+              <button className="gw-press" onClick={() => startNew('customer')} style={{ ...primaryBtn, flex: 2, padding: '15px 12px', fontSize: '16px' }}>+ New Customer Order</button>
+              <button className="gw-press" onClick={() => startNew('stock')} style={{ ...primaryBtn, flex: 1, padding: '15px 12px', fontSize: '15px', background: PAD, boxShadow: '0 2px 10px rgba(42,76,156,0.28)' }}>+ New Stock Order</button>
+            </div>
             <div className="gw-tabs" style={{ marginBottom: '16px' }}>
               <button onClick={() => setTab('open')} style={tabBtn(tab === 'open')}>Open ({openList.length})</button>
               <button onClick={() => setTab('completed')} style={tabBtn(tab === 'completed')}>Completed ({doneList.length})</button>
@@ -937,6 +980,7 @@ export default function Gowns() {
               const altTasks = orders.flatMap(o => (o.alterationsList || []).map(a => ({
                 id: 'alt-' + a.id, isAlteration: true, alterationId: a.id,
                 text: a.note?.trim() ? `✂ ${a.note.trim()}` : '✂ Alteration',
+                garment: a.garment?.trim() || '', hours: a.hours || '',
                 assignedTo: a.assignee || '', date: a.due || '', done: !!a.done,
                 orderId: o.id, orderNo: o.orderNo, customerName: fullName(o),
               })))
@@ -958,15 +1002,23 @@ export default function Gowns() {
               const byPerson = open.reduce((acc, t) => { const k = t.assignedTo || 'Unassigned'; if (!acc[k]) acc[k] = []; acc[k].push(t); return acc }, {})
               const byCustomer = open.reduce((acc, t) => { const k = t.customerName || 'General (no order)'; if (!acc[k]) acc[k] = []; acc[k].push(t); return acc }, {})
               const byDate = [...open].sort((a, b) => (a.date || '').localeCompare(b.date || ''))
-              const taskRow = (t) => (
+              // Mirrors the workroom: the garment, the alteration, who's on it, hours, and when it's due.
+              const taskRow = (t) => {
+                const dt = dueTone(t.date, t.done)
+                return (
                 <div key={t.id} style={{ display: 'grid', gridTemplateColumns: '80px 1fr auto', gap: '10px', alignItems: 'center', padding: '11px 14px', borderBottom: `1px solid ${CREAM}` }}>
-                  <span style={{ fontSize: '13px', color: MUTED, fontWeight: 500, whiteSpace: 'nowrap' }}>{t.date ? fmtShort(t.date) : '—'}</span>
+                  <span style={{ fontSize: '13px', color: dt.color, fontWeight: dt.weight, whiteSpace: 'nowrap' }}>{t.date ? `${dt.overdue ? '⚠ ' : ''}${fmtShort(t.date)}` : '—'}</span>
                   <div>
-                    <div style={{ fontSize: '14px', color: INK, fontWeight: 500 }}>{t.text}</div>
+                    <div style={{ fontSize: '14px', color: INK, fontWeight: 500 }}>
+                      {t.garment && <span style={{ fontWeight: 800 }}>👗 {t.garment} — </span>}
+                      <span style={{ color: t.isAlteration ? ROSE_DK : INK, fontWeight: t.isAlteration ? 600 : 500 }}>{t.text}</span>
+                    </div>
                     <div style={{ fontSize: '12px', color: MUTED, marginTop: '2px' }}>
                       {t.orderNo != null
                         ? <><span style={{ color: REDNO, fontWeight: 600, cursor: 'pointer' }} onClick={() => { const o = orders.find(x => x.id === t.orderId); if (o) openOrder(o) }}>No. {t.orderNo}</span>{t.customerName ? ` · ${t.customerName}` : ''}</>
                         : <span style={{ fontStyle: 'italic' }}>General task</span>}
+                      <span> · {t.assignedTo || 'unassigned'}</span>
+                      {t.hours ? <span> · {t.hours}h</span> : ''}
                     </div>
                   </div>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
@@ -978,7 +1030,8 @@ export default function Gowns() {
                     {t.isStandalone && <button onClick={() => removeTask(t.taskId)} title="Delete task" style={{ border: 'none', background: 'none', color: '#D0C5BF', fontSize: '16px', cursor: 'pointer', lineHeight: 1 }}>×</button>}
                   </div>
                 </div>
-              )
+                )
+              }
               return (
                 <div>
                   {/* Add a standalone task (optionally linked to an order) */}
@@ -1005,22 +1058,15 @@ export default function Gowns() {
                     <button onClick={addTask} className="gw-press" style={{ ...primaryBtn, width: '100%', padding: '12px' }}>+ Add task</button>
                   </div>
 
-                  <div style={{ display: 'flex', gap: '8px', marginBottom: '16px', flexWrap: 'wrap' }}>
-                    {[['person', 'By Person'], ['customer', 'By Customer'], ['date', 'By Date']].map(([v, l]) => (
-                      <button key={v} onClick={() => setTodoView(v)} style={{ ...tabBtn(todoView === v), flex: 'none', padding: '10px 20px' }}>{l}</button>
-                    ))}
-                    {open.length > 0 && <button onClick={() => {
-                      const grouped = todoView === 'person'
-                        ? Object.keys(byPerson).sort().map(p => `<div style="margin-bottom:20px;"><div style="font-size:15px;font-weight:700;color:#2A4C9C;border-bottom:2px solid #2A4C9C;padding-bottom:6px;margin-bottom:8px;">${p}</div>${byPerson[p].sort((a,b)=>(a.date||'').localeCompare(b.date||'')).map(t=>`<div style="display:flex;gap:12px;padding:7px 0;border-bottom:1px solid #eee;font-size:13px;"><span style="width:70px;color:#888;flex-shrink:0;">${t.date?fmtShort(t.date):'—'}</span><span style="flex:1;">${t.text}</span><span style="color:#C8322B;font-weight:600;white-space:nowrap;">${t.orderNo != null ? 'No. ' + t.orderNo : 'General'}</span><span style="color:#666;margin-left:8px;">${t.customerName}</span></div>`).join('')}</div>`).join('')
-                        : todoView === 'customer'
-                        ? Object.keys(byCustomer).sort().map(c => `<div style="margin-bottom:20px;"><div style="font-size:15px;font-weight:700;color:#2A4C9C;border-bottom:2px solid #2A4C9C;padding-bottom:6px;margin-bottom:8px;">${c}</div>${byCustomer[c].sort((a,b)=>(a.date||'').localeCompare(b.date||'')).map(t=>`<div style="display:flex;gap:12px;padding:7px 0;border-bottom:1px solid #eee;font-size:13px;"><span style="width:70px;color:#888;flex-shrink:0;">${t.date?fmtShort(t.date):'—'}</span><span style="flex:1;">${t.text}</span><span style="color:#8A8A93;">${t.assignedTo||'—'}</span><span style="color:#C8322B;font-weight:600;white-space:nowrap;">${t.orderNo != null ? 'No. ' + t.orderNo : 'General'}</span></div>`).join('')}</div>`).join('')
-                        : (() => { const gd = byDate.reduce((acc,t)=>{const k=t.date||'No date';if(!acc[k])acc[k]=[];acc[k].push(t);return acc},{});return Object.keys(gd).map(d=>`<div style="margin-bottom:20px;"><div style="font-size:15px;font-weight:700;color:#2A4C9C;border-bottom:2px solid #2A4C9C;padding-bottom:6px;margin-bottom:8px;">${d==='No date'?'No date':fmtDate(d)}</div>${gd[d].map(t=>`<div style="display:flex;gap:12px;padding:7px 0;border-bottom:1px solid #eee;font-size:13px;"><span style="flex:1;">${t.text}</span><span style="color:#8A8A93;">${t.assignedTo||'—'}</span><span style="color:#C8322B;font-weight:600;white-space:nowrap;margin-left:8px;">${t.orderNo != null ? 'No. ' + t.orderNo : 'General'}</span><span style="color:#666;margin-left:8px;">${t.customerName}</span></div>`).join('')}</div>`).join('') })()
-                      const viewLabel = todoView === 'person' ? 'By Person' : todoView === 'customer' ? 'By Customer' : 'By Date'
-                      const win = window.open('', '_blank')
-                      win.document.write(`<!DOCTYPE html><html><head><title>${BIZ} — Tasks</title></head><body style="font-family:sans-serif;padding:32px;max-width:720px;margin:0 auto;"><div style="display:flex;justify-content:space-between;align-items:baseline;border-bottom:2px solid #2A4C9C;padding-bottom:12px;margin-bottom:24px;"><div style="font-size:22px;font-weight:700;">${BIZ} — Task List</div><div style="font-size:13px;color:#888;">${new Date().toLocaleDateString()} · ${viewLabel}</div></div>${grouped}</body></html>`)
-                      win.document.close(); win.focus(); setTimeout(()=>win.print(), 400)
-                    }} style={{ flex: 'none', padding: '10px 20px', fontSize: '14px', fontWeight: 600, color: '#fff', background: PAD, border: 'none', borderRadius: '12px', cursor: 'pointer', fontFamily: 'inherit' }}>🖨 Print</button>}
-                  </div>
+                  {open.length > 0 && (
+                    <div style={{ display: 'flex', gap: '8px', marginBottom: '16px', flexWrap: 'wrap' }}>
+                      <button onClick={() => {
+                        const win = window.open('', '_blank')
+                        win.document.write(`<!DOCTYPE html><html><head><title>${BIZ} — Tasks</title></head><body style="font-family:sans-serif;padding:32px;max-width:720px;margin:0 auto;"><div style="display:flex;justify-content:space-between;align-items:baseline;border-bottom:2px solid #2A4C9C;padding-bottom:12px;margin-bottom:24px;"><div style="font-size:22px;font-weight:700;">${BIZ} — What's Open</div><div style="font-size:13px;color:#888;">${new Date().toLocaleDateString()}</div></div>${buildTaskListHtml(byDate)}</body></html>`)
+                        win.document.close(); win.focus(); setTimeout(() => win.print(), 400)
+                      }} style={{ flex: 'none', padding: '10px 20px', fontSize: '14px', fontWeight: 600, color: '#fff', background: PAD, border: 'none', borderRadius: '12px', cursor: 'pointer', fontFamily: 'inherit' }}>🖨 Print list</button>
+                    </div>
+                  )}
 
                   {open.length === 0 && (
                     <div className="gw-card" style={{ padding: '36px 24px', textAlign: 'center', color: MUTED }}>
@@ -1030,38 +1076,15 @@ export default function Gowns() {
                     </div>
                   )}
 
-                  {todoView === 'person' && Object.keys(byPerson).sort().map(person => (
-                    <div key={person} className="gw-card" style={{ marginBottom: '14px', overflow: 'hidden' }}>
-                      <div style={{ padding: '12px 14px', background: '#F0F4FF', borderBottom: `1px solid ${GRID}`, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                        <span style={{ fontSize: '14px', fontWeight: 700, color: PAD }}>{person}</span>
-                        <span style={{ fontSize: '12px', color: MUTED }}>{byPerson[person].length} task{byPerson[person].length !== 1 ? 's' : ''}</span>
+                  {/* One simple list, soonest due first — what's open, for which dress, who has it, how long. */}
+                  {open.length > 0 && (
+                    <div className="gw-card" style={{ overflow: 'hidden' }}>
+                      <div style={{ padding: '11px 14px', background: '#F0F4FF', borderBottom: `1px solid ${GRID}`, fontSize: '13px', fontWeight: 700, color: PAD }}>
+                        {open.length} open · soonest first
                       </div>
-                      {byPerson[person].sort((a, b) => (a.date || '').localeCompare(b.date || '')).map(taskRow)}
+                      {byDate.map(taskRow)}
                     </div>
-                  ))}
-
-                  {todoView === 'customer' && Object.keys(byCustomer).sort().map(cust => (
-                    <div key={cust} className="gw-card" style={{ marginBottom: '14px', overflow: 'hidden' }}>
-                      <div style={{ padding: '12px 14px', background: '#F0F4FF', borderBottom: `1px solid ${GRID}`, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                        <span style={{ fontSize: '14px', fontWeight: 700, color: PAD }}>{cust}</span>
-                        <span style={{ fontSize: '12px', color: MUTED }}>{byCustomer[cust].length} task{byCustomer[cust].length !== 1 ? 's' : ''}</span>
-                      </div>
-                      {byCustomer[cust].sort((a, b) => (a.date || '').localeCompare(b.date || '')).map(taskRow)}
-                    </div>
-                  ))}
-
-                  {todoView === 'date' && (() => {
-                    const grouped = byDate.reduce((acc, t) => { const k = t.date || 'No date'; if (!acc[k]) acc[k] = []; acc[k].push(t); return acc }, {})
-                    return Object.keys(grouped).map(date => (
-                      <div key={date} className="gw-card" style={{ marginBottom: '14px', overflow: 'hidden' }}>
-                        <div style={{ padding: '12px 14px', background: '#F0F4FF', borderBottom: `1px solid ${GRID}`, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                          <span style={{ fontSize: '14px', fontWeight: 700, color: PAD }}>{date === 'No date' ? 'No date' : fmtDate(date)}</span>
-                          <span style={{ fontSize: '12px', color: MUTED }}>{grouped[date].length} task{grouped[date].length !== 1 ? 's' : ''}</span>
-                        </div>
-                        {grouped[date].map(taskRow)}
-                      </div>
-                    ))
-                  })()}
+                  )}
                 </div>
               )
             })()}
@@ -1226,15 +1249,17 @@ export default function Gowns() {
             {orders.length > 0 && tab !== 'todos' && tab !== 'customers' && tab !== 'catalog' && (
               <>
                 <div style={{ display: 'flex', gap: '10px', marginTop: '26px' }}>
-                  <button onClick={downloadCSV} style={{ flex: 1, padding: '14px', fontSize: '14px', fontWeight: 600, color: PAD, background: '#fff', border: `1.5px solid ${GRID}`, borderRadius: '12px', cursor: 'pointer', fontFamily: 'inherit' }}>
-                    ⬇ Export to Excel (.csv)
+                  <button onClick={() => downloadCSV(filtered)} style={{ flex: 1, padding: '14px', fontSize: '14px', fontWeight: 600, color: PAD, background: '#fff', border: `1.5px solid ${GRID}`, borderRadius: '12px', cursor: 'pointer', fontFamily: 'inherit' }}>
+                    ⬇ Excel ({filtered.length})
                   </button>
                   <button onClick={() => printOrders(filtered)} style={{ flex: 1, padding: '14px', fontSize: '14px', fontWeight: 600, color: '#fff', background: PAD, border: 'none', borderRadius: '12px', cursor: 'pointer', fontFamily: 'inherit' }}>
-                    🖨 Print orders
+                    🖨 Print {filtered.length} invoice{filtered.length === 1 ? '' : 's'}
                   </button>
                 </div>
 
-                <div style={{ textAlign: 'center', marginTop: '6px', fontSize: '11px', color: '#B9ADA8' }}>for your bookkeeper</div>
+                <div style={{ textAlign: 'center', marginTop: '6px', fontSize: '11px', color: '#B9ADA8' }}>
+                  {tab === 'all' ? 'every order' : `${tab} orders`} — one full invoice per page, for the binder
+                </div>
               </>
             )}
             <div style={{ textAlign: 'center', marginTop: '28px', fontSize: '12px', color: '#B9ADA8' }}>
@@ -1255,7 +1280,8 @@ export default function Gowns() {
             </div>
             <div style={{ display: 'flex', gap: '10px', marginBottom: '14px' }}>
               <button className="gw-press" onClick={() => printReceipt(form)} style={{ ...primaryBtn, flex: 1, padding: '10px', background: '#fff', color: PAD, border: `1.5px solid ${PAD}` }}>🖨 Print receipt</button>
-              <button className="gw-press" onClick={emailReceipt} disabled={emailing} style={{ ...primaryBtn, flex: 1, padding: '10px', background: emailing ? '#B9A9C6' : '#6D4C8E' }}>{emailing ? 'Sending…' : '✉ Email receipt'}</button>
+              <button className="gw-press" onClick={() => emailReceipt(false)} disabled={emailing} style={{ ...primaryBtn, flex: 1, padding: '10px', background: emailing ? '#B9A9C6' : '#6D4C8E' }}>{emailing ? 'Sending…' : '✉ Email receipt'}</button>
+              <button className="gw-press" onClick={() => emailReceipt(true)} disabled={emailing} title={`Send to the customer and to ${BIZ_EMAIL}`} style={{ ...primaryBtn, flex: '0 0 auto', padding: '10px 12px', fontSize: '13px', background: '#fff', color: '#6D4C8E', border: '1.5px solid #6D4C8E', boxShadow: 'none' }}>+ me</button>
             </div>
 
             {/* The pad */}
@@ -1343,7 +1369,8 @@ export default function Gowns() {
               {form.items.map((it, i) => {
                 const showSuggest = suggest && suggest.id === it.id
                 return (
-                  <div key={it.id} style={{ display: 'flex', borderBottom: `1px solid ${GRID}`, alignItems: 'center', position: 'relative' }}>
+                  <div key={it.id}>
+                    <div style={{ display: 'flex', borderBottom: `1px solid ${GRID}`, alignItems: 'center', position: 'relative' }}>
                     <div style={{ width: '26px', textAlign: 'center', fontSize: '11px', color: PAD, fontWeight: 600 }}>{i + 1}</div>
                     <input value={it.qty} onChange={e => setItem(it.id, 'qty', e.target.value)} type="text" inputMode="numeric" style={{ ...cellIn, width: '44px', textAlign: 'center', padding: '12px 2px', borderLeft: `1px solid ${GRID}` }} />
                     {/* item # with typeahead */}
@@ -1402,6 +1429,45 @@ export default function Gowns() {
                       <input type="checkbox" className="tax-check" checked={it.taxable !== false} onChange={e => setItem(it.id, 'taxable', e.target.checked)} title="Taxable" />
                     </div>
                     <button onClick={() => removeRow(it.id)} aria-label="remove" style={{ width: '26px', height: '40px', border: 'none', background: 'none', color: '#C7B7B1', fontSize: '18px', cursor: 'pointer', lineHeight: 1 }}>×</button>
+                    </div>
+                    {/* company → item is a hierarchy: choose the company, then its gowns */}
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '5px 12px 7px 32px', background: '#FBFAF7', borderBottom: `1px solid ${GRID}`, flexWrap: 'wrap' }}>
+                        <select value={it.company || ''} onChange={e => {
+                          const co = e.target.value
+                          // Switching company clears an item that belongs to a different one.
+                          const cur = catalog.find(c => c.no === (it.itemNo || '').trim().toUpperCase())
+                          const keep = !cur || !co || (cur.company || '').trim() === co
+                          setForm(f => ({ ...f, items: f.items.map(x => x.id === it.id ? { ...x, company: co, ...(keep ? {} : { itemNo: '', desc: '' }) } : x) }))
+                        }}
+                          style={{ fontSize: '12px', fontWeight: 600, color: it.company ? INK : MUTED, border: '1px solid #E2D7D1', borderRadius: '7px', padding: '4px 7px', background: '#fff', fontFamily: 'inherit', outline: 'none', cursor: 'pointer', maxWidth: '150px' }}>
+                          <option value="">Company…</option>
+                          {[...new Set([...catalog.map(c => (c.company || '').trim()).filter(Boolean), ...(it.company ? [it.company] : [])])].sort().map(co => <option key={co} value={co}>{co}</option>)}
+                        </select>
+                        {it.company && (
+                          <select value={(it.itemNo || '').trim().toUpperCase()} onChange={e => {
+                            const picked = catalog.find(c => c.no === e.target.value)
+                            if (picked) pickItem(it.id, picked); else setItem(it.id, 'itemNo', '')
+                          }}
+                            style={{ fontSize: '12px', fontWeight: 600, color: it.itemNo ? PAD : MUTED, border: '1px solid #E2D7D1', borderRadius: '7px', padding: '4px 7px', background: '#fff', fontFamily: 'inherit', outline: 'none', cursor: 'pointer', maxWidth: '190px' }}>
+                            <option value="">Item…</option>
+                            {catalog.filter(c => (c.company || '').trim() === it.company).sort((a, b) => a.no.localeCompare(b.no))
+                              .map(c => <option key={c.no} value={c.no}>{c.no}{c.desc ? ` — ${c.desc}` : ''}</option>)}
+                          </select>
+                        )}
+                        <div style={{ display: 'flex', gap: '4px' }}>
+                          {['Stock', 'Order'].map(s => {
+                            const on = it.source === s
+                            return (
+                              <button key={s} onClick={() => setItem(it.id, 'source', on ? '' : s)} style={{
+                                padding: '4px 12px', fontSize: '12px', fontWeight: 700, borderRadius: '999px', cursor: 'pointer', fontFamily: 'inherit',
+                                border: `1.5px solid ${on ? (s === 'Stock' ? GREEN : AMBER) : '#E2D7D1'}`,
+                                background: on ? (s === 'Stock' ? '#EAF5EC' : '#FBF3E4') : '#fff',
+                                color: on ? (s === 'Stock' ? GREEN : AMBER) : MUTED,
+                              }}>{s === 'Stock' ? 'In stock' : 'To order'}</button>
+                            )
+                          })}
+                        </div>
+                    </div>
                   </div>
                 )
               })}
@@ -1654,7 +1720,8 @@ export default function Gowns() {
             <button className="gw-press" onClick={() => save(true)} style={{ ...primaryBtn, width: '100%' }}>{justSaved ? 'Saved ✓' : 'Save'}</button>
             <div style={{ display: 'flex', gap: '10px', marginTop: '10px' }}>
               <button className="gw-press" onClick={() => printReceipt(form)} style={{ ...primaryBtn, flex: 1, background: '#fff', color: PAD, border: `1.5px solid ${PAD}` }}>🖨 Print receipt</button>
-              <button className="gw-press" onClick={emailReceipt} disabled={emailing} style={{ ...primaryBtn, flex: 1, background: emailing ? '#B9A9C6' : '#6D4C8E' }}>{emailing ? 'Sending…' : '✉ Email receipt'}</button>
+              <button className="gw-press" onClick={() => emailReceipt(false)} disabled={emailing} style={{ ...primaryBtn, flex: 1, background: emailing ? '#B9A9C6' : '#6D4C8E' }}>{emailing ? 'Sending…' : '✉ Email receipt'}</button>
+              <button className="gw-press" onClick={() => emailReceipt(true)} disabled={emailing} title={`Send to the customer and to ${BIZ_EMAIL}`} style={{ ...primaryBtn, flex: '0 0 auto', padding: '14px 14px', fontSize: '14px', background: '#fff', color: '#6D4C8E', border: '1.5px solid #6D4C8E', boxShadow: 'none' }}>+ me</button>
             </div>
             <button onClick={() => { setView('list'); window.scrollTo(0, 0) }} style={{ ...ghostBtn, marginTop: '10px', border: 'none', color: MUTED }}>← Back to all orders</button>
           </div>
