@@ -51,7 +51,7 @@ export default function DemoGallery() {
             Don't see your industry?
           </div>
           <p style={{ color: '#9AA3BD', fontSize: '14px', marginBottom: '24px' }}>
-            We'll build a demo around <i>your</i> business before you pay a dime. Free consult + $25 gift card for new clients.
+            We'll build a demo around <i>your</i> business, wired into your own systems, before you pay a dime.
           </p>
           <a href={BOOK} target="_blank" rel="noopener noreferrer" style={{ background: '#C9A84C', color: '#080808', textDecoration: 'none', padding: '15px 32px', fontFamily: 'DM Mono, monospace', fontSize: '12px', letterSpacing: '2px', display: 'inline-block' }}>
             BOOK A FREE CONSULT →

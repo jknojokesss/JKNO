@@ -3,7 +3,7 @@ import { useRouter } from 'next/router'
 import Head from 'next/head'
 import { ALL_DEMOS } from '../lib/industryDemos'
 
-// Calendly booking link for the $25 gift-card offer.
+// Calendly booking link behind every "book a call" CTA.
 const BOOKING_URL = 'https://calendly.com/jk-jknojokes/30min'
 
 export default function Landing() {
@@ -106,8 +106,8 @@ export default function Landing() {
       <style>{`
         * { box-sizing: border-box; margin: 0; padding: 0; }
         html { scroll-behavior: smooth; }
-        /* The promo bar (44px) + nav are fixed, so anchored jumps need clearance. */
-        #build, #demos, #demo-preview, #contact { scroll-margin-top: 124px; }
+        /* The nav is fixed, so anchored jumps need clearance underneath it. */
+        #build, #demos, #demo-preview, #contact { scroll-margin-top: 88px; }
         body {
           background-color: #F5F1EA;
           background-image:
@@ -256,37 +256,12 @@ export default function Landing() {
         }
         @keyframes shine { 0% { left: -60%; } 55%, 100% { left: 140%; } }
 
-        .promo-bar {
-          position: fixed; top: 0; left: 0; right: 0; z-index: 200;
-          height: 44px;
-          display: flex; align-items: center; justify-content: center; gap: 10px;
-          background: #C9A84C;
-          color: #1A1A2E; text-decoration: none;
-          font-family: 'DM Mono', monospace; font-size: 13px; letter-spacing: 1px;
-          white-space: nowrap; overflow: hidden; padding: 0 16px;
-          border-bottom: 1px solid rgba(0,0,0,0.12);
-        }
-        .promo-bar:hover { background: #D4B65E; }
-        .promo-bar b { font-weight: 700; }
-        .promo-book {
-          background: #1A2035; color: #F0DEAC; padding: 4px 12px; border-radius: 2px;
-          font-size: 11px; letter-spacing: 1px; white-space: nowrap;
-        }
-        .promo-short { display: none; }
-        @media (max-width: 600px) {
-          .promo-full { display: none; }
-          .promo-short { display: inline; }
-          .promo-bar { font-size: 11px; letter-spacing: 0.4px; gap: 8px; padding: 0 10px; }
-          .promo-book { padding: 4px 10px; font-size: 10px; }
-        }
-
         @media (max-width: 980px) {
           .build-grid { grid-template-columns: 1fr !important; }
         }
         @media (max-width: 768px) {
           .features-grid { grid-template-columns: 1fr !important; }
           .hero-title-text { font-size: 34px !important; }
-          .jkway-arrow { transform: rotate(90deg); }
           .split-section { grid-template-columns: 1fr !important; gap: 32px !important; }
           .offer-btn { padding: 20px 24px !important; font-size: 20px !important; }
           .section-pad { padding: clamp(48px,8vw,120px) clamp(16px,5vw,48px) !important; }
@@ -301,16 +276,9 @@ export default function Landing() {
         }
       `}</style>
 
-      {/* PERSISTENT PROMO BAR — always visible at the very top */}
-      <a href={BOOKING_URL} target="_blank" rel="noopener noreferrer" className="promo-bar">
-        <span className="promo-full"><b>FREE $25 gift card</b> + free consultation for new clients</span>
-        <span className="promo-short"><b>FREE $25 gift card</b> + free consult</span>
-        <span className="promo-book">BOOK NOW →</span>
-      </a>
-
       {/* NAV */}
       <nav style={{
-        position: 'fixed', top: '44px', left: 0, right: 0, zIndex: 100,
+        position: 'fixed', top: 0, left: 0, right: 0, zIndex: 100,
         padding: '20px 32px',
         background: scrolled ? 'rgba(247,244,239,0.97)' : 'transparent',
         backdropFilter: scrolled ? 'blur(12px)' : 'none',
@@ -347,7 +315,7 @@ export default function Landing() {
 
       {/* Mobile menu */}
       {menuOpen && (
-        <div style={{ position: 'fixed', top: '108px', left: 0, right: 0, zIndex: 99,
+        <div style={{ position: 'fixed', top: '64px', left: 0, right: 0, zIndex: 99,
           background: '#EEEAE2', borderBottom: '1px solid #DDD8CE', padding: '20px' }}>
           {[
             { label: 'What We Build', to: '#build' },
@@ -522,40 +490,6 @@ export default function Landing() {
         </div>
       </section>
 
-      {/* WHY THE JK WAY */}
-      <section style={{ background: 'linear-gradient(180deg, #FBF9F4 0%, #F4F0E8 100%)', padding: 'clamp(64px,9vw,104px) clamp(20px,5vw,48px)', position: 'relative', overflow: 'hidden', borderTop: '1px solid #EDE8DF' }}>
-        <div style={{ position: 'relative', maxWidth: '980px', margin: '0 auto', textAlign: 'center' }}>
-          <div style={{ fontFamily: 'DM Mono, monospace', fontSize: '11px', letterSpacing: '3px', color: '#C9A84C', marginBottom: '18px' }}>— THE JK WAY™</div>
-          <h2 style={{ fontFamily: 'Playfair Display, serif', fontWeight: 700, fontSize: 'clamp(30px,4.4vw,52px)', color: '#1A2035', lineHeight: 1.12, marginBottom: '12px' }}>
-            Numbers are easy.<br /><span style={{ color: '#B8943C' }}>The story</span> is everything.
-          </h2>
-          <div style={{ width: '54px', height: '2px', background: '#C9A84C', margin: '26px auto 44px', opacity: 0.8 }} />
-
-          {/* What vs Why cards */}
-          <div className="jkway-cards" style={{ display: 'flex', gap: '18px', alignItems: 'stretch', justifyContent: 'center', flexWrap: 'wrap' }}>
-            <div style={{ flex: '1 1 300px', maxWidth: '380px', background: '#fff', border: '1px solid #E6E0D4', padding: 'clamp(24px,3vw,34px)', textAlign: 'left' }}>
-              <div style={{ fontFamily: 'DM Mono, monospace', fontSize: '10px', letterSpacing: '2px', color: '#A39A86', marginBottom: '14px' }}>MOST REPORTS</div>
-              <div style={{ fontFamily: 'Cormorant Garamond, serif', fontSize: 'clamp(22px,2.6vw,30px)', lineHeight: 1.3, color: '#8A8475' }}>
-                Tell you <span style={{ color: '#1A2035', fontWeight: 600 }}>what</span> happened.
-              </div>
-            </div>
-
-            <div className="jkway-arrow" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#C9A84C', fontSize: '26px', flexShrink: 0 }}>→</div>
-
-            <div style={{ flex: '1 1 300px', maxWidth: '380px', background: '#FBF5E6', border: '1.5px solid #C9A84C', padding: 'clamp(24px,3vw,34px)', textAlign: 'left' }}>
-              <div style={{ fontFamily: 'DM Mono, monospace', fontSize: '10px', letterSpacing: '2px', color: '#B8943C', marginBottom: '14px' }}>THE JK WAY™</div>
-              <div style={{ fontFamily: 'Cormorant Garamond, serif', fontSize: 'clamp(22px,2.6vw,30px)', lineHeight: 1.3, color: '#1A2035' }}>
-                Shows you <span style={{ color: '#B8943C', fontWeight: 700 }}>why</span> — and what to do next.
-              </div>
-            </div>
-          </div>
-
-          <p style={{ fontFamily: "'DM Mono', monospace", fontSize: 'clamp(12px,1.5vw,15.5px)', letterSpacing: '2px', textTransform: 'uppercase', lineHeight: 1.7, color: '#B8943C', fontWeight: 500, marginTop: '44px' }}>
-            Every business is different. Your financial insights should be too.
-          </p>
-        </div>
-      </section>
-
       {/* TICKER */}
       <div style={{ borderTop: '1px solid #DDD8CE', borderBottom: '1px solid #DDD8CE',
         padding: '16px 0', background: '#EEEAE2', overflow: 'hidden' }}>
@@ -574,10 +508,10 @@ export default function Landing() {
           </div>
           <h2 style={{ fontFamily: 'Cormorant Garamond, serif', fontSize: 'clamp(28px, 4vw, 48px)',
             fontWeight: '600', letterSpacing: '-1px', lineHeight: 1.1, marginBottom: '16px' }}>
-            Ready to see your books differently?
+            What would you want built first?
           </h2>
           <p style={{ color: '#5A6070', fontSize: '15px', lineHeight: 1.7 }}>
-            Leave your info and we'll reach out to show you what a custom portal looks like for your business.
+            Tell us how your business actually runs and we'll show you the dashboard we'd build for it — and the integrations underneath it.
           </p>
         </div>
 

@@ -833,7 +833,7 @@ export default function IndustryDemo({ cfg }) {
             Want this for your {industry.toLowerCase()} business — with your real numbers?
           </div>
           <div style={{ fontFamily: "'Inter', sans-serif", fontSize: '13px', color: '#8C9AAA', marginBottom: '18px' }}>
-            Built custom for you. Books included. Free consult + $25 gift card for new clients.
+            Built custom for you, wired into your POS and your books. Free consult.
           </div>
           <a href={BOOK} target="_blank" rel="noopener noreferrer" style={{ background: A, color: '#fff', textDecoration: 'none', borderRadius: '5px', padding: '12px 24px', fontFamily: "'Inter', sans-serif", fontSize: '12.5px', fontWeight: 600, letterSpacing: '0.3px', display: 'inline-block' }}>
             BOOK A 10-MINUTE CALL →
