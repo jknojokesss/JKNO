@@ -4,12 +4,12 @@ import { useRouter } from 'next/router'
 const BOOKING_URL = 'https://calendly.com/jk-jknojokes/30min'
 
 const features = [
-  { icon: '◈', title: 'Plain-English Insights', desc: 'Your financials explained clearly. No jargon, no confusion — just straight answers about how your business is doing and what to watch.' },
-  { icon: '▣', title: 'Custom-Built Dashboards', desc: 'Every client gets a portal built around their business. See your revenue, expenses, and profit at a glance — tailored to what matters to you.' },
-  { icon: '⬡', title: 'QuickBooks Optional', desc: 'Keep QuickBooks or skip it — your call. We can plug into the books you already have, or run everything on our own system. Either way: cleaner data, smarter reporting, no bloat.' },
-  { icon: '◎', title: 'Real-Time Financials', desc: 'Log in any time, from any device, and see exactly where your business stands. Your numbers are always up to date and always accessible.' },
-  { icon: '⬟', title: 'Drill Into Every Number', desc: 'Click any line on your P&L and see every transaction behind it — the vendors, sales, and ad spend that make up the number. Full transparency, no black boxes.' },
-  { icon: '◉', title: 'POS & Bank Integration', desc: 'Using Clover, Square, or another POS? We connect directly to your systems so your sales data flows in automatically. No manual exports.' },
+  { icon: '◉', title: 'Integrations We Wrote Ourselves', desc: 'QuickBooks Online in both directions, Clover POS, your vendor portal, your bank. Real API work on a nightly schedule — not a $99/mo connector that drops half your line items.' },
+  { icon: '▣', title: 'Custom-Built Dashboards', desc: 'Every client gets a portal built around their business — your income streams, your reports, your language. Not a template with your logo on it.' },
+  { icon: '⬟', title: 'Profit Per Order', desc: 'Revenue, cost, and margin on every single ticket — matched back to what you actually paid your vendor for that exact item. Most POS systems will never tell you this.' },
+  { icon: '◈', title: 'Inventory That Ties Out', desc: 'Dated purchase layers, FIFO relief, and a month-end COGS journal entry ready to post. The dollars reconcile to QuickBooks — that is the whole point.' },
+  { icon: '◎', title: 'Real-Time, Drill-Down Numbers', desc: 'Log in any time, from any device. Click any line on your P&L and see every transaction behind it — the vendors, sales, and ad spend that make up the number.' },
+  { icon: '⬡', title: 'Ideas From Other Clients', desc: 'An AR desk that emails every statement in one pass. A crew log that lands in QuickBooks coded to the job. A WIP schedule and buyer package. Built once, available to you.' },
 ]
 
 export default function WhatWeDo() {
@@ -51,13 +51,13 @@ export default function WhatWeDo() {
       <section style={{ padding:'clamp(64px,9vw,100px) clamp(16px,5vw,48px) clamp(48px,6vw,72px)', textAlign:'center', maxWidth:'800px', margin:'0 auto' }}>
         <div style={{ fontFamily:'DM Mono,monospace', fontSize:'11px', letterSpacing:'3px', color:'#C9A84C', marginBottom:'20px' }}>— WHAT YOU GET</div>
         <h1 style={{ fontFamily:'Cormorant Garamond,serif', fontSize:'clamp(36px,5vw,64px)', fontWeight:600, lineHeight:1.1, marginBottom:'20px' }}>
-          Financials built for<br />the modern business.
+          We build the software<br />behind your numbers.
         </h1>
         <div style={{ fontFamily:'Cormorant Garamond,serif', fontStyle:'italic', fontSize:'clamp(20px,2.8vw,30px)', color:'#C9A84C', fontWeight:600, marginBottom:'20px' }}>
           The JK Way™ — built around your business.
         </div>
         <p style={{ fontSize:'17px', color:'#5A6070', lineHeight:1.7, maxWidth:'520px', margin:'0 auto' }}>
-          Every client gets a fully custom portal. Here's what's inside.
+          Every client gets a fully custom portal, wired into the systems you already run. Here's what's inside.
         </p>
       </section>
 
