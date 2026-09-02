@@ -11,7 +11,7 @@ const ROSE = '#B14D6A', ROSE_DK = '#8E3B54', GREEN = '#2E7D46', AMBER = '#9C6B12
 
 const BIZ = 'LEW Imports'
 const BIZ_ADDR = '1342 51st Street, Brooklyn NY 11219'
-const BIZ_TEL = '718-851-1___'   // TODO: confirm full telephone number
+const BIZ_TEL = '718-851-1201'
 const BIZ_FAX = '718-851-0847'
 const BIZ_EMAIL = 'Info@lewimports.com'
 // Never print a half-known number: anything with a blank (___) is dropped from
