@@ -358,7 +358,7 @@ export default function Landing() {
             QuickBooks, your POS, your vendor portal, your bank — <strong style={{ color: '#1A2035', fontWeight: 600 }}>we write the integrations ourselves</strong>, then build the dashboard your business is actually run on.
           </p>
           <p className="hero-sub" style={{ margin: '16px auto 0', maxWidth: '700px', fontSize: 'clamp(17px,2vw,21px)', lineHeight: 1.4, color: '#1A2035', fontWeight: 500 }}>
-            Every idea below started as one client&rsquo;s headache. Now any of them can be yours.
+            Everything below was built for a real business. See what we&rsquo;d build for yours.
           </p>
           <div className="hero-cta" style={{ marginTop: '32px', display: 'flex', gap: '14px', flexWrap: 'wrap', justifyContent: 'center' }}>
             <button className="cta-btn" onClick={() => document.getElementById('build')?.scrollIntoView({ behavior: 'smooth' })}>See What We Build ↓</button>

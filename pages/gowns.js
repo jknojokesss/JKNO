@@ -217,7 +217,11 @@ const blankForm = () => ({
 export default function Gowns() {
   const [user, setUser] = useState(null)
   const [authLoading, setAuthLoading] = useState(true)
-  const [loginEmail, setLoginEmail] = useState('')
+  // /login already asked for the email; carry it over so it is typed once.
+  const [loginEmail, setLoginEmail] = useState(() => {
+    if (typeof window === 'undefined') return ''
+    return new URLSearchParams(window.location.search).get('email') || ''
+  })
   const [loginPass, setLoginPass] = useState('')
   const [loginErr, setLoginErr] = useState('')
   const [loginBusy, setLoginBusy] = useState(false)

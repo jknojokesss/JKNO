@@ -964,7 +964,11 @@ function NewInvoice({ refs, call, onClose, onCreated }) {
 }
 
 function Login() {
-  const [email, setEmail] = useState('')
+  // /login already asked for the email; carry it over so it is typed once.
+  const [email, setEmail] = useState(() => {
+    if (typeof window === 'undefined') return ''
+    return new URLSearchParams(window.location.search).get('email') || ''
+  })
   const [password, setPassword] = useState('')
   const [err, setErr] = useState(null)
   const [busy, setBusy] = useState(false)

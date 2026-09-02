@@ -17,8 +17,10 @@ const nextConfig = {
       // and the Intuit callback don't move. Swap the host when
       // reydel.jknojokes.com is attached. Leave /reset-password here —
       // recovery tokens sit in the URL hash and a redirect would drop them.
+      // NOT /login — that is now the router page in pages/login.js that sends
+      // each client to their own portal (Reydel clients included). A redirect
+      // here would shadow it at the edge and send everyone to Reydel again.
       ...[
-        '/login',
         '/dashboard',
         '/financials',
         '/inventory',

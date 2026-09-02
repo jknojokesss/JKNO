@@ -1,44 +1,59 @@
-import { useEffect, useState } from 'react'
-import { supabase } from '../lib/supabase'
+import { useState } from 'react'
 import { useRouter } from 'next/router'
 import Head from 'next/head'
 
+// ── One login link for every client ──────────────────────────────────────
+// This page does NOT sign anybody in. Our clients' portals live in different
+// places — /portal, /gowns, /jerky-munch, and Reydel's own app on another
+// origin — so "Client Login" on the marketing site used to be a redirect
+// straight to Reydel's door and everyone else landed in the wrong place.
+//
+// Now it asks for an email, asks the server which door that is
+// (/api/login-destination), and sends them there with the email pre-filled.
+// The password is always typed on the destination's own screen: a session
+// made here would not survive the hop to another origin anyway, and keeping
+// the credential out of this page keeps the routing layer un-privileged.
+//
+// The lookup never says whether an account exists — an unknown email routes
+// to the default portal like any other. Don't add a "no such account"
+// message here; that turns this into a client-list enumerator.
 export default function Login() {
   const router = useRouter()
   const [email, setEmail] = useState('')
-  const [password, setPassword] = useState('')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
-  const [checking, setChecking] = useState(true)
 
-  useEffect(() => {
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      if (session) router.push('/dashboard')
-      else setChecking(false)
-    })
-  }, [])
-
-  const handleLogin = async () => {
+  const go = async () => {
+    const clean = email.trim()
+    if (!clean) return
     setLoading(true)
     setError('')
-    const { error } = await supabase.auth.signInWithPassword({ email, password })
-    if (error) {
-      setError('Incorrect email or password. Please try again.')
+    try {
+      const res = await fetch('/api/login-destination', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: clean }),
+      })
+      if (!res.ok) throw new Error('lookup failed')
+      const { url } = await res.json()
+      const target = `${url}${url.includes('?') ? '&' : '?'}email=${encodeURIComponent(clean)}`
+      // External portals (Reydel) leave the site; ours stay in the router.
+      if (/^https?:\/\//i.test(target)) window.location.href = target
+      else router.push(target)
+    } catch {
+      setError('Could not reach the sign-in service. Try again, or email jk@jknojokes.com.')
       setLoading(false)
-    } else {
-      router.push('/dashboard')
     }
   }
 
-  const handleKeyDown = (e) => { if (e.key === 'Enter') handleLogin() }
-
-  if (checking) return null
+  const handleKeyDown = (e) => { if (e.key === 'Enter') go() }
 
   return (
     <>
       <Head>
         <title>Client Login — JK No Jokes</title>
         <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <meta name="robots" content="noindex" />
         <link href="https://fonts.googleapis.com/css2?family=Syne:wght@600;700;800&family=DM+Sans:wght@300;400;500&family=DM+Mono:wght@400;500&family=Playfair+Display:wght@700&display=swap" rel="stylesheet" />
       </Head>
 
@@ -140,16 +155,16 @@ export default function Login() {
               Client Portal
             </h1>
             <p style={{ fontSize: '14px', color: '#A8B0C8', margin: 0, lineHeight: 1.6 }}>
-              Sign in to view your financials and insights.
+              Enter your email and we&rsquo;ll take you to your portal.
             </p>
           </div>
 
           {/* Email */}
-          <div style={{ marginBottom: '14px' }}>
+          <div style={{ marginBottom: '24px' }}>
             <label style={{ display: 'block', fontFamily: 'DM Mono, monospace',
               fontSize: '10px', letterSpacing: '2px', color: '#6B7A96',
               marginBottom: '8px', textTransform: 'uppercase' }}>Email</label>
-            <input type="email" value={email}
+            <input type="email" value={email} autoComplete="username"
               onChange={e => setEmail(e.target.value)} onKeyDown={handleKeyDown}
               placeholder="you@company.com"
               style={{ width: '100%', padding: '12px 14px',
@@ -161,24 +176,7 @@ export default function Login() {
               onBlur={e => e.target.style.borderColor = '#2E3A5C'} />
           </div>
 
-          {/* Password */}
-          <div style={{ marginBottom: '24px' }}>
-            <label style={{ display: 'block', fontFamily: 'DM Mono, monospace',
-              fontSize: '10px', letterSpacing: '2px', color: '#6B7A96',
-              marginBottom: '8px', textTransform: 'uppercase' }}>Password</label>
-            <input type="password" value={password}
-              onChange={e => setPassword(e.target.value)} onKeyDown={handleKeyDown}
-              placeholder="••••••••"
-              style={{ width: '100%', padding: '12px 14px',
-                border: '1px solid #2E3A5C', borderRadius: '2px',
-                fontSize: '14px', fontFamily: 'DM Sans, sans-serif',
-                color: '#EAE8E4', background: '#243050',
-                outline: 'none', boxSizing: 'border-box', transition: 'border-color 0.15s' }}
-              onFocus={e => e.target.style.borderColor = '#C9A84C'}
-              onBlur={e => e.target.style.borderColor = '#2E3A5C'} />
-          </div>
-
-          {/* Error */}
+          {/* Error — connectivity only. Never anything about the account. */}
           {error && (
             <div style={{ marginBottom: '16px', padding: '10px 14px',
               background: 'rgba(192,57,43,0.15)', border: '1px solid rgba(192,57,43,0.4)',
@@ -187,33 +185,24 @@ export default function Login() {
           )}
 
           {/* Button */}
-          <button onClick={handleLogin} disabled={loading || !email || !password}
+          <button onClick={go} disabled={loading || !email}
             style={{ width: '100%', padding: '14px 20px',
-              background: loading || !email || !password ? '#2E3A5C' : '#C9A84C',
-              color: loading || !email || !password ? '#6B7A96' : '#12151C',
+              background: loading || !email ? '#2E3A5C' : '#C9A84C',
+              color: loading || !email ? '#6B7A96' : '#12151C',
               border: 'none', borderRadius: '2px', fontSize: '12px',
               fontFamily: 'DM Mono, monospace', fontWeight: '500', letterSpacing: '2px',
-              cursor: loading || !email || !password ? 'not-allowed' : 'pointer',
+              cursor: loading || !email ? 'not-allowed' : 'pointer',
               textTransform: 'uppercase', transition: 'all 0.2s' }}
-            onMouseEnter={e => { if (!loading && email && password) e.target.style.background = '#E8D5A3' }}
-            onMouseLeave={e => { if (!loading && email && password) e.target.style.background = '#C9A84C' }}>
-            {loading ? 'Signing in...' : 'Sign In →'}
+            onMouseEnter={e => { if (!loading && email) e.target.style.background = '#E8D5A3' }}
+            onMouseLeave={e => { if (!loading && email) e.target.style.background = '#C9A84C' }}>
+            {loading ? 'Finding your portal...' : 'Continue →'}
           </button>
 
-          {/* Footer note */}
-          <p style={{ textAlign: 'center', fontSize: '12px', color: '#6B7A96',
-            marginTop: '24px', marginBottom: 0, lineHeight: 1.6,
-            fontFamily: 'DM Mono, monospace', letterSpacing: '0.5px' }}>
-            No account? <span style={{ color: '#C9A84C', cursor: 'pointer' }}
-              onClick={() => router.push('/#contact')}>Request access →</span>
+          <p style={{ marginTop: '20px', textAlign: 'center', fontSize: '12px',
+            color: '#6B7A96', lineHeight: 1.7, fontFamily: 'DM Sans, sans-serif' }}>
+            You&rsquo;ll enter your password on your own portal.<br />
+            Trouble getting in? <a href="mailto:jk@jknojokes.com" style={{ color: '#C9A84C', textDecoration: 'none' }}>jk@jknojokes.com</a>
           </p>
-        </div>
-
-        {/* Bottom */}
-        <div style={{ marginTop: '32px', fontFamily: 'DM Mono, monospace',
-          fontSize: '10px', letterSpacing: '2px', color: '#2E3A5C',
-          textTransform: 'uppercase', position: 'relative' }}>
-          JK No Jokes © {new Date().getFullYear()}
         </div>
       </div>
     </>
