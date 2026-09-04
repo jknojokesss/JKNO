@@ -153,7 +153,15 @@ const balanceOf = (o) => orderTotal(o) - sumPaid(o)
 const isOpen = (o) => orderTotal(o) <= 0.005 || balanceOf(o) > 0.005 || (o.alterationsList || []).some(a => !a.done)
 
 // backward-compat: old orders have a single `name` field
-const fullName = (o) => o.firstName ? `${o.firstName} ${o.lastName || ''}`.trim() : (o.name || '')
+// Lists and search read "Augenbaum, Zlaty" — she looks people up by last name.
+const fullName = (o) => {
+  const f = (o.firstName || '').trim(), l = (o.lastName || '').trim()
+  if (l && f) return `${l}, ${f}`
+  return l || f || (o.name || '')
+}
+// Natural order, for receipts and letters addressed to the customer.
+const fullNameNatural = (o) => (o.firstName ? `${o.firstName} ${o.lastName || ''}`.trim() : (o.name || ''))
+const lastFirstKey = (o) => `${(o.lastName || '').trim()} ${(o.firstName || '').trim()}`.trim().toLowerCase()
 
 // Role by login. Seamstress gets the workroom view; everyone else is owner/admin.
 const roleOf = (u) => ((u?.email || '').toLowerCase() === 'seamstress@lewimports.com' ? 'seamstress' : 'owner')
@@ -318,10 +326,8 @@ export default function Gowns() {
   const paid = sumPaid(form)
   const balance = total - paid
 
-  const startNew = (orderKind = 'customer') => {
-    // A stock order is the shop buying gowns for itself — the "customer" is the shop.
-    const base = blankForm()
-    setForm(orderKind === 'stock' ? { ...base, orderKind, firstName: 'Stock', lastName: 'Order' } : base)
+  const startNew = () => {
+    setForm(blankForm())
     setPay({ amount: '', method: '', date: todayStr() }); setFormTodo({ text: '', assignee: '', date: '' })
     setEditing(false); setView('form'); window.scrollTo(0, 0)
   }
@@ -838,22 +844,44 @@ export default function Gowns() {
     if (error) { alert('Could not delete task: ' + error.message); setTasks(prev) }
   }
 
+  // One row per line item so Excel can sort/pivot: company, item #, qty, price
+  // and amount are each their own column. Order totals sit on the first row of
+  // each order only, so summing a column doesn't double-count.
   const downloadCSV = (which) => {
     const list = which && which.length ? which : orders
     if (!list.length) { alert('No orders to export yet.'); return }
     const esc = (s) => { const v = String(s == null ? '' : s).replace(/[\r\n]+/g, ' ').trim(); return v.includes(',') || v.includes('"') ? `"${v.replace(/"/g, '""')}"` : v }
-    const headers = ['Order #', 'Type', 'Date', 'First Name', 'Last Name', 'Cell', 'Home', 'Email', 'Address', 'City', 'State', 'Zip', 'Items', 'Subtotal', 'Tax Rate', 'Tax', 'Total', 'Amount Paid', 'Balance', 'Status', 'Payments', 'Alterations', 'Notes']
-    const rows = list.map(o => {
+    const headers = [
+      'Order #', 'Date', 'Last Name', 'First Name', 'Cell', 'Home', 'Email', 'Address', 'City', 'State', 'Zip',
+      'Company', 'Item #', 'Type', 'Qty', 'Description', 'Price Each', 'Amount', 'Taxable',
+      'Subtotal', 'Tax Rate', 'Tax', 'Total', 'Amount Paid', 'Balance', 'Status', 'Payments', 'Alterations', 'Notes',
+    ]
+    const rows = []
+    for (const o of list) {
       const sub = sumItems(o.items), tax = calcTax(o.items, o.taxRate), tot = sub + tax, p = sumPaid(o), bal = tot - p
-      const itemsSummary = o.items.filter(it => it.desc || lineAmt(it)).map(it => `${it.qty > 1 ? it.qty + 'x ' : ''}${it.desc || ''}${lineAmt(it) ? ' (' + money(lineAmt(it)) + (it.taxable === false ? ' no tax' : '') + ')' : ''}`).join('; ')
-      const payHistory = (o.payments || []).map(p => `${money(p.amount)}${p.method ? ' ' + p.method : ''}${p.method === 'Check' && p.checkNo ? ' #' + p.checkNo : ''}${p.date ? ' ' + fmtDate(p.date) : ''}`).join('; ')
-      const altNote = (o.alterationsList || []).map(a => `${a.done ? 'Done' : 'Pending'}${a.due ? ' (due ' + fmtDate(a.due) + ')' : ''}${a.note ? ': ' + a.note : ''}${a.assignee ? ' [' + a.assignee + ']' : ''}`).join(' | ')
+      const payHistory = (o.payments || []).map(pm => `${money(pm.amount)}${pm.method ? ' ' + pm.method : ''}${pm.method === 'Check' && pm.checkNo ? ' #' + pm.checkNo : ''}${pm.date ? ' ' + fmtDate(pm.date) : ''}`).join('; ')
+      const altNote = (o.alterationsList || []).map(a => `${a.done ? 'Done' : 'Pending'}${a.garment ? ' [' + a.garment + ']' : ''}${a.note ? ': ' + a.note : ''}${a.assignee ? ' (' + a.assignee + ')' : ''}${a.hours ? ' ' + a.hours + 'h' : ''}${a.due ? ' due ' + fmtDate(a.due) : ''}`).join(' | ')
       const status = isOpen(o) ? 'Open' : 'Completed'
       const fn = o.firstName || (o.name ? o.name.split(' ')[0] : '')
       const ln = o.lastName || (o.name ? o.name.split(' ').slice(1).join(' ') : '')
-      const kind = o.orderKind === 'stock' ? 'Stock' : 'Customer'
-      return [o.orderNo || '', kind, o.date || '', fn, ln, o.phone || '', o.home || '', o.email || '', o.address || '', o.city || '', o.state || '', o.zip || '', itemsSummary, sub.toFixed(2), (o.taxRate || 0) + '%', tax.toFixed(2), tot.toFixed(2), p.toFixed(2), bal.toFixed(2), status, payHistory, altNote, o.notes || ''].map(esc).join(',')
-    })
+      const lines = (o.items || []).filter(it => it.desc?.trim() || lineAmt(it) || it.itemNo)
+      const printable = lines.length ? lines : [null]
+      printable.forEach((it, idx) => {
+        const first = idx === 0
+        rows.push([
+          o.orderNo || '', o.date || '', ln, fn, o.phone || '', o.home || '', o.email || '', o.address || '', o.city || '', o.state || '', o.zip || '',
+          it ? (it.company || '') : '', it ? (it.itemNo || '') : '', it ? (it.source || '') : '',
+          it ? (it.qty || '1') : '', it ? (it.desc || '') : '',
+          it && it.price ? (parseFloat(it.price) || 0).toFixed(2) : '',
+          it && lineAmt(it) ? lineAmt(it).toFixed(2) : '',
+          it ? (it.taxable === false ? 'No' : 'Yes') : '',
+          // order-level values on the first row of the order only
+          first ? sub.toFixed(2) : '', first ? (o.taxRate || 0) + '%' : '', first ? tax.toFixed(2) : '',
+          first ? tot.toFixed(2) : '', first ? p.toFixed(2) : '', first ? bal.toFixed(2) : '',
+          first ? status : '', first ? payHistory : '', first ? altNote : '', first ? (o.notes || '') : '',
+        ].map(esc).join(','))
+      })
+    }
     const csv = [headers.join(','), ...rows].join('\r\n')
     const blob = new Blob([csv], { type: 'text/csv;charset=utf-8' })
     const url = URL.createObjectURL(blob)
@@ -866,7 +894,13 @@ export default function Gowns() {
   const doneList = orders.filter(o => !isOpen(o))
   const base = tab === 'open' ? openList : tab === 'completed' ? doneList : orders
   // When searching, look across ALL orders (not just the current tab) so a name always finds its customer.
-  const filtered = (search ? orders : base).filter(o => !search || fullName(o).toLowerCase().includes(search.toLowerCase()))
+  const filtered = (search ? orders : base)
+    .filter(o => {
+      if (!search) return true
+      const q = search.toLowerCase()
+      return fullName(o).toLowerCase().includes(q) || fullNameNatural(o).toLowerCase().includes(q)
+    })
+    .sort((a, b) => lastFirstKey(a).localeCompare(lastFirstKey(b)))
 
   // ── styles ──────────────────────────────────────────────────────────────────
   const lbl = { fontSize: '9px', fontWeight: 700, letterSpacing: '0.04em', textTransform: 'uppercase', color: PAD }
@@ -947,15 +981,12 @@ export default function Gowns() {
         {/* ===== LIST ===== */}
         {role !== 'seamstress' && view === 'list' && (
           <>
-            <div style={{ display: 'flex', gap: '8px', marginBottom: '14px' }}>
-              <button className="gw-press" onClick={() => startNew('customer')} style={{ ...primaryBtn, flex: 2, padding: '15px 12px', fontSize: '16px' }}>+ New Customer Order</button>
-              <button className="gw-press" onClick={() => startNew('stock')} style={{ ...primaryBtn, flex: 1, padding: '15px 12px', fontSize: '15px', background: PAD, boxShadow: '0 2px 10px rgba(42,76,156,0.28)' }}>+ New Stock Order</button>
-            </div>
+            <button className="gw-new-btn gw-press" onClick={() => startNew()}>+ New Order</button>
             <div className="gw-tabs" style={{ marginBottom: '16px' }}>
               <button onClick={() => setTab('open')} style={tabBtn(tab === 'open')}>Open ({openList.length})</button>
               <button onClick={() => setTab('completed')} style={tabBtn(tab === 'completed')}>Completed ({doneList.length})</button>
               <button onClick={() => setTab('all')} style={tabBtn(tab === 'all')}>All ({orders.length})</button>
-              <button onClick={() => setTab('todos')} style={tabBtn(tab === 'todos')}>Tasks ({orders.reduce((s, o) => s + (o.todos || []).filter(t => !t.done).length + (o.alterationsList || []).filter(a => !a.done).length, 0) + tasks.filter(t => !t.done).length})</button>
+              <button onClick={() => setTab('todos')} style={tabBtn(tab === 'todos')}>Alterations ({orders.reduce((s, o) => s + (o.alterationsList || []).filter(a => !a.done).length, 0)})</button>
               <button onClick={() => { setTab('customers'); setSelectedCustomer(null) }} style={tabBtn(tab === 'customers')}>Customers</button>
               <button onClick={() => setTab('catalog')} style={tabBtn(tab === 'catalog')}>Catalog</button>
             </div>
@@ -996,116 +1027,87 @@ export default function Gowns() {
               </div>
             ) : null}
 
-            {/* ===== TASKS TAB ===== */}
+            {/* ===== TASKS TAB — alterations only, editable right here ===== */}
             {tab === 'todos' && (() => {
-              // Alterations show up as tasks automatically (due date + note), alongside manual to-dos.
-              const altTasks = orders.flatMap(o => (o.alterationsList || []).map(a => ({
-                id: 'alt-' + a.id, isAlteration: true, alterationId: a.id,
-                text: a.note?.trim() ? `✂ ${a.note.trim()}` : '✂ Alteration',
-                garment: a.garment?.trim() || '', hours: a.hours || '',
-                assignedTo: a.assignee || '', date: a.due || '', done: !!a.done,
-                orderId: o.id, orderNo: o.orderNo, customerName: fullName(o),
+              // Every unfinished alteration across all orders. No sales-order or
+              // vendor clutter: she works the list without opening an invoice.
+              const alts = orders.flatMap(o => (o.alterationsList || []).map(a => ({
+                ...a, orderId: o.id, orderNo: o.orderNo, customer: fullName(o),
               })))
-              // Standalone tasks from the Tasks page (may be linked to an order).
-              const standalone = tasks.map(tk => {
-                const o = tk.order_id ? orders.find(x => x.id === tk.order_id) : null
-                return {
-                  id: 'st-' + tk.id, taskId: tk.id, isStandalone: true,
-                  text: tk.text, assignedTo: tk.assignee || '', date: tk.due_date || '', done: tk.done,
-                  orderId: o ? o.id : null, orderNo: o ? o.orderNo : null, customerName: o ? fullName(o) : '',
-                }
-              })
-              const allTodos = [
-                ...altTasks,
-                ...standalone,
-                ...orders.flatMap(o => (o.todos || []).map(t => ({ ...t, orderId: o.id, orderNo: o.orderNo, customerName: fullName(o) }))),
-              ]
-              const open = allTodos.filter(t => !t.done)
-              const byPerson = open.reduce((acc, t) => { const k = t.assignedTo || 'Unassigned'; if (!acc[k]) acc[k] = []; acc[k].push(t); return acc }, {})
-              const byCustomer = open.reduce((acc, t) => { const k = t.customerName || 'General (no order)'; if (!acc[k]) acc[k] = []; acc[k].push(t); return acc }, {})
-              const byDate = [...open].sort((a, b) => (a.date || '').localeCompare(b.date || ''))
-              // Mirrors the workroom: the garment, the alteration, who's on it, hours, and when it's due.
-              const taskRow = (t) => {
-                const dt = dueTone(t.date, t.done)
-                return (
-                <div key={t.id} style={{ display: 'grid', gridTemplateColumns: '80px 1fr auto', gap: '10px', alignItems: 'center', padding: '11px 14px', borderBottom: `1px solid ${CREAM}` }}>
-                  <span style={{ fontSize: '13px', color: dt.color, fontWeight: dt.weight, whiteSpace: 'nowrap' }}>{t.date ? `${dt.overdue ? '⚠ ' : ''}${fmtShort(t.date)}` : '—'}</span>
-                  <div>
-                    <div style={{ fontSize: '14px', color: INK, fontWeight: 500 }}>
-                      {t.garment && <span style={{ fontWeight: 800 }}>👗 {t.garment} — </span>}
-                      <span style={{ color: t.isAlteration ? ROSE_DK : INK, fontWeight: t.isAlteration ? 600 : 500 }}>{t.text}</span>
-                    </div>
-                    <div style={{ fontSize: '12px', color: MUTED, marginTop: '2px' }}>
-                      {t.orderNo != null
-                        ? <><span style={{ color: REDNO, fontWeight: 600, cursor: 'pointer' }} onClick={() => { const o = orders.find(x => x.id === t.orderId); if (o) openOrder(o) }}>No. {t.orderNo}</span>{t.customerName ? ` · ${t.customerName}` : ''}</>
-                        : <span style={{ fontStyle: 'italic' }}>General task</span>}
-                      <span> · {t.assignedTo || 'unassigned'}</span>
-                      {t.hours ? <span> · {t.hours}h</span> : ''}
-                    </div>
-                  </div>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                    <input type="checkbox" checked={false} onChange={() => {
-                      if (t.isAlteration) { const o = orders.find(x => x.id === t.orderId); if (o) patchOrder(t.orderId, { alterationsList: (o.alterationsList || []).map(a => a.id === t.alterationId ? { ...a, done: true } : a) }) }
-                      else if (t.isStandalone) toggleTask(t.taskId)
-                      else toggleTodo(t.orderId, t.id)
-                    }} style={{ width: '17px', height: '17px', accentColor: PAD, cursor: 'pointer' }} />
-                    {t.isStandalone && <button onClick={() => removeTask(t.taskId)} title="Delete task" style={{ border: 'none', background: 'none', color: '#D0C5BF', fontSize: '16px', cursor: 'pointer', lineHeight: 1 }}>×</button>}
-                  </div>
-                </div>
-                )
+              const openAlts = alts.filter(a => !a.done)
+                .sort((x, y) => (x.due || '9999-99-99').localeCompare(y.due || '9999-99-99'))
+              // Anyone already assigned work becomes a choice in the dropdown.
+              const workers = [...new Set(alts.map(a => (a.assignee || '').trim()).filter(Boolean))].sort()
+
+              // Edit an alteration in place, straight from this list.
+              const editAlt = (orderId, altId, patch) => {
+                const o = orders.find(x => x.id === orderId); if (!o) return
+                patchOrder(orderId, { alterationsList: (o.alterationsList || []).map(a => a.id === altId ? { ...a, ...patch } : a) })
               }
+
               return (
                 <div>
-                  {/* Add a standalone task (optionally linked to an order) */}
-                  <div className="gw-card" style={{ padding: '16px 18px', marginBottom: '16px' }}>
-                    <div style={{ fontSize: '13px', fontWeight: 700, color: MUTED, marginBottom: '10px', textTransform: 'uppercase', letterSpacing: '0.04em' }}>New task</div>
-                    <input value={newTask.text} onChange={e => setNewTask(p => ({ ...p, text: e.target.value }))} onKeyDown={e => { if (e.key === 'Enter') addTask() }} placeholder="What needs to get done?" style={{ ...fieldIn, marginBottom: '8px' }} />
-                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px', marginBottom: '8px' }}>
-                      <div>
-                        <div style={{ fontSize: '12px', color: MUTED, marginBottom: '4px' }}>Person</div>
-                        <input value={newTask.assignee} onChange={e => setNewTask(p => ({ ...p, assignee: e.target.value }))} onBlur={e => setNewTask(p => ({ ...p, assignee: titleCase(e.target.value) }))} placeholder="Who's on it" style={fieldIn} />
-                      </div>
-                      <div>
-                        <div style={{ fontSize: '12px', color: MUTED, marginBottom: '4px' }}>Due</div>
-                        <input type="date" value={newTask.date} onChange={e => setNewTask(p => ({ ...p, date: e.target.value }))} style={fieldIn} />
-                      </div>
-                    </div>
-                    <div style={{ marginBottom: '10px' }}>
-                      <div style={{ fontSize: '12px', color: MUTED, marginBottom: '4px' }}>Link to order (optional)</div>
-                      <select value={newTask.orderId} onChange={e => setNewTask(p => ({ ...p, orderId: e.target.value }))} style={{ ...fieldIn, cursor: 'pointer' }}>
-                        <option value="">— none (standalone task) —</option>
-                        {orders.map(o => <option key={o.id} value={o.id}>No. {o.orderNo} — {fullName(o)}</option>)}
-                      </select>
-                    </div>
-                    <button onClick={addTask} className="gw-press" style={{ ...primaryBtn, width: '100%', padding: '12px' }}>+ Add task</button>
-                  </div>
+                  <datalist id="gown-workers">{workers.map(w => <option key={w} value={w} />)}</datalist>
 
-                  {open.length > 0 && (
-                    <div style={{ display: 'flex', gap: '8px', marginBottom: '16px', flexWrap: 'wrap' }}>
-                      <button onClick={() => {
-                        const win = window.open('', '_blank')
-                        win.document.write(`<!DOCTYPE html><html><head><title>${BIZ} — Tasks</title></head><body style="font-family:sans-serif;padding:32px;max-width:720px;margin:0 auto;"><div style="display:flex;justify-content:space-between;align-items:baseline;border-bottom:2px solid #2A4C9C;padding-bottom:12px;margin-bottom:24px;"><div style="font-size:22px;font-weight:700;">${BIZ} — What's Open</div><div style="font-size:13px;color:#888;">${new Date().toLocaleDateString()}</div></div>${buildTaskListHtml(byDate)}</body></html>`)
-                        win.document.close(); win.focus(); setTimeout(() => win.print(), 400)
-                      }} style={{ flex: 'none', padding: '10px 20px', fontSize: '14px', fontWeight: 600, color: '#fff', background: PAD, border: 'none', borderRadius: '12px', cursor: 'pointer', fontFamily: 'inherit' }}>🖨 Print list</button>
-                    </div>
-                  )}
-
-                  {open.length === 0 && (
+                  {openAlts.length === 0 ? (
                     <div className="gw-card" style={{ padding: '36px 24px', textAlign: 'center', color: MUTED }}>
                       <div style={{ fontSize: '32px', marginBottom: '8px' }}>✓</div>
                       <div style={{ fontSize: '16px', fontWeight: 600, color: INK }}>All caught up</div>
-                      <div style={{ fontSize: '14px', marginTop: '4px' }}>No open tasks across any orders.</div>
+                      <div style={{ fontSize: '14px', marginTop: '4px' }}>No alterations waiting.</div>
                     </div>
-                  )}
-
-                  {/* One simple list, soonest due first — what's open, for which dress, who has it, how long. */}
-                  {open.length > 0 && (
-                    <div className="gw-card" style={{ overflow: 'hidden' }}>
-                      <div style={{ padding: '11px 14px', background: '#F0F4FF', borderBottom: `1px solid ${GRID}`, fontSize: '13px', fontWeight: 700, color: PAD }}>
-                        {open.length} open · soonest first
+                  ) : (
+                    <>
+                      <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: '10px' }}>
+                        <button onClick={() => {
+                          const win = window.open('', '_blank')
+                          const rows = openAlts.map(a => ({ date: a.due, garment: a.garment, text: a.note || 'Alteration', hours: a.hours, assignedTo: a.assignee, orderNo: a.orderNo, customerName: a.customer }))
+                          win.document.write(`<!DOCTYPE html><html><head><title>${BIZ} — Alterations</title></head><body style="font-family:sans-serif;padding:32px;max-width:720px;margin:0 auto;"><div style="display:flex;justify-content:space-between;align-items:baseline;border-bottom:2px solid #2A4C9C;padding-bottom:12px;margin-bottom:24px;"><div style="font-size:22px;font-weight:700;">${BIZ} — Alterations</div><div style="font-size:13px;color:#888;">${new Date().toLocaleDateString()}</div></div>${buildTaskListHtml(rows)}</body></html>`)
+                          win.document.close(); win.focus(); setTimeout(() => win.print(), 400)
+                        }} style={{ padding: '9px 18px', fontSize: '14px', fontWeight: 600, color: '#fff', background: PAD, border: 'none', borderRadius: '11px', cursor: 'pointer', fontFamily: 'inherit' }}>🖨 Print list</button>
                       </div>
-                      {byDate.map(taskRow)}
-                    </div>
+
+                      <div className="gw-card" style={{ overflow: 'hidden' }}>
+                        <div style={{ padding: '11px 14px', background: '#F0F4FF', borderBottom: `1px solid ${GRID}`, fontSize: '13px', fontWeight: 700, color: PAD }}>
+                          {openAlts.length} alteration{openAlts.length === 1 ? '' : 's'} to do · soonest first
+                        </div>
+                        {openAlts.map(a => {
+                          const dt = dueTone(a.due, false)
+                          return (
+                            <div key={a.orderId + a.id} style={{ padding: '11px 13px', borderBottom: `1px solid ${CREAM}`, borderLeft: dt.overdue ? '4px solid #C0504C' : (dt.soon ? '4px solid #9C6B12' : '4px solid transparent') }}>
+                              <div style={{ display: 'flex', alignItems: 'flex-start', gap: '10px' }}>
+                                {a.photos?.length > 0 && mediaThumb(a.photos[0].url, 42, 7)}
+                                <div style={{ minWidth: 0, flex: 1 }}>
+                                  <div style={{ fontSize: '14px' }}>
+                                    {a.garment?.trim() && <span style={{ fontWeight: 800, color: INK }}>👗 {a.garment.trim()} — </span>}
+                                    <span style={{ fontWeight: 600, color: ROSE_DK }}>{a.note || 'Alteration'}</span>
+                                  </div>
+                                  <div style={{ fontSize: '12px', color: MUTED, marginTop: '2px' }}>
+                                    <span onClick={() => { const o = orders.find(x => x.id === a.orderId); if (o) openOrder(o) }} style={{ color: REDNO, fontWeight: 600, cursor: 'pointer' }}>No. {a.orderNo}</span>
+                                    {a.customer ? ` · ${a.customer}` : ''}
+                                  </div>
+                                </div>
+                                <input type="checkbox" checked={false} onChange={() => editAlt(a.orderId, a.id, { done: true })} title="Mark done" style={{ width: '18px', height: '18px', accentColor: PAD, cursor: 'pointer', flexShrink: 0, marginTop: '2px' }} />
+                              </div>
+
+                              {/* assign · hours · due — all editable without leaving this list */}
+                              <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginTop: '7px', flexWrap: 'wrap' }}>
+                                <input value={a.assignee || ''} list="gown-workers" placeholder="assign to…"
+                                  onChange={e => editAlt(a.orderId, a.id, { assignee: e.target.value })}
+                                  onBlur={e => editAlt(a.orderId, a.id, { assignee: titleCase(e.target.value) })}
+                                  style={{ width: '116px', fontSize: '13px', fontWeight: 600, color: a.assignee ? INK : MUTED, border: `1px solid ${a.assignee ? '#E2D7D1' : REDNO}`, borderRadius: '7px', padding: '5px 8px', background: '#fff', fontFamily: 'inherit', outline: 'none' }} />
+                                <input value={a.hours || ''} type="text" inputMode="decimal" placeholder="hrs"
+                                  onChange={e => editAlt(a.orderId, a.id, { hours: e.target.value })}
+                                  style={{ width: '54px', fontSize: '13px', textAlign: 'center', border: '1px solid #E2D7D1', borderRadius: '7px', padding: '5px 6px', background: '#fff', fontFamily: 'inherit', color: INK, outline: 'none' }} />
+                                <input value={a.due || ''} type="date"
+                                  onChange={e => editAlt(a.orderId, a.id, { due: e.target.value })}
+                                  style={{ fontSize: '13px', border: '1px solid #E2D7D1', borderRadius: '7px', padding: '5px 7px', background: '#fff', fontFamily: 'inherit', color: dt.color, fontWeight: dt.weight, outline: 'none' }} />
+                                {dt.overdue && <span style={{ fontSize: '11px', fontWeight: 700, color: '#C0504C' }}>⚠ overdue</span>}
+                              </div>
+                            </div>
+                          )
+                        })}
+                      </div>
+                    </>
                   )}
                 </div>
               )
@@ -1376,10 +1378,15 @@ export default function Gowns() {
                 </div>
               </div>
 
+              <datalist id="gown-companies">
+                {[...new Set([...catalog.map(c => (c.company || '').trim()), ...form.items.map(i => (i.company || '').trim())].filter(Boolean))].sort().map(co => <option key={co} value={co} />)}
+              </datalist>
+
               {/* table header */}
               <div style={{ display: 'flex', borderBottom: `1px solid ${GRID}` }}>
                 <div style={{ ...th, width: '26px', textAlign: 'center', padding: '8px 0' }} />
                 <div style={{ ...th, width: '44px', textAlign: 'center', borderLeft: `1px solid ${GRID}` }}>Qty</div>
+                <div style={{ ...th, width: '62px', textAlign: 'center', borderLeft: `1px solid ${GRID}` }} title="Stock or custom order">Type</div>
                 <div style={{ ...th, width: '72px', borderLeft: `1px solid ${GRID}` }}>Item #</div>
                 <div style={{ ...th, flex: 1, borderLeft: `1px solid ${GRID}` }}>Description</div>
                 <div style={{ ...th, width: '82px', textAlign: 'right', borderLeft: `1px solid ${GRID}` }}>Price</div>
@@ -1396,6 +1403,12 @@ export default function Gowns() {
                     <div style={{ display: 'flex', borderBottom: `1px solid ${GRID}`, alignItems: 'center', position: 'relative' }}>
                     <div style={{ width: '26px', textAlign: 'center', fontSize: '11px', color: PAD, fontWeight: 600 }}>{i + 1}</div>
                     <input value={it.qty} onChange={e => setItem(it.id, 'qty', e.target.value)} type="text" inputMode="numeric" style={{ ...cellIn, width: '44px', textAlign: 'center', padding: '12px 2px', borderLeft: `1px solid ${GRID}` }} />
+                    <select value={it.source || ''} onChange={e => setItem(it.id, 'source', e.target.value)} title="Stock or custom order"
+                      style={{ width: '62px', borderLeft: `1px solid ${GRID}`, alignSelf: 'stretch', border: 'none', borderLeftWidth: '1px', borderLeftStyle: 'solid', borderLeftColor: GRID, background: 'transparent', fontFamily: 'inherit', fontSize: '13px', fontWeight: 600, textAlign: 'center', color: it.source === 'Stock' ? GREEN : it.source === 'Custom' ? AMBER : '#C7B7B1', outline: 'none', cursor: 'pointer' }}>
+                      <option value="">—</option>
+                      <option value="Stock">Stock</option>
+                      <option value="Custom">Custom</option>
+                    </select>
                     {/* item # with typeahead */}
                     <div style={{ width: '72px', borderLeft: `1px solid ${GRID}`, position: 'relative', alignSelf: 'stretch', display: 'flex', alignItems: 'center' }}>
                       <input
@@ -1453,43 +1466,24 @@ export default function Gowns() {
                     </div>
                     <button onClick={() => removeRow(it.id)} aria-label="remove" style={{ width: '26px', height: '40px', border: 'none', background: 'none', color: '#C7B7B1', fontSize: '18px', cursor: 'pointer', lineHeight: 1 }}>×</button>
                     </div>
-                    {/* company → item is a hierarchy: choose the company, then its gowns */}
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '5px 12px 7px 32px', background: '#FBFAF7', borderBottom: `1px solid ${GRID}`, flexWrap: 'wrap' }}>
-                        <select value={it.company || ''} onChange={e => {
-                          const co = e.target.value
-                          // Switching company clears an item that belongs to a different one.
-                          const cur = catalog.find(c => c.no === (it.itemNo || '').trim().toUpperCase())
-                          const keep = !cur || !co || (cur.company || '').trim() === co
-                          setForm(f => ({ ...f, items: f.items.map(x => x.id === it.id ? { ...x, company: co, ...(keep ? {} : { itemNo: '', desc: '' }) } : x) }))
+                    {/* company → item: type a new company or pick one you've used */}
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '5px 12px 7px 32px', background: '#FBFAF7', borderBottom: `1px solid ${GRID}`, flexWrap: 'wrap' }}>
+                      <span style={{ fontSize: '10px', fontWeight: 700, letterSpacing: '0.04em', textTransform: 'uppercase', color: MUTED }}>Company</span>
+                      <input value={it.company || ''} list="gown-companies" placeholder="type or pick…"
+                        onChange={e => setItem(it.id, 'company', e.target.value)}
+                        onBlur={e => setItem(it.id, 'company', titleCase(e.target.value))}
+                        style={{ fontSize: '13px', fontWeight: 600, color: INK, border: '1px solid #E2D7D1', borderRadius: '7px', padding: '5px 8px', background: '#fff', fontFamily: 'inherit', outline: 'none', width: '150px' }} />
+                      {it.company && catalog.some(c => (c.company || '').trim().toLowerCase() === it.company.trim().toLowerCase()) && (
+                        <select value={(it.itemNo || '').trim().toUpperCase()} onChange={e => {
+                          const picked = catalog.find(c => c.no === e.target.value)
+                          if (picked) pickItem(it.id, picked); else setItem(it.id, 'itemNo', '')
                         }}
-                          style={{ fontSize: '12px', fontWeight: 600, color: it.company ? INK : MUTED, border: '1px solid #E2D7D1', borderRadius: '7px', padding: '4px 7px', background: '#fff', fontFamily: 'inherit', outline: 'none', cursor: 'pointer', maxWidth: '150px' }}>
-                          <option value="">Company…</option>
-                          {[...new Set([...catalog.map(c => (c.company || '').trim()).filter(Boolean), ...(it.company ? [it.company] : [])])].sort().map(co => <option key={co} value={co}>{co}</option>)}
+                          style={{ fontSize: '13px', fontWeight: 600, color: it.itemNo ? PAD : MUTED, border: '1px solid #E2D7D1', borderRadius: '7px', padding: '5px 8px', background: '#fff', fontFamily: 'inherit', outline: 'none', maxWidth: '190px', cursor: 'pointer' }}>
+                          <option value="">Their gowns…</option>
+                          {catalog.filter(c => (c.company || '').trim().toLowerCase() === it.company.trim().toLowerCase()).sort((a, b) => a.no.localeCompare(b.no))
+                            .map(c => <option key={c.no} value={c.no}>{c.no}{c.desc ? ` — ${c.desc}` : ''}</option>)}
                         </select>
-                        {it.company && (
-                          <select value={(it.itemNo || '').trim().toUpperCase()} onChange={e => {
-                            const picked = catalog.find(c => c.no === e.target.value)
-                            if (picked) pickItem(it.id, picked); else setItem(it.id, 'itemNo', '')
-                          }}
-                            style={{ fontSize: '12px', fontWeight: 600, color: it.itemNo ? PAD : MUTED, border: '1px solid #E2D7D1', borderRadius: '7px', padding: '4px 7px', background: '#fff', fontFamily: 'inherit', outline: 'none', cursor: 'pointer', maxWidth: '190px' }}>
-                            <option value="">Item…</option>
-                            {catalog.filter(c => (c.company || '').trim() === it.company).sort((a, b) => a.no.localeCompare(b.no))
-                              .map(c => <option key={c.no} value={c.no}>{c.no}{c.desc ? ` — ${c.desc}` : ''}</option>)}
-                          </select>
-                        )}
-                        <div style={{ display: 'flex', gap: '4px' }}>
-                          {['Stock', 'Order'].map(s => {
-                            const on = it.source === s
-                            return (
-                              <button key={s} onClick={() => setItem(it.id, 'source', on ? '' : s)} style={{
-                                padding: '4px 12px', fontSize: '12px', fontWeight: 700, borderRadius: '999px', cursor: 'pointer', fontFamily: 'inherit',
-                                border: `1.5px solid ${on ? (s === 'Stock' ? GREEN : AMBER) : '#E2D7D1'}`,
-                                background: on ? (s === 'Stock' ? '#EAF5EC' : '#FBF3E4') : '#fff',
-                                color: on ? (s === 'Stock' ? GREEN : AMBER) : MUTED,
-                              }}>{s === 'Stock' ? 'In stock' : 'To order'}</button>
-                            )
-                          })}
-                        </div>
+                      )}
                     </div>
                   </div>
                 )
