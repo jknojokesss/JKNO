@@ -40,6 +40,10 @@ async function main() {
   check('empty list explains itself instead of showing a blank page',
     /No orders yet|Nothing here right now/.test(body))
 
+  // She works on a phone: nothing may push the page wider than the screen.
+  const pageW = await page.evaluate(() => ({ sw: document.documentElement.scrollWidth, cw: document.documentElement.clientWidth }))
+  check(`page fits the phone, no sideways slide (${pageW.sw}px content in ${pageW.cw}px)`, pageW.sw <= pageW.cw + 2)
+
   console.log('\nAlterations tab — empty')
   await page.locator('button', { hasText: /^Alterations \(/ }).first().click()
   await page.waitForTimeout(600)
@@ -86,10 +90,17 @@ async function main() {
   check(`description keeps a writable width (${descBox ? Math.round(descBox.width) : 0}px, want >=90)`,
     !!descBox && descBox.width >= 90)
 
-  console.log('\nSeamstress — workroom')
-  await page.goto(BASE + '/gowns?role=seamstress', { waitUntil: 'networkidle' })
-  await page.waitForTimeout(1200)
-  check('seamstress route loads without crashing', /LEW Imports/.test(await page.textContent('body')))
+  console.log('\nSeamstress — workroom (different screens off the same data)')
+  await page.goto(BASE + '/gowns?e2e_role=seamstress', { waitUntil: 'networkidle' })
+  await page.waitForTimeout(1500)
+  await dropOverlay()
+  body = await page.textContent('body')
+  check('workroom renders for the seamstress, not the order book',
+    /Workroom/.test(body) && !/Order Book/.test(body))
+  check('she is labelled as the seamstress', /Seamstress/i.test(body))
+  check('no money is shown to her', !/Owes|Paid \u2713|Subtotal/.test(body))
+  check('she gets her own current/history views', /Current|History/i.test(body))
+  check('she can still start an order', /\+ New Order/.test(body))
 
   await browser.close()
 

@@ -264,7 +264,14 @@ export default function Gowns() {
 
   // ── auth ────────────────────────────────────────────────────────────────────
   useEffect(() => {
-    if (E2E) { setAuthLoading(false); setLoaded(true); return }
+    if (E2E) {
+      // ?e2e_role=seamstress renders the workroom, so the tests exercise both
+      // roles for real (role comes from the login email, not a URL param).
+      const seam = typeof window !== 'undefined' && /(\?|&)e2e_role=seamstress/.test(window.location.search)
+      const who = { id: '00000000-0000-0000-0000-000000000001', email: seam ? 'seamstress@lewimports.com' : 'info@lewimports.com' }
+      setUser(who); setRole(roleOf(who)); setAuthLoading(false); setLoaded(true)
+      return
+    }
     supabase.auth.getSession().then(({ data }) => {
       if (data.session) { setUser(data.session.user); setRole(roleOf(data.session.user)); loadData(data.session.user) }
       setAuthLoading(false)
@@ -912,7 +919,7 @@ export default function Gowns() {
   const fieldIn = { width: '100%', padding: '13px 14px', fontSize: '17px', border: '1.5px solid #E2D7D1', borderRadius: '11px', background: '#fff', color: INK, outline: 'none', fontFamily: 'inherit' }
   const primaryBtn = { padding: '15px 20px', fontSize: '17px', fontWeight: 700, color: '#fff', background: ROSE, border: 'none', borderRadius: '13px', cursor: 'pointer', boxShadow: '0 2px 10px rgba(177,77,106,0.3)' }
   const ghostBtn = { width: '100%', padding: '14px', fontSize: '16px', fontWeight: 600, color: ROSE_DK, background: '#fff', border: `1.5px solid #E2D7D1`, borderRadius: '12px', cursor: 'pointer' }
-  const tabBtn = (on) => ({ flex: 1, padding: '12px 8px', fontSize: '15px', fontWeight: 700, borderRadius: '12px', cursor: 'pointer', fontFamily: 'inherit', border: `1.5px solid ${on ? PAD : '#DDD5CE'}`, background: on ? PAD : '#fff', color: on ? '#fff' : '#6B6870', boxShadow: on ? '0 2px 8px rgba(42,76,156,0.2)' : 'none' })
+  const tabBtn = (on) => ({ flex: '1 1 88px', padding: '12px 8px', fontSize: '15px', fontWeight: 700, borderRadius: '12px', cursor: 'pointer', fontFamily: 'inherit', border: `1.5px solid ${on ? PAD : '#DDD5CE'}`, background: on ? PAD : '#fff', color: on ? '#fff' : '#6B6870', boxShadow: on ? '0 2px 8px rgba(42,76,156,0.2)' : 'none' })
 
   // ── login screen ─────────────────────────────────────────────────────────────
   if (authLoading) return null
@@ -971,7 +978,7 @@ export default function Gowns() {
           .gw-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(310px, 1fr)); gap: 16px; }
           .gw-new-btn { width: 100%; padding: 17px; font-size: 18px; font-weight: 700; color: #fff; background: ${ROSE}; border: none; border-radius: 14px; cursor: pointer; font-family: inherit; letter-spacing: 0.01em; box-shadow: 0 3px 12px rgba(177,77,106,0.35); }
           .gw-new-btn:active { transform: scale(0.98); box-shadow: none; }
-          .gw-tabs { display: flex; gap: 8px; margin-top: 12px; }
+          .gw-tabs { display: flex; gap: 8px; margin-top: 12px; flex-wrap: wrap; }
           .tax-check { width: 18px; height: 18px; accent-color: ${PAD}; cursor: pointer; }
         `}</style>
       </Head>
