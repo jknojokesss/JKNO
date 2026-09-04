@@ -31,13 +31,20 @@ export default function ResetPassword() {
     }
     setLoading(true)
     setError('')
-    const { error } = await supabase.auth.updateUser({ password })
+    const { data, error } = await supabase.auth.updateUser({ password })
     if (error) {
       setError(error.message)
       setLoading(false)
-    } else {
-      router.push('/dashboard')
+      return
     }
+    // /dashboard now just redirects to Reydel's portal (next.config.js), so
+    // route staff back into the admin app and send everyone else to the
+    // client login router instead of into that redirect loop.
+    const email = data?.user?.email
+    const { data: adminRow } = email
+      ? await supabase.from('admins').select('email').eq('email', email).single()
+      : { data: null }
+    router.push(adminRow ? '/admin/dashboard' : '/login')
   }
 
   return (
