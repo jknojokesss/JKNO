@@ -43,12 +43,23 @@ export default function AdminLogin() {
   // Never reveal whether the email has an admin account — same posture as
   // /login. Supabase's own resetPasswordForEmail already no-ops silently for
   // an unknown address, so one generic message covers both cases.
+  //
+  // redirectTo must be a URL on Supabase Auth's allowed redirect list or the
+  // recovery link fails validation server-side and drops the token, landing
+  // on /reset-password with nothing to process. jknojokes.com serves both
+  // the apex and www hosts with no canonicalizing redirect between them, so
+  // window.location.origin can be either one — pin to the apex (the
+  // documented production domain) instead of trusting whichever host the
+  // admin happened to be on.
   const handleForgotPassword = async () => {
     if (!email) return
     setResetLoading(true)
     setError('')
+    const base = window.location.hostname === 'localhost'
+      ? window.location.origin
+      : 'https://jknojokes.com'
     await supabase.auth.resetPasswordForEmail(email, {
-      redirectTo: `${window.location.origin}/reset-password`,
+      redirectTo: `${base}/reset-password`,
     })
     setResetLoading(false)
     setResetSent(true)
