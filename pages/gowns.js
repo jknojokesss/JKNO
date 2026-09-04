@@ -960,6 +960,9 @@ export default function Gowns() {
           .gw-header { background: #1C1C2E; padding: 22px 20px 18px; text-align: center; margin: -20px -14px 24px; }
           .gw-wrap { max-width: 980px; margin: 0 auto; padding: 20px 14px 80px; }
           .gw-press:active { transform: scale(0.98); opacity: 0.92; }
+          /* Item grid keeps every column; on a phone she swipes it sideways
+             rather than having Description crushed to nothing. */
+          .gw-itemscroll { overflow-x: auto; -webkit-overflow-scrolling: touch; }
           .gw-card { background: #fff; border: 1px solid #EAE0D8; border-radius: 18px; box-shadow: 0 2px 14px rgba(0,0,0,0.07); }
           .gw-card-click:hover { box-shadow: 0 4px 22px rgba(0,0,0,0.11); transform: translateY(-1px); transition: box-shadow 0.15s, transform 0.15s; }
           .gw-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(310px, 1fr)); gap: 16px; }
@@ -1383,10 +1386,11 @@ export default function Gowns() {
               </datalist>
 
               {/* table header */}
-              <div style={{ display: 'flex', borderBottom: `1px solid ${GRID}` }}>
+              <div className="gw-itemscroll">
+              <div style={{ display: 'flex', borderBottom: `1px solid ${GRID}`, minWidth: '486px' }}>
                 <div style={{ ...th, width: '26px', textAlign: 'center', padding: '8px 0' }} />
                 <div style={{ ...th, width: '44px', textAlign: 'center', borderLeft: `1px solid ${GRID}` }}>Qty</div>
-                <div style={{ ...th, width: '62px', textAlign: 'center', borderLeft: `1px solid ${GRID}` }} title="Stock or custom order">Type</div>
+                <div style={{ ...th, width: '76px', textAlign: 'center', borderLeft: `1px solid ${GRID}` }} title="Stock or custom order">Type</div>
                 <div style={{ ...th, width: '72px', borderLeft: `1px solid ${GRID}` }}>Item #</div>
                 <div style={{ ...th, flex: 1, borderLeft: `1px solid ${GRID}` }}>Description</div>
                 <div style={{ ...th, width: '82px', textAlign: 'right', borderLeft: `1px solid ${GRID}` }}>Price</div>
@@ -1399,12 +1403,12 @@ export default function Gowns() {
               {form.items.map((it, i) => {
                 const showSuggest = suggest && suggest.id === it.id
                 return (
-                  <div key={it.id}>
+                  <div key={it.id} style={{ minWidth: '486px' }}>
                     <div style={{ display: 'flex', borderBottom: `1px solid ${GRID}`, alignItems: 'center', position: 'relative' }}>
                     <div style={{ width: '26px', textAlign: 'center', fontSize: '11px', color: PAD, fontWeight: 600 }}>{i + 1}</div>
                     <input value={it.qty} onChange={e => setItem(it.id, 'qty', e.target.value)} type="text" inputMode="numeric" style={{ ...cellIn, width: '44px', textAlign: 'center', padding: '12px 2px', borderLeft: `1px solid ${GRID}` }} />
                     <select value={it.source || ''} onChange={e => setItem(it.id, 'source', e.target.value)} title="Stock or custom order"
-                      style={{ width: '62px', borderLeft: `1px solid ${GRID}`, alignSelf: 'stretch', border: 'none', borderLeftWidth: '1px', borderLeftStyle: 'solid', borderLeftColor: GRID, background: 'transparent', fontFamily: 'inherit', fontSize: '13px', fontWeight: 600, textAlign: 'center', color: it.source === 'Stock' ? GREEN : it.source === 'Custom' ? AMBER : '#C7B7B1', outline: 'none', cursor: 'pointer' }}>
+                      style={{ width: '76px', borderLeft: `1px solid ${GRID}`, alignSelf: 'stretch', border: 'none', borderLeftWidth: '1px', borderLeftStyle: 'solid', borderLeftColor: GRID, background: 'transparent', fontFamily: 'inherit', fontSize: '13px', fontWeight: 600, textAlign: 'center', color: it.source === 'Stock' ? GREEN : it.source === 'Custom' ? AMBER : '#C7B7B1', outline: 'none', cursor: 'pointer' }}>
                       <option value="">—</option>
                       <option value="Stock">Stock</option>
                       <option value="Custom">Custom</option>
@@ -1468,7 +1472,7 @@ export default function Gowns() {
                     </div>
                     {/* company → item: type a new company or pick one you've used */}
                     <div style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '5px 12px 7px 32px', background: '#FBFAF7', borderBottom: `1px solid ${GRID}`, flexWrap: 'wrap' }}>
-                      <span style={{ fontSize: '10px', fontWeight: 700, letterSpacing: '0.04em', textTransform: 'uppercase', color: MUTED }}>Company</span>
+                      <span style={{ fontSize: '10px', fontWeight: 700, letterSpacing: '0.04em', textTransform: 'uppercase', color: MUTED, flexShrink: 0 }}>Company</span>
                       <input value={it.company || ''} list="gown-companies" placeholder="type or pick…"
                         onChange={e => setItem(it.id, 'company', e.target.value)}
                         onBlur={e => setItem(it.id, 'company', titleCase(e.target.value))}
@@ -1489,6 +1493,7 @@ export default function Gowns() {
                 )
               })}
 
+              </div>
               <button onClick={addRow} style={{ width: '100%', padding: '11px', fontSize: '14px', fontWeight: 600, color: PAD, background: '#F6F9FE', border: 'none', borderBottom: `2px solid ${PAD}`, cursor: 'pointer', fontFamily: 'inherit' }}>+ Add line</button>
 
               {/* totals */}
