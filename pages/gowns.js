@@ -222,8 +222,14 @@ const blankForm = () => ({
   orderKind: 'customer',   // 'customer' = a sales order for a person; 'stock' = buying gowns for the shop
 })
 
+// Set only by `npm run test:e2e` so the smoke tests can render the owner
+// screens against an empty database. Both halves are build-time constants and
+// the NODE_ENV half is false in any production build, so this whole branch is
+// compiled away by `next build` — it can never be switched on in the field.
+const E2E = process.env.NODE_ENV !== 'production' && process.env.NEXT_PUBLIC_E2E === '1'
+
 export default function Gowns() {
-  const [user, setUser] = useState(null)
+  const [user, setUser] = useState(E2E ? { id: '00000000-0000-0000-0000-000000000001', email: 'info@lewimports.com' } : null)
   const [authLoading, setAuthLoading] = useState(true)
   // /login already asked for the email; carry it over so it is typed once.
   const [loginEmail, setLoginEmail] = useState(() => {
@@ -262,6 +268,7 @@ export default function Gowns() {
 
   // ── auth ────────────────────────────────────────────────────────────────────
   useEffect(() => {
+    if (E2E) { setAuthLoading(false); setLoaded(true); return }
     supabase.auth.getSession().then(({ data }) => {
       if (data.session) { setUser(data.session.user); setRole(roleOf(data.session.user)); loadData(data.session.user) }
       setAuthLoading(false)
@@ -1387,7 +1394,7 @@ export default function Gowns() {
 
               {/* table header */}
               <div className="gw-itemscroll">
-              <div style={{ display: 'flex', borderBottom: `1px solid ${GRID}`, minWidth: '486px' }}>
+              <div style={{ display: 'flex', borderBottom: `1px solid ${GRID}`, minWidth: '560px' }}>
                 <div style={{ ...th, width: '26px', textAlign: 'center', padding: '8px 0' }} />
                 <div style={{ ...th, width: '44px', textAlign: 'center', borderLeft: `1px solid ${GRID}` }}>Qty</div>
                 <div style={{ ...th, width: '76px', textAlign: 'center', borderLeft: `1px solid ${GRID}` }} title="Stock or custom order">Type</div>
@@ -1403,7 +1410,7 @@ export default function Gowns() {
               {form.items.map((it, i) => {
                 const showSuggest = suggest && suggest.id === it.id
                 return (
-                  <div key={it.id} style={{ minWidth: '486px' }}>
+                  <div key={it.id} style={{ minWidth: '560px' }}>
                     <div style={{ display: 'flex', borderBottom: `1px solid ${GRID}`, alignItems: 'center', position: 'relative' }}>
                     <div style={{ width: '26px', textAlign: 'center', fontSize: '11px', color: PAD, fontWeight: 600 }}>{i + 1}</div>
                     <input value={it.qty} onChange={e => setItem(it.id, 'qty', e.target.value)} type="text" inputMode="numeric" style={{ ...cellIn, width: '44px', textAlign: 'center', padding: '12px 2px', borderLeft: `1px solid ${GRID}` }} />
