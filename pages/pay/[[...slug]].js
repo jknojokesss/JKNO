@@ -197,7 +197,7 @@ function CheckoutForm({ inv, email, amountCents, customerName, dueDate }) {
       <div style={{ fontSize: '11px', letterSpacing: '0.1em', textTransform: 'uppercase', color: MUTED, marginBottom: '6px' }}>
         Invoice {inv}
       </div>
-      <div style={{ fontFamily: 'Playfair Display, serif', fontSize: '34px', fontWeight: '700', lineHeight: 1.1 }}>
+      <div style={{ fontFamily: 'Inter, -apple-system, sans-serif', fontVariantNumeric: 'lining-nums tabular-nums', fontSize: '34px', fontWeight: '700', lineHeight: 1.1 }}>
         {money(amountCents)}
       </div>
       <div style={{ fontSize: '13.5px', color: MUTED, marginTop: '4px' }}>
