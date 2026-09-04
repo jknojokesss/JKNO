@@ -5,7 +5,7 @@ import { buildInvoiceEmail } from '../../../lib/invoiceEmail'
 import { isPortalClient, portalClientRefusal } from '../../../lib/portalAuth'
 import { getLiveToken, QboAuthError } from '../../../lib/qboAuth'
 import { fetchOpenInvoices, fetchInvoice, fetchInvoicePdf, fetchArRefs, buildInvoice, postInvoice, nextDocNumber, setInvoiceDocNumber, statementFor } from '../../../lib/qboAr'
-import { addPayLinkPage } from '../../../lib/pdfPayLink'
+import { stampPayLink } from '../../../lib/pdfPayLink'
 
 // ── Live AR for one client: list, view, and email real invoices ──────────
 //
@@ -22,9 +22,6 @@ import { addPayLinkPage } from '../../../lib/pdfPayLink'
 
 const clean = (s) => String(s || '').toLowerCase().replace(/[^a-z0-9-]/g, '')
 const money = (n) => '$' + Number(n || 0).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
-const niceDate = (iso) => iso
-  ? new Date(iso + 'T00:00:00Z').toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric', timeZone: 'UTC' })
-  : null
 
 // How this company takes money, in the words the customer reads. Scoped to
 // the company that owns the accounts, so a client whose books pass through
@@ -72,7 +69,7 @@ export default async function handler(req, res) {
         if (!id) return res.status(400).json({ error: 'Missing ?id= invoice id.' })
         const pdf = await fetchInvoicePdf(env, token, realmId, id)
 
-        // Same pay-link page as the emailed PDF (see the POST handler below)
+        // Same pay-link stamp as the emailed PDF (see the POST handler below)
         // — the "PDF" button in the admin table should show the same
         // Stripe/Zelle info as what actually gets sent, not QBO's bare file.
         const owner = process.env.STRIPE_PAY_CLIENT || 'jkno'
@@ -81,14 +78,13 @@ export default async function handler(req, res) {
         const zelle = canPay ? (process.env.PAY_ZELLE || null) : null
         let finalPdf = pdf
         if ((canPay && stripeConfigured) || zelle) {
-          const inv = await fetchInvoice(env, token, realmId, id)
-          const doc = (inv && inv.DocNumber) || id
-          const balance = inv && inv.Balance != null ? Number(inv.Balance) : null
-          const dueDate = (inv && inv.DueDate) || null
-          const url = (canPay && stripeConfigured)
-            ? `${process.env.PORTAL_BASE_URL || 'https://jknojokes.com'}/pay?inv=${encodeURIComponent(doc)}`
-            : null
-          finalPdf = await addPayLinkPage(pdf, { url, amount: balance != null ? money(balance) : null, doc, due: niceDate(dueDate), zelle })
+          let url = null
+          if (canPay && stripeConfigured) {
+            const inv = await fetchInvoice(env, token, realmId, id)
+            const doc = (inv && inv.DocNumber) || id
+            url = `${process.env.PORTAL_BASE_URL || 'https://jknojokes.com'}/pay?inv=${encodeURIComponent(doc)}`
+          }
+          finalPdf = await stampPayLink(pdf, { url, zelle })
         }
 
         res.setHeader('Content-Type', 'application/pdf')
@@ -258,13 +254,11 @@ export default async function handler(req, res) {
         replyTo: SMTP_USER,
       })
       // QuickBooks' own PDF has no idea our Stripe link (or Zelle) exists —
-      // Intuit can't template it in. Append a page with a real, clickable
-      // link so the attachment itself can pay the invoice, not just the
+      // Intuit can't template it in. Stamp it onto the invoice's own last
+      // page so the attachment itself can pay the invoice, not just the
       // email body (which strips on forward, print, or a client that blocks
       // HTML).
-      const attachedPdf = (payUrl || zelle)
-        ? await addPayLinkPage(pdf, { url: payUrl, amount: balance != null ? money(balance) : null, doc, due: niceDate(dueDate), zelle })
-        : pdf
+      const attachedPdf = await stampPayLink(pdf, { url: payUrl, zelle })
       const info = await transporter.sendMail({
         from: process.env.SMTP_FROM || `JK No Jokes <${SMTP_USER}>`,
         replyTo: SMTP_USER,
