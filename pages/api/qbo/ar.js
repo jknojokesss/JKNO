@@ -22,6 +22,9 @@ import { stampPayLink } from '../../../lib/pdfPayLink'
 
 const clean = (s) => String(s || '').toLowerCase().replace(/[^a-z0-9-]/g, '')
 const money = (n) => '$' + Number(n || 0).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
+// Real sold line items only — QBO's own Line array on a fetched invoice also
+// carries a trailing SubTotalLineDetail entry that isn't a row on the PDF.
+const countLines = (inv) => (inv && inv.Line ? inv.Line.filter((l) => l.DetailType === 'SalesItemLineDetail').length : 0)
 
 // How this company takes money, in the words the customer reads. Scoped to
 // the company that owns the accounts, so a client whose books pass through
@@ -78,13 +81,11 @@ export default async function handler(req, res) {
         const zelle = canPay ? (process.env.PAY_ZELLE || null) : null
         let finalPdf = pdf
         if ((canPay && stripeConfigured) || zelle) {
-          let url = null
-          if (canPay && stripeConfigured) {
-            const inv = await fetchInvoice(env, token, realmId, id)
-            const doc = (inv && inv.DocNumber) || id
-            url = `${process.env.PORTAL_BASE_URL || 'https://jknojokes.com'}/pay?inv=${encodeURIComponent(doc)}`
-          }
-          finalPdf = await stampPayLink(pdf, { url, zelle })
+          const inv = await fetchInvoice(env, token, realmId, id)
+          const url = (canPay && stripeConfigured)
+            ? `${process.env.PORTAL_BASE_URL || 'https://jknojokes.com'}/pay?inv=${encodeURIComponent((inv && inv.DocNumber) || id)}`
+            : null
+          finalPdf = await stampPayLink(pdf, { url, zelle, lineCount: countLines(inv) })
         }
 
         res.setHeader('Content-Type', 'application/pdf')
@@ -258,7 +259,7 @@ export default async function handler(req, res) {
       // page so the attachment itself can pay the invoice, not just the
       // email body (which strips on forward, print, or a client that blocks
       // HTML).
-      const attachedPdf = await stampPayLink(pdf, { url: payUrl, zelle })
+      const attachedPdf = await stampPayLink(pdf, { url: payUrl, zelle, lineCount: countLines(inv) })
       const info = await transporter.sendMail({
         from: process.env.SMTP_FROM || `JK No Jokes <${SMTP_USER}>`,
         replyTo: SMTP_USER,
