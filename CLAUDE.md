@@ -293,10 +293,21 @@ Pessi found it in production, on a live shop's real orders.
 
 Before pushing anything a client touches:
 
-- **Run the actual flow in a browser.** Chromium + Playwright are installed on
-  this VM (`PLAYWRIGHT_BROWSERS_PATH=/opt/pw-browsers`; never run
-  `playwright install`). `npx next dev` on this VM with `.env.local` set,
-  drive the page, and confirm the thing does what was asked.
+- **Run `npm run test:e2e`.** It boots a dev server, drives the gown app in
+  Chromium against an empty database, and fails loudly. Add a case to
+  `tests/e2e/gowns.spec.js` for whatever you just built. It needs no
+  `.env.local` and no real data: `NEXT_PUBLIC_E2E=1` makes the page render the
+  owner screens without a login. The flag is `process.env.NODE_ENV !==
+  'production' && process.env.NEXT_PUBLIC_E2E === '1'` — both halves are
+  build-time constants, so `next build` compiles the branch out entirely
+  (verified: the stub identity does not appear in the production bundle). Keep
+  the NODE_ENV half. A `window` flag or a bare env check stays live in the
+  shipped bundle and is a real auth bypass.
+- **Run the actual flow in a browser too**, for anything the tests can't judge —
+  spacing, truncation, whether it reads right on a phone. Screenshot it and
+  look. The tests passed a 40px-wide description box that no one could type a
+  gown into; only the screenshot showed it. Chromium + Playwright are on this VM
+  (`PLAYWRIGHT_BROWSERS_PATH=/opt/pw-browsers`; never run `playwright install`).
 - **Test the empty state first.** Most shipped bugs here are a list that is
   empty on the client's screen but not on mine: no catalog rows, no companies,
   no prior assignees, no photos, no payments. A picker with nothing to pick is
