@@ -10,14 +10,24 @@ export default function ResetPassword() {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
   const [ready, setReady] = useState(false)
+  const [invalid, setInvalid] = useState(false)
 
   useEffect(() => {
-    // Supabase puts the token in the URL hash - we need to let it process
-    supabase.auth.onAuthStateChange((event, session) => {
-      if (event === 'PASSWORD_RECOVERY') {
-        setReady(true)
+    // Supabase puts the recovery token in the URL hash and processes it
+    // during client init, which can finish before this effect subscribes —
+    // a late subscriber never gets a replayed PASSWORD_RECOVERY, only the
+    // INITIAL_SESSION that follows it, so both have to flip `ready`. If
+    // init finishes with no session, the link was bad (used, expired, or
+    // the redirect URL isn't on Supabase's allow list) — say so instead of
+    // spinning on "Processing..." forever.
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      if (event === 'PASSWORD_RECOVERY') setReady(true)
+      else if (event === 'INITIAL_SESSION') {
+        if (session) setReady(true)
+        else setInvalid(true)
       }
     })
+    return () => subscription.unsubscribe()
   }, [])
 
   const handleReset = async () => {
@@ -85,7 +95,11 @@ export default function ResetPassword() {
             fontWeight: '600', color: '#0D0D0D', textAlign: 'center',
             marginBottom: '28px' }}>Set New Password</h1>
 
-          {!ready ? (
+          {invalid ? (
+            <div style={{ textAlign: 'center', color: '#718096', fontSize: '14px', lineHeight: 1.6 }}>
+              This reset link is invalid or has expired.<br />Request a new one from the login page.
+            </div>
+          ) : !ready ? (
             <div style={{ textAlign: 'center', color: '#718096', fontSize: '14px' }}>
               Processing your reset link...
             </div>
