@@ -282,6 +282,35 @@ Two tables in the main project have RLS **off**: `shul_board_status` and
 `outreach_contacts` — anyone with the anon key can read/modify them. Don't
 copy that pattern onto client books.
 
+## Test before shipping — not just "it compiles"
+
+`next build` proves the code parses. It proves **nothing** about whether the
+feature works. Shipping a green build as if it were a working feature is how
+the gown Catalog went out with a company field that could not accept a company:
+the dropdown only listed companies already in the catalog, so on an empty
+catalog there was nothing to pick and no way to type. It compiled perfectly.
+Pessi found it in production, on a live shop's real orders.
+
+Before pushing anything a client touches:
+
+- **Run the actual flow in a browser.** Chromium + Playwright are installed on
+  this VM (`PLAYWRIGHT_BROWSERS_PATH=/opt/pw-browsers`; never run
+  `playwright install`). `npx next dev` on this VM with `.env.local` set,
+  drive the page, and confirm the thing does what was asked.
+- **Test the empty state first.** Most shipped bugs here are a list that is
+  empty on the client's screen but not on mine: no catalog rows, no companies,
+  no prior assignees, no photos, no payments. A picker with nothing to pick is
+  a dead end — every one of them needs a way to type a new value.
+- **Test with the client's own data**, not a fresh happy-path record. Open a
+  real order with missing address, no email, one line item, a legacy `Card`
+  payment. Old rows do not have new fields.
+- **Both roles.** Owner and seamstress see different screens off the same data
+  (`roleOf`). A change to shared code has to be checked from both logins.
+- **Then say what you actually verified.** "Compiles clean" is not "works."
+  If a flow was not exercised, say which one and why.
+
+A feature that has not been run is not finished, no matter how clean the diff.
+
 ## Conventions
 
 - Working style: blunt, short, make the call. Verify numbers against data
