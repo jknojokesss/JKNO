@@ -10,6 +10,8 @@ export default function AdminLogin() {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
   const [checking, setChecking] = useState(true)
+  const [resetSent, setResetSent] = useState(false)
+  const [resetLoading, setResetLoading] = useState(false)
 
   useEffect(() => {
     supabase.auth.getSession().then(async ({ data: { session } }) => {
@@ -36,6 +38,20 @@ export default function AdminLogin() {
       return
     }
     router.push('/admin/dashboard')
+  }
+
+  // Never reveal whether the email has an admin account — same posture as
+  // /login. Supabase's own resetPasswordForEmail already no-ops silently for
+  // an unknown address, so one generic message covers both cases.
+  const handleForgotPassword = async () => {
+    if (!email) return
+    setResetLoading(true)
+    setError('')
+    await supabase.auth.resetPasswordForEmail(email, {
+      redirectTo: `${window.location.origin}/reset-password`,
+    })
+    setResetLoading(false)
+    setResetSent(true)
   }
 
   const handleKeyDown = (e) => { if (e.key === 'Enter') handleLogin() }
@@ -118,6 +134,22 @@ export default function AdminLogin() {
               onFocus={e => e.target.style.borderColor = '#C9A84C'}
               onBlur={e => e.target.style.borderColor = '#2E3A5C'} />
           </div>
+
+          <div style={{ textAlign: 'right', marginBottom: '20px', marginTop: '-14px' }}>
+            <span onClick={handleForgotPassword}
+              style={{ fontSize: '12px', color: resetLoading ? '#4A5568' : '#6B7A96',
+                cursor: !email || resetLoading ? 'default' : 'pointer', fontFamily: 'sans-serif' }}>
+              {resetLoading ? 'Sending…' : 'Forgot password?'}
+            </span>
+          </div>
+
+          {resetSent && (
+            <div style={{ marginBottom: '16px', padding: '10px 14px',
+              background: 'rgba(52,152,90,0.12)', border: '1px solid rgba(52,152,90,0.35)',
+              borderRadius: '2px', fontSize: '13px', color: '#8FCC9E' }}>
+              If that email has admin access, a reset link is on its way.
+            </div>
+          )}
 
           {error && (
             <div style={{ marginBottom: '16px', padding: '10px 14px',
