@@ -16,14 +16,12 @@ const nextConfig = {
       { source: '/roofing', destination: '/riverstone-roofing', permanent: false },
       { source: '/srl', destination: '/riverstone-roofing', permanent: false },
       { source: '/quefence', destination: '/riverbend-fence', permanent: false },
-      // Reydel portal lives in jknojokesss/reydel (Vercel project `reydel`).
-      // QBO nightly pull + Clover cron + Weldon import stay here so tokens
-      // and the Intuit callback don't move. Swap the host when
-      // reydel.jknojokes.com is attached. Leave /reset-password here —
-      // recovery tokens sit in the URL hash and a redirect would drop them.
-      // NOT /login — that is now the router page in pages/login.js that sends
-      // each client to their own portal (Reydel clients included). A redirect
-      // here would shadow it at the edge and send everyone to Reydel again.
+      // Reydel portal lives in jknojokesss/reydel under /reydel-tire.
+      // QBO nightly pull + Intuit connect/callback stay here (token rotation).
+      // Clover cron + Weldon import moved to the reydel project — do not
+      // re-add /api/cron/clover-sync here or two syncs will race.
+      // Leave /reset-password here — recovery tokens sit in the URL hash and
+      // a redirect would drop them. NOT /login — that is the router page.
       ...[
         '/dashboard',
         '/financials',
@@ -35,7 +33,7 @@ const nextConfig = {
         '/admin/qbo-push',
       ].map((source) => ({
         source,
-        destination: `https://reydel.vercel.app${source}`,
+        destination: `https://reydel.vercel.app/reydel-tire${source}`,
         permanent: false,
       })),
       {
