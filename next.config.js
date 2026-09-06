@@ -36,6 +36,16 @@ const nextConfig = {
         destination: `https://reydel.vercel.app/reydel-tire${source}`,
         permanent: false,
       })),
+      // LEW Imports gown shop lives in jknojokesss/gowns.
+      // Keep the morning task cron HERE until copy-gowns-env.sh has run on
+      // the gowns Vercel project (receipts/cron need Gmail + service role).
+      // Then drop /api/cron/gown-tasks from this vercel.json so two crons
+      // do not double-email. Do not edit pages/gowns.js here.
+      {
+        source: '/gowns',
+        destination: 'https://gowns-nine.vercel.app/gowns',
+        permanent: false,
+      },
       {
         source: '/shul-vote',
         has: [{ type: 'host', value: 'jknojokes.com' }],
