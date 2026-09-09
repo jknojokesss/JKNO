@@ -3,99 +3,102 @@ import { useRouter } from 'next/router'
 
 const BOOKING_URL = 'https://calendly.com/jk-jknojokes/30min'
 
+const C = {
+  ink: '#12181E',
+  paper: '#F2F4F6',
+  line: '#D5DCE4',
+  muted: '#5A6570',
+  soft: '#8A949E',
+  accent: '#0E7C66',
+  accentDark: '#0A5C4B',
+  wash: '#D7EFE8',
+  panel: '#E8ECF0',
+}
+
 export default function About() {
   const router = useRouter()
   return (
     <>
       <Head>
-        <title>Who We Are — JK No Jokes Financials</title>
+        <title>About — JK No Jokes Financials</title>
         <meta name="viewport" content="width=device-width, initial-scale=1" />
-        <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600;700&family=DM+Sans:wght@300;400;500&family=DM+Mono:wght@400;500&family=Playfair+Display:wght@700&display=swap" rel="stylesheet" />
+        <link href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet" />
       </Head>
       <style>{`
         *{box-sizing:border-box;margin:0;padding:0}
-        body{background:#F7F4EF;color:#1A1A2E;font-family:'DM Sans',sans-serif}
-        .cta-btn{background:#C9A84C;color:#080808;border:none;padding:16px 36px;font-family:'DM Mono',monospace;font-size:12px;letter-spacing:2px;text-transform:uppercase;cursor:pointer;transition:all .2s;display:inline-block;text-decoration:none}
-        .cta-btn:hover{background:#E8D5A3;transform:translateY(-1px)}
-        .ghost-btn{background:transparent;color:#B8943C;border:1px solid #B8943C;padding:14px 32px;font-family:'DM Mono',monospace;font-size:12px;letter-spacing:2px;text-transform:uppercase;cursor:pointer;transition:all .2s;text-decoration:none;display:inline-block}
-        .ghost-btn:hover{background:#C9A84C;color:#fff}
-        @media(max-width:768px){.split{grid-template-columns:1fr !important;gap:40px !important}.stats{grid-template-columns:1fr 1fr !important}}
+        body{background:${C.paper};color:${C.ink};font-family:'Figtree',sans-serif}
+        .cta-btn{background:${C.accent};color:#fff;border:none;padding:15px 28px;font-family:'IBM Plex Mono',monospace;font-size:12px;letter-spacing:1.5px;text-transform:uppercase;cursor:pointer;text-decoration:none;display:inline-block}
+        .cta-btn:hover{background:${C.accentDark}}
+        .ghost-btn{background:transparent;color:${C.accentDark};border:1px solid ${C.accent};padding:14px 26px;font-family:'IBM Plex Mono',monospace;font-size:12px;letter-spacing:1.5px;text-transform:uppercase;cursor:pointer;text-decoration:none;display:inline-block}
+        .ghost-btn:hover{background:${C.wash}}
+        @media(max-width:768px){.split{grid-template-columns:1fr !important;gap:36px !important}.stats{grid-template-columns:1fr 1fr !important}}
       `}</style>
 
-      {/* Nav */}
-      <nav style={{ position:'sticky', top:0, zIndex:100, background:'rgba(247,244,239,0.97)', borderBottom:'1px solid #DDD8CE', padding:'18px clamp(16px,5vw,48px)', display:'flex', alignItems:'center', justifyContent:'space-between', gap:'16px', flexWrap:'wrap' }}>
-        <button onClick={() => router.push('/')} style={{ fontFamily:'Playfair Display,serif', fontSize:'22px', fontWeight:700, letterSpacing:'-0.5px', background:'none', border:'none', cursor:'pointer', display:'flex', alignItems:'baseline', gap:'2px' }}>
-          JK<span style={{ color:'#C9A84C' }}>.</span>
+      <nav style={{ position: 'sticky', top: 0, zIndex: 100, background: 'rgba(242,244,246,0.96)', borderBottom: `1px solid ${C.line}`, padding: '18px clamp(16px,5vw,48px)', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '16px', flexWrap: 'wrap' }}>
+        <button onClick={() => router.push('/')} style={{ fontFamily: "'Space Grotesk',sans-serif", fontSize: '22px', fontWeight: 700, letterSpacing: '-0.5px', background: 'none', border: 'none', cursor: 'pointer' }}>
+          JK<span style={{ color: C.accent }}>.</span>
         </button>
-        <div style={{ display:'flex', gap:'28px', alignItems:'center', flexWrap:'wrap' }}>
-          <button onClick={() => router.push('/how-it-works')} style={{ fontFamily:'DM Mono,monospace', fontSize:'12px', letterSpacing:'1px', color:'#5A6070', background:'none', border:'none', cursor:'pointer' }}>How It Works</button>
-          <button onClick={() => router.push('/what-we-do')} style={{ fontFamily:'DM Mono,monospace', fontSize:'12px', letterSpacing:'1px', color:'#5A6070', background:'none', border:'none', cursor:'pointer' }}>What You Get</button>
-          <button onClick={() => router.push('/about')} style={{ fontFamily:'DM Mono,monospace', fontSize:'12px', letterSpacing:'1px', color:'#C9A84C', background:'none', border:'none', cursor:'pointer' }}>Who We Are</button>
-          <button onClick={() => router.push('/#contact')} className="cta-btn" style={{ padding:'10px 20px', fontSize:'11px' }}>Contact</button>
+        <div style={{ display: 'flex', gap: '22px', alignItems: 'center', flexWrap: 'wrap' }}>
+          <button onClick={() => router.push('/#demos')} style={{ fontFamily: "'IBM Plex Mono',monospace", fontSize: '12px', letterSpacing: '0.6px', color: C.muted, background: 'none', border: 'none', cursor: 'pointer' }}>Work</button>
+          <button onClick={() => router.push('/about')} style={{ fontFamily: "'IBM Plex Mono',monospace", fontSize: '12px', letterSpacing: '0.6px', color: C.accentDark, background: 'none', border: 'none', cursor: 'pointer' }}>About</button>
+          <button onClick={() => router.push('/#contact')} className="cta-btn" style={{ padding: '10px 18px', fontSize: '11px' }}>Contact</button>
         </div>
       </nav>
 
-      {/* Hero */}
-      <section style={{ padding:'clamp(64px,9vw,100px) clamp(16px,5vw,48px) clamp(48px,6vw,72px)', textAlign:'center', maxWidth:'800px', margin:'0 auto' }}>
-        <div style={{ fontFamily:'DM Mono,monospace', fontSize:'11px', letterSpacing:'3px', color:'#C9A84C', marginBottom:'20px' }}>— WHO WE ARE</div>
-        <h1 style={{ fontFamily:'Cormorant Garamond,serif', fontSize:'clamp(36px,5vw,64px)', fontWeight:600, lineHeight:1.1, marginBottom:'20px' }}>
-          Beyond bookkeeping.
+      <section style={{ padding: 'clamp(56px,8vw,88px) clamp(16px,5vw,48px) clamp(40px,5vw,56px)', textAlign: 'center', maxWidth: '720px', margin: '0 auto' }}>
+        <div style={{ fontFamily: "'IBM Plex Mono',monospace", fontSize: '11px', letterSpacing: '2.5px', color: C.accentDark, marginBottom: '18px' }}>ABOUT</div>
+        <h1 style={{ fontFamily: "'Space Grotesk',sans-serif", fontSize: 'clamp(34px,5vw,52px)', fontWeight: 600, lineHeight: 1.1, marginBottom: '18px', letterSpacing: '-1px' }}>
+          Books, software, and one person who owns both.
         </h1>
-        <div style={{ fontFamily:'Cormorant Garamond,serif', fontStyle:'italic', fontSize:'clamp(20px,2.8vw,30px)', color:'#C9A84C', fontWeight:600, marginBottom:'20px' }}>
-          The JK Way™ — finance with a human behind it.
-        </div>
-        <p style={{ fontSize:'17px', color:'#5A6070', lineHeight:1.7, maxWidth:'520px', margin:'0 auto' }}>
-          JK No Jokes Financials is a boutique finance firm that combines deep financial expertise with custom-built technology — built specifically for your business.
+        <p style={{ fontSize: '17px', color: C.muted, lineHeight: 1.7, maxWidth: '520px', margin: '0 auto' }}>
+          JK No Jokes builds custom portals wired into the systems you already run — then stays on the books so the screens stay true.
         </p>
       </section>
 
-      {/* Split section */}
-      <section style={{ padding:'0 clamp(16px,5vw,48px) clamp(64px,9vw,100px)', maxWidth:'1100px', margin:'0 auto' }}>
-        <div className="split" style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:'80px', alignItems:'center' }}>
+      <section style={{ padding: '0 clamp(16px,5vw,48px) clamp(64px,9vw,100px)', maxWidth: '1040px', margin: '0 auto' }}>
+        <div className="split" style={{ display: 'grid', gridTemplateColumns: '1.1fr 0.9fr', gap: '64px', alignItems: 'center' }}>
           <div>
-            {/* Portrait */}
-            <div style={{ marginBottom:'36px', display:'flex', alignItems:'center', gap:'20px' }}>
-              <img src="/1779727210800.jpg" alt="Jonathan Katz" style={{ width:'100px', height:'100px', borderRadius:'50%', objectFit:'cover', border:'3px solid #C9A84C', flexShrink:0 }} />
+            <div style={{ marginBottom: '28px', display: 'flex', alignItems: 'center', gap: '18px' }}>
+              <img src="/1779727210800.jpg" alt="Jonathan Katz" style={{ width: 96, height: 96, borderRadius: '50%', objectFit: 'cover', border: `2px solid ${C.accent}`, flexShrink: 0 }} />
               <div>
-                <div style={{ fontFamily:'Cormorant Garamond,serif', fontSize:'22px', fontWeight:600, lineHeight:1.2 }}>Jonathan (Chaim) Katz</div>
-                <div style={{ fontFamily:'DM Mono,monospace', fontSize:'10px', letterSpacing:'1.5px', color:'#C9A84C', marginTop:'4px' }}>FOUNDER · JK NO JOKES FINANCIALS</div>
+                <div style={{ fontFamily: "'Space Grotesk',sans-serif", fontSize: '22px', fontWeight: 600, lineHeight: 1.2 }}>Jonathan (Chaim) Katz</div>
+                <div style={{ fontFamily: "'IBM Plex Mono',monospace", fontSize: '10px', letterSpacing: '1.4px', color: C.accentDark, marginTop: '5px' }}>FOUNDER</div>
               </div>
             </div>
-            <p style={{ fontSize:'16px', color:'#5A6070', lineHeight:1.8, marginBottom:'24px' }}>
-              We don't just record your numbers — we build the system that turns them into decisions. Every client gets their own custom-built financial portal, updated in real time, accessible from any device.
+            <p style={{ fontSize: '16px', color: C.muted, lineHeight: 1.8, marginBottom: '18px' }}>
+              I started this because owners were drowning in QuickBooks reports that didn’t match how they thought about the business — and because off-the-shelf dashboards never quite fit.
             </p>
-            <p style={{ fontSize:'16px', color:'#5A6070', lineHeight:1.8, marginBottom:'24px' }}>
-              We work with small business owners who are tired of flying blind — who know something is off but can't see it in a pile of spreadsheets or a QuickBooks report that makes no sense.
+            <p style={{ fontSize: '16px', color: C.muted, lineHeight: 1.8, marginBottom: '18px' }}>
+              So I build the portal: POs, tickets, inventory, partner payments, whatever the operation needs. Then I keep the ledger and the software tied together. You’re not hiring a SaaS seat. You’re hiring someone who will answer when a deposit doesn’t land.
             </p>
-            <p style={{ fontSize:'16px', color:'#5A6070', lineHeight:1.8, marginBottom:'36px' }}>
-              Our job is to make your numbers clear, your reporting automatic, and your books something you actually look at.
+            <p style={{ fontSize: '16px', color: C.muted, lineHeight: 1.8, marginBottom: '28px' }}>
+              If that sounds like what you need, we’ll look at your stack on a call and tell you straight whether it’s a fit.
             </p>
-            <div style={{ display:'flex', gap:'14px', flexWrap:'wrap' }}>
+            <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
               <button className="cta-btn" onClick={() => router.push('/#contact')}>Work with us →</button>
-              <a href={BOOKING_URL} target="_blank" rel="noopener noreferrer" className="ghost-btn">Book a free call</a>
+              <a href={BOOKING_URL} target="_blank" rel="noopener noreferrer" className="ghost-btn">Book a call</a>
             </div>
           </div>
 
-          {/* Stats */}
-          <div className="stats" style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:'1px', background:'#DDD8CE', border:'1px solid #DDD8CE' }}>
+          <div className="stats" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1px', background: C.line, border: `1px solid ${C.line}` }}>
             {[
-              { number:'1', label:'Point of Contact' },
-              { number:'24/7', label:'Portal Access' },
-              { number:'100%', label:'Custom Built' },
-              { number:'0', label:'Guesswork' },
-            ].map((stat, i) => (
-              <div key={i} style={{ background:'#E8E4DC', padding:'36px 28px' }}>
-                <div style={{ fontFamily:'Cormorant Garamond,serif', fontSize:'44px', fontWeight:600, color:'#C9A84C', lineHeight:1, marginBottom:'8px' }}>{stat.number}</div>
-                <div style={{ fontSize:'13px', color:'#5A6070', fontFamily:'DM Mono,monospace', letterSpacing:'1px' }}>{stat.label.toUpperCase()}</div>
+              { number: '1', label: 'Point of contact' },
+              { number: '24/7', label: 'Portal access' },
+              { number: 'Custom', label: 'Every build' },
+              { number: '$750+', label: 'Typical monthly' },
+            ].map((stat) => (
+              <div key={stat.label} style={{ background: C.panel, padding: '32px 24px' }}>
+                <div style={{ fontFamily: "'Space Grotesk',sans-serif", fontSize: '34px', fontWeight: 600, color: C.accentDark, lineHeight: 1, marginBottom: '8px' }}>{stat.number}</div>
+                <div style={{ fontSize: '12px', color: C.muted, fontFamily: "'IBM Plex Mono',monospace", letterSpacing: '1px' }}>{stat.label.toUpperCase()}</div>
               </div>
             ))}
           </div>
         </div>
       </section>
 
-      <footer style={{ borderTop:'1px solid #DDD8CE', padding:'28px clamp(16px,5vw,48px)', display:'flex', justifyContent:'space-between', alignItems:'center', flexWrap:'wrap', gap:'12px' }}>
-        <button onClick={() => router.push('/')} style={{ fontFamily:'Playfair Display,serif', fontSize:'18px', fontWeight:700, background:'none', border:'none', cursor:'pointer' }}>JK<span style={{ color:'#C9A84C' }}>.</span></button>
-        <div style={{ fontFamily:'DM Mono,monospace', fontSize:'11px', color:'#5A6070', letterSpacing:'1px' }}>© {new Date().getFullYear()} JK NO JOKES FINANCIALS</div>
+      <footer style={{ borderTop: `1px solid ${C.line}`, padding: '28px clamp(16px,5vw,48px)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '12px' }}>
+        <button onClick={() => router.push('/')} style={{ fontFamily: "'Space Grotesk',sans-serif", fontSize: '18px', fontWeight: 700, background: 'none', border: 'none', cursor: 'pointer' }}>JK<span style={{ color: C.accent }}>.</span></button>
+        <div style={{ fontFamily: "'IBM Plex Mono',monospace", fontSize: '11px', color: C.soft, letterSpacing: '1px' }}>© {new Date().getFullYear()} JK NO JOKES FINANCIALS</div>
       </footer>
     </>
   )
