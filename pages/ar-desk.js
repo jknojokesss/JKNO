@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useMemo } from 'react'
 import Head from 'next/head'
 import { supabase } from '../lib/supabase'
+import { DEMO_UI, DEMO_HEAD, DEMO_FONT_LINK } from '../lib/demoFonts'
 
 // ─────────────────────────────────────────────────────────────────────────
 // Lakeland Supply Co. — statements, the simple way.
@@ -23,8 +24,8 @@ const RULE = '#DFDCD3'
 const MUTED = '#7C838C'
 const RED = '#B3261E'
 
-const serif = "'Charter','Bitstream Charter','Sitka Text','Iowan Old Style',Georgia,serif"
-const sans = "'Inter',-apple-system,'Segoe UI',sans-serif"
+const serif = DEMO_HEAD
+const sans = DEMO_UI
 
 // The demo dataset is pinned to this date so aging never drifts.
 const AS_OF = new Date('2026-08-21T00:00:00Z')
@@ -193,7 +194,7 @@ function Frame({ children }) {
         <title>{BIZ} — Statements</title>
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <link rel="preconnect" href="https://fonts.googleapis.com" />
-        <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+        <link href={DEMO_FONT_LINK} rel="stylesheet" />
       </Head>
       <style>{`
         *{box-sizing:border-box;margin:0;padding:0}

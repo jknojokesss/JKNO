@@ -1,5 +1,7 @@
 import { useState, useEffect, useMemo, useRef } from 'react'
 import Head from 'next/head'
+import { useRouter } from 'next/router'
+import { isDemoEmbedQuery } from '../lib/demoEmbed'
 
 /* ─── Fence Makers job entry portal — demo scaffold ───────────────────────────
    UI only. The QuickBooks pane on the right is a simulation of what the
@@ -753,6 +755,8 @@ const Line = ({ label, value, color, bold, sub }) => (
 /* ─── Page ────────────────────────────────────────────────────────────── */
 
 export default function FenceMakersDemo() {
+  const router = useRouter()
+  const embedded = isDemoEmbedQuery(router.query)
   const [stock, setStock] = useState(STOCK_SEED)
   const [customers, setCustomers] = useState(CUSTOMERS)
   const [vendors, setVendors] = useState(VENDORS)
@@ -796,8 +800,13 @@ export default function FenceMakersDemo() {
   useEffect(() => {
     const d = new Date()
     setToday(`${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`)
-    try { if (!localStorage.getItem('fm_intro2')) setIntro(true) } catch (e) { setIntro(true) }
   }, [])
+
+  useEffect(() => {
+    if (!embedded) return
+    document.documentElement.classList.add('demo-embed')
+    return () => document.documentElement.classList.remove('demo-embed')
+  }, [embedded])
 
   const closeIntro = () => { setIntro(false); try { localStorage.setItem('fm_intro2', '1') } catch (e) {} }
   const job = jobs.find((j) => j.id === view.jobId)
@@ -1051,7 +1060,7 @@ export default function FenceMakersDemo() {
           <div style={{ padding: '14px 18px', borderBottom: `1px solid ${BORDER}`, display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: '#fff' }}>
             <div style={{ display: 'flex', alignItems: 'baseline', gap: 10 }}>
               <div style={{ fontFamily: head, fontSize: 20, fontWeight: 700, letterSpacing: '-.01em' }}>{BIZ}</div>
-              <button onClick={() => setIntro(true)} style={{ border: 'none', background: 'none', padding: 0, color: FAINT, fontSize: 12.5, cursor: 'pointer' }}>Why this exists</button>
+              {!embedded && <button onClick={() => setIntro(true)} style={{ border: 'none', background: 'none', padding: 0, color: FAINT, fontSize: 12.5, cursor: 'pointer' }}>Why this exists</button>}
             </div>
             <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
               <span style={{ fontSize: 12, color: queued ? AMBER : MUTED, fontWeight: 600 }}>{queued ? `${queued} sending…` : 'All sent'}</span>
@@ -1163,7 +1172,7 @@ export default function FenceMakersDemo() {
         </div>
       </div>
 
-      {intro && <Intro jobs={jobs} stock={stock} onClose={closeIntro} />}
+      {intro && !embedded && <Intro jobs={jobs} stock={stock} onClose={closeIntro} />}
 
       {toast && (
         <div style={{

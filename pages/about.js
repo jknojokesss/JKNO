@@ -1,102 +1,56 @@
-import Head from 'next/head'
 import { useRouter } from 'next/router'
-
-const BOOKING_URL = 'https://calendly.com/jk-jknojokes/30min'
+import MarketingShell, { PageHero } from '../components/MarketingShell'
+import { BOOKING_URL } from '../lib/marketing'
 
 export default function About() {
   const router = useRouter()
   return (
-    <>
-      <Head>
-        <title>Who We Are — JK No Jokes Financials</title>
-        <meta name="viewport" content="width=device-width, initial-scale=1" />
-        <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600;700&family=DM+Sans:wght@300;400;500&family=DM+Mono:wght@400;500&family=Playfair+Display:wght@700&display=swap" rel="stylesheet" />
-      </Head>
-      <style>{`
-        *{box-sizing:border-box;margin:0;padding:0}
-        body{background:#F7F4EF;color:#1A1A2E;font-family:'DM Sans',sans-serif}
-        .cta-btn{background:#C9A84C;color:#080808;border:none;padding:16px 36px;font-family:'DM Mono',monospace;font-size:12px;letter-spacing:2px;text-transform:uppercase;cursor:pointer;transition:all .2s;display:inline-block;text-decoration:none}
-        .cta-btn:hover{background:#E8D5A3;transform:translateY(-1px)}
-        .ghost-btn{background:transparent;color:#B8943C;border:1px solid #B8943C;padding:14px 32px;font-family:'DM Mono',monospace;font-size:12px;letter-spacing:2px;text-transform:uppercase;cursor:pointer;transition:all .2s;text-decoration:none;display:inline-block}
-        .ghost-btn:hover{background:#C9A84C;color:#fff}
-        @media(max-width:768px){.split{grid-template-columns:1fr !important;gap:40px !important}.stats{grid-template-columns:1fr 1fr !important}}
-      `}</style>
+    <MarketingShell title="Who We Are — JK No Jokes Financials">
+      <PageHero
+        kicker="Who we are"
+        title={<>We write the software<br />and keep the books.</>}
+        lead="JK No Jokes Financials is a small shop that builds custom financial portals and keeps the books underneath them — wired to QuickBooks, your register, your distributors, and whatever else your business actually uses."
+      />
 
-      {/* Nav */}
-      <nav style={{ position:'sticky', top:0, zIndex:100, background:'rgba(247,244,239,0.97)', borderBottom:'1px solid #DDD8CE', padding:'18px clamp(16px,5vw,48px)', display:'flex', alignItems:'center', justifyContent:'space-between', gap:'16px', flexWrap:'wrap' }}>
-        <button onClick={() => router.push('/')} style={{ fontFamily:'Playfair Display,serif', fontSize:'22px', fontWeight:700, letterSpacing:'-0.5px', background:'none', border:'none', cursor:'pointer', display:'flex', alignItems:'baseline', gap:'2px' }}>
-          JK<span style={{ color:'#C9A84C' }}>.</span>
-        </button>
-        <div style={{ display:'flex', gap:'28px', alignItems:'center', flexWrap:'wrap' }}>
-          <button onClick={() => router.push('/how-it-works')} style={{ fontFamily:'DM Mono,monospace', fontSize:'12px', letterSpacing:'1px', color:'#5A6070', background:'none', border:'none', cursor:'pointer' }}>How It Works</button>
-          <button onClick={() => router.push('/what-we-do')} style={{ fontFamily:'DM Mono,monospace', fontSize:'12px', letterSpacing:'1px', color:'#5A6070', background:'none', border:'none', cursor:'pointer' }}>What You Get</button>
-          <button onClick={() => router.push('/about')} style={{ fontFamily:'DM Mono,monospace', fontSize:'12px', letterSpacing:'1px', color:'#C9A84C', background:'none', border:'none', cursor:'pointer' }}>Who We Are</button>
-          <button onClick={() => router.push('/#contact')} className="cta-btn" style={{ padding:'10px 20px', fontSize:'11px' }}>Contact</button>
-        </div>
-      </nav>
-
-      {/* Hero */}
-      <section style={{ padding:'clamp(64px,9vw,100px) clamp(16px,5vw,48px) clamp(48px,6vw,72px)', textAlign:'center', maxWidth:'800px', margin:'0 auto' }}>
-        <div style={{ fontFamily:'DM Mono,monospace', fontSize:'11px', letterSpacing:'3px', color:'#C9A84C', marginBottom:'20px' }}>— WHO WE ARE</div>
-        <h1 style={{ fontFamily:'Cormorant Garamond,serif', fontSize:'clamp(36px,5vw,64px)', fontWeight:600, lineHeight:1.1, marginBottom:'20px' }}>
-          Beyond bookkeeping.
-        </h1>
-        <div style={{ fontFamily:'Cormorant Garamond,serif', fontStyle:'italic', fontSize:'clamp(20px,2.8vw,30px)', color:'#C9A84C', fontWeight:600, marginBottom:'20px' }}>
-          The JK Way™ — finance with a human behind it.
-        </div>
-        <p style={{ fontSize:'17px', color:'#5A6070', lineHeight:1.7, maxWidth:'520px', margin:'0 auto' }}>
-          JK No Jokes Financials is a boutique finance firm that combines deep financial expertise with custom-built technology — built specifically for your business.
-        </p>
-      </section>
-
-      {/* Split section */}
-      <section style={{ padding:'0 clamp(16px,5vw,48px) clamp(64px,9vw,100px)', maxWidth:'1100px', margin:'0 auto' }}>
-        <div className="split" style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:'80px', alignItems:'center' }}>
+      <section className="m-section">
+        <div className="m-wrap" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '48px', alignItems: 'start' }}>
           <div>
-            {/* Portrait */}
-            <div style={{ marginBottom:'36px', display:'flex', alignItems:'center', gap:'20px' }}>
-              <img src="/1779727210800.jpg" alt="Jonathan Katz" style={{ width:'100px', height:'100px', borderRadius:'50%', objectFit:'cover', border:'3px solid #C9A84C', flexShrink:0 }} />
+            <div style={{ marginBottom: '32px', display: 'flex', alignItems: 'center', gap: '18px' }}>
+              <img src="/1779727210800.jpg" alt="Jonathan Katz" style={{ width: '88px', height: '88px', borderRadius: '50%', objectFit: 'cover', flexShrink: 0, border: '2px solid #C9A84C' }} />
               <div>
-                <div style={{ fontFamily:'Cormorant Garamond,serif', fontSize:'22px', fontWeight:600, lineHeight:1.2 }}>Jonathan (Chaim) Katz</div>
-                <div style={{ fontFamily:'DM Mono,monospace', fontSize:'10px', letterSpacing:'1.5px', color:'#C9A84C', marginTop:'4px' }}>FOUNDER · JK NO JOKES FINANCIALS</div>
+                <div style={{ fontFamily: "'Space Grotesk', sans-serif", fontSize: '20px', fontWeight: 600, lineHeight: 1.2 }}>Jonathan (Chaim) Katz</div>
+                <div style={{ fontSize: '14px', color: '#5A6577', marginTop: '4px' }}>Founder</div>
               </div>
             </div>
-            <p style={{ fontSize:'16px', color:'#5A6070', lineHeight:1.8, marginBottom:'24px' }}>
-              We don't just record your numbers — we build the system that turns them into decisions. Every client gets their own custom-built financial portal, updated in real time, accessible from any device.
+            <p style={{ fontSize: '16px', color: '#48536A', lineHeight: 1.75, marginBottom: '18px' }}>
+              We don&rsquo;t just record your numbers — we build the system that turns them into decisions. Every client gets their own portal, updated on a schedule, accessible from any device.
             </p>
-            <p style={{ fontSize:'16px', color:'#5A6070', lineHeight:1.8, marginBottom:'24px' }}>
-              We work with small business owners who are tired of flying blind — who know something is off but can't see it in a pile of spreadsheets or a QuickBooks report that makes no sense.
+            <p style={{ fontSize: '16px', color: '#48536A', lineHeight: 1.75, marginBottom: '18px' }}>
+              We work with owners who are tired of flying blind — who know something is off but can&rsquo;t see it in a pile of spreadsheets or a QuickBooks report that makes no sense.
             </p>
-            <p style={{ fontSize:'16px', color:'#5A6070', lineHeight:1.8, marginBottom:'36px' }}>
+            <p style={{ fontSize: '16px', color: '#48536A', lineHeight: 1.75, marginBottom: '28px' }}>
               Our job is to make your numbers clear, your reporting automatic, and your books something you actually look at.
             </p>
-            <div style={{ display:'flex', gap:'14px', flexWrap:'wrap' }}>
-              <button className="cta-btn" onClick={() => router.push('/#contact')}>Work with us →</button>
-              <a href={BOOKING_URL} target="_blank" rel="noopener noreferrer" className="ghost-btn">Book a free call</a>
+            <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
+              <button className="m-btn m-btn--primary" onClick={() => router.push('/#contact')}>Work with us</button>
+              <a href={BOOKING_URL} target="_blank" rel="noopener noreferrer" className="m-btn m-btn--secondary">Book a call</a>
             </div>
           </div>
 
-          {/* Stats */}
-          <div className="stats" style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:'1px', background:'#DDD8CE', border:'1px solid #DDD8CE' }}>
+          <div className="m-card" style={{ padding: '28px' }}>
             {[
-              { number:'1', label:'Point of Contact' },
-              { number:'24/7', label:'Portal Access' },
-              { number:'100%', label:'Custom Built' },
-              { number:'0', label:'Guesswork' },
-            ].map((stat, i) => (
-              <div key={i} style={{ background:'#E8E4DC', padding:'36px 28px' }}>
-                <div style={{ fontFamily:'Cormorant Garamond,serif', fontSize:'44px', fontWeight:600, color:'#C9A84C', lineHeight:1, marginBottom:'8px' }}>{stat.number}</div>
-                <div style={{ fontSize:'13px', color:'#5A6070', fontFamily:'DM Mono,monospace', letterSpacing:'1px' }}>{stat.label.toUpperCase()}</div>
+              'One point of contact — the person who built your portal',
+              'Your own login, scoped to your company on the server',
+              'Integrations we wrote ourselves, not a Zapier chain',
+              'Nothing goes live until it ties out to QuickBooks',
+            ].map((line) => (
+              <div key={line} style={{ padding: '12px 0', borderBottom: '1px solid #EEF1F5', fontSize: '15px', color: '#48536A', lineHeight: 1.6 }}>
+                {line}
               </div>
             ))}
           </div>
         </div>
       </section>
-
-      <footer style={{ borderTop:'1px solid #DDD8CE', padding:'28px clamp(16px,5vw,48px)', display:'flex', justifyContent:'space-between', alignItems:'center', flexWrap:'wrap', gap:'12px' }}>
-        <button onClick={() => router.push('/')} style={{ fontFamily:'Playfair Display,serif', fontSize:'18px', fontWeight:700, background:'none', border:'none', cursor:'pointer' }}>JK<span style={{ color:'#C9A84C' }}>.</span></button>
-        <div style={{ fontFamily:'DM Mono,monospace', fontSize:'11px', color:'#5A6070', letterSpacing:'1px' }}>© {new Date().getFullYear()} JK NO JOKES FINANCIALS</div>
-      </footer>
-    </>
+    </MarketingShell>
   )
 }

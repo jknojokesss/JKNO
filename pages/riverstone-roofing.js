@@ -1,6 +1,9 @@
 import React, { useState, useEffect, useMemo } from 'react'
 import Head from 'next/head'
+import { useRouter } from 'next/router'
 import { supabase } from '../lib/supabase'
+import { isDemoEmbedQuery } from '../lib/demoEmbed'
+import { DEMO_UI, DEMO_HEAD, DEMO_FONT_LINK } from '../lib/demoFonts'
 
 // ─────────────────────────────────────────────────────────────────────────
 // Riverstone Roofing — management portal demo. The business name and
@@ -24,8 +27,8 @@ const WHITE = '#FFFFFF'
 const RULE = '#DEDAD1' // stone lightened for hairlines
 const MUTED = '#7A828C' // slate lightened for secondary text
 
-const serif = "'Charter','Bitstream Charter','Sitka Text','Iowan Old Style',Georgia,serif"
-const sans = "'Inter',-apple-system,'Segoe UI',sans-serif"
+const serif = DEMO_HEAD
+const sans = DEMO_UI
 
 // The demo dataset is pinned to this date so aging and the forecast are stable.
 const AS_OF = new Date('2026-08-11T00:00:00Z')
@@ -65,6 +68,8 @@ const NEXT = {
 }
 
 export default function RoofingPortal() {
+  const router = useRouter()
+  const embedded = isDemoEmbedQuery(router.query)
   const [tab, setTab] = useState('jobs')
   const [raw, setRaw] = useState(null)
   const [err, setErr] = useState(null)
@@ -74,8 +79,10 @@ export default function RoofingPortal() {
   const [intro, setIntro] = useState(false)
 
   useEffect(() => {
-    try { if (!window.localStorage.getItem('roof-intro-seen')) setIntro(true) } catch (e) { setIntro(true) }
-  }, [])
+    if (!embedded) return
+    document.documentElement.classList.add('demo-embed')
+    return () => document.documentElement.classList.remove('demo-embed')
+  }, [embedded])
   const closeIntro = (target) => {
     try { window.localStorage.setItem('roof-intro-seen', '1') } catch (e) {}
     setIntro(false)
@@ -111,7 +118,7 @@ export default function RoofingPortal() {
         <title>{BIZ} — Management Portal Demo</title>
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <link rel="preconnect" href="https://fonts.googleapis.com" />
-        <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+        <link href={DEMO_FONT_LINK} rel="stylesheet" />
       </Head>
       <style>{`
         *{box-sizing:border-box;margin:0;padding:0}
@@ -148,11 +155,14 @@ export default function RoofingPortal() {
         .bucket.on{background:#EFECE4}
         .print-only{display:none}
         .mobilenav{display:none}
+        .topbar-sub{opacity:1}
+        html.demo-embed .topbar-sub{display:none}
         @media(max-width:820px){
           .side{display:none}
           .main{padding:14px 14px 40px}
-          .mobilenav{display:flex;position:sticky;top:34px;z-index:9;background:${INK};overflow-x:auto;gap:2px;padding:0 8px}
-          .mobilenav button{flex-shrink:0;border:none;background:transparent;color:#9aa0a8;font-size:12px;font-weight:600;padding:11px 10px;cursor:pointer;border-bottom:3px solid transparent}
+          .topbar-sub{display:none}
+          .mobilenav{display:flex;position:sticky;top:34px;z-index:9;background:${INK};overflow-x:auto;gap:2px;padding:0 8px;-webkit-overflow-scrolling:touch}
+          .mobilenav button{flex-shrink:0;border:none;background:transparent;color:#9aa0a8;font-size:12px;font-weight:600;padding:11px 10px;cursor:pointer;border-bottom:3px solid transparent;white-space:nowrap}
           .mobilenav button.on{color:${WHITE};border-bottom-color:${SIGNAL}}
         }
         @media print{
@@ -169,11 +179,11 @@ export default function RoofingPortal() {
       {/* SIGNAL use 1 of 3: the top bar, matching the prospect's site */}
       <div className="no-print" style={{ position: 'sticky', top: 0, zIndex: 10, background: SIGNAL, color: WHITE, height: '34px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0 18px', fontSize: '10.5px', fontWeight: 600, letterSpacing: '.12em' }}>
         <span>{BIZ.toUpperCase()} — MANAGEMENT PORTAL</span>
-        <span style={{ fontWeight: 500, letterSpacing: '.08em' }}>DEMO · SYNTHETIC DATA · AS OF AUG 11, 2026</span>
+        <span className="topbar-sub" style={{ fontWeight: 500, letterSpacing: '.08em' }}>DEMO · SYNTHETIC DATA · AS OF AUG 11, 2026</span>
       </div>
 
       <div className="mobilenav no-print">
-        <button onClick={() => setIntro(true)} style={{ fontFamily: serif, fontStyle: 'italic' }}>The 4 questions</button>
+        {!embedded && <button onClick={() => setIntro(true)} style={{ fontFamily: serif, fontStyle: 'italic' }}>The 4 questions</button>}
         {NAV.map((n) => (
           <button key={n.id} className={tab === n.id ? 'on' : ''} onClick={() => { setTab(n.id); setExpanded(null) }}>{n.label}</button>
         ))}
@@ -199,7 +209,7 @@ export default function RoofingPortal() {
         </aside>
 
         <main className="main">
-          {intro && M && <Intro M={M} onClose={closeIntro} />}
+          {intro && !embedded && M && <Intro M={M} onClose={closeIntro} />}
           {err && <div className="card" style={{ padding: '28px', color: INK }}>Couldn&rsquo;t load demo data: {err}</div>}
           {!err && !M && <div style={{ padding: '60px 0', color: MUTED, fontSize: '13px' }}>Loading job data…</div>}
           {M && tab === 'jobs' && <JobMargin M={M} groupBy={groupBy} setGroupBy={setGroupBy} jobFilter={jobFilter} setJobFilter={setJobFilter} expanded={expanded} setExpanded={setExpanded} />}

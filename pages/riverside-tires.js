@@ -1,12 +1,13 @@
 import { useState } from 'react'
 import Head from 'next/head'
+import { DEMO_UI, DEMO_HEAD, DEMO_MONO, DEMO_FONT_LINK } from '../lib/demoFonts'
 
 const BIZ = 'Riverside Tires'
 const SIDEBAR = '#1A1A1A', ACCENT = '#CC2222', BG = '#F8F8F8', BORDER = '#E5E5E5'
 const INK = '#1A1A1A', MUTED = '#888', GREEN = '#1E7A3A', RED = '#CC2222', AMBER = '#C98A2A'
-const mono = "'DM Mono', monospace"
-const serif = "'Cormorant Garamond', serif"
-const ui = "'DM Sans', sans-serif"
+const mono = DEMO_MONO
+const serif = DEMO_HEAD
+const ui = DEMO_UI
 
 const fmt = (n) => '$' + Math.round(n).toLocaleString()
 const fmtD2 = (n) => '$' + Number(n).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })
@@ -165,7 +166,8 @@ export default function RiversideTires() {
     <>
       <Head>
         <title>{BIZ} — Dashboard Demo</title>
-        <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600;700&family=DM+Sans:wght@300;400;500&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet" />
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <link href={DEMO_FONT_LINK} rel="stylesheet" />
       </Head>
       <style>{`
         *{box-sizing:border-box;margin:0;padding:0}
@@ -177,8 +179,21 @@ export default function RiversideTires() {
         .nbtn:hover{background:rgba(255,255,255,.06);color:#ccc}
         .nbtn.on{background:rgba(255,255,255,.09);color:#fff;box-shadow:inset 3px 0 0 ${ACCENT}}
         .kpi-row{display:flex;gap:12px;flex-wrap:wrap;margin-bottom:20px}
-        @media(max-width:700px){.side{display:none}.main{padding:16px 14px 48px}}
+        .mobilenav{display:none}
+        @media(max-width:700px){
+          .side{display:none}
+          .main{padding:16px 14px 48px}
+          .mobilenav{display:flex;overflow-x:auto;gap:2px;padding:8px 10px;background:${SIDEBAR};position:sticky;top:0;z-index:9;-webkit-overflow-scrolling:touch}
+          .mobilenav button{flex-shrink:0;border:none;background:transparent;color:#888;font-family:${ui};font-size:12px;font-weight:500;padding:8px 12px;border-radius:6px;cursor:pointer;white-space:nowrap}
+          .mobilenav button.on{background:rgba(255,255,255,.1);color:#fff;box-shadow:inset 0 -2px 0 ${ACCENT}}
+        }
       `}</style>
+
+      <div className="mobilenav">
+        {NAV.map((n) => (
+          <button key={n.id} type="button" className={tab === n.id ? 'on' : ''} onClick={() => setTab(n.id)}>{n.label}</button>
+        ))}
+      </div>
 
       <div className="shell">
         <aside className="side">

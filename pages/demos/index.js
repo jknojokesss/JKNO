@@ -1,63 +1,55 @@
-import Head from 'next/head'
+import { useRouter } from 'next/router'
+import MarketingShell, { PageHero } from '../../components/MarketingShell'
+import { BOOKING_URL } from '../../lib/marketing'
 import { ALL_DEMOS } from '../../lib/industryDemos'
 
-const BOOK = 'https://calendly.com/jk-jknojokes/30min'
-
 export default function DemoGallery() {
+  const router = useRouter()
   return (
-    <>
-      <Head>
-        <title>Live Industry Demos — JK No Jokes Financials</title>
-        <meta name="description" content="20 live, clickable financial dashboard demos — one for your industry. Auto repair, HVAC, restaurants, construction, law firms, gyms, and more. No login, sample data." />
-        <meta name="viewport" content="width=device-width, initial-scale=1" />
-        <link rel="preconnect" href="https://fonts.googleapis.com" />
-        <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=DM+Sans:wght@300;400;500&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet" />
-        <style>{`*{box-sizing:border-box;margin:0;padding:0}body{background:#F7F4EF;color:#1A1A2E;font-family:'DM Sans',sans-serif}
-          .demo-card{display:block;text-decoration:none;background:#fff;border:1px solid #DDD8CE;border-radius:8px;padding:22px;transition:all .2s ease}
-          .demo-card:hover{border-color:#C9A84C;transform:translateY(-3px);box-shadow:0 12px 32px rgba(26,26,46,.08)}
-        `}</style>
-      </Head>
+    <MarketingShell
+      title="Live Industry Demos — JK No Jokes Financials"
+      description="Live, clickable financial dashboard demos — one for your industry. No login, sample data."
+    >
+      <PageHero
+        kicker={`${ALL_DEMOS.length} live demos · no login`}
+        title={<>One of these is<br /><span style={{ color: '#B8943C' }}>your business.</span></>}
+        lead="Every demo below is a real, clickable dashboard built the way we'd build yours. Find your industry and click in."
+        align="center"
+      />
 
-      <div style={{ maxWidth: '1100px', margin: '0 auto', padding: '48px 20px 80px' }}>
-        <a href="/" style={{ fontFamily: 'DM Mono, monospace', fontSize: '11px', color: '#5A6070', letterSpacing: '1px', textDecoration: 'none' }}>← JKNOJOKES.COM</a>
-
-        <div style={{ textAlign: 'center', margin: '36px 0 12px' }}>
-          <div style={{ fontFamily: 'DM Mono, monospace', fontSize: '11px', letterSpacing: '3px', color: '#C9A84C', marginBottom: '16px' }}>
-            — {ALL_DEMOS.length} LIVE DEMOS · NO LOGIN · CLICK AROUND
+      <section className="m-section">
+        <div className="m-wrap">
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(260px, 1fr))', gap: '14px' }}>
+            {ALL_DEMOS.map((d) => (
+              <a key={d.href} href={d.href} className="m-card" style={{
+                textDecoration: 'none', color: 'inherit', display: 'block',
+                borderLeftWidth: '3px', transition: 'border-color 0.15s',
+              }}
+              onMouseEnter={(e) => { e.currentTarget.style.borderColor = '#C9A84C' }}
+              onMouseLeave={(e) => { e.currentTarget.style.borderColor = '#DFE4EC' }}
+              >
+                <div style={{ fontSize: '12px', fontWeight: 600, color: '#B8943C', marginBottom: '6px', letterSpacing: '0.06em', textTransform: 'uppercase' }}>{d.industry}</div>
+                <div style={{ fontFamily: "'Space Grotesk', sans-serif", fontSize: '19px', fontWeight: 600, color: '#0E1420', marginBottom: '8px' }}>{d.biz}</div>
+                <div style={{ fontSize: '14px', color: '#48536A', lineHeight: 1.6, marginBottom: '12px' }}>{d.blurb}</div>
+                <div style={{ fontSize: '14px', fontWeight: 600, color: '#B8943C' }}>Open live demo →</div>
+              </a>
+            ))}
           </div>
-          <h1 style={{ fontFamily: 'Cormorant Garamond, serif', fontSize: 'clamp(34px, 5vw, 56px)', fontWeight: 600, letterSpacing: '-0.5px', lineHeight: 1.1 }}>
-            One of these is<br /><span style={{ color: '#C9A84C' }}>your business.</span>
-          </h1>
-          <p style={{ color: '#5A6070', fontSize: '15px', lineHeight: 1.7, maxWidth: '520px', margin: '20px auto 0' }}>
-            Every demo below is a real, clickable dashboard built the way we'd build yours —
-            your revenue, your costs, your margin, in plain English. Find your industry and click in.
+        </div>
+      </section>
+
+      <section className="m-section--panel" style={{ padding: 'clamp(56px,7vw,72px) 0' }}>
+        <div className="m-wrap" style={{ textAlign: 'center', maxWidth: '520px' }}>
+          <h2 className="m-h2" style={{ marginBottom: '12px' }}>Don&rsquo;t see your industry?</h2>
+          <p className="m-lead" style={{ margin: '0 auto 24px' }}>
+            We&rsquo;ll build a demo around your business, wired into your own systems, before you pay a dime.
           </p>
-        </div>
-
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(240px, 1fr))', gap: '14px', marginTop: '40px' }}>
-          {ALL_DEMOS.map((d) => (
-            <a key={d.href} href={d.href} className="demo-card">
-              <div style={{ fontSize: '26px', marginBottom: '12px' }}>{d.emoji}</div>
-              <div style={{ fontFamily: 'DM Mono, monospace', fontSize: '9px', letterSpacing: '2px', color: '#C9A84C', marginBottom: '6px' }}>{d.industry.toUpperCase()}</div>
-              <div style={{ fontFamily: 'Cormorant Garamond, serif', fontSize: '20px', fontWeight: 600, color: '#1A1A2E', marginBottom: '8px' }}>{d.biz}</div>
-              <div style={{ fontSize: '13px', color: '#5A6070', lineHeight: 1.6, marginBottom: '14px' }}>{d.blurb}</div>
-              <div style={{ fontFamily: 'DM Mono, monospace', fontSize: '10px', letterSpacing: '1px', color: '#B8943C' }}>OPEN LIVE DEMO →</div>
-            </a>
-          ))}
-        </div>
-
-        <div style={{ textAlign: 'center', marginTop: '56px', background: 'linear-gradient(160deg, #1A2035 0%, #242C4A 100%)', borderRadius: '12px', padding: '48px 24px' }}>
-          <div style={{ fontFamily: 'Cormorant Garamond, serif', fontSize: 'clamp(24px, 3vw, 34px)', fontWeight: 600, color: '#F7F4EF', marginBottom: '10px' }}>
-            Don't see your industry?
+          <div style={{ display: 'flex', gap: '12px', justifyContent: 'center', flexWrap: 'wrap' }}>
+            <button className="m-btn m-btn--primary" onClick={() => router.push('/#contact')}>Get in touch</button>
+            <a href={BOOKING_URL} target="_blank" rel="noopener noreferrer" className="m-btn m-btn--secondary">Book a call</a>
           </div>
-          <p style={{ color: '#9AA3BD', fontSize: '14px', marginBottom: '24px' }}>
-            We'll build a demo around <i>your</i> business, wired into your own systems, before you pay a dime.
-          </p>
-          <a href={BOOK} target="_blank" rel="noopener noreferrer" style={{ background: '#C9A84C', color: '#080808', textDecoration: 'none', padding: '15px 32px', fontFamily: 'DM Mono, monospace', fontSize: '12px', letterSpacing: '2px', display: 'inline-block' }}>
-            BOOK A FREE CONSULT →
-          </a>
         </div>
-      </div>
-    </>
+      </section>
+    </MarketingShell>
   )
 }
