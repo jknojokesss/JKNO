@@ -28,15 +28,11 @@ export function MarketingLogo({ size = 26, tagline = true, onClick }) {
 export default function MarketingShell({ title, description, children, padTop = true }) {
   const router = useRouter()
   const [scrolled, setScrolled] = useState(false)
-  const [showStickyCta, setShowStickyCta] = useState(false)
   const [menuOpen, setMenuOpen] = useState(false)
   const [isMobile, setIsMobile] = useState(false)
 
   useEffect(() => {
-    const onScroll = () => {
-      setScrolled(window.scrollY > 8)
-      setShowStickyCta(window.scrollY > 480)
-    }
+    const onScroll = () => setScrolled(window.scrollY > 8)
     window.addEventListener('scroll', onScroll)
     return () => window.removeEventListener('scroll', onScroll)
   }, [])
@@ -128,15 +124,7 @@ export default function MarketingShell({ title, description, children, padTop = 
         </div>
       )}
 
-      <div style={{ paddingTop: padTop ? '68px' : 0, paddingBottom: showStickyCta && isMobile ? '72px' : 0 }}>{children}</div>
-
-      {isMobile && !menuOpen && (
-        <div className={`m-sticky-cta${showStickyCta ? ' is-visible' : ''}`}>
-          <a href={BOOKING_URL} target="_blank" rel="noopener noreferrer" className="m-btn m-btn--primary">
-            Book a free call
-          </a>
-        </div>
-      )}
+      <div style={{ paddingTop: padTop ? '68px' : 0 }}>{children}</div>
 
       <footer style={{ padding: '48px 0 40px', borderTop: '1px solid #DFE4EC', background: '#fff' }}>
         <div className="m-wrap" style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'space-between', gap: '32px', alignItems: 'flex-start' }}>
