@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react'
-import { HOME_INTRO_KEY, shouldSkipHomeIntro } from '../lib/homeIntro'
+import { markHomeIntroSeen, shouldSkipHomeIntro } from '../lib/homeIntro'
 
 export default function HomeIntro({ onStart, onDone }) {
   const [active, setActive] = useState(false)
@@ -11,7 +11,7 @@ export default function HomeIntro({ onStart, onDone }) {
       setActive(false)
       document.body.style.overflow = ''
       onDone?.()
-      try { sessionStorage.setItem(HOME_INTRO_KEY, '1') } catch { /* ignore */ }
+      markHomeIntroSeen()
     }, 350)
   }, [onDone])
 
@@ -25,9 +25,9 @@ export default function HomeIntro({ onStart, onDone }) {
     onStart?.()
     document.body.style.overflow = 'hidden'
 
-    const t1 = window.setTimeout(() => setPhase('line'), 550)
-    const t2 = window.setTimeout(() => setPhase('burst'), 1300)
-    const t3 = window.setTimeout(finish, 2400)
+    const t1 = window.setTimeout(() => setPhase('line'), 900)
+    const t2 = window.setTimeout(() => setPhase('burst'), 1800)
+    const t3 = window.setTimeout(finish, 3000)
 
     return () => {
       document.body.style.overflow = ''
