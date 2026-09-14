@@ -1,8 +1,9 @@
 export default async function handler(req, res) {
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' })
 
-  const { name, email, business } = req.body
+  const { name, email, business, message } = req.body
   if (!name || !email || !business) return res.status(400).json({ error: 'Missing fields' })
+  const safeMsg = message ? String(message).slice(0, 2000) : ''
 
   try {
     const response = await fetch('https://api.resend.com/emails', {
@@ -31,10 +32,14 @@ export default async function handler(req, res) {
                 <td style="padding: 14px 0; font-size: 11px; color: #AAA098; font-family: monospace; letter-spacing: 1px;">EMAIL</td>
                 <td style="padding: 14px 0; font-size: 15px; color: #1A1A2E;"><a href="mailto:${email}" style="color: #C9A84C;">${email}</a></td>
               </tr>
-              <tr>
+              <tr style="border-bottom: 1px solid #EEEAE2;">
                 <td style="padding: 14px 0; font-size: 11px; color: #AAA098; font-family: monospace; letter-spacing: 1px;">BUSINESS</td>
                 <td style="padding: 14px 0; font-size: 15px; color: #1A1A2E;">${business}</td>
               </tr>
+              ${safeMsg ? `<tr>
+                <td style="padding: 14px 0; font-size: 11px; color: #AAA098; font-family: monospace; letter-spacing: 1px; vertical-align: top;">WANTS</td>
+                <td style="padding: 14px 0; font-size: 15px; color: #1A1A2E; line-height: 1.5;">${safeMsg.replace(/</g, '&lt;').replace(/>/g, '&gt;')}</td>
+              </tr>` : ''}
             </table>
             <div style="margin-top: 32px; padding: 16px; background: #F7F4EF; border-left: 3px solid #C9A84C;">
               <p style="margin: 0; font-size: 13px; color: #5A6070;">Reply directly to this email to respond to ${name}.</p>

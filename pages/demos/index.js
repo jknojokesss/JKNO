@@ -38,15 +38,19 @@ export default function DemoGallery() {
         </div>
       </section>
 
-      <section className="m-section--panel" style={{ padding: 'clamp(56px,7vw,72px) 0' }}>
-        <div className="m-wrap" style={{ textAlign: 'center', maxWidth: '520px' }}>
-          <h2 className="m-h2" style={{ marginBottom: '12px' }}>Don&rsquo;t see your industry?</h2>
-          <p className="m-lead" style={{ margin: '0 auto 24px' }}>
-            We&rsquo;ll build a demo around your business, wired into your own systems, before you pay a dime.
-          </p>
-          <div style={{ display: 'flex', gap: '12px', justifyContent: 'center', flexWrap: 'wrap' }}>
-            <button className="m-btn m-btn--primary" onClick={() => router.push('/#contact')}>Get in touch</button>
-            <a href={BOOKING_URL} target="_blank" rel="noopener noreferrer" className="m-btn m-btn--secondary">Book a call</a>
+      <section className="m-cta-band">
+        <div className="m-wrap m-cta-band__inner" style={{ textAlign: 'left' }}>
+          <div>
+            <h2 className="m-h2" style={{ fontSize: 'clamp(22px, 3vw, 30px)', marginBottom: '8px' }}>
+              Don&rsquo;t see your industry?
+            </h2>
+            <p className="m-lead" style={{ fontSize: '16px', margin: 0, maxWidth: '480px' }}>
+              We&rsquo;ll build a demo around your business before you pay anything. 30 minutes on a call.
+            </p>
+          </div>
+          <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap', flexShrink: 0 }}>
+            <a href={BOOKING_URL} target="_blank" rel="noopener noreferrer" className="m-btn m-btn--primary m-cta-band__btn">Book a free call</a>
+            <button type="button" className="m-btn m-btn--secondary m-cta-band__btn" style={{ background: 'rgba(255,255,255,0.1)', color: '#fff', borderColor: 'rgba(255,255,255,0.25)' }} onClick={() => router.push('/#contact')}>Send a message</button>
           </div>
         </div>
       </section>
