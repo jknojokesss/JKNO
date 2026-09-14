@@ -30,6 +30,8 @@ const TIMELINE = [
   ['Ongoing', 'Books updated every month. Portal stays current.'],
 ]
 
+const slug = (s) => s.toLowerCase().replace(/[^a-z0-9]+/g, '-')
+
 function OverviewRotator() {
   const [i, setI] = useState(0)
   const [visible, setVisible] = useState(true)
@@ -53,6 +55,24 @@ function OverviewRotator() {
       <span className={`hp-spotlight__word${visible ? ' is-in' : ' is-out'}`}>{ROTATE[i]}</span>
       <br />on one screen.
     </h2>
+  )
+}
+
+function ScreenFooter({ onNav, showDemos }) {
+  return (
+    <footer className="hp-foot">
+      <button type="button" className="hp-btn hp-btn--primary" onClick={() => onNav('contact')}>
+        Get started
+      </button>
+      <a href={BOOKING_URL} target="_blank" rel="noopener noreferrer" className="hp-btn hp-btn--ghost">
+        Book a call
+      </a>
+      {showDemos && (
+        <button type="button" className="hp-btn hp-btn--ghost" onClick={() => onNav('demos')}>
+          Browse demos
+        </button>
+      )}
+    </footer>
   )
 }
 
@@ -90,7 +110,7 @@ function Screen({ tab, form, setForm, onSubmit, submitted, submitting, onNav }) 
         </p>
 
         <nav className="hp-jump" aria-label="Explore">
-          {NAV.filter((n) => n.id !== 'overview').map((n) => (
+          {NAV.filter((n) => n.id !== 'overview' && n.id !== 'contact').map((n) => (
             <button key={n.id} type="button" className="hp-jump__btn" onClick={() => onNav(n.id)}>
               {n.label} →
             </button>
@@ -102,31 +122,65 @@ function Screen({ tab, form, setForm, onSubmit, submitted, submitting, onNav }) 
 
   if (tab === 'build') {
     return (
-      <div className="hp-stack">
-        {BUILD_STACK.map((col) => (
-          <section key={col.title} className="hp-build">
-            <div className="hp-build__head">
-              <span className="hp-kicker">{col.kicker}</span>
-              <h2 className="hp-build__title">{col.title}</h2>
-              <p className="hp-build__blurb">{col.blurb}</p>
-            </div>
-            <ul className="hp-item-list">
-              {col.items.map((it) => (
-                <li key={it.t} className="hp-item">
-                  <span className="hp-item__t">{it.t}</span>
-                  <span className="hp-item__d">{it.d}</span>
-                </li>
-              ))}
-            </ul>
-          </section>
-        ))}
+      <div className="hp-page">
+        <p className="hp-page-lead">
+          Everything here is built custom for one business. No template, no settings screen to learn.
+        </p>
+
+        <nav className="hp-build-nav" aria-label="Sections">
+          {BUILD_STACK.map((col) => (
+            <a key={col.kicker} href={`#${slug(col.kicker)}`} className="hp-build-nav__a">
+              {col.kicker}
+            </a>
+          ))}
+        </nav>
+
+        <div className="hp-stack">
+          {BUILD_STACK.map((col) => (
+            <section key={col.title} id={slug(col.kicker)} className="hp-build">
+              <div className="hp-build__head">
+                <span className="hp-kicker">{col.kicker}</span>
+                <h2 className="hp-build__title">{col.title}</h2>
+                <p className="hp-build__blurb">{col.blurb}</p>
+              </div>
+              <ul className="hp-item-list">
+                {col.items.map((it) => (
+                  <li key={it.t} className="hp-item">
+                    {it.href ? (
+                      <a href={it.href} className="hp-item__link">
+                        <span className="hp-item__t">{it.t}</span>
+                        <span className="hp-item__d">{it.d}</span>
+                        <span className="hp-item__go" aria-hidden="true">→</span>
+                      </a>
+                    ) : (
+                      <>
+                        <span className="hp-item__t">{it.t}</span>
+                        <span className="hp-item__d">{it.d}</span>
+                      </>
+                    )}
+                  </li>
+                ))}
+              </ul>
+            </section>
+          ))}
+        </div>
+
+        <ScreenFooter onNav={onNav} showDemos />
       </div>
     )
   }
 
   if (tab === 'how') {
     return (
-      <>
+      <div className="hp-page">
+        <section className="hp-spotlight hp-spotlight--compact">
+          <p className="hp-spotlight__kicker">How it works</p>
+          <h2 className="hp-spotlight__title hp-spotlight__title--sm">
+            Messy books in.<br />Clear numbers out.
+          </h2>
+          <p className="hp-spotlight__sub">Three steps. Six days to launch. Then your portal stays current every month.</p>
+        </section>
+
         <ol className="hp-timeline">
           {STEPS.map((s) => (
             <li key={s.n} className="hp-timeline__step">
@@ -141,7 +195,8 @@ function Screen({ tab, form, setForm, onSubmit, submitted, submitting, onNav }) 
 
         <section className="hp-build">
           <div className="hp-build__head">
-            <h2 className="hp-build__title">Six days to launch</h2>
+            <span className="hp-kicker">Launch schedule</span>
+            <h2 className="hp-build__title">Six days to go live</h2>
           </div>
           <ul className="hp-item-list hp-item-list--compact">
             {TIMELINE.map(([when, what]) => (
@@ -153,18 +208,18 @@ function Screen({ tab, form, setForm, onSubmit, submitted, submitting, onNav }) 
           </ul>
         </section>
 
-        <div className="hp-actions">
-          <button type="button" className="hp-btn hp-btn--primary" onClick={() => onNav('contact')}>Get started</button>
-          <a href={BOOKING_URL} target="_blank" rel="noopener noreferrer" className="hp-btn hp-btn--ghost">Book a call</a>
-        </div>
-      </>
+        <ScreenFooter onNav={onNav} />
+      </div>
     )
   }
 
   if (tab === 'demos') {
     return (
-      <>
-        <p className="hp-body hp-body--top">Fictitious businesses. Real product ideas. Click in — no login.</p>
+      <div className="hp-page">
+        <p className="hp-page-lead">
+          {FEATURED_DEMOS.length} sample portals — fictitious businesses, real product ideas. Click in, no login.
+        </p>
+
         <div className="hp-demo-list">
           {FEATURED_DEMOS.map((d) => (
             <a key={d.src} href={d.src} className="hp-demo-row">
@@ -174,25 +229,25 @@ function Screen({ tab, form, setForm, onSubmit, submitted, submitting, onNav }) 
             </a>
           ))}
         </div>
-        <p className="hp-body">
-          <button type="button" className="hp-link-btn" onClick={() => onNav('contact')}>Want one built for your business?</button>
-        </p>
-      </>
+
+        <ScreenFooter onNav={onNav} />
+      </div>
     )
   }
 
   if (tab === 'about') {
     return (
-      <>
-        <div className="hp-founder">
+      <div className="hp-page">
+        <section className="hp-spotlight hp-spotlight--compact hp-spotlight--founder">
           <div className="hp-founder__photo">
-            <img src="/1779727210800.jpg" alt="Jonathan Katz" width={88} height={88} />
+            <img src="/1779727210800.jpg" alt="Jonathan Katz" width={72} height={72} />
           </div>
           <div>
             <div className="hp-founder__name">Jonathan (Chaim) Katz</div>
-            <div className="hp-founder__role">Founder</div>
+            <div className="hp-founder__role">Founder · JK No Jokes Financials</div>
           </div>
-        </div>
+        </section>
+
         <div className="hp-split">
           <div className="hp-prose">
             <h2 className="hp-prose__title">We write the software and keep the books</h2>
@@ -217,52 +272,63 @@ function Screen({ tab, form, setForm, onSubmit, submitted, submitting, onNav }) 
             ))}
           </ul>
         </div>
-      </>
+
+        <ScreenFooter onNav={onNav} showDemos />
+      </div>
     )
   }
 
   return (
-    <div id="contact" className="hp-get">
-      <div className="hp-get__copy">
-        <h2 className="hp-get__title">What would you want built first?</h2>
-        <p className="hp-get__lead">
-          Tell us what you run today. We&rsquo;ll show you what we&rsquo;d wire up — register, vendors, job cost, inventory, AR, whatever you need on one screen.
-        </p>
-        <a href={BOOKING_URL} target="_blank" rel="noopener noreferrer" className="hp-get__book">Or book a 30-min call →</a>
-      </div>
-      <div className="hp-get__form">
-        {submitted ? (
-          <div className="hp-get__done">We&rsquo;ll be in touch.</div>
-        ) : (
-          <>
-            {[
-              { key: 'name', label: 'Your name', placeholder: 'John Smith' },
-              { key: 'email', label: 'Email', placeholder: 'you@company.com' },
-              { key: 'business', label: 'Business name', placeholder: 'Acme Corp' },
-            ].map(({ key, label, placeholder }) => (
-              <label key={key} className="hp-field">
-                <span>{label}</span>
-                <input
-                  type={key === 'email' ? 'email' : 'text'}
-                  placeholder={placeholder}
-                  value={form[key]}
-                  onChange={(e) => setForm({ ...form, [key]: e.target.value })}
-                />
-              </label>
-            ))}
-            <button
-              type="button"
-              className="hp-get__submit"
-              onClick={onSubmit}
-              disabled={submitting || !form.name || !form.email || !form.business}
-            >
-              {submitting ? 'Sending…' : 'Send message'}
-            </button>
-            <p className="hp-get__alt">
-              Or <a href="mailto:jk@jknojokes.com">jk@jknojokes.com</a>
-            </p>
-          </>
-        )}
+    <div id="contact" className="hp-page hp-contact">
+      <div className="hp-contact__grid">
+        <section className="hp-spotlight hp-spotlight--compact">
+          <p className="hp-spotlight__kicker">Get started</p>
+          <h2 className="hp-spotlight__title hp-spotlight__title--sm">
+            What would you want<br />built first?
+          </h2>
+          <p className="hp-spotlight__sub">
+            Tell us what you run today — register, vendors, job cost, inventory, AR.
+            We&rsquo;ll show you what we&rsquo;d wire up on one screen.
+          </p>
+          <a href={BOOKING_URL} target="_blank" rel="noopener noreferrer" className="hp-spotlight__link">
+            Or book a 30-min call →
+          </a>
+        </section>
+
+        <div className="hp-contact__form">
+          {submitted ? (
+            <div className="hp-get__done">We&rsquo;ll be in touch.</div>
+          ) : (
+            <>
+              {[
+                { key: 'name', label: 'Your name', placeholder: 'John Smith' },
+                { key: 'email', label: 'Email', placeholder: 'you@company.com' },
+                { key: 'business', label: 'Business name', placeholder: 'Acme Corp' },
+              ].map(({ key, label, placeholder }) => (
+                <label key={key} className="hp-field">
+                  <span>{label}</span>
+                  <input
+                    type={key === 'email' ? 'email' : 'text'}
+                    placeholder={placeholder}
+                    value={form[key]}
+                    onChange={(e) => setForm({ ...form, [key]: e.target.value })}
+                  />
+                </label>
+              ))}
+              <button
+                type="button"
+                className="hp-get__submit"
+                onClick={onSubmit}
+                disabled={submitting || !form.name || !form.email || !form.business}
+              >
+                {submitting ? 'Sending…' : 'Send message'}
+              </button>
+              <p className="hp-get__alt">
+                Or <a href="mailto:jk@jknojokes.com">jk@jknojokes.com</a>
+              </p>
+            </>
+          )}
+        </div>
       </div>
     </div>
   )
@@ -271,7 +337,6 @@ function Screen({ tab, form, setForm, onSubmit, submitted, submitting, onNav }) 
 export default function HomePortal({ live, form, setForm, onSubmit, submitted, submitting }) {
   const router = useRouter()
   const [tab, setTab] = useState('overview')
-  const active = NAV.find((n) => n.id === tab)
 
   const pick = (id) => {
     setTab(id)
@@ -327,15 +392,6 @@ export default function HomePortal({ live, form, setForm, onSubmit, submitted, s
         </aside>
 
         <main className={`hp-main${tab === 'overview' ? ' hp-main--overview' : ''}`}>
-          {tab !== 'overview' && (
-            <header className="hp-top">
-              <div>
-                <div className="hp-top__month">{active?.kicker}</div>
-                <h1 className="hp-top__title">{active?.label}</h1>
-              </div>
-            </header>
-          )}
-
           <div key={tab} className="hp-screen">
             <Screen
               tab={tab}
