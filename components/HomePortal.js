@@ -1,219 +1,230 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useRouter } from 'next/router'
 import { BOOKING_URL } from '../lib/marketing'
+import { BUILD_STACK } from '../lib/buildStack'
+import { FEATURED_DEMOS } from '../lib/marketingDemos'
 
-const BIZ = 'Westline Tire & Auto'
+const ROTATE = ['margin', 'profit', 'inventory', 'cash flow', 'job cost', 'rent roll']
+
 const NAV = [
-  { id: 'dashboard', label: 'Dashboard' },
-  { id: 'orders', label: 'Orders' },
-  { id: 'stock', label: 'Stock' },
-  { id: 'financials', label: 'Financials' },
-  { id: 'ask', label: 'Ask' },
-  { id: 'get-yours', label: 'Get yours' },
+  { id: 'overview', label: 'Overview', kicker: 'Your portal' },
+  { id: 'build', label: 'What we build', kicker: 'Capabilities' },
+  { id: 'how', label: 'How it works', kicker: 'Process' },
+  { id: 'demos', label: 'Demos', kicker: 'See it live' },
+  { id: 'about', label: 'About', kicker: 'Who we are' },
+  { id: 'contact', label: 'Get started', kicker: 'Contact' },
 ]
 
-const ORDERS = [
-  { ro: 'RO-4812', date: 'Jun 14', vehicle: '2019 Camry', size: '215/55R17', rev: 847, cost: 512, margin: 39.6 },
-  { ro: 'RO-4809', date: 'Jun 14', vehicle: '2021 F-150', size: '275/65R18', rev: 1240, cost: 798, margin: 35.6 },
-  { ro: 'RO-4805', date: 'Jun 13', vehicle: '2017 Civic', size: '215/55R17', rev: 692, cost: 468, margin: 32.4 },
-  { ro: 'RO-4801', date: 'Jun 13', vehicle: '2020 RAV4', size: '225/65R17', rev: 918, cost: 601, margin: 34.5 },
-  { ro: 'RO-4798', date: 'Jun 12', vehicle: '2015 Altima', size: '215/60R16', rev: 756, cost: 524, margin: 30.7 },
+const STEPS = [
+  { n: '01', title: 'We learn your business', body: 'One call. How you get paid, what you sell, what you wish you could see on one screen.' },
+  { n: '02', title: 'We wire your systems', body: 'QuickBooks, register, vendors, bank — integrations we wrote, on a nightly schedule.' },
+  { n: '03', title: 'You get one portal', body: 'Custom dashboard. Not a template. Log in any time. Numbers stay current.' },
 ]
 
-const STOCK = [
-  { size: '215/55R17', onHand: 18, avgCost: 74, value: 1332 },
-  { size: '225/65R17', onHand: 12, avgCost: 81, value: 972 },
-  { size: '275/65R18', onHand: 8, avgCost: 112, value: 896 },
-  { size: '265/45R20', onHand: 4, avgCost: 119, value: 476 },
-]
+function OverviewRotator() {
+  const [i, setI] = useState(0)
+  const [visible, setVisible] = useState(true)
 
-const PL = [
-  { line: 'Tire & service revenue', amt: 48240 },
-  { line: 'Parts & tire COGS', amt: -29810 },
-  { line: 'Gross profit', amt: 18430, bold: true },
-  { line: 'Operating expenses', amt: -11200 },
-  { line: 'Net income', amt: 7230, accent: true },
-]
+  useEffect(() => {
+    const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches
+    if (reduced) return
+    const id = window.setInterval(() => {
+      setVisible(false)
+      window.setTimeout(() => {
+        setI((n) => (n + 1) % ROTATE.length)
+        setVisible(true)
+      }, 220)
+    }, 2800)
+    return () => window.clearInterval(id)
+  }, [])
 
-const money = (n) => '$' + Math.round(n).toLocaleString()
-const pct = (n) => n.toFixed(1) + '%'
-
-function Kpi({ label, value, sub, accent }) {
   return (
-    <div className="hp-kpi">
-      <div className="hp-kpi__label">{label}</div>
-      <div className={`hp-kpi__value${accent ? ' hp-kpi__value--accent' : ''}`}>{value}</div>
-      {sub && <div className="hp-kpi__sub">{sub}</div>}
-    </div>
+    <p className="hp-lead">
+      Your{' '}
+      <span className={`hp-lead__word${visible ? ' is-in' : ' is-out'}`}>{ROTATE[i]}</span>
+      {' '}— on one screen. QuickBooks wired to your register, distributors, and vendors.
+    </p>
   )
 }
 
-function Screen({ tab, form, setForm, onSubmit, submitted, submitting }) {
-  if (tab === 'dashboard') {
+function Screen({ tab, form, setForm, onSubmit, submitted, submitting, onNav }) {
+  if (tab === 'overview') {
     return (
       <>
         <div className="hp-kpi-row">
-          <Kpi label="Month revenue" value={money(48240)} sub="Through Jun 14" />
-          <Kpi label="Gross margin" value="38.2%" sub="Matched to vendor cost" accent />
-          <Kpi label="Open AR" value={money(6840)} sub="4 invoices" />
-          <Kpi label="Stock on hand" value={money(3676)} sub="4 sizes tracked" />
+          <div className="hp-kpi">
+            <div className="hp-kpi__label">Built for</div>
+            <div className="hp-kpi__value">You</div>
+            <div className="hp-kpi__sub">One business, one portal</div>
+          </div>
+          <div className="hp-kpi">
+            <div className="hp-kpi__label">QuickBooks</div>
+            <div className="hp-kpi__value hp-kpi__value--accent">Both ways</div>
+            <div className="hp-kpi__sub">Pull books · push JEs</div>
+          </div>
+          <div className="hp-kpi">
+            <div className="hp-kpi__label">Updates</div>
+            <div className="hp-kpi__value">Nightly</div>
+            <div className="hp-kpi__sub">Register · vendors · bank</div>
+          </div>
+          <div className="hp-kpi">
+            <div className="hp-kpi__label">Login</div>
+            <div className="hp-kpi__value">Yours</div>
+            <div className="hp-kpi__sub">Scoped to one company</div>
+          </div>
         </div>
         <div className="hp-card">
           <div className="hp-card__head">
-            <h2 className="hp-card__title">Recent repair orders</h2>
-            <span className="hp-card__meta">Clover × distributor cost</span>
+            <h2 className="hp-card__title">The software behind your numbers</h2>
           </div>
-          <table className="hp-table">
-            <thead>
-              <tr>
-                <th>RO</th><th>Vehicle</th><th>Size</th><th className="hp-num">Revenue</th><th className="hp-num">Cost</th><th className="hp-num">Margin</th>
-              </tr>
-            </thead>
-            <tbody>
-              {ORDERS.slice(0, 4).map((o) => (
-                <tr key={o.ro}>
-                  <td className="hp-mono">{o.ro}</td>
-                  <td>{o.vehicle}</td>
-                  <td className="hp-mono hp-muted">{o.size}</td>
-                  <td className="hp-num">{money(o.rev)}</td>
-                  <td className="hp-num hp-muted">{money(o.cost)}</td>
-                  <td className="hp-num hp-good">{pct(o.margin)}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-        <p className="hp-pitch">Every ticket matched to what you paid the vendor — updated nightly from your register and distributor portal.</p>
-      </>
-    )
-  }
-
-  if (tab === 'orders') {
-    return (
-      <>
-        <div className="hp-kpi-row">
-          <Kpi label="Orders this month" value="186" />
-          <Kpi label="Avg margin" value="34.8%" accent />
-          <Kpi label="Same-day matches" value="42" sub="Qty ≤ 4, near sale date" />
-        </div>
-        <div className="hp-card">
-          <div className="hp-card__head"><h2 className="hp-card__title">Profit per repair order</h2></div>
-          <table className="hp-table">
-            <thead>
-              <tr>
-                <th>RO</th><th>Date</th><th>Vehicle</th><th className="hp-num">Revenue</th><th className="hp-num">Cost</th><th className="hp-num">Margin</th>
-              </tr>
-            </thead>
-            <tbody>
-              {ORDERS.map((o) => (
-                <tr key={o.ro}>
-                  <td className="hp-mono">{o.ro}</td>
-                  <td className="hp-muted">{o.date}</td>
-                  <td>{o.vehicle}</td>
-                  <td className="hp-num">{money(o.rev)}</td>
-                  <td className="hp-num hp-muted">{money(o.cost)}</td>
-                  <td className="hp-num hp-good">{pct(o.margin)}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-        <p className="hp-pitch">Not a Clover report. Not a guess. Revenue from the register, cost from the invoice.</p>
-      </>
-    )
-  }
-
-  if (tab === 'stock') {
-    return (
-      <>
-        <div className="hp-kpi-row">
-          <Kpi label="Inventory asset" value={money(3676)} sub="As of Jun 14" />
-          <Kpi label="Restocks MTD" value={money(4240)} sub="Capitalized to balance sheet" />
-          <Kpi label="COGS relief" value={money(3180)} sub="Month-end JE ready" accent />
-        </div>
-        <div className="hp-card">
-          <div className="hp-card__head"><h2 className="hp-card__title">On-hand by size</h2></div>
-          <table className="hp-table">
-            <thead>
-              <tr><th>Size</th><th className="hp-num">Qty</th><th className="hp-num">Avg cost</th><th className="hp-num">Value</th></tr>
-            </thead>
-            <tbody>
-              {STOCK.map((s) => (
-                <tr key={s.size}>
-                  <td className="hp-mono">{s.size}</td>
-                  <td className="hp-num">{s.onHand}</td>
-                  <td className="hp-num hp-muted">{money(s.avgCost)}</td>
-                  <td className="hp-num">{money(s.value)}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-        <p className="hp-pitch">Dated purchase layers, FIFO relief, and a month-end entry that ties to QuickBooks.</p>
-      </>
-    )
-  }
-
-  if (tab === 'financials') {
-    return (
-      <>
-        <div className="hp-kpi-row">
-          <Kpi label="QBO sync" value="Nightly" sub="P&L · BS · GL detail" accent />
-          <Kpi label="Closed through" value="May 2026" />
-          <Kpi label="Open month" value="June" sub="Live register mix" />
-        </div>
-        <div className="hp-split">
-          <div className="hp-card">
-            <div className="hp-card__head">
-              <h2 className="hp-card__title">P&amp;L — June (open)</h2>
-              <span className="hp-card__meta">Portal view</span>
+          <div className="hp-card__body">
+            <OverviewRotator />
+            <p className="hp-body">
+              This is what your portal looks like — sidebar, screens, numbers that tie out.
+              We build it custom for your shop, contractor, wholesaler, or whatever you run.
+            </p>
+            <div className="hp-actions">
+              <button type="button" className="hp-btn hp-btn--primary" onClick={() => onNav('contact')}>
+                Get started
+              </button>
+              <button type="button" className="hp-btn hp-btn--ghost" onClick={() => onNav('demos')}>
+                Browse demos
+              </button>
+              <a href={BOOKING_URL} target="_blank" rel="noopener noreferrer" className="hp-btn hp-btn--ghost">
+                Book a call
+              </a>
             </div>
-            <table className="hp-table hp-table--pl">
+          </div>
+        </div>
+      </>
+    )
+  }
+
+  if (tab === 'build') {
+    return (
+      <div className="hp-stack">
+        {BUILD_STACK.map((col) => (
+          <div key={col.title} className="hp-card">
+            <div className="hp-card__head">
+              <div>
+                <div className="hp-kicker">{col.kicker}</div>
+                <h2 className="hp-card__title">{col.title}</h2>
+              </div>
+            </div>
+            <p className="hp-card__blurb">{col.blurb}</p>
+            <table className="hp-table">
               <tbody>
-                {PL.map((r) => (
-                  <tr key={r.line} className={r.bold ? 'hp-row-bold' : r.accent ? 'hp-row-accent' : ''}>
-                    <td>{r.line}</td>
-                    <td className="hp-num">{money(Math.abs(r.amt))}</td>
+                {col.items.map((it) => (
+                  <tr key={it.t}>
+                    <td className="hp-feature-name">{it.t}</td>
+                    <td className="hp-feature-desc">{it.d}</td>
                   </tr>
                 ))}
               </tbody>
             </table>
           </div>
-          <div className="hp-card hp-card--qbo">
-            <div className="hp-card__head">
-              <h2 className="hp-card__title">QuickBooks statement</h2>
-              <span className="hp-pill hp-pill--ok">Reconciled</span>
+        ))}
+      </div>
+    )
+  }
+
+  if (tab === 'how') {
+    return (
+      <>
+        <div className="hp-step-row">
+          {STEPS.map((s) => (
+            <div key={s.n} className="hp-card hp-card--step">
+              <div className="hp-step-n">{s.n}</div>
+              <h3 className="hp-step-title">{s.title}</h3>
+              <p className="hp-body">{s.body}</p>
             </div>
-            <div className="hp-qbo-lines">
-              <div><span>Gross profit</span><span>{money(18430)}</span></div>
-              <div><span>Net income</span><span className="hp-good">{money(7230)}</span></div>
-              <div><span>Inventory asset</span><span>{money(3676)}</span></div>
-            </div>
-            <p className="hp-qbo-note">Official QBO figure on the same screen. If they don&rsquo;t match, you see it here.</p>
-          </div>
+          ))}
+        </div>
+        <div className="hp-card">
+          <div className="hp-card__head"><h2 className="hp-card__title">Six days to launch</h2></div>
+          <table className="hp-table">
+            <tbody>
+              {[
+                ['Day 1', 'Kickoff call — we learn your business and what you want to see.'],
+                ['Days 2–5', 'We build your portal and wire the integrations.'],
+                ['Day 6', 'Review, tweaks, go live.'],
+                ['Ongoing', 'Books updated every month. Portal stays current.'],
+              ].map(([when, what]) => (
+                <tr key={when}>
+                  <td className="hp-mono hp-when">{when}</td>
+                  <td>{what}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+        <div className="hp-actions">
+          <button type="button" className="hp-btn hp-btn--primary" onClick={() => onNav('contact')}>Get started</button>
+          <a href={BOOKING_URL} target="_blank" rel="noopener noreferrer" className="hp-btn hp-btn--ghost">Book a call</a>
         </div>
       </>
     )
   }
 
-  if (tab === 'ask') {
+  if (tab === 'demos') {
     return (
-      <div className="hp-ask">
-        <div className="hp-ask__thread">
-          <div className="hp-ask__q">What was margin on 225/65R17 this month?</div>
-          <div className="hp-ask__a">
-            <strong>34.5%</strong> across 14 units sold. Revenue {money(12852)}, tire cost {money(8424)}.
-            Best day was Jun 8 — 6 units at 41% after a restock at $78.
-          </div>
-          <div className="hp-ask__q">How much is sitting in open AR?</div>
-          <div className="hp-ask__a">
-            <strong>{money(6840)}</strong> across 4 invoices. Oldest is Fleet Care LLC — 22 days, {money(2180)}.
+      <>
+        <p className="hp-body hp-body--top">Click into a sample portal — fictitious businesses, real product ideas.</p>
+        <div className="hp-card">
+          <table className="hp-table">
+            <thead>
+              <tr><th>Industry</th><th>What it shows</th><th /></tr>
+            </thead>
+            <tbody>
+              {FEATURED_DEMOS.map((d) => (
+                <tr key={d.src}>
+                  <td className="hp-feature-name">{d.label}</td>
+                  <td className="hp-feature-desc">{d.caption}</td>
+                  <td className="hp-num">
+                    <a href={d.src} className="hp-link">Open →</a>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+        <p className="hp-body">
+          <button type="button" className="hp-link-btn" onClick={() => onNav('contact')}>Want one built for your business?</button>
+        </p>
+      </>
+    )
+  }
+
+  if (tab === 'about') {
+    return (
+      <div className="hp-split">
+        <div className="hp-card">
+          <div className="hp-card__head"><h2 className="hp-card__title">We write the software and keep the books</h2></div>
+          <div className="hp-card__body">
+            <p className="hp-body">
+              Small shop. Custom portals wired to QuickBooks, your register, your distributors —
+              whatever your business actually runs on.
+            </p>
+            <p className="hp-body">
+              We work with owners who are tired of flying blind — who know something is off
+              but can&rsquo;t see it in a pile of spreadsheets or a QuickBooks report that makes no sense.
+            </p>
+            <p className="hp-body">Our job is to make your numbers clear, your reporting automatic, and your books something you actually look at.</p>
           </div>
         </div>
-        <div className="hp-ask__input">
-          <span className="hp-ask__placeholder">Ask anything about your numbers…</span>
+        <div className="hp-card">
+          <div className="hp-card__head"><h2 className="hp-card__title">What you get</h2></div>
+          <ul className="hp-bullets">
+            {[
+              'One point of contact — the person who built your portal',
+              'Your own login, scoped to your company on the server',
+              'Integrations we wrote ourselves, not a Zapier chain',
+              'Nothing goes live until it ties out to QuickBooks',
+            ].map((line) => (
+              <li key={line}>{line}</li>
+            ))}
+          </ul>
         </div>
-        <p className="hp-pitch">Plain English in, answer out — computed from your books, not guessed by a chatbot.</p>
       </div>
     )
   }
@@ -221,24 +232,17 @@ function Screen({ tab, form, setForm, onSubmit, submitted, submitting }) {
   return (
     <div id="contact" className="hp-get">
       <div className="hp-get__copy">
-        <h2 className="hp-get__title">This is what we build.</h2>
+        <h2 className="hp-get__title">What would you want built first?</h2>
         <p className="hp-get__lead">
-          One custom portal for your business — QuickBooks wired to your register, distributors, and vendors. Updated every night.
+          Tell us what you run today. We&rsquo;ll show you what we&rsquo;d wire up — register, vendors, job cost, inventory, AR, whatever you need on one screen.
         </p>
-        <ul className="hp-get__list">
-          <li>Profit per ticket, job, or order</li>
-          <li>Inventory that ties to the balance sheet</li>
-          <li>Financials reconciled against QBO</li>
-          <li>Your own login — scoped to one company</li>
-        </ul>
-        <a href={BOOKING_URL} target="_blank" rel="noopener noreferrer" className="hp-get__book">Book a 30-min call →</a>
+        <a href={BOOKING_URL} target="_blank" rel="noopener noreferrer" className="hp-get__book">Or book a 30-min call →</a>
       </div>
       <div className="hp-get__form">
         {submitted ? (
           <div className="hp-get__done">We&rsquo;ll be in touch.</div>
         ) : (
           <>
-            <h3 className="hp-get__form-title">What would you want built first?</h3>
             {[
               { key: 'name', label: 'Your name', placeholder: 'John Smith' },
               { key: 'email', label: 'Email', placeholder: 'you@company.com' },
@@ -274,14 +278,12 @@ function Screen({ tab, form, setForm, onSubmit, submitted, submitting }) {
 
 export default function HomePortal({ live, form, setForm, onSubmit, submitted, submitting }) {
   const router = useRouter()
-  const [tab, setTab] = useState('dashboard')
+  const [tab, setTab] = useState('overview')
   const active = NAV.find((n) => n.id === tab)
 
   const pick = (id) => {
     setTab(id)
-    if (id === 'get-yours') {
-      window.setTimeout(() => document.getElementById('contact')?.scrollIntoView({ behavior: 'smooth', block: 'nearest' }), 50)
-    }
+    window.scrollTo({ top: 0, behavior: 'smooth' })
   }
 
   return (
@@ -297,19 +299,16 @@ export default function HomePortal({ live, form, setForm, onSubmit, submitted, s
       <div className="hp-shell">
         <aside className="hp-side">
           <div className="hp-brand">
-            <div className="hp-brand__icon">W</div>
-            <div>
-              <div className="hp-brand__name">Westline</div>
-              <div className="hp-brand__sub">Tire &amp; Auto</div>
-            </div>
+            <div className="hp-brand__jk">JK<span>.</span></div>
+            <div className="hp-brand__sub">Your financial portal</div>
           </div>
 
-          <nav className="hp-nav">
+          <nav className="hp-nav" aria-label="Site">
             {NAV.map((n) => (
               <button
                 key={n.id}
                 type="button"
-                className={`hp-navbtn${tab === n.id ? ' is-on' : ''}${n.id === 'get-yours' ? ' hp-navbtn--cta' : ''}`}
+                className={`hp-navbtn${tab === n.id ? ' is-on' : ''}${n.id === 'contact' ? ' hp-navbtn--cta' : ''}`}
                 onClick={() => pick(n.id)}
               >
                 {n.label}
@@ -318,21 +317,22 @@ export default function HomePortal({ live, form, setForm, onSubmit, submitted, s
           </nav>
 
           <div className="hp-sidefoot">
-            <div className="hp-sidefoot__jk">JK<span>.</span></div>
-            <button type="button" className="hp-sidefoot__link" onClick={() => router.push('/demos')}>More demos</button>
-            <button type="button" className="hp-sidefoot__link" onClick={() => router.push('/what-we-do')}>What we build</button>
-            <button type="button" className="hp-sidefoot__link" onClick={() => router.push('/about')}>About</button>
             <button type="button" className="hp-sidefoot__link" onClick={() => router.push('/login')}>Log in</button>
+            <button type="button" className="hp-sidefoot__link" onClick={() => router.push('/privacy')}>Privacy</button>
+            <button type="button" className="hp-sidefoot__link" onClick={() => router.push('/terms')}>Terms</button>
+            <div className="hp-sidefoot__tag">Built in Jersey. No jokes.</div>
           </div>
         </aside>
 
         <main className="hp-main">
           <header className="hp-top">
             <div>
-              <div className="hp-top__month">June 2026 · open month</div>
+              <div className="hp-top__month">{active?.kicker}</div>
               <h1 className="hp-top__title">{active?.label}</h1>
             </div>
-            <div className="hp-top__badge">Built by JK No Jokes</div>
+            <a href={BOOKING_URL} target="_blank" rel="noopener noreferrer" className="hp-top__badge hp-top__badge--link">
+              Book a call
+            </a>
           </header>
 
           <Screen
@@ -342,6 +342,7 @@ export default function HomePortal({ live, form, setForm, onSubmit, submitted, s
             onSubmit={onSubmit}
             submitted={submitted}
             submitting={submitting}
+            onNav={pick}
           />
         </main>
       </div>
