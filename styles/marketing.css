@@ -22,6 +22,7 @@
 .marketing-site #build,
 .marketing-site #demos,
 .marketing-site #demo-preview,
+.marketing-site #showcase,
 .marketing-site #contact,
 .marketing-site #how {
   scroll-margin-top: 88px;
@@ -970,12 +971,6 @@
   line-height: 1.05;
   letter-spacing: -0.035em;
   margin: 0 0 18px;
-  opacity: 0;
-  transform: translateY(16px);
-}
-
-.m-home--live .m-stage__title {
-  animation: m-stage-in 0.8s ease 0.05s forwards;
 }
 
 .m-stage__sub {
@@ -984,44 +979,194 @@
   color: rgba(247, 244, 239, 0.58);
   margin: 0 0 28px;
   max-width: 480px;
+}
+
+.m-rotator {
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: clamp(17px, 2.2vw, 22px);
+  font-weight: 600;
+  color: rgba(247, 244, 239, 0.92);
+  margin: 0 0 14px;
+  letter-spacing: -0.02em;
+}
+
+.m-rotator__word {
+  display: inline-block;
+  color: var(--m-gold);
+  min-width: 5.5ch;
+  transition: opacity 0.22s ease, transform 0.22s ease;
+}
+.m-rotator__word.is-out {
   opacity: 0;
-  transform: translateY(12px);
+  transform: translateY(6px);
+}
+.m-rotator__word.is-in {
+  opacity: 1;
+  transform: translateY(0);
 }
 
-.m-home--live .m-stage__sub {
-  animation: m-stage-in 0.75s ease 0.15s forwards;
+.m-home-spot {
+  position: relative;
+}
+.m-home-spot--on::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+  background: radial-gradient(
+    600px circle at var(--spot-x, 50%) var(--spot-y, 30%),
+    rgba(201, 168, 76, 0.07),
+    transparent 55%
+  );
+}
+.m-home-spot > * { position: relative; z-index: 1; }
+
+.m-showcase {
+  padding: clamp(36px, 5vw, 56px) 0 clamp(40px, 5vw, 52px);
 }
 
-.m-stage__btn {
+.m-pipe {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 4px 0;
+  margin-bottom: 28px;
+  padding: 16px 12px;
+  background: #fff;
+  border: 1px solid var(--m-line);
+  box-shadow: 6px 6px 0 rgba(14, 20, 32, 0.05);
+}
+
+.m-pipe__segment {
+  display: flex;
+  align-items: center;
+}
+
+.m-pipe__node {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--m-ink);
+  padding: 6px 12px;
+  background: var(--m-paper);
+  border: 1px solid var(--m-line);
+  border-radius: 4px;
+  white-space: nowrap;
+}
+
+.m-pipe__line {
+  position: relative;
+  width: clamp(28px, 5vw, 56px);
+  height: 2px;
+  background: var(--m-line);
+  margin: 0 4px;
+  overflow: hidden;
+}
+
+.m-pipe__pulse {
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, var(--m-gold), transparent);
+  animation: m-pipe-run 2.2s ease-in-out infinite;
+}
+
+.m-pipe__segment:nth-child(2) .m-pipe__pulse { animation-delay: 0.4s; }
+.m-pipe__segment:nth-child(3) .m-pipe__pulse { animation-delay: 0.8s; }
+.m-pipe__segment:nth-child(4) .m-pipe__pulse { animation-delay: 1.2s; }
+
+@keyframes m-pipe-run {
+  0% { left: -100%; }
+  100% { left: 100%; }
+}
+
+.m-bento {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  grid-auto-rows: minmax(108px, auto);
+  gap: 10px;
+}
+
+.m-bento__cell {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  padding: 18px 18px 16px;
+  text-decoration: none;
+  color: #F7F4EF;
+  background: #0E1420;
+  border: 1px solid #1a2230;
+  overflow: hidden;
+  transition: transform 0.22s ease, border-color 0.22s ease, box-shadow 0.22s ease;
+}
+.m-bento__cell::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle at 80% 20%, rgba(201, 168, 76, 0.18), transparent 55%);
   opacity: 0;
-  transform: translateY(10px);
+  transition: opacity 0.25s ease;
 }
-
-.m-home--live .m-stage__btn {
-  animation: m-stage-in 0.7s ease 0.28s forwards;
+.m-bento__cell:hover {
+  transform: translateY(-4px) scale(1.01);
+  border-color: var(--m-gold);
+  box-shadow: 0 12px 32px rgba(14, 20, 32, 0.35), inset 0 0 0 1px rgba(201, 168, 76, 0.2);
 }
+.m-bento__cell:hover::before { opacity: 1; }
 
-@keyframes m-stage-in {
-  to { opacity: 1; transform: translateY(0); }
+.m-bento__cell--wide { grid-column: span 2; }
+.m-bento__cell--tall { grid-row: span 2; justify-content: flex-end; }
+
+.m-bento__label {
+  position: relative;
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: clamp(18px, 2.2vw, 24px);
+  font-weight: 700;
+  letter-spacing: -0.03em;
+  line-height: 1.1;
+  margin-bottom: 4px;
 }
-
-.m-home__demos,
-.m-home #build,
-.m-home #contact {
+.m-bento__line {
+  position: relative;
+  font-size: 13px;
+  color: rgba(247, 244, 239, 0.5);
+  margin-bottom: 10px;
+}
+.m-bento__go {
+  position: relative;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  color: var(--m-gold);
   opacity: 0;
-  transform: translateY(18px);
+  transform: translateY(4px);
+  transition: opacity 0.2s ease, transform 0.2s ease;
+}
+.m-bento__cell:hover .m-bento__go {
+  opacity: 1;
+  transform: translateY(0);
 }
 
-.m-home--live .m-home__demos {
-  animation: m-stage-in 0.7s ease 0.35s forwards;
+.m-showcase__foot {
+  text-align: center;
+  margin: 24px 0 0;
 }
 
-.m-home--live #build {
-  animation: m-stage-in 0.7s ease 0.45s forwards;
+.m-contact-slab {
+  padding: clamp(40px, 5vw, 52px) 0 clamp(48px, 6vw, 64px);
+  background: #fff;
+  border-top: 1px solid var(--m-line);
 }
-
-.m-home--live #contact {
-  animation: m-stage-in 0.7s ease 0.55s forwards;
+.m-contact-slab__title {
+  text-align: center;
+  margin-bottom: 18px;
+  font-size: clamp(20px, 2.5vw, 26px);
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -1029,12 +1174,6 @@
   .m-intro__burst,
   .m-intro__mark,
   .m-intro__line,
-  .m-stage__title,
-  .m-stage__sub,
-  .m-stage__btn,
-  .m-home__demos,
-  .m-home #build,
-  .m-home #contact,
   .m-card--pop,
   .m-btn--pop,
   .m-demo-tile,
@@ -1050,6 +1189,14 @@
 @media (max-width: 900px) {
   .m-stage__inner { text-align: center; margin: 0 auto; }
   .m-stage__sub { margin-left: auto; margin-right: auto; }
+  .m-rotator { margin-left: auto; margin-right: auto; }
+  .m-bento {
+    grid-template-columns: repeat(2, 1fr);
+    grid-auto-rows: minmax(100px, auto);
+  }
+  .m-bento__cell--wide { grid-column: span 2; }
+  .m-bento__cell--tall { grid-row: span 1; }
+  .m-bento__go { opacity: 1; transform: none; }
   .marketing-site .nav-tagline { display: none; }
   .m-step-row,
   .m-build-grid,
@@ -1098,8 +1245,10 @@
   .m-card--pop:hover,
   .m-demo-tile:hover,
   .m-demo-frame--pop:hover,
-  .m-step-pop:hover {
+  .m-step-pop:hover,
+  .m-bento__cell:hover {
     transform: none;
     box-shadow: none;
   }
+  .m-home-spot--on::before { display: none; }
 }

@@ -1,32 +1,30 @@
 import { useState, useEffect, useCallback } from 'react'
+import { HOME_INTRO_KEY, shouldSkipHomeIntro } from '../lib/homeIntro'
 
-const STORAGE_KEY = 'jk-home-intro-seen'
-
-export default function HomeIntro({ onDone }) {
-  const [phase, setPhase] = useState('mark') // mark → line → burst → out
-  const [gone, setGone] = useState(false)
+export default function HomeIntro({ onStart, onDone }) {
+  const [active, setActive] = useState(false)
+  const [phase, setPhase] = useState('mark')
 
   const finish = useCallback(() => {
     setPhase('out')
     window.setTimeout(() => {
-      setGone(true)
+      setActive(false)
+      document.body.style.overflow = ''
       onDone?.()
-      try { sessionStorage.setItem(STORAGE_KEY, '1') } catch { /* ignore */ }
+      try { sessionStorage.setItem(HOME_INTRO_KEY, '1') } catch { /* ignore */ }
     }, 350)
   }, [onDone])
 
   useEffect(() => {
-    const skip = typeof window !== 'undefined' && (
-      window.matchMedia('(prefers-reduced-motion: reduce)').matches
-      || sessionStorage.getItem(STORAGE_KEY)
-    )
-    if (skip) {
-      setGone(true)
+    if (shouldSkipHomeIntro()) {
       onDone?.()
       return
     }
 
+    setActive(true)
+    onStart?.()
     document.body.style.overflow = 'hidden'
+
     const t1 = window.setTimeout(() => setPhase('line'), 550)
     const t2 = window.setTimeout(() => setPhase('burst'), 1300)
     const t3 = window.setTimeout(finish, 2400)
@@ -37,13 +35,9 @@ export default function HomeIntro({ onDone }) {
       window.clearTimeout(t2)
       window.clearTimeout(t3)
     }
-  }, [finish, onDone])
+  }, [finish, onDone, onStart])
 
-  useEffect(() => {
-    if (gone) document.body.style.overflow = ''
-  }, [gone])
-
-  if (gone) return null
+  if (!active) return null
 
   return (
     <button

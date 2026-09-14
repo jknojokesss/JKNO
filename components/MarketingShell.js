@@ -75,7 +75,7 @@ export default function MarketingShell({ title, description, children, padTop = 
   }
 
   const navActive = (href) => {
-    if (href === '/#build') return router.pathname === '/'
+    if (href === '/what-we-do') return router.pathname === '/what-we-do'
     return router.pathname === href || router.pathname.startsWith(href + '/')
   }
 
