@@ -9,44 +9,45 @@ export default function About() {
       <PageHero
         kicker="Who we are"
         title={<>We write the software<br />and keep the books.</>}
-        lead="JK No Jokes Financials is a small shop that builds custom financial portals and keeps the books underneath them — wired to QuickBooks, your register, your distributors, and whatever else your business actually uses."
+        lead="Small shop. Custom portals wired to QuickBooks, your register, your distributors — whatever your business actually runs on."
+        align="center"
       />
 
-      <section className="m-section">
-        <div className="m-wrap" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '48px', alignItems: 'start' }}>
+      <section className="m-section" style={{ paddingTop: 'clamp(32px,4vw,48px)' }}>
+        <div className="m-wrap m-about-grid">
           <div>
-            <div style={{ marginBottom: '32px', display: 'flex', alignItems: 'center', gap: '18px' }}>
-              <img src="/1779727210800.jpg" alt="Jonathan Katz" style={{ width: '88px', height: '88px', borderRadius: '50%', objectFit: 'cover', flexShrink: 0, border: '2px solid #C9A84C' }} />
+            <div className="m-about-founder">
+              <div className="m-photo-pop">
+                <img src="/1779727210800.jpg" alt="Jonathan Katz" />
+              </div>
               <div>
-                <div style={{ fontFamily: "'Space Grotesk', sans-serif", fontSize: '20px', fontWeight: 600, lineHeight: 1.2 }}>Jonathan (Chaim) Katz</div>
-                <div style={{ fontSize: '14px', color: '#5A6577', marginTop: '4px' }}>Founder</div>
+                <div className="m-about-name">Jonathan (Chaim) Katz</div>
+                <div className="m-about-role">Founder</div>
               </div>
             </div>
-            <p style={{ fontSize: '16px', color: '#48536A', lineHeight: 1.75, marginBottom: '18px' }}>
+            <p className="m-about-p">
               We don&rsquo;t just record your numbers — we build the system that turns them into decisions. Every client gets their own portal, updated on a schedule, accessible from any device.
             </p>
-            <p style={{ fontSize: '16px', color: '#48536A', lineHeight: 1.75, marginBottom: '18px' }}>
+            <p className="m-about-p">
               We work with owners who are tired of flying blind — who know something is off but can&rsquo;t see it in a pile of spreadsheets or a QuickBooks report that makes no sense.
             </p>
-            <p style={{ fontSize: '16px', color: '#48536A', lineHeight: 1.75, marginBottom: '28px' }}>
+            <p className="m-about-p" style={{ marginBottom: '28px' }}>
               Our job is to make your numbers clear, your reporting automatic, and your books something you actually look at.
             </p>
             <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
-              <button className="m-btn m-btn--primary" onClick={() => router.push('/#contact')}>Work with us</button>
-              <a href={BOOKING_URL} target="_blank" rel="noopener noreferrer" className="m-btn m-btn--secondary">Book a call</a>
+              <button type="button" className="m-btn m-btn--primary m-btn--pop" onClick={() => router.push('/#contact')}>Work with us</button>
+              <a href={BOOKING_URL} target="_blank" rel="noopener noreferrer" className="m-btn m-btn--secondary m-btn--pop">Book a call</a>
             </div>
           </div>
 
-          <div className="m-card" style={{ padding: '28px' }}>
+          <div className="m-card m-card--pop m-about-list">
             {[
               'One point of contact — the person who built your portal',
               'Your own login, scoped to your company on the server',
               'Integrations we wrote ourselves, not a Zapier chain',
               'Nothing goes live until it ties out to QuickBooks',
             ].map((line) => (
-              <div key={line} style={{ padding: '12px 0', borderBottom: '1px solid #EEF1F5', fontSize: '15px', color: '#48536A', lineHeight: 1.6 }}>
-                {line}
-              </div>
+              <div key={line} className="m-about-list__item">{line}</div>
             ))}
           </div>
         </div>

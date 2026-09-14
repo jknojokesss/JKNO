@@ -12,41 +12,34 @@ export default function DemoGallery() {
     >
       <PageHero
         kicker={`${ALL_DEMOS.length} live demos · no login`}
-        title={<>One of these is<br /><span style={{ color: '#B8943C' }}>your business.</span></>}
-        lead="Every demo below is a real, clickable dashboard built the way we'd build yours. Find your industry and click in."
+        title={<>One of these is your business.</>}
+        lead="Every card below is a real dashboard — click in, scroll around, pretend it's yours."
         align="center"
       />
 
-      <section className="m-section">
+      <section className="m-section" style={{ paddingTop: 'clamp(32px,4vw,48px)' }}>
         <div className="m-wrap">
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(260px, 1fr))', gap: '14px' }}>
+          <div className="m-demo-grid">
             {ALL_DEMOS.map((d) => (
-              <a key={d.href} href={d.href} className="m-card" style={{
-                textDecoration: 'none', color: 'inherit', display: 'block',
-                borderLeftWidth: '3px', transition: 'border-color 0.15s',
-              }}
-              onMouseEnter={(e) => { e.currentTarget.style.borderColor = '#C9A84C' }}
-              onMouseLeave={(e) => { e.currentTarget.style.borderColor = '#DFE4EC' }}
-              >
-                <div style={{ fontSize: '12px', fontWeight: 600, color: '#B8943C', marginBottom: '6px', letterSpacing: '0.06em', textTransform: 'uppercase' }}>{d.industry}</div>
-                <div style={{ fontFamily: "'Space Grotesk', sans-serif", fontSize: '19px', fontWeight: 600, color: '#0E1420', marginBottom: '8px' }}>{d.biz}</div>
-                <div style={{ fontSize: '14px', color: '#48536A', lineHeight: 1.6, marginBottom: '12px' }}>{d.blurb}</div>
-                <div style={{ fontSize: '14px', fontWeight: 600, color: '#B8943C' }}>Open live demo →</div>
+              <a key={d.href} href={d.href} className="m-demo-tile">
+                <span className="m-demo-tile__emoji" aria-hidden="true">{d.emoji}</span>
+                <span className="m-demo-tile__industry">{d.industry}</span>
+                <span className="m-demo-tile__biz">{d.biz}</span>
+                <span className="m-demo-tile__blurb">{d.blurb}</span>
+                <span className="m-demo-tile__go">Open live demo →</span>
               </a>
             ))}
           </div>
         </div>
       </section>
 
-      <section className="m-section--panel" style={{ padding: 'clamp(48px,6vw,64px) 0' }}>
-        <div className="m-wrap" style={{ textAlign: 'center', maxWidth: '520px' }}>
-          <h2 className="m-h2" style={{ marginBottom: '12px' }}>Don&rsquo;t see your industry?</h2>
-          <p className="m-lead" style={{ margin: '0 auto 20px' }}>
-            We&rsquo;ll build a demo around your business before you pay a dime.
-          </p>
-          <div style={{ display: 'flex', gap: '12px', justifyContent: 'center', flexWrap: 'wrap' }}>
-            <button type="button" className="m-btn m-btn--primary" onClick={() => router.push('/#contact')}>Get in touch</button>
-            <a href={BOOKING_URL} target="_blank" rel="noopener noreferrer" className="m-btn m-btn--secondary">Book a call</a>
+      <section className="m-cta-slab">
+        <div className="m-wrap m-cta-slab__inner">
+          <h2 className="m-h2 m-cta-slab__title">Don&rsquo;t see your industry?</h2>
+          <p className="m-cta-slab__lead">We&rsquo;ll build a demo around your business before you pay a dime.</p>
+          <div className="m-cta-slab__actions">
+            <button type="button" className="m-btn m-btn--primary m-btn--pop" onClick={() => router.push('/#contact')}>Get in touch</button>
+            <a href={BOOKING_URL} target="_blank" rel="noopener noreferrer" className="m-btn m-btn--secondary m-btn--pop-dark">Book a call</a>
           </div>
         </div>
       </section>

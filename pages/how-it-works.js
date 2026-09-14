@@ -3,9 +3,9 @@ import MarketingShell, { PageHero } from '../components/MarketingShell'
 import { BOOKING_URL } from '../lib/marketing'
 
 const STEPS = [
-  { title: 'We learn your business', body: 'One call. You tell us how you get paid, what you sell, what you spend, and what you wish you could see on one screen. We figure out exactly what the dashboard needs to show.' },
-  { title: 'We wire up your systems', body: 'QuickBooks, your register, vendor invoices, bank activity — whatever you already run. We write the integrations ourselves and run them on a nightly schedule.' },
-  { title: 'You get one portal', body: 'A custom dashboard built around your business. Not a template. Log in any time. Your numbers stay current. Have a question? You get a plain-English answer from someone who knows your books.' },
+  { n: '01', title: 'We learn your business', body: 'One call. How you get paid, what you sell, what you wish you could see on one screen.' },
+  { n: '02', title: 'We wire your systems', body: 'QuickBooks, register, vendors, bank — integrations we wrote, on a nightly schedule.' },
+  { n: '03', title: 'You get one portal', body: 'Custom dashboard. Not a template. Log in any time. Numbers stay current.' },
 ]
 
 const TIMELINE = [
@@ -21,38 +21,39 @@ export default function HowItWorks() {
     <MarketingShell title="How It Works — JK No Jokes Financials">
       <PageHero
         kicker="How it works"
-        title={<>From messy books to<br />clear numbers.</>}
-        lead="Three steps. No bloated software. No settings screen to learn. Just a system that runs while you focus on the business."
+        title={<>Messy books in.<br />Clear numbers out.</>}
+        lead="Three steps. No bloated software. No settings screen. A system that runs while you run the business."
+        align="center"
       />
 
-      <section className="m-section">
+      <section className="m-section" style={{ paddingTop: 'clamp(32px,4vw,48px)' }}>
         <div className="m-wrap">
-          <div className="m-how-strip" style={{ marginBottom: '72px' }}>
-            {STEPS.map((s, i) => (
-              <div key={s.title}>
-                <div style={{ fontSize: '13px', fontWeight: 600, color: '#C9A84C', marginBottom: '10px' }}>Step {i + 1}</div>
-                <h3 style={{ fontFamily: "'Space Grotesk', sans-serif", fontSize: '20px', fontWeight: 600, marginBottom: '12px', lineHeight: 1.25 }}>{s.title}</h3>
-                <p style={{ fontSize: '15px', color: '#48536A', lineHeight: 1.7 }}>{s.body}</p>
+          <div className="m-step-row m-step-row--pop">
+            {STEPS.map((s) => (
+              <div key={s.n} className="m-step-pop">
+                <div className="m-step-pop__n">{s.n}</div>
+                <h3 className="m-step-pop__title">{s.title}</h3>
+                <p className="m-step-pop__body">{s.body}</p>
               </div>
             ))}
           </div>
 
-          <div style={{ borderTop: '1px solid #DFE4EC', paddingTop: '56px' }}>
-            <h2 className="m-h2" style={{ marginBottom: '32px' }}>Six days to launch</h2>
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '28px' }}>
+          <div className="m-timeline-block">
+            <h2 className="m-h2" style={{ marginBottom: '24px' }}>Six days to launch</h2>
+            <div className="m-timeline-grid">
               {TIMELINE.map((item) => (
-                <div key={item.label} className="m-card" style={{ borderLeftWidth: '3px' }}>
-                  <div style={{ fontSize: '12px', fontWeight: 600, color: '#B8943C', marginBottom: '6px', letterSpacing: '0.06em' }}>{item.label}</div>
-                  <div style={{ fontFamily: "'Space Grotesk', sans-serif", fontSize: '17px', fontWeight: 600, marginBottom: '8px' }}>{item.title}</div>
-                  <div style={{ fontSize: '14px', color: '#48536A', lineHeight: 1.65 }}>{item.desc}</div>
+                <div key={item.label} className="m-card m-card--pop">
+                  <div className="m-timeline-label">{item.label}</div>
+                  <div className="m-timeline-title">{item.title}</div>
+                  <div className="m-timeline-desc">{item.desc}</div>
                 </div>
               ))}
             </div>
           </div>
 
-          <div style={{ marginTop: '48px', display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
-            <button className="m-btn m-btn--primary" onClick={() => router.push('/#contact')}>Get started</button>
-            <a href={BOOKING_URL} target="_blank" rel="noopener noreferrer" className="m-btn m-btn--secondary">Book a call</a>
+          <div style={{ marginTop: '40px', display: 'flex', gap: '12px', flexWrap: 'wrap', justifyContent: 'center' }}>
+            <button type="button" className="m-btn m-btn--primary m-btn--pop" onClick={() => router.push('/#contact')}>Get started</button>
+            <a href={BOOKING_URL} target="_blank" rel="noopener noreferrer" className="m-btn m-btn--secondary m-btn--pop">Book a call</a>
           </div>
         </div>
       </section>

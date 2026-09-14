@@ -3,14 +3,16 @@ import { useRouter } from 'next/router'
 import Head from 'next/head'
 import { BOOKING_URL, MARKETING_FONTS, NAV_LINKS } from '../lib/marketing'
 
-export function MarketingLogo({ size = 26, tagline = true, onClick }) {
+export function MarketingLogo({ size = 26, tagline = true, onClick, light = false }) {
+  const ink = light ? '#F7F4EF' : '#0E1420'
+  const muted = light ? 'rgba(247, 244, 239, 0.55)' : '#5A6577'
   const inner = (
     <div style={{ display: 'flex', alignItems: 'baseline', gap: '10px' }}>
-      <span style={{ fontFamily: 'Playfair Display, serif', fontSize: `${size}px`, fontWeight: '700', letterSpacing: '-0.5px', color: '#0E1420' }}>
+      <span style={{ fontFamily: 'Playfair Display, serif', fontSize: `${size}px`, fontWeight: '700', letterSpacing: '-0.5px', color: ink }}>
         JK<span style={{ color: '#C9A84C' }}>.</span>
       </span>
       {tagline && (
-        <span className="nav-tagline" style={{ fontFamily: "'Space Grotesk', sans-serif", fontSize: '13px', fontWeight: 600, letterSpacing: '0.12em', color: '#5A6577', textTransform: 'uppercase' }}>
+        <span className="nav-tagline" style={{ fontFamily: "'Space Grotesk', sans-serif", fontSize: '13px', fontWeight: 600, letterSpacing: '0.12em', color: muted, textTransform: 'uppercase' }}>
           No Jokes Financials
         </span>
       )}
@@ -25,17 +27,24 @@ export function MarketingLogo({ size = 26, tagline = true, onClick }) {
   )
 }
 
-export default function MarketingShell({ title, description, children, padTop = true }) {
+export default function MarketingShell({ title, description, children, padTop = true, darkHeader = false }) {
   const router = useRouter()
   const [scrolled, setScrolled] = useState(false)
+  const [onDarkHero, setOnDarkHero] = useState(false)
   const [menuOpen, setMenuOpen] = useState(false)
   const [isMobile, setIsMobile] = useState(false)
 
+  const headerLight = darkHeader || onDarkHero
+
   useEffect(() => {
-    const onScroll = () => setScrolled(window.scrollY > 8)
+    const onScroll = () => {
+      setScrolled(window.scrollY > 8)
+      if (router.pathname === '/') setOnDarkHero(window.scrollY < 340)
+    }
+    onScroll()
     window.addEventListener('scroll', onScroll)
     return () => window.removeEventListener('scroll', onScroll)
-  }, [])
+  }, [router.pathname])
 
   useEffect(() => {
     const checkMobile = () => setIsMobile(window.innerWidth < 900)
@@ -84,9 +93,9 @@ export default function MarketingShell({ title, description, children, padTop = 
         <link href={MARKETING_FONTS} rel="stylesheet" />
       </Head>
 
-      <header className={`m-header${scrolled || menuOpen ? ' is-solid' : ''}${menuOpen ? ' is-menu-open' : ''}`}>
+      <header className={`m-header${scrolled || menuOpen ? ' is-solid' : ''}${menuOpen ? ' is-menu-open' : ''}${headerLight ? ' m-header--dark' : ''}`}>
         <div className="m-wrap m-header__inner">
-          <MarketingLogo onClick={() => { setMenuOpen(false); router.push('/') }} />
+          <MarketingLogo light={headerLight && !menuOpen} onClick={() => { setMenuOpen(false); router.push('/') }} />
           {!isMobile && (
             <nav className="m-header__nav" aria-label="Main">
               {NAV_LINKS.map((item) => (
@@ -94,8 +103,8 @@ export default function MarketingShell({ title, description, children, padTop = 
                   onClick={() => go(item.href)}>{item.label}</button>
               ))}
               <button type="button" className="m-nav-link" onClick={() => go('/#contact')}>Contact</button>
-              <button type="button" className="m-btn m-btn--secondary m-header__btn" onClick={() => router.push('/login')}>Log in</button>
-              <a href={BOOKING_URL} target="_blank" rel="noopener noreferrer" className="m-btn m-btn--primary m-header__btn">
+              <button type="button" className={`m-btn m-header__btn${headerLight ? ' m-btn--ghost-light' : ' m-btn--secondary'}`} onClick={() => router.push('/login')}>Log in</button>
+              <a href={BOOKING_URL} target="_blank" rel="noopener noreferrer" className="m-btn m-btn--primary m-btn--pop m-header__btn">
                 Book a call
               </a>
             </nav>
@@ -149,8 +158,9 @@ export default function MarketingShell({ title, description, children, padTop = 
             </div>
           </div>
         </div>
-        <div className="m-wrap" style={{ marginTop: '32px', paddingTop: '20px', borderTop: '1px solid #EEF1F5', fontSize: '13px', color: '#9AA3BD' }}>
-          © {new Date().getFullYear()} JK No Jokes Financials
+        <div className="m-wrap m-footer-bar">
+          <span>© {new Date().getFullYear()} JK No Jokes Financials</span>
+          <span className="m-footer-bar__tag">Built in Jersey. No jokes.</span>
         </div>
       </footer>
     </div>
@@ -160,11 +170,11 @@ export default function MarketingShell({ title, description, children, padTop = 
 export function PageHero({ eyebrow, kicker, title, lead, children, align = 'left' }) {
   const label = eyebrow || (kicker ? kicker.replace(/^—\s*/, '') : null)
   return (
-    <section className="m-section--panel" style={{ padding: 'clamp(48px,7vw,72px) 0 clamp(36px,5vw,56px)' }}>
-      <div className="m-wrap" style={{ maxWidth: align === 'center' ? '720px' : undefined, textAlign: align, margin: align === 'center' ? '0 auto' : undefined }}>
+    <section className={`m-inner-hero${align === 'center' ? ' m-inner-hero--center' : ''}`}>
+      <div className="m-wrap m-inner-hero__inner">
         {label && <div className="m-kicker">{label}</div>}
-        {title && <h1 className="m-h1" style={{ marginBottom: lead ? '18px' : 0 }}>{title}</h1>}
-        {lead && <p className="m-lead" style={{ margin: align === 'center' ? '0 auto' : 0, maxWidth: '620px' }}>{lead}</p>}
+        {title && <h1 className="m-h1 m-inner-hero__title">{title}</h1>}
+        {lead && <p className="m-lead m-inner-hero__lead">{lead}</p>}
         {children}
       </div>
     </section>

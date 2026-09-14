@@ -48,37 +48,41 @@ export default function DemoPreview({ demos, onMoreDemos }) {
 
   return (
     <>
-      <div id="demos" style={{ marginBottom: '10px' }}>
-        <div className="m-demo-tabs">
-          {demos.map((d, idx) => (
-            <button key={d.label} className={`m-tab${activeDemo === idx ? ' is-active' : ''}`} onClick={() => onDemoPick(idx)}>
-              {d.label}
-            </button>
-          ))}
-        </div>
+      <div className="m-demo-head">
+        <p className="m-demo-head__title">Pick one. Poke around.</p>
+        <p className="m-demo-head__sub">Real dashboards — sample data, no login.</p>
       </div>
 
-      <div id="demo-preview" className="m-demo-frame">
+      <div id="demos" className="m-demo-pills">
+        {demos.map((d, idx) => (
+          <button
+            key={d.label}
+            type="button"
+            className={`m-pill${activeDemo === idx ? ' is-active' : ''}`}
+            onClick={() => onDemoPick(idx)}
+          >
+            {d.label}
+          </button>
+        ))}
+      </div>
+
+      <div id="demo-preview" className="m-demo-frame m-demo-frame--pop">
         <div className="m-demo-chrome">
-          <span className="m-demo-dot" /><span className="m-demo-dot" /><span className="m-demo-dot" />
-          <span className="m-demo-chrome-label">{active.label} — sample portal</span>
+          <span className="m-demo-dot m-demo-dot--red" />
+          <span className="m-demo-dot m-demo-dot--gold" />
+          <span className="m-demo-dot" />
+          <span className="m-demo-chrome-label">{active.label}</span>
           <a href={active.src} target="_blank" rel="noopener noreferrer" className="m-demo-open-full">
             Open full ↗
           </a>
         </div>
 
-        <div
-          className="m-demo-viewport"
-          style={{ height: viewportHeight, minHeight: '320px' }}
-        >
+        <div className="m-demo-viewport" style={{ height: viewportHeight, minHeight: '320px' }}>
           {!demoReady && (
-            <div className="m-demo-loading m-demo-loading--overlay">Loading demo…</div>
+            <div className="m-demo-loading m-demo-loading--overlay">Loading…</div>
           )}
 
-          <div
-            ref={wrapRef}
-            className={isMobile ? 'm-demo-scale-wrap' : 'm-demo-desktop-wrap'}
-          >
+          <div ref={wrapRef} className={isMobile ? 'm-demo-scale-wrap' : 'm-demo-desktop-wrap'}>
             <div
               className={isMobile ? 'm-demo-scale-inner' : undefined}
               style={isMobile ? { width: DESKTOP_W, height: DESKTOP_H, transform: `scale(${scale})` } : { height: '100%' }}
@@ -102,10 +106,10 @@ export default function DemoPreview({ demos, onMoreDemos }) {
         </div>
       </div>
 
-      <p style={{ marginTop: '10px', fontSize: '13px', color: '#5A6577', lineHeight: 1.55 }}>
+      <p className="m-demo-caption">
         {active.caption}{' '}
         {onMoreDemos && (
-          <button className="m-btn--text" style={{ fontSize: '13px' }} onClick={onMoreDemos}>More demos →</button>
+          <button type="button" className="m-btn--text" style={{ fontSize: '13px' }} onClick={onMoreDemos}>More demos →</button>
         )}
       </p>
     </>

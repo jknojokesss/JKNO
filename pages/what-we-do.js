@@ -10,10 +10,11 @@ export default function WhatWeDo() {
       <PageHero
         kicker="What you get"
         title={<>Everything we build<br />for one business.</>}
-        lead="Every business gets a custom portal wired into the systems it already runs — shops, contractors, wholesalers, custom-order retail. Here is what goes into one."
+        lead="Shops, contractors, wholesalers, custom-order retail — one custom portal wired to whatever you already run."
+        align="center"
       />
 
-      <section className="m-section m-section--stack">
+      <section className="m-section m-section--stack" style={{ paddingTop: 'clamp(32px,4vw,48px)' }}>
         <div className="m-wrap m-stack-list">
           {BUILD_STACK.map((col, i) => (
             <div key={col.title} className={`m-split-row${i < BUILD_STACK.length - 1 ? ' m-split-row--bordered' : ''}`}>
@@ -47,8 +48,8 @@ export default function WhatWeDo() {
             Tell us what you run today and we&rsquo;ll show you what we&rsquo;d wire up.
           </p>
           <div style={{ display: 'flex', gap: '12px', justifyContent: 'center', flexWrap: 'wrap' }}>
-            <button className="m-btn m-btn--primary" onClick={() => router.push('/#contact')}>Get started</button>
-            <a href={BOOKING_URL} target="_blank" rel="noopener noreferrer" className="m-btn m-btn--secondary">Book a call</a>
+            <button type="button" className="m-btn m-btn--primary m-btn--pop" onClick={() => router.push('/#contact')}>Get started</button>
+            <a href={BOOKING_URL} target="_blank" rel="noopener noreferrer" className="m-btn m-btn--secondary m-btn--pop">Book a call</a>
           </div>
         </div>
       </section>
