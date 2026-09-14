@@ -21,6 +21,13 @@ const STEPS = [
   { n: '03', title: 'You get one portal', body: 'Custom dashboard. Not a template. Log in any time. Numbers stay current.' },
 ]
 
+const WIRED = [
+  ['QuickBooks Online', 'P&L, balance sheet, GL detail, JE pushback'],
+  ['POS register', 'Tickets, line items, payment mix'],
+  ['Distributor portal', 'Unit cost, PO#, stock vs same-day'],
+  ['Bank & card', 'Classified to your chart of accounts'],
+]
+
 function OverviewRotator() {
   const [i, setI] = useState(0)
   const [visible, setVisible] = useState(true)
@@ -39,11 +46,11 @@ function OverviewRotator() {
   }, [])
 
   return (
-    <p className="hp-lead">
+    <h2 className="hp-hero__title">
       Your{' '}
-      <span className={`hp-lead__word${visible ? ' is-in' : ' is-out'}`}>{ROTATE[i]}</span>
-      {' '}— on one screen. QuickBooks wired to your register, distributors, and vendors.
-    </p>
+      <span className={`hp-hero__word${visible ? ' is-in' : ' is-out'}`}>{ROTATE[i]}</span>
+      {' '}— on one screen.
+    </h2>
   )
 }
 
@@ -51,50 +58,47 @@ function Screen({ tab, form, setForm, onSubmit, submitted, submitting, onNav }) 
   if (tab === 'overview') {
     return (
       <>
-        <div className="hp-kpi-row">
-          <div className="hp-kpi">
-            <div className="hp-kpi__label">Built for</div>
-            <div className="hp-kpi__value">You</div>
-            <div className="hp-kpi__sub">One business, one portal</div>
-          </div>
-          <div className="hp-kpi">
-            <div className="hp-kpi__label">QuickBooks</div>
-            <div className="hp-kpi__value hp-kpi__value--accent">Both ways</div>
-            <div className="hp-kpi__sub">Pull books · push JEs</div>
-          </div>
-          <div className="hp-kpi">
-            <div className="hp-kpi__label">Updates</div>
-            <div className="hp-kpi__value">Nightly</div>
-            <div className="hp-kpi__sub">Register · vendors · bank</div>
-          </div>
-          <div className="hp-kpi">
-            <div className="hp-kpi__label">Login</div>
-            <div className="hp-kpi__value">Yours</div>
-            <div className="hp-kpi__sub">Scoped to one company</div>
-          </div>
+        <div className="hp-hero">
+          <OverviewRotator />
+          <p className="hp-hero__sub">
+            QuickBooks wired to your register, distributors, and vendors — updated every night.
+            We build this custom for your shop, contractor, wholesaler, or whatever you run.
+          </p>
         </div>
+
+        <div className="hp-syncbar">
+          <span className="hp-syncbar__dot" aria-hidden="true" />
+          <span className="hp-syncbar__text">Nightly sync · last run 2:14 AM</span>
+        </div>
+
         <div className="hp-card">
           <div className="hp-card__head">
-            <h2 className="hp-card__title">The software behind your numbers</h2>
+            <h2 className="hp-card__title">What we wire up</h2>
+            <span className="hp-card__meta">Your systems → one portal</span>
           </div>
-          <div className="hp-card__body">
-            <OverviewRotator />
-            <p className="hp-body">
-              This is what your portal looks like — sidebar, screens, numbers that tie out.
-              We build it custom for your shop, contractor, wholesaler, or whatever you run.
-            </p>
-            <div className="hp-actions">
-              <button type="button" className="hp-btn hp-btn--primary" onClick={() => onNav('contact')}>
-                Get started
-              </button>
-              <button type="button" className="hp-btn hp-btn--ghost" onClick={() => onNav('demos')}>
-                Browse demos
-              </button>
-              <a href={BOOKING_URL} target="_blank" rel="noopener noreferrer" className="hp-btn hp-btn--ghost">
-                Book a call
-              </a>
-            </div>
-          </div>
+          <table className="hp-table">
+            <thead>
+              <tr><th>Source</th><th>Pulls</th><th className="hp-num">Status</th></tr>
+            </thead>
+            <tbody>
+              {WIRED.map(([src, pulls]) => (
+                <tr key={src}>
+                  <td className="hp-feature-name">{src}</td>
+                  <td className="hp-feature-desc">{pulls}</td>
+                  <td className="hp-num hp-mono hp-good">ok</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+
+        <div className="hp-actions">
+          <button type="button" className="hp-btn hp-btn--primary" onClick={() => onNav('contact')}>
+            Get started
+          </button>
+          <button type="button" className="hp-btn hp-btn--ghost" onClick={() => onNav('demos')}>
+            Browse demos
+          </button>
         </div>
       </>
     )
@@ -197,7 +201,17 @@ function Screen({ tab, form, setForm, onSubmit, submitted, submitting, onNav }) 
 
   if (tab === 'about') {
     return (
-      <div className="hp-split">
+      <>
+        <div className="hp-founder">
+          <div className="hp-founder__photo">
+            <img src="/1779727210800.jpg" alt="Jonathan Katz" width={88} height={88} />
+          </div>
+          <div>
+            <div className="hp-founder__name">Jonathan (Chaim) Katz</div>
+            <div className="hp-founder__role">Founder</div>
+          </div>
+        </div>
+        <div className="hp-split">
         <div className="hp-card">
           <div className="hp-card__head"><h2 className="hp-card__title">We write the software and keep the books</h2></div>
           <div className="hp-card__body">
@@ -225,7 +239,8 @@ function Screen({ tab, form, setForm, onSubmit, submitted, submitting, onNav }) 
             ))}
           </ul>
         </div>
-      </div>
+        </div>
+      </>
     )
   }
 
@@ -288,6 +303,17 @@ export default function HomePortal({ live, form, setForm, onSubmit, submitted, s
 
   return (
     <div className={`hp-portal${live ? ' hp-portal--live' : ''}`}>
+      <header className="hp-topbar">
+        <div className="hp-topbar__brand">
+          <span className="hp-topbar__jk">JK<span>.</span></span>
+          <span className="hp-topbar__name">NO JOKES</span>
+          <span className="hp-topbar__fin">Financials</span>
+        </div>
+        <a href={BOOKING_URL} target="_blank" rel="noopener noreferrer" className="hp-topbar__cta">
+          Book a call
+        </a>
+      </header>
+
       <div className="hp-mobilenav">
         {NAV.map((n) => (
           <button key={n.id} type="button" className={tab === n.id ? 'is-on' : ''} onClick={() => pick(n.id)}>
@@ -330,9 +356,6 @@ export default function HomePortal({ live, form, setForm, onSubmit, submitted, s
               <div className="hp-top__month">{active?.kicker}</div>
               <h1 className="hp-top__title">{active?.label}</h1>
             </div>
-            <a href={BOOKING_URL} target="_blank" rel="noopener noreferrer" className="hp-top__badge hp-top__badge--link">
-              Book a call
-            </a>
           </header>
 
           <Screen
