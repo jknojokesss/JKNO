@@ -61,15 +61,29 @@ export function HomeRotator() {
   )
 }
 
-export default function HomeFeatures({ live }) {
+export default function HomeFeatures({ live, focusPulse = 0 }) {
   const [active, setActive] = useState(0)
   const [paused, setPaused] = useState(false)
+  const [focused, setFocused] = useState(false)
 
   const pick = useCallback((idx) => {
     setActive(idx)
     setPaused(true)
     window.setTimeout(() => setPaused(false), 8000)
   }, [])
+
+  useEffect(() => {
+    if (!focusPulse) return
+    setActive(0)
+    setPaused(true)
+    setFocused(true)
+    const t1 = window.setTimeout(() => setFocused(false), 1100)
+    const t2 = window.setTimeout(() => setPaused(false), 8000)
+    return () => {
+      window.clearTimeout(t1)
+      window.clearTimeout(t2)
+    }
+  }, [focusPulse])
 
   useEffect(() => {
     if (!live || paused) return
@@ -84,7 +98,7 @@ export default function HomeFeatures({ live }) {
   const f = HOME_FEATURES[active]
 
   return (
-    <div id="features" className={`m-features${live ? ' m-features--live' : ''}`}>
+    <div id="features" className={`m-features${live ? ' m-features--live' : ''}${focused ? ' m-features--focus' : ''}`}>
       <div className="m-features__display" key={active}>
         <span className="m-features__k">{f.k}</span>
         <h2 className="m-features__title">{f.title}</h2>

@@ -1095,6 +1095,17 @@
   transform: translateY(0);
 }
 
+.m-features--focus {
+  border-color: rgba(201, 168, 76, 0.45);
+  box-shadow:
+    0 0 0 2px rgba(201, 168, 76, 0.18),
+    0 24px 64px rgba(0, 0, 0, 0.35);
+}
+
+#features {
+  scroll-margin-top: 88px;
+}
+
 .m-features__display {
   flex: 1;
   padding-bottom: 16px;
@@ -1210,6 +1221,7 @@
 @media (prefers-reduced-motion: reduce) {
   .m-home--live .m-band__mark,
   .m-home--live .m-band__hero > *,
+  .m-features--focus,
   .m-features__display,
   .m-features__bar-fill,
   .m-intro,
