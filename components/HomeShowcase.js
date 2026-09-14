@@ -1,18 +1,15 @@
 import { useState, useEffect } from 'react'
-import { useRouter } from 'next/router'
 
 const ROTATE = ['margin', 'profit', 'inventory', 'cash flow', 'job cost', 'rent roll']
 
-const BENTO = [
-  { label: 'Tires & auto', href: '/riverside-tires', line: 'Profit per repair order', span: 'wide' },
-  { label: 'Roofing', href: '/riverstone-roofing', line: 'Job margin & WIP', span: 'tall' },
-  { label: 'Fencing', href: '/riverbend-fence', line: 'Crew log → QuickBooks', span: 'norm' },
-  { label: 'Bridal', href: '/riverfall-gowns', line: 'Orders & alterations', span: 'norm' },
-  { label: 'Property', href: '/harborfield-properties', line: 'Rent roll & owners', span: 'norm' },
-  { label: 'Import', href: '/northline-global', line: 'Landed cost pipeline', span: 'wide' },
+const DOORS = [
+  { n: '01', title: 'Tires & auto', hint: 'Profit per repair order', href: '/riverside-tires' },
+  { n: '02', title: 'Roofing', hint: 'Job margin & WIP', href: '/riverstone-roofing' },
+  { n: '03', title: 'Fencing', hint: 'Crew log → QuickBooks', href: '/riverbend-fence' },
+  { n: '04', title: 'Bridal', hint: 'Orders & alterations', href: '/riverfall-gowns' },
+  { n: '05', title: 'Property', hint: 'Rent roll & owners', href: '/harborfield-properties' },
+  { n: '06', title: 'Import', hint: 'Landed cost pipeline', href: '/northline-global' },
 ]
-
-const PIPE = ['QuickBooks', 'Register', 'Vendors', 'Your portal']
 
 export function HomeRotator() {
   const [i, setI] = useState(0)
@@ -41,36 +38,22 @@ export function HomeRotator() {
 }
 
 export default function HomeShowcase() {
-  const router = useRouter()
-
   return (
-    <section id="showcase" className="m-showcase">
-      <div className="m-wrap">
-        <div className="m-pipe" aria-hidden="true">
-          {PIPE.map((node, idx) => (
-            <div key={node} className="m-pipe__segment">
-              <span className="m-pipe__node">{node}</span>
-              {idx < PIPE.length - 1 && <span className="m-pipe__line"><span className="m-pipe__pulse" /></span>}
-            </div>
-          ))}
-        </div>
-
-        <div className="m-bento">
-          {BENTO.map((t) => (
-            <a key={t.href} href={t.href} className={`m-bento__cell m-bento__cell--${t.span}`}>
-              <span className="m-bento__label">{t.label}</span>
-              <span className="m-bento__line">{t.line}</span>
-              <span className="m-bento__go">Open demo →</span>
-            </a>
-          ))}
-        </div>
-
-        <p className="m-showcase__foot">
-          <button type="button" className="m-btn m-btn--primary m-btn--pop" onClick={() => router.push('/demos')}>
-            All {BENTO.length}+ live demos
-          </button>
-        </p>
+    <div id="showcase" className="m-band__doors">
+      <p className="m-doors__label">Live portals — click in, no login</p>
+      <div className="m-doors__grid">
+        {DOORS.map((d) => (
+          <a key={d.href} href={d.href} className="m-door">
+            <span className="m-door__n">{d.n}</span>
+            <span className="m-door__body">
+              <span className="m-door__title">{d.title}</span>
+              <span className="m-door__hint">{d.hint}</span>
+            </span>
+            <span className="m-door__arrow" aria-hidden="true">→</span>
+          </a>
+        ))}
       </div>
-    </section>
+      <a href="/demos" className="m-doors__more">All demos &amp; industries →</a>
+    </div>
   )
 }

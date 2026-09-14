@@ -2,7 +2,6 @@ import { useState } from 'react'
 import MarketingShell from '../components/MarketingShell'
 import HomeIntro from '../components/HomeIntro'
 import HomeShowcase, { HomeRotator } from '../components/HomeShowcase'
-import HomeSpotlight from '../components/HomeSpotlight'
 import { BOOKING_URL } from '../lib/marketing'
 
 export default function Landing() {
@@ -42,68 +41,69 @@ export default function Landing() {
         onDone={() => setIntroPlaying(false)}
       />
 
-      <HomeSpotlight active={!introPlaying}>
-        <div className="m-home">
-          <section className="m-stage">
-            <div className="m-wrap m-stage__inner">
-              <h1 className="m-stage__title">
-                We build the software<br />behind your numbers.
+      <div className="m-home">
+        <section className="m-dark-band">
+          <div className="m-wrap m-band">
+            <div className="m-band__hero">
+              <div className="m-band__mark">JK<span>.</span></div>
+              <h1 className="m-band__title">
+                The software behind<br />your numbers.
               </h1>
               <HomeRotator />
-              <p className="m-stage__sub">
+              <p className="m-band__sub">
                 QuickBooks wired to your register, distributors, and vendors — updated every night.
               </p>
-              <button type="button" className="m-btn m-btn--primary m-btn--pop m-stage__btn" onClick={scrollShowcase}>
-                Pick your industry ↓
+              <button type="button" className="m-btn m-btn--primary m-btn--pop" onClick={scrollShowcase}>
+                See live portals ↓
               </button>
             </div>
-          </section>
 
-          <HomeShowcase />
+            <HomeShowcase />
+          </div>
+        </section>
 
-          <section id="contact" className="m-contact-slab">
-            <div className="m-wrap" style={{ maxWidth: '440px' }}>
-              <h2 className="m-h2 m-contact-slab__title">
-                What would you want built first?
-              </h2>
+        <section id="contact" className="m-contact-slab">
+          <div className="m-wrap" style={{ maxWidth: '440px' }}>
+            <h2 className="m-h2 m-contact-slab__title">
+              What would you want built first?
+            </h2>
 
-              {submitted ? (
-                <div className="m-card" style={{ textAlign: 'center', padding: '32px 20px' }}>
-                  <div style={{ fontFamily: "'Space Grotesk', sans-serif", fontSize: '18px', fontWeight: 600 }}>We&rsquo;ll be in touch.</div>
-                </div>
-              ) : (
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-                  {[
-                    { key: 'name', label: 'Your name', type: 'text', placeholder: 'John Smith' },
-                    { key: 'email', label: 'Email', type: 'email', placeholder: 'you@company.com' },
-                    { key: 'business', label: 'Business name', type: 'text', placeholder: 'Acme Corp' },
-                  ].map(({ key, label, type, placeholder }) => (
-                    <div key={key}>
-                      <label className="m-label">{label}</label>
-                      <input type={type} placeholder={placeholder} value={form[key]}
-                        onChange={(e) => setForm({ ...form, [key]: e.target.value })} />
-                    </div>
-                  ))}
-                  <button
-                    type="button"
-                    className="m-btn m-btn--primary m-btn--pop"
-                    style={{ width: '100%', marginTop: '4px' }}
-                    onClick={handleSubmit}
-                    disabled={submitting || !form.name || !form.email || !form.business}
-                  >
-                    {submitting ? 'Sending…' : 'Send message'}
-                  </button>
-                  <p style={{ textAlign: 'center', fontSize: '13px', color: '#9AA3BD' }}>
-                    Or <a href="mailto:jk@jknojokes.com" style={{ color: '#5A6577' }}>jk@jknojokes.com</a>
-                    {' · '}
-                    <a href={BOOKING_URL} target="_blank" rel="noopener noreferrer" style={{ color: '#5A6577' }}>book a call</a>
-                  </p>
-                </div>
-              )}
-            </div>
-          </section>
-        </div>
-      </HomeSpotlight>
+            {submitted ? (
+              <div className="m-card" style={{ textAlign: 'center', padding: '32px 20px' }}>
+                <div style={{ fontFamily: "'Space Grotesk', sans-serif", fontSize: '18px', fontWeight: 600 }}>We&rsquo;ll be in touch.</div>
+              </div>
+            ) : (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                {[
+                  { key: 'name', label: 'Your name', type: 'text', placeholder: 'John Smith' },
+                  { key: 'email', label: 'Email', type: 'email', placeholder: 'you@company.com' },
+                  { key: 'business', label: 'Business name', type: 'text', placeholder: 'Acme Corp' },
+                ].map(({ key, label, type, placeholder }) => (
+                  <div key={key}>
+                    <label className="m-label">{label}</label>
+                    <input type={type} placeholder={placeholder} value={form[key]}
+                      onChange={(e) => setForm({ ...form, [key]: e.target.value })} />
+                  </div>
+                ))}
+                <button
+                  type="button"
+                  className="m-btn m-btn--primary m-btn--pop"
+                  style={{ width: '100%', marginTop: '4px' }}
+                  onClick={handleSubmit}
+                  disabled={submitting || !form.name || !form.email || !form.business}
+                >
+                  {submitting ? 'Sending…' : 'Send message'}
+                </button>
+                <p style={{ textAlign: 'center', fontSize: '13px', color: '#9AA3BD' }}>
+                  Or <a href="mailto:jk@jknojokes.com" style={{ color: '#5A6577' }}>jk@jknojokes.com</a>
+                  {' · '}
+                  <a href={BOOKING_URL} target="_blank" rel="noopener noreferrer" style={{ color: '#5A6577' }}>book a call</a>
+                </p>
+              </div>
+            )}
+          </div>
+        </section>
+      </div>
     </MarketingShell>
   )
 }
