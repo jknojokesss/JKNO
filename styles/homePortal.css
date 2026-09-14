@@ -1185,7 +1185,124 @@
   display: none;
 }
 
+/* Post-intro: jumbled numbers snap into portal chrome */
+.hp-assemble {
+  position: fixed;
+  inset: 0;
+  z-index: 250;
+  background: var(--hp-paper);
+  pointer-events: none;
+  transition: opacity 0.35s ease;
+}
+
+.hp-assemble--out {
+  opacity: 0;
+}
+
+.hp-assemble__stage {
+  position: relative;
+  width: 100%;
+  height: 100%;
+}
+
+.hp-assemble__shard {
+  position: absolute;
+  opacity: 0;
+  animation: hp-shard-in 0.9s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
+.hp-assemble__shard--topbar {
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 48px;
+  background: var(--hp-side);
+  box-shadow: inset 0 -2px 0 var(--hp-accent);
+  transform: translateY(-130%) rotate(-3deg);
+  animation-delay: 0.04s;
+}
+
+.hp-assemble__shard--side {
+  top: 48px;
+  left: 0;
+  width: 214px;
+  bottom: 0;
+  background: var(--hp-side);
+  box-shadow: inset -3px 0 0 var(--hp-accent);
+  transform: translate(-75%, 35%) rotate(7deg);
+  animation-delay: 0.1s;
+}
+
+.hp-assemble__shard--main {
+  top: 48px;
+  left: 214px;
+  right: 0;
+  bottom: 0;
+  background: var(--hp-paper);
+  transform: translate(55%, 25%) rotate(-5deg);
+  animation-delay: 0.16s;
+}
+
+.hp-assemble__shard--spot {
+  top: 68px;
+  left: 234px;
+  width: min(520px, calc(100vw - 260px));
+  height: min(200px, 28vh);
+  background: var(--hp-side);
+  box-shadow: inset 3px 0 0 var(--hp-accent);
+  transform: translate(30%, -90%) scale(0.55) rotate(10deg);
+  animation-delay: 0.22s;
+}
+
+@keyframes hp-shard-in {
+  to {
+    opacity: 1;
+    transform: translate(0, 0) rotate(0deg) scale(1);
+  }
+}
+
+.hp-assemble__chip {
+  position: absolute;
+  top: 50%;
+  left: 58%;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 11px;
+  letter-spacing: 0.03em;
+  color: var(--hp-muted);
+  background: #fff;
+  border: 1px solid var(--hp-line);
+  padding: 5px 9px;
+  border-radius: 3px;
+  white-space: nowrap;
+  opacity: 0;
+  transform: translate(var(--sx), var(--sy)) rotate(var(--sr));
+  animation: hp-chip-in 0.95s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+  animation-delay: var(--chip-d, 0s);
+}
+
+@keyframes hp-chip-in {
+  0% {
+    opacity: 1;
+    transform: translate(var(--sx), var(--sy)) rotate(var(--sr)) scale(1);
+  }
+  65% {
+    opacity: 0.85;
+    transform: translate(calc(var(--sx) * 0.15), calc(var(--sy) * 0.15)) rotate(0deg) scale(0.92);
+  }
+  100% {
+    opacity: 0;
+    transform: translate(0, 0) rotate(0deg) scale(0.75);
+  }
+}
+
 @media (max-width: 860px) {
+  .hp-assemble__shard--side { display: none; }
+  .hp-assemble__shard--main { left: 0; }
+  .hp-assemble__shard--spot {
+    left: 16px;
+    width: calc(100vw - 32px);
+    top: 56px;
+  }
   .hp-topbar { padding: 0 14px; }
   .hp-topbar__fin { display: none; }
   .hp-shell { flex-direction: column; min-height: 0; }
@@ -1237,4 +1354,6 @@
   .hp-main { opacity: 1; transform: none; transition: none; }
   .hp-screen { animation: none; }
   .hp-spotlight__word { transition: none; }
+  .hp-assemble__shard,
+  .hp-assemble__chip { animation: none; opacity: 0; }
 }

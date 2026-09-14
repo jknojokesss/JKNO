@@ -1,11 +1,13 @@
 import { useState } from 'react'
 import Head from 'next/head'
 import HomeIntro from '../components/HomeIntro'
+import HomeAssemble from '../components/HomeAssemble'
 import HomePortal from '../components/HomePortal'
 import { MARKETING_FONTS } from '../lib/marketing'
 
 export default function Landing() {
-  const [heroLive, setHeroLive] = useState(false)
+  const [portalVisible, setPortalVisible] = useState(false)
+  const [assembling, setAssembling] = useState(false)
   const [form, setForm] = useState({ name: '', email: '', business: '' })
   const [submitted, setSubmitted] = useState(false)
   const [submitting, setSubmitting] = useState(false)
@@ -27,6 +29,11 @@ export default function Landing() {
     setSubmitting(false)
   }
 
+  const handleIntroDone = ({ playedIntro }) => {
+    setPortalVisible(true)
+    setAssembling(playedIntro)
+  }
+
   return (
     <>
       <Head>
@@ -41,16 +48,22 @@ export default function Landing() {
         <link href={MARKETING_FONTS} rel="stylesheet" />
       </Head>
 
-      <HomeIntro onDone={() => setHeroLive(true)} />
+      <HomeIntro onDone={handleIntroDone} />
 
-      <HomePortal
-        live={heroLive}
-        form={form}
-        setForm={setForm}
-        onSubmit={handleSubmit}
-        submitted={submitted}
-        submitting={submitting}
-      />
+      {portalVisible && assembling && (
+        <HomeAssemble onDone={() => setAssembling(false)} />
+      )}
+
+      {portalVisible && (
+        <HomePortal
+          live={!assembling}
+          form={form}
+          setForm={setForm}
+          onSubmit={handleSubmit}
+          submitted={submitted}
+          submitting={submitting}
+        />
+      )}
     </>
   )
 }

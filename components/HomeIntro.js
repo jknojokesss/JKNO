@@ -10,14 +10,14 @@ export default function HomeIntro({ onStart, onDone }) {
     window.setTimeout(() => {
       setActive(false)
       document.body.style.overflow = ''
-      onDone?.()
+      onDone?.({ playedIntro: true })
       markHomeIntroSeen()
     }, 350)
   }, [onDone])
 
   useEffect(() => {
     if (shouldSkipHomeIntro()) {
-      onDone?.()
+      onDone?.({ playedIntro: false })
       return
     }
 
