@@ -21,11 +21,13 @@ const STEPS = [
   { n: '03', title: 'You get one portal', body: 'Custom dashboard. Not a template. Log in any time. Numbers stay current.' },
 ]
 
-const WIRED = [
-  ['QuickBooks Online', 'P&L, balance sheet, GL detail, JE pushback'],
-  ['POS register', 'Tickets, line items, payment mix'],
-  ['Distributor portal', 'Unit cost, PO#, stock vs same-day'],
-  ['Bank & card', 'Classified to your chart of accounts'],
+const FLOW = ['QuickBooks', 'Register', 'Distributors', 'Bank', 'Your portal']
+
+const TIMELINE = [
+  ['Day 1', 'Kickoff call — we learn your business and what you want to see.'],
+  ['Days 2–5', 'We build your portal and wire the integrations.'],
+  ['Day 6', 'Review, tweaks, go live.'],
+  ['Ongoing', 'Books updated every month. Portal stays current.'],
 ]
 
 function OverviewRotator() {
@@ -46,10 +48,10 @@ function OverviewRotator() {
   }, [])
 
   return (
-    <h2 className="hp-hero__title">
+    <h2 className="hp-spotlight__title">
       Your{' '}
-      <span className={`hp-hero__word${visible ? ' is-in' : ' is-out'}`}>{ROTATE[i]}</span>
-      {' '}— on one screen.
+      <span className={`hp-spotlight__word${visible ? ' is-in' : ' is-out'}`}>{ROTATE[i]}</span>
+      <br />on one screen.
     </h2>
   )
 }
@@ -57,50 +59,44 @@ function OverviewRotator() {
 function Screen({ tab, form, setForm, onSubmit, submitted, submitting, onNav }) {
   if (tab === 'overview') {
     return (
-      <>
-        <div className="hp-hero">
+      <div className="hp-overview">
+        <section className="hp-spotlight">
+          <p className="hp-spotlight__kicker">Custom financial portal</p>
           <OverviewRotator />
-          <p className="hp-hero__sub">
+          <p className="hp-spotlight__sub">
             QuickBooks wired to your register, distributors, and vendors — updated every night.
-            We build this custom for your shop, contractor, wholesaler, or whatever you run.
           </p>
-        </div>
-
-        <div className="hp-syncbar">
-          <span className="hp-syncbar__dot" aria-hidden="true" />
-          <span className="hp-syncbar__text">Nightly sync · last run 2:14 AM</span>
-        </div>
-
-        <div className="hp-card">
-          <div className="hp-card__head">
-            <h2 className="hp-card__title">What we wire up</h2>
-            <span className="hp-card__meta">Your systems → one portal</span>
+          <div className="hp-actions hp-actions--light">
+            <button type="button" className="hp-btn hp-btn--primary" onClick={() => onNav('contact')}>
+              Get started
+            </button>
+            <button type="button" className="hp-btn hp-btn--light" onClick={() => onNav('demos')}>
+              Browse demos
+            </button>
           </div>
-          <table className="hp-table">
-            <thead>
-              <tr><th>Source</th><th>Pulls</th><th className="hp-num">Status</th></tr>
-            </thead>
-            <tbody>
-              {WIRED.map(([src, pulls]) => (
-                <tr key={src}>
-                  <td className="hp-feature-name">{src}</td>
-                  <td className="hp-feature-desc">{pulls}</td>
-                  <td className="hp-num hp-mono hp-good">ok</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+        </section>
+
+        <div className="hp-flow" aria-label="Systems we connect">
+          {FLOW.map((node, idx) => (
+            <span key={node} className="hp-flow__seg">
+              <span className="hp-flow__node">{node}</span>
+              {idx < FLOW.length - 1 && <span className="hp-flow__arrow" aria-hidden="true">→</span>}
+            </span>
+          ))}
         </div>
 
-        <div className="hp-actions">
-          <button type="button" className="hp-btn hp-btn--primary" onClick={() => onNav('contact')}>
-            Get started
-          </button>
-          <button type="button" className="hp-btn hp-btn--ghost" onClick={() => onNav('demos')}>
-            Browse demos
-          </button>
-        </div>
-      </>
+        <p className="hp-manifest">
+          Not Zapier. Not a template. One portal built for your business — numbers that tie out to QuickBooks.
+        </p>
+
+        <nav className="hp-jump" aria-label="Explore">
+          {NAV.filter((n) => n.id !== 'overview').map((n) => (
+            <button key={n.id} type="button" className="hp-jump__btn" onClick={() => onNav(n.id)}>
+              {n.label} →
+            </button>
+          ))}
+        </nav>
+      </div>
     )
   }
 
@@ -108,25 +104,21 @@ function Screen({ tab, form, setForm, onSubmit, submitted, submitting, onNav }) 
     return (
       <div className="hp-stack">
         {BUILD_STACK.map((col) => (
-          <div key={col.title} className="hp-card">
-            <div className="hp-card__head">
-              <div>
-                <div className="hp-kicker">{col.kicker}</div>
-                <h2 className="hp-card__title">{col.title}</h2>
-              </div>
+          <section key={col.title} className="hp-build">
+            <div className="hp-build__head">
+              <span className="hp-kicker">{col.kicker}</span>
+              <h2 className="hp-build__title">{col.title}</h2>
+              <p className="hp-build__blurb">{col.blurb}</p>
             </div>
-            <p className="hp-card__blurb">{col.blurb}</p>
-            <table className="hp-table">
-              <tbody>
-                {col.items.map((it) => (
-                  <tr key={it.t}>
-                    <td className="hp-feature-name">{it.t}</td>
-                    <td className="hp-feature-desc">{it.d}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+            <ul className="hp-item-list">
+              {col.items.map((it) => (
+                <li key={it.t} className="hp-item">
+                  <span className="hp-item__t">{it.t}</span>
+                  <span className="hp-item__d">{it.d}</span>
+                </li>
+              ))}
+            </ul>
+          </section>
         ))}
       </div>
     )
@@ -135,33 +127,32 @@ function Screen({ tab, form, setForm, onSubmit, submitted, submitting, onNav }) 
   if (tab === 'how') {
     return (
       <>
-        <div className="hp-step-row">
+        <ol className="hp-timeline">
           {STEPS.map((s) => (
-            <div key={s.n} className="hp-card hp-card--step">
-              <div className="hp-step-n">{s.n}</div>
-              <h3 className="hp-step-title">{s.title}</h3>
-              <p className="hp-body">{s.body}</p>
-            </div>
+            <li key={s.n} className="hp-timeline__step">
+              <span className="hp-timeline__n">{s.n}</span>
+              <div>
+                <h3 className="hp-timeline__title">{s.title}</h3>
+                <p className="hp-timeline__body">{s.body}</p>
+              </div>
+            </li>
           ))}
-        </div>
-        <div className="hp-card">
-          <div className="hp-card__head"><h2 className="hp-card__title">Six days to launch</h2></div>
-          <table className="hp-table">
-            <tbody>
-              {[
-                ['Day 1', 'Kickoff call — we learn your business and what you want to see.'],
-                ['Days 2–5', 'We build your portal and wire the integrations.'],
-                ['Day 6', 'Review, tweaks, go live.'],
-                ['Ongoing', 'Books updated every month. Portal stays current.'],
-              ].map(([when, what]) => (
-                <tr key={when}>
-                  <td className="hp-mono hp-when">{when}</td>
-                  <td>{what}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+        </ol>
+
+        <section className="hp-build">
+          <div className="hp-build__head">
+            <h2 className="hp-build__title">Six days to launch</h2>
+          </div>
+          <ul className="hp-item-list hp-item-list--compact">
+            {TIMELINE.map(([when, what]) => (
+              <li key={when} className="hp-item">
+                <span className="hp-item__t hp-mono">{when}</span>
+                <span className="hp-item__d">{what}</span>
+              </li>
+            ))}
+          </ul>
+        </section>
+
         <div className="hp-actions">
           <button type="button" className="hp-btn hp-btn--primary" onClick={() => onNav('contact')}>Get started</button>
           <a href={BOOKING_URL} target="_blank" rel="noopener noreferrer" className="hp-btn hp-btn--ghost">Book a call</a>
@@ -173,24 +164,15 @@ function Screen({ tab, form, setForm, onSubmit, submitted, submitting, onNav }) 
   if (tab === 'demos') {
     return (
       <>
-        <p className="hp-body hp-body--top">Click into a sample portal — fictitious businesses, real product ideas.</p>
-        <div className="hp-card">
-          <table className="hp-table">
-            <thead>
-              <tr><th>Industry</th><th>What it shows</th><th /></tr>
-            </thead>
-            <tbody>
-              {FEATURED_DEMOS.map((d) => (
-                <tr key={d.src}>
-                  <td className="hp-feature-name">{d.label}</td>
-                  <td className="hp-feature-desc">{d.caption}</td>
-                  <td className="hp-num">
-                    <a href={d.src} className="hp-link">Open →</a>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+        <p className="hp-body hp-body--top">Fictitious businesses. Real product ideas. Click in — no login.</p>
+        <div className="hp-demo-list">
+          {FEATURED_DEMOS.map((d) => (
+            <a key={d.src} href={d.src} className="hp-demo-row">
+              <span className="hp-demo-row__label">{d.label}</span>
+              <span className="hp-demo-row__cap">{d.caption}</span>
+              <span className="hp-demo-row__go" aria-hidden="true">→</span>
+            </a>
+          ))}
         </div>
         <p className="hp-body">
           <button type="button" className="hp-link-btn" onClick={() => onNav('contact')}>Want one built for your business?</button>
@@ -212,9 +194,8 @@ function Screen({ tab, form, setForm, onSubmit, submitted, submitting, onNav }) 
           </div>
         </div>
         <div className="hp-split">
-        <div className="hp-card">
-          <div className="hp-card__head"><h2 className="hp-card__title">We write the software and keep the books</h2></div>
-          <div className="hp-card__body">
+          <div className="hp-prose">
+            <h2 className="hp-prose__title">We write the software and keep the books</h2>
             <p className="hp-body">
               Small shop. Custom portals wired to QuickBooks, your register, your distributors —
               whatever your business actually runs on.
@@ -225,10 +206,7 @@ function Screen({ tab, form, setForm, onSubmit, submitted, submitting, onNav }) 
             </p>
             <p className="hp-body">Our job is to make your numbers clear, your reporting automatic, and your books something you actually look at.</p>
           </div>
-        </div>
-        <div className="hp-card">
-          <div className="hp-card__head"><h2 className="hp-card__title">What you get</h2></div>
-          <ul className="hp-bullets">
+          <ul className="hp-checklist">
             {[
               'One point of contact — the person who built your portal',
               'Your own login, scoped to your company on the server',
@@ -238,7 +216,6 @@ function Screen({ tab, form, setForm, onSubmit, submitted, submitting, onNav }) 
               <li key={line}>{line}</li>
             ))}
           </ul>
-        </div>
         </div>
       </>
     )
@@ -325,8 +302,7 @@ export default function HomePortal({ live, form, setForm, onSubmit, submitted, s
       <div className="hp-shell">
         <aside className="hp-side">
           <div className="hp-brand">
-            <div className="hp-brand__jk">JK<span>.</span></div>
-            <div className="hp-brand__sub">Your financial portal</div>
+            <div className="hp-brand__label">Menu</div>
           </div>
 
           <nav className="hp-nav" aria-label="Site">
@@ -350,23 +326,27 @@ export default function HomePortal({ live, form, setForm, onSubmit, submitted, s
           </div>
         </aside>
 
-        <main className="hp-main">
-          <header className="hp-top">
-            <div>
-              <div className="hp-top__month">{active?.kicker}</div>
-              <h1 className="hp-top__title">{active?.label}</h1>
-            </div>
-          </header>
+        <main className={`hp-main${tab === 'overview' ? ' hp-main--overview' : ''}`}>
+          {tab !== 'overview' && (
+            <header className="hp-top">
+              <div>
+                <div className="hp-top__month">{active?.kicker}</div>
+                <h1 className="hp-top__title">{active?.label}</h1>
+              </div>
+            </header>
+          )}
 
-          <Screen
-            tab={tab}
-            form={form}
-            setForm={setForm}
-            onSubmit={onSubmit}
-            submitted={submitted}
-            submitting={submitting}
-            onNav={pick}
-          />
+          <div key={tab} className="hp-screen">
+            <Screen
+              tab={tab}
+              form={form}
+              setForm={setForm}
+              onSubmit={onSubmit}
+              submitted={submitted}
+              submitting={submitting}
+              onNav={pick}
+            />
+          </div>
         </main>
       </div>
     </div>
