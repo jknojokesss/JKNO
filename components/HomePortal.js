@@ -44,6 +44,32 @@ const slug = (s) => s.toLowerCase().replace(/[^a-z0-9]+/g, '-')
 
 
 
+function PageHero({ title, lead, tone, children }) {
+
+  return (
+
+    <header className={`hp-page-hero${tone ? ` hp-page-hero--${tone}` : ''}`}>
+
+      {children || (
+
+        <>
+
+          <h2 className="hp-page-hero__title">{title}</h2>
+
+          {lead && <p className="hp-page-hero__lead">{lead}</p>}
+
+        </>
+
+      )}
+
+    </header>
+
+  )
+
+}
+
+
+
 function ScreenFooter({ onNav }) {
 
   return (
@@ -170,13 +196,10 @@ function Screen({ tab, form, setForm, onSubmit, submitted, submitting, onNav }) 
 
       <div className="hp-page">
 
-        <h2 className="hp-page-title">What we build</h2>
-
-        <p className="hp-page-lead">
-
-          Not a template. One business at a time: integrations, screens, and month-end for that shop.
-
-        </p>
+        <PageHero
+          title="What we build"
+          lead="Not a template. One business at a time: integrations, screens, and month-end for that shop."
+        />
 
 
 
@@ -198,9 +221,9 @@ function Screen({ tab, form, setForm, onSubmit, submitted, submitting, onNav }) 
 
         <div className="hp-stack">
 
-          {BUILD_STACK.map((col) => (
+          {BUILD_STACK.map((col, i) => (
 
-            <section key={col.title} id={slug(col.kicker)} className="hp-build">
+            <section key={col.title} id={slug(col.kicker)} className={`hp-build hp-build--${i}`}>
 
               <div className="hp-build__head">
 
@@ -270,21 +293,21 @@ function Screen({ tab, form, setForm, onSubmit, submitted, submitting, onNav }) 
 
       <div className="hp-page">
 
-        <h2 className="hp-page-title">How it works</h2>
-
-        <p className="hp-page-lead">
-
-          Call, build, launch. About a week. After that the sync keeps running and I keep the month tied out.
-
-        </p>
+        <PageHero
+          tone="how"
+          title="How it works"
+          lead="Call, build, launch. About a week. After that the sync keeps running and I keep the month tied out."
+        />
 
 
 
         <ol className="hp-timeline">
 
-          {HOW.map((s) => (
+          {HOW.map((s, i) => (
 
             <li key={s.title} className="hp-timeline__step">
+
+              <span className="hp-timeline__n">{String(i + 1).padStart(2, '0')}</span>
 
               <div>
 
@@ -318,17 +341,17 @@ function Screen({ tab, form, setForm, onSubmit, submitted, submitting, onNav }) 
 
       <div className="hp-page">
 
-        <h2 className="hp-page-title">Demos</h2>
-
-        <p className="hp-page-lead">
-
-          {FEATURED_DEMOS.length} sample portals. Made-up businesses, real screens. Pick your trade, click in.
-
-        </p>
+        <PageHero
+          tone="demos"
+          title="Demos"
+          lead={`${FEATURED_DEMOS.length} sample portals. Made-up businesses, real screens. Pick your trade, click in.`}
+        />
 
 
 
-        <div className="hp-demo-list">
+        <div className="hp-demo-panel">
+
+          <div className="hp-demo-list">
 
           {FEATURED_DEMOS.map((d) => (
 
@@ -343,6 +366,8 @@ function Screen({ tab, form, setForm, onSubmit, submitted, submitting, onNav }) 
             </a>
 
           ))}
+
+          </div>
 
         </div>
 
@@ -364,23 +389,27 @@ function Screen({ tab, form, setForm, onSubmit, submitted, submitting, onNav }) 
 
       <div className="hp-page">
 
-        <div className="hp-founder">
+        <PageHero tone="about">
 
-          <img className="hp-founder__img" src="/1779727210800.jpg" alt="Jonathan Katz" width={88} height={88} />
+          <div className="hp-founder">
 
-          <div>
+            <img className="hp-founder__img" src="/1779727210800.jpg" alt="Jonathan Katz" width={88} height={88} />
 
-            <h2 className="hp-page-title hp-page-title--tight">Jonathan (Chaim) Katz</h2>
+            <div>
 
-            <p className="hp-founder__role">Founder · JK No Jokes Financials</p>
+              <h2 className="hp-page-hero__title">Jonathan (Chaim) Katz</h2>
+
+              <p className="hp-founder__role">Founder · JK No Jokes Financials</p>
+
+            </div>
 
           </div>
 
-        </div>
+        </PageHero>
 
 
 
-        <div>
+        <div className="hp-about__body">
 
           <p className="hp-body">
 
@@ -418,15 +447,21 @@ function Screen({ tab, form, setForm, onSubmit, submitted, submitting, onNav }) 
 
     <div id="contact" className="hp-page hp-contact">
 
+      <PageHero
+        tone="contact"
+        title="Get started"
+        lead="What you run today and which screen you&rsquo;re tired of rebuilding in Excel."
+      />
+
+
+
       <div className="hp-contact__grid">
 
         <div className="hp-contact__copy">
 
-          <h2 className="hp-page-title">Get started</h2>
-
           <p className="hp-body">
 
-            What you run today (register, vendors, inventory, AR) and which screen you&rsquo;re tired of rebuilding in Excel.
+            Register, vendors, inventory, AR. Tell me what you run and what you need on one screen.
 
           </p>
 
@@ -624,7 +659,7 @@ export default function HomePortal({ live, form, setForm, onSubmit, submitted, s
 
 
 
-        <main className={`hp-main${tab === 'overview' ? ' hp-main--overview' : ''}`}>
+        <main className="hp-main">
 
           <div key={tab} className="hp-screen">
 
