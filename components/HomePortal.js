@@ -84,86 +84,36 @@ function Screen({ tab, form, setForm, onSubmit, submitted, submitting, onNav }) 
 
         <header className="hp-overview__hero">
 
-          <div className="hp-overview__hero-copy">
+          <h1 className="hp-overview__headline">
+            One portal. Your systems.<br />
+            Numbers that tie out.
+          </h1>
 
-            <h1 className="hp-overview__headline">
-              One portal. Your systems.<br />
-              Numbers that tie out.
-            </h1>
+          <p className="hp-overview__hook">
+            You&rsquo;re already in it. Sidebar, top bar, these screens. Same shell I build
+            for your shop.
+          </p>
 
-            <p className="hp-overview__hook">
-              You&rsquo;re already in it. Sidebar, top bar, these screens. Same shell I build
-              for your shop.
-            </p>
+          <p className="hp-overview__deck">
+            Register, vendors, QuickBooks behind one login. The screens your register and QBO
+            never gave you, synced every night, tied out at month-end.
+          </p>
 
-            <p className="hp-overview__deck">
-              Register, vendors, QuickBooks behind one login. The screens your register and QBO
-              never gave you, synced every night, tied out at month-end.
-            </p>
+          <div className="hp-overview__actions">
 
-            <div className="hp-overview__actions">
+            <button type="button" className="hp-btn hp-btn--primary" onClick={() => onNav('contact')}>
 
-              <button type="button" className="hp-btn hp-btn--primary" onClick={() => onNav('contact')}>
+              Get started
 
-                Get started
+            </button>
 
-              </button>
+            <button type="button" className="hp-overview__link" onClick={() => onNav('demos')}>
 
-              <button type="button" className="hp-overview__link" onClick={() => onNav('demos')}>
+              See sample portals
 
-                See sample portals
-
-              </button>
-
-            </div>
+            </button>
 
           </div>
-
-
-
-          <aside className="hp-overview__glance" aria-label="Sample portal metrics">
-
-            <p className="hp-overview__glance-k">Open month</p>
-
-            <p className="hp-overview__glance-m">September 2026</p>
-
-            <dl className="hp-overview__glance-stats">
-
-              <div>
-
-                <dt>Revenue (MTD)</dt>
-
-                <dd>$42,180</dd>
-
-              </div>
-
-              <div>
-
-                <dt>Gross margin</dt>
-
-                <dd>38.2%</dd>
-
-              </div>
-
-              <div>
-
-                <dt>Open AR</dt>
-
-                <dd>$4,820</dd>
-
-              </div>
-
-            </dl>
-
-            <ul className="hp-overview__glance-sync">
-
-              <li><span>QBO sync</span> 2:00 AM</li>
-
-              <li><span>GL through</span> Jul 2026</li>
-
-            </ul>
-
-          </aside>
 
         </header>
 
