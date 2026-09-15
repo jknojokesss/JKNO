@@ -211,12 +211,156 @@
 }
 
 .hp-screen {
-  animation: hp-screen-in 0.35s cubic-bezier(0.22, 1, 0.36, 1);
+  animation: hp-screen-in 0.2s ease both;
 }
 
 @keyframes hp-screen-in {
-  from { opacity: 0; transform: translateY(8px); }
-  to { opacity: 1; transform: translateY(0); }
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+/* ── Tab enter animations ─────────────────────────────────────────────── */
+
+.hp-anim-sweep {
+  position: relative;
+  overflow: hidden;
+}
+
+.hp-anim-sweep::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    105deg,
+    transparent 38%,
+    rgba(224, 192, 104, 0.14) 50%,
+    transparent 62%
+  );
+  transform: translateX(-120%);
+  animation: hp-sweep 0.85s cubic-bezier(0.22, 1, 0.36, 1) both;
+  pointer-events: none;
+}
+
+@keyframes hp-sweep {
+  to { transform: translateX(120%); }
+}
+
+.hp-anim {
+  animation-duration: 0.72s;
+  animation-timing-function: cubic-bezier(0.16, 1, 0.3, 1);
+  animation-fill-mode: both;
+}
+
+.hp-anim--hero { animation-name: hp-fly-hero; }
+.hp-anim--in { animation-name: hp-fly-in; }
+.hp-anim--up { animation-name: hp-fly-up; }
+.hp-anim--scale { animation-name: hp-fly-scale; }
+
+.hp-anim--d1 { animation-delay: 0.1s; }
+.hp-anim--d2 { animation-delay: 0.2s; }
+.hp-anim--d3 { animation-delay: 0.3s; }
+.hp-anim--d4 { animation-delay: 0.4s; }
+.hp-anim--d6 { animation-delay: 0.55s; }
+
+@keyframes hp-fly-hero {
+  from {
+    opacity: 0;
+    transform: translateX(-48px) skewX(-3deg);
+    filter: blur(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0) skewX(0);
+    filter: blur(0);
+  }
+}
+
+@keyframes hp-fly-in {
+  from {
+    opacity: 0;
+    transform: translateX(-28px) translateY(12px);
+    filter: blur(4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0) translateY(0);
+    filter: blur(0);
+  }
+}
+
+@keyframes hp-fly-up {
+  from {
+    opacity: 0;
+    transform: translateY(36px) scale(0.96);
+    filter: blur(3px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+    filter: blur(0);
+  }
+}
+
+@keyframes hp-fly-scale {
+  from {
+    opacity: 0;
+    transform: scale(0.82);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.hp-stagger > * {
+  animation: hp-fly-up 0.65s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.hp-stagger > *:nth-child(1) { animation-delay: 0.16s; }
+.hp-stagger > *:nth-child(2) { animation-delay: 0.24s; }
+.hp-stagger > *:nth-child(3) { animation-delay: 0.32s; }
+.hp-stagger > *:nth-child(4) { animation-delay: 0.4s; }
+.hp-stagger > *:nth-child(5) { animation-delay: 0.48s; }
+.hp-stagger > *:nth-child(6) { animation-delay: 0.56s; }
+.hp-stagger > *:nth-child(7) { animation-delay: 0.64s; }
+.hp-stagger > *:nth-child(8) { animation-delay: 0.72s; }
+.hp-stagger > *:nth-child(9) { animation-delay: 0.8s; }
+.hp-stagger > *:nth-child(10) { animation-delay: 0.88s; }
+.hp-stagger > *:nth-child(11) { animation-delay: 0.96s; }
+.hp-stagger > *:nth-child(12) { animation-delay: 1.04s; }
+
+.hp-stagger--alt > *:nth-child(odd) {
+  animation-name: hp-fly-in-left;
+}
+
+.hp-stagger--alt > *:nth-child(even) {
+  animation-name: hp-fly-in-right;
+}
+
+@keyframes hp-fly-in-left {
+  from {
+    opacity: 0;
+    transform: translateX(-32px) translateY(8px);
+    filter: blur(3px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0) translateY(0);
+    filter: blur(0);
+  }
+}
+
+@keyframes hp-fly-in-right {
+  from {
+    opacity: 0;
+    transform: translateX(32px) translateY(8px);
+    filter: blur(3px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0) translateY(0);
+    filter: blur(0);
+  }
 }
 
 .hp-top {
@@ -1431,10 +1575,11 @@
   .hp-topbar__fin { display: none; }
   .hp-shell { flex-direction: column; min-height: 0; }
   .hp-side { display: none; }
-  .hp-main { padding: 16px 14px 48px; }
-  .hp-main--overview { padding: 0 0 48px; }
-  .hp-overview { padding: 0 14px; }
-  .hp-overview__hero {
+  .hp-main { padding: 0 0 48px; }
+  .hp-overview,
+  .hp-page { padding: 0 14px; }
+  .hp-overview__hero,
+  .hp-page-hero {
     margin: 0 -14px 24px;
     padding: 28px 18px 32px;
   }
@@ -1481,5 +1626,13 @@
 
 @media (prefers-reduced-motion: reduce) {
   .hp-main { opacity: 1; transform: none; transition: none; }
-  .hp-screen { animation: none; }
+  .hp-screen,
+  .hp-anim,
+  .hp-anim-sweep::after,
+  .hp-stagger > * {
+    animation: none !important;
+    opacity: 1 !important;
+    transform: none !important;
+    filter: none !important;
+  }
 }

@@ -48,15 +48,15 @@ function PageHero({ title, lead, tone, children }) {
 
   return (
 
-    <header className={`hp-page-hero${tone ? ` hp-page-hero--${tone}` : ''}`}>
+    <header className={`hp-page-hero hp-anim-sweep${tone ? ` hp-page-hero--${tone}` : ''}`}>
 
       {children || (
 
         <>
 
-          <h2 className="hp-page-hero__title">{title}</h2>
+          <h2 className="hp-page-hero__title hp-anim hp-anim--hero">{title}</h2>
 
-          {lead && <p className="hp-page-hero__lead">{lead}</p>}
+          {lead && <p className="hp-page-hero__lead hp-anim hp-anim--in hp-anim--d1">{lead}</p>}
 
         </>
 
@@ -70,11 +70,27 @@ function PageHero({ title, lead, tone, children }) {
 
 
 
+function Stagger({ className = '', alt = false, children }) {
+
+  return (
+
+    <div className={`hp-stagger${alt ? ' hp-stagger--alt' : ''}${className ? ` ${className}` : ''}`}>
+
+      {children}
+
+    </div>
+
+  )
+
+}
+
+
+
 function ScreenFooter({ onNav }) {
 
   return (
 
-    <footer className="hp-foot">
+    <footer className="hp-foot hp-anim hp-anim--up hp-anim--d6">
 
       <button type="button" className="hp-btn hp-btn--primary" onClick={() => onNav('contact')}>
 
@@ -108,24 +124,25 @@ function Screen({ tab, form, setForm, onSubmit, submitted, submitting, onNav }) 
 
       <div className="hp-overview">
 
-        <header className="hp-overview__hero">
+        <header className="hp-overview__hero hp-anim-sweep">
 
           <h1 className="hp-overview__headline">
-            One portal. Your systems.<br />
-            <span className="hp-overview__headline-accent">Numbers that tie out.</span>
+            <span className="hp-anim hp-anim--hero">One portal. Your systems.</span>
+            <br />
+            <span className="hp-overview__headline-accent hp-anim hp-anim--hero hp-anim--d1">Numbers that tie out.</span>
           </h1>
 
-          <p className="hp-overview__hook">
+          <p className="hp-overview__hook hp-anim hp-anim--in hp-anim--d2">
             You&rsquo;re already in it. Sidebar, top bar, these screens. Same shell I build
             for your shop.
           </p>
 
-          <p className="hp-overview__deck">
+          <p className="hp-overview__deck hp-anim hp-anim--in hp-anim--d3">
             Register, vendors, QuickBooks behind one login. The screens your register and QBO
             never gave you, synced every night, tied out at month-end.
           </p>
 
-          <div className="hp-overview__actions">
+          <div className="hp-overview__actions hp-anim hp-anim--up hp-anim--d4">
 
             <button type="button" className="hp-btn hp-btn--primary" onClick={() => onNav('contact')}>
 
@@ -145,7 +162,7 @@ function Screen({ tab, form, setForm, onSubmit, submitted, submitting, onNav }) 
 
 
 
-        <p className="hp-body hp-overview__note">
+        <p className="hp-body hp-overview__note hp-anim hp-anim--in hp-anim--d4">
 
           Click around the nav. Demos opens sample businesses in this same shell.
 
@@ -156,7 +173,7 @@ function Screen({ tab, form, setForm, onSubmit, submitted, submitting, onNav }) 
 
 
 
-        <div className="hp-overview__pillars">
+        <div className="hp-overview__pillars hp-stagger">
 
           {pillars.map((block, i) => (
 
@@ -203,7 +220,7 @@ function Screen({ tab, form, setForm, onSubmit, submitted, submitting, onNav }) 
 
 
 
-        <nav className="hp-build-nav" aria-label="Sections">
+        <nav className="hp-build-nav hp-anim hp-anim--in hp-anim--d2" aria-label="Sections">
 
           {BUILD_STACK.map((col) => (
 
@@ -219,7 +236,7 @@ function Screen({ tab, form, setForm, onSubmit, submitted, submitting, onNav }) 
 
 
 
-        <div className="hp-stack">
+        <Stagger className="hp-stack">
 
           {BUILD_STACK.map((col, i) => (
 
@@ -273,7 +290,7 @@ function Screen({ tab, form, setForm, onSubmit, submitted, submitting, onNav }) 
 
           ))}
 
-        </div>
+        </Stagger>
 
 
 
@@ -301,7 +318,7 @@ function Screen({ tab, form, setForm, onSubmit, submitted, submitting, onNav }) 
 
 
 
-        <ol className="hp-timeline">
+        <ol className="hp-timeline hp-stagger">
 
           {HOW.map((s, i) => (
 
@@ -349,9 +366,9 @@ function Screen({ tab, form, setForm, onSubmit, submitted, submitting, onNav }) 
 
 
 
-        <div className="hp-demo-panel">
+        <div className="hp-demo-panel hp-anim hp-anim--up hp-anim--d2">
 
-          <div className="hp-demo-list">
+          <Stagger alt className="hp-demo-list">
 
           {FEATURED_DEMOS.map((d) => (
 
@@ -367,7 +384,7 @@ function Screen({ tab, form, setForm, onSubmit, submitted, submitting, onNav }) 
 
           ))}
 
-          </div>
+          </Stagger>
 
         </div>
 
@@ -391,11 +408,11 @@ function Screen({ tab, form, setForm, onSubmit, submitted, submitting, onNav }) 
 
         <PageHero tone="about">
 
-          <div className="hp-founder">
+          <div className="hp-founder hp-anim hp-anim--hero">
 
-            <img className="hp-founder__img" src="/1779727210800.jpg" alt="Jonathan Katz" width={88} height={88} />
+            <img className="hp-founder__img hp-anim hp-anim--scale hp-anim--d1" src="/1779727210800.jpg" alt="Jonathan Katz" width={88} height={88} />
 
-            <div>
+            <div className="hp-anim hp-anim--in hp-anim--d2">
 
               <h2 className="hp-page-hero__title">Jonathan (Chaim) Katz</h2>
 
@@ -409,7 +426,7 @@ function Screen({ tab, form, setForm, onSubmit, submitted, submitting, onNav }) 
 
 
 
-        <div className="hp-about__body">
+        <div className="hp-about__body hp-anim hp-anim--up hp-anim--d3">
 
           <p className="hp-body">
 
@@ -455,7 +472,7 @@ function Screen({ tab, form, setForm, onSubmit, submitted, submitting, onNav }) 
 
 
 
-      <div className="hp-contact__grid">
+      <Stagger className="hp-contact__grid">
 
         <div className="hp-contact__copy">
 
@@ -543,7 +560,7 @@ function Screen({ tab, form, setForm, onSubmit, submitted, submitting, onNav }) 
 
         </div>
 
-      </div>
+      </Stagger>
 
     </div>
 
