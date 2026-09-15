@@ -8,9 +8,9 @@ export default function WhatWeDo() {
   return (
     <MarketingShell title="What You Get — JK No Jokes Financials">
       <PageHero
-        kicker="What you get"
-        title={<>Everything we build<br />for one business.</>}
-        lead="Shops, contractors, wholesalers, custom-order retail — one custom portal wired to whatever you already run."
+        kicker="What we build"
+        title="One business at a time."
+        lead="Not a template — integrations, screens, and month-end wired to what you already run."
         align="center"
       />
 
@@ -41,13 +41,12 @@ export default function WhatWeDo() {
         </div>
       </section>
 
-      <section className="m-section--panel" style={{ padding: 'clamp(56px,7vw,72px) 0' }}>
-        <div className="m-wrap" style={{ textAlign: 'center', maxWidth: '560px' }}>
-          <h2 className="m-h2" style={{ marginBottom: '14px' }}>All of this. Built for your business.</h2>
-          <p className="m-lead" style={{ margin: '0 auto 24px' }}>
-            Tell us what you run today and we&rsquo;ll show you what we&rsquo;d wire up.
+      <section className="m-section" style={{ paddingTop: 0 }}>
+        <div className="m-wrap" style={{ maxWidth: '560px' }}>
+          <p className="m-about-p" style={{ marginBottom: '24px' }}>
+            Tell me what you run and I&rsquo;ll show you what I&rsquo;d wire up.
           </p>
-          <div style={{ display: 'flex', gap: '12px', justifyContent: 'center', flexWrap: 'wrap' }}>
+          <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
             <button type="button" className="m-btn m-btn--primary m-btn--pop" onClick={() => router.push('/#contact')}>Get started</button>
             <a href={BOOKING_URL} target="_blank" rel="noopener noreferrer" className="m-btn m-btn--secondary m-btn--pop">Book a call</a>
           </div>
