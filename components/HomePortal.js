@@ -90,9 +90,8 @@ function Screen({ tab, form, setForm, onSubmit, submitted, submitting, onNav }) 
           </h1>
 
           <p className="hp-overview__hook">
-            You&rsquo;re looking at it. The sidebar, the top bar, these screens: this is the
-            portal shell I build for your shop. jknojokes.com isn&rsquo;t a brochure site
-            pretending to be software.
+            You&rsquo;re already in it. Sidebar, top bar, these screens. Same shell I build
+            for your shop.
           </p>
 
           <p className="hp-overview__deck">
@@ -122,8 +121,7 @@ function Screen({ tab, form, setForm, onSubmit, submitted, submitting, onNav }) 
 
         <p className="hp-body hp-overview__note">
 
-          Click around. Overview, What we build, Demos in the nav. Same layout your team would
-          use every day. Demos opens sample businesses built in this shell.
+          Click around the nav. Demos opens sample businesses in this same shell.
 
           Roughly six days kickoff to live. Tire shops, contractors, wholesalers, custom retail
           on QuickBooks. That&rsquo;s usually who calls.
