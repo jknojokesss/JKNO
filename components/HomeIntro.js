@@ -1,20 +1,8 @@
 import { useState, useEffect, useCallback, useRef } from 'react'
 import { markHomeIntroSeen, shouldSkipHomeIntro } from '../lib/homeIntro'
 
-const CHIPS = [
-  { text: 'margin', left: '6%', top: '14%', r: -14 },
-  { text: 'profit', left: '78%', top: '11%', r: 11 },
-  { text: 'QuickBooks', left: '4%', top: '52%', r: -8 },
-  { text: 'register', left: '82%', top: '38%', r: 16 },
-  { text: 'COGS', left: '44%', top: '6%', r: -20 },
-  { text: 'inventory', left: '18%', top: '78%', r: 9 },
-  { text: 'RO #4812', left: '68%', top: '72%', r: -12 },
-  { text: '$4,820 AR', left: '2%', top: '32%', r: 7 },
-  { text: '38.2%', left: '52%', top: '82%', r: -16 },
-  { text: 'PO #1042', left: '86%', top: '58%', r: 13 },
-  { text: 'job cost', left: '34%', top: '22%', r: 10 },
-  { text: 'rent roll', left: '58%', top: '48%', r: -9 },
-]
+const INTRO_LINE = 'Loading your customized portal...'
+const TYPE_MS = 36
 
 function introShouldCover() {
   if (typeof window === 'undefined') return true
@@ -24,6 +12,7 @@ function introShouldCover() {
 export default function HomeIntro({ onStart, onReveal }) {
   const [active, setActive] = useState(introShouldCover)
   const [phase, setPhase] = useState('mark')
+  const [typed, setTyped] = useState('')
   const doneRef = useRef(false)
   const onRevealRef = useRef(onReveal)
   const onStartRef = useRef(onStart)
@@ -34,6 +23,7 @@ export default function HomeIntro({ onStart, onReveal }) {
   const finish = useCallback(() => {
     if (doneRef.current) return
     doneRef.current = true
+    setTyped(INTRO_LINE)
     setPhase('out')
     window.setTimeout(() => {
       setActive(false)
@@ -53,25 +43,44 @@ export default function HomeIntro({ onStart, onReveal }) {
 
     onStartRef.current?.()
 
-    const t1 = window.setTimeout(() => setPhase('line'), 700)
-    const t2 = window.setTimeout(() => setPhase('scatter'), 1500)
-    const t3 = window.setTimeout(() => {
-      setPhase('snap')
+    const typeDone = INTRO_LINE.length * TYPE_MS
+    const revealAt = 650 + typeDone + 480
+    const outAt = revealAt + 750
+    const endAt = outAt + 400
+
+    const t1 = window.setTimeout(() => setPhase('line'), 650)
+    const t2 = window.setTimeout(() => {
+      setPhase('reveal')
       onRevealRef.current?.()
-    }, 2600)
-    const t4 = window.setTimeout(() => setPhase('out'), 4000)
-    const t5 = window.setTimeout(finish, 4400)
+    }, revealAt)
+    const t3 = window.setTimeout(() => setPhase('out'), outAt)
+    const t4 = window.setTimeout(finish, endAt)
 
     return () => {
       window.clearTimeout(t1)
       window.clearTimeout(t2)
       window.clearTimeout(t3)
       window.clearTimeout(t4)
-      window.clearTimeout(t5)
     }
   }, [finish])
 
+  useEffect(() => {
+    if (phase !== 'line' || doneRef.current) return undefined
+
+    setTyped('')
+    let i = 0
+    const id = window.setInterval(() => {
+      i += 1
+      setTyped(INTRO_LINE.slice(0, i))
+      if (i >= INTRO_LINE.length) window.clearInterval(id)
+    }, TYPE_MS)
+
+    return () => window.clearInterval(id)
+  }, [phase])
+
   if (!active) return null
+
+  const progress = typed.length / INTRO_LINE.length
 
   return (
     <button
@@ -83,26 +92,17 @@ export default function HomeIntro({ onStart, onReveal }) {
       }}
       aria-label="Enter site"
     >
-      {CHIPS.map((chip) => (
-        <span
-          key={chip.text}
-          className="m-intro__chip"
-          style={{
-            left: chip.left,
-            top: chip.top,
-            '--r': `${chip.r}deg`,
-          }}
-          aria-hidden="true"
-        >
-          {chip.text}
-        </span>
-      ))}
-
       <div className="m-intro__inner">
         <div className="m-intro__mark">JK<span>.</span></div>
-        <p className="m-intro__line">
-          Loading your<br />customized portal&hellip;
+        <p className="m-intro__line" aria-live="polite">
+          <span className="m-intro__type">{typed}</span>
+          {phase === 'line' && typed.length < INTRO_LINE.length && (
+            <span className="m-intro__cursor" aria-hidden="true" />
+          )}
         </p>
+        <div className="m-intro__progress" aria-hidden="true">
+          <div className="m-intro__progress-fill" style={{ width: `${progress * 100}%` }} />
+        </div>
       </div>
     </button>
   )
