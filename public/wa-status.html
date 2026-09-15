@@ -125,20 +125,30 @@
       z-index: 2;
     }
 
+    .kicker {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: clamp(9px, 2.4vw, 13px);
+      font-weight: 500;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: #9A7B2E;
+      margin-bottom: 0.75em;
+    }
+
     .headline {
       font-family: 'Space Grotesk', sans-serif;
-      font-size: clamp(28px, 9vw, 52px);
+      font-size: clamp(26px, 8.2vw, 48px);
       font-weight: 700;
       letter-spacing: -0.04em;
       line-height: 1.05;
-      margin-bottom: 1em;
+      margin-bottom: 0.75em;
     }
 
     .deck {
-      font-size: clamp(14px, 4.2vw, 22px);
+      font-size: clamp(13px, 3.8vw, 19px);
       line-height: 1.5;
       color: #6B6560;
-      margin-bottom: 1.2em;
+      margin-bottom: 1em;
     }
 
     .points {
@@ -147,10 +157,10 @@
     }
     .points li {
       font-family: 'Space Grotesk', sans-serif;
-      font-size: clamp(12px, 3.6vw, 20px);
+      font-size: clamp(11px, 3.3vw, 17px);
       font-weight: 600;
-      line-height: 1.4;
-      padding: 0.65em 0 0.65em 1.2em;
+      line-height: 1.38;
+      padding: 0.55em 0 0.55em 1.2em;
       border-bottom: 1px solid #D8D4CC;
       position: relative;
     }
@@ -214,14 +224,15 @@
     </header>
 
     <div class="main">
+      <p class="kicker">Custom portals · Bookkeeping</p>
       <h1 class="headline">One portal.<br />Your systems.</h1>
       <p class="deck">
-        Register, vendors, QuickBooks.<br />
-        One login instead of ten tabs.
+        I build dashboards for shops on QuickBooks. Wire your register, vendors, and bank into one login. Margin per job, inventory, and AR on one screen.
       </p>
       <ul class="points">
-        <li>Integrations I wrote, synced nightly</li>
-        <li>Nothing goes live until it matches QBO</li>
+        <li>Register tickets matched to vendor cost</li>
+        <li>Synced nightly. Month tied out to QBO.</li>
+        <li>Not a template. One shop at a time.</li>
         <li>You get me, not a ticket queue</li>
       </ul>
       <footer class="foot">
