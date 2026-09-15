@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/router'
 import { BOOKING_URL } from '../lib/marketing'
-import { BUILD_STACK } from '../lib/buildStack'
+import { BUILD_STACK, BUSINESS_TYPES } from '../lib/buildStack'
 import { FEATURED_DEMOS } from '../lib/marketingDemos'
 
 const ROTATE = ['margin', 'profit', 'inventory', 'cash flow', 'job cost', 'rent roll']
@@ -18,10 +18,8 @@ const NAV = [
 const STEPS = [
   { n: '01', title: 'We learn your business', body: 'One call. How you get paid, what you sell, what you wish you could see on one screen.' },
   { n: '02', title: 'We wire your systems', body: 'QuickBooks, register, vendors, bank — integrations we wrote, on a nightly schedule.' },
-  { n: '03', title: 'You get one portal', body: 'Custom dashboard. Not a template. Log in any time. Numbers stay current.' },
+  { n: '03', title: 'You get one portal', body: 'Custom dashboard built around your workflow. Log in any time. Numbers stay current.' },
 ]
-
-const FLOW = ['QuickBooks', 'Register', 'Distributors', 'Bank', 'Your portal']
 
 const TIMELINE = [
   ['Day 1', 'Kickoff call — we learn your business and what you want to see.'],
@@ -78,13 +76,15 @@ function ScreenFooter({ onNav, showDemos }) {
 
 function Screen({ tab, form, setForm, onSubmit, submitted, submitting, onNav }) {
   if (tab === 'overview') {
+    const pillars = [BUILD_STACK[0], BUILD_STACK[1], BUILD_STACK[3]]
+
     return (
       <div className="hp-overview">
         <section className="hp-spotlight">
           <p className="hp-spotlight__kicker">Custom financial portal</p>
           <OverviewRotator />
           <p className="hp-spotlight__sub">
-            QuickBooks wired to your register, distributors, and vendors — updated every night.
+            Log in once. Your numbers update overnight — tied out to QuickBooks.
           </p>
           <div className="hp-actions hp-actions--light">
             <button type="button" className="hp-btn hp-btn--primary" onClick={() => onNav('contact')}>
@@ -96,26 +96,58 @@ function Screen({ tab, form, setForm, onSubmit, submitted, submitting, onNav }) 
           </div>
         </section>
 
-        <div className="hp-flow" aria-label="Systems we connect">
-          {FLOW.map((node, idx) => (
-            <span key={node} className="hp-flow__seg">
-              <span className="hp-flow__node">{node}</span>
-              {idx < FLOW.length - 1 && <span className="hp-flow__arrow" aria-hidden="true">→</span>}
-            </span>
-          ))}
+        <div className="hp-overview__body">
+          <p className="hp-body">
+            We build one portal per business — the screen you open when you want to know if last week
+            was actually profitable, what you owe, and what&apos;s sitting on the shelf.
+          </p>
+          <p className="hp-body">
+            The work is wiring your real systems into that view and keeping the books current.
+            Six days to go live, then we stay on the pipe.
+          </p>
         </div>
 
-        <p className="hp-manifest">
-          Not Zapier. Not a template. One portal built for your business — numbers that tie out to QuickBooks.
-        </p>
-
-        <nav className="hp-jump" aria-label="Explore">
-          {NAV.filter((n) => n.id !== 'overview' && n.id !== 'contact').map((n) => (
-            <button key={n.id} type="button" className="hp-jump__btn" onClick={() => onNav(n.id)}>
-              {n.label} →
-            </button>
+        <div className="hp-overview__pillars">
+          {pillars.map((block) => (
+            <section key={block.kicker} className="hp-overview__pillar">
+              <p className="hp-overview__pillar-k">{block.kicker}</p>
+              <h3 className="hp-overview__pillar-t">{block.title}</h3>
+              <p className="hp-overview__pillar-d">{block.blurb}</p>
+            </section>
           ))}
-        </nav>
+          <button type="button" className="hp-overview__more" onClick={() => onNav('build')}>
+            Full capability list
+          </button>
+        </div>
+
+        <section className="hp-overview__types">
+          <h3 className="hp-overview__types-h">Built for</h3>
+          <ul className="hp-overview__types-list">
+            {BUSINESS_TYPES.map((t) => (
+              <li key={t.label}>
+                <span className="hp-overview__types-label">{t.label}</span>
+                <span className="hp-overview__types-detail">{t.detail}</span>
+              </li>
+            ))}
+          </ul>
+        </section>
+
+        <section className="hp-overview__schedule">
+          <h3 className="hp-overview__schedule-h">Typical launch</h3>
+          <ol className="hp-overview__schedule-list">
+            {TIMELINE.map(([when, what]) => (
+              <li key={when}>
+                <span className="hp-overview__schedule-w">{when}</span>
+                <span className="hp-overview__schedule-d">{what}</span>
+              </li>
+            ))}
+          </ol>
+          <button type="button" className="hp-overview__more" onClick={() => onNav('how')}>
+            How it works
+          </button>
+        </section>
+
+        <ScreenFooter onNav={onNav} showDemos />
       </div>
     )
   }
@@ -265,7 +297,7 @@ function Screen({ tab, form, setForm, onSubmit, submitted, submitting, onNav }) 
             {[
               'One point of contact — the person who built your portal',
               'Your own login, scoped to your company on the server',
-              'Integrations we wrote ourselves, not a Zapier chain',
+              'Integrations we wrote ourselves — nightly sync into your portal',
               'Nothing goes live until it ties out to QuickBooks',
             ].map((line) => (
               <li key={line}>{line}</li>

@@ -44,7 +44,7 @@ export default function About() {
             {[
               'One point of contact — the person who built your portal',
               'Your own login, scoped to your company on the server',
-              'Integrations we wrote ourselves, not a Zapier chain',
+              'Integrations we wrote ourselves — nightly sync into your portal',
               'Nothing goes live until it ties out to QuickBooks',
             ].map((line) => (
               <div key={line} className="m-about-list__item">{line}</div>

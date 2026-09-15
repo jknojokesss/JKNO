@@ -1,16 +1,18 @@
-import { useState } from 'react'
+import { useState, useCallback, useEffect } from 'react'
 import Head from 'next/head'
 import HomeIntro from '../components/HomeIntro'
-import HomeAssemble from '../components/HomeAssemble'
 import HomePortal from '../components/HomePortal'
 import { MARKETING_FONTS } from '../lib/marketing'
 
 export default function Landing() {
-  const [portalVisible, setPortalVisible] = useState(false)
-  const [assembling, setAssembling] = useState(false)
+  const [portalLive, setPortalLive] = useState(false)
   const [form, setForm] = useState({ name: '', email: '', business: '' })
   const [submitted, setSubmitted] = useState(false)
   const [submitting, setSubmitting] = useState(false)
+
+  useEffect(() => {
+    document.body.style.removeProperty('overflow')
+  }, [])
 
   const handleSubmit = async () => {
     if (!form.name || !form.email || !form.business) return
@@ -29,10 +31,7 @@ export default function Landing() {
     setSubmitting(false)
   }
 
-  const handleIntroDone = ({ playedIntro }) => {
-    setPortalVisible(true)
-    setAssembling(playedIntro)
-  }
+  const handleIntroReveal = useCallback(() => setPortalLive(true), [])
 
   return (
     <>
@@ -48,22 +47,16 @@ export default function Landing() {
         <link href={MARKETING_FONTS} rel="stylesheet" />
       </Head>
 
-      <HomeIntro onDone={handleIntroDone} />
+      <HomePortal
+        live={portalLive}
+        form={form}
+        setForm={setForm}
+        onSubmit={handleSubmit}
+        submitted={submitted}
+        submitting={submitting}
+      />
 
-      {portalVisible && assembling && (
-        <HomeAssemble onDone={() => setAssembling(false)} />
-      )}
-
-      {portalVisible && (
-        <HomePortal
-          live={!assembling}
-          form={form}
-          setForm={setForm}
-          onSubmit={handleSubmit}
-          submitted={submitted}
-          submitting={submitting}
-        />
-      )}
+      <HomeIntro onReveal={handleIntroReveal} />
     </>
   )
 }
