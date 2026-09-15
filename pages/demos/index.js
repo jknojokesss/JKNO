@@ -7,13 +7,13 @@ export default function DemoGallery() {
   const router = useRouter()
   return (
     <MarketingShell
-      title="Live Industry Demos — JK No Jokes Financials"
-      description="Live, clickable financial dashboard demos — one for your industry. No login, sample data."
+      title="Live Industry Demos | JK No Jokes Financials"
+      description="Live, clickable financial dashboard demos for your industry. No login, sample data."
     >
       <PageHero
         kicker={`${ALL_DEMOS.length} live demos · no login`}
         title={<>One of these is your business.</>}
-        lead="Every card below is a real dashboard — click in, scroll around, pretend it's yours."
+        lead="Every card below is a real dashboard. Click in, scroll around, pretend it's yours."
         align="center"
       />
 

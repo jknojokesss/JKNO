@@ -6,11 +6,11 @@ import { BUILD_STACK } from '../lib/buildStack'
 export default function WhatWeDo() {
   const router = useRouter()
   return (
-    <MarketingShell title="What You Get — JK No Jokes Financials">
+    <MarketingShell title="What You Get | JK No Jokes Financials">
       <PageHero
         kicker="What we build"
         title="One business at a time."
-        lead="Not a template — integrations, screens, and month-end wired to what you already run."
+        lead="Not a template. Integrations, screens, and month-end wired to what you already run."
         align="center"
       />
 

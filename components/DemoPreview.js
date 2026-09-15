@@ -50,7 +50,7 @@ export default function DemoPreview({ demos, onMoreDemos }) {
     <>
       <div className="m-demo-head">
         <p className="m-demo-head__title">Pick one. Poke around.</p>
-        <p className="m-demo-head__sub">Real dashboards — sample data, no login.</p>
+        <p className="m-demo-head__sub">Real dashboards. Sample data, no login.</p>
       </div>
 
       <div id="demos" className="m-demo-pills">

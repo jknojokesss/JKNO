@@ -32,7 +32,7 @@ const HOW = [
 
   { title: 'Kickoff call', body: 'Thirty minutes. How you get paid, what you sell, what has to land on one screen.' },
 
-  { title: 'Wire-up', body: 'QuickBooks, register, vendors, bank — whatever you run on. I write the integrations; they sync every night.' },
+  { title: 'Wire-up', body: 'QuickBooks, register, vendors, bank, whatever you run on. I write the integrations; they sync every night.' },
 
   { title: 'Go live', body: 'About six days. You log in, we walk it, fix what\u2019s off. Nothing ships until it matches QuickBooks.' },
 
@@ -90,7 +90,7 @@ function Screen({ tab, form, setForm, onSubmit, submitted, submitting, onNav }) 
           </h1>
 
           <p className="hp-overview__deck">
-            Register, vendors, QuickBooks — one login instead of ten tabs. The screens your
+            Register, vendors, QuickBooks. One login instead of ten tabs. The screens your
             register and QBO never gave you, synced every night, tied out at month-end.
           </p>
 
@@ -116,9 +116,9 @@ function Screen({ tab, form, setForm, onSubmit, submitted, submitting, onNav }) 
 
         <p className="hp-body hp-overview__note">
 
-          Roughly six days kickoff to live. Then I stay on the pipe — books current, portal updated.
+          Roughly six days kickoff to live. Then I stay on the pipe: books current, portal updated.
 
-          Tire shops, contractors, wholesalers, custom retail. On QuickBooks, numbers in too many places — that&rsquo;s usually who calls.
+          Tire shops, contractors, wholesalers, custom retail. On QuickBooks, numbers in too many places. That&rsquo;s usually who calls.
 
         </p>
 
@@ -168,7 +168,7 @@ function Screen({ tab, form, setForm, onSubmit, submitted, submitting, onNav }) 
 
         <p className="hp-page-lead">
 
-          Not a template. One business at a time — integrations, screens, and month-end for that shop.
+          Not a template. One business at a time: integrations, screens, and month-end for that shop.
 
         </p>
 
@@ -268,7 +268,7 @@ function Screen({ tab, form, setForm, onSubmit, submitted, submitting, onNav }) 
 
         <p className="hp-page-lead">
 
-          Call, build, launch — about a week. After that the sync keeps running and I keep the month tied out.
+          Call, build, launch. About a week. After that the sync keeps running and I keep the month tied out.
 
         </p>
 
@@ -316,7 +316,7 @@ function Screen({ tab, form, setForm, onSubmit, submitted, submitting, onNav }) 
 
         <p className="hp-page-lead">
 
-          {FEATURED_DEMOS.length} sample portals — made-up businesses, real screens. Pick your trade, click in.
+          {FEATURED_DEMOS.length} sample portals. Made-up businesses, real screens. Pick your trade, click in.
 
         </p>
 
@@ -384,7 +384,7 @@ function Screen({ tab, form, setForm, onSubmit, submitted, submitting, onNav }) 
 
           <p className="hp-body">
 
-            QuickBooks, register, distributor — wired on a nightly sync. One login, your company only.
+            QuickBooks, register, distributor, wired on a nightly sync. One login, your company only.
 
           </p>
 
@@ -420,7 +420,7 @@ function Screen({ tab, form, setForm, onSubmit, submitted, submitting, onNav }) 
 
           <p className="hp-body">
 
-            What you run today — register, vendors, inventory, AR — and which screen you&rsquo;re tired of rebuilding in Excel.
+            What you run today (register, vendors, inventory, AR) and which screen you&rsquo;re tired of rebuilding in Excel.
 
           </p>
 

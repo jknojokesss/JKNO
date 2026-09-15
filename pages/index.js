@@ -36,9 +36,9 @@ export default function Landing() {
   return (
     <>
       <Head>
-        <title>JK No Jokes Financials — One Portal, Your Systems, Numbers That Tie Out</title>
+        <title>JK No Jokes Financials | One Portal, Your Systems, Numbers That Tie Out</title>
         <meta name="description" content="Custom portals wired to QuickBooks, your register, and your vendors. One login. Synced nightly. Built for one shop at a time." />
-        <meta property="og:title" content="JK No Jokes Financials — One Portal, Your Systems, Numbers That Tie Out" />
+        <meta property="og:title" content="JK No Jokes Financials | One Portal, Your Systems, Numbers That Tie Out" />
         <meta property="og:description" content="Custom portals wired to QuickBooks, your register, and your vendors. One login. Synced nightly. Built for one shop at a time." />
         <meta property="og:type" content="website" />
         <meta property="og:url" content="https://jknojokes.com" />
@@ -60,4 +60,4 @@ export default function Landing() {
     </>
   )
 }
-
+
