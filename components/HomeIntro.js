@@ -101,7 +101,7 @@ export default function HomeIntro({ onStart, onReveal }) {
       <div className="m-intro__inner">
         <div className="m-intro__mark">JK<span>.</span></div>
         <p className="m-intro__line">
-          Custom portals<br />for your books.
+          This is what<br />the portal looks like.
         </p>
       </div>
     </button>

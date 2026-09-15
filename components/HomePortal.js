@@ -89,9 +89,15 @@ function Screen({ tab, form, setForm, onSubmit, submitted, submitting, onNav }) 
             Numbers that tie out.
           </h1>
 
+          <p className="hp-overview__hook">
+            You&rsquo;re looking at it. The sidebar, the top bar, these screens: this is the
+            portal shell I build for your shop. jknojokes.com isn&rsquo;t a brochure site
+            pretending to be software.
+          </p>
+
           <p className="hp-overview__deck">
-            Register, vendors, QuickBooks. One login instead of ten tabs. The screens your
-            register and QBO never gave you, synced every night, tied out at month-end.
+            Register, vendors, QuickBooks behind one login. The screens your register and QBO
+            never gave you, synced every night, tied out at month-end.
           </p>
 
           <div className="hp-overview__actions">
@@ -116,9 +122,11 @@ function Screen({ tab, form, setForm, onSubmit, submitted, submitting, onNav }) 
 
         <p className="hp-body hp-overview__note">
 
-          Roughly six days kickoff to live. Then I stay on the pipe: books current, portal updated.
+          Click around. Overview, What we build, Demos in the nav. Same layout your team would
+          use every day. Demos opens sample businesses built in this shell.
 
-          Tire shops, contractors, wholesalers, custom retail. On QuickBooks, numbers in too many places. That&rsquo;s usually who calls.
+          Roughly six days kickoff to live. Tire shops, contractors, wholesalers, custom retail
+          on QuickBooks. That&rsquo;s usually who calls.
 
         </p>
 

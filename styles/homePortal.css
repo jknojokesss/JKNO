@@ -284,6 +284,18 @@
   max-width: 22ch;
 }
 
+.hp-overview__hook {
+  margin: 0 0 16px;
+  padding-left: 16px;
+  border-left: 2px solid var(--hp-accent);
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 17px;
+  font-weight: 600;
+  line-height: 1.55;
+  color: var(--hp-ink);
+  max-width: 46ch;
+}
+
 .hp-overview__deck {
   margin: 0 0 22px;
   font-size: 17px;
