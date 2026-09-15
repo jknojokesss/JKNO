@@ -86,7 +86,7 @@ function Screen({ tab, form, setForm, onSubmit, submitted, submitting, onNav }) 
 
           <h1 className="hp-overview__headline">
             One portal. Your systems.<br />
-            Numbers that tie out.
+            <span className="hp-overview__headline-accent">Numbers that tie out.</span>
           </h1>
 
           <p className="hp-overview__hook">
@@ -132,9 +132,9 @@ function Screen({ tab, form, setForm, onSubmit, submitted, submitting, onNav }) 
 
         <div className="hp-overview__pillars">
 
-          {pillars.map((block) => (
+          {pillars.map((block, i) => (
 
-            <section key={block.title} className="hp-overview__pillar">
+            <section key={block.title} className={`hp-overview__pillar hp-overview__pillar--${i}`}>
 
               <h3 className="hp-overview__pillar-t">{block.title}</h3>
 
