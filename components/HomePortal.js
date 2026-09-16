@@ -678,27 +678,31 @@ export default function HomePortal({ live, form, setForm, onSubmit, submitted, s
 
         <main className="hp-main">
 
-          <div key={tab} className="hp-screen">
+          {live && (
 
-            <Screen
+            <div key={tab} className="hp-screen">
 
-              tab={tab}
+              <Screen
 
-              form={form}
+                tab={tab}
 
-              setForm={setForm}
+                form={form}
 
-              onSubmit={onSubmit}
+                setForm={setForm}
 
-              submitted={submitted}
+                onSubmit={onSubmit}
 
-              submitting={submitting}
+                submitted={submitted}
 
-              onNav={pick}
+                submitting={submitting}
 
-            />
+                onNav={pick}
 
-          </div>
+              />
+
+            </div>
+
+          )}
 
         </main>
 

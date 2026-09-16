@@ -2,10 +2,16 @@ import { useState, useCallback, useEffect } from 'react'
 import Head from 'next/head'
 import HomeIntro from '../components/HomeIntro'
 import HomePortal from '../components/HomePortal'
+import { shouldSkipHomeIntro } from '../lib/homeIntro'
 import { MARKETING_FONTS } from '../lib/marketing'
 
+function initialPortalLive() {
+  if (typeof window === 'undefined') return false
+  return shouldSkipHomeIntro()
+}
+
 export default function Landing() {
-  const [portalLive, setPortalLive] = useState(false)
+  const [portalLive, setPortalLive] = useState(initialPortalLive)
   const [form, setForm] = useState({ name: '', email: '', business: '' })
   const [submitted, setSubmitted] = useState(false)
   const [submitting, setSubmitting] = useState(false)
