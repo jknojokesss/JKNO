@@ -93,7 +93,9 @@ export default function HomeIntro({ onStart, onReveal }) {
       aria-label="Enter site"
     >
       <div className="m-intro__inner">
-        <div className="m-intro__mark">JK<span>.</span></div>
+        <div className="m-intro__mark">
+          <span className="m-intro__j">J</span><span className="m-intro__k">K</span><span className="m-intro__dot">.</span>
+        </div>
         <p className="m-intro__line" aria-live="polite">
           <span className="m-intro__type">{typed}</span>
           {phase === 'line' && typed.length < INTRO_LINE.length && (

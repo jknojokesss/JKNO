@@ -908,7 +908,6 @@
   font-family: 'Playfair Display', serif;
   font-size: clamp(72px, 14vw, 132px);
   font-weight: 700;
-  color: #F7F4EF;
   letter-spacing: -3px;
   line-height: 1;
   opacity: 0;
@@ -923,7 +922,9 @@
   transform: scale(0.88);
 }
 
-.m-intro__mark span { color: var(--m-gold); }
+.m-intro__j { color: var(--m-orange); }
+.m-intro__k { color: var(--m-blue); }
+.m-intro__dot { color: var(--m-gold); }
 
 .m-intro__line {
   font-family: 'IBM Plex Mono', monospace;
