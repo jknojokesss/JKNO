@@ -100,6 +100,18 @@ export default function HomeIntro({ onStart, onReveal }) {
       }}
       aria-label="Enter site"
     >
+      <button
+        type="button"
+        className="m-intro__skip"
+        onClick={(e) => {
+          e.stopPropagation()
+          onRevealRef.current?.()
+          finish()
+        }}
+      >
+        Skip
+      </button>
+
       <div className="m-intro__inner">
         <div className="m-intro__mark">
           <span className="m-intro__j">J</span><span className="m-intro__k">K</span><span className="m-intro__dot">.</span>

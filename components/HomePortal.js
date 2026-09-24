@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect, useRef } from 'react'
 
 import { useRouter } from 'next/router'
 
@@ -37,6 +37,34 @@ const HOW = [
   { title: 'Go live', body: 'About six days. You log in, we walk it, fix what\u2019s off. Nothing ships until it matches QuickBooks.' },
 
 ]
+
+
+
+const LIVE_PROOF = [
+
+  { k: 'Live stack', v: 'QuickBooks, your register, and vendor invoices on one nightly sync.' },
+
+  { k: 'What you get', v: 'Profit per ticket or job on screen. Month-end tied to the official QBO statements.' },
+
+  { k: 'Timeline', v: 'About six business days from kickoff call to your login.' },
+
+]
+
+
+
+const NEXT_STEPS = [
+
+  { n: '1', title: 'You reach out', body: 'Short form or a 30-minute call. Tell me what you run and what you keep rebuilding in Excel.' },
+
+  { n: '2', title: 'I wire your shop', body: 'Connect QuickBooks, build the integrations, and put your screens in this portal shell.' },
+
+  { n: '3', title: 'You sign in', body: 'We walk it together. Nothing stays live until the portal matches QuickBooks.' },
+
+]
+
+
+
+const OVERVIEW_DEMO_PICKS = FEATURED_DEMOS.slice(0, 3)
 
 
 
@@ -79,6 +107,156 @@ function Stagger({ className = '', alt = false, children }) {
       {children}
 
     </div>
+
+  )
+
+}
+
+
+
+function ProofStrip() {
+
+  return (
+
+    <section className="hp-proof" aria-label="What clients get">
+
+      {LIVE_PROOF.map((row) => (
+
+        <div key={row.k} className="hp-proof__item">
+
+          <p className="hp-proof__k">{row.k}</p>
+
+          <p className="hp-proof__v">{row.v}</p>
+
+        </div>
+
+      ))}
+
+    </section>
+
+  )
+
+}
+
+
+
+function DemoQuickPicks({ onNav }) {
+
+  return (
+
+    <section className="hp-demo-picks" aria-labelledby="hp-demo-picks-title">
+
+      <div className="hp-demo-picks__head">
+
+        <h2 id="hp-demo-picks-title" className="hp-demo-picks__title">Pick a trade. Click through.</h2>
+
+        <button type="button" className="hp-demo-picks__all" onClick={() => onNav('demos')}>
+
+          All demos
+
+        </button>
+
+      </div>
+
+      <div className="hp-demo-picks__grid">
+
+        {OVERVIEW_DEMO_PICKS.map((d) => (
+
+          <a key={d.src} href={d.src} className="hp-demo-pick">
+
+            <span className="hp-demo-pick__label">{d.label}</span>
+
+            <span className="hp-demo-pick__cap">{d.caption}</span>
+
+            <span className="hp-demo-pick__go" aria-hidden="true">→</span>
+
+          </a>
+
+        ))}
+
+      </div>
+
+    </section>
+
+  )
+
+}
+
+
+
+function NextSteps() {
+
+  return (
+
+    <section className="hp-next" aria-labelledby="hp-next-title">
+
+      <h2 id="hp-next-title" className="hp-next__title">What happens after you reach out</h2>
+
+      <ol className="hp-next__steps">
+
+        {NEXT_STEPS.map((s) => (
+
+          <li key={s.n} className="hp-next__step">
+
+            <span className="hp-next__n">{s.n}</span>
+
+            <div>
+
+              <h3 className="hp-next__step-t">{s.title}</h3>
+
+              <p className="hp-next__step-d">{s.body}</p>
+
+            </div>
+
+          </li>
+
+        ))}
+
+      </ol>
+
+    </section>
+
+  )
+
+}
+
+
+
+function PricingNote() {
+
+  return (
+
+    <p className="hp-pricing-note">
+
+      Not $49/mo shelf software. Custom portal and books for your shop — you work with me directly.
+
+    </p>
+
+  )
+
+}
+
+
+
+function FounderStrip({ onNav }) {
+
+  return (
+
+    <button type="button" className="hp-founder-strip" onClick={() => onNav('about')}>
+
+      <img className="hp-founder-strip__img" src="/1779727210800.jpg" alt="" width={56} height={56} />
+
+      <div className="hp-founder-strip__copy">
+
+        <p className="hp-founder-strip__name">Jonathan (Chaim) Katz</p>
+
+        <p className="hp-founder-strip__role">I build the portal, write the integrations, and keep the books.</p>
+
+      </div>
+
+      <span className="hp-founder-strip__go" aria-hidden="true">About →</span>
+
+    </button>
 
   )
 
@@ -158,18 +336,21 @@ function Screen({ tab, form, setForm, onSubmit, submitted, submitting, onNav }) 
 
           </div>
 
+          <p className="hp-hero-next hp-anim hp-anim--in hp-anim--d4">
+
+            30-min call → connect QuickBooks → about six days to your login.
+
+          </p>
+
         </header>
 
 
 
-        <p className="hp-body hp-overview__note hp-anim hp-anim--in hp-anim--d4">
+        <ProofStrip />
 
-          Click around the nav. Demos opens sample businesses in this same shell.
 
-          Roughly six days kickoff to live. Tire shops, contractors, wholesalers, custom retail
-          on QuickBooks. That&rsquo;s usually who calls.
 
-        </p>
+        <DemoQuickPicks onNav={onNav} />
 
 
 
@@ -194,6 +375,18 @@ function Screen({ tab, form, setForm, onSubmit, submitted, submitting, onNav }) 
           </button>
 
         </div>
+
+
+
+        <FounderStrip onNav={onNav} />
+
+
+
+        <NextSteps />
+
+
+
+        <PricingNote />
 
 
 
@@ -467,8 +660,16 @@ function Screen({ tab, form, setForm, onSubmit, submitted, submitting, onNav }) 
       <PageHero
         tone="contact"
         title="Get started"
-        lead="What you run today and which screen you&rsquo;re tired of rebuilding in Excel."
+        lead="Tell me what you run. I&rsquo;ll show you a demo in your trade and quote the build."
       />
+
+
+
+      <NextSteps />
+
+
+
+      <PricingNote />
 
 
 
@@ -576,9 +777,29 @@ export default function HomePortal({ live, form, setForm, onSubmit, submitted, s
 
   const [tab, setTab] = useState('overview')
 
+  const [motionSettled, setMotionSettled] = useState(false)
+
+  const navCountRef = useRef(0)
+
+
+
+  useEffect(() => {
+
+    if (!live) return undefined
+
+    const t = window.setTimeout(() => setMotionSettled(true), 5000)
+
+    return () => window.clearTimeout(t)
+
+  }, [live])
+
 
 
   const pick = (id) => {
+
+    navCountRef.current += 1
+
+    if (navCountRef.current > 1) setMotionSettled(true)
 
     setTab(id)
 
@@ -590,7 +811,9 @@ export default function HomePortal({ live, form, setForm, onSubmit, submitted, s
 
   return (
 
-    <div className={`hp-portal${live ? ' hp-portal--live' : ''}`}>
+    <div
+      className={`hp-portal${live ? ' hp-portal--live' : ''}${motionSettled ? ' hp-portal--settled' : ''}`}
+    >
 
       <header className="hp-topbar">
 

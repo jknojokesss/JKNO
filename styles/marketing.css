@@ -874,6 +874,33 @@
   transition: background 0.9s ease, opacity 0.35s ease;
 }
 
+.m-intro__skip {
+  position: absolute;
+  top: 18px;
+  right: 18px;
+  z-index: 12;
+  pointer-events: auto;
+  margin: 0;
+  border: 1px solid rgba(148, 163, 184, 0.35);
+  background: rgba(15, 23, 42, 0.55);
+  color: #94a3b8;
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  padding: 8px 14px;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: color 0.15s, border-color 0.15s, background 0.15s;
+}
+
+.m-intro__skip:hover {
+  color: #e2e8f0;
+  border-color: rgba(201, 168, 76, 0.45);
+  background: rgba(15, 23, 42, 0.75);
+}
+
 .m-intro--reveal {
   background: rgba(5, 6, 8, 0.72);
   pointer-events: none;
@@ -960,8 +987,8 @@
   font-weight: 500;
   line-height: 1.5;
   letter-spacing: 0.02em;
-  color: rgba(247, 244, 239, 0.88);
-  margin: 28px 0 0;
+  color: rgba(226, 232, 240, 0.78);
+  margin: 26px 0 0;
   min-height: 1.5em;
   opacity: 0;
   transform: translateY(10px);
@@ -990,7 +1017,7 @@
   height: 1.05em;
   margin-left: 2px;
   vertical-align: text-bottom;
-  background: var(--m-gold);
+  background: rgba(196, 168, 130, 0.85);
   animation: m-intro-cursor 0.85s step-end infinite;
 }
 
