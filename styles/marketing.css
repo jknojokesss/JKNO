@@ -1,10 +1,12 @@
 /* Marketing site only — scoped under .marketing-site so portal pages stay untouched */
 
 .marketing-site {
-  --m-ink: #0E1420;
-  --m-muted: #48536A;
-  --m-line: #DFE4EC;
-  --m-paper: #F7F4EF;
+  --m-ink: #0F172A;
+  --m-muted: #475569;
+  --m-line: #CBD5E1;
+  --m-paper: #EEF2F7;
+  --m-blue: #1D4ED8;
+  --m-orange: #EA580C;
   --m-gold: #C9A84C;
   --m-gold-dark: #B8943C;
   background-color: var(--m-paper);
@@ -60,7 +62,7 @@
   font-weight: 600;
   letter-spacing: 0.14em;
   text-transform: uppercase;
-  color: var(--m-gold-dark);
+  color: var(--m-blue);
   margin-bottom: 12px;
 }
 
@@ -88,10 +90,10 @@
 }
 
 .m-btn--primary {
-  background: var(--m-gold);
-  color: var(--m-ink);
+  background: var(--m-orange);
+  color: #fff;
 }
-.m-btn--primary:hover { background: var(--m-gold-dark); }
+.m-btn--primary:hover { background: #C2410C; }
 .m-btn--primary:disabled { opacity: 0.5; cursor: not-allowed; }
 
 .m-btn--pop {
@@ -857,7 +859,9 @@
   border: none;
   padding: 0;
   cursor: pointer;
-  background: #050608;
+  background:
+    radial-gradient(ellipse 80% 50% at 50% 0%, rgba(29, 78, 216, 0.22), transparent 55%),
+    #050608;
   overflow: hidden;
   transition: background 0.9s ease, opacity 0.35s ease;
 }
