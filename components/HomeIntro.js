@@ -83,12 +83,20 @@ export default function HomeIntro({ onStart, onReveal }) {
   const progress = typed.length / INTRO_LINE.length
 
   return (
-    <button
-      type="button"
+    <div
+      role="button"
+      tabIndex={0}
       className={`m-intro m-intro--${phase}`}
       onClick={() => {
         onRevealRef.current?.()
         finish()
+      }}
+      onKeyDown={(e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault()
+          onRevealRef.current?.()
+          finish()
+        }
       }}
       aria-label="Enter site"
     >
@@ -106,6 +114,6 @@ export default function HomeIntro({ onStart, onReveal }) {
           <div className="m-intro__progress-fill" style={{ width: `${progress * 100}%` }} />
         </div>
       </div>
-    </button>
+    </div>
   )
 }

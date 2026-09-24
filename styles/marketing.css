@@ -859,9 +859,14 @@
   display: flex;
   align-items: center;
   justify-content: center;
+  margin: 0;
   border: none;
   padding: 0;
   cursor: pointer;
+  font: inherit;
+  color: #f8fafc;
+  -webkit-appearance: none;
+  appearance: none;
   background:
     radial-gradient(ellipse 80% 50% at 50% 0%, rgba(29, 78, 216, 0.22), transparent 55%),
     #050608;
@@ -913,21 +918,38 @@
   font-weight: 700;
   letter-spacing: -3px;
   line-height: 1;
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.m-intro--mark .m-intro__mark {
   opacity: 0;
   transform: translateY(8px);
   animation: m-intro-in 0.7s ease forwards;
-  transition: opacity 0.55s ease, transform 0.55s ease, color 0.4s ease;
+}
+
+.m-intro--line .m-intro__mark {
+  opacity: 1;
+  transform: translateY(0);
 }
 
 .m-intro--reveal .m-intro__mark,
 .m-intro--out .m-intro__mark {
   opacity: 0;
   transform: scale(0.88);
+  transition: opacity 0.45s ease, transform 0.45s ease;
 }
 
-.m-intro__j { color: #EA580C; }
-.m-intro__k { color: #60A5FA; }
-.m-intro__dot { color: #C9A84C; }
+.m-intro__j,
+.m-intro__k,
+.m-intro__dot {
+  display: inline-block;
+  -webkit-text-fill-color: currentColor;
+}
+
+.m-intro__j { color: #FB923C; }
+.m-intro__k { color: #38BDF8; }
+.m-intro__dot { color: #FACC15; }
 
 .m-intro__line {
   font-family: 'IBM Plex Mono', monospace;
