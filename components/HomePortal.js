@@ -86,13 +86,12 @@ function Screen({ tab, form, setForm, onSubmit, submitted, submitting, onNav }) 
 
           <h1 className="hp-overview__headline">
             One portal. Your systems.<br />
-            Numbers that tie out.
+            <span className="hp-overview__headline-accent">Numbers that tie out.</span>
           </h1>
 
           <p className="hp-overview__hook">
-            You&rsquo;re looking at it. The sidebar, the top bar, these screens: this is the
-            portal shell I build for your shop. jknojokes.com isn&rsquo;t a brochure site
-            pretending to be software.
+            You&rsquo;re already in it. Sidebar, top bar, these screens. Same shell I build
+            for your shop.
           </p>
 
           <p className="hp-overview__deck">
