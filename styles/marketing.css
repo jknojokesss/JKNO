@@ -850,6 +850,9 @@
 /* ── Homepage intro + dark stage ─────────────────────────────────────── */
 
 .m-intro {
+  --m-blue: #1D4ED8;
+  --m-orange: #EA580C;
+  --m-gold: #C9A84C;
   position: fixed;
   inset: 0;
   z-index: 300;
@@ -922,9 +925,9 @@
   transform: scale(0.88);
 }
 
-.m-intro__j { color: var(--m-orange); }
-.m-intro__k { color: var(--m-blue); }
-.m-intro__dot { color: var(--m-gold); }
+.m-intro__j { color: #EA580C; }
+.m-intro__k { color: #60A5FA; }
+.m-intro__dot { color: #C9A84C; }
 
 .m-intro__line {
   font-family: 'IBM Plex Mono', monospace;
