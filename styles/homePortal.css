@@ -16,7 +16,9 @@
   --hp-muted: #475569;
   --hp-line: #CBD5E1;
   --hp-good: #059669;
-  --hp-font: 'Source Sans 3', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  --hp-font: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto,
+    'Helvetica Neue', Arial, sans-serif;
+  --hp-serif: Georgia, 'Times New Roman', Times, serif;
   min-height: 100vh;
   background:
     radial-gradient(ellipse 90% 60% at 100% 0%, rgba(29, 78, 216, 0.08), transparent 50%),
@@ -102,9 +104,9 @@
 .hp-topbar__cta {
   flex-shrink: 0;
   font-family: var(--hp-font);
-  font-size: 12px;
-  font-weight: 700;
-  letter-spacing: 0.02em;
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0;
   color: #fff;
   background: var(--hp-orange);
   padding: 7px 14px;
@@ -216,14 +218,12 @@
   flex: 1;
   min-width: 0;
   padding: 0 0 56px;
-  opacity: 0.92;
-  transform: translateY(6px);
-  transition: opacity 0.55s ease, transform 0.55s ease;
+  opacity: 0.97;
+  transition: opacity 0.35s ease;
 }
 
 .hp-portal--live .hp-main {
   opacity: 1;
-  transform: translateY(0);
 }
 
 .hp-screen {
@@ -478,10 +478,10 @@
 }
 
 .hp-page-hero__title {
-  font-family: var(--hp-font);
-  font-size: clamp(26px, 3.4vw, 38px);
-  font-weight: 700;
-  letter-spacing: -0.03em;
+  font-family: var(--hp-serif);
+  font-size: clamp(26px, 3.2vw, 34px);
+  font-weight: 600;
+  letter-spacing: 0;
   line-height: 1.12;
   margin: 0 0 10px;
   color: #F7F4EF;
@@ -507,11 +507,15 @@
   box-shadow: 0 12px 40px rgba(27, 24, 21, 0.12);
 }
 
+.hp-overview__headline,
+.hp-overview__headline span {
+  font-family: var(--hp-serif);
+}
+
 .hp-overview__headline {
-  font-family: var(--hp-font);
-  font-size: clamp(28px, 3.8vw, 40px);
+  font-size: clamp(28px, 3.6vw, 38px);
   font-weight: 600;
-  letter-spacing: -0.02em;
+  letter-spacing: 0;
   line-height: 1.1;
   margin: 0 0 16px;
   max-width: 24ch;
@@ -526,9 +530,8 @@
   margin: 0 0 16px;
   padding-left: 16px;
   border-left: 3px solid var(--hp-orange);
-  font-family: var(--hp-font);
-  font-size: 17px;
-  font-weight: 600;
+  font-size: 16px;
+  font-weight: 500;
   line-height: 1.55;
   color: #EDEBE6;
 }
@@ -554,15 +557,20 @@
   box-shadow: 0 2px 12px rgba(234, 88, 12, 0.35);
 }
 
+.hp-overview__cta {
+  margin-top: 2px;
+}
+
 .hp-overview__actions {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
   gap: 16px 20px;
+  min-height: 44px;
 }
 
 .hp-hero-next {
-  margin: 18px 0 0;
+  margin: 14px 0 0;
   font-family: var(--hp-font);
   font-size: 12px;
   font-weight: 500;
@@ -623,10 +631,10 @@
 
 .hp-demo-picks__title {
   margin: 0;
-  font-family: var(--hp-font);
-  font-size: 17px;
-  font-weight: 700;
-  letter-spacing: -0.01em;
+  font-family: var(--hp-serif);
+  font-size: 18px;
+  font-weight: 600;
+  letter-spacing: 0;
   color: var(--hp-ink);
 }
 
@@ -766,9 +774,9 @@
 
 .hp-next__title {
   margin: 0 0 16px;
-  font-family: var(--hp-font);
-  font-size: 17px;
-  font-weight: 700;
+  font-family: var(--hp-serif);
+  font-size: 18px;
+  font-weight: 600;
   color: var(--hp-ink);
 }
 
@@ -855,10 +863,10 @@
 }
 
 .hp-page-title {
-  font-family: var(--hp-font);
-  font-size: clamp(26px, 3.2vw, 34px);
-  font-weight: 700;
-  letter-spacing: -0.03em;
+  font-family: var(--hp-serif);
+  font-size: clamp(24px, 3vw, 32px);
+  font-weight: 600;
+  letter-spacing: 0;
   line-height: 1.15;
   margin: 0 0 12px;
   padding-bottom: 10px;
@@ -874,10 +882,10 @@
 }
 
 .hp-section-h {
-  font-family: var(--hp-font);
-  font-size: 17px;
-  font-weight: 700;
-  letter-spacing: -0.01em;
+  font-family: var(--hp-serif);
+  font-size: 18px;
+  font-weight: 600;
+  letter-spacing: 0;
   color: var(--hp-ink);
   margin: 0 0 14px;
 }
@@ -971,10 +979,10 @@
 }
 
 .hp-overview__pillar-t {
-  font-family: var(--hp-font);
-  font-size: 18px;
-  font-weight: 700;
-  letter-spacing: -0.02em;
+  font-family: var(--hp-serif);
+  font-size: 17px;
+  font-weight: 600;
+  letter-spacing: 0;
   margin: 0 0 6px;
   line-height: 1.2;
 }
@@ -1545,8 +1553,8 @@
   padding: 10px 16px;
   border-radius: 6px;
   font-family: var(--hp-font);
-  font-size: 13px;
-  font-weight: 700;
+  font-size: 14px;
+  font-weight: 600;
   text-decoration: none;
   cursor: pointer;
   border: none;

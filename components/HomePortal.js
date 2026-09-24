@@ -320,27 +320,31 @@ function Screen({ tab, form, setForm, onSubmit, submitted, submitting, onNav }) 
             never gave you, synced every night, tied out at month-end.
           </p>
 
-          <div className="hp-overview__actions hp-anim hp-anim--up hp-anim--d4">
+          <div className="hp-overview__cta">
 
-            <button type="button" className="hp-btn hp-btn--primary" onClick={() => onNav('contact')}>
+            <div className="hp-overview__actions">
 
-              Get started
+              <button type="button" className="hp-btn hp-btn--primary" onClick={() => onNav('contact')}>
 
-            </button>
+                Get started
 
-            <button type="button" className="hp-overview__link" onClick={() => onNav('demos')}>
+              </button>
 
-              See sample portals
+              <button type="button" className="hp-overview__link" onClick={() => onNav('demos')}>
 
-            </button>
+                See sample portals
+
+              </button>
+
+            </div>
+
+            <p className="hp-hero-next">
+
+              30-min call → connect QuickBooks → about six days to your login.
+
+            </p>
 
           </div>
-
-          <p className="hp-hero-next hp-anim hp-anim--in hp-anim--d4">
-
-            30-min call → connect QuickBooks → about six days to your login.
-
-          </p>
 
         </header>
 
