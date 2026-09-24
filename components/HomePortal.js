@@ -305,8 +305,7 @@ function Screen({ tab, form, setForm, onSubmit, submitted, submitting, onNav }) 
         <header className="hp-overview__hero hp-anim-sweep">
 
           <h1 className="hp-overview__headline">
-            <span className="hp-anim hp-anim--hero">One portal. Your systems.</span>
-            <br />
+            <span className="hp-overview__headline-line hp-anim hp-anim--hero">One portal. Your systems.</span>
             <span className="hp-overview__headline-accent hp-anim hp-anim--hero hp-anim--d1">Numbers that tie out.</span>
           </h1>
 
