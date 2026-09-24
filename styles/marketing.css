@@ -15,8 +15,12 @@
     linear-gradient(90deg, var(--m-line) 1px, transparent 1px);
   background-size: 48px 48px;
   color: var(--m-ink);
-  font-family: 'DM Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+  --m-font: 'Source Sans 3', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  font-family: var(--m-font);
+  font-size: 16px;
+  line-height: 1.6;
   -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
 .marketing-site * { box-sizing: border-box; }
@@ -34,7 +38,7 @@
 .m-wrap--wide { max-width: 1200px; margin: 0 auto; padding: 0 24px; }
 
 .m-h1 {
-  font-family: 'Space Grotesk', sans-serif;
+  font-family: var(--m-font);
   font-size: clamp(36px, 5.4vw, 60px);
   font-weight: 700;
   line-height: 1.08;
@@ -43,7 +47,7 @@
 }
 
 .m-h2 {
-  font-family: 'Space Grotesk', sans-serif;
+  font-family: var(--m-font);
   font-size: clamp(26px, 3.2vw, 36px);
   font-weight: 700;
   line-height: 1.15;
@@ -78,7 +82,7 @@
   align-items: center;
   justify-content: center;
   gap: 8px;
-  font-family: 'DM Sans', sans-serif;
+  font-family: var(--m-font);
   font-size: 15px;
   font-weight: 600;
   padding: 13px 24px;
@@ -135,7 +139,7 @@
   background: none;
   border: none;
   cursor: pointer;
-  font-family: 'DM Sans', sans-serif;
+  font-family: var(--m-font);
   font-size: 14px;
   font-weight: 500;
   color: var(--m-muted);
@@ -247,7 +251,7 @@
   width: 100%;
   text-align: left;
   padding: 14px 0;
-  font-family: 'DM Sans', sans-serif;
+  font-family: var(--m-font);
   font-size: 16px;
   font-weight: 500;
   color: var(--m-muted);
@@ -281,7 +285,7 @@
   border-radius: 6px;
   color: var(--m-ink);
   padding: 14px 16px;
-  font-family: 'DM Sans', sans-serif;
+  font-family: var(--m-font);
   font-size: 15px;
   outline: none;
   transition: border-color 0.15s;
@@ -319,7 +323,7 @@
   border: none;
   border-bottom: 2px solid transparent;
   cursor: pointer;
-  font-family: 'DM Sans', sans-serif;
+  font-family: var(--m-font);
   font-size: 14px;
   font-weight: 500;
   color: var(--m-muted);
@@ -371,7 +375,7 @@
 
 .m-demo-head { margin-bottom: 14px; }
 .m-demo-head__title {
-  font-family: 'Space Grotesk', sans-serif;
+  font-family: var(--m-font);
   font-size: clamp(20px, 2.5vw, 26px);
   font-weight: 700;
   letter-spacing: -0.02em;
@@ -396,7 +400,7 @@
   background: #fff;
   border-radius: 999px;
   padding: 8px 14px;
-  font-family: 'DM Sans', sans-serif;
+  font-family: var(--m-font);
   font-size: 13px;
   font-weight: 600;
   color: var(--m-muted);
@@ -492,7 +496,7 @@
   margin-bottom: 6px;
 }
 .m-demo-tile__biz {
-  font-family: 'Space Grotesk', sans-serif;
+  font-family: var(--m-font);
   font-size: 19px;
   font-weight: 600;
   color: var(--m-ink);
@@ -563,7 +567,7 @@
   box-shadow: 6px 8px 0 rgba(201, 168, 76, 0.25);
 }
 .m-step-pop__n {
-  font-family: 'Space Grotesk', sans-serif;
+  font-family: var(--m-font);
   font-size: 32px;
   font-weight: 700;
   color: var(--m-gold);
@@ -572,7 +576,7 @@
   margin-bottom: 12px;
 }
 .m-step-pop__title {
-  font-family: 'Space Grotesk', sans-serif;
+  font-family: var(--m-font);
   font-size: 18px;
   font-weight: 600;
   margin: 0 0 8px;
@@ -603,7 +607,7 @@
   margin-bottom: 6px;
 }
 .m-timeline-title {
-  font-family: 'Space Grotesk', sans-serif;
+  font-family: var(--m-font);
   font-size: 17px;
   font-weight: 600;
   margin-bottom: 8px;
@@ -639,7 +643,7 @@
   object-position: center top;
 }
 .m-about-name {
-  font-family: 'Space Grotesk', sans-serif;
+  font-family: var(--m-font);
   font-size: 20px;
   font-weight: 600;
   line-height: 1.2;
@@ -715,7 +719,7 @@
 }
 
 .m-stack-title {
-  font-family: 'Space Grotesk', sans-serif;
+  font-family: var(--m-font);
   font-size: 22px;
   font-weight: 600;
   margin: 0 0 12px;
@@ -853,6 +857,7 @@
   --m-blue: #1D4ED8;
   --m-orange: #EA580C;
   --m-gold: #C9A84C;
+  --m-font: 'Source Sans 3', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
   position: fixed;
   inset: 0;
   z-index: 300;
@@ -884,11 +889,11 @@
   border: 1px solid rgba(148, 163, 184, 0.35);
   background: rgba(15, 23, 42, 0.55);
   color: #94a3b8;
-  font-family: 'Space Grotesk', sans-serif;
-  font-size: 11px;
-  font-weight: 600;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
+  font-family: var(--m-font);
+  font-size: 13px;
+  font-weight: 500;
+  letter-spacing: 0.02em;
+  text-transform: none;
   padding: 8px 14px;
   border-radius: 4px;
   cursor: pointer;
@@ -947,7 +952,8 @@
   line-height: 1;
   opacity: 1;
   transform: translateY(0);
-  text-shadow: 0 8px 40px rgba(0, 0, 0, 0.35);
+  display: inline-block;
+  filter: drop-shadow(0 10px 32px rgba(0, 0, 0, 0.5));
 }
 
 .m-intro--mark .m-intro__mark {
@@ -968,26 +974,53 @@
   transition: opacity 0.45s ease, transform 0.45s ease;
 }
 
+/* One wordmark: warm ivory face, extruded depth, brand color only in rim light */
 .m-intro__j,
-.m-intro__k,
-.m-intro__dot {
-  -webkit-text-fill-color: currentColor;
+.m-intro__k {
+  display: inline-block;
+  color: #EDE8DF;
 }
 
-.m-intro__j { color: #C4A882; }
-.m-intro__k { color: #8B9DAD; }
+.m-intro__j {
+  text-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.28),
+    0 -1px 0 rgba(0, 0, 0, 0.45),
+    0 2px 0 #5C554C,
+    0 5px 0 #3D3832,
+    0 10px 22px rgba(0, 0, 0, 0.55),
+    -4px 3px 14px rgba(29, 78, 216, 0.22);
+}
+
+.m-intro__k {
+  margin-left: -0.03em;
+  text-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.28),
+    0 -1px 0 rgba(0, 0, 0, 0.45),
+    0 2px 0 #5C554C,
+    0 5px 0 #3D3832,
+    0 10px 22px rgba(0, 0, 0, 0.55),
+    4px 3px 14px rgba(234, 88, 12, 0.18);
+}
+
 .m-intro__dot {
-  color: #C9A84C;
+  display: inline-block;
+  color: #D4B96A;
   margin-left: 0.02em;
+  text-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.2),
+    0 -1px 0 rgba(40, 32, 12, 0.55),
+    0 2px 0 #6B5428,
+    0 6px 16px rgba(0, 0, 0, 0.5),
+    0 0 32px rgba(201, 168, 76, 0.4);
 }
 
 .m-intro__line {
-  font-family: 'IBM Plex Mono', monospace;
-  font-size: clamp(14px, 2.2vw, 17px);
-  font-weight: 500;
+  font-family: var(--m-font);
+  font-size: clamp(15px, 2.2vw, 17px);
+  font-weight: 400;
   line-height: 1.5;
-  letter-spacing: 0.02em;
-  color: rgba(226, 232, 240, 0.78);
+  letter-spacing: 0.01em;
+  color: rgba(226, 232, 240, 0.82);
   margin: 26px 0 0;
   min-height: 1.5em;
   opacity: 0;
@@ -1017,7 +1050,7 @@
   height: 1.05em;
   margin-left: 2px;
   vertical-align: text-bottom;
-  background: rgba(196, 168, 130, 0.85);
+  background: rgba(201, 168, 76, 0.75);
   animation: m-intro-cursor 0.85s step-end infinite;
 }
 
@@ -1112,7 +1145,7 @@
 .m-band__mark span { color: var(--m-gold); }
 
 .m-band__title {
-  font-family: 'Space Grotesk', sans-serif;
+  font-family: var(--m-font);
   font-size: clamp(32px, 4.2vw, 48px);
   font-weight: 700;
   line-height: 1.08;

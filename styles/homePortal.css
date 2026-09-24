@@ -16,15 +16,20 @@
   --hp-muted: #475569;
   --hp-line: #CBD5E1;
   --hp-good: #059669;
+  --hp-font: 'Source Sans 3', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
   min-height: 100vh;
   background:
     radial-gradient(ellipse 90% 60% at 100% 0%, rgba(29, 78, 216, 0.08), transparent 50%),
     radial-gradient(ellipse 70% 50% at 0% 100%, rgba(234, 88, 12, 0.06), transparent 45%),
     linear-gradient(180deg, #F8FAFC 0%, var(--hp-paper) 40%, var(--hp-paper-warm) 100%);
   color: var(--hp-ink);
-  font-family: 'DM Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+  font-family: var(--hp-font);
+  font-size: 16px;
+  line-height: 1.6;
+  letter-spacing: 0.01em;
   font-variant-numeric: tabular-nums;
   -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
 .hp-portal * { box-sizing: border-box; }
@@ -75,17 +80,17 @@
 .hp-topbar__jk span { color: var(--hp-gold); }
 
 .hp-topbar__name {
-  font-family: 'Space Grotesk', sans-serif;
+  font-family: var(--hp-font);
   font-size: 13px;
   font-weight: 600;
-  letter-spacing: 0.14em;
+  letter-spacing: 0.06em;
   text-transform: uppercase;
   color: #EDEBE6;
   white-space: nowrap;
 }
 
 .hp-topbar__fin {
-  font-family: 'Space Grotesk', sans-serif;
+  font-family: var(--hp-font);
   font-size: 12px;
   font-weight: 600;
   letter-spacing: 0.1em;
@@ -96,7 +101,7 @@
 
 .hp-topbar__cta {
   flex-shrink: 0;
-  font-family: 'Space Grotesk', sans-serif;
+  font-family: var(--hp-font);
   font-size: 12px;
   font-weight: 700;
   letter-spacing: 0.02em;
@@ -148,11 +153,11 @@
   border-left: 2px solid transparent;
   background: transparent;
   color: #948D81;
-  font-family: 'Space Grotesk', sans-serif;
-  font-size: 13px;
+  font-family: var(--hp-font);
+  font-size: 14px;
   font-weight: 500;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
+  letter-spacing: 0.02em;
+  text-transform: none;
   cursor: pointer;
   transition: background 0.15s, color 0.15s;
 }
@@ -185,7 +190,7 @@
 
 .hp-sidefoot__tag {
   margin-top: 10px;
-  font-family: 'IBM Plex Mono', monospace;
+  font-family: var(--hp-font);
   font-size: 9px;
   color: #5a6a78;
   line-height: 1.5;
@@ -198,7 +203,7 @@
   padding: 5px 0;
   border: none;
   background: none;
-  font-family: 'IBM Plex Mono', monospace;
+  font-family: var(--hp-font);
   font-size: 10px;
   color: #7C766B;
   cursor: pointer;
@@ -401,7 +406,7 @@
 }
 
 .hp-top__month {
-  font-family: 'IBM Plex Mono', monospace;
+  font-family: var(--hp-font);
   font-size: 10px;
   color: var(--hp-muted);
   letter-spacing: 0.1em;
@@ -409,7 +414,7 @@
 }
 
 .hp-top__title {
-  font-family: 'Space Grotesk', sans-serif;
+  font-family: var(--hp-font);
   font-size: 26px;
   font-weight: 700;
   letter-spacing: -0.02em;
@@ -418,7 +423,7 @@
 }
 
 .hp-top__badge {
-  font-family: 'IBM Plex Mono', monospace;
+  font-family: var(--hp-font);
   font-size: 10px;
   color: var(--hp-muted);
   background: #E8E4DC;
@@ -473,7 +478,7 @@
 }
 
 .hp-page-hero__title {
-  font-family: 'Space Grotesk', sans-serif;
+  font-family: var(--hp-font);
   font-size: clamp(26px, 3.4vw, 38px);
   font-weight: 700;
   letter-spacing: -0.03em;
@@ -484,7 +489,7 @@
 
 .hp-page-hero__lead {
   margin: 0;
-  font-family: 'Space Grotesk', sans-serif;
+  font-family: var(--hp-font);
   font-size: clamp(16px, 2vw, 18px);
   font-weight: 500;
   line-height: 1.5;
@@ -503,10 +508,10 @@
 }
 
 .hp-overview__headline {
-  font-family: 'Space Grotesk', sans-serif;
-  font-size: clamp(30px, 4.2vw, 44px);
-  font-weight: 700;
-  letter-spacing: -0.035em;
+  font-family: var(--hp-font);
+  font-size: clamp(28px, 3.8vw, 40px);
+  font-weight: 600;
+  letter-spacing: -0.02em;
   line-height: 1.1;
   margin: 0 0 16px;
   max-width: 24ch;
@@ -521,7 +526,7 @@
   margin: 0 0 16px;
   padding-left: 16px;
   border-left: 3px solid var(--hp-orange);
-  font-family: 'Space Grotesk', sans-serif;
+  font-family: var(--hp-font);
   font-size: 17px;
   font-weight: 600;
   line-height: 1.55;
@@ -558,7 +563,7 @@
 
 .hp-hero-next {
   margin: 18px 0 0;
-  font-family: 'IBM Plex Mono', monospace;
+  font-family: var(--hp-font);
   font-size: 12px;
   font-weight: 500;
   letter-spacing: 0.02em;
@@ -586,7 +591,7 @@
 
 .hp-proof__k {
   margin: 0 0 6px;
-  font-family: 'IBM Plex Mono', monospace;
+  font-family: var(--hp-font);
   font-size: 10px;
   font-weight: 600;
   letter-spacing: 0.08em;
@@ -618,7 +623,7 @@
 
 .hp-demo-picks__title {
   margin: 0;
-  font-family: 'Space Grotesk', sans-serif;
+  font-family: var(--hp-font);
   font-size: 17px;
   font-weight: 700;
   letter-spacing: -0.01em;
@@ -629,7 +634,7 @@
   border: none;
   background: none;
   padding: 0;
-  font-family: 'Space Grotesk', sans-serif;
+  font-family: var(--hp-font);
   font-size: 13px;
   font-weight: 600;
   color: var(--hp-link);
@@ -670,7 +675,7 @@
 }
 
 .hp-demo-pick__label {
-  font-family: 'Space Grotesk', sans-serif;
+  font-family: var(--hp-font);
   font-size: 15px;
   font-weight: 700;
   color: var(--hp-ink);
@@ -729,7 +734,7 @@
 
 .hp-founder-strip__name {
   margin: 0 0 4px;
-  font-family: 'Space Grotesk', sans-serif;
+  font-family: var(--hp-font);
   font-size: 15px;
   font-weight: 700;
   color: var(--hp-ink);
@@ -744,7 +749,7 @@
 
 .hp-founder-strip__go {
   flex-shrink: 0;
-  font-family: 'Space Grotesk', sans-serif;
+  font-family: var(--hp-font);
   font-size: 13px;
   font-weight: 600;
   color: var(--hp-link);
@@ -761,7 +766,7 @@
 
 .hp-next__title {
   margin: 0 0 16px;
-  font-family: 'Space Grotesk', sans-serif;
+  font-family: var(--hp-font);
   font-size: 17px;
   font-weight: 700;
   color: var(--hp-ink);
@@ -792,14 +797,14 @@
   border-radius: 50%;
   background: rgba(29, 78, 216, 0.1);
   color: var(--hp-blue-deep);
-  font-family: 'IBM Plex Mono', monospace;
+  font-family: var(--hp-font);
   font-size: 13px;
   font-weight: 600;
 }
 
 .hp-next__step-t {
   margin: 0 0 4px;
-  font-family: 'Space Grotesk', sans-serif;
+  font-family: var(--hp-font);
   font-size: 15px;
   font-weight: 700;
   color: var(--hp-ink);
@@ -828,7 +833,7 @@
   border: none;
   background: none;
   padding: 0;
-  font-family: 'Space Grotesk', sans-serif;
+  font-family: var(--hp-font);
   font-size: 14px;
   font-weight: 600;
   color: var(--hp-link);
@@ -850,7 +855,7 @@
 }
 
 .hp-page-title {
-  font-family: 'Space Grotesk', sans-serif;
+  font-family: var(--hp-font);
   font-size: clamp(26px, 3.2vw, 34px);
   font-weight: 700;
   letter-spacing: -0.03em;
@@ -869,7 +874,7 @@
 }
 
 .hp-section-h {
-  font-family: 'Space Grotesk', sans-serif;
+  font-family: var(--hp-font);
   font-size: 17px;
   font-weight: 700;
   letter-spacing: -0.01em;
@@ -919,7 +924,7 @@
 }
 
 .hp-contact__call {
-  font-family: 'Space Grotesk', sans-serif;
+  font-family: var(--hp-font);
   font-size: 14px;
   font-weight: 600;
   color: var(--hp-link);
@@ -966,7 +971,7 @@
 }
 
 .hp-overview__pillar-t {
-  font-family: 'Space Grotesk', sans-serif;
+  font-family: var(--hp-font);
   font-size: 18px;
   font-weight: 700;
   letter-spacing: -0.02em;
@@ -985,7 +990,7 @@
   border: none;
   background: none;
   padding: 0;
-  font-family: 'Space Grotesk', sans-serif;
+  font-family: var(--hp-font);
   font-size: 13px;
   font-weight: 600;
   color: var(--hp-link);
@@ -1059,7 +1064,7 @@
 }
 
 .hp-overview__schedule-w {
-  font-family: 'IBM Plex Mono', monospace;
+  font-family: var(--hp-font);
   font-size: 11px;
   letter-spacing: 0.03em;
   color: var(--hp-muted);
@@ -1071,7 +1076,7 @@
 }
 
 .hp-page-lead {
-  font-family: 'Space Grotesk', sans-serif;
+  font-family: var(--hp-font);
   font-size: clamp(17px, 2vw, 19px);
   font-weight: 600;
   line-height: 1.45;
@@ -1088,7 +1093,7 @@
 }
 
 .hp-build-nav__a {
-  font-family: 'Space Grotesk', sans-serif;
+  font-family: var(--hp-font);
   font-size: 13px;
   font-weight: 600;
   letter-spacing: 0.02em;
@@ -1237,7 +1242,7 @@
 .hp-build__head { margin-bottom: 14px; }
 
 .hp-build__title {
-  font-family: 'Space Grotesk', sans-serif;
+  font-family: var(--hp-font);
   font-size: 20px;
   font-weight: 700;
   letter-spacing: -0.02em;
@@ -1318,7 +1323,7 @@
 }
 
 .hp-timeline__n {
-  font-family: 'IBM Plex Mono', monospace;
+  font-family: var(--hp-font);
   font-size: 22px;
   font-weight: 500;
   line-height: 1;
@@ -1327,7 +1332,7 @@
 }
 
 .hp-timeline__title {
-  font-family: 'Space Grotesk', sans-serif;
+  font-family: var(--hp-font);
   font-size: 17px;
   font-weight: 700;
   margin: 0 0 6px;
@@ -1375,7 +1380,7 @@
 }
 
 .hp-demo-row__label {
-  font-family: 'Space Grotesk', sans-serif;
+  font-family: var(--hp-font);
   font-weight: 700;
   font-size: 14px;
   color: var(--hp-link);
@@ -1400,7 +1405,7 @@
 }
 
 .hp-prose__title {
-  font-family: 'Space Grotesk', sans-serif;
+  font-family: var(--hp-font);
   font-size: 20px;
   font-weight: 700;
   margin: 0 0 14px;
@@ -1443,14 +1448,14 @@
 }
 
 .hp-card__title {
-  font-family: 'Space Grotesk', sans-serif;
+  font-family: var(--hp-font);
   font-size: 15px;
   font-weight: 700;
   margin: 0;
 }
 
 .hp-card__meta {
-  font-family: 'IBM Plex Mono', monospace;
+  font-family: var(--hp-font);
   font-size: 10px;
   color: var(--hp-muted);
 }
@@ -1464,7 +1469,7 @@
 .hp-table th {
   padding: 8px 14px;
   text-align: left;
-  font-family: 'IBM Plex Mono', monospace;
+  font-family: var(--hp-font);
   font-size: 9px;
   font-weight: 500;
   letter-spacing: 0.08em;
@@ -1486,7 +1491,7 @@
 .hp-row-accent td { font-weight: 700; color: var(--hp-link); }
 
 .hp-num { text-align: right; }
-.hp-mono { font-family: 'IBM Plex Mono', monospace; font-size: 12px; }
+.hp-mono { font-family: var(--hp-font); font-size: 12px; }
 .hp-muted { color: var(--hp-muted); }
 .hp-good { color: var(--hp-good); font-weight: 600; }
 
@@ -1500,7 +1505,7 @@
 }
 
 .hp-kicker {
-  font-family: 'Space Grotesk', sans-serif;
+  font-family: var(--hp-font);
   font-size: 12px;
   font-weight: 600;
   letter-spacing: 0.08em;
@@ -1510,7 +1515,7 @@
 }
 
 .hp-lead {
-  font-family: 'Space Grotesk', sans-serif;
+  font-family: var(--hp-font);
   font-size: clamp(18px, 2.2vw, 22px);
   font-weight: 600;
   line-height: 1.45;
@@ -1539,7 +1544,7 @@
   align-items: center;
   padding: 10px 16px;
   border-radius: 6px;
-  font-family: 'Space Grotesk', sans-serif;
+  font-family: var(--hp-font);
   font-size: 13px;
   font-weight: 700;
   text-decoration: none;
@@ -1593,14 +1598,14 @@
 .hp-card--step { padding: 18px 16px; }
 
 .hp-step-n {
-  font-family: 'IBM Plex Mono', monospace;
+  font-family: var(--hp-font);
   font-size: 11px;
   color: var(--hp-accent);
   margin-bottom: 8px;
 }
 
 .hp-step-title {
-  font-family: 'Space Grotesk', sans-serif;
+  font-family: var(--hp-font);
   font-size: 16px;
   font-weight: 700;
   margin: 0 0 8px;
@@ -1615,7 +1620,7 @@
 }
 
 .hp-link {
-  font-family: 'Space Grotesk', sans-serif;
+  font-family: var(--hp-font);
   font-size: 13px;
   font-weight: 600;
   color: var(--hp-link);
@@ -1628,7 +1633,7 @@
   border: none;
   background: none;
   padding: 0;
-  font-family: 'Space Grotesk', sans-serif;
+  font-family: var(--hp-font);
   font-size: 14px;
   font-weight: 600;
   color: var(--hp-link);
@@ -1645,7 +1650,7 @@
 .hp-card--qbo { background: #FDFCFA; }
 
 .hp-pill {
-  font-family: 'IBM Plex Mono', monospace;
+  font-family: var(--hp-font);
   font-size: 9px;
   letter-spacing: 0.06em;
   text-transform: uppercase;
@@ -1736,7 +1741,7 @@
 }
 
 .hp-get__title {
-  font-family: 'Space Grotesk', sans-serif;
+  font-family: var(--hp-font);
   font-size: clamp(26px, 3vw, 34px);
   font-weight: 700;
   letter-spacing: -0.03em;
@@ -1760,7 +1765,7 @@
 }
 
 .hp-get__book {
-  font-family: 'Space Grotesk', sans-serif;
+  font-family: var(--hp-font);
   font-size: 14px;
   font-weight: 600;
   color: var(--hp-link);
@@ -1779,7 +1784,7 @@
 }
 
 .hp-get__form-title {
-  font-family: 'Space Grotesk', sans-serif;
+  font-family: var(--hp-font);
   font-size: 17px;
   font-weight: 700;
   margin: 0 0 14px;
@@ -1792,7 +1797,7 @@
 
 .hp-field span {
   display: block;
-  font-family: 'IBM Plex Mono', monospace;
+  font-family: var(--hp-font);
   font-size: 10px;
   letter-spacing: 0.06em;
   text-transform: uppercase;
@@ -1805,7 +1810,7 @@
   padding: 10px 12px;
   border: 1px solid var(--hp-line);
   border-radius: 6px;
-  font-family: 'DM Sans', sans-serif;
+  font-family: var(--hp-font);
   font-size: 14px;
   background: #FDFCFA;
 }
@@ -1825,7 +1830,7 @@
   border: none;
   border-radius: 6px;
   color: #1B1815;
-  font-family: 'Space Grotesk', sans-serif;
+  font-family: var(--hp-font);
   font-size: 14px;
   font-weight: 700;
   cursor: pointer;
@@ -1847,7 +1852,7 @@
 .hp-get__done {
   text-align: center;
   padding: 32px 12px;
-  font-family: 'Space Grotesk', sans-serif;
+  font-family: var(--hp-font);
   font-size: 18px;
   font-weight: 600;
 }
@@ -1914,7 +1919,7 @@
     border: none;
     background: transparent;
     color: #948D81;
-    font-family: 'Space Grotesk', sans-serif;
+    font-family: var(--hp-font);
     font-size: 11px;
     font-weight: 600;
     letter-spacing: 0.04em;
