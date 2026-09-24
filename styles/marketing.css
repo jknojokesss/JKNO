@@ -90,10 +90,10 @@
 }
 
 .m-btn--primary {
-  background: var(--m-gold);
-  color: var(--m-ink);
+  background: var(--m-orange);
+  color: #fff;
 }
-.m-btn--primary:hover { background: var(--m-gold-dark); }
+.m-btn--primary:hover { background: #C2410C; }
 .m-btn--primary:disabled { opacity: 0.5; cursor: not-allowed; }
 
 .m-btn--pop {
