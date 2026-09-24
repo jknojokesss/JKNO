@@ -868,8 +868,8 @@
   -webkit-appearance: none;
   appearance: none;
   background:
-    radial-gradient(ellipse 80% 50% at 50% 0%, rgba(29, 78, 216, 0.22), transparent 55%),
-    #050608;
+    radial-gradient(ellipse 70% 45% at 50% 0%, rgba(71, 85, 105, 0.35), transparent 58%),
+    #07090d;
   overflow: hidden;
   transition: background 0.9s ease, opacity 0.35s ease;
 }
@@ -914,12 +914,13 @@
 
 .m-intro__mark {
   font-family: 'Playfair Display', serif;
-  font-size: clamp(72px, 14vw, 132px);
+  font-size: clamp(68px, 13vw, 120px);
   font-weight: 700;
-  letter-spacing: -3px;
+  letter-spacing: -0.04em;
   line-height: 1;
   opacity: 1;
   transform: translateY(0);
+  text-shadow: 0 8px 40px rgba(0, 0, 0, 0.35);
 }
 
 .m-intro--mark .m-intro__mark {
@@ -943,13 +944,15 @@
 .m-intro__j,
 .m-intro__k,
 .m-intro__dot {
-  display: inline-block;
   -webkit-text-fill-color: currentColor;
 }
 
-.m-intro__j { color: #FB923C; }
-.m-intro__k { color: #38BDF8; }
-.m-intro__dot { color: #FACC15; }
+.m-intro__j { color: #C4A882; }
+.m-intro__k { color: #8B9DAD; }
+.m-intro__dot {
+  color: #C9A84C;
+  margin-left: 0.02em;
+}
 
 .m-intro__line {
   font-family: 'IBM Plex Mono', monospace;
@@ -998,9 +1001,9 @@
 
 .m-intro__progress {
   width: min(300px, 72vw);
-  height: 2px;
+  height: 1px;
   margin: 18px auto 0;
-  background: rgba(201, 168, 76, 0.18);
+  background: rgba(148, 163, 184, 0.22);
   border-radius: 1px;
   overflow: hidden;
   opacity: 0;
@@ -1014,7 +1017,7 @@
 
 .m-intro__progress-fill {
   height: 100%;
-  background: var(--m-gold);
+  background: linear-gradient(90deg, #C4A882 0%, #8B9DAD 100%);
   transition: width 0.04s linear;
 }
 
