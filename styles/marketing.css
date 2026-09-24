@@ -17,7 +17,7 @@
   color: var(--m-ink);
   --m-font: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto,
     'Helvetica Neue', Arial, sans-serif;
-  --m-serif: Georgia, 'Times New Roman', Times, serif;
+  --m-serif: 'Palatino Linotype', Palatino, 'Book Antiqua', Georgia, serif;
   font-family: var(--m-font);
   font-size: 16px;
   line-height: 1.6;
@@ -949,14 +949,14 @@
 
 .m-intro__mark {
   font-family: 'Playfair Display', serif;
-  font-size: clamp(68px, 13vw, 120px);
-  font-weight: 700;
-  letter-spacing: -0.04em;
+  font-size: clamp(56px, 11vw, 96px);
+  font-weight: 600;
+  letter-spacing: -0.03em;
   line-height: 1;
   opacity: 1;
   transform: translateY(0);
   display: inline-block;
-  filter: drop-shadow(0 10px 32px rgba(0, 0, 0, 0.5));
+  filter: drop-shadow(0 6px 24px rgba(0, 0, 0, 0.38));
 }
 
 .m-intro--mark .m-intro__mark {
@@ -986,23 +986,19 @@
 
 .m-intro__j {
   text-shadow:
-    0 1px 0 rgba(255, 255, 255, 0.28),
-    0 -1px 0 rgba(0, 0, 0, 0.45),
-    0 2px 0 #5C554C,
-    0 5px 0 #3D3832,
-    0 10px 22px rgba(0, 0, 0, 0.55),
-    -4px 3px 14px rgba(29, 78, 216, 0.22);
+    0 1px 0 rgba(255, 255, 255, 0.22),
+    0 2px 3px rgba(0, 0, 0, 0.45),
+    0 6px 18px rgba(0, 0, 0, 0.42),
+    -2px 2px 12px rgba(29, 78, 216, 0.14);
 }
 
 .m-intro__k {
   margin-left: -0.03em;
   text-shadow:
-    0 1px 0 rgba(255, 255, 255, 0.28),
-    0 -1px 0 rgba(0, 0, 0, 0.45),
-    0 2px 0 #5C554C,
-    0 5px 0 #3D3832,
-    0 10px 22px rgba(0, 0, 0, 0.55),
-    4px 3px 14px rgba(234, 88, 12, 0.18);
+    0 1px 0 rgba(255, 255, 255, 0.22),
+    0 2px 3px rgba(0, 0, 0, 0.45),
+    0 6px 18px rgba(0, 0, 0, 0.42),
+    2px 2px 12px rgba(234, 88, 12, 0.12);
 }
 
 .m-intro__dot {
@@ -1010,11 +1006,9 @@
   color: #D4B96A;
   margin-left: 0.02em;
   text-shadow:
-    0 1px 0 rgba(255, 255, 255, 0.2),
-    0 -1px 0 rgba(40, 32, 12, 0.55),
-    0 2px 0 #6B5428,
-    0 6px 16px rgba(0, 0, 0, 0.5),
-    0 0 32px rgba(201, 168, 76, 0.4);
+    0 1px 0 rgba(255, 255, 255, 0.18),
+    0 2px 4px rgba(0, 0, 0, 0.4),
+    0 0 20px rgba(201, 168, 76, 0.28);
 }
 
 .m-intro__line {
@@ -1080,12 +1074,44 @@
 
 .m-intro__progress-fill {
   height: 100%;
-  background: linear-gradient(90deg, #C4A882 0%, #8B9DAD 100%);
+  background: linear-gradient(90deg, rgba(201, 168, 76, 0.5) 0%, var(--m-gold) 100%);
   transition: width 0.04s linear;
 }
 
 .m-intro--out .m-intro__progress {
   opacity: 0;
+}
+
+@media (min-width: 900px) {
+  .m-intro {
+    background:
+      radial-gradient(ellipse 55% 38% at 50% 0%, rgba(71, 85, 105, 0.22), transparent 52%),
+      #0a0c10;
+  }
+
+  .m-intro__mark {
+    font-size: 76px;
+    filter: drop-shadow(0 4px 18px rgba(0, 0, 0, 0.32));
+  }
+
+  .m-intro__line {
+    font-size: 14px;
+    font-weight: 400;
+    color: rgba(203, 213, 225, 0.52);
+    margin-top: 22px;
+  }
+
+  .m-intro__progress {
+    width: 220px;
+    margin-top: 14px;
+  }
+
+  .m-intro__skip {
+    top: 24px;
+    right: 28px;
+    border-color: rgba(148, 163, 184, 0.28);
+    background: rgba(15, 23, 42, 0.4);
+  }
 }
 
 @keyframes m-intro-in {

@@ -18,7 +18,7 @@
   --hp-good: #059669;
   --hp-font: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto,
     'Helvetica Neue', Arial, sans-serif;
-  --hp-serif: Georgia, 'Times New Roman', Times, serif;
+  --hp-serif: 'Palatino Linotype', Palatino, 'Book Antiqua', Georgia, serif;
   min-height: 100vh;
   background:
     radial-gradient(ellipse 90% 60% at 100% 0%, rgba(29, 78, 216, 0.08), transparent 50%),
@@ -1870,12 +1870,126 @@
 }
 
 @media (min-width: 900px) {
+  .hp-portal {
+    font-size: 17px;
+    line-height: 1.65;
+    --hp-ink: #1a2332;
+    --hp-muted: #52607a;
+  }
+
+  .hp-topbar {
+    height: 52px;
+    padding: 0 28px;
+    box-shadow: inset 0 -2px 0 rgba(29, 78, 216, 0.85);
+  }
+
+  .hp-topbar__jk {
+    font-size: 24px;
+    font-weight: 600;
+  }
+
+  .hp-topbar__name {
+    text-transform: none;
+    letter-spacing: 0.01em;
+    font-weight: 500;
+    font-size: 14px;
+  }
+
+  .hp-topbar__fin {
+    text-transform: none;
+    letter-spacing: 0;
+    font-weight: 400;
+    font-size: 13px;
+    color: #a8a29a;
+  }
+
+  .hp-side {
+    width: 220px;
+    padding: 24px 14px;
+  }
+
+  .hp-navbtn {
+    font-size: 15px;
+    padding: 11px 12px;
+  }
+
+  .hp-overview__hero {
+    margin: 0 -32px 32px;
+    padding: 44px 40px 48px;
+  }
+
+  .hp-overview__hero.hp-anim-sweep::after {
+    display: none;
+  }
+
+  .hp-overview__hero .hp-anim {
+    animation: none !important;
+    opacity: 1 !important;
+    filter: none !important;
+    transform: none !important;
+  }
+
+  .hp-overview__headline {
+    font-size: 36px;
+    font-weight: 500;
+    line-height: 1.12;
+    max-width: 22ch;
+  }
+
+  .hp-overview__deck {
+    font-size: 16px;
+    line-height: 1.7;
+    max-width: 56ch;
+  }
+
+  .hp-page-hero__title {
+    font-weight: 500;
+  }
+
+  .hp-anim--hero,
+  .hp-anim--in {
+    animation-duration: 0.45s;
+  }
+
+  @keyframes hp-fly-hero {
+    from {
+      opacity: 0;
+      transform: translateX(-16px);
+      filter: none;
+    }
+    to {
+      opacity: 1;
+      transform: translateX(0);
+      filter: none;
+    }
+  }
+
+  @keyframes hp-fly-in {
+    from {
+      opacity: 0;
+      transform: translateY(8px);
+      filter: none;
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+      filter: none;
+    }
+  }
+
   .hp-overview__pillars {
     grid-template-columns: repeat(3, minmax(0, 1fr));
   }
 
   .hp-overview__more {
     grid-column: 1 / -1;
+  }
+
+  .hp-proof__v,
+  .hp-demo-pick__cap,
+  .hp-next__step-d {
+    font-size: 15px;
+    line-height: 1.6;
   }
 }
 

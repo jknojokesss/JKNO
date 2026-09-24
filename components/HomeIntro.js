@@ -2,7 +2,24 @@ import { useState, useEffect, useCallback, useRef } from 'react'
 import { markHomeIntroSeen, shouldSkipHomeIntro } from '../lib/homeIntro'
 
 const INTRO_LINE = 'Loading your customized portal...'
-const TYPE_MS = 36
+
+function introTiming() {
+  const desktop =
+    typeof window !== 'undefined' && window.matchMedia('(min-width: 900px)').matches
+  const typeMs = desktop ? 26 : 36
+  const typeDone = INTRO_LINE.length * typeMs
+  const markDelay = desktop ? 420 : 650
+  const afterType = desktop ? 320 : 480
+  const holdBeforeOut = desktop ? 520 : 750
+  const outDuration = desktop ? 320 : 400
+  return {
+    typeMs,
+    revealAt: markDelay + typeDone + afterType,
+    outAt: markDelay + typeDone + afterType + holdBeforeOut,
+    endAt: markDelay + typeDone + afterType + holdBeforeOut + outDuration,
+    markDelay,
+  }
+}
 
 function introShouldCover() {
   if (typeof window === 'undefined') return true
@@ -43,18 +60,15 @@ export default function HomeIntro({ onStart, onReveal }) {
 
     onStartRef.current?.()
 
-    const typeDone = INTRO_LINE.length * TYPE_MS
-    const revealAt = 650 + typeDone + 480
-    const outAt = revealAt + 750
-    const endAt = outAt + 400
+    const t = introTiming()
 
-    const t1 = window.setTimeout(() => setPhase('line'), 650)
+    const t1 = window.setTimeout(() => setPhase('line'), t.markDelay)
     const t2 = window.setTimeout(() => {
       setPhase('reveal')
       onRevealRef.current?.()
-    }, revealAt)
-    const t3 = window.setTimeout(() => setPhase('out'), outAt)
-    const t4 = window.setTimeout(finish, endAt)
+    }, t.revealAt)
+    const t3 = window.setTimeout(() => setPhase('out'), t.outAt)
+    const t4 = window.setTimeout(finish, t.endAt)
 
     return () => {
       window.clearTimeout(t1)
@@ -67,13 +81,14 @@ export default function HomeIntro({ onStart, onReveal }) {
   useEffect(() => {
     if (phase !== 'line' || doneRef.current) return undefined
 
+    const { typeMs } = introTiming()
     setTyped('')
     let i = 0
     const id = window.setInterval(() => {
       i += 1
       setTyped(INTRO_LINE.slice(0, i))
       if (i >= INTRO_LINE.length) window.clearInterval(id)
-    }, TYPE_MS)
+    }, typeMs)
 
     return () => window.clearInterval(id)
   }, [phase])
