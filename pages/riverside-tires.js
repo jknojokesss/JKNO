@@ -55,14 +55,14 @@ const ORDER_ROWS = ORDER_LINES.map((r) => {
   return { ...r, profit, margin }
 })
 
-const ITEMS = [
-  { name: '235/65/17 Bridgestone Ecopia', orders: 48, qty: 96, rev: 11520, cost: 7200 },
-  { name: '205/55/16 Michelin Primacy', orders: 41, qty: 82, rev: 8610, cost: 5330 },
-  { name: '225/60/17 Goodyear Assurance', orders: 37, qty: 74, rev: 8140, cost: 5180 },
-  { name: 'Tire plug / patch repair', orders: 62, qty: 62, rev: 1550, cost: 310 },
-  { name: 'Tire rotation (set)', orders: 55, qty: 55, rev: 1925, cost: 275 },
-  { name: '245/70/17 BFGoodrich A/T', orders: 28, qty: 56, rev: 7840, cost: 4760 },
-]
+// Same lines as Orders — one row per ticket (no conflicting “full month” item totals).
+const WEEK_ITEMS = ORDER_ROWS.map((r) => ({
+  name: r.item,
+  orders: 1,
+  qty: 1,
+  rev: r.sale,
+  cost: r.cost,
+}))
 
 const STOCK = [
   { size: '235/65/17', desc: 'Bridgestone Ecopia', onHand: 8, reorder: 6, unitCost: 75 },
@@ -99,9 +99,39 @@ const cell = (align = 'left', extra = {}) => ({
   ...extra,
 })
 
+function OrderCards({ rows }) {
+  return (
+    <div className="rt-order-cards">
+      {rows.map((r) => (
+        <article key={r.ticket} className="rt-order-card">
+          <div className="rt-order-card__top">
+            <span className="rt-order-card__ticket">{r.ticket}</span>
+            <span className="rt-order-card__date">{r.date}</span>
+          </div>
+          <p className="rt-order-card__item">{r.item}</p>
+          <dl className="rt-order-card__nums">
+            <div><dt>Sale</dt><dd>{fmtC(r.sale)}</dd></div>
+            <div><dt>Cost</dt><dd>{fmtC(r.cost)}</dd></div>
+            <div><dt>Profit</dt><dd className="rt-order-card__profit">{fmtC(r.profit)}</dd></div>
+            <div><dt>Margin</dt><dd>{pct(r.margin)}</dd></div>
+          </dl>
+          <p className="rt-order-card__match">{r.source}</p>
+        </article>
+      ))}
+    </div>
+  )
+}
+
 function DemoShell({ tab, setTab, right, children }) {
   return (
     <div className="rt-shell">
+      <div className="rt-mobilenav" aria-label="Sections">
+        {NAV.map((n) => (
+          <button key={n.id} type="button" className={tab === n.id ? 'on' : ''} onClick={() => setTab(n.id)}>
+            {n.label}
+          </button>
+        ))}
+      </div>
       <aside className="rt-side">
         <div style={{ padding: '2px 8px 4px' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
@@ -150,33 +180,20 @@ function DemoShell({ tab, setTab, right, children }) {
           ))}
         </nav>
         <div className="rt-foot">
-          <div style={{ fontFamily: mono, fontSize: 9, color: '#7C766B', lineHeight: 1.6 }}>
-            SAMPLE DEMO
-            <br />
-            <a href="https://jknojokes.com" style={{ color: '#948D81', textDecoration: 'underline' }}>
-              JK No Jokes Financials
-            </a>
-          </div>
+          <a href="https://jknojokes.com" style={{ fontFamily: mono, fontSize: 10, color: '#948D81', textDecoration: 'underline' }}>
+            JK No Jokes Financials
+          </a>
         </div>
       </aside>
       <main className="rt-main">
         <div className="rt-status">
           <span style={{ fontFamily: mono, fontSize: 11, color: C.muted, letterSpacing: '0.05em' }}>
-            {BIZ} · FICTITIOUS SHOP
+            {BIZ} · Sample demo
           </span>
-          {right || (
-            <span style={{ fontFamily: mono, fontSize: 11, color: C.muted }}>Demo data · not QuickBooks</span>
-          )}
+          {right || null}
         </div>
         <div className="rt-content">{children}</div>
       </main>
-      <div className="rt-mobilenav">
-        {NAV.map((n) => (
-          <button key={n.id} type="button" className={tab === n.id ? 'on' : ''} onClick={() => setTab(n.id)}>
-            {n.label}
-          </button>
-        ))}
-      </div>
     </div>
   )
 }
@@ -209,7 +226,7 @@ export default function RiversideTires() {
   const [aiQ, setAiQ] = useState('')
   const [aiA, setAiA] = useState('')
 
-  const sortedItems = [...ITEMS].sort((a, b) => b[sort] - a[sort])
+  const sortedItems = [...WEEK_ITEMS].sort((a, b) => b[sort] - a[sort])
   const openRegister = ORDER_ROWS.reduce(
     (acc, r) => ({
       sale: acc.sale + r.sale,
@@ -230,7 +247,10 @@ export default function RiversideTires() {
     const q = aiQ.toLowerCase()
     let ans = `Matched tickets this week: ${fmt0(totalProfit)} est. gross on ${fmt0(totalRev)} sales.`
     if (q.includes('margin')) ans = `Average margin on shown lines is ${pct(ORDER_ROWS.reduce((s, r) => s + r.margin, 0) / ORDER_ROWS.length)}.`
-    if (q.includes('stock') || q.includes('reorder')) ans = `${STOCK.filter((s) => s.onHand <= s.reorder).length} sizes at or below reorder.`
+    if (q.includes('stock') || q.includes('reorder')) {
+      const n = STOCK.filter((s) => s.onHand <= s.reorder).length
+      ans = `${n} size${n === 1 ? '' : 's'} at or below reorder in the sample stock list.`
+    }
     setAiA(ans)
   }
 
@@ -256,14 +276,27 @@ export default function RiversideTires() {
         .rt-status{display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid ${C.hair};padding:12px 30px;gap:12px;flex-wrap:wrap}
         .rt-content{padding:26px 30px 56px;max-width:1160px}
         .rt-mobilenav{display:none}
+        .rt-order-cards{display:none}
+        .rt-order-card{background:${C.card};border:1px solid ${C.hair};padding:14px 16px}
+        .rt-order-card__top{display:flex;justify-content:space-between;gap:12px;margin-bottom:8px;font-family:${mono};font-size:11px;color:${C.muted}}
+        .rt-order-card__ticket{color:${C.ink};font-weight:600;white-space:nowrap}
+        .rt-order-card__date{white-space:nowrap}
+        .rt-order-card__item{font-size:14px;line-height:1.4;margin:0 0 12px;color:${C.ink}}
+        .rt-order-card__nums{display:grid;grid-template-columns:1fr 1fr;gap:10px 16px;margin:0}
+        .rt-order-card__nums dt{font-family:${ui};font-size:10px;color:${C.muted};text-transform:uppercase;letter-spacing:.06em}
+        .rt-order-card__nums dd{margin:2px 0 0;font-family:${mono};font-size:15px;font-weight:500;color:${C.ink}}
+        .rt-order-card__profit{color:${C.green}!important;font-weight:600!important}
+        .rt-order-card__match{margin:12px 0 0;font-size:11px;color:${C.sub}}
         @media(max-width:860px){
           .rt-shell{flex-direction:column}
           .rt-side{display:none}
-          .rt-mobilenav{display:flex;overflow-x:auto;gap:4px;padding:8px 10px;background:${THEME.side};position:sticky;top:0;z-index:9;-webkit-overflow-scrolling:touch;box-shadow:inset 0 -3px 0 ${THEME.accent}}
+          .rt-mobilenav{display:flex;overflow-x:auto;gap:4px;padding:8px 10px;background:${THEME.side};position:sticky;top:0;z-index:20;-webkit-overflow-scrolling:touch;box-shadow:inset 0 -3px 0 ${THEME.accent}}
           .rt-mobilenav button{flex-shrink:0;border:none;background:rgba(255,255,255,.06);color:#948D81;font-family:${head};font-size:11px;font-weight:500;letter-spacing:.04em;text-transform:uppercase;padding:8px 12px;cursor:pointer;white-space:nowrap}
           .rt-mobilenav button.on{background:rgba(176,40,28,.2);color:#fff;box-shadow:inset 0 -2px 0 ${THEME.accent}}
           .rt-content{padding:18px 14px 48px}
           .rt-status{padding:10px 14px}
+          .rt-order-table{display:none}
+          .rt-order-cards{display:flex;flex-direction:column;gap:10px}
         }
       `}</style>
 
@@ -282,7 +315,7 @@ export default function RiversideTires() {
           <>
             <PageHead
               title="Orders"
-              sub="Register tickets matched to distributor invoices. Sample numbers — not what’s in QuickBooks."
+              sub="Register tickets matched to distributor cost. Same 7-day sample as the dashboard register strip."
             />
             <div style={{ display: 'flex', gap: 12, marginBottom: 20, flexWrap: 'wrap' }}>
               {[
@@ -298,7 +331,8 @@ export default function RiversideTires() {
                 </div>
               ))}
             </div>
-            <div style={{ background: C.card, border: `1px solid ${C.hair}`, overflow: 'auto' }}>
+            <OrderCards rows={ORDER_ROWS} />
+            <div className="rt-order-table" style={{ background: C.card, border: `1px solid ${C.hair}`, overflow: 'auto' }}>
               <table style={{ width: '100%', borderCollapse: 'collapse', minWidth: 720 }}>
                 <thead>
                   <tr>
@@ -333,13 +367,13 @@ export default function RiversideTires() {
 
         {tab === 'dashboard' && (
           <>
-            <PageHead title="Dashboard" sub="Open month at the register, then closed-month books below. Sample demo." />
+            <PageHead title="Dashboard" sub="Register week (live-style) and closed month books are separate on purpose." />
             <div style={{ ...panel, marginBottom: 28, cursor: 'pointer' }} onClick={() => setTab('orders')}>
               <div style={{ fontFamily: head, fontSize: 13, fontWeight: 700, color: C.ink, letterSpacing: '0.08em', textTransform: 'uppercase' }}>
-                June · At the register
+                Last 7 days · At the register
               </div>
               <div style={{ fontFamily: ui, fontSize: 11, color: C.muted, marginTop: 3, marginBottom: 12 }}>
-                Clover sales · distributor cost · not closed books
+                {ORDER_ROWS.length} tickets in the sample · Clover sales · distributor cost
               </div>
               <div style={{ display: 'flex', flexWrap: 'wrap' }}>
                 {[
@@ -357,7 +391,7 @@ export default function RiversideTires() {
               </div>
             </div>
             <div style={{ fontFamily: head, fontSize: 13, fontWeight: 600, color: C.red, letterSpacing: '0.18em', textTransform: 'uppercase' }}>
-              Net profit · {last.label} 2026
+              Net profit · {last.label} 2026 · Books (closed)
             </div>
             <div style={{ fontFamily: head, fontSize: 56, fontWeight: 700, color: C.ink, lineHeight: 1, margin: '6px 0 16px' }}>{fmt0(last.profit)}</div>
             <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap' }}>
@@ -377,7 +411,7 @@ export default function RiversideTires() {
 
         {tab === 'financials' && (
           <>
-            <PageHead title="Financials" sub="Official-style P&amp;L from QuickBooks sync. Sample months." />
+            <PageHead title="Financials" sub="Closed-month P&amp;L shape. Not tied to the 7-day register sample on Orders." />
             <table style={{ width: '100%', borderCollapse: 'collapse', background: C.card, border: `1px solid ${C.hair}` }}>
               <thead>
                 <tr>
@@ -405,7 +439,7 @@ export default function RiversideTires() {
 
         {tab === 'inventory' && (
           <>
-            <PageHead title="Sales & Items" sub="Clover line items ranked by revenue — June sample." />
+            <PageHead title="Sales & Items" sub="Same ticket lines as Orders, sorted by revenue." />
             <div style={{ marginBottom: 12, display: 'flex', gap: 6, flexWrap: 'wrap' }}>
               {[['rev', 'Revenue'], ['orders', 'Orders'], ['qty', 'Units']].map(([k, l]) => (
                 <button
@@ -484,7 +518,7 @@ export default function RiversideTires() {
 
         {tab === 'ai' && (
           <>
-            <PageHead title="Ask" sub="Answers from your synced books and register — sample responses." />
+            <PageHead title="Ask" sub="Sample answers from the demo ticket set." />
             <div style={{ ...panel, maxWidth: 640 }}>
               <div style={{ display: 'flex', gap: 8, marginBottom: 12 }}>
                 <input
