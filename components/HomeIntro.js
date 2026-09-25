@@ -6,12 +6,14 @@ const INTRO_LINE = 'Loading your customized portal...'
 function introTiming() {
   const desktop =
     typeof window !== 'undefined' && window.matchMedia('(min-width: 900px)').matches
-  const typeMs = desktop ? 26 : 36
+  const mobile =
+    typeof window !== 'undefined' && window.matchMedia('(max-width: 860px)').matches
+  const typeMs = desktop ? 26 : mobile ? 30 : 36
   const typeDone = INTRO_LINE.length * typeMs
-  const markDelay = desktop ? 420 : 650
-  const afterType = desktop ? 320 : 480
-  const holdBeforeOut = desktop ? 520 : 750
-  const outDuration = desktop ? 320 : 400
+  const markDelay = desktop ? 420 : mobile ? 380 : 650
+  const afterType = desktop ? 320 : mobile ? 260 : 480
+  const holdBeforeOut = desktop ? 520 : mobile ? 400 : 750
+  const outDuration = desktop ? 320 : mobile ? 280 : 400
   return {
     typeMs,
     revealAt: markDelay + typeDone + afterType,

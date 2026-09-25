@@ -26,6 +26,21 @@ const NAV = [
 
 ]
 
+/** Mobile: high-intent tabs first; Get started is pinned outside the scroll row. */
+const MOBILE_NAV = [
+
+  { id: 'overview', label: 'Overview' },
+
+  { id: 'demos', label: 'Demos' },
+
+  { id: 'about', label: 'About' },
+
+  { id: 'build', label: 'Build' },
+
+  { id: 'how', label: 'How' },
+
+]
+
 
 
 const HOW = [
@@ -309,9 +324,12 @@ function Screen({ tab, form, setForm, onSubmit, submitted, submitting, onNav }) 
             <span className="hp-overview__headline-accent hp-anim hp-anim--hero hp-anim--d1">Numbers that tie out.</span>
           </h1>
 
-          <p className="hp-overview__hook hp-anim hp-anim--in hp-anim--d2">
+          <p className="hp-overview__hook hp-overview__hook--wide hp-anim hp-anim--in hp-anim--d2">
             You&rsquo;re already in it. Sidebar, top bar, these screens. Same shell I build
             for your shop.
+          </p>
+          <p className="hp-overview__hook hp-overview__hook--narrow hp-anim hp-anim--in hp-anim--d2">
+            You&rsquo;re already in it. Top bar, these tabs, same portal shell I build for your shop.
           </p>
 
           <p className="hp-overview__deck hp-anim hp-anim--in hp-anim--d3">
@@ -840,17 +858,29 @@ export default function HomePortal({ live, form, setForm, onSubmit, submitted, s
 
 
 
-      <div className="hp-mobilenav">
+      <div className="hp-mobilenav-bar">
 
-        {NAV.map((n) => (
+        <div className="hp-mobilenav" aria-label="Site sections">
 
-          <button key={n.id} type="button" className={tab === n.id ? 'is-on' : ''} onClick={() => pick(n.id)}>
+          {MOBILE_NAV.map((n) => (
 
-            {n.label}
+            <button key={n.id} type="button" className={tab === n.id ? 'is-on' : ''} onClick={() => pick(n.id)}>
 
-          </button>
+              {n.label}
 
-        ))}
+            </button>
+
+          ))}
+
+        </div>
+
+        <button
+          type="button"
+          className={`hp-mobilenav__cta${tab === 'contact' ? ' is-on' : ''}`}
+          onClick={() => pick('contact')}
+        >
+          Get started
+        </button>
 
       </div>
 
