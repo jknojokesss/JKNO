@@ -4,6 +4,7 @@ import { useRouter } from 'next/router'
 import { supabase } from '../lib/supabase'
 import { isDemoEmbedQuery } from '../lib/demoEmbed'
 import { DEMO_UI, DEMO_HEAD, DEMO_FONT_LINK } from '../lib/demoFonts'
+import { DEMO_AS_OF as AS_OF } from '../lib/demoAsOf'
 
 // ─────────────────────────────────────────────────────────────────────────
 // Riverstone Roofing — management portal demo. The business name and
@@ -30,8 +31,6 @@ const MUTED = '#7A828C' // slate lightened for secondary text
 const serif = DEMO_HEAD
 const sans = DEMO_UI
 
-// The demo dataset is pinned to this date so aging and the forecast are stable.
-const AS_OF = new Date('2026-08-11T00:00:00Z')
 const DAY = 86400000
 const dt = (s) => new Date(s + 'T00:00:00Z')
 const daysBetween = (a, b) => Math.round((b - a) / DAY)

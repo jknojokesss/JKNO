@@ -140,7 +140,7 @@ export default function ApplianceRepair() {
         <main className="ar-main">
           <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:'24px', flexWrap:'wrap', gap:'8px' }}>
             <div>
-              <div style={{ fontFamily:'DM Mono, monospace', fontSize:'9px', color:FAINT, letterSpacing:'.1em', textTransform:'uppercase', marginBottom:'3px' }}>June 2026</div>
+              <div style={{ fontFamily:'DM Mono, monospace', fontSize:'9px', color:FAINT, letterSpacing:'.1em', textTransform:'uppercase', marginBottom:'3px' }}>September 2026</div>
               <div style={{ fontFamily:'Cormorant Garamond, serif', fontSize:'22px', fontWeight:600, color:INK }}>{tabs.find(t=>t.id===tab)?.label || 'Dashboard'}</div>
             </div>
             <div style={{ fontFamily:'DM Mono, monospace', fontSize:'10px', color:FAINT, background:'#EEF1F5', padding:'5px 12px', borderRadius:'20px' }}>Sample · JK No Jokes</div>

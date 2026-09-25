@@ -111,7 +111,7 @@ export default function HarborfieldProperties() {
         <main className="main">
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '22px', flexWrap: 'wrap', gap: '8px' }}>
             <div>
-              <div style={{ fontFamily: DEMO_MONO, fontSize: '9px', color: MUTED, letterSpacing: '.1em', textTransform: 'uppercase' }}>June 2026</div>
+              <div style={{ fontFamily: DEMO_MONO, fontSize: '9px', color: MUTED, letterSpacing: '.1em', textTransform: 'uppercase' }}>September 2026</div>
               <div style={{ fontFamily: DEMO_HEAD, fontSize: '22px', fontWeight: 600 }}>{NAV.find((n) => n.id === tab)?.label}</div>
             </div>
             <div style={{ fontFamily: DEMO_MONO, fontSize: '10px', color: MUTED, background: '#E8EDF2', padding: '5px 12px', borderRadius: '20px' }}>Sample · JK No Jokes</div>
@@ -120,7 +120,7 @@ export default function HarborfieldProperties() {
           {tab === 'portfolio' && (
             <>
               <div className="kpi-row">
-                <Kpi k="Rent roll" v={money(totalRoll)} sub="June 2026" />
+                <Kpi k="Rent roll" v={money(totalRoll)} sub="September 2026" />
                 <Kpi k="Collected MTD" v="96.2%" sub="of rent roll" color={GREEN} />
                 <Kpi k="Delinquent" v={money(totalDelinquent)} sub="11 tenants" color={RED} />
                 <Kpi k="Vacancy" v={fmtPct((totalVacant / totalDoors) * 100)} sub={`${totalVacant} of ${totalDoors} doors`} />

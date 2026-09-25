@@ -17,10 +17,10 @@ const NAV = [
 ]
 
 const PIPELINE = [
-  { id: 'PO-2841', vendor: 'Shenzhen Apex', status: 'In transit', eta: '2026-06-18', value: 48200, landed: 52840, stage: 3 },
-  { id: 'PO-2836', vendor: 'Guangzhou Bright', status: 'At port', eta: '2026-06-12', value: 31400, landed: 34680, stage: 4 },
-  { id: 'PO-2830', vendor: 'Ningbo Home Co', status: 'Customs hold', eta: '2026-06-08', value: 22100, landed: 24800, stage: 4 },
-  { id: 'PO-2825', vendor: 'Shenzhen Apex', status: 'Received', eta: '2026-05-28', value: 55600, landed: 61160, stage: 5 },
+  { id: 'PO-2841', vendor: 'Shenzhen Apex', status: 'In transit', eta: '2026-09-18', value: 48200, landed: 52840, stage: 3 },
+  { id: 'PO-2836', vendor: 'Guangzhou Bright', status: 'At port', eta: '2026-09-12', value: 31400, landed: 34680, stage: 4 },
+  { id: 'PO-2830', vendor: 'Ningbo Home Co', status: 'Customs hold', eta: '2026-09-08', value: 22100, landed: 24800, stage: 4 },
+  { id: 'PO-2825', vendor: 'Shenzhen Apex', status: 'Received', eta: '2026-08-28', value: 55600, landed: 61160, stage: 5 },
   { id: 'PO-2819', vendor: 'Dongguan Pack', status: 'Draft', eta: '—', value: 18900, landed: 20800, stage: 1 },
 ]
 
@@ -35,10 +35,10 @@ const INVENTORY = [
 ]
 
 const ORDERS = [
-  { id: 'SO-8821', customer: 'Urban Home Co', date: '2026-06-04', lines: 4, total: 8420, margin: 28.4, status: 'Picking' },
-  { id: 'SO-8818', customer: 'Lakeside Retail', date: '2026-06-03', lines: 2, total: 3180, margin: 31.2, status: 'Shipped' },
-  { id: 'SO-8814', customer: 'Main St Mercantile', date: '2026-06-02', lines: 6, total: 12400, margin: 24.8, status: 'Invoiced' },
-  { id: 'SO-8809', customer: 'Coastal Living', date: '2026-06-01', lines: 3, total: 5640, margin: 29.1, status: 'Paid' },
+  { id: 'SO-8821', customer: 'Urban Home Co', date: '2026-09-04', lines: 4, total: 8420, margin: 28.4, status: 'Picking' },
+  { id: 'SO-8818', customer: 'Lakeside Retail', date: '2026-09-03', lines: 2, total: 3180, margin: 31.2, status: 'Shipped' },
+  { id: 'SO-8814', customer: 'Main St Mercantile', date: '2026-09-02', lines: 6, total: 12400, margin: 24.8, status: 'Invoiced' },
+  { id: 'SO-8809', customer: 'Coastal Living', date: '2026-09-01', lines: 3, total: 5640, margin: 29.1, status: 'Paid' },
 ]
 
 const inTransit = PIPELINE.filter((p) => p.stage >= 3 && p.stage < 5).reduce((s, p) => s + p.landed, 0)
@@ -126,7 +126,7 @@ export default function NorthlineGlobal() {
         <main className="main">
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '22px', flexWrap: 'wrap', gap: '8px' }}>
             <div>
-              <div style={{ fontFamily: DEMO_MONO, fontSize: '9px', color: MUTED, letterSpacing: '.1em', textTransform: 'uppercase' }}>June 2026</div>
+              <div style={{ fontFamily: DEMO_MONO, fontSize: '9px', color: MUTED, letterSpacing: '.1em', textTransform: 'uppercase' }}>September 2026</div>
               <div style={{ fontFamily: DEMO_HEAD, fontSize: '22px', fontWeight: 600 }}>{NAV.find((n) => n.id === tab)?.label}</div>
             </div>
             <div style={{ fontFamily: DEMO_MONO, fontSize: '10px', color: MUTED, background: '#E8E4DC', padding: '5px 12px', borderRadius: '20px' }}>Sample · JK No Jokes</div>

@@ -161,12 +161,12 @@ const SEED_JOBS = [
       { assemblyId: 'gate2', qty: 1, price: 1650 },
     ],
     labor: [
-      { id: 'l1', date: '2026-08-04', crew: ['Miguel R.', 'Danny T.'], hours: 8 },
-      { id: 'l2', date: '2026-08-05', crew: ['Miguel R.', 'Danny T.'], hours: 7 },
+      { id: 'l1', date: '2026-09-04', crew: ['Miguel R.', 'Danny T.'], hours: 8 },
+      { id: 'l2', date: '2026-09-05', crew: ['Miguel R.', 'Danny T.'], hours: 7 },
     ],
     pulls: [
       {
-        id: 'p1', date: '2026-07-30', lines: [
+        id: 'p1', date: '2026-08-30', lines: [
           { name: 'Vinyl line post, 5x5', qty: 12, cost: 42 },
           { name: "6'x8' vinyl panel kit", qty: 12, cost: 155 },
           { name: 'Vinyl post cap', qty: 12, cost: 9 },
@@ -175,11 +175,11 @@ const SEED_JOBS = [
       },
     ],
     deliveries: [
-      { id: 'd1', date: '2026-08-05', vendor: 'Cedar Supply Co.', desc: 'Drive gate frame, hardware and 6x6 posts', amount: 870, photo: null },
+      { id: 'd1', date: '2026-09-05', vendor: 'Cedar Supply Co.', desc: 'Drive gate frame, hardware and 6x6 posts', amount: 870, photo: null },
     ],
     changes: [],
-    invoices: [{ id: 'i1', date: '2026-07-30', amount: 3000, memo: 'Deposit' }],
-    payments: [{ id: 'y1', date: '2026-08-01', amount: 3000, method: 'Check 2214' }],
+    invoices: [{ id: 'i1', date: '2026-08-30', amount: 3000, memo: 'Deposit' }],
+    payments: [{ id: 'y1', date: '2026-09-01', amount: 3000, method: 'Check 2214' }],
   },
   {
     id: 'j2', name: 'Northview Townhomes — phase 1', customer: 'Northview Townhomes HOA',
@@ -189,14 +189,14 @@ const SEED_JOBS = [
       { assemblyId: 'tearout', qty: 420, price: 9 },
     ],
     labor: [
-      { id: 'l3', date: '2026-07-21', crew: ['Miguel R.', 'Danny T.', 'Wes K.'], hours: 9 },
-      { id: 'l4', date: '2026-07-22', crew: ['Danny T.', 'Wes K.'], hours: 8 },
-      { id: 'l5', date: '2026-07-28', crew: ['Miguel R.', 'Junior P.', 'Wes K.'], hours: 8 },
-      { id: 'l6', date: '2026-08-06', crew: ['Tomás A.', 'Junior P.'], hours: 6 },
+      { id: 'l3', date: '2026-08-21', crew: ['Miguel R.', 'Danny T.', 'Wes K.'], hours: 9 },
+      { id: 'l4', date: '2026-08-22', crew: ['Danny T.', 'Wes K.'], hours: 8 },
+      { id: 'l5', date: '2026-08-28', crew: ['Miguel R.', 'Junior P.', 'Wes K.'], hours: 8 },
+      { id: 'l6', date: '2026-09-06', crew: ['Tomás A.', 'Junior P.'], hours: 6 },
     ],
     pulls: [
       {
-        id: 'p2', date: '2026-07-21', lines: [
+        id: 'p2', date: '2026-08-21', lines: [
           { name: '1-3/8" line post', qty: 42, cost: 18 },
           { name: "Top rail, 10' stick", qty: 42, cost: 21 },
           { name: "4' galvanized mesh", qty: 420, cost: 4.60 },
@@ -206,14 +206,14 @@ const SEED_JOBS = [
       },
     ],
     deliveries: [
-      { id: 'd2', date: '2026-07-28', vendor: 'Master Halco', desc: 'Extra mesh and posts for the east line', amount: 1120, photo: null },
-      { id: 'd3', date: '2026-08-06', vendor: 'County Transfer Station', desc: 'Dump fees, old fence haul away', amount: 582, photo: null },
+      { id: 'd2', date: '2026-08-28', vendor: 'Master Halco', desc: 'Extra mesh and posts for the east line', amount: 1120, photo: null },
+      { id: 'd3', date: '2026-09-06', vendor: 'County Transfer Station', desc: 'Dump fees, old fence haul away', amount: 582, photo: null },
     ],
     changes: [
       { id: 'c1', desc: 'Add 60 more feet along the east property line', amount: 2240, approved: true, billed: false },
     ],
-    invoices: [{ id: 'i2', date: '2026-07-25', amount: 8000, memo: 'Progress billing' }],
-    payments: [{ id: 'y2', date: '2026-08-03', amount: 5000, method: 'ACH' }],
+    invoices: [{ id: 'i2', date: '2026-08-25', amount: 8000, memo: 'Progress billing' }],
+    payments: [{ id: 'y2', date: '2026-09-03', amount: 5000, method: 'ACH' }],
   },
   {
     id: 'j3', name: 'Callahan property', customer: 'Robert Callahan',
@@ -223,12 +223,12 @@ const SEED_JOBS = [
       { assemblyId: 'gate1', qty: 1, price: 625 },
     ],
     labor: [
-      { id: 'l7', date: '2026-07-08', crew: ['Miguel R.', 'Danny T.', 'Junior P.'], hours: 8 },
-      { id: 'l8', date: '2026-07-09', crew: ['Miguel R.', 'Danny T.'], hours: 9 },
+      { id: 'l7', date: '2026-08-08', crew: ['Miguel R.', 'Danny T.', 'Junior P.'], hours: 8 },
+      { id: 'l8', date: '2026-08-09', crew: ['Miguel R.', 'Danny T.'], hours: 9 },
     ],
     pulls: [
       {
-        id: 'p3', date: '2026-07-08', lines: [
+        id: 'p3', date: '2026-08-08', lines: [
           { name: '4x4x8 cedar post', qty: 27, cost: 26 },
           { name: "6'x8' cedar privacy panel", qty: 27, cost: 92 },
           { name: 'Cedar post cap', qty: 27, cost: 5 },
@@ -237,7 +237,7 @@ const SEED_JOBS = [
         ],
       },
       {
-        id: 'p4', date: '2026-07-09', lines: [
+        id: 'p4', date: '2026-08-09', lines: [
           { name: 'Gate frame kit', qty: 1, cost: 95 },
           { name: 'Cedar pickets, gate', qty: 1, cost: 70 },
           { name: 'Hinges & latch set', qty: 1, cost: 58 },
@@ -250,12 +250,12 @@ const SEED_JOBS = [
       { id: 'c2', desc: 'Move the gate to the south side after the walkthrough', amount: 340, approved: true, billed: true },
     ],
     invoices: [
-      { id: 'i3', date: '2026-07-06', amount: 4000, memo: 'Deposit' },
-      { id: 'i4', date: '2026-07-15', amount: 7045, memo: 'Final bill' },
+      { id: 'i3', date: '2026-08-06', amount: 4000, memo: 'Deposit' },
+      { id: 'i4', date: '2026-08-15', amount: 7045, memo: 'Final bill' },
     ],
     payments: [
-      { id: 'y3', date: '2026-07-07', amount: 4000, method: 'Check 1180' },
-      { id: 'y4', date: '2026-07-24', amount: 4045, method: 'Check 1206' },
+      { id: 'y3', date: '2026-08-07', amount: 4000, method: 'Check 1180' },
+      { id: 'y4', date: '2026-08-24', amount: 4045, method: 'Check 1206' },
     ],
   },
   {
@@ -269,7 +269,7 @@ const SEED_JOBS = [
     ],
     labor: [],
     pulls: [{
-      id: 'p5', date: '2026-08-10', lines: [
+      id: 'p5', date: '2026-09-10', lines: [
         { name: "6'x8' cedar privacy panel", qty: 6, cost: 92 },
         { name: '4x4x8 cedar post', qty: 12, cost: 26 },
         { name: 'Hinges & latch set', qty: 2, cost: 58 },
@@ -277,7 +277,7 @@ const SEED_JOBS = [
     }],
     deliveries: [],
     changes: [],
-    invoices: [{ id: 'i5', date: '2026-08-10', amount: 1360, memo: 'Counter sale' }],
+    invoices: [{ id: 'i5', date: '2026-09-10', amount: 1360, memo: 'Counter sale' }],
     payments: [],
   },
 ]
@@ -286,7 +286,7 @@ const SEED_JOBS = [
    a job pulls it or somebody buys it over the counter. */
 const SEED_RECEIPTS = [
   {
-    id: 'r1', date: '2026-07-14', vendor: 'Master Halco', ref: 'PO-1841',
+    id: 'r1', date: '2026-08-14', vendor: 'Master Halco', ref: 'PO-1841',
     lines: [
       { name: '1-3/8" line post', qty: 60, cost: 18 },
       { name: "4' galvanized mesh", qty: 500, cost: 4.60 },
@@ -294,7 +294,7 @@ const SEED_RECEIPTS = [
     ],
   },
   {
-    id: 'r2', date: '2026-07-27', vendor: 'Cedar Supply Co.', ref: 'PO-1858',
+    id: 'r2', date: '2026-08-27', vendor: 'Cedar Supply Co.', ref: 'PO-1858',
     lines: [
       { name: "6'x8' cedar privacy panel", qty: 40, cost: 92 },
       { name: '4x4x8 cedar post', qty: 80, cost: 26 },
@@ -429,7 +429,7 @@ function seedQbo(jobs, stock) {
     const id = nextQid()
     vendorIds[v] = id
     out.push({
-      key: 'vend-' + id, type: 'Vendor', qid: id, status: 'synced', date: '2026-06-30',
+      key: 'vend-' + id, type: 'Vendor', qid: id, status: 'synced', date: '2026-07-30',
       title: v, sub: 'Supplier', amount: null,
       payload: { Vendor: { Id: id, DisplayName: v, Active: true, SyncToken: '0' } },
     })
@@ -439,7 +439,7 @@ function seedQbo(jobs, stock) {
     const id = nextQid()
     parents[c] = id
     out.push({
-      key: 'cust-' + id, type: 'Customer', qid: id, status: 'synced', date: '2026-06-30',
+      key: 'cust-' + id, type: 'Customer', qid: id, status: 'synced', date: '2026-07-30',
       title: c, sub: 'Top-level customer', amount: null,
       payload: { Customer: { Id: id, DisplayName: c, Job: false, SyncToken: '0' } },
     })
@@ -449,7 +449,7 @@ function seedQbo(jobs, stock) {
     const jid = nextQid()
     parents[job.name] = jid
     out.push({
-      key: 'job-' + jid, type: 'Customer', qid: jid, status: 'synced', date: '2026-07-01', isJob: true,
+      key: 'job-' + jid, type: 'Customer', qid: jid, status: 'synced', date: '2026-08-01', isJob: true,
       title: job.name, sub: 'Sub-customer of ' + job.customer, amount: null,
       payload: {
         Customer: {
@@ -466,7 +466,7 @@ function seedQbo(jobs, stock) {
     }
     const eid = nextQid()
     out.push({
-      key: 'est-' + eid, type: 'Estimate', qid: eid, status: 'synced', date: '2026-07-01',
+      key: 'est-' + eid, type: 'Estimate', qid: eid, status: 'synced', date: '2026-08-01',
       title: job.name, amount: b.baseContract,
       sub: job.assemblies.map((ja) => `${ja.qty} ${asmById(ja.assemblyId).unit} ${asmById(ja.assemblyId).name}`).join(' · '),
       payload: {
@@ -482,7 +482,7 @@ function seedQbo(jobs, stock) {
     job.changes.filter((c) => c.approved).forEach((c) => {
       const cid = nextQid()
       out.push({
-        key: 'est-' + cid, type: 'Estimate', qid: cid, status: 'synced', date: '2026-07-20',
+        key: 'est-' + cid, type: 'Estimate', qid: cid, status: 'synced', date: '2026-08-20',
         title: job.name + ' — extra work', sub: c.desc, amount: c.amount,
         payload: {
           Estimate: {
@@ -786,7 +786,7 @@ export default function FenceMakersDemo() {
   const [view, setView] = useState({ screen: 'list' })
   const [qtab, setQtab] = useState('Customer')
   const [pane, setPane] = useState('portal')
-  const [today, setToday] = useState('2026-08-13')
+  const [today, setToday] = useState('2026-09-13')
   const [openPayload, setOpenPayload] = useState(null)
   const [toast, setToast] = useState(null)
   const [intro, setIntro] = useState(false)

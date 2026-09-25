@@ -2,6 +2,7 @@ import React, { useState, useEffect, useMemo } from 'react'
 import Head from 'next/head'
 import { supabase } from '../lib/supabase'
 import { DEMO_UI, DEMO_HEAD, DEMO_FONT_LINK } from '../lib/demoFonts'
+import { DEMO_AS_OF as AS_OF } from '../lib/demoAsOf'
 
 // ─────────────────────────────────────────────────────────────────────────
 // Lakeland Supply Co. — statements, the simple way.
@@ -27,8 +28,6 @@ const RED = '#B3261E'
 const serif = DEMO_HEAD
 const sans = DEMO_UI
 
-// The demo dataset is pinned to this date so aging never drifts.
-const AS_OF = new Date('2026-08-21T00:00:00Z')
 const DAY = 86400000
 const dt = (s) => new Date(s + 'T00:00:00Z')
 const daysBetween = (a, b) => Math.round((b - a) / DAY)

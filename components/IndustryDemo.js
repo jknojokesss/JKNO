@@ -8,7 +8,7 @@ import Head from 'next/head'
 // ─────────────────────────────────────────────────────────────────────────
 
 const BOOK = 'https://calendly.com/jk-jknojokes/30min'
-const MONTHS = ['Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec', 'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun']
+const MONTHS = ['Oct', 'Nov', 'Dec', 'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep']
 const usd0 = (n) => '$' + Math.round(Math.abs(n)).toLocaleString('en-US')
 
 const STATUS_SETS = {

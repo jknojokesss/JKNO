@@ -24,15 +24,15 @@ const recon = (c) => {
 }
 
 const SEED_CONSIGN = [
-  { id: uid(), store: 'Gourmet Glatt North', price: 8.5, sent: 60, returned: 0, paid: 425, counted: 6, countedDate: '2026-06-15', diagnosis: '', cycle: 1, lastContact: '2026-06-15', restock: 'now', notes: 'Manager Yossi reorders every ~2 weeks. Reorders the Classic board weekly.', log: [{ at: 'Jun 15', t: 'Counted 6 on shelf' }, { at: 'Jun 6', t: 'Check received $425' }] },
-  { id: uid(), store: 'Gourmet Glatt South', price: 8.5, sent: 48, returned: 4, paid: 340, counted: 2, countedDate: '2026-06-15', diagnosis: '', cycle: 1, lastContact: '2026-06-12', restock: 'now', notes: 'Down to 2 boards — promised a delivery this week.', log: [{ at: 'Jun 15', t: 'Counted 2 on shelf' }, { at: 'Jun 5', t: 'Check received $340' }] },
-  { id: uid(), store: 'Seasons', price: 9, sent: 54, returned: 0, paid: 360, counted: 14, countedDate: '2026-06-14', diagnosis: '', cycle: 1, lastContact: '2026-06-14', restock: 'good', notes: 'Steady account. Loves the charcuterie boards.', log: [{ at: 'Jun 14', t: 'Counted 14 — reconciles clean' }, { at: 'Jun 4', t: 'Check received $360' }] },
-  { id: uid(), store: 'Nutmeg', price: 8, sent: 40, returned: 0, paid: 200, counted: 8, countedDate: '2026-06-16', diagnosis: '', cycle: 1, lastContact: '2026-05-26', restock: 'soon', notes: "Haven't spoken in ~3 weeks — check in, and ask about the missing units.", log: [{ at: 'Jun 16', t: 'Counted 8 on shelf' }, { at: 'Jun 2', t: 'Check received $200' }] },
-  { id: uid(), store: 'Aisle 9 Jackson', price: 8.5, sent: 36, returned: 0, paid: 255, counted: 4, countedDate: '2026-06-13', diagnosis: '', cycle: 1, lastContact: '2026-06-13', restock: 'soon', notes: 'New buyer contact — trial going well so far.', log: [{ at: 'Jun 13', t: 'Counted 4 on shelf' }, { at: 'Jun 3', t: 'Check received $255' }] },
-  { id: uid(), store: 'Aisle 9 Lakewood', price: 8.5, sent: 44, returned: 0, paid: 340, counted: 4, countedDate: '2026-06-13', diagnosis: '', cycle: 1, lastContact: '2026-06-13', restock: 'good', notes: 'Clean account, always pays on time.', log: [{ at: 'Jun 13', t: 'Counted 4 — reconciles clean' }, { at: 'Jun 3', t: 'Check received $340' }] },
-  { id: uid(), store: 'Foodex', price: 8, sent: 30, returned: 0, paid: 160, counted: 9, countedDate: '2026-06-12', diagnosis: '', cycle: 1, lastContact: '2026-06-05', restock: 'soon', notes: 'Slower mover — suggest a standing weekly board order.', log: [{ at: 'Jun 12', t: 'Counted 9 on shelf' }, { at: 'Jun 1', t: 'Check received $160' }] },
-  { id: uid(), store: 'Superstop', price: 8, sent: 36, returned: 0, paid: 0, counted: 36, countedDate: '2026-06-10', diagnosis: '', cycle: 1, lastContact: '2026-06-10', restock: 'good', notes: 'First delivery just landed — follow up in 2 weeks.', log: [{ at: 'Jun 10', t: 'Shipped 36 units — first delivery' }] },
-  { id: uid(), store: 'Evergreen', price: 9, sent: 40, returned: 0, paid: 270, counted: 8, countedDate: '2026-06-16', diagnosis: '', cycle: 1, lastContact: '2026-06-16', restock: 'now', notes: 'Reorders fast — strong location, push more here.', log: [{ at: 'Jun 16', t: 'Counted 8 on shelf' }, { at: 'Jun 5', t: 'Check received $270' }] },
+  { id: uid(), store: 'Gourmet Glatt North', price: 8.5, sent: 60, returned: 0, paid: 425, counted: 6, countedDate: '2026-09-15', diagnosis: '', cycle: 1, lastContact: '2026-09-15', restock: 'now', notes: 'Manager Yossi reorders every ~2 weeks. Reorders the Classic board weekly.', log: [{ at: 'Sep 15', t: 'Counted 6 on shelf' }, { at: 'Sep 6', t: 'Check received $425' }] },
+  { id: uid(), store: 'Gourmet Glatt South', price: 8.5, sent: 48, returned: 4, paid: 340, counted: 2, countedDate: '2026-09-15', diagnosis: '', cycle: 1, lastContact: '2026-09-12', restock: 'now', notes: 'Down to 2 boards — promised a delivery this week.', log: [{ at: 'Sep 15', t: 'Counted 2 on shelf' }, { at: 'Sep 5', t: 'Check received $340' }] },
+  { id: uid(), store: 'Seasons', price: 9, sent: 54, returned: 0, paid: 360, counted: 14, countedDate: '2026-09-14', diagnosis: '', cycle: 1, lastContact: '2026-09-14', restock: 'good', notes: 'Steady account. Loves the charcuterie boards.', log: [{ at: 'Sep 14', t: 'Counted 14 — reconciles clean' }, { at: 'Sep 4', t: 'Check received $360' }] },
+  { id: uid(), store: 'Nutmeg', price: 8, sent: 40, returned: 0, paid: 200, counted: 8, countedDate: '2026-09-16', diagnosis: '', cycle: 1, lastContact: '2026-08-26', restock: 'soon', notes: "Haven't spoken in ~3 weeks — check in, and ask about the missing units.", log: [{ at: 'Sep 16', t: 'Counted 8 on shelf' }, { at: 'Sep 2', t: 'Check received $200' }] },
+  { id: uid(), store: 'Aisle 9 Jackson', price: 8.5, sent: 36, returned: 0, paid: 255, counted: 4, countedDate: '2026-09-13', diagnosis: '', cycle: 1, lastContact: '2026-09-13', restock: 'soon', notes: 'New buyer contact — trial going well so far.', log: [{ at: 'Sep 13', t: 'Counted 4 on shelf' }, { at: 'Sep 3', t: 'Check received $255' }] },
+  { id: uid(), store: 'Aisle 9 Lakewood', price: 8.5, sent: 44, returned: 0, paid: 340, counted: 4, countedDate: '2026-09-13', diagnosis: '', cycle: 1, lastContact: '2026-09-13', restock: 'good', notes: 'Clean account, always pays on time.', log: [{ at: 'Sep 13', t: 'Counted 4 — reconciles clean' }, { at: 'Sep 3', t: 'Check received $340' }] },
+  { id: uid(), store: 'Foodex', price: 8, sent: 30, returned: 0, paid: 160, counted: 9, countedDate: '2026-09-12', diagnosis: '', cycle: 1, lastContact: '2026-09-05', restock: 'soon', notes: 'Slower mover — suggest a standing weekly board order.', log: [{ at: 'Sep 12', t: 'Counted 9 on shelf' }, { at: 'Sep 1', t: 'Check received $160' }] },
+  { id: uid(), store: 'Superstop', price: 8, sent: 36, returned: 0, paid: 0, counted: 36, countedDate: '2026-09-10', diagnosis: '', cycle: 1, lastContact: '2026-09-10', restock: 'good', notes: 'First delivery just landed — follow up in 2 weeks.', log: [{ at: 'Sep 10', t: 'Shipped 36 units — first delivery' }] },
+  { id: uid(), store: 'Evergreen', price: 9, sent: 40, returned: 0, paid: 270, counted: 8, countedDate: '2026-09-16', diagnosis: '', cycle: 1, lastContact: '2026-09-16', restock: 'now', notes: 'Reorders fast — strong location, push more here.', log: [{ at: 'Sep 16', t: 'Counted 8 on shelf' }, { at: 'Sep 5', t: 'Check received $270' }] },
 ]
 
 const SEED_DIRECT = [
@@ -120,17 +120,17 @@ const SM = Object.fromEntries(ORDER_STAGES.map(s => [s.id, s]))
 const fmtDue = (d) => new Date(d + 'T00:00').toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
 const stageBadge = (st) => ({ display: 'inline-block', padding: '3px 9px', borderRadius: '2px', fontSize: '11px', fontWeight: 600, background: (SM[st]?.color || '#888') + '22', color: SM[st]?.color || '#888', whiteSpace: 'nowrap' })
 const SEED_ORDERS = [
-  { id: uid(), customer: 'Weiss — Bar Mitzvah', items: '3-Tier Board + 2 platters', amount: 640, channel: 'Catering', due: '2026-06-22', stage: 'new' },
-  { id: uid(), customer: 'Gourmet Glatt North', items: '6 Classic Meat Boards', amount: 510, channel: 'Wholesale', due: '2026-06-19', stage: 'prepping' },
-  { id: uid(), customer: 'Online — R. Klein', items: 'Charcuterie Board + Kishka', amount: 155, channel: 'Online', due: '2026-06-18', stage: 'prepping' },
-  { id: uid(), customer: 'Friedman Simcha', items: '4 Charcuterie Boards', amount: 460, channel: 'Catering', due: '2026-06-18', stage: 'ready' },
-  { id: uid(), customer: 'Online — S. Berger', items: 'Fish Platter + Yapchik', amount: 135, channel: 'Online', due: '2026-06-17', stage: 'ready' },
-  { id: uid(), customer: 'Seasons Lakewood', items: '8 Classic Boards (weekly)', amount: 640, channel: 'Wholesale', due: '2026-06-16', stage: 'delivered' },
-  { id: uid(), customer: 'Cohen — Sheva Brachos', items: '3-Tier Board', amount: 275, channel: 'Catering', due: '2026-06-15', stage: 'delivered' },
-  { id: uid(), customer: 'Online — M. Stein', items: 'Jerky Sticks ×12', amount: 96, channel: 'Online', due: '2026-06-15', stage: 'delivered' },
-  { id: uid(), customer: 'Evergreen', items: '5 Charcuterie Boards', amount: 575, channel: 'Wholesale', due: '2026-06-13', stage: 'paid' },
-  { id: uid(), customer: 'Online — Y. Gross', items: 'Kishka & Gravy + board', amount: 180, channel: 'Online', due: '2026-06-12', stage: 'paid' },
-  { id: uid(), customer: 'Aisle 9 Jackson', items: '4 Classic Boards', amount: 340, channel: 'Wholesale', due: '2026-06-11', stage: 'paid' },
+  { id: uid(), customer: 'Weiss — Bar Mitzvah', items: '3-Tier Board + 2 platters', amount: 640, channel: 'Catering', due: '2026-09-22', stage: 'new' },
+  { id: uid(), customer: 'Gourmet Glatt North', items: '6 Classic Meat Boards', amount: 510, channel: 'Wholesale', due: '2026-09-19', stage: 'prepping' },
+  { id: uid(), customer: 'Online — R. Klein', items: 'Charcuterie Board + Kishka', amount: 155, channel: 'Online', due: '2026-09-18', stage: 'prepping' },
+  { id: uid(), customer: 'Friedman Simcha', items: '4 Charcuterie Boards', amount: 460, channel: 'Catering', due: '2026-09-18', stage: 'ready' },
+  { id: uid(), customer: 'Online — S. Berger', items: 'Fish Platter + Yapchik', amount: 135, channel: 'Online', due: '2026-09-17', stage: 'ready' },
+  { id: uid(), customer: 'Seasons Lakewood', items: '8 Classic Boards (weekly)', amount: 640, channel: 'Wholesale', due: '2026-09-16', stage: 'delivered' },
+  { id: uid(), customer: 'Cohen — Sheva Brachos', items: '3-Tier Board', amount: 275, channel: 'Catering', due: '2026-09-15', stage: 'delivered' },
+  { id: uid(), customer: 'Online — M. Stein', items: 'Jerky Sticks ×12', amount: 96, channel: 'Online', due: '2026-09-15', stage: 'delivered' },
+  { id: uid(), customer: 'Evergreen', items: '5 Charcuterie Boards', amount: 575, channel: 'Wholesale', due: '2026-09-13', stage: 'paid' },
+  { id: uid(), customer: 'Online — Y. Gross', items: 'Kishka & Gravy + board', amount: 180, channel: 'Online', due: '2026-09-12', stage: 'paid' },
+  { id: uid(), customer: 'Aisle 9 Jackson', items: '4 Classic Boards', amount: 340, channel: 'Wholesale', due: '2026-09-11', stage: 'paid' },
 ]
 
 // products sold this month (swap illustrations for real photos anytime)

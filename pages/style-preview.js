@@ -51,13 +51,13 @@ export default function StylePreview() {
         <main style={{ flex: 1, minWidth: 0 }}>
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderBottom: `1px solid ${C.hair}`, padding: '12px 34px' }}>
             <div style={{ fontFamily: mono, fontSize: 11, color: C.muted, letterSpacing: '0.06em' }}>REYDEL TIRE &amp; AUTO · LAKEWOOD, NJ</div>
-            <div style={{ fontFamily: mono, fontSize: 11, color: C.green }}>● LIVE · JUN 2026</div>
+            <div style={{ fontFamily: mono, fontSize: 11, color: C.green }}>● LIVE · SEP 2026</div>
           </div>
 
           <div style={{ padding: '34px 34px', maxWidth: 1000 }}>
 
             {/* HERO */}
-            <div style={{ fontFamily: head, fontSize: 13, fontWeight: 600, color: C.red, letterSpacing: '0.18em', textTransform: 'uppercase' }}>Net Profit · June 2026</div>
+            <div style={{ fontFamily: head, fontSize: 13, fontWeight: 600, color: C.red, letterSpacing: '0.18em', textTransform: 'uppercase' }}>Net Profit · September 2026</div>
             <div style={{ fontFamily: head, fontSize: 82, fontWeight: 700, color: C.ink, letterSpacing: '-0.01em', lineHeight: 1, margin: '6px 0 12px' }}>$39,204</div>
             <div style={{ fontFamily: ui, fontSize: 16, color: C.sub, maxWidth: 620, lineHeight: 1.5 }}>
               Reydel's strongest month on record — <span style={{ color: C.ink, fontWeight: 500 }}>$75,090 in sales, up 48% over May</span>, at a 52% net margin. Tires drove 72% of it; brakes and service the rest.
@@ -76,7 +76,7 @@ export default function StylePreview() {
             {/* Body */}
             <div style={{ display: 'grid', gridTemplateColumns: '1.25fr 1fr', gap: 28, marginTop: 30 }}>
               <div>
-                <div style={{ fontFamily: head, fontSize: 16, fontWeight: 700, color: C.ink, letterSpacing: '0.05em', textTransform: 'uppercase', paddingBottom: 8, borderBottom: `1px solid ${C.hair}`, marginBottom: 4 }}>Profit &amp; Loss — June</div>
+                <div style={{ fontFamily: head, fontSize: 16, fontWeight: 700, color: C.ink, letterSpacing: '0.05em', textTransform: 'uppercase', paddingBottom: 8, borderBottom: `1px solid ${C.hair}`, marginBottom: 4 }}>Profit &amp; Loss — September</div>
                 <div style={{ fontFamily: head, fontSize: 11, fontWeight: 600, color: C.muted, letterSpacing: '0.14em', margin: '12px 0 2px' }}>INCOME</div>
                 <Row label="Clover Sales" val="$73,450" indent />
                 <Row label="Sales Income" val="$1,640" indent />
