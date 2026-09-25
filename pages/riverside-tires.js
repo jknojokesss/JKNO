@@ -72,10 +72,78 @@ const STOCK = [
   { size: '265/70/17', desc: 'Toyo Open Country', onHand: 2, reorder: 4, unitCost: 85 },
 ]
 
+// Closed books — line items sum to these totals (matches dashboard headline month).
 const CLOSED_MONTHS = [
-  { label: 'MAY', month: '2026-05', revenue: 38100, cogs: 23900, profit: 14200 },
-  { label: 'JUN', month: '2026-06', revenue: 34800, cogs: 21800, profit: 13000 },
+  { label: 'MAY', month: '2026-05', revenue: 38100, cogs: 14600, opex: 9300, profit: 14200 },
+  { label: 'JUN', month: '2026-06', revenue: 34800, cogs: 13300, opex: 8500, profit: 13000 },
 ]
+
+const MONTHLY_TREND = [
+  { month: '2026-01', label: 'JAN', revenue: 31200, profit: 10800 },
+  { month: '2026-02', label: 'FEB', revenue: 29800, profit: 9600 },
+  { month: '2026-03', label: 'MAR', revenue: 33400, profit: 12100 },
+  { month: '2026-04', label: 'APR', revenue: 35600, profit: 12800 },
+  { month: '2026-05', label: 'MAY', revenue: 38100, profit: 14200 },
+  { month: '2026-06', label: 'JUN', revenue: 34800, profit: 13000 },
+]
+
+const PL_BY_MONTH = {
+  '2026-05': {
+    income: [
+      { label: 'Tire sales', amount: 31200 },
+      { label: 'Service & labor', amount: 5200 },
+      { label: 'Parts & accessories', amount: 1700 },
+    ],
+    cogs: [
+      { label: 'Tire cost of sales', amount: 11200 },
+      { label: 'Parts & fluids', amount: 2400 },
+      { label: 'Shop supplies (COGS)', amount: 1000 },
+    ],
+    expense: [
+      { label: 'Rent', amount: 4500 },
+      { label: 'Payroll — shop', amount: 3200 },
+      { label: 'Utilities', amount: 900 },
+      { label: 'Insurance', amount: 400 },
+      { label: 'Equipment & tools', amount: 300 },
+    ],
+  },
+  '2026-06': {
+    income: [
+      { label: 'Tire sales', amount: 28400 },
+      { label: 'Service & labor', amount: 4800 },
+      { label: 'Parts & accessories', amount: 1600 },
+    ],
+    cogs: [
+      { label: 'Tire cost of sales', amount: 10200 },
+      { label: 'Parts & fluids', amount: 2100 },
+      { label: 'Shop supplies (COGS)', amount: 1000 },
+    ],
+    expense: [
+      { label: 'Rent', amount: 4500 },
+      { label: 'Payroll — shop', amount: 2800 },
+      { label: 'Utilities', amount: 750 },
+      { label: 'Insurance', amount: 400 },
+      { label: 'Marketing', amount: 350 },
+      { label: 'Bank & merchant fees', amount: 200 },
+      { label: 'Miscellaneous', amount: 500 },
+    ],
+  },
+}
+
+const BS_AS_OF = {
+  label: 'Jun 30, 2026',
+  assets: [
+    { label: 'Business checking', amount: 42800 },
+    { label: 'Inventory', amount: 18600 },
+    { label: 'Accounts receivable', amount: 4200 },
+  ],
+  liabilities: [
+    { label: 'Accounts payable', amount: 11200 },
+    { label: 'Credit cards', amount: 6800 },
+    { label: 'Sales tax payable', amount: 2100 },
+  ],
+  equity: [{ label: "Owner's equity", amount: 45500 }],
+}
 
 const hcell = (align = 'left') => ({
   padding: '7px 12px',
@@ -198,6 +266,105 @@ function DemoShell({ tab, setTab, right, children }) {
   )
 }
 
+const sumLines = (lines) => lines.reduce((s, r) => s + r.amount, 0)
+const paren = (n) => (n < 0 ? `(${fmt0(-n)})` : fmt0(n))
+
+function FinTabs({ active, onChange, tabs }) {
+  return (
+    <div className="rt-fintabs">
+      {tabs.map((t) => (
+        <button key={t.id} type="button" className={active === t.id ? 'on' : ''} onClick={() => onChange(t.id)}>
+          {t.label}
+        </button>
+      ))}
+    </div>
+  )
+}
+
+function PlStatement({ monthKey }) {
+  const pl = PL_BY_MONTH[monthKey]
+  const meta = CLOSED_MONTHS.find((m) => m.month === monthKey)
+  if (!pl || !meta) return null
+  const inc = sumLines(pl.income)
+  const cogs = sumLines(pl.cogs)
+  const exp = sumLines(pl.expense)
+  const gross = inc - cogs
+  const net = gross - exp
+  const panel = { background: C.card, border: `1px solid ${C.hair}`, padding: '18px 20px', maxWidth: 680 }
+
+  const SectionHead = ({ children }) => (
+    <div style={{ fontSize: 9, color: C.muted, letterSpacing: '0.14em', fontWeight: 700, padding: '14px 8px 4px', fontFamily: ui }}>
+      {children}
+    </div>
+  )
+  const Line = ({ label, amount, indent }) => (
+    <div style={{ display: 'flex', justifyContent: 'space-between', padding: `6px 8px 6px ${indent ? 20 : 8}px`, fontFamily: ui, fontSize: 12, color: C.sub }}>
+      <span>{label}</span>
+      <span style={{ fontFamily: mono, fontVariantNumeric: 'tabular-nums', color: C.ink }}>{paren(amount)}</span>
+    </div>
+  )
+  const Total = ({ label, amount, accent, sub }) => (
+    <div
+      style={{
+        display: 'flex',
+        justifyContent: 'space-between',
+        alignItems: 'baseline',
+        padding: '9px 8px 4px',
+        marginTop: 2,
+        borderTop: `1px solid ${C.hair}`,
+        fontFamily: ui,
+        fontSize: 12,
+        fontWeight: 600,
+        color: C.ink,
+      }}
+    >
+      <span>
+        {label}
+        {sub && <span style={{ fontSize: 10, color: C.muted, fontWeight: 400, marginLeft: 8 }}>{sub}</span>}
+      </span>
+      <span style={{ fontFamily: mono, fontWeight: 700, color: accent ? C.green : C.ink }}>{paren(amount)}</span>
+    </div>
+  )
+
+  return (
+    <div style={panel}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', borderBottom: `1px solid ${C.hair}`, paddingBottom: 12, marginBottom: 4, flexWrap: 'wrap', gap: 8 }}>
+        <div>
+          <div style={{ fontSize: 15, fontWeight: 700, color: C.ink, fontFamily: ui }}>Profit &amp; Loss</div>
+          <div style={{ fontSize: 10, color: C.muted, marginTop: 2, fontFamily: ui }}>{BIZ}</div>
+        </div>
+        <div style={{ fontSize: 12, color: C.sub, fontFamily: ui, fontWeight: 500 }}>{meta.label} 2026 · Closed</div>
+      </div>
+      <SectionHead>INCOME</SectionHead>
+      {pl.income.map((r) => <Line key={r.label} label={r.label} amount={r.amount} indent />)}
+      <Total label="Total income" amount={inc} />
+      <SectionHead>COST OF GOODS SOLD</SectionHead>
+      {pl.cogs.map((r) => <Line key={r.label} label={r.label} amount={-r.amount} indent />)}
+      <Total label="Gross profit" amount={gross} accent sub={inc > 0 ? `${pct((gross / inc) * 100)} margin` : null} />
+      <SectionHead>OPERATING EXPENSES</SectionHead>
+      {pl.expense.map((r) => <Line key={r.label} label={r.label} amount={-r.amount} indent />)}
+      <Total label="Total operating expenses" amount={-exp} />
+      <div
+        style={{
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          marginTop: 16,
+          padding: '14px 12px',
+          background: net >= 0 ? '#EEF3EE' : '#fef2f2',
+          border: `1px solid ${net >= 0 ? '#C6DECB' : '#fecaca'}`,
+        }}
+      >
+        <span style={{ fontSize: 12, fontWeight: 700, letterSpacing: '0.08em', color: net >= 0 ? C.green : C.red, fontFamily: ui }}>NET INCOME</span>
+        <span style={{ display: 'flex', alignItems: 'baseline', gap: 12 }}>
+          {inc > 0 && <span style={{ fontSize: 11, color: C.sub, fontFamily: ui }}>{pct((net / inc) * 100)} margin</span>}
+          <span style={{ fontSize: 21, fontWeight: 700, color: net >= 0 ? C.green : C.red, fontFamily: ui, fontVariantNumeric: 'tabular-nums' }}>{fmt0(net)}</span>
+        </span>
+      </div>
+    </div>
+  )
+}
+
 function PageHead({ title, sub }) {
   return (
     <div style={{ marginBottom: 20 }}>
@@ -220,11 +387,19 @@ function PageHead({ title, sub }) {
   )
 }
 
+const FIN_TABS = [
+  { id: 'pl', label: 'Profit & Loss' },
+  { id: 'monthly', label: 'Monthly' },
+  { id: 'bs', label: 'Balance Sheet' },
+]
+
 export default function RiversideTires() {
   const [tab, setTab] = useState('orders')
   const [sort, setSort] = useState('rev')
   const [aiQ, setAiQ] = useState('')
   const [aiA, setAiA] = useState('')
+  const [finView, setFinView] = useState('pl')
+  const [plMonth, setPlMonth] = useState('2026-06')
 
   const sortedItems = [...WEEK_ITEMS].sort((a, b) => b[sort] - a[sort])
   const openRegister = ORDER_ROWS.reduce(
@@ -287,6 +462,13 @@ export default function RiversideTires() {
         .rt-order-card__nums dd{margin:2px 0 0;font-family:${mono};font-size:15px;font-weight:500;color:${C.ink}}
         .rt-order-card__profit{color:${C.green}!important;font-weight:600!important}
         .rt-order-card__match{margin:12px 0 0;font-size:11px;color:${C.sub}}
+        .rt-fintabs{display:flex;gap:2px;border-bottom:1px solid ${C.hair};margin-bottom:18px;overflow-x:auto;-webkit-overflow-scrolling:touch}
+        .rt-fintabs button{padding:8px 14px;font-size:10px;font-family:${ui};letter-spacing:.08em;background:none;border:none;cursor:pointer;color:${C.muted};border-bottom:2px solid transparent;margin-bottom:-1px;white-space:nowrap}
+        .rt-fintabs button.on{color:${C.ink};border-bottom-color:${THEME.accent}}
+        .rt-fin-pills{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:16px;align-items:center}
+        .rt-fin-pills span{font-size:9px;color:${C.muted};letter-spacing:.14em;font-weight:600;margin-right:2px}
+        .rt-fin-pills button{font-family:${mono};font-size:10px;padding:6px 10px;border:1px solid ${C.hair};background:${C.card};color:${C.muted};cursor:pointer}
+        .rt-fin-pills button.on{border-color:${C.red};background:${C.red};color:#fff}
         @media(max-width:860px){
           .rt-shell{flex-direction:column}
           .rt-side{display:none}
@@ -398,6 +580,7 @@ export default function RiversideTires() {
               {[
                 ['Revenue', fmt0(last.revenue)],
                 ['COGS', fmt0(last.cogs)],
+                ['Operating', fmt0(last.opex)],
                 ['Net margin', pct((last.profit / last.revenue) * 100)],
               ].map(([l, v]) => (
                 <div key={l} style={{ ...panel, flex: '1 1 160px', marginBottom: 0 }}>
@@ -411,29 +594,83 @@ export default function RiversideTires() {
 
         {tab === 'financials' && (
           <>
-            <PageHead title="Financials" sub="Closed-month P&amp;L for the sample books." />
-            <table style={{ width: '100%', borderCollapse: 'collapse', background: C.card, border: `1px solid ${C.hair}` }}>
-              <thead>
-                <tr>
-                  <th style={hcell()}>Month</th>
-                  <th style={hcell('right')}>Revenue</th>
-                  <th style={hcell('right')}>COGS</th>
-                  <th style={hcell('right')}>Net profit</th>
-                  <th style={hcell('right')}>Margin</th>
-                </tr>
-              </thead>
-              <tbody>
-                {CLOSED_MONTHS.map((m, i) => (
-                  <tr key={m.month} style={{ background: i % 2 ? '#FAF8F4' : C.card }}>
-                    <td style={cell('left', { fontFamily: mono, fontWeight: 500 })}>{m.label} 2026</td>
-                    <td style={cell('right', { fontFamily: mono })}>{fmt0(m.revenue)}</td>
-                    <td style={cell('right', { fontFamily: mono, color: C.sub })}>{fmt0(m.cogs)}</td>
-                    <td style={cell('right', { fontFamily: mono, fontWeight: 600, color: C.green })}>{fmt0(m.profit)}</td>
-                    <td style={cell('right', { fontFamily: mono })}>{pct((m.profit / m.revenue) * 100)}</td>
-                  </tr>
+            <PageHead title="Financials" sub="Profit &amp; loss, monthly trend, and balance sheet — sample closed books." />
+            <FinTabs active={finView} onChange={setFinView} tabs={FIN_TABS} />
+
+            {finView === 'pl' && (
+              <>
+                <div className="rt-fin-pills">
+                  <span>PERIOD</span>
+                  {CLOSED_MONTHS.map((m) => (
+                    <button key={m.month} type="button" className={plMonth === m.month ? 'on' : ''} onClick={() => setPlMonth(m.month)}>
+                      {m.label}
+                    </button>
+                  ))}
+                </div>
+                <PlStatement monthKey={plMonth} />
+              </>
+            )}
+
+            {finView === 'monthly' && (
+              <div style={{ background: C.card, border: `1px solid ${C.hair}`, overflow: 'auto' }}>
+                <table style={{ width: '100%', borderCollapse: 'collapse', minWidth: 520 }}>
+                  <thead>
+                    <tr>
+                      <th style={hcell()}>Month</th>
+                      <th style={hcell('right')}>Revenue</th>
+                      <th style={hcell('right')}>Net income</th>
+                      <th style={hcell('right')}>Margin</th>
+                      <th style={hcell('right')}>vs prior</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {MONTHLY_TREND.map((m, i) => {
+                      const prior = i > 0 ? MONTHLY_TREND[i - 1].profit : null
+                      const delta = prior != null ? m.profit - prior : null
+                      const closed = CLOSED_MONTHS.some((c) => c.month === m.month)
+                      return (
+                        <tr key={m.month} style={{ background: i % 2 ? '#FAF8F4' : C.card }}>
+                          <td style={cell('left', { fontFamily: mono, fontWeight: closed ? 600 : 400 })}>
+                            {m.label} 2026{closed ? ' · closed' : ''}
+                          </td>
+                          <td style={cell('right', { fontFamily: mono })}>{fmt0(m.revenue)}</td>
+                          <td style={cell('right', { fontFamily: mono, fontWeight: 600, color: C.green })}>{fmt0(m.profit)}</td>
+                          <td style={cell('right', { fontFamily: mono })}>{pct((m.profit / m.revenue) * 100)}</td>
+                          <td style={cell('right', { fontFamily: mono, color: delta == null ? C.muted : delta >= 0 ? C.green : C.red })}>
+                            {delta == null ? '—' : `${delta >= 0 ? '+' : '−'}${fmt0(Math.abs(delta))}`}
+                          </td>
+                        </tr>
+                      )
+                    })}
+                  </tbody>
+                </table>
+              </div>
+            )}
+
+            {finView === 'bs' && (
+              <div style={{ display: 'flex', flexWrap: 'wrap', gap: 16 }}>
+                {[
+                  { title: 'Assets', rows: BS_AS_OF.assets, total: sumLines(BS_AS_OF.assets) },
+                  { title: 'Liabilities', rows: BS_AS_OF.liabilities, total: sumLines(BS_AS_OF.liabilities) },
+                  { title: 'Equity', rows: BS_AS_OF.equity, total: sumLines(BS_AS_OF.equity) },
+                ].map((block) => (
+                  <div key={block.title} style={{ flex: '1 1 220px', background: C.card, border: `1px solid ${C.hair}`, padding: '16px 18px' }}>
+                    <div style={{ fontFamily: head, fontSize: 12, fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', marginBottom: 10 }}>{block.title}</div>
+                    {block.rows.map((r) => (
+                      <div key={r.label} style={{ display: 'flex', justifyContent: 'space-between', fontSize: 12, padding: '6px 0', borderBottom: `1px solid ${C.line}`, fontFamily: ui }}>
+                        <span style={{ color: C.sub }}>{r.label}</span>
+                        <span style={{ fontFamily: mono }}>{fmt0(r.amount)}</span>
+                      </div>
+                    ))}
+                    <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: 10, fontWeight: 600, fontFamily: ui, fontSize: 12 }}>
+                      <span>Total {block.title.toLowerCase()}</span>
+                      <span style={{ fontFamily: mono }}>{fmt0(block.total)}</span>
+                    </div>
+                  </div>
                 ))}
-              </tbody>
-            </table>
+                <p style={{ width: '100%', fontSize: 11, color: C.muted, fontFamily: ui, margin: 0 }}>As of {BS_AS_OF.label} · sample balances</p>
+              </div>
+            )}
           </>
         )}
 
