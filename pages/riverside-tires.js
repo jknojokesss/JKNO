@@ -1,477 +1,531 @@
 import { useState } from 'react'
 import Head from 'next/head'
-import { DEMO_UI, DEMO_HEAD, DEMO_MONO, DEMO_FONT_LINK } from '../lib/demoFonts'
 
 const BIZ = 'Riverside Tires'
-const SIDEBAR = '#1A1A1A', ACCENT = '#CC2222', BG = '#F8F8F8', BORDER = '#E5E5E5'
-const INK = '#1A1A1A', MUTED = '#888', GREEN = '#1E7A3A', RED = '#CC2222', AMBER = '#C98A2A'
-const mono = DEMO_MONO
-const serif = DEMO_HEAD
-const ui = DEMO_UI
+const THEME = { side: '#1E1C19', border: '#33302B', accent: '#B0281C', content: '#F2F0EA' }
+const C = {
+  paper: '#F2F0EA',
+  card: '#FFFFFF',
+  ink: '#1B1815',
+  sub: '#6A655C',
+  muted: '#9A9284',
+  hair: '#DBD5C7',
+  line: '#E6E1D6',
+  red: '#B0281C',
+  green: '#1C7A4E',
+}
+const head = "'Barlow Semi Condensed', sans-serif"
+const ui = "'Inter', sans-serif"
+const mono = "'IBM Plex Mono', monospace"
+const FONT =
+  'https://fonts.googleapis.com/css2?family=Barlow+Semi+Condensed:wght@500;600;700&family=IBM+Plex+Mono:wght@400;500;600&family=Inter:wght@400;500;600&display=swap'
 
-const fmt = (n) => '$' + Math.round(n).toLocaleString()
-const fmtD2 = (n) => '$' + Number(n).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })
-const pct = (n) => n.toFixed(1) + '%'
+const fmtC = (n) =>
+  new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(n)
+const fmt0 = (n) =>
+  new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }).format(n)
+const pct = (n) => `${Number(n).toFixed(1)}%`
 
 const NAV = [
-  { id: 'dashboard',  label: 'Dashboard'    },
-  { id: 'financials', label: 'Financials'   },
-  { id: 'inventory',  label: 'Sales & Items'},
-  { id: 'orders',     label: 'Orders'       },
-  { id: 'stock',      label: 'Stock'        },
-  { id: 'accounts',   label: 'Accounts'     },
-  { id: 'ai',         label: '✦ Ask Us'    },
+  { id: 'dashboard', label: 'Dashboard' },
+  { id: 'financials', label: 'Financials' },
+  { id: 'inventory', label: 'Sales & Items' },
+  { id: 'orders', label: 'Orders' },
+  { id: 'stock', label: 'Stock' },
+  { id: 'ai', label: 'Ask' },
 ]
+
+// Fictitious shop — shaped like Reydel orders view (Clover ticket × distributor cost).
+const ORDER_LINES = [
+  { date: '2026-06-26', ticket: 'C-88421', item: '235/65R17 Bridgestone Ecopia ×4', sale: 520, cost: 300, source: 'Weldon · matched' },
+  { date: '2026-06-26', ticket: 'C-88419', item: 'Oil change + rotation', sale: 115, cost: 42, source: 'Parts est.' },
+  { date: '2026-06-25', ticket: 'C-88402', item: '205/55R16 Michelin Primacy ×2', sale: 248, cost: 130, source: 'Weldon · matched' },
+  { date: '2026-06-25', ticket: 'C-88398', item: 'Tire plug repair', sale: 25, cost: 4, source: 'Service' },
+  { date: '2026-06-25', ticket: 'C-88391', item: '245/70R17 BFG A/T ×4 + alignment', sale: 620, cost: 340, source: 'Weldon · matched' },
+  { date: '2026-06-24', ticket: 'C-88370', item: '225/60R17 Goodyear Assurance ×4', sale: 440, cost: 280, source: 'Inventory' },
+  { date: '2026-06-24', ticket: 'C-88365', item: 'TPMS sensor ×2', sale: 210, cost: 72, source: 'Parts est.' },
+  { date: '2026-06-23', ticket: 'C-88340', item: '255/50R20 Michelin Latitude ×4', sale: 880, cost: 460, source: 'Weldon · same-day' },
+  { date: '2026-06-23', ticket: 'C-88332', item: 'Wheel balance (set)', sale: 48, cost: 8, source: 'Service' },
+  { date: '2026-06-22', ticket: 'C-88310', item: '265/70R17 Toyo Open Country ×2', sale: 280, cost: 170, source: 'Weldon · matched' },
+]
+
+const ORDER_ROWS = ORDER_LINES.map((r) => {
+  const profit = r.sale - r.cost
+  const margin = r.sale > 0 ? (profit / r.sale) * 100 : 0
+  return { ...r, profit, margin }
+})
 
 const ITEMS = [
-  { name: '235/65/17 Bridgestone Ecopia', orders: 48, qty: 96,  rev: 11520, cost: 7200  },
-  { name: '205/55/16 Michelin Primacy',   orders: 41, qty: 82,  rev: 8610,  cost: 5330  },
-  { name: '225/60/17 Goodyear Assurance', orders: 37, qty: 74,  rev: 8140,  cost: 5180  },
-  { name: '215/60/16 Cooper CS5',         orders: 34, qty: 68,  rev: 6460,  cost: 4080  },
-  { name: '245/70/17 BFGoodrich A/T',     orders: 28, qty: 56,  rev: 7840,  cost: 4760  },
-  { name: 'Tire plug / patch repair',     orders: 62, qty: 62,  rev: 1550,  cost: 310   },
-  { name: 'Tire rotation (set)',          orders: 55, qty: 55,  rev: 1925,  cost: 275   },
-  { name: '235/55/18 Pirelli P-Zero',     orders: 22, qty: 44,  rev: 5940,  cost: 3740  },
-  { name: 'Oil change (synthetic)',       orders: 44, qty: 44,  rev: 3080,  cost: 1320  },
-  { name: '225/45/18 Continental ExtremeContact', orders: 19, qty: 38, rev: 4940, cost: 3040 },
-  { name: 'Wheel balance (full set)',     orders: 38, qty: 38,  rev: 1900,  cost: 380   },
-  { name: '265/70/17 Toyo Open Country', orders: 16, qty: 32,  rev: 4480,  cost: 2720  },
-  { name: 'Lug nut replacement',         orders: 29, qty: 58,  rev: 870,   cost: 290   },
-  { name: '195/65/15 Hankook Kinergy',   orders: 18, qty: 36,  rev: 2340,  cost: 1440  },
-  { name: 'TPMS sensor replacement',     orders: 24, qty: 24,  rev: 1920,  cost: 720   },
-  { name: '255/50/20 Michelin Latitude', orders: 12, qty: 24,  rev: 4200,  cost: 2760  },
-  { name: 'Valve stem replacement',      orders: 33, qty: 66,  rev: 660,   cost: 132   },
-  { name: '225/65/17 Firestone All-Season', orders: 21, qty: 42, rev: 3780, cost: 2310 },
-]
-
-const ORDERS = [
-  { id: 'WO-041', customer: 'James Carter',    service: '235/65/17 Bridgestone x4 + balance', total: 520, status: 'completed', date: 'Jun 25', tech: 'Mike' },
-  { id: 'WO-042', customer: 'Linda Torres',    service: 'Oil change + tire rotation',         total: 115, status: 'completed', date: 'Jun 25', tech: 'Luis' },
-  { id: 'WO-043', customer: 'Kevin Nguyen',    service: '205/55/16 Michelin x2 + balance',   total: 248, status: 'in-progress', date: 'Jun 26', tech: 'Mike' },
-  { id: 'WO-044', customer: 'Diane Morris',    service: 'Tire plug repair',                  total: 25,  status: 'completed', date: 'Jun 26', tech: 'Luis' },
-  { id: 'WO-045', customer: 'Marcus Johnson',  service: '245/70/17 BFG A/T x4 + alignment', total: 620, status: 'in-progress', date: 'Jun 27', tech: 'Mike' },
-  { id: 'WO-046', customer: 'Sandra Reyes',    service: 'TPMS sensor x2 + balance',         total: 210, status: 'scheduled', date: 'Jun 28', tech: 'Luis' },
-  { id: 'WO-047', customer: 'Brian Walsh',     service: '225/60/17 Goodyear x4',            total: 440, status: 'scheduled', date: 'Jun 28', tech: 'Mike' },
-  { id: 'WO-048', customer: 'Angela Kim',      service: 'Lug nut replacement + torque check', total: 65, status: 'scheduled', date: 'Jun 28', tech: 'Luis' },
-  { id: 'WO-049', customer: 'Robert Patel',    service: '255/50/20 Michelin x4',            total: 880, status: 'scheduled', date: 'Jun 29', tech: 'Mike' },
+  { name: '235/65/17 Bridgestone Ecopia', orders: 48, qty: 96, rev: 11520, cost: 7200 },
+  { name: '205/55/16 Michelin Primacy', orders: 41, qty: 82, rev: 8610, cost: 5330 },
+  { name: '225/60/17 Goodyear Assurance', orders: 37, qty: 74, rev: 8140, cost: 5180 },
+  { name: 'Tire plug / patch repair', orders: 62, qty: 62, rev: 1550, cost: 310 },
+  { name: 'Tire rotation (set)', orders: 55, qty: 55, rev: 1925, cost: 275 },
+  { name: '245/70/17 BFGoodrich A/T', orders: 28, qty: 56, rev: 7840, cost: 4760 },
 ]
 
 const STOCK = [
-  { name: '235/65/17 Bridgestone Ecopia', onHand: 8,  reorder: 6,  cost: 75,  price: 120 },
-  { name: '205/55/16 Michelin Primacy',   onHand: 6,  reorder: 4,  cost: 65,  price: 105 },
-  { name: '225/60/17 Goodyear Assurance', onHand: 10, reorder: 6,  cost: 70,  price: 110 },
-  { name: '215/60/16 Cooper CS5',         onHand: 4,  reorder: 4,  cost: 60,  price: 95  },
-  { name: '245/70/17 BFGoodrich A/T',     onHand: 6,  reorder: 4,  cost: 85,  price: 140 },
-  { name: '235/55/18 Pirelli P-Zero',     onHand: 4,  reorder: 4,  cost: 85,  price: 135 },
-  { name: '225/45/18 Continental',        onHand: 3,  reorder: 4,  cost: 80,  price: 130 },
-  { name: '265/70/17 Toyo Open Country',  onHand: 2,  reorder: 4,  cost: 85,  price: 140 },
-  { name: '195/65/15 Hankook Kinergy',    onHand: 8,  reorder: 4,  cost: 40,  price: 65  },
-  { name: '225/65/17 Firestone',          onHand: 6,  reorder: 4,  cost: 55,  price: 90  },
-  { name: '255/50/20 Michelin Latitude',  onHand: 2,  reorder: 2,  cost: 115, price: 175 },
+  { size: '235/65/17', desc: 'Bridgestone Ecopia', onHand: 8, reorder: 6, unitCost: 75 },
+  { size: '205/55/16', desc: 'Michelin Primacy', onHand: 6, reorder: 4, unitCost: 65 },
+  { size: '225/60/17', desc: 'Goodyear Assurance', onHand: 10, reorder: 6, unitCost: 70 },
+  { size: '245/70/17', desc: 'BFGoodrich A/T', onHand: 6, reorder: 4, unitCost: 85 },
+  { size: '265/70/17', desc: 'Toyo Open Country', onHand: 2, reorder: 4, unitCost: 85 },
 ]
 
-const ACCOUNTS = [
-  { name: 'Checking — Main Operating', type: 'Asset',     balance: 28400  },
-  { name: 'Savings — Reserve',         type: 'Asset',     balance: 14200  },
-  { name: 'Clover POS Clearing',       type: 'Asset',     balance: 3180   },
-  { name: 'Accounts Receivable',       type: 'Asset',     balance: 4620   },
-  { name: 'Tire Inventory',            type: 'Asset',     balance: 18340  },
-  { name: 'Parts & Supplies',          type: 'Asset',     balance: 2860   },
-  { name: 'Tire Sales',                type: 'Income',    balance: 69040  },
-  { name: 'Service Revenue',           type: 'Income',    balance: 14260  },
-  { name: 'Cost of Goods — Tires',     type: 'Expense',   balance: 43200  },
-  { name: 'Labor & Wages',             type: 'Expense',   balance: 12400  },
-  { name: 'Rent',                      type: 'Expense',   balance: 7200   },
-  { name: 'Shop Supplies',             type: 'Expense',   balance: 1840   },
-  { name: 'Credit Card — Shop',        type: 'Liability', balance: 3240   },
-  { name: 'Business Loan',             type: 'Liability', balance: 22000  },
+const CLOSED_MONTHS = [
+  { label: 'MAY', month: '2026-05', revenue: 38100, cogs: 23900, profit: 14200 },
+  { label: 'JUN', month: '2026-06', revenue: 34800, cogs: 21800, profit: 13000 },
 ]
 
-const MONTH_REV = [
-  { m: 'Jul', rev: 28400, cogs: 18200 }, { m: 'Aug', rev: 31200, cogs: 19800 },
-  { m: 'Sep', rev: 29800, cogs: 18900 }, { m: 'Oct', rev: 33600, cogs: 21200 },
-  { m: 'Nov', rev: 30100, cogs: 19100 }, { m: 'Dec', rev: 27500, cogs: 17400 },
-  { m: 'Jan', rev: 24800, cogs: 15800 }, { m: 'Feb', rev: 26400, cogs: 16700 },
-  { m: 'Mar', rev: 31900, cogs: 20200 }, { m: 'Apr', rev: 35200, cogs: 22100 },
-  { m: 'May', rev: 38100, cogs: 23900 }, { m: 'Jun', rev: 34800, cogs: 21800 },
-]
-const maxRev = Math.max(...MONTH_REV.map(m => m.rev))
+const hcell = (align = 'left') => ({
+  padding: '7px 12px',
+  fontSize: '9px',
+  color: C.muted,
+  background: '#ECE7DD',
+  fontWeight: 400,
+  letterSpacing: '0.1em',
+  textTransform: 'uppercase',
+  borderBottom: `1px solid ${C.hair}`,
+  fontFamily: ui,
+  textAlign: align,
+})
+const cell = (align = 'left', extra = {}) => ({
+  padding: '9px 12px',
+  borderBottom: `1px solid ${C.line}`,
+  color: C.ink,
+  fontSize: '11px',
+  fontFamily: ui,
+  textAlign: align,
+  ...extra,
+})
 
-const STATUS_COLOR = { completed: GREEN, 'in-progress': AMBER, scheduled: '#5A6070' }
-const TYPE_COLOR   = { Asset: '#1857A4', Income: GREEN, Expense: RED, Liability: AMBER, Equity: MUTED }
+function DemoShell({ tab, setTab, right, children }) {
+  return (
+    <div className="rt-shell">
+      <aside className="rt-side">
+        <div style={{ padding: '2px 8px 4px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+            <span
+              style={{
+                width: 32,
+                height: 32,
+                background: THEME.accent,
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                fontSize: 19,
+                fontWeight: 700,
+                color: '#fff',
+                fontFamily: head,
+              }}
+            >
+              R
+            </span>
+            <div style={{ lineHeight: 1 }}>
+              <div style={{ fontSize: 20, fontWeight: 700, color: '#fff', letterSpacing: '0.04em', fontFamily: head }}>
+                RIVERSIDE
+              </div>
+              <div style={{ fontSize: 9, color: '#7C766B', letterSpacing: '0.3em', fontFamily: head, fontWeight: 500, marginTop: 3 }}>
+                TIRE &amp; AUTO
+              </div>
+            </div>
+          </div>
+        </div>
+        <div style={{ height: 1, background: THEME.border, margin: '16px 8px' }} />
+        <nav className="rt-nav">
+          {NAV.map((n) => (
+            <button
+              key={n.id}
+              type="button"
+              className="rt-navbtn"
+              onClick={() => setTab(n.id)}
+              style={
+                tab === n.id
+                  ? { background: 'rgba(176,40,28,.16)', color: '#fff', boxShadow: `inset 2px 0 0 ${THEME.accent}` }
+                  : undefined
+              }
+            >
+              {n.label}
+            </button>
+          ))}
+        </nav>
+        <div className="rt-foot">
+          <div style={{ fontFamily: mono, fontSize: 9, color: '#7C766B', lineHeight: 1.6 }}>
+            SAMPLE DEMO
+            <br />
+            <a href="https://jknojokes.com" style={{ color: '#948D81', textDecoration: 'underline' }}>
+              JK No Jokes Financials
+            </a>
+          </div>
+        </div>
+      </aside>
+      <main className="rt-main">
+        <div className="rt-status">
+          <span style={{ fontFamily: mono, fontSize: 11, color: C.muted, letterSpacing: '0.05em' }}>
+            {BIZ} · FICTITIOUS SHOP
+          </span>
+          {right || (
+            <span style={{ fontFamily: mono, fontSize: 11, color: C.muted }}>Demo data · not QuickBooks</span>
+          )}
+        </div>
+        <div className="rt-content">{children}</div>
+      </main>
+      <div className="rt-mobilenav">
+        {NAV.map((n) => (
+          <button key={n.id} type="button" className={tab === n.id ? 'on' : ''} onClick={() => setTab(n.id)}>
+            {n.label}
+          </button>
+        ))}
+      </div>
+    </div>
+  )
+}
+
+function PageHead({ title, sub }) {
+  return (
+    <div style={{ marginBottom: 20 }}>
+      <div
+        style={{
+          fontSize: 23,
+          fontWeight: 700,
+          color: C.ink,
+          fontFamily: head,
+          letterSpacing: '0.02em',
+          textTransform: 'uppercase',
+        }}
+      >
+        {title}
+      </div>
+      {sub && (
+        <div style={{ fontSize: 12, color: C.muted, fontFamily: ui, marginTop: 4, maxWidth: '62ch' }}>{sub}</div>
+      )}
+    </div>
+  )
+}
 
 export default function RiversideTires() {
-  const [tab, setTab]   = useState('dashboard')
+  const [tab, setTab] = useState('orders')
   const [sort, setSort] = useState('rev')
-  const [aiQ, setAiQ]   = useState('')
-  const [aiA, setAiA]   = useState('')
-  const [aiLoading, setAiLoading] = useState(false)
-  const [rngStart, setRngStart] = useState(0)
-  const [rngEnd, setRngEnd] = useState(99)
+  const [aiQ, setAiQ] = useState('')
+  const [aiA, setAiA] = useState('')
 
   const sortedItems = [...ITEMS].sort((a, b) => b[sort] - a[sort])
-  const totalRev  = ITEMS.reduce((s, i) => s + i.rev, 0)
-  const totalCogs = ITEMS.reduce((s, i) => s + i.cost, 0)
-  const grossProfit = totalRev - totalCogs
-  const ytdRev    = MONTH_REV.reduce((s, m) => s + m.rev, 0)
-  const ytdCogs   = MONTH_REV.reduce((s, m) => s + m.cogs, 0)
-  const ytdGP     = ytdRev - ytdCogs
-  // date-range aggregation over MONTH_REV
-  const rA = Math.min(rngStart, MONTH_REV.length - 1)
-  const rB = Math.min(Math.max(rngEnd, rA), MONTH_REV.length - 1)
-  const rSel = MONTH_REV.slice(rA, rB + 1)
-  const rRev = rSel.reduce((s, m) => s + m.rev, 0)
-  const rCogs = rSel.reduce((s, m) => s + m.cogs, 0)
-  const rGp = rRev - rCogs
-  const rLabel = `${MONTH_REV[rA].m}–${MONTH_REV[rB].m}`
-  const rCount = rB - rA + 1
-
-  const hcell = (align = 'left') => ({ padding: '7px 12px', fontSize: '9px', color: MUTED, background: '#FAFAFA', fontWeight: 400, letterSpacing: '0.1em', textTransform: 'uppercase', borderBottom: `1px solid ${BORDER}`, fontFamily: ui, textAlign: align })
-  const cell  = (align = 'left', extra = {}) => ({ padding: '9px 12px', borderBottom: `1px solid #F5F5F5`, color: INK, fontSize: '12px', fontFamily: ui, textAlign: align, ...extra })
-
-  const Kpi = ({ k, v, sub, color }) => (
-    <div style={{ background: '#fff', border: `1px solid ${BORDER}`, borderRadius: '8px', padding: '16px', flex: 1, minWidth: '140px' }}>
-      <div style={{ fontFamily: mono, fontSize: '9px', color: MUTED, letterSpacing: '0.1em', textTransform: 'uppercase', marginBottom: '6px' }}>{k}</div>
-      <div style={{ fontFamily: serif, fontSize: '28px', fontWeight: 600, color: color || INK, lineHeight: 1.1 }}>{v}</div>
-      {sub && <div style={{ fontFamily: mono, fontSize: '10px', color: MUTED, marginTop: '4px' }}>{sub}</div>}
-    </div>
+  const openRegister = ORDER_ROWS.reduce(
+    (acc, r) => ({
+      sale: acc.sale + r.sale,
+      cost: acc.cost + r.cost,
+      tickets: acc.tickets + 1,
+    }),
+    { sale: 0, cost: 0, tickets: 0 },
   )
+  openRegister.profit = openRegister.sale - openRegister.cost
+  openRegister.margin = openRegister.sale ? (openRegister.profit / openRegister.sale) * 100 : 0
 
-  const Card = ({ title, children, extra }) => (
-    <div style={{ background: '#fff', border: `1px solid ${BORDER}`, borderRadius: '10px', overflow: 'hidden', marginBottom: '20px' }}>
-      <div style={{ padding: '12px 16px', borderBottom: `1px solid ${BORDER}`, fontFamily: mono, fontSize: '10px', color: MUTED, letterSpacing: '0.08em', textTransform: 'uppercase', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-        {title}{extra}
-      </div>
-      {children}
-    </div>
-  )
+  const last = CLOSED_MONTHS[CLOSED_MONTHS.length - 1]
+  const totalProfit = ORDER_ROWS.reduce((s, r) => s + r.profit, 0)
+  const totalRev = ORDER_ROWS.reduce((s, r) => s + r.sale, 0)
 
   const askAi = () => {
     if (!aiQ.trim()) return
-    setAiLoading(true)
-    setTimeout(() => {
-      const q = aiQ.toLowerCase()
-      let ans = ''
-      if (q.includes('top') || q.includes('best')) ans = `Your top seller this month is ${ITEMS[0].name} at ${fmt(ITEMS[0].rev)} revenue across ${ITEMS[0].orders} orders. Bridgestone 235/65/17 and Michelin 205/55/16 together account for over 28% of total revenue.`
-      else if (q.includes('profit') || q.includes('margin')) ans = `Your gross margin this month is ${pct((grossProfit/totalRev)*100)} — ${fmt(grossProfit)} profit on ${fmt(totalRev)} revenue. Year-to-date gross profit is ${fmt(ytdGP)}, a ${pct((ytdGP/ytdRev)*100)} margin.`
-      else if (q.includes('stock') || q.includes('inventory') || q.includes('reorder')) ans = `You have ${STOCK.filter(s=>s.onHand<=s.reorder).length} items at or below reorder level. Most urgent: ${STOCK.filter(s=>s.onHand<s.reorder).map(s=>s.name.split(' ').slice(0,3).join(' ')).join(', ')}.`
-      else if (q.includes('revenue') || q.includes('sales')) ans = `Month-to-date revenue is ${fmt(34800)} across ${ORDERS.length + 180} work orders. Your busiest month this year was May at ${fmt(38100)}. Revenue is down 8.7% from May but up 22.5% vs June last year.`
-      else ans = `Based on your current data: ${fmt(totalRev)} MTD revenue, ${pct((grossProfit/totalRev)*100)} gross margin, ${ORDERS.filter(o=>o.status!=='completed').length} open work orders. Your strongest category is tire sales at ${pct((69040/83300)*100)} of total revenue.`
-      setAiA(ans)
-      setAiLoading(false)
-    }, 900)
+    const q = aiQ.toLowerCase()
+    let ans = `Matched tickets this week: ${fmt0(totalProfit)} est. gross on ${fmt0(totalRev)} sales.`
+    if (q.includes('margin')) ans = `Average margin on shown lines is ${pct(ORDER_ROWS.reduce((s, r) => s + r.margin, 0) / ORDER_ROWS.length)}.`
+    if (q.includes('stock') || q.includes('reorder')) ans = `${STOCK.filter((s) => s.onHand <= s.reorder).length} sizes at or below reorder.`
+    setAiA(ans)
   }
+
+  const panel = { background: C.card, border: `1px solid ${C.hair}`, padding: '18px 20px', marginBottom: 20 }
 
   return (
     <>
       <Head>
-        <title>{BIZ} — Dashboard Demo</title>
+        <title>{BIZ} — Sample portal</title>
         <meta name="viewport" content="width=device-width, initial-scale=1" />
-        <link href={DEMO_FONT_LINK} rel="stylesheet" />
+        <link href={FONT} rel="stylesheet" />
       </Head>
       <style>{`
         *{box-sizing:border-box;margin:0;padding:0}
-        body{font-family:${ui};background:${BG};color:${INK}}
-        .shell{display:flex;min-height:100vh}
-        .side{width:210px;flex-shrink:0;background:${SIDEBAR};display:flex;flex-direction:column;padding:22px 12px;position:sticky;top:0;height:100vh;overflow-y:auto}
-        .main{flex:1;min-width:0;padding:28px 32px 60px;overflow-y:auto}
-        .nbtn{display:block;width:100%;text-align:left;padding:9px 13px;border-radius:7px;border:none;background:transparent;color:#6a6a6a;font-family:${ui};font-size:13px;font-weight:500;cursor:pointer;margin-bottom:2px;letter-spacing:.01em;transition:background .15s,color .15s}
-        .nbtn:hover{background:rgba(255,255,255,.06);color:#ccc}
-        .nbtn.on{background:rgba(255,255,255,.09);color:#fff;box-shadow:inset 3px 0 0 ${ACCENT}}
-        .kpi-row{display:flex;gap:12px;flex-wrap:wrap;margin-bottom:20px}
-        .mobilenav{display:none}
-        @media(max-width:700px){
-          .side{display:none}
-          .main{padding:16px 14px 48px}
-          .mobilenav{display:flex;overflow-x:auto;gap:2px;padding:8px 10px;background:${SIDEBAR};position:sticky;top:0;z-index:9;-webkit-overflow-scrolling:touch}
-          .mobilenav button{flex-shrink:0;border:none;background:transparent;color:#888;font-family:${ui};font-size:12px;font-weight:500;padding:8px 12px;border-radius:6px;cursor:pointer;white-space:nowrap}
-          .mobilenav button.on{background:rgba(255,255,255,.1);color:#fff;box-shadow:inset 0 -2px 0 ${ACCENT}}
+        body{font-family:${ui};background:${C.paper};color:${C.ink};font-variant-numeric:tabular-nums}
+        .rt-shell{display:flex;min-height:100vh;align-items:stretch;background:${C.paper}}
+        .rt-side{width:214px;flex-shrink:0;background:${THEME.side};box-shadow:inset -3px 0 0 ${THEME.accent};display:flex;flex-direction:column;padding:20px 12px;position:sticky;top:0;height:100vh}
+        .rt-nav{display:flex;flex-direction:column;gap:2px;flex:1}
+        .rt-navbtn{display:block;width:100%;text-align:left;padding:10px 11px;border:none;border-left:2px solid transparent;background:transparent;color:#948D81;font-family:${head};font-size:13px;font-weight:500;letter-spacing:.06em;text-transform:uppercase;cursor:pointer;white-space:nowrap;transition:background .15s,color .15s}
+        .rt-navbtn:hover{background:rgba(255,255,255,.05);color:#EDEBE6}
+        .rt-foot{padding:12px 8px 0;border-top:1px solid ${THEME.border};margin-top:8px}
+        .rt-main{flex:1;min-width:0;background:${C.paper}}
+        .rt-status{display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid ${C.hair};padding:12px 30px;gap:12px;flex-wrap:wrap}
+        .rt-content{padding:26px 30px 56px;max-width:1160px}
+        .rt-mobilenav{display:none}
+        @media(max-width:860px){
+          .rt-shell{flex-direction:column}
+          .rt-side{display:none}
+          .rt-mobilenav{display:flex;overflow-x:auto;gap:4px;padding:8px 10px;background:${THEME.side};position:sticky;top:0;z-index:9;-webkit-overflow-scrolling:touch;box-shadow:inset 0 -3px 0 ${THEME.accent}}
+          .rt-mobilenav button{flex-shrink:0;border:none;background:rgba(255,255,255,.06);color:#948D81;font-family:${head};font-size:11px;font-weight:500;letter-spacing:.04em;text-transform:uppercase;padding:8px 12px;cursor:pointer;white-space:nowrap}
+          .rt-mobilenav button.on{background:rgba(176,40,28,.2);color:#fff;box-shadow:inset 0 -2px 0 ${THEME.accent}}
+          .rt-content{padding:18px 14px 48px}
+          .rt-status{padding:10px 14px}
         }
       `}</style>
 
-      <div className="mobilenav">
-        {NAV.map((n) => (
-          <button key={n.id} type="button" className={tab === n.id ? 'on' : ''} onClick={() => setTab(n.id)}>{n.label}</button>
-        ))}
-      </div>
-
-      <div className="shell">
-        <aside className="side">
-          <div style={{ paddingBottom: '22px', borderBottom: '1px solid #2a2a2a', marginBottom: '16px' }}>
-            <div style={{ fontFamily: mono, fontSize: '15px', fontWeight: 700, color: '#fff', letterSpacing: '.1em' }}>RIVERSIDE</div>
-            <div style={{ fontFamily: mono, fontSize: '9px', color: ACCENT, letterSpacing: '.2em', marginTop: '3px' }}>TIRES &amp; AUTO</div>
-          </div>
-          <nav style={{ flex: 1 }}>
-            {NAV.map(n => (
-              <button key={n.id} className={`nbtn${tab===n.id?' on':''}`} onClick={()=>setTab(n.id)}>{n.label}</button>
-            ))}
-          </nav>
-          <div style={{ borderTop: '1px solid #2a2a2a', paddingTop: '14px', marginTop: '8px' }}>
-            <div style={{ fontFamily: mono, fontSize: '9px', color: '#444', lineHeight: 1.7 }}>
-              SAMPLE DASHBOARD<br/><span style={{ color: ACCENT }}>JK No Jokes Financials</span>
+      <DemoShell
+        tab={tab}
+        setTab={setTab}
+        right={
+          tab === 'orders' ? (
+            <span style={{ fontFamily: mono, fontSize: 10, color: C.muted }}>
+              {ORDER_ROWS.length} tickets · Clover + distributor
+            </span>
+          ) : undefined
+        }
+      >
+        {tab === 'orders' && (
+          <>
+            <PageHead
+              title="Orders"
+              sub="Register tickets matched to distributor invoices. Sample numbers — not what’s in QuickBooks."
+            />
+            <div style={{ display: 'flex', gap: 12, marginBottom: 20, flexWrap: 'wrap' }}>
+              {[
+                { label: 'TICKETS', value: ORDER_ROWS.length, sub: 'shown', color: C.ink },
+                { label: 'SALES', value: fmt0(totalRev), sub: 'sample week', color: C.ink },
+                { label: 'EST. COST', value: fmt0(openRegister.cost), sub: 'matched + est.', color: C.sub },
+                { label: 'EST. GROSS', value: fmt0(totalProfit), sub: pct((totalProfit / totalRev) * 100), color: C.green },
+              ].map((k) => (
+                <div key={k.label} style={{ flex: '1 1 140px', background: C.card, border: `1px solid ${C.hair}`, padding: '14px 16px' }}>
+                  <div style={{ fontSize: 9, color: C.muted, letterSpacing: '0.15em', marginBottom: 6, fontFamily: ui }}>{k.label}</div>
+                  <div style={{ fontSize: 18, color: k.color, fontWeight: 600, fontFamily: ui, lineHeight: 1.2 }}>{k.value}</div>
+                  <div style={{ fontSize: 10, color: C.muted, marginTop: 4, fontFamily: ui }}>{k.sub}</div>
+                </div>
+              ))}
             </div>
-          </div>
-        </aside>
-
-        <main className="main">
-          <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:'24px', flexWrap:'wrap', gap:'8px' }}>
-            <div>
-              <div style={{ fontFamily:mono, fontSize:'9px', color:MUTED, letterSpacing:'.1em', textTransform:'uppercase', marginBottom:'3px' }}>June 2026</div>
-              <div style={{ fontFamily:serif, fontSize:'22px', fontWeight:600 }}>{NAV.find(n=>n.id===tab)?.label}</div>
+            <div style={{ background: C.card, border: `1px solid ${C.hair}`, overflow: 'auto' }}>
+              <table style={{ width: '100%', borderCollapse: 'collapse', minWidth: 720 }}>
+                <thead>
+                  <tr>
+                    <th style={hcell()}>Date</th>
+                    <th style={hcell()}>Ticket</th>
+                    <th style={hcell()}>Line</th>
+                    <th style={hcell('right')}>Sale</th>
+                    <th style={hcell('right')}>Cost</th>
+                    <th style={hcell('right')}>Profit</th>
+                    <th style={hcell('right')}>Margin</th>
+                    <th style={hcell()}>Match</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {ORDER_ROWS.map((r, i) => (
+                    <tr key={r.ticket} style={{ background: i % 2 ? '#FAF8F4' : C.card }}>
+                      <td style={cell('left', { fontFamily: mono, fontSize: 10, color: C.muted })}>{r.date}</td>
+                      <td style={cell('left', { fontFamily: mono, fontSize: 10 })}>{r.ticket}</td>
+                      <td style={cell()}>{r.item}</td>
+                      <td style={cell('right', { fontFamily: mono, fontWeight: 500 })}>{fmtC(r.sale)}</td>
+                      <td style={cell('right', { fontFamily: mono, color: C.sub })}>{fmtC(r.cost)}</td>
+                      <td style={cell('right', { fontFamily: mono, fontWeight: 600, color: C.green })}>{fmtC(r.profit)}</td>
+                      <td style={cell('right', { fontFamily: mono, color: C.green })}>{pct(r.margin)}</td>
+                      <td style={cell('left', { fontSize: 10, color: C.sub })}>{r.source}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
             </div>
-            <div style={{ fontFamily:mono, fontSize:'10px', color:MUTED, background:'#F0F0F0', padding:'5px 12px', borderRadius:'20px' }}>Live · JK No Jokes</div>
-          </div>
+          </>
+        )}
 
-          {/* ── DASHBOARD ── */}
-          {tab==='dashboard' && <>
-            <div className="kpi-row">
-              <Kpi k="Revenue MTD"  v={fmt(34800)} sub="June 2026" />
-              <Kpi k="Gross Profit" v={fmt(13000)} sub={pct((13000/34800)*100)+' margin'} color={GREEN} />
-              <Kpi k="Work Orders"  v="247"        sub="this month" />
-              <Kpi k="Avg Ticket"   v={fmt(141)}   sub="per order" />
-            </div>
-            <Card title="Monthly Revenue vs. COGS — Last 12 Months">
-              <div style={{ padding:'20px 16px 12px', display:'flex', alignItems:'flex-end', gap:'5px', height:'180px' }}>
-                {MONTH_REV.map((m,i)=>(
-                  <div key={m.m} style={{ flex:1, display:'flex', flexDirection:'column', alignItems:'center', gap:'3px' }}>
-                    <div style={{ width:'100%', display:'flex', flexDirection:'column', justifyContent:'flex-end', height:'140px', gap:'2px' }}>
-                      <div style={{ width:'100%', background: i===11?ACCENT:'#E5E5E5', borderRadius:'3px 3px 0 0', height:`${Math.round((m.rev/maxRev)*120)}px`, minHeight:'3px' }} />
-                    </div>
-                    <div style={{ fontFamily:mono, fontSize:'8px', color:i===11?ACCENT:MUTED }}>{m.m}</div>
+        {tab === 'dashboard' && (
+          <>
+            <PageHead title="Dashboard" sub="Open month at the register, then closed-month books below. Sample demo." />
+            <div style={{ ...panel, marginBottom: 28, cursor: 'pointer' }} onClick={() => setTab('orders')}>
+              <div style={{ fontFamily: head, fontSize: 13, fontWeight: 700, color: C.ink, letterSpacing: '0.08em', textTransform: 'uppercase' }}>
+                June · At the register
+              </div>
+              <div style={{ fontFamily: ui, fontSize: 11, color: C.muted, marginTop: 3, marginBottom: 12 }}>
+                Clover sales · distributor cost · not closed books
+              </div>
+              <div style={{ display: 'flex', flexWrap: 'wrap' }}>
+                {[
+                  ['Sales', fmt0(openRegister.sale)],
+                  ['Est. cost', fmt0(openRegister.cost)],
+                  ['Est. gross', fmt0(openRegister.profit)],
+                  ['Margin', pct(openRegister.margin)],
+                  ['Tickets', String(openRegister.tickets)],
+                ].map(([l, v], i) => (
+                  <div key={l} style={{ flex: '1 1 120px', padding: '10px 14px', borderLeft: i ? `1px solid ${C.line}` : 'none' }}>
+                    <div style={{ fontFamily: ui, fontSize: 10.5, color: C.muted }}>{l}</div>
+                    <div style={{ fontFamily: mono, fontSize: 16, color: l === 'Est. gross' ? C.green : C.ink, fontWeight: 500, marginTop: 4 }}>{v}</div>
                   </div>
                 ))}
               </div>
-            </Card>
-            <Card title="Top Sellers — June" extra={<span style={{cursor:'pointer',color:ACCENT,fontFamily:mono,fontSize:'10px'}} onClick={()=>setTab('inventory')}>View all →</span>}>
-              <table style={{ width:'100%', borderCollapse:'collapse' }}>
-                <thead><tr><th style={hcell()}>Item</th><th style={hcell('right')}>Orders</th><th style={hcell('right')}>Revenue</th><th style={hcell('right')}>Margin</th></tr></thead>
-                <tbody>{ITEMS.slice(0,6).map((it,i)=>(
-                  <tr key={i} style={{ background:i%2?'#FAFAFA':'#fff' }}>
-                    <td style={cell()}>{it.name}</td>
-                    <td style={cell('right',{color:MUTED})}>{it.orders}</td>
-                    <td style={cell('right',{fontFamily:mono,fontWeight:500})}>{fmt(it.rev)}</td>
-                    <td style={cell('right',{fontFamily:mono,color:GREEN})}>{pct(((it.rev-it.cost)/it.rev)*100)}</td>
-                  </tr>
-                ))}</tbody>
-              </table>
-            </Card>
-            <Card title="Open Work Orders">
-              <table style={{ width:'100%', borderCollapse:'collapse' }}>
-                <thead><tr><th style={hcell()}>WO #</th><th style={hcell()}>Customer</th><th style={hcell()}>Service</th><th style={hcell('right')}>Total</th><th style={hcell('center')}>Status</th></tr></thead>
-                <tbody>{ORDERS.filter(o=>o.status!=='completed').map((o,i)=>(
-                  <tr key={i} style={{ background:i%2?'#FAFAFA':'#fff' }}>
-                    <td style={cell('left',{fontFamily:mono,fontSize:'11px',color:MUTED})}>{o.id}</td>
-                    <td style={cell()}>{o.customer}</td>
-                    <td style={cell('left',{color:MUTED,fontSize:'11px'})}>{o.service}</td>
-                    <td style={cell('right',{fontFamily:mono,fontWeight:500})}>{fmt(o.total)}</td>
-                    <td style={{...cell('center')}}>
-                      <span style={{background:STATUS_COLOR[o.status]+'20',color:STATUS_COLOR[o.status],padding:'3px 9px',borderRadius:'20px',fontSize:'11px',fontWeight:500,whiteSpace:'nowrap'}}>{o.status}</span>
-                    </td>
-                  </tr>
-                ))}</tbody>
-              </table>
-            </Card>
-          </>}
-
-          {/* ── FINANCIALS ── */}
-          {tab==='financials' && <>
-            <div className="kpi-row">
-              <Kpi k="YTD Revenue"  v={fmt(ytdRev)} sub="Jul 2025 – Jun 2026" />
-              <Kpi k="YTD COGS"     v={fmt(ytdCogs)} sub="cost of tires sold" color={RED} />
-              <Kpi k="Gross Profit" v={fmt(ytdGP)}   sub={pct((ytdGP/ytdRev)*100)+' margin'} color={GREEN} />
             </div>
-            <Card title="P&L — Date range">
-              <div style={{ display:'flex', gap:'10px', alignItems:'center', flexWrap:'wrap', marginBottom:'14px' }}>
-                <span style={{ fontSize:'11px', fontWeight:600, color:MUTED, textTransform:'uppercase', letterSpacing:'0.08em' }}>From</span>
-                <select value={rA} onChange={e=>{const v=Number(e.target.value); setRngStart(v); if(v>rB) setRngEnd(v)}} style={{ padding:'7px 10px', border:`1px solid ${BORDER}`, borderRadius:'6px', fontFamily:mono, fontSize:'13px', cursor:'pointer', background:'#fff', color:INK }}>
-                  {MONTH_REV.map((m,i)=><option key={i} value={i}>{m.m}</option>)}
-                </select>
-                <span style={{ fontSize:'11px', fontWeight:600, color:MUTED, textTransform:'uppercase', letterSpacing:'0.08em' }}>to</span>
-                <select value={rB} onChange={e=>{const v=Number(e.target.value); setRngEnd(v); if(v<rA) setRngStart(v)}} style={{ padding:'7px 10px', border:`1px solid ${BORDER}`, borderRadius:'6px', fontFamily:mono, fontSize:'13px', cursor:'pointer', background:'#fff', color:INK }}>
-                  {MONTH_REV.map((m,i)=><option key={i} value={i}>{m.m}</option>)}
-                </select>
-                <span style={{ fontSize:'13px', color:MUTED }}>{rCount} month{rCount>1?'s':''} combined</span>
-              </div>
-              <div className="kpi-row">
-                <Kpi k={`Revenue · ${rLabel}`} v={fmt(rRev)} sub={`${rCount} months combined`} />
-                <Kpi k="COGS" v={fmt(rCogs)} sub="cost of tires sold" color={RED} />
-                <Kpi k="Gross Profit" v={fmt(rGp)} sub={rRev?pct((rGp/rRev)*100)+' margin':'—'} color={GREEN} />
-              </div>
-            </Card>
-            <Card title="P&L — Month by Month">
-              <table style={{ width:'100%', borderCollapse:'collapse' }}>
-                <thead><tr><th style={hcell()}>Month</th><th style={hcell('right')}>Revenue</th><th style={hcell('right')}>COGS</th><th style={hcell('right')}>Gross Profit</th><th style={hcell('right')}>Margin</th></tr></thead>
-                <tbody>{[...MONTH_REV].reverse().map((m,i)=>{
-                  const gp = m.rev-m.cogs
-                  return <tr key={i} style={{ background:i%2?'#FAFAFA':'#fff' }}>
-                    <td style={cell('left',{fontFamily:mono,fontWeight:500})}>{m.m} {m.m==='Jul'||m.m==='Aug'||m.m==='Sep'||m.m==='Oct'||m.m==='Nov'||m.m==='Dec'?'2025':'2026'}</td>
-                    <td style={cell('right',{fontFamily:mono})}>{fmt(m.rev)}</td>
-                    <td style={cell('right',{fontFamily:mono,color:MUTED})}>{fmt(m.cogs)}</td>
-                    <td style={cell('right',{fontFamily:mono,fontWeight:600,color:GREEN})}>{fmt(gp)}</td>
-                    <td style={cell('right',{fontFamily:mono,color:MUTED})}>{pct((gp/m.rev)*100)}</td>
-                  </tr>
-                })}
-                </tbody>
-                <tfoot><tr style={{ background:'#F5F5F5', borderTop:`2px solid ${BORDER}` }}>
-                  <td style={cell('left',{fontWeight:600,fontFamily:mono})}>YTD Total</td>
-                  <td style={cell('right',{fontFamily:mono,fontWeight:700})}>{fmt(ytdRev)}</td>
-                  <td style={cell('right',{fontFamily:mono,color:MUTED})}>{fmt(ytdCogs)}</td>
-                  <td style={cell('right',{fontFamily:mono,fontWeight:700,color:GREEN})}>{fmt(ytdGP)}</td>
-                  <td style={cell('right',{fontFamily:mono,color:MUTED})}>{pct((ytdGP/ytdRev)*100)}</td>
-                </tr></tfoot>
-              </table>
-            </Card>
-          </>}
+            <div style={{ fontFamily: head, fontSize: 13, fontWeight: 600, color: C.red, letterSpacing: '0.18em', textTransform: 'uppercase' }}>
+              Net profit · {last.label} 2026
+            </div>
+            <div style={{ fontFamily: head, fontSize: 56, fontWeight: 700, color: C.ink, lineHeight: 1, margin: '6px 0 16px' }}>{fmt0(last.profit)}</div>
+            <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap' }}>
+              {[
+                ['Revenue', fmt0(last.revenue)],
+                ['COGS', fmt0(last.cogs)],
+                ['Net margin', pct((last.profit / last.revenue) * 100)],
+              ].map(([l, v]) => (
+                <div key={l} style={{ ...panel, flex: '1 1 160px', marginBottom: 0 }}>
+                  <div style={{ fontFamily: ui, fontSize: 10, color: C.muted }}>{l}</div>
+                  <div style={{ fontFamily: mono, fontSize: 18, marginTop: 6, fontWeight: 500 }}>{v}</div>
+                </div>
+              ))}
+            </div>
+          </>
+        )}
 
-          {/* ── SALES & ITEMS ── */}
-          {tab==='inventory' && <>
-            <Card title="All Items — June 2026" extra={
-              <div style={{ display:'flex', gap:'6px' }}>
-                {[['rev','Revenue'],['orders','Orders'],['qty','Units']].map(([k,l])=>(
-                  <button key={k} onClick={()=>setSort(k)} style={{ fontFamily:mono, fontSize:'10px', padding:'3px 9px', borderRadius:'5px', border:`1px solid ${sort===k?ACCENT:BORDER}`, background:sort===k?ACCENT:'transparent', color:sort===k?'#fff':MUTED, cursor:'pointer' }}>{l}</button>
-                ))}
-              </div>
-            }>
-              <table style={{ width:'100%', borderCollapse:'collapse' }}>
-                <thead><tr>
-                  <th style={hcell()}>#</th><th style={hcell()}>Item / Service</th>
-                  <th style={hcell('right')}>Orders</th><th style={hcell('right')}>Units</th>
-                  <th style={hcell('right')}>Revenue</th><th style={hcell('right')}>COGS</th>
+        {tab === 'financials' && (
+          <>
+            <PageHead title="Financials" sub="Official-style P&amp;L from QuickBooks sync. Sample months." />
+            <table style={{ width: '100%', borderCollapse: 'collapse', background: C.card, border: `1px solid ${C.hair}` }}>
+              <thead>
+                <tr>
+                  <th style={hcell()}>Month</th>
+                  <th style={hcell('right')}>Revenue</th>
+                  <th style={hcell('right')}>COGS</th>
+                  <th style={hcell('right')}>Net profit</th>
                   <th style={hcell('right')}>Margin</th>
-                </tr></thead>
-                <tbody>{sortedItems.map((it,i)=>(
-                  <tr key={i} style={{ background:i%2?'#FAFAFA':'#fff' }}>
-                    <td style={cell('left',{fontFamily:mono,fontSize:'11px',color:MUTED,width:'28px'})}>{i+1}</td>
+                </tr>
+              </thead>
+              <tbody>
+                {CLOSED_MONTHS.map((m, i) => (
+                  <tr key={m.month} style={{ background: i % 2 ? '#FAF8F4' : C.card }}>
+                    <td style={cell('left', { fontFamily: mono, fontWeight: 500 })}>{m.label} 2026</td>
+                    <td style={cell('right', { fontFamily: mono })}>{fmt0(m.revenue)}</td>
+                    <td style={cell('right', { fontFamily: mono, color: C.sub })}>{fmt0(m.cogs)}</td>
+                    <td style={cell('right', { fontFamily: mono, fontWeight: 600, color: C.green })}>{fmt0(m.profit)}</td>
+                    <td style={cell('right', { fontFamily: mono })}>{pct((m.profit / m.revenue) * 100)}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </>
+        )}
+
+        {tab === 'inventory' && (
+          <>
+            <PageHead title="Sales & Items" sub="Clover line items ranked by revenue — June sample." />
+            <div style={{ marginBottom: 12, display: 'flex', gap: 6, flexWrap: 'wrap' }}>
+              {[['rev', 'Revenue'], ['orders', 'Orders'], ['qty', 'Units']].map(([k, l]) => (
+                <button
+                  key={k}
+                  type="button"
+                  onClick={() => setSort(k)}
+                  style={{
+                    fontFamily: mono,
+                    fontSize: 10,
+                    padding: '6px 10px',
+                    border: `1px solid ${sort === k ? C.red : C.hair}`,
+                    background: sort === k ? C.red : C.card,
+                    color: sort === k ? '#fff' : C.muted,
+                    cursor: 'pointer',
+                  }}
+                >
+                  {l}
+                </button>
+              ))}
+            </div>
+            <table style={{ width: '100%', borderCollapse: 'collapse', background: C.card, border: `1px solid ${C.hair}` }}>
+              <thead>
+                <tr>
+                  <th style={hcell()}>Item</th>
+                  <th style={hcell('right')}>Orders</th>
+                  <th style={hcell('right')}>Revenue</th>
+                  <th style={hcell('right')}>COGS</th>
+                  <th style={hcell('right')}>Margin</th>
+                </tr>
+              </thead>
+              <tbody>
+                {sortedItems.map((it, i) => (
+                  <tr key={it.name} style={{ background: i % 2 ? '#FAF8F4' : C.card }}>
                     <td style={cell()}>{it.name}</td>
-                    <td style={cell('right',{color:MUTED})}>{it.orders}</td>
-                    <td style={cell('right',{color:MUTED})}>{it.qty}</td>
-                    <td style={cell('right',{fontFamily:mono,fontWeight:500})}>{fmt(it.rev)}</td>
-                    <td style={cell('right',{fontFamily:mono,color:MUTED})}>{fmt(it.cost)}</td>
-                    <td style={cell('right',{fontFamily:mono,color:GREEN})}>{pct(((it.rev-it.cost)/it.rev)*100)}</td>
+                    <td style={cell('right', { color: C.sub })}>{it.orders}</td>
+                    <td style={cell('right', { fontFamily: mono })}>{fmt0(it.rev)}</td>
+                    <td style={cell('right', { fontFamily: mono, color: C.sub })}>{fmt0(it.cost)}</td>
+                    <td style={cell('right', { fontFamily: mono, color: C.green })}>{pct(((it.rev - it.cost) / it.rev) * 100)}</td>
                   </tr>
-                ))}</tbody>
-                <tfoot><tr style={{ background:'#F5F5F5', borderTop:`2px solid ${BORDER}` }}>
-                  <td colSpan={4} style={cell('left',{fontWeight:600,fontFamily:mono})}>Total</td>
-                  <td style={cell('right',{fontFamily:mono,fontWeight:700,color:ACCENT})}>{fmt(totalRev)}</td>
-                  <td style={cell('right',{fontFamily:mono,color:MUTED})}>{fmt(totalCogs)}</td>
-                  <td style={cell('right',{fontFamily:mono,color:GREEN})}>{pct((grossProfit/totalRev)*100)}</td>
-                </tr></tfoot>
-              </table>
-            </Card>
-          </>}
+                ))}
+              </tbody>
+            </table>
+          </>
+        )}
 
-          {/* ── ORDERS ── */}
-          {tab==='orders' && <>
-            <div className="kpi-row">
-              <Kpi k="Open"          v={ORDERS.filter(o=>o.status!=='completed').length} sub="in progress / scheduled" color={AMBER} />
-              <Kpi k="Completed today" v={ORDERS.filter(o=>o.status==='completed').length} sub="closed out" color={GREEN} />
-              <Kpi k="Revenue today" v={fmt(ORDERS.filter(o=>o.status==='completed').reduce((s,o)=>s+o.total,0))} />
-            </div>
-            <Card title="Work Orders — Jun 25–29">
-              <table style={{ width:'100%', borderCollapse:'collapse' }}>
-                <thead><tr>
-                  <th style={hcell()}>WO #</th><th style={hcell()}>Customer</th><th style={hcell()}>Service</th>
-                  <th style={hcell()}>Tech</th><th style={hcell('right')}>Total</th>
-                  <th style={hcell('center')}>Status</th><th style={hcell('right')}>Date</th>
-                </tr></thead>
-                <tbody>{ORDERS.map((o,i)=>(
-                  <tr key={i} style={{ background:i%2?'#FAFAFA':'#fff' }}>
-                    <td style={cell('left',{fontFamily:mono,fontSize:'11px',color:MUTED})}>{o.id}</td>
-                    <td style={cell()}>{o.customer}</td>
-                    <td style={cell('left',{color:MUTED,fontSize:'11px'})}>{o.service}</td>
-                    <td style={cell('left',{color:MUTED})}>{o.tech}</td>
-                    <td style={cell('right',{fontFamily:mono,fontWeight:500})}>{fmt(o.total)}</td>
-                    <td style={{...cell('center')}}>
-                      <span style={{background:STATUS_COLOR[o.status]+'20',color:STATUS_COLOR[o.status],padding:'3px 9px',borderRadius:'20px',fontSize:'11px',fontWeight:500,whiteSpace:'nowrap'}}>{o.status}</span>
-                    </td>
-                    <td style={cell('right',{fontFamily:mono,fontSize:'11px',color:MUTED})}>{o.date}</td>
-                  </tr>
-                ))}</tbody>
-              </table>
-            </Card>
-          </>}
-
-          {/* ── STOCK ── */}
-          {tab==='stock' && <>
-            <div className="kpi-row">
-              <Kpi k="SKUs in stock" v={STOCK.length} />
-              <Kpi k="Reorder needed" v={STOCK.filter(s=>s.onHand<=s.reorder).length} sub="at or below reorder level" color={RED} />
-              <Kpi k="Inventory value" v={fmt(STOCK.reduce((s,i)=>s+i.onHand*i.cost,0))} />
-            </div>
-            <Card title="Tire Inventory">
-              <table style={{ width:'100%', borderCollapse:'collapse' }}>
-                <thead><tr>
-                  <th style={hcell()}>Item</th><th style={hcell('right')}>On Hand</th>
-                  <th style={hcell('right')}>Reorder At</th><th style={hcell('right')}>Unit Cost</th>
-                  <th style={hcell('right')}>Sell Price</th><th style={hcell('center')}>Status</th>
-                </tr></thead>
-                <tbody>{STOCK.map((s,i)=>{
+        {tab === 'stock' && (
+          <>
+            <PageHead title="Stock" sub="On-hand from dated purchase layers minus sales — sample as of Jun 30." />
+            <table style={{ width: '100%', borderCollapse: 'collapse', background: C.card, border: `1px solid ${C.hair}` }}>
+              <thead>
+                <tr>
+                  <th style={hcell()}>Size</th>
+                  <th style={hcell()}>Description</th>
+                  <th style={hcell('right')}>On hand</th>
+                  <th style={hcell('right')}>Reorder at</th>
+                  <th style={hcell('right')}>Unit cost</th>
+                </tr>
+              </thead>
+              <tbody>
+                {STOCK.map((s, i) => {
                   const low = s.onHand <= s.reorder
-                  return <tr key={i} style={{ background:i%2?'#FAFAFA':'#fff' }}>
-                    <td style={cell()}>{s.name}</td>
-                    <td style={cell('right',{fontFamily:mono,fontWeight:600,color:low?RED:INK})}>{s.onHand}</td>
-                    <td style={cell('right',{fontFamily:mono,color:MUTED})}>{s.reorder}</td>
-                    <td style={cell('right',{fontFamily:mono,color:MUTED})}>{fmt(s.cost)}</td>
-                    <td style={cell('right',{fontFamily:mono})}>{fmt(s.price)}</td>
-                    <td style={{...cell('center')}}>
-                      <span style={{background:low?RED+'20':GREEN+'20',color:low?RED:GREEN,padding:'3px 9px',borderRadius:'20px',fontSize:'11px',fontWeight:500}}>{low?'Reorder':'OK'}</span>
-                    </td>
-                  </tr>
-                })}</tbody>
-              </table>
-            </Card>
-          </>}
+                  return (
+                    <tr key={s.size} style={{ background: i % 2 ? '#FAF8F4' : C.card }}>
+                      <td style={cell('left', { fontFamily: mono })}>{s.size}</td>
+                      <td style={cell()}>{s.desc}</td>
+                      <td style={cell('right', { fontFamily: mono, fontWeight: 600, color: low ? C.red : C.ink })}>{s.onHand}</td>
+                      <td style={cell('right', { fontFamily: mono, color: C.sub })}>{s.reorder}</td>
+                      <td style={cell('right', { fontFamily: mono })}>{fmtC(s.unitCost)}</td>
+                    </tr>
+                  )
+                })}
+              </tbody>
+            </table>
+          </>
+        )}
 
-          {/* ── ACCOUNTS ── */}
-          {tab==='accounts' && <>
-            <div className="kpi-row">
-              <Kpi k="Total Assets"      v={fmt(ACCOUNTS.filter(a=>a.type==='Asset').reduce((s,a)=>s+a.balance,0))} color='#1857A4' />
-              <Kpi k="Total Income"      v={fmt(ACCOUNTS.filter(a=>a.type==='Income').reduce((s,a)=>s+a.balance,0))} color={GREEN} />
-              <Kpi k="Total Expenses"    v={fmt(ACCOUNTS.filter(a=>a.type==='Expense').reduce((s,a)=>s+a.balance,0))} color={RED} />
-              <Kpi k="Total Liabilities" v={fmt(ACCOUNTS.filter(a=>a.type==='Liability').reduce((s,a)=>s+a.balance,0))} color={AMBER} />
-            </div>
-            <Card title="Chart of Accounts">
-              <table style={{ width:'100%', borderCollapse:'collapse' }}>
-                <thead><tr><th style={hcell()}>Account</th><th style={hcell('center')}>Type</th><th style={hcell('right')}>Balance</th></tr></thead>
-                <tbody>{ACCOUNTS.map((a,i)=>(
-                  <tr key={i} style={{ background:i%2?'#FAFAFA':'#fff' }}>
-                    <td style={cell()}>{a.name}</td>
-                    <td style={{...cell('center')}}>
-                      <span style={{background:TYPE_COLOR[a.type]+'18',color:TYPE_COLOR[a.type],padding:'3px 9px',borderRadius:'20px',fontSize:'11px',fontWeight:500}}>{a.type}</span>
-                    </td>
-                    <td style={cell('right',{fontFamily:mono,fontWeight:500})}>{fmt(a.balance)}</td>
-                  </tr>
-                ))}</tbody>
-              </table>
-            </Card>
-          </>}
-
-          {/* ── ASK AI ── */}
-          {tab==='ai' && <>
-            <div style={{ background:'#fff', border:`1px solid ${BORDER}`, borderRadius:'12px', padding:'28px', maxWidth:'680px' }}>
-              <div style={{ fontFamily:serif, fontSize:'22px', fontWeight:600, marginBottom:'6px' }}>✦ Ask Us</div>
-              <div style={{ fontFamily:mono, fontSize:'10px', color:MUTED, marginBottom:'20px', letterSpacing:'.05em' }}>Ask anything about your business data</div>
-              <div style={{ display:'flex', gap:'8px', marginBottom:'16px' }}>
-                <input value={aiQ} onChange={e=>setAiQ(e.target.value)} onKeyDown={e=>e.key==='Enter'&&askAi()}
-                  placeholder="e.g. What's my best seller? What's my margin?"
-                  style={{ flex:1, padding:'10px 14px', fontSize:'14px', border:`1px solid ${BORDER}`, borderRadius:'8px', fontFamily:ui, outline:'none' }} />
-                <button onClick={askAi} style={{ background:ACCENT, color:'#fff', border:'none', borderRadius:'8px', padding:'10px 18px', fontFamily:mono, fontSize:'11px', cursor:'pointer', letterSpacing:'.05em' }}>ASK</button>
+        {tab === 'ai' && (
+          <>
+            <PageHead title="Ask" sub="Answers from your synced books and register — sample responses." />
+            <div style={{ ...panel, maxWidth: 640 }}>
+              <div style={{ display: 'flex', gap: 8, marginBottom: 12 }}>
+                <input
+                  value={aiQ}
+                  onChange={(e) => setAiQ(e.target.value)}
+                  onKeyDown={(e) => e.key === 'Enter' && askAi()}
+                  placeholder="e.g. What’s my margin this week?"
+                  style={{
+                    flex: 1,
+                    padding: '10px 12px',
+                    border: `1px solid ${C.hair}`,
+                    fontFamily: ui,
+                    fontSize: 14,
+                    outline: 'none',
+                  }}
+                />
+                <button
+                  type="button"
+                  onClick={askAi}
+                  style={{
+                    background: C.red,
+                    color: '#fff',
+                    border: 'none',
+                    padding: '10px 16px',
+                    fontFamily: mono,
+                    fontSize: 11,
+                    cursor: 'pointer',
+                  }}
+                >
+                  Ask
+                </button>
               </div>
-              {aiLoading && <div style={{ fontFamily:mono, fontSize:'12px', color:MUTED }}>Thinking…</div>}
-              {aiA && !aiLoading && (
-                <div style={{ background:'#F8F8F8', border:`1px solid ${BORDER}`, borderRadius:'8px', padding:'16px', fontFamily:ui, fontSize:'14px', lineHeight:1.7, color:INK }}>
+              {aiA && (
+                <div style={{ fontFamily: ui, fontSize: 14, lineHeight: 1.6, color: C.ink, background: '#FAF8F4', padding: 14, border: `1px solid ${C.line}` }}>
                   {aiA}
                 </div>
               )}
-              <div style={{ marginTop:'20px', display:'flex', flexWrap:'wrap', gap:'8px' }}>
-                {["What's my top seller?","What's my gross margin?","Which items need reorder?","How was revenue this year?"].map(q=>(
-                  <button key={q} onClick={()=>{setAiQ(q);setTimeout(askAi,0)}} style={{ fontFamily:mono, fontSize:'10px', padding:'5px 11px', borderRadius:'20px', border:`1px solid ${BORDER}`, background:'#fff', color:MUTED, cursor:'pointer' }}>{q}</button>
-                ))}
-              </div>
             </div>
-          </>}
-        </main>
-      </div>
+          </>
+        )}
+      </DemoShell>
     </>
   )
 }
