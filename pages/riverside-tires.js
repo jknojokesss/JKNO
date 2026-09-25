@@ -36,8 +36,6 @@ const NAV = [
 ]
 
 // Fictitious shop — sample pinned to Sep 25, 2026 (books closed through August).
-const DEMO_TODAY = '2026-09-25'
-
 const ORDER_LINES = [
   { date: '2026-09-25', ticket: 'C-89221', item: '235/65R17 Bridgestone Ecopia ×4', sale: 520, cost: 300, source: 'Weldon · matched' },
   { date: '2026-09-25', ticket: 'C-89219', item: 'Oil change + rotation', sale: 115, cost: 42, source: 'Parts est.' },
