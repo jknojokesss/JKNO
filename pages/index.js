@@ -5,13 +5,14 @@ import HomePortal from '../components/HomePortal'
 import { shouldSkipHomeIntro } from '../lib/homeIntro'
 import { MARKETING_FONTS } from '../lib/marketing'
 
-function initialPortalLive() {
+function initialSkipIntro() {
   if (typeof window === 'undefined') return false
   return shouldSkipHomeIntro()
 }
 
 export default function Landing() {
-  const [portalLive, setPortalLive] = useState(initialPortalLive)
+  const [portalLive, setPortalLive] = useState(initialSkipIntro)
+  const [enteredInstant] = useState(initialSkipIntro)
   const [form, setForm] = useState({ name: '', email: '', business: '' })
   const [submitted, setSubmitted] = useState(false)
   const [submitting, setSubmitting] = useState(false)
@@ -55,6 +56,7 @@ export default function Landing() {
 
       <HomePortal
         live={portalLive}
+        enteredInstant={enteredInstant}
         form={form}
         setForm={setForm}
         onSubmit={handleSubmit}

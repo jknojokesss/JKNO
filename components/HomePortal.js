@@ -81,6 +81,8 @@ const NEXT_STEPS = [
 
 const OVERVIEW_DEMO_PICKS = FEATURED_DEMOS.slice(0, 3)
 
+const TIRE_DEMO = FEATURED_DEMOS[0]
+
 
 
 const slug = (s) => s.toLowerCase().replace(/[^a-z0-9]+/g, '-')
@@ -154,6 +156,16 @@ function ProofStrip() {
 }
 
 
+
+function TireHeroLead() {
+  return (
+    <a href={TIRE_DEMO.src} className="hp-tire-lead">
+      <span className="hp-tire-lead__tag">Sample tire &amp; auto shop</span>
+      <span className="hp-tire-lead__title">{TIRE_DEMO.caption}</span>
+      <span className="hp-tire-lead__go">Open demo →</span>
+    </a>
+  )
+}
 
 function DemoQuickPicks({ onNav }) {
 
@@ -324,24 +336,24 @@ function Screen({ tab, form, setForm, onSubmit, submitted, submitting, onNav }) 
             <span className="hp-overview__headline-accent hp-anim hp-anim--hero hp-anim--d1">Numbers that tie out.</span>
           </h1>
 
-          <p className="hp-overview__hook hp-overview__hook--wide hp-anim hp-anim--in hp-anim--d2">
-            You&rsquo;re already in it. Sidebar, top bar, these screens. Same shell I build
-            for your shop.
-          </p>
-          <p className="hp-overview__hook hp-overview__hook--narrow hp-anim hp-anim--in hp-anim--d2">
-            You&rsquo;re already in it. Top bar, these tabs, same portal shell I build for your shop.
-          </p>
+          <TireHeroLead />
 
-          <p className="hp-overview__deck hp-anim hp-anim--in hp-anim--d3">
-            Register, vendors, QuickBooks behind one login. The screens your register and QBO
-            never gave you, synced every night, tied out at month-end.
+          <p className="hp-overview__deck hp-anim hp-anim--in hp-anim--d2">
+            QuickBooks and your register on a nightly sync. Month-end tied to the official QBO
+            statements — built in this portal shell for your shop.
           </p>
 
           <div className="hp-overview__cta">
 
             <div className="hp-overview__actions">
 
-              <button type="button" className="hp-btn hp-btn--primary" onClick={() => onNav('contact')}>
+              <a href={TIRE_DEMO.src} className="hp-btn hp-btn--primary hp-only-mobile">
+
+                Open tire shop demo
+
+              </a>
+
+              <button type="button" className="hp-btn hp-btn--primary hp-only-desktop" onClick={() => onNav('contact')}>
 
                 Get started
 
@@ -349,7 +361,7 @@ function Screen({ tab, form, setForm, onSubmit, submitted, submitting, onNav }) 
 
               <button type="button" className="hp-overview__link" onClick={() => onNav('demos')}>
 
-                See sample portals
+                All sample portals
 
               </button>
 
@@ -367,11 +379,11 @@ function Screen({ tab, form, setForm, onSubmit, submitted, submitting, onNav }) 
 
 
 
-        <ProofStrip />
-
-
-
         <DemoQuickPicks onNav={onNav} />
+
+
+
+        <ProofStrip />
 
 
 
@@ -678,11 +690,87 @@ function Screen({ tab, form, setForm, onSubmit, submitted, submitting, onNav }) 
 
     <div id="contact" className="hp-page hp-contact">
 
-      <PageHero
-        tone="contact"
-        title="Get started"
-        lead="Tell me what you run. I&rsquo;ll show you a demo in your trade and quote the build."
-      />
+      <header className="hp-contact__head">
+
+        <h2 className="hp-page-title hp-page-title--tight">Get started</h2>
+
+        <p className="hp-contact__lead">
+
+          Tell me what you run. I&rsquo;ll show you a demo in your trade and quote the build.
+
+        </p>
+
+      </header>
+
+
+
+      <div className="hp-contact__form hp-contact__form--lead">
+
+        {submitted ? (
+
+          <div className="hp-get__done">We&rsquo;ll be in touch.</div>
+
+        ) : (
+
+          <>
+
+            {[
+
+              { key: 'name', label: 'Your name', placeholder: 'Your name' },
+
+              { key: 'email', label: 'Email', placeholder: 'you@yourshop.com' },
+
+              { key: 'business', label: 'Business name', placeholder: 'Your shop' },
+
+            ].map(({ key, label, placeholder }) => (
+
+              <label key={key} className="hp-field">
+
+                <span>{label}</span>
+
+                <input
+
+                  type={key === 'email' ? 'email' : 'text'}
+
+                  placeholder={placeholder}
+
+                  value={form[key]}
+
+                  onChange={(e) => setForm({ ...form, [key]: e.target.value })}
+
+                />
+
+              </label>
+
+            ))}
+
+            <button
+
+              type="button"
+
+              className="hp-get__submit"
+
+              onClick={onSubmit}
+
+              disabled={submitting || !form.name || !form.email || !form.business}
+
+            >
+
+              {submitting ? 'Sending…' : 'Send message'}
+
+            </button>
+
+            <p className="hp-get__alt">
+
+              Or <a href="mailto:jk@jknojokes.com">jk@jknojokes.com</a>
+
+            </p>
+
+          </>
+
+        )}
+
+      </div>
 
 
 
@@ -694,95 +782,19 @@ function Screen({ tab, form, setForm, onSubmit, submitted, submitting, onNav }) 
 
 
 
-      <Stagger className="hp-contact__grid">
+      <p className="hp-contact__book">
 
-        <div className="hp-contact__copy">
+        <a href={BOOKING_URL} target="_blank" rel="noopener noreferrer" className="hp-contact__call">
 
-          <p className="hp-body">
+          Book a 30-min call
 
-            Register, vendors, inventory, AR. Tell me what you run and what you need on one screen.
+        </a>
 
-          </p>
+        {' '}
 
-          <a href={BOOKING_URL} target="_blank" rel="noopener noreferrer" className="hp-contact__call">
+        if you prefer to talk first.
 
-            Book a 30-min call
-
-          </a>
-
-        </div>
-
-
-
-        <div className="hp-contact__form">
-
-          {submitted ? (
-
-            <div className="hp-get__done">We&rsquo;ll be in touch.</div>
-
-          ) : (
-
-            <>
-
-              {[
-
-                { key: 'name', label: 'Your name', placeholder: 'Your name' },
-
-                { key: 'email', label: 'Email', placeholder: 'you@yourshop.com' },
-
-                { key: 'business', label: 'Business name', placeholder: 'Your shop' },
-
-              ].map(({ key, label, placeholder }) => (
-
-                <label key={key} className="hp-field">
-
-                  <span>{label}</span>
-
-                  <input
-
-                    type={key === 'email' ? 'email' : 'text'}
-
-                    placeholder={placeholder}
-
-                    value={form[key]}
-
-                    onChange={(e) => setForm({ ...form, [key]: e.target.value })}
-
-                  />
-
-                </label>
-
-              ))}
-
-              <button
-
-                type="button"
-
-                className="hp-get__submit"
-
-                onClick={onSubmit}
-
-                disabled={submitting || !form.name || !form.email || !form.business}
-
-              >
-
-                {submitting ? 'Sending…' : 'Send message'}
-
-              </button>
-
-              <p className="hp-get__alt">
-
-                Or <a href="mailto:jk@jknojokes.com">jk@jknojokes.com</a>
-
-              </p>
-
-            </>
-
-          )}
-
-        </div>
-
-      </Stagger>
+      </p>
 
     </div>
 
@@ -792,7 +804,7 @@ function Screen({ tab, form, setForm, onSubmit, submitted, submitting, onNav }) 
 
 
 
-export default function HomePortal({ live, form, setForm, onSubmit, submitted, submitting }) {
+export default function HomePortal({ live, enteredInstant, form, setForm, onSubmit, submitted, submitting }) {
 
   const router = useRouter()
 
@@ -833,7 +845,7 @@ export default function HomePortal({ live, form, setForm, onSubmit, submitted, s
   return (
 
     <div
-      className={`hp-portal${live ? ' hp-portal--live' : ''}${motionSettled ? ' hp-portal--settled' : ''}`}
+      className={`hp-portal${live ? ' hp-portal--live' : ''}${enteredInstant ? ' hp-portal--instant' : ''}${motionSettled ? ' hp-portal--settled' : ''}`}
     >
 
       <header className="hp-topbar">

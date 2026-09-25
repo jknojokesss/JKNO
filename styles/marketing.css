@@ -945,6 +945,7 @@
   text-align: center;
   padding: 24px;
   pointer-events: none;
+  min-height: 0;
 }
 
 .m-intro__mark {
