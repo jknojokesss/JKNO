@@ -2101,11 +2101,13 @@ button.hp-btn.hp-only-desktop {
   .hp-topbar { padding: 0 14px; }
   .hp-topbar__cta { display: none; }
   .hp-topbar__fin { display: none; }
-  .hp-only-mobile {
-    display: inline-flex;
+  a.hp-btn.hp-only-mobile,
+  button.hp-btn.hp-only-mobile {
+    display: inline-flex !important;
   }
-  .hp-only-desktop {
-    display: none;
+  a.hp-btn.hp-only-desktop,
+  button.hp-btn.hp-only-desktop {
+    display: none !important;
   }
   .hp-shell { flex-direction: column; min-height: 0; }
   .hp-side { display: none; }

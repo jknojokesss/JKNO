@@ -188,7 +188,7 @@ function DemoShell({ tab, setTab, right, children }) {
       <main className="rt-main">
         <div className="rt-status">
           <span style={{ fontFamily: mono, fontSize: 11, color: C.muted, letterSpacing: '0.05em' }}>
-            {BIZ} · Sample demo
+            {BIZ} · Fictitious shop
           </span>
           {right || null}
         </div>
@@ -315,7 +315,7 @@ export default function RiversideTires() {
           <>
             <PageHead
               title="Orders"
-              sub="Register tickets matched to distributor cost. Same 7-day sample as the dashboard register strip."
+              sub="Register tickets matched to distributor cost for the last 7 days in the sample."
             />
             <div style={{ display: 'flex', gap: 12, marginBottom: 20, flexWrap: 'wrap' }}>
               {[
@@ -367,7 +367,7 @@ export default function RiversideTires() {
 
         {tab === 'dashboard' && (
           <>
-            <PageHead title="Dashboard" sub="Register week (live-style) and closed month books are separate on purpose." />
+            <PageHead title="Dashboard" sub="Week at the register, then closed-month books — same sample, two views." />
             <div style={{ ...panel, marginBottom: 28, cursor: 'pointer' }} onClick={() => setTab('orders')}>
               <div style={{ fontFamily: head, fontSize: 13, fontWeight: 700, color: C.ink, letterSpacing: '0.08em', textTransform: 'uppercase' }}>
                 Last 7 days · At the register
@@ -411,7 +411,7 @@ export default function RiversideTires() {
 
         {tab === 'financials' && (
           <>
-            <PageHead title="Financials" sub="Closed-month P&amp;L shape. Not tied to the 7-day register sample on Orders." />
+            <PageHead title="Financials" sub="Closed-month P&amp;L for the sample books." />
             <table style={{ width: '100%', borderCollapse: 'collapse', background: C.card, border: `1px solid ${C.hair}` }}>
               <thead>
                 <tr>
@@ -518,7 +518,7 @@ export default function RiversideTires() {
 
         {tab === 'ai' && (
           <>
-            <PageHead title="Ask" sub="Sample answers from the demo ticket set." />
+            <PageHead title="Ask" sub="Answers from the ticket and stock sample on this page." />
             <div style={{ ...panel, maxWidth: 640 }}>
               <div style={{ display: 'flex', gap: 8, marginBottom: 12 }}>
                 <input
