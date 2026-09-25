@@ -35,18 +35,20 @@ const NAV = [
   { id: 'ai', label: 'Ask' },
 ]
 
-// Fictitious shop — shaped like Reydel orders view (Clover ticket × distributor cost).
+// Fictitious shop — sample pinned to Sep 25, 2026 (books closed through August).
+const DEMO_TODAY = '2026-09-25'
+
 const ORDER_LINES = [
-  { date: '2026-06-26', ticket: 'C-88421', item: '235/65R17 Bridgestone Ecopia ×4', sale: 520, cost: 300, source: 'Weldon · matched' },
-  { date: '2026-06-26', ticket: 'C-88419', item: 'Oil change + rotation', sale: 115, cost: 42, source: 'Parts est.' },
-  { date: '2026-06-25', ticket: 'C-88402', item: '205/55R16 Michelin Primacy ×2', sale: 248, cost: 130, source: 'Weldon · matched' },
-  { date: '2026-06-25', ticket: 'C-88398', item: 'Tire plug repair', sale: 25, cost: 4, source: 'Service' },
-  { date: '2026-06-25', ticket: 'C-88391', item: '245/70R17 BFG A/T ×4 + alignment', sale: 620, cost: 340, source: 'Weldon · matched' },
-  { date: '2026-06-24', ticket: 'C-88370', item: '225/60R17 Goodyear Assurance ×4', sale: 440, cost: 280, source: 'Inventory' },
-  { date: '2026-06-24', ticket: 'C-88365', item: 'TPMS sensor ×2', sale: 210, cost: 72, source: 'Parts est.' },
-  { date: '2026-06-23', ticket: 'C-88340', item: '255/50R20 Michelin Latitude ×4', sale: 880, cost: 460, source: 'Weldon · same-day' },
-  { date: '2026-06-23', ticket: 'C-88332', item: 'Wheel balance (set)', sale: 48, cost: 8, source: 'Service' },
-  { date: '2026-06-22', ticket: 'C-88310', item: '265/70R17 Toyo Open Country ×2', sale: 280, cost: 170, source: 'Weldon · matched' },
+  { date: '2026-09-25', ticket: 'C-89221', item: '235/65R17 Bridgestone Ecopia ×4', sale: 520, cost: 300, source: 'Weldon · matched' },
+  { date: '2026-09-25', ticket: 'C-89219', item: 'Oil change + rotation', sale: 115, cost: 42, source: 'Parts est.' },
+  { date: '2026-09-24', ticket: 'C-89202', item: '205/55R16 Michelin Primacy ×2', sale: 248, cost: 130, source: 'Weldon · matched' },
+  { date: '2026-09-24', ticket: 'C-89198', item: 'Tire plug repair', sale: 25, cost: 4, source: 'Service' },
+  { date: '2026-09-24', ticket: 'C-89191', item: '245/70R17 BFG A/T ×4 + alignment', sale: 620, cost: 340, source: 'Weldon · matched' },
+  { date: '2026-09-23', ticket: 'C-89170', item: '225/60R17 Goodyear Assurance ×4', sale: 440, cost: 280, source: 'Inventory' },
+  { date: '2026-09-23', ticket: 'C-89165', item: 'TPMS sensor ×2', sale: 210, cost: 72, source: 'Parts est.' },
+  { date: '2026-09-22', ticket: 'C-89140', item: '255/50R20 Michelin Latitude ×4', sale: 880, cost: 460, source: 'Weldon · same-day' },
+  { date: '2026-09-22', ticket: 'C-89132', item: 'Wheel balance (set)', sale: 48, cost: 8, source: 'Service' },
+  { date: '2026-09-22', ticket: 'C-89110', item: '265/70R17 Toyo Open Country ×2', sale: 280, cost: 170, source: 'Weldon · matched' },
 ]
 
 const ORDER_ROWS = ORDER_LINES.map((r) => {
@@ -74,75 +76,73 @@ const STOCK = [
 
 // Closed books — line items sum to these totals (matches dashboard headline month).
 const CLOSED_MONTHS = [
-  { label: 'MAY', month: '2026-05', revenue: 38100, cogs: 14600, opex: 9300, profit: 14200 },
-  { label: 'JUN', month: '2026-06', revenue: 34800, cogs: 13300, opex: 8500, profit: 13000 },
+  { label: 'JUL', month: '2026-07', revenue: 36200, cogs: 14000, opex: 9000, profit: 13200 },
+  { label: 'AUG', month: '2026-08', revenue: 37100, cogs: 14400, opex: 9100, profit: 13600 },
 ]
 
 const MONTHLY_TREND = [
-  { month: '2026-01', label: 'JAN', revenue: 31200, profit: 10800 },
-  { month: '2026-02', label: 'FEB', revenue: 29800, profit: 9600 },
-  { month: '2026-03', label: 'MAR', revenue: 33400, profit: 12100 },
-  { month: '2026-04', label: 'APR', revenue: 35600, profit: 12800 },
-  { month: '2026-05', label: 'MAY', revenue: 38100, profit: 14200 },
-  { month: '2026-06', label: 'JUN', revenue: 34800, profit: 13000 },
+  { month: '2026-04', label: 'APR', revenue: 35600, profit: 12800, closed: true },
+  { month: '2026-05', label: 'MAY', revenue: 38100, profit: 14200, closed: true },
+  { month: '2026-06', label: 'JUN', revenue: 34800, profit: 13000, closed: true },
+  { month: '2026-07', label: 'JUL', revenue: 36200, profit: 13200, closed: true },
+  { month: '2026-08', label: 'AUG', revenue: 37100, profit: 13600, closed: true },
+  { month: '2026-09', label: 'SEP', revenue: 16200, profit: null, closed: false },
 ]
 
 const PL_BY_MONTH = {
-  '2026-05': {
+  '2026-07': {
     income: [
-      { label: 'Tire sales', amount: 31200 },
-      { label: 'Service & labor', amount: 5200 },
-      { label: 'Parts & accessories', amount: 1700 },
+      { label: 'Tire sales', amount: 29600 },
+      { label: 'Service & labor', amount: 5000 },
+      { label: 'Parts & accessories', amount: 1600 },
     ],
     cogs: [
-      { label: 'Tire cost of sales', amount: 11200 },
-      { label: 'Parts & fluids', amount: 2400 },
+      { label: 'Tire cost of sales', amount: 10800 },
+      { label: 'Parts & fluids', amount: 2200 },
+      { label: 'Shop supplies (COGS)', amount: 1000 },
+    ],
+    expense: [
+      { label: 'Rent', amount: 4500 },
+      { label: 'Payroll — shop', amount: 3100 },
+      { label: 'Utilities', amount: 850 },
+      { label: 'Insurance', amount: 400 },
+      { label: 'Marketing', amount: 150 },
+    ],
+  },
+  '2026-08': {
+    income: [
+      { label: 'Tire sales', amount: 30300 },
+      { label: 'Service & labor', amount: 5200 },
+      { label: 'Parts & accessories', amount: 1600 },
+    ],
+    cogs: [
+      { label: 'Tire cost of sales', amount: 11100 },
+      { label: 'Parts & fluids', amount: 2300 },
       { label: 'Shop supplies (COGS)', amount: 1000 },
     ],
     expense: [
       { label: 'Rent', amount: 4500 },
       { label: 'Payroll — shop', amount: 3200 },
-      { label: 'Utilities', amount: 900 },
+      { label: 'Utilities', amount: 800 },
       { label: 'Insurance', amount: 400 },
-      { label: 'Equipment & tools', amount: 300 },
-    ],
-  },
-  '2026-06': {
-    income: [
-      { label: 'Tire sales', amount: 28400 },
-      { label: 'Service & labor', amount: 4800 },
-      { label: 'Parts & accessories', amount: 1600 },
-    ],
-    cogs: [
-      { label: 'Tire cost of sales', amount: 10200 },
-      { label: 'Parts & fluids', amount: 2100 },
-      { label: 'Shop supplies (COGS)', amount: 1000 },
-    ],
-    expense: [
-      { label: 'Rent', amount: 4500 },
-      { label: 'Payroll — shop', amount: 2800 },
-      { label: 'Utilities', amount: 750 },
-      { label: 'Insurance', amount: 400 },
-      { label: 'Marketing', amount: 350 },
-      { label: 'Bank & merchant fees', amount: 200 },
-      { label: 'Miscellaneous', amount: 500 },
+      { label: 'Marketing', amount: 200 },
     ],
   },
 }
 
 const BS_AS_OF = {
-  label: 'Jun 30, 2026',
+  label: 'Aug 31, 2026',
   assets: [
-    { label: 'Business checking', amount: 42800 },
-    { label: 'Inventory', amount: 18600 },
-    { label: 'Accounts receivable', amount: 4200 },
+    { label: 'Business checking', amount: 45200 },
+    { label: 'Inventory', amount: 19200 },
+    { label: 'Accounts receivable', amount: 3800 },
   ],
   liabilities: [
-    { label: 'Accounts payable', amount: 11200 },
-    { label: 'Credit cards', amount: 6800 },
-    { label: 'Sales tax payable', amount: 2100 },
+    { label: 'Accounts payable', amount: 10800 },
+    { label: 'Credit cards', amount: 6400 },
+    { label: 'Sales tax payable', amount: 2200 },
   ],
-  equity: [{ label: "Owner's equity", amount: 45500 }],
+  equity: [{ label: "Owner's equity", amount: 48800 }],
 }
 
 const hcell = (align = 'left') => ({
@@ -256,7 +256,7 @@ function DemoShell({ tab, setTab, right, children }) {
       <main className="rt-main">
         <div className="rt-status">
           <span style={{ fontFamily: mono, fontSize: 11, color: C.muted, letterSpacing: '0.05em' }}>
-            {BIZ} · Fictitious shop
+            {BIZ} · Sample · books through Aug 2026
           </span>
           {right || null}
         </div>
@@ -399,7 +399,7 @@ export default function RiversideTires() {
   const [aiQ, setAiQ] = useState('')
   const [aiA, setAiA] = useState('')
   const [finView, setFinView] = useState('pl')
-  const [plMonth, setPlMonth] = useState('2026-06')
+  const [plMonth, setPlMonth] = useState('2026-08')
 
   const sortedItems = [...WEEK_ITEMS].sort((a, b) => b[sort] - a[sort])
   const openRegister = ORDER_ROWS.reduce(
@@ -549,13 +549,13 @@ export default function RiversideTires() {
 
         {tab === 'dashboard' && (
           <>
-            <PageHead title="Dashboard" sub="Week at the register, then closed-month books — same sample, two views." />
+            <PageHead title="Dashboard" sub="September at the register; books closed through August." />
             <div style={{ ...panel, marginBottom: 28, cursor: 'pointer' }} onClick={() => setTab('orders')}>
               <div style={{ fontFamily: head, fontSize: 13, fontWeight: 700, color: C.ink, letterSpacing: '0.08em', textTransform: 'uppercase' }}>
                 Last 7 days · At the register
               </div>
               <div style={{ fontFamily: ui, fontSize: 11, color: C.muted, marginTop: 3, marginBottom: 12 }}>
-                {ORDER_ROWS.length} tickets in the sample · Clover sales · distributor cost
+                Through Sep 25 · {ORDER_ROWS.length} tickets · Clover sales · distributor cost
               </div>
               <div style={{ display: 'flex', flexWrap: 'wrap' }}>
                 {[
@@ -594,7 +594,7 @@ export default function RiversideTires() {
 
         {tab === 'financials' && (
           <>
-            <PageHead title="Financials" sub="Profit &amp; loss, monthly trend, and balance sheet — sample closed books." />
+            <PageHead title="Financials" sub="Closed months through August; September is still open in the sample." />
             <FinTabs active={finView} onChange={setFinView} tabs={FIN_TABS} />
 
             {finView === 'pl' && (
@@ -625,17 +625,22 @@ export default function RiversideTires() {
                   </thead>
                   <tbody>
                     {MONTHLY_TREND.map((m, i) => {
-                      const prior = i > 0 ? MONTHLY_TREND[i - 1].profit : null
-                      const delta = prior != null ? m.profit - prior : null
-                      const closed = CLOSED_MONTHS.some((c) => c.month === m.month)
+                      const priorProfit = i > 0 ? MONTHLY_TREND[i - 1].profit : null
+                      const delta = m.profit != null && priorProfit != null ? m.profit - priorProfit : null
                       return (
                         <tr key={m.month} style={{ background: i % 2 ? '#FAF8F4' : C.card }}>
-                          <td style={cell('left', { fontFamily: mono, fontWeight: closed ? 600 : 400 })}>
-                            {m.label} 2026{closed ? ' · closed' : ''}
+                          <td style={cell('left', { fontFamily: mono, fontWeight: m.closed ? 600 : 400 })}>
+                            {m.label} 2026{m.closed ? ' · closed' : ' · open'}
                           </td>
-                          <td style={cell('right', { fontFamily: mono })}>{fmt0(m.revenue)}</td>
-                          <td style={cell('right', { fontFamily: mono, fontWeight: 600, color: C.green })}>{fmt0(m.profit)}</td>
-                          <td style={cell('right', { fontFamily: mono })}>{pct((m.profit / m.revenue) * 100)}</td>
+                          <td style={cell('right', { fontFamily: mono })}>
+                            {fmt0(m.revenue)}{!m.closed ? ' MTD' : ''}
+                          </td>
+                          <td style={cell('right', { fontFamily: mono, fontWeight: m.closed ? 600 : 400, color: m.closed ? C.green : C.muted })}>
+                            {m.profit != null ? fmt0(m.profit) : '—'}
+                          </td>
+                          <td style={cell('right', { fontFamily: mono })}>
+                            {m.profit != null ? pct((m.profit / m.revenue) * 100) : '—'}
+                          </td>
                           <td style={cell('right', { fontFamily: mono, color: delta == null ? C.muted : delta >= 0 ? C.green : C.red })}>
                             {delta == null ? '—' : `${delta >= 0 ? '+' : '−'}${fmt0(Math.abs(delta))}`}
                           </td>
@@ -724,7 +729,7 @@ export default function RiversideTires() {
 
         {tab === 'stock' && (
           <>
-            <PageHead title="Stock" sub="On-hand from dated purchase layers minus sales — sample as of Jun 30." />
+            <PageHead title="Stock" sub="On-hand from dated purchase layers minus sales — sample as of Aug 31." />
             <table style={{ width: '100%', borderCollapse: 'collapse', background: C.card, border: `1px solid ${C.hair}` }}>
               <thead>
                 <tr>
