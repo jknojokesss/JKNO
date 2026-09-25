@@ -598,12 +598,14 @@
   color: var(--hp-accent-bright);
 }
 
-.hp-only-mobile {
-  display: none;
+a.hp-btn.hp-only-mobile,
+button.hp-btn.hp-only-mobile {
+  display: none !important;
 }
 
-.hp-only-desktop {
-  display: inline-flex;
+a.hp-btn.hp-only-desktop,
+button.hp-btn.hp-only-desktop {
+  display: inline-flex !important;
 }
 
 .hp-overview__deck {
