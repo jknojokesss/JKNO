@@ -963,19 +963,18 @@
 .m-intro--mark .m-intro__mark {
   opacity: 0;
   transform: translateY(8px);
-  animation: m-intro-in 0.7s ease forwards;
+  animation: m-intro-in 0.55s ease forwards;
 }
 
-.m-intro--line .m-intro__mark {
+.m-intro--reveal .m-intro__mark {
   opacity: 1;
-  transform: translateY(0);
+  transform: translateY(0) scale(1);
 }
 
-.m-intro--reveal .m-intro__mark,
 .m-intro--out .m-intro__mark {
   opacity: 0;
-  transform: scale(0.88);
-  transition: opacity 0.45s ease, transform 0.45s ease;
+  transform: scale(0.92);
+  transition: opacity 0.35s ease, transform 0.35s ease;
 }
 
 /* One wordmark: warm ivory face, extruded depth, brand color only in rim light */
