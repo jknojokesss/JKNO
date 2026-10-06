@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useRef } from 'react'
+import { useState, useEffect, useLayoutEffect, useCallback, useRef } from 'react'
 import { markHomeIntroSeen, shouldSkipHomeIntro } from '../lib/homeIntro'
 
 const CHIPS = [
@@ -16,13 +16,8 @@ const CHIPS = [
   { text: 'rent roll', left: '58%', top: '48%', r: -9 },
 ]
 
-function introShouldCover() {
-  if (typeof window === 'undefined') return true
-  return !shouldSkipHomeIntro()
-}
-
 export default function HomeIntro({ onStart, onReveal }) {
-  const [active, setActive] = useState(introShouldCover)
+  const [active, setActive] = useState(false)
   const [phase, setPhase] = useState('mark')
   const doneRef = useRef(false)
   const onRevealRef = useRef(onReveal)
@@ -41,7 +36,7 @@ export default function HomeIntro({ onStart, onReveal }) {
     }, 400)
   }, [])
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     if (doneRef.current) return
 
     if (shouldSkipHomeIntro()) {
@@ -51,6 +46,7 @@ export default function HomeIntro({ onStart, onReveal }) {
       return
     }
 
+    setActive(true)
     onStartRef.current?.()
 
     const t1 = window.setTimeout(() => setPhase('line'), 700)

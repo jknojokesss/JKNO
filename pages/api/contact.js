@@ -3,8 +3,9 @@ export default async function handler(req, res) {
 
   const { name, email, business, trade, quickbooks, message } = req.body
   if (!name || !email || !business || !trade || !quickbooks) return res.status(400).json({ error: 'Missing fields' })
-  const safeTrade = String(trade).slice(0, 120)
-  const safeQb = String(quickbooks).slice(0, 120)
+  const esc = (s) => String(s).replace(/</g, '&lt;').replace(/>/g, '&gt;')
+  const safeTrade = esc(trade).slice(0, 120)
+  const safeQb = esc(quickbooks).slice(0, 120)
   const safeMsg = message ? String(message).slice(0, 2000) : ''
 
   try {
