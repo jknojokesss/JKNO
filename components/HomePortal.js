@@ -77,7 +77,7 @@ const NEXT_STEPS = [
 
 
 
-const OVERVIEW_DEMO_PICKS = FEATURED_DEMOS.slice(0, 3)
+const OVERVIEW_DEMO_PICKS = FEATURED_DEMOS.slice(0, 2)
 
 const TIRE_DEMO = FEATURED_DEMOS[0]
 
@@ -173,7 +173,7 @@ function DemoQuickPicks({ onNav }) {
 
       <div className="hp-demo-picks__head">
 
-        <h2 id="hp-demo-picks-title" className="hp-demo-picks__title">Pick a trade. Click through.</h2>
+        <h2 id="hp-demo-picks-title" className="hp-demo-picks__title">Sample portals</h2>
 
         <button type="button" className="hp-demo-picks__all" onClick={() => onNav('demos')}>
 
@@ -327,68 +327,54 @@ function Screen({ tab, form, setForm, onSubmit, submitted, submitting, onNav }) 
 
       <div className="hp-overview">
 
-        <header className="hp-overview__hero hp-anim-sweep">
+        <header className="hp-overview__hero">
 
-          <h1 className="hp-overview__headline">
-            <span className="hp-overview__headline-line hp-anim hp-anim--hero">
-              QuickBooks won&rsquo;t show margin on today&rsquo;s tickets.
-            </span>
-            <span className="hp-overview__headline-accent hp-anim hp-anim--hero hp-anim--d1">
-              Your phone can — and month-end still ties.
-            </span>
-          </h1>
+          <div className="hp-overview__hero-grid">
+            <div className="hp-overview__hero-copy">
+              <p className="hp-overview__kicker">Custom portal · QuickBooks</p>
 
-          <TireHeroLead />
+              <h1 className="hp-overview__headline">
+                <span className="hp-overview__headline-line">
+                  QuickBooks won&rsquo;t show margin on today&rsquo;s tickets.
+                </span>
+                <span className="hp-overview__headline-accent">
+                  Your phone can — and month-end still ties.
+                </span>
+              </h1>
 
-          <p className="hp-overview__deck hp-anim hp-anim--in hp-anim--d2">
-            You check the business on your phone, not in ten reports. Register, vendor cost,
-            and books in one login; month-end reconciles to the official QBO statement.
-          </p>
+              <p className="hp-overview__deck">
+                Register, vendor cost, and books in one login. Month-end reconciles to the
+                official QBO statement — built in this shell for your shop.
+              </p>
 
-          <p className="hp-overview__hook hp-anim hp-anim--in hp-anim--d3">
-            This homepage is that shell. Below: sample portals you can click through.
-          </p>
-
-          <div className="hp-overview__cta">
-            <div className="hp-overview__actions">
-
-              <a href={TIRE_DEMO.src} className="hp-btn hp-btn--primary hp-only-mobile">
-
-                Open tire shop demo
-
-              </a>
-
-              <button type="button" className="hp-btn hp-btn--primary hp-only-desktop" onClick={() => onNav('contact')}>
-
-                Get started
-
-              </button>
-
-              <button type="button" className="hp-overview__link" onClick={() => onNav('demos')}>
-
-                All sample portals
-
-              </button>
-
+              <div className="hp-overview__cta">
+                <div className="hp-overview__actions">
+                  <a href={TIRE_DEMO.src} className="hp-btn hp-btn--primary hp-only-mobile">
+                    Open tire shop demo
+                  </a>
+                  <button type="button" className="hp-btn hp-btn--primary hp-only-desktop" onClick={() => onNav('contact')}>
+                    Get started
+                  </button>
+                  <button type="button" className="hp-btn hp-btn--ghost" onClick={() => onNav('demos')}>
+                    All demos
+                  </button>
+                </div>
+                <p className="hp-hero-next">
+                  30-min call → connect QuickBooks → about six days to your login.
+                </p>
+              </div>
             </div>
 
-            <p className="hp-hero-next">
-
-              30-min call → connect QuickBooks → about six days to your login.
-
-            </p>
-
+            <aside className="hp-overview__hero-aside" aria-label="Featured sample">
+              <TireHeroLead />
+            </aside>
           </div>
 
         </header>
 
         <DemoQuickPicks onNav={onNav} />
 
-        <ProofStrip />
-
-
-
-        <div className="hp-overview__pillars hp-stagger">
+        <div className="hp-overview__pillars">
 
           {pillars.map((block, i) => (
 
@@ -417,12 +403,6 @@ function Screen({ tab, form, setForm, onSubmit, submitted, submitting, onNav }) 
 
 
         <NextSteps />
-
-
-
-        <PricingNote />
-
-
 
         <ScreenFooter onNav={onNav} />
 

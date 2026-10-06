@@ -55,9 +55,9 @@ export default function Landing() {
   return (
     <>
       <Head>
-        <title>JK No Jokes Financials | One Portal, Your Systems, Numbers That Tie Out</title>
-        <meta name="description" content="This website runs in the portal shell I build for clients. Custom dashboards wired to QuickBooks, your register, and your vendors." />
-        <meta property="og:title" content="JK No Jokes Financials | One Portal, Your Systems, Numbers That Tie Out" />
+        <title>JK No Jokes Financials | Portals wired to QuickBooks</title>
+        <meta name="description" content="Custom client portals: register, vendor cost, and books in one login. Month-end ties to QuickBooks." />
+        <meta property="og:title" content="JK No Jokes Financials | Portals wired to QuickBooks" />
         <meta property="og:description" content="This website runs in the portal shell I build for clients. Custom dashboards wired to QuickBooks, your register, and your vendors." />
         <meta property="og:type" content="website" />
         <meta property="og:url" content="https://jknojokes.com" />
