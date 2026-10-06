@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { demoEmbedSrc } from '../lib/demoEmbed'
 
 const DEMO_SRC = demoEmbedSrc('/riverside-tires')
@@ -49,7 +49,7 @@ const HOME_ROWS = [
   [
     { label: 'Maps', glyph: '↑', hue: '#22c55e' },
     { label: 'Weather', glyph: '☀', hue: '#38bdf8' },
-    { label: 'Stocks', glyph: '📈', hue: '#1e1e1e' },
+    { label: 'NFL', glyph: '🏈', hue: '#013369' },
     { label: 'Settings', glyph: '⚙', hue: '#6b7280' },
   ],
 ]
@@ -71,46 +71,18 @@ function captionForPhase(phase) {
 }
 
 export default function HomePhoneShowcase() {
-  const stageRef = useRef(null)
   const [phase, setPhase] = useState('home')
-  const [motionOk, setMotionOk] = useState(true)
-  const [inView, setInView] = useState(false)
-  const [loadDemo, setLoadDemo] = useState(false)
+  const [loadDemo, setLoadDemo] = useState(true)
 
   useEffect(() => {
-    const el = stageRef.current
-    if (!el) return undefined
-
-    const obs = new IntersectionObserver(
-      ([entry]) => setInView(entry.isIntersecting && entry.intersectionRatio >= 0.35),
-      { threshold: [0, 0.35, 0.6] },
-    )
-    obs.observe(el)
-    return () => obs.disconnect()
-  }, [])
-
-  useEffect(() => {
-    const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches
-    if (reduced) {
-      setMotionOk(false)
-      setPhase('home')
-      return undefined
-    }
-
-    if (!inView) {
-      setPhase('home')
-      return undefined
-    }
-
     let cancelled = false
 
     const loop = async () => {
-      await sleep(400)
-      while (!cancelled && inView) {
+      await sleep(600)
+      while (!cancelled) {
         setPhase('home')
         await sleep(TIMING.home)
         if (cancelled) break
-        setLoadDemo(true)
         setPhase('approach')
         await sleep(TIMING.approach)
         if (cancelled) break
@@ -132,17 +104,14 @@ export default function HomePhoneShowcase() {
     return () => {
       cancelled = true
     }
-  }, [inView])
+  }, [])
 
-  const screenClass = motionOk
-    ? `m-phone__screen m-phone__screen--${phase}`
-    : 'm-phone__screen m-phone__screen--home'
+  const screenClass = `m-phone__screen m-phone__screen--${phase}`
 
   const cap = captionForPhase(phase)
 
   return (
     <div
-      ref={stageRef}
       className="m-phone-stage"
       aria-label="iPhone home screen — tap Riverside Tires to open the portal"
     >
@@ -180,15 +149,13 @@ export default function HomePhoneShowcase() {
             </div>
 
             <div className="m-phone__scene m-phone__scene--portal">
-              {loadDemo && (
-                <iframe
-                  title="Riverside Tires demo"
-                  src={DEMO_SRC}
-                  className="m-phone__iframe"
-                  loading="eager"
-                  tabIndex={-1}
-                />
-              )}
+              <iframe
+                title="Riverside Tires demo"
+                src={DEMO_SRC}
+                className="m-phone__iframe"
+                loading="eager"
+                tabIndex={-1}
+              />
             </div>
           </div>
         </div>
