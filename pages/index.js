@@ -55,6 +55,7 @@ export default function Landing() {
         title="JK No Jokes Financials | Portals wired to QuickBooks"
         description="Margin on today's tickets, month-end that ties to QuickBooks. Custom portal for shops on a register."
         darkHeader
+        padTop={false}
       >
         <HomeLanding
           live={portalLive}

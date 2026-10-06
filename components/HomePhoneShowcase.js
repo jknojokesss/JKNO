@@ -3,6 +3,13 @@ import { demoEmbedSrc } from '../lib/demoEmbed'
 
 const DEMO_SRC = demoEmbedSrc('/riverside-tires')
 
+const TIMING = {
+  home: 2800,
+  press: 420,
+  open: 700,
+  hold: 4500,
+}
+
 export default function HomePhoneShowcase() {
   const [phase, setPhase] = useState('home')
   const [motionOk, setMotionOk] = useState(true)
@@ -11,40 +18,48 @@ export default function HomePhoneShowcase() {
     const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches
     if (reduced) {
       setMotionOk(false)
-      setPhase('portal')
+      setPhase('hold')
       return undefined
     }
-    let t = 0
+
     const ids = []
     const schedule = (fn, ms) => {
       ids.push(window.setTimeout(fn, ms))
     }
-    const loop = () => {
+
+    const cycleMs = TIMING.home + TIMING.press + TIMING.open + TIMING.hold
+
+    const runCycle = () => {
       setPhase('home')
-      schedule(() => setPhase('tap'), 2200)
-      schedule(() => setPhase('portal'), 2800)
-      schedule(loop, 7200)
+      schedule(() => setPhase('press'), TIMING.home)
+      schedule(() => setPhase('open'), TIMING.home + TIMING.press)
+      schedule(() => setPhase('hold'), TIMING.home + TIMING.press + TIMING.open)
     }
-    schedule(() => setPhase('tap'), 1400)
-    schedule(() => setPhase('portal'), 2000)
-    schedule(loop, 6400)
+
+    schedule(runCycle, 600)
+    const loopId = window.setInterval(runCycle, cycleMs)
+    ids.push(loopId)
     return () => ids.forEach((id) => window.clearTimeout(id))
   }, [])
 
+  const screenClass = motionOk
+    ? `m-phone__screen m-phone__screen--${phase}`
+    : 'm-phone__screen m-phone__screen--hold'
+
   return (
-    <div className="m-phone-stage" aria-label="Sample portal on a phone">
+    <div className="m-phone-stage" aria-label="Tap the app to open the sample portal">
       <div className="m-phone">
         <div className="m-phone__bezel">
-          <div className={`m-phone__screen${motionOk ? ` m-phone__screen--${phase}` : ' m-phone__screen--portal'}`}>
+          <div className={screenClass}>
             <div className="m-phone__scene m-phone__scene--home">
               <div className="m-phone__status" aria-hidden="true">9:41</div>
               <div className="m-phone__app-grid">
-                <div className="m-phone__app">
+                <button type="button" className="m-phone__app" tabIndex={-1} aria-hidden="true">
                   <span className="m-phone__app-icon">JK</span>
                   <span className="m-phone__app-name">Portal</span>
-                </div>
+                </button>
               </div>
-              <span className="m-phone__tap-ring" aria-hidden="true" />
+              <span className="m-phone__finger" aria-hidden="true" />
             </div>
             <div className="m-phone__scene m-phone__scene--portal">
               <iframe
@@ -59,7 +74,7 @@ export default function HomePhoneShowcase() {
         </div>
       </div>
       <p className="m-phone-stage__cap">
-        Sample tire shop —{' '}
+        Tap the app —{' '}
         <a href="/riverside-tires">open full demo</a>
       </p>
     </div>

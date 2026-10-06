@@ -4,17 +4,13 @@ import Head from 'next/head'
 import { BOOKING_URL, MARKETING_FONTS, NAV_LINKS } from '../lib/marketing'
 
 export function MarketingLogo({ size = 26, tagline = true, onClick, light = false }) {
-  const ink = light ? '#F7F4EF' : '#0E1420'
-  const muted = light ? 'rgba(247, 244, 239, 0.82)' : '#5A6577'
   const inner = (
-    <div style={{ display: 'flex', alignItems: 'baseline', gap: '10px' }}>
-      <span style={{ fontFamily: 'Playfair Display, serif', fontSize: `${size}px`, fontWeight: '700', letterSpacing: '-0.5px', color: ink }}>
-        JK<span style={{ color: '#C9A84C' }}>.</span>
+    <div className={`m-logo${light ? ' m-logo--light' : ''}`} style={{ '--m-logo-size': `${size}px` }}>
+      <span className="m-logo__jk">
+        JK<span className="m-logo__dot">.</span>
       </span>
       {tagline && (
-        <span className="nav-tagline" style={{ fontFamily: "'Space Grotesk', sans-serif", fontSize: '13px', fontWeight: 600, letterSpacing: '0.12em', color: muted, textTransform: 'uppercase' }}>
-          No Jokes Financials
-        </span>
+        <span className="m-logo__tag nav-tagline">No Jokes Financials</span>
       )}
     </div>
   )
@@ -34,7 +30,7 @@ export default function MarketingShell({ title, description, children, padTop = 
   const [menuOpen, setMenuOpen] = useState(false)
   const [isMobile, setIsMobile] = useState(false)
 
-  const overDarkHero = (darkHeader || onDarkHero) && !scrolled && !menuOpen
+  const onHomeHero = darkHeader && onDarkHero && !menuOpen
 
   useEffect(() => {
     const onScroll = () => {
@@ -93,9 +89,11 @@ export default function MarketingShell({ title, description, children, padTop = 
         <link href={MARKETING_FONTS} rel="stylesheet" />
       </Head>
 
-      <header className={`m-header${scrolled || menuOpen ? ' is-solid' : ''}${menuOpen ? ' is-menu-open' : ''}${overDarkHero ? ' m-header--dark' : ''}`}>
+      <header
+        className={`m-header${onHomeHero ? ' m-header--hero' : ''}${!onHomeHero && (scrolled || menuOpen) ? ' is-solid' : ''}${menuOpen ? ' is-menu-open' : ''}${onHomeHero ? ' m-header--dark' : ''}`}
+      >
         <div className="m-wrap m-header__inner">
-          <MarketingLogo light={overDarkHero} onClick={() => { setMenuOpen(false); router.push('/') }} />
+          <MarketingLogo light={onHomeHero} onClick={() => { setMenuOpen(false); router.push('/') }} />
           {!isMobile && (
             <nav className="m-header__nav" aria-label="Main">
               {NAV_LINKS.map((item) => (
@@ -103,14 +101,14 @@ export default function MarketingShell({ title, description, children, padTop = 
                   onClick={() => go(item.href)}>{item.label}</button>
               ))}
               <button type="button" className="m-nav-link" onClick={() => go('/#contact')}>Contact</button>
-              <button type="button" className={`m-btn m-header__btn${overDarkHero ? ' m-btn--ghost-light' : ' m-btn--secondary'}`} onClick={() => router.push('/login')}>Log in</button>
-              <a href={BOOKING_URL} target="_blank" rel="noopener noreferrer" className={`m-btn m-btn--pop m-header__btn${overDarkHero ? ' m-btn--gold' : ' m-btn--primary'}`}>
+              <button type="button" className={`m-btn m-header__btn${onHomeHero ? ' m-btn--ghost-light' : ' m-btn--secondary'}`} onClick={() => router.push('/login')}>Log in</button>
+              <a href={BOOKING_URL} target="_blank" rel="noopener noreferrer" className={`m-btn m-btn--pop m-header__btn${onHomeHero ? ' m-btn--gold' : ' m-btn--primary'}`}>
                 Book a call
               </a>
             </nav>
           )}
           {isMobile && (
-            <button type="button" className={`m-menu-toggle${overDarkHero ? ' m-menu-toggle--light' : ''}`} onClick={() => setMenuOpen(!menuOpen)} aria-label={menuOpen ? 'Close menu' : 'Open menu'} aria-expanded={menuOpen}>
+            <button type="button" className={`m-menu-toggle${onHomeHero ? ' m-menu-toggle--light' : ''}`} onClick={() => setMenuOpen(!menuOpen)} aria-label={menuOpen ? 'Close menu' : 'Open menu'} aria-expanded={menuOpen}>
               {menuOpen ? '✕' : '☰'}
             </button>
           )}
