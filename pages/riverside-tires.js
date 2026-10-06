@@ -439,7 +439,6 @@ export default function RiversideTires() {
 
   useEffect(() => {
     if (!phoneDemo) return undefined
-    if (phoneDemo) startPhoneDemoMotion()
 
     const onMessage = (event) => {
       if (event.data?.type !== PHONE_DEMO_MSG) return
@@ -568,8 +567,8 @@ export default function RiversideTires() {
         .rt-embed .rt-order-table{display:none}
         .rt-embed .rt-order-cards{display:flex;flex-direction:column;gap:10px}
         .rt-embed .rt-foot{display:none}
-        .rt-embed .rt-main{overflow-y:auto;-webkit-overflow-scrolling:touch;max-height:100vh}
-        .rt-embed .rt-content{overflow-y:auto;-webkit-overflow-scrolling:touch}
+        .rt-embed .rt-main{overflow-y:auto;-webkit-overflow-scrolling:touch;height:100vh;max-height:100vh}
+        .rt-embed .rt-content{overflow-y:visible}
       `}</style>
 
       <DemoShell

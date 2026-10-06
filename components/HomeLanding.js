@@ -48,6 +48,7 @@ export default function HomeLanding({
       <section className="m-dark-band">
         <div className="m-wrap m-band">
           <div className="m-band__hero">
+            <p className="m-band__kicker">Shops on a register · QuickBooks</p>
             <h1 className="m-band__title">
               QuickBooks won&rsquo;t show today&rsquo;s margin.
               <br />
@@ -57,6 +58,11 @@ export default function HomeLanding({
               I build one login for your register, vendor cost, and books. When you close the month,
               it ties to the official QuickBooks statement — not a side spreadsheet.
             </p>
+            <ul className="m-band__checks">
+              <li>Margin on today&rsquo;s tickets, not last month&rsquo;s spreadsheet</li>
+              <li>Vendor cost matched to what rang up at the register</li>
+              <li>Month-end ties to the official QuickBooks statement</li>
+            </ul>
             <div className="m-band__actions">
               <button type="button" className="m-btn m-btn--gold m-btn--pop" onClick={scrollContact}>
                 Get started
@@ -66,6 +72,15 @@ export default function HomeLanding({
               </a>
             </div>
             <p className="m-band__fine">Kickoff call → connect QBO → about six days to your login.</p>
+            <p className="m-band__foot">
+              <button type="button" className="m-band__foot-link" onClick={() => router.push('/demos')}>
+                More demos
+              </button>
+              <span className="m-band__foot-dot" aria-hidden="true">·</span>
+              <a href={BOOKING_URL} target="_blank" rel="noopener noreferrer" className="m-band__foot-link">
+                Book a call
+              </a>
+            </p>
           </div>
 
           <HomePhoneShowcase />
