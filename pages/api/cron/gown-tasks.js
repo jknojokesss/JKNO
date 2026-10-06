@@ -21,6 +21,9 @@ export default async function handler(req, res) {
   const ok = secret && (auth === `Bearer ${secret}` || req.query.key === secret)
   if (!ok) return res.status(401).json({ error: 'Unauthorized' })
 
+  // Daily email off — Pessi asked to stop (Oct 2026). Cron removed from vercel.json.
+  return res.status(200).json({ ok: true, skipped: true, reason: 'daily gown email disabled' })
+
   try {
     const [{ data: orders, error: oErr }, { data: tasks }] = await Promise.all([
       supabaseAdmin.from('gown_orders').select('*'),
