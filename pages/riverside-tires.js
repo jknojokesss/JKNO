@@ -42,7 +42,10 @@ const NAV = [
 /** One pass per portal open — no wrap back to Orders mid-loop */
 const PHONE_DEMO_TABS = ['orders', 'dashboard', 'financials', 'stock']
 const PHONE_TAB_MS = 2300
-const PHONE_SCROLL_MS = 380
+const PHONE_TAB_MS_ORDERS = 2800
+const PHONE_SCROLL_MS = 320
+const PHONE_SCROLL_STEP_ORDERS = 56
+const PHONE_SCROLL_STEP = 48
 
 // Fictitious shop — sample pinned to Sep 25, 2026 (books closed through August).
 const ORDER_LINES = [
@@ -56,6 +59,15 @@ const ORDER_LINES = [
   { date: '2026-09-22', ticket: 'C-89140', item: '255/50R20 Michelin Latitude ×4', sale: 880, cost: 460, source: 'Weldon · same-day' },
   { date: '2026-09-22', ticket: 'C-89132', item: 'Wheel balance (set)', sale: 48, cost: 8, source: 'Service' },
   { date: '2026-09-22', ticket: 'C-89110', item: '265/70R17 Toyo Open Country ×2', sale: 280, cost: 170, source: 'Weldon · matched' },
+  { date: '2026-09-21', ticket: 'C-89088', item: '275/55R20 Hankook Dynapro ×4', sale: 720, cost: 400, source: 'Weldon · matched' },
+  { date: '2026-09-21', ticket: 'C-89072', item: 'Battery install · group 48', sale: 189, cost: 95, source: 'Parts est.' },
+  { date: '2026-09-21', ticket: 'C-89061', item: '195/65R15 Continental PureContact ×4', sale: 360, cost: 220, source: 'Inventory' },
+  { date: '2026-09-20', ticket: 'C-89040', item: 'Alignment · 4-wheel', sale: 120, cost: 18, source: 'Service' },
+  { date: '2026-09-20', ticket: 'C-89028', item: '285/45R22 Pirelli Scorpion ×2', sale: 540, cost: 310, source: 'Weldon · same-day' },
+  { date: '2026-09-20', ticket: 'C-89015', item: 'Brake pads front · ceramic', sale: 285, cost: 110, source: 'Parts est.' },
+  { date: '2026-09-19', ticket: 'C-88990', item: '215/55R17 Falken Ziex ×4', sale: 392, cost: 248, source: 'Weldon · matched' },
+  { date: '2026-09-19', ticket: 'C-88977', item: 'Flat repair + mount', sale: 35, cost: 6, source: 'Service' },
+  { date: '2026-09-19', ticket: 'C-88962', item: '245/60R18 Michelin Defender ×4', sale: 680, cost: 420, source: 'Inventory' },
 ]
 
 const ORDER_ROWS = ORDER_LINES.map((r) => {
@@ -437,7 +449,8 @@ export default function RiversideTires() {
       if (index >= PHONE_DEMO_TABS.length) return
       setTab(PHONE_DEMO_TABS[index])
       if (index + 1 < PHONE_DEMO_TABS.length) {
-        phoneTabTimerRef.current = window.setTimeout(() => visitTab(index + 1), PHONE_TAB_MS)
+        const dwell = PHONE_DEMO_TABS[index] === 'orders' ? PHONE_TAB_MS_ORDERS : PHONE_TAB_MS
+        phoneTabTimerRef.current = window.setTimeout(() => visitTab(index + 1), dwell)
       }
     }
     visitTab(0)
@@ -459,6 +472,16 @@ export default function RiversideTires() {
   }, [phoneDemo])
 
   useEffect(() => {
+    if (!phoneDemo) return undefined
+    document.documentElement.classList.add('rt-phone-embed')
+    document.body.classList.add('rt-phone-embed')
+    return () => {
+      document.documentElement.classList.remove('rt-phone-embed')
+      document.body.classList.remove('rt-phone-embed')
+    }
+  }, [phoneDemo])
+
+  useEffect(() => {
     const onTourTab = phoneTourActive && PHONE_DEMO_TABS.includes(tab)
     if (!phoneDemo || !onTourTab) {
       if (phoneScrollTimerRef.current) {
@@ -471,11 +494,12 @@ export default function RiversideTires() {
     if (!el) return undefined
     el.scrollTop = 0
     if (phoneScrollTimerRef.current) window.clearInterval(phoneScrollTimerRef.current)
+    const step = tab === 'orders' ? PHONE_SCROLL_STEP_ORDERS : PHONE_SCROLL_STEP
     phoneScrollTimerRef.current = window.setInterval(() => {
       const max = el.scrollHeight - el.clientHeight
       if (max <= 0) return
       if (el.scrollTop >= max - 10) el.scrollTop = 0
-      else el.scrollTop += 48
+      else el.scrollTop += step
     }, PHONE_SCROLL_MS)
     return () => {
       if (phoneScrollTimerRef.current) {
@@ -524,6 +548,7 @@ export default function RiversideTires() {
       </Head>
       <style>{`
         *{box-sizing:border-box;margin:0;padding:0}
+        html.rt-phone-embed,body.rt-phone-embed{height:100%;overflow:hidden}
         body{font-family:${ui};background:${C.paper};color:${C.ink};font-variant-numeric:tabular-nums}
         .rt-shell{display:flex;min-height:100vh;align-items:stretch;background:${C.paper}}
         .rt-side{width:214px;flex-shrink:0;background:${THEME.side};box-shadow:inset -3px 0 0 ${THEME.accent};display:flex;flex-direction:column;padding:20px 12px;position:sticky;top:0;height:100vh}
@@ -564,7 +589,7 @@ export default function RiversideTires() {
           .rt-order-table{display:none}
           .rt-order-cards{display:flex;flex-direction:column;gap:10px}
         }
-        .rt-embed.rt-shell{flex-direction:column;min-height:100%}
+        .rt-embed.rt-shell{flex-direction:column;height:100vh;max-height:100vh;min-height:0;overflow:hidden}
         .rt-embed .rt-side{display:none!important}
         .rt-embed .rt-mobilenav{display:flex!important;overflow-x:auto;gap:4px;padding:8px 10px;background:${THEME.side};position:sticky;top:0;z-index:20;-webkit-overflow-scrolling:touch;box-shadow:inset 0 -3px 0 ${THEME.accent}}
         .rt-embed .rt-mobilenav button{flex-shrink:0;border:none;background:rgba(255,255,255,.06);color:#948D81;font-family:${head};font-size:11px;font-weight:500;letter-spacing:.04em;text-transform:uppercase;padding:8px 12px;cursor:pointer;white-space:nowrap}
@@ -574,8 +599,9 @@ export default function RiversideTires() {
         .rt-embed .rt-order-table{display:none}
         .rt-embed .rt-order-cards{display:flex;flex-direction:column;gap:10px}
         .rt-embed .rt-foot{display:none}
-        .rt-embed .rt-main{overflow-y:auto;-webkit-overflow-scrolling:touch;height:100vh;max-height:100vh}
+        .rt-embed .rt-main{flex:1 1 auto;min-height:0;overflow-y:auto;-webkit-overflow-scrolling:touch}
         .rt-embed .rt-content{overflow-y:visible}
+        .rt-embed .rt-mobilenav{flex-shrink:0}
       `}</style>
 
       <DemoShell
