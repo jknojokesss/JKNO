@@ -1385,6 +1385,7 @@
   gap: 16px;
   padding: 4px 6px 0;
   min-height: 0;
+  overflow: visible;
 }
 
 .m-phone__ios-row {
@@ -1619,6 +1620,23 @@
   transition: transform 0.35s ease, box-shadow 0.35s ease, filter 0.35s ease;
 }
 
+.m-phone__screen--home .m-phone__app-icon--rt {
+  animation: m-phone-rt-beacon 3.2s ease-in-out infinite;
+}
+
+@keyframes m-phone-rt-beacon {
+  0%,
+  72%,
+  100% {
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+  }
+  82% {
+    box-shadow:
+      0 4px 12px rgba(0, 0, 0, 0.25),
+      0 0 0 3px rgba(201, 168, 76, 0.7);
+  }
+}
+
 .m-phone__app-name {
   font-size: 9px;
   line-height: 1.25;
@@ -1792,6 +1810,7 @@
   .m-phone__screen--open .m-phone__scene--home,
   .m-phone__screen--open .m-phone__app--rt,
   .m-phone__screen--open .m-phone__scene--portal,
+  .m-phone__screen--home .m-phone__app-icon--rt,
   .m-home--live .m-band__mark,
   .m-home--live .m-band__hero > *,
   .m-intro,
@@ -1812,8 +1831,14 @@
 
 @media (max-width: 900px) {
   .m-band {
-    grid-template-columns: 1fr;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
     gap: 28px;
+  }
+  .m-phone-stage {
+    order: -1;
+    width: min(100%, 280px);
   }
   .m-band__hero { text-align: center; padding-right: 0; }
   .m-band__sub { margin-left: auto; margin-right: auto; }

@@ -1,15 +1,15 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { demoEmbedSrc } from '../lib/demoEmbed'
 
 const DEMO_SRC = demoEmbedSrc('/riverside-tires')
 
 const TIMING = {
-  home: 13000,
-  approach: 1600,
-  tap: 1000,
-  pressed: 4500,
-  open: 2600,
-  hold: 16000,
+  home: 4200,
+  approach: 1800,
+  tap: 1100,
+  pressed: 3800,
+  open: 2800,
+  hold: 12000,
 }
 
 function AppIcon({ label, glyph, hue, rt = false }) {
@@ -32,7 +32,7 @@ function AppIcon({ label, glyph, hue, rt = false }) {
   )
 }
 
-/** Three rows × four icons — Riverside Tires row 2, column 1 (under Mail). */
+/** Three rows × four icons — Riverside Tires row 2, column 1. */
 const HOME_ROWS = [
   [
     { label: 'FaceTime', glyph: '📹', hue: '#22c55e' },
@@ -60,26 +60,57 @@ function sleep(ms) {
   })
 }
 
+function captionForPhase(phase) {
+  if (phase === 'approach' || phase === 'tap' || phase === 'pressed') {
+    return 'press'
+  }
+  if (phase === 'open' || phase === 'hold') {
+    return 'open'
+  }
+  return 'home'
+}
+
 export default function HomePhoneShowcase() {
+  const stageRef = useRef(null)
   const [phase, setPhase] = useState('home')
   const [motionOk, setMotionOk] = useState(true)
+  const [inView, setInView] = useState(false)
+  const [loadDemo, setLoadDemo] = useState(false)
+
+  useEffect(() => {
+    const el = stageRef.current
+    if (!el) return undefined
+
+    const obs = new IntersectionObserver(
+      ([entry]) => setInView(entry.isIntersecting && entry.intersectionRatio >= 0.35),
+      { threshold: [0, 0.35, 0.6] },
+    )
+    obs.observe(el)
+    return () => obs.disconnect()
+  }, [])
 
   useEffect(() => {
     const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches
     if (reduced) {
       setMotionOk(false)
-      setPhase('hold')
+      setPhase('home')
+      return undefined
+    }
+
+    if (!inView) {
+      setPhase('home')
       return undefined
     }
 
     let cancelled = false
 
     const loop = async () => {
-      await sleep(800)
-      while (!cancelled) {
+      await sleep(400)
+      while (!cancelled && inView) {
         setPhase('home')
         await sleep(TIMING.home)
         if (cancelled) break
+        setLoadDemo(true)
         setPhase('approach')
         await sleep(TIMING.approach)
         if (cancelled) break
@@ -101,14 +132,20 @@ export default function HomePhoneShowcase() {
     return () => {
       cancelled = true
     }
-  }, [])
+  }, [inView])
 
   const screenClass = motionOk
     ? `m-phone__screen m-phone__screen--${phase}`
-    : 'm-phone__screen m-phone__screen--hold'
+    : 'm-phone__screen m-phone__screen--home'
+
+  const cap = captionForPhase(phase)
 
   return (
-    <div className="m-phone-stage" aria-label="iPhone home screen — tap Riverside Tires to open the portal">
+    <div
+      ref={stageRef}
+      className="m-phone-stage"
+      aria-label="iPhone home screen — tap Riverside Tires to open the portal"
+    >
       <div className="m-phone">
         <div className="m-phone__bezel">
           <div className="m-phone__island" aria-hidden="true" />
@@ -143,20 +180,37 @@ export default function HomePhoneShowcase() {
             </div>
 
             <div className="m-phone__scene m-phone__scene--portal">
-              <iframe
-                title="Riverside Tires demo"
-                src={DEMO_SRC}
-                className="m-phone__iframe"
-                loading="lazy"
-                tabIndex={-1}
-              />
+              {loadDemo && (
+                <iframe
+                  title="Riverside Tires demo"
+                  src={DEMO_SRC}
+                  className="m-phone__iframe"
+                  loading="eager"
+                  tabIndex={-1}
+                />
+              )}
             </div>
           </div>
         </div>
       </div>
       <p className="m-phone-stage__cap">
-        Tap <strong>Riverside Tires</strong> —{' '}
-        <a href="/riverside-tires">open full demo</a>
+        {cap === 'press' && (
+          <>
+            Finger on <strong>Riverside Tires</strong> — watch it open
+          </>
+        )}
+        {cap === 'open' && (
+          <>
+            <strong>Riverside Tires</strong> portal —{' '}
+            <a href="/riverside-tires">open full demo</a>
+          </>
+        )}
+        {cap === 'home' && (
+          <>
+            Home screen — tap <strong>Riverside Tires</strong> (
+            <a href="/riverside-tires">full demo</a>)
+          </>
+        )}
       </p>
     </div>
   )
