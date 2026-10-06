@@ -39,7 +39,12 @@ export default function HomePhoneShowcase() {
     schedule(runCycle, 600)
     const loopId = window.setInterval(runCycle, cycleMs)
     ids.push(loopId)
-    return () => ids.forEach((id) => window.clearTimeout(id))
+    return () => {
+      ids.forEach((id) => {
+        window.clearTimeout(id)
+        window.clearInterval(id)
+      })
+    }
   }, [])
 
   const screenClass = motionOk
