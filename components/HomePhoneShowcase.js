@@ -3,11 +3,10 @@ import { demoEmbedSrc } from '../lib/demoEmbed'
 
 const DEMO_SRC = demoEmbedSrc('/riverside-tires')
 
-/** home → tap → portal, repeat. Short and obvious. */
 const STEP_MS = {
-  home: 2800,
-  tap: 1600,
-  portal: 7500,
+  home: 1100,
+  press: 520,
+  portal: 6500,
 }
 
 const HOME_ROWS = [
@@ -47,7 +46,6 @@ function AppIcon({ label, glyph, hue, rt = false }) {
         {glyph}
       </span>
       <span className="m-phone__app-name">{label}</span>
-      {rt && <span className="m-phone__finger" aria-hidden="true" />}
     </div>
   )
 }
@@ -57,10 +55,9 @@ export default function HomePhoneShowcase() {
 
   useEffect(() => {
     let cancelled = false
-    const order = ['home', 'tap', 'portal']
+    const order = ['home', 'press', 'portal']
 
     const loop = async () => {
-      await sleep(300)
       let i = 0
       while (!cancelled) {
         const name = order[i]
@@ -78,12 +75,6 @@ export default function HomePhoneShowcase() {
 
   return (
     <div className="m-phone-stage" aria-label="Tap Riverside Tires on the home screen to open the shop portal">
-      <ol className="m-phone-steps" aria-hidden="true">
-        <li className={step === 'home' ? 'is-on' : ''}>Home</li>
-        <li className={step === 'tap' ? 'is-on' : ''}>Tap</li>
-        <li className={step === 'portal' ? 'is-on' : ''}>Portal</li>
-      </ol>
-
       <div className="m-phone">
         <div className="m-phone__bezel">
           <div className="m-phone__island" aria-hidden="true" />
@@ -93,7 +84,6 @@ export default function HomePhoneShowcase() {
               <div className="m-phone__ios-bar">
                 <span>9:41</span>
               </div>
-              <p className="m-phone__home-hint">Tap your shop app</p>
 
               <div className="m-phone__ios-pages">
                 {HOME_ROWS.map((row, ri) => (
@@ -116,9 +106,6 @@ export default function HomePhoneShowcase() {
                   <div key={name} className="m-phone__dock-icon" />
                 ))}
               </div>
-
-              <div className="m-phone__shade" aria-hidden="true" />
-              <div className="m-phone__tap-badge" aria-hidden="true">TAP</div>
             </div>
 
             <div className="m-phone__scene m-phone__scene--portal">
@@ -137,12 +124,12 @@ export default function HomePhoneShowcase() {
       <p className="m-phone-stage__cap">
         {step === 'portal' ? (
           <>
-            Your portal, on the phone —{' '}
+            Your portal on the phone —{' '}
             <a href="/riverside-tires">open full demo</a>
           </>
         ) : (
           <>
-            <strong>Riverside Tires</strong> on the home screen → books inside
+            Tap <strong>Riverside Tires</strong> like any other app
           </>
         )}
       </p>

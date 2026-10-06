@@ -1277,39 +1277,12 @@
   max-width: 720px;
 }
 
-/* ── Hero phone showcase (3 steps: home → tap → portal) ───────────────── */
+/* ── Hero phone showcase (home → press → portal) ─────────────────────── */
 
 .m-phone-stage {
   justify-self: end;
   width: min(100%, 340px);
   margin: 0 auto;
-}
-
-.m-phone-steps {
-  display: flex;
-  justify-content: center;
-  gap: 8px;
-  margin: 0 0 12px;
-  padding: 0;
-  list-style: none;
-  font-size: 11px;
-  font-weight: 600;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-  color: rgba(247, 244, 239, 0.35);
-}
-
-.m-phone-steps li {
-  padding: 6px 10px;
-  border-radius: 999px;
-  border: 1px solid rgba(247, 244, 239, 0.12);
-  transition: background 0.25s ease, color 0.25s ease, border-color 0.25s ease;
-}
-
-.m-phone-steps li.is-on {
-  color: #1b1815;
-  background: var(--m-gold);
-  border-color: var(--m-gold);
 }
 
 .m-phone-stage__cap {
@@ -1368,48 +1341,10 @@
   background: #0a0a0a;
 }
 
-.m-phone__shade {
-  position: absolute;
-  inset: 0;
-  z-index: 8;
-  background: rgba(0, 0, 0, 0.62);
-  opacity: 0;
-  pointer-events: none;
-  transition: opacity 0.35s ease;
-}
-
-.m-phone__tap-badge {
-  position: absolute;
-  left: 50%;
-  top: 38%;
-  z-index: 12;
-  transform: translate(-50%, -50%) scale(0.85);
-  padding: 10px 22px;
-  border-radius: 8px;
-  font-size: 22px;
-  font-weight: 800;
-  letter-spacing: 0.12em;
-  color: #1b1815;
-  background: var(--m-gold);
-  box-shadow: 0 8px 28px rgba(0, 0, 0, 0.45);
-  opacity: 0;
-  pointer-events: none;
-  transition: opacity 0.25s ease, transform 0.25s ease;
-}
-
-.m-phone__screen--tap .m-phone__shade {
-  opacity: 1;
-}
-
-.m-phone__screen--tap .m-phone__tap-badge {
-  opacity: 1;
-  transform: translate(-50%, -50%) scale(1);
-}
-
 .m-phone__scene {
   position: absolute;
   inset: 0;
-  transition: opacity 0.45s ease;
+  transition: opacity 0.32s ease;
 }
 
 .m-phone__scene--home {
@@ -1418,7 +1353,6 @@
   padding: 36px 12px 10px;
   z-index: 2;
   overflow: hidden;
-  isolation: isolate;
 }
 
 .m-phone__scene--portal {
@@ -1453,26 +1387,7 @@
   font-size: 11px;
   font-weight: 600;
   color: rgba(255, 255, 255, 0.92);
-  margin-bottom: 8px;
-}
-
-.m-phone__home-hint {
-  position: relative;
-  z-index: 1;
-  margin: 0 8px 10px;
-  padding: 8px 10px;
-  text-align: center;
-  font-size: 12px;
-  font-weight: 600;
-  color: #fff;
-  background: rgba(0, 0, 0, 0.35);
-  border: 1px solid rgba(201, 168, 76, 0.55);
-  border-radius: 8px;
-}
-
-.m-phone__screen--tap .m-phone__home-hint,
-.m-phone__screen--portal .m-phone__home-hint {
-  opacity: 0;
+  margin-bottom: 14px;
 }
 
 .m-phone__ios-pages {
@@ -1524,24 +1439,10 @@
   padding: 0 2px;
   min-width: 0;
   width: 100%;
-  transition: opacity 0.3s ease, transform 0.3s ease;
 }
 
 .m-phone__app--rt {
   position: relative;
-  z-index: 9;
-}
-
-.m-phone__screen--home .m-phone__app:not(.m-phone__app--rt) {
-  opacity: 0.55;
-}
-
-.m-phone__screen--tap .m-phone__app:not(.m-phone__app--rt) {
-  opacity: 0.2;
-}
-
-.m-phone__screen--tap .m-phone__app--rt {
-  transform: scale(0.9);
 }
 
 .m-phone__app-icon {
@@ -1557,6 +1458,7 @@
   font-size: 15px;
   color: #fff;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+  transition: transform 0.12s ease, filter 0.12s ease, box-shadow 0.12s ease;
 }
 
 .m-phone__app-icon--rt {
@@ -1564,16 +1466,14 @@
   font-size: 18px;
   font-weight: 700;
   background: linear-gradient(145deg, #c42e22 0%, #b0281c 45%, #8a1f16 100%);
-  box-shadow:
-    0 4px 12px rgba(0, 0, 0, 0.25),
-    0 0 0 3px var(--m-gold);
 }
 
-.m-phone__screen--tap .m-phone__app-icon--rt {
+.m-phone__screen--press .m-phone__app--rt .m-phone__app-icon--rt {
+  transform: scale(0.9);
+  filter: brightness(0.82);
   box-shadow:
-    0 4px 12px rgba(0, 0, 0, 0.25),
-    0 0 0 4px #fff,
-    0 0 0 7px var(--m-gold);
+    inset 0 5px 12px rgba(0, 0, 0, 0.35),
+    0 2px 6px rgba(0, 0, 0, 0.2);
 }
 
 .m-phone__app-name {
@@ -1583,32 +1483,11 @@
   color: rgba(255, 255, 255, 0.92);
   text-shadow: 0 1px 2px rgba(0, 0, 0, 0.35);
   max-width: 64px;
+  transition: transform 0.12s ease;
 }
 
-.m-phone__screen--tap .m-phone__app--rt .m-phone__app-name {
-  font-weight: 700;
-  color: #fff;
-}
-
-.m-phone__finger {
-  position: absolute;
-  left: 50%;
-  top: 28px;
-  z-index: 11;
-  width: 44px;
-  height: 44px;
-  border-radius: 50%;
-  background: #fff;
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
-  opacity: 0;
-  transform: translate(-50%, 8px);
-  pointer-events: none;
-  transition: opacity 0.25s ease, transform 0.25s ease;
-}
-
-.m-phone__screen--tap .m-phone__finger {
-  opacity: 1;
-  transform: translate(-50%, -6px);
+.m-phone__screen--press .m-phone__app--rt .m-phone__app-name {
+  transform: scale(0.96);
 }
 
 .m-phone__iframe {
@@ -1687,9 +1566,7 @@
 
 @media (prefers-reduced-motion: reduce) {
   .m-phone__scene,
-  .m-phone__shade,
-  .m-phone__tap-badge,
-  .m-phone__finger,
+  .m-phone__app-icon,
   .m-home--live .m-band__mark,
   .m-home--live .m-band__hero > *,
   .m-intro,
