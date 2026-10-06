@@ -3,36 +3,13 @@ import { demoEmbedSrc } from '../lib/demoEmbed'
 
 const DEMO_SRC = demoEmbedSrc('/riverside-tires')
 
-const TIMING = {
-  home: 4200,
-  approach: 1800,
-  tap: 1100,
-  pressed: 3800,
-  open: 2800,
-  hold: 12000,
+/** home → tap → portal, repeat. Short and obvious. */
+const STEP_MS = {
+  home: 2800,
+  tap: 1600,
+  portal: 7500,
 }
 
-function AppIcon({ label, glyph, hue, rt = false }) {
-  return (
-    <div className={`m-phone__app${rt ? ' m-phone__app--rt' : ''}`}>
-      <span
-        className={`m-phone__app-icon${rt ? ' m-phone__app-icon--rt' : ''}`}
-        style={rt ? undefined : { background: hue }}
-      >
-        {glyph}
-      </span>
-      <span className="m-phone__app-name">{label}</span>
-      {rt && (
-        <>
-          <span className="m-phone__press-ring" aria-hidden="true" />
-          <span className="m-phone__finger" aria-hidden="true" />
-        </>
-      )}
-    </div>
-  )
-}
-
-/** Three rows × four icons — Riverside Tires row 2, column 1. */
 const HOME_ROWS = [
   [
     { label: 'FaceTime', glyph: '📹', hue: '#22c55e' },
@@ -60,43 +37,36 @@ function sleep(ms) {
   })
 }
 
-function captionForPhase(phase) {
-  if (phase === 'approach' || phase === 'tap' || phase === 'pressed') {
-    return 'press'
-  }
-  if (phase === 'open' || phase === 'hold') {
-    return 'open'
-  }
-  return 'home'
+function AppIcon({ label, glyph, hue, rt = false }) {
+  return (
+    <div className={`m-phone__app${rt ? ' m-phone__app--rt' : ''}`}>
+      <span
+        className={`m-phone__app-icon${rt ? ' m-phone__app-icon--rt' : ''}`}
+        style={rt ? undefined : { background: hue }}
+      >
+        {glyph}
+      </span>
+      <span className="m-phone__app-name">{label}</span>
+      {rt && <span className="m-phone__finger" aria-hidden="true" />}
+    </div>
+  )
 }
 
 export default function HomePhoneShowcase() {
-  const [phase, setPhase] = useState('home')
-  const [loadDemo, setLoadDemo] = useState(true)
+  const [step, setStep] = useState('home')
 
   useEffect(() => {
     let cancelled = false
+    const order = ['home', 'tap', 'portal']
 
     const loop = async () => {
-      await sleep(600)
+      await sleep(300)
+      let i = 0
       while (!cancelled) {
-        setPhase('home')
-        await sleep(TIMING.home)
-        if (cancelled) break
-        setPhase('approach')
-        await sleep(TIMING.approach)
-        if (cancelled) break
-        setPhase('tap')
-        await sleep(TIMING.tap)
-        if (cancelled) break
-        setPhase('pressed')
-        await sleep(TIMING.pressed)
-        if (cancelled) break
-        setPhase('open')
-        await sleep(TIMING.open)
-        if (cancelled) break
-        setPhase('hold')
-        await sleep(TIMING.hold)
+        const name = order[i]
+        setStep(name)
+        await sleep(STEP_MS[name])
+        i = (i + 1) % order.length
       }
     }
 
@@ -106,24 +76,24 @@ export default function HomePhoneShowcase() {
     }
   }, [])
 
-  const screenClass = `m-phone__screen m-phone__screen--${phase}`
-
-  const cap = captionForPhase(phase)
-
   return (
-    <div
-      className="m-phone-stage"
-      aria-label="iPhone home screen — tap Riverside Tires to open the portal"
-    >
+    <div className="m-phone-stage" aria-label="Tap Riverside Tires on the home screen to open the shop portal">
+      <ol className="m-phone-steps" aria-hidden="true">
+        <li className={step === 'home' ? 'is-on' : ''}>Home</li>
+        <li className={step === 'tap' ? 'is-on' : ''}>Tap</li>
+        <li className={step === 'portal' ? 'is-on' : ''}>Portal</li>
+      </ol>
+
       <div className="m-phone">
         <div className="m-phone__bezel">
           <div className="m-phone__island" aria-hidden="true" />
-          <div className={screenClass}>
+          <div className={`m-phone__screen m-phone__screen--${step}`}>
             <div className="m-phone__scene m-phone__scene--home">
               <div className="m-phone__wallpaper" aria-hidden="true" />
               <div className="m-phone__ios-bar">
                 <span>9:41</span>
               </div>
+              <p className="m-phone__home-hint">Tap your shop app</p>
 
               <div className="m-phone__ios-pages">
                 {HOME_ROWS.map((row, ri) => (
@@ -146,6 +116,9 @@ export default function HomePhoneShowcase() {
                   <div key={name} className="m-phone__dock-icon" />
                 ))}
               </div>
+
+              <div className="m-phone__shade" aria-hidden="true" />
+              <div className="m-phone__tap-badge" aria-hidden="true">TAP</div>
             </div>
 
             <div className="m-phone__scene m-phone__scene--portal">
@@ -160,22 +133,16 @@ export default function HomePhoneShowcase() {
           </div>
         </div>
       </div>
+
       <p className="m-phone-stage__cap">
-        {cap === 'press' && (
+        {step === 'portal' ? (
           <>
-            Finger on <strong>Riverside Tires</strong> — watch it open
-          </>
-        )}
-        {cap === 'open' && (
-          <>
-            <strong>Riverside Tires</strong> portal —{' '}
+            Your portal, on the phone —{' '}
             <a href="/riverside-tires">open full demo</a>
           </>
-        )}
-        {cap === 'home' && (
+        ) : (
           <>
-            Home screen — tap <strong>Riverside Tires</strong> (
-            <a href="/riverside-tires">full demo</a>)
+            <strong>Riverside Tires</strong> on the home screen → books inside
           </>
         )}
       </p>
