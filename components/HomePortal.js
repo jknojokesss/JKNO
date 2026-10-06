@@ -98,18 +98,18 @@ function Screen({ tab, form, setForm, onSubmit, submitted, submitting, onNav }) 
         <header className="hp-overview__hero">
 
           <h1 className="hp-overview__headline">
-            One portal. Your systems.<br />
-            <span className="hp-overview__headline-accent">Numbers that tie out.</span>
+            QuickBooks won&rsquo;t show margin on today&rsquo;s tickets.<br />
+            <span className="hp-overview__headline-accent">Your phone can — and month-end still ties.</span>
           </h1>
 
           <p className="hp-overview__hook">
-            This site runs in the same portal shell I ship for clients — sidebar, top bar, these
-            tabs. Not a marketing theme dressed up as software.
+            You check the business on your phone, not in ten reports. I wire register, vendor cost,
+            and books into one login; the portal reconciles to the official QBO statement when you close.
           </p>
 
           <p className="hp-overview__deck">
-            Register, vendors, QuickBooks behind one login. Nightly sync, month-end tied to the
-            official QBO statement. Sample businesses below; the pipe is the same on a live shop.
+            This homepage is that shell. Below: a live tire shop on it every day, plus sample portals
+            you can click through.
           </p>
 
           <div className="hp-overview__actions">
@@ -130,7 +130,23 @@ function Screen({ tab, form, setForm, onSubmit, submitted, submitting, onNav }) 
 
         </header>
 
-
+        <section className="hp-proof" aria-labelledby="hp-proof-title">
+          <p className="hp-proof__eyebrow">Live on QuickBooks</p>
+          <h2 id="hp-proof-title" className="hp-proof__title">Reydel Tire &amp; Auto</h2>
+          <p className="hp-proof__body">
+            Clover tickets matched to Weldon distributor cost — profit per repair order on the phone.
+            Nightly QBO sync; month-end inventory posts back to the GL when the numbers tie.
+          </p>
+          <p className="hp-proof__meta">Lakewood, NJ · owner login · not a demo dataset</p>
+          <a
+            className="hp-proof__link"
+            href="https://reydel.vercel.app"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            Open the live portal →
+          </a>
+        </section>
 
         <p className="hp-body hp-overview__note">
 
@@ -499,6 +515,55 @@ function Screen({ tab, form, setForm, onSubmit, submitted, submitting, onNav }) 
 
               ))}
 
+              <label className="hp-field">
+
+                <span>What you run</span>
+
+                <select
+                  value={form.trade}
+                  onChange={(e) => setForm({ ...form, trade: e.target.value })}
+                >
+                  <option value="">Select trade</option>
+                  <option value="Tire / auto">Tire / auto</option>
+                  <option value="Contractor / trades">Contractor / trades</option>
+                  <option value="Import / wholesale">Import / wholesale</option>
+                  <option value="Retail / custom orders">Retail / custom orders</option>
+                  <option value="Property / professional services">Property / professional services</option>
+                  <option value="Other">Other</option>
+                </select>
+
+              </label>
+
+              <label className="hp-field">
+
+                <span>Books today</span>
+
+                <select
+                  value={form.quickbooks}
+                  onChange={(e) => setForm({ ...form, quickbooks: e.target.value })}
+                >
+                  <option value="">Select</option>
+                  <option value="QuickBooks Online">QuickBooks Online</option>
+                  <option value="QuickBooks Desktop">QuickBooks Desktop</option>
+                  <option value="Spreadsheet / accountant only">Spreadsheet / accountant only</option>
+                  <option value="Other software">Other software</option>
+                </select>
+
+              </label>
+
+              <label className="hp-field">
+
+                <span>What do you want on one screen?</span>
+
+                <textarea
+                  rows={3}
+                  placeholder="e.g. margin per ticket, landed cost per PO, job WIP…"
+                  value={form.message}
+                  onChange={(e) => setForm({ ...form, message: e.target.value })}
+                />
+
+              </label>
+
               <button
 
                 type="button"
@@ -507,7 +572,14 @@ function Screen({ tab, form, setForm, onSubmit, submitted, submitting, onNav }) 
 
                 onClick={onSubmit}
 
-                disabled={submitting || !form.name || !form.email || !form.business}
+                disabled={
+                  submitting
+                  || !form.name
+                  || !form.email
+                  || !form.business
+                  || !form.trade
+                  || !form.quickbooks
+                }
 
               >
 

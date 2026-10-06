@@ -3,19 +3,28 @@ import Head from 'next/head'
 import HomeIntro from '../components/HomeIntro'
 import HomePortal from '../components/HomePortal'
 import { MARKETING_FONTS } from '../lib/marketing'
+import { isDirectHomeTraffic } from '../lib/homeIntro'
 
 export default function Landing() {
   const [portalLive, setPortalLive] = useState(false)
-  const [form, setForm] = useState({ name: '', email: '', business: '' })
+  const [form, setForm] = useState({
+    name: '',
+    email: '',
+    business: '',
+    trade: '',
+    quickbooks: '',
+    message: '',
+  })
   const [submitted, setSubmitted] = useState(false)
   const [submitting, setSubmitting] = useState(false)
 
   useEffect(() => {
     document.body.style.removeProperty('overflow')
+    if (isDirectHomeTraffic()) setPortalLive(true)
   }, [])
 
   const handleSubmit = async () => {
-    if (!form.name || !form.email || !form.business) return
+    if (!form.name || !form.email || !form.business || !form.trade || !form.quickbooks) return
     setSubmitting(true)
     try {
       const res = await fetch('/api/contact', {
