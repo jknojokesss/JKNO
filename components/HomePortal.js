@@ -8,6 +8,19 @@ import { BUILD_STACK } from '../lib/buildStack'
 
 import { FEATURED_DEMOS } from '../lib/marketingDemos'
 
+const SPOTLIGHT_DEMOS = [
+  {
+    label: 'Tire & auto',
+    src: '/riverside-tires',
+    caption: 'Clover ticket × distributor cost on every line. Margin per repair order.',
+  },
+  {
+    label: 'Import & distribution',
+    src: '/northline-global',
+    caption: 'PO pipeline, landed cost, and margin per order — same pipe wholesalers need.',
+  },
+]
+
 
 
 const NAV = [
@@ -90,13 +103,13 @@ function Screen({ tab, form, setForm, onSubmit, submitted, submitting, onNav }) 
           </h1>
 
           <p className="hp-overview__hook">
-            You&rsquo;re already in it. Sidebar, top bar, these screens. Same shell I build
-            for your shop.
+            This site runs in the same portal shell I ship for clients — sidebar, top bar, these
+            tabs. Not a marketing theme dressed up as software.
           </p>
 
           <p className="hp-overview__deck">
-            Register, vendors, QuickBooks behind one login. The screens your register and QBO
-            never gave you, synced every night, tied out at month-end.
+            Register, vendors, QuickBooks behind one login. Nightly sync, month-end tied to the
+            official QBO statement. Sample businesses below; the pipe is the same on a live shop.
           </p>
 
           <div className="hp-overview__actions">
@@ -121,15 +134,20 @@ function Screen({ tab, form, setForm, onSubmit, submitted, submitting, onNav }) 
 
         <p className="hp-body hp-overview__note">
 
-          Click around. Overview, What we build, Demos in the nav. Same layout your team would
-          use every day. Demos opens sample businesses built in this shell.
-
-          Roughly six days kickoff to live. Tire shops, contractors, wholesalers, custom retail
-          on QuickBooks. That&rsquo;s usually who calls.
+          Open a sample portal — tire margin or import landed cost are the fastest reads. Everything
+          else is under Demos. Roughly six days kickoff to live for shops on QuickBooks.
 
         </p>
 
-
+        <div className="hp-spotlight" aria-label="Featured sample portals">
+          {SPOTLIGHT_DEMOS.map((d) => (
+            <a key={d.src} href={d.src} className="hp-spotlight__card">
+              <span className="hp-spotlight__label">{d.label}</span>
+              <span className="hp-spotlight__cap">{d.caption}</span>
+              <span className="hp-spotlight__go" aria-hidden="true">Open sample →</span>
+            </a>
+          ))}
+        </div>
 
         <div className="hp-overview__pillars">
 
@@ -323,7 +341,7 @@ function Screen({ tab, form, setForm, onSubmit, submitted, submitting, onNav }) 
 
         <p className="hp-page-lead">
 
-          {FEATURED_DEMOS.length} sample portals. Made-up businesses, real screens. Pick your trade, click in.
+          Fictitious companies, real product screens. Nothing here posts to QuickBooks unless you wire it.
 
         </p>
 
