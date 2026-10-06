@@ -346,8 +346,7 @@ function Screen({ tab, form, setForm, onSubmit, submitted, submitting, onNav }) 
           </p>
 
           <p className="hp-overview__hook hp-anim hp-anim--in hp-anim--d3">
-            This homepage is that shell. Below: a live tire shop on it every day, plus sample
-            portals you can click through.
+            This homepage is that shell. Below: sample portals you can click through.
           </p>
 
           <div className="hp-overview__cta">
