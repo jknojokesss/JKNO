@@ -5,13 +5,6 @@ const DEMO_SRC = demoEmbedSrc('/riverside-tires')
 const FRAME_W = 390
 const FRAME_H = 844
 
-const STEP_MS = {
-  home: 1100,
-  press: 720,
-  launch: 900,
-  portal: 6500,
-}
-
 const HOME_ROWS = [
   [
     { label: 'FaceTime', glyph: '📹', hue: '#22c55e' },
@@ -33,12 +26,6 @@ const HOME_ROWS = [
   ],
 ]
 
-function sleep(ms) {
-  return new Promise((resolve) => {
-    window.setTimeout(resolve, ms)
-  })
-}
-
 function AppIcon({ label, glyph, hue, rt = false }) {
   return (
     <div className={`m-phone__app${rt ? ' m-phone__app--rt' : ''}`}>
@@ -54,7 +41,6 @@ function AppIcon({ label, glyph, hue, rt = false }) {
 }
 
 export default function HomePhoneShowcase() {
-  const [step, setStep] = useState('home')
   const iframeHostRef = useRef(null)
   const [frameScale, setFrameScale] = useState(1)
 
@@ -73,32 +59,12 @@ export default function HomePhoneShowcase() {
     return () => ro.disconnect()
   }, [])
 
-  useEffect(() => {
-    let cancelled = false
-    const order = ['home', 'press', 'launch', 'portal']
-
-    const loop = async () => {
-      let i = 0
-      while (!cancelled) {
-        const name = order[i]
-        setStep(name)
-        await sleep(STEP_MS[name])
-        i = (i + 1) % order.length
-      }
-    }
-
-    loop()
-    return () => {
-      cancelled = true
-    }
-  }, [])
-
   return (
     <div className="m-phone-stage" aria-label="Tap Riverside Tires on the home screen to open the shop portal">
       <div className="m-phone">
         <div className="m-phone__bezel">
           <div className="m-phone__island" aria-hidden="true" />
-          <div className={`m-phone__screen m-phone__screen--${step}`}>
+          <div className="m-phone__screen m-phone__screen--cycle">
             <div className="m-phone__scene m-phone__scene--home">
               <div className="m-phone__wallpaper" aria-hidden="true" />
               <div className="m-phone__ios-bar">
@@ -149,22 +115,8 @@ export default function HomePhoneShowcase() {
       </div>
 
       <p className="m-phone-stage__cap">
-        {step === 'portal' && (
-          <>
-            Your portal on the phone —{' '}
-            <a href="/riverside-tires">open full demo</a>
-          </>
-        )}
-        {step === 'launch' && (
-          <>
-            Opening <strong>Riverside Tires</strong>…
-          </>
-        )}
-        {(step === 'home' || step === 'press') && (
-          <>
-            Tap <strong>Riverside Tires</strong> on the home screen
-          </>
-        )}
+        Tap <strong>Riverside Tires</strong> —{' '}
+        <a href="/riverside-tires">open full demo</a>
       </p>
     </div>
   )
