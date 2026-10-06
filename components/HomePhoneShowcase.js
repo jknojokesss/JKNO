@@ -6,8 +6,9 @@ const FRAME_W = 390
 const FRAME_H = 844
 
 const STEP_MS = {
-  home: 750,
-  press: 480,
+  home: 1100,
+  press: 720,
+  launch: 900,
   portal: 6500,
 }
 
@@ -74,7 +75,7 @@ export default function HomePhoneShowcase() {
 
   useEffect(() => {
     let cancelled = false
-    const order = ['home', 'press', 'portal']
+    const order = ['home', 'press', 'launch', 'portal']
 
     const loop = async () => {
       let i = 0
@@ -148,14 +149,20 @@ export default function HomePhoneShowcase() {
       </div>
 
       <p className="m-phone-stage__cap">
-        {step === 'portal' ? (
+        {step === 'portal' && (
           <>
             Your portal on the phone —{' '}
             <a href="/riverside-tires">open full demo</a>
           </>
-        ) : (
+        )}
+        {step === 'launch' && (
           <>
-            Tap <strong>Riverside Tires</strong> like any other app
+            Opening <strong>Riverside Tires</strong>…
+          </>
+        )}
+        {(step === 'home' || step === 'press') && (
+          <>
+            Tap <strong>Riverside Tires</strong> on the home screen
           </>
         )}
       </p>

@@ -1360,6 +1360,29 @@
   opacity: 0;
   pointer-events: none;
   background: #f2f0ea;
+  transform: scale(0.16);
+  transform-origin: 14% 39%;
+}
+
+.m-phone__screen--press .m-phone__scene--home,
+.m-phone__screen--launch .m-phone__scene--home {
+  opacity: 1;
+}
+
+.m-phone__screen--launch .m-phone__scene--home {
+  animation: m-phone-home-fade 0.9s ease forwards;
+  z-index: 2;
+}
+
+.m-phone__screen--launch .m-phone__scene--portal {
+  animation: m-phone-open-from-rt 0.9s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+  z-index: 8;
+  pointer-events: none;
+  transition: none;
+}
+
+.m-phone__screen--launch .m-phone__scene--home {
+  transition: none;
 }
 
 .m-phone__screen--portal .m-phone__scene--home {
@@ -1368,7 +1391,29 @@
 
 .m-phone__screen--portal .m-phone__scene--portal {
   opacity: 1;
+  transform: scale(1);
   pointer-events: auto;
+}
+
+@keyframes m-phone-open-from-rt {
+  0% {
+    opacity: 0.4;
+    transform: scale(0.16);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes m-phone-home-fade {
+  0%,
+  28% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+  }
 }
 
 .m-phone__wallpaper {
@@ -1470,12 +1515,27 @@
   background: linear-gradient(145deg, #c42e22 0%, #b0281c 45%, #8a1f16 100%);
 }
 
+.m-phone__screen--press .m-phone__app:not(.m-phone__app--rt),
+.m-phone__screen--launch .m-phone__app:not(.m-phone__app--rt) {
+  opacity: 0.55;
+}
+
+.m-phone__screen--press .m-phone__app--rt {
+  z-index: 6;
+}
+
 .m-phone__screen--press .m-phone__app--rt .m-phone__app-icon--rt {
-  transform: scale(0.9);
-  filter: brightness(0.82);
+  transform: scale(0.86);
+  filter: brightness(0.78);
   box-shadow:
-    inset 0 5px 12px rgba(0, 0, 0, 0.35),
-    0 2px 6px rgba(0, 0, 0, 0.2);
+    inset 0 6px 14px rgba(0, 0, 0, 0.4),
+    0 1px 4px rgba(0, 0, 0, 0.25);
+  transition: transform 0.14s ease, filter 0.14s ease, box-shadow 0.14s ease;
+}
+
+.m-phone__screen--launch .m-phone__app--rt .m-phone__app-icon--rt {
+  transform: scale(0.86);
+  filter: brightness(0.78);
 }
 
 .m-phone__app-name {
@@ -1577,6 +1637,8 @@
 @media (prefers-reduced-motion: reduce) {
   .m-phone__scene,
   .m-phone__app-icon,
+  .m-phone__screen--launch .m-phone__scene--home,
+  .m-phone__screen--launch .m-phone__scene--portal,
   .m-home--live .m-band__mark,
   .m-home--live .m-band__hero > *,
   .m-intro,
