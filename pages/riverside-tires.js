@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from 'react'
 import Head from 'next/head'
 import { useRouter } from 'next/router'
 import { isDemoEmbedQuery } from '../lib/demoEmbed'
+import { PHONE_DEMO_MSG, isPhoneDemoUrl } from '../lib/phoneDemoPostMessage'
 
 const BIZ = 'Riverside Tires'
 const THEME = { side: '#1E1C19', border: '#33302B', accent: '#B0281C', content: '#F2F0EA' }
@@ -39,8 +40,8 @@ const NAV = [
 
 /** Homepage phone mockup — rotate these while ?phone=1 */
 const PHONE_DEMO_TABS = ['orders', 'dashboard', 'financials', 'stock']
-const PHONE_TAB_MS = 2000
-const PHONE_SCROLL_MS = 450
+const PHONE_TAB_MS = 1800
+const PHONE_SCROLL_MS = 380
 
 // Fictitious shop — sample pinned to Sep 25, 2026 (books closed through August).
 const ORDER_LINES = [
@@ -401,39 +402,82 @@ const FIN_TABS = [
 export default function RiversideTires() {
   const router = useRouter()
   const embed = router.asPath.includes('embed=1') || isDemoEmbedQuery(router.query)
-  const phoneDemo = router.asPath.includes('phone=1') || router.query?.phone === '1'
+  const phoneDemo = isPhoneDemoUrl()
+    || router.asPath.includes('phone=1')
+    || router.query?.phone === '1'
   const [tab, setTab] = useState('orders')
   const tabIndexRef = useRef(0)
+  const phoneTabTimerRef = useRef(null)
+  const phoneScrollTimerRef = useRef(null)
   const [sort, setSort] = useState('rev')
   const [aiQ, setAiQ] = useState('')
   const [aiA, setAiA] = useState('')
   const [finView, setFinView] = useState('pl')
   const [plMonth, setPlMonth] = useState('2026-08')
 
-  useEffect(() => {
-    if (!embed || !phoneDemo) return undefined
+  const stopPhoneDemoMotion = () => {
+    if (phoneTabTimerRef.current) {
+      window.clearInterval(phoneTabTimerRef.current)
+      phoneTabTimerRef.current = null
+    }
+    if (phoneScrollTimerRef.current) {
+      window.clearInterval(phoneScrollTimerRef.current)
+      phoneScrollTimerRef.current = null
+    }
+  }
+
+  const startPhoneDemoMotion = () => {
+    if (!phoneDemo) return
+    stopPhoneDemoMotion()
     tabIndexRef.current = 0
     setTab(PHONE_DEMO_TABS[0])
-    const id = window.setInterval(() => {
+    phoneTabTimerRef.current = window.setInterval(() => {
       tabIndexRef.current = (tabIndexRef.current + 1) % PHONE_DEMO_TABS.length
       setTab(PHONE_DEMO_TABS[tabIndexRef.current])
     }, PHONE_TAB_MS)
-    return () => window.clearInterval(id)
-  }, [embed, phoneDemo])
+  }
 
   useEffect(() => {
-    if (!embed || !phoneDemo || tab !== 'orders') return undefined
-    const el = document.querySelector('.rt-content') || document.scrollingElement
+    if (!phoneDemo) return undefined
+    if (phoneDemo) startPhoneDemoMotion()
+
+    const onMessage = (event) => {
+      if (event.data?.type !== PHONE_DEMO_MSG) return
+      if (event.data.cmd === 'start') startPhoneDemoMotion()
+      if (event.data.cmd === 'stop') stopPhoneDemoMotion()
+    }
+    window.addEventListener('message', onMessage)
+    return () => {
+      window.removeEventListener('message', onMessage)
+      stopPhoneDemoMotion()
+    }
+  }, [phoneDemo])
+
+  useEffect(() => {
+    if (!phoneDemo || tab !== 'orders') {
+      if (phoneScrollTimerRef.current) {
+        window.clearInterval(phoneScrollTimerRef.current)
+        phoneScrollTimerRef.current = null
+      }
+      return undefined
+    }
+    const el = document.querySelector('.rt-main') || document.querySelector('.rt-content') || document.scrollingElement
     if (!el) return undefined
     el.scrollTop = 0
-    const id = window.setInterval(() => {
+    if (phoneScrollTimerRef.current) window.clearInterval(phoneScrollTimerRef.current)
+    phoneScrollTimerRef.current = window.setInterval(() => {
       const max = el.scrollHeight - el.clientHeight
       if (max <= 0) return
-      if (el.scrollTop >= max - 8) el.scrollTop = 0
-      else el.scrollTop += 56
+      if (el.scrollTop >= max - 10) el.scrollTop = 0
+      else el.scrollTop += 48
     }, PHONE_SCROLL_MS)
-    return () => window.clearInterval(id)
-  }, [embed, phoneDemo, tab])
+    return () => {
+      if (phoneScrollTimerRef.current) {
+        window.clearInterval(phoneScrollTimerRef.current)
+        phoneScrollTimerRef.current = null
+      }
+    }
+  }, [phoneDemo, tab])
 
   const sortedItems = [...WEEK_ITEMS].sort((a, b) => b[sort] - a[sort])
   const openRegister = ORDER_ROWS.reduce(
@@ -524,6 +568,8 @@ export default function RiversideTires() {
         .rt-embed .rt-order-table{display:none}
         .rt-embed .rt-order-cards{display:flex;flex-direction:column;gap:10px}
         .rt-embed .rt-foot{display:none}
+        .rt-embed .rt-main{overflow-y:auto;-webkit-overflow-scrolling:touch;max-height:100vh}
+        .rt-embed .rt-content{overflow-y:auto;-webkit-overflow-scrolling:touch}
       `}</style>
 
       <DemoShell

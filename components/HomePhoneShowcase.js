@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import { phoneDemoEmbedSrc } from '../lib/demoEmbed'
+import { postPhoneDemo } from '../lib/phoneDemoPostMessage'
 
 const DEMO_SRC = phoneDemoEmbedSrc('/riverside-tires')
 const FRAME_W = 390
@@ -8,8 +9,8 @@ const FRAME_H = 844
 const PHASES = [
   { id: 'home', ms: 2200 },
   { id: 'press', ms: 550 },
-  { id: 'launch', ms: 750 },
-  { id: 'portal', ms: 5800 },
+  { id: 'launch', ms: 800 },
+  { id: 'portal', ms: 9500 },
 ]
 
 const HOME_ROWS = [
@@ -49,14 +50,21 @@ function AppIcon({ label, glyph, hue, rt = false }) {
 
 export default function HomePhoneShowcase() {
   const [phase, setPhase] = useState('home')
-  const [showPortal, setShowPortal] = useState(false)
+  const [iframeMounted, setIframeMounted] = useState(false)
   const iframeHostRef = useRef(null)
+  const iframeRef = useRef(null)
   const [frameScale, setFrameScale] = useState(1)
   const phaseIndexRef = useRef(0)
 
+  const portalVisible = phase === 'launch' || phase === 'portal'
+
+  useEffect(() => {
+    if (portalVisible) setIframeMounted(true)
+  }, [portalVisible])
+
   useEffect(() => {
     const el = iframeHostRef.current
-    if (!el || !showPortal) return undefined
+    if (!el || !iframeMounted) return undefined
     const fit = () => {
       const w = el.clientWidth
       const h = el.clientHeight
@@ -67,7 +75,18 @@ export default function HomePhoneShowcase() {
     const ro = new ResizeObserver(fit)
     ro.observe(el)
     return () => ro.disconnect()
-  }, [showPortal])
+  }, [iframeMounted])
+
+  useEffect(() => {
+    const win = iframeRef.current?.contentWindow
+    if (!win) return
+    if (portalVisible) postPhoneDemo('start', win)
+    else postPhoneDemo('stop', win)
+  }, [portalVisible, phase])
+
+  const onIframeLoad = () => {
+    if (portalVisible) postPhoneDemo('start', iframeRef.current?.contentWindow)
+  }
 
   useEffect(() => {
     let timer
@@ -75,7 +94,6 @@ export default function HomePhoneShowcase() {
     const advance = () => {
       const next = PHASES[phaseIndexRef.current]
       setPhase(next.id)
-      setShowPortal(next.id === 'launch' || next.id === 'portal')
       timer = window.setTimeout(() => {
         phaseIndexRef.current = (phaseIndexRef.current + 1) % PHASES.length
         advance()
@@ -122,15 +140,20 @@ export default function HomePhoneShowcase() {
               </div>
             </div>
 
-            {showPortal && (
-              <div className="m-phone__scene m-phone__scene--portal">
+            {iframeMounted && (
+              <div
+                className={`m-phone__scene m-phone__scene--portal${portalVisible ? '' : ' m-phone__scene--portal-hidden'}`}
+                aria-hidden={!portalVisible}
+              >
                 <div ref={iframeHostRef} className="m-phone__iframe-host">
                   <iframe
+                    ref={iframeRef}
                     title="Riverside Tires demo"
                     src={DEMO_SRC}
                     className="m-phone__iframe"
                     loading="eager"
                     tabIndex={-1}
+                    onLoad={onIframeLoad}
                     style={{
                       width: FRAME_W,
                       height: FRAME_H,
@@ -145,7 +168,7 @@ export default function HomePhoneShowcase() {
       </div>
 
       <p className="m-phone-stage__cap">
-        {phase === 'portal' || phase === 'launch' ? (
+        {portalVisible ? (
           <>
             <strong>Riverside Tires</strong> portal —{' '}
             <a href="/riverside-tires">open full demo</a>

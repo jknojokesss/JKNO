@@ -1387,6 +1387,13 @@
   transform: scale(1);
 }
 
+.m-phone__scene--portal-hidden {
+  opacity: 0 !important;
+  visibility: hidden;
+  pointer-events: none;
+  transform: scale(0.16);
+}
+
 @keyframes m-phone-open-from-rt {
   from {
     opacity: 0.5;
