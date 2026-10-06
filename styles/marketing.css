@@ -1150,6 +1150,11 @@
   align-items: center;
 }
 
+.m-band--solo {
+  grid-template-columns: 1fr;
+  max-width: 720px;
+}
+
 .m-band__hero {
   padding-right: clamp(0px, 2vw, 12px);
 }

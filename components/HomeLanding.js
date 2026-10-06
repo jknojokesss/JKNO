@@ -45,7 +45,7 @@ export default function HomeLanding({
   return (
     <div className={live ? 'm-home m-home--live' : 'm-home'}>
       <section className="m-dark-band">
-        <div className="m-wrap m-band">
+        <div className="m-wrap m-band m-band--solo">
           <div className="m-band__hero">
             <h1 className="m-band__title">
               QuickBooks won&rsquo;t show today&rsquo;s margin.
