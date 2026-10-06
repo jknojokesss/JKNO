@@ -5,6 +5,13 @@ const DEMO_SRC = demoEmbedSrc('/riverside-tires')
 const FRAME_W = 390
 const FRAME_H = 844
 
+const PHASES = [
+  { id: 'home', ms: 2200 },
+  { id: 'press', ms: 550 },
+  { id: 'launch', ms: 750 },
+  { id: 'portal', ms: 4200 },
+]
+
 const HOME_ROWS = [
   [
     { label: 'FaceTime', glyph: '📹', hue: '#22c55e' },
@@ -41,12 +48,15 @@ function AppIcon({ label, glyph, hue, rt = false }) {
 }
 
 export default function HomePhoneShowcase() {
+  const [phase, setPhase] = useState('home')
+  const [showPortal, setShowPortal] = useState(false)
   const iframeHostRef = useRef(null)
   const [frameScale, setFrameScale] = useState(1)
+  const phaseIndexRef = useRef(0)
 
   useEffect(() => {
     const el = iframeHostRef.current
-    if (!el) return undefined
+    if (!el || !showPortal) return undefined
     const fit = () => {
       const w = el.clientWidth
       const h = el.clientHeight
@@ -57,6 +67,24 @@ export default function HomePhoneShowcase() {
     const ro = new ResizeObserver(fit)
     ro.observe(el)
     return () => ro.disconnect()
+  }, [showPortal])
+
+  useEffect(() => {
+    let timer
+
+    const advance = () => {
+      const next = PHASES[phaseIndexRef.current]
+      setPhase(next.id)
+      setShowPortal(next.id === 'launch' || next.id === 'portal')
+      timer = window.setTimeout(() => {
+        phaseIndexRef.current = (phaseIndexRef.current + 1) % PHASES.length
+        advance()
+      }, next.ms)
+    }
+
+    phaseIndexRef.current = 0
+    advance()
+    return () => window.clearTimeout(timer)
   }, [])
 
   return (
@@ -64,7 +92,7 @@ export default function HomePhoneShowcase() {
       <div className="m-phone">
         <div className="m-phone__bezel">
           <div className="m-phone__island" aria-hidden="true" />
-          <div className="m-phone__screen m-phone__screen--cycle">
+          <div className={`m-phone__screen m-phone__screen--${phase}`}>
             <div className="m-phone__scene m-phone__scene--home">
               <div className="m-phone__wallpaper" aria-hidden="true" />
               <div className="m-phone__ios-bar">
@@ -94,29 +122,39 @@ export default function HomePhoneShowcase() {
               </div>
             </div>
 
-            <div className="m-phone__scene m-phone__scene--portal">
-              <div ref={iframeHostRef} className="m-phone__iframe-host">
-                <iframe
-                  title="Riverside Tires demo"
-                  src={DEMO_SRC}
-                  className="m-phone__iframe"
-                  loading="eager"
-                  tabIndex={-1}
-                  style={{
-                    width: FRAME_W,
-                    height: FRAME_H,
-                    transform: `scale(${frameScale})`,
-                  }}
-                />
+            {showPortal && (
+              <div className="m-phone__scene m-phone__scene--portal">
+                <div ref={iframeHostRef} className="m-phone__iframe-host">
+                  <iframe
+                    title="Riverside Tires demo"
+                    src={DEMO_SRC}
+                    className="m-phone__iframe"
+                    loading="eager"
+                    tabIndex={-1}
+                    style={{
+                      width: FRAME_W,
+                      height: FRAME_H,
+                      transform: `scale(${frameScale})`,
+                    }}
+                  />
+                </div>
               </div>
-            </div>
+            )}
           </div>
         </div>
       </div>
 
       <p className="m-phone-stage__cap">
-        Tap <strong>Riverside Tires</strong> —{' '}
-        <a href="/riverside-tires">open full demo</a>
+        {phase === 'portal' || phase === 'launch' ? (
+          <>
+            <strong>Riverside Tires</strong> portal —{' '}
+            <a href="/riverside-tires">open full demo</a>
+          </>
+        ) : (
+          <>
+            Tap <strong>Riverside Tires</strong> (red <strong>RT</strong> icon, second row)
+          </>
+        )}
       </p>
     </div>
   )

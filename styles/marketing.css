@@ -1363,83 +1363,48 @@
   transform-origin: 14% 39%;
 }
 
-/* One loop: home → RT press → zoom from RT → portal → home (11s) */
-.m-phone__screen--cycle .m-phone__scene--home {
-  animation: m-phone-home-layer 11s linear infinite;
+.m-phone__screen--home .m-phone__scene--home,
+.m-phone__screen--press .m-phone__scene--home {
+  opacity: 1;
+  visibility: visible;
 }
 
-.m-phone__screen--cycle .m-phone__scene--portal {
-  animation: m-phone-portal-layer 11s cubic-bezier(0.22, 1, 0.36, 1) infinite;
+.m-phone__screen--launch .m-phone__scene--home {
+  opacity: 1;
+  animation: m-phone-home-fade 0.75s ease forwards;
 }
 
-.m-phone__screen--cycle .m-phone__app-icon--rt {
-  animation: m-phone-rt-press 11s ease-in-out infinite;
-  transition: none;
+.m-phone__screen--portal .m-phone__scene--home {
+  display: none;
 }
 
-@keyframes m-phone-rt-press {
-  0%,
-  7% {
-    transform: scale(1);
-    filter: brightness(1);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
-  }
-  8%,
-  12% {
-    transform: scale(0.86);
-    filter: brightness(0.76);
-    box-shadow:
-      inset 0 6px 14px rgba(0, 0, 0, 0.42),
-      0 1px 4px rgba(0, 0, 0, 0.2);
-  }
-  13%,
-  100% {
-    transform: scale(1);
-    filter: brightness(1);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
-  }
+.m-phone__screen--launch .m-phone__scene--portal {
+  animation: m-phone-open-from-rt 0.75s cubic-bezier(0.22, 1, 0.36, 1) forwards;
 }
 
-@keyframes m-phone-portal-layer {
-  0%,
-  12% {
-    opacity: 0;
-    transform: scale(0.16);
+.m-phone__screen--portal .m-phone__scene--portal {
+  opacity: 1;
+  transform: scale(1);
+}
+
+@keyframes m-phone-open-from-rt {
+  from {
+    opacity: 0.5;
+    transform: scale(0.18);
   }
-  13% {
-    opacity: 0.55;
-    transform: scale(0.2);
-  }
-  20% {
+  to {
     opacity: 1;
     transform: scale(1);
   }
-  88% {
+}
+
+@keyframes m-phone-home-fade {
+  0%,
+  35% {
     opacity: 1;
-    transform: scale(1);
   }
-  94%,
   100% {
     opacity: 0;
-    transform: scale(0.16);
-  }
-}
-
-@keyframes m-phone-home-layer {
-  0%,
-  19% {
-    opacity: 1;
-    visibility: visible;
-  }
-  20%,
-  93% {
-    opacity: 0;
-    visibility: hidden;
-  }
-  94%,
-  100% {
-    opacity: 1;
-    visibility: visible;
   }
 }
 
@@ -1538,8 +1503,16 @@
   background: linear-gradient(145deg, #c42e22 0%, #b0281c 45%, #8a1f16 100%);
 }
 
-.m-phone__app--rt {
-  z-index: 4;
+.m-phone__screen--press .m-phone__app--rt {
+  z-index: 6;
+}
+
+.m-phone__screen--press .m-phone__app--rt .m-phone__app-icon--rt {
+  transform: scale(0.86);
+  filter: brightness(0.76);
+  box-shadow:
+    inset 0 6px 14px rgba(0, 0, 0, 0.42),
+    0 1px 4px rgba(0, 0, 0, 0.2);
 }
 
 .m-phone__app-name {
@@ -1635,10 +1608,16 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .m-phone__screen--cycle .m-phone__scene--home,
-  .m-phone__screen--cycle .m-phone__scene--portal,
-  .m-phone__screen--cycle .m-phone__app-icon--rt {
-    animation-duration: 18s;
+  .m-phone__screen--launch .m-phone__scene--portal,
+  .m-phone__screen--launch .m-phone__scene--home {
+    animation: none !important;
+  }
+  .m-phone__screen--launch .m-phone__scene--home {
+    opacity: 0;
+  }
+  .m-phone__screen--launch .m-phone__scene--portal {
+    opacity: 1;
+    transform: none;
   }
   .m-home--live .m-band__mark,
   .m-home--live .m-band__hero > *,
