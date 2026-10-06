@@ -385,20 +385,12 @@ function Screen({ tab, form, setForm, onSubmit, submitted, submitting, onNav }) 
 
         <section className="hp-client-proof" aria-labelledby="hp-client-proof-title">
           <p className="hp-client-proof__eyebrow">Live on QuickBooks</p>
-          <h2 id="hp-client-proof-title" className="hp-client-proof__title">Reydel Tire &amp; Auto</h2>
+          <h2 id="hp-client-proof-title" className="hp-client-proof__title">Tire &amp; auto — in production</h2>
           <p className="hp-client-proof__body">
             Clover tickets matched to Weldon distributor cost — profit per repair order on the phone.
             Nightly QBO sync; month-end inventory posts back to the GL when the numbers tie.
           </p>
-          <p className="hp-client-proof__meta">Lakewood, NJ · owner login · not a demo dataset</p>
-          <a
-            className="hp-client-proof__link"
-            href="https://reydel.vercel.app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Open the live portal →
-          </a>
+          <p className="hp-client-proof__meta">Owner login · real books · not a public demo</p>
         </section>
 
         <DemoQuickPicks onNav={onNav} />
