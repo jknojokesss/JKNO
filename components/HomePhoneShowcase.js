@@ -4,28 +4,53 @@ import { demoEmbedSrc } from '../lib/demoEmbed'
 const DEMO_SRC = demoEmbedSrc('/riverside-tires')
 
 const TIMING = {
-  home: 3200,
-  press: 450,
-  open: 750,
-  hold: 5000,
+  home: 5500,
+  press: 650,
+  open: 950,
+  hold: 8500,
 }
 
-/** Decorative home-screen apps — Riverside Tires is the one that opens the demo. */
-const DECOY_APPS = [
-  { label: 'Mail', glyph: 'M', hue: '#3b82f6' },
-  { label: 'Photos', glyph: '🌸', hue: '#ec4899' },
-  { label: 'Maps', glyph: '↑', hue: '#22c55e' },
-  { label: 'Clock', glyph: '◷', hue: '#1e1e1e' },
-  { label: 'Notes', glyph: '≡', hue: '#fbbf24' },
-  { label: 'Weather', glyph: '☀', hue: '#38bdf8' },
-  { label: 'Music', glyph: '♫', hue: '#f43f5e' },
-  { label: 'Settings', glyph: '⚙', hue: '#6b7280' },
+function AppIcon({ label, glyph, hue, rt = false }) {
+  return (
+    <div className={`m-phone__app${rt ? ' m-phone__app--rt' : ''}`}>
+      <span
+        className={`m-phone__app-icon${rt ? ' m-phone__app-icon--rt' : ''}`}
+        style={rt ? undefined : { background: hue }}
+      >
+        {glyph}
+      </span>
+      <span className="m-phone__app-name">{label}</span>
+      {rt && <span className="m-phone__finger" aria-hidden="true" />}
+    </div>
+  )
+}
+
+/** Three rows × four icons — Riverside Tires row 2, column 1 (under Mail). */
+const HOME_ROWS = [
+  [
+    { label: 'FaceTime', glyph: '📹', hue: '#22c55e' },
+    { label: 'Calendar', glyph: '31', hue: '#fff' },
+    { label: 'Photos', glyph: '🌸', hue: '#ec4899' },
+    { label: 'Camera', glyph: '📷', hue: '#64748b' },
+  ],
+  [
+    { label: 'Riverside Tires', glyph: 'RT', hue: '#B0281C', rt: true },
+    { label: 'Mail', glyph: 'M', hue: '#3b82f6' },
+    { label: 'Notes', glyph: '≡', hue: '#fbbf24' },
+    { label: 'Reminders', glyph: '☑', hue: '#fff' },
+  ],
+  [
+    { label: 'Maps', glyph: '↑', hue: '#22c55e' },
+    { label: 'Weather', glyph: '☀', hue: '#38bdf8' },
+    { label: 'Stocks', glyph: '📈', hue: '#1e1e1e' },
+    { label: 'Settings', glyph: '⚙', hue: '#6b7280' },
+  ],
 ]
 
-const RIVERSIDE_APP = {
-  label: 'Riverside Tires',
-  abbr: 'RT',
-  hue: '#B0281C',
+function sleep(ms) {
+  return new Promise((resolve) => {
+    window.setTimeout(resolve, ms)
+  })
 }
 
 export default function HomePhoneShowcase() {
@@ -40,28 +65,28 @@ export default function HomePhoneShowcase() {
       return undefined
     }
 
-    const ids = []
-    const schedule = (fn, ms) => {
-      ids.push(window.setTimeout(fn, ms))
+    let cancelled = false
+
+    const loop = async () => {
+      await sleep(800)
+      while (!cancelled) {
+        setPhase('home')
+        await sleep(TIMING.home)
+        if (cancelled) break
+        setPhase('press')
+        await sleep(TIMING.press)
+        if (cancelled) break
+        setPhase('open')
+        await sleep(TIMING.open)
+        if (cancelled) break
+        setPhase('hold')
+        await sleep(TIMING.hold)
+      }
     }
 
-    const cycleMs = TIMING.home + TIMING.press + TIMING.open + TIMING.hold
-
-    const runCycle = () => {
-      setPhase('home')
-      schedule(() => setPhase('press'), TIMING.home)
-      schedule(() => setPhase('open'), TIMING.home + TIMING.press)
-      schedule(() => setPhase('hold'), TIMING.home + TIMING.press + TIMING.open)
-    }
-
-    schedule(runCycle, 700)
-    const loopId = window.setInterval(runCycle, cycleMs)
-    ids.push(loopId)
+    loop()
     return () => {
-      ids.forEach((id) => {
-        window.clearTimeout(id)
-        window.clearInterval(id)
-      })
+      cancelled = true
     }
   }, [])
 
@@ -81,24 +106,18 @@ export default function HomePhoneShowcase() {
                 <span>9:41</span>
               </div>
 
-              <div className="m-phone__ios-grid">
-                {DECOY_APPS.slice(0, 4).map((app) => (
-                  <div key={app.label} className="m-phone__app m-phone__app--decoy">
-                    <span className="m-phone__app-icon" style={{ background: app.hue }}>{app.glyph}</span>
-                    <span className="m-phone__app-name">{app.label}</span>
-                  </div>
-                ))}
-
-                <div className="m-phone__app m-phone__app--rt">
-                  <span className="m-phone__app-icon m-phone__app-icon--rt">{RIVERSIDE_APP.abbr}</span>
-                  <span className="m-phone__app-name">{RIVERSIDE_APP.label}</span>
-                  <span className="m-phone__finger" aria-hidden="true" />
-                </div>
-
-                {DECOY_APPS.slice(4).map((app) => (
-                  <div key={app.label} className="m-phone__app m-phone__app--decoy">
-                    <span className="m-phone__app-icon" style={{ background: app.hue }}>{app.glyph}</span>
-                    <span className="m-phone__app-name">{app.label}</span>
+              <div className="m-phone__ios-pages">
+                {HOME_ROWS.map((row, ri) => (
+                  <div key={ri} className="m-phone__ios-row">
+                    {row.map((app) => (
+                      <AppIcon
+                        key={app.label}
+                        label={app.label}
+                        glyph={app.glyph}
+                        hue={app.hue}
+                        rt={app.rt}
+                      />
+                    ))}
                   </div>
                 ))}
               </div>
