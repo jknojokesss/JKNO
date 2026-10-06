@@ -39,8 +39,9 @@ const NAV = [
 ]
 
 /** Homepage phone mockup — rotate these while ?phone=1 */
+/** One pass per portal open — no wrap back to Orders mid-loop */
 const PHONE_DEMO_TABS = ['orders', 'dashboard', 'financials', 'stock']
-const PHONE_TAB_MS = 1800
+const PHONE_TAB_MS = 2300
 const PHONE_SCROLL_MS = 380
 
 // Fictitious shop — sample pinned to Sep 25, 2026 (books closed through August).
@@ -406,7 +407,7 @@ export default function RiversideTires() {
     || router.asPath.includes('phone=1')
     || router.query?.phone === '1'
   const [tab, setTab] = useState('orders')
-  const tabIndexRef = useRef(0)
+  const [phoneTourActive, setPhoneTourActive] = useState(false)
   const phoneTabTimerRef = useRef(null)
   const phoneScrollTimerRef = useRef(null)
   const [sort, setSort] = useState('rev')
@@ -416,8 +417,9 @@ export default function RiversideTires() {
   const [plMonth, setPlMonth] = useState('2026-08')
 
   const stopPhoneDemoMotion = () => {
+    setPhoneTourActive(false)
     if (phoneTabTimerRef.current) {
-      window.clearInterval(phoneTabTimerRef.current)
+      window.clearTimeout(phoneTabTimerRef.current)
       phoneTabTimerRef.current = null
     }
     if (phoneScrollTimerRef.current) {
@@ -429,12 +431,16 @@ export default function RiversideTires() {
   const startPhoneDemoMotion = () => {
     if (!phoneDemo) return
     stopPhoneDemoMotion()
-    tabIndexRef.current = 0
-    setTab(PHONE_DEMO_TABS[0])
-    phoneTabTimerRef.current = window.setInterval(() => {
-      tabIndexRef.current = (tabIndexRef.current + 1) % PHONE_DEMO_TABS.length
-      setTab(PHONE_DEMO_TABS[tabIndexRef.current])
-    }, PHONE_TAB_MS)
+    setPhoneTourActive(true)
+
+    const visitTab = (index) => {
+      if (index >= PHONE_DEMO_TABS.length) return
+      setTab(PHONE_DEMO_TABS[index])
+      if (index + 1 < PHONE_DEMO_TABS.length) {
+        phoneTabTimerRef.current = window.setTimeout(() => visitTab(index + 1), PHONE_TAB_MS)
+      }
+    }
+    visitTab(0)
   }
 
   useEffect(() => {
@@ -453,7 +459,8 @@ export default function RiversideTires() {
   }, [phoneDemo])
 
   useEffect(() => {
-    if (!phoneDemo || tab !== 'orders') {
+    const onTourTab = phoneTourActive && PHONE_DEMO_TABS.includes(tab)
+    if (!phoneDemo || !onTourTab) {
       if (phoneScrollTimerRef.current) {
         window.clearInterval(phoneScrollTimerRef.current)
         phoneScrollTimerRef.current = null
@@ -476,7 +483,7 @@ export default function RiversideTires() {
         phoneScrollTimerRef.current = null
       }
     }
-  }, [phoneDemo, tab])
+  }, [phoneDemo, phoneTourActive, tab])
 
   const sortedItems = [...WEEK_ITEMS].sort((a, b) => b[sort] - a[sort])
   const openRegister = ORDER_ROWS.reduce(
