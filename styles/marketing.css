@@ -129,6 +129,12 @@
 }
 .m-btn--secondary:hover { border-color: #B8C0CC; background: #FAFAFA; }
 
+.m-header .m-btn.is-nav-current {
+  border-color: var(--m-ink);
+  color: var(--m-ink);
+  font-weight: 600;
+}
+
 .m-btn--text {
   background: none;
   border: none;
@@ -349,6 +355,62 @@
   font-weight: 500;
   color: var(--m-muted);
   margin-bottom: 8px;
+}
+
+.m-login-section {
+  padding-top: 0;
+  padding-bottom: clamp(56px, 8vw, 96px);
+}
+
+.m-login-section__card {
+  max-width: 440px;
+  margin: 0 auto;
+}
+
+.m-login-card {
+  padding: 26px 24px 28px;
+}
+
+.m-login-card__title {
+  margin: 0 0 8px;
+  font-family: var(--m-font);
+  font-size: 18px;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  color: var(--m-ink);
+}
+
+.m-login-card__hint {
+  margin: 0;
+  font-size: 14px;
+  line-height: 1.55;
+  color: var(--m-muted);
+}
+
+.m-login-card__hint a {
+  color: var(--m-ink);
+  font-weight: 600;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.m-login-card__foot {
+  margin: 18px 0 0;
+  font-size: 13px;
+  line-height: 1.55;
+  color: var(--m-muted);
+  text-align: center;
+}
+
+.m-form-error {
+  margin: 14px 0 0;
+  padding: 12px 14px;
+  font-size: 14px;
+  line-height: 1.5;
+  color: #9b2c2c;
+  background: #fef2f2;
+  border: 1px solid #fecaca;
+  border-radius: 6px;
 }
 
 .m-card {

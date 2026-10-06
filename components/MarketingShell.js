@@ -101,7 +101,7 @@ export default function MarketingShell({ title, description, children, padTop = 
                   onClick={() => go(item.href)}>{item.label}</button>
               ))}
               <button type="button" className="m-nav-link" onClick={() => go('/#contact')}>Contact</button>
-              <button type="button" className={`m-btn m-header__btn${onHomeHero ? ' m-btn--ghost-light' : ' m-btn--secondary'}`} onClick={() => router.push('/login')}>Log in</button>
+              <button type="button" className={`m-btn m-header__btn${onHomeHero ? ' m-btn--ghost-light' : ' m-btn--secondary'}${router.pathname === '/login' ? ' is-nav-current' : ''}`} onClick={() => router.push('/login')}>Log in</button>
               <a href={BOOKING_URL} target="_blank" rel="noopener noreferrer" className={`m-btn m-btn--pop m-header__btn${onHomeHero ? ' m-btn--gold' : ' m-btn--primary'}`}>
                 Book a call
               </a>
