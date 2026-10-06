@@ -5,7 +5,7 @@ import { BOOKING_URL, MARKETING_FONTS, NAV_LINKS } from '../lib/marketing'
 
 export function MarketingLogo({ size = 26, tagline = true, onClick, light = false }) {
   const ink = light ? '#F7F4EF' : '#0E1420'
-  const muted = light ? 'rgba(247, 244, 239, 0.55)' : '#5A6577'
+  const muted = light ? 'rgba(247, 244, 239, 0.82)' : '#5A6577'
   const inner = (
     <div style={{ display: 'flex', alignItems: 'baseline', gap: '10px' }}>
       <span style={{ fontFamily: 'Playfair Display, serif', fontSize: `${size}px`, fontWeight: '700', letterSpacing: '-0.5px', color: ink }}>
@@ -34,12 +34,12 @@ export default function MarketingShell({ title, description, children, padTop = 
   const [menuOpen, setMenuOpen] = useState(false)
   const [isMobile, setIsMobile] = useState(false)
 
-  const headerLight = darkHeader || onDarkHero
+  const overDarkHero = (darkHeader || onDarkHero) && !scrolled && !menuOpen
 
   useEffect(() => {
     const onScroll = () => {
       setScrolled(window.scrollY > 8)
-      if (router.pathname === '/') setOnDarkHero(window.scrollY < 340)
+      if (router.pathname === '/') setOnDarkHero(window.scrollY < 420)
     }
     onScroll()
     window.addEventListener('scroll', onScroll)
@@ -93,9 +93,9 @@ export default function MarketingShell({ title, description, children, padTop = 
         <link href={MARKETING_FONTS} rel="stylesheet" />
       </Head>
 
-      <header className={`m-header${scrolled || menuOpen ? ' is-solid' : ''}${menuOpen ? ' is-menu-open' : ''}${headerLight ? ' m-header--dark' : ''}`}>
+      <header className={`m-header${scrolled || menuOpen ? ' is-solid' : ''}${menuOpen ? ' is-menu-open' : ''}${overDarkHero ? ' m-header--dark' : ''}`}>
         <div className="m-wrap m-header__inner">
-          <MarketingLogo light={headerLight && !menuOpen} onClick={() => { setMenuOpen(false); router.push('/') }} />
+          <MarketingLogo light={overDarkHero} onClick={() => { setMenuOpen(false); router.push('/') }} />
           {!isMobile && (
             <nav className="m-header__nav" aria-label="Main">
               {NAV_LINKS.map((item) => (
@@ -103,14 +103,14 @@ export default function MarketingShell({ title, description, children, padTop = 
                   onClick={() => go(item.href)}>{item.label}</button>
               ))}
               <button type="button" className="m-nav-link" onClick={() => go('/#contact')}>Contact</button>
-              <button type="button" className={`m-btn m-header__btn${headerLight ? ' m-btn--ghost-light' : ' m-btn--secondary'}`} onClick={() => router.push('/login')}>Log in</button>
-              <a href={BOOKING_URL} target="_blank" rel="noopener noreferrer" className="m-btn m-btn--primary m-btn--pop m-header__btn">
+              <button type="button" className={`m-btn m-header__btn${overDarkHero ? ' m-btn--ghost-light' : ' m-btn--secondary'}`} onClick={() => router.push('/login')}>Log in</button>
+              <a href={BOOKING_URL} target="_blank" rel="noopener noreferrer" className={`m-btn m-btn--pop m-header__btn${overDarkHero ? ' m-btn--gold' : ' m-btn--primary'}`}>
                 Book a call
               </a>
             </nav>
           )}
           {isMobile && (
-            <button type="button" className="m-menu-toggle" onClick={() => setMenuOpen(!menuOpen)} aria-label={menuOpen ? 'Close menu' : 'Open menu'} aria-expanded={menuOpen}>
+            <button type="button" className={`m-menu-toggle${overDarkHero ? ' m-menu-toggle--light' : ''}`} onClick={() => setMenuOpen(!menuOpen)} aria-label={menuOpen ? 'Close menu' : 'Open menu'} aria-expanded={menuOpen}>
               {menuOpen ? '✕' : '☰'}
             </button>
           )}

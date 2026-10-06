@@ -2,6 +2,7 @@ import { useRouter } from 'next/router'
 import { BOOKING_URL } from '../lib/marketing'
 import { BUSINESS_TYPES } from '../lib/buildStack'
 import { FEATURED_DEMOS } from '../lib/marketingDemos'
+import HomePhoneShowcase from './HomePhoneShowcase'
 
 const HOME_DEMOS = FEATURED_DEMOS.slice(0, 4)
 
@@ -45,7 +46,7 @@ export default function HomeLanding({
   return (
     <div className={live ? 'm-home m-home--live' : 'm-home'}>
       <section className="m-dark-band">
-        <div className="m-wrap m-band m-band--solo">
+        <div className="m-wrap m-band">
           <div className="m-band__hero">
             <h1 className="m-band__title">
               QuickBooks won&rsquo;t show today&rsquo;s margin.
@@ -57,21 +58,17 @@ export default function HomeLanding({
               it ties to the official QuickBooks statement — not a side spreadsheet.
             </p>
             <div className="m-band__actions">
-              <button type="button" className="m-btn m-btn--primary m-btn--pop" onClick={scrollContact}>
+              <button type="button" className="m-btn m-btn--gold m-btn--pop" onClick={scrollContact}>
                 Get started
               </button>
-              <a href={tire.src} className="m-btn m-btn--secondary m-btn--pop m-btn--pop-dark">
+              <a href={tire.src} className="m-btn m-btn--ghost-light m-btn--pop">
                 Tire shop demo
               </a>
             </div>
             <p className="m-band__fine">Kickoff call → connect QBO → about six days to your login.</p>
           </div>
 
-          <a href={tire.src} className="m-home-preview m-card m-card--pop">
-            <span className="m-home-preview__tag">Demo · tire &amp; auto</span>
-            <span className="m-home-preview__title">{tire.caption}</span>
-            <span className="m-home-preview__go">Open demo →</span>
-          </a>
+          <HomePhoneShowcase />
         </div>
       </section>
 

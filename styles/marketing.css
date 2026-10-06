@@ -98,6 +98,15 @@
 .m-btn--primary:hover { background: #2A2724; }
 .m-btn--primary:disabled { opacity: 0.5; cursor: not-allowed; }
 
+.m-btn--gold {
+  background: var(--m-gold);
+  color: #1B1815;
+}
+.m-btn--gold:hover {
+  background: var(--m-gold-dark);
+  color: #1B1815;
+}
+
 .m-btn--pop {
   transition: transform 0.18s ease, box-shadow 0.18s ease, background 0.15s, border-color 0.15s;
 }
@@ -221,6 +230,10 @@
   cursor: pointer;
   padding: 4px;
   color: var(--m-ink);
+}
+
+.m-menu-toggle--light {
+  color: #F7F4EF;
 }
 
 .m-mobile-menu {
@@ -1155,6 +1168,174 @@
   max-width: 720px;
 }
 
+/* ── Hero phone showcase ─────────────────────────────────────────────── */
+
+.m-phone-stage {
+  justify-self: end;
+  width: min(100%, 300px);
+  margin: 0 auto;
+}
+
+.m-phone-stage__cap {
+  margin: 14px 0 0;
+  text-align: center;
+  font-size: 13px;
+  color: rgba(247, 244, 239, 0.5);
+}
+
+.m-phone-stage__cap a {
+  color: var(--m-gold);
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.m-phone-stage__cap a:hover {
+  text-decoration: underline;
+}
+
+.m-phone {
+  filter: drop-shadow(0 24px 48px rgba(0, 0, 0, 0.45));
+}
+
+.m-phone__bezel {
+  border-radius: 36px;
+  padding: 10px;
+  background: linear-gradient(145deg, #3a3a3a 0%, #1a1a1a 55%, #0d0d0d 100%);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+}
+
+.m-phone__screen {
+  position: relative;
+  border-radius: 28px;
+  overflow: hidden;
+  aspect-ratio: 9 / 19.5;
+  background: #0a0a0a;
+}
+
+.m-phone__scene {
+  position: absolute;
+  inset: 0;
+  transition: opacity 0.45s ease, transform 0.45s ease;
+}
+
+.m-phone__scene--home {
+  background: linear-gradient(180deg, #1c1c1e 0%, #000 100%);
+  display: flex;
+  flex-direction: column;
+  padding: 12px 14px;
+  z-index: 2;
+}
+
+.m-phone__scene--portal {
+  z-index: 1;
+  opacity: 0;
+  transform: scale(0.98);
+}
+
+.m-phone__screen--home .m-phone__scene--home,
+.m-phone__screen--tap .m-phone__scene--home {
+  opacity: 1;
+  transform: scale(1);
+}
+
+.m-phone__screen--portal .m-phone__scene--home {
+  opacity: 0;
+  transform: scale(1.02);
+  pointer-events: none;
+}
+
+.m-phone__screen--portal .m-phone__scene--portal {
+  opacity: 1;
+  transform: scale(1);
+  z-index: 3;
+}
+
+.m-phone__status {
+  font-size: 11px;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.85);
+  text-align: center;
+  padding-top: 4px;
+}
+
+.m-phone__app-grid {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.m-phone__app {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+}
+
+.m-phone__app-icon {
+  width: 56px;
+  height: 56px;
+  border-radius: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'Playfair Display', serif;
+  font-weight: 700;
+  font-size: 18px;
+  color: #f7f4ef;
+  background: linear-gradient(145deg, #2a2724, #1b1815);
+  border: 1px solid rgba(201, 168, 76, 0.35);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.4);
+}
+
+.m-phone__app-name {
+  font-size: 11px;
+  color: rgba(255, 255, 255, 0.75);
+}
+
+.m-phone__tap-ring {
+  position: absolute;
+  left: 50%;
+  top: 58%;
+  width: 48px;
+  height: 48px;
+  margin: -24px 0 0 -24px;
+  border-radius: 50%;
+  border: 2px solid rgba(201, 168, 76, 0.9);
+  opacity: 0;
+  transform: scale(0.6);
+  pointer-events: none;
+}
+
+.m-phone__screen--tap .m-phone__tap-ring {
+  animation: m-phone-tap 0.55s ease-out forwards;
+}
+
+@keyframes m-phone-tap {
+  0% { opacity: 0; transform: scale(0.5); }
+  30% { opacity: 1; }
+  100% { opacity: 0; transform: scale(1.35); }
+}
+
+.m-phone__iframe {
+  width: 390px;
+  height: 844px;
+  border: none;
+  transform: scale(0.72);
+  transform-origin: top left;
+  pointer-events: none;
+}
+
+.m-dark-band .m-btn--ghost-light {
+  border-color: rgba(247, 244, 239, 0.55);
+  color: #fff;
+}
+
+.m-dark-band .m-btn--ghost-light:hover {
+  background: rgba(255, 255, 255, 0.1);
+  border-color: #fff;
+}
+
 .m-band__hero {
   padding-right: clamp(0px, 2vw, 12px);
 }
@@ -1211,6 +1392,7 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
+  .m-phone__screen--tap .m-phone__tap-ring,
   .m-home--live .m-band__mark,
   .m-home--live .m-band__hero > *,
   .m-intro,
@@ -1236,6 +1418,9 @@
   }
   .m-band__hero { text-align: center; padding-right: 0; }
   .m-band__sub { margin-left: auto; margin-right: auto; }
+  .m-band__actions { justify-content: center; }
+  .m-band__fine { margin-left: auto; margin-right: auto; }
+  .m-phone-stage { justify-self: center; }
   .marketing-site .nav-tagline { display: none; }
   .m-step-row,
   .m-build-grid,
