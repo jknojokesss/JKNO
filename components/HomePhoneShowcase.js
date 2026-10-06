@@ -4,10 +4,12 @@ import { demoEmbedSrc } from '../lib/demoEmbed'
 const DEMO_SRC = demoEmbedSrc('/riverside-tires')
 
 const TIMING = {
-  home: 5500,
-  press: 650,
-  open: 950,
-  hold: 8500,
+  home: 13000,
+  approach: 1600,
+  tap: 1000,
+  pressed: 4500,
+  open: 2600,
+  hold: 16000,
 }
 
 function AppIcon({ label, glyph, hue, rt = false }) {
@@ -20,7 +22,12 @@ function AppIcon({ label, glyph, hue, rt = false }) {
         {glyph}
       </span>
       <span className="m-phone__app-name">{label}</span>
-      {rt && <span className="m-phone__finger" aria-hidden="true" />}
+      {rt && (
+        <>
+          <span className="m-phone__press-ring" aria-hidden="true" />
+          <span className="m-phone__finger" aria-hidden="true" />
+        </>
+      )}
     </div>
   )
 }
@@ -73,8 +80,14 @@ export default function HomePhoneShowcase() {
         setPhase('home')
         await sleep(TIMING.home)
         if (cancelled) break
-        setPhase('press')
-        await sleep(TIMING.press)
+        setPhase('approach')
+        await sleep(TIMING.approach)
+        if (cancelled) break
+        setPhase('tap')
+        await sleep(TIMING.tap)
+        if (cancelled) break
+        setPhase('pressed')
+        await sleep(TIMING.pressed)
         if (cancelled) break
         setPhase('open')
         await sleep(TIMING.open)
