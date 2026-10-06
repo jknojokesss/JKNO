@@ -7,9 +7,9 @@ const FRAME_W = 390
 const FRAME_H = 844
 
 const PHASES = [
-  { id: 'home', ms: 2200 },
-  { id: 'press', ms: 550 },
-  { id: 'launch', ms: 800 },
+  { id: 'home', ms: 900 },
+  { id: 'press', ms: 500 },
+  { id: 'launch', ms: 750 },
   { id: 'portal', ms: 9500 },
 ]
 
