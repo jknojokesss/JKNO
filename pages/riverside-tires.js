@@ -1,5 +1,7 @@
 import { useState } from 'react'
 import Head from 'next/head'
+import { useRouter } from 'next/router'
+import { isDemoEmbedQuery } from '../lib/demoEmbed'
 
 const BIZ = 'Riverside Tires'
 const THEME = { side: '#1E1C19', border: '#33302B', accent: '#B0281C', content: '#F2F0EA' }
@@ -188,9 +190,9 @@ function OrderCards({ rows }) {
   )
 }
 
-function DemoShell({ tab, setTab, right, children }) {
+function DemoShell({ tab, setTab, right, children, embed }) {
   return (
-    <div className="rt-shell">
+    <div className={embed ? 'rt-shell rt-embed' : 'rt-shell'}>
       <div className="rt-mobilenav" aria-label="Sections">
         {NAV.map((n) => (
           <button key={n.id} type="button" className={tab === n.id ? 'on' : ''} onClick={() => setTab(n.id)}>
@@ -392,6 +394,8 @@ const FIN_TABS = [
 ]
 
 export default function RiversideTires() {
+  const router = useRouter()
+  const embed = router.asPath.includes('embed=1') || isDemoEmbedQuery(router.query)
   const [tab, setTab] = useState('orders')
   const [sort, setSort] = useState('rev')
   const [aiQ, setAiQ] = useState('')
@@ -478,9 +482,20 @@ export default function RiversideTires() {
           .rt-order-table{display:none}
           .rt-order-cards{display:flex;flex-direction:column;gap:10px}
         }
+        .rt-embed.rt-shell{flex-direction:column;min-height:100%}
+        .rt-embed .rt-side{display:none!important}
+        .rt-embed .rt-mobilenav{display:flex!important;overflow-x:auto;gap:4px;padding:8px 10px;background:${THEME.side};position:sticky;top:0;z-index:20;-webkit-overflow-scrolling:touch;box-shadow:inset 0 -3px 0 ${THEME.accent}}
+        .rt-embed .rt-mobilenav button{flex-shrink:0;border:none;background:rgba(255,255,255,.06);color:#948D81;font-family:${head};font-size:11px;font-weight:500;letter-spacing:.04em;text-transform:uppercase;padding:8px 12px;cursor:pointer;white-space:nowrap}
+        .rt-embed .rt-mobilenav button.on{background:rgba(176,40,28,.2);color:#fff;box-shadow:inset 0 -2px 0 ${THEME.accent}}
+        .rt-embed .rt-content{padding:14px 12px 28px;max-width:none}
+        .rt-embed .rt-status{padding:8px 12px}
+        .rt-embed .rt-order-table{display:none}
+        .rt-embed .rt-order-cards{display:flex;flex-direction:column;gap:10px}
+        .rt-embed .rt-foot{display:none}
       `}</style>
 
       <DemoShell
+        embed={embed}
         tab={tab}
         setTab={setTab}
         right={

@@ -1,11 +1,13 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { demoEmbedSrc } from '../lib/demoEmbed'
 
 const DEMO_SRC = demoEmbedSrc('/riverside-tires')
+const FRAME_W = 390
+const FRAME_H = 844
 
 const STEP_MS = {
-  home: 1100,
-  press: 520,
+  home: 750,
+  press: 480,
   portal: 6500,
 }
 
@@ -52,6 +54,23 @@ function AppIcon({ label, glyph, hue, rt = false }) {
 
 export default function HomePhoneShowcase() {
   const [step, setStep] = useState('home')
+  const iframeHostRef = useRef(null)
+  const [frameScale, setFrameScale] = useState(1)
+
+  useEffect(() => {
+    const el = iframeHostRef.current
+    if (!el) return undefined
+    const fit = () => {
+      const w = el.clientWidth
+      const h = el.clientHeight
+      if (!w || !h) return
+      setFrameScale(Math.min(w / FRAME_W, h / FRAME_H))
+    }
+    fit()
+    const ro = new ResizeObserver(fit)
+    ro.observe(el)
+    return () => ro.disconnect()
+  }, [])
 
   useEffect(() => {
     let cancelled = false
@@ -109,13 +128,20 @@ export default function HomePhoneShowcase() {
             </div>
 
             <div className="m-phone__scene m-phone__scene--portal">
-              <iframe
-                title="Riverside Tires demo"
-                src={DEMO_SRC}
-                className="m-phone__iframe"
-                loading="eager"
-                tabIndex={-1}
-              />
+              <div ref={iframeHostRef} className="m-phone__iframe-host">
+                <iframe
+                  title="Riverside Tires demo"
+                  src={DEMO_SRC}
+                  className="m-phone__iframe"
+                  loading="eager"
+                  tabIndex={-1}
+                  style={{
+                    width: FRAME_W,
+                    height: FRAME_H,
+                    transform: `scale(${frameScale})`,
+                  }}
+                />
+              </div>
             </div>
           </div>
         </div>
