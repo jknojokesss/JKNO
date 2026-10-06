@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import Head from 'next/head'
 import { useRouter } from 'next/router'
 import { isDemoEmbedQuery } from '../lib/demoEmbed'
@@ -36,6 +36,11 @@ const NAV = [
   { id: 'stock', label: 'Stock' },
   { id: 'ai', label: 'Ask' },
 ]
+
+/** Homepage phone mockup — rotate these while ?phone=1 */
+const PHONE_DEMO_TABS = ['orders', 'dashboard', 'financials', 'stock']
+const PHONE_TAB_MS = 2000
+const PHONE_SCROLL_MS = 450
 
 // Fictitious shop — sample pinned to Sep 25, 2026 (books closed through August).
 const ORDER_LINES = [
@@ -396,12 +401,39 @@ const FIN_TABS = [
 export default function RiversideTires() {
   const router = useRouter()
   const embed = router.asPath.includes('embed=1') || isDemoEmbedQuery(router.query)
+  const phoneDemo = router.asPath.includes('phone=1') || router.query?.phone === '1'
   const [tab, setTab] = useState('orders')
+  const tabIndexRef = useRef(0)
   const [sort, setSort] = useState('rev')
   const [aiQ, setAiQ] = useState('')
   const [aiA, setAiA] = useState('')
   const [finView, setFinView] = useState('pl')
   const [plMonth, setPlMonth] = useState('2026-08')
+
+  useEffect(() => {
+    if (!embed || !phoneDemo) return undefined
+    tabIndexRef.current = 0
+    setTab(PHONE_DEMO_TABS[0])
+    const id = window.setInterval(() => {
+      tabIndexRef.current = (tabIndexRef.current + 1) % PHONE_DEMO_TABS.length
+      setTab(PHONE_DEMO_TABS[tabIndexRef.current])
+    }, PHONE_TAB_MS)
+    return () => window.clearInterval(id)
+  }, [embed, phoneDemo])
+
+  useEffect(() => {
+    if (!embed || !phoneDemo || tab !== 'orders') return undefined
+    const el = document.querySelector('.rt-content') || document.scrollingElement
+    if (!el) return undefined
+    el.scrollTop = 0
+    const id = window.setInterval(() => {
+      const max = el.scrollHeight - el.clientHeight
+      if (max <= 0) return
+      if (el.scrollTop >= max - 8) el.scrollTop = 0
+      else el.scrollTop += 56
+    }, PHONE_SCROLL_MS)
+    return () => window.clearInterval(id)
+  }, [embed, phoneDemo, tab])
 
   const sortedItems = [...WEEK_ITEMS].sort((a, b) => b[sort] - a[sort])
   const openRegister = ORDER_ROWS.reduce(

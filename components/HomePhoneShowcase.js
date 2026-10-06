@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
-import { demoEmbedSrc } from '../lib/demoEmbed'
+import { phoneDemoEmbedSrc } from '../lib/demoEmbed'
 
-const DEMO_SRC = demoEmbedSrc('/riverside-tires')
+const DEMO_SRC = phoneDemoEmbedSrc('/riverside-tires')
 const FRAME_W = 390
 const FRAME_H = 844
 
@@ -9,7 +9,7 @@ const PHASES = [
   { id: 'home', ms: 2200 },
   { id: 'press', ms: 550 },
   { id: 'launch', ms: 750 },
-  { id: 'portal', ms: 4200 },
+  { id: 'portal', ms: 5800 },
 ]
 
 const HOME_ROWS = [
