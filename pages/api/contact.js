@@ -1,8 +1,11 @@
 export default async function handler(req, res) {
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' })
 
-  const { name, email, business, message } = req.body
-  if (!name || !email || !business) return res.status(400).json({ error: 'Missing fields' })
+  const { name, email, business, trade, quickbooks, message } = req.body
+  if (!name || !email || !business || !trade || !quickbooks) return res.status(400).json({ error: 'Missing fields' })
+  const esc = (s) => String(s).replace(/</g, '&lt;').replace(/>/g, '&gt;')
+  const safeTrade = esc(trade).slice(0, 120)
+  const safeQb = esc(quickbooks).slice(0, 120)
   const safeMsg = message ? String(message).slice(0, 2000) : ''
 
   try {
@@ -35,6 +38,14 @@ export default async function handler(req, res) {
               <tr style="border-bottom: 1px solid #EEEAE2;">
                 <td style="padding: 14px 0; font-size: 11px; color: #AAA098; font-family: monospace; letter-spacing: 1px;">BUSINESS</td>
                 <td style="padding: 14px 0; font-size: 15px; color: #1A1A2E;">${business}</td>
+              </tr>
+              <tr style="border-bottom: 1px solid #EEEAE2;">
+                <td style="padding: 14px 0; font-size: 11px; color: #AAA098; font-family: monospace; letter-spacing: 1px;">TRADE</td>
+                <td style="padding: 14px 0; font-size: 15px; color: #1A1A2E;">${safeTrade}</td>
+              </tr>
+              <tr style="border-bottom: 1px solid #EEEAE2;">
+                <td style="padding: 14px 0; font-size: 11px; color: #AAA098; font-family: monospace; letter-spacing: 1px;">QUICKBOOKS</td>
+                <td style="padding: 14px 0; font-size: 15px; color: #1A1A2E;">${safeQb}</td>
               </tr>
               ${safeMsg ? `<tr>
                 <td style="padding: 14px 0; font-size: 11px; color: #AAA098; font-family: monospace; letter-spacing: 1px; vertical-align: top;">WANTS</td>

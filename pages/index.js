@@ -1,9 +1,10 @@
-import { useState, useCallback, useEffect } from 'react'
+import { useState, useCallback, useEffect, useLayoutEffect } from 'react'
 import Head from 'next/head'
 import HomeIntro from '../components/HomeIntro'
 import HomePortal from '../components/HomePortal'
 import { shouldSkipHomeIntro } from '../lib/homeIntro'
 import { MARKETING_FONTS } from '../lib/marketing'
+import { isDirectHomeTraffic } from '../lib/homeIntro'
 
 function initialSkipIntro() {
   if (typeof window === 'undefined') return false
@@ -13,16 +14,27 @@ function initialSkipIntro() {
 export default function Landing() {
   const [portalLive, setPortalLive] = useState(initialSkipIntro)
   const [enteredInstant] = useState(initialSkipIntro)
-  const [form, setForm] = useState({ name: '', email: '', business: '' })
+  const [form, setForm] = useState({
+    name: '',
+    email: '',
+    business: '',
+    trade: '',
+    quickbooks: '',
+    message: '',
+  })
   const [submitted, setSubmitted] = useState(false)
   const [submitting, setSubmitting] = useState(false)
+
+  useLayoutEffect(() => {
+    if (isDirectHomeTraffic()) setPortalLive(true)
+  }, [])
 
   useEffect(() => {
     document.body.style.removeProperty('overflow')
   }, [])
 
   const handleSubmit = async () => {
-    if (!form.name || !form.email || !form.business) return
+    if (!form.name || !form.email || !form.business || !form.trade || !form.quickbooks) return
     setSubmitting(true)
     try {
       const res = await fetch('/api/contact', {
