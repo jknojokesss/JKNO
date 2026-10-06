@@ -36,7 +36,7 @@ export default function DemoGallery() {
       <section className="m-cta-slab">
         <div className="m-wrap m-cta-slab__inner">
           <h2 className="m-h2 m-cta-slab__title">Don&rsquo;t see your industry?</h2>
-          <p className="m-cta-slab__lead">We&rsquo;ll build a demo around your business before you pay a dime.</p>
+          <p className="m-cta-slab__lead">I&rsquo;ll build a demo around your business before you pay a dime.</p>
           <div className="m-cta-slab__actions">
             <button type="button" className="m-btn m-btn--primary m-btn--pop" onClick={() => router.push('/#contact')}>Get in touch</button>
             <a href={BOOKING_URL} target="_blank" rel="noopener noreferrer" className="m-btn m-btn--secondary m-btn--pop-dark">Book a call</a>

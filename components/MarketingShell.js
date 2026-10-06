@@ -140,7 +140,7 @@ export default function MarketingShell({ title, description, children, padTop = 
           <div>
             <MarketingLogo size={22} tagline={false} onClick={() => router.push('/')} />
             <p style={{ marginTop: '12px', fontSize: '14px', color: '#5A6577', maxWidth: '300px', lineHeight: 1.65 }}>
-              Custom financial portals wired into QuickBooks and the systems you already run.
+              I build the portal, write the integrations, and keep the books. One company per login.
             </p>
           </div>
           <div style={{ display: 'flex', gap: '40px', flexWrap: 'wrap' }}>

@@ -4,16 +4,12 @@
   --m-ink: #0F172A;
   --m-muted: #475569;
   --m-line: #CBD5E1;
-  --m-paper: #EEF2F7;
-  --m-blue: #1D4ED8;
-  --m-orange: #EA580C;
+  --m-paper: #F2F0EA;
+  --m-blue: #3D4F5F;
+  --m-orange: #9A7B2E;
   --m-gold: #C9A84C;
   --m-gold-dark: #B8943C;
   background-color: var(--m-paper);
-  background-image:
-    linear-gradient(var(--m-line) 1px, transparent 1px),
-    linear-gradient(90deg, var(--m-line) 1px, transparent 1px);
-  background-size: 48px 48px;
   color: var(--m-ink);
   --m-font: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto,
     'Helvetica Neue', Arial, sans-serif;
@@ -68,7 +64,7 @@
   font-weight: 600;
   letter-spacing: 0.14em;
   text-transform: uppercase;
-  color: var(--m-blue);
+  color: var(--m-gold-dark);
   margin-bottom: 12px;
 }
 
@@ -96,10 +92,10 @@
 }
 
 .m-btn--primary {
-  background: var(--m-orange);
-  color: #fff;
+  background: #1B1815;
+  color: #F7F4EF;
 }
-.m-btn--primary:hover { background: #C2410C; }
+.m-btn--primary:hover { background: #2A2724; }
 .m-btn--primary:disabled { opacity: 0.5; cursor: not-allowed; }
 
 .m-btn--pop {
@@ -237,10 +233,6 @@
   overflow-y: auto;
   -webkit-overflow-scrolling: touch;
   background-color: var(--m-paper);
-  background-image:
-    linear-gradient(var(--m-line) 1px, transparent 1px),
-    linear-gradient(90deg, var(--m-line) 1px, transparent 1px);
-  background-size: 48px 48px;
   border-top: 1px solid var(--m-line);
 }
 
@@ -479,8 +471,8 @@
   transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
 .m-demo-tile:hover {
-  transform: translateY(-4px) rotate(0.4deg);
-  box-shadow: 10px 12px 0 rgba(14, 20, 32, 0.08);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(14, 20, 32, 0.08);
 }
 .m-demo-tile__emoji {
   font-size: 28px;
@@ -1193,16 +1185,7 @@
 .m-home--live .m-band__hero > * {
   animation: m-hero-rise 0.65s cubic-bezier(0.22, 1, 0.36, 1) backwards;
 }
-.m-home--live .m-band__mark {
-  animation: m-hero-rise 0.65s 0.05s cubic-bezier(0.22, 1, 0.36, 1) backwards,
-             m-hero-glow 4s 0.7s ease-in-out infinite;
-}
-
-@keyframes m-hero-glow {
-  0%, 100% { text-shadow: 0 0 0 transparent; }
-  50% { text-shadow: 0 0 48px rgba(201, 168, 76, 0.22); }
-}
-.m-home--live .m-band__title { animation-delay: 0.12s; }
+.m-home--live .m-band__title { animation-delay: 0.08s; }
 .m-home--live .m-band__sub { animation-delay: 0.28s; }
 .m-home--live .m-band__hero .m-btn { animation-delay: 0.36s; }
 
@@ -1298,4 +1281,107 @@
   .m-demo-frame--pop:hover,
   .m-step-pop:hover,
   .m-door:hover { padding-left: 18px; }
+}
+
+.m-band__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.m-band__fine {
+  margin: 0;
+  font-size: 13px;
+  color: rgba(247, 244, 239, 0.45);
+  max-width: 40ch;
+}
+
+.m-home-preview {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  text-decoration: none;
+  color: var(--m-ink);
+  background: #fff;
+}
+
+.m-home-preview__tag {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--m-muted);
+}
+
+.m-home-preview__title {
+  font-family: var(--m-serif);
+  font-size: 18px;
+  font-weight: 600;
+  line-height: 1.35;
+}
+
+.m-home-preview__go {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--m-gold-dark);
+}
+
+.m-home-fit {
+  list-style: none;
+  margin: 24px 0 0;
+  padding: 0;
+  display: grid;
+  gap: 0;
+  border: 1px solid var(--m-line);
+  background: #fff;
+}
+
+.m-home-fit li {
+  display: grid;
+  grid-template-columns: minmax(140px, 220px) 1fr;
+  gap: 16px 24px;
+  padding: 16px 20px;
+  border-bottom: 1px solid #EEF1F5;
+  font-size: 15px;
+  line-height: 1.55;
+}
+
+.m-home-fit li:last-child {
+  border-bottom: none;
+}
+
+.m-home-fit strong {
+  font-weight: 600;
+  color: var(--m-ink);
+}
+
+.m-home-fit span {
+  color: var(--m-muted);
+}
+
+.marketing-site select.m-select,
+.marketing-site textarea {
+  width: 100%;
+  background: #fff;
+  border: 1px solid var(--m-line);
+  border-radius: 6px;
+  color: var(--m-ink);
+  padding: 14px 16px;
+  font-family: var(--m-font);
+  font-size: 15px;
+  outline: none;
+  transition: border-color 0.15s;
+}
+
+.marketing-site select.m-select:focus,
+.marketing-site textarea:focus {
+  border-color: #A8B0BC;
+}
+
+@media (max-width: 700px) {
+  .m-home-fit li {
+    grid-template-columns: 1fr;
+    gap: 4px;
+  }
 }
