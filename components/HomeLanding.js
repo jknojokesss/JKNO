@@ -2,8 +2,6 @@ import { useRouter } from 'next/router'
 import { BOOKING_URL } from '../lib/marketing'
 import { BUSINESS_TYPES } from '../lib/buildStack'
 import { FEATURED_DEMOS } from '../lib/marketingDemos'
-import HomeHeroProof from './HomeHeroProof'
-
 const HOME_DEMOS = FEATURED_DEMOS.slice(0, 4)
 
 const STEPS = [
@@ -46,17 +44,16 @@ export default function HomeLanding({
   return (
     <div className={live ? 'm-home m-home--live' : 'm-home'}>
       <section className="m-dark-band">
-        <div className="m-wrap m-band">
+        <div className="m-wrap m-band m-band--solo m-band--hero">
           <div className="m-band__hero">
-            <p className="m-band__kicker">Shops on a register · QuickBooks</p>
             <h1 className="m-band__title">
               QuickBooks won&rsquo;t show today&rsquo;s margin.
               <br />
-              One login can.
+              I build the login that does.
             </h1>
             <p className="m-band__sub">
-              I wire your register, vendor cost, and books into one place shop owners actually open.
-              You see gross on today&rsquo;s tickets; your accountant still closes against QuickBooks.
+              Register tickets, vendor cost, and your books in one place — for owners who run a shop,
+              not a spreadsheet after close.
             </p>
             <div className="m-band__actions">
               <button type="button" className="m-btn m-btn--gold m-btn--pop" onClick={scrollContact}>
@@ -66,19 +63,13 @@ export default function HomeLanding({
                 Tire shop demo
               </a>
             </div>
-            <p className="m-band__fine">Kickoff call → connect QBO → about six days to your login.</p>
-            <p className="m-band__foot">
-              <button type="button" className="m-band__foot-link" onClick={() => router.push('/demos')}>
-                More demos
-              </button>
-              <span className="m-band__foot-dot" aria-hidden="true">·</span>
-              <a href={BOOKING_URL} target="_blank" rel="noopener noreferrer" className="m-band__foot-link">
-                Book a call
+            <p className="m-band__fine">
+              Kickoff call, connect QuickBooks, about six days to go live.{' '}
+              <a href={BOOKING_URL} target="_blank" rel="noopener noreferrer" className="m-band__fine-link">
+                Or book a call
               </a>
             </p>
           </div>
-
-          <HomeHeroProof />
         </div>
       </section>
 
