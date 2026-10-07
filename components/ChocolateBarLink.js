@@ -1,7 +1,6 @@
-const MOLD_PIECES = 6
-
 /**
- * Gold-wrapped candy bar — company on the label, industry as the variety line.
+ * Gold-foil favor bar — reference: flat metallic wrap, white centered type.
+ * Company = main line; industry = small line below (like date on favor bars).
  */
 export default function ChocolateBarLink({
   href,
@@ -17,26 +16,26 @@ export default function ChocolateBarLink({
     <a
       href={href}
       className={[
-        'jk-candy-bar',
-        here && 'jk-candy-bar--here',
-        wideFlavor && 'jk-candy-bar--wide',
+        'jk-foil-bar',
+        here && 'jk-foil-bar--here',
+        wideFlavor && 'jk-foil-bar--wide',
         className,
       ].filter(Boolean).join(' ')}
     >
-      <span className="jk-candy-bar__crimp jk-candy-bar__crimp--left" aria-hidden="true" />
-      <span className="jk-candy-bar__face">
-        <span className="jk-candy-bar__mold" aria-hidden="true">
-          {Array.from({ length: MOLD_PIECES }, (_, i) => (
-            <span key={i} className="jk-candy-bar__piece" />
-          ))}
-        </span>
-        <span className="jk-candy-bar__foil" aria-hidden="true" />
-        <span className="jk-candy-bar__label">
-          <span className="jk-candy-bar__name">{name}</span>
-          {industry ? <span className="jk-candy-bar__variety">{industry}</span> : null}
+      <span className="jk-foil-bar__end jk-foil-bar__end--left" aria-hidden="true">
+        <span className="jk-foil-bar__choc" />
+      </span>
+      <span className="jk-foil-bar__face">
+        <span className="jk-foil-bar__sheen" aria-hidden="true" />
+        <span className="jk-foil-bar__type">
+          <span className="jk-foil-bar__kicker">Sample portal</span>
+          <span className="jk-foil-bar__name">{name}</span>
+          {industry ? <span className="jk-foil-bar__sub">{industry}</span> : null}
         </span>
       </span>
-      <span className="jk-candy-bar__crimp jk-candy-bar__crimp--right" aria-hidden="true" />
+      <span className="jk-foil-bar__end jk-foil-bar__end--right" aria-hidden="true">
+        <span className="jk-foil-bar__choc" />
+      </span>
     </a>
   )
 }
