@@ -2,6 +2,7 @@ import { useState, Fragment } from 'react'
 import Head from 'next/head'
 import DemoScopeBanner from '../components/DemoScopeBanner'
 import DemoLobby from '../components/DemoLobby'
+import DemoBooksPanel from '../components/DemoBooksPanel'
 
 // ─────────────────────────────────────────────────────────────────────────
 // Bespoke sample dashboard for an SBA loan broker. Front page = lead pipeline
@@ -59,7 +60,7 @@ export default function SbaLending() {
   const addDeal = () => { if (!df.client || !df.amount) return; setDeals([{ id: Date.now(), client: df.client, contact: df.contact, amount: Number(df.amount), rate: Number(df.rate || 0), maturity: df.maturity }, ...deals]); setDf({ client: '', contact: '', amount: '', rate: '', maturity: '' }); setAddingDeal(false) }
   const addFee = () => { if (!ff.amount) return; setFees([{ id: Date.now(), source: ff.source || 'Fee', date: ff.date || new Date().toISOString().slice(0, 10), amount: Number(ff.amount) }, ...fees]); setFf({ source: '', amount: '', date: '' }); setAddingFee(false) }
 
-  const tabs = [{ id: 'leads', label: 'Leads' }, { id: 'deals', label: 'Deals' }, { id: 'financials', label: 'Fees' }]
+  const tabs = [{ id: 'leads', label: 'Leads' }, { id: 'deals', label: 'Deals' }, { id: 'financials', label: 'Fees & books' }]
   const serif = { fontFamily: 'Cormorant Garamond, serif' }
   const lbl = { fontFamily: 'DM Mono, monospace', fontSize: '9px', letterSpacing: '1.5px', color: FAINT }
   const card = { background: CARD, border: '1px solid #DCE3EB', borderRadius: '6px', padding: '16px' }
@@ -243,6 +244,12 @@ export default function SbaLending() {
         {/* FEES */}
         {tab === 'financials' && (
           <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+            <div style={{ ...card, background: '#F7FAFC', borderStyle: 'dashed' }}>
+              <div style={{ ...serif, fontSize: '17px', fontWeight: 600, color: INK, marginBottom: '6px' }}>Pipeline screen — not loan servicing</div>
+              <p style={{ margin: 0, fontSize: '13px', color: MUTED, lineHeight: 1.6 }}>
+                Leads and disbursed deals are how you <strong style={{ color: INK }}>run</strong> the book of business. QuickBooks stays where fees are recognized. This portal does not service loans, collect payments, or replace your LOS — it keeps pipeline and fee income next to the GL.
+              </p>
+            </div>
             <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
               <Kpi k="FEES (YTD)" v={usd0(feesYtd)} sub="Total brought in" color={GREEN} />
               <Kpi k="DEALS CLOSED" v={fees.length} sub="Fee-earning" />
@@ -282,6 +289,27 @@ export default function SbaLending() {
                 </table>
               </div>
             </div>
+            <DemoBooksPanel
+              headFont="Cormorant Garamond, serif"
+              monoFont="DM Mono, monospace"
+              ink={INK}
+              muted={MUTED}
+              green={GREEN}
+              border="#DCE3EB"
+              title="Fee income vs QuickBooks"
+              intro="Every fee you log here should already exist (or will exist) as brokerage / referral revenue in QuickBooks — nightly sync flags drift before your CPA closes the year."
+              rows={[
+                { label: 'Fees logged (portal)', portal: usd0(feesYtd), qbo: usd0(feesYtd) },
+                { label: 'YTD brokerage income (P&L)', portal: usd0(feesYtd), qbo: usd0(feesYtd) },
+                { label: 'Open pipeline (not in GL)', portal: usd0(0), qbo: '—' },
+              ]}
+              footnote="Pipeline dollars are operational only until a deal funds and the fee posts in QBO."
+              bullets={[
+                'Disbursed deals tracked for relationship follow-up — not amortization schedules',
+                'Fee rows export to the same accounts your bookkeeper already uses',
+                'Scoped login — one broker company, no shared SaaS tenant',
+              ]}
+            />
           </div>
         )}
 

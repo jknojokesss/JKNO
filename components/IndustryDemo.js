@@ -46,7 +46,6 @@ export default function IndustryDemo({ cfg }) {
   const [fi, setFi] = useState({ name: '', qty: '', rev: '', cost: '' })
   const [pnlView, setPnlView] = useState('month')
   const [ask, setAsk] = useState(null)
-  const [thinking, setThinking] = useState(false)
   const [typed, setTyped] = useState('')
   const [whatIf, setWhatIf] = useState({ r: 0, e: 0 })
   const qboSync = {
@@ -78,7 +77,7 @@ export default function IndustryDemo({ cfg }) {
     { q: 'Am I doing better than three months ago?', a: q3d >= 0 ? `Yes — profit is up ${usd0(q3d)} vs ${MONTHS[8]} (${usd0(profit[8])} → ${usd0(profit[11])}), on ${usd0(rev[11] - rev[8])} more revenue. Keep doing whatever you changed.` : `Not quite — profit is down ${usd0(q3d)} vs ${MONTHS[8]} (${usd0(profit[8])} → ${usd0(profit[11])}). Flip the P&L to the 3-month view and you can see exactly which line moved.` },
     { q: 'What should I be watching right now?', a: insights ? insights[0] : `Your margin is running ${margin}% — the biggest lever in the business is ${topExp[0].n.toLowerCase()}.` },
   ]
-  const askIt = (i) => { setThinking(false); setAsk(i) }
+  const askIt = (i) => { setAsk(i) }
   const simProfit = Math.round(rev[mi] * (1 + whatIf.r / 100) - exp[mi] * (1 + whatIf.e / 100))
   const NARRATIVE_BY_OPS = {
     jobs: 'register or job tickets, vendor invoices, and cost matched to what you sold',
@@ -835,12 +834,7 @@ export default function IndustryDemo({ cfg }) {
                 ))}
               </div>
 
-              {thinking && (
-                <div style={{ background: '#F7F9FB', borderRadius: '8px', padding: '16px', fontFamily: "'Inter', sans-serif", fontSize: '12.5px', color: MUTED }}>
-                  ◈ Reading your books…
-                </div>
-              )}
-              {!thinking && ask !== null && (
+              {ask !== null && (
                 <div style={{ background: '#F7F9FB', borderLeft: `2px solid ${A}`, borderRadius: '8px', padding: '16px' }}>
                   <div style={{ ...lbl, marginBottom: '8px' }}>{ask === 'free' ? `"${typed.toUpperCase().slice(0, 60)}"` : askQs[ask].q.toUpperCase()}</div>
                   <div style={{ fontSize: '14px', color: '#2A3542', lineHeight: 1.7 }}>

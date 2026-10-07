@@ -3,6 +3,7 @@ import Head from 'next/head'
 import { DEMO_UI, DEMO_HEAD, DEMO_MONO, DEMO_FONT_LINK } from '../lib/demoFonts'
 import DemoScopeBanner from '../components/DemoScopeBanner'
 import DemoLobby from '../components/DemoLobby'
+import DemoBooksPanel from '../components/DemoBooksPanel'
 
 const BIZ = 'Harborfield Residential'
 const SIDEBAR = '#1E2A35', ACCENT = '#4A7BA8', BG = '#F4F6F8', BORDER = '#D8DEE6'
@@ -15,7 +16,7 @@ const NAV = [
   { id: 'portfolio', label: 'Portfolio' },
   { id: 'delinquent', label: 'Delinquency' },
   { id: 'owners', label: 'Owner statements' },
-  { id: 'financials', label: 'Financials' },
+  { id: 'financials', label: 'Books' },
 ]
 
 const PROPERTIES = [
@@ -218,9 +219,31 @@ export default function HarborfieldProperties() {
                 <Kpi k="Expenses" v={money(71900)} sub="payroll + maintenance" />
                 <Kpi k="Net income" v={money(24500)} sub="26% margin" color={GREEN} />
               </div>
-              <div style={{ background: '#fff', border: `1px solid ${BORDER}`, borderRadius: '8px', padding: '18px 20px', fontSize: '14px', color: MUTED, lineHeight: 1.65 }}>
-                Management fees, leasing commissions, and maintenance markups — reconciled to QuickBooks on the same screen as the rent roll.
-              </div>
+              <DemoBooksPanel
+                headFont={DEMO_HEAD}
+                monoFont={DEMO_MONO}
+                ink={INK}
+                muted={MUTED}
+                green={GREEN}
+                border={BORDER}
+                title="September — portfolio vs QuickBooks"
+                intro={
+                  <>
+                    Rent roll and owner packets on the other tabs are how you <strong style={{ color: INK }}>run</strong> the month. QuickBooks stays the book of record — nightly sync mirrors the GL; owner distributions and management fees tie out here before statements go out on the 1st.
+                  </>
+                }
+                rows={[
+                  { label: 'Rental income (collected)', portal: money(89200), qbo: money(89200) },
+                  { label: 'Management & leasing revenue', portal: money(96400), qbo: money(96400) },
+                  { label: 'Operating expenses', portal: money(71900), qbo: money(71900) },
+                  { label: 'Net income', portal: money(24500), qbo: money(24500) },
+                ]}
+                bullets={[
+                  'Delinquency and repair holds reviewed against trust / operating accounts',
+                  'Owner statement PDFs use the same GL balances your CPA closes',
+                  'Unsigned bank rec does not hide a closed month',
+                ]}
+              />
             </>
           )}
         </main>

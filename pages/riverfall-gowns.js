@@ -3,6 +3,7 @@ import Head from 'next/head'
 import { DEMO_UI, DEMO_HEAD, DEMO_MONO, DEMO_FONT_LINK } from '../lib/demoFonts'
 import DemoScopeBanner from '../components/DemoScopeBanner'
 import DemoLobby from '../components/DemoLobby'
+import DemoBooksPanel from '../components/DemoBooksPanel'
 
 const BIZ = 'Riverfall Gowns'
 const SIDEBAR = '#1E1A2E', ACCENT = '#B14D6A', BG = '#FAF8F5', BORDER = '#E8E0D8'
@@ -18,7 +19,7 @@ const fmtDate = (s) => new Date(s + 'T00:00:00').toLocaleDateString([], { month:
 const NAV = [
   { id: 'orders',     label: 'Orders'     },
   { id: 'customers',  label: 'Customers'  },
-  { id: 'financials', label: 'Financials' },
+  { id: 'financials', label: 'Books' },
   { id: 'alterations',label: 'Alterations'},
 ]
 
@@ -292,6 +293,27 @@ export default function RiverfallGowns() {
                 </tr></tfoot>
               </table>
             </div>
+            <DemoBooksPanel
+              headFont={serif}
+              monoFont={mono}
+              ink={INK}
+              muted={MUTED}
+              green={GREEN}
+              border={BORDER}
+              title="Deposits, revenue, and QuickBooks"
+              intro="The table above is how the floor runs open orders. QuickBooks stays the book of record — deposits sit in liability until pickup; revenue and sales tax post on the rules your bookkeeper already uses."
+              rows={[
+                { label: 'Customer deposits (liability)', portal: money0(totalCollected), qbo: money0(totalCollected) },
+                { label: 'Revenue recognized (picked up)', portal: money0(totalRevenue - totalOutstanding), qbo: money0(totalRevenue - totalOutstanding) },
+                { label: 'Sales tax payable', portal: money(ORDERS.reduce((s, o) => s + calcTax(o.items), 0)), qbo: money(ORDERS.reduce((s, o) => s + calcTax(o.items), 0)) },
+                { label: 'Outstanding balances', portal: money0(totalOutstanding), qbo: money0(totalOutstanding) },
+              ]}
+              bullets={[
+                'Alterations queue does not change GL — labor posts when the order closes',
+                'Owner view vs staff view on the same orders; no duplicate entry at month-end',
+                'Closed month locks to the official QBO statement after you sign off',
+              ]}
+            />
           </>}
 
           {/* ── ALTERATIONS ── */}
