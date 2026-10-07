@@ -2,6 +2,7 @@ import { useRouter } from 'next/router'
 import MarketingShell, { PageHero } from '../components/MarketingShell'
 import { BOOKING_URL } from '../lib/marketing'
 import { BUILD_STACK, SERVICE_PACKAGES } from '../lib/buildStack'
+import ChocolateBarLink, { ChocolateBarCaption } from '../components/ChocolateBarLink'
 
 export default function WhatWeDo() {
   const router = useRouter()
