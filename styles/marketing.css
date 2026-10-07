@@ -2855,13 +2855,10 @@
 .jk-foil-bar__sheen {
   position: absolute;
   inset: 0;
-  background: linear-gradient(
-    108deg,
-    rgba(255, 255, 255, 0) 0%,
-    rgba(255, 255, 255, 0.55) 42%,
-    rgba(255, 255, 255, 0.08) 48%,
-    rgba(255, 255, 255, 0) 58%
-  );
+  /* Corner highlights only — keep the label band readable */
+  background:
+    radial-gradient(ellipse 50% 90% at 4% 35%, rgba(255, 255, 255, 0.32), transparent 58%),
+    radial-gradient(ellipse 45% 85% at 96% 65%, rgba(255, 255, 255, 0.2), transparent 55%);
   pointer-events: none;
 }
 
