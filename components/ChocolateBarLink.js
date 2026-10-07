@@ -1,5 +1,5 @@
 /**
- * Sample link — gold crimp ends, Hershey-style segmented face with embossed type.
+ * Sample link — crimped wrapper ends, smooth face (no segment grid), embossed type.
  */
 export default function ChocolateBarLink({
   href,
@@ -25,11 +25,6 @@ export default function ChocolateBarLink({
         <span className="jk-foil-bar__choc" />
       </span>
       <span className="jk-foil-bar__face">
-        <span className="jk-foil-bar__slab" aria-hidden="true">
-          {Array.from({ length: 12 }, (_, i) => (
-            <span key={i} className="jk-foil-bar__segment" />
-          ))}
-        </span>
         <span className="jk-foil-bar__type">
           <span className="jk-foil-bar__name">{name}</span>
           {industry ? <span className="jk-foil-bar__sub">{industry}</span> : null}
@@ -42,10 +37,11 @@ export default function ChocolateBarLink({
   )
 }
 
-export function ChocolateBarCaption({ children, sub = false }) {
-  return (
-    <p className={sub ? 'jk-choc-cap jk-choc-cap--sub' : 'jk-choc-cap'}>
-      {children}
-    </p>
-  )
+export function ChocolateBarCaption({ children, sub = false, strip = false }) {
+  const className = [
+    'jk-choc-cap',
+    sub && 'jk-choc-cap--sub',
+    strip && 'jk-choc-cap--strip',
+  ].filter(Boolean).join(' ')
+  return <p className={className}>{children}</p>
 }
