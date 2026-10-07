@@ -1806,6 +1806,14 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
+  .jk-foil-bar:hover .jk-foil-bar__face,
+  .jk-foil-bar:hover .jk-foil-bar__end--left,
+  .jk-foil-bar:hover .jk-foil-bar__end--right {
+    transform: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
   .m-phone__screen--launch .m-phone__scene--portal,
   .m-phone__screen--launch .m-phone__scene--home {
     animation: none !important;
@@ -2545,6 +2553,14 @@
   width: 22px;
 }
 
+.m-hero-home__samples .jk-foil-bar__mid {
+  min-height: 112px;
+}
+
+.m-hero-home__samples .jk-foil-bar:hover .jk-foil-bar__face {
+  transform: translateY(-9px);
+}
+
 .m-hero-home__samples .jk-foil-bar__face {
   padding: 20px 26px;
 }
@@ -2924,58 +2940,82 @@
   box-shadow: 0 14px 32px rgba(0, 0, 0, 0.38);
 }
 
-.jk-foil-bar__end {
-  position: relative;
-  width: 14px;
-  flex-shrink: 0;
-  background:
-    linear-gradient(180deg, #e8e8ec 0%, #c8c8d0 45%, #a8a8b0 100%);
-  box-shadow: inset -1px 0 3px rgba(0, 0, 0, 0.15);
+.jk-foil-bar:hover .jk-foil-bar__face {
+  transform: translateY(-7px);
 }
 
-.jk-foil-bar__end--left {
+.jk-foil-bar:hover .jk-foil-bar__end--left {
+  transform: translateX(-2px);
+}
+
+.jk-foil-bar:hover .jk-foil-bar__end--right {
+  transform: translateX(2px);
+}
+
+.jk-foil-bar__end {
+  position: relative;
+  z-index: 2;
+  width: 14px;
+  flex-shrink: 0;
+  transition: transform 0.28s ease;
   background:
     repeating-linear-gradient(90deg, #e2e2e8 0 2px, #b8b8c2 2px 3px, #d8d8de 3px 5px),
     linear-gradient(180deg, #ececf0 0%, #b0b0ba 55%, #9898a4 100%);
+  box-shadow: inset -1px 0 3px rgba(0, 0, 0, 0.12);
 }
 
 .jk-foil-bar__end--right {
-  background:
-    repeating-linear-gradient(90deg, #e2e2e8 0 2px, #b8b8c2 2px 3px, #d8d8de 3px 5px),
-    linear-gradient(180deg, #ececf0 0%, #b0b0ba 55%, #9898a4 100%);
-  box-shadow: inset 1px 0 3px rgba(0, 0, 0, 0.15);
+  box-shadow: inset 1px 0 3px rgba(0, 0, 0, 0.12);
 }
 
-.jk-foil-bar__choc {
+.jk-foil-bar__mid {
+  position: relative;
+  flex: 1;
+  min-width: 0;
+  min-height: inherit;
+  overflow: hidden;
+  background: linear-gradient(180deg, #5c4030 0%, #3d281c 55%, #2f2016 100%);
+}
+
+.jk-foil-bar__peek {
   position: absolute;
-  top: 9px;
-  bottom: 9px;
-  left: 3px;
-  right: 3px;
-  border-radius: 1px;
-  background: linear-gradient(180deg, #5c4030 0%, #3d281c 100%);
+  inset: 0;
+  background: linear-gradient(180deg, #6b4a32 0%, #4a3224 50%, #3d281c 100%);
+  opacity: 1;
 }
 
 .jk-foil-bar__face {
   position: relative;
-  flex: 1;
+  z-index: 1;
   display: flex;
   align-items: center;
   justify-content: center;
-  min-width: 0;
+  min-height: 100%;
+  width: 100%;
   padding: 12px 16px;
   background: linear-gradient(180deg, #e2c878 0%, #c9a84c 45%, #b8941f 100%);
   box-shadow:
     inset 0 1px 0 rgba(255, 255, 255, 0.28),
     inset 0 -5px 14px rgba(100, 72, 12, 0.22);
+  transition: transform 0.28s ease;
+}
+
+.jk-foil-bar__sheen {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background:
+    radial-gradient(ellipse 55% 95% at 6% 42%, rgba(255, 255, 255, 0.28), transparent 58%),
+    radial-gradient(ellipse 50% 90% at 94% 58%, rgba(255, 255, 255, 0.2), transparent 55%),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.12) 0%, transparent 20%);
 }
 
 .jk-foil-bar__face::after {
   content: '';
   position: absolute;
   inset: 0;
-  background: linear-gradient(180deg, rgba(255, 255, 255, 0.14) 0%, transparent 22%);
   pointer-events: none;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.08) 0%, transparent 18%);
 }
 
 .jk-foil-bar__type {

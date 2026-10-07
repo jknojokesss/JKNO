@@ -1,5 +1,5 @@
 /**
- * Sample link — gold foil favor bar, crimped ends, white type on metallic face.
+ * Sample link — gold foil favor bar; hover lifts the face to reveal chocolate underneath.
  */
 export default function ChocolateBarLink({
   href,
@@ -21,18 +21,18 @@ export default function ChocolateBarLink({
         className,
       ].filter(Boolean).join(' ')}
     >
-      <span className="jk-foil-bar__end jk-foil-bar__end--left" aria-hidden="true">
-        <span className="jk-foil-bar__choc" />
-      </span>
-      <span className="jk-foil-bar__face">
-        <span className="jk-foil-bar__type">
-          <span className="jk-foil-bar__name">{name}</span>
-          {industry ? <span className="jk-foil-bar__sub">{industry}</span> : null}
+      <span className="jk-foil-bar__end jk-foil-bar__end--left" aria-hidden="true" />
+      <span className="jk-foil-bar__mid">
+        <span className="jk-foil-bar__peek" aria-hidden="true" />
+        <span className="jk-foil-bar__face">
+          <span className="jk-foil-bar__sheen" aria-hidden="true" />
+          <span className="jk-foil-bar__type">
+            <span className="jk-foil-bar__name">{name}</span>
+            {industry ? <span className="jk-foil-bar__sub">{industry}</span> : null}
+          </span>
         </span>
       </span>
-      <span className="jk-foil-bar__end jk-foil-bar__end--right" aria-hidden="true">
-        <span className="jk-foil-bar__choc" />
-      </span>
+      <span className="jk-foil-bar__end jk-foil-bar__end--right" aria-hidden="true" />
     </a>
   )
 }

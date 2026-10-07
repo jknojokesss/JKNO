@@ -446,14 +446,14 @@ export default function Demo() {
   return (
     <>
       <Head>
-        <title>{`${BIZ} — CPG & Consignment Demo`}</title>
-        <meta name="description" content="Sample portal for a CPG brand: consignment stores, direct channels, and month-end close tied to QuickBooks." />
-        <meta property="og:title" content="Summit Snacks Co. — CPG & consignment demo" />
+        <title>{`${BIZ} — Packaged snacks & consignment demo`}</title>
+        <meta name="description" content="Sample portal for a snack brand: consignment stores, direct channels, and month-end close tied to QuickBooks." />
+        <meta property="og:title" content="Summit Snacks Co. — packaged snacks & consignment demo" />
         <meta property="og:description" content="Store partners, shelf counts, collections, and channel P&L — reconciled to QuickBooks at month-end." />
         <meta property="og:type" content="website" />
         <meta property="og:url" content="https://www.jknojokes.com/demo" />
         <meta name="twitter:card" content="summary" />
-        <meta name="twitter:title" content="Summit Snacks Co. — CPG & consignment demo" />
+        <meta name="twitter:title" content="Summit Snacks Co. — packaged snacks & consignment demo" />
         <meta name="twitter:description" content="Store partners, shelf counts, collections, and channel P&L — reconciled to QuickBooks at month-end." />
         <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
         <meta name="theme-color" content="#1E2A3A" />
