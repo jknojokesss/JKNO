@@ -439,7 +439,7 @@ export default function Demo() {
   )
 
   const TABS = [['overview', 'Overview'], ['consign', 'Consignment'], ['direct', 'Direct Sales'], ['ads', 'Advertising'], ['pnl', 'P&L']]
-  const EXTRA = [['expenses', 'Import expenses'], ['quickbooks', 'QuickBooks sync'], ['close', 'Monthly close'], ['askai', 'Answers']]
+  const EXTRA = [['expenses', 'Personal card'], ['quickbooks', 'QuickBooks sync'], ['close', 'Monthly close'], ['askai', 'Answers']]
   const currentLabel = ([...TABS, ...EXTRA].find(t => t[0] === tab) || ['', ''])[1]
 
   return (
@@ -589,7 +589,6 @@ export default function Demo() {
                     </div>
                   ))}
                 </div>
-                <p style={{ fontSize: '12px', color: MUTED, marginTop: '14px' }}>These are placeholder illustrations — drop in real product photos whenever you like.</p>
               </div>
             </>
           )}
@@ -941,7 +940,7 @@ export default function Demo() {
             <>
               <div style={{ ...card, marginBottom: '16px' }}>
                 <div style={{ ...big, fontSize: '18px', color: INK, marginBottom: '6px' }}>Personal-card expenses only</div>
-                <p style={{ fontSize: '13.5px', color: MUTED, lineHeight: 1.55 }}>Anything on a <b style={{ color: INK }}>business card</b> already flows in through <b style={{ color: INK }}>QuickBooks</b>. This is just for what you put on your <b style={{ color: INK }}>personal card</b> — import a statement or add them by hand. Each one <b style={{ color: INK }}>hits your P&L</b> here, and <b style={{ color: INK }}>I post them into QuickBooks for you at the monthly close</b> — you never touch QB.</p>
+                <p style={{ fontSize: '13.5px', color: MUTED, lineHeight: 1.55 }}>Business-card spend already lives in <b style={{ color: INK }}>QuickBooks</b> via the nightly sync. This tab is <b style={{ color: INK }}>operating capture</b> for personal-card buys — categorize here during the month; at close they become journal entries in QBO. This is not a CSV upload of your general ledger.</p>
               </div>
               <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap', marginBottom: '16px' }}>
                 <KPI k="On your personal card" v={m0(personalExp)} sub="the business owes you this back" accent={RED} />
@@ -951,11 +950,11 @@ export default function Demo() {
               {!addingE ? (
                 <>
                   <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', marginBottom: '8px' }}>
-                    <button onClick={() => fileRef.current && fileRef.current.click()} style={{ flex: 2, minWidth: '180px', background: CHAR, color: CREAM, border: 'none', borderRadius: '11px', padding: '13px', ...btn }}>Import expenses (CSV)</button>
+                    <button onClick={() => fileRef.current && fileRef.current.click()} style={{ flex: 2, minWidth: '180px', background: CHAR, color: CREAM, border: 'none', borderRadius: '11px', padding: '13px', ...btn }}>Import statement lines (CSV)</button>
                     <button onClick={() => setAddingE(true)} style={{ flex: 1, minWidth: '150px', background: CARDBG, color: INK, border: `1px solid ${BORDER}`, borderRadius: '11px', padding: '13px', ...btn }}>Add one manually</button>
                     <input ref={fileRef} type="file" accept=".csv,text/csv" onChange={importCSV} style={{ display: 'none' }} />
                   </div>
-                  <p style={{ fontSize: '12px', color: MUTED, marginBottom: '16px' }}>Drop in your personal-card statement (CSV: vendor, amount, category) and every line loads at once.</p>
+                  <p style={{ fontSize: '12px', color: MUTED, marginBottom: '16px' }}>Bulk-load a personal-card export (vendor, amount, category) — same rows you would type by hand, staged for month-end posting.</p>
                 </>
               ) : (
                 <div style={{ ...card, marginBottom: '16px' }}>
@@ -1135,7 +1134,8 @@ export default function Demo() {
                 </div>
               </div>
 
-              <button onClick={exportClose} style={{ marginTop: '14px', background: CHAR, color: CREAM, border: 'none', borderRadius: '11px', padding: '13px 20px', ...btn }}>⤓ Export for QuickBooks (CSV)</button>
+              <button onClick={exportClose} style={{ marginTop: '14px', background: CHAR, color: CREAM, border: 'none', borderRadius: '11px', padding: '13px 20px', ...btn }}>⤓ Download close worksheet (CSV)</button>
+              <p style={{ fontSize: '12px', color: MUTED, marginTop: '10px', lineHeight: 1.55 }}>In production this becomes a reviewed journal entry pushed to QuickBooks — the CSV is a demo stand-in for your accountant&rsquo;s worksheet.</p>
             </>
           )}
 

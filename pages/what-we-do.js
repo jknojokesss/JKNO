@@ -1,7 +1,7 @@
 import { useRouter } from 'next/router'
 import MarketingShell, { PageHero } from '../components/MarketingShell'
 import { BOOKING_URL } from '../lib/marketing'
-import { BUILD_STACK } from '../lib/buildStack'
+import { BUILD_STACK, SERVICE_PACKAGES } from '../lib/buildStack'
 
 export default function WhatWeDo() {
   const router = useRouter()
@@ -14,7 +14,25 @@ export default function WhatWeDo() {
         align="center"
       />
 
-      <section className="m-section m-section--stack" style={{ paddingTop: 'clamp(32px,4vw,48px)' }}>
+      <section className="m-section" style={{ paddingTop: 'clamp(32px,4vw,48px)', paddingBottom: 0 }}>
+        <div className="m-wrap">
+          <h2 className="m-h2" style={{ marginBottom: '12px' }}>Four packages</h2>
+          <p className="m-lead" style={{ maxWidth: '58ch', marginBottom: '24px' }}>
+            Most owners land in one of these. The portal is custom; the pipe is the same — QuickBooks in the middle, sync at night, your login on top.
+          </p>
+          <div className="m-package-grid">
+            {SERVICE_PACKAGES.map((p) => (
+              <a key={p.title} href={p.href} className="m-package-card">
+                <span className="m-package-card__title">{p.title}</span>
+                <span className="m-package-card__blurb">{p.blurb}</span>
+                <span className="m-package-card__go">See sample →</span>
+              </a>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      <section className="m-section m-section--stack" style={{ paddingTop: 'clamp(40px,5vw,56px)' }}>
         <div className="m-wrap m-stack-list">
           {BUILD_STACK.map((col, i) => (
             <div key={col.title} className={`m-split-row${i < BUILD_STACK.length - 1 ? ' m-split-row--bordered' : ''}`}>

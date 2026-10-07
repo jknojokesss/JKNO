@@ -4,9 +4,9 @@ import { BUSINESS_TYPES } from '../lib/buildStack'
 import { FEATURED_DEMOS } from '../lib/marketingDemos'
 /** Homepage grid — range of industries; full list lives on /demos */
 const HOME_DEMOS = [
+  FEATURED_DEMOS[0],
   FEATURED_DEMOS[1],
   FEATURED_DEMOS[5],
-  FEATURED_DEMOS[3],
   FEATURED_DEMOS[4],
 ].filter(Boolean)
 
@@ -86,14 +86,14 @@ export default function HomeLanding({
         <div className="m-wrap">
           <h2 className="m-h2">Demos</h2>
           <p className="m-lead" style={{ maxWidth: '56ch', marginBottom: '28px' }}>
-            Sample businesses across trades, retail, and distribution — each demo is a working screen, not a mockup deck.
+            Sample portals across trades, retail, and distribution — fictitious data, the same screen patterns we ship on QuickBooks.
           </p>
           <div className="m-demo-grid">
             {HOME_DEMOS.map((d) => (
               <a key={d.src} href={d.src} className="m-demo-tile">
                 <span className="m-demo-tile__industry">{d.label}</span>
                 <span className="m-demo-tile__blurb">{d.caption}</span>
-                <span className="m-demo-tile__go">Open →</span>
+                <span className="m-demo-tile__go">Open sample →</span>
               </a>
             ))}
           </div>

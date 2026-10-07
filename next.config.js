@@ -16,6 +16,11 @@ const nextConfig = {
       { source: '/roofing', destination: '/riverstone-roofing', permanent: false },
       { source: '/srl', destination: '/riverstone-roofing', permanent: false },
       { source: '/quefence', destination: '/riverbend-fence', permanent: false },
+      ...['dental', 'law-firm', 'gym', 'barbershop', 'boutique', 'property-management'].map((slug) => ({
+        source: `/demos/${slug}`,
+        destination: '/demos',
+        permanent: false,
+      })),
       { source: '/status', destination: '/wa-status.html?clean=1', permanent: false },
       // Reydel portal lives in jknojokesss/reydel under /reydel-tire.
       // QBO nightly pull + Intuit connect/callback stay here (token rotation).
