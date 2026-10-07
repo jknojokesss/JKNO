@@ -1,7 +1,7 @@
 import { useRouter } from 'next/router'
 import { BOOKING_URL } from '../lib/marketing'
 import { FEATURED_DEMOS } from '../lib/marketingDemos'
-import { HERO_DOORS, getDemoHook } from '../lib/demoHooks'
+import { HERO_DOORS } from '../lib/demoHooks'
 import DemoGalleryCard from './DemoGalleryCard'
 
 const HOME_DEMOS = [
@@ -56,10 +56,8 @@ export default function HomeLanding({
   return (
     <div className={live ? 'm-home m-home--live' : 'm-home'}>
       <section className="m-hero-home">
-        <div className="m-hero-home__frame" aria-hidden="true" />
         <div className="m-wrap m-hero-home__grid">
           <div className="m-hero-home__copy">
-            <p className="m-hero-home__kicker">Owner portals on real books</p>
             <p className="m-hero-home__mark" aria-hidden="true">
               JK<span className="m-hero-home__dot">.</span>
             </p>
@@ -70,14 +68,15 @@ export default function HomeLanding({
             <p className="m-hero-home__sub">
               Register, vendors, jobs — synced nightly into a login that looks like your business, not a template.
             </p>
-            <div className="m-hero-home__actions">
-              <button type="button" className="m-btn m-btn--gold m-btn--pop" onClick={scrollContact}>
-                Start a build
+            <p className="m-hero-home__actions">
+              <button type="button" className="m-hero-home__action m-hero-home__action--lead" onClick={scrollContact}>
+                Tell me what you run
               </button>
-              <button type="button" className="m-btn m-btn--ghost-light" onClick={scrollDemos}>
-                Open a sample
+              <span className="m-hero-home__action-sep" aria-hidden="true">/</span>
+              <button type="button" className="m-hero-home__action" onClick={scrollDemos}>
+                Walk a sample
               </button>
-            </div>
+            </p>
             <p className="m-hero-home__foot">
               <button type="button" className="m-hero-home__link" onClick={() => router.push('/what-we-do')}>
                 What we build
@@ -89,28 +88,17 @@ export default function HomeLanding({
             </p>
           </div>
 
-          <div className="m-hero-home__doors">
-            <p className="m-hero-home__doors-cap">
-              <span>No login</span>
-              <span className="m-hero-home__doors-cap-line" />
-              <span>pick a door</span>
-            </p>
-            {HERO_DOORS.map((p, i) => {
-              const { hook } = getDemoHook(p.href)
-              return (
-                <a
-                  key={p.href}
-                  href={p.href}
-                  className={`m-hero-home__door${i === 0 ? ' m-hero-home__door--lead' : ''}`}
-                  style={{ '--door-i': i }}
-                >
-                  <span className="m-hero-home__door-num">{p.n}</span>
-                  <span className="m-hero-home__door-hook">{hook}</span>
-                  <span className="m-hero-home__door-name">{p.name}</span>
-                  <span className="m-hero-home__door-go" aria-hidden="true">→</span>
-                </a>
-              )
-            })}
+          <div className="m-hero-home__samples">
+            <p className="m-hero-home__samples-note">Sample portals — no login</p>
+            {HERO_DOORS.map((p) => (
+              <a key={p.href} href={p.href} className="m-hero-home__bar">
+                <span className="m-hero-home__bar-text">
+                  <span className="m-hero-home__bar-name">{p.name}</span>
+                  <span className="m-hero-home__bar-industry">{p.industry}</span>
+                </span>
+                <span className="m-hero-home__bar-go" aria-hidden="true">→</span>
+              </a>
+            ))}
           </div>
         </div>
       </section>
