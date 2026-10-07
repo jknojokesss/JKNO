@@ -44,7 +44,7 @@ export default function DemoGallery() {
                 href={p.href}
                 name={p.title}
                 industry={p.blurb}
-                className="jk-choc-bar--grid"
+                wide
               />
             ))}
           </div>
