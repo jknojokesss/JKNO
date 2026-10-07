@@ -90,7 +90,7 @@ export default function HomeLanding({
           </div>
 
           <div className="m-hero-home__samples jk-choc-stack">
-            <ChocolateBarCaption strip>Break off a sample — no login</ChocolateBarCaption>
+            <ChocolateBarCaption>Sample portals — no login</ChocolateBarCaption>
             {HERO_SAMPLE_BARS.map((p) => (
               <ChocolateBarLink
                 key={p.href}

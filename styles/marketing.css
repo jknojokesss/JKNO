@@ -2511,7 +2511,62 @@
 .m-hero-home__samples {
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 18px;
+  min-width: min(100%, 420px);
+}
+
+.m-hero-home__samples .jk-choc-cap {
+  margin: 0 0 6px;
+  font-family: 'DM Sans', var(--m-font);
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: 0.14em;
+  color: rgba(201, 168, 76, 0.72);
+}
+
+.m-hero-home__samples .jk-foil-bar {
+  min-height: 96px;
+  border-radius: 6px;
+  box-shadow:
+    0 14px 36px rgba(0, 0, 0, 0.45),
+    0 4px 0 rgba(0, 0, 0, 0.2);
+}
+
+.m-hero-home__samples .jk-foil-bar:hover {
+  transform: translateY(-3px);
+  box-shadow:
+    0 18px 42px rgba(0, 0, 0, 0.5),
+    0 5px 0 rgba(0, 0, 0, 0.22);
+}
+
+.m-hero-home__samples .jk-foil-bar__end {
+  width: 18px;
+}
+
+.m-hero-home__samples .jk-foil-bar__face {
+  padding: 16px 22px;
+}
+
+.m-hero-home__samples .jk-foil-bar__name {
+  font-family: 'Playfair Display', Georgia, serif;
+  font-size: clamp(18px, 2.6vw, 26px);
+  font-weight: 600;
+  font-stretch: normal;
+  letter-spacing: 0.1em;
+  line-height: 1.12;
+  color: #f7f4ef;
+  text-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.12),
+    0 2px 8px rgba(0, 0, 0, 0.55);
+}
+
+.m-hero-home__samples .jk-foil-bar__sub {
+  font-family: 'DM Sans', var(--m-font);
+  font-size: clamp(10px, 1.2vw, 12px);
+  font-weight: 500;
+  letter-spacing: 0.18em;
+  color: rgba(247, 244, 239, 0.72);
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.45);
 }
 
 .m-home-proof {
@@ -2848,14 +2903,14 @@
   margin-bottom: 8px;
 }
 
-/* Wrapper bar: crimp ends + smooth chocolate face, embossed lettering */
+/* Wrapper bar: crimp ends + smooth chocolate face */
 .jk-foil-bar {
   display: flex;
   align-items: stretch;
   width: 100%;
-  min-height: 64px;
+  min-height: 76px;
   text-decoration: none;
-  border-radius: 4px;
+  border-radius: 5px;
   overflow: hidden;
   box-shadow: 0 10px 26px rgba(0, 0, 0, 0.32);
   transition: transform 0.2s ease, box-shadow 0.2s ease;
@@ -2868,7 +2923,7 @@
 
 .jk-foil-bar__end {
   position: relative;
-  width: 12px;
+  width: 14px;
   flex-shrink: 0;
   background:
     linear-gradient(180deg, #e8e8ec 0%, #c8c8d0 45%, #a8a8b0 100%);
@@ -2925,37 +2980,30 @@
   pointer-events: none;
 }
 
-/* Embossed silver on smooth wrapper — like the front of the bar, not the squares */
 .jk-foil-bar__name {
-  font-family: 'Arial Narrow', 'Franklin Gothic Medium', 'Helvetica Neue', Arial, sans-serif;
-  font-size: clamp(14px, 2.1vw, 19px);
-  font-weight: 700;
-  font-stretch: condensed;
-  line-height: 1.05;
-  letter-spacing: 0.16em;
+  font-family: 'Playfair Display', Georgia, serif;
+  font-size: clamp(15px, 2vw, 21px);
+  font-weight: 600;
+  line-height: 1.12;
+  letter-spacing: 0.08em;
   text-transform: uppercase;
-  color: #e8e4dc;
-  text-shadow:
-    0 -1px 0 rgba(255, 255, 255, 0.4),
-    0 1px 0 rgba(12, 6, 2, 0.9),
-    0 2px 3px rgba(0, 0, 0, 0.5);
+  color: #f7f4ef;
+  text-shadow: 0 1px 4px rgba(0, 0, 0, 0.5);
 }
 
 .jk-foil-bar__sub {
-  font-family: 'Arial Narrow', 'Franklin Gothic Medium', Arial, sans-serif;
-  font-size: clamp(8px, 1.1vw, 10px);
-  font-weight: 600;
-  letter-spacing: 0.22em;
+  font-family: 'DM Sans', var(--m-font);
+  font-size: clamp(9px, 1vw, 11px);
+  font-weight: 500;
+  letter-spacing: 0.14em;
   text-transform: uppercase;
-  line-height: 1.35;
-  color: #c4beb4;
-  text-shadow:
-    0 -1px 0 rgba(255, 255, 255, 0.22),
-    0 1px 1px rgba(0, 0, 0, 0.7);
+  line-height: 1.4;
+  color: rgba(247, 244, 239, 0.7);
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.45);
 }
 
 .jk-foil-bar--wide {
-  min-height: 72px;
+  min-height: 84px;
 }
 
 .jk-foil-bar--wide .jk-foil-bar__face {
