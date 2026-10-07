@@ -1,5 +1,7 @@
+const MOLD_PIECES = 6
+
 /**
- * Sample portal link — gold-foil wrapped bar; company = name on wrapper, industry = variety line.
+ * Gold-wrapped candy bar — company on the label, industry as the variety line.
  */
 export default function ChocolateBarLink({
   href,
@@ -15,21 +17,26 @@ export default function ChocolateBarLink({
     <a
       href={href}
       className={[
-        'jk-wrap-bar',
-        here && 'jk-wrap-bar--here',
-        wideFlavor && 'jk-wrap-bar--wide',
+        'jk-candy-bar',
+        here && 'jk-candy-bar--here',
+        wideFlavor && 'jk-candy-bar--wide',
         className,
       ].filter(Boolean).join(' ')}
     >
-      <span className="jk-wrap-bar__end jk-wrap-bar__end--left" aria-hidden="true" />
-      <span className="jk-wrap-bar__body">
-        <span className="jk-wrap-bar__foil" aria-hidden="true" />
-        <span className="jk-wrap-bar__label">
-          <span className="jk-wrap-bar__name">{name}</span>
-          {industry ? <span className="jk-wrap-bar__flavor">{industry}</span> : null}
+      <span className="jk-candy-bar__crimp jk-candy-bar__crimp--left" aria-hidden="true" />
+      <span className="jk-candy-bar__face">
+        <span className="jk-candy-bar__mold" aria-hidden="true">
+          {Array.from({ length: MOLD_PIECES }, (_, i) => (
+            <span key={i} className="jk-candy-bar__piece" />
+          ))}
+        </span>
+        <span className="jk-candy-bar__foil" aria-hidden="true" />
+        <span className="jk-candy-bar__label">
+          <span className="jk-candy-bar__name">{name}</span>
+          {industry ? <span className="jk-candy-bar__variety">{industry}</span> : null}
         </span>
       </span>
-      <span className="jk-wrap-bar__end jk-wrap-bar__end--right" aria-hidden="true" />
+      <span className="jk-candy-bar__crimp jk-candy-bar__crimp--right" aria-hidden="true" />
     </a>
   )
 }
