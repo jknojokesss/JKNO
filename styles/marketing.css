@@ -2530,7 +2530,8 @@
   border-radius: 7px;
   box-shadow:
     0 16px 40px rgba(0, 0, 0, 0.48),
-    0 5px 0 rgba(0, 0, 0, 0.22);
+    0 1px 0 rgba(255, 255, 255, 0.22) inset,
+    0 5px 0 rgba(0, 0, 0, 0.18);
 }
 
 .m-hero-home__samples .jk-foil-bar:hover {
@@ -2555,10 +2556,8 @@
   font-stretch: normal;
   letter-spacing: 0.09em;
   line-height: 1.1;
-  color: #f7f4ef;
-  text-shadow:
-    0 1px 0 rgba(255, 255, 255, 0.12),
-    0 2px 10px rgba(0, 0, 0, 0.55);
+  color: #fff;
+  text-shadow: 0 1px 3px rgba(80, 55, 10, 0.5);
 }
 
 .m-hero-home__samples .jk-foil-bar__sub {
@@ -2567,8 +2566,8 @@
   font-weight: 500;
   letter-spacing: 0.16em;
   margin-top: 4px;
-  color: rgba(247, 244, 239, 0.75);
-  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.45);
+  color: rgba(255, 255, 255, 0.9);
+  text-shadow: 0 1px 2px rgba(80, 55, 10, 0.4);
 }
 
 .m-home-proof {
@@ -2905,7 +2904,7 @@
   margin-bottom: 8px;
 }
 
-/* Wrapper bar: crimp ends + smooth chocolate face */
+/* Gold foil favor bar — crimp ends, smooth metallic face (JK gold palette) */
 .jk-foil-bar {
   display: flex;
   align-items: stretch;
@@ -2914,7 +2913,9 @@
   text-decoration: none;
   border-radius: 5px;
   overflow: hidden;
-  box-shadow: 0 10px 26px rgba(0, 0, 0, 0.32);
+  box-shadow:
+    0 10px 26px rgba(0, 0, 0, 0.32),
+    0 1px 0 rgba(255, 255, 255, 0.2) inset;
   transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
 
@@ -2963,10 +2964,18 @@
   justify-content: center;
   min-width: 0;
   padding: 12px 16px;
-  background: linear-gradient(180deg, #6f4f38 0%, #5a3f2c 48%, #4a3224 100%);
+  background: linear-gradient(180deg, #e2c878 0%, #c9a84c 45%, #b8941f 100%);
   box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.06),
-    inset 0 -5px 12px rgba(0, 0, 0, 0.28);
+    inset 0 1px 0 rgba(255, 255, 255, 0.28),
+    inset 0 -5px 14px rgba(100, 72, 12, 0.22);
+}
+
+.jk-foil-bar__face::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.14) 0%, transparent 22%);
+  pointer-events: none;
 }
 
 .jk-foil-bar__type {
@@ -2989,8 +2998,8 @@
   line-height: 1.12;
   letter-spacing: 0.08em;
   text-transform: uppercase;
-  color: #f7f4ef;
-  text-shadow: 0 1px 4px rgba(0, 0, 0, 0.5);
+  color: #fff;
+  text-shadow: 0 1px 2px rgba(80, 55, 10, 0.45);
 }
 
 .jk-foil-bar__sub {
@@ -3000,8 +3009,8 @@
   letter-spacing: 0.14em;
   text-transform: uppercase;
   line-height: 1.4;
-  color: rgba(247, 244, 239, 0.7);
-  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.45);
+  color: rgba(255, 255, 255, 0.88);
+  text-shadow: 0 1px 1px rgba(80, 55, 10, 0.35);
 }
 
 .jk-foil-bar--wide {
