@@ -20,17 +20,32 @@ export default function DemoGallery() {
         align="center"
       />
 
-      <section className="m-section" style={{ paddingTop: 0, paddingBottom: 'clamp(24px,3vw,36px)' }}>
+      <section className="m-section m-section--panel" style={{ paddingTop: 'clamp(28px,4vw,40px)', paddingBottom: 'clamp(28px,4vw,40px)' }}>
         <div className="m-wrap">
-          <div className="m-ship-strip">
-            <p className="m-ship-strip__title">How it ships</p>
-            <ol className="m-ship-strip__steps">
-              <li>Connect your QuickBooks company (OAuth)</li>
-              <li>Nightly sync — P&amp;L, balance sheet, GL; plus your register, vendors, or jobs as needed</li>
-              <li>Your scoped login — one company, operating views owners actually use</li>
-              <li>Month-end — inventory JE, AR, consignment close, posted when you approve</li>
-            </ol>
-          </div>
+          <p className="m-ship-row__cap">How it ships</p>
+          <ol className="m-ship-row">
+            <li>
+              <span className="m-ship-row__n">1</span>
+              <span className="m-ship-row__text">Connect QuickBooks</span>
+            </li>
+            <li>
+              <span className="m-ship-row__n">2</span>
+              <span className="m-ship-row__text">Sync runs at night</span>
+            </li>
+            <li>
+              <span className="m-ship-row__n">3</span>
+              <span className="m-ship-row__text">Your scoped login</span>
+            </li>
+            <li>
+              <span className="m-ship-row__n">4</span>
+              <span className="m-ship-row__text">Close when you approve</span>
+            </li>
+          </ol>
+          <p className="m-ship-row__more">
+            <button type="button" className="m-btn--text" onClick={() => router.push('/how-it-works')}>
+              Full timeline
+            </button>
+          </p>
         </div>
       </section>
 
