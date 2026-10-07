@@ -3,6 +3,7 @@ import Head from 'next/head'
 import { useRouter } from 'next/router'
 import { isDemoEmbedQuery } from '../lib/demoEmbed'
 import { PHONE_DEMO_MSG, isPhoneDemoUrl } from '../lib/phoneDemoPostMessage'
+import DemoScopeBanner from '../components/DemoScopeBanner'
 
 const BIZ = 'Riverside Tires'
 const THEME = { side: '#1E1C19', border: '#33302B', accent: '#B0281C', content: '#F2F0EA' }
@@ -604,6 +605,8 @@ export default function RiversideTires() {
         .rt-embed .rt-mobilenav{flex-shrink:0}
       `}</style>
 
+      <DemoScopeBanner scope="register" compact />
+
       <DemoShell
         embed={embed}
         tab={tab}
@@ -717,7 +720,7 @@ export default function RiversideTires() {
 
         {tab === 'financials' && (
           <>
-            <PageHead title="Financials" sub="Closed months through August; September is still open in the sample." />
+            <PageHead title="Financials" sub="Official QuickBooks statements for closed months; portal P&amp;L reconciled line-by-line. September register view is operating only." />
             <FinTabs active={finView} onChange={setFinView} tabs={FIN_TABS} />
 
             {finView === 'pl' && (

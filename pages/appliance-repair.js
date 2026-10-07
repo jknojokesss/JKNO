@@ -1,5 +1,6 @@
 import { useState, Fragment } from 'react'
 import Head from 'next/head'
+import DemoScopeBanner from '../components/DemoScopeBanner'
 
 // ─────────────────────────────────────────────────────────────────────────
 // Bespoke sample dashboard for an appliance-repair business. Front page is a
@@ -117,6 +118,8 @@ export default function ApplianceRepair() {
           .ar-main{flex:1;min-width:0;padding:28px 28px 60px}
           @media(max-width:640px){.ar-side{display:none}.ar-main{padding:16px 14px 48px}}`}</style>
       </Head>
+
+      <DemoScopeBanner scope="register" compact />
 
       <div className="ar-shell">
         <aside className="ar-side">

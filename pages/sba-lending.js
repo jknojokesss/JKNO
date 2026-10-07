@@ -1,5 +1,6 @@
 import { useState, Fragment } from 'react'
 import Head from 'next/head'
+import DemoScopeBanner from '../components/DemoScopeBanner'
 
 // ─────────────────────────────────────────────────────────────────────────
 // Bespoke sample dashboard for an SBA loan broker. Front page = lead pipeline
@@ -90,6 +91,8 @@ export default function SbaLending() {
           .sb-main{flex:1;min-width:0;padding:28px 28px 60px}
           @media(max-width:640px){.sb-side{display:none}.sb-main{padding:16px 14px 48px}}`}</style>
       </Head>
+
+      <DemoScopeBanner scope="lending" compact />
 
       <div className="sb-shell">
         <aside className="sb-side">

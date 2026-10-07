@@ -5,6 +5,7 @@ import { supabase } from '../lib/supabase'
 import { isDemoEmbedQuery } from '../lib/demoEmbed'
 import { DEMO_UI, DEMO_HEAD, DEMO_FONT_LINK } from '../lib/demoFonts'
 import { DEMO_AS_OF as AS_OF } from '../lib/demoAsOf'
+import DemoScopeBanner from '../components/DemoScopeBanner'
 
 // ─────────────────────────────────────────────────────────────────────────
 // Riverstone Roofing — management portal demo. The business name and
@@ -180,6 +181,8 @@ export default function RoofingPortal() {
         <span>{BIZ.toUpperCase()} — MANAGEMENT PORTAL</span>
         <span className="topbar-sub" style={{ fontWeight: 500, letterSpacing: '.08em' }}>DEMO · SYNTHETIC DATA · AS OF AUG 11, 2026</span>
       </div>
+
+      <DemoScopeBanner scope="roofing" compact />
 
       <div className="mobilenav no-print">
         {!embedded && <button onClick={() => setIntro(true)} style={{ fontFamily: serif, fontStyle: 'italic' }}>The 4 questions</button>}

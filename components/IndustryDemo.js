@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import Head from 'next/head'
+import DemoScopeBanner from './DemoScopeBanner'
 
 // ─────────────────────────────────────────────────────────────────────────
 // Config-driven sample dashboard — one polished template, one config per
@@ -47,11 +48,12 @@ export default function IndustryDemo({ cfg }) {
   const [thinking, setThinking] = useState(false)
   const [typed, setTyped] = useState('')
   const [whatIf, setWhatIf] = useState({ r: 0, e: 0 })
-  const [books, setBooks] = useState({
-    coa: { name: 'chart-of-accounts.csv', rows: 48 },
-    gl: { name: 'general-ledger-jun.csv', rows: 142 },
-    updated: null,
-  })
+  const qboSync = {
+    company: `${biz} (sample)`,
+    lastSync: 'Last night · 02:14 ET',
+    glMonths: 24,
+    statements: 'P&L, balance sheet, GL detail',
+  }
   const [doneMap, setDoneMap] = useState({})
   const [qf, setQf] = useState({ sys: 0, hrs: 10, mk: 40, permit: true })
   const [mix, setMix] = useState(0)
@@ -77,7 +79,13 @@ export default function IndustryDemo({ cfg }) {
   ]
   const askIt = (i) => { setAsk(null); setThinking(true); setTimeout(() => { setThinking(false); setAsk(i) }, 700) }
   const simProfit = Math.round(rev[mi] * (1 + whatIf.r / 100) - exp[mi] * (1 + whatIf.e / 100))
-  const dropIn = (k) => setBooks((b) => ({ ...b, [k]: { name: k === 'gl' ? 'general-ledger-jul.csv' : 'chart-of-accounts-v2.csv', rows: b[k].rows + (k === 'gl' ? 38 : 4) }, updated: k }))
+  const NARRATIVE_BY_OPS = {
+    jobs: 'register or job tickets, vendor invoices, and cost matched to what you sold',
+    orders: 'purchase orders, inventory layers, and margin on each order',
+    clients: 'customer accounts, collections, and receivables aging',
+    sales: 'product cost and sales mix by channel',
+  }
+  const opsHook = NARRATIVE_BY_OPS[ops.type] || 'your operating data'
 
   const D = theme.dark, A = theme.accent
   const INK = '#1F2A36', MUTED = '#647082', FAINT = '#97A3B2'
@@ -114,7 +122,7 @@ export default function IndustryDemo({ cfg }) {
     { id: 'pnl', label: 'P&L' },
     { id: 'ops', label: ops.label },
     ...extras.map((x, i) => ({ id: 'x' + i, label: x.tab })),
-    { id: 'ask', label: 'Ask Us' },
+    { id: 'ask', label: 'Answers' },
   ]
 
   // Add-a-row config per ops archetype — every demo gets a live add workflow.
@@ -131,7 +139,7 @@ export default function IndustryDemo({ cfg }) {
     <>
       <Head>
         <title>{`${biz} — ${industry} Dashboard Demo`}</title>
-        <meta name="description" content={`Live sample financial dashboard for a ${industry.toLowerCase()} business — built by JK No Jokes Financials.`} />
+        <meta name="description" content={`Sample ${industry.toLowerCase()} portal on QuickBooks — operating screens and month-end recon, built by JK No Jokes.`} />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
@@ -144,9 +152,7 @@ export default function IndustryDemo({ cfg }) {
           @media(max-width:860px){.id-shell{display:block}.id-side{display:none}.id-topbar{display:block}.id-main{padding:18px 14px 48px}}`}</style>
       </Head>
 
-      <div style={{ background: A, color: '#fff', textAlign: 'center', padding: '8px 16px', fontFamily: "'Inter', sans-serif", fontSize: '12.5px', fontWeight: 600, letterSpacing: '0.3px' }}>
-        SAMPLE DASHBOARD · built for a {industry.toLowerCase()} business by JK No Jokes Financials
-      </div>
+      <DemoScopeBanner scope="template" compact />
 
       <div className="id-shell">
         {/* SIDEBAR — desktop */}
@@ -197,6 +203,13 @@ export default function IndustryDemo({ cfg }) {
         </div>
 
         <div className="id-main">
+        <div style={{ background: '#f7f5f0', border: '1px solid #d8d4cc', borderLeft: `3px solid ${A}`, padding: '14px 18px', marginBottom: '18px', borderRadius: '2px' }}>
+          <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: '10px', fontWeight: 600, letterSpacing: '0.1em', textTransform: 'uppercase', color: '#6b6560', marginBottom: '6px' }}>Production shape</div>
+          <div style={{ fontFamily: "'Inter', sans-serif", fontSize: '14px', fontWeight: 600, color: INK, marginBottom: '6px' }}>QuickBooks stays the book of record</div>
+          <div style={{ fontFamily: "'Inter', sans-serif", fontSize: '13px', color: '#4a4540', lineHeight: 1.55 }}>
+            We connect to your QuickBooks company, pull statements and GL on a schedule, and layer in {opsHook}. You run the month on these screens; close reconciles to the official QBO numbers.
+          </div>
+        </div>
 
         {/* DASHBOARD */}
         {tab === 'dash' && (
@@ -399,25 +412,24 @@ export default function IndustryDemo({ cfg }) {
               </>)}
             </div>
 
-            {/* BOOKS DROP-IN */}
             <div style={card}>
-              <div style={{ ...serif, fontSize: '18px', fontWeight: 600, color: INK, marginBottom: '4px' }}>Already have books? Drop them in.</div>
-              <div style={{ fontFamily: "'Inter', sans-serif", fontSize: '12px', color: MUTED, marginBottom: '14px' }}>QuickBooks, Wave, a spreadsheet — export it, we take it from there. No re-entering anything.</div>
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(240px,1fr))', gap: '10px' }}>
-                {[['coa', 'CHART OF ACCOUNTS'], ['gl', 'GENERAL LEDGER']].map(([k, label]) => (
-                  <div key={k} style={{ border: '1px dashed #CFD8E2', borderRadius: '8px', padding: '14px', background: '#F7F9FB', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '10px', flexWrap: 'wrap' }}>
-                    <div>
-                      <div style={{ ...lbl, marginBottom: '6px' }}>{label}</div>
-                      <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: '11px', color: INK }}>📄 {books[k].name}</div>
-                      <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: '9px', color: books.updated === k ? GREEN : FAINT, marginTop: '4px' }}>
-                        {books.updated === k ? `✓ ${books[k].rows} rows imported just now` : `${books[k].rows} rows imported`}
-                      </div>
-                    </div>
-                    <button onClick={() => dropIn(k)} style={{ background: '#fff', border: `1px solid ${A}`, color: A, borderRadius: '5px', padding: '8px 13px', fontFamily: "'Inter', sans-serif", fontSize: '11px', fontWeight: 600, letterSpacing: '0.4px', cursor: 'pointer' }}>
-                      DROP IN / REPLACE
-                    </button>
-                  </div>
-                ))}
+              <div style={{ ...serif, fontSize: '18px', fontWeight: 600, color: INK, marginBottom: '4px' }}>QuickBooks connection (sample)</div>
+              <div style={{ fontFamily: "'Inter', sans-serif", fontSize: '12px', color: MUTED, marginBottom: '14px' }}>
+                In production we OAuth to your QuickBooks Online company and refresh tokens nightly. No CSV uploads — the portal and the official statement read the same pipe.
+              </div>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(200px,1fr))', gap: '10px' }}>
+                <div style={{ border: '1px solid #E2E7ED', borderRadius: '6px', padding: '12px 14px', background: '#F7F9FB' }}>
+                  <div style={{ ...lbl, marginBottom: '6px' }}>Company</div>
+                  <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: '11px', color: INK }}>{qboSync.company}</div>
+                </div>
+                <div style={{ border: '1px solid #E2E7ED', borderRadius: '6px', padding: '12px 14px', background: '#F7F9FB' }}>
+                  <div style={{ ...lbl, marginBottom: '6px' }}>Last sync</div>
+                  <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: '11px', color: GREEN }}>{qboSync.lastSync}</div>
+                </div>
+                <div style={{ border: '1px solid #E2E7ED', borderRadius: '6px', padding: '12px 14px', background: '#F7F9FB' }}>
+                  <div style={{ ...lbl, marginBottom: '6px' }}>Reports mirrored</div>
+                  <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: '11px', color: INK }}>{qboSync.statements}</div>
+                </div>
               </div>
             </div>
           </div>
@@ -744,9 +756,9 @@ export default function IndustryDemo({ cfg }) {
             <div style={{ ...card, borderLeft: `3px solid ${A}`, background: '#FDFCFA' }}>
               <div style={{ display: 'flex', alignItems: 'baseline', gap: '10px', marginBottom: '4px' }}>
                 <span style={{ color: A, fontSize: '16px' }}>◈</span>
-                <div style={{ ...serif, fontSize: '20px', fontWeight: 600, color: INK }}>Ask your numbers</div>
+                <div style={{ ...serif, fontSize: '20px', fontWeight: 600, color: INK }}>Answers from your books</div>
               </div>
-              <div style={{ fontFamily: "'Inter', sans-serif", fontSize: '12px', color: MUTED, marginBottom: '16px' }}>Plain English in, plain English out. In your real portal, ask anything — it reads your live books.</div>
+              <div style={{ fontFamily: "'Inter', sans-serif", fontSize: '12px', color: MUTED, marginBottom: '16px' }}>Computed from synced QuickBooks data — not a chatbot. This demo uses canned Q&amp;A on sample numbers; your portal runs the same idea on live GL.</div>
 
               <div style={{ display: 'flex', gap: '8px', marginBottom: '14px', flexWrap: 'wrap' }}>
                 <input
@@ -781,7 +793,7 @@ export default function IndustryDemo({ cfg }) {
                   <div style={{ ...lbl, marginBottom: '8px' }}>{ask === 'free' ? `"${typed.toUpperCase().slice(0, 60)}"` : askQs[ask].q.toUpperCase()}</div>
                   <div style={{ fontSize: '14px', color: '#2A3542', lineHeight: 1.7 }}>
                     {ask === 'free'
-                      ? `Good question — in your real portal I read your live books and answer anything you throw at me. This demo runs on sample data, so try one of the set questions above. Or book a 10-minute call and ask me about YOUR numbers instead.`
+                      ? `In production this runs against your nightly QuickBooks sync — no model bill. This page is sample data only; use the questions above or book a call to walk your company.`
                       : askQs[ask].a}
                   </div>
                 </div>

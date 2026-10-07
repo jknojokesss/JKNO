@@ -1,10 +1,11 @@
 import { useState, useRef } from 'react'
 import Head from 'next/head'
+import DemoScopeBanner from '../components/DemoScopeBanner'
 
 const CHAR = '#1E2A3A', SPICE = '#2A6CB8', KRAFT = '#C2923E', CREAM = '#FBF4EC'
 const INK = '#2E2230', MUTED = '#8C7C82', GREEN = '#3E7C4F', BORDER = '#ECE0D8', AMBER = '#C98A2A', RED = '#C03A22'
 const CARDBG = '#FFFDFA'
-const BIZ = 'Riverside Bakery'
+const BIZ = 'Summit Snacks Co.'
 
 const money = (n) => '$' + (Math.round(n * 100) / 100).toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 2 })
 const m0 = (n) => '$' + Math.round(n).toLocaleString()
@@ -25,7 +26,7 @@ const recon = (c) => {
 
 const SEED_CONSIGN = [
   { id: uid(), store: 'Midtown Market', price: 8.5, sent: 60, returned: 0, paid: 425, counted: 6, countedDate: '2026-09-15', diagnosis: '', cycle: 1, lastContact: '2026-09-15', restock: 'now', notes: 'Reorders every ~2 weeks. Wants more of the Original.', log: [{ at: 'Sep 15', t: 'Counted 6 on shelf' }, { at: 'Sep 6', t: 'Check received $425' }] },
-  { id: uid(), store: 'Hillside Grocery', price: 8.5, sent: 48, returned: 4, paid: 340, counted: 2, countedDate: '2026-09-15', diagnosis: '', cycle: 1, lastContact: '2026-09-12', restock: 'now', notes: 'Down to 2 loaves — promised a delivery this week.', log: [{ at: 'Sep 15', t: 'Counted 2 on shelf' }, { at: 'Sep 5', t: 'Check received $340' }] },
+  { id: uid(), store: 'Hillside Grocery', price: 8.5, sent: 48, returned: 4, paid: 340, counted: 2, countedDate: '2026-09-15', diagnosis: '', cycle: 1, lastContact: '2026-09-12', restock: 'now', notes: 'Down to 2 bags — promised a delivery this week.', log: [{ at: 'Sep 15', t: 'Counted 2 on shelf' }, { at: 'Sep 5', t: 'Check received $340' }] },
   { id: uid(), store: 'Parkway Foods', price: 9, sent: 54, returned: 0, paid: 360, counted: 14, countedDate: '2026-09-14', diagnosis: '', cycle: 1, lastContact: '2026-09-14', restock: 'good', notes: 'Steady account. Strong seller.', log: [{ at: 'Sep 14', t: 'Counted 14 — reconciles clean' }, { at: 'Sep 4', t: 'Check received $360' }] },
   { id: uid(), store: 'Cedar Market', price: 8, sent: 40, returned: 0, paid: 200, counted: 8, countedDate: '2026-09-16', diagnosis: '', cycle: 1, lastContact: '2026-08-26', restock: 'soon', notes: "Haven't spoken in ~3 weeks — check in, and ask about the missing items.", log: [{ at: 'Sep 16', t: 'Counted 8 on shelf' }, { at: 'Sep 2', t: 'Check received $200' }] },
   { id: uid(), store: 'Sunrise Grocers', price: 8.5, sent: 36, returned: 0, paid: 255, counted: 4, countedDate: '2026-09-13', diagnosis: '', cycle: 1, lastContact: '2026-09-13', restock: 'soon', notes: 'New buyer contact — trial going well so far.', log: [{ at: 'Sep 13', t: 'Counted 4 on shelf' }, { at: 'Sep 3', t: 'Check received $255' }] },
@@ -102,14 +103,14 @@ const PNL_ROWS = [
 
 // products sold this month (swap illustrations for real photos anytime)
 const PRODUCTS = [
-  { name: 'Sourdough Loaf', color: '#B07A3C', icon: 'loaf', week: 22, month: 88 },
-  { name: 'Challah', color: '#D8A24A', icon: 'braid', week: 16, month: 64 },
-  { name: 'Croissants', color: '#C98A3E', icon: 'croissant', week: 13, month: 50 },
-  { name: 'Bagels', color: '#9E6B34', icon: 'bagel', week: 12, month: 46 },
-  { name: 'Cinnamon Babka', color: '#7A4A2E', icon: 'babka', week: 11, month: 42 },
-  { name: 'Rye Bread', color: '#6B4A2A', icon: 'loaf', week: 9, month: 37 },
-  { name: 'Muffins', color: '#C2693E', icon: 'muffin', week: 8, month: 33 },
-  { name: 'Baguettes', color: '#C99A5A', icon: 'baguette', week: 6, month: 25 },
+  { name: 'Original Beef Jerky', color: '#8B3A2A', icon: 'loaf', week: 22, month: 88 },
+  { name: 'Honey BBQ Bites', color: '#B5651D', icon: 'babka', week: 16, month: 64 },
+  { name: 'Sea Salt Crisps', color: '#C98A3E', icon: 'croissant', week: 13, month: 50 },
+  { name: 'Trail Mix Singles', color: '#6B4A2A', icon: 'muffin', week: 12, month: 46 },
+  { name: 'Spicy Sriracha', color: '#C8322B', icon: 'loaf', week: 11, month: 42 },
+  { name: 'Sweet & Smoky', color: '#9E6B34', icon: 'braid', week: 9, month: 37 },
+  { name: 'Classic Nut Mix', color: '#7A5A3A', icon: 'bagel', week: 8, month: 33 },
+  { name: 'Family Size Pouch', color: '#C99A5A', icon: 'baguette', week: 6, month: 25 },
 ]
 // per-period sales for the front-page leaderboards (week vs month)
 const STORE_PERF = [
@@ -228,11 +229,7 @@ export default function Demo() {
   const [logoOk, setLogoOk] = useState(true)
   const [addingA, setAddingA] = useState(false)
   const [af, setAf] = useState({ channel: '', spend: '', rev: '', track: '' })
-  const [coa, setCoa] = useState({ name: 'chart-of-accounts.csv', rows: 48 })
-  const [gl, setGl] = useState({ name: 'general-ledger-jun.csv', rows: 142 })
   const fileRef = useRef(null)
-  const coaRef = useRef(null)
-  const glRef = useRef(null)
 
   const dv = (k) => draft[k] || ''
   const setDv = (k, v) => setDraft({ ...draft, [k]: v })
@@ -297,7 +294,6 @@ export default function Demo() {
     }
     reader.readAsText(file)
   }
-  const importBook = (e, setter) => { const file = e.target.files && e.target.files[0]; if (!file) return; const reader = new FileReader(); reader.onload = ev => { const rows = String(ev.target.result || '').split(/\r?\n/).filter(r => r.trim()).length; setter({ name: file.name, rows: Math.max(rows - 1, 0) }) }; reader.readAsText(file); e.target.value = '' }
   const addDirect = () => { if (!df.who.trim()) return; setDirect([{ id: uid(), who: df.who.trim(), source: df.source, units: Number(df.units) || 0, rev: Number(df.rev) || 0 }, ...direct]); setDf({ who: '', source: 'Shopify / online', units: '', rev: '' }); setAddingD(false) }
   const removeDirect = (id) => setDirect(direct.filter(d => d.id !== id))
   const addAd = () => { if (!af.channel.trim()) return; const tr = af.track.trim(); setAds([{ id: uid(), channel: af.channel.trim(), spend: Number(af.spend) || 0, rev: Number(af.rev) || 0, track: tr || 'Estimated — needs a promo code', tracked: !!tr }, ...ads]); setAf({ channel: '', spend: '', rev: '', track: '' }); setAddingA(false) }
@@ -443,21 +439,21 @@ export default function Demo() {
   )
 
   const TABS = [['overview', 'Overview'], ['consign', 'Consignment'], ['direct', 'Direct Sales'], ['ads', 'Advertising'], ['pnl', 'P&L']]
-  const EXTRA = [['expenses', 'Import expenses'], ['quickbooks', 'QuickBooks sync'], ['close', 'Monthly close'], ['askai', 'Ask Us']]
+  const EXTRA = [['expenses', 'Import expenses'], ['quickbooks', 'QuickBooks sync'], ['close', 'Monthly close'], ['askai', 'Answers']]
   const currentLabel = ([...TABS, ...EXTRA].find(t => t[0] === tab) || ['', ''])[1]
 
   return (
     <>
       <Head>
-        <title>{`${BIZ} — Dashboard`}</title>
-        <meta name="description" content="A live look at the JK No Jokes client dashboard — sales, stores, and real profit on one screen." />
-        <meta property="og:title" content="JK No Jokes — live dashboard demo" />
-        <meta property="og:description" content="A live look at the JK No Jokes client dashboard — sales, stores, and real profit on one screen." />
+        <title>{`${BIZ} — CPG & Consignment Demo`}</title>
+        <meta name="description" content="Sample portal for a CPG brand: consignment stores, direct channels, and month-end close tied to QuickBooks." />
+        <meta property="og:title" content="Summit Snacks Co. — CPG & consignment demo" />
+        <meta property="og:description" content="Store partners, shelf counts, collections, and channel P&L — reconciled to QuickBooks at month-end." />
         <meta property="og:type" content="website" />
         <meta property="og:url" content="https://www.jknojokes.com/demo" />
         <meta name="twitter:card" content="summary" />
-        <meta name="twitter:title" content="JK No Jokes — live dashboard demo" />
-        <meta name="twitter:description" content="A live look at the JK No Jokes client dashboard — sales, stores, and real profit on one screen." />
+        <meta name="twitter:title" content="Summit Snacks Co. — CPG & consignment demo" />
+        <meta name="twitter:description" content="Store partners, shelf counts, collections, and channel P&L — reconciled to QuickBooks at month-end." />
         <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
         <meta name="theme-color" content="#1E2A3A" />
         <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
@@ -471,12 +467,14 @@ export default function Demo() {
 @media(max-width:860px){.jm-shell{flex-direction:column}.jm-side{width:auto;height:auto;position:static;flex-direction:column;padding:14px 12px}.jm-nav{flex-direction:row;overflow-x:auto;gap:6px;padding-bottom:4px}.jm-navbtn{width:auto;padding:8px 15px;border-radius:18px;background:rgba(255,255,255,.07)}.jm-main{padding:18px 16px 52px;max-width:100%}}`}</style>
       </Head>
 
+      <DemoScopeBanner scope="consignment" compact />
+
       <div className="jm-shell">
         {/* Sidebar */}
         <aside className="jm-side">
           <div style={{ padding: '2px 8px 16px' }}>
             <div style={{ ...big, fontSize: '25px', letterSpacing: '-0.5px', lineHeight: 1 }}>
-              <span style={{ color: SPICE }}>Riverside</span> <span style={{ color: KRAFT }}>Bakery</span>
+              <span style={{ color: SPICE }}>Summit</span> <span style={{ color: KRAFT }}>Snacks</span>
             </div>
             <div style={{ ...lbl, color: '#B6A78C', marginTop: '7px' }}>Dashboard</div>
           </div>
@@ -497,11 +495,9 @@ export default function Demo() {
                 <button key={id} className="jm-navbtn" onClick={() => { setTab(id); setExpanded(null) }}
                   style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '8px', ...(active ? { background: 'rgba(255,255,255,.12)', color: CREAM, boxShadow: `inset 3px 0 0 ${SPICE}` } : {}) }}>
                   <span>{label}</span>
-                  {id === 'quickbooks'
-                    ? <span style={{ width: '7px', height: '7px', borderRadius: '50%', background: '#4FbE6A', flexShrink: 0 }} />
-                    : id === 'askai'
-                      ? <span style={{ fontSize: '9px', fontWeight: 700, color: '#fff', background: SPICE, padding: '2px 6px', borderRadius: '10px', flexShrink: 0 }}>NEW</span>
-                      : null}
+                  {id === 'quickbooks' ? (
+                    <span style={{ width: '7px', height: '7px', borderRadius: '50%', background: '#4FbE6A', flexShrink: 0 }} />
+                  ) : null}
                 </button>
               )
             })}
@@ -1072,42 +1068,33 @@ export default function Demo() {
             </>
           )}
 
-          {/* ===== QUICKBOOKS SYNC (drop in GL + COA) ===== */}
+          {/* ===== QUICKBOOKS (book of record) ===== */}
           {tab === 'quickbooks' && (
             <>
               <div style={{ ...card, marginBottom: '16px' }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '14px', marginBottom: '10px' }}>
                   <div style={{ width: '44px', height: '44px', borderRadius: '10px', background: '#2CA01C', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', ...big, fontSize: '19px' }}>qb</div>
                   <div>
-                    <div style={{ ...big, fontSize: '18px', color: INK }}>QuickBooks → your books</div>
-                    <div style={{ fontSize: '12.5px', color: MUTED, marginTop: '2px' }}>Export from QuickBooks, drop the files in here.</div>
+                    <div style={{ ...big, fontSize: '18px', color: INK }}>QuickBooks Online — book of record</div>
+                    <div style={{ fontSize: '12.5px', color: MUTED, marginTop: '2px' }}>{BIZ} (sample company) · last sync last night 02:14 ET</div>
                   </div>
                 </div>
-                <p style={{ fontSize: '13.5px', color: MUTED, lineHeight: 1.55 }}>Two exports keep everything current — your <b style={{ color: INK }}>Chart of Accounts</b> and your <b style={{ color: INK }}>General Ledger</b>. Drop them in and the dashboard's P&L and balances update. No live connection to babysit — same way I run it for every client.</p>
+                <p style={{ fontSize: '13.5px', color: MUTED, lineHeight: 1.55 }}>Production portals OAuth to your QuickBooks company and refresh P&amp;L, balance sheet, and GL on a nightly cron. Consignment income, COGS, and Shopify settlements post here at month-end — this screen reads the same numbers your CPA signs off on. No CSV uploads.</p>
               </div>
 
               {[
-                { title: 'Chart of Accounts', desc: 'Your account list — assets, income, expenses…', st: coa, rf: coaRef, setter: setCoa },
-                { title: 'General Ledger', desc: 'Every transaction, by account and date', st: gl, rf: glRef, setter: setGl },
+                { title: 'Synced reports', detail: 'Trailing 24 months P&L and balance sheet; GL detail for recent months' },
+                { title: 'Operating hooks', detail: 'Shopify → revenue accounts; consignment collections → income; ingredient spend → COGS' },
+                { title: 'Close workflow', detail: 'Use the Monthly close tab for the JE preview, then post from admin when you are ready' },
               ].map((b, i) => (
-                <div key={i} style={{ ...card, marginBottom: '12px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '12px' }}>
-                  <div>
-                    <div style={{ fontWeight: 600, color: INK, fontSize: '16px' }}>{b.title}</div>
-                    <div style={{ fontSize: '12.5px', color: MUTED, marginTop: '2px' }}>{b.desc}</div>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '7px', fontSize: '12.5px', color: GREEN, marginTop: '9px' }}>
-                      <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: GREEN, flexShrink: 0 }} />
-                      Imported · <span style={{ fontFamily: MONO }}>{b.st.name}</span> · {b.st.rows} rows
-                    </div>
-                  </div>
-                  <div>
-                    <button onClick={() => b.rf.current && b.rf.current.click()} style={{ background: CARDBG, color: INK, border: `1px solid ${BORDER}`, borderRadius: '10px', padding: '11px 18px', ...btn }}>Drop in / replace</button>
-                    <input ref={b.rf} type="file" accept=".csv,.txt" onChange={e => importBook(e, b.setter)} style={{ display: 'none' }} />
-                  </div>
+                <div key={i} style={{ ...card, marginBottom: '12px' }}>
+                  <div style={{ fontWeight: 600, color: INK, fontSize: '16px' }}>{b.title}</div>
+                  <div style={{ fontSize: '13px', color: MUTED, marginTop: '6px', lineHeight: 1.55 }}>{b.detail}</div>
                 </div>
               ))}
 
               <div style={{ ...card, background: '#EAF3EC', borderColor: '#CFE4D6', fontSize: '13.5px', color: INK, lineHeight: 1.55 }}>
-                Both files are in, so your P&L, account balances, and this whole dashboard reflect your real books. Each month you just drop in the fresh GL — takes about a minute.
+                Fictitious data in this demo — the pipe is real: one scoped login, one QBO company, operating screens during the month and recon at close.
               </div>
             </>
           )}
@@ -1152,15 +1139,12 @@ export default function Demo() {
             </>
           )}
 
-          {/* ===== ASK AI (preview) ===== */}
+          {/* ===== Answers (computed, not a chatbot) ===== */}
           {tab === 'askai' && (
             <>
-              <div style={{ ...card, marginBottom: '16px', borderColor: 'rgba(200,70,44,.28)' }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '4px' }}>
-                  <span style={{ ...big, fontSize: '18px', color: INK }}>Ask your numbers</span>
-                  <span style={{ fontSize: '10px', fontWeight: 700, color: '#fff', background: SPICE, padding: '2px 8px', borderRadius: '10px' }}>PREVIEW</span>
-                </div>
-                <div style={{ fontSize: '13.5px', color: MUTED, lineHeight: 1.55 }}>A look at what's coming: ask plain-English questions about your business and get answers straight from your live data. Here are a few samples.</div>
+              <div style={{ ...card, marginBottom: '16px' }}>
+                <div style={{ ...big, fontSize: '18px', color: INK, marginBottom: '4px' }}>Answers from your books</div>
+                <div style={{ fontSize: '13.5px', color: MUTED, lineHeight: 1.55 }}>Plain-English questions with responses computed from consignment counts, channel sales, and the synced QuickBooks P&amp;L — no paid model, no mystery API bill.</div>
               </div>
               {[
                 { q: 'Which store owes me the most right now?', a: <>Your counts show <b>Cedar Market</b> has the biggest gap: <b>7 items missing</b> (~$56), most likely sold-but-unreported. Across all stores you're owed about <b>{m0(missVal)}</b> — I'd invoice the worst offenders.</> },
@@ -1177,11 +1161,7 @@ export default function Demo() {
                   </div>
                 </div>
               ))}
-              <div style={{ ...card, display: 'flex', gap: '8px', alignItems: 'center', marginTop: '8px' }}>
-                <input disabled placeholder="Ask anything about your business…" style={{ ...inp, flex: 1, background: '#fff', cursor: 'not-allowed' }} />
-                <button disabled style={{ background: MUTED, color: '#fff', border: 'none', borderRadius: '9px', padding: '11px 18px', ...btn, cursor: 'not-allowed' }}>Send</button>
-              </div>
-              <p style={{ fontSize: '12px', color: MUTED, marginTop: '10px', textAlign: 'center' }}>Live Q&amp;A is on the roadmap — this is a preview of the feature.</p>
+              <p style={{ fontSize: '12px', color: MUTED, marginTop: '10px', lineHeight: 1.55 }}>In production we wire a short list of questions to the same tables this portal already uses — identical pattern to our client &ldquo;Ask&rdquo; screens that read monthly_summary and operating data.</p>
             </>
           )}
 

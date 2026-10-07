@@ -3,6 +3,7 @@ import Head from 'next/head'
 import { supabase } from '../lib/supabase'
 import { DEMO_UI, DEMO_HEAD, DEMO_FONT_LINK } from '../lib/demoFonts'
 import { DEMO_AS_OF as AS_OF } from '../lib/demoAsOf'
+import DemoScopeBanner from '../components/DemoScopeBanner'
 
 // ─────────────────────────────────────────────────────────────────────────
 // Lakeland Supply Co. — statements, the simple way.
@@ -83,6 +84,7 @@ export default function ArDesk() {
 
   return (
     <Frame>
+      <DemoScopeBanner scope="ar" />
       <h1 style={{ fontSize: '26px', letterSpacing: '-0.01em', marginBottom: '8px' }}>Send statements</h1>
       <p style={{ fontSize: '14px', color: SLATE, lineHeight: 1.6, maxWidth: '600px', marginBottom: '18px' }}>
         <b style={{ color: INK }}>{M.rows.length} customers owe you {money0(M.arTotal)}.</b> Everyone&rsquo;s

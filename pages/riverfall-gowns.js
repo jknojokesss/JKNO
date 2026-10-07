@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import Head from 'next/head'
 import { DEMO_UI, DEMO_HEAD, DEMO_MONO, DEMO_FONT_LINK } from '../lib/demoFonts'
+import DemoScopeBanner from '../components/DemoScopeBanner'
 
 const BIZ = 'Riverfall Gowns'
 const SIDEBAR = '#1E1A2E', ACCENT = '#B14D6A', BG = '#FAF8F5', BORDER = '#E8E0D8'
@@ -68,7 +69,7 @@ export default function RiverfallGowns() {
   return (
     <>
       <Head>
-        <title>{BIZ} — Dashboard Demo</title>
+        <title>{BIZ} — Made-to-Order Retail Demo</title>
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <link href={DEMO_FONT_LINK} rel="stylesheet" />
       </Head>
@@ -92,6 +93,8 @@ export default function RiverfallGowns() {
           .mobilenav button.on{background:rgba(255,255,255,.1);color:#fff;box-shadow:inset 0 -2px 0 ${ACCENT}}
         }
       `}</style>
+
+      <DemoScopeBanner scope="madeToOrder" compact />
 
       <div className="mobilenav">
         {NAV.map((n) => (
