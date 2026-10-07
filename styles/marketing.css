@@ -2511,8 +2511,8 @@
 .m-hero-home__samples {
   display: flex;
   flex-direction: column;
-  gap: 18px;
-  min-width: min(100%, 420px);
+  gap: 20px;
+  min-width: min(100%, 460px);
 }
 
 .m-hero-home__samples .jk-choc-cap {
@@ -2541,32 +2541,33 @@
 }
 
 .m-hero-home__samples .jk-foil-bar__end {
-  width: 18px;
+  width: 22px;
 }
 
 .m-hero-home__samples .jk-foil-bar__face {
-  padding: 16px 22px;
+  padding: 20px 26px;
 }
 
 .m-hero-home__samples .jk-foil-bar__name {
   font-family: 'Playfair Display', Georgia, serif;
-  font-size: clamp(18px, 2.6vw, 26px);
+  font-size: clamp(20px, 2.9vw, 30px);
   font-weight: 600;
   font-stretch: normal;
-  letter-spacing: 0.1em;
-  line-height: 1.12;
+  letter-spacing: 0.09em;
+  line-height: 1.1;
   color: #f7f4ef;
   text-shadow:
     0 1px 0 rgba(255, 255, 255, 0.12),
-    0 2px 8px rgba(0, 0, 0, 0.55);
+    0 2px 10px rgba(0, 0, 0, 0.55);
 }
 
 .m-hero-home__samples .jk-foil-bar__sub {
   font-family: 'DM Sans', var(--m-font);
-  font-size: clamp(10px, 1.2vw, 12px);
+  font-size: clamp(11px, 1.35vw, 13px);
   font-weight: 500;
-  letter-spacing: 0.18em;
-  color: rgba(247, 244, 239, 0.72);
+  letter-spacing: 0.16em;
+  margin-top: 4px;
+  color: rgba(247, 244, 239, 0.75);
   text-shadow: 0 1px 3px rgba(0, 0, 0, 0.45);
 }
 
