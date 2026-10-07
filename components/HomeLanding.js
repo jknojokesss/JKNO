@@ -43,56 +43,51 @@ export default function HomeLanding({
 
   return (
     <div className={live ? 'm-home m-home--live' : 'm-home'}>
-      <section className="m-dark-band">
-        <div className="m-wrap m-band m-band--solo m-band--hero">
-          <div className="m-band__hero">
-            <h1 className="m-band__title">
+      <section className="m-home-hero">
+        <div className="m-wrap m-home-hero__grid">
+          <div className="m-home-hero__main">
+            <h1 className="m-h1 m-home-hero__title">
               QuickBooks won&rsquo;t show today&rsquo;s margin.
               <br />
               I build the login that does.
             </h1>
-            <p className="m-band__sub">
+            <p className="m-lead m-home-hero__lead">
               Register tickets, vendor cost, and your books in one place — for owners who run a shop,
               not a spreadsheet after close.
             </p>
-            <div className="m-band__actions">
-              <button type="button" className="m-btn m-btn--gold m-btn--pop" onClick={scrollContact}>
+            <div className="m-home-hero__actions">
+              <button type="button" className="m-btn m-btn--primary" onClick={scrollContact}>
                 Get started
               </button>
-              <a href={tire.src} className="m-btn m-btn--ghost-light m-btn--pop">
-                Tire shop demo
+              <a href={BOOKING_URL} target="_blank" rel="noopener noreferrer" className="m-btn m-btn--secondary">
+                Book a call
               </a>
             </div>
-            <p className="m-band__fine">
-              Kickoff call, connect QuickBooks, about six days to go live.{' '}
-              <a href={BOOKING_URL} target="_blank" rel="noopener noreferrer" className="m-band__fine-link">
-                Or book a call
-              </a>
+            <p className="m-home-hero__note">
+              Kickoff call, connect QuickBooks, about six days to go live. Start with the{' '}
+              <a href={tire.src}>tire shop demo</a> if you want to click before you talk.
             </p>
           </div>
-        </div>
-      </section>
 
-      <section id="demos" className="m-section">
-        <div className="m-wrap">
-          <h2 className="m-h2">Demos</h2>
-          <p className="m-lead" style={{ maxWidth: '52ch', marginBottom: '28px' }}>
-            Fictitious businesses, real screens. Tire and import are the fastest read if you live on a register.
-          </p>
-          <div className="m-demo-grid">
-            {HOME_DEMOS.map((d) => (
-              <a key={d.src} href={d.src} className="m-demo-tile">
-                <span className="m-demo-tile__industry">{d.label}</span>
-                <span className="m-demo-tile__blurb">{d.caption}</span>
-                <span className="m-demo-tile__go">Open →</span>
-              </a>
-            ))}
+          <div className="m-home-hero__panel" id="demos">
+            <p className="m-home-hero__panel-k">Demos</p>
+            <p className="m-home-hero__panel-lead">Fictitious businesses. Real screens I ship.</p>
+            <ul className="m-home-hero__demo-list">
+              {HOME_DEMOS.map((d) => (
+                <li key={d.src}>
+                  <a href={d.src} className="m-home-hero__demo-link">
+                    <span className="m-home-hero__demo-name">{d.label}</span>
+                    <span className="m-home-hero__demo-blurb">{d.caption}</span>
+                  </a>
+                </li>
+              ))}
+            </ul>
+            <p className="m-home-hero__panel-more">
+              <button type="button" className="m-btn--text" onClick={() => router.push('/demos')}>
+                All demos
+              </button>
+            </p>
           </div>
-          <p style={{ marginTop: '24px' }}>
-            <button type="button" className="m-btn--text" onClick={() => router.push('/demos')}>
-              All demos
-            </button>
-          </p>
         </div>
       </section>
 
