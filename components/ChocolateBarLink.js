@@ -1,5 +1,5 @@
 /**
- * Sample link — crimped wrapper ends, smooth face (no segment grid), embossed type.
+ * Sample link — gold foil favor bar, crimped ends, white type on metallic face.
  */
 export default function ChocolateBarLink({
   href,
