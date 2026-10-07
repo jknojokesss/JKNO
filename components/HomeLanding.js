@@ -13,8 +13,8 @@ const HOME_DEMOS = [
 
 const STEPS = [
   { n: '1', title: 'Call', body: 'Thirty minutes. What you sell, how you get paid, what you keep rebuilding in Excel.' },
-  { n: '2', title: 'Wire-up', body: 'QuickBooks, register, vendors — I write the sync. It runs every night.' },
-  { n: '3', title: 'Go live', body: 'About six days. We walk the portal together. Nothing ships until it matches QuickBooks.' },
+  { n: '2', title: 'Wire-up', body: 'Your books, register, vendors — I write the sync. It runs every night.' },
+  { n: '3', title: 'Go live', body: 'About six days. We walk the portal together. Nothing ships until it matches your books.' },
 ]
 
 const TRADES = [
@@ -33,34 +33,43 @@ const BOOKS = [
   'Other software',
 ]
 
-/** Mini portal previews in the hero — real demo routes, each styled like the product. */
+/** Mini portal previews — same chrome as the live demos (sidebar + screen). */
 const HERO_PORTALS = [
   {
     href: '/demo',
-    initial: 'S',
-    name: 'Summit Snacks Co.',
-    tag: 'CPG & consignment',
-    line: 'Shelf counts · collections · channel P&L',
-    accent: '#2A6CB8',
+    code: 'SUMMIT',
     side: '#1E2A3A',
+    accent: '#2A6CB8',
+    screen: 'Consignment · September',
+    stat: '$4,215',
+    statLabel: 'collected · sample month',
+    nav: ['Overview', 'Stores', 'Direct', 'Close'],
+    activeNav: 1,
+    rows: [['Midtown Market', '6 units short'], ['Parkway Foods', 'Clean']],
   },
   {
     href: '/riverstone-roofing',
-    initial: 'R',
-    name: 'Riverstone Roofing',
-    tag: 'Commercial roofing',
-    line: 'Job margin · WIP · claim-aware cash',
-    accent: '#035CEB',
+    code: 'RIVERSTONE',
     side: '#1A1E24',
+    accent: '#035CEB',
+    screen: 'Job margin · open',
+    stat: '−4.2 pts',
+    statLabel: 'vs bid · flagged job',
+    nav: ['Margin', 'WIP', 'Cash', 'Buyer'],
+    activeNav: 0,
+    rows: [['Harbor Apts re-roof', 'Over budget'], ['Retail pad #4', 'On track']],
   },
   {
     href: '/northline-global',
-    initial: 'N',
-    name: 'Northline Global',
-    tag: 'Import & distribution',
-    line: 'Landed cost · bins · margin per order',
-    accent: '#C9A84C',
+    code: 'NORTHLINE',
     side: '#1A1C19',
+    accent: '#C9A84C',
+    screen: 'Orders · picking',
+    stat: '31.2%',
+    statLabel: 'margin · SO-8821',
+    nav: ['Pipeline', 'POs', 'Inventory', 'Orders'],
+    activeNav: 3,
+    rows: [['Urban Home Co', '$8,420'], ['Landed PO-2841', 'In transit']],
   },
 ]
 
@@ -91,13 +100,14 @@ export default function HomeLanding({
               <span className="m-hero-brief__jk">JK<span className="m-hero-brief__dot">.</span></span>
             </p>
             <h1 className="m-band__title m-band__title--brief">
-              QuickBooks is the books.
+              Your books close the month.
               <br />
               You still need today&rsquo;s margin in one login.
             </h1>
             <p className="m-band__sub m-band__sub--brief">
-              I connect your register, vendor portal, or job system to a portal scoped to your company.
-              Operating numbers during the month; close reconciles to QuickBooks.
+              I connect your register, vendor portal, or jobs to a portal scoped to your company.
+              Most owners run QuickBooks Online; I&rsquo;ll wire to Desktop or the stack your accountant
+              already uses — operating view here, official books there.
             </p>
             <div className="m-band__actions">
               <button type="button" className="m-btn m-btn--gold m-btn--pop" onClick={scrollContact}>
@@ -113,7 +123,7 @@ export default function HomeLanding({
           </div>
 
           <div className="m-hero-portal-stack">
-            <p className="m-hero-portal-stack__cap">Sample portals — click through</p>
+            <p className="m-hero-portal-stack__cap">Sample portals</p>
             {HERO_PORTALS.map((p, i) => (
               <a
                 key={p.href}
@@ -125,13 +135,31 @@ export default function HomeLanding({
                   '--portal-i': i,
                 }}
               >
-                <div className="m-hero-portal-card__side">
-                  <span>{p.initial}</span>
-                </div>
-                <div className="m-hero-portal-card__body">
-                  <span className="m-hero-portal-card__name">{p.name}</span>
-                  <span className="m-hero-portal-card__tag">{p.tag}</span>
-                  <span className="m-hero-portal-card__line">{p.line}</span>
+                <div className="m-hero-portal-card__inner">
+                  <div className="m-hero-portal-card__nav">
+                    <span className="m-hero-portal-card__code">{p.code}</span>
+                    {p.nav.map((label, ni) => (
+                      <span
+                        key={label}
+                        className={`m-hero-portal-card__navitem${ni === p.activeNav ? ' is-on' : ''}`}
+                      >
+                        {label}
+                      </span>
+                    ))}
+                  </div>
+                  <div className="m-hero-portal-card__main">
+                    <span className="m-hero-portal-card__screen">{p.screen}</span>
+                    <span className="m-hero-portal-card__stat">{p.stat}</span>
+                    <span className="m-hero-portal-card__statlab">{p.statLabel}</span>
+                    <div className="m-hero-portal-card__rows">
+                      {p.rows.map(([left, right]) => (
+                        <div key={left} className="m-hero-portal-card__row">
+                          <span>{left}</span>
+                          <span>{right}</span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
                 </div>
               </a>
             ))}
@@ -143,7 +171,7 @@ export default function HomeLanding({
         <div className="m-wrap">
           <h2 className="m-h2">What owners hire me for</h2>
           <p className="m-lead" style={{ maxWidth: '52ch', marginBottom: '24px' }}>
-            Same nightly QuickBooks pipe — different operating screen depending on the business.
+            Books in on a schedule, operating screen out — different UI depending on the business.
           </p>
           <div className="m-package-grid">
             {SERVICE_PACKAGES.map((p) => (
