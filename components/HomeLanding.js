@@ -33,44 +33,11 @@ const BOOKS = [
   'Other software',
 ]
 
-/** Mini portal previews — same chrome as the live demos (sidebar + screen). */
+/** Hero demo links — black / cream / gold only, minimal copy. */
 const HERO_PORTALS = [
-  {
-    href: '/demo',
-    code: 'SUMMIT',
-    side: '#1E2A3A',
-    accent: '#2A6CB8',
-    screen: 'Consignment · September',
-    stat: '$4,215',
-    statLabel: 'collected · sample month',
-    nav: ['Overview', 'Stores', 'Direct', 'Close'],
-    activeNav: 1,
-    rows: [['Midtown Market', '6 units short'], ['Parkway Foods', 'Clean']],
-  },
-  {
-    href: '/riverstone-roofing',
-    code: 'RIVERSTONE',
-    side: '#1A1E24',
-    accent: '#035CEB',
-    screen: 'Job margin · open',
-    stat: '−4.2 pts',
-    statLabel: 'vs bid · flagged job',
-    nav: ['Margin', 'WIP', 'Cash', 'Buyer'],
-    activeNav: 0,
-    rows: [['Harbor Apts re-roof', 'Over budget'], ['Retail pad #4', 'On track']],
-  },
-  {
-    href: '/northline-global',
-    code: 'NORTHLINE',
-    side: '#1A1C19',
-    accent: '#C9A84C',
-    screen: 'Orders · picking',
-    stat: '31.2%',
-    statLabel: 'margin · SO-8821',
-    nav: ['Pipeline', 'POs', 'Inventory', 'Orders'],
-    activeNav: 3,
-    rows: [['Urban Home Co', '$8,420'], ['Landed PO-2841', 'In transit']],
-  },
+  { href: '/demo', name: 'Summit Snacks Co.', tag: 'CPG & consignment' },
+  { href: '/riverstone-roofing', name: 'Riverstone Roofing', tag: 'Commercial roofing' },
+  { href: '/northline-global', name: 'Northline Global', tag: 'Import & distribution' },
 ]
 
 export default function HomeLanding({
@@ -125,42 +92,10 @@ export default function HomeLanding({
           <div className="m-hero-portal-stack">
             <p className="m-hero-portal-stack__cap">Sample portals</p>
             {HERO_PORTALS.map((p, i) => (
-              <a
-                key={p.href}
-                href={p.href}
-                className="m-hero-portal-card"
-                style={{
-                  '--portal-accent': p.accent,
-                  '--portal-side': p.side,
-                  '--portal-i': i,
-                }}
-              >
-                <div className="m-hero-portal-card__inner">
-                  <div className="m-hero-portal-card__nav">
-                    <span className="m-hero-portal-card__code">{p.code}</span>
-                    {p.nav.map((label, ni) => (
-                      <span
-                        key={label}
-                        className={`m-hero-portal-card__navitem${ni === p.activeNav ? ' is-on' : ''}`}
-                      >
-                        {label}
-                      </span>
-                    ))}
-                  </div>
-                  <div className="m-hero-portal-card__main">
-                    <span className="m-hero-portal-card__screen">{p.screen}</span>
-                    <span className="m-hero-portal-card__stat">{p.stat}</span>
-                    <span className="m-hero-portal-card__statlab">{p.statLabel}</span>
-                    <div className="m-hero-portal-card__rows">
-                      {p.rows.map(([left, right]) => (
-                        <div key={left} className="m-hero-portal-card__row">
-                          <span>{left}</span>
-                          <span>{right}</span>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                </div>
+              <a key={p.href} href={p.href} className="m-hero-portal-card" style={{ '--portal-i': i }}>
+                <span className="m-hero-portal-card__name">{p.name}</span>
+                <span className="m-hero-portal-card__tag">{p.tag}</span>
+                <span className="m-hero-portal-card__go" aria-hidden="true">→</span>
               </a>
             ))}
           </div>
