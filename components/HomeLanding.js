@@ -2,7 +2,7 @@ import { useRouter } from 'next/router'
 import { BOOKING_URL } from '../lib/marketing'
 import { BUSINESS_TYPES } from '../lib/buildStack'
 import { FEATURED_DEMOS } from '../lib/marketingDemos'
-import HomePhoneShowcase from './HomePhoneShowcase'
+import HomeHeroProof from './HomeHeroProof'
 
 const HOME_DEMOS = FEATURED_DEMOS.slice(0, 4)
 
@@ -52,17 +52,12 @@ export default function HomeLanding({
             <h1 className="m-band__title">
               QuickBooks won&rsquo;t show today&rsquo;s margin.
               <br />
-              Your phone can.
+              One login can.
             </h1>
             <p className="m-band__sub">
-              I build one login for your register, vendor cost, and books. When you close the month,
-              it ties to the official QuickBooks statement — not a side spreadsheet.
+              I wire your register, vendor cost, and books into one place shop owners actually open.
+              You see gross on today&rsquo;s tickets; your accountant still closes against QuickBooks.
             </p>
-            <ul className="m-band__checks">
-              <li>Margin on today&rsquo;s tickets, not last month&rsquo;s spreadsheet</li>
-              <li>Vendor cost matched to what rang up at the register</li>
-              <li>Month-end ties to the official QuickBooks statement</li>
-            </ul>
             <div className="m-band__actions">
               <button type="button" className="m-btn m-btn--gold m-btn--pop" onClick={scrollContact}>
                 Get started
@@ -83,7 +78,7 @@ export default function HomeLanding({
             </p>
           </div>
 
-          <HomePhoneShowcase />
+          <HomeHeroProof />
         </div>
       </section>
 
