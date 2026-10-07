@@ -1,5 +1,5 @@
 /**
- * Sample link — gold foil favor bar; hover lifts the face to reveal chocolate underneath.
+ * Gold foil favor bar — 3D foil hinge on hover (pointer devices); glint sweep on foil.
  */
 export default function ChocolateBarLink({
   href,
@@ -23,9 +23,11 @@ export default function ChocolateBarLink({
     >
       <span className="jk-foil-bar__end jk-foil-bar__end--left" aria-hidden="true" />
       <span className="jk-foil-bar__mid">
-        <span className="jk-foil-bar__peek" aria-hidden="true" />
+        <span className="jk-foil-bar__fill" aria-hidden="true" />
         <span className="jk-foil-bar__face">
-          <span className="jk-foil-bar__sheen" aria-hidden="true" />
+          <span className="jk-foil-bar__sheen" aria-hidden="true">
+            <span className="jk-foil-bar__glint" />
+          </span>
           <span className="jk-foil-bar__type">
             <span className="jk-foil-bar__name">{name}</span>
             {industry ? <span className="jk-foil-bar__sub">{industry}</span> : null}

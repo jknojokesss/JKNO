@@ -14,10 +14,10 @@ const HOME_DEMOS = [
   FEATURED_DEMOS[8],
 ].filter(Boolean)
 
-const PROOF = [
-  { n: '06', label: 'days', detail: 'kickoff to go-live, typical' },
-  { n: '01', label: 'login', detail: 'one company — scoped on the server' },
-  { n: '00', label: 'chatbots', detail: 'answers from your books, computed' },
+const BRIDGE = [
+  'QuickBooks in the middle',
+  'Nightly sync',
+  'One login — one company',
 ]
 
 const TRADES = [
@@ -103,27 +103,11 @@ export default function HomeLanding({
         </div>
       </section>
 
-      <section className="m-home-proof" aria-label="How it works in numbers">
-        <div className="m-wrap m-home-proof__grid">
-          {PROOF.map((row) => (
-            <div key={row.label} className="m-home-proof__cell">
-              <p className="m-home-proof__num">
-                {row.n}
-                <span className="m-home-proof__label">{row.label}</span>
-              </p>
-              <p className="m-home-proof__detail">{row.detail}</p>
-            </div>
+      <section className="m-home-bridge" aria-label="How it ships">
+        <div className="m-wrap m-home-bridge__row">
+          {BRIDGE.map((line) => (
+            <span key={line} className="m-home-bridge__item">{line}</span>
           ))}
-        </div>
-      </section>
-
-      <section className="m-home-manifesto">
-        <div className="m-wrap">
-          <p className="m-home-manifesto__text">
-            Not another SaaS dashboard.
-            <br />
-            The screen you&rsquo;d build if you had a year — shipped in a week.
-          </p>
         </div>
       </section>
 
