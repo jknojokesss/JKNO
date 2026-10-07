@@ -16,6 +16,7 @@ const NAV = [
   { id: 'pos', label: 'Purchase orders' },
   { id: 'inventory', label: 'Inventory' },
   { id: 'orders', label: 'Orders' },
+  { id: 'books', label: 'Books' },
 ]
 
 const PIPELINE = [
@@ -274,6 +275,40 @@ export default function NorthlineGlobal() {
                 </table>
               </div>
             </>
+          )}
+
+          {tab === 'books' && (
+            <div style={{ background: '#fff', border: `1px solid ${BORDER}`, borderRadius: '8px', padding: '20px 22px', maxWidth: '640px' }}>
+              <div style={{ fontFamily: DEMO_HEAD, fontSize: '20px', fontWeight: 600, color: INK, marginBottom: '8px' }}>QuickBooks at month-end</div>
+              <p style={{ fontSize: '13px', color: MUTED, lineHeight: 1.6, margin: '0 0 16px' }}>
+                Landed cost on each PO hits <strong style={{ color: INK }}>Inventory Asset</strong> in QBO. Sales on the Orders tab relieve COGS using those unit costs — not a flat COGS %. The portal shows margin during the month; close ties inventory and P&amp;L to the official statement.
+              </p>
+              <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '13px' }}>
+                <thead>
+                  <tr>
+                    <th style={hcell}>Check</th>
+                    <th style={{ ...hcell, textAlign: 'right' }}>Portal</th>
+                    <th style={{ ...hcell, textAlign: 'right' }}>QBO</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {[
+                    ['Inventory on hand', money(inventoryVal), money(inventoryVal)],
+                    ['In-transit POs (capitalized)', money(inTransit), money(inTransit)],
+                    ['September net margin (orders)', '28.1%', '28.1%'],
+                  ].map(([label, a, b]) => (
+                    <tr key={label}>
+                      <td style={cell()}>{label}</td>
+                      <td style={cell({ textAlign: 'right', fontFamily: DEMO_MONO })}>{a}</td>
+                      <td style={cell({ textAlign: 'right', fontFamily: DEMO_MONO, color: GREEN })}>{b} ✓</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+              <p style={{ fontSize: '11px', color: MUTED, marginTop: '14px', lineHeight: 1.5 }}>
+                Nightly sync on P&amp;L, balance sheet, and GL — month-end inventory JE posts when you approve.
+              </p>
+            </div>
           )}
         </main>
       </div>

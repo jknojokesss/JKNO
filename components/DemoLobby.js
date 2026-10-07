@@ -2,6 +2,7 @@ import Link from 'next/link'
 import Head from 'next/head'
 import { getDemoHook } from '../lib/demoHooks'
 import { getSamplePortal } from '../lib/samplePortals'
+import { getDemoAlignment } from '../lib/demoAlignment'
 import ChocolateBarLink, { ChocolateBarCaption } from './ChocolateBarLink'
 
 const CHOC_FONT =
@@ -17,6 +18,7 @@ export default function DemoLobby({ href, biz }) {
   const nextHref = next || '/demos'
   const nextPortal = getSamplePortal(nextHref)
   const nextName = nextPortal.name || nextLabel || 'All samples'
+  const { sells } = getDemoAlignment(href)
 
   return (
     <>
@@ -36,6 +38,9 @@ export default function DemoLobby({ href, biz }) {
           industry={current.industry}
           here
         />
+        <p className="jk-choc-lobby__sells">
+          {sells.join(' · ')}
+        </p>
         <ChocolateBarCaption sub>Next bar</ChocolateBarCaption>
         <ChocolateBarLink
           href={nextHref}

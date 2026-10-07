@@ -346,8 +346,24 @@ export default function ApplianceRepair() {
                 <span style={{ fontFamily: 'DM Mono, monospace', fontSize: '13px', letterSpacing: '1px', color: GREEN, fontWeight: 600 }}>NET PROFIT</span>
                 <span style={{ ...serif, fontSize: '24px', fontWeight: 700, color: GREEN }}>{usd0(net)}</span>
               </div>
-              <div style={{ fontFamily: 'DM Mono, monospace', fontSize: '10px', color: FAINT, textAlign: 'center' }}>
-                Built straight from your jobs — no separate bookkeeping, no shoebox of receipts.
+              <div style={card}>
+                <div style={{ ...lbl, marginBottom: '8px' }}>QUICKBOOKS STATEMENT (SAMPLE)</div>
+                <div style={{ fontSize: '12px', color: MUTED, lineHeight: 1.55, marginBottom: '12px' }}>
+                  Job board = operating margin during the week. QuickBooks stays the book of record — this column is the synced statement you reconcile to at close.
+                </div>
+                {[
+                  ['Revenue', billed, billed],
+                  ['Parts + labor (COGS)', parts + labor, parts + labor],
+                  ['Overhead', totalExp, totalExp],
+                  ['Net income', net, net],
+                ].map(([label, portal, qbo], i) => (
+                  <div key={label} style={{ display: 'flex', justifyContent: 'space-between', padding: '7px 0', borderBottom: i < 3 ? '1px solid #EEF1F5' : 'none', fontWeight: i === 3 ? 600 : 400 }}>
+                    <span style={{ fontSize: '13px', color: INK }}>{label}</span>
+                    <span style={{ fontFamily: 'DM Mono, monospace', fontSize: '12px', color: i === 3 ? GREEN : INK }}>
+                      {usd0(portal)} <span style={{ color: FAINT, marginLeft: '8px' }}>QBO {usd0(qbo)} ✓</span>
+                    </span>
+                  </div>
+                ))}
               </div>
             </div>
           )

@@ -78,7 +78,7 @@ export default function IndustryDemo({ cfg }) {
     { q: 'Am I doing better than three months ago?', a: q3d >= 0 ? `Yes — profit is up ${usd0(q3d)} vs ${MONTHS[8]} (${usd0(profit[8])} → ${usd0(profit[11])}), on ${usd0(rev[11] - rev[8])} more revenue. Keep doing whatever you changed.` : `Not quite — profit is down ${usd0(q3d)} vs ${MONTHS[8]} (${usd0(profit[8])} → ${usd0(profit[11])}). Flip the P&L to the 3-month view and you can see exactly which line moved.` },
     { q: 'What should I be watching right now?', a: insights ? insights[0] : `Your margin is running ${margin}% — the biggest lever in the business is ${topExp[0].n.toLowerCase()}.` },
   ]
-  const askIt = (i) => { setAsk(null); setThinking(true); setTimeout(() => { setThinking(false); setAsk(i) }, 700) }
+  const askIt = (i) => { setThinking(false); setAsk(i) }
   const simProfit = Math.round(rev[mi] * (1 + whatIf.r / 100) - exp[mi] * (1 + whatIf.e / 100))
   const NARRATIVE_BY_OPS = {
     jobs: 'register or job tickets, vendor invoices, and cost matched to what you sold',
@@ -120,8 +120,9 @@ export default function IndustryDemo({ cfg }) {
   const extras = cfg.extras || []
   const tabs = [
     { id: 'dash', label: 'Dashboard' },
-    { id: 'pnl', label: 'P&L' },
     { id: 'ops', label: ops.label },
+    { id: 'pnl', label: 'Operating P&L' },
+    { id: 'books', label: 'Books' },
     ...extras.map((x, i) => ({ id: 'x' + i, label: x.tab })),
     { id: 'ask', label: 'Answers' },
   ]
@@ -263,7 +264,7 @@ export default function IndustryDemo({ cfg }) {
                   <span style={{ color: A, fontSize: '16px' }}>◈</span>
                   <div>
                     <div style={{ ...serif, fontSize: '18px', fontWeight: 600, color: INK }}>What your numbers are saying</div>
-                    <div style={{ fontFamily: "'Inter', sans-serif", fontSize: '10.5px', fontWeight: 600, letterSpacing: '0.7px', color: FAINT }}>PLAIN-ENGLISH INSIGHTS, READ STRAIGHT FROM YOUR BOOKS</div>
+                    <div style={{ fontFamily: "'Inter', sans-serif", fontSize: '10.5px', fontWeight: 600, letterSpacing: '0.7px', color: FAINT }}>FROM SYNCED QUICKBOOKS + {ops.label.toUpperCase()} — NOT GENERATED COPY</div>
                   </div>
                 </div>
                 {insights.map((t, i) => (
@@ -433,6 +434,55 @@ export default function IndustryDemo({ cfg }) {
                   <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: '11px', color: INK }}>{qboSync.statements}</div>
                 </div>
               </div>
+            </div>
+          </div>
+        )}
+
+        {/* BOOKS — recon to QuickBooks (what we actually sell) */}
+        {tab === 'books' && (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+            <div style={card}>
+              <div style={{ ...serif, fontSize: '20px', fontWeight: 600, color: INK, marginBottom: '4px' }}>{MONTHS[mi]} — operating view vs QuickBooks</div>
+              <div style={{ fontFamily: "'Inter', sans-serif", fontSize: '12px', color: MUTED, marginBottom: '14px', lineHeight: 1.55 }}>
+                You run the week on {ops.label.toLowerCase()} and dashboards. QuickBooks stays the book of record — nightly sync mirrors P&amp;L and GL; month-end posts (inventory, payroll accruals, etc.) go back when you approve.
+              </div>
+              <div style={{ overflowX: 'auto' }}>
+                <table style={{ width: '100%', borderCollapse: 'collapse', minWidth: '420px' }}>
+                  <thead>
+                    <tr>
+                      <th style={th}>LINE</th>
+                      <th style={{ ...th, textAlign: 'right' }}>PORTAL</th>
+                      <th style={{ ...th, textAlign: 'right' }}>QBO STATEMENT</th>
+                      <th style={{ ...th, textAlign: 'center' }}>MATCH</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {[
+                      ['Revenue', rev[mi], rev[mi]],
+                      ['Expenses', exp[mi], exp[mi]],
+                      ['Net income', profit[mi], profit[mi]],
+                    ].map(([label, portal, qbo], i) => (
+                      <tr key={label}>
+                        <td style={{ ...td, fontWeight: i === 2 ? 600 : 400 }}>{label}</td>
+                        <td style={{ ...td, textAlign: 'right', fontFamily: "'IBM Plex Mono', monospace", fontSize: '11px' }}>{usd0(portal)}</td>
+                        <td style={{ ...td, textAlign: 'right', fontFamily: "'IBM Plex Mono', monospace", fontSize: '11px' }}>{usd0(qbo)}</td>
+                        <td style={{ ...td, textAlign: 'center', color: GREEN, fontWeight: 600 }}>✓</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+              <div style={{ fontFamily: "'Inter', sans-serif", fontSize: '11px', color: FAINT, marginTop: '12px' }}>
+                Production portals flag any line that drifts — unsigned bank rec does not hide a closed month.
+              </div>
+            </div>
+            <div style={{ ...card, borderLeft: `3px solid ${A}` }}>
+              <div style={{ ...lbl, marginBottom: '8px' }}>Month-end (when you close)</div>
+              <ul style={{ margin: 0, paddingLeft: '18px', fontSize: '13px', color: '#3A4552', lineHeight: 1.6 }}>
+                <li>Inventory / COGS journal entry drafted from layers or movement method</li>
+                <li>Operating captures (personal card, field logs) reviewed → posted to QBO</li>
+                <li>Portal month locks to the official statement after you sign off</li>
+              </ul>
             </div>
           </div>
         )}
