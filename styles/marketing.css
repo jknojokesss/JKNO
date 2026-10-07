@@ -2794,18 +2794,19 @@
   margin-bottom: 8px;
 }
 
-/* Gold foil favor bar — metallic face, white type (see reference photo) */
+/* Gold foil favor bar — chocolate slab under wrap, soft foil (no center glare) */
 .jk-foil-bar {
   display: flex;
   align-items: stretch;
   width: 100%;
-  min-height: 62px;
+  min-height: 68px;
   text-decoration: none;
-  border-radius: 3px;
+  border-radius: 4px;
   overflow: hidden;
   box-shadow:
     0 10px 28px rgba(0, 0, 0, 0.28),
-    0 2px 0 rgba(255, 255, 255, 0.15) inset;
+    0 1px 0 rgba(255, 255, 255, 0.12) inset,
+    0 -3px 8px rgba(45, 32, 18, 0.35) inset;
   transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
 
@@ -2818,18 +2819,35 @@
 
 .jk-foil-bar__end {
   position: relative;
-  width: 10px;
+  width: 15px;
   flex-shrink: 0;
-  background: linear-gradient(180deg, #e8e8ec 0%, #c8c8d0 45%, #a8a8b0 100%);
+  background:
+    repeating-linear-gradient(
+      90deg,
+      #e2e2e8 0 2px,
+      #b8b8c2 2px 3px,
+      #d8d8de 3px 5px
+    ),
+    linear-gradient(180deg, #ececf0 0%, #b0b0ba 55%, #9898a4 100%);
+  box-shadow: inset -2px 0 4px rgba(0, 0, 0, 0.12);
+}
+
+.jk-foil-bar__end--right {
+  box-shadow: inset 2px 0 4px rgba(0, 0, 0, 0.12);
 }
 
 .jk-foil-bar__choc {
   position: absolute;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  height: 5px;
-  background: linear-gradient(180deg, #5c4030 0%, #3d281c 100%);
+  top: 10px;
+  bottom: 10px;
+  left: 4px;
+  right: 4px;
+  height: auto;
+  border-radius: 2px;
+  background: linear-gradient(180deg, #6b4a32 0%, #4a3224 45%, #3d281c 100%);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.08),
+    inset 0 -2px 4px rgba(0, 0, 0, 0.35);
 }
 
 .jk-foil-bar__face {
@@ -2840,26 +2858,61 @@
   justify-content: center;
   min-width: 0;
   padding: 14px 20px;
+  /* Even gold — diagonal stops were the harsh center glimmer */
+  background:
+    repeating-linear-gradient(
+      93deg,
+      transparent 0 14px,
+      rgba(255, 255, 255, 0.03) 14px 15px
+    ),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.05) 0%, transparent 20%),
+    linear-gradient(180deg, #d4b85c 0%, #c9a84c 40%, #b8941f 100%);
+}
+
+.jk-foil-bar__slab {
+  position: absolute;
+  inset: 5px 12px 10px;
+  display: flex;
+  align-items: stretch;
+  gap: 2px;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.jk-foil-bar__segment {
+  flex: 1;
+  min-width: 0;
+  border-radius: 2px 2px 4px 4px;
   background: linear-gradient(
-    125deg,
-    #c9a84c 0%,
-    #f0e0a0 18%,
-    #d4af37 38%,
-    #f7ecc0 48%,
-    #c9a227 62%,
-    #b8941f 78%,
-    #e2c878 100%
+    180deg,
+    rgba(74, 50, 36, 0.12) 0%,
+    rgba(61, 40, 28, 0.55) 58%,
+    #4a3224 78%,
+    #3d281c 100%
   );
+  box-shadow:
+    inset 0 1px 1px rgba(255, 255, 255, 0.14),
+    inset 0 -3px 5px rgba(25, 16, 10, 0.45);
+}
+
+.jk-foil-bar__rim {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 9px;
+  pointer-events: none;
+  z-index: 1;
+  background: linear-gradient(180deg, rgba(74, 50, 36, 0.15), #4a3224 40%, #2f2016 100%);
 }
 
 .jk-foil-bar__sheen {
   position: absolute;
   inset: 0;
-  /* Corner highlights only — keep the label band readable */
-  background:
-    radial-gradient(ellipse 50% 90% at 4% 35%, rgba(255, 255, 255, 0.32), transparent 58%),
-    radial-gradient(ellipse 45% 85% at 96% 65%, rgba(255, 255, 255, 0.2), transparent 55%);
+  /* Soft top edge only — no center band */
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.1) 0%, transparent 18%);
   pointer-events: none;
+  z-index: 1;
 }
 
 .jk-foil-bar__type {
@@ -2905,7 +2958,7 @@
 }
 
 .jk-foil-bar--wide {
-  min-height: 72px;
+  min-height: 76px;
 }
 
 .jk-foil-bar--wide .jk-foil-bar__face {

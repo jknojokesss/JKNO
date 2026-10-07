@@ -26,6 +26,12 @@ export default function ChocolateBarLink({
         <span className="jk-foil-bar__choc" />
       </span>
       <span className="jk-foil-bar__face">
+        <span className="jk-foil-bar__slab" aria-hidden="true">
+          {Array.from({ length: 12 }, (_, i) => (
+            <span key={i} className="jk-foil-bar__segment" />
+          ))}
+        </span>
+        <span className="jk-foil-bar__rim" aria-hidden="true" />
         <span className="jk-foil-bar__sheen" aria-hidden="true" />
         <span className="jk-foil-bar__type">
           <span className="jk-foil-bar__kicker">Sample portal</span>
