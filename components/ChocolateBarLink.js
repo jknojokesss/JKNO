@@ -1,6 +1,5 @@
 /**
- * Gold-foil favor bar — reference: flat metallic wrap, white centered type.
- * Company = main line; industry = small line below (like date on favor bars).
+ * Sample link — gold crimp ends, Hershey-style segmented face with embossed type.
  */
 export default function ChocolateBarLink({
   href,
@@ -31,10 +30,7 @@ export default function ChocolateBarLink({
             <span key={i} className="jk-foil-bar__segment" />
           ))}
         </span>
-        <span className="jk-foil-bar__rim" aria-hidden="true" />
-        <span className="jk-foil-bar__sheen" aria-hidden="true" />
         <span className="jk-foil-bar__type">
-          <span className="jk-foil-bar__kicker">Sample portal</span>
           <span className="jk-foil-bar__name">{name}</span>
           {industry ? <span className="jk-foil-bar__sub">{industry}</span> : null}
         </span>
