@@ -1,8 +1,9 @@
 import { useRouter } from 'next/router'
 import { BOOKING_URL } from '../lib/marketing'
 import { FEATURED_DEMOS } from '../lib/marketingDemos'
-import { HERO_DOORS } from '../lib/demoHooks'
+import { HERO_SAMPLE_BARS } from '../lib/samplePortals'
 import DemoGalleryCard from './DemoGalleryCard'
+import ChocolateBarLink, { ChocolateBarCaption } from './ChocolateBarLink'
 
 const HOME_DEMOS = [
   FEATURED_DEMOS[0],
@@ -88,16 +89,15 @@ export default function HomeLanding({
             </p>
           </div>
 
-          <div className="m-hero-home__samples">
-            <p className="m-hero-home__samples-note">Sample portals — no login</p>
-            {HERO_DOORS.map((p) => (
-              <a key={p.href} href={p.href} className="m-hero-home__bar">
-                <span className="m-hero-home__bar-text">
-                  <span className="m-hero-home__bar-name">{p.name}</span>
-                  <span className="m-hero-home__bar-industry">{p.industry}</span>
-                </span>
-                <span className="m-hero-home__bar-go" aria-hidden="true">→</span>
-              </a>
+          <div className="m-hero-home__samples jk-choc-stack">
+            <ChocolateBarCaption>Break off a sample — no login</ChocolateBarCaption>
+            {HERO_SAMPLE_BARS.map((p) => (
+              <ChocolateBarLink
+                key={p.href}
+                href={p.href}
+                name={p.name}
+                industry={p.industry}
+              />
             ))}
           </div>
         </div>
@@ -138,7 +138,7 @@ export default function HomeLanding({
               All samples
             </button>
           </div>
-          <div className="m-demo-spot-grid m-demo-spot-grid--home">
+          <div className="jk-choc-grid jk-choc-grid--home">
             {HOME_DEMOS.map((d, i) => (
               <DemoGalleryCard
                 key={d.src}

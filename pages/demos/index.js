@@ -4,6 +4,7 @@ import { BOOKING_URL } from '../../lib/marketing'
 import { ALL_DEMOS } from '../../lib/industryDemos'
 import { SERVICE_PACKAGES } from '../../lib/buildStack'
 import DemoGalleryCard from '../../components/DemoGalleryCard'
+import ChocolateBarLink, { ChocolateBarCaption } from '../../components/ChocolateBarLink'
 
 export default function DemoGallery() {
   const router = useRouter()
@@ -35,14 +36,16 @@ export default function DemoGallery() {
 
       <section className="m-section" style={{ paddingTop: 0 }}>
         <div className="m-wrap">
-          <h2 className="m-h3" style={{ marginBottom: '16px' }}>Four ways owners use this</h2>
-          <div className="m-package-grid">
+          <ChocolateBarCaption>Four flavors</ChocolateBarCaption>
+          <div className="jk-choc-grid jk-choc-grid--tight">
             {SERVICE_PACKAGES.map((p) => (
-              <a key={p.title} href={p.href} className="m-package-card">
-                <span className="m-package-card__title">{p.title}</span>
-                <span className="m-package-card__blurb">{p.blurb}</span>
-                <span className="m-package-card__go">Open sample →</span>
-              </a>
+              <ChocolateBarLink
+                key={p.title}
+                href={p.href}
+                name={p.title}
+                industry={p.blurb}
+                className="jk-choc-bar--grid"
+              />
             ))}
           </div>
         </div>
@@ -50,15 +53,14 @@ export default function DemoGallery() {
 
       <section className="m-section" style={{ paddingTop: 'clamp(32px,4vw,48px)' }}>
         <div className="m-wrap">
-          <h2 className="m-h3" style={{ marginBottom: '20px' }}>All samples</h2>
-          <div className="m-demo-spot-grid m-demo-spot-grid--gallery">
-            {ALL_DEMOS.map((d, i) => (
+          <ChocolateBarCaption>Full box</ChocolateBarCaption>
+          <div className="jk-choc-grid jk-choc-grid--gallery">
+            {ALL_DEMOS.map((d) => (
               <DemoGalleryCard
                 key={d.href}
                 href={d.href}
                 biz={d.biz}
                 industry={d.industry}
-                index={i}
               />
             ))}
           </div>

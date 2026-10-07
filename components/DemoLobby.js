@@ -1,30 +1,53 @@
 import Link from 'next/link'
+import Head from 'next/head'
 import { getDemoHook } from '../lib/demoHooks'
+import { getSamplePortal } from '../lib/samplePortals'
+import ChocolateBarLink, { ChocolateBarCaption } from './ChocolateBarLink'
+
+const CHOC_FONT =
+  'https://fonts.googleapis.com/css2?family=Bitter:wght@600;700&display=swap'
 
 /**
- * Thin entry strip on sample portals — sets the mood before the product UI.
- * Scope copy stays in DemoScopeBanner; this is the tease.
+ * Sample portal header — same chocolate bars as the homepage, plus “next bar” trail.
  */
 export default function DemoLobby({ href, biz }) {
-  const { hook, next, nextLabel } = getDemoHook(href)
+  const current = getSamplePortal(href)
+  const name = current.name || biz
+  const { next, nextLabel } = getDemoHook(href)
   const nextHref = next || '/demos'
-  const nextText = nextLabel || 'All samples'
+  const nextPortal = getSamplePortal(nextHref)
+  const nextName = nextPortal.name || nextLabel || 'All samples'
 
   return (
-    <div className="m-demo-lobby" role="region" aria-label="Sample portal">
-      <div className="m-demo-lobby__inner">
-        <Link href="/" className="m-demo-lobby__jk">
-          JK<span className="m-demo-lobby__dot">.</span>
-        </Link>
-        <div className="m-demo-lobby__mid">
-          {biz && <span className="m-demo-lobby__biz">{biz}</span>}
-          <p className="m-demo-lobby__hook">{hook}</p>
+    <>
+      <Head>
+        <link rel="stylesheet" href={CHOC_FONT} />
+      </Head>
+      <div className="jk-choc-lobby" role="region" aria-label="Sample portal">
+        <div className="jk-choc-lobby__top">
+          <Link href="/" className="jk-choc-lobby__jk">
+            JK<span className="jk-choc-lobby__dot">.</span>
+          </Link>
+          <ChocolateBarCaption>Fictitious company · sample portal</ChocolateBarCaption>
         </div>
-        <Link href={nextHref} className="m-demo-lobby__next">
-          Next: {nextText}
-          <span aria-hidden="true"> →</span>
-        </Link>
+        <ChocolateBarLink
+          href={href}
+          name={name}
+          industry={current.industry}
+          here
+        />
+        <ChocolateBarCaption sub>Next bar</ChocolateBarCaption>
+        <ChocolateBarLink
+          href={nextHref}
+          name={nextName}
+          industry={nextPortal.industry}
+        />
+        <p className="jk-choc-lobby__foot">
+          <Link href="/demos">All samples</Link>
+          <span aria-hidden="true"> · </span>
+          <Link href="/#contact">Start a build</Link>
+        </p>
       </div>
-    </div>
+    </>
   )
 }
