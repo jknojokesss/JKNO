@@ -1,6 +1,7 @@
 import { useState, useRef } from 'react'
 import Head from 'next/head'
 import DemoScopeBanner from '../components/DemoScopeBanner'
+import DemoLobby from '../components/DemoLobby'
 
 const CHAR = '#1E2A3A', SPICE = '#2A6CB8', KRAFT = '#C2923E', CREAM = '#FBF4EC'
 const INK = '#2E2230', MUTED = '#8C7C82', GREEN = '#3E7C4F', BORDER = '#ECE0D8', AMBER = '#C98A2A', RED = '#C03A22'
@@ -467,6 +468,7 @@ export default function Demo() {
 @media(max-width:860px){.jm-shell{flex-direction:column}.jm-side{width:auto;height:auto;position:static;flex-direction:column;padding:14px 12px}.jm-nav{flex-direction:row;overflow-x:auto;gap:6px;padding-bottom:4px}.jm-navbtn{width:auto;padding:8px 15px;border-radius:18px;background:rgba(255,255,255,.07)}.jm-main{padding:18px 16px 52px;max-width:100%}}`}</style>
       </Head>
 
+      <DemoLobby href="/demo" biz={BIZ} />
       <DemoScopeBanner scope="consignment" compact />
 
       <div className="jm-shell">

@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import Head from 'next/head'
 import DemoScopeBanner from './DemoScopeBanner'
+import DemoLobby from './DemoLobby'
 
 // ─────────────────────────────────────────────────────────────────────────
 // Config-driven sample dashboard — one polished template, one config per
@@ -33,7 +34,7 @@ const STATUS_SETS = {
 }
 
 export default function IndustryDemo({ cfg }) {
-  const { biz, industry, emoji, theme, months, revCats, expLines, extraKpi, insights, ops } = cfg
+  const { slug, biz, industry, emoji, theme, months, revCats, expLines, extraKpi, insights, ops } = cfg
   const [tab, setTab] = useState('dash')
   const [mi, setMi] = useState(11)
   const [openLine, setOpenLine] = useState(null)
@@ -152,6 +153,7 @@ export default function IndustryDemo({ cfg }) {
           @media(max-width:860px){.id-shell{display:block}.id-side{display:none}.id-topbar{display:block}.id-main{padding:18px 14px 48px}}`}</style>
       </Head>
 
+      <DemoLobby href={`/demos/${slug}`} biz={biz} />
       <DemoScopeBanner scope="template" compact />
 
       <div className="id-shell">

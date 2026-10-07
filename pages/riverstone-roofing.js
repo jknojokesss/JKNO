@@ -6,6 +6,7 @@ import { isDemoEmbedQuery } from '../lib/demoEmbed'
 import { DEMO_UI, DEMO_HEAD, DEMO_FONT_LINK } from '../lib/demoFonts'
 import { DEMO_AS_OF as AS_OF } from '../lib/demoAsOf'
 import DemoScopeBanner from '../components/DemoScopeBanner'
+import DemoLobby from '../components/DemoLobby'
 
 // ─────────────────────────────────────────────────────────────────────────
 // Riverstone Roofing — management portal demo. The business name and
@@ -182,6 +183,7 @@ export default function RoofingPortal() {
         <span className="topbar-sub" style={{ fontWeight: 500, letterSpacing: '.08em' }}>DEMO · SYNTHETIC DATA · AS OF AUG 11, 2026</span>
       </div>
 
+      <DemoLobby href="/riverstone-roofing" biz={BIZ} />
       <DemoScopeBanner scope="roofing" compact />
 
       <div className="mobilenav no-print">

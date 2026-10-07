@@ -3,6 +3,7 @@ import MarketingShell, { PageHero } from '../../components/MarketingShell'
 import { BOOKING_URL } from '../../lib/marketing'
 import { ALL_DEMOS } from '../../lib/industryDemos'
 import { SERVICE_PACKAGES } from '../../lib/buildStack'
+import DemoGalleryCard from '../../components/DemoGalleryCard'
 
 export default function DemoGallery() {
   const router = useRouter()
@@ -12,9 +13,9 @@ export default function DemoGallery() {
       description="Clickable sample portals for trades, retail, and distribution — fictitious data, real screen patterns on QuickBooks."
     >
       <PageHero
-        kicker={`${ALL_DEMOS.length} sample portals · no login`}
-        title={<>See the shape of what we build.</>}
-        lead="Fictitious businesses, real workflows: nightly QuickBooks sync, operating screens during the month, recon when you close. Click any card to walk through."
+        kicker={`${ALL_DEMOS.length} doors · no login`}
+        title={<>Pick a door.</>}
+        lead="Fictitious companies, real layouts. One screen should make you reach for your phone — that&rsquo;s the meeting."
         align="center"
       />
 
@@ -50,15 +51,15 @@ export default function DemoGallery() {
       <section className="m-section" style={{ paddingTop: 'clamp(32px,4vw,48px)' }}>
         <div className="m-wrap">
           <h2 className="m-h3" style={{ marginBottom: '20px' }}>All samples</h2>
-          <div className="m-demo-grid">
-            {ALL_DEMOS.map((d) => (
-              <a key={d.href} href={d.href} className="m-demo-tile">
-                <span className="m-demo-tile__emoji" aria-hidden="true">{d.emoji}</span>
-                <span className="m-demo-tile__industry">{d.industry}</span>
-                <span className="m-demo-tile__biz">{d.biz}</span>
-                <span className="m-demo-tile__blurb">{d.blurb}</span>
-                <span className="m-demo-tile__go">Open sample →</span>
-              </a>
+          <div className="m-demo-spot-grid m-demo-spot-grid--gallery">
+            {ALL_DEMOS.map((d, i) => (
+              <DemoGalleryCard
+                key={d.href}
+                href={d.href}
+                biz={d.biz}
+                industry={d.industry}
+                index={i}
+              />
             ))}
           </div>
         </div>
@@ -66,8 +67,8 @@ export default function DemoGallery() {
 
       <section className="m-cta-slab">
         <div className="m-wrap m-cta-slab__inner">
-          <h2 className="m-h2 m-cta-slab__title">Don&rsquo;t see your industry?</h2>
-          <p className="m-cta-slab__lead">I&rsquo;ll build a sample around your business before you pay a dime.</p>
+          <h2 className="m-h2 m-cta-slab__title">Nothing here with your name on it?</h2>
+          <p className="m-cta-slab__lead">Good. Tell me what you sell — I&rsquo;ll mock your portal first, invoice second.</p>
           <div className="m-cta-slab__actions">
             <button type="button" className="m-btn m-btn--primary m-btn--pop" onClick={() => router.push('/#contact')}>Get in touch</button>
             <a href={BOOKING_URL} target="_blank" rel="noopener noreferrer" className="m-btn m-btn--secondary m-btn--pop-dark">Book a call</a>

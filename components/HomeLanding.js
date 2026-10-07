@@ -2,6 +2,8 @@ import { useRouter } from 'next/router'
 import { BOOKING_URL } from '../lib/marketing'
 import { BUSINESS_TYPES, SERVICE_PACKAGES } from '../lib/buildStack'
 import { FEATURED_DEMOS } from '../lib/marketingDemos'
+import { HERO_DOORS, getDemoHook } from '../lib/demoHooks'
+import DemoGalleryCard from './DemoGalleryCard'
 
 /** Homepage grid — range of industries; full list lives on /demos */
 const HOME_DEMOS = [
@@ -33,13 +35,6 @@ const BOOKS = [
   'Other software',
 ]
 
-/** Hero demo links — black / cream / gold only, minimal copy. */
-const HERO_PORTALS = [
-  { href: '/demo', name: 'Summit Snacks Co.', tag: 'CPG & consignment' },
-  { href: '/riverstone-roofing', name: 'Riverstone Roofing', tag: 'Commercial roofing' },
-  { href: '/northline-global', name: 'Northline Global', tag: 'Import & distribution' },
-]
-
 export default function HomeLanding({
   live,
   form,
@@ -67,14 +62,13 @@ export default function HomeLanding({
               <span className="m-hero-brief__jk">JK<span className="m-hero-brief__dot">.</span></span>
             </p>
             <h1 className="m-band__title m-band__title--brief">
-              Your books close the month.
+              QuickBooks closes the month.
               <br />
-              You still need today&rsquo;s margin in one login.
+              <span className="m-hero-accent">You run the week.</span>
             </h1>
             <p className="m-band__sub m-band__sub--brief">
-              I connect your register, vendor portal, or jobs to a portal scoped to your company.
-              Most owners run QuickBooks Online; I&rsquo;ll wire to Desktop or the stack your accountant
-              already uses — operating view here, official books there.
+              Custom owner portals — register, vendors, jobs — wired to the books you already trust.
+              About six days from kickoff to go-live.
             </p>
             <div className="m-band__actions">
               <button type="button" className="m-btn m-btn--gold m-btn--pop" onClick={scrollContact}>
@@ -84,20 +78,23 @@ export default function HomeLanding({
                 View demos
               </button>
             </div>
-            <p className="m-hero-brief__note">
-              Custom build per owner — about six days from kickoff to go-live.
-            </p>
           </div>
 
-          <div className="m-hero-portal-stack">
-            <p className="m-hero-portal-stack__cap">Sample portals</p>
-            {HERO_PORTALS.map((p, i) => (
-              <a key={p.href} href={p.href} className="m-hero-portal-card" style={{ '--portal-i': i }}>
-                <span className="m-hero-portal-card__name">{p.name}</span>
-                <span className="m-hero-portal-card__tag">{p.tag}</span>
-                <span className="m-hero-portal-card__go" aria-hidden="true">→</span>
-              </a>
-            ))}
+          <div className="m-hero-doors">
+            <p className="m-hero-doors__cap">Pick a door — no login</p>
+            {HERO_DOORS.map((p, i) => {
+              const { hook } = getDemoHook(p.href)
+              return (
+                <a key={p.href} href={p.href} className="m-hero-door" style={{ '--door-i': i }}>
+                  <span className="m-hero-door__num">{p.n}</span>
+                  <span className="m-hero-door__body">
+                    <span className="m-hero-door__hook">{hook}</span>
+                    <span className="m-hero-door__name">{p.name}</span>
+                  </span>
+                  <span className="m-hero-door__go" aria-hidden="true">→</span>
+                </a>
+              )
+            })}
           </div>
         </div>
       </section>
@@ -122,17 +119,19 @@ export default function HomeLanding({
 
       <section id="demos" className="m-section m-section--panel">
         <div className="m-wrap">
-          <h2 className="m-h2">Demos</h2>
-          <p className="m-lead" style={{ maxWidth: '52ch', marginBottom: '24px' }}>
-            Fictitious companies. Real screen layouts — walk them like you own the place.
+          <h2 className="m-h2">More samples</h2>
+          <p className="m-lead m-lead--tight">
+            Fictitious names. If one screen makes you reach for your phone, that&rsquo;s the conversation we want.
           </p>
-          <div className="m-demo-grid">
-            {HOME_DEMOS.map((d) => (
-              <a key={d.src} href={d.src} className="m-demo-tile">
-                <span className="m-demo-tile__industry">{d.label}</span>
-                <span className="m-demo-tile__blurb">{d.caption}</span>
-                <span className="m-demo-tile__go">Open →</span>
-              </a>
+          <div className="m-demo-spot-grid">
+            {HOME_DEMOS.map((d, i) => (
+              <DemoGalleryCard
+                key={d.src}
+                href={d.src}
+                biz={d.biz || d.label}
+                industry={d.label}
+                index={i}
+              />
             ))}
           </div>
           <p style={{ marginTop: '24px' }}>

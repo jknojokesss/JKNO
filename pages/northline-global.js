@@ -2,6 +2,7 @@ import { useState } from 'react'
 import Head from 'next/head'
 import { DEMO_UI, DEMO_HEAD, DEMO_MONO, DEMO_FONT_LINK } from '../lib/demoFonts'
 import DemoScopeBanner from '../components/DemoScopeBanner'
+import DemoLobby from '../components/DemoLobby'
 
 const BIZ = 'Northline Global'
 const SIDEBAR = '#1A1C19', ACCENT = '#C9A84C', BG = '#F2F0EA', BORDER = '#D8D4CC'
@@ -102,6 +103,7 @@ export default function NorthlineGlobal() {
         }
       `}</style>
 
+      <DemoLobby href="/northline-global" biz={BIZ} />
       <DemoScopeBanner scope="import" compact />
 
       <div className="mobilenav">

@@ -4,6 +4,7 @@ import { useRouter } from 'next/router'
 import { isDemoEmbedQuery } from '../lib/demoEmbed'
 import { PHONE_DEMO_MSG, isPhoneDemoUrl } from '../lib/phoneDemoPostMessage'
 import DemoScopeBanner from '../components/DemoScopeBanner'
+import DemoLobby from '../components/DemoLobby'
 
 const BIZ = 'Riverside Tires'
 const THEME = { side: '#1E1C19', border: '#33302B', accent: '#B0281C', content: '#F2F0EA' }
@@ -605,6 +606,7 @@ export default function RiversideTires() {
         .rt-embed .rt-mobilenav{flex-shrink:0}
       `}</style>
 
+      <DemoLobby href="/riverside-tires" biz={BIZ} />
       <DemoScopeBanner scope="register" compact />
 
       <DemoShell
