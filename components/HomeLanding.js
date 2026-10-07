@@ -33,7 +33,36 @@ const BOOKS = [
   'Other software',
 ]
 
-const MARQUEE = BUSINESS_TYPES.map((r) => r.label)
+/** Mini portal previews in the hero — real demo routes, each styled like the product. */
+const HERO_PORTALS = [
+  {
+    href: '/demo',
+    initial: 'S',
+    name: 'Summit Snacks Co.',
+    tag: 'CPG & consignment',
+    line: 'Shelf counts · collections · channel P&L',
+    accent: '#2A6CB8',
+    side: '#1E2A3A',
+  },
+  {
+    href: '/riverstone-roofing',
+    initial: 'R',
+    name: 'Riverstone Roofing',
+    tag: 'Commercial roofing',
+    line: 'Job margin · WIP · claim-aware cash',
+    accent: '#035CEB',
+    side: '#1A1E24',
+  },
+  {
+    href: '/northline-global',
+    initial: 'N',
+    name: 'Northline Global',
+    tag: 'Import & distribution',
+    line: 'Landed cost · bins · margin per order',
+    accent: '#C9A84C',
+    side: '#1A1C19',
+  },
+]
 
 export default function HomeLanding({
   live,
@@ -55,131 +84,106 @@ export default function HomeLanding({
 
   return (
     <div className={live ? 'm-home m-home--live' : 'm-home'}>
-      <section className="m-dark-band m-dark-band--energy">
-        <div className="m-wrap m-band m-band--hero-split">
-          <div className="m-band__hero m-band__hero--punch">
-            <p className="m-band__kicker m-band__kicker--glow">Your books stay in QuickBooks</p>
-            <h1 className="m-band__title m-band__title--punch">
-              I build the login that shows{' '}
-              <span className="m-gold-text">today&rsquo;s margin</span>.
-            </h1>
-            <p className="m-band__sub m-band__sub--punch">
-              Custom owner portals — tickets, jobs, stores, or SKUs matched to real cost.
-              Nightly sync. One company per login. Month-end that actually ties.
+      <section className="m-dark-band m-dark-band--brief">
+        <div className="m-wrap m-hero-brief">
+          <div className="m-hero-brief__copy">
+            <p className="m-hero-brief__mark" aria-hidden="true">
+              <span className="m-hero-brief__jk">JK<span className="m-hero-brief__dot">.</span></span>
             </p>
-            <div className="m-band__actions m-band__actions--punch">
-              <button type="button" className="m-btn m-btn--gold m-btn--xl m-btn--pop" onClick={scrollContact}>
-                Build my portal →
+            <h1 className="m-band__title m-band__title--brief">
+              QuickBooks is the books.
+              <br />
+              You still need today&rsquo;s margin in one login.
+            </h1>
+            <p className="m-band__sub m-band__sub--brief">
+              I connect your register, vendor portal, or job system to a portal scoped to your company.
+              Operating numbers during the month; close reconciles to QuickBooks.
+            </p>
+            <div className="m-band__actions">
+              <button type="button" className="m-btn m-btn--gold m-btn--pop" onClick={scrollContact}>
+                Get started
               </button>
-              <button type="button" className="m-btn m-btn--ghost-light m-btn--xl" onClick={scrollDemos}>
-                Tour the demos
+              <button type="button" className="m-btn m-btn--ghost-light" onClick={scrollDemos}>
+                View demos
               </button>
             </div>
-            <ul className="m-hero-chips" aria-label="Highlights">
-              <li>~6 days to launch</li>
-              <li>QuickBooks native</li>
-              <li>Your data only</li>
-            </ul>
+            <p className="m-hero-brief__note">
+              Custom build per owner — about six days from kickoff to go-live.
+            </p>
           </div>
 
-          <div className="m-hero-visual" aria-hidden="true">
-            <div className="m-hero-window">
-              <div className="m-hero-window__dots">
-                <span /><span /><span />
-              </div>
-              <p className="m-hero-window__label">Owner view · sample</p>
-              <div className="m-hero-window__stats">
-                <div className="m-hero-window__stat m-hero-window__stat--hot">
-                  <span>Margin today</span>
-                  <strong>$4,280</strong>
+          <div className="m-hero-portal-stack">
+            <p className="m-hero-portal-stack__cap">Sample portals — click through</p>
+            {HERO_PORTALS.map((p, i) => (
+              <a
+                key={p.href}
+                href={p.href}
+                className="m-hero-portal-card"
+                style={{
+                  '--portal-accent': p.accent,
+                  '--portal-side': p.side,
+                  '--portal-i': i,
+                }}
+              >
+                <div className="m-hero-portal-card__side">
+                  <span>{p.initial}</span>
                 </div>
-                <div className="m-hero-window__stat">
-                  <span>Open tickets</span>
-                  <strong>37</strong>
+                <div className="m-hero-portal-card__body">
+                  <span className="m-hero-portal-card__name">{p.name}</span>
+                  <span className="m-hero-portal-card__tag">{p.tag}</span>
+                  <span className="m-hero-portal-card__line">{p.line}</span>
                 </div>
-                <div className="m-hero-window__stat">
-                  <span>Synced</span>
-                  <strong className="m-hero-window__live">2:14 AM</strong>
-                </div>
-              </div>
-              <div className="m-hero-window__bar">
-                <span style={{ width: '72%' }} />
-              </div>
-              <p className="m-hero-window__foot">QuickBooks reconciled through last close</p>
-            </div>
-          </div>
-        </div>
-
-        <div className="m-marquee-wrap" aria-hidden="true">
-          <div className="m-marquee">
-            {[...MARQUEE, ...MARQUEE].map((label, i) => (
-              <span key={`${label}-${i}`} className="m-marquee__item">{label}</span>
+              </a>
             ))}
           </div>
         </div>
       </section>
 
-      <section className="m-section m-section--packages-punch">
+      <section className="m-section">
         <div className="m-wrap">
-          <div className="m-section-head-punch">
-            <p className="m-kicker">Four shapes. One pipe.</p>
-            <h2 className="m-h2 m-section-head-punch__title">
-              Pick the fight you&rsquo;re in.
-            </h2>
-          </div>
-          <div className="m-package-grid m-package-grid--home">
-            {SERVICE_PACKAGES.map((p, i) => (
-              <a key={p.title} href={p.href} className="m-package-card m-package-card--punch" style={{ '--pkg-i': i }}>
+          <h2 className="m-h2">What owners hire me for</h2>
+          <p className="m-lead" style={{ maxWidth: '52ch', marginBottom: '24px' }}>
+            Same nightly QuickBooks pipe — different operating screen depending on the business.
+          </p>
+          <div className="m-package-grid">
+            {SERVICE_PACKAGES.map((p) => (
+              <a key={p.title} href={p.href} className="m-package-card">
                 <span className="m-package-card__title">{p.title}</span>
                 <span className="m-package-card__blurb">{p.blurb}</span>
-                <span className="m-package-card__go">See it →</span>
+                <span className="m-package-card__go">Open sample</span>
               </a>
             ))}
           </div>
         </div>
       </section>
 
-      <section id="demos" className="m-section m-section--demos-punch">
+      <section id="demos" className="m-section m-section--panel">
         <div className="m-wrap">
-          <div className="m-section-head-punch">
-            <p className="m-kicker">No slide deck</p>
-            <h2 className="m-h2 m-section-head-punch__title">
-              Click in. <span className="m-gold-text-dark">Want it for your shop.</span>
-            </h2>
-            <p className="m-lead m-section-head-punch__lead">
-              Fictitious businesses, real screens — the same patterns we ship on your QuickBooks company.
-            </p>
-          </div>
-          <div className="m-demo-grid m-demo-grid--home">
+          <h2 className="m-h2">Demos</h2>
+          <p className="m-lead" style={{ maxWidth: '52ch', marginBottom: '24px' }}>
+            Fictitious companies. Real screen layouts — walk them like you own the place.
+          </p>
+          <div className="m-demo-grid">
             {HOME_DEMOS.map((d) => (
-              <a
-                key={d.src}
-                href={d.src}
-                className="m-demo-tile m-demo-tile--punch"
-                style={{ '--tile-accent': d.accent || 'var(--m-gold)' }}
-              >
-                <span className="m-demo-tile__emoji" aria-hidden="true">{d.emoji}</span>
+              <a key={d.src} href={d.src} className="m-demo-tile">
                 <span className="m-demo-tile__industry">{d.label}</span>
                 <span className="m-demo-tile__blurb">{d.caption}</span>
-                <span className="m-demo-tile__go">Open sample →</span>
+                <span className="m-demo-tile__go">Open →</span>
               </a>
             ))}
           </div>
-          <p className="m-demoshow-more">
-            <button type="button" className="m-btn m-btn--secondary m-btn--pop" onClick={() => router.push('/demos')}>
-              See every sample portal →
+          <p style={{ marginTop: '24px' }}>
+            <button type="button" className="m-btn--text" onClick={() => router.push('/demos')}>
+              All demos
             </button>
           </p>
         </div>
       </section>
 
-      <section className="m-section m-section--panel">
+      <section className="m-section">
         <div className="m-wrap">
-          <div className="m-section-head-punch">
-            <p className="m-kicker">Built for operators</p>
-            <h2 className="m-h2">If you run the business, this is for you.</h2>
-          </div>
-          <ul className="m-home-fit m-home-fit--punch">
+          <h2 className="m-h2">Who I build for</h2>
+          <ul className="m-home-fit">
             {BUSINESS_TYPES.map((row) => (
               <li key={row.label}>
                 <strong>{row.label}</strong>
@@ -188,22 +192,19 @@ export default function HomeLanding({
             ))}
           </ul>
           <p style={{ marginTop: '28px' }}>
-            <button type="button" className="m-btn m-btn--primary m-btn--pop" onClick={() => router.push('/what-we-do')}>
-              Everything I build →
+            <button type="button" className="m-btn m-btn--secondary" onClick={() => router.push('/what-we-do')}>
+              What I build
             </button>
           </p>
         </div>
       </section>
 
-      <section id="how" className="m-section">
+      <section id="how" className="m-section m-section--panel">
         <div className="m-wrap">
-          <div className="m-section-head-punch">
-            <p className="m-kicker">Fast</p>
-            <h2 className="m-h2">Call → wire-up → go live.</h2>
-          </div>
+          <h2 className="m-h2">How it works</h2>
           <div className="m-how-strip" style={{ marginTop: '32px' }}>
             {STEPS.map((s) => (
-              <div key={s.n} className="m-step-pop m-step-pop--punch">
+              <div key={s.n} className="m-step-pop">
                 <div className="m-step-pop__n">{s.n}</div>
                 <h3 className="m-step-pop__title">{s.title}</h3>
                 <p className="m-step-pop__body">{s.body}</p>
@@ -218,27 +219,23 @@ export default function HomeLanding({
         </div>
       </section>
 
-      <section id="contact" className="m-contact-slab m-contact-slab--punch">
+      <section id="contact" className="m-contact-slab">
         <div className="m-wrap m-contact-grid">
           <div>
-            <p className="m-kicker">Let&rsquo;s go</p>
-            <h2 className="m-h2 m-contact-slab__title-left">Tell me what you run.</h2>
+            <h2 className="m-h2">Get started</h2>
             <p className="m-lead" style={{ marginTop: '12px' }}>
-              I&rsquo;ll point you at the right demo and quote the build — usually same week we start.
+              Tell me what you run and what you want on one screen. I&rsquo;ll point you at the right demo and quote the build.
             </p>
-            <p style={{ marginTop: '20px' }}>
-              <a
-                href={BOOKING_URL}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="m-btn m-btn--gold m-btn--pop"
-              >
-                Book 30 minutes →
+            <p style={{ marginTop: '20px', fontSize: '15px', color: 'var(--m-muted)' }}>
+              Or{' '}
+              <a href={BOOKING_URL} target="_blank" rel="noopener noreferrer" className="m-btn--text">
+                book a 30-minute call
               </a>
+              .
             </p>
           </div>
 
-          <div className="m-card m-card--pop" style={{ padding: '24px 22px' }}>
+          <div className="m-card" style={{ padding: '24px 22px' }}>
             {submitted ? (
               <p style={{ margin: 0, fontSize: '18px', fontWeight: 600 }}>Got it — I&rsquo;ll be in touch.</p>
             ) : (
@@ -299,7 +296,7 @@ export default function HomeLanding({
 
                 <button
                   type="button"
-                  className="m-btn m-btn--primary m-btn--xl m-btn--pop"
+                  className="m-btn m-btn--primary"
                   style={{ width: '100%', marginTop: 18 }}
                   onClick={onSubmit}
                   disabled={
@@ -311,7 +308,7 @@ export default function HomeLanding({
                     || !form.quickbooks
                   }
                 >
-                  {submitting ? 'Sending…' : 'Send — let’s build it →'}
+                  {submitting ? 'Sending…' : 'Send'}
                 </button>
               </>
             )}
