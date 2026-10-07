@@ -35,7 +35,7 @@ export default function MarketingShell({ title, description, children, padTop = 
   useEffect(() => {
     const onScroll = () => {
       setScrolled(window.scrollY > 8)
-      if (router.pathname === '/') setOnDarkHero(window.scrollY < 560)
+      if (router.pathname === '/') setOnDarkHero(window.scrollY < 720)
     }
     onScroll()
     window.addEventListener('scroll', onScroll)

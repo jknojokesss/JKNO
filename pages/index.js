@@ -53,7 +53,7 @@ export default function Landing() {
     <>
       <MarketingShell
         title="JK No Jokes Financials | Owner portals on your books"
-        description="Custom portals wired to your books and your operations — margin during the month, close that ties out. QuickBooks Online most often; demos for trades, retail, and distribution."
+        description="Owner portals on real books — margin during the week, close that ties out. Walk the samples, then start a build in about six days."
         darkHeader
         padTop={false}
       >

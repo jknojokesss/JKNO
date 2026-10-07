@@ -1,22 +1,22 @@
 import { useRouter } from 'next/router'
 import { BOOKING_URL } from '../lib/marketing'
-import { BUSINESS_TYPES, SERVICE_PACKAGES } from '../lib/buildStack'
 import { FEATURED_DEMOS } from '../lib/marketingDemos'
 import { HERO_DOORS, getDemoHook } from '../lib/demoHooks'
 import DemoGalleryCard from './DemoGalleryCard'
 
-/** Homepage grid — range of industries; full list lives on /demos */
 const HOME_DEMOS = [
   FEATURED_DEMOS[0],
   FEATURED_DEMOS[1],
   FEATURED_DEMOS[5],
   FEATURED_DEMOS[4],
+  FEATURED_DEMOS[3],
+  FEATURED_DEMOS[8],
 ].filter(Boolean)
 
-const STEPS = [
-  { n: '1', title: 'Call', body: 'Thirty minutes. What you sell, how you get paid, what you keep rebuilding in Excel.' },
-  { n: '2', title: 'Wire-up', body: 'Your books, register, vendors — I write the sync. It runs every night.' },
-  { n: '3', title: 'Go live', body: 'About six days. We walk the portal together. Nothing ships until it matches your books.' },
+const PROOF = [
+  { n: '06', label: 'days', detail: 'kickoff to go-live, typical' },
+  { n: '01', label: 'login', detail: 'one company — scoped on the server' },
+  { n: '00', label: 'chatbots', detail: 'answers from your books, computed' },
 ]
 
 const TRADES = [
@@ -55,43 +55,59 @@ export default function HomeLanding({
 
   return (
     <div className={live ? 'm-home m-home--live' : 'm-home'}>
-      <section className="m-dark-band m-dark-band--brief">
-        <div className="m-wrap m-hero-brief">
-          <div className="m-hero-brief__copy">
-            <p className="m-hero-brief__mark" aria-hidden="true">
-              <span className="m-hero-brief__jk">JK<span className="m-hero-brief__dot">.</span></span>
+      <section className="m-hero-home">
+        <div className="m-hero-home__frame" aria-hidden="true" />
+        <div className="m-wrap m-hero-home__grid">
+          <div className="m-hero-home__copy">
+            <p className="m-hero-home__kicker">Owner portals on real books</p>
+            <p className="m-hero-home__mark" aria-hidden="true">
+              JK<span className="m-hero-home__dot">.</span>
             </p>
-            <h1 className="m-band__title m-band__title--brief">
-              QuickBooks closes the month.
-              <br />
-              <span className="m-hero-accent">You run the week.</span>
+            <h1 className="m-hero-home__title">
+              Your accountant has the month.
+              <span className="m-hero-home__title-line">You need <em>today</em>.</span>
             </h1>
-            <p className="m-band__sub m-band__sub--brief">
-              Custom owner portals — register, vendors, jobs — wired to the books you already trust.
-              About six days from kickoff to go-live.
+            <p className="m-hero-home__sub">
+              Register, vendors, jobs — synced nightly into a login that looks like your business, not a template.
             </p>
-            <div className="m-band__actions">
+            <div className="m-hero-home__actions">
               <button type="button" className="m-btn m-btn--gold m-btn--pop" onClick={scrollContact}>
-                Get started
+                Start a build
               </button>
               <button type="button" className="m-btn m-btn--ghost-light" onClick={scrollDemos}>
-                View demos
+                Open a sample
               </button>
             </div>
+            <p className="m-hero-home__foot">
+              <button type="button" className="m-hero-home__link" onClick={() => router.push('/what-we-do')}>
+                What we build
+              </button>
+              <span className="m-hero-home__foot-dot" aria-hidden="true">·</span>
+              <button type="button" className="m-hero-home__link" onClick={() => router.push('/how-it-works')}>
+                How it ships
+              </button>
+            </p>
           </div>
 
-          <div className="m-hero-doors">
-            <p className="m-hero-doors__cap">Pick a door — no login</p>
+          <div className="m-hero-home__doors">
+            <p className="m-hero-home__doors-cap">
+              <span>No login</span>
+              <span className="m-hero-home__doors-cap-line" />
+              <span>pick a door</span>
+            </p>
             {HERO_DOORS.map((p, i) => {
               const { hook } = getDemoHook(p.href)
               return (
-                <a key={p.href} href={p.href} className="m-hero-door" style={{ '--door-i': i }}>
-                  <span className="m-hero-door__num">{p.n}</span>
-                  <span className="m-hero-door__body">
-                    <span className="m-hero-door__hook">{hook}</span>
-                    <span className="m-hero-door__name">{p.name}</span>
-                  </span>
-                  <span className="m-hero-door__go" aria-hidden="true">→</span>
+                <a
+                  key={p.href}
+                  href={p.href}
+                  className={`m-hero-home__door${i === 0 ? ' m-hero-home__door--lead' : ''}`}
+                  style={{ '--door-i': i }}
+                >
+                  <span className="m-hero-home__door-num">{p.n}</span>
+                  <span className="m-hero-home__door-hook">{hook}</span>
+                  <span className="m-hero-home__door-name">{p.name}</span>
+                  <span className="m-hero-home__door-go" aria-hidden="true">→</span>
                 </a>
               )
             })}
@@ -99,31 +115,42 @@ export default function HomeLanding({
         </div>
       </section>
 
-      <section className="m-section">
-        <div className="m-wrap">
-          <h2 className="m-h2">What owners hire me for</h2>
-          <p className="m-lead" style={{ maxWidth: '52ch', marginBottom: '24px' }}>
-            Books in on a schedule, operating screen out — different UI depending on the business.
-          </p>
-          <div className="m-package-grid">
-            {SERVICE_PACKAGES.map((p) => (
-              <a key={p.title} href={p.href} className="m-package-card">
-                <span className="m-package-card__title">{p.title}</span>
-                <span className="m-package-card__blurb">{p.blurb}</span>
-                <span className="m-package-card__go">Open sample</span>
-              </a>
-            ))}
-          </div>
+      <section className="m-home-proof" aria-label="How it works in numbers">
+        <div className="m-wrap m-home-proof__grid">
+          {PROOF.map((row) => (
+            <div key={row.label} className="m-home-proof__cell">
+              <p className="m-home-proof__num">
+                {row.n}
+                <span className="m-home-proof__label">{row.label}</span>
+              </p>
+              <p className="m-home-proof__detail">{row.detail}</p>
+            </div>
+          ))}
         </div>
       </section>
 
-      <section id="demos" className="m-section m-section--panel">
+      <section className="m-home-manifesto">
         <div className="m-wrap">
-          <h2 className="m-h2">More samples</h2>
-          <p className="m-lead m-lead--tight">
-            Fictitious names. If one screen makes you reach for your phone, that&rsquo;s the conversation we want.
+          <p className="m-home-manifesto__text">
+            Not another SaaS dashboard.
+            <br />
+            The screen you&rsquo;d build if you had a year — shipped in a week.
           </p>
-          <div className="m-demo-spot-grid">
+        </div>
+      </section>
+
+      <section id="demos" className="m-home-demos">
+        <div className="m-wrap">
+          <div className="m-home-demos__head">
+            <h2 className="m-home-demos__title">Walk someone else&rsquo;s week.</h2>
+            <p className="m-home-demos__lead">
+              Fictitious companies. Real layouts. If one question sticks in your head, we&rsquo;re done.
+            </p>
+            <button type="button" className="m-btn m-btn--secondary m-home-demos__all" onClick={() => router.push('/demos')}>
+              All samples
+            </button>
+          </div>
+          <div className="m-demo-spot-grid m-demo-spot-grid--home">
             {HOME_DEMOS.map((d, i) => (
               <DemoGalleryCard
                 key={d.src}
@@ -134,72 +161,26 @@ export default function HomeLanding({
               />
             ))}
           </div>
-          <p style={{ marginTop: '24px' }}>
-            <button type="button" className="m-btn--text" onClick={() => router.push('/demos')}>
-              All demos
-            </button>
-          </p>
         </div>
       </section>
 
-      <section className="m-section">
-        <div className="m-wrap">
-          <h2 className="m-h2">Who I build for</h2>
-          <ul className="m-home-fit">
-            {BUSINESS_TYPES.map((row) => (
-              <li key={row.label}>
-                <strong>{row.label}</strong>
-                <span>{row.detail}</span>
-              </li>
-            ))}
-          </ul>
-          <p style={{ marginTop: '28px' }}>
-            <button type="button" className="m-btn m-btn--secondary" onClick={() => router.push('/what-we-do')}>
-              What I build
-            </button>
-          </p>
-        </div>
-      </section>
-
-      <section id="how" className="m-section m-section--panel">
-        <div className="m-wrap">
-          <h2 className="m-h2">How it works</h2>
-          <div className="m-how-strip" style={{ marginTop: '32px' }}>
-            {STEPS.map((s) => (
-              <div key={s.n} className="m-step-pop">
-                <div className="m-step-pop__n">{s.n}</div>
-                <h3 className="m-step-pop__title">{s.title}</h3>
-                <p className="m-step-pop__body">{s.body}</p>
-              </div>
-            ))}
-          </div>
-          <p style={{ marginTop: '28px' }}>
-            <button type="button" className="m-btn--text" onClick={() => router.push('/how-it-works')}>
-              Full timeline
-            </button>
-          </p>
-        </div>
-      </section>
-
-      <section id="contact" className="m-contact-slab">
-        <div className="m-wrap m-contact-grid">
-          <div>
-            <h2 className="m-h2">Get started</h2>
-            <p className="m-lead" style={{ marginTop: '12px' }}>
-              Tell me what you run and what you want on one screen. I&rsquo;ll point you at the right demo and quote the build.
-            </p>
-            <p style={{ marginTop: '20px', fontSize: '15px', color: 'var(--m-muted)' }}>
-              Or{' '}
-              <a href={BOOKING_URL} target="_blank" rel="noopener noreferrer" className="m-btn--text">
-                book a 30-minute call
+      <section id="contact" className="m-home-close">
+        <div className="m-wrap m-home-close__grid">
+          <div className="m-home-close__copy">
+            <p className="m-home-close__kicker">Ready when you are</p>
+            <h2 className="m-home-close__title">Tell me the one screen you keep rebuilding in Excel.</h2>
+            <p className="m-home-close__lead">
+              I&rsquo;ll point you at the closest sample and quote the build — or{' '}
+              <a href={BOOKING_URL} target="_blank" rel="noopener noreferrer" className="m-home-close__book">
+                book thirty minutes
               </a>
               .
             </p>
           </div>
 
-          <div className="m-card" style={{ padding: '24px 22px' }}>
+          <div className="m-home-close__form m-card">
             {submitted ? (
-              <p style={{ margin: 0, fontSize: '18px', fontWeight: 600 }}>Got it — I&rsquo;ll be in touch.</p>
+              <p className="m-home-close__thanks">Got it. I&rsquo;ll be in touch.</p>
             ) : (
               <>
                 {[
@@ -247,10 +228,10 @@ export default function HomeLanding({
                 </label>
 
                 <label className="m-label" style={{ marginTop: 14 }}>
-                  One screen you want
+                  That one screen
                   <textarea
                     rows={3}
-                    placeholder="e.g. margin per ticket, landed cost per PO…"
+                    placeholder="Margin per ticket, landed cost per PO, rent roll on the 1st…"
                     value={form.message}
                     onChange={(e) => setForm({ ...form, message: e.target.value })}
                   />
@@ -258,7 +239,7 @@ export default function HomeLanding({
 
                 <button
                   type="button"
-                  className="m-btn m-btn--primary"
+                  className="m-btn m-btn--gold m-btn--pop"
                   style={{ width: '100%', marginTop: 18 }}
                   onClick={onSubmit}
                   disabled={
