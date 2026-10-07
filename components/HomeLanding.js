@@ -2,7 +2,13 @@ import { useRouter } from 'next/router'
 import { BOOKING_URL } from '../lib/marketing'
 import { BUSINESS_TYPES } from '../lib/buildStack'
 import { FEATURED_DEMOS } from '../lib/marketingDemos'
-const HOME_DEMOS = FEATURED_DEMOS.slice(0, 4)
+/** Homepage grid — range of industries; full list lives on /demos */
+const HOME_DEMOS = [
+  FEATURED_DEMOS[1],
+  FEATURED_DEMOS[5],
+  FEATURED_DEMOS[3],
+  FEATURED_DEMOS[4],
+].filter(Boolean)
 
 const STEPS = [
   { n: '1', title: 'Call', body: 'Thirty minutes. What you sell, how you get paid, what you keep rebuilding in Excel.' },
@@ -35,10 +41,13 @@ export default function HomeLanding({
   submitting,
 }) {
   const router = useRouter()
-  const tire = FEATURED_DEMOS[0]
 
   const scrollContact = () => {
     document.getElementById('contact')?.scrollIntoView({ behavior: 'smooth' })
+  }
+
+  const scrollDemos = () => {
+    document.getElementById('demos')?.scrollIntoView({ behavior: 'smooth' })
   }
 
   return (
@@ -52,16 +61,16 @@ export default function HomeLanding({
               I build the login that does.
             </h1>
             <p className="m-band__sub">
-              Register tickets, vendor cost, and your books in one place — for owners who run a shop,
-              not a spreadsheet after close.
+              Custom portals wired to QuickBooks — sales, costs, and operating numbers owners check
+              during the month, reconciled when you close.
             </p>
             <div className="m-band__actions">
-              <button type="button" className="m-btn m-btn--gold m-btn--pop" onClick={scrollContact}>
+              <button type="button" className="m-btn m-btn--gold" onClick={scrollContact}>
                 Get started
               </button>
-              <a href={tire.src} className="m-btn m-btn--ghost-light m-btn--pop">
-                Tire shop demo
-              </a>
+              <button type="button" className="m-btn m-btn--ghost-light" onClick={scrollDemos}>
+                View demos
+              </button>
             </div>
             <p className="m-band__fine">
               Kickoff call, connect QuickBooks, about six days to go live.{' '}
@@ -76,8 +85,8 @@ export default function HomeLanding({
       <section id="demos" className="m-section">
         <div className="m-wrap">
           <h2 className="m-h2">Demos</h2>
-          <p className="m-lead" style={{ maxWidth: '52ch', marginBottom: '28px' }}>
-            Fictitious businesses, real screens. Tire and import are the fastest read if you live on a register.
+          <p className="m-lead" style={{ maxWidth: '56ch', marginBottom: '28px' }}>
+            Sample businesses across trades, retail, and distribution — each demo is a working screen, not a mockup deck.
           </p>
           <div className="m-demo-grid">
             {HOME_DEMOS.map((d) => (

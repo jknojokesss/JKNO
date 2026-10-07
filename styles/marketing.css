@@ -583,27 +583,24 @@
   color: inherit;
   background: #fff;
   border: 1px solid var(--m-line);
-  border-left: 3px solid var(--m-gold);
   padding: 18px 20px;
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  transition: border-color 0.15s ease, background 0.15s ease;
 }
 .m-demo-tile:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 8px 24px rgba(14, 20, 32, 0.08);
+  border-color: #94a3b8;
+  background: #fafaf8;
 }
 .m-demo-tile__emoji {
   font-size: 28px;
   line-height: 1;
   margin-bottom: 10px;
-  transition: transform 0.2s ease;
 }
-.m-demo-tile:hover .m-demo-tile__emoji { transform: scale(1.12) rotate(-6deg); }
 .m-demo-tile__industry {
   font-size: 11px;
-  font-weight: 700;
-  letter-spacing: 0.1em;
+  font-weight: 600;
+  letter-spacing: 0.08em;
   text-transform: uppercase;
-  color: var(--m-gold-dark);
+  color: var(--m-muted);
   margin-bottom: 6px;
 }
 .m-demo-tile__biz {
@@ -623,8 +620,8 @@
 }
 .m-demo-tile__go {
   font-size: 14px;
-  font-weight: 700;
-  color: var(--m-gold-dark);
+  font-weight: 600;
+  color: var(--m-ink);
 }
 
 .m-cta-slab {
