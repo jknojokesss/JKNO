@@ -190,7 +190,7 @@ export default function HomeLanding({
             <div className="c-eyebrow">
               Samples <i aria-hidden="true" />
             </div>
-            <h2>Break off a piece — no login</h2>
+            <h2>Open a sample — no login</h2>
             <p className="lead">Fictitious companies. Real layouts. Pick one that feels close.</p>
             <ChocolateBarCaption strip={false}>Tap a bar</ChocolateBarCaption>
             <div className="jk-choc-stack" style={{ gap: 12 }}>

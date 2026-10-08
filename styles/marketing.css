@@ -2898,7 +2898,7 @@
   transition: transform 0.22s ease;
 }
 
-.jk-foil-bar:not(.jk-foil-bar--unwrap) {
+.jk-foil-bar {
   overflow: hidden;
   border-radius: 5px;
   box-shadow:
@@ -3012,7 +3012,7 @@
     opacity: 1;
   }
 
-  .jk-foil-bar:not(.jk-foil-bar--unwrap):hover {
+  .jk-foil-bar:hover {
     transform: translateY(-2px);
     box-shadow: 0 14px 32px rgba(0, 0, 0, 0.38);
   }
@@ -3070,14 +3070,14 @@
   min-height: 100%;
 }
 
-.jk-foil-bar:not(.jk-foil-bar--unwrap) .jk-foil-bar__face {
+.jk-foil-bar .jk-foil-bar__face {
   background: linear-gradient(180deg, #e2c878 0%, #c9a84c 45%, #b8941f 100%);
   box-shadow:
     inset 0 1px 0 rgba(255, 255, 255, 0.28),
     inset 0 -5px 14px rgba(100, 72, 12, 0.22);
 }
 
-.jk-foil-bar:not(.jk-foil-bar--unwrap) .jk-foil-bar__mid {
+.jk-foil-bar .jk-foil-bar__mid {
   overflow: hidden;
   perspective: none;
 }

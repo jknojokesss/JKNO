@@ -379,17 +379,10 @@ html {
   backdrop-filter: blur(30px) saturate(1.25);
   -webkit-backdrop-filter: blur(30px) saturate(1.25);
   overflow: visible;
-  opacity: 0;
-  visibility: hidden;
   --flight-lift: 0px;
   --flight-scale: 0.96;
   transform: translate3d(var(--flight-drift, 0px), var(--flight-lift, 0px), 0) scale(var(--flight-scale));
   transition: box-shadow 0.45s ease, background 0.45s ease;
-}
-
-.m-flight-card.is-visible {
-  opacity: 1;
-  visibility: visible;
 }
 
 .m-flight:not(.m-flight--scrolling) .m-flight-card {
@@ -421,22 +414,14 @@ html {
 }
 
 .m-flight-card.is-visible .m-flight-card__fly {
-  animation: m-flight-box-in 1.05s cubic-bezier(0.12, 0.92, 0.22, 1) forwards;
+  animation: m-flight-box-in 0.88s cubic-bezier(0.16, 0.84, 0.28, 1) forwards;
   animation-delay: var(--fly-stagger, 0ms);
 }
 
 @keyframes m-flight-box-in {
-  0% {
-    opacity: 0;
-    filter: blur(6px);
-  }
-  55% {
-    filter: blur(0);
-  }
   to {
     opacity: 1;
     transform: translate3d(0, 0, 0) rotate(0deg) scale(1);
-    filter: blur(0);
   }
 }
 
@@ -565,6 +550,29 @@ html {
   letter-spacing: 0.14em;
 }
 
+.m-flight-card .jk-foil-bar {
+  min-height: 72px;
+  border-radius: 6px;
+}
+
+.m-flight-card .jk-foil-bar__face {
+  padding: 14px 18px;
+}
+
+.m-flight-card .jk-foil-bar__name {
+  font-size: clamp(14px, 1.8vw, 18px);
+  letter-spacing: 0.06em;
+  color: #1a1409;
+  text-shadow: none;
+}
+
+.m-flight-card .jk-foil-bar__sub {
+  font-size: 10px;
+  letter-spacing: 0.12em;
+  color: rgba(26, 20, 9, 0.72);
+  text-shadow: none;
+}
+
 .m-flight-card--demos .jk-choc-grid--home {
   margin-top: 0.5rem;
 }
@@ -663,7 +671,7 @@ html {
   top: 0;
   bottom: 0;
   left: 0;
-  width: calc(var(--flight-strip-fill, 0) * 100%);
+  width: 0;
   min-width: 0;
   background: linear-gradient(90deg, rgba(201, 162, 74, 0.5), rgba(255, 255, 255, 0.95));
   box-shadow: 0 0 14px rgba(255, 255, 255, 0.45);
@@ -674,7 +682,7 @@ html {
 .m-flight-strip__beacon {
   position: absolute;
   top: 50%;
-  left: calc(var(--flight-strip-fill, 0) * 100%);
+  left: 0;
   width: 8px;
   height: 8px;
   margin-left: -4px;
@@ -861,8 +869,6 @@ html {
 
   .m-flight__nose > *,
   .m-flight-card {
-    opacity: 1;
-    visibility: visible;
     transform: none;
     transition: none;
   }
