@@ -384,10 +384,17 @@ html {
   backdrop-filter: blur(30px) saturate(1.25);
   -webkit-backdrop-filter: blur(30px) saturate(1.25);
   overflow: visible;
+  opacity: 0;
+  pointer-events: none;
   --flight-lift: 0px;
   --flight-scale: 0.96;
   transform: translate3d(var(--flight-drift, 0px), var(--flight-lift, 0px), 0) scale(var(--flight-scale));
   transition: box-shadow 0.45s ease, background 0.45s ease;
+}
+
+.m-flight-card.is-visible {
+  opacity: 1;
+  pointer-events: auto;
 }
 
 .m-flight:not(.m-flight--scrolling) .m-flight-card {
@@ -419,11 +426,15 @@ html {
 }
 
 .m-flight-card.is-visible .m-flight-card__fly {
-  animation: m-flight-box-in 0.88s cubic-bezier(0.16, 0.84, 0.28, 1) forwards;
+  animation: m-flight-box-in 0.92s cubic-bezier(0.16, 0.84, 0.28, 1) forwards;
   animation-delay: var(--fly-stagger, 0ms);
 }
 
 @keyframes m-flight-box-in {
+  from {
+    opacity: 0;
+    transform: translate3d(var(--fly-x), var(--fly-y), 0) rotate(var(--fly-rotate)) scale(0.9);
+  }
   to {
     opacity: 1;
     transform: translate3d(0, 0, 0) rotate(0deg) scale(1);
@@ -897,6 +908,8 @@ html {
 
   .m-flight__nose > *,
   .m-flight-card {
+    opacity: 1;
+    pointer-events: auto;
     transform: none;
     transition: none;
     animation: none;

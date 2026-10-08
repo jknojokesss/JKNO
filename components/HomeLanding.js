@@ -1,4 +1,4 @@
-import { useRef } from 'react'
+import { useRef, useState, useEffect } from 'react'
 import { useHomeFlightMotion, FLIGHT_STEPS } from '../lib/useHomeFlightMotion'
 import { useScrollFlyIn } from '../lib/useScrollFlyIn'
 import { scrollToFlightStep } from '../lib/flightSteps'
@@ -65,7 +65,11 @@ export default function HomeLanding({
 }) {
   const router = useRouter()
   const rootRef = useRef(null)
-  useScrollFlyIn(rootRef, true)
+  const [flyReady, setFlyReady] = useState(false)
+  useEffect(() => {
+    setFlyReady(true)
+  }, [])
+  useScrollFlyIn(rootRef, flyReady)
   const { hud, activeStep } = useHomeFlightMotion(rootRef)
   const scrollDemos = () => {
     scrollToFlightStep('flight-demos')
