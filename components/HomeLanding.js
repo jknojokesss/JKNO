@@ -67,7 +67,7 @@ export default function HomeLanding({
   const router = useRouter()
   const rootRef = useRef(null)
   const visible = useRevealCards()
-  const { hud, activeStep, stripFill } = useHomeFlightMotion(rootRef, live)
+  const { hud, activeStep } = useHomeFlightMotion(rootRef)
   const scrollDemos = () => {
     scrollToFlightStep('flight-demos')
   }
@@ -104,14 +104,8 @@ export default function HomeLanding({
 
       <nav className="m-flight-strip" aria-label="Story progress">
         <div className="m-flight-strip__track">
-          <div
-            className="m-flight-strip__fill"
-            style={{ width: `${stripFill * 100}%` }}
-          />
-          <div
-            className="m-flight-strip__beacon"
-            style={{ left: `${stripFill * 100}%` }}
-          />
+          <div className="m-flight-strip__fill" />
+          <div className="m-flight-strip__beacon" />
         </div>
         <ul className="m-flight-waypoints">
           {FLIGHT_STEPS.map((step, i) => (

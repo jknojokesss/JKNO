@@ -1,5 +1,5 @@
 /**
- * Gold foil favor bar — one piece. With `unwrap`, the foil shell hinges back in 3D on hover.
+ * Gold foil favor bar — label stays readable; foil caps peel in 3D on hover.
  */
 export default function ChocolateBarLink({
   href,
@@ -12,19 +12,42 @@ export default function ChocolateBarLink({
 }) {
   const wideFlavor = wide || (className && className.includes('wide'))
 
+  const typeBlock = (
+    <span className="jk-foil-bar__type">
+      <span className="jk-foil-bar__name">{name}</span>
+      {industry ? <span className="jk-foil-bar__sub">{industry}</span> : null}
+    </span>
+  )
+
+  const sheen = (
+    <span className="jk-foil-bar__sheen" aria-hidden="true">
+      <span className="jk-foil-bar__glint" />
+    </span>
+  )
+
+  const faceInner = unwrap ? (
+    <>
+      <span className="jk-foil-bar__face-base" aria-hidden="true" />
+      <span className="jk-foil-bar__flap jk-foil-bar__flap--top" aria-hidden="true" />
+      <span className="jk-foil-bar__flap jk-foil-bar__flap--left" aria-hidden="true" />
+      <span className="jk-foil-bar__flap jk-foil-bar__flap--right" aria-hidden="true" />
+      <span className="jk-foil-bar__label">
+        {sheen}
+        {typeBlock}
+      </span>
+    </>
+  ) : (
+    <>
+      {sheen}
+      {typeBlock}
+    </>
+  )
+
   const barBody = (
     <>
       <span className="jk-foil-bar__end jk-foil-bar__end--left" aria-hidden="true" />
       <span className="jk-foil-bar__mid">
-        <span className="jk-foil-bar__face">
-          <span className="jk-foil-bar__sheen" aria-hidden="true">
-            <span className="jk-foil-bar__glint" />
-          </span>
-          <span className="jk-foil-bar__type">
-            <span className="jk-foil-bar__name">{name}</span>
-            {industry ? <span className="jk-foil-bar__sub">{industry}</span> : null}
-          </span>
-        </span>
+        <span className="jk-foil-bar__face">{faceInner}</span>
       </span>
       <span className="jk-foil-bar__end jk-foil-bar__end--right" aria-hidden="true" />
     </>

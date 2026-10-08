@@ -13,6 +13,10 @@ html:has(.m-flight) {
   scroll-snap-type: y proximity;
 }
 
+html {
+  --flight-strip-fill: 0;
+}
+
 .m-flight {
   position: relative;
   color: var(--flight-paper);
@@ -527,16 +531,18 @@ html:has(.m-flight) {
   top: 0;
   bottom: 0;
   left: 0;
-  width: 0;
+  width: calc(var(--flight-strip-fill, 0) * 100%);
+  min-width: 0;
   background: linear-gradient(90deg, rgba(201, 162, 74, 0.5), rgba(255, 255, 255, 0.95));
   box-shadow: 0 0 14px rgba(255, 255, 255, 0.45);
   border-radius: 2px;
-  transition: width 0.12s linear;
+  will-change: width;
 }
 
 .m-flight-strip__beacon {
   position: absolute;
   top: 50%;
+  left: calc(var(--flight-strip-fill, 0) * 100%);
   width: 8px;
   height: 8px;
   margin-left: -4px;
@@ -546,8 +552,8 @@ html:has(.m-flight) {
   box-shadow:
     0 0 0 2px rgba(201, 162, 74, 0.85),
     0 0 16px rgba(255, 255, 255, 0.75);
-  transition: left 0.12s linear;
   pointer-events: none;
+  will-change: left;
 }
 
 .m-flight-waypoints {
