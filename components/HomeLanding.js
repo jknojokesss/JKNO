@@ -1,4 +1,5 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
+import { useHomeFlightMotion } from '../lib/useHomeFlightMotion'
 import { useRouter } from 'next/router'
 import { BOOKING_URL } from '../lib/marketing'
 import { FEATURED_DEMOS } from '../lib/marketingDemos'
@@ -63,7 +64,9 @@ export default function HomeLanding({
   submitting,
 }) {
   const router = useRouter()
+  const rootRef = useRef(null)
   const visible = useRevealCards()
+  const { hud } = useHomeFlightMotion(rootRef, live)
   const scrollDemos = () => {
     document.getElementById('demos')?.scrollIntoView({ behavior: 'smooth' })
   }
@@ -76,24 +79,29 @@ export default function HomeLanding({
     `m-flight-card${visible.has(id) ? ' is-visible' : ''}`
 
   return (
-    <div className={live ? 'm-flight m-flight--live' : 'm-flight'}>
+    <div ref={rootRef} className={live ? 'm-flight m-flight--live' : 'm-flight'}>
       <div className="m-flight__sky" aria-hidden="true" />
+      <div className="m-flight__haze" aria-hidden="true" />
+      <div className="m-flight__orb" aria-hidden="true" />
       <div className="m-flight__vignette" aria-hidden="true" />
       <div className="m-flight__grain" aria-hidden="true" />
       <div className="m-flight__dim" aria-hidden="true" />
+      <div className="m-flight__progress" aria-hidden="true">
+        <span className="m-flight__progress-fill" />
+      </div>
 
       <div className="m-flight-hud" aria-hidden="true">
         <div className="m-flight-hud__cell">
           <span>Books</span>
-          <strong>QBO</strong>
+          <strong key={hud.books}>{hud.books}</strong>
         </div>
         <div className="m-flight-hud__cell">
           <span>Sync</span>
-          <strong>24h</strong>
+          <strong key={hud.sync}>{hud.sync}</strong>
         </div>
         <div className="m-flight-hud__cell">
           <span>Login</span>
-          <strong>1 co</strong>
+          <strong key={hud.login}>{hud.login}</strong>
         </div>
       </div>
 
@@ -110,6 +118,9 @@ export default function HomeLanding({
           <button type="button" className="m-flight__go m-flight__go--ghost" onClick={scrollContact}>
             Tell me what you run
           </button>
+          <p className="m-flight__scroll-cue" aria-hidden="true">
+            <span>Scroll</span>
+          </p>
         </header>
 
         <div className="m-flight__lane m-flight__lane--left">
