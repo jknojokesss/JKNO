@@ -68,7 +68,7 @@ export default function HomeLanding({
   useFlightCardReveal(rootRef)
   const { hud, activeStep } = useHomeFlightMotion(rootRef)
   const scrollDemos = () => {
-    scrollToFlightStep('flight-demos')
+    scrollToFlightStep('flight-samples')
   }
 
   const scrollContact = () => {

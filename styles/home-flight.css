@@ -42,8 +42,6 @@ html {
   --flight-sky-y: 0px;
   --flight-haze-y: 0px;
   --flight-orb-y: 0px;
-  --flight-nose-opacity: 1;
-  --flight-nose-shift: 0px;
 }
 
 .m-flight__sky,
@@ -266,9 +264,6 @@ html {
   padding: calc(5.5rem + env(safe-area-inset-top, 0px)) 1.5rem 4rem;
   text-shadow: 0 1px 3px rgba(4, 8, 14, 0.9), 0 3px 20px rgba(4, 8, 14, 0.65);
   scroll-snap-align: start;
-  opacity: var(--flight-nose-opacity, 1);
-  transform: translate3d(0, var(--flight-nose-shift, 0), 0);
-  will-change: opacity, transform;
 }
 
 .m-flight__nose > * {
@@ -697,9 +692,18 @@ html {
   position: fixed;
   left: 1.15rem;
   bottom: calc(7.4rem + env(safe-area-inset-bottom, 0px));
-  z-index: 46;
+  z-index: 52;
   display: flex;
   gap: 1.35rem;
+  padding: 0.6rem 0.95rem;
+  border-radius: 10px;
+  border: 1px solid rgba(201, 162, 74, 0.42);
+  background: rgba(10, 12, 18, 0.78);
+  box-shadow:
+    0 10px 36px rgba(0, 0, 0, 0.55),
+    inset 0 1px 0 rgba(255, 255, 255, 0.06);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
   pointer-events: none;
 }
 
@@ -714,16 +718,19 @@ html {
   font-size: 0.55rem;
   letter-spacing: 0.2em;
   text-transform: uppercase;
-  color: rgba(239, 227, 200, 0.55);
+  color: rgba(255, 248, 235, 0.88);
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.85);
 }
 
 .m-flight-instruments__val {
   font-family: var(--flight-mono);
   font-size: 0.92rem;
-  font-weight: 500;
+  font-weight: 600;
   letter-spacing: 0.08em;
-  color: var(--flight-gold-hi);
-  text-shadow: 0 0 18px rgba(201, 162, 74, 0.35);
+  color: #f8e8b8;
+  text-shadow:
+    0 1px 2px rgba(0, 0, 0, 0.9),
+    0 0 14px rgba(201, 162, 74, 0.55);
   animation: m-flight-hud-tick 0.45s cubic-bezier(0.16, 0.84, 0.28, 1);
 }
 
