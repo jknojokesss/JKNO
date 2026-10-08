@@ -140,15 +140,17 @@ export default function HomeLanding({
           <p className="m-flight__hero-lead">
             Register, vendors, jobs — synced nightly into a login that looks like your business, not a template.
           </p>
-          <button type="button" className="m-flight__go" onClick={scrollDemos}>
-            Walk a sample
-          </button>
-          <button type="button" className="m-flight__go m-flight__go--ghost" onClick={scrollContact}>
-            Tell me what you run
-          </button>
-          <p className="m-flight__scroll-cue" aria-hidden="true">
-            <span>Scroll</span>
-          </p>
+          <div className="m-flight__hero-actions">
+            <button type="button" className="m-flight__go" onClick={scrollDemos}>
+              Walk a sample
+            </button>
+            <button type="button" className="m-flight__go m-flight__go--ghost" onClick={scrollContact}>
+              Tell me what you run
+            </button>
+            <p className="m-flight__scroll-cue" aria-hidden="true">
+              <span>Scroll</span>
+            </p>
+          </div>
         </header>
 
         <div className="m-flight__lane m-flight__lane--left" id="flight-books">
