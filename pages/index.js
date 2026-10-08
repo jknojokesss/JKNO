@@ -55,6 +55,7 @@ export default function Landing() {
         title="JK No Jokes Financials | Owner portals on your books"
         description="Owner portals on real books — margin during the week, close that ties out. Walk the samples, then start a build in about six days."
         darkHeader
+        flightHome
         padTop={false}
       >
         <HomeLanding

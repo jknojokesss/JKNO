@@ -23,24 +23,31 @@ export function MarketingLogo({ size = 26, tagline = true, onClick, light = fals
   )
 }
 
-export default function MarketingShell({ title, description, children, padTop = true, darkHeader = false }) {
+export default function MarketingShell({
+  title,
+  description,
+  children,
+  padTop = true,
+  darkHeader = false,
+  flightHome = false,
+}) {
   const router = useRouter()
   const [scrolled, setScrolled] = useState(false)
   const [onDarkHero, setOnDarkHero] = useState(false)
   const [menuOpen, setMenuOpen] = useState(false)
   const [isMobile, setIsMobile] = useState(false)
 
-  const onHomeHero = darkHeader && onDarkHero && !menuOpen
+  const onHomeHero = flightHome || (darkHeader && onDarkHero && !menuOpen)
 
   useEffect(() => {
     const onScroll = () => {
       setScrolled(window.scrollY > 8)
-      if (router.pathname === '/') setOnDarkHero(window.scrollY < 720)
+      if (router.pathname === '/' && !flightHome) setOnDarkHero(window.scrollY < 720)
     }
     onScroll()
     window.addEventListener('scroll', onScroll)
     return () => window.removeEventListener('scroll', onScroll)
-  }, [router.pathname])
+  }, [router.pathname, flightHome])
 
   useEffect(() => {
     const checkMobile = () => setIsMobile(window.innerWidth < 900)
@@ -90,7 +97,7 @@ export default function MarketingShell({ title, description, children, padTop = 
       </Head>
 
       <header
-        className={`m-header${onHomeHero ? ' m-header--hero' : ''}${!onHomeHero && (scrolled || menuOpen) ? ' is-solid' : ''}${menuOpen ? ' is-menu-open' : ''}${onHomeHero ? ' m-header--dark' : ''}`}
+        className={`m-header${flightHome ? ' m-header--flight' : ''}${onHomeHero ? ' m-header--hero' : ''}${!onHomeHero && (scrolled || menuOpen) ? ' is-solid' : ''}${menuOpen ? ' is-menu-open' : ''}${onHomeHero ? ' m-header--dark' : ''}`}
       >
         <div className="m-wrap m-header__inner">
           <MarketingLogo light={onHomeHero} onClick={() => { setMenuOpen(false); router.push('/') }} />
@@ -133,7 +140,7 @@ export default function MarketingShell({ title, description, children, padTop = 
 
       <div style={{ paddingTop: padTop ? '68px' : 0 }}>{children}</div>
 
-      <footer style={{ padding: '48px 0 40px', borderTop: '1px solid #DFE4EC', background: '#fff' }}>
+      <footer className={flightHome ? 'm-footer-flight' : ''} style={{ padding: '48px 0 40px', borderTop: flightHome ? undefined : '1px solid #DFE4EC', background: flightHome ? undefined : '#fff' }}>
         <div className="m-wrap" style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'space-between', gap: '32px', alignItems: 'flex-start' }}>
           <div>
             <MarketingLogo size={22} tagline={false} onClick={() => router.push('/')} />
