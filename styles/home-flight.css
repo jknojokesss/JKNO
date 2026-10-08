@@ -234,8 +234,10 @@ html {
   max-width: 36rem;
 }
 
-.m-flight--live .m-flight__nose > *:not(.m-flight__scroll-cue) {
-  animation: m-flight-hero-in 0.95s cubic-bezier(0.16, 0.84, 0.28, 1) backwards;
+@media (prefers-reduced-motion: no-preference) {
+  .m-flight--live .m-flight__nose > *:not(.m-flight__scroll-cue) {
+    animation: m-flight-hero-in 0.95s cubic-bezier(0.16, 0.84, 0.28, 1) both;
+  }
 }
 
 .m-flight--live .m-flight__nose > *:nth-child(1) { animation-delay: 0.08s; }
@@ -247,11 +249,9 @@ html {
 
 @keyframes m-flight-hero-in {
   from {
-    opacity: 0;
     transform: translateY(22px);
   }
   to {
-    opacity: 1;
     transform: none;
   }
 }
@@ -390,22 +390,6 @@ html {
   transition: box-shadow 0.45s ease, background 0.45s ease;
 }
 
-/* Before JS: cards readable. After motion boots, hide off-screen cards until fly-in. */
-.m-flight:not(.m-flight--motion) .m-flight-card__fly {
-  opacity: 1;
-  transform: none;
-}
-
-.m-flight--motion .m-flight-card:not(.is-visible) {
-  opacity: 0;
-  pointer-events: none;
-}
-
-.m-flight--motion .m-flight-card.is-visible {
-  opacity: 1;
-  pointer-events: auto;
-}
-
 .m-flight:not(.m-flight--scrolling) .m-flight-card {
   transition:
     transform 0.75s cubic-bezier(0.16, 0.84, 0.28, 1),
@@ -413,19 +397,11 @@ html {
     background 0.45s ease;
 }
 
-.m-flight--motion .m-flight-card:not(.is-visible) .m-flight-card__fly {
-  --fly-x: 0px;
-  --fly-y: 36px;
-  --fly-rotate: 0deg;
-  opacity: 0;
-  transform: translate3d(var(--fly-x), var(--fly-y), 0) rotate(var(--fly-rotate)) scale(0.92);
-  will-change: transform, opacity;
-}
-
 .m-flight-card__fly {
   --fly-x: 0px;
   --fly-y: 36px;
   --fly-rotate: 0deg;
+  opacity: 1;
 }
 
 .m-flight__lane--left .m-flight-card__fly {
@@ -441,18 +417,16 @@ html {
 }
 
 .m-flight-card.is-visible .m-flight-card__fly {
-  animation: m-flight-box-in 0.92s cubic-bezier(0.16, 0.84, 0.28, 1) forwards;
+  animation: m-flight-box-in 0.85s cubic-bezier(0.16, 0.84, 0.28, 1) both;
   animation-delay: var(--fly-stagger, 0ms);
 }
 
 @keyframes m-flight-box-in {
   from {
-    opacity: 0;
-    transform: translate3d(var(--fly-x), var(--fly-y), 0) rotate(var(--fly-rotate)) scale(0.9);
+    transform: translate3d(var(--fly-x), var(--fly-y), 0) rotate(var(--fly-rotate)) scale(0.96);
   }
   to {
-    opacity: 1;
-    transform: translate3d(0, 0, 0) rotate(0deg) scale(1);
+    transform: none;
   }
 }
 
