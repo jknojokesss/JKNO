@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
-import { useHomeFlightMotion } from '../lib/useHomeFlightMotion'
+import { useHomeFlightMotion, FLIGHT_STEPS } from '../lib/useHomeFlightMotion'
+import { scrollToFlightStep } from '../lib/flightSteps'
 import { useRouter } from 'next/router'
 import { BOOKING_URL } from '../lib/marketing'
 import { FEATURED_DEMOS } from '../lib/marketingDemos'
@@ -66,13 +67,13 @@ export default function HomeLanding({
   const router = useRouter()
   const rootRef = useRef(null)
   const visible = useRevealCards()
-  const { hud } = useHomeFlightMotion(rootRef, live)
+  const { hud, activeStep, stripFill } = useHomeFlightMotion(rootRef, live)
   const scrollDemos = () => {
-    document.getElementById('demos')?.scrollIntoView({ behavior: 'smooth' })
+    scrollToFlightStep('flight-demos')
   }
 
   const scrollContact = () => {
-    document.getElementById('contact')?.scrollIntoView({ behavior: 'smooth' })
+    scrollToFlightStep('contact')
   }
 
   const cardClass = (id) =>
@@ -86,27 +87,50 @@ export default function HomeLanding({
       <div className="m-flight__vignette" aria-hidden="true" />
       <div className="m-flight__grain" aria-hidden="true" />
       <div className="m-flight__dim" aria-hidden="true" />
-      <div className="m-flight__progress" aria-hidden="true">
-        <span className="m-flight__progress-fill" />
-      </div>
+      <aside className="m-flight-instruments" aria-hidden="true">
+        <div className="m-flight-instruments__inst">
+          <span className="m-flight-instruments__lab">Books</span>
+          <span className="m-flight-instruments__val" key={`b-${hud.books}`}>{hud.books}</span>
+        </div>
+        <div className="m-flight-instruments__inst">
+          <span className="m-flight-instruments__lab">Sync</span>
+          <span className="m-flight-instruments__val" key={`s-${hud.sync}`}>{hud.sync}</span>
+        </div>
+        <div className="m-flight-instruments__inst">
+          <span className="m-flight-instruments__lab">Login</span>
+          <span className="m-flight-instruments__val" key={`l-${hud.login}`}>{hud.login}</span>
+        </div>
+      </aside>
 
-      <div className="m-flight-hud" aria-hidden="true">
-        <div className="m-flight-hud__cell">
-          <span>Books</span>
-          <strong key={hud.books}>{hud.books}</strong>
+      <nav className="m-flight-strip" aria-label="Story progress">
+        <div className="m-flight-strip__track">
+          <div
+            className="m-flight-strip__fill"
+            style={{ width: `${stripFill * 100}%` }}
+          />
+          <div
+            className="m-flight-strip__beacon"
+            style={{ left: `${stripFill * 100}%` }}
+          />
         </div>
-        <div className="m-flight-hud__cell">
-          <span>Sync</span>
-          <strong key={hud.sync}>{hud.sync}</strong>
-        </div>
-        <div className="m-flight-hud__cell">
-          <span>Login</span>
-          <strong key={hud.login}>{hud.login}</strong>
-        </div>
-      </div>
+        <ul className="m-flight-waypoints">
+          {FLIGHT_STEPS.map((step, i) => (
+            <li key={step.id} data-on={activeStep === i ? '1' : undefined}>
+              <button
+                type="button"
+                onClick={() => scrollToFlightStep(step.target)}
+                aria-current={activeStep === i ? 'step' : undefined}
+              >
+                <span className="wp-n">{step.num}</span>
+                <span className="wp-l">{step.label}</span>
+              </button>
+            </li>
+          ))}
+        </ul>
+      </nav>
 
       <div className="m-flight__scroll">
-        <header className="m-flight__nose">
+        <header className="m-flight__nose" id="flight-intro">
           <p className="m-flight__eyebrow">Owner portals on real books</p>
           <h1 className="m-flight__hero-h">Your accountant has the month. You need today.</h1>
           <p className="m-flight__hero-lead">
@@ -123,7 +147,7 @@ export default function HomeLanding({
           </p>
         </header>
 
-        <div className="m-flight__lane m-flight__lane--left">
+        <div className="m-flight__lane m-flight__lane--left" id="flight-books">
           <article
             className={cardClass('books')}
             data-flight-card="books"
@@ -143,7 +167,7 @@ export default function HomeLanding({
           </article>
         </div>
 
-        <div className="m-flight__lane m-flight__lane--right">
+        <div className="m-flight__lane m-flight__lane--right" id="flight-portal">
           <article
             className={cardClass('portal')}
             data-flight-card="portal"
@@ -163,7 +187,7 @@ export default function HomeLanding({
           </article>
         </div>
 
-        <div className="m-flight__lane m-flight__lane--left">
+        <div className="m-flight__lane m-flight__lane--left" id="flight-samples">
           <article
             className={cardClass('samples')}
             data-flight-card="samples"
@@ -187,7 +211,7 @@ export default function HomeLanding({
           </article>
         </div>
 
-        <div className="m-flight__lane m-flight__lane--right" id="demos">
+        <div className="m-flight__lane m-flight__lane--right" id="flight-demos">
           <article
             className={`${cardClass('demos')} m-flight-card--demos`}
             data-flight-card="demos"
@@ -218,7 +242,7 @@ export default function HomeLanding({
           </article>
         </div>
 
-        <div className="m-flight__lane m-flight__lane--left">
+        <div className="m-flight__lane m-flight__lane--left" id="flight-how">
           <article
             className={cardClass('how')}
             data-flight-card="how"
