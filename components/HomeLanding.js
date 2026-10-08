@@ -79,6 +79,7 @@ export default function HomeLanding({
     <div ref={rootRef} className="m-flight m-flight--live">
       <div className="m-flight__sky" aria-hidden="true" />
       <div className="m-flight__haze" aria-hidden="true" />
+      <div className="m-flight__horizon" aria-hidden="true" />
       <div className="m-flight__orb" aria-hidden="true" />
       <div className="m-flight__vignette" aria-hidden="true" />
       <div className="m-flight__grain" aria-hidden="true" />
