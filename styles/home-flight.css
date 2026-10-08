@@ -98,6 +98,101 @@ html {
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.82' numOctaves='3'/%3E%3C/filter%3E%3Crect width='180' height='180' filter='url(%23n)'/%3E%3C/svg%3E");
 }
 
+/* Scroll-driven foil shards + contrails */
+.m-flight__debris {
+  position: fixed;
+  inset: -10%;
+  z-index: 3;
+  pointer-events: none;
+  overflow: hidden;
+  transform: translate3d(var(--flight-debris-sway, 0px), var(--flight-debris-y, 0px), 0)
+    rotate(var(--flight-debris-roll, 0deg));
+  will-change: transform;
+}
+
+.m-flight__shard {
+  position: absolute;
+  display: block;
+  border-radius: 2px;
+  background: linear-gradient(
+    105deg,
+    transparent 0%,
+    rgba(240, 220, 164, 0.55) 35%,
+    rgba(201, 162, 74, 0.75) 50%,
+    rgba(240, 220, 164, 0.4) 65%,
+    transparent 100%
+  );
+  box-shadow: 0 0 20px rgba(201, 162, 74, 0.25);
+  opacity: 0.35;
+  animation: m-flight-shard-pulse 9s ease-in-out infinite;
+}
+
+.m-flight__shard--1 { top: 12%; left: 8%; width: 140px; height: 10px; transform: rotate(-18deg); animation-delay: 0s; }
+.m-flight__shard--2 { top: 28%; right: 6%; width: 100px; height: 7px; transform: rotate(12deg); animation-delay: -2s; }
+.m-flight__shard--3 { top: 48%; left: 4%; width: 180px; height: 8px; transform: rotate(-8deg); animation-delay: -4s; }
+.m-flight__shard--4 { top: 62%; right: 10%; width: 120px; height: 9px; transform: rotate(22deg); animation-delay: -1s; }
+.m-flight__shard--5 { top: 78%; left: 14%; width: 90px; height: 6px; transform: rotate(-25deg); animation-delay: -3s; }
+.m-flight__shard--6 { top: 38%; left: 42%; width: 70px; height: 5px; transform: rotate(35deg); animation-delay: -5s; opacity: 0.22; }
+
+.m-flight__contrail {
+  position: absolute;
+  left: -20%;
+  width: 45%;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.35), transparent);
+  opacity: 0.5;
+  transform: translateX(calc(var(--flight-contrail-shift, 0) * -1));
+}
+
+.m-flight__contrail--1 { top: 22%; }
+.m-flight__contrail--2 { top: 55%; opacity: 0.35; width: 55%; }
+.m-flight__contrail--3 { top: 74%; opacity: 0.28; width: 38%; }
+
+.m-flight__foil {
+  position: absolute;
+  width: 52px;
+  height: 28px;
+  border-radius: 4px;
+  background: linear-gradient(145deg, #ead89a, #c9a84c 55%, #a88830);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
+  opacity: 0.42;
+  animation: m-flight-foil-drift 16s ease-in-out infinite alternate;
+}
+
+.m-flight__foil--1 {
+  top: 18%;
+  right: 12%;
+  transform: rotate(-12deg) translateY(calc(var(--flight-scroll, 0) * -80px));
+}
+
+.m-flight__foil--2 {
+  bottom: 22%;
+  left: 10%;
+  width: 44px;
+  height: 24px;
+  transform: rotate(18deg) translateY(calc(var(--flight-scroll, 0) * -120px));
+  animation-delay: -6s;
+}
+
+@keyframes m-flight-shard-pulse {
+  0%, 100% { opacity: 0.28; filter: brightness(0.9); }
+  50% { opacity: 0.62; filter: brightness(1.15); }
+}
+
+@keyframes m-flight-foil-drift {
+  from { transform: rotate(-12deg) translate(0, 0); }
+  to { transform: rotate(8deg) translate(24px, -32px); }
+}
+
+.m-flight[data-flight-section]:not([data-flight-section='nose']) .m-flight__shard {
+  opacity: 0.5;
+}
+
+.m-flight[data-flight-section='demos'] .m-flight__foil,
+.m-flight[data-flight-section='samples'] .m-flight__foil {
+  opacity: 0.65;
+}
+
 .m-flight__dim {
   position: fixed;
   inset: 0;
@@ -584,6 +679,7 @@ html {
 
 .m-flight-waypoints li[data-on='1'] button {
   opacity: 1;
+  transform: translateY(-3px) scale(1.04);
 }
 
 .m-flight-waypoints li[data-on='1'] .wp-l {
@@ -687,13 +783,30 @@ html {
   color: rgba(247, 244, 239, 0.4);
 }
 
-.marketing-site:has(.m-flight) .m-footer-flight p {
-  color: rgba(247, 244, 239, 0.55);
+.marketing-site:has(.m-flight) .m-footer-flight p,
+.marketing-site .m-footer-flight__blurb {
+  color: rgba(247, 244, 239, 0.62);
+}
+
+.marketing-site .m-footer-flight .m-logo__jk {
+  color: #f7f4ef;
+}
+
+.marketing-site .m-footer-flight .m-logo__dot {
+  color: var(--flight-gold-hi, #f0dca4);
+}
+
+.marketing-site .m-footer-flight .m-nav-link:hover {
+  color: var(--flight-gold-hi, #f0dca4);
 }
 
 @media (prefers-reduced-motion: reduce) {
   html:has(.m-flight) {
     scroll-snap-type: none;
+  }
+
+  .m-flight__debris {
+    display: none;
   }
 
   .m-flight__sky,

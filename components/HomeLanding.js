@@ -87,6 +87,19 @@ export default function HomeLanding({
       <div className="m-flight__vignette" aria-hidden="true" />
       <div className="m-flight__grain" aria-hidden="true" />
       <div className="m-flight__dim" aria-hidden="true" />
+      <div className="m-flight__debris" aria-hidden="true">
+        <span className="m-flight__shard m-flight__shard--1" />
+        <span className="m-flight__shard m-flight__shard--2" />
+        <span className="m-flight__shard m-flight__shard--3" />
+        <span className="m-flight__shard m-flight__shard--4" />
+        <span className="m-flight__shard m-flight__shard--5" />
+        <span className="m-flight__shard m-flight__shard--6" />
+        <span className="m-flight__contrail m-flight__contrail--1" />
+        <span className="m-flight__contrail m-flight__contrail--2" />
+        <span className="m-flight__contrail m-flight__contrail--3" />
+        <span className="m-flight__foil m-flight__foil--1" />
+        <span className="m-flight__foil m-flight__foil--2" />
+      </div>
       <aside className="m-flight-instruments" aria-hidden="true">
         <div className="m-flight-instruments__inst">
           <span className="m-flight-instruments__lab">Books</span>

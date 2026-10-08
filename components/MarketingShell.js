@@ -143,8 +143,17 @@ export default function MarketingShell({
       <footer className={flightHome ? 'm-footer-flight' : ''} style={{ padding: '48px 0 40px', borderTop: flightHome ? undefined : '1px solid #DFE4EC', background: flightHome ? undefined : '#fff' }}>
         <div className="m-wrap" style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'space-between', gap: '32px', alignItems: 'flex-start' }}>
           <div>
-            <MarketingLogo size={22} tagline={false} onClick={() => router.push('/')} />
-            <p style={{ marginTop: '12px', fontSize: '14px', color: '#5A6577', maxWidth: '300px', lineHeight: 1.65 }}>
+            <MarketingLogo size={22} tagline={false} light={flightHome} onClick={() => router.push('/')} />
+            <p
+              className={flightHome ? 'm-footer-flight__blurb' : ''}
+              style={{
+                marginTop: '12px',
+                fontSize: '14px',
+                color: flightHome ? undefined : '#5A6577',
+                maxWidth: '300px',
+                lineHeight: 1.65,
+              }}
+            >
               I build the portal, write the integrations, and keep the books. One company per login.
             </p>
           </div>
