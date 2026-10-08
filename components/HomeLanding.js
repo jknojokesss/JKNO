@@ -1,4 +1,4 @@
-import { useRef, useState, useEffect } from 'react'
+import { useState, useCallback } from 'react'
 import { useHomeFlightMotion, FLIGHT_STEPS } from '../lib/useHomeFlightMotion'
 import { useScrollFlyIn } from '../lib/useScrollFlyIn'
 import { scrollToFlightStep } from '../lib/flightSteps'
@@ -64,13 +64,12 @@ export default function HomeLanding({
   submitting,
 }) {
   const router = useRouter()
-  const rootRef = useRef(null)
-  const [flyReady, setFlyReady] = useState(false)
-  useEffect(() => {
-    setFlyReady(true)
+  const [flightRoot, setFlightRoot] = useState(null)
+  const setRootRef = useCallback((node) => {
+    setFlightRoot(node)
   }, [])
-  useScrollFlyIn(rootRef, flyReady)
-  const { hud, activeStep } = useHomeFlightMotion(rootRef)
+  useScrollFlyIn(flightRoot, Boolean(flightRoot))
+  const { hud, activeStep } = useHomeFlightMotion(flightRoot)
   const scrollDemos = () => {
     scrollToFlightStep('flight-demos')
   }
@@ -80,7 +79,7 @@ export default function HomeLanding({
   }
 
   return (
-    <div ref={rootRef} className="m-flight m-flight--live">
+    <div ref={setRootRef} className="m-flight m-flight--live">
       <div className="m-flight__sky" aria-hidden="true" />
       <div className="m-flight__haze" aria-hidden="true" />
       <div className="m-flight__orb" aria-hidden="true" />
