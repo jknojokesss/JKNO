@@ -1,5 +1,6 @@
 import { useRef } from 'react'
 import { useHomeFlightMotion, FLIGHT_STEPS } from '../lib/useHomeFlightMotion'
+import { useFlightCardReveal } from '../lib/useFlightCardReveal'
 import { scrollToFlightStep } from '../lib/flightSteps'
 import { useRouter } from 'next/router'
 import { BOOKING_URL } from '../lib/marketing'
@@ -64,6 +65,7 @@ export default function HomeLanding({
 }) {
   const router = useRouter()
   const rootRef = useRef(null)
+  useFlightCardReveal(rootRef)
   const { hud, activeStep } = useHomeFlightMotion(rootRef)
   const scrollDemos = () => {
     scrollToFlightStep('flight-demos')
