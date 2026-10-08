@@ -57,7 +57,6 @@ function FlightCard({ id, className = '', children }) {
 }
 
 export default function HomeLanding({
-  live,
   form,
   setForm,
   onSubmit,
@@ -77,7 +76,7 @@ export default function HomeLanding({
   }
 
   return (
-    <div ref={rootRef} className={live ? 'm-flight m-flight--live' : 'm-flight'}>
+    <div ref={rootRef} className="m-flight m-flight--live">
       <div className="m-flight__sky" aria-hidden="true" />
       <div className="m-flight__haze" aria-hidden="true" />
       <div className="m-flight__orb" aria-hidden="true" />

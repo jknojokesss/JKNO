@@ -163,15 +163,21 @@
   backdrop-filter: blur(24px);
 }
 
-.marketing-site--flight .m-label {
+/* Dark form fields only on inner flight pages — not white glass cards on home */
+.m-flight-page .m-label {
   color: rgba(247, 244, 239, 0.75);
 }
 
-.marketing-site--flight .m-label input,
-.marketing-site--flight .m-label textarea {
+.m-flight-page .m-label input,
+.m-flight-page .m-label textarea {
   background: rgba(255, 255, 255, 0.08);
   border-color: rgba(255, 255, 255, 0.2);
   color: #f7f4ef;
+}
+
+.m-flight-page .m-label input::placeholder,
+.m-flight-page .m-label textarea::placeholder {
+  color: rgba(247, 244, 239, 0.42);
 }
 
 .marketing-site--flight .jk-choc-cap {

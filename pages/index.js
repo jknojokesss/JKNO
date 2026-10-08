@@ -1,16 +1,8 @@
-import { useState, useCallback, useEffect, useLayoutEffect } from 'react'
+import { useState, useEffect } from 'react'
 import HomeIntro from '../components/HomeIntro'
 import HomeLanding from '../components/HomeLanding'
 import MarketingShell from '../components/MarketingShell'
-import { shouldSkipHomeIntro, isDirectHomeTraffic } from '../lib/homeIntro'
-
-function initialSkipIntro() {
-  if (typeof window === 'undefined') return false
-  return shouldSkipHomeIntro()
-}
-
 export default function Landing() {
-  const [portalLive, setPortalLive] = useState(initialSkipIntro)
   const [form, setForm] = useState({
     name: '',
     email: '',
@@ -21,11 +13,6 @@ export default function Landing() {
   })
   const [submitted, setSubmitted] = useState(false)
   const [submitting, setSubmitting] = useState(false)
-
-  useLayoutEffect(() => {
-    // Hero stays visible under the JK intro overlay (intro no longer blanks the page).
-    setPortalLive(true)
-  }, [])
 
   useEffect(() => {
     document.body.style.removeProperty('overflow')
@@ -48,8 +35,6 @@ export default function Landing() {
     setSubmitting(false)
   }
 
-  const handleIntroReveal = useCallback(() => setPortalLive(true), [])
-
   return (
     <>
       <MarketingShell
@@ -60,7 +45,6 @@ export default function Landing() {
         padTop={false}
       >
         <HomeLanding
-          live={portalLive}
           form={form}
           setForm={setForm}
           onSubmit={handleSubmit}
@@ -69,7 +53,7 @@ export default function Landing() {
         />
       </MarketingShell>
 
-      <HomeIntro onReveal={handleIntroReveal} />
+      <HomeIntro />
     </>
   )
 }
