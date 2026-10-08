@@ -1,5 +1,4 @@
 import { useState, useEffect } from 'react'
-import HomeIntro from '../components/HomeIntro'
 import HomeLanding from '../components/HomeLanding'
 import MarketingShell from '../components/MarketingShell'
 export default function Landing() {
@@ -52,8 +51,6 @@ export default function Landing() {
           submitting={submitting}
         />
       </MarketingShell>
-
-      <HomeIntro />
     </>
   )
 }

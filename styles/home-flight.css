@@ -403,6 +403,10 @@ html {
   --fly-rotate: 0deg;
   opacity: 1;
   transform: none;
+  transition:
+    transform 0.9s cubic-bezier(0.16, 0.84, 0.28, 1),
+    opacity 0.65s ease;
+  transition-delay: var(--fly-stagger, 0ms);
 }
 
 .m-flight__lane--left .m-flight-card__fly {
@@ -417,36 +421,14 @@ html {
   --fly-rotate: 4deg;
 }
 
-/* SSR / no-JS: cards readable. After reveal hook mounts, off-screen cards wait for scroll. */
-.m-flight--reveal-ready .m-flight-card:not(.is-visible) {
+.m-flight--reveal-pending .m-flight-card:not(.is-visible) .m-flight-card__fly {
   opacity: 0;
-  pointer-events: none;
+  transform: translate3d(var(--fly-x), var(--fly-y), 0) rotate(var(--fly-rotate)) scale(0.94);
 }
 
-.m-flight--reveal-ready .m-flight-card:not(.is-visible) .m-flight-card__fly {
-  opacity: 0;
-  transform: translate3d(var(--fly-x), var(--fly-y), 0) rotate(var(--fly-rotate)) scale(0.92);
-}
-
-.m-flight-card.is-visible {
+.m-flight--reveal-pending .m-flight-card.is-visible .m-flight-card__fly {
   opacity: 1;
-  pointer-events: auto;
-}
-
-.m-flight-card.is-visible .m-flight-card__fly {
-  animation: m-flight-box-in 1s cubic-bezier(0.16, 0.84, 0.28, 1) forwards;
-  animation-delay: var(--fly-stagger, 0ms);
-}
-
-@keyframes m-flight-box-in {
-  from {
-    opacity: 0;
-    transform: translate3d(var(--fly-x), var(--fly-y), 0) rotate(var(--fly-rotate)) scale(0.92);
-  }
-  to {
-    opacity: 1;
-    transform: none;
-  }
+  transform: none;
 }
 
 .m-flight-card.is-active {
@@ -921,12 +903,6 @@ html {
     transform: none;
     transition: none;
     animation: none;
-  }
-
-  .m-flight--reveal-ready .m-flight-card:not(.is-visible),
-  .m-flight-card {
-    opacity: 1;
-    pointer-events: auto;
   }
 
   .m-flight-card__fly {
