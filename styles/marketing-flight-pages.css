@@ -1,0 +1,231 @@
+/* Inner marketing pages — same flight sky + dark chrome as homepage */
+
+.marketing-site--flight {
+  background: #07080b;
+  color: #f7f4ef;
+  --flight-display: 'Poppins', var(--m-font);
+  --flight-gold: #c9a24a;
+  --flight-gold-hi: #f0dca4;
+}
+
+.m-flight-page__chrome {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+}
+
+.m-flight-page__sky,
+.m-flight-page__haze,
+.m-flight-page__vignette,
+.m-flight-page__grain {
+  position: absolute;
+  inset: 0;
+}
+
+.m-flight-page__sky {
+  background: linear-gradient(
+    180deg,
+    #0b1330 0%,
+    #2a3558 38%,
+    #6b5a48 72%,
+    #c08b5e 88%,
+    #f4c58a 100%
+  );
+}
+
+.m-flight-page__haze {
+  opacity: 0.5;
+  background: radial-gradient(90% 70% at 50% 100%, rgba(244, 197, 138, 0.4), transparent 70%);
+}
+
+.m-flight-page__vignette {
+  background: radial-gradient(
+    125% 100% at 50% 46%,
+    rgba(4, 6, 11, 0) 52%,
+    rgba(4, 6, 11, 0.45) 100%
+  );
+}
+
+.m-flight-page__grain {
+  opacity: 0.035;
+  mix-blend-mode: overlay;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.82' numOctaves='3'/%3E%3C/filter%3E%3Crect width='180' height='180' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+
+.m-flight-page {
+  position: relative;
+  z-index: 1;
+  min-height: 60vh;
+}
+
+.marketing-site--flight .m-inner-hero {
+  background: transparent;
+  clip-path: none;
+  margin-bottom: 0;
+  padding: clamp(72px, 9vw, 96px) 0 clamp(40px, 5vw, 56px);
+  text-shadow: 0 1px 3px rgba(4, 8, 14, 0.85), 0 3px 18px rgba(4, 8, 14, 0.55);
+}
+
+.marketing-site--flight .m-inner-hero__title,
+.marketing-site--flight .m-h1,
+.marketing-site--flight .m-h2,
+.marketing-site--flight .m-h3,
+.marketing-site--flight .m-stack-title {
+  font-family: var(--flight-display);
+  font-weight: 300;
+  color: #fff;
+}
+
+.marketing-site--flight .m-lead,
+.marketing-site--flight .m-about-p,
+.marketing-site--flight .m-stack-blurb,
+.marketing-site--flight .m-inner-hero__lead {
+  color: rgba(247, 244, 239, 0.72);
+}
+
+.marketing-site--flight .m-kicker {
+  font-family: var(--flight-display);
+  letter-spacing: 0.24em;
+  color: var(--flight-gold-hi);
+}
+
+.marketing-site--flight .m-section {
+  padding: clamp(40px, 5vw, 64px) 0;
+}
+
+.marketing-site--flight .m-section--panel {
+  background: rgba(8, 10, 14, 0.35);
+  border-top: 1px solid rgba(201, 162, 74, 0.22);
+  border-bottom: 1px solid rgba(201, 162, 74, 0.22);
+  backdrop-filter: blur(12px);
+}
+
+.marketing-site--flight .m-split-row--bordered {
+  border-bottom-color: rgba(255, 255, 255, 0.12);
+}
+
+.marketing-site--flight .m-stack-item__title {
+  color: #f7f4ef;
+}
+
+.marketing-site--flight .m-stack-item__desc {
+  color: rgba(247, 244, 239, 0.58);
+}
+
+.marketing-site--flight .m-stack-item-link:hover .m-stack-item__title {
+  color: var(--flight-gold-hi);
+}
+
+.marketing-site--flight .m-ship-row__cap,
+.marketing-site--flight .m-ship-row__text {
+  color: rgba(247, 244, 239, 0.85);
+}
+
+.marketing-site--flight .m-ship-row__n {
+  color: var(--flight-gold-hi);
+  border-color: rgba(201, 162, 74, 0.45);
+}
+
+.marketing-site--flight .m-btn--primary {
+  background: linear-gradient(180deg, #e2c892, var(--flight-gold));
+  color: #1a1409;
+  border: 1px solid rgba(201, 162, 74, 0.65);
+}
+
+.marketing-site--flight .m-btn--primary:hover {
+  background: linear-gradient(180deg, #f0dca4, #d4b85c);
+  color: #1a1409;
+}
+
+.marketing-site--flight .m-btn--secondary {
+  background: transparent;
+  color: #efe3c8;
+  border: 1px solid rgba(201, 162, 74, 0.55);
+}
+
+.marketing-site--flight .m-btn--secondary:hover {
+  background: rgba(201, 162, 74, 0.16);
+  border-color: var(--flight-gold);
+  color: #fff;
+}
+
+.marketing-site--flight .m-btn--text {
+  color: var(--flight-gold-hi);
+}
+
+.marketing-site--flight .m-card {
+  background: rgba(252, 253, 255, 0.88);
+  color: #0d1319;
+  border: none;
+  border-radius: 18px;
+  box-shadow: 0 20px 50px rgba(8, 20, 38, 0.28);
+  backdrop-filter: blur(24px);
+}
+
+.marketing-site--flight .m-label {
+  color: rgba(247, 244, 239, 0.75);
+}
+
+.marketing-site--flight .m-label input,
+.marketing-site--flight .m-label textarea {
+  background: rgba(255, 255, 255, 0.08);
+  border-color: rgba(255, 255, 255, 0.2);
+  color: #f7f4ef;
+}
+
+.marketing-site--flight .jk-choc-cap {
+  color: rgba(247, 244, 239, 0.45);
+}
+
+.marketing-site--flight .m-about-name {
+  color: #fff;
+}
+
+.marketing-site--flight .m-about-role {
+  color: var(--flight-gold-hi);
+}
+
+.marketing-site--flight .m-mobile-menu {
+  background: rgba(6, 8, 12, 0.98);
+  border-bottom: 1px solid rgba(201, 162, 74, 0.3);
+}
+
+.marketing-site--flight .m-mobile-nav-link {
+  color: rgba(247, 244, 239, 0.72);
+}
+
+.marketing-site--flight .m-mobile-nav-link.is-active,
+.marketing-site--flight .m-mobile-nav-link:hover {
+  color: #fff;
+}
+
+.marketing-site--flight .m-footer-flight .m-footer-bar {
+  color: rgba(247, 244, 239, 0.4);
+  border-top-color: rgba(255, 255, 255, 0.08);
+}
+
+.marketing-site--flight .m-footer-flight .m-nav-link {
+  color: rgba(247, 244, 239, 0.55);
+}
+
+.marketing-site--flight .m-footer-flight .m-nav-link:hover {
+  color: var(--flight-gold-hi);
+}
+
+/* Legal pages */
+.marketing-site--flight .m-legal-doc {
+  color: rgba(247, 244, 239, 0.78);
+}
+
+.marketing-site--flight .m-legal-doc h1,
+.marketing-site--flight .m-legal-doc h2 {
+  color: #fff;
+  font-family: var(--flight-display);
+  font-weight: 400;
+}
+
+.marketing-site--flight .m-legal-doc li,
+.marketing-site--flight .m-legal-doc p {
+  color: rgba(247, 244, 239, 0.72);
+}

@@ -3,7 +3,7 @@ import MarketingShell from './MarketingShell'
 export default function LegalDoc({ title, sections }) {
   return (
     <MarketingShell title={`${title} — JK No Jokes Financials`} description={`${title} for JK No Jokes Financials`}>
-      <main className="m-wrap" style={{ maxWidth: '720px', padding: 'clamp(48px,6vw,72px) 24px clamp(64px,8vw,96px)' }}>
+      <main className="m-wrap m-legal-doc" style={{ maxWidth: '720px', padding: 'clamp(48px,6vw,72px) 24px clamp(64px,8vw,96px)' }}>
         <div style={{ marginBottom: '40px', paddingBottom: '28px', borderBottom: '1px solid #DFE4EC' }}>
           <div className="m-kicker">Legal</div>
           <h1 className="m-h1" style={{ fontSize: 'clamp(32px, 4vw, 44px)', marginBottom: '12px' }}>{title}</h1>

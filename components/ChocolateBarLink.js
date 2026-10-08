@@ -1,5 +1,5 @@
 /**
- * Gold foil favor bar — label stays readable; foil caps peel in 3D on hover.
+ * Gold foil favor bar — label stays fixed; foil shell peels in 3D on hover.
  */
 export default function ChocolateBarLink({
   href,
@@ -25,29 +25,26 @@ export default function ChocolateBarLink({
     </span>
   )
 
-  const faceInner = unwrap ? (
-    <>
-      <span className="jk-foil-bar__face-base" aria-hidden="true" />
-      <span className="jk-foil-bar__flap jk-foil-bar__flap--top" aria-hidden="true" />
-      <span className="jk-foil-bar__flap jk-foil-bar__flap--left" aria-hidden="true" />
-      <span className="jk-foil-bar__flap jk-foil-bar__flap--right" aria-hidden="true" />
-      <span className="jk-foil-bar__label">
-        {sheen}
-        {typeBlock}
-      </span>
-    </>
-  ) : (
-    <>
-      {sheen}
-      {typeBlock}
-    </>
-  )
-
-  const barBody = (
+  const foilShell = (
     <>
       <span className="jk-foil-bar__end jk-foil-bar__end--left" aria-hidden="true" />
       <span className="jk-foil-bar__mid">
-        <span className="jk-foil-bar__face">{faceInner}</span>
+        <span className="jk-foil-bar__face jk-foil-bar__face--shell">
+          <span className="jk-foil-bar__face-base" aria-hidden="true" />
+        </span>
+      </span>
+      <span className="jk-foil-bar__end jk-foil-bar__end--right" aria-hidden="true" />
+    </>
+  )
+
+  const flatBar = (
+    <>
+      <span className="jk-foil-bar__end jk-foil-bar__end--left" aria-hidden="true" />
+      <span className="jk-foil-bar__mid">
+        <span className="jk-foil-bar__face">
+          {sheen}
+          {typeBlock}
+        </span>
       </span>
       <span className="jk-foil-bar__end jk-foil-bar__end--right" aria-hidden="true" />
     </>
@@ -71,10 +68,14 @@ export default function ChocolateBarLink({
             <span className="jk-foil-bar__choc-body" />
             <span className="jk-foil-bar__end jk-foil-bar__end--choc jk-foil-bar__end--right" />
           </span>
-          <span className="jk-foil-bar__wrap">{barBody}</span>
+          <span className="jk-foil-bar__foil-roll">{foilShell}</span>
+          <span className="jk-foil-bar__label-float">
+            {sheen}
+            {typeBlock}
+          </span>
         </span>
       ) : (
-        barBody
+        flatBar
       )}
     </a>
   )

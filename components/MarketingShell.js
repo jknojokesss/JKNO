@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import { useRouter } from 'next/router'
 import Head from 'next/head'
 import { BOOKING_URL, MARKETING_FONTS, NAV_LINKS } from '../lib/marketing'
+import MarketingFlightChrome from './MarketingFlightChrome'
 
 export function MarketingLogo({ size = 26, tagline = true, onClick, light = false }) {
   const inner = (
@@ -30,6 +31,7 @@ export default function MarketingShell({
   padTop = true,
   darkHeader = false,
   flightHome = false,
+  flightTheme = true,
 }) {
   const router = useRouter()
   const [scrolled, setScrolled] = useState(false)
@@ -37,7 +39,9 @@ export default function MarketingShell({
   const [menuOpen, setMenuOpen] = useState(false)
   const [isMobile, setIsMobile] = useState(false)
 
-  const onHomeHero = flightHome || (darkHeader && onDarkHero && !menuOpen)
+  const chromeFlight = flightTheme || flightHome
+  const showPageChrome = flightTheme && !flightHome
+  const onHomeHero = flightHome || (chromeFlight && !flightHome) || (darkHeader && onDarkHero && !menuOpen)
 
   useEffect(() => {
     const onScroll = () => {
@@ -83,7 +87,7 @@ export default function MarketingShell({
   }
 
   return (
-    <div className="marketing-site">
+    <div className={chromeFlight ? 'marketing-site marketing-site--flight' : 'marketing-site'}>
       <Head>
         {title && <title>{title}</title>}
         {description && <meta name="description" content={description} />}
@@ -97,10 +101,10 @@ export default function MarketingShell({
       </Head>
 
       <header
-        className={`m-header${flightHome ? ' m-header--flight' : ''}${onHomeHero ? ' m-header--hero' : ''}${!onHomeHero && (scrolled || menuOpen) ? ' is-solid' : ''}${menuOpen ? ' is-menu-open' : ''}${onHomeHero ? ' m-header--dark' : ''}`}
+        className={`m-header${chromeFlight ? ' m-header--flight' : ''}${onHomeHero ? ' m-header--hero' : ''}${!onHomeHero && (scrolled || menuOpen) ? ' is-solid' : ''}${menuOpen ? ' is-menu-open' : ''}${onHomeHero || chromeFlight ? ' m-header--dark' : ''}`}
       >
         <div className="m-wrap m-header__inner">
-          <MarketingLogo light={onHomeHero} onClick={() => { setMenuOpen(false); router.push('/') }} />
+          <MarketingLogo light={onHomeHero || chromeFlight} onClick={() => { setMenuOpen(false); router.push('/') }} />
           {!isMobile && (
             <nav className="m-header__nav" aria-label="Main">
               {NAV_LINKS.map((item) => (
@@ -108,14 +112,14 @@ export default function MarketingShell({
                   onClick={() => go(item.href)}>{item.label}</button>
               ))}
               <button type="button" className="m-nav-link" onClick={() => go('/#contact')}>Contact</button>
-              <button type="button" className={`m-btn m-header__btn${onHomeHero ? ' m-btn--ghost-light' : ' m-btn--secondary'}${router.pathname === '/login' ? ' is-nav-current' : ''}`} onClick={() => router.push('/login')}>Log in</button>
-              <a href={BOOKING_URL} target="_blank" rel="noopener noreferrer" className={`m-btn m-header__btn${onHomeHero ? ' m-btn--gold' : ' m-btn--primary'}`}>
+              <button type="button" className={`m-btn m-header__btn${onHomeHero || chromeFlight ? ' m-btn--ghost-light' : ' m-btn--secondary'}${router.pathname === '/login' ? ' is-nav-current' : ''}`} onClick={() => router.push('/login')}>Log in</button>
+              <a href={BOOKING_URL} target="_blank" rel="noopener noreferrer" className={`m-btn m-header__btn${onHomeHero || chromeFlight ? ' m-btn--gold' : ' m-btn--primary'}`}>
                 Book a call
               </a>
             </nav>
           )}
           {isMobile && (
-            <button type="button" className={`m-menu-toggle${onHomeHero ? ' m-menu-toggle--light' : ''}`} onClick={() => setMenuOpen(!menuOpen)} aria-label={menuOpen ? 'Close menu' : 'Open menu'} aria-expanded={menuOpen}>
+            <button type="button" className={`m-menu-toggle${onHomeHero || chromeFlight ? ' m-menu-toggle--light' : ''}`} onClick={() => setMenuOpen(!menuOpen)} aria-label={menuOpen ? 'Close menu' : 'Open menu'} aria-expanded={menuOpen}>
               {menuOpen ? '✕' : '☰'}
             </button>
           )}
@@ -138,18 +142,33 @@ export default function MarketingShell({
         </div>
       )}
 
-      <div style={{ paddingTop: padTop ? '68px' : 0 }}>{children}</div>
+      {showPageChrome ? <MarketingFlightChrome /> : null}
+      <div
+        className={showPageChrome ? 'm-flight-page' : undefined}
+        style={{ paddingTop: padTop && !flightHome ? '68px' : 0 }}
+      >
+        {children}
+      </div>
 
-      <footer className={flightHome ? 'm-footer-flight' : ''} style={{ padding: '48px 0 40px', borderTop: flightHome ? undefined : '1px solid #DFE4EC', background: flightHome ? undefined : '#fff' }}>
+      <footer
+        className={chromeFlight ? 'm-footer-flight' : ''}
+        style={{
+          padding: '48px 0 40px',
+          borderTop: chromeFlight ? undefined : '1px solid #DFE4EC',
+          background: chromeFlight ? undefined : '#fff',
+          position: chromeFlight ? 'relative' : undefined,
+          zIndex: chromeFlight ? 1 : undefined,
+        }}
+      >
         <div className="m-wrap" style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'space-between', gap: '32px', alignItems: 'flex-start' }}>
           <div>
-            <MarketingLogo size={22} tagline={false} light={flightHome} onClick={() => router.push('/')} />
+            <MarketingLogo size={22} tagline={false} light={chromeFlight} onClick={() => router.push('/')} />
             <p
-              className={flightHome ? 'm-footer-flight__blurb' : ''}
+              className={chromeFlight ? 'm-footer-flight__blurb' : ''}
               style={{
                 marginTop: '12px',
                 fontSize: '14px',
-                color: flightHome ? undefined : '#5A6577',
+                color: chromeFlight ? undefined : '#5A6577',
                 maxWidth: '300px',
                 lineHeight: 1.65,
               }}
