@@ -379,10 +379,17 @@ html {
   backdrop-filter: blur(30px) saturate(1.25);
   -webkit-backdrop-filter: blur(30px) saturate(1.25);
   overflow: visible;
+  opacity: 0;
+  visibility: hidden;
   --flight-lift: 0px;
   --flight-scale: 0.96;
   transform: translate3d(var(--flight-drift, 0px), var(--flight-lift, 0px), 0) scale(var(--flight-scale));
   transition: box-shadow 0.45s ease, background 0.45s ease;
+}
+
+.m-flight-card.is-visible {
+  opacity: 1;
+  visibility: visible;
 }
 
 .m-flight:not(.m-flight--scrolling) .m-flight-card {
@@ -402,25 +409,34 @@ html {
 }
 
 .m-flight__lane--left .m-flight-card__fly {
-  --fly-x: clamp(-140px, -16vw, -72px);
-  --fly-y: 32px;
-  --fly-rotate: -3deg;
+  --fly-x: clamp(-180px, -22vw, -96px);
+  --fly-y: 48px;
+  --fly-rotate: -5deg;
 }
 
 .m-flight__lane--right .m-flight-card__fly {
-  --fly-x: clamp(72px, 16vw, 140px);
-  --fly-y: 32px;
-  --fly-rotate: 3deg;
+  --fly-x: clamp(96px, 22vw, 180px);
+  --fly-y: 48px;
+  --fly-rotate: 5deg;
 }
 
 .m-flight-card.is-visible .m-flight-card__fly {
-  animation: m-flight-box-in 1s cubic-bezier(0.16, 0.84, 0.28, 1) forwards;
+  animation: m-flight-box-in 1.05s cubic-bezier(0.12, 0.92, 0.22, 1) forwards;
+  animation-delay: var(--fly-stagger, 0ms);
 }
 
 @keyframes m-flight-box-in {
+  0% {
+    opacity: 0;
+    filter: blur(6px);
+  }
+  55% {
+    filter: blur(0);
+  }
   to {
     opacity: 1;
     transform: translate3d(0, 0, 0) rotate(0deg) scale(1);
+    filter: blur(0);
   }
 }
 
@@ -845,6 +861,8 @@ html {
 
   .m-flight__nose > *,
   .m-flight-card {
+    opacity: 1;
+    visibility: visible;
     transform: none;
     transition: none;
   }
@@ -853,6 +871,7 @@ html {
     opacity: 1;
     transform: none;
     animation: none;
+    filter: none;
   }
 
   .m-flight-instruments__val {

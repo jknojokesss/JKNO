@@ -34,9 +34,23 @@ const BOOKS = [
   'Other software',
 ]
 
+const CARD_STAGGER_MS = {
+  books: 0,
+  portal: 60,
+  samples: 40,
+  demos: 60,
+  how: 40,
+  contact: 80,
+}
+
 function FlightCard({ id, className = '', children }) {
+  const stagger = CARD_STAGGER_MS[id] ?? 0
   return (
-    <article className={`m-flight-card${className ? ` ${className}` : ''}`} data-flight-card={id}>
+    <article
+      className={`m-flight-card${className ? ` ${className}` : ''}`}
+      data-flight-card={id}
+      style={{ '--fly-stagger': `${stagger}ms` }}
+    >
       <div className="m-flight-card__fly">{children}</div>
     </article>
   )

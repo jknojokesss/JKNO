@@ -23,7 +23,8 @@ export default function Landing() {
   const [submitting, setSubmitting] = useState(false)
 
   useLayoutEffect(() => {
-    if (isDirectHomeTraffic()) setPortalLive(true)
+    // Hero stays visible under the JK intro overlay (intro no longer blanks the page).
+    setPortalLive(true)
   }, [])
 
   useEffect(() => {
