@@ -8,6 +8,11 @@
   --flight-gold-hi: #f0dca4;
 }
 
+/* Homepage: parallax reveals page bg — keep sunset gradient, not flat black */
+.marketing-site--flight:has(.m-flight) {
+  background: linear-gradient(180deg, #0b1330 0%, #6b5a48 55%, #e8b878 100%);
+}
+
 .m-flight-page__chrome {
   position: fixed;
   inset: 0;
