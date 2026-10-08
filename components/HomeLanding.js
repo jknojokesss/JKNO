@@ -1,5 +1,6 @@
-import { useEffect, useRef, useState } from 'react'
+import { useRef } from 'react'
 import { useHomeFlightMotion, FLIGHT_STEPS } from '../lib/useHomeFlightMotion'
+import { useScrollFlyIn } from '../lib/useScrollFlyIn'
 import { scrollToFlightStep } from '../lib/flightSteps'
 import { useRouter } from 'next/router'
 import { BOOKING_URL } from '../lib/marketing'
@@ -33,27 +34,12 @@ const BOOKS = [
   'Other software',
 ]
 
-function useRevealCards() {
-  const [visible, setVisible] = useState(() => new Set())
-  useEffect(() => {
-    const nodes = document.querySelectorAll('[data-flight-card]')
-    if (!nodes.length) return undefined
-    const io = new IntersectionObserver(
-      (entries) => {
-        setVisible((prev) => {
-          const next = new Set(prev)
-          entries.forEach((e) => {
-            if (e.isIntersecting) next.add(e.target.getAttribute('data-flight-card'))
-          })
-          return next
-        })
-      },
-      { rootMargin: '0px 0px -12% 0px', threshold: 0.12 },
-    )
-    nodes.forEach((n) => io.observe(n))
-    return () => io.disconnect()
-  }, [])
-  return visible
+function FlightCard({ id, className = '', children }) {
+  return (
+    <article className={`m-flight-card${className ? ` ${className}` : ''}`} data-flight-card={id}>
+      <div className="m-flight-card__fly">{children}</div>
+    </article>
+  )
 }
 
 export default function HomeLanding({
@@ -66,7 +52,7 @@ export default function HomeLanding({
 }) {
   const router = useRouter()
   const rootRef = useRef(null)
-  const visible = useRevealCards()
+  useScrollFlyIn(rootRef, true)
   const { hud, activeStep } = useHomeFlightMotion(rootRef)
   const scrollDemos = () => {
     scrollToFlightStep('flight-demos')
@@ -75,9 +61,6 @@ export default function HomeLanding({
   const scrollContact = () => {
     scrollToFlightStep('contact')
   }
-
-  const cardClass = (id) =>
-    `m-flight-card${visible.has(id) ? ' is-visible' : ''}`
 
   return (
     <div ref={rootRef} className={live ? 'm-flight m-flight--live' : 'm-flight'}>
@@ -155,10 +138,7 @@ export default function HomeLanding({
         </header>
 
         <div className="m-flight__lane m-flight__lane--left" id="flight-books">
-          <article
-            className={cardClass('books')}
-            data-flight-card="books"
-          >
+          <FlightCard id="books">
             <div className="c-eyebrow">
               Books <i aria-hidden="true" />
             </div>
@@ -171,14 +151,11 @@ export default function HomeLanding({
               <li>GL detail for recon and close</li>
               <li>One Intuit connection per company</li>
             </ul>
-          </article>
+          </FlightCard>
         </div>
 
         <div className="m-flight__lane m-flight__lane--right" id="flight-portal">
-          <article
-            className={cardClass('portal')}
-            data-flight-card="portal"
-          >
+          <FlightCard id="portal">
             <div className="c-eyebrow">
               Portal <i aria-hidden="true" />
             </div>
@@ -191,14 +168,11 @@ export default function HomeLanding({
               <li>Closed month ties to QuickBooks</li>
               <li>No shared template with another client</li>
             </ul>
-          </article>
+          </FlightCard>
         </div>
 
         <div className="m-flight__lane m-flight__lane--left" id="flight-samples">
-          <article
-            className={cardClass('samples')}
-            data-flight-card="samples"
-          >
+          <FlightCard id="samples">
             <div className="c-eyebrow">
               Samples <i aria-hidden="true" />
             </div>
@@ -215,14 +189,11 @@ export default function HomeLanding({
                 />
               ))}
             </div>
-          </article>
+          </FlightCard>
         </div>
 
         <div className="m-flight__lane m-flight__lane--right" id="flight-demos">
-          <article
-            className={`${cardClass('demos')} m-flight-card--demos`}
-            data-flight-card="demos"
-          >
+          <FlightCard id="demos" className="m-flight-card--demos">
             <div className="c-eyebrow">
               Gallery <i aria-hidden="true" />
             </div>
@@ -246,14 +217,11 @@ export default function HomeLanding({
             >
               All samples
             </button>
-          </article>
+          </FlightCard>
         </div>
 
         <div className="m-flight__lane m-flight__lane--left" id="flight-how">
-          <article
-            className={cardClass('how')}
-            data-flight-card="how"
-          >
+          <FlightCard id="how">
             <div className="c-eyebrow">
               How it ships <i aria-hidden="true" />
             </div>
@@ -272,14 +240,11 @@ export default function HomeLanding({
             >
               Full timeline
             </button>
-          </article>
+          </FlightCard>
         </div>
 
         <div className="m-flight__lane m-flight__lane--right" id="contact">
-          <article
-            className={`${cardClass('contact')} m-flight-card--form`}
-            data-flight-card="contact"
-          >
+          <FlightCard id="contact" className="m-flight-card--form">
             <div className="c-eyebrow">
               Start <i aria-hidden="true" />
             </div>
@@ -367,7 +332,7 @@ export default function HomeLanding({
                 </button>
               </>
             )}
-          </article>
+          </FlightCard>
         </div>
       </div>
     </div>

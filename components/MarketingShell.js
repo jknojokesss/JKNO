@@ -1,4 +1,5 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
+import { markFlightPageFlyIns, useScrollFlyIn } from '../lib/useScrollFlyIn'
 import { useRouter } from 'next/router'
 import Head from 'next/head'
 import { BOOKING_URL, MARKETING_FONTS, NAV_LINKS } from '../lib/marketing'
@@ -34,6 +35,7 @@ export default function MarketingShell({
   flightTheme = true,
 }) {
   const router = useRouter()
+  const flightPageRef = useRef(null)
   const [scrolled, setScrolled] = useState(false)
   const [onDarkHero, setOnDarkHero] = useState(false)
   const [menuOpen, setMenuOpen] = useState(false)
@@ -42,6 +44,13 @@ export default function MarketingShell({
   const chromeFlight = flightTheme || flightHome
   const showPageChrome = flightTheme && !flightHome
   const onHomeHero = flightHome || (chromeFlight && !flightHome) || (darkHeader && onDarkHero && !menuOpen)
+
+  useScrollFlyIn(flightPageRef, showPageChrome, router.pathname)
+
+  useEffect(() => {
+    if (!showPageChrome || !flightPageRef.current) return
+    markFlightPageFlyIns(flightPageRef.current)
+  }, [showPageChrome, router.pathname, children])
 
   useEffect(() => {
     const onScroll = () => {
@@ -144,6 +153,7 @@ export default function MarketingShell({
 
       {showPageChrome ? <MarketingFlightChrome /> : null}
       <div
+        ref={flightPageRef}
         className={showPageChrome ? 'm-flight-page' : undefined}
         style={{ paddingTop: padTop && !flightHome ? '68px' : 0 }}
       >

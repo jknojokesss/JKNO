@@ -229,3 +229,41 @@
 .marketing-site--flight .m-legal-doc p {
   color: rgba(247, 244, 239, 0.72);
 }
+
+/* Scroll fly-in for inner marketing sections */
+.m-flight-page [data-fly-in] {
+  --page-fly-x: 0px;
+  --page-fly-y: 48px;
+  opacity: 0;
+  transform: translate3d(var(--page-fly-x), var(--page-fly-y), 0) scale(0.97);
+  will-change: transform, opacity;
+}
+
+.m-flight-page [data-fly-in][data-fly-lane='left'] {
+  --page-fly-x: clamp(-100px, -12vw, -56px);
+  --page-fly-y: 40px;
+}
+
+.m-flight-page [data-fly-in][data-fly-lane='right'] {
+  --page-fly-x: clamp(56px, 12vw, 100px);
+  --page-fly-y: 40px;
+}
+
+.m-flight-page [data-fly-in].is-visible {
+  animation: m-page-fly-in 0.9s cubic-bezier(0.16, 0.84, 0.28, 1) forwards;
+}
+
+@keyframes m-page-fly-in {
+  to {
+    opacity: 1;
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .m-flight-page [data-fly-in] {
+    opacity: 1;
+    transform: none;
+    animation: none;
+  }
+}
