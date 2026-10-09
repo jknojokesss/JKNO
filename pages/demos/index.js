@@ -5,6 +5,25 @@ import { ALL_DEMOS } from '../../lib/industryDemos'
 import { SERVICE_PACKAGES } from '../../lib/buildStack'
 import DemoGalleryCard from '../../components/DemoGalleryCard'
 
+const SHIP_PIPELINE = [
+  {
+    title: 'Connect QuickBooks',
+    body: 'One Intuit link. Chart and GL mirror on a nightly schedule.',
+  },
+  {
+    title: 'Nightly sync',
+    body: 'Register, vendors, jobs — whatever you actually run.',
+  },
+  {
+    title: 'Your login',
+    body: 'Your name on sign-in, your colors. One company per account.',
+  },
+  {
+    title: 'Close in sync',
+    body: 'Month-end ties to the books you already trust.',
+  },
+]
+
 export default function DemoGallery() {
   const router = useRouter()
   return (
@@ -19,32 +38,28 @@ export default function DemoGallery() {
         align="center"
       />
 
-      <section className="m-section m-section--panel" style={{ paddingTop: 'clamp(28px,4vw,40px)', paddingBottom: 'clamp(28px,4vw,40px)' }}>
-        <div className="m-wrap">
-          <p className="m-ship-row__cap">How it ships</p>
-          <ol className="m-ship-row">
-            <li>
-              <span className="m-ship-row__n">1</span>
-              <span className="m-ship-row__text">Connect QuickBooks</span>
-            </li>
-            <li>
-              <span className="m-ship-row__n">2</span>
-              <span className="m-ship-row__text">Sync runs at night</span>
-            </li>
-            <li>
-              <span className="m-ship-row__n">3</span>
-              <span className="m-ship-row__text">Your scoped login</span>
-            </li>
-            <li>
-              <span className="m-ship-row__n">4</span>
-              <span className="m-ship-row__text">Close when you approve</span>
-            </li>
-          </ol>
-          <p className="m-ship-row__more">
-            <button type="button" className="m-btn--text" onClick={() => router.push('/how-it-works')}>
-              Full timeline
-            </button>
+      <section className="m-section" style={{ paddingTop: 'clamp(24px,4vw,36px)', paddingBottom: 'clamp(20px,3vw,28px)' }}>
+        <div className="m-wrap" style={{ maxWidth: '52rem' }}>
+          <h2 className="m-h2" style={{ marginBottom: '0.45rem' }}>How it ships</h2>
+          <p className="m-lead" style={{ marginBottom: '1.25rem', maxWidth: '40ch' }}>
+            Same pipe for every client — about six days from kickoff to login.
           </p>
+          <ol className="m-jk-pipeline">
+            {SHIP_PIPELINE.map((step, i) => (
+              <li key={step.title} className="m-jk-pipeline__item">
+                <span className="m-jk-pipeline__n">Step {i + 1}</span>
+                <p className="m-jk-pipeline__title">{step.title}</p>
+                <p className="m-jk-pipeline__body">{step.body}</p>
+              </li>
+            ))}
+          </ol>
+          <button
+            type="button"
+            className="m-jk-text-link"
+            onClick={() => router.push('/how-it-works')}
+          >
+            Full timeline
+          </button>
         </div>
       </section>
 

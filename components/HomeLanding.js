@@ -126,7 +126,7 @@ export default function HomeLanding({
           </div>
           <button
             type="button"
-            className="m-jk-home__text-link"
+            className="m-jk-text-link"
             onClick={() => router.push('/demos')}
           >
             Browse all samples
@@ -135,7 +135,7 @@ export default function HomeLanding({
 
         <section className="m-jk-home__panel" id="how">
           <h2>Kickoff to login in about six days</h2>
-          <ol className="m-jk-home__steps">
+          <ol className="m-jk-steps">
             <li>Tell me what you run and what&rsquo;s in QuickBooks already.</li>
             <li>I wire sync and your portal shell.</li>
             <li>You click around on real GL — not slides.</li>
@@ -143,7 +143,7 @@ export default function HomeLanding({
           </ol>
           <button
             type="button"
-            className="m-jk-home__text-link"
+            className="m-jk-text-link"
             onClick={() => router.push('/how-it-works')}
           >
             Full timeline
