@@ -114,9 +114,9 @@ export default function HomeLanding({
             JK<span className="m-fun__mark-dot">.</span>
           </p>
           <h1 className="m-fun__h1">
-            Your accountant has
-            <span className="m-fun__h1-pop">the month</span>
-            You need today.
+            Your accountant has the month.
+            <br />
+            You need <span className="m-fun__h1-pop">TODAY</span>.
           </h1>
           <p className="m-fun__lead">
             Margin while the week is still open — then a close that ties to QuickBooks. Built for owners who are done rebuilding the same screen every Monday.
