@@ -533,7 +533,7 @@
 
 .m-fun-doors--grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(9.5rem, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(10.75rem, 1fr));
   gap: 0.55rem;
 }
 
@@ -558,31 +558,46 @@
   box-shadow: 0 4px 0 rgba(15, 20, 28, 0.1), 0 8px 20px rgba(15, 23, 42, 0.1);
 }
 
+.m-fun-door__text {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.2rem;
+  min-width: 0;
+}
+
 .m-fun-door__emoji {
   display: block;
+  flex-shrink: 0;
   font-size: 1.4rem;
   line-height: 1;
 }
 
 .m-fun-doors--grid .m-fun-door {
-  grid-template-columns: 1fr;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.35rem;
   text-align: left;
   padding: 0.7rem 0.75rem;
 }
 
 .m-fun-doors--grid .m-fun-door__emoji {
   font-size: 1.6rem;
-  margin-bottom: 0.1rem;
+  margin-bottom: 0;
 }
 
 .m-fun-door__industry {
-  font-size: 0.6rem;
-  letter-spacing: 0.1em;
+  display: block;
+  font-size: 0.58rem;
+  letter-spacing: 0.08em;
+  line-height: 1.35;
   text-transform: uppercase;
   color: #64748b;
 }
 
 .m-fun-door__name {
+  display: block;
   font-family: var(--jk-display);
   font-size: 0.92rem;
   font-weight: 600;
