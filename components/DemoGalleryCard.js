@@ -5,7 +5,27 @@ export default function DemoGalleryCard({
   here = false,
   compact = false,
   onDark = false,
+  variant = 'default',
+  emoji = '✦',
+  accent = '#c9a84c',
 }) {
+  if (variant === 'fun') {
+    return (
+      <a
+        href={href}
+        className="m-fun-door"
+        style={{ '--door-accent': accent }}
+      >
+        <span className="m-fun-door__emoji" aria-hidden="true">{emoji}</span>
+        <span className="m-fun-door__text">
+          {industry ? <span className="m-fun-door__industry">{industry}</span> : null}
+          <span className="m-fun-door__name">{biz}</span>
+        </span>
+        <span className="m-fun-door__go" aria-hidden="true">→</span>
+      </a>
+    )
+  }
+
   return (
     <a
       href={href}

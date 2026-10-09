@@ -1,7 +1,11 @@
+import { useEffect, useRef, useState } from 'react'
 import { useRouter } from 'next/router'
 import { BOOKING_URL } from '../lib/marketing'
 import { FEATURED_DEMOS } from '../lib/marketingDemos'
+import { ALL_DEMOS } from '../lib/industryDemos'
 import { HERO_SAMPLE_BARS } from '../lib/samplePortals'
+import { FUN_CHAPTERS, scrollToChapter } from '../lib/funChapters'
+import { useFunCardReveal } from '../lib/useFunCardReveal'
 import DemoGalleryCard from './DemoGalleryCard'
 
 const HOME_DEMOS = [
@@ -12,6 +16,17 @@ const HOME_DEMOS = [
   FEATURED_DEMOS[3],
   FEATURED_DEMOS[8],
 ].filter(Boolean)
+
+const MARQUEE = [
+  'QuickBooks',
+  'Nightly sync',
+  'Your register',
+  'Your vendors',
+  'One login',
+  'Real close',
+  'Six-day build',
+  'No template',
+]
 
 const TRADES = [
   'Tire / auto',
@@ -29,30 +44,31 @@ const BOOKS = [
   'Other software',
 ]
 
-const BRIDGE = [
-  'QuickBooks in the middle',
-  'Nightly sync',
-  'One login per company',
-  'Close ties to the books',
-]
+const CARD_EMOJI = {
+  books: '📒',
+  portal: '🏪',
+  samples: '🚪',
+  demos: '🎪',
+  how: '🛠️',
+  contact: '✉️',
+}
 
-const FIT_ROWS = [
-  {
-    label: 'Books',
-    body: 'P&L and balance sheet, trailing two years. GL detail for recon. Statements stay the source of truth — not a spreadsheet rebuild.',
-  },
-  {
-    label: 'Portal',
-    body: 'Your name on sign-in, your palette on the nav. Margin and cash while the week is open; closed month matches QuickBooks.',
-  },
-  {
-    label: 'Ship',
-    body: 'About six business days from kickoff to your login. Integrations, screens, tune until close matches.',
-  },
-]
+function demoMeta(href) {
+  const featured = FEATURED_DEMOS.find((d) => d.src === href)
+  if (featured) {
+    return { emoji: featured.emoji, accent: featured.accent }
+  }
+  const row = ALL_DEMOS.find((d) => d.href === href)
+  return { emoji: row?.emoji || '✦', accent: '#c9a84c' }
+}
 
-function scrollToId(id) {
-  document.getElementById(id)?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+function FunCard({ id, className = '', children }) {
+  return (
+    <article className={`m-fun-card${className ? ` ${className}` : ''}`} data-fun-card={id}>
+      <span className="m-fun-card__emoji" aria-hidden="true">{CARD_EMOJI[id]}</span>
+      <div className="m-fun-card__fly">{children}</div>
+    </article>
+  )
 }
 
 export default function HomeLanding({
@@ -63,163 +79,200 @@ export default function HomeLanding({
   submitting,
 }) {
   const router = useRouter()
+  const rootRef = useRef(null)
+  const [activeChapter, setActiveChapter] = useState(0)
+  useFunCardReveal(rootRef)
+
+  useEffect(() => {
+    const onScroll = () => {
+      const focal = window.scrollY + window.innerHeight * 0.35
+      let best = 0
+      let bestDist = Infinity
+      FUN_CHAPTERS.forEach((ch, i) => {
+        const el = document.getElementById(ch.target)
+        if (!el) return
+        const top = el.getBoundingClientRect().top + window.scrollY
+        const d = Math.abs(focal - top)
+        if (d < bestDist) {
+          bestDist = d
+          best = i
+        }
+      })
+      setActiveChapter(best)
+    }
+    onScroll()
+    window.addEventListener('scroll', onScroll, { passive: true })
+    return () => window.removeEventListener('scroll', onScroll)
+  }, [])
+
+  const marqueeItems = [...MARQUEE, ...MARQUEE]
 
   return (
-    <div className="m-home m-home--live">
-      <section className="m-hero-home" id="top">
-        <div className="m-wrap m-hero-home__grid">
-          <div className="m-hero-home__copy">
-            <p className="m-hero-home__mark" aria-hidden="true">
-              JK<span className="m-hero-home__dot">.</span>
-            </p>
-            <h1 className="m-hero-home__title">
-              Your accountant has <em>the month.</em>
-              <span className="m-hero-home__title-line">You need today.</span>
-            </h1>
-            <p className="m-hero-home__sub">
-              Register, vendors, jobs — synced nightly into a login that looks like your business, not a template.
-            </p>
-            <div className="m-hero-home__actions">
-              <button
-                type="button"
-                className="m-hero-home__action m-hero-home__action--lead"
-                onClick={() => scrollToId('contact')}
-              >
-                Start a build
-              </button>
-              <span className="m-hero-home__action-sep" aria-hidden="true">or</span>
-              <button
-                type="button"
-                className="m-hero-home__action"
-                onClick={() => router.push('/demos')}
-              >
-                Open samples
-              </button>
-            </div>
-            <p className="m-hero-home__foot">
-              <button
-                type="button"
-                className="m-hero-home__link"
-                onClick={() => router.push('/how-it-works')}
-              >
-                How it ships
-              </button>
-              <span className="m-hero-home__foot-dot" aria-hidden="true">·</span>
-              <span>Six days kickoff to login</span>
-            </p>
-          </div>
+    <div ref={rootRef} className="m-fun">
+      <div className="m-fun__blobs" aria-hidden="true" />
+      <div className="m-fun__dots" aria-hidden="true" />
 
-          <div className="m-hero-home__samples" id="samples">
-            <p className="m-hero-home__samples-label">Fictitious shops · real screens</p>
-            {HERO_SAMPLE_BARS.map((p) => (
-              <DemoGalleryCard
-                key={p.href}
-                href={p.href}
-                biz={p.name}
-                industry={p.industry}
-                onDark
-              />
-            ))}
-          </div>
-        </div>
-      </section>
-
-      <section className="m-home-bridge" aria-label="At a glance">
-        <div className="m-wrap m-home-bridge__row">
-          {BRIDGE.map((item) => (
-            <span key={item} className="m-home-bridge__item">{item}</span>
+      <div className="m-fun__marquee" aria-hidden="true">
+        <div className="m-fun__marquee-track">
+          {marqueeItems.map((t, i) => (
+            <span key={`${t}-${i}`}>{t}</span>
           ))}
         </div>
-      </section>
+      </div>
 
-      <section className="m-section m-section--paper" id="books">
-        <div className="m-wrap">
-          <p className="m-kicker">What you get</p>
-          <h2 className="m-h2" style={{ maxWidth: '20ch', marginBottom: '1.25rem' }}>
-            One pipe. Your portal on top.
-          </h2>
-          <ul className="m-home-fit">
-            {FIT_ROWS.map((row) => (
-              <li key={row.label}>
-                <strong>{row.label}</strong>
-                <span>{row.body}</span>
-              </li>
-            ))}
-          </ul>
-        </div>
-      </section>
-
-      <section className="m-home-demos" id="demos">
-        <div className="m-wrap">
-          <div className="m-home-demos__head">
-            <h2 className="m-home-demos__title">Sample portals</h2>
-            <p className="m-home-demos__lead">
-              If one screen sticks in your head, we&rsquo;re done. No login — walk someone else&rsquo;s week.
-            </p>
+      <div className="m-fun__main">
+        <header className="m-fun__hero" id="top">
+          <span className="m-fun__sticker">Real books · custom login</span>
+          <p className="m-fun__mark" aria-hidden="true">
+            JK<span className="m-fun__mark-dot">.</span>
+          </p>
+          <h1 className="m-fun__h1">
+            Your accountant has
+            <span className="m-fun__h1-pop">the month</span>
+            You need today.
+          </h1>
+          <p className="m-fun__lead">
+            Margin while the week is still open — then a close that ties to QuickBooks. Built for owners who are tired of Excel cosplay.
+          </p>
+          <div className="m-fun__hero-actions">
             <button
               type="button"
-              className="m-btn m-btn--secondary m-home-demos__all"
+              className="m-fun__btn m-fun__btn--primary"
+              onClick={() => scrollToChapter('samples')}
+            >
+              Pick a sample door
+            </button>
+            <button
+              type="button"
+              className="m-fun__btn m-fun__btn--ghost"
+              onClick={() => scrollToChapter('contact')}
+            >
+              Start a build
+            </button>
+          </div>
+        </header>
+
+        <div className="m-fun__lane m-fun__lane--left" id="books">
+          <FunCard id="books">
+            <p className="m-fun-card__kicker">Books</p>
+            <h2>QuickBooks stays the boss</h2>
+            <p className="lead">
+              Nightly sync mirrors your chart and GL. Statements win arguments — not a spreadsheet rebuild.
+            </p>
+            <ul className="checks">
+              <li>P&amp;L and balance sheet, trailing two years</li>
+              <li>GL detail for recon and close</li>
+              <li>One Intuit connection per company</li>
+            </ul>
+          </FunCard>
+        </div>
+
+        <div className="m-fun__lane m-fun__lane--right" id="portal">
+          <FunCard id="portal">
+            <p className="m-fun-card__kicker">Portal</p>
+            <h2>Looks like your shop</h2>
+            <p className="lead">
+              Your name on sign-in, your colors on the nav. One login, one company — never someone else&rsquo;s template.
+            </p>
+            <ul className="checks">
+              <li>Live week vs closed month, labeled honestly</li>
+              <li>Integrations for register, vendors, jobs</li>
+              <li>Built in about six days after kickoff</li>
+            </ul>
+          </FunCard>
+        </div>
+
+        <div className="m-fun__lane m-fun__lane--left" id="samples">
+          <FunCard id="samples">
+            <p className="m-fun-card__kicker">Samples</p>
+            <h2>Walk a fictitious shop</h2>
+            <p className="lead">No login. Pick a door — if one screen sticks, that&rsquo;s the meeting.</p>
+            <div className="m-fun-doors">
+              {HERO_SAMPLE_BARS.map((p) => {
+                const meta = demoMeta(p.href)
+                return (
+                  <DemoGalleryCard
+                    key={p.href}
+                    variant="fun"
+                    href={p.href}
+                    biz={p.name}
+                    industry={p.industry}
+                    emoji={meta.emoji}
+                    accent={meta.accent}
+                  />
+                )
+              })}
+            </div>
+          </FunCard>
+        </div>
+
+        <div className="m-fun__lane m-fun__lane--right" id="demos">
+          <FunCard id="demos">
+            <p className="m-fun-card__kicker">Gallery</p>
+            <h2>More doors</h2>
+            <p className="lead">Tires, roofs, gowns, imports — same pipe, different screens.</p>
+            <div className="m-fun-doors m-fun-doors--grid">
+              {HOME_DEMOS.map((d) => {
+                const meta = demoMeta(d.src)
+                return (
+                  <DemoGalleryCard
+                    key={d.src}
+                    variant="fun"
+                    href={d.src}
+                    biz={d.biz || d.label}
+                    industry={d.label}
+                    emoji={meta.emoji}
+                    accent={meta.accent}
+                    compact
+                  />
+                )
+              })}
+            </div>
+            <button
+              type="button"
+              className="m-fun__btn m-fun__btn--primary"
+              style={{ marginTop: '1rem', width: '100%' }}
               onClick={() => router.push('/demos')}
             >
               All samples
             </button>
-          </div>
-          <div className="m-demo-grid m-demo-grid--gallery">
-            {HOME_DEMOS.map((d) => (
-              <DemoGalleryCard
-                key={d.src}
-                href={d.src}
-                biz={d.biz || d.label}
-                industry={d.label}
-              />
-            ))}
-          </div>
+          </FunCard>
         </div>
-      </section>
 
-      <section className="m-dark-band" id="how">
-        <div className="m-wrap m-band m-band--solo">
-          <div className="m-band__hero" style={{ maxWidth: '40rem' }}>
-            <p className="m-band__kicker">How it ships</p>
-            <h2 className="m-band__title">Kickoff to login in about six days</h2>
-            <ul className="m-band__checks">
-              <li>Tell me what you run and what&rsquo;s already in QuickBooks.</li>
-              <li>I wire nightly sync and your portal shell.</li>
-              <li>You walk it on real GL — not a slide deck.</li>
-              <li>We tune until close and the screen you asked for match.</li>
-            </ul>
-            <p className="m-band__foot">
-              <button
-                type="button"
-                className="m-band__foot-link"
-                onClick={() => router.push('/how-it-works')}
-              >
-                Full timeline
-              </button>
-            </p>
-          </div>
+        <div className="m-fun__lane m-fun__lane--left" id="how">
+          <FunCard id="how">
+            <p className="m-fun-card__kicker">Ship</p>
+            <h2>Kickoff → login in ~6 days</h2>
+            <ol className="steps">
+              <li>Tell me what you run and what&rsquo;s in QuickBooks already.</li>
+              <li>I wire sync and your portal shell.</li>
+              <li>You click around on real GL — not slides.</li>
+              <li>We tune until close and your must-have screen match.</li>
+            </ol>
+            <button
+              type="button"
+              className="m-fun__btn m-fun__btn--ghost"
+              style={{ marginTop: '0.5rem', width: '100%' }}
+              onClick={() => router.push('/how-it-works')}
+            >
+              Full timeline
+            </button>
+          </FunCard>
         </div>
-      </section>
 
-      <section className="m-home-close" id="contact">
-        <div className="m-wrap m-home-close__grid">
-          <div className="m-home-close__copy">
-            <p className="m-home-close__kicker">Start</p>
-            <h2 className="m-home-close__title">
-              Tell me the one screen you keep rebuilding in Excel.
-            </h2>
-            <p className="m-home-close__lead">
-              I&rsquo;ll point you at the closest sample and quote the build — or{' '}
-              <a className="m-home-close__book" href={BOOKING_URL} target="_blank" rel="noopener noreferrer">
+        <div className="m-fun__lane m-fun__lane--right" id="contact">
+          <FunCard id="contact" className="m-fun-card--form">
+            <p className="m-fun-card__kicker">Start</p>
+            <h2>What&rsquo;s the one screen you keep rebuilding?</h2>
+            <p className="lead">
+              I&rsquo;ll point you at the closest sample — or{' '}
+              <a href={BOOKING_URL} target="_blank" rel="noopener noreferrer" style={{ color: '#c45c38', fontWeight: 600 }}>
                 book thirty minutes
               </a>
               .
             </p>
-          </div>
-
-          <div className="m-card m-home-close__form">
             {submitted ? (
-              <p className="m-home-close__thanks">Got it. I&rsquo;ll be in touch.</p>
+              <p className="lead" style={{ marginBottom: 0 }}>Got it. I&rsquo;ll be in touch.</p>
             ) : (
               <>
                 {[
@@ -294,9 +347,25 @@ export default function HomeLanding({
                 </button>
               </>
             )}
-          </div>
+          </FunCard>
         </div>
-      </section>
+      </div>
+
+      <nav className="m-fun-chapters" aria-label="Page sections">
+        <ul className="m-fun-chapters__list">
+          {FUN_CHAPTERS.map((ch, i) => (
+            <li key={ch.id}>
+              <button
+                type="button"
+                className={activeChapter === i ? 'is-on' : undefined}
+                onClick={() => scrollToChapter(ch.target)}
+              >
+                {ch.label}
+              </button>
+            </li>
+          ))}
+        </ul>
+      </nav>
     </div>
   )
 }
