@@ -122,8 +122,11 @@
 
 .marketing-site--jk .m-inner-hero {
   background: transparent;
+  clip-path: none;
+  margin-bottom: 0;
   text-shadow: none;
-  padding-bottom: clamp(28px, 4vw, 40px);
+  padding: clamp(52px, 7vw, 72px) 0 clamp(40px, 5vw, 56px);
+  color: #f7f4ef;
 }
 
 .marketing-site--jk .m-inner-hero__title,
@@ -140,7 +143,16 @@
 
 .marketing-site--jk .m-inner-hero__lead,
 .marketing-site--jk .m-inner-hero .m-lead {
-  color: rgba(247, 244, 239, 0.72);
+  color: rgba(255, 232, 210, 0.92);
+  font-size: 1.05rem;
+  line-height: 1.65;
+  max-width: 38ch;
+}
+
+.marketing-site--jk .m-inner-hero--center .m-inner-hero__lead,
+.marketing-site--jk .m-inner-hero--center .m-lead {
+  margin-left: auto;
+  margin-right: auto;
 }
 
 .marketing-site--jk .m-jk-page > section.m-section .m-wrap,
