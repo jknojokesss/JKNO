@@ -5,25 +5,6 @@ import { ALL_DEMOS } from '../../lib/industryDemos'
 import { SERVICE_PACKAGES } from '../../lib/buildStack'
 import DemoGalleryCard from '../../components/DemoGalleryCard'
 
-const SHIP_PIPELINE = [
-  {
-    title: 'Connect QuickBooks',
-    body: 'One Intuit link. Chart and GL mirror on a nightly schedule.',
-  },
-  {
-    title: 'Nightly sync',
-    body: 'Register, vendors, jobs — whatever you actually run.',
-  },
-  {
-    title: 'Your login',
-    body: 'Your name on sign-in, your colors. One company per account.',
-  },
-  {
-    title: 'Close in sync',
-    body: 'Month-end ties to the books you already trust.',
-  },
-]
-
 export default function DemoGallery() {
   const router = useRouter()
   return (
@@ -38,24 +19,31 @@ export default function DemoGallery() {
         align="center"
       />
 
-      <section className="m-section" style={{ paddingTop: 'clamp(24px,4vw,36px)', paddingBottom: 'clamp(20px,3vw,28px)' }}>
-        <div className="m-wrap" style={{ maxWidth: '52rem' }}>
-          <h2 className="m-h2" style={{ marginBottom: '0.45rem' }}>How it ships</h2>
-          <p className="m-lead" style={{ marginBottom: '1.25rem', maxWidth: '40ch' }}>
-            Same pipe for every client — about six days from kickoff to login.
+      <section
+        className="m-section m-ship-intro"
+        style={{ paddingTop: 'clamp(20px,3vw,32px)', paddingBottom: 'clamp(16px,2.5vw,28px)' }}
+      >
+        <div className="m-wrap m-ship-intro__inner">
+          <p className="m-ship-hook">
+            Kickoff to login in about <strong>six days</strong> — same pipe on every build.
           </p>
-          <ol className="m-jk-pipeline">
-            {SHIP_PIPELINE.map((step, i) => (
-              <li key={step.title} className="m-jk-pipeline__item">
-                <span className="m-jk-pipeline__n">Step {i + 1}</span>
-                <p className="m-jk-pipeline__title">{step.title}</p>
-                <p className="m-jk-pipeline__body">{step.body}</p>
-              </li>
-            ))}
-          </ol>
+          <ul className="m-ship-chain" aria-label="How a build ships">
+            <li>
+              <span className="m-ship-chain__verb">Connect</span> QuickBooks once
+            </li>
+            <li>
+              <span className="m-ship-chain__verb">Sync</span> register and vendors nightly
+            </li>
+            <li>
+              <span className="m-ship-chain__verb">Sign in</span> to one scoped portal
+            </li>
+            <li>
+              <span className="m-ship-chain__verb">Close</span> when the books match
+            </li>
+          </ul>
           <button
             type="button"
-            className="m-jk-text-link"
+            className="m-ship-intro__more m-jk-text-link"
             onClick={() => router.push('/how-it-works')}
           >
             Full timeline

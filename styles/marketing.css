@@ -690,6 +690,79 @@
   }
 }
 
+/* Demos / inner pages — editorial ship line (not numbered infographic) */
+.m-ship-intro__inner {
+  max-width: 46rem;
+}
+
+.m-ship-hook {
+  margin: 0 0 0.85rem;
+  font-family: 'Playfair Display', Georgia, serif;
+  font-size: clamp(1.2rem, 2.8vw, 1.45rem);
+  font-weight: 600;
+  line-height: 1.35;
+  letter-spacing: -0.01em;
+  color: var(--m-ink);
+}
+
+.m-ship-hook strong {
+  font-weight: 700;
+  color: #c45c28;
+}
+
+.m-ship-chain {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0.4rem 0.55rem;
+  font-size: clamp(0.92rem, 2vw, 1.02rem);
+  line-height: 1.5;
+  color: #334155;
+}
+
+.m-ship-chain li {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 0.2rem;
+}
+
+.m-ship-chain li:not(:last-child)::after {
+  content: '→';
+  margin-left: 0.15rem;
+  font-weight: 600;
+  color: var(--m-gold-dark);
+}
+
+.m-ship-chain__verb {
+  font-weight: 700;
+  color: #c45c28;
+}
+
+.m-ship-intro__more {
+  display: inline-block;
+  margin-top: 1rem;
+  padding: 0;
+  font-size: 0.95rem;
+  background: none;
+  border: none;
+  cursor: pointer;
+}
+
+@media (max-width: 520px) {
+  .m-ship-chain {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.5rem;
+  }
+
+  .m-ship-chain li:not(:last-child)::after {
+    display: none;
+  }
+}
+
 .m-package-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
