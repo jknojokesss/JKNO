@@ -2,8 +2,12 @@ import MarketingShell from './MarketingShell'
 
 export default function LegalDoc({ title, sections }) {
   return (
-    <MarketingShell title={`${title} — JK No Jokes Financials`} description={`${title} for JK No Jokes Financials`}>
-      <main className="m-wrap m-legal-doc">
+    <MarketingShell
+      title={`${title} — JK No Jokes Financials`}
+      description={`${title} for JK No Jokes Financials`}
+      flightTheme={false}
+    >
+      <main className="m-legal-doc">
         <article className="m-legal-doc__paper">
           <header className="m-legal-doc__head">
             <div className="m-kicker">Legal</div>
