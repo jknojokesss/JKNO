@@ -359,6 +359,17 @@
   box-shadow: 0 3px 0 rgba(0, 0, 0, 0.2);
 }
 
+@media (prefers-reduced-motion: no-preference) {
+  .m-fun__h1-pop {
+    animation: m-jk-h1-pop-nudge 5s ease-in-out infinite;
+  }
+}
+
+@keyframes m-jk-h1-pop-nudge {
+  0%, 100% { transform: rotate(-1deg) translateY(0); }
+  50% { transform: rotate(1.5deg) translateY(-3px); }
+}
+
 .m-fun__lead {
   margin: 0 0 1.75rem;
   max-width: 36ch;
@@ -809,7 +820,8 @@
 
 @media (prefers-reduced-motion: reduce) {
   .m-fun__marquee-track,
-  .m-fun__sticker {
+  .m-fun__sticker,
+  .m-fun__h1-pop {
     animation: none;
   }
 
