@@ -1,5 +1,3 @@
-import { useRef } from 'react'
-import { useHomeCardReveal } from '../lib/useHomeCardReveal'
 import { useRouter } from 'next/router'
 import { BOOKING_URL } from '../lib/marketing'
 import { FEATURED_DEMOS } from '../lib/marketingDemos'
@@ -31,26 +29,30 @@ const BOOKS = [
   'Other software',
 ]
 
-const CARD_STAGGER_MS = {
-  books: 0,
-  portal: 60,
-  samples: 40,
-  demos: 60,
-  how: 40,
-  contact: 80,
-}
+const BRIDGE = [
+  'QuickBooks in the middle',
+  'Nightly sync',
+  'One login per company',
+  'Close ties to the books',
+]
 
-function StoryCard({ id, className = '', children }) {
-  const stagger = CARD_STAGGER_MS[id] ?? 0
-  return (
-    <article
-      className={`m-home-card${className ? ` ${className}` : ''}`}
-      data-home-card={id}
-      style={{ '--fly-stagger': `${stagger}ms` }}
-    >
-      <div className="m-home-card__fly">{children}</div>
-    </article>
-  )
+const FIT_ROWS = [
+  {
+    label: 'Books',
+    body: 'P&L and balance sheet, trailing two years. GL detail for recon. Statements stay the source of truth — not a spreadsheet rebuild.',
+  },
+  {
+    label: 'Portal',
+    body: 'Your name on sign-in, your palette on the nav. Margin and cash while the week is open; closed month matches QuickBooks.',
+  },
+  {
+    label: 'Ship',
+    body: 'About six business days from kickoff to your login. Integrations, screens, tune until close matches.',
+  },
+]
+
+function scrollToId(id) {
+  document.getElementById(id)?.scrollIntoView({ behavior: 'smooth', block: 'start' })
 }
 
 export default function HomeLanding({
@@ -61,153 +63,163 @@ export default function HomeLanding({
   submitting,
 }) {
   const router = useRouter()
-  const rootRef = useRef(null)
-  useHomeCardReveal(rootRef)
-
-  const scrollToSection = (id) => {
-    document.getElementById(id)?.scrollIntoView({ behavior: 'smooth', block: 'start' })
-  }
 
   return (
-    <div ref={rootRef} className="m-home">
-      <div className="m-home__bg" aria-hidden="true" />
-      <div className="m-home__grain" aria-hidden="true" />
-
-      <div className="m-home__scroll">
-        <header className="m-home__hero" id="top">
-          <p className="m-home__eyebrow">Owner portals on real books</p>
-          <h1 className="m-home__hero-h">Your accountant has the month. You need today.</h1>
-          <p className="m-home__hero-lead">
-            Register, vendors, jobs — synced nightly into a login that looks like your business, not a template.
-          </p>
-          <button
-            type="button"
-            className="m-home__scroll-cue"
-            onClick={() => scrollToSection('books')}
-          >
-            See how it works
-          </button>
-        </header>
-
-        <div className="m-home__lane m-home__lane--left" id="books">
-          <StoryCard id="books">
-            <div className="c-eyebrow">
-              Books <i aria-hidden="true" />
-            </div>
-            <h2>QuickBooks in the middle</h2>
-            <p className="lead">
-              Nightly sync mirrors your chart and GL — statements stay the source of truth, not a spreadsheet rebuild.
+    <div className="m-home m-home--live">
+      <section className="m-hero-home" id="top">
+        <div className="m-wrap m-hero-home__grid">
+          <div className="m-hero-home__copy">
+            <p className="m-hero-home__mark" aria-hidden="true">
+              JK<span className="m-hero-home__dot">.</span>
             </p>
-            <ul className="checks">
-              <li>P&amp;L and balance sheet, trailing two years</li>
-              <li>GL detail for recon and close</li>
-              <li>One Intuit connection per company</li>
-            </ul>
-          </StoryCard>
-        </div>
-
-        <div className="m-home__lane m-home__lane--right" id="portal">
-          <StoryCard id="portal">
-            <div className="c-eyebrow">
-              Portal <i aria-hidden="true" />
-            </div>
-            <h2>Looks like your shop</h2>
-            <p className="lead">
-              Your name on the sign-in, your palette on the nav — one login maps to exactly one set of books.
+            <h1 className="m-hero-home__title">
+              Your accountant has <em>the month.</em>
+              <span className="m-hero-home__title-line">You need today.</span>
+            </h1>
+            <p className="m-hero-home__sub">
+              Register, vendors, jobs — synced nightly into a login that looks like your business, not a template.
             </p>
-            <ul className="checks">
-              <li>Margin and cash while the week is still open</li>
-              <li>Closed month ties to QuickBooks</li>
-              <li>No shared template with another client</li>
-            </ul>
-          </StoryCard>
-        </div>
+            <div className="m-hero-home__actions">
+              <button
+                type="button"
+                className="m-hero-home__action m-hero-home__action--lead"
+                onClick={() => scrollToId('contact')}
+              >
+                Start a build
+              </button>
+              <span className="m-hero-home__action-sep" aria-hidden="true">or</span>
+              <button
+                type="button"
+                className="m-hero-home__action"
+                onClick={() => router.push('/demos')}
+              >
+                Open samples
+              </button>
+            </div>
+            <p className="m-hero-home__foot">
+              <button
+                type="button"
+                className="m-hero-home__link"
+                onClick={() => router.push('/how-it-works')}
+              >
+                How it ships
+              </button>
+              <span className="m-hero-home__foot-dot" aria-hidden="true">·</span>
+              <span>Six days kickoff to login</span>
+            </p>
+          </div>
 
-        <div className="m-home__lane m-home__lane--left" id="samples">
-          <StoryCard id="samples">
-            <div className="c-eyebrow">
-              Samples <i aria-hidden="true" />
-            </div>
-            <h2>Open a sample — no login</h2>
-            <p className="lead">Fictitious companies. Real layouts. Pick one that feels close.</p>
-            <div className="m-home-card__samples">
-              {HERO_SAMPLE_BARS.map((p) => (
-                <DemoGalleryCard
-                  key={p.href}
-                  href={p.href}
-                  biz={p.name}
-                  industry={p.industry}
-                />
-              ))}
-            </div>
-          </StoryCard>
+          <div className="m-hero-home__samples" id="samples">
+            <p className="m-hero-home__samples-label">Fictitious shops · real screens</p>
+            {HERO_SAMPLE_BARS.map((p) => (
+              <DemoGalleryCard
+                key={p.href}
+                href={p.href}
+                biz={p.name}
+                industry={p.industry}
+                onDark
+              />
+            ))}
+          </div>
         </div>
+      </section>
 
-        <div className="m-home__lane m-home__lane--right" id="demos">
-          <StoryCard id="demos">
-            <div className="c-eyebrow">
-              Gallery <i aria-hidden="true" />
-            </div>
-            <h2>More sample portals</h2>
-            <p className="lead">If one screen sticks in your head, we&rsquo;re done.</p>
-            <div className="m-home-card__demos">
-              {HOME_DEMOS.map((d) => (
-                <DemoGalleryCard
-                  key={d.src}
-                  href={d.src}
-                  biz={d.biz || d.label}
-                  industry={d.label}
-                  compact
-                />
-              ))}
-            </div>
+      <section className="m-home-bridge" aria-label="At a glance">
+        <div className="m-wrap m-home-bridge__row">
+          {BRIDGE.map((item) => (
+            <span key={item} className="m-home-bridge__item">{item}</span>
+          ))}
+        </div>
+      </section>
+
+      <section className="m-section m-section--paper" id="books">
+        <div className="m-wrap">
+          <p className="m-kicker">What you get</p>
+          <h2 className="m-h2" style={{ maxWidth: '20ch', marginBottom: '1.25rem' }}>
+            One pipe. Your portal on top.
+          </h2>
+          <ul className="m-home-fit">
+            {FIT_ROWS.map((row) => (
+              <li key={row.label}>
+                <strong>{row.label}</strong>
+                <span>{row.body}</span>
+              </li>
+            ))}
+          </ul>
+        </div>
+      </section>
+
+      <section className="m-home-demos" id="demos">
+        <div className="m-wrap">
+          <div className="m-home-demos__head">
+            <h2 className="m-home-demos__title">Sample portals</h2>
+            <p className="m-home-demos__lead">
+              If one screen sticks in your head, we&rsquo;re done. No login — walk someone else&rsquo;s week.
+            </p>
             <button
               type="button"
-              className="m-home-card__btn"
+              className="m-btn m-btn--secondary m-home-demos__all"
               onClick={() => router.push('/demos')}
             >
               All samples
             </button>
-          </StoryCard>
+          </div>
+          <div className="m-demo-grid m-demo-grid--gallery">
+            {HOME_DEMOS.map((d) => (
+              <DemoGalleryCard
+                key={d.src}
+                href={d.src}
+                biz={d.biz || d.label}
+                industry={d.label}
+              />
+            ))}
+          </div>
         </div>
+      </section>
 
-        <div className="m-home__lane m-home__lane--left" id="how">
-          <StoryCard id="how">
-            <div className="c-eyebrow">
-              How it ships <i aria-hidden="true" />
-            </div>
-            <h2>One build, about six days</h2>
-            <ol className="steps">
+      <section className="m-dark-band" id="how">
+        <div className="m-wrap m-band m-band--solo">
+          <div className="m-band__hero" style={{ maxWidth: '40rem' }}>
+            <p className="m-band__kicker">How it ships</p>
+            <h2 className="m-band__title">Kickoff to login in about six days</h2>
+            <ul className="m-band__checks">
               <li>Tell me what you run and what&rsquo;s already in QuickBooks.</li>
               <li>I wire nightly sync and your portal shell.</li>
               <li>You walk it on real GL — not a slide deck.</li>
               <li>We tune until close and the screen you asked for match.</li>
-            </ol>
-            <button
-              type="button"
-              className="m-home-card__btn m-home-card__btn--ghost"
-              onClick={() => router.push('/how-it-works')}
-            >
-              Full timeline
-            </button>
-          </StoryCard>
+            </ul>
+            <p className="m-band__foot">
+              <button
+                type="button"
+                className="m-band__foot-link"
+                onClick={() => router.push('/how-it-works')}
+              >
+                Full timeline
+              </button>
+            </p>
+          </div>
         </div>
+      </section>
 
-        <div className="m-home__lane m-home__lane--right" id="contact">
-          <StoryCard id="contact" className="m-home-card--form">
-            <div className="c-eyebrow">
-              Start <i aria-hidden="true" />
-            </div>
-            <h2>Tell me the one screen you keep rebuilding in Excel.</h2>
-            <p className="lead">
+      <section className="m-home-close" id="contact">
+        <div className="m-wrap m-home-close__grid">
+          <div className="m-home-close__copy">
+            <p className="m-home-close__kicker">Start</p>
+            <h2 className="m-home-close__title">
+              Tell me the one screen you keep rebuilding in Excel.
+            </h2>
+            <p className="m-home-close__lead">
               I&rsquo;ll point you at the closest sample and quote the build — or{' '}
-              <a href={BOOKING_URL} target="_blank" rel="noopener noreferrer" style={{ color: '#8c6b25' }}>
+              <a className="m-home-close__book" href={BOOKING_URL} target="_blank" rel="noopener noreferrer">
                 book thirty minutes
               </a>
               .
             </p>
+          </div>
+
+          <div className="m-card m-home-close__form">
             {submitted ? (
-              <p className="lead" style={{ marginBottom: 0 }}>Got it. I&rsquo;ll be in touch.</p>
+              <p className="m-home-close__thanks">Got it. I&rsquo;ll be in touch.</p>
             ) : (
               <>
                 {[
@@ -282,9 +294,9 @@ export default function HomeLanding({
                 </button>
               </>
             )}
-          </StoryCard>
+          </div>
         </div>
-      </div>
+      </section>
     </div>
   )
 }
