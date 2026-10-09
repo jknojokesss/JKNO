@@ -253,7 +253,7 @@ export default function HomeLanding({
             <h2>What&rsquo;s the one screen you keep rebuilding?</h2>
             <p className="lead">
               I&rsquo;ll point you at the closest sample — or{' '}
-              <a href={BOOKING_URL} target="_blank" rel="noopener noreferrer" style={{ color: '#8c6b25', fontWeight: 600 }}>
+              <a href={BOOKING_URL} target="_blank" rel="noopener noreferrer">
                 book thirty minutes
               </a>
               .
