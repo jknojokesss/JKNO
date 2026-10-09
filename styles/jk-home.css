@@ -108,9 +108,10 @@
 }
 
 .m-home__flow {
-  padding: 0 1.25rem 4rem;
+  padding: 0 1.25rem 3rem;
 }
 
+.marketing-site--jk .m-jk-page .m-home__panel,
 .m-home__panel {
   max-width: 52rem;
   margin: 0 auto 1.35rem;

@@ -48,7 +48,7 @@ export default function MarketingShell({
   const useJK = jkTheme && !flightTheme && !flightHome
   const showFlightChrome = flightTheme && !flightHome
   const showJKChrome = useJK
-  const showPageChrome = showFlightChrome || (useJK && !marketingHome)
+  const showPageChrome = showFlightChrome || useJK
   const onHomeHero = useJK || marketingHome || flightHome || (chromeFlight && !flightHome) || (darkHeader && onDarkHero && !menuOpen)
 
   useScrollFlyIn(flightPageRef, showPageChrome, router.pathname)

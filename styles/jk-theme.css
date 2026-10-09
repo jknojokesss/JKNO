@@ -13,7 +13,23 @@
   --jk-border: #2a3344;
   --jk-display: 'Bitter', Georgia, serif;
   --jk-body: 'DM Sans', var(--m-font);
-  background: #080b10;
+  --jk-sky-top: #0c1638;
+  --jk-sky-mid: #4a5f8a;
+  --jk-sky-warm: #c87850;
+  --jk-sky-gold: #f5a85c;
+  --jk-sky-bottom: #ffe8c0;
+  background: linear-gradient(
+    180deg,
+    var(--jk-sky-top) 0%,
+    #3a4f78 24%,
+    #7d8cad 38%,
+    var(--jk-sky-warm) 54%,
+    var(--jk-sky-gold) 74%,
+    #ffc878 88%,
+    var(--jk-sky-bottom) 100%
+  );
+  background-attachment: fixed;
+  min-height: 100vh;
   color: #f7f4ef;
 }
 
@@ -27,13 +43,16 @@
 .m-jk-chrome__bg {
   position: absolute;
   inset: 0;
-  background:
-    radial-gradient(78% 62% at 50% 100%, var(--jk-orange-glow), transparent 62%),
-    radial-gradient(55% 48% at 30% 92%, rgba(255, 178, 120, 0.32), transparent 56%),
-    radial-gradient(50% 42% at 72% 86%, rgba(255, 196, 140, 0.22), transparent 54%),
-    radial-gradient(40% 35% at 8% 12%, rgba(255, 140, 80, 0.14), transparent 52%),
-    radial-gradient(35% 30% at 92% 8%, rgba(74, 96, 120, 0.22), transparent 50%),
-    linear-gradient(168deg, #0a0e16 0%, #1a2436 34%, #2c3a50 68%, #455468 100%);
+  background: linear-gradient(
+    180deg,
+    var(--jk-sky-top) 0%,
+    #3a4f78 22%,
+    #6a7fa8 36%,
+    #c87850 52%,
+    #f0a050 70%,
+    #ffc878 86%,
+    var(--jk-sky-bottom) 100%
+  );
 }
 
 .m-jk-chrome__grain {
@@ -58,7 +77,8 @@
 
 .marketing-site--jk .m-header--jk.is-solid,
 .marketing-site--jk .m-header--jk.is-menu-open {
-  background: rgba(8, 11, 16, 0.94);
+  background: rgba(12, 22, 56, 0.82);
+  backdrop-filter: blur(12px);
   border-bottom: 1px solid var(--jk-orange-line);
 }
 
@@ -98,7 +118,14 @@
 .marketing-site--jk .m-footer-flight {
   position: relative;
   z-index: 1;
-  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  margin-top: 1.5rem;
+  background: linear-gradient(
+    180deg,
+    rgba(255, 232, 200, 0) 0%,
+    rgba(52, 62, 82, 0.88) 32%,
+    #1a2030 100%
+  );
+  border-top: 1px solid rgba(255, 200, 150, 0.35);
 }
 
 .marketing-site--jk .m-footer-flight .m-nav-link {
@@ -138,7 +165,10 @@
 
 .marketing-site--jk .m-inner-hero .m-kicker {
   color: var(--jk-orange-soft);
-  letter-spacing: 0.2em;
+  font-size: 0.9rem;
+  font-weight: 500;
+  letter-spacing: 0.04em;
+  text-transform: none;
 }
 
 .marketing-site--jk .m-inner-hero__lead,
@@ -156,7 +186,8 @@
 }
 
 .marketing-site--jk .m-jk-page > section.m-section .m-wrap,
-.marketing-site--jk .m-jk-page > section.m-cta-slab .m-wrap {
+.marketing-site--jk .m-jk-page > section.m-cta-slab .m-wrap,
+.marketing-site--jk .m-jk-page > section.m-login-section .m-wrap {
   background: var(--jk-paper);
   color: var(--jk-ink);
   border-radius: 16px;
@@ -168,6 +199,21 @@
 
 .marketing-site--jk .m-jk-page .m-section {
   padding: clamp(20px, 3vw, 28px) 0;
+}
+
+.marketing-site--jk .m-jk-page .m-section--panel,
+.marketing-site--jk .m-jk-page .m-section--stack,
+.marketing-site--jk .m-jk-page .m-cta-slab {
+  background: transparent;
+  border: none;
+}
+
+.marketing-site--jk .m-jk-page .m-kicker {
+  color: var(--jk-orange-mid);
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
 }
 
 .marketing-site--jk .m-jk-page .m-section--panel .m-wrap {
