@@ -240,7 +240,7 @@
 .m-fun__main {
   position: relative;
   z-index: 2;
-  padding-bottom: calc(5.5rem + env(safe-area-inset-bottom, 0px));
+  padding-bottom: calc(2rem + var(--fun-chapters-clear, 3.35rem));
 }
 
 .m-fun__hero {
@@ -611,6 +611,20 @@
 
 .m-fun-doors--grid .m-fun-door__go {
   display: none;
+}
+
+.marketing-site--jk:has(.m-fun-chapters) {
+  --fun-chapters-clear: calc(3.35rem + env(safe-area-inset-bottom, 0px));
+}
+
+@media (max-width: 720px) {
+  .marketing-site--jk:has(.m-fun-chapters) {
+    --fun-chapters-clear: calc(5rem + env(safe-area-inset-bottom, 0px));
+  }
+}
+
+.marketing-site--jk .m-footer-flight--home-chapters {
+  padding-bottom: calc(2.5rem + var(--fun-chapters-clear, 3.35rem)) !important;
 }
 
 .m-fun-chapters {

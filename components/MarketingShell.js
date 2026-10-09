@@ -175,9 +175,12 @@ export default function MarketingShell({
       </div>
 
       <footer
-        className={chromeFlight || marketingHome || useJK ? 'm-footer-flight' : ''}
+        className={[
+          chromeFlight || marketingHome || useJK ? 'm-footer-flight' : '',
+          marketingHome ? 'm-footer-flight--home-chapters' : '',
+        ].filter(Boolean).join(' ')}
         style={{
-          padding: '48px 0 40px',
+          padding: marketingHome ? '48px 0 0' : '48px 0 40px',
           borderTop: chromeFlight || marketingHome || useJK ? undefined : '1px solid #DFE4EC',
           background: chromeFlight || marketingHome || useJK ? undefined : '#fff',
           position: chromeFlight || marketingHome || useJK ? 'relative' : undefined,
