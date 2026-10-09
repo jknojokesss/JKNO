@@ -7,13 +7,13 @@
 }
 
 .m-home__hero {
-  min-height: min(82vh, 720px);
+  min-height: min(56vh, 520px);
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
   text-align: center;
-  padding: calc(5rem + env(safe-area-inset-top, 0px)) 1.5rem 3.5rem;
+  padding: calc(4.5rem + env(safe-area-inset-top, 0px)) 1.5rem 2rem;
 }
 
 .m-home__eyebrow {

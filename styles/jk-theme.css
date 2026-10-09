@@ -13,24 +13,33 @@
   --jk-border: #2a3344;
   --jk-display: 'Bitter', Georgia, serif;
   --jk-body: 'DM Sans', var(--m-font);
-  --jk-sky-top: #0c1638;
-  --jk-sky-mid: #4a5f8a;
-  --jk-sky-warm: #c87850;
+  --jk-sky-top: #2a4478;
+  --jk-sky-mid: #8a9cc4;
+  --jk-sky-warm: #e88848;
   --jk-sky-gold: #f5a85c;
-  --jk-sky-bottom: #ffe8c0;
-  background: linear-gradient(
-    180deg,
-    var(--jk-sky-top) 0%,
-    #3a4f78 24%,
-    #7d8cad 38%,
-    var(--jk-sky-warm) 54%,
-    var(--jk-sky-gold) 74%,
-    #ffc878 88%,
-    var(--jk-sky-bottom) 100%
-  );
+  --jk-sky-bottom: #ffe4b8;
+  background-color: var(--jk-sky-bottom);
+  background-image:
+    radial-gradient(120% 90% at 50% 105%, rgba(255, 150, 70, 0.55), transparent 55%),
+    radial-gradient(80% 50% at 20% 0%, rgba(255, 180, 100, 0.22), transparent 50%),
+    linear-gradient(
+      180deg,
+      var(--jk-sky-top) 0%,
+      #5a78b0 14%,
+      #a8b8d8 26%,
+      #e09050 38%,
+      var(--jk-sky-warm) 50%,
+      var(--jk-sky-gold) 68%,
+      #ffc060 82%,
+      var(--jk-sky-bottom) 100%
+    );
   background-attachment: fixed;
   min-height: 100vh;
   color: #f7f4ef;
+}
+
+html:has(.marketing-site--jk) {
+  background-color: var(--jk-sky-bottom);
 }
 
 .m-jk-chrome {
@@ -43,22 +52,26 @@
 .m-jk-chrome__bg {
   position: absolute;
   inset: 0;
-  background: linear-gradient(
-    180deg,
-    var(--jk-sky-top) 0%,
-    #3a4f78 22%,
-    #6a7fa8 36%,
-    #c87850 52%,
-    #f0a050 70%,
-    #ffc878 86%,
-    var(--jk-sky-bottom) 100%
-  );
+  background:
+    radial-gradient(115% 85% at 50% 100%, rgba(255, 145, 65, 0.62), transparent 58%),
+    radial-gradient(70% 45% at 85% 15%, rgba(255, 195, 120, 0.28), transparent 52%),
+    linear-gradient(
+      180deg,
+      var(--jk-sky-top) 0%,
+      #5a78b0 12%,
+      #98aac8 24%,
+      #e08848 36%,
+      #f09848 48%,
+      var(--jk-sky-gold) 64%,
+      #ffc868 80%,
+      var(--jk-sky-bottom) 100%
+    );
 }
 
 .m-jk-chrome__grain {
   position: absolute;
   inset: 0;
-  opacity: 0.045;
+  opacity: 0.03;
   mix-blend-mode: overlay;
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.82' numOctaves='3'/%3E%3C/filter%3E%3Crect width='180' height='180' filter='url(%23n)'/%3E%3C/svg%3E");
 }
@@ -77,7 +90,7 @@
 
 .marketing-site--jk .m-header--jk.is-solid,
 .marketing-site--jk .m-header--jk.is-menu-open {
-  background: rgba(12, 22, 56, 0.82);
+  background: rgba(72, 48, 36, 0.72);
   backdrop-filter: blur(12px);
   border-bottom: 1px solid var(--jk-orange-line);
 }
@@ -107,8 +120,8 @@
 }
 
 .marketing-site--jk .m-mobile-menu {
-  background: rgba(8, 11, 16, 0.98);
-  border-bottom: 1px solid rgba(201, 168, 76, 0.28);
+  background: rgba(58, 42, 32, 0.96);
+  border-bottom: 1px solid var(--jk-orange-line);
 }
 
 .marketing-site--jk .m-mobile-nav-link {
@@ -121,9 +134,10 @@
   margin-top: 1.5rem;
   background: linear-gradient(
     180deg,
-    rgba(255, 232, 200, 0) 0%,
-    rgba(52, 62, 82, 0.88) 32%,
-    #1a2030 100%
+    rgba(255, 220, 170, 0) 0%,
+    rgba(120, 72, 48, 0.45) 28%,
+    rgba(48, 40, 36, 0.92) 55%,
+    #2a2420 100%
   );
   border-top: 1px solid rgba(255, 200, 150, 0.35);
 }
@@ -152,7 +166,7 @@
   clip-path: none;
   margin-bottom: 0;
   text-shadow: none;
-  padding: clamp(52px, 7vw, 72px) 0 clamp(40px, 5vw, 56px);
+  padding: clamp(44px, 6vw, 60px) 0 clamp(28px, 4vw, 40px);
   color: #f7f4ef;
 }
 
