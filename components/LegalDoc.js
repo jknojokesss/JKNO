@@ -5,7 +5,6 @@ export default function LegalDoc({ title, sections }) {
     <MarketingShell
       title={`${title} — JK No Jokes Financials`}
       description={`${title} for JK No Jokes Financials`}
-      flightTheme={false}
     >
       <main className="m-legal-doc">
         <article className="m-legal-doc__paper">

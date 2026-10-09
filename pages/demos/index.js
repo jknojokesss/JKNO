@@ -51,13 +51,15 @@ export default function DemoGallery() {
       <section className="m-section" style={{ paddingTop: 0 }}>
         <div className="m-wrap">
           <p className="m-kicker" style={{ marginBottom: 12 }}>Packages</p>
-          <div className="m-demo-grid m-demo-grid--tight">
+          <div className="m-fun-doors">
             {SERVICE_PACKAGES.map((p) => (
               <DemoGalleryCard
                 key={p.title}
+                variant="fun"
                 href={p.href}
                 biz={p.title}
                 industry={p.blurb}
+                accent="#8c6b25"
               />
             ))}
           </div>
@@ -67,13 +69,17 @@ export default function DemoGallery() {
       <section className="m-section" style={{ paddingTop: 'clamp(32px,4vw,48px)' }}>
         <div className="m-wrap">
           <p className="m-kicker" style={{ marginBottom: 12 }}>All samples</p>
-          <div className="m-demo-grid m-demo-grid--gallery">
+          <div className="m-fun-doors m-fun-doors--grid">
             {ALL_DEMOS.map((d) => (
               <DemoGalleryCard
                 key={d.href}
+                variant="fun"
                 href={d.href}
                 biz={d.biz}
                 industry={d.industry}
+                emoji={d.emoji}
+                accent="#8c6b25"
+                compact
               />
             ))}
           </div>

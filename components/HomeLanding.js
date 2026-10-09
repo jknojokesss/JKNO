@@ -44,15 +44,6 @@ const BOOKS = [
   'Other software',
 ]
 
-const CARD_EMOJI = {
-  books: '📒',
-  portal: '🏪',
-  samples: '🚪',
-  demos: '🎪',
-  how: '🛠️',
-  contact: '✉️',
-}
-
 function demoMeta(href) {
   const featured = FEATURED_DEMOS.find((d) => d.src === href)
   if (featured) {
@@ -65,7 +56,6 @@ function demoMeta(href) {
 function FunCard({ id, className = '', children }) {
   return (
     <article className={`m-fun-card${className ? ` ${className}` : ''}`} data-fun-card={id}>
-      <span className="m-fun-card__emoji" aria-hidden="true">{CARD_EMOJI[id]}</span>
       <div className="m-fun-card__fly">{children}</div>
     </article>
   )
@@ -109,9 +99,6 @@ export default function HomeLanding({
 
   return (
     <div ref={rootRef} className="m-fun">
-      <div className="m-fun__blobs" aria-hidden="true" />
-      <div className="m-fun__dots" aria-hidden="true" />
-
       <div className="m-fun__marquee" aria-hidden="true">
         <div className="m-fun__marquee-track">
           {marqueeItems.map((t, i) => (
@@ -140,7 +127,7 @@ export default function HomeLanding({
               className="m-fun__btn m-fun__btn--primary"
               onClick={() => scrollToChapter('samples')}
             >
-              Pick a sample door
+              Open a sample
             </button>
             <button
               type="button"
@@ -185,7 +172,7 @@ export default function HomeLanding({
         <div className="m-fun__lane m-fun__lane--left" id="samples">
           <FunCard id="samples">
             <p className="m-fun-card__kicker">Samples</p>
-            <h2>Walk a fictitious shop</h2>
+            <h2>Try a fictitious shop</h2>
             <p className="lead">No login. Pick a door — if one screen sticks, that&rsquo;s the meeting.</p>
             <div className="m-fun-doors">
               {HERO_SAMPLE_BARS.map((p) => {
@@ -266,7 +253,7 @@ export default function HomeLanding({
             <h2>What&rsquo;s the one screen you keep rebuilding?</h2>
             <p className="lead">
               I&rsquo;ll point you at the closest sample — or{' '}
-              <a href={BOOKING_URL} target="_blank" rel="noopener noreferrer" style={{ color: '#c45c38', fontWeight: 600 }}>
+              <a href={BOOKING_URL} target="_blank" rel="noopener noreferrer" style={{ color: '#8c6b25', fontWeight: 600 }}>
                 book thirty minutes
               </a>
               .
