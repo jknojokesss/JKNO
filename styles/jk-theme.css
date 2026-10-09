@@ -105,22 +105,61 @@ html:has(.marketing-site--jk) {
 
 .marketing-site--jk .m-header--jk.is-solid,
 .marketing-site--jk .m-header--jk.is-menu-open {
-  background: rgba(72, 48, 36, 0.72);
+  background: rgba(255, 235, 210, 0.94);
   backdrop-filter: blur(12px);
-  border-bottom: 1px solid var(--jk-orange-line);
+  -webkit-backdrop-filter: blur(12px);
+  border-bottom: 1px solid rgba(255, 158, 96, 0.45);
 }
 
-.marketing-site--jk .m-header--jk .m-nav-link {
-  color: rgba(247, 244, 239, 0.78);
+.marketing-site--jk .m-header--jk.m-header--hero .m-nav-link {
+  color: rgba(247, 244, 239, 0.88);
 }
 
-.marketing-site--jk .m-header--jk .m-nav-link:hover {
+.marketing-site--jk .m-header--jk.m-header--hero .m-nav-link:hover {
   color: var(--jk-orange-hi);
 }
 
-.marketing-site--jk .m-header--jk .m-nav-link.is-active {
+.marketing-site--jk .m-header--jk.m-header--hero .m-nav-link.is-active {
   color: #fff;
   text-shadow: 0 0 20px rgba(255, 160, 96, 0.35);
+}
+
+.marketing-site--jk .m-header--jk.is-solid .m-nav-link,
+.marketing-site--jk .m-header--jk.is-menu-open .m-nav-link {
+  color: rgba(15, 20, 25, 0.82);
+}
+
+.marketing-site--jk .m-header--jk.is-solid .m-nav-link:hover,
+.marketing-site--jk .m-header--jk.is-menu-open .m-nav-link:hover {
+  color: #b85a28;
+}
+
+.marketing-site--jk .m-header--jk.is-solid .m-nav-link.is-active,
+.marketing-site--jk .m-header--jk.is-menu-open .m-nav-link.is-active {
+  color: var(--jk-ink);
+  text-shadow: none;
+}
+
+.marketing-site--jk .m-header--jk.is-solid .m-logo__jk,
+.marketing-site--jk .m-header--jk.is-menu-open .m-logo__jk {
+  color: var(--jk-ink);
+}
+
+.marketing-site--jk .m-header--jk.is-solid .m-logo__dot,
+.marketing-site--jk .m-header--jk.is-menu-open .m-logo__dot {
+  color: var(--jk-gold);
+}
+
+.marketing-site--jk .m-header--jk.is-solid .m-btn--ghost-light,
+.marketing-site--jk .m-header--jk.is-menu-open .m-btn--ghost-light {
+  color: var(--jk-ink);
+  border-color: rgba(42, 51, 68, 0.28);
+}
+
+.marketing-site--jk .m-header--jk.is-solid .m-menu-toggle,
+.marketing-site--jk .m-header--jk.is-menu-open .m-menu-toggle {
+  color: var(--jk-ink);
+  border-color: rgba(42, 51, 68, 0.25);
 }
 
 .marketing-site--jk .m-header--jk .m-btn--gold {

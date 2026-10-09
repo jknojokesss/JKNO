@@ -49,7 +49,9 @@ export default function MarketingShell({
   const showFlightChrome = flightTheme && !flightHome
   const showJKChrome = useJK
   const showPageChrome = showFlightChrome || useJK
-  const onHomeHero = useJK || marketingHome || flightHome || (chromeFlight && !flightHome) || (darkHeader && onDarkHero && !menuOpen)
+  const onHomeHero = useJK
+    ? !scrolled && !menuOpen
+    : marketingHome || flightHome || (chromeFlight && !flightHome) || (darkHeader && onDarkHero && !menuOpen)
 
   useScrollFlyIn(flightPageRef, showPageChrome, router.pathname)
 
@@ -123,10 +125,10 @@ export default function MarketingShell({
       </Head>
 
       <header
-        className={`m-header${chromeFlight ? ' m-header--flight' : ''}${useJK ? ' m-header--jk' : ''}${onHomeHero ? ' m-header--hero' : ''}${!onHomeHero && (scrolled || menuOpen) ? ' is-solid' : ''}${menuOpen ? ' is-menu-open' : ''}${onHomeHero || chromeFlight || useJK ? ' m-header--dark' : ''}`}
+        className={`m-header${chromeFlight ? ' m-header--flight' : ''}${useJK ? ' m-header--jk' : ''}${onHomeHero ? ' m-header--hero' : ''}${(scrolled || menuOpen) && (useJK || !onHomeHero) ? ' is-solid' : ''}${menuOpen ? ' is-menu-open' : ''}${onHomeHero || chromeFlight ? ' m-header--dark' : ''}`}
       >
         <div className="m-wrap m-header__inner">
-          <MarketingLogo light={onHomeHero || chromeFlight || useJK} onClick={() => { setMenuOpen(false); router.push('/') }} />
+          <MarketingLogo light={onHomeHero || chromeFlight} onClick={() => { setMenuOpen(false); router.push('/') }} />
           {!isMobile && (
             <nav className="m-header__nav" aria-label="Main">
               {NAV_LINKS.map((item) => (
@@ -134,14 +136,14 @@ export default function MarketingShell({
                   onClick={() => go(item.href)}>{item.label}</button>
               ))}
               <button type="button" className="m-nav-link" onClick={() => go('/#contact')}>Contact</button>
-              <button type="button" className={`m-btn m-header__btn${onHomeHero || chromeFlight || useJK ? ' m-btn--ghost-light' : ' m-btn--secondary'}${router.pathname === '/login' ? ' is-nav-current' : ''}`} onClick={() => router.push('/login')}>Log in</button>
-              <a href={BOOKING_URL} target="_blank" rel="noopener noreferrer" className={`m-btn m-header__btn${onHomeHero || chromeFlight || useJK ? ' m-btn--gold' : ' m-btn--primary'}`}>
+              <button type="button" className={`m-btn m-header__btn${onHomeHero || chromeFlight ? ' m-btn--ghost-light' : ' m-btn--secondary'}${router.pathname === '/login' ? ' is-nav-current' : ''}`} onClick={() => router.push('/login')}>Log in</button>
+              <a href={BOOKING_URL} target="_blank" rel="noopener noreferrer" className={`m-btn m-header__btn${onHomeHero || chromeFlight ? ' m-btn--gold' : ' m-btn--primary'}`}>
                 Book a call
               </a>
             </nav>
           )}
           {isMobile && (
-            <button type="button" className={`m-menu-toggle${onHomeHero || chromeFlight || useJK ? ' m-menu-toggle--light' : ''}`} onClick={() => setMenuOpen(!menuOpen)} aria-label={menuOpen ? 'Close menu' : 'Open menu'} aria-expanded={menuOpen}>
+            <button type="button" className={`m-menu-toggle${onHomeHero || chromeFlight ? ' m-menu-toggle--light' : ''}`} onClick={() => setMenuOpen(!menuOpen)} aria-label={menuOpen ? 'Close menu' : 'Open menu'} aria-expanded={menuOpen}>
               {menuOpen ? '✕' : '☰'}
             </button>
           )}
