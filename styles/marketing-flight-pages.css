@@ -231,21 +231,103 @@
   color: var(--flight-gold-hi);
 }
 
-/* Legal pages */
-.marketing-site--flight .m-legal-doc {
-  color: rgba(247, 244, 239, 0.78);
+/* Legal pages — paper panel (inline grays were invisible on flight sky) */
+.m-legal-doc {
+  padding: clamp(48px, 6vw, 72px) 24px clamp(64px, 8vw, 96px);
 }
 
-.marketing-site--flight .m-legal-doc h1,
-.marketing-site--flight .m-legal-doc h2 {
-  color: #fff;
+.m-legal-doc__paper {
+  max-width: 720px;
+  margin: 0 auto;
+  padding: clamp(28px, 4vw, 40px) clamp(22px, 4vw, 36px) clamp(36px, 5vw, 48px);
+  border-radius: 18px;
+  background: rgba(252, 253, 255, 0.94);
+  color: #1a222c;
+  border: 1px solid rgba(255, 255, 255, 0.65);
+  box-shadow: 0 20px 50px rgba(8, 20, 38, 0.28);
+}
+
+.m-legal-doc__head {
+  margin-bottom: 2rem;
+  padding-bottom: 1.75rem;
+  border-bottom: 1px solid #dfe4ec;
+}
+
+.m-legal-doc__paper .m-kicker {
+  margin-bottom: 0.65rem;
+  color: #8c6b25;
+}
+
+.m-legal-doc__title {
+  font-size: clamp(32px, 4vw, 44px);
+  margin: 0 0 0.75rem;
+  color: #0d1319;
+  line-height: 1.1;
+}
+
+.marketing-site--flight .m-legal-doc__title {
   font-family: var(--flight-display);
   font-weight: 400;
 }
 
-.marketing-site--flight .m-legal-doc li,
-.marketing-site--flight .m-legal-doc p {
-  color: rgba(247, 244, 239, 0.72);
+.m-legal-doc__meta {
+  margin: 0;
+  font-size: 15px;
+  line-height: 1.7;
+  color: #48536a;
+}
+
+.m-legal-doc__body {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+}
+
+.m-legal-doc__h2 {
+  margin: 0 0 0.75rem;
+  font-family: 'Space Grotesk', var(--m-font);
+  font-size: 20px;
+  font-weight: 600;
+  color: #0d1319;
+}
+
+.m-legal-doc__p,
+.m-legal-doc__li,
+.m-legal-doc__item-label {
+  margin: 0;
+  font-size: 15px;
+  line-height: 1.75;
+  color: #48536a;
+}
+
+.m-legal-doc__p + .m-legal-doc__ul,
+.m-legal-doc__p + .m-legal-doc__block,
+.m-legal-doc__ul + .m-legal-doc__p {
+  margin-top: 0.75rem;
+}
+
+.m-legal-doc__item-label {
+  font-weight: 600;
+  color: #2a3344;
+  margin-bottom: 0.5rem;
+}
+
+.m-legal-doc__ul {
+  margin: 0;
+  padding-left: 1.25rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.m-legal-doc__link {
+  color: #8c6b25;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.m-legal-doc__link:hover {
+  color: #6b5220;
 }
 
 /* Scroll fly-in for inner marketing sections */
