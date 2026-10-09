@@ -20,32 +20,35 @@ export default function DemoGallery() {
         align="center"
       />
 
-      <section className="m-section m-section--panel" style={{ paddingTop: 'clamp(28px,4vw,40px)', paddingBottom: 'clamp(28px,4vw,40px)' }}>
-        <div className="m-wrap">
-          <p className="m-ship-row__cap">How it ships</p>
-          <ol className="m-ship-row">
-            <li>
-              <span className="m-ship-row__n">1</span>
-              <span className="m-ship-row__text">Connect QuickBooks</span>
-            </li>
-            <li>
-              <span className="m-ship-row__n">2</span>
-              <span className="m-ship-row__text">Sync runs at night</span>
-            </li>
-            <li>
-              <span className="m-ship-row__n">3</span>
-              <span className="m-ship-row__text">Your scoped login</span>
-            </li>
-            <li>
-              <span className="m-ship-row__n">4</span>
-              <span className="m-ship-row__text">Close when you approve</span>
-            </li>
-          </ol>
-          <p className="m-ship-row__more">
-            <button type="button" className="m-btn--text" onClick={() => router.push('/how-it-works')}>
-              Full timeline
-            </button>
+      <section
+        className="m-section m-ship-intro"
+        style={{ paddingTop: 'clamp(20px,3vw,32px)', paddingBottom: 'clamp(16px,2.5vw,28px)' }}
+      >
+        <div className="m-wrap m-ship-intro__inner">
+          <p className="m-ship-hook">
+            Kickoff to login in about <strong>six days</strong> — same pipe on every build.
           </p>
+          <ul className="m-ship-chain" aria-label="How a build ships">
+            <li>
+              <span className="m-ship-chain__verb">Connect</span> QuickBooks once
+            </li>
+            <li>
+              <span className="m-ship-chain__verb">Sync</span> register and vendors nightly
+            </li>
+            <li>
+              <span className="m-ship-chain__verb">Sign in</span> to one scoped portal
+            </li>
+            <li>
+              <span className="m-ship-chain__verb">Close</span> when the books match
+            </li>
+          </ul>
+          <button
+            type="button"
+            className="m-ship-intro__more m-btn--text"
+            onClick={() => router.push('/how-it-works')}
+          >
+            Full timeline
+          </button>
         </div>
       </section>
 

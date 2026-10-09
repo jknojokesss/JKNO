@@ -127,6 +127,24 @@
   border-color: rgba(201, 162, 74, 0.45);
 }
 
+.marketing-site--flight .m-ship-hook {
+  color: #f7f4ef;
+}
+
+.marketing-site--flight .m-ship-hook strong,
+.marketing-site--flight .m-ship-chain__verb {
+  color: #ffb080;
+}
+
+.marketing-site--flight .m-ship-chain {
+  color: rgba(247, 244, 239, 0.78);
+}
+
+.marketing-site--flight .m-ship-chain li:not(:last-child)::after {
+  color: var(--flight-gold-hi);
+  opacity: 0.75;
+}
+
 .marketing-site--flight .m-btn--primary {
   background: linear-gradient(180deg, #e2c892, var(--flight-gold));
   color: #1a1409;
