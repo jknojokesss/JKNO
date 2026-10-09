@@ -119,7 +119,7 @@ export default function HomeLanding({
             You need today.
           </h1>
           <p className="m-fun__lead">
-            Margin while the week is still open — then a close that ties to QuickBooks. Built for owners who are tired of Excel cosplay.
+            Margin while the week is still open — then a close that ties to QuickBooks. Built for owners who are done rebuilding the same screen every Monday.
           </p>
           <div className="m-fun__hero-actions">
             <button
