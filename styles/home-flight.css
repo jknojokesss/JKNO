@@ -262,7 +262,7 @@ html {
   align-items: center;
   justify-content: center;
   text-align: center;
-  padding: calc(5.5rem + env(safe-area-inset-top, 0px)) 1.5rem 11rem;
+  padding: calc(5.5rem + env(safe-area-inset-top, 0px)) 1.5rem 5rem;
   text-shadow: 0 1px 3px rgba(4, 8, 14, 0.9), 0 3px 20px rgba(4, 8, 14, 0.65);
   scroll-snap-align: start;
 }
@@ -418,58 +418,6 @@ html {
     top: calc(100% - 8px);
     opacity: 0;
   }
-}
-
-.m-flight__peek {
-  position: relative;
-  z-index: 1;
-  width: min(22rem, calc(100vw - 2.5rem));
-  margin-top: -0.35rem;
-  overflow: hidden;
-  pointer-events: none;
-}
-
-.m-flight__peek-card {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  gap: 0.35rem;
-  padding: 1.1rem 1.35rem 2.4rem;
-  border-radius: 20px 20px 0 0;
-  border: 1px solid rgba(255, 255, 255, 0.55);
-  border-bottom: none;
-  background: rgba(252, 253, 255, 0.9);
-  color: #0d1319;
-  box-shadow: 0 -8px 40px rgba(0, 0, 0, 0.22);
-  transform: translateY(42%);
-}
-
-@media (prefers-reduced-motion: no-preference) {
-  .m-flight__peek-card {
-    animation: m-flight-peek-rise 3.6s ease-in-out infinite;
-  }
-}
-
-@keyframes m-flight-peek-rise {
-  0%, 100% { transform: translateY(46%); }
-  50% { transform: translateY(38%); }
-}
-
-.m-flight__peek-eyebrow {
-  font-family: var(--flight-display);
-  font-size: 0.58rem;
-  letter-spacing: 0.22em;
-  text-transform: uppercase;
-  color: #8c6b25;
-}
-
-.m-flight__peek-h {
-  font-family: var(--flight-display);
-  font-size: 1.05rem;
-  font-weight: 500;
-  letter-spacing: -0.01em;
-  line-height: 1.2;
-  color: #0d1319;
 }
 
 .m-flight__eyebrow {
@@ -1180,8 +1128,7 @@ html {
     filter: none !important;
   }
 
-  .m-flight__descent-beacon,
-  .m-flight__peek-card {
+  .m-flight__descent-beacon {
     animation: none;
   }
 

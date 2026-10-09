@@ -7,7 +7,7 @@ export default function LegalDoc({ title, sections }) {
         <article className="m-legal-doc__paper">
           <header className="m-legal-doc__head">
             <div className="m-kicker">Legal</div>
-            <h1 className="m-h1 m-legal-doc__title">{title}</h1>
+            <h1 className="m-legal-doc__title">{title}</h1>
             <p className="m-legal-doc__meta">
               <strong>JK No Jokes Financials</strong>
               <br />

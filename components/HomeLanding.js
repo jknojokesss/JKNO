@@ -151,12 +151,6 @@ export default function HomeLanding({
                 <span className="m-flight__descent-beacon" />
               </span>
             </button>
-            <div className="m-flight__peek" aria-hidden="true">
-              <article className="m-flight__peek-card">
-                <span className="m-flight__peek-eyebrow">Books</span>
-                <span className="m-flight__peek-h">QuickBooks in the middle</span>
-              </article>
-            </div>
           </div>
         </header>
 

@@ -89,6 +89,31 @@
   color: #fff;
 }
 
+/* Legal paper panel — keep ink on white (privacy + terms share LegalDoc) */
+.marketing-site--flight .m-legal-doc__paper {
+  color: #1a222c;
+  text-shadow: none;
+}
+
+.marketing-site--flight .m-legal-doc__paper .m-legal-doc__title,
+.marketing-site--flight .m-legal-doc__paper .m-legal-doc__h2 {
+  color: #0d1319;
+}
+
+.marketing-site--flight .m-legal-doc__paper .m-legal-doc__p,
+.marketing-site--flight .m-legal-doc__paper .m-legal-doc__li,
+.marketing-site--flight .m-legal-doc__paper .m-legal-doc__meta {
+  color: #48536a;
+}
+
+.marketing-site--flight .m-legal-doc__paper .m-legal-doc__item-label {
+  color: #2a3344;
+}
+
+.marketing-site--flight .m-legal-doc__paper .m-kicker {
+  color: #8c6b25;
+}
+
 .marketing-site--flight .m-lead,
 .marketing-site--flight .m-about-p,
 .marketing-site--flight .m-stack-blurb,
