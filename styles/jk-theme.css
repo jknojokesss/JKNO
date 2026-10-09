@@ -214,6 +214,10 @@
   border: 1px solid rgba(42, 51, 68, 0.1);
 }
 
+.marketing-site--jk .m-jk-page .m-demo-card {
+  border-left: 3px solid var(--jk-orange-mid);
+}
+
 .marketing-site--jk .m-legal-doc {
   padding: clamp(32px, 4vw, 48px) 20px clamp(64px, 8vw, 96px);
 }
