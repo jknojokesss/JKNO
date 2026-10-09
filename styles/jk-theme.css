@@ -88,6 +88,21 @@ html:has(.marketing-site--jk) {
   background: transparent;
 }
 
+.marketing-site--jk .m-header--jk.m-header--hero {
+  background: transparent;
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+  border-bottom: 1px solid rgba(255, 190, 140, 0.22);
+}
+
+.marketing-site--jk .m-jk-page {
+  background: transparent;
+}
+
+.marketing-site--jk .m-jk-home {
+  background: transparent;
+}
+
 .marketing-site--jk .m-header--jk.is-solid,
 .marketing-site--jk .m-header--jk.is-menu-open {
   background: rgba(72, 48, 36, 0.72);

@@ -38,31 +38,31 @@ export default function HomeLanding({
   const router = useRouter()
 
   return (
-    <div className="m-home">
-      <header className="m-home__hero" id="top">
-        <p className="m-home__eyebrow">Owner portals on QuickBooks</p>
-        <p className="m-home__mark" aria-hidden="true">
-          JK<span className="m-home__mark-dot">.</span>
+    <div className="m-jk-home">
+      <header className="m-jk-home__hero" id="top">
+        <p className="m-jk-home__eyebrow">Owner portals on QuickBooks</p>
+        <p className="m-jk-home__mark" aria-hidden="true">
+          JK<span className="m-jk-home__mark-dot">.</span>
         </p>
-        <h1 className="m-home__h1">
+        <h1 className="m-jk-home__h1">
           Your accountant has the month.
           <br />
-          You need <em className="m-home__today">TODAY</em>.
+          You need <em className="m-jk-home__today">TODAY</em>.
         </h1>
-        <p className="m-home__lead">
+        <p className="m-jk-home__lead">
           Margin while the week is still open — then a close that ties to QuickBooks. Built for owners who are done rebuilding the same screen every Monday.
         </p>
-        <div className="m-home__hero-actions">
+        <div className="m-jk-home__hero-actions">
           <button
             type="button"
-            className="m-home__btn m-home__btn--primary"
+            className="m-jk-home__btn m-jk-home__btn--primary"
             onClick={() => scrollTo('samples')}
           >
             Open a sample
           </button>
           <button
             type="button"
-            className="m-home__btn m-home__btn--ghost"
+            className="m-jk-home__btn m-jk-home__btn--ghost"
             onClick={() => scrollTo('contact')}
           >
             Start a build
@@ -70,15 +70,15 @@ export default function HomeLanding({
         </div>
       </header>
 
-      <div className="m-home__flow">
-        <section className="m-home__panel" id="approach">
-          <div className="m-home__split">
+      <div className="m-jk-home__flow">
+        <section className="m-jk-home__panel" id="approach">
+          <div className="m-jk-home__split">
             <div>
               <h2>QuickBooks stays the boss</h2>
               <p>
                 Nightly sync mirrors your chart and GL. Statements win arguments — not a spreadsheet rebuild.
               </p>
-              <ul className="m-home__list">
+              <ul className="m-jk-home__list">
                 <li>P&amp;L and balance sheet, trailing two years</li>
                 <li>GL detail for recon and close</li>
                 <li>One Intuit connection per company</li>
@@ -89,7 +89,7 @@ export default function HomeLanding({
               <p>
                 Your name on sign-in, your colors on the nav. One login, one company — never someone else&rsquo;s template.
               </p>
-              <ul className="m-home__list">
+              <ul className="m-jk-home__list">
                 <li>Live week vs closed month, labeled honestly</li>
                 <li>Integrations for register, vendors, jobs</li>
                 <li>Built in about six days after kickoff</li>
@@ -98,10 +98,10 @@ export default function HomeLanding({
           </div>
         </section>
 
-        <section className="m-home__panel" id="samples">
+        <section className="m-jk-home__panel" id="samples">
           <h2>Open a sample shop</h2>
-          <p className="m-home__lede">Fictitious businesses, real screens. No login — if one view sticks, that&rsquo;s the meeting.</p>
-          <div className="m-home__demos m-home__demos--lead">
+          <p className="m-jk-home__lede">Fictitious businesses, real screens. No login — if one view sticks, that&rsquo;s the meeting.</p>
+          <div className="m-jk-home__demos m-jk-home__demos--lead">
             {HERO_SAMPLE_BARS.map((p) => (
               <DemoGalleryCard
                 key={p.href}
@@ -113,7 +113,7 @@ export default function HomeLanding({
             ))}
           </div>
           <h3>More industries</h3>
-          <div className="m-home__demos m-home__demos--grid">
+          <div className="m-jk-home__demos m-jk-home__demos--grid">
             {HOME_DEMOS.map((d) => (
               <DemoGalleryCard
                 key={d.src}
@@ -126,16 +126,16 @@ export default function HomeLanding({
           </div>
           <button
             type="button"
-            className="m-home__text-link"
+            className="m-jk-home__text-link"
             onClick={() => router.push('/demos')}
           >
             Browse all samples
           </button>
         </section>
 
-        <section className="m-home__panel" id="how">
+        <section className="m-jk-home__panel" id="how">
           <h2>Kickoff to login in about six days</h2>
-          <ol className="m-home__steps">
+          <ol className="m-jk-home__steps">
             <li>Tell me what you run and what&rsquo;s in QuickBooks already.</li>
             <li>I wire sync and your portal shell.</li>
             <li>You click around on real GL — not slides.</li>
@@ -143,16 +143,16 @@ export default function HomeLanding({
           </ol>
           <button
             type="button"
-            className="m-home__text-link"
+            className="m-jk-home__text-link"
             onClick={() => router.push('/how-it-works')}
           >
             Full timeline
           </button>
         </section>
 
-        <section className="m-home__panel m-home__panel--form" id="contact">
+        <section className="m-jk-home__panel m-jk-home__panel--form" id="contact">
           <h2>What&rsquo;s the one screen you keep rebuilding?</h2>
-          <p className="m-home__lede">
+          <p className="m-jk-home__lede">
             I&rsquo;ll point you at the closest sample — or{' '}
             <a href={BOOKING_URL} target="_blank" rel="noopener noreferrer">
               book thirty minutes
@@ -160,7 +160,7 @@ export default function HomeLanding({
             .
           </p>
           {submitted ? (
-            <p className="m-home__lede" style={{ marginBottom: 0 }}>Got it. I&rsquo;ll be in touch.</p>
+            <p className="m-jk-home__lede" style={{ marginBottom: 0 }}>Got it. I&rsquo;ll be in touch.</p>
           ) : (
             <>
               {[
