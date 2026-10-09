@@ -13,8 +13,8 @@ export default function DemoGallery() {
       description="Clickable sample portals for trades, retail, and distribution — fictitious data, real screen patterns on QuickBooks."
     >
       <PageHero
-        kicker={`${ALL_DEMOS.length} doors · no login`}
-        title={<>Pick a door.</>}
+        kicker={`${ALL_DEMOS.length} samples · no login`}
+        title={<>Open a sample.</>}
         lead="Fictitious companies, real layouts. One screen should make you reach for your phone — that&rsquo;s the meeting."
         align="center"
       />
@@ -51,15 +51,13 @@ export default function DemoGallery() {
       <section className="m-section" style={{ paddingTop: 0 }}>
         <div className="m-wrap">
           <p className="m-kicker" style={{ marginBottom: 12 }}>Packages</p>
-          <div className="m-fun-doors">
+          <div className="m-demo-grid">
             {SERVICE_PACKAGES.map((p) => (
               <DemoGalleryCard
                 key={p.title}
-                variant="fun"
                 href={p.href}
                 biz={p.title}
                 industry={p.blurb}
-                accent="#8c6b25"
               />
             ))}
           </div>
@@ -69,16 +67,13 @@ export default function DemoGallery() {
       <section className="m-section" style={{ paddingTop: 'clamp(32px,4vw,48px)' }}>
         <div className="m-wrap">
           <p className="m-kicker" style={{ marginBottom: 12 }}>All samples</p>
-          <div className="m-fun-doors m-fun-doors--grid">
+          <div className="m-demo-grid m-demo-grid--gallery">
             {ALL_DEMOS.map((d) => (
               <DemoGalleryCard
                 key={d.href}
-                variant="fun"
                 href={d.href}
                 biz={d.biz}
                 industry={d.industry}
-                emoji={d.emoji}
-                accent="#8c6b25"
                 compact
               />
             ))}

@@ -21,15 +21,13 @@ export default function WhatWeDo() {
           <p className="m-lead" style={{ maxWidth: '58ch', marginBottom: '24px' }}>
             Most owners land in one of these. The portal is custom; the pipe is the same — QuickBooks in the middle, sync at night, your login on top.
           </p>
-          <div className="m-fun-doors">
+          <div className="m-demo-grid">
             {SERVICE_PACKAGES.map((p) => (
               <DemoGalleryCard
                 key={p.title}
-                variant="fun"
                 href={p.href}
                 biz={p.title}
                 industry={p.blurb}
-                accent="#8c6b25"
               />
             ))}
           </div>
