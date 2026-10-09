@@ -67,13 +67,7 @@ export default function HomeLanding({
   const rootRef = useRef(null)
   useFlightCardReveal(rootRef)
   const { hud, activeStep } = useHomeFlightMotion(rootRef)
-  const scrollDemos = () => {
-    scrollToFlightStep('flight-samples')
-  }
-
-  const scrollContact = () => {
-    scrollToFlightStep('contact')
-  }
+  const beginStory = () => scrollToFlightStep('flight-books')
 
   return (
     <div ref={rootRef} className="m-flight m-flight--live">
@@ -140,16 +134,29 @@ export default function HomeLanding({
           <p className="m-flight__hero-lead">
             Register, vendors, jobs — synced nightly into a login that looks like your business, not a template.
           </p>
-          <div className="m-flight__hero-actions">
-            <button type="button" className="m-flight__go" onClick={scrollDemos}>
-              Walk a sample
+          <div className="m-flight__hero-floor">
+            <button
+              type="button"
+              className="m-flight__descent"
+              onClick={beginStory}
+              aria-label="Scroll to how your books connect"
+            >
+              <span className="m-flight__descent-copy">
+                <span className="m-flight__descent-kicker">Waypoint 01</span>
+                <span className="m-flight__descent-title">Follow the glide path down</span>
+                <span className="m-flight__descent-hint">Scroll or tap</span>
+              </span>
+              <span className="m-flight__descent-track" aria-hidden="true">
+                <span className="m-flight__descent-line" />
+                <span className="m-flight__descent-beacon" />
+              </span>
             </button>
-            <button type="button" className="m-flight__go m-flight__go--ghost" onClick={scrollContact}>
-              Tell me what you run
-            </button>
-            <p className="m-flight__scroll-cue" aria-hidden="true">
-              <span>Scroll</span>
-            </p>
+            <div className="m-flight__peek" aria-hidden="true">
+              <article className="m-flight__peek-card">
+                <span className="m-flight__peek-eyebrow">Books</span>
+                <span className="m-flight__peek-h">QuickBooks in the middle</span>
+              </article>
+            </div>
           </div>
         </header>
 
