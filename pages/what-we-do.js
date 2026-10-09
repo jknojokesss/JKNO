@@ -2,7 +2,7 @@ import { useRouter } from 'next/router'
 import MarketingShell, { PageHero } from '../components/MarketingShell'
 import { BOOKING_URL } from '../lib/marketing'
 import { BUILD_STACK, SERVICE_PACKAGES } from '../lib/buildStack'
-import ChocolateBarLink, { ChocolateBarCaption } from '../components/ChocolateBarLink'
+import DemoGalleryCard from '../components/DemoGalleryCard'
 
 export default function WhatWeDo() {
   const router = useRouter()
@@ -21,15 +21,13 @@ export default function WhatWeDo() {
           <p className="m-lead" style={{ maxWidth: '58ch', marginBottom: '24px' }}>
             Most owners land in one of these. The portal is custom; the pipe is the same — QuickBooks in the middle, sync at night, your login on top.
           </p>
-          <ChocolateBarCaption>Four flavors</ChocolateBarCaption>
-          <div className="jk-choc-grid jk-choc-grid--tight">
+          <div className="m-demo-grid m-demo-grid--tight">
             {SERVICE_PACKAGES.map((p) => (
-              <ChocolateBarLink
+              <DemoGalleryCard
                 key={p.title}
                 href={p.href}
-                name={p.title}
+                biz={p.title}
                 industry={p.blurb}
-                wide
               />
             ))}
           </div>

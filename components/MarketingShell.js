@@ -32,7 +32,8 @@ export default function MarketingShell({
   padTop = true,
   darkHeader = false,
   flightHome = false,
-  flightTheme = true,
+  marketingHome = false,
+  flightTheme = false,
 }) {
   const router = useRouter()
   const flightPageRef = useRef(null)
@@ -43,7 +44,7 @@ export default function MarketingShell({
 
   const chromeFlight = flightTheme || flightHome
   const showPageChrome = flightTheme && !flightHome
-  const onHomeHero = flightHome || (chromeFlight && !flightHome) || (darkHeader && onDarkHero && !menuOpen)
+  const onHomeHero = marketingHome || flightHome || (chromeFlight && !flightHome) || (darkHeader && onDarkHero && !menuOpen)
 
   useScrollFlyIn(flightPageRef, showPageChrome, router.pathname)
 
@@ -55,12 +56,13 @@ export default function MarketingShell({
   useEffect(() => {
     const onScroll = () => {
       setScrolled(window.scrollY > 8)
-      if (router.pathname === '/' && !flightHome) setOnDarkHero(window.scrollY < 720)
+      if (router.pathname === '/' && !flightHome && !marketingHome) setOnDarkHero(window.scrollY < 720)
+      if (router.pathname === '/' && marketingHome) setOnDarkHero(window.scrollY < 640)
     }
     onScroll()
     window.addEventListener('scroll', onScroll)
     return () => window.removeEventListener('scroll', onScroll)
-  }, [router.pathname, flightHome])
+  }, [router.pathname, flightHome, marketingHome])
 
   useEffect(() => {
     const checkMobile = () => setIsMobile(window.innerWidth < 900)
@@ -155,24 +157,24 @@ export default function MarketingShell({
       <div
         ref={flightPageRef}
         className={showPageChrome ? 'm-flight-page' : undefined}
-        style={{ paddingTop: padTop && !flightHome ? '68px' : 0 }}
+        style={{ paddingTop: padTop && !flightHome && !marketingHome ? '68px' : 0 }}
       >
         {children}
       </div>
 
       <footer
-        className={chromeFlight ? 'm-footer-flight' : ''}
+        className={chromeFlight || marketingHome ? 'm-footer-flight' : ''}
         style={{
           padding: '48px 0 40px',
-          borderTop: chromeFlight ? undefined : '1px solid #DFE4EC',
-          background: chromeFlight ? undefined : '#fff',
-          position: chromeFlight ? 'relative' : undefined,
-          zIndex: chromeFlight ? 1 : undefined,
+          borderTop: chromeFlight || marketingHome ? undefined : '1px solid #DFE4EC',
+          background: chromeFlight || marketingHome ? undefined : '#fff',
+          position: chromeFlight || marketingHome ? 'relative' : undefined,
+          zIndex: chromeFlight || marketingHome ? 1 : undefined,
         }}
       >
         <div className="m-wrap" style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'space-between', gap: '32px', alignItems: 'flex-start' }}>
           <div>
-            <MarketingLogo size={22} tagline={false} light={chromeFlight} onClick={() => router.push('/')} />
+            <MarketingLogo size={22} tagline={false} light={chromeFlight || marketingHome} onClick={() => router.push('/')} />
             <p
               className={chromeFlight ? 'm-footer-flight__blurb' : ''}
               style={{

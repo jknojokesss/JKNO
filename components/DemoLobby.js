@@ -1,15 +1,11 @@
 import Link from 'next/link'
-import Head from 'next/head'
 import { getDemoHook } from '../lib/demoHooks'
 import { getSamplePortal } from '../lib/samplePortals'
 import { getDemoAlignment } from '../lib/demoAlignment'
-import ChocolateBarLink, { ChocolateBarCaption } from './ChocolateBarLink'
-
-const CHOC_FONT =
-  'https://fonts.googleapis.com/css2?family=Bitter:wght@600;700&display=swap'
+import DemoGalleryCard from './DemoGalleryCard'
 
 /**
- * Sample portal header — same chocolate bars as the homepage, plus “next bar” trail.
+ * Sample portal header — current demo + next sample link.
  */
 export default function DemoLobby({ href, biz }) {
   const current = getSamplePortal(href)
@@ -21,38 +17,33 @@ export default function DemoLobby({ href, biz }) {
   const { sells } = getDemoAlignment(href)
 
   return (
-    <>
-      <Head>
-        <link rel="stylesheet" href={CHOC_FONT} />
-      </Head>
-      <div className="jk-choc-lobby" role="region" aria-label="Sample portal">
-        <div className="jk-choc-lobby__top">
-          <Link href="/" className="jk-choc-lobby__jk">
-            JK<span className="jk-choc-lobby__dot">.</span>
-          </Link>
-          <ChocolateBarCaption>Fictitious company · sample portal</ChocolateBarCaption>
-        </div>
-        <ChocolateBarLink
-          href={href}
-          name={name}
-          industry={current.industry}
-          here
-        />
-        <p className="jk-choc-lobby__sells">
-          {sells.join(' · ')}
-        </p>
-        <ChocolateBarCaption sub>Next bar</ChocolateBarCaption>
-        <ChocolateBarLink
-          href={nextHref}
-          name={nextName}
-          industry={nextPortal.industry}
-        />
-        <p className="jk-choc-lobby__foot">
-          <Link href="/demos">All samples</Link>
-          <span aria-hidden="true"> · </span>
-          <Link href="/#contact">Start a build</Link>
-        </p>
+    <div className="m-sample-lobby" role="region" aria-label="Sample portal">
+      <div className="m-sample-lobby__top">
+        <Link href="/" className="m-sample-lobby__jk">
+          JK<span className="m-sample-lobby__dot">.</span>
+        </Link>
+        <p className="m-kicker">Fictitious company · sample portal</p>
       </div>
-    </>
+      <DemoGalleryCard
+        href={href}
+        biz={name}
+        industry={current.industry}
+        here
+      />
+      <p className="m-sample-lobby__sells">
+        {sells.join(' · ')}
+      </p>
+      <p className="m-sample-lobby__next-label">Next sample</p>
+      <DemoGalleryCard
+        href={nextHref}
+        biz={nextName}
+        industry={nextPortal.industry}
+      />
+      <p className="m-sample-lobby__foot">
+        <Link href="/demos">All samples</Link>
+        <span aria-hidden="true"> · </span>
+        <Link href="/#contact">Start a build</Link>
+      </p>
+    </div>
   )
 }

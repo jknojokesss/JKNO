@@ -4,7 +4,6 @@ import { BOOKING_URL } from '../../lib/marketing'
 import { ALL_DEMOS } from '../../lib/industryDemos'
 import { SERVICE_PACKAGES } from '../../lib/buildStack'
 import DemoGalleryCard from '../../components/DemoGalleryCard'
-import ChocolateBarLink, { ChocolateBarCaption } from '../../components/ChocolateBarLink'
 
 export default function DemoGallery() {
   const router = useRouter()
@@ -51,15 +50,14 @@ export default function DemoGallery() {
 
       <section className="m-section" style={{ paddingTop: 0 }}>
         <div className="m-wrap">
-          <ChocolateBarCaption>Four flavors</ChocolateBarCaption>
-          <div className="jk-choc-grid jk-choc-grid--tight">
+          <p className="m-kicker" style={{ marginBottom: 12 }}>Packages</p>
+          <div className="m-demo-grid m-demo-grid--tight">
             {SERVICE_PACKAGES.map((p) => (
-              <ChocolateBarLink
+              <DemoGalleryCard
                 key={p.title}
                 href={p.href}
-                name={p.title}
+                biz={p.title}
                 industry={p.blurb}
-                wide
               />
             ))}
           </div>
@@ -68,8 +66,8 @@ export default function DemoGallery() {
 
       <section className="m-section" style={{ paddingTop: 'clamp(32px,4vw,48px)' }}>
         <div className="m-wrap">
-          <ChocolateBarCaption>Full box</ChocolateBarCaption>
-          <div className="jk-choc-grid jk-choc-grid--gallery">
+          <p className="m-kicker" style={{ marginBottom: 12 }}>All samples</p>
+          <div className="m-demo-grid m-demo-grid--gallery">
             {ALL_DEMOS.map((d) => (
               <DemoGalleryCard
                 key={d.href}

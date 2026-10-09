@@ -38,10 +38,11 @@ export default function Landing() {
     <>
       <MarketingShell
         title="JK No Jokes Financials | Owner portals on your books"
-        description="Owner portals on real books — margin during the week, close that ties out. Walk the samples, then start a build in about six days."
+        description="Owner portals on real books — margin during the week, close that ties out. Open a sample, then start a build in about six days."
+        marketingHome
         darkHeader
-        flightHome
         padTop={false}
+        flightTheme={false}
       >
         <HomeLanding
           form={form}

@@ -1,13 +1,10 @@
 import { useRef } from 'react'
-import { useHomeFlightMotion, FLIGHT_STEPS } from '../lib/useHomeFlightMotion'
-import { useFlightCardReveal } from '../lib/useFlightCardReveal'
-import { scrollToFlightStep } from '../lib/flightSteps'
+import { useHomeCardReveal } from '../lib/useHomeCardReveal'
 import { useRouter } from 'next/router'
 import { BOOKING_URL } from '../lib/marketing'
 import { FEATURED_DEMOS } from '../lib/marketingDemos'
 import { HERO_SAMPLE_BARS } from '../lib/samplePortals'
 import DemoGalleryCard from './DemoGalleryCard'
-import ChocolateBarLink, { ChocolateBarCaption } from './ChocolateBarLink'
 
 const HOME_DEMOS = [
   FEATURED_DEMOS[0],
@@ -43,15 +40,15 @@ const CARD_STAGGER_MS = {
   contact: 80,
 }
 
-function FlightCard({ id, className = '', children }) {
+function StoryCard({ id, className = '', children }) {
   const stagger = CARD_STAGGER_MS[id] ?? 0
   return (
     <article
-      className={`m-flight-card${className ? ` ${className}` : ''}`}
-      data-flight-card={id}
+      className={`m-home-card${className ? ` ${className}` : ''}`}
+      data-home-card={id}
       style={{ '--fly-stagger': `${stagger}ms` }}
     >
-      <div className="m-flight-card__fly">{children}</div>
+      <div className="m-home-card__fly">{children}</div>
     </article>
   )
 }
@@ -65,97 +62,35 @@ export default function HomeLanding({
 }) {
   const router = useRouter()
   const rootRef = useRef(null)
-  useFlightCardReveal(rootRef)
-  const { hud, activeStep } = useHomeFlightMotion(rootRef)
-  const beginStory = () => scrollToFlightStep('flight-books')
+  useHomeCardReveal(rootRef)
+
+  const scrollToSection = (id) => {
+    document.getElementById(id)?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+  }
 
   return (
-    <div ref={rootRef} className="m-flight m-flight--live">
-      <div className="m-flight__sky" aria-hidden="true" />
-      <div className="m-flight__haze" aria-hidden="true" />
-      <div className="m-flight__horizon" aria-hidden="true" />
-      <div className="m-flight__orb" aria-hidden="true" />
-      <div className="m-flight__vignette" aria-hidden="true" />
-      <div className="m-flight__grain" aria-hidden="true" />
-      <div className="m-flight__dim" aria-hidden="true" />
-      <div className="m-flight__debris" aria-hidden="true">
-        <span className="m-flight__shard m-flight__shard--1" />
-        <span className="m-flight__shard m-flight__shard--2" />
-        <span className="m-flight__shard m-flight__shard--3" />
-        <span className="m-flight__shard m-flight__shard--4" />
-        <span className="m-flight__shard m-flight__shard--5" />
-        <span className="m-flight__shard m-flight__shard--6" />
-        <span className="m-flight__contrail m-flight__contrail--1" />
-        <span className="m-flight__contrail m-flight__contrail--2" />
-        <span className="m-flight__contrail m-flight__contrail--3" />
-        <span className="m-flight__foil m-flight__foil--1" />
-        <span className="m-flight__foil m-flight__foil--2" />
-      </div>
-      <aside className="m-flight-instruments" aria-hidden="true">
-        <div className="m-flight-instruments__inst">
-          <span className="m-flight-instruments__lab">Books</span>
-          <span className="m-flight-instruments__val" key={`b-${hud.books}`}>{hud.books}</span>
-        </div>
-        <div className="m-flight-instruments__inst">
-          <span className="m-flight-instruments__lab">Sync</span>
-          <span className="m-flight-instruments__val" key={`s-${hud.sync}`}>{hud.sync}</span>
-        </div>
-        <div className="m-flight-instruments__inst">
-          <span className="m-flight-instruments__lab">Login</span>
-          <span className="m-flight-instruments__val" key={`l-${hud.login}`}>{hud.login}</span>
-        </div>
-      </aside>
+    <div ref={rootRef} className="m-home">
+      <div className="m-home__bg" aria-hidden="true" />
+      <div className="m-home__grain" aria-hidden="true" />
 
-      <nav className="m-flight-strip" aria-label="Story progress">
-        <div className="m-flight-strip__track">
-          <div className="m-flight-strip__fill" />
-          <div className="m-flight-strip__beacon" />
-        </div>
-        <ul className="m-flight-waypoints">
-          {FLIGHT_STEPS.map((step, i) => (
-            <li key={step.id} data-on={activeStep === i ? '1' : undefined}>
-              <button
-                type="button"
-                onClick={() => scrollToFlightStep(step.target)}
-                aria-current={activeStep === i ? 'step' : undefined}
-              >
-                <span className="wp-n">{step.num}</span>
-                <span className="wp-l">{step.label}</span>
-              </button>
-            </li>
-          ))}
-        </ul>
-      </nav>
-
-      <div className="m-flight__scroll">
-        <header className="m-flight__nose" id="flight-intro">
-          <p className="m-flight__eyebrow">Owner portals on real books</p>
-          <h1 className="m-flight__hero-h">Your accountant has the month. You need today.</h1>
-          <p className="m-flight__hero-lead">
+      <div className="m-home__scroll">
+        <header className="m-home__hero" id="top">
+          <p className="m-home__eyebrow">Owner portals on real books</p>
+          <h1 className="m-home__hero-h">Your accountant has the month. You need today.</h1>
+          <p className="m-home__hero-lead">
             Register, vendors, jobs — synced nightly into a login that looks like your business, not a template.
           </p>
-          <div className="m-flight__hero-floor">
-            <button
-              type="button"
-              className="m-flight__descent"
-              onClick={beginStory}
-              aria-label="Scroll to how your books connect"
-            >
-              <span className="m-flight__descent-copy">
-                <span className="m-flight__descent-kicker">Waypoint 01</span>
-                <span className="m-flight__descent-title">Follow the glide path down</span>
-                <span className="m-flight__descent-hint">Scroll or tap</span>
-              </span>
-              <span className="m-flight__descent-track" aria-hidden="true">
-                <span className="m-flight__descent-line" />
-                <span className="m-flight__descent-beacon" />
-              </span>
-            </button>
-          </div>
+          <button
+            type="button"
+            className="m-home__scroll-cue"
+            onClick={() => scrollToSection('books')}
+          >
+            See how it works
+          </button>
         </header>
 
-        <div className="m-flight__lane m-flight__lane--left" id="flight-books">
-          <FlightCard id="books">
+        <div className="m-home__lane m-home__lane--left" id="books">
+          <StoryCard id="books">
             <div className="c-eyebrow">
               Books <i aria-hidden="true" />
             </div>
@@ -168,11 +103,11 @@ export default function HomeLanding({
               <li>GL detail for recon and close</li>
               <li>One Intuit connection per company</li>
             </ul>
-          </FlightCard>
+          </StoryCard>
         </div>
 
-        <div className="m-flight__lane m-flight__lane--right" id="flight-portal">
-          <FlightCard id="portal">
+        <div className="m-home__lane m-home__lane--right" id="portal">
+          <StoryCard id="portal">
             <div className="c-eyebrow">
               Portal <i aria-hidden="true" />
             </div>
@@ -185,60 +120,59 @@ export default function HomeLanding({
               <li>Closed month ties to QuickBooks</li>
               <li>No shared template with another client</li>
             </ul>
-          </FlightCard>
+          </StoryCard>
         </div>
 
-        <div className="m-flight__lane m-flight__lane--left" id="flight-samples">
-          <FlightCard id="samples">
+        <div className="m-home__lane m-home__lane--left" id="samples">
+          <StoryCard id="samples">
             <div className="c-eyebrow">
               Samples <i aria-hidden="true" />
             </div>
             <h2>Open a sample — no login</h2>
             <p className="lead">Fictitious companies. Real layouts. Pick one that feels close.</p>
-            <ChocolateBarCaption strip={false}>Tap a bar</ChocolateBarCaption>
-            <div className="jk-choc-stack" style={{ gap: 12 }}>
+            <div className="m-home-card__samples">
               {HERO_SAMPLE_BARS.map((p) => (
-                <ChocolateBarLink
+                <DemoGalleryCard
                   key={p.href}
                   href={p.href}
-                  name={p.name}
+                  biz={p.name}
                   industry={p.industry}
                 />
               ))}
             </div>
-          </FlightCard>
+          </StoryCard>
         </div>
 
-        <div className="m-flight__lane m-flight__lane--right" id="flight-demos">
-          <FlightCard id="demos" className="m-flight-card--demos">
+        <div className="m-home__lane m-home__lane--right" id="demos">
+          <StoryCard id="demos">
             <div className="c-eyebrow">
               Gallery <i aria-hidden="true" />
             </div>
-            <h2>Walk someone else&rsquo;s week</h2>
-            <p className="lead">If one question sticks in your head, we&rsquo;re done.</p>
-            <div className="jk-choc-grid jk-choc-grid--home">
+            <h2>More sample portals</h2>
+            <p className="lead">If one screen sticks in your head, we&rsquo;re done.</p>
+            <div className="m-home-card__demos">
               {HOME_DEMOS.map((d) => (
                 <DemoGalleryCard
                   key={d.src}
                   href={d.src}
                   biz={d.biz || d.label}
                   industry={d.label}
+                  compact
                 />
               ))}
             </div>
             <button
               type="button"
-              className="m-flight__go"
-              style={{ marginTop: '1.25rem', width: '100%' }}
+              className="m-home-card__btn"
               onClick={() => router.push('/demos')}
             >
               All samples
             </button>
-          </FlightCard>
+          </StoryCard>
         </div>
 
-        <div className="m-flight__lane m-flight__lane--left" id="flight-how">
-          <FlightCard id="how">
+        <div className="m-home__lane m-home__lane--left" id="how">
+          <StoryCard id="how">
             <div className="c-eyebrow">
               How it ships <i aria-hidden="true" />
             </div>
@@ -251,17 +185,16 @@ export default function HomeLanding({
             </ol>
             <button
               type="button"
-              className="m-flight__go m-flight__go--ghost"
-              style={{ color: '#1a222c', borderColor: 'rgba(16,24,32,0.2)' }}
+              className="m-home-card__btn m-home-card__btn--ghost"
               onClick={() => router.push('/how-it-works')}
             >
               Full timeline
             </button>
-          </FlightCard>
+          </StoryCard>
         </div>
 
-        <div className="m-flight__lane m-flight__lane--right" id="contact">
-          <FlightCard id="contact" className="m-flight-card--form">
+        <div className="m-home__lane m-home__lane--right" id="contact">
+          <StoryCard id="contact" className="m-home-card--form">
             <div className="c-eyebrow">
               Start <i aria-hidden="true" />
             </div>
@@ -349,7 +282,7 @@ export default function HomeLanding({
                 </button>
               </>
             )}
-          </FlightCard>
+          </StoryCard>
         </div>
       </div>
     </div>

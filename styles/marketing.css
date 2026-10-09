@@ -2784,7 +2784,134 @@
   }
 }
 
-/* ── JK chocolate-bar sample links (home, /demos, demo lobby) ─────────── */
+/* ── Sample portal cards (replaces chocolate bars) ─────────────────── */
+
+.m-demo-grid {
+  display: grid;
+  gap: 12px;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+}
+
+.m-demo-grid--tight {
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+}
+
+.m-demo-grid--gallery {
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+}
+
+.m-demo-card {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+  padding: 1rem 1.1rem;
+  border-radius: 12px;
+  border: 1px solid var(--m-line);
+  background: #fff;
+  text-decoration: none;
+  color: var(--m-ink);
+  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.05);
+  transition: border-color 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease;
+}
+
+.m-demo-card:hover {
+  border-color: var(--m-gold);
+  box-shadow: 0 10px 28px rgba(15, 23, 42, 0.1);
+  transform: translateY(-2px);
+}
+
+.m-demo-card--here {
+  border-color: var(--m-gold);
+  background: linear-gradient(180deg, #fffef8, #fff);
+}
+
+.m-demo-card--compact {
+  padding: 0.75rem 0.85rem;
+}
+
+.m-demo-card__industry {
+  font-size: 0.65rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--m-muted);
+}
+
+.m-demo-card__name {
+  font-size: 1rem;
+  font-weight: 600;
+  line-height: 1.25;
+  color: var(--m-ink);
+}
+
+.m-demo-card--compact .m-demo-card__name {
+  font-size: 0.9rem;
+}
+
+.m-demo-card__go {
+  margin-top: 0.35rem;
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: #7c5c12;
+}
+
+.m-sample-lobby {
+  max-width: 420px;
+  margin: 0 auto;
+  padding: clamp(24px, 4vw, 40px) 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.m-sample-lobby__top {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-bottom: 4px;
+}
+
+.m-sample-lobby__jk {
+  font-family: var(--m-serif);
+  font-size: 1.35rem;
+  color: var(--m-ink);
+  text-decoration: none;
+}
+
+.m-sample-lobby__dot {
+  color: var(--m-gold);
+}
+
+.m-sample-lobby__sells {
+  margin: 0;
+  font-size: 0.85rem;
+  line-height: 1.5;
+  color: var(--m-muted);
+}
+
+.m-sample-lobby__next-label {
+  margin: 8px 0 0;
+  font-size: 0.65rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--m-muted);
+}
+
+.m-sample-lobby__foot {
+  margin: 12px 0 0;
+  font-size: 0.85rem;
+  text-align: center;
+}
+
+.m-sample-lobby__foot a {
+  color: #7c5c12;
+  text-decoration: none;
+}
+
+.m-sample-lobby__foot a:hover {
+  text-decoration: underline;
+}
+
+/* ── JK chocolate-bar sample links (legacy — prefer m-demo-card) ─────── */
 
 .jk-choc-cap {
   margin: 0 0 10px;
