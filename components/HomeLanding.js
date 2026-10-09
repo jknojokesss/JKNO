@@ -8,14 +8,10 @@ import { FUN_CHAPTERS, scrollToChapter } from '../lib/funChapters'
 import { useFunCardReveal } from '../lib/useFunCardReveal'
 import DemoGalleryCard from './DemoGalleryCard'
 
-const HOME_DEMOS = [
-  FEATURED_DEMOS[0],
-  FEATURED_DEMOS[1],
-  FEATURED_DEMOS[5],
-  FEATURED_DEMOS[4],
-  FEATURED_DEMOS[3],
-  FEATURED_DEMOS[8],
-].filter(Boolean)
+const SAMPLE_HREFS = new Set(HERO_SAMPLE_BARS.map((p) => p.href))
+
+/** Gallery doors — never repeat the Samples trio above. */
+const HOME_DEMOS = FEATURED_DEMOS.filter((d) => !SAMPLE_HREFS.has(d.src)).slice(0, 6)
 
 const MARQUEE = [
   'QuickBooks',
