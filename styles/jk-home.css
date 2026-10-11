@@ -57,6 +57,17 @@
   text-decoration-thickness: 3px;
   text-underline-offset: 0.14em;
   text-decoration-color: var(--jk-orange-mid);
+  animation: m-jk-today-glow 5s ease-in-out infinite;
+}
+
+@keyframes m-jk-today-glow {
+  0%,
+  100% {
+    text-decoration-color: var(--jk-orange-mid);
+  }
+  50% {
+    text-decoration-color: var(--jk-gold);
+  }
 }
 
 .m-jk-home__lead {

@@ -13,7 +13,7 @@ const HOW = [
   },
   {
     title: 'Go live',
-    body: 'About six days. You log in, we walk it, fix what\u2019s off. Nothing ships until it matches QuickBooks.',
+    body: 'You log in, we walk it, fix what\u2019s off. Nothing stays live until it matches QuickBooks.',
   },
 ]
 
@@ -23,8 +23,8 @@ export default function HowItWorks() {
     <MarketingShell title="How It Works | JK No Jokes Financials">
       <PageHero
         kicker="How it works"
-        title="Kickoff to login in about six days."
-        lead="Call, build, launch. After go-live, nightly sync keeps your week live and the close tied to QuickBooks."
+        title="Call, build, launch."
+        lead="Short fixed scope — not a quarter-long rollout. After go-live, nightly sync keeps your week live and the close tied to the books."
         align="center"
       />
 

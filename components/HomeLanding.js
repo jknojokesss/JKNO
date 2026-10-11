@@ -1,6 +1,6 @@
+import { useState } from 'react'
 import { useRouter } from 'next/router'
 import { BOOKING_URL } from '../lib/marketing'
-import { FEATURED_DEMOS } from '../lib/marketingDemos'
 import { HERO_SAMPLE_BARS } from '../lib/samplePortals'
 import DemoGalleryCard from './DemoGalleryCard'
 
@@ -21,9 +21,9 @@ const SITE_FEATURES = [
     body: 'Your sign-in, your nav, your colors. One login, one company.',
   },
   {
-    tag: 'The build',
-    title: 'Kickoff to login in about six days',
-    body: 'You click around on real data. Nothing ships until the screen you asked for matches.',
+    tag: 'Short build',
+    title: 'Days on the calendar, not a quarter-long IT project',
+    body: 'Kickoff call, wire-up, your login. You click through on real data before anything stays live.',
   },
 ]
 
@@ -55,6 +55,8 @@ export default function HomeLanding({
   submitting,
 }) {
   const router = useRouter()
+  const [featureIx, setFeatureIx] = useState(0)
+  const activeFeature = SITE_FEATURES[featureIx]
 
   return (
     <div className="m-jk-home">
@@ -95,15 +97,34 @@ export default function HomeLanding({
           <p className="m-jk-home__lede">
             Operating screens for the week you&rsquo;re in — plus a close that lines up with the books.
           </p>
-          <ul className="m-jk-feature-grid">
-            {SITE_FEATURES.map((f) => (
-              <li key={f.tag} className="m-jk-feature">
-                <p className="m-jk-feature__tag">{f.tag}</p>
-                <h3 className="m-jk-feature__title">{f.title}</h3>
-                <p className="m-jk-feature__body">{f.body}</p>
-              </li>
-            ))}
-          </ul>
+          <div className="m-jk-feature-picker">
+            <div className="m-jk-feature-picker__tabs" role="tablist" aria-label="What you get">
+              {SITE_FEATURES.map((f, i) => (
+                <button
+                  key={f.tag}
+                  type="button"
+                  role="tab"
+                  id={`feature-tab-${i}`}
+                  aria-selected={featureIx === i}
+                  aria-controls="feature-panel"
+                  className={`m-jk-feature-picker__tab${featureIx === i ? ' is-active' : ''}`}
+                  onClick={() => setFeatureIx(i)}
+                >
+                  {f.tag}
+                </button>
+              ))}
+            </div>
+            <div
+              className="m-jk-feature-picker__stage"
+              role="tabpanel"
+              id="feature-panel"
+              aria-labelledby={`feature-tab-${featureIx}`}
+              key={featureIx}
+            >
+              <h3 className="m-jk-feature-picker__title">{activeFeature.title}</h3>
+              <p className="m-jk-feature-picker__body">{activeFeature.body}</p>
+            </div>
+          </div>
         </section>
 
         <section className="m-jk-home__panel" id="samples">
@@ -112,18 +133,15 @@ export default function HomeLanding({
             Fictitious businesses, real portals — full screen, no login. Pick an industry and click through.
           </p>
           <div className="m-jk-home__demos m-jk-home__demos--lead">
-            {HERO_SAMPLE_BARS.map((p) => {
-              const row = FEATURED_DEMOS.find((d) => d.src === p.href)
-              return (
-                <DemoGalleryCard
-                  key={p.href}
-                  href={p.href}
-                  biz={p.name}
-                  industry={p.industry}
-                  compact
-                />
-              )
-            })}
+            {HERO_SAMPLE_BARS.map((p) => (
+              <DemoGalleryCard
+                key={p.href}
+                href={p.href}
+                biz={p.name}
+                industry={p.industry}
+                compact
+              />
+            ))}
           </div>
           <button
             type="button"
@@ -155,19 +173,19 @@ export default function HomeLanding({
               <ul className="m-jk-home__list">
                 <li>Live week vs closed month, labeled honestly</li>
                 <li>Integrations for register, vendors, jobs</li>
-                <li>Built in about six days after kickoff</li>
+                <li>Short fixed-scope build — not a drawn-out IT rollout</li>
               </ul>
             </div>
           </div>
         </section>
 
         <section className="m-jk-home__panel" id="how">
-          <h2>Kickoff to login in about six days</h2>
+          <h2>Call, build, tune</h2>
           <ol className="m-jk-steps">
-            <li>Tell me what you run and what&rsquo;s in QuickBooks already.</li>
-            <li>I wire sync and your portal shell.</li>
-            <li>You click around on real GL — not slides.</li>
-            <li>We tune until close and your must-have screen match.</li>
+            <li>Thirty-minute kickoff — what you sell and what has to be on one screen.</li>
+            <li>I wire your books, register, vendors, whatever you run.</li>
+            <li>You log in and click around — not a slide deck.</li>
+            <li>We keep at it until close and that screen match.</li>
           </ol>
           <button
             type="button"

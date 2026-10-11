@@ -25,7 +25,7 @@ export default function DemoGallery() {
       >
         <div className="m-wrap m-ship-intro__inner">
           <p className="m-ship-hook">
-            Kickoff to login in about <strong>six days</strong> — same pipe on every build.
+            Same pipe on every build — <strong>short scope</strong>, your login when it&rsquo;s right.
           </p>
           <ul className="m-ship-chain" aria-label="How a build ships">
             <li>
