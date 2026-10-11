@@ -47,50 +47,52 @@ export default function HomeLanding({
 
   return (
     <div className="m-jk-home">
-      <header className="m-jk-home__hero" id="top">
-        <p className="m-jk-home__eyebrow">Owner portals on QuickBooks</p>
-        <p className="m-jk-home__mark" aria-hidden="true">
-          JK<span className="m-jk-home__mark-dot">.</span>
-        </p>
-        <h1 className="m-jk-home__h1">
-          Your accountant has the month.
-          <br />
-          You need <em className="m-jk-home__today">TODAY</em>.
-        </h1>
-        <p className="m-jk-home__lead">
-          Margin while the week is still open — then a close that ties to QuickBooks. Built for owners who are done rebuilding the same screen every Monday.
-        </p>
-        <div className="m-jk-home__hero-actions">
-          <button
-            type="button"
-            className="m-jk-home__btn m-jk-home__btn--primary"
-            onClick={() => scrollTo('samples')}
-          >
-            Open a sample
-          </button>
-          <button
-            type="button"
-            className="m-jk-home__btn m-jk-home__btn--ghost"
-            onClick={() => scrollTo('contact')}
-          >
-            Start a build
-          </button>
-        </div>
-      </header>
-
-      <div className="m-jk-home__flow">
-        <section className="m-jk-home__panel m-jk-home__panel--samples" id="samples">
-          <h2>Open a sample shop</h2>
-          <p className="m-jk-home__lede">
-            Fictitious businesses, real screens. Pick an industry, poke around in the frame — no login.
-          </p>
+      <header className="m-jk-home__hero m-jk-home__hero--product" id="top">
+        <div
+          className="m-jk-home__hero-preview m-jk-home__panel m-jk-home__panel--samples"
+          id="samples"
+        >
+          <p className="m-jk-home__preview-kicker">Sample portals · no login</p>
           <DemoPreview
             demos={HOME_PREVIEW_DEMOS}
             showHead={false}
             onMoreDemos={() => router.push('/demos')}
           />
-        </section>
+        </div>
 
+        <div className="m-jk-home__hero-copy">
+          <p className="m-jk-home__eyebrow">Owner portals on QuickBooks</p>
+          <p className="m-jk-home__mark" aria-hidden="true">
+            JK<span className="m-jk-home__mark-dot">.</span>
+          </p>
+          <h1 className="m-jk-home__h1">
+            Your accountant has the month.
+            <br />
+            You need <em className="m-jk-home__today">TODAY</em>.
+          </h1>
+          <p className="m-jk-home__lead">
+            Margin while the week is still open — then a close that ties to QuickBooks. Built for owners who are done rebuilding the same screen every Monday.
+          </p>
+          <div className="m-jk-home__hero-actions">
+            <button
+              type="button"
+              className="m-jk-home__btn m-jk-home__btn--primary"
+              onClick={() => scrollTo('contact')}
+            >
+              Start a build
+            </button>
+            <button
+              type="button"
+              className="m-jk-home__btn m-jk-home__btn--ghost"
+              onClick={() => router.push('/demos')}
+            >
+              All samples
+            </button>
+          </div>
+        </div>
+      </header>
+
+      <div className="m-jk-home__flow">
         <section className="m-jk-home__panel" id="approach">
           <div className="m-jk-home__split">
             <div>
