@@ -46,7 +46,7 @@ export default function DemoGallery() {
             className="m-ship-intro__more m-jk-text-link"
             onClick={() => router.push('/how-it-works')}
           >
-            Full timeline
+            How it works
           </button>
         </div>
       </section>

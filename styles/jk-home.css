@@ -324,6 +324,41 @@
   color: var(--jk-ink);
 }
 
+.m-jk-story__kicker {
+  margin: 0 0 0.5rem;
+  font-family: 'DM Mono', ui-monospace, monospace;
+  font-size: 0.68rem;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--jk-orange-mid);
+}
+
+.m-jk-story__title {
+  margin: 0 0 0.75rem;
+  font-family: var(--jk-display);
+  font-size: clamp(1.35rem, 3vw, 1.65rem);
+  font-weight: 600;
+  line-height: 1.22;
+  color: var(--jk-ink);
+}
+
+.m-jk-story__body {
+  margin: 0;
+  max-width: 42rem;
+  font-size: 1.02rem;
+  line-height: 1.62;
+  color: #475569;
+}
+
+.m-jk-story__body--tight {
+  margin-bottom: 1.15rem;
+}
+
+.m-jk-home__panel--story {
+  border-left: 4px solid rgba(232, 168, 76, 0.55);
+}
+
 .m-jk-home__panel h3 {
   margin: 1.75rem 0 0.65rem;
   font-family: var(--jk-display);

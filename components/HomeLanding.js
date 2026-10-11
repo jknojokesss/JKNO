@@ -1,30 +1,27 @@
-import { useState } from 'react'
 import { useRouter } from 'next/router'
 import { BOOKING_URL } from '../lib/marketing'
 import { HERO_SAMPLE_BARS } from '../lib/samplePortals'
 import DemoGalleryCard from './DemoGalleryCard'
 
-const SITE_FEATURES = [
+const STORY = [
   {
-    tag: 'Week',
-    title: 'Margin while tickets are still ringing',
-    body: 'Match register, vendor, or job data to what you sold — before the month is closed.',
+    kicker: 'What we do',
+    title: 'One login for your business',
+    body:
+      'We hook up QuickBooks and the tools you already use — register, vendors, jobs, whatever fits — and build a private site with the screens you keep asking for. Shaped around your shop, not a one-size-fits-all app.',
   },
   {
-    tag: 'Month',
-    title: 'Books you can defend',
-    body: 'Official statements and GL in the portal. Nightly sync — not a spreadsheet rebuild.',
+    kicker: 'What you get',
+    title: 'A portal you can actually use',
+    body:
+      'Your name on sign-in. The numbers you trust from QuickBooks, plus the day-to-day views that never lived in one place before. We build it on your real data so you can click through before go-live. One company per login — nobody else\u2019s books mixed in.',
   },
-  {
-    tag: 'Portal',
-    title: 'Not a template with your logo pasted on',
-    body: 'Your sign-in, your nav, your colors. One login, one company.',
-  },
-  {
-    tag: 'Build',
-    title: 'Days on the calendar, not a quarter-long IT project',
-    body: 'Kickoff call, wire-up, your login. You click through on real data before anything stays live.',
-  },
+]
+
+const START_STEPS = [
+  'Quick call — what you sell and what you want to see.',
+  'I connect your books and tools, then build the site.',
+  'You sign in on real data; we adjust until it clicks.',
 ]
 
 const TRADES = [
@@ -55,8 +52,6 @@ export default function HomeLanding({
   submitting,
 }) {
   const router = useRouter()
-  const [featureIx, setFeatureIx] = useState(0)
-  const activeFeature = SITE_FEATURES[featureIx]
 
   return (
     <div className="m-jk-home">
@@ -65,12 +60,10 @@ export default function HomeLanding({
           JK<span className="m-jk-home__mark-dot">.</span>
         </p>
         <h1 className="m-jk-home__h1">
-          Your accountant has the month.
-          <br />
-          You need <em className="m-jk-home__today">TODAY</em>.
+          One login for the numbers that run your shop.
         </h1>
         <p className="m-jk-home__lead">
-          Week-open margin. Month-end close that matches the books. For owners done rebuilding the same screen every Monday.
+          Custom websites for owners who are tired of jumping between QuickBooks, spreadsheets, and five other tabs.
         </p>
         <div className="m-jk-home__hero-actions">
           <button
@@ -78,7 +71,7 @@ export default function HomeLanding({
             className="m-jk-home__btn m-jk-home__btn--primary"
             onClick={() => scrollTo('samples')}
           >
-            Open a sample
+            See sample portals
           </button>
           <button
             type="button"
@@ -91,45 +84,19 @@ export default function HomeLanding({
       </header>
 
       <div className="m-jk-home__flow">
-        <section className="m-jk-home__panel m-jk-home__panel--features" id="features">
-          <h2>What you actually get</h2>
-          <p className="m-jk-home__lede">
-            Operating screens for the week you&rsquo;re in — plus a close that lines up with the books.
-          </p>
-          <div className="m-jk-feature-picker">
-            <div className="m-jk-feature-picker__tabs" role="tablist" aria-label="What you get">
-              {SITE_FEATURES.map((f, i) => (
-                <button
-                  key={f.tag}
-                  type="button"
-                  role="tab"
-                  id={`feature-tab-${i}`}
-                  aria-selected={featureIx === i}
-                  aria-controls="feature-panel"
-                  className={`m-jk-feature-picker__tab${featureIx === i ? ' is-active' : ''}`}
-                  onClick={() => setFeatureIx(i)}
-                >
-                  {f.tag}
-                </button>
-              ))}
-            </div>
-            <div
-              className="m-jk-feature-picker__stage"
-              role="tabpanel"
-              id="feature-panel"
-              aria-labelledby={`feature-tab-${featureIx}`}
-              key={featureIx}
-            >
-              <h3 className="m-jk-feature-picker__title">{activeFeature.title}</h3>
-              <p className="m-jk-feature-picker__body">{activeFeature.body}</p>
-            </div>
-          </div>
-        </section>
+        {STORY.map((beat) => (
+          <section key={beat.kicker} className="m-jk-home__panel m-jk-home__panel--story">
+            <p className="m-jk-story__kicker">{beat.kicker}</p>
+            <h2 className="m-jk-story__title">{beat.title}</h2>
+            <p className="m-jk-story__body">{beat.body}</p>
+          </section>
+        ))}
 
         <section className="m-jk-home__panel" id="samples">
-          <h2>Open a sample shop</h2>
-          <p className="m-jk-home__lede">
-            Fictitious businesses, real portals — full screen, no login. Pick an industry and click through.
+          <p className="m-jk-story__kicker">Samples</p>
+          <h2 className="m-jk-story__title">Open a sample shop</h2>
+          <p className="m-jk-story__body m-jk-story__body--tight">
+            Fictitious names, real screen layouts. No password — pick one and look around.
           </p>
           <div className="m-jk-home__demos m-jk-home__demos--lead">
             {HERO_SAMPLE_BARS.map((p) => (
@@ -147,60 +114,33 @@ export default function HomeLanding({
             className="m-jk-text-link"
             onClick={() => router.push('/demos')}
           >
-            Browse all samples
+            All samples
           </button>
         </section>
 
-        <section className="m-jk-home__panel" id="approach">
-          <div className="m-jk-home__split">
-            <div>
-              <h2>QuickBooks stays the boss</h2>
-              <p>
-                Nightly sync mirrors your chart and GL. Statements win arguments — not a spreadsheet rebuild.
-              </p>
-              <ul className="m-jk-home__list">
-                <li>P&amp;L and balance sheet, trailing two years</li>
-                <li>GL detail for recon and close</li>
-                <li>One Intuit connection per company</li>
-              </ul>
-            </div>
-            <div>
-              <h2>Looks like your shop</h2>
-              <p>
-                Your name on sign-in, your colors on the nav. One login, one company — never someone else&rsquo;s template.
-              </p>
-              <ul className="m-jk-home__list">
-                <li>Live week vs closed month, labeled honestly</li>
-                <li>Integrations for register, vendors, jobs</li>
-                <li>Short fixed-scope build — not a drawn-out IT rollout</li>
-              </ul>
-            </div>
-          </div>
-        </section>
-
-        <section className="m-jk-home__panel" id="how">
-          <h2>Call, build, tune</h2>
+        <section className="m-jk-home__panel m-jk-home__panel--story" id="how">
+          <p className="m-jk-story__kicker">How it starts</p>
+          <h2 className="m-jk-story__title">Call, build, tune</h2>
           <ol className="m-jk-steps">
-            <li>Thirty-minute kickoff — what you sell and what has to be on one screen.</li>
-            <li>I wire your books, register, vendors, whatever you run.</li>
-            <li>You log in and click around — not a slide deck.</li>
-            <li>We keep at it until close and that screen match.</li>
+            {START_STEPS.map((step) => (
+              <li key={step}>{step}</li>
+            ))}
           </ol>
           <button
             type="button"
             className="m-jk-text-link"
             onClick={() => router.push('/how-it-works')}
           >
-            Full timeline
+            More detail
           </button>
         </section>
 
         <section className="m-jk-home__panel m-jk-home__panel--form" id="contact">
-          <h2>What&rsquo;s the one screen you keep rebuilding?</h2>
+          <h2>What do you want on screen?</h2>
           <p className="m-jk-home__lede">
-            I&rsquo;ll point you at the closest sample — or{' '}
+            Tell me your trade and the report you wish you had — I&rsquo;ll send the closest sample or{' '}
             <a href={BOOKING_URL} target="_blank" rel="noopener noreferrer">
-              book thirty minutes
+              book a call
             </a>
             .
           </p>
@@ -253,10 +193,10 @@ export default function HomeLanding({
               </label>
 
               <label className="m-label" style={{ marginTop: 14, display: 'block' }}>
-                That one screen
+                The screen you want
                 <textarea
                   rows={3}
-                  placeholder="Margin per ticket, landed cost per PO, rent roll on the 1st…"
+                  placeholder="Profit per order, jobs in progress, what\u2019s on the shelf\u2026"
                   value={form.message}
                   onChange={(e) => setForm({ ...form, message: e.target.value })}
                 />

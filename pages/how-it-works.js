@@ -24,7 +24,7 @@ export default function HowItWorks() {
       <PageHero
         kicker="How it works"
         title="Call, build, launch."
-        lead="Short fixed scope — not a quarter-long rollout. After go-live, nightly sync keeps your week live and the close tied to the books."
+        lead="A short call, a focused build, then you sign in and we fix what’s off. Your data keeps syncing after launch."
         align="center"
       />
 
