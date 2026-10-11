@@ -2965,6 +2965,10 @@
   color: var(--m-gold);
 }
 
+html.demo-embed .m-sample-lobby {
+  display: none !important;
+}
+
 .m-sample-lobby {
   max-width: 420px;
   margin: 0 auto;

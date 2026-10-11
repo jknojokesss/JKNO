@@ -10,10 +10,12 @@ import DemoGalleryCard from './DemoGalleryCard'
  * Sample portal header — current demo + next sample link.
  * Hidden when ?embed=1 (homepage / marketing iframe — show the app, not the lobby).
  */
-export default function DemoLobby({ href, biz }) {
+export default function DemoLobby({ href, biz, suppress = false }) {
   const router = useRouter()
+  if (suppress) return null
   const embedded =
-    router.asPath.includes('embed=1')
+    (typeof window !== 'undefined' && /[?&]embed=(?:1|true)(?:&|$)/.test(window.location.search))
+    || router.asPath.includes('embed=1')
     || (router.isReady && isDemoEmbedQuery(router.query))
   if (embedded) return null
 

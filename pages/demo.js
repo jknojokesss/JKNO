@@ -1,7 +1,8 @@
-import { useState, useRef } from 'react'
+import { useState, useRef, useEffect } from 'react'
 import Head from 'next/head'
 import DemoScopeBanner from '../components/DemoScopeBanner'
 import DemoLobby from '../components/DemoLobby'
+import { DEMO_EMBED_HIDE_LOBBY_CSS, getDemoEmbedServerProps } from '../lib/demoEmbed'
 
 const CHAR = '#1E2A3A', SPICE = '#2A6CB8', KRAFT = '#C2923E', CREAM = '#FBF4EC'
 const INK = '#2E2230', MUTED = '#8C7C82', GREEN = '#3E7C4F', BORDER = '#ECE0D8', AMBER = '#C98A2A', RED = '#C03A22'
@@ -206,7 +207,7 @@ const Item = ({ color, type }) => {
 
 const MONO = "'IBM Plex Mono', monospace"
 
-export default function Demo() {
+export default function Demo({ demoEmbed = false }) {
   const [tab, setTab] = useState('overview')
   const [consign, setConsign] = useState(SEED_CONSIGN)
   const [direct, setDirect] = useState(SEED_DIRECT)
@@ -231,6 +232,13 @@ export default function Demo() {
   const [addingA, setAddingA] = useState(false)
   const [af, setAf] = useState({ channel: '', spend: '', rev: '', track: '' })
   const fileRef = useRef(null)
+
+  useEffect(() => {
+    if (!demoEmbed) return
+    document.documentElement.classList.add('demo-embed')
+    window.scrollTo(0, 0)
+    return () => document.documentElement.classList.remove('demo-embed')
+  }, [demoEmbed])
 
   const dv = (k) => draft[k] || ''
   const setDv = (k, v) => setDraft({ ...draft, [k]: v })
@@ -458,6 +466,7 @@ export default function Demo() {
         <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
         <meta name="theme-color" content="#1E2A3A" />
         <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+        {demoEmbed ? <style>{DEMO_EMBED_HIDE_LOBBY_CSS}</style> : null}
         <style>{`*{box-sizing:border-box;margin:0;padding:0}html{-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale;text-rendering:optimizeLegibility}body{background:${CREAM};font-family:'Inter',sans-serif;color:${INK}}::placeholder{color:#A99A82}
 .jm-shell{display:flex;min-height:100vh;align-items:stretch}
 .jm-side{width:236px;flex-shrink:0;background:${CHAR};color:${CREAM};display:flex;flex-direction:column;padding:22px 14px;position:sticky;top:0;height:100vh}
@@ -468,10 +477,10 @@ export default function Demo() {
 @media(max-width:860px){.jm-shell{flex-direction:column}.jm-side{width:auto;height:auto;position:static;flex-direction:column;padding:14px 12px}.jm-nav{flex-direction:row;overflow-x:auto;gap:6px;padding-bottom:4px}.jm-navbtn{width:auto;padding:8px 15px;border-radius:18px;background:rgba(255,255,255,.07)}.jm-main{padding:18px 16px 52px;max-width:100%}}`}</style>
       </Head>
 
-      <DemoLobby href="/demo" biz={BIZ} />
-      <DemoScopeBanner scope="consignment" compact />
+      {!demoEmbed && <DemoLobby href="/demo" biz={BIZ} />}
+      {!demoEmbed && <DemoScopeBanner scope="consignment" compact />}
 
-      <div className="jm-shell">
+      <div className="jm-shell" id={demoEmbed ? 'jk-embed-app' : undefined}>
         {/* Sidebar */}
         <aside className="jm-side">
           <div style={{ padding: '2px 8px 16px' }}>
@@ -1172,3 +1181,5 @@ export default function Demo() {
     </>
   )
 }
+
+export const getServerSideProps = ({ query }) => getDemoEmbedServerProps(query)
