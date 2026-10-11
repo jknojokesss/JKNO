@@ -3,20 +3,12 @@ import { BOOKING_URL } from '../lib/marketing'
 import { HERO_SAMPLE_BARS } from '../lib/samplePortals'
 import DemoGalleryCard from './DemoGalleryCard'
 
-const STORY = [
-  {
-    kicker: 'What we do',
-    title: 'One login for your business',
-    body:
-      'We hook up QuickBooks and the tools you already use — register, vendors, jobs, whatever fits — and build a private owner portal with the screens you keep asking for. Yours, not a template off the shelf.',
-  },
-  {
-    kicker: 'What you get',
-    title: 'A portal you can actually use',
-    body:
-      'Your name on sign-in. The numbers you trust from QuickBooks, plus the day-to-day views that never lived in one place before. We build it on your real data so you can click through before go-live. One company per login — nobody else\u2019s books mixed in.',
-  },
-]
+const STORY = {
+  kicker: 'What you get',
+  title: 'Your portal, on your real data',
+  body:
+    'QuickBooks plus the tools you already run — register, vendors, jobs — wired into one private login. Your name on sign-in, the screens you keep asking for, built on your numbers so you can click through before go-live. One company per account.',
+}
 
 const START_STEPS = [
   'Quick call — what you sell and what you want to see.',
@@ -84,13 +76,11 @@ export default function HomeLanding({
       </header>
 
       <div className="m-jk-home__flow">
-        {STORY.map((beat) => (
-          <section key={beat.kicker} className="m-jk-home__panel m-jk-home__panel--story">
-            <p className="m-jk-story__kicker">{beat.kicker}</p>
-            <h2 className="m-jk-story__title">{beat.title}</h2>
-            <p className="m-jk-story__body">{beat.body}</p>
-          </section>
-        ))}
+        <section className="m-jk-home__panel m-jk-home__panel--story">
+          <p className="m-jk-story__kicker">{STORY.kicker}</p>
+          <h2 className="m-jk-story__title">{STORY.title}</h2>
+          <p className="m-jk-story__body">{STORY.body}</p>
+        </section>
 
         <section className="m-jk-home__panel" id="samples">
           <p className="m-jk-story__kicker">Samples</p>
