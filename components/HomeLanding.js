@@ -55,7 +55,7 @@ export default function HomeLanding({
           One login for the numbers that run your shop.
         </h1>
         <p className="m-jk-home__lead">
-          Custom owner portals on QuickBooks and the tools you already run — one login instead of spreadsheets and a pile of tabs.
+          Owner portals wired to QuickBooks and the tools you already run — one login instead of spreadsheets and a pile of tabs.
         </p>
         <div className="m-jk-home__hero-actions">
           <button

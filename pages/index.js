@@ -37,8 +37,8 @@ export default function Landing() {
   return (
     <>
       <MarketingShell
-        title="JK No Jokes Financials | Custom owner portals"
-        description="Custom owner portals on QuickBooks and the tools you run. See sample shops, then start your build."
+        title="JK No Jokes Financials | Owner portals for your shop"
+        description="Owner portals tied to QuickBooks and the software you already use. See sample shops, then start a build."
         marketingHome
         padTop={false}
       >
