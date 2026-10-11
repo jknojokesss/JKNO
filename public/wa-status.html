@@ -23,7 +23,7 @@
       align-items: center;
       justify-content: center;
       padding: 16px;
-      background: #1a1a1a;
+      background: #111;
     }
 
     body.preview .canvas {
@@ -33,7 +33,7 @@
 
     body.preview .tip {
       display: block;
-      max-width: 340px;
+      max-width: 360px;
       margin-top: 14px;
       font: 13px/1.5 'DM Sans', sans-serif;
       color: #999;
@@ -48,148 +48,205 @@
       height: 1920px;
       background:
         radial-gradient(115% 85% at 50% 100%, rgba(255, 145, 65, 0.55), transparent 58%),
-        radial-gradient(70% 45% at 88% 12%, rgba(255, 195, 120, 0.25), transparent 52%),
+        radial-gradient(65% 40% at 0% 20%, rgba(255, 200, 140, 0.2), transparent 55%),
         linear-gradient(
           180deg,
           #2a4478 0%,
-          #5a78b0 14%,
-          #98aac8 26%,
-          #e08848 40%,
-          #f09848 54%,
-          #f5a85c 68%,
-          #ffc868 84%,
+          #5a78b0 12%,
+          #98aac8 24%,
+          #e08848 38%,
+          #f09848 52%,
+          #f5a85c 66%,
+          #ffc868 82%,
           #ffe4b8 100%
         );
-      padding: 96px 72px 88px;
+      padding: 88px 64px 80px;
       display: flex;
       flex-direction: column;
-      color: #fffaf5;
+    }
+
+    .top {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 56px;
     }
 
     .mark {
       font-family: 'Playfair Display', Georgia, serif;
-      font-size: 64px;
+      font-size: 56px;
       font-weight: 700;
-      text-align: center;
-      text-shadow: 0 2px 20px rgba(12, 18, 32, 0.35);
-      margin-bottom: 64px;
+      color: #fffaf5;
+      text-shadow: 0 2px 16px rgba(12, 18, 32, 0.35);
+      line-height: 1;
     }
 
     .mark span { color: #ff8f52; }
 
-    .headline {
-      font-family: 'Bitter', Georgia, serif;
-      font-size: 76px;
-      font-weight: 700;
-      line-height: 1.08;
-      letter-spacing: -0.02em;
-      text-align: center;
-      text-shadow: 0 2px 18px rgba(12, 18, 32, 0.4);
-      margin-bottom: 40px;
-      padding: 0 12px;
-    }
-
-    .hook {
-      font-family: 'DM Sans', sans-serif;
-      font-size: 32px;
-      font-weight: 500;
-      line-height: 1.45;
-      text-align: center;
-      color: #fff8f0;
-      text-shadow: 0 1px 12px rgba(12, 18, 32, 0.35);
-      max-width: 880px;
-      margin: 0 auto 72px;
-    }
-
-    .card {
-      margin-top: auto;
-      background: #f2f0ea;
-      color: #0f1419;
-      border-radius: 16px;
-      border: 1px solid rgba(42, 51, 68, 0.12);
-      border-top: 4px solid #ff8f52;
-      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.28);
-      padding: 48px 44px 44px;
-    }
-
-    .card-k {
-      font-family: 'DM Mono', monospace;
-      font-size: 18px;
-      font-weight: 500;
-      letter-spacing: 0.14em;
-      text-transform: uppercase;
-      color: #e88848;
-      margin-bottom: 16px;
-    }
-
-    .card-p {
-      font-family: 'DM Sans', sans-serif;
-      font-size: 30px;
-      font-weight: 500;
-      line-height: 1.5;
-      color: #475569;
-      margin-bottom: 28px;
-    }
-
-    .card-p strong {
-      color: #0f1419;
-      font-weight: 600;
-    }
-
-    .card-url {
-      font-family: 'Bitter', Georgia, serif;
-      font-size: 40px;
-      font-weight: 700;
-      color: #0f1419;
-      line-height: 1.2;
-      margin-bottom: 20px;
-    }
-
-    .card-foot {
-      display: flex;
-      flex-wrap: wrap;
-      justify-content: space-between;
-      align-items: baseline;
-      gap: 12px;
-      padding-top: 24px;
-      border-top: 1px solid rgba(42, 51, 68, 0.12);
-      font-family: 'DM Sans', sans-serif;
-      font-size: 26px;
-      font-weight: 600;
-      color: #0f1419;
-    }
-
-    .card-foot small {
+    .eyebrow {
       font-family: 'DM Mono', monospace;
       font-size: 17px;
       font-weight: 500;
-      letter-spacing: 0.1em;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: #ffe8d4;
+      text-align: right;
+      max-width: 280px;
+      line-height: 1.45;
+      text-shadow: 0 1px 10px rgba(12, 18, 32, 0.3);
+    }
+
+    .sell {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      padding-bottom: 24px;
+    }
+
+    .punch {
+      font-family: 'Bitter', Georgia, serif;
+      font-size: 92px;
+      font-weight: 700;
+      line-height: 1.02;
+      letter-spacing: -0.03em;
+      color: #fffaf5;
+      text-shadow: 0 3px 24px rgba(12, 18, 32, 0.45);
+      margin-bottom: 12px;
+    }
+
+    .punch em {
+      font-style: normal;
+      color: #ffd4a8;
+      text-decoration: line-through;
+      text-decoration-thickness: 6px;
+      text-decoration-color: rgba(255, 143, 82, 0.9);
+    }
+
+    .punch .hi {
+      display: block;
+      color: #fff8f0;
+      font-size: 0.92em;
+    }
+
+    .punch .lo {
+      display: block;
+      color: #ff8f52;
+      margin-top: 8px;
+    }
+
+    .body {
+      font-family: 'DM Sans', sans-serif;
+      font-size: 34px;
+      font-weight: 500;
+      line-height: 1.42;
+      color: #fff8f0;
+      text-shadow: 0 1px 14px rgba(12, 18, 32, 0.35);
+      max-width: 920px;
+      margin-top: 28px;
+    }
+
+    .card {
+      background: #f2f0ea;
+      color: #0f1419;
+      border-radius: 16px;
+      border: 1px solid rgba(42, 51, 68, 0.1);
+      border-top: 4px solid #ff8f52;
+      box-shadow: 0 22px 56px rgba(0, 0, 0, 0.3);
+      padding: 44px 40px 40px;
+    }
+
+    .offer {
+      display: flex;
+      align-items: flex-start;
+      gap: 28px;
+      margin-bottom: 28px;
+    }
+
+    .num {
+      font-family: 'Bitter', Georgia, serif;
+      font-size: 88px;
+      font-weight: 700;
+      line-height: 1;
+      color: #e88848;
+      letter-spacing: -0.04em;
+    }
+
+    .offer-text {
+      font-size: 28px;
+      line-height: 1.45;
+      font-weight: 500;
+      color: #475569;
+      padding-top: 8px;
+    }
+
+    .offer-text strong {
+      color: #0f1419;
+      font-weight: 600;
+    }
+
+    .url {
+      font-family: 'Bitter', Georgia, serif;
+      font-size: 44px;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      margin-bottom: 22px;
+    }
+
+    .contact {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      flex-wrap: wrap;
+      gap: 8px;
+      padding-top: 22px;
+      border-top: 1px solid rgba(42, 51, 68, 0.12);
+      font-size: 26px;
+      font-weight: 600;
+    }
+
+    .contact small {
+      font-family: 'DM Mono', monospace;
+      font-size: 16px;
+      font-weight: 500;
+      letter-spacing: 0.08em;
       text-transform: uppercase;
       color: #9a9284;
     }
   </style>
 </head>
 <body>
-  <p class="tip">Screenshot this for status: <strong>jknojokes.com/wa-status.html?export=1</strong></p>
+  <p class="tip">Save as picture: <strong>jknojokes.com/wa-status.html?export=1</strong> → screenshot.</p>
 
-  <article class="canvas" id="ad">
-    <p class="mark" aria-hidden="true">JK<span>.</span></p>
+  <article class="canvas">
+    <header class="top">
+      <p class="mark">JK<span>.</span></p>
+      <p class="eyebrow">Owner portals<br />QuickBooks shops</p>
+    </header>
 
-    <h1 class="headline">Your CPA has the books.<br />You need Tuesday&rsquo;s numbers.</h1>
-
-    <p class="hook">Owner portals for shops on QuickBooks — one login, your register and vendors wired in.</p>
-
-    <div class="card">
-      <p class="card-k">On the site now</p>
-      <p class="card-p">
-        <strong>22 sample shops</strong> — fake names, real screen layouts. Open one on your phone, no signup.
+    <div class="sell">
+      <h1 class="punch">
+        <span class="hi">Still matching sales to cost in</span>
+        <span class="lo">Excel?</span>
+      </h1>
+      <p class="body">
+        I build one login for your shop — books, register, vendors — with the screen QB never gave you. Margin on a ticket. Jobs. Inventory. Your name on the door.
       </p>
-      <p class="card-url">jknojokes.com/demos</p>
-      <div class="card-foot">
-        <span>Jonathan Katz &nbsp;·&nbsp; 917-589-8455</span>
-        <small>No jokes · Jersey</small>
-      </div>
     </div>
+
+    <footer class="card">
+      <div class="offer">
+        <div class="num" aria-hidden="true">22</div>
+        <p class="offer-text">
+          <strong>Sample shops on the site.</strong> Fake companies, real layouts. Open one on your phone before you waste a lunch on another pitch.
+        </p>
+      </div>
+      <p class="url">jknojokes.com/demos</p>
+      <div class="contact">
+        <span>917-589-8455 · Jonathan Katz</span>
+        <small>Built in Jersey</small>
+      </div>
+    </footer>
   </article>
 
   <script>

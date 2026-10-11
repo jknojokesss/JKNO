@@ -21,7 +21,7 @@ const nextConfig = {
         destination: '/demos',
         permanent: false,
       })),
-      { source: '/status', destination: '/wa-status.html?clean=1', permanent: false },
+      { source: '/status', destination: '/wa-status.html?export=1', permanent: false },
       // Reydel portal lives in jknojokesss/reydel under /reydel-tire.
       // QBO nightly pull + Intuit connect/callback stay here (token rotation).
       // Clover cron + Weldon import moved to the reydel project — do not
