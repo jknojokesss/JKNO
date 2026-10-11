@@ -61,7 +61,7 @@ export default function HomeLanding({
         </div>
 
         <div className="m-jk-home__hero-copy">
-          <p className="m-jk-home__eyebrow">Owner portals on QuickBooks</p>
+          <p className="m-jk-home__eyebrow">Run the week on real numbers</p>
           <p className="m-jk-home__mark" aria-hidden="true">
             JK<span className="m-jk-home__mark-dot">.</span>
           </p>
