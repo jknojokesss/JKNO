@@ -186,7 +186,7 @@ export default function HomeLanding({
                 The screen you want
                 <textarea
                   rows={3}
-                  placeholder="Profit per order, jobs in progress, what\u2019s on the shelf\u2026"
+                  placeholder="Profit per order, jobs in progress, what's on the shelf…"
                   value={form.message}
                   onChange={(e) => setForm({ ...form, message: e.target.value })}
                 />
