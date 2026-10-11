@@ -353,22 +353,37 @@ html:has(.marketing-site--jk) {
   color: #b85a28;
 }
 
-.marketing-site--jk .m-ship-hook {
-  color: #f7f4ef;
+/* Ship block sits in cream .m-wrap on inner pages — ink text, not sky text */
+.marketing-site--jk .m-jk-page section.m-section .m-wrap .m-ship-hook {
+  color: var(--jk-ink);
 }
 
-.marketing-site--jk .m-ship-hook strong,
-.marketing-site--jk .m-ship-chain__verb {
-  color: var(--jk-orange-soft);
+.marketing-site--jk .m-jk-page section.m-section .m-wrap .m-ship-hook strong,
+.marketing-site--jk .m-jk-page section.m-section .m-wrap .m-ship-chain__verb {
+  color: #b85a28;
 }
 
-.marketing-site--jk .m-ship-chain {
-  color: rgba(255, 232, 210, 0.88);
+.marketing-site--jk .m-jk-page section.m-section .m-wrap .m-ship-chain {
+  color: #334155;
 }
 
-.marketing-site--jk .m-ship-chain li:not(:last-child)::after {
+.marketing-site--jk .m-jk-page section.m-section .m-wrap .m-ship-chain li:not(:last-child)::after {
   color: var(--jk-gold);
-  opacity: 0.85;
+  opacity: 1;
+}
+
+.marketing-site--jk .m-jk-page section.m-cta-slab .m-wrap .m-btn--pop-dark,
+.marketing-site--jk .m-jk-page section.m-cta-slab .m-wrap .m-btn--secondary.m-btn--pop-dark {
+  color: var(--jk-ink);
+  background: #fff;
+  border: 1.5px solid rgba(15, 20, 28, 0.28);
+}
+
+.marketing-site--jk .m-jk-page section.m-cta-slab .m-wrap .m-btn--pop-dark:hover,
+.marketing-site--jk .m-jk-page section.m-cta-slab .m-wrap .m-btn--secondary.m-btn--pop-dark:hover {
+  color: var(--jk-ink);
+  background: #faf8f4;
+  border-color: rgba(15, 20, 28, 0.45);
 }
 
 .m-ship-intro__more.m-jk-text-link {

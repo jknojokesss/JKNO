@@ -75,10 +75,14 @@
 
 .m-jk-home__lead {
   margin: 0 0 1.75rem;
-  max-width: 40ch;
-  font-size: 1.05rem;
-  line-height: 1.65;
-  color: rgba(255, 232, 210, 0.9);
+  max-width: 36ch;
+  font-size: 1.02rem;
+  font-weight: 500;
+  line-height: 1.45;
+  letter-spacing: 0.01em;
+  color: #fff8f0;
+  text-shadow: 0 1px 12px rgba(12, 18, 32, 0.4);
+  -webkit-font-smoothing: antialiased;
 }
 
 .m-jk-home__hero-actions {
@@ -88,39 +92,47 @@
   justify-content: center;
 }
 
+.marketing-site--jk .m-jk-home__btn,
 .m-jk-home__btn {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  padding: 0.75rem 1.35rem;
-  border-radius: 8px;
+  padding: 0.7rem 1.25rem;
+  border-radius: 6px;
   border: 1px solid transparent;
   font-family: var(--jk-body);
-  font-size: 0.9rem;
+  font-size: 0.88rem;
   font-weight: 600;
+  letter-spacing: 0.02em;
   cursor: pointer;
-  transition: background 0.2s ease, border-color 0.2s ease, color 0.2s ease;
+  appearance: none;
+  -webkit-appearance: none;
+  transition: background 0.15s ease, border-color 0.15s ease, color 0.15s ease, box-shadow 0.15s ease;
 }
 
 .m-jk-home__btn--primary {
-  background: linear-gradient(180deg, #ffc090, #e8b060 50%, var(--jk-gold));
-  color: #1a1409;
-  border-color: rgba(26, 20, 9, 0.35);
+  background: #e8a84c;
+  color: #1a1208;
+  border-color: #1a1208;
+  box-shadow: 0 1px 0 rgba(255, 255, 255, 0.35) inset;
 }
 
 .m-jk-home__btn--primary:hover {
-  filter: brightness(1.04);
+  background: #f0b85c;
+  box-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.4) inset,
+    0 2px 8px rgba(12, 18, 32, 0.2);
 }
 
 .m-jk-home__btn--ghost {
-  background: transparent;
-  color: #f7f4ef;
-  border-color: rgba(255, 184, 140, 0.45);
+  background: rgba(12, 18, 32, 0.12);
+  color: #fffaf5;
+  border: 1.5px solid rgba(255, 248, 240, 0.88);
 }
 
 .m-jk-home__btn--ghost:hover {
-  border-color: var(--jk-orange-soft);
-  background: rgba(255, 150, 90, 0.1);
+  border-color: #fff8f0;
+  background: rgba(12, 18, 32, 0.22);
 }
 
 .m-jk-feature-picker__tabs {

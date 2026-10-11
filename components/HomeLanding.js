@@ -70,7 +70,7 @@ export default function HomeLanding({
           You need <em className="m-jk-home__today">TODAY</em>.
         </h1>
         <p className="m-jk-home__lead">
-          Margin while the week is still open — then a close that ties to QuickBooks. Built for owners who are done rebuilding the same screen every Monday.
+          Week-open margin. Month-end close that matches the books. For owners done rebuilding the same screen every Monday.
         </p>
         <div className="m-jk-home__hero-actions">
           <button
