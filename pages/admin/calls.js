@@ -73,7 +73,7 @@ export default function Calls() {
 
       <div style={{ maxWidth: '720px', margin: '0 auto', padding: '32px 18px 60px' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '18px', flexWrap: 'wrap', gap: '8px' }}>
-          <button onClick={() => router.push('/dashboard')} style={{ background: 'none', border: 'none', color: MUTED, fontFamily: 'DM Mono, monospace', fontSize: '11px', letterSpacing: '1px', cursor: 'pointer' }}>← Dashboard</button>
+          <button onClick={() => router.push('/admin/dashboard')} style={{ background: 'none', border: 'none', color: MUTED, fontFamily: 'DM Mono, monospace', fontSize: '11px', letterSpacing: '1px', cursor: 'pointer' }}>← Dashboard</button>
           <button onClick={() => router.push('/admin/leads')} style={{ background: 'none', border: '1px solid #E0D6C2', borderRadius: '20px', color: INK, fontFamily: 'DM Mono, monospace', fontSize: '11px', letterSpacing: '1px', cursor: 'pointer', padding: '7px 14px' }}>🎯 Lead Tracker →</button>
         </div>
 
