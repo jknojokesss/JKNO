@@ -135,11 +135,7 @@
 }
 
 .m-jk-home__panel--samples .m-demo-caption {
-  margin-bottom: 1.5rem;
-}
-
-.m-jk-home__panel--samples h3 {
-  margin-top: 0.25rem;
+  margin-bottom: 0;
 }
 
 .m-jk-home__flow {
