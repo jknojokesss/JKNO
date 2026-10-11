@@ -1,4 +1,6 @@
 import Link from 'next/link'
+import { useRouter } from 'next/router'
+import { isDemoEmbedQuery } from '../lib/demoEmbed'
 import { getDemoHook } from '../lib/demoHooks'
 import { getSamplePortal } from '../lib/samplePortals'
 import { getDemoAlignment } from '../lib/demoAlignment'
@@ -6,8 +8,15 @@ import DemoGalleryCard from './DemoGalleryCard'
 
 /**
  * Sample portal header — current demo + next sample link.
+ * Hidden when ?embed=1 (homepage / marketing iframe — show the app, not the lobby).
  */
 export default function DemoLobby({ href, biz }) {
+  const router = useRouter()
+  const embedded =
+    router.asPath.includes('embed=1')
+    || (router.isReady && isDemoEmbedQuery(router.query))
+  if (embedded) return null
+
   const current = getSamplePortal(href)
   const name = current.name || biz
   const { next, nextLabel } = getDemoHook(href)
