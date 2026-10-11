@@ -6,22 +6,22 @@ import DemoGalleryCard from './DemoGalleryCard'
 
 const SITE_FEATURES = [
   {
-    tag: 'Open week',
+    tag: 'Week',
     title: 'Margin while tickets are still ringing',
     body: 'Match register, vendor, or job data to what you sold — before the month is closed.',
   },
   {
-    tag: 'Closed month',
+    tag: 'Month',
     title: 'Books you can defend',
     body: 'Official statements and GL in the portal. Nightly sync — not a spreadsheet rebuild.',
   },
   {
-    tag: 'Your shop',
+    tag: 'Portal',
     title: 'Not a template with your logo pasted on',
     body: 'Your sign-in, your nav, your colors. One login, one company.',
   },
   {
-    tag: 'Short build',
+    tag: 'Build',
     title: 'Days on the calendar, not a quarter-long IT project',
     body: 'Kickoff call, wire-up, your login. You click through on real data before anything stays live.',
   },

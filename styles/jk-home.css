@@ -1,4 +1,4 @@
-/* Homepage — editorial layout on JK chrome (no marquee / chapters / fly-in cards) */
+/* Homepage — JK chrome; scroll-reveal panels + interactive feature picker */
 
 .m-jk-home {
   position: relative;
@@ -120,58 +120,162 @@
   background: rgba(255, 150, 90, 0.1);
 }
 
-.m-jk-feature-grid {
-  list-style: none;
-  margin: 0;
-  padding: 0;
+.m-jk-feature-picker__tabs {
   display: grid;
-  gap: 0.85rem;
-  grid-template-columns: 1fr;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.45rem;
+  margin-bottom: 1rem;
 }
 
-@media (min-width: 640px) {
-  .m-jk-feature-grid {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 1rem;
+@media (min-width: 520px) {
+  .m-jk-feature-picker__tabs {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
   }
 }
 
-.m-jk-feature {
-  padding: 1.1rem 1.15rem 1.05rem;
-  border-radius: 10px;
-  background: rgba(255, 255, 255, 0.65);
-  border: 1px solid rgba(42, 51, 68, 0.08);
-  border-left: 3px solid var(--jk-orange-mid);
-}
-
-.m-jk-feature__tag {
-  margin: 0 0 0.4rem;
-  font-family: 'DM Mono', ui-monospace, monospace;
-  font-size: 0.62rem;
+/* Tailwind preflight resets buttons — must restate display + chrome */
+.marketing-site--jk button.m-jk-feature-picker__tab,
+.m-jk-home button.m-jk-feature-picker__tab {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  margin: 0;
+  padding: 0.55rem 0.65rem;
+  border-radius: 999px;
+  border: 1px solid rgba(42, 51, 68, 0.14);
+  background: rgba(255, 255, 255, 0.55);
+  font-family: var(--jk-body);
+  font-size: 0.78rem;
   font-weight: 600;
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
-  color: var(--jk-orange-mid);
+  line-height: 1.2;
+  text-align: center;
+  color: #475569;
+  cursor: pointer;
+  appearance: none;
+  -webkit-appearance: none;
+  transition:
+    background 0.2s ease,
+    border-color 0.2s ease,
+    color 0.2s ease,
+    transform 0.2s ease,
+    box-shadow 0.2s ease;
 }
 
-.m-jk-feature__title {
-  margin: 0 0 0.35rem;
+.marketing-site--jk button.m-jk-feature-picker__tab:hover,
+.m-jk-home button.m-jk-feature-picker__tab:hover {
+  border-color: rgba(255, 143, 82, 0.45);
+  color: var(--jk-ink);
+  transform: translateY(-1px);
+}
+
+.m-jk-feature-picker__tab.is-active {
+  background: var(--jk-ink);
+  border-color: var(--jk-ink);
+  color: #f7f4ef;
+  box-shadow: 0 3px 0 var(--jk-orange-mid);
+}
+
+.m-jk-feature-picker__tab:focus-visible {
+  outline: 2px solid var(--jk-gold);
+  outline-offset: 2px;
+}
+
+.m-jk-feature-picker__stage {
+  padding: 1.25rem 1.2rem 1.15rem;
+  border-radius: 12px;
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.92), rgba(255, 248, 235, 0.75));
+  border: 1px solid rgba(42, 51, 68, 0.1);
+  border-left: 4px solid var(--jk-orange-mid);
+  animation: m-jk-feature-in 0.45s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+@keyframes m-jk-feature-in {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.m-jk-feature-picker__title {
+  margin: 0 0 0.45rem;
   font-family: var(--jk-display);
-  font-size: 1.02rem;
+  font-size: clamp(1.05rem, 2.5vw, 1.2rem);
   font-weight: 600;
-  line-height: 1.25;
+  line-height: 1.3;
   color: var(--jk-ink);
 }
 
-.m-jk-feature__body {
+.m-jk-feature-picker__body {
   margin: 0;
-  font-size: 0.9rem;
-  line-height: 1.55;
+  font-size: 0.95rem;
+  line-height: 1.6;
   color: #475569;
 }
 
 .m-jk-home__panel--features .m-jk-home__lede {
   margin-bottom: 1.15rem;
+}
+
+.m-jk-page [data-fly-in] {
+  opacity: 0;
+  transform: translateY(20px);
+  transition:
+    opacity 0.6s cubic-bezier(0.22, 1, 0.36, 1),
+    transform 0.6s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.m-jk-page [data-fly-in].is-visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.m-jk-home__panel .m-demo-card {
+  transition:
+    transform 0.22s ease,
+    border-left-color 0.22s ease,
+    box-shadow 0.22s ease;
+}
+
+.m-jk-home__panel .m-demo-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 10px 28px rgba(15, 20, 28, 0.12);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .m-jk-home__today {
+    animation: none;
+  }
+
+  .m-jk-feature-picker__stage {
+    animation: none;
+  }
+
+  .m-jk-feature-picker__tab {
+    transition: none;
+  }
+
+  .m-jk-feature-picker__tab:hover {
+    transform: none;
+  }
+
+  .m-jk-page [data-fly-in] {
+    opacity: 1;
+    transform: none;
+    transition: none;
+  }
+
+  .m-jk-home__panel .m-demo-card {
+    transition: none;
+  }
+
+  .m-jk-home__panel .m-demo-card:hover {
+    transform: none;
+  }
 }
 
 .m-jk-home__flow {
