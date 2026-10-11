@@ -2,19 +2,30 @@ import { useRouter } from 'next/router'
 import { BOOKING_URL } from '../lib/marketing'
 import { FEATURED_DEMOS } from '../lib/marketingDemos'
 import { HERO_SAMPLE_BARS } from '../lib/samplePortals'
-import DemoPreview from './DemoPreview'
+import DemoGalleryCard from './DemoGalleryCard'
 
-const HOME_PREVIEW_DEMOS = HERO_SAMPLE_BARS.map((bar) => {
-  const row = FEATURED_DEMOS.find((d) => d.src === bar.href)
-  return {
-    label: bar.industry || row?.label || bar.name,
-    biz: bar.name,
-    src: bar.href,
-    caption:
-      row?.caption
-      || `Fictitious data — open ${bar.name} and click around like it’s your shop.`,
-  }
-})
+const SITE_FEATURES = [
+  {
+    tag: 'Open week',
+    title: 'Margin while tickets are still ringing',
+    body: 'Match register, vendor, or job data to what you sold — before the month is closed.',
+  },
+  {
+    tag: 'Closed month',
+    title: 'Books you can defend',
+    body: 'Official statements and GL in the portal. Nightly sync — not a spreadsheet rebuild.',
+  },
+  {
+    tag: 'Your shop',
+    title: 'Not a template with your logo pasted on',
+    body: 'Your sign-in, your nav, your colors. One login, one company.',
+  },
+  {
+    tag: 'The build',
+    title: 'Kickoff to login in about six days',
+    body: 'You click around on real data. Nothing ships until the screen you asked for matches.',
+  },
+]
 
 const TRADES = [
   'Tire / auto',
@@ -79,16 +90,48 @@ export default function HomeLanding({
       </header>
 
       <div className="m-jk-home__flow">
-        <section className="m-jk-home__panel m-jk-home__panel--samples" id="samples">
+        <section className="m-jk-home__panel m-jk-home__panel--features" id="features">
+          <h2>What you actually get</h2>
+          <p className="m-jk-home__lede">
+            Operating screens for the week you&rsquo;re in — plus a close that lines up with the books.
+          </p>
+          <ul className="m-jk-feature-grid">
+            {SITE_FEATURES.map((f) => (
+              <li key={f.tag} className="m-jk-feature">
+                <p className="m-jk-feature__tag">{f.tag}</p>
+                <h3 className="m-jk-feature__title">{f.title}</h3>
+                <p className="m-jk-feature__body">{f.body}</p>
+              </li>
+            ))}
+          </ul>
+        </section>
+
+        <section className="m-jk-home__panel" id="samples">
           <h2>Open a sample shop</h2>
           <p className="m-jk-home__lede">
-            Fictitious businesses, real screens. Pick an industry and click around in the frame — no login.
+            Fictitious businesses, real portals — full screen, no login. Pick an industry and click through.
           </p>
-          <DemoPreview
-            demos={HOME_PREVIEW_DEMOS}
-            showHead={false}
-            onMoreDemos={() => router.push('/demos')}
-          />
+          <div className="m-jk-home__demos m-jk-home__demos--lead">
+            {HERO_SAMPLE_BARS.map((p) => {
+              const row = FEATURED_DEMOS.find((d) => d.src === p.href)
+              return (
+                <DemoGalleryCard
+                  key={p.href}
+                  href={p.href}
+                  biz={p.name}
+                  industry={p.industry}
+                  compact
+                />
+              )
+            })}
+          </div>
+          <button
+            type="button"
+            className="m-jk-text-link"
+            onClick={() => router.push('/demos')}
+          >
+            Browse all samples
+          </button>
         </section>
 
         <section className="m-jk-home__panel" id="approach">
