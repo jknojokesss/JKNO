@@ -257,9 +257,8 @@
   </div>
 
   <script>
-    const q = new URLSearchParams(location.search)
-    if (q.get('export') === '1') {
-      document.body.classList.remove('preview')
+    if (!new URLSearchParams(location.search).get('export')) {
+      document.body.classList.add('preview')
     }
   </script>
 </body>
