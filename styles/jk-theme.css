@@ -52,6 +52,7 @@ html:has(.marketing-site--jk) {
 .m-jk-chrome__bg {
   position: absolute;
   inset: 0;
+  overflow: hidden;
   background:
     radial-gradient(115% 85% at 50% 100%, rgba(255, 145, 65, 0.62), transparent 58%),
     radial-gradient(70% 45% at 85% 15%, rgba(255, 195, 120, 0.28), transparent 52%),
@@ -66,6 +67,44 @@ html:has(.marketing-site--jk) {
       #ffc868 80%,
       var(--jk-sky-bottom) 100%
     );
+}
+
+.m-jk-chrome__bg::before {
+  content: '';
+  position: absolute;
+  inset: -8%;
+  background: radial-gradient(55% 40% at 30% 70%, rgba(255, 175, 90, 0.35), transparent 55%);
+  animation: m-jk-sky-glow 18s ease-in-out infinite alternate;
+  pointer-events: none;
+}
+
+.m-jk-chrome__bg::after {
+  content: '';
+  position: absolute;
+  inset: -5%;
+  background: radial-gradient(45% 35% at 75% 25%, rgba(255, 220, 150, 0.22), transparent 50%);
+  animation: m-jk-sky-glow 22s ease-in-out infinite alternate-reverse;
+  pointer-events: none;
+}
+
+@keyframes m-jk-sky-glow {
+  from {
+    transform: translate3d(-2%, 1%, 0) scale(1);
+    opacity: 0.85;
+  }
+
+  to {
+    transform: translate3d(3%, -2%, 0) scale(1.06);
+    opacity: 1;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .m-jk-chrome__bg::before,
+  .m-jk-chrome__bg::after {
+    animation: none;
+    transform: none;
+  }
 }
 
 .m-jk-chrome__grain {

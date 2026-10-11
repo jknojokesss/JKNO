@@ -37,6 +37,8 @@
 
 .m-jk-home__mark-dot {
   color: var(--jk-orange-mid);
+  display: inline-block;
+  animation: m-jk-dot-pop 0.6s cubic-bezier(0.34, 1.4, 0.64, 1) 0.35s both;
 }
 
 .m-jk-home__h1 {
@@ -107,7 +109,12 @@
   cursor: pointer;
   appearance: none;
   -webkit-appearance: none;
-  transition: background 0.15s ease, border-color 0.15s ease, color 0.15s ease, box-shadow 0.15s ease;
+  transition:
+    background 0.15s ease,
+    border-color 0.15s ease,
+    color 0.15s ease,
+    box-shadow 0.2s ease,
+    transform 0.2s cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 .m-jk-home__btn--primary {
@@ -119,9 +126,10 @@
 
 .m-jk-home__btn--primary:hover {
   background: #f0b85c;
+  transform: translateY(-2px);
   box-shadow:
     0 1px 0 rgba(255, 255, 255, 0.4) inset,
-    0 2px 8px rgba(12, 18, 32, 0.2);
+    0 6px 18px rgba(12, 18, 32, 0.28);
 }
 
 .m-jk-home__btn--ghost {
@@ -133,6 +141,54 @@
 .m-jk-home__btn--ghost:hover {
   border-color: #fff8f0;
   background: rgba(12, 18, 32, 0.22);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(8, 12, 24, 0.35);
+}
+
+.m-jk-home__btn:active {
+  transform: translateY(0);
+}
+
+/* Hero — staggered entrance on first paint */
+.m-jk-home__hero--enter > * {
+  opacity: 0;
+  transform: translateY(22px);
+  animation: m-jk-hero-piece 0.85s cubic-bezier(0.16, 0.84, 0.28, 1) forwards;
+}
+
+.m-jk-home__hero--enter > *:nth-child(1) {
+  animation-delay: 0.05s;
+}
+
+.m-jk-home__hero--enter > *:nth-child(2) {
+  animation-delay: 0.14s;
+}
+
+.m-jk-home__hero--enter > *:nth-child(3) {
+  animation-delay: 0.24s;
+}
+
+.m-jk-home__hero--enter > *:nth-child(4) {
+  animation-delay: 0.34s;
+}
+
+@keyframes m-jk-hero-piece {
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes m-jk-dot-pop {
+  from {
+    transform: scale(0.6);
+    opacity: 0.4;
+  }
+
+  to {
+    transform: scale(1);
+    opacity: 1;
+  }
 }
 
 .m-jk-feature-picker__tabs {
@@ -238,33 +294,173 @@
   margin-bottom: 1.15rem;
 }
 
+/* Scroll fly-in — alternating lanes (matches inner flight pages) */
 .m-jk-page [data-fly-in] {
+  --page-fly-x: 0px;
+  --page-fly-y: 44px;
   opacity: 0;
-  transform: translateY(20px);
-  transition:
-    opacity 0.6s cubic-bezier(0.22, 1, 0.36, 1),
-    transform 0.6s cubic-bezier(0.22, 1, 0.36, 1);
+  transform: translate3d(var(--page-fly-x), var(--page-fly-y), 0) scale(0.98);
+  will-change: transform, opacity;
+}
+
+.m-jk-page [data-fly-in][data-fly-lane='left'] {
+  --page-fly-x: clamp(-72px, -10vw, -40px);
+  --page-fly-y: 36px;
+}
+
+.m-jk-page [data-fly-in][data-fly-lane='right'] {
+  --page-fly-x: clamp(40px, 10vw, 72px);
+  --page-fly-y: 36px;
 }
 
 .m-jk-page [data-fly-in].is-visible {
-  opacity: 1;
-  transform: translateY(0);
+  animation: m-jk-page-fly-in 0.88s cubic-bezier(0.16, 0.84, 0.28, 1) forwards;
+}
+
+@keyframes m-jk-page-fly-in {
+  to {
+    opacity: 1;
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+}
+
+/* Stagger copy + controls inside each panel */
+.m-jk-page [data-fly-in] > :not(.m-jk-stagger-cards) {
+  opacity: 0;
+  transform: translateY(12px);
+}
+
+.m-jk-page [data-fly-in].is-visible > :not(.m-jk-stagger-cards) {
+  animation: m-jk-panel-child 0.65s cubic-bezier(0.16, 0.84, 0.28, 1) forwards;
+}
+
+.m-jk-page [data-fly-in].is-visible > :nth-child(1):not(.m-jk-stagger-cards) {
+  animation-delay: 0.12s;
+}
+
+.m-jk-page [data-fly-in].is-visible > :nth-child(2):not(.m-jk-stagger-cards) {
+  animation-delay: 0.2s;
+}
+
+.m-jk-page [data-fly-in].is-visible > :nth-child(3):not(.m-jk-stagger-cards) {
+  animation-delay: 0.28s;
+}
+
+.m-jk-page [data-fly-in].is-visible > :nth-child(4):not(.m-jk-stagger-cards) {
+  animation-delay: 0.36s;
+}
+
+.m-jk-page [data-fly-in].is-visible > :nth-child(5):not(.m-jk-stagger-cards) {
+  animation-delay: 0.44s;
+}
+
+.m-jk-page [data-fly-in].is-visible > :nth-child(6):not(.m-jk-stagger-cards) {
+  animation-delay: 0.52s;
+}
+
+@keyframes m-jk-panel-child {
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.m-jk-page [data-fly-in] .m-jk-stagger-cards .m-demo-card {
+  opacity: 0;
+  transform: translateY(18px) scale(0.97);
+}
+
+.m-jk-page [data-fly-in].is-visible .m-jk-stagger-cards .m-demo-card {
+  animation: m-jk-card-rise 0.7s cubic-bezier(0.16, 0.84, 0.28, 1) forwards;
+}
+
+.m-jk-page [data-fly-in].is-visible .m-jk-stagger-cards .m-demo-card:nth-child(1) {
+  animation-delay: 0.32s;
+}
+
+.m-jk-page [data-fly-in].is-visible .m-jk-stagger-cards .m-demo-card:nth-child(2) {
+  animation-delay: 0.42s;
+}
+
+.m-jk-page [data-fly-in].is-visible .m-jk-stagger-cards .m-demo-card:nth-child(3) {
+  animation-delay: 0.52s;
+}
+
+@keyframes m-jk-card-rise {
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.m-jk-page [data-fly-in] .m-jk-steps li {
+  opacity: 0;
+  transform: translateX(-10px);
+}
+
+.m-jk-page [data-fly-in].is-visible .m-jk-steps li {
+  animation: m-jk-step-in 0.55s cubic-bezier(0.16, 0.84, 0.28, 1) forwards;
+}
+
+.m-jk-page [data-fly-in].is-visible .m-jk-steps li:nth-child(1) {
+  animation-delay: 0.28s;
+}
+
+.m-jk-page [data-fly-in].is-visible .m-jk-steps li:nth-child(2) {
+  animation-delay: 0.38s;
+}
+
+.m-jk-page [data-fly-in].is-visible .m-jk-steps li:nth-child(3) {
+  animation-delay: 0.48s;
+}
+
+@keyframes m-jk-step-in {
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
 }
 
 .m-jk-home__panel .m-demo-card {
   transition:
-    transform 0.22s ease,
+    transform 0.28s cubic-bezier(0.22, 1, 0.36, 1),
     border-left-color 0.22s ease,
-    box-shadow 0.22s ease;
+    box-shadow 0.28s ease;
 }
 
 .m-jk-home__panel .m-demo-card:hover {
-  transform: translateY(-3px);
-  box-shadow: 0 10px 28px rgba(15, 20, 28, 0.12);
+  transform: translateY(-5px) scale(1.01);
+  box-shadow: 0 14px 32px rgba(15, 20, 28, 0.16);
+}
+
+.m-jk-home__panel {
+  transition: box-shadow 0.35s ease, transform 0.35s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.m-jk-page [data-fly-in].is-visible.m-jk-home__panel:hover {
+  box-shadow: 0 18px 48px rgba(0, 0, 0, 0.26);
+}
+
+.m-jk-text-link {
+  transition: color 0.15s ease, transform 0.2s ease;
+}
+
+.m-jk-text-link:hover {
+  transform: translateX(3px);
 }
 
 @media (prefers-reduced-motion: reduce) {
   .m-jk-home__today {
+    animation: none;
+  }
+
+  .m-jk-home__hero--enter > * {
+    opacity: 1;
+    transform: none;
+    animation: none;
+  }
+
+  .m-jk-home__mark-dot {
     animation: none;
   }
 
@@ -282,10 +478,13 @@
     transform: none;
   }
 
-  .m-jk-page [data-fly-in] {
+  .m-jk-page [data-fly-in],
+  .m-jk-page [data-fly-in] > *,
+  .m-jk-page [data-fly-in] .m-jk-stagger-cards .m-demo-card,
+  .m-jk-page [data-fly-in] .m-jk-steps li {
     opacity: 1;
     transform: none;
-    transition: none;
+    animation: none;
   }
 
   .m-jk-home__panel .m-demo-card {
@@ -293,6 +492,11 @@
   }
 
   .m-jk-home__panel .m-demo-card:hover {
+    transform: none;
+  }
+
+  .m-jk-home__btn:hover,
+  .m-jk-text-link:hover {
     transform: none;
   }
 }

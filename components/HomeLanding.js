@@ -55,7 +55,7 @@ export default function HomeLanding({
 
   return (
     <div className="m-jk-home">
-      <header className="m-jk-home__hero" id="top">
+      <header className="m-jk-home__hero m-jk-home__hero--enter" id="top">
         <p className="m-jk-home__mark" aria-hidden="true">
           JK<span className="m-jk-home__mark-dot">.</span>
         </p>
@@ -98,7 +98,7 @@ export default function HomeLanding({
           <p className="m-jk-story__body m-jk-story__body--tight">
             Fictitious names, real screen layouts. No password — pick one and look around.
           </p>
-          <div className="m-jk-home__demos m-jk-home__demos--lead">
+          <div className="m-jk-home__demos m-jk-home__demos--lead m-jk-stagger-cards">
             {HERO_SAMPLE_BARS.map((p) => (
               <DemoGalleryCard
                 key={p.href}
