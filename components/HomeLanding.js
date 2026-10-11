@@ -2,12 +2,7 @@ import { useRouter } from 'next/router'
 import { BOOKING_URL } from '../lib/marketing'
 import { FEATURED_DEMOS } from '../lib/marketingDemos'
 import { HERO_SAMPLE_BARS } from '../lib/samplePortals'
-import DemoGalleryCard from './DemoGalleryCard'
 import DemoPreview from './DemoPreview'
-
-const SAMPLE_HREFS = new Set(HERO_SAMPLE_BARS.map((p) => p.href))
-
-const HOME_DEMOS = FEATURED_DEMOS.filter((d) => !SAMPLE_HREFS.has(d.src)).slice(0, 6)
 
 const HOME_PREVIEW_DEMOS = HERO_SAMPLE_BARS.map((bar) => {
   const row = FEATURED_DEMOS.find((d) => d.src === bar.href)
@@ -94,25 +89,6 @@ export default function HomeLanding({
             showHead={false}
             onMoreDemos={() => router.push('/demos')}
           />
-          <h3>More industries</h3>
-          <div className="m-jk-home__demos m-jk-home__demos--grid">
-            {HOME_DEMOS.map((d) => (
-              <DemoGalleryCard
-                key={d.src}
-                href={d.src}
-                biz={d.biz || d.label}
-                industry={d.label}
-                compact
-              />
-            ))}
-          </div>
-          <button
-            type="button"
-            className="m-jk-text-link"
-            onClick={() => router.push('/demos')}
-          >
-            Browse all samples
-          </button>
         </section>
 
         <section className="m-jk-home__panel" id="approach">
