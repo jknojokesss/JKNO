@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import { useRouter } from 'next/router'
 import { BOOKING_URL } from '../lib/marketing'
 import { FEATURED_DEMOS } from '../lib/marketingDemos'
@@ -28,6 +29,27 @@ function scrollTo(id) {
   document.getElementById(id)?.scrollIntoView({ behavior: 'smooth', block: 'start' })
 }
 
+const HERO_LENS = {
+  week: {
+    label: 'Open week',
+    caption: 'Operational view — tickets, margin, and alerts while the week is still moving.',
+    stats: [
+      { k: 'Margin (WTD)', v: '$4,280' },
+      { k: 'Tickets today', v: '47' },
+      { k: 'Low stock', v: '2 sizes' },
+    ],
+  },
+  month: {
+    label: 'Closed month',
+    caption: 'Statement view — the month your accountant already signed off.',
+    stats: [
+      { k: 'Net income (Jul)', v: '$18,420' },
+      { k: 'Revenue (Jul)', v: '$142k' },
+      { k: 'Inventory (Jul 31)', v: '$38.2k' },
+    ],
+  },
+}
+
 export default function HomeLanding({
   form,
   setForm,
@@ -36,6 +58,7 @@ export default function HomeLanding({
   submitting,
 }) {
   const router = useRouter()
+  const [lens, setLens] = useState('week')
 
   return (
     <div className="m-jk-home">
@@ -67,6 +90,41 @@ export default function HomeLanding({
           >
             Start a build
           </button>
+        </div>
+
+        <div className="m-jk-lens" aria-live="polite">
+          <div className="m-jk-lens__tabs" role="tablist" aria-label="Portal view">
+            {Object.entries(HERO_LENS).map(([key, { label }]) => (
+              <button
+                key={key}
+                type="button"
+                role="tab"
+                id={`lens-tab-${key}`}
+                aria-selected={lens === key}
+                aria-controls={`lens-panel-${key}`}
+                className={`m-jk-lens__tab${lens === key ? ' is-active' : ''}`}
+                onClick={() => setLens(key)}
+              >
+                {label}
+              </button>
+            ))}
+          </div>
+          <div
+            className="m-jk-lens__panel"
+            role="tabpanel"
+            id={`lens-panel-${lens}`}
+            aria-labelledby={`lens-tab-${lens}`}
+          >
+            <dl className="m-jk-lens__stats">
+              {HERO_LENS[lens].stats.map(({ k, v }) => (
+                <div key={k} className="m-jk-lens__stat">
+                  <dt>{k}</dt>
+                  <dd>{v}</dd>
+                </div>
+              ))}
+            </dl>
+            <p className="m-jk-lens__caption">{HERO_LENS[lens].caption}</p>
+          </div>
         </div>
       </header>
 
