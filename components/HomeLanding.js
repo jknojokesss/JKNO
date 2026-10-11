@@ -8,7 +8,7 @@ const STORY = [
     kicker: 'What we do',
     title: 'One login for your business',
     body:
-      'We hook up QuickBooks and the tools you already use — register, vendors, jobs, whatever fits — and build a private site with the screens you keep asking for. Shaped around your shop, not a one-size-fits-all app.',
+      'We hook up QuickBooks and the tools you already use — register, vendors, jobs, whatever fits — and build a private owner portal with the screens you keep asking for. Yours, not a template off the shelf.',
   },
   {
     kicker: 'What you get',
@@ -20,7 +20,7 @@ const STORY = [
 
 const START_STEPS = [
   'Quick call — what you sell and what you want to see.',
-  'I connect your books and tools, then build the site.',
+  'I connect your books and tools, then build your portal.',
   'You sign in on real data; we adjust until it clicks.',
 ]
 
@@ -63,7 +63,7 @@ export default function HomeLanding({
           One login for the numbers that run your shop.
         </h1>
         <p className="m-jk-home__lead">
-          Custom websites for owners who are tired of jumping between QuickBooks, spreadsheets, and five other tabs.
+          Custom owner portals on QuickBooks and the tools you already run — one login instead of spreadsheets and a pile of tabs.
         </p>
         <div className="m-jk-home__hero-actions">
           <button
