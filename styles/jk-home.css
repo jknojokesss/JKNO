@@ -47,6 +47,9 @@
   font-weight: 600;
   line-height: 1.1;
   letter-spacing: -0.02em;
+  color: #fffaf5;
+  text-shadow: 0 1px 18px rgba(12, 18, 32, 0.45);
+  -webkit-font-smoothing: antialiased;
 }
 
 .m-jk-home__today {
@@ -169,14 +172,16 @@
   transform: translateY(-1px);
 }
 
-.m-jk-feature-picker__tab.is-active {
+.marketing-site--jk button.m-jk-feature-picker__tab.is-active,
+.m-jk-home button.m-jk-feature-picker__tab.is-active {
   background: var(--jk-ink);
   border-color: var(--jk-ink);
   color: #f7f4ef;
   box-shadow: 0 3px 0 var(--jk-orange-mid);
 }
 
-.m-jk-feature-picker__tab:focus-visible {
+.marketing-site--jk button.m-jk-feature-picker__tab:focus-visible,
+.m-jk-home button.m-jk-feature-picker__tab:focus-visible {
   outline: 2px solid var(--jk-gold);
   outline-offset: 2px;
 }
@@ -255,11 +260,13 @@
     animation: none;
   }
 
-  .m-jk-feature-picker__tab {
+  .marketing-site--jk button.m-jk-feature-picker__tab,
+  .m-jk-home button.m-jk-feature-picker__tab {
     transition: none;
   }
 
-  .m-jk-feature-picker__tab:hover {
+  .marketing-site--jk button.m-jk-feature-picker__tab:hover,
+  .m-jk-home button.m-jk-feature-picker__tab:hover {
     transform: none;
   }
 
