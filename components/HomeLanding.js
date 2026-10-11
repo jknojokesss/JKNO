@@ -61,7 +61,6 @@ export default function HomeLanding({
   return (
     <div className="m-jk-home">
       <header className="m-jk-home__hero" id="top">
-        <p className="m-jk-home__eyebrow">Run the week on real numbers</p>
         <p className="m-jk-home__mark" aria-hidden="true">
           JK<span className="m-jk-home__mark-dot">.</span>
         </p>
