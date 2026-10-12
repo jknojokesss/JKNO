@@ -124,7 +124,7 @@ export default function DemoGalleryIndex() {
                 key={d.href}
                 href={d.href}
                 biz={d.biz}
-                pain={painLineForDemo(d.href)}
+                pain={painLineForDemo(d.href) || undefined}
                 compact
               />
             ))}
