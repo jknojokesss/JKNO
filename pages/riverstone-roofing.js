@@ -131,8 +131,8 @@ export default function RoofingPortal({ demoEmbed = false }) {
         table{border-collapse:collapse;width:100%;font-variant-numeric:tabular-nums}
         h1,h2,h3{font-family:${serif};color:${INK};font-weight:600}
         button{font-family:${sans}}
-        .shell{display:flex;min-height:calc(100vh - 34px)}
-        .side{width:212px;flex-shrink:0;background:${INK};padding:26px 0 20px;position:sticky;top:34px;height:calc(100vh - 34px);display:flex;flex-direction:column}
+        .shell{display:flex;min-height:calc(100vh - ${embedded ? 34 : 72}px)}
+        .side{width:212px;flex-shrink:0;background:${INK};padding:26px 0 20px;position:sticky;top:${embedded ? 34 : 72}px;height:calc(100vh - ${embedded ? 34 : 72}px);display:flex;flex-direction:column}
         .main{flex:1;min-width:0;padding:30px 36px 20px;max-width:1280px}
         .nbtn{display:block;width:100%;text-align:left;padding:10px 24px;border:none;background:transparent;color:#9aa0a8;font-size:12.5px;font-weight:500;letter-spacing:.02em;cursor:pointer;border-left:3px solid transparent}
         .nbtn:hover{color:${STONE}}
@@ -165,7 +165,7 @@ export default function RoofingPortal({ demoEmbed = false }) {
           .side{display:none}
           .main{padding:14px 14px 40px}
           .topbar-sub{display:none}
-          .mobilenav{display:flex;position:sticky;top:34px;z-index:9;background:${INK};overflow-x:auto;gap:2px;padding:0 8px;-webkit-overflow-scrolling:touch}
+          .mobilenav{display:flex;position:sticky;top:${embedded ? 34 : 72}px;z-index:9;background:${INK};overflow-x:auto;gap:2px;padding:0 8px;-webkit-overflow-scrolling:touch}
           .mobilenav button{flex-shrink:0;border:none;background:transparent;color:#9aa0a8;font-size:12px;font-weight:600;padding:11px 10px;cursor:pointer;border-bottom:3px solid transparent;white-space:nowrap}
           .mobilenav button.on{color:${WHITE};border-bottom-color:${SIGNAL}}
         }
@@ -180,13 +180,30 @@ export default function RoofingPortal({ demoEmbed = false }) {
         }
       `}</style>
 
+      {!embedded && <DemoLobby />}
+
       {/* SIGNAL use 1 of 3: the top bar, matching the prospect's site */}
-      <div className="no-print" style={{ position: 'sticky', top: 0, zIndex: 10, background: SIGNAL, color: WHITE, height: '34px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0 18px', fontSize: '10.5px', fontWeight: 600, letterSpacing: '.12em' }}>
+      <div
+        className="no-print"
+        style={{
+          position: 'sticky',
+          top: embedded ? 0 : 38,
+          zIndex: 10,
+          background: SIGNAL,
+          color: WHITE,
+          height: '34px',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          padding: '0 18px',
+          fontSize: '10.5px',
+          fontWeight: 600,
+          letterSpacing: '.12em',
+        }}
+      >
         <span>{BIZ.toUpperCase()} — MANAGEMENT PORTAL</span>
         <span className="topbar-sub" style={{ fontWeight: 500, letterSpacing: '.08em' }}>DEMO · SYNTHETIC DATA · AS OF AUG 11, 2026</span>
       </div>
-
-      {!embedded && <DemoLobby />}
 
       <div className="mobilenav no-print">
         {!embedded && <button onClick={() => setIntro(true)} style={{ fontFamily: serif, fontStyle: 'italic' }}>The 4 questions</button>}

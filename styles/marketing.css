@@ -2970,6 +2970,9 @@ html.demo-embed .m-sample-lobby {
 }
 
 .m-sample-lobby {
+  position: sticky;
+  top: 0;
+  z-index: 20;
   background: var(--m-paper, #f2f0ea);
   border-bottom: 1px solid rgba(27, 24, 21, 0.08);
   font-family: var(--m-font);
