@@ -1,8 +1,8 @@
 import { useState } from 'react'
 import Head from 'next/head'
 import { DEMO_UI, DEMO_HEAD, DEMO_MONO, DEMO_FONT_LINK } from '../lib/demoFonts'
-import DemoScopeBanner from '../components/DemoScopeBanner'
 import DemoLobby from '../components/DemoLobby'
+import { DEMO_EMBED_HIDE_LOBBY_CSS, getDemoEmbedServerProps } from '../lib/demoEmbed'
 
 const BIZ = 'Northline Global'
 const SIDEBAR = '#1A1C19', ACCENT = '#C9A84C', BG = '#F2F0EA', BORDER = '#D8D4CC'
@@ -47,7 +47,7 @@ const ORDERS = [
 const inTransit = PIPELINE.filter((p) => p.stage >= 3 && p.stage < 5).reduce((s, p) => s + p.landed, 0)
 const inventoryVal = INVENTORY.reduce((s, i) => s + i.value, 0)
 
-export default function NorthlineGlobal() {
+export default function NorthlineGlobal({ demoEmbed = false }) {
   const [tab, setTab] = useState('pipeline')
   const [binSearch, setBinSearch] = useState('')
 
@@ -79,6 +79,7 @@ export default function NorthlineGlobal() {
         <title>{BIZ} — Import & Distribution Demo</title>
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <link href={DEMO_FONT_LINK} rel="stylesheet" />
+        {demoEmbed ? <style>{DEMO_EMBED_HIDE_LOBBY_CSS}</style> : null}
       </Head>
       <style>{`
         *{box-sizing:border-box;margin:0;padding:0}
@@ -104,8 +105,7 @@ export default function NorthlineGlobal() {
         }
       `}</style>
 
-      <DemoLobby href="/northline-global" biz={BIZ} />
-      <DemoScopeBanner scope="import" compact />
+      {!demoEmbed && <DemoLobby />}
 
       <div className="mobilenav">
         {NAV.map((n) => (
@@ -113,7 +113,7 @@ export default function NorthlineGlobal() {
         ))}
       </div>
 
-      <div className="shell">
+      <div className="shell" id={demoEmbed ? 'jk-embed-app' : undefined}>
         <aside className="side">
           <div style={{ paddingBottom: '20px', borderBottom: '1px solid rgba(255,255,255,.08)', marginBottom: '16px' }}>
             <div style={{ fontFamily: DEMO_HEAD, fontSize: '17px', fontWeight: 600, color: '#fff', lineHeight: 1.2 }}>Northline<br />Global</div>
@@ -315,3 +315,5 @@ export default function NorthlineGlobal() {
     </>
   )
 }
+
+export const getServerSideProps = ({ query }) => getDemoEmbedServerProps(query)

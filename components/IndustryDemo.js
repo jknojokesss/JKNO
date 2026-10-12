@@ -1,6 +1,5 @@
 import { useState } from 'react'
 import Head from 'next/head'
-import DemoScopeBanner from './DemoScopeBanner'
 import DemoLobby from './DemoLobby'
 
 // ─────────────────────────────────────────────────────────────────────────
@@ -153,8 +152,7 @@ export default function IndustryDemo({ cfg }) {
           @media(max-width:860px){.id-shell{display:block}.id-side{display:none}.id-topbar{display:block}.id-main{padding:18px 14px 48px}}`}</style>
       </Head>
 
-      <DemoLobby href={`/demos/${slug}`} biz={biz} />
-      <DemoScopeBanner scope="template" compact />
+      <DemoLobby />
 
       <div className="id-shell">
         {/* SIDEBAR — desktop */}

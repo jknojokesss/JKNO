@@ -1,6 +1,5 @@
 import { useState, Fragment } from 'react'
 import Head from 'next/head'
-import DemoScopeBanner from '../components/DemoScopeBanner'
 import DemoLobby from '../components/DemoLobby'
 import DemoBooksPanel from '../components/DemoBooksPanel'
 
@@ -94,8 +93,7 @@ export default function SbaLending() {
           @media(max-width:640px){.sb-side{display:none}.sb-main{padding:16px 14px 48px}}`}</style>
       </Head>
 
-      <DemoLobby href="/sba-lending" biz={BIZ} />
-      <DemoScopeBanner scope="lending" compact />
+      <DemoLobby />
 
       <div className="sb-shell">
         <aside className="sb-side">

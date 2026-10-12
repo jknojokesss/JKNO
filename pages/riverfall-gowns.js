@@ -1,7 +1,6 @@
 import { useState } from 'react'
 import Head from 'next/head'
 import { DEMO_UI, DEMO_HEAD, DEMO_MONO, DEMO_FONT_LINK } from '../lib/demoFonts'
-import DemoScopeBanner from '../components/DemoScopeBanner'
 import DemoLobby from '../components/DemoLobby'
 import DemoBooksPanel from '../components/DemoBooksPanel'
 
@@ -96,8 +95,7 @@ export default function RiverfallGowns() {
         }
       `}</style>
 
-      <DemoLobby href="/riverfall-gowns" biz={BIZ} />
-      <DemoScopeBanner scope="madeToOrder" compact />
+      <DemoLobby />
 
       <div className="mobilenav">
         {NAV.map((n) => (

@@ -2,10 +2,9 @@ import React, { useState, useEffect, useMemo } from 'react'
 import Head from 'next/head'
 import { useRouter } from 'next/router'
 import { supabase } from '../lib/supabase'
-import { isDemoEmbedQuery } from '../lib/demoEmbed'
+import { DEMO_EMBED_HIDE_LOBBY_CSS, getDemoEmbedServerProps, isDemoEmbedQuery } from '../lib/demoEmbed'
 import { DEMO_UI, DEMO_HEAD, DEMO_FONT_LINK } from '../lib/demoFonts'
 import { DEMO_AS_OF as AS_OF } from '../lib/demoAsOf'
-import DemoScopeBanner from '../components/DemoScopeBanner'
 import DemoLobby from '../components/DemoLobby'
 
 // ─────────────────────────────────────────────────────────────────────────
@@ -68,9 +67,12 @@ const NEXT = {
   liab: { id: 'buyer', q: "What does the buyer's first meeting look like?" },
 }
 
-export default function RoofingPortal() {
+export default function RoofingPortal({ demoEmbed = false }) {
   const router = useRouter()
-  const embedded = isDemoEmbedQuery(router.query)
+  const embedded =
+    demoEmbed
+    || router.asPath.includes('embed=1')
+    || (router.isReady && isDemoEmbedQuery(router.query))
   const [tab, setTab] = useState('jobs')
   const [raw, setRaw] = useState(null)
   const [err, setErr] = useState(null)
@@ -120,6 +122,7 @@ export default function RoofingPortal() {
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link href={DEMO_FONT_LINK} rel="stylesheet" />
+        {embedded ? <style>{DEMO_EMBED_HIDE_LOBBY_CSS}</style> : null}
       </Head>
       <style>{`
         *{box-sizing:border-box;margin:0;padding:0}
@@ -183,8 +186,7 @@ export default function RoofingPortal() {
         <span className="topbar-sub" style={{ fontWeight: 500, letterSpacing: '.08em' }}>DEMO · SYNTHETIC DATA · AS OF AUG 11, 2026</span>
       </div>
 
-      <DemoLobby href="/riverstone-roofing" biz={BIZ} />
-      <DemoScopeBanner scope="roofing" compact />
+      {!embedded && <DemoLobby />}
 
       <div className="mobilenav no-print">
         {!embedded && <button onClick={() => setIntro(true)} style={{ fontFamily: serif, fontStyle: 'italic' }}>The 4 questions</button>}
@@ -194,7 +196,7 @@ export default function RoofingPortal() {
         <button className={tab === 'buyer' ? 'on' : ''} onClick={() => setTab('buyer')}>Buyer Package</button>
       </div>
 
-      <div className="shell">
+      <div className="shell" id={embedded ? 'jk-embed-app' : undefined}>
         <aside className="side no-print">
           <div style={{ padding: '0 24px 18px', borderBottom: '1px solid rgba(201,196,184,.15)', marginBottom: '10px' }}>
             <div style={{ fontFamily: serif, fontSize: '18px', fontWeight: 700, color: WHITE, lineHeight: 1.3 }}>Riverstone<br />Roofing</div>
@@ -235,6 +237,8 @@ export default function RoofingPortal() {
     </>
   )
 }
+
+export const getServerSideProps = ({ query }) => getDemoEmbedServerProps(query)
 
 // ── model ────────────────────────────────────────────────────────────────
 
