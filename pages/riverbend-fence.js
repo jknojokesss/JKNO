@@ -3,7 +3,7 @@ import Head from 'next/head'
 import { useRouter } from 'next/router'
 import { isDemoEmbedQuery } from '../lib/demoEmbed'
 import DemoFontLinks from '../components/DemoFontLinks'
-import { DEMO_RENDER_HINTS, DEMO_UI, DEMO_HEAD } from '../lib/demoFonts'
+import { DEMO_PORTAL_ROOT_CLASS, DEMO_RENDER_HINTS, DEMO_UI, DEMO_HEAD } from '../lib/demoFonts'
 import DemoLobby from '../components/DemoLobby'
 
 /* ─── Riverbend Fence job entry portal — demo scaffold ────────────────────
@@ -1036,7 +1036,7 @@ export default function RiverbendFenceDemo() {
       <style>{`
         *{box-sizing:border-box;margin:0;padding:0}
         ${DEMO_RENDER_HINTS}
-        body{font-family:${ui};background:${BG};color:${INK}}
+        body{background:${BG};color:${INK}}
         input,select,textarea,button{font-family:${ui}}
         input:focus,select:focus,textarea:focus{border-color:${INK}!important}
         .num{font-variant-numeric:tabular-nums}
@@ -1059,7 +1059,7 @@ export default function RiverbendFenceDemo() {
 
       <DemoLobby />
 
-      <div className={`split show-${pane}`}>
+      <div className={`split show-${pane} ${DEMO_PORTAL_ROOT_CLASS}`}>
         <div className="paneL">
           <div style={{ padding: '14px 18px', borderBottom: `1px solid ${BORDER}`, display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: '#fff' }}>
             <div style={{ display: 'flex', alignItems: 'baseline', gap: 10 }}>

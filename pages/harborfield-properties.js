@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import Head from 'next/head'
 import DemoFontLinks from '../components/DemoFontLinks'
-import { DEMO_RENDER_HINTS, DEMO_UI, DEMO_HEAD, DEMO_MONO } from '../lib/demoFonts'
+import { DEMO_PORTAL_ROOT_CLASS, DEMO_RENDER_HINTS, DEMO_UI, DEMO_HEAD, DEMO_MONO } from '../lib/demoFonts'
 import DemoLobby from '../components/DemoLobby'
 import DemoBooksPanel from '../components/DemoBooksPanel'
 
@@ -72,7 +72,7 @@ export default function HarborfieldProperties() {
       <style>{`
         *{box-sizing:border-box;margin:0;padding:0}
         ${DEMO_RENDER_HINTS}
-        body{font-family:${DEMO_UI};background:${BG};color:${INK}}
+        body{background:${BG};color:${INK}}
         .shell{display:flex;min-height:100vh}
         .side{width:210px;flex-shrink:0;background:${SIDEBAR};display:flex;flex-direction:column;padding:22px 12px;position:sticky;top:0;height:100vh;overflow-y:auto}
         .main{flex:1;min-width:0;padding:28px 32px 60px;overflow-y:auto}
@@ -98,7 +98,7 @@ export default function HarborfieldProperties() {
         ))}
       </div>
 
-      <div className="shell">
+      <div className={`shell ${DEMO_PORTAL_ROOT_CLASS}`}>
         <aside className="side">
           <div style={{ paddingBottom: '20px', borderBottom: '1px solid rgba(255,255,255,.08)', marginBottom: '16px' }}>
             <div style={{ fontFamily: DEMO_HEAD, fontSize: '17px', fontWeight: 600, color: '#fff', lineHeight: 1.2 }}>Harborfield<br />Residential</div>

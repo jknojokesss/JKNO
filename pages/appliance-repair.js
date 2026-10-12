@@ -2,7 +2,7 @@ import { useState, Fragment } from 'react'
 import Head from 'next/head'
 import DemoFontLinks from '../components/DemoFontLinks'
 import DemoLobby from '../components/DemoLobby'
-import { DEMO_HEAD, DEMO_MONO, DEMO_RENDER_HINTS, DEMO_UI } from '../lib/demoFonts'
+import { DEMO_HEAD, DEMO_MONO, DEMO_PORTAL_ROOT_CLASS, DEMO_RENDER_HINTS, DEMO_UI } from '../lib/demoFonts'
 
 // ─────────────────────────────────────────────────────────────────────────
 // Bespoke sample dashboard for an appliance-repair business. Front page is a
@@ -110,7 +110,7 @@ export default function ApplianceRepair() {
         <title>{BIZ} — Job Dashboard Demo</title>
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <DemoFontLinks />
-        <style>{`*{box-sizing:border-box;margin:0;padding:0}${DEMO_RENDER_HINTS}body{background:${BG};font-family:${DEMO_UI}}::placeholder{color:#A8B2BE}
+        <style>{`*{box-sizing:border-box;margin:0;padding:0}${DEMO_RENDER_HINTS}body{background:${BG}}::placeholder{color:#A8B2BE}
           .ar-shell{display:flex;min-height:100vh}
           .ar-side{width:200px;flex-shrink:0;background:${DARK};display:flex;flex-direction:column;padding:20px 12px;position:sticky;top:0;height:100vh;overflow-y:auto}
           .ar-nav-btn{display:block;width:100%;text-align:left;padding:9px 12px;border-radius:6px;border:none;background:transparent;color:#6A7A88;font-family:${DEMO_UI};font-size:13px;cursor:pointer;margin-bottom:2px}
@@ -122,7 +122,7 @@ export default function ApplianceRepair() {
 
       <DemoLobby />
 
-      <div className="ar-shell">
+      <div className={`ar-shell ${DEMO_PORTAL_ROOT_CLASS}`}>
         <aside className="ar-side">
           <div style={{ paddingBottom: '20px' }}>
             <div style={{ fontFamily: DEMO_HEAD, fontSize: '16px', fontWeight: 600, color: '#fff', lineHeight: 1.2 }}>Riverside<br />Appliance</div>

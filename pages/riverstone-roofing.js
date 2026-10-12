@@ -4,7 +4,7 @@ import { useRouter } from 'next/router'
 import { supabase } from '../lib/supabase'
 import { DEMO_EMBED_HIDE_LOBBY_CSS, getDemoEmbedServerProps, isDemoEmbedQuery } from '../lib/demoEmbed'
 import DemoFontLinks from '../components/DemoFontLinks'
-import { DEMO_RENDER_HINTS, DEMO_UI, DEMO_HEAD } from '../lib/demoFonts'
+import { DEMO_PORTAL_ROOT_CLASS, DEMO_RENDER_HINTS, DEMO_UI, DEMO_HEAD } from '../lib/demoFonts'
 import { DEMO_AS_OF as AS_OF } from '../lib/demoAsOf'
 import DemoLobby from '../components/DemoLobby'
 
@@ -128,7 +128,7 @@ export default function RoofingPortal({ demoEmbed = false }) {
         *{box-sizing:border-box;margin:0;padding:0}
         html,body{background:${PAPER}}
         ${DEMO_RENDER_HINTS}
-        body{font-family:${sans};color:${SLATE};font-size:13px}
+        body{color:${SLATE};font-size:13px}
         table{border-collapse:collapse;width:100%;font-variant-numeric:tabular-nums}
         h1,h2,h3{font-family:${serif};color:${INK};font-weight:600}
         button{font-family:${sans}}
@@ -214,7 +214,7 @@ export default function RoofingPortal({ demoEmbed = false }) {
         <button className={tab === 'buyer' ? 'on' : ''} onClick={() => setTab('buyer')}>Buyer Package</button>
       </div>
 
-      <div className="shell" id={embedded ? 'jk-embed-app' : undefined}>
+      <div className={`shell ${DEMO_PORTAL_ROOT_CLASS}`} id={embedded ? 'jk-embed-app' : undefined}>
         <aside className="side no-print">
           <div style={{ padding: '0 24px 18px', borderBottom: '1px solid rgba(201,196,184,.15)', marginBottom: '10px' }}>
             <div style={{ fontFamily: serif, fontSize: '18px', fontWeight: 700, color: WHITE, lineHeight: 1.3 }}>Riverstone<br />Roofing</div>

@@ -3,7 +3,7 @@ import Head from 'next/head'
 import DemoFontLinks from '../components/DemoFontLinks'
 import DemoLobby from '../components/DemoLobby'
 import { DEMO_EMBED_HIDE_LOBBY_CSS, getDemoEmbedServerProps } from '../lib/demoEmbed'
-import { DEMO_RENDER_HINTS, DEMO_UI } from '../lib/demoFonts'
+import { DEMO_PORTAL_ROOT_CLASS, DEMO_RENDER_HINTS, DEMO_UI } from '../lib/demoFonts'
 
 const CHAR = '#1E2A3A', SPICE = '#2A6CB8', KRAFT = '#C2923E', CREAM = '#FBF4EC'
 const INK = '#2E2230', MUTED = '#8C7C82', GREEN = '#3E7C4F', BORDER = '#ECE0D8', AMBER = '#C98A2A', RED = '#C03A22'
@@ -468,7 +468,7 @@ export default function Demo({ demoEmbed = false }) {
         <meta name="theme-color" content="#1E2A3A" />
         <DemoFontLinks />
         {demoEmbed ? <style>{DEMO_EMBED_HIDE_LOBBY_CSS}</style> : null}
-        <style>{`*{box-sizing:border-box;margin:0;padding:0}${DEMO_RENDER_HINTS}body{background:${CREAM};font-family:${DEMO_UI};color:${INK}}::placeholder{color:#A99A82}
+        <style>{`*{box-sizing:border-box;margin:0;padding:0}${DEMO_RENDER_HINTS}body{background:${CREAM};color:${INK}}::placeholder{color:#A99A82}
 .jm-shell{display:flex;min-height:100vh;align-items:stretch}
 .jm-side{width:236px;flex-shrink:0;background:${CHAR};color:${CREAM};display:flex;flex-direction:column;padding:22px 14px;position:sticky;top:0;height:100vh}
 .jm-nav{display:flex;flex-direction:column;gap:3px;flex:1}
@@ -480,7 +480,7 @@ export default function Demo({ demoEmbed = false }) {
 
       {!demoEmbed && <DemoLobby />}
 
-      <div className="jm-shell" id={demoEmbed ? 'jk-embed-app' : undefined}>
+      <div className={`jm-shell ${DEMO_PORTAL_ROOT_CLASS}`} id={demoEmbed ? 'jk-embed-app' : undefined}>
         {/* Sidebar */}
         <aside className="jm-side">
           <div style={{ padding: '2px 8px 16px' }}>
