@@ -1,6 +1,8 @@
 import { useState } from 'react'
 import Head from 'next/head'
+import DemoFontLinks from './DemoFontLinks'
 import DemoLobby from './DemoLobby'
+import { DEMO_RENDER_HINTS, DEMO_UI, DEMO_MONO } from '../lib/demoFonts'
 
 // ─────────────────────────────────────────────────────────────────────────
 // Config-driven sample dashboard — one polished template, one config per
@@ -141,9 +143,8 @@ export default function IndustryDemo({ cfg }) {
         <title>{`${biz} — ${industry} Dashboard Demo`}</title>
         <meta name="description" content={`Sample ${industry.toLowerCase()} portal on QuickBooks — operating screens and month-end recon, built by JK No Jokes.`} />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
-        <link rel="preconnect" href="https://fonts.googleapis.com" />
-        <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
-        <style>{`*{box-sizing:border-box;margin:0;padding:0}html{-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale}body{background:#EEF1F5;font-family:'Inter',sans-serif}
+        <DemoFontLinks />
+        <style>{`*{box-sizing:border-box;margin:0;padding:0}${DEMO_RENDER_HINTS}body{background:#EEF1F5;font-family:${DEMO_UI}}
           .id-tabs::-webkit-scrollbar{display:none}.id-tabs{scrollbar-width:none}::placeholder{color:#A8B2BE}
           .id-shell{display:flex;align-items:flex-start;min-height:100vh}
           .id-side{width:236px;flex-shrink:0;position:sticky;top:0;height:100vh;display:flex;flex-direction:column}

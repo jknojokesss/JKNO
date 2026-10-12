@@ -1,6 +1,8 @@
+import Head from 'next/head'
 import Link from 'next/link'
 import { useRouter } from 'next/router'
 import { isDemoEmbedQuery } from '../lib/demoEmbed'
+import { DEMO_LOBBY_FONT_LINK } from '../lib/demoFonts'
 
 /**
  * Minimal escape hatch above a sample portal (gallery lives on /demos).
@@ -16,15 +18,30 @@ export default function DemoLobby({ suppress = false }) {
   if (embedded) return null
 
   return (
-    <nav className="m-sample-lobby" aria-label="Leave sample">
-      <div className="m-sample-lobby__inner">
-        <Link href="/demos" className="m-sample-lobby__back">
-          ← All samples
-        </Link>
-        <Link href="/" className="m-sample-lobby__home">
-          Home
-        </Link>
-      </div>
-    </nav>
+    <>
+      <Head>
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
+        <link href={DEMO_LOBBY_FONT_LINK} rel="stylesheet" />
+      </Head>
+      <nav className="m-sample-lobby" aria-label="Leave sample">
+        <div className="m-sample-lobby__inner">
+          <Link href="/" className="m-sample-lobby__brand">
+            <span className="m-sample-lobby__jk">
+              JK<span className="m-sample-lobby__dot">.</span>
+            </span>
+            <span className="m-sample-lobby__co">No Jokes Financials</span>
+          </Link>
+          <div className="m-sample-lobby__nav">
+            <Link href="/demos" className="m-sample-lobby__back">
+              ← All samples
+            </Link>
+            <Link href="/" className="m-sample-lobby__home">
+              Home
+            </Link>
+          </div>
+        </div>
+      </nav>
+    </>
   )
 }

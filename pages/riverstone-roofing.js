@@ -3,7 +3,8 @@ import Head from 'next/head'
 import { useRouter } from 'next/router'
 import { supabase } from '../lib/supabase'
 import { DEMO_EMBED_HIDE_LOBBY_CSS, getDemoEmbedServerProps, isDemoEmbedQuery } from '../lib/demoEmbed'
-import { DEMO_UI, DEMO_HEAD, DEMO_FONT_LINK } from '../lib/demoFonts'
+import DemoFontLinks from '../components/DemoFontLinks'
+import { DEMO_RENDER_HINTS, DEMO_UI, DEMO_HEAD } from '../lib/demoFonts'
 import { DEMO_AS_OF as AS_OF } from '../lib/demoAsOf'
 import DemoLobby from '../components/DemoLobby'
 
@@ -120,14 +121,14 @@ export default function RoofingPortal({ demoEmbed = false }) {
       <Head>
         <title>{BIZ} — Management Portal Demo</title>
         <meta name="viewport" content="width=device-width, initial-scale=1" />
-        <link rel="preconnect" href="https://fonts.googleapis.com" />
-        <link href={DEMO_FONT_LINK} rel="stylesheet" />
+        <DemoFontLinks />
         {embedded ? <style>{DEMO_EMBED_HIDE_LOBBY_CSS}</style> : null}
       </Head>
       <style>{`
         *{box-sizing:border-box;margin:0;padding:0}
         html,body{background:${PAPER}}
-        body{font-family:${sans};color:${SLATE};font-size:13px;-webkit-font-smoothing:antialiased}
+        ${DEMO_RENDER_HINTS}
+        body{font-family:${sans};color:${SLATE};font-size:13px}
         table{border-collapse:collapse;width:100%;font-variant-numeric:tabular-nums}
         h1,h2,h3{font-family:${serif};color:${INK};font-weight:600}
         button{font-family:${sans}}

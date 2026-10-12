@@ -1,7 +1,9 @@
 import { useState, useRef, useEffect } from 'react'
 import Head from 'next/head'
+import DemoFontLinks from '../components/DemoFontLinks'
 import DemoLobby from '../components/DemoLobby'
 import { DEMO_EMBED_HIDE_LOBBY_CSS, getDemoEmbedServerProps } from '../lib/demoEmbed'
+import { DEMO_RENDER_HINTS, DEMO_UI } from '../lib/demoFonts'
 
 const CHAR = '#1E2A3A', SPICE = '#2A6CB8', KRAFT = '#C2923E', CREAM = '#FBF4EC'
 const INK = '#2E2230', MUTED = '#8C7C82', GREEN = '#3E7C4F', BORDER = '#ECE0D8', AMBER = '#C98A2A', RED = '#C03A22'
@@ -464,13 +466,13 @@ export default function Demo({ demoEmbed = false }) {
         <meta name="twitter:description" content="Store partners, shelf counts, collections, and channel P&L — reconciled to QuickBooks at month-end." />
         <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
         <meta name="theme-color" content="#1E2A3A" />
-        <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+        <DemoFontLinks />
         {demoEmbed ? <style>{DEMO_EMBED_HIDE_LOBBY_CSS}</style> : null}
-        <style>{`*{box-sizing:border-box;margin:0;padding:0}html{-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale;text-rendering:optimizeLegibility}body{background:${CREAM};font-family:'Inter',sans-serif;color:${INK}}::placeholder{color:#A99A82}
+        <style>{`*{box-sizing:border-box;margin:0;padding:0}${DEMO_RENDER_HINTS}body{background:${CREAM};font-family:${DEMO_UI};color:${INK}}::placeholder{color:#A99A82}
 .jm-shell{display:flex;min-height:100vh;align-items:stretch}
 .jm-side{width:236px;flex-shrink:0;background:${CHAR};color:${CREAM};display:flex;flex-direction:column;padding:22px 14px;position:sticky;top:0;height:100vh}
 .jm-nav{display:flex;flex-direction:column;gap:3px;flex:1}
-.jm-navbtn{display:block;width:100%;text-align:left;padding:11px 14px;border-radius:10px;border:none;background:transparent;color:#B6A78C;font-family:'Inter',sans-serif;font-size:14px;font-weight:500;cursor:pointer;white-space:nowrap;transition:background .15s}
+.jm-navbtn{display:block;width:100%;text-align:left;padding:11px 14px;border-radius:10px;border:none;background:transparent;color:#B6A78C;font-family:${DEMO_UI};font-size:14px;font-weight:500;cursor:pointer;white-space:nowrap;transition:background .15s}
 .jm-navbtn:hover{background:rgba(255,255,255,.08);color:${CREAM}}
 .jm-main{flex:1;min-width:0;max-width:1180px;padding:24px 30px 60px}
 @media(max-width:860px){.jm-shell{flex-direction:column}.jm-side{width:auto;height:auto;position:static;flex-direction:column;padding:14px 12px}.jm-nav{flex-direction:row;overflow-x:auto;gap:6px;padding-bottom:4px}.jm-navbtn{width:auto;padding:8px 15px;border-radius:18px;background:rgba(255,255,255,.07)}.jm-main{padding:18px 16px 52px;max-width:100%}}`}</style>

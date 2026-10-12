@@ -2986,14 +2986,54 @@ html.demo-embed .m-sample-lobby {
   align-items: center;
   justify-content: space-between;
   gap: 16px;
+  flex-wrap: wrap;
+}
+
+.m-sample-lobby__brand {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 8px;
+  text-decoration: none;
+  color: var(--m-ink, #1b1815);
+  min-width: 0;
+}
+
+.m-sample-lobby__jk {
+  font-family: 'Playfair Display', Georgia, serif;
+  font-size: 1.125rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  line-height: 1;
+}
+
+.m-sample-lobby__dot {
+  color: var(--m-gold, #c9a84c);
+}
+
+.m-sample-lobby__co {
+  font-family: 'Inter', system-ui, sans-serif;
+  font-size: 0.7rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--m-muted, #6b6560);
+  white-space: nowrap;
+}
+
+.m-sample-lobby__nav {
+  display: flex;
+  align-items: center;
+  gap: 16px;
 }
 
 .m-sample-lobby__back,
 .m-sample-lobby__home {
+  font-family: 'Inter', system-ui, sans-serif;
   font-size: 0.875rem;
   font-weight: 600;
   color: #7c5c12;
   text-decoration: none;
+  -webkit-font-smoothing: antialiased;
 }
 
 .m-sample-lobby__back:hover,
