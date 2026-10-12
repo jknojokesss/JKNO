@@ -1,7 +1,6 @@
 import { useMemo, useState } from 'react'
 import { useRouter } from 'next/router'
 import { ALL_DEMOS } from '../lib/industryDemos'
-import { SERVICE_PACKAGES } from '../lib/buildStack'
 import {
   DEMO_TRADE_FILTERS,
   STARTER_DEMOS,
