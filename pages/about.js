@@ -30,11 +30,27 @@ export default function About() {
           <p className="m-about-p">
             You get me, not a ticket queue. Nothing goes live until it matches QuickBooks.
           </p>
+          <p className="m-about-p">
+            Background is shop-floor finance — tire and auto, import, property, consignment — wired to QuickBooks Online for
+            real operating businesses in New Jersey. The samples on this site use fictitious names; live portals run on
+            owner data with the same patterns.
+          </p>
+          <p className="m-about-p m-about-p--proof">
+            <strong>Proof:</strong> Owner portals on this stack run on live QuickBooks data for real shops (tire &amp; auto,
+            import, and others in NJ). Everything labeled &ldquo;sample&rdquo; on jknojokes.com is fictitious — the layouts
+            are the same ones owners sign into daily.
+          </p>
+          <p className="m-about-p">
+            <strong>How your data is handled:</strong> QuickBooks tokens and book data stay in a private Supabase project
+            with row-level security on client tables. Portal logins are scoped server-side to one company — a user cannot
+            name or open another client&rsquo;s books. I use the service role only on the server for sync and admin tasks,
+            never in the browser bundle.
+          </p>
           <p className="m-about-p" style={{ marginBottom: '28px' }}>
-            If margin, inventory, and the P&L live in three places and never agree, that&rsquo;s what I fix.
+            If margin, inventory, and the profit-and-loss live in three places and never agree, that&rsquo;s what I fix.
           </p>
           <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
-            <button type="button" className="m-btn m-btn--primary m-btn--pop" onClick={() => router.push('/#contact')}>Get started</button>
+            <button type="button" className="m-btn m-btn--primary m-btn--pop" onClick={() => router.push('/#contact')}>Tell me what you need</button>
             <a href={BOOKING_URL} target="_blank" rel="noopener noreferrer" className="m-btn m-btn--secondary m-btn--pop">Book a call</a>
           </div>
         </div>

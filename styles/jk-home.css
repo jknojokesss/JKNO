@@ -149,26 +149,31 @@
   transform: translateY(0);
 }
 
-/* Hero — staggered entrance on first paint */
-.m-jk-home__hero--enter > * {
+/* Hero — staggered entrance (visible on SSR; animates after hydrate when --motion) */
+.m-jk-home__hero--enter:not(.m-jk-home__hero--motion) > * {
+  opacity: 1;
+  transform: none;
+}
+
+.m-jk-home__hero--enter.m-jk-home__hero--motion > * {
   opacity: 0;
   transform: translateY(22px);
   animation: m-jk-hero-piece 0.85s cubic-bezier(0.16, 0.84, 0.28, 1) forwards;
 }
 
-.m-jk-home__hero--enter > *:nth-child(1) {
+.m-jk-home__hero--enter.m-jk-home__hero--motion > *:nth-child(1) {
   animation-delay: 0.05s;
 }
 
-.m-jk-home__hero--enter > *:nth-child(2) {
+.m-jk-home__hero--enter.m-jk-home__hero--motion > *:nth-child(2) {
   animation-delay: 0.14s;
 }
 
-.m-jk-home__hero--enter > *:nth-child(3) {
+.m-jk-home__hero--enter.m-jk-home__hero--motion > *:nth-child(3) {
   animation-delay: 0.24s;
 }
 
-.m-jk-home__hero--enter > *:nth-child(4) {
+.m-jk-home__hero--enter.m-jk-home__hero--motion > *:nth-child(4) {
   animation-delay: 0.34s;
 }
 
@@ -298,9 +303,14 @@
 .m-jk-page [data-fly-in] {
   --page-fly-x: 0px;
   --page-fly-y: 44px;
+  opacity: 1;
+  transform: none;
+  will-change: transform, opacity;
+}
+
+html.jk-scroll-motion .m-jk-page [data-fly-in]:not(.is-visible) {
   opacity: 0;
   transform: translate3d(var(--page-fly-x), var(--page-fly-y), 0) scale(0.98);
-  will-change: transform, opacity;
 }
 
 .m-jk-page [data-fly-in][data-fly-lane='left'] {
@@ -365,7 +375,7 @@
   }
 }
 
-.m-jk-page [data-fly-in] .m-jk-stagger-cards .m-demo-card {
+html.jk-scroll-motion .m-jk-page [data-fly-in]:not(.is-visible) .m-jk-stagger-cards .m-demo-card {
   opacity: 0;
   transform: translateY(18px) scale(0.97);
 }
@@ -393,7 +403,7 @@
   }
 }
 
-.m-jk-page [data-fly-in] .m-jk-steps li {
+html.jk-scroll-motion .m-jk-page [data-fly-in]:not(.is-visible) .m-jk-steps li {
   opacity: 0;
   transform: translateX(-10px);
 }
@@ -553,6 +563,22 @@
   font-size: 1.02rem;
   line-height: 1.62;
   color: #475569;
+}
+
+.m-jk-steps--plain {
+  list-style: none;
+  margin: 0.75rem 0 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+  font-size: 0.95rem;
+  line-height: 1.5;
+  color: #e8e4dc;
+}
+
+.m-jk-steps--plain strong {
+  color: #fff8f0;
 }
 
 .m-jk-story__body--tight {

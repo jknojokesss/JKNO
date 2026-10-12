@@ -1,6 +1,8 @@
+import { useEffect, useState } from 'react'
 import { useRouter } from 'next/router'
 import { BOOKING_URL } from '../lib/marketing'
 import { HERO_SAMPLE_BARS } from '../lib/samplePortals'
+import { painLineForDemo } from '../lib/homeSamplePains'
 import DemoGalleryCard from './DemoGalleryCard'
 
 const STORY = {
@@ -44,10 +46,15 @@ export default function HomeLanding({
   submitting,
 }) {
   const router = useRouter()
+  const [motionOn, setMotionOn] = useState(false)
+
+  useEffect(() => {
+    setMotionOn(true)
+  }, [])
 
   return (
-    <div className="m-jk-home">
-      <header className="m-jk-home__hero m-jk-home__hero--enter" id="top">
+    <div className={`m-jk-home${motionOn ? ' m-jk-home--motion-on' : ''}`}>
+      <header className={`m-jk-home__hero m-jk-home__hero--enter${motionOn ? ' m-jk-home__hero--motion' : ''}`} id="top">
         <p className="m-jk-home__mark" aria-hidden="true">
           JK<span className="m-jk-home__mark-dot">.</span>
         </p>
@@ -70,12 +77,26 @@ export default function HomeLanding({
             className="m-jk-home__btn m-jk-home__btn--ghost"
             onClick={() => scrollTo('contact')}
           >
-            Start a build
+            Tell me what you need
           </button>
         </div>
       </header>
 
       <div className="m-jk-home__flow">
+        <section className="m-jk-home__panel m-jk-home__panel--story" id="offer">
+          <p className="m-jk-story__kicker">Two ways to work together</p>
+          <h2 className="m-jk-story__title">Portal first — books optional</h2>
+          <p className="m-jk-story__body">
+            Already have a bookkeeper? Add the portal on top of QuickBooks. Want me to do the books too? We can do both —
+            same login, same nightly sync.
+          </p>
+          <ul className="m-jk-steps m-jk-steps--plain">
+            <li><strong>Setup</strong> — connect QuickBooks and your tools, build your screens, launch on real data.</li>
+            <li><strong>Ongoing</strong> — sync keeps running; tune screens as you grow. Bookkeeping help only if you want it.</li>
+            <li><strong>Timing</strong> — most first portals land in a few weeks; exact scope comes out of the kickoff call.</li>
+          </ul>
+        </section>
+
         <section className="m-jk-home__panel m-jk-home__panel--story">
           <p className="m-jk-story__kicker">{STORY.kicker}</p>
           <h2 className="m-jk-story__title">{STORY.title}</h2>
@@ -94,7 +115,7 @@ export default function HomeLanding({
                 key={p.href}
                 href={p.href}
                 biz={p.name}
-                industry={p.industry}
+                pain={painLineForDemo(p.href)}
                 compact
               />
             ))}
@@ -106,6 +127,15 @@ export default function HomeLanding({
           >
             All samples
           </button>
+        </section>
+
+        <section className="m-jk-home__panel m-jk-home__panel--story m-jk-home__panel--proof">
+          <p className="m-jk-story__kicker">Proof</p>
+          <h2 className="m-jk-story__title">Samples are fake; the stack isn&rsquo;t</h2>
+          <p className="m-jk-story__body">
+            Live owner portals run on real QuickBooks data for NJ trades businesses. The demos here use made-up company names
+            so you can click around without a password.
+          </p>
         </section>
 
         <section className="m-jk-home__panel m-jk-home__panel--story" id="how">
