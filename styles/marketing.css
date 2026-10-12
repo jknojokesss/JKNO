@@ -2970,60 +2970,40 @@ html.demo-embed .m-sample-lobby {
 }
 
 .m-sample-lobby {
-  max-width: 420px;
+  position: sticky;
+  top: 0;
+  z-index: 20;
+  background: var(--m-paper, #f2f0ea);
+  border-bottom: 1px solid rgba(27, 24, 21, 0.08);
+  font-family: var(--m-font);
+}
+
+.m-sample-lobby__inner {
+  max-width: 1200px;
   margin: 0 auto;
-  padding: clamp(24px, 4vw, 40px) 20px;
+  padding: 10px 20px;
   display: flex;
-  flex-direction: column;
-  gap: 12px;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
 }
 
-.m-sample-lobby__top {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-  margin-bottom: 4px;
-}
-
-.m-sample-lobby__jk {
-  font-family: var(--m-serif);
-  font-size: 1.35rem;
-  color: var(--m-ink);
-  text-decoration: none;
-}
-
-.m-sample-lobby__dot {
-  color: var(--m-gold);
-}
-
-.m-sample-lobby__sells {
-  margin: 0;
-  font-size: 0.85rem;
-  line-height: 1.5;
-  color: var(--m-muted);
-}
-
-.m-sample-lobby__next-label {
-  margin: 8px 0 0;
-  font-size: 0.65rem;
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
-  color: var(--m-muted);
-}
-
-.m-sample-lobby__foot {
-  margin: 12px 0 0;
-  font-size: 0.85rem;
-  text-align: center;
-}
-
-.m-sample-lobby__foot a {
+.m-sample-lobby__back,
+.m-sample-lobby__home {
+  font-size: 0.875rem;
+  font-weight: 600;
   color: #7c5c12;
   text-decoration: none;
 }
 
-.m-sample-lobby__foot a:hover {
+.m-sample-lobby__back:hover,
+.m-sample-lobby__home:hover {
   text-decoration: underline;
+}
+
+.m-sample-lobby__home {
+  font-weight: 500;
+  color: var(--m-muted, #6b6560);
 }
 
 /* ── JK chocolate-bar sample links (legacy — prefer m-demo-card) ─────── */

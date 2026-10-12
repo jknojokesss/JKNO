@@ -1,7 +1,6 @@
 import { useState } from 'react'
 import Head from 'next/head'
 import { DEMO_UI, DEMO_HEAD, DEMO_MONO, DEMO_FONT_LINK } from '../lib/demoFonts'
-import DemoScopeBanner from '../components/DemoScopeBanner'
 import DemoLobby from '../components/DemoLobby'
 import { DEMO_EMBED_HIDE_LOBBY_CSS, getDemoEmbedServerProps } from '../lib/demoEmbed'
 
@@ -106,8 +105,7 @@ export default function NorthlineGlobal({ demoEmbed = false }) {
         }
       `}</style>
 
-      {!demoEmbed && <DemoLobby href="/northline-global" biz={BIZ} />}
-      {!demoEmbed && <DemoScopeBanner scope="import" compact />}
+      {!demoEmbed && <DemoLobby />}
 
       <div className="mobilenav">
         {NAV.map((n) => (

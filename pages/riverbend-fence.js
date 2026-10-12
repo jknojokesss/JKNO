@@ -3,7 +3,6 @@ import Head from 'next/head'
 import { useRouter } from 'next/router'
 import { isDemoEmbedQuery } from '../lib/demoEmbed'
 import { DEMO_UI, DEMO_HEAD, DEMO_FONT_LINK } from '../lib/demoFonts'
-import DemoScopeBanner from '../components/DemoScopeBanner'
 import DemoLobby from '../components/DemoLobby'
 
 /* ─── Riverbend Fence job entry portal — demo scaffold ────────────────────
@@ -1057,8 +1056,7 @@ export default function RiverbendFenceDemo() {
         @media (max-width:620px){ .qbnav{display:none} }
       `}</style>
 
-      <DemoLobby href="/riverbend-fence" biz={BIZ} />
-      <DemoScopeBanner scope="fieldJobs" compact />
+      <DemoLobby />
 
       <div className={`split show-${pane}`}>
         <div className="paneL">

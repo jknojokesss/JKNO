@@ -1,6 +1,5 @@
 import { useState, useRef, useEffect } from 'react'
 import Head from 'next/head'
-import DemoScopeBanner from '../components/DemoScopeBanner'
 import DemoLobby from '../components/DemoLobby'
 import { DEMO_EMBED_HIDE_LOBBY_CSS, getDemoEmbedServerProps } from '../lib/demoEmbed'
 
@@ -477,8 +476,7 @@ export default function Demo({ demoEmbed = false }) {
 @media(max-width:860px){.jm-shell{flex-direction:column}.jm-side{width:auto;height:auto;position:static;flex-direction:column;padding:14px 12px}.jm-nav{flex-direction:row;overflow-x:auto;gap:6px;padding-bottom:4px}.jm-navbtn{width:auto;padding:8px 15px;border-radius:18px;background:rgba(255,255,255,.07)}.jm-main{padding:18px 16px 52px;max-width:100%}}`}</style>
       </Head>
 
-      {!demoEmbed && <DemoLobby href="/demo" biz={BIZ} />}
-      {!demoEmbed && <DemoScopeBanner scope="consignment" compact />}
+      {!demoEmbed && <DemoLobby />}
 
       <div className="jm-shell" id={demoEmbed ? 'jk-embed-app' : undefined}>
         {/* Sidebar */}
