@@ -5,7 +5,7 @@ const DESKTOP_W = 1120
 const DESKTOP_H = 700
 const MOBILE_BREAK = 768
 
-export default function DemoPreview({ demos, onMoreDemos }) {
+export default function DemoPreview({ demos, onMoreDemos, showHead = true }) {
   const [activeDemo, setActiveDemo] = useState(0)
   const [demoReady, setDemoReady] = useState(false)
   const [isMobile, setIsMobile] = useState(false)
@@ -48,10 +48,12 @@ export default function DemoPreview({ demos, onMoreDemos }) {
 
   return (
     <>
-      <div className="m-demo-head">
-        <p className="m-demo-head__title">Pick one. Poke around.</p>
-        <p className="m-demo-head__sub">Real dashboards. Sample data, no login.</p>
-      </div>
+      {showHead && (
+        <div className="m-demo-head">
+          <p className="m-demo-head__title">Pick one. Poke around.</p>
+          <p className="m-demo-head__sub">Real dashboards. Sample data, no login.</p>
+        </div>
+      )}
 
       <div id="demos" className="m-demo-pills">
         {demos.map((d, idx) => (

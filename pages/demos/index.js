@@ -4,7 +4,6 @@ import { BOOKING_URL } from '../../lib/marketing'
 import { ALL_DEMOS } from '../../lib/industryDemos'
 import { SERVICE_PACKAGES } from '../../lib/buildStack'
 import DemoGalleryCard from '../../components/DemoGalleryCard'
-import ChocolateBarLink, { ChocolateBarCaption } from '../../components/ChocolateBarLink'
 
 export default function DemoGallery() {
   const router = useRouter()
@@ -14,8 +13,8 @@ export default function DemoGallery() {
       description="Clickable sample portals for trades, retail, and distribution — fictitious data, real screen patterns on QuickBooks."
     >
       <PageHero
-        kicker={`${ALL_DEMOS.length} doors · no login`}
-        title={<>Pick a door.</>}
+        kicker={`${ALL_DEMOS.length} samples · no login`}
+        title={<>Open a sample.</>}
         lead="Fictitious companies, real layouts. One screen should make you reach for your phone — that&rsquo;s the meeting."
         align="center"
       />
@@ -26,7 +25,7 @@ export default function DemoGallery() {
       >
         <div className="m-wrap m-ship-intro__inner">
           <p className="m-ship-hook">
-            Kickoff to login in about <strong>six days</strong> — same pipe on every build.
+            Same pipe on every build — <strong>short scope</strong>, your login when it&rsquo;s right.
           </p>
           <ul className="m-ship-chain" aria-label="How a build ships">
             <li>
@@ -44,25 +43,24 @@ export default function DemoGallery() {
           </ul>
           <button
             type="button"
-            className="m-ship-intro__more m-btn--text"
+            className="m-ship-intro__more m-jk-text-link"
             onClick={() => router.push('/how-it-works')}
           >
-            Full timeline
+            How it works
           </button>
         </div>
       </section>
 
       <section className="m-section" style={{ paddingTop: 0 }}>
         <div className="m-wrap">
-          <ChocolateBarCaption>Four flavors</ChocolateBarCaption>
-          <div className="jk-choc-grid jk-choc-grid--tight">
+          <p className="m-kicker" style={{ marginBottom: 12 }}>Packages</p>
+          <div className="m-demo-grid">
             {SERVICE_PACKAGES.map((p) => (
-              <ChocolateBarLink
+              <DemoGalleryCard
                 key={p.title}
                 href={p.href}
-                name={p.title}
+                biz={p.title}
                 industry={p.blurb}
-                wide
               />
             ))}
           </div>
@@ -71,14 +69,15 @@ export default function DemoGallery() {
 
       <section className="m-section" style={{ paddingTop: 'clamp(32px,4vw,48px)' }}>
         <div className="m-wrap">
-          <ChocolateBarCaption>Full box</ChocolateBarCaption>
-          <div className="jk-choc-grid jk-choc-grid--gallery">
+          <p className="m-kicker" style={{ marginBottom: 12 }}>All samples</p>
+          <div className="m-demo-grid m-demo-grid--gallery">
             {ALL_DEMOS.map((d) => (
               <DemoGalleryCard
                 key={d.href}
                 href={d.href}
                 biz={d.biz}
                 industry={d.industry}
+                compact
               />
             ))}
           </div>

@@ -1,9 +1,19 @@
+import { useRouter } from 'next/router'
+import { isDemoEmbedQuery } from '../lib/demoEmbed'
 import { DEMO_SCOPES } from '../lib/demoScope'
 
 const mono = "'IBM Plex Mono', ui-monospace, monospace"
 const sans = "'Inter', system-ui, sans-serif"
 
-export default function DemoScopeBanner({ scope = 'template', compact = false }) {
+export default function DemoScopeBanner({ scope = 'template', compact = false, suppress = false }) {
+  const router = useRouter()
+  if (suppress) return null
+  const embedded =
+    (typeof window !== 'undefined' && /[?&]embed=(?:1|true)(?:&|$)/.test(window.location.search))
+    || router.asPath.includes('embed=1')
+    || (router.isReady && isDemoEmbedQuery(router.query))
+  if (embedded) return null
+
   const copy = DEMO_SCOPES[scope] || DEMO_SCOPES.template
 
   if (compact) {

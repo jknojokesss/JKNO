@@ -1,4 +1,4 @@
-import { resolveLoginDestination } from '../../lib/loginDestinations'
+import { resolveLoginDestination, signInOnLoginPage } from '../../lib/loginDestinations'
 
 // Tells /login which sign-in screen an email belongs to. Routing only — it
 // authenticates nobody and returns nothing about the account itself.
@@ -16,9 +16,9 @@ export default async function handler(req, res) {
 
   try {
     const url = await resolveLoginDestination(email)
-    return res.status(200).json({ url })
+    return res.status(200).json({ url, signInHere: signInOnLoginPage(url) })
   } catch {
     // Never fail in a way that tells the caller something about the email.
-    return res.status(200).json({ url: '/portal' })
+    return res.status(200).json({ url: '/portal', signInHere: true })
   }
 }

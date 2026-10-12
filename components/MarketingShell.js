@@ -4,6 +4,7 @@ import { useRouter } from 'next/router'
 import Head from 'next/head'
 import { BOOKING_URL, MARKETING_FONTS, NAV_LINKS } from '../lib/marketing'
 import MarketingFlightChrome from './MarketingFlightChrome'
+import MarketingJKChrome from './MarketingJKChrome'
 
 export function MarketingLogo({ size = 26, tagline = true, onClick, light = false }) {
   const inner = (
@@ -32,7 +33,9 @@ export default function MarketingShell({
   padTop = true,
   darkHeader = false,
   flightHome = false,
-  flightTheme = true,
+  marketingHome = false,
+  jkTheme = true,
+  flightTheme = false,
 }) {
   const router = useRouter()
   const flightPageRef = useRef(null)
@@ -42,8 +45,13 @@ export default function MarketingShell({
   const [isMobile, setIsMobile] = useState(false)
 
   const chromeFlight = flightTheme || flightHome
-  const showPageChrome = flightTheme && !flightHome
-  const onHomeHero = flightHome || (chromeFlight && !flightHome) || (darkHeader && onDarkHero && !menuOpen)
+  const useJK = jkTheme && !flightTheme && !flightHome
+  const showFlightChrome = flightTheme && !flightHome
+  const showJKChrome = useJK
+  const showPageChrome = showFlightChrome || useJK
+  const onHomeHero = useJK
+    ? !scrolled && !menuOpen
+    : marketingHome || flightHome || (chromeFlight && !flightHome) || (darkHeader && onDarkHero && !menuOpen)
 
   useScrollFlyIn(flightPageRef, showPageChrome, router.pathname)
 
@@ -55,12 +63,13 @@ export default function MarketingShell({
   useEffect(() => {
     const onScroll = () => {
       setScrolled(window.scrollY > 8)
-      if (router.pathname === '/' && !flightHome) setOnDarkHero(window.scrollY < 720)
+      if (router.pathname === '/' && !flightHome && !marketingHome) setOnDarkHero(window.scrollY < 720)
+      if (router.pathname === '/' && marketingHome) setOnDarkHero(window.scrollY < 640)
     }
     onScroll()
     window.addEventListener('scroll', onScroll)
     return () => window.removeEventListener('scroll', onScroll)
-  }, [router.pathname, flightHome])
+  }, [router.pathname, flightHome, marketingHome])
 
   useEffect(() => {
     const checkMobile = () => setIsMobile(window.innerWidth < 900)
@@ -96,7 +105,13 @@ export default function MarketingShell({
   }
 
   return (
-    <div className={chromeFlight ? 'marketing-site marketing-site--flight' : 'marketing-site'}>
+    <div
+      className={[
+        'marketing-site',
+        chromeFlight ? 'marketing-site--flight' : '',
+        useJK ? 'marketing-site--jk' : '',
+      ].filter(Boolean).join(' ')}
+    >
       <Head>
         {title && <title>{title}</title>}
         {description && <meta name="description" content={description} />}
@@ -110,7 +125,7 @@ export default function MarketingShell({
       </Head>
 
       <header
-        className={`m-header${chromeFlight ? ' m-header--flight' : ''}${onHomeHero ? ' m-header--hero' : ''}${!onHomeHero && (scrolled || menuOpen) ? ' is-solid' : ''}${menuOpen ? ' is-menu-open' : ''}${onHomeHero || chromeFlight ? ' m-header--dark' : ''}`}
+        className={`m-header${chromeFlight ? ' m-header--flight' : ''}${useJK ? ' m-header--jk' : ''}${onHomeHero ? ' m-header--hero' : ''}${(scrolled || menuOpen) && (useJK || !onHomeHero) ? ' is-solid' : ''}${menuOpen ? ' is-menu-open' : ''}${onHomeHero || chromeFlight ? ' m-header--dark' : ''}`}
       >
         <div className="m-wrap m-header__inner">
           <MarketingLogo light={onHomeHero || chromeFlight} onClick={() => { setMenuOpen(false); router.push('/') }} />
@@ -151,34 +166,35 @@ export default function MarketingShell({
         </div>
       )}
 
-      {showPageChrome ? <MarketingFlightChrome /> : null}
+      {showFlightChrome ? <MarketingFlightChrome /> : null}
+      {showJKChrome ? <MarketingJKChrome /> : null}
       <div
         ref={flightPageRef}
-        className={showPageChrome ? 'm-flight-page' : undefined}
-        style={{ paddingTop: padTop && !flightHome ? '68px' : 0 }}
+        className={showPageChrome ? (showFlightChrome ? 'm-flight-page' : 'm-jk-page') : undefined}
+        style={{ paddingTop: padTop && !flightHome && !marketingHome ? '68px' : 0 }}
       >
         {children}
       </div>
 
       <footer
-        className={chromeFlight ? 'm-footer-flight' : ''}
+        className={chromeFlight || marketingHome || useJK ? 'm-footer-flight' : ''}
         style={{
           padding: '48px 0 40px',
-          borderTop: chromeFlight ? undefined : '1px solid #DFE4EC',
-          background: chromeFlight ? undefined : '#fff',
-          position: chromeFlight ? 'relative' : undefined,
-          zIndex: chromeFlight ? 1 : undefined,
+          borderTop: chromeFlight || marketingHome || useJK ? undefined : '1px solid #DFE4EC',
+          background: chromeFlight || marketingHome || useJK ? undefined : '#fff',
+          position: chromeFlight || marketingHome || useJK ? 'relative' : undefined,
+          zIndex: chromeFlight || marketingHome || useJK ? 1 : undefined,
         }}
       >
         <div className="m-wrap" style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'space-between', gap: '32px', alignItems: 'flex-start' }}>
           <div>
-            <MarketingLogo size={22} tagline={false} light={chromeFlight} onClick={() => router.push('/')} />
+            <MarketingLogo size={22} tagline={false} light={chromeFlight || marketingHome || useJK} onClick={() => router.push('/')} />
             <p
-              className={chromeFlight ? 'm-footer-flight__blurb' : ''}
+              className={chromeFlight || useJK ? 'm-footer-flight__blurb' : ''}
               style={{
                 marginTop: '12px',
                 fontSize: '14px',
-                color: chromeFlight ? undefined : '#5A6577',
+                color: chromeFlight || useJK ? undefined : '#5A6577',
                 maxWidth: '300px',
                 lineHeight: 1.65,
               }}

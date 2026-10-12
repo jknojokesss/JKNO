@@ -49,7 +49,7 @@ export default function CloverSync() {
       <div style={{ minHeight: '100vh', background: '#F8F8F8', fontFamily: 'DM Mono, monospace', padding: '40px' }}>
         <div style={{ maxWidth: '640px', margin: '0 auto' }}>
 
-          <button onClick={() => router.push('/dashboard')}
+          <button onClick={() => router.push('/admin/dashboard')}
             style={{ background: 'none', border: 'none', color: '#888', fontSize: '11px', cursor: 'pointer', marginBottom: '20px', fontFamily: 'DM Mono, monospace' }}>
             ← Dashboard
           </button>
