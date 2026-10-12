@@ -32,13 +32,12 @@ export default function About() {
           </p>
           <p className="m-about-p">
             Background is shop-floor finance — tire and auto, import, property, consignment — wired to QuickBooks Online for
-            real operating businesses in New Jersey. The samples on this site use fictitious names; live portals run on
-            owner data with the same patterns.
+            real operating businesses. The samples on this site use fictitious names; live portals run on owner data with
+            the same patterns.
           </p>
           <p className="m-about-p m-about-p--proof">
-            <strong>Proof:</strong> Owner portals on this stack run on live QuickBooks data for real shops (tire &amp; auto,
-            import, and others in NJ). Everything labeled &ldquo;sample&rdquo; on jknojokes.com is fictitious — the layouts
-            are the same ones owners sign into daily.
+            <strong>References:</strong> Ask on a call — I can point you at owners already on this stack. Public demos are
+            fictitious; I don&rsquo;t post quotes here without permission.
           </p>
           <p className="m-about-p">
             <strong>How your data is handled:</strong> QuickBooks tokens and book data stay in a private Supabase project

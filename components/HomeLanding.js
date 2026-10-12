@@ -94,6 +94,7 @@ export default function HomeLanding({
             <li><strong>Setup</strong> — connect QuickBooks and your tools, build your screens, launch on real data.</li>
             <li><strong>Ongoing</strong> — sync keeps running; tune screens as you grow. Bookkeeping help only if you want it.</li>
             <li><strong>Timing</strong> — most first portals land in a few weeks; exact scope comes out of the kickoff call.</li>
+            <li><strong>Pricing</strong> — flat setup quote after kickoff (in writing before build starts). Many first portals land in the <strong>$12k–$28k</strong> setup range depending on integrations; optional monthly support is quoted separately.</li>
           </ul>
         </section>
 
@@ -130,11 +131,12 @@ export default function HomeLanding({
         </section>
 
         <section className="m-jk-home__panel m-jk-home__panel--story m-jk-home__panel--proof">
-          <p className="m-jk-story__kicker">Proof</p>
-          <h2 className="m-jk-story__title">Samples are fake; the stack isn&rsquo;t</h2>
+          <p className="m-jk-story__kicker">References</p>
+          <h2 className="m-jk-story__title">Samples here are fake — ask for a real one</h2>
           <p className="m-jk-story__body">
-            Live owner portals run on real QuickBooks data for NJ trades businesses. The demos here use made-up company names
-            so you can click around without a password.
+            Every demo on this site uses a made-up company so you can click around without a password. I don&rsquo;t put
+            client testimonials on a public page without permission — on a kickoff call I can share references from owners
+            already using this on their books.
           </p>
         </section>
 
