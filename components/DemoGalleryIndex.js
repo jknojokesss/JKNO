@@ -62,7 +62,7 @@ export default function DemoGalleryIndex() {
         <div className="m-wrap">
           <p className="m-kicker" style={{ marginBottom: 12 }}>Start here</p>
           <p className="m-about-p" style={{ marginTop: 0, marginBottom: 16, maxWidth: '42rem' }}>
-            Four samples owners usually open first — each answers one money question in plain language.
+            Four common builds — each opens a sample shop that answers one money question. Pick what sounds like you.
           </p>
           <div className="m-demo-grid m-demo-grid--gallery">
             {STARTER_DEMOS.map((s) => {
@@ -73,27 +73,11 @@ export default function DemoGalleryIndex() {
                   key={s.href}
                   href={s.href}
                   biz={row.biz}
-                  pain={s.pain}
+                  pain={s.pain || painLineForDemo(s.href)}
                   compact
                 />
               )
             })}
-          </div>
-        </div>
-      </section>
-
-      <section className="m-section" style={{ paddingTop: 'clamp(24px,3vw,36px)' }}>
-        <div className="m-wrap">
-          <p className="m-kicker" style={{ marginBottom: 12 }}>Packages</p>
-          <div className="m-demo-grid">
-            {SERVICE_PACKAGES.map((p) => (
-              <DemoGalleryCard
-                key={p.title}
-                href={p.href}
-                biz={p.title}
-                industry={p.blurb}
-              />
-            ))}
           </div>
         </div>
       </section>
