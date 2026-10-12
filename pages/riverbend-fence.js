@@ -2,7 +2,8 @@ import { useState, useEffect, useMemo, useRef } from 'react'
 import Head from 'next/head'
 import { useRouter } from 'next/router'
 import { isDemoEmbedQuery } from '../lib/demoEmbed'
-import { DEMO_UI, DEMO_HEAD, DEMO_FONT_LINK } from '../lib/demoFonts'
+import DemoFontLinks from '../components/DemoFontLinks'
+import { DEMO_RENDER_HINTS, DEMO_UI, DEMO_HEAD } from '../lib/demoFonts'
 import DemoLobby from '../components/DemoLobby'
 
 /* ─── Riverbend Fence job entry portal — demo scaffold ────────────────────
@@ -1030,12 +1031,12 @@ export default function RiverbendFenceDemo() {
       <Head>
         <title>{`${BIZ} — job entry portal`}</title>
         <meta name="viewport" content="width=device-width, initial-scale=1" />
-        <link rel="preconnect" href="https://fonts.googleapis.com" />
-        <link href={DEMO_FONT_LINK} rel="stylesheet" />
+        <DemoFontLinks />
       </Head>
       <style>{`
         *{box-sizing:border-box;margin:0;padding:0}
-        body{font-family:${ui};background:${BG};color:${INK};-webkit-font-smoothing:antialiased}
+        ${DEMO_RENDER_HINTS}
+        body{font-family:${ui};background:${BG};color:${INK}}
         input,select,textarea,button{font-family:${ui}}
         input:focus,select:focus,textarea:focus{border-color:${INK}!important}
         .num{font-variant-numeric:tabular-nums}

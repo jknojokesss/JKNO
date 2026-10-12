@@ -3,7 +3,9 @@ import Head from 'next/head'
 import { useRouter } from 'next/router'
 import { isDemoEmbedQuery } from '../lib/demoEmbed'
 import { PHONE_DEMO_MSG, isPhoneDemoUrl } from '../lib/phoneDemoPostMessage'
+import DemoFontLinks from '../components/DemoFontLinks'
 import DemoLobby from '../components/DemoLobby'
+import { DEMO_HEAD, DEMO_MONO, DEMO_RENDER_HINTS, DEMO_UI } from '../lib/demoFonts'
 
 const BIZ = 'Riverside Tires'
 const THEME = { side: '#1E1C19', border: '#33302B', accent: '#B0281C', content: '#F2F0EA' }
@@ -18,11 +20,10 @@ const C = {
   red: '#B0281C',
   green: '#1C7A4E',
 }
-const head = "'Barlow Semi Condensed', sans-serif"
-const ui = "'Inter', sans-serif"
-const mono = "'IBM Plex Mono', monospace"
-const FONT =
-  'https://fonts.googleapis.com/css2?family=Barlow+Semi+Condensed:wght@500;600;700&family=IBM+Plex+Mono:wght@400;500;600&family=Inter:wght@400;500;600&display=swap'
+
+const head = DEMO_HEAD
+const ui = DEMO_UI
+const mono = DEMO_MONO
 
 const fmtC = (n) =>
   new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(n)
@@ -545,12 +546,13 @@ export default function RiversideTires() {
       <Head>
         <title>{BIZ} — Sample portal</title>
         <meta name="viewport" content="width=device-width, initial-scale=1" />
-        <link href={FONT} rel="stylesheet" />
+        <DemoFontLinks />
       </Head>
       <style>{`
         *{box-sizing:border-box;margin:0;padding:0}
+        ${DEMO_RENDER_HINTS}
         html.rt-phone-embed,body.rt-phone-embed{height:100%;overflow:hidden}
-        body{font-family:${ui};background:${C.paper};color:${C.ink};font-variant-numeric:tabular-nums}
+        body{font-family:${ui};background:${C.paper};color:${C.ink}}
         .rt-shell{display:flex;min-height:100vh;align-items:stretch;background:${C.paper}}
         .rt-side{width:214px;flex-shrink:0;background:${THEME.side};box-shadow:inset -3px 0 0 ${THEME.accent};display:flex;flex-direction:column;padding:20px 12px;position:sticky;top:0;height:100vh}
         .rt-nav{display:flex;flex-direction:column;gap:2px;flex:1}

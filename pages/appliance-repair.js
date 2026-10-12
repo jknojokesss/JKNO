@@ -1,6 +1,8 @@
 import { useState, Fragment } from 'react'
 import Head from 'next/head'
+import DemoFontLinks from '../components/DemoFontLinks'
 import DemoLobby from '../components/DemoLobby'
+import { DEMO_HEAD, DEMO_MONO, DEMO_RENDER_HINTS, DEMO_UI } from '../lib/demoFonts'
 
 // ─────────────────────────────────────────────────────────────────────────
 // Bespoke sample dashboard for an appliance-repair business. Front page is a
@@ -85,34 +87,33 @@ export default function ApplianceRepair() {
   }
 
   const tabs = [{ id: 'jobs', label: 'Jobs' }, { id: 'techs', label: 'Techs' }, { id: 'financials', label: 'Financials' }]
-  const serif = { fontFamily: 'Cormorant Garamond, serif' }
-  const lbl = { fontFamily: 'DM Mono, monospace', fontSize: '9px', letterSpacing: '1.5px', color: FAINT }
+  const serif = { fontFamily: DEMO_HEAD }
+  const lbl = { fontFamily: DEMO_MONO, fontSize: '9px', letterSpacing: '1.5px', color: FAINT }
   const card = { background: CARD, border: '1px solid #DDE3EA', borderRadius: '6px', padding: '16px' }
-  const th = { fontFamily: 'DM Mono, monospace', fontSize: '8px', letterSpacing: '1px', color: FAINT, textAlign: 'left', padding: '8px 10px', borderBottom: '1px solid #E2E7ED' }
+  const th = { fontFamily: DEMO_MONO, fontSize: '8px', letterSpacing: '1px', color: FAINT, textAlign: 'left', padding: '8px 10px', borderBottom: '1px solid #E2E7ED' }
   const td = { fontSize: '12px', color: INK, padding: '9px 10px', borderBottom: '1px solid #EEF1F5', verticalAlign: 'top' }
-  const inp = { width: '100%', padding: '9px 10px', fontSize: '13px', fontFamily: "'DM Sans',sans-serif", border: '1px solid #CFD8E2', borderRadius: '5px', background: '#fff', color: INK, outline: 'none' }
-  const inpSm = { padding: '8px 9px', fontSize: '12px', fontFamily: "'DM Sans',sans-serif", border: '1px solid #CFD8E2', borderRadius: '5px', background: '#fff', color: INK, outline: 'none' }
+  const inp = { width: '100%', padding: '9px 10px', fontSize: '13px', fontFamily: DEMO_UI, border: '1px solid #CFD8E2', borderRadius: '5px', background: '#fff', color: INK, outline: 'none' }
+  const inpSm = { padding: '8px 9px', fontSize: '12px', fontFamily: DEMO_UI, border: '1px solid #CFD8E2', borderRadius: '5px', background: '#fff', color: INK, outline: 'none' }
 
   const Kpi = ({ k, v, sub, color }) => (
     <div style={{ ...card, flex: 1, minWidth: '150px' }}>
       <div style={lbl}>{k}</div>
       <div style={{ ...serif, fontSize: '26px', fontWeight: 600, color: INK, lineHeight: 1.1, marginTop: '4px' }}>{v}</div>
-      {sub && <div style={{ fontFamily: 'DM Mono, monospace', fontSize: '10px', color: color || MUTED, marginTop: '4px' }}>{sub}</div>}
+      {sub && <div style={{ fontFamily: DEMO_MONO, fontSize: '10px', color: color || MUTED, marginTop: '4px' }}>{sub}</div>}
     </div>
   )
-  const Badge = ({ s }) => { const [bg, fg, t] = STATUS[s]; return <span style={{ background: bg, color: fg, fontFamily: 'DM Mono, monospace', fontSize: '10px', padding: '2px 8px', borderRadius: '3px', whiteSpace: 'nowrap' }}>{t}</span> }
+  const Badge = ({ s }) => { const [bg, fg, t] = STATUS[s]; return <span style={{ background: bg, color: fg, fontFamily: DEMO_MONO, fontSize: '10px', padding: '2px 8px', borderRadius: '3px', whiteSpace: 'nowrap' }}>{t}</span> }
 
   return (
     <>
       <Head>
         <title>{BIZ} — Job Dashboard Demo</title>
         <meta name="viewport" content="width=device-width, initial-scale=1" />
-        <link rel="preconnect" href="https://fonts.googleapis.com" />
-        <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=DM+Sans:wght@300;400;500&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet" />
-        <style>{`@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600;700&family=DM+Sans:wght@300;400;500&family=DM+Mono:wght@400;500&display=swap');*{box-sizing:border-box;margin:0;padding:0}body{background:${BG};font-family:'DM Sans',sans-serif}::placeholder{color:#A8B2BE}
+        <DemoFontLinks />
+        <style>{`*{box-sizing:border-box;margin:0;padding:0}${DEMO_RENDER_HINTS}body{background:${BG};font-family:${DEMO_UI}}::placeholder{color:#A8B2BE}
           .ar-shell{display:flex;min-height:100vh}
           .ar-side{width:200px;flex-shrink:0;background:${DARK};display:flex;flex-direction:column;padding:20px 12px;position:sticky;top:0;height:100vh;overflow-y:auto}
-          .ar-nav-btn{display:block;width:100%;text-align:left;padding:9px 12px;border-radius:6px;border:none;background:transparent;color:#6A7A88;font-family:'DM Sans',sans-serif;font-size:13px;cursor:pointer;margin-bottom:2px}
+          .ar-nav-btn{display:block;width:100%;text-align:left;padding:9px 12px;border-radius:6px;border:none;background:transparent;color:#6A7A88;font-family:${DEMO_UI};font-size:13px;cursor:pointer;margin-bottom:2px}
           .ar-nav-btn:hover{background:rgba(255,255,255,.06);color:#ccc}
           .ar-nav-btn.on{background:rgba(255,255,255,.09);color:#fff;box-shadow:inset 3px 0 0 ${ORANGE}}
           .ar-main{flex:1;min-width:0;padding:28px 28px 60px}
@@ -124,8 +125,8 @@ export default function ApplianceRepair() {
       <div className="ar-shell">
         <aside className="ar-side">
           <div style={{ paddingBottom: '20px' }}>
-            <div style={{ fontFamily: 'Cormorant Garamond, serif', fontSize: '16px', fontWeight: 600, color: '#fff', lineHeight: 1.2 }}>Riverside<br />Appliance</div>
-            <div style={{ fontFamily: 'DM Mono, monospace', fontSize: '9px', color: ORANGE, letterSpacing: '.18em', marginTop: '4px' }}>REPAIR</div>
+            <div style={{ fontFamily: DEMO_HEAD, fontSize: '16px', fontWeight: 600, color: '#fff', lineHeight: 1.2 }}>Riverside<br />Appliance</div>
+            <div style={{ fontFamily: DEMO_MONO, fontSize: '9px', color: ORANGE, letterSpacing: '.18em', marginTop: '4px' }}>REPAIR</div>
           </div>
           <nav style={{ flex: 1 }}>
             {tabs.map(t => (
@@ -144,7 +145,7 @@ export default function ApplianceRepair() {
           <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:'24px', flexWrap:'wrap', gap:'8px' }}>
             <div>
               <div style={{ fontFamily:'DM Mono, monospace', fontSize:'9px', color:FAINT, letterSpacing:'.1em', textTransform:'uppercase', marginBottom:'3px' }}>September 2026</div>
-              <div style={{ fontFamily:'Cormorant Garamond, serif', fontSize:'22px', fontWeight:600, color:INK }}>{tabs.find(t=>t.id===tab)?.label || 'Dashboard'}</div>
+              <div style={{ fontFamily: DEMO_HEAD, fontSize:'22px', fontWeight:600, color:INK }}>{tabs.find(t=>t.id===tab)?.label || 'Dashboard'}</div>
             </div>
             <div style={{ fontFamily:'DM Mono, monospace', fontSize:'10px', color:FAINT, background:'#EEF1F5', padding:'5px 12px', borderRadius:'20px' }}>Sample · JK No Jokes</div>
           </div>

@@ -1,7 +1,9 @@
 import { useState, Fragment } from 'react'
 import Head from 'next/head'
+import DemoFontLinks from '../components/DemoFontLinks'
 import DemoLobby from '../components/DemoLobby'
 import DemoBooksPanel from '../components/DemoBooksPanel'
+import { DEMO_HEAD, DEMO_MONO, DEMO_RENDER_HINTS, DEMO_UI } from '../lib/demoFonts'
 
 // ─────────────────────────────────────────────────────────────────────────
 // Bespoke sample dashboard for an SBA loan broker. Front page = lead pipeline
@@ -60,33 +62,32 @@ export default function SbaLending() {
   const addFee = () => { if (!ff.amount) return; setFees([{ id: Date.now(), source: ff.source || 'Fee', date: ff.date || new Date().toISOString().slice(0, 10), amount: Number(ff.amount) }, ...fees]); setFf({ source: '', amount: '', date: '' }); setAddingFee(false) }
 
   const tabs = [{ id: 'leads', label: 'Leads' }, { id: 'deals', label: 'Deals' }, { id: 'financials', label: 'Fees & books' }]
-  const serif = { fontFamily: 'Cormorant Garamond, serif' }
-  const lbl = { fontFamily: 'DM Mono, monospace', fontSize: '9px', letterSpacing: '1.5px', color: FAINT }
+  const serif = { fontFamily: DEMO_HEAD }
+  const lbl = { fontFamily: DEMO_MONO, fontSize: '9px', letterSpacing: '1.5px', color: FAINT }
   const card = { background: CARD, border: '1px solid #DCE3EB', borderRadius: '6px', padding: '16px' }
-  const th = { fontFamily: 'DM Mono, monospace', fontSize: '8px', letterSpacing: '1px', color: FAINT, textAlign: 'left', padding: '8px 10px', borderBottom: '1px solid #E2E8EF' }
+  const th = { fontFamily: DEMO_MONO, fontSize: '8px', letterSpacing: '1px', color: FAINT, textAlign: 'left', padding: '8px 10px', borderBottom: '1px solid #E2E8EF' }
   const td = { fontSize: '12px', color: INK, padding: '9px 10px', borderBottom: '1px solid #EEF2F6', verticalAlign: 'top' }
-  const inp = { width: '100%', padding: '9px 10px', fontSize: '13px', fontFamily: "'DM Sans',sans-serif", border: '1px solid #CCD6E0', borderRadius: '5px', background: '#fff', color: INK, outline: 'none' }
+  const inp = { width: '100%', padding: '9px 10px', fontSize: '13px', fontFamily: DEMO_UI, border: '1px solid #CCD6E0', borderRadius: '5px', background: '#fff', color: INK, outline: 'none' }
 
   const Kpi = ({ k, v, sub, color }) => (
     <div style={{ ...card, flex: 1, minWidth: '150px' }}>
       <div style={lbl}>{k}</div>
       <div style={{ ...serif, fontSize: '26px', fontWeight: 600, color: INK, lineHeight: 1.1, marginTop: '4px' }}>{v}</div>
-      {sub && <div style={{ fontFamily: 'DM Mono, monospace', fontSize: '10px', color: color || MUTED, marginTop: '4px' }}>{sub}</div>}
+      {sub && <div style={{ fontFamily: DEMO_MONO, fontSize: '10px', color: color || MUTED, marginTop: '4px' }}>{sub}</div>}
     </div>
   )
-  const addBtn = (on, setOn) => ({ background: on ? '#E2E8EF' : GREEN, color: on ? MUTED : '#fff', border: 'none', borderRadius: '5px', padding: '9px 14px', fontFamily: 'DM Mono, monospace', fontSize: '11px', letterSpacing: '1px', cursor: 'pointer' })
+  const addBtn = (on, setOn) => ({ background: on ? '#E2E8EF' : GREEN, color: on ? MUTED : '#fff', border: 'none', borderRadius: '5px', padding: '9px 14px', fontFamily: DEMO_MONO, fontSize: '11px', letterSpacing: '1px', cursor: 'pointer' })
 
   return (
     <>
       <Head>
         <title>{BIZ} — Pipeline Dashboard Demo</title>
         <meta name="viewport" content="width=device-width, initial-scale=1" />
-        <link rel="preconnect" href="https://fonts.googleapis.com" />
-        <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=DM+Sans:wght@300;400;500&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet" />
-        <style>{`@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600;700&family=DM+Sans:wght@300;400;500&family=DM+Mono:wght@400;500&display=swap');*{box-sizing:border-box;margin:0;padding:0}body{background:${BG};font-family:'DM Sans',sans-serif}::placeholder{color:#A7B2BD}
+        <DemoFontLinks />
+        <style>{`*{box-sizing:border-box;margin:0;padding:0}${DEMO_RENDER_HINTS}body{background:${BG};font-family:${DEMO_UI}}::placeholder{color:#A7B2BD}
           .sb-shell{display:flex;min-height:100vh}
           .sb-side{width:200px;flex-shrink:0;background:${DARK};display:flex;flex-direction:column;padding:20px 12px;position:sticky;top:0;height:100vh;overflow-y:auto}
-          .sb-nav-btn{display:block;width:100%;text-align:left;padding:9px 12px;border-radius:6px;border:none;background:transparent;color:#5A7080;font-family:'DM Sans',sans-serif;font-size:13px;cursor:pointer;margin-bottom:2px}
+          .sb-nav-btn{display:block;width:100%;text-align:left;padding:9px 12px;border-radius:6px;border:none;background:transparent;color:#5A7080;font-family:${DEMO_UI};font-size:13px;cursor:pointer;margin-bottom:2px}
           .sb-nav-btn:hover{background:rgba(255,255,255,.06);color:#ccc}
           .sb-nav-btn.on{background:rgba(255,255,255,.09);color:#fff;box-shadow:inset 3px 0 0 ${GREEN}}
           .sb-main{flex:1;min-width:0;padding:28px 28px 60px}
@@ -98,8 +99,8 @@ export default function SbaLending() {
       <div className="sb-shell">
         <aside className="sb-side">
           <div style={{ paddingBottom: '20px' }}>
-            <div style={{ fontFamily: 'Cormorant Garamond, serif', fontSize: '16px', fontWeight: 600, color: '#fff', lineHeight: 1.2 }}>Riverbank<br />Funding</div>
-            <div style={{ fontFamily: 'DM Mono, monospace', fontSize: '9px', color: '#4A9FD4', letterSpacing: '.18em', marginTop: '4px' }}>LOAN DASHBOARD</div>
+            <div style={{ fontFamily: DEMO_HEAD, fontSize: '16px', fontWeight: 600, color: '#fff', lineHeight: 1.2 }}>Riverbank<br />Funding</div>
+            <div style={{ fontFamily: DEMO_MONO, fontSize: '9px', color: '#4A9FD4', letterSpacing: '.18em', marginTop: '4px' }}>LOAN DASHBOARD</div>
           </div>
           <nav style={{ flex: 1 }}>
             {tabs.map(t => (
@@ -107,10 +108,10 @@ export default function SbaLending() {
             ))}
           </nav>
           <div style={{ borderTop: '1px solid #1E3248', paddingTop: '14px', marginTop: '8px' }}>
-            <div style={{ fontFamily: 'DM Mono, monospace', fontSize: '9px', color: '#304A60', lineHeight: 1.6 }}>
+            <div style={{ fontFamily: DEMO_MONO, fontSize: '9px', color: '#304A60', lineHeight: 1.6 }}>
               SAMPLE DASHBOARD<br /><span style={{ color: GREEN }}>JK No Jokes Financials</span>
             </div>
-            <a href={BOOK} target="_blank" rel="noopener noreferrer" style={{ display: 'inline-block', marginTop: '10px', background: GREEN, color: '#fff', textDecoration: 'none', borderRadius: '5px', padding: '7px 12px', fontFamily: 'DM Mono, monospace', fontSize: '10px', letterSpacing: '1px' }}>BUILT BY JK →</a>
+            <a href={BOOK} target="_blank" rel="noopener noreferrer" style={{ display: 'inline-block', marginTop: '10px', background: GREEN, color: '#fff', textDecoration: 'none', borderRadius: '5px', padding: '7px 12px', fontFamily: DEMO_MONO, fontSize: '10px', letterSpacing: '1px' }}>BUILT BY JK →</a>
           </div>
         </aside>
 
@@ -118,7 +119,7 @@ export default function SbaLending() {
           <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:'24px', flexWrap:'wrap', gap:'8px' }}>
             <div>
               <div style={{ fontFamily:'DM Mono, monospace', fontSize:'9px', color:FAINT, letterSpacing:'.1em', textTransform:'uppercase', marginBottom:'3px' }}>September 2026</div>
-              <div style={{ fontFamily:'Cormorant Garamond, serif', fontSize:'22px', fontWeight:600, color:INK }}>{tabs.find(t=>t.id===tab)?.label || 'Dashboard'}</div>
+              <div style={{ fontFamily: DEMO_HEAD, fontSize:'22px', fontWeight:600, color:INK }}>{tabs.find(t=>t.id===tab)?.label || 'Dashboard'}</div>
             </div>
             <div style={{ fontFamily:'DM Mono, monospace', fontSize:'10px', color:FAINT, background:'#EEF2F7', padding:'5px 12px', borderRadius:'20px' }}>Sample · JK No Jokes</div>
           </div>
@@ -144,14 +145,14 @@ export default function SbaLending() {
                   <input style={inp} placeholder="Phone or email" value={lf.contact} onChange={(e) => setLf({ ...lf, contact: e.target.value })} />
                   <input style={inp} placeholder="Note (what they need)" value={lf.note} onChange={(e) => setLf({ ...lf, note: e.target.value })} />
                 </div>
-                <button onClick={addLead} style={{ marginTop: '12px', background: NAVY, color: '#fff', border: 'none', borderRadius: '5px', padding: '10px 18px', fontFamily: 'DM Mono, monospace', fontSize: '11px', letterSpacing: '1px', cursor: 'pointer' }}>ADD TO "TO CALL" →</button>
+                <button onClick={addLead} style={{ marginTop: '12px', background: NAVY, color: '#fff', border: 'none', borderRadius: '5px', padding: '10px 18px', fontFamily: DEMO_MONO, fontSize: '11px', letterSpacing: '1px', cursor: 'pointer' }}>ADD TO "TO CALL" →</button>
               </div>
             )}
 
             {/* To call — first contact */}
             <div style={card}>
               <div style={{ ...serif, fontSize: '19px', fontWeight: 600, color: INK }}>🆕 To call — first contact <span style={{ fontSize: '13px', color: MUTED }}>({toCall.length})</span></div>
-              <div style={{ fontFamily: 'DM Mono, monospace', fontSize: '10px', color: MUTED, marginBottom: '10px' }}>New leads you haven't reached yet — hit "Called" to move them to follow-up</div>
+              <div style={{ fontFamily: DEMO_MONO, fontSize: '10px', color: MUTED, marginBottom: '10px' }}>New leads you haven't reached yet — hit "Called" to move them to follow-up</div>
               <div style={{ overflowX: 'auto' }}>
                 <table style={{ width: '100%', borderCollapse: 'collapse', minWidth: '620px' }}>
                   <thead><tr>{['LEAD', 'CONTACT', 'NOTE', ''].map((h) => <th key={h} style={th}>{h}</th>)}</tr></thead>
@@ -160,9 +161,9 @@ export default function SbaLending() {
                     {toCall.map((l) => (
                       <tr key={l.id}>
                         <td style={td}><div style={{ fontWeight: 600 }}>{l.name}</div><div style={{ color: MUTED, fontSize: '11px' }}>{l.business}</div></td>
-                        <td style={{ ...td, color: MUTED, fontFamily: 'DM Mono, monospace', fontSize: '11px' }}>{l.contact}</td>
+                        <td style={{ ...td, color: MUTED, fontFamily: DEMO_MONO, fontSize: '11px' }}>{l.contact}</td>
                         <td style={{ ...td, color: MUTED }}>{l.note}</td>
-                        <td style={{ ...td, textAlign: 'right' }}><button onClick={() => markCalled(l.id)} style={{ background: GREEN, color: '#fff', border: 'none', borderRadius: '4px', padding: '6px 12px', fontFamily: 'DM Mono, monospace', fontSize: '10px', letterSpacing: '1px', cursor: 'pointer', whiteSpace: 'nowrap' }}>✓ CALLED</button></td>
+                        <td style={{ ...td, textAlign: 'right' }}><button onClick={() => markCalled(l.id)} style={{ background: GREEN, color: '#fff', border: 'none', borderRadius: '4px', padding: '6px 12px', fontFamily: DEMO_MONO, fontSize: '10px', letterSpacing: '1px', cursor: 'pointer', whiteSpace: 'nowrap' }}>✓ CALLED</button></td>
                       </tr>
                     ))}
                   </tbody>
@@ -173,7 +174,7 @@ export default function SbaLending() {
             {/* Follow up */}
             <div style={card}>
               <div style={{ ...serif, fontSize: '19px', fontWeight: 600, color: INK }}>📞 Follow up — already called <span style={{ fontSize: '13px', color: MUTED }}>({followUp.length})</span></div>
-              <div style={{ fontFamily: 'DM Mono, monospace', fontSize: '10px', color: MUTED, marginBottom: '10px' }}>People you've talked to — circle back and keep them warm</div>
+              <div style={{ fontFamily: DEMO_MONO, fontSize: '10px', color: MUTED, marginBottom: '10px' }}>People you've talked to — circle back and keep them warm</div>
               <div style={{ overflowX: 'auto' }}>
                 <table style={{ width: '100%', borderCollapse: 'collapse', minWidth: '620px' }}>
                   <thead><tr>{['LEAD', 'CONTACT', 'LAST SPOKE', 'NOTE'].map((h) => <th key={h} style={th}>{h}</th>)}</tr></thead>
@@ -182,8 +183,8 @@ export default function SbaLending() {
                     {followUp.map((l) => (
                       <tr key={l.id}>
                         <td style={td}><div style={{ fontWeight: 600 }}>{l.name}</div><div style={{ color: MUTED, fontSize: '11px' }}>{l.business}</div></td>
-                        <td style={{ ...td, color: MUTED, fontFamily: 'DM Mono, monospace', fontSize: '11px' }}>{l.contact}</td>
-                        <td style={{ ...td, color: MUTED, fontFamily: 'DM Mono, monospace', fontSize: '11px' }}>{l.last}</td>
+                        <td style={{ ...td, color: MUTED, fontFamily: DEMO_MONO, fontSize: '11px' }}>{l.contact}</td>
+                        <td style={{ ...td, color: MUTED, fontFamily: DEMO_MONO, fontSize: '11px' }}>{l.last}</td>
                         <td style={{ ...td, color: MUTED }}>{l.note}</td>
                       </tr>
                     ))}
@@ -204,7 +205,7 @@ export default function SbaLending() {
             </div>
             <div style={card}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px', flexWrap: 'wrap', gap: '8px' }}>
-                <div><div style={{ ...serif, fontSize: '20px', fontWeight: 600, color: INK }}>Disbursed loans</div><div style={{ fontFamily: 'DM Mono, monospace', fontSize: '10px', color: MUTED }}>Amount, rate, maturity, and who to reach</div></div>
+                <div><div style={{ ...serif, fontSize: '20px', fontWeight: 600, color: INK }}>Disbursed loans</div><div style={{ fontFamily: DEMO_MONO, fontSize: '10px', color: MUTED }}>Amount, rate, maturity, and who to reach</div></div>
                 <button onClick={() => setAddingDeal((a) => !a)} style={addBtn(addingDeal)}>{addingDeal ? '✕ CANCEL' : '+ NEW DEAL'}</button>
               </div>
               {addingDeal && (
@@ -216,7 +217,7 @@ export default function SbaLending() {
                     <input style={inp} type="number" step="0.01" placeholder="Interest %" value={df.rate} onChange={(e) => setDf({ ...df, rate: e.target.value })} />
                     <input style={inp} type="date" placeholder="Maturity" value={df.maturity} onChange={(e) => setDf({ ...df, maturity: e.target.value })} />
                   </div>
-                  <button onClick={addDeal} style={{ marginTop: '12px', background: NAVY, color: '#fff', border: 'none', borderRadius: '5px', padding: '10px 18px', fontFamily: 'DM Mono, monospace', fontSize: '11px', letterSpacing: '1px', cursor: 'pointer' }}>ADD DEAL →</button>
+                  <button onClick={addDeal} style={{ marginTop: '12px', background: NAVY, color: '#fff', border: 'none', borderRadius: '5px', padding: '10px 18px', fontFamily: DEMO_MONO, fontSize: '11px', letterSpacing: '1px', cursor: 'pointer' }}>ADD DEAL →</button>
                 </div>
               )}
               <div style={{ overflowX: 'auto' }}>
@@ -226,10 +227,10 @@ export default function SbaLending() {
                     {deals.map((d) => (
                       <tr key={d.id}>
                         <td style={{ ...td, fontWeight: 600 }}>{d.client}</td>
-                        <td style={{ ...td, color: MUTED, fontFamily: 'DM Mono, monospace', fontSize: '11px' }}>{d.contact || '—'}</td>
-                        <td style={{ ...td, textAlign: 'right', fontFamily: 'DM Mono, monospace' }}>{usd0(d.amount)}</td>
-                        <td style={{ ...td, textAlign: 'right', fontFamily: 'DM Mono, monospace' }}>{d.rate ? d.rate + '%' : '—'}</td>
-                        <td style={{ ...td, fontFamily: 'DM Mono, monospace', fontSize: '11px', color: MUTED }}>{fmtDate(d.maturity)}</td>
+                        <td style={{ ...td, color: MUTED, fontFamily: DEMO_MONO, fontSize: '11px' }}>{d.contact || '—'}</td>
+                        <td style={{ ...td, textAlign: 'right', fontFamily: DEMO_MONO }}>{usd0(d.amount)}</td>
+                        <td style={{ ...td, textAlign: 'right', fontFamily: DEMO_MONO }}>{d.rate ? d.rate + '%' : '—'}</td>
+                        <td style={{ ...td, fontFamily: DEMO_MONO, fontSize: '11px', color: MUTED }}>{fmtDate(d.maturity)}</td>
                       </tr>
                     ))}
                   </tbody>
@@ -255,7 +256,7 @@ export default function SbaLending() {
             </div>
             <div style={card}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px', flexWrap: 'wrap', gap: '8px' }}>
-                <div><div style={{ ...serif, fontSize: '20px', fontWeight: 600, color: INK }}>Fees brought in</div><div style={{ fontFamily: 'DM Mono, monospace', fontSize: '10px', color: MUTED }}>Log every fee you earn — total tracks itself</div></div>
+                <div><div style={{ ...serif, fontSize: '20px', fontWeight: 600, color: INK }}>Fees brought in</div><div style={{ fontFamily: DEMO_MONO, fontSize: '10px', color: MUTED }}>Log every fee you earn — total tracks itself</div></div>
                 <button onClick={() => setAddingFee((a) => !a)} style={addBtn(addingFee)}>{addingFee ? '✕ CANCEL' : '+ ADD FEE'}</button>
               </div>
               {addingFee && (
@@ -265,7 +266,7 @@ export default function SbaLending() {
                     <input style={inp} type="number" placeholder="Fee $" value={ff.amount} onChange={(e) => setFf({ ...ff, amount: e.target.value })} />
                     <input style={inp} type="date" value={ff.date} onChange={(e) => setFf({ ...ff, date: e.target.value })} />
                   </div>
-                  <button onClick={addFee} style={{ marginTop: '12px', background: NAVY, color: '#fff', border: 'none', borderRadius: '5px', padding: '10px 18px', fontFamily: 'DM Mono, monospace', fontSize: '11px', letterSpacing: '1px', cursor: 'pointer' }}>ADD FEE →</button>
+                  <button onClick={addFee} style={{ marginTop: '12px', background: NAVY, color: '#fff', border: 'none', borderRadius: '5px', padding: '10px 18px', fontFamily: DEMO_MONO, fontSize: '11px', letterSpacing: '1px', cursor: 'pointer' }}>ADD FEE →</button>
                 </div>
               )}
               <div style={{ overflowX: 'auto' }}>
@@ -275,21 +276,21 @@ export default function SbaLending() {
                     {fees.map((f) => (
                       <tr key={f.id}>
                         <td style={{ ...td, fontWeight: 600 }}>{f.source}</td>
-                        <td style={{ ...td, color: MUTED, fontFamily: 'DM Mono, monospace', fontSize: '11px' }}>{fmtDate(f.date)}</td>
-                        <td style={{ ...td, textAlign: 'right', fontFamily: 'DM Mono, monospace', color: GREEN, fontWeight: 600 }}>{usd0(f.amount)}</td>
+                        <td style={{ ...td, color: MUTED, fontFamily: DEMO_MONO, fontSize: '11px' }}>{fmtDate(f.date)}</td>
+                        <td style={{ ...td, textAlign: 'right', fontFamily: DEMO_MONO, color: GREEN, fontWeight: 600 }}>{usd0(f.amount)}</td>
                       </tr>
                     ))}
                     <tr>
-                      <td colSpan={2} style={{ ...td, textAlign: 'right', fontWeight: 600, fontFamily: 'DM Mono, monospace', borderTop: '2px solid #E2E8EF' }}>Total fees YTD</td>
-                      <td style={{ ...td, textAlign: 'right', fontWeight: 600, fontFamily: 'DM Mono, monospace', color: GREEN, borderTop: '2px solid #E2E8EF' }}>{usd0(feesYtd)}</td>
+                      <td colSpan={2} style={{ ...td, textAlign: 'right', fontWeight: 600, fontFamily: DEMO_MONO, borderTop: '2px solid #E2E8EF' }}>Total fees YTD</td>
+                      <td style={{ ...td, textAlign: 'right', fontWeight: 600, fontFamily: DEMO_MONO, color: GREEN, borderTop: '2px solid #E2E8EF' }}>{usd0(feesYtd)}</td>
                     </tr>
                   </tbody>
                 </table>
               </div>
             </div>
             <DemoBooksPanel
-              headFont="Cormorant Garamond, serif"
-              monoFont="DM Mono, monospace"
+              headFont={DEMO_HEAD}
+              monoFont={DEMO_MONO}
               ink={INK}
               muted={MUTED}
               green={GREEN}
@@ -317,8 +318,8 @@ export default function SbaLending() {
           <p style={{ color: MUTED, fontSize: '14px', margin: '8px auto 18px', maxWidth: '480px', lineHeight: 1.6 }}>
             I built this for you. I also clean up small-business books and build dashboards like this — exactly what your borrowers need to qualify and stay on top of their numbers. Send them my way.
           </p>
-          <a href={BOOK} target="_blank" rel="noopener noreferrer" style={{ background: GREEN, color: '#fff', textDecoration: 'none', padding: '14px 30px', borderRadius: '4px', fontFamily: 'DM Mono, monospace', fontSize: '12px', letterSpacing: '2px' }}>LET'S TALK →</a>
-          <div style={{ marginTop: '14px', fontFamily: 'DM Mono, monospace', fontSize: '11px', color: FAINT }}>Jonathan Katz · JK No Jokes Financials · jk@jknojokes.com</div>
+          <a href={BOOK} target="_blank" rel="noopener noreferrer" style={{ background: GREEN, color: '#fff', textDecoration: 'none', padding: '14px 30px', borderRadius: '4px', fontFamily: DEMO_MONO, fontSize: '12px', letterSpacing: '2px' }}>LET'S TALK →</a>
+          <div style={{ marginTop: '14px', fontFamily: DEMO_MONO, fontSize: '11px', color: FAINT }}>Jonathan Katz · JK No Jokes Financials · jk@jknojokes.com</div>
         </div>
         </main>
       </div>

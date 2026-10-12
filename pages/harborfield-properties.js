@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import Head from 'next/head'
-import { DEMO_UI, DEMO_HEAD, DEMO_MONO, DEMO_FONT_LINK } from '../lib/demoFonts'
+import DemoFontLinks from '../components/DemoFontLinks'
+import { DEMO_RENDER_HINTS, DEMO_UI, DEMO_HEAD, DEMO_MONO } from '../lib/demoFonts'
 import DemoLobby from '../components/DemoLobby'
 import DemoBooksPanel from '../components/DemoBooksPanel'
 
@@ -66,10 +67,11 @@ export default function HarborfieldProperties() {
       <Head>
         <title>{BIZ} — Property Management Demo</title>
         <meta name="viewport" content="width=device-width, initial-scale=1" />
-        <link href={DEMO_FONT_LINK} rel="stylesheet" />
+        <DemoFontLinks />
       </Head>
       <style>{`
         *{box-sizing:border-box;margin:0;padding:0}
+        ${DEMO_RENDER_HINTS}
         body{font-family:${DEMO_UI};background:${BG};color:${INK}}
         .shell{display:flex;min-height:100vh}
         .side{width:210px;flex-shrink:0;background:${SIDEBAR};display:flex;flex-direction:column;padding:22px 12px;position:sticky;top:0;height:100vh;overflow-y:auto}
