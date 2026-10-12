@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import Head from 'next/head'
 import DemoFontLinks from '../components/DemoFontLinks'
-import { DEMO_RENDER_HINTS, DEMO_UI, DEMO_HEAD, DEMO_MONO } from '../lib/demoFonts'
+import { DEMO_PORTAL_ROOT_CLASS, DEMO_RENDER_HINTS, DEMO_UI, DEMO_HEAD, DEMO_MONO } from '../lib/demoFonts'
 import DemoLobby from '../components/DemoLobby'
 import { DEMO_EMBED_HIDE_LOBBY_CSS, getDemoEmbedServerProps } from '../lib/demoEmbed'
 
@@ -52,13 +52,13 @@ export default function NorthlineGlobal({ demoEmbed = false }) {
   const [tab, setTab] = useState('pipeline')
   const [binSearch, setBinSearch] = useState('')
 
-  const hcell = { padding: '7px 12px', fontSize: '9px', color: MUTED, background: '#EAE6DE', fontWeight: 600, letterSpacing: '0.1em', textTransform: 'uppercase', borderBottom: `1px solid ${BORDER}`, fontFamily: DEMO_UI }
-  const cell = (extra = {}) => ({ padding: '10px 12px', borderBottom: `1px solid #E8E4DC`, color: INK, fontSize: '13px', fontFamily: DEMO_UI, ...extra })
+  const hcell = { padding: '8px 12px', fontSize: '10px', color: MUTED, background: '#EAE6DE', fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase', borderBottom: `1px solid ${BORDER}`, fontFamily: DEMO_MONO }
+  const cell = (extra = {}) => ({ padding: '10px 12px', borderBottom: `1px solid #E8E4DC`, color: INK, fontSize: '13.5px', fontWeight: 500, fontFamily: DEMO_UI, ...extra })
 
   const Kpi = ({ k, v, sub, color }) => (
     <div style={{ background: '#fff', border: `1px solid ${BORDER}`, borderRadius: '8px', padding: '16px 18px', flex: 1, minWidth: '140px' }}>
-      <div style={{ fontFamily: DEMO_MONO, fontSize: '9px', color: MUTED, letterSpacing: '0.1em', textTransform: 'uppercase', marginBottom: '6px' }}>{k}</div>
-      <div style={{ fontFamily: DEMO_HEAD, fontSize: '26px', fontWeight: 600, color: color || INK, lineHeight: 1 }}>{v}</div>
+      <div style={{ fontFamily: DEMO_MONO, fontSize: '10px', color: MUTED, letterSpacing: '0.08em', textTransform: 'uppercase', marginBottom: '6px' }}>{k}</div>
+      <div style={{ fontFamily: DEMO_HEAD, fontSize: '28px', fontWeight: 700, color: color || INK, lineHeight: 1, letterSpacing: '0.02em' }}>{v}</div>
       {sub && <div style={{ fontFamily: DEMO_MONO, fontSize: '10px', color: MUTED, marginTop: '4px' }}>{sub}</div>}
     </div>
   )
@@ -85,11 +85,11 @@ export default function NorthlineGlobal({ demoEmbed = false }) {
       <style>{`
         *{box-sizing:border-box;margin:0;padding:0}
         ${DEMO_RENDER_HINTS}
-        body{font-family:${DEMO_UI};background:${BG};color:${INK}}
+        body{background:${BG};color:${INK}}
         .shell{display:flex;min-height:100vh}
         .side{width:210px;flex-shrink:0;background:${SIDEBAR};display:flex;flex-direction:column;padding:22px 12px;position:sticky;top:0;height:100vh;overflow-y:auto}
         .main{flex:1;min-width:0;padding:28px 32px 60px;overflow-y:auto}
-        .nbtn{display:block;width:100%;text-align:left;padding:9px 13px;border-radius:7px;border:none;background:transparent;color:#9a9590;font-family:${DEMO_UI};font-size:13px;font-weight:500;cursor:pointer;margin-bottom:2px}
+        .nbtn{display:block;width:100%;text-align:left;padding:9px 13px;border-radius:7px;border:none;background:transparent;color:#9a9590;font-family:${DEMO_UI};font-size:13.5px;font-weight:500;cursor:pointer;margin-bottom:2px}
         .nbtn:hover{background:rgba(255,255,255,.06);color:#ddd}
         .nbtn.on{background:rgba(255,255,255,.08);color:#fff;box-shadow:inset 3px 0 0 ${ACCENT}}
         .kpi-row{display:flex;gap:12px;flex-wrap:wrap;margin-bottom:20px}
@@ -115,7 +115,7 @@ export default function NorthlineGlobal({ demoEmbed = false }) {
         ))}
       </div>
 
-      <div className="shell" id={demoEmbed ? 'jk-embed-app' : undefined}>
+      <div className={`shell ${DEMO_PORTAL_ROOT_CLASS}`} id={demoEmbed ? 'jk-embed-app' : undefined}>
         <aside className="side">
           <div style={{ paddingBottom: '20px', borderBottom: '1px solid rgba(255,255,255,.08)', marginBottom: '16px' }}>
             <div style={{ fontFamily: DEMO_HEAD, fontSize: '17px', fontWeight: 600, color: '#fff', lineHeight: 1.2 }}>Northline<br />Global</div>

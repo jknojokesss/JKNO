@@ -3,7 +3,7 @@ import Head from 'next/head'
 import DemoFontLinks from '../components/DemoFontLinks'
 import DemoLobby from '../components/DemoLobby'
 import DemoBooksPanel from '../components/DemoBooksPanel'
-import { DEMO_HEAD, DEMO_MONO, DEMO_RENDER_HINTS, DEMO_UI } from '../lib/demoFonts'
+import { DEMO_HEAD, DEMO_MONO, DEMO_PORTAL_ROOT_CLASS, DEMO_RENDER_HINTS, DEMO_UI } from '../lib/demoFonts'
 
 // ─────────────────────────────────────────────────────────────────────────
 // Bespoke sample dashboard for an SBA loan broker. Front page = lead pipeline
@@ -84,7 +84,7 @@ export default function SbaLending() {
         <title>{BIZ} — Pipeline Dashboard Demo</title>
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <DemoFontLinks />
-        <style>{`*{box-sizing:border-box;margin:0;padding:0}${DEMO_RENDER_HINTS}body{background:${BG};font-family:${DEMO_UI}}::placeholder{color:#A7B2BD}
+        <style>{`*{box-sizing:border-box;margin:0;padding:0}${DEMO_RENDER_HINTS}body{background:${BG}}::placeholder{color:#A7B2BD}
           .sb-shell{display:flex;min-height:100vh}
           .sb-side{width:200px;flex-shrink:0;background:${DARK};display:flex;flex-direction:column;padding:20px 12px;position:sticky;top:0;height:100vh;overflow-y:auto}
           .sb-nav-btn{display:block;width:100%;text-align:left;padding:9px 12px;border-radius:6px;border:none;background:transparent;color:#5A7080;font-family:${DEMO_UI};font-size:13px;cursor:pointer;margin-bottom:2px}
@@ -96,7 +96,7 @@ export default function SbaLending() {
 
       <DemoLobby />
 
-      <div className="sb-shell">
+      <div className={`sb-shell ${DEMO_PORTAL_ROOT_CLASS}`}>
         <aside className="sb-side">
           <div style={{ paddingBottom: '20px' }}>
             <div style={{ fontFamily: DEMO_HEAD, fontSize: '16px', fontWeight: 600, color: '#fff', lineHeight: 1.2 }}>Riverbank<br />Funding</div>

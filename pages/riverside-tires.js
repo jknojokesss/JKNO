@@ -5,7 +5,7 @@ import { isDemoEmbedQuery } from '../lib/demoEmbed'
 import { PHONE_DEMO_MSG, isPhoneDemoUrl } from '../lib/phoneDemoPostMessage'
 import DemoFontLinks from '../components/DemoFontLinks'
 import DemoLobby from '../components/DemoLobby'
-import { DEMO_HEAD, DEMO_MONO, DEMO_RENDER_HINTS, DEMO_UI } from '../lib/demoFonts'
+import { DEMO_HEAD, DEMO_MONO, DEMO_PORTAL_ROOT_CLASS, DEMO_RENDER_HINTS, DEMO_UI } from '../lib/demoFonts'
 
 const BIZ = 'Riverside Tires'
 const THEME = { side: '#1E1C19', border: '#33302B', accent: '#B0281C', content: '#F2F0EA' }
@@ -213,7 +213,7 @@ function OrderCards({ rows }) {
 
 function DemoShell({ tab, setTab, right, children, embed }) {
   return (
-    <div className={embed ? 'rt-shell rt-embed' : 'rt-shell'}>
+    <div className={embed ? `rt-shell rt-embed ${DEMO_PORTAL_ROOT_CLASS}` : `rt-shell ${DEMO_PORTAL_ROOT_CLASS}`}>
       <div className="rt-mobilenav" aria-label="Sections">
         {NAV.map((n) => (
           <button key={n.id} type="button" className={tab === n.id ? 'on' : ''} onClick={() => setTab(n.id)}>
@@ -552,7 +552,7 @@ export default function RiversideTires() {
         *{box-sizing:border-box;margin:0;padding:0}
         ${DEMO_RENDER_HINTS}
         html.rt-phone-embed,body.rt-phone-embed{height:100%;overflow:hidden}
-        body{font-family:${ui};background:${C.paper};color:${C.ink}}
+        body{background:${C.paper};color:${C.ink}}
         .rt-shell{display:flex;min-height:100vh;align-items:stretch;background:${C.paper}}
         .rt-side{width:214px;flex-shrink:0;background:${THEME.side};box-shadow:inset -3px 0 0 ${THEME.accent};display:flex;flex-direction:column;padding:20px 12px;position:sticky;top:0;height:100vh}
         .rt-nav{display:flex;flex-direction:column;gap:2px;flex:1}

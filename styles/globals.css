@@ -23,8 +23,13 @@
 body {
   background: var(--paper);
   color: var(--ink);
-  font-family: 'DM Sans', sans-serif;
   -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Marketing pages only — sample portals set their own stack in-page */
+.marketing-site {
+  font-family: 'DM Sans', sans-serif;
 }
 
 .font-display {
