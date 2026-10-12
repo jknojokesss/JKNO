@@ -2,6 +2,7 @@ export default function DemoGalleryCard({
   href,
   biz,
   industry,
+  pain,
   here = false,
   compact = false,
   onDark = false,
@@ -36,8 +37,17 @@ export default function DemoGalleryCard({
         onDark && 'm-demo-card--on-dark',
       ].filter(Boolean).join(' ')}
     >
-      {industry ? <span className="m-demo-card__industry">{industry}</span> : null}
-      <span className="m-demo-card__name">{biz}</span>
+      {pain ? (
+        <>
+          <span className="m-demo-card__pain">{pain}</span>
+          <span className="m-demo-card__name m-demo-card__name--sub">{biz}</span>
+        </>
+      ) : (
+        <>
+          {industry ? <span className="m-demo-card__industry">{industry}</span> : null}
+          <span className="m-demo-card__name">{biz}</span>
+        </>
+      )}
       <span className="m-demo-card__go">{here ? 'You are here' : 'Open sample'}</span>
     </a>
   )

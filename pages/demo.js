@@ -28,32 +28,32 @@ const recon = (c) => {
 }
 
 const SEED_CONSIGN = [
-  { id: uid(), store: 'Midtown Market', price: 8.5, sent: 60, returned: 0, paid: 425, counted: 6, countedDate: '2026-09-15', diagnosis: '', cycle: 1, lastContact: '2026-09-15', restock: 'now', notes: 'Reorders every ~2 weeks. Wants more of the Original.', log: [{ at: 'Sep 15', t: 'Counted 6 on shelf' }, { at: 'Sep 6', t: 'Check received $425' }] },
-  { id: uid(), store: 'Hillside Grocery', price: 8.5, sent: 48, returned: 4, paid: 340, counted: 2, countedDate: '2026-09-15', diagnosis: '', cycle: 1, lastContact: '2026-09-12', restock: 'now', notes: 'Down to 2 bags — promised a delivery this week.', log: [{ at: 'Sep 15', t: 'Counted 2 on shelf' }, { at: 'Sep 5', t: 'Check received $340' }] },
-  { id: uid(), store: 'Parkway Foods', price: 9, sent: 54, returned: 0, paid: 360, counted: 14, countedDate: '2026-09-14', diagnosis: '', cycle: 1, lastContact: '2026-09-14', restock: 'good', notes: 'Steady account. Strong seller.', log: [{ at: 'Sep 14', t: 'Counted 14 — reconciles clean' }, { at: 'Sep 4', t: 'Check received $360' }] },
-  { id: uid(), store: 'Cedar Market', price: 8, sent: 40, returned: 0, paid: 200, counted: 8, countedDate: '2026-09-16', diagnosis: '', cycle: 1, lastContact: '2026-08-26', restock: 'soon', notes: "Haven't spoken in ~3 weeks — check in, and ask about the missing items.", log: [{ at: 'Sep 16', t: 'Counted 8 on shelf' }, { at: 'Sep 2', t: 'Check received $200' }] },
-  { id: uid(), store: 'Sunrise Grocers', price: 8.5, sent: 36, returned: 0, paid: 255, counted: 4, countedDate: '2026-09-13', diagnosis: '', cycle: 1, lastContact: '2026-09-13', restock: 'soon', notes: 'New buyer contact — trial going well so far.', log: [{ at: 'Sep 13', t: 'Counted 4 on shelf' }, { at: 'Sep 3', t: 'Check received $255' }] },
-  { id: uid(), store: 'Harbor Foods', price: 8.5, sent: 44, returned: 0, paid: 340, counted: 4, countedDate: '2026-09-13', diagnosis: '', cycle: 1, lastContact: '2026-09-13', restock: 'good', notes: 'Clean account, always pays on time.', log: [{ at: 'Sep 13', t: 'Counted 4 — reconciles clean' }, { at: 'Sep 3', t: 'Check received $340' }] },
-  { id: uid(), store: 'Greenfield Grocery', price: 8, sent: 30, returned: 0, paid: 160, counted: 9, countedDate: '2026-09-12', diagnosis: '', cycle: 1, lastContact: '2026-09-05', restock: 'soon', notes: 'Slower mover — try a sampler display by the register.', log: [{ at: 'Sep 12', t: 'Counted 9 on shelf' }, { at: 'Sep 1', t: 'Check received $160' }] },
-  { id: uid(), store: 'Main St. Market', price: 8, sent: 36, returned: 0, paid: 0, counted: 36, countedDate: '2026-09-10', diagnosis: '', cycle: 1, lastContact: '2026-09-10', restock: 'good', notes: 'First delivery just landed — follow up in 2 weeks.', log: [{ at: 'Sep 10', t: 'Shipped 36 units — first delivery' }] },
-  { id: uid(), store: 'Lakeside Market', price: 9, sent: 40, returned: 0, paid: 270, counted: 8, countedDate: '2026-09-16', diagnosis: '', cycle: 1, lastContact: '2026-09-16', restock: 'now', notes: 'Reorders fast — strong location, push more here.', log: [{ at: 'Sep 16', t: 'Counted 8 on shelf' }, { at: 'Sep 5', t: 'Check received $270' }] },
+  { id: 'c-midtown', store: 'Midtown Market', price: 8.5, sent: 60, returned: 0, paid: 425, counted: 6, countedDate: '2026-09-15', diagnosis: '', cycle: 1, lastContact: '2026-09-15', restock: 'now', notes: 'Reorders every ~2 weeks. Wants more of the Original.', log: [{ at: 'Sep 15', t: 'Counted 6 on shelf' }, { at: 'Sep 6', t: 'Check received $425' }] },
+  { id: 'c-hillside', store: 'Hillside Grocery', price: 8.5, sent: 48, returned: 4, paid: 340, counted: 2, countedDate: '2026-09-15', diagnosis: '', cycle: 1, lastContact: '2026-09-12', restock: 'now', notes: 'Down to 2 bags — promised a delivery this week.', log: [{ at: 'Sep 15', t: 'Counted 2 on shelf' }, { at: 'Sep 5', t: 'Check received $340' }] },
+  { id: 'c-parkway', store: 'Parkway Foods', price: 9, sent: 54, returned: 0, paid: 360, counted: 14, countedDate: '2026-09-14', diagnosis: '', cycle: 1, lastContact: '2026-09-14', restock: 'good', notes: 'Steady account. Strong seller.', log: [{ at: 'Sep 14', t: 'Counted 14 — reconciles clean' }, { at: 'Sep 4', t: 'Check received $360' }] },
+  { id: 'c-cedar', store: 'Cedar Market', price: 8, sent: 40, returned: 0, paid: 200, counted: 8, countedDate: '2026-09-16', diagnosis: '', cycle: 1, lastContact: '2026-09-21', restock: 'soon', notes: 'Check in — ask about the missing items and whether they need a restock.', log: [{ at: 'Sep 16', t: 'Counted 8 on shelf' }, { at: 'Sep 2', t: 'Check received $200' }] },
+  { id: 'c-sunrise', store: 'Sunrise Grocers', price: 8.5, sent: 36, returned: 0, paid: 255, counted: 4, countedDate: '2026-09-13', diagnosis: '', cycle: 1, lastContact: '2026-09-13', restock: 'soon', notes: 'New buyer contact — trial going well so far.', log: [{ at: 'Sep 13', t: 'Counted 4 on shelf' }, { at: 'Sep 3', t: 'Check received $255' }] },
+  { id: 'c-harbor', store: 'Harbor Foods', price: 8.5, sent: 44, returned: 0, paid: 340, counted: 4, countedDate: '2026-09-13', diagnosis: '', cycle: 1, lastContact: '2026-09-13', restock: 'good', notes: 'Clean account, always pays on time.', log: [{ at: 'Sep 13', t: 'Counted 4 — reconciles clean' }, { at: 'Sep 3', t: 'Check received $340' }] },
+  { id: 'c-greenfield', store: 'Greenfield Grocery', price: 8, sent: 30, returned: 0, paid: 160, counted: 9, countedDate: '2026-09-12', diagnosis: '', cycle: 1, lastContact: '2026-09-05', restock: 'soon', notes: 'Slower mover — try a sampler display by the register.', log: [{ at: 'Sep 12', t: 'Counted 9 on shelf' }, { at: 'Sep 1', t: 'Check received $160' }] },
+  { id: 'c-mainst', store: 'Main St. Market', price: 8, sent: 36, returned: 0, paid: 0, counted: 36, countedDate: '2026-09-10', diagnosis: '', cycle: 1, lastContact: '2026-09-10', restock: 'good', notes: 'First delivery just landed — follow up in 2 weeks.', log: [{ at: 'Sep 10', t: 'Shipped 36 units — first delivery' }] },
+  { id: 'c-lakeside', store: 'Lakeside Market', price: 9, sent: 40, returned: 0, paid: 270, counted: 8, countedDate: '2026-09-16', diagnosis: '', cycle: 1, lastContact: '2026-09-16', restock: 'now', notes: 'Reorders fast — strong location, push more here.', log: [{ at: 'Sep 16', t: 'Counted 8 on shelf' }, { at: 'Sep 5', t: 'Check received $270' }] },
 ]
 
 const SEED_DIRECT = [
-  { id: uid(), who: 'Online store (Shopify)', source: 'Shopify / online', units: 120, rev: 1560 },
-  { id: uid(), who: 'Farmers market — downtown', source: 'Farmers market', units: 45, rev: 585 },
-  { id: uid(), who: 'Acme Corp — office bulk order', source: 'Wholesale / bulk', units: 60, rev: 540 },
-  { id: uid(), who: 'Weekend pop-up', source: 'Pop-up event', units: 30, rev: 390 },
+  { id: 'd-shopify', who: 'Online store (Shopify)', source: 'Shopify / online', units: 120, rev: 1560 },
+  { id: 'd-farmers', who: 'Farmers market — downtown', source: 'Farmers market', units: 45, rev: 585 },
+  { id: 'd-acme', who: 'Acme Corp — office bulk order', source: 'Wholesale / bulk', units: 60, rev: 540 },
+  { id: 'd-popup', who: 'Weekend pop-up', source: 'Pop-up event', units: 30, rev: 390 },
 ]
 const DIRECT_SOURCES = ['Shopify / online', 'Farmers market', 'Pop-up event', 'Wholesale / bulk', 'Other']
 
 const SEED_ADS = [
-  { id: uid(), channel: 'Instagram Ads', spend: 600, rev: 2400, track: 'Meta pixel + code IG10', tracked: true },
-  { id: uid(), channel: 'Influencer — @njfoodie', spend: 400, rev: 1600, track: 'Promo code NJFOODIE', tracked: true },
-  { id: uid(), channel: 'Google Search', spend: 300, rev: 900, track: 'Google conversion tag', tracked: true },
-  { id: uid(), channel: 'Facebook Ads', spend: 450, rev: 180, track: 'Meta pixel', tracked: true },
-  { id: uid(), channel: 'Local 5K Sponsorship', spend: 250, rev: 150, track: 'Estimated — needs a promo code', tracked: false },
-  { id: uid(), channel: 'Flyers / print', spend: 120, rev: 90, track: 'Estimated — needs a promo code', tracked: false },
+  { id: 'a-ig', channel: 'Instagram Ads', spend: 600, rev: 2400, track: 'Meta pixel + code IG10', tracked: true },
+  { id: 'a-inf', channel: 'Influencer — @njfoodie', spend: 400, rev: 1600, track: 'Promo code NJFOODIE', tracked: true },
+  { id: 'a-goog', channel: 'Google Search', spend: 300, rev: 900, track: 'Google conversion tag', tracked: true },
+  { id: 'a-fb', channel: 'Facebook Ads', spend: 450, rev: 180, track: 'Meta pixel', tracked: true },
+  { id: 'a-5k', channel: 'Local 5K Sponsorship', spend: 250, rev: 150, track: 'Estimated — needs a promo code', tracked: false },
+  { id: 'a-fly', channel: 'Flyers / print', spend: 120, rev: 90, track: 'Estimated — needs a promo code', tracked: false },
 ]
 const COGS_CATS = ['Ingredients', 'Packaging']
 const EXP_CATS = ['Ingredients', 'Packaging', 'Marketing', 'Fees', 'Equipment', 'Travel', 'Other']
@@ -65,13 +65,13 @@ const verdict = (roas) => roas >= 2 ? { c: GREEN, t: 'Scale' } : roas >= 1 ? { c
 const PAY = [{ id: 'business', label: 'Business acct', color: MUTED }, { id: 'personal', label: 'Personal CC', color: RED }]
 const PAYM = Object.fromEntries(PAY.map(p => [p.id, p]))
 const SEED_EXPENSES = [
-  { id: uid(), vendor: 'Ingredient supplier', cat: 'Ingredients', amt: 1850, pay: 'business' },
-  { id: uid(), vendor: 'Packaging & boxes', cat: 'Packaging', amt: 420, pay: 'personal' },
-  { id: uid(), vendor: 'Seasoning & supplies', cat: 'Ingredients', amt: 260, pay: 'personal' },
-  { id: uid(), vendor: 'Market booth fee', cat: 'Fees', amt: 150, pay: 'personal' },
-  { id: uid(), vendor: 'Equipment repair', cat: 'Equipment', amt: 180, pay: 'business' },
-  { id: uid(), vendor: 'Gas & deliveries', cat: 'Travel', amt: 220, pay: 'personal' },
-  { id: uid(), vendor: 'Labels & printing', cat: 'Packaging', amt: 95, pay: 'personal' },
+  { id: 'x-ing', vendor: 'Ingredient supplier', cat: 'Ingredients', amt: 1850, pay: 'business' },
+  { id: 'x-pkg', vendor: 'Packaging & boxes', cat: 'Packaging', amt: 420, pay: 'personal' },
+  { id: 'x-season', vendor: 'Seasoning & supplies', cat: 'Ingredients', amt: 260, pay: 'personal' },
+  { id: 'x-booth', vendor: 'Market booth fee', cat: 'Fees', amt: 150, pay: 'personal' },
+  { id: 'x-equip', vendor: 'Equipment repair', cat: 'Equipment', amt: 180, pay: 'business' },
+  { id: 'x-gas', vendor: 'Gas & deliveries', cat: 'Travel', amt: 220, pay: 'personal' },
+  { id: 'x-label', vendor: 'Labels & printing', cat: 'Packaging', amt: 95, pay: 'personal' },
 ]
 
 // 11 prior months (current month is appended live) for the multi-month P&L
@@ -475,7 +475,7 @@ export default function Demo({ demoEmbed = false }) {
 .jm-navbtn{display:block;width:100%;text-align:left;padding:11px 14px;border-radius:10px;border:none;background:transparent;color:#B6A78C;font-family:${DEMO_UI};font-size:14px;font-weight:500;cursor:pointer;white-space:nowrap;transition:background .15s}
 .jm-navbtn:hover{background:rgba(255,255,255,.08);color:${CREAM}}
 .jm-main{flex:1;min-width:0;max-width:1180px;padding:24px 30px 60px}
-@media(max-width:860px){.jm-shell{flex-direction:column}.jm-side{width:auto;height:auto;position:static;flex-direction:column;padding:14px 12px}.jm-nav{flex-direction:row;overflow-x:auto;gap:6px;padding-bottom:4px}.jm-navbtn{width:auto;padding:8px 15px;border-radius:18px;background:rgba(255,255,255,.07)}.jm-main{padding:18px 16px 52px;max-width:100%}}`}</style>
+@media(max-width:860px){.jm-shell{flex-direction:column}.jm-side{width:auto;height:auto;position:static;flex-direction:column;padding:14px 12px 10px}.jm-nav{flex-direction:row;overflow-x:auto;gap:6px;padding:2px 2px 8px;-webkit-overflow-scrolling:touch;scrollbar-width:none}.jm-nav::-webkit-scrollbar{display:none}.jm-navbtn{width:auto;padding:8px 15px;border-radius:18px;background:rgba(255,255,255,.07);flex-shrink:0}.jm-store-chips{display:flex!important;flex-direction:row!important;flex-wrap:wrap;align-items:center;justify-content:flex-end;gap:6px!important}.jm-main{padding:18px 16px 52px;max-width:100%}}`}</style>
       </Head>
 
       {!demoEmbed && <DemoLobby />}
@@ -755,20 +755,20 @@ export default function Demo({ demoEmbed = false }) {
 
               {R.some(c => c.variance > 0) && (
                 <div style={{ ...card, marginBottom: '16px', background: '#FBEDE9', borderColor: '#E7C3B8' }}>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', flexWrap: 'wrap', gap: '8px', marginBottom: '10px' }}>
-                    <div style={{ ...lbl, color: RED }}>Money to collect</div>
-                    <div style={{ fontSize: '13px', color: MUTED }}><b style={{ ...big, fontSize: '18px', color: RED }}>{m0(missVal)}</b> across {R.filter(c => c.variance > 0).length} stores</div>
-                  </div>
+                  <h3 style={{ ...big, fontSize: '20px', color: RED, marginBottom: '4px' }}>{m0(missVal)} you haven&rsquo;t been paid for</h3>
+                  <p style={{ fontSize: '12px', color: MUTED, marginBottom: '12px', lineHeight: 1.5 }}>
+                    Across {R.filter(c => c.variance > 0).length} stores · tap a row to open that account
+                  </p>
                   {R.filter(c => c.variance > 0).sort((a, b) => b.varVal - a.varVal).map((c, i) => (
-                    <div key={c.id} onClick={() => setExpanded(c.id)} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '8px 0', borderTop: i ? '1px solid #F2D2CB' : 'none', cursor: 'pointer', gap: '8px', flexWrap: 'wrap' }}>
+                    <div key={c.id} onClick={() => setExpanded(c.id)} role="button" tabIndex={0} onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setExpanded(c.id) } }} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '10px 0', borderTop: i ? '1px solid #F2D2CB' : 'none', cursor: 'pointer', gap: '8px', flexWrap: 'wrap' }}>
                       <div>
                         <span style={{ fontWeight: 600, color: INK, fontSize: '14px' }}>{c.store}</span>
-                        <span style={{ fontSize: '12px', color: MUTED }}> · {c.variance} items · {c.diagnosis ? c.diagnosis : 'needs a diagnosis'}</span>
+                        <span style={{ fontSize: '12px', color: MUTED }}> · {c.variance} {c.variance === 1 ? 'item' : 'items'}{c.diagnosis ? ` · ${c.diagnosis}` : ''}</span>
                       </div>
-                      <span style={{ ...big, fontSize: '15px', color: RED }}>{money(c.varVal)}</span>
+                      <span style={{ ...big, fontSize: '15px', color: RED }}>{money(c.varVal)} →</span>
                     </div>
                   ))}
-                  <p style={{ fontSize: '12px', color: MUTED, marginTop: '10px', lineHeight: 1.5 }}>Items gone from shelves you haven't been paid for. Tap a store to diagnose it — then invoice the ones the store sold and didn't report, or write off the rest at close-out.</p>
+                  <p style={{ fontSize: '12px', color: MUTED, marginTop: '10px', lineHeight: 1.5 }}>Tap to figure out why — then invoice stores that sold product and didn&rsquo;t report it, or write off the rest when you close the cycle.</p>
                 </div>
               )}
 
@@ -791,7 +791,17 @@ export default function Demo({ demoEmbed = false }) {
 
               {R.map(c => {
                 const open = expanded === c.id
-                const badge = c.status === 'reconciled' ? { c: GREEN, t: 'Reconciled' } : c.status === 'short' ? { c: RED, t: `${c.variance} missing` } : c.status === 'over' ? { c: AMBER, t: `${-c.variance} over` } : { c: MUTED, t: 'Not counted' }
+                const newPartner = c.paid === 0 && c.sent > 0 && (c.cycle || 1) === 1
+                const badge = newPartner
+                  ? { c: AMBER, t: 'New — not due yet' }
+                  : c.status === 'reconciled'
+                    ? { c: GREEN, t: 'Reconciled' }
+                    : c.status === 'short'
+                      ? { c: RED, t: `${c.variance} missing` }
+                      : c.status === 'over'
+                        ? { c: AMBER, t: `${-c.variance} over` }
+                        : { c: MUTED, t: 'Not counted' }
+                const onShelf = Math.max(c.expected, 0)
                 return (
                   <div key={c.id} style={{ ...card, padding: 0, marginBottom: '12px', overflow: 'hidden', borderColor: open ? CHAR : (c.status === 'short' ? '#E7C3B8' : BORDER) }}>
                     <div onClick={() => setExpanded(open ? null : c.id)} style={{ padding: '15px 18px', cursor: 'pointer' }}>
@@ -799,10 +809,16 @@ export default function Demo({ demoEmbed = false }) {
                         <div>
                           <div style={{ ...big, fontSize: '20px', color: INK }}>{c.store}</div>
                           <div style={{ fontSize: '12px', color: MUTED, marginTop: '3px' }}>
-                            {money(c.price)}/unit · sent {c.sent} · paid for {c.paidUnits} · {money(c.paid)} collected · cycle {c.cycle || 1}
+                            {money(c.price)}/unit · sent {c.sent} · paid for {c.paidUnits} · {money(c.paid)} collected
+                          </div>
+                          <div style={{ fontSize: '12px', color: INK, marginTop: '5px', fontWeight: 500 }}>
+                            {onShelf} on shelf{c.variance > 0 ? ` · ${c.variance} unaccounted` : c.variance === 0 && c.counted != null ? ' · counts match' : ''}
+                          </div>
+                          <div style={{ fontSize: '11px', color: MUTED, marginTop: '4px' }}>
+                            Cycle {c.cycle || 1} — one delivery &amp; count round; close it to start fresh
                           </div>
                         </div>
-                        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '6px' }}>
+                        <div className="jm-store-chips" style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '6px' }}>
                           <span style={{ fontFamily: "'Inter', sans-serif", fontSize: '12px', fontWeight: 600, color: '#fff', background: badge.c, padding: '5px 11px', borderRadius: '20px', whiteSpace: 'nowrap' }}>{badge.t}</span>
                           {c.restock && c.restock !== 'good' && <span style={{ fontSize: '11px', fontWeight: 600, color: RM[c.restock].color, background: RM[c.restock].color + '1A', padding: '3px 10px', borderRadius: '20px', whiteSpace: 'nowrap' }}>{RM[c.restock].label}</span>}
                         </div>
@@ -863,7 +879,7 @@ export default function Demo({ demoEmbed = false }) {
                         <div style={{ ...lbl, margin: '18px 0 8px' }}>Store relationship</div>
                         <div style={{ display: 'flex', gap: '10px', alignItems: 'center', flexWrap: 'wrap', marginBottom: '10px' }}>
                           <span style={{ fontSize: '13px', color: MUTED }}>Last spoke: <b style={{ color: INK }}>{fmtD(c.lastContact)}</b>{c.lastContact ? ` · ${daysSince(c.lastContact)}d ago` : ''}</span>
-                          <button onClick={() => upd(c.id, { lastContact: todayStr }, 'Spoke with the store')} style={{ background: KRAFT, color: '#fff', border: 'none', borderRadius: '20px', padding: '5px 13px', ...btn, fontSize: '11px' }}>Spoke today</button>
+                          <button type="button" onClick={() => upd(c.id, { lastContact: todayStr }, 'Spoke with the store')} style={{ background: KRAFT, color: '#fff', border: '2px solid #a67a2e', borderRadius: '8px', padding: '6px 14px', ...btn, fontSize: '12px', fontWeight: 600 }}>Log a call today</button>
                         </div>
                         <div style={{ display: 'flex', gap: '10px', alignItems: 'center', flexWrap: 'wrap', marginBottom: '10px' }}>
                           <span style={{ fontSize: '13px', color: MUTED }}>Do they need more?</span>
@@ -877,8 +893,8 @@ export default function Demo({ demoEmbed = false }) {
                         <button onClick={() => { if (window.confirm(`Close out cycle ${c.cycle || 1} for ${c.store}? This settles the ${c.variance > 0 ? c.variance + ' missing items' : 'reconciliation'} and starts a fresh cycle from the ${c.counted == null ? 0 : c.counted} items on the shelf now.`)) closeOut(c.id) }} style={{ width: '100%', background: 'none', color: INK, border: `1px solid ${BORDER}`, borderRadius: '10px', padding: '12px', ...btn }}>Close out this cycle →</button>
                         <p style={{ fontSize: '12px', color: MUTED, marginTop: '7px', lineHeight: 1.5 }}>
                           {c.variance > 0
-                            ? <>Settles the <b>{c.variance} missing</b> {c.diagnosis === 'Sold but not reported (store owes me)' ? <>by <b style={{ color: RED }}>invoicing the store {money(c.varVal)}</b></> : <>as a <b>write-off</b></>}, then resets the count clean for the next delivery — so old gaps never bleed into the new cycle.</>
-                            : <>Reconciles clean and resets the count for the next delivery — so old numbers never bleed into the new cycle.</>}
+                            ? <>Settles the <b>{c.variance} missing</b> {c.diagnosis === 'Sold but not reported (store owes me)' ? <>by <b style={{ color: RED }}>invoicing the store {money(c.varVal)}</b></> : <>as a <b>write-off</b> (you stop chasing those units as product loss)</>}, then starts cycle {(c.cycle || 1) + 1} from what&rsquo;s on the shelf now.</>
+                            : <>Reconciles clean and starts cycle {(c.cycle || 1) + 1} from what&rsquo;s on the shelf now — old gaps don&rsquo;t carry forward.</>}
                         </p>
 
                         {(c.log || []).length > 0 && (

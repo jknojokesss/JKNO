@@ -4,9 +4,9 @@
   --jk-ink: #0f1419;
   --jk-paper: #f2f0ea;
   --jk-gold: #c9a84c;
-  --jk-gold-hi: #e8d5a8;
-  --jk-orange-soft: #ffad78;
-  --jk-orange-mid: #ff8f52;
+  --jk-gold-hi: #d4bc7a;
+  --jk-orange-soft: #e8a078;
+  --jk-orange-mid: #e88858;
   --jk-orange-hi: #ffe0cc;
   --jk-orange-glow: rgba(255, 138, 72, 0.45);
   --jk-orange-line: rgba(255, 158, 96, 0.62);
@@ -20,17 +20,17 @@
   --jk-sky-bottom: #ffe4b8;
   background-color: var(--jk-sky-bottom);
   background-image:
-    radial-gradient(120% 90% at 50% 105%, rgba(255, 150, 70, 0.55), transparent 55%),
-    radial-gradient(80% 50% at 20% 0%, rgba(255, 180, 100, 0.22), transparent 50%),
+    radial-gradient(120% 90% at 50% 105%, rgba(180, 130, 90, 0.35), transparent 55%),
+    radial-gradient(80% 50% at 20% 0%, rgba(140, 160, 200, 0.18), transparent 50%),
     linear-gradient(
       180deg,
       var(--jk-sky-top) 0%,
-      #5a78b0 14%,
-      #a8b8d8 26%,
-      #e09050 38%,
-      var(--jk-sky-warm) 50%,
-      var(--jk-sky-gold) 68%,
-      #ffc060 82%,
+      #4a6288 16%,
+      #8a9ab8 30%,
+      #b8a890 42%,
+      #c8a080 52%,
+      #d8b890 68%,
+      #e8d0a8 84%,
       var(--jk-sky-bottom) 100%
     );
   background-attachment: fixed;
@@ -54,17 +54,17 @@ html:has(.marketing-site--jk) {
   inset: 0;
   overflow: hidden;
   background:
-    radial-gradient(115% 85% at 50% 100%, rgba(255, 145, 65, 0.62), transparent 58%),
-    radial-gradient(70% 45% at 85% 15%, rgba(255, 195, 120, 0.28), transparent 52%),
+    radial-gradient(115% 85% at 50% 100%, rgba(180, 130, 90, 0.38), transparent 58%),
+    radial-gradient(70% 45% at 85% 15%, rgba(160, 175, 205, 0.22), transparent 52%),
     linear-gradient(
       180deg,
       var(--jk-sky-top) 0%,
-      #5a78b0 12%,
-      #98aac8 24%,
-      #e08848 36%,
-      #f09848 48%,
-      var(--jk-sky-gold) 64%,
-      #ffc868 80%,
+      #4a6288 14%,
+      #8a9ab0 26%,
+      #b0a090 38%,
+      #c0a080 48%,
+      #d0b888 62%,
+      #e0c8a0 78%,
       var(--jk-sky-bottom) 100%
     );
 }

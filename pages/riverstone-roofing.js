@@ -169,6 +169,10 @@ export default function RoofingPortal({ demoEmbed = false }) {
           .mobilenav{display:flex;position:sticky;top:${embedded ? 34 : 72}px;z-index:9;background:${INK};overflow-x:auto;gap:2px;padding:0 8px;-webkit-overflow-scrolling:touch}
           .mobilenav button{flex-shrink:0;border:none;background:transparent;color:#9aa0a8;font-size:12px;font-weight:600;padding:11px 10px;cursor:pointer;border-bottom:3px solid transparent;white-space:nowrap}
           .mobilenav button.on{color:${WHITE};border-bottom-color:${SIGNAL}}
+          .job-margin-table .th:nth-child(n+5),.job-margin-table .td:nth-child(n+5){display:none}
+          .job-margin-table .th:nth-child(9),.job-margin-table .td:nth-child(9){display:table-cell}
+          .job-margin-table .th:nth-child(1),.job-margin-table .td:nth-child(1){position:sticky;left:0;background:${WHITE};z-index:1;box-shadow:4px 0 8px -4px rgba(0,0,0,.08)}
+          .job-margin-table .th:nth-child(9),.job-margin-table .td:nth-child(9){position:sticky;right:0;background:${WHITE};z-index:1;box-shadow:-4px 0 8px -4px rgba(0,0,0,.08);min-width:108px}
         }
         @media print{
           .no-print{display:none!important}
@@ -619,7 +623,7 @@ function JobMargin({ M, groupBy, setGroupBy, jobFilter, setJobFilter, expanded, 
         <div style={{ fontSize: '11px', color: MUTED }}>{rows.length} jobs · click a row for the cost breakdown</div>
       </div>
 
-      <div className="card" style={{ overflowX: 'auto' }}>
+      <div className="card job-margin-table" style={{ overflowX: 'auto' }}>
         <table>
           <thead><tr>
             <th className="th">Job</th><th className="th">Customer</th><th className="th">St</th><th className="th">Type</th>
