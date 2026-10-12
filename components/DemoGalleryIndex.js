@@ -46,8 +46,9 @@ export default function DemoGalleryIndex() {
             </li>
           </ul>
           <p className="m-ship-intro__note">
-            Typical first portal: a few weeks from kickoff to login on live data (scope-dependent). Setup is quoted
-            after the call; ongoing support is optional if you keep your own bookkeeper.
+            Typical first portal: a few weeks from kickoff to login on live data (scope-dependent). Setup is a flat quote
+            after the call — many land in the <strong>$12k–$28k</strong> range depending on integrations. Ongoing support
+            is optional if you keep your own bookkeeper.
           </p>
           <button
             type="button"

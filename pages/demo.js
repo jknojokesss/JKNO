@@ -14,9 +14,12 @@ const money = (n) => '$' + (Math.round(n * 100) / 100).toLocaleString(undefined,
 const m0 = (n) => '$' + Math.round(n).toLocaleString()
 const sgn = (n) => (n < 0 ? '-$' : '$') + Math.abs(Math.round(n)).toLocaleString()
 const uid = () => Math.random().toString(36).slice(2, 9)
-const todayStr = new Date().toISOString().slice(0, 10)
+// Sample "as of" date — keeps relationship nudges aligned with the fictitious September dataset.
+const DEMO_AS_OF = '2026-09-20'
+const todayStr = DEMO_AS_OF
+const demoNowMs = () => new Date(`${DEMO_AS_OF}T12:00:00`).getTime()
 const fmtD = (s) => s ? new Date(s + 'T00:00:00').toLocaleDateString([], { month: 'short', day: 'numeric' }) : '—'
-const daysSince = (s) => s ? Math.round((Date.now() - new Date(s + 'T00:00:00')) / 86400000) : null
+const daysSince = (s) => s ? Math.round((demoNowMs() - new Date(s + 'T00:00:00').getTime()) / 86400000) : null
 
 // consignment reconciliation
 const recon = (c) => {
@@ -31,7 +34,7 @@ const SEED_CONSIGN = [
   { id: 'c-midtown', store: 'Midtown Market', price: 8.5, sent: 60, returned: 0, paid: 425, counted: 6, countedDate: '2026-09-15', diagnosis: '', cycle: 1, lastContact: '2026-09-15', restock: 'now', notes: 'Reorders every ~2 weeks. Wants more of the Original.', log: [{ at: 'Sep 15', t: 'Counted 6 on shelf' }, { at: 'Sep 6', t: 'Check received $425' }] },
   { id: 'c-hillside', store: 'Hillside Grocery', price: 8.5, sent: 48, returned: 4, paid: 340, counted: 2, countedDate: '2026-09-15', diagnosis: '', cycle: 1, lastContact: '2026-09-12', restock: 'now', notes: 'Down to 2 bags — promised a delivery this week.', log: [{ at: 'Sep 15', t: 'Counted 2 on shelf' }, { at: 'Sep 5', t: 'Check received $340' }] },
   { id: 'c-parkway', store: 'Parkway Foods', price: 9, sent: 54, returned: 0, paid: 360, counted: 14, countedDate: '2026-09-14', diagnosis: '', cycle: 1, lastContact: '2026-09-14', restock: 'good', notes: 'Steady account. Strong seller.', log: [{ at: 'Sep 14', t: 'Counted 14 — reconciles clean' }, { at: 'Sep 4', t: 'Check received $360' }] },
-  { id: 'c-cedar', store: 'Cedar Market', price: 8, sent: 40, returned: 0, paid: 200, counted: 8, countedDate: '2026-09-16', diagnosis: '', cycle: 1, lastContact: '2026-09-21', restock: 'soon', notes: 'Check in — ask about the missing items and whether they need a restock.', log: [{ at: 'Sep 16', t: 'Counted 8 on shelf' }, { at: 'Sep 2', t: 'Check received $200' }] },
+  { id: 'c-cedar', store: 'Cedar Market', price: 8, sent: 40, returned: 0, paid: 200, counted: 8, countedDate: '2026-09-16', diagnosis: '', cycle: 1, lastContact: '2026-08-30', restock: 'soon', notes: 'About three weeks since you spoke — check in and ask about the missing items.', log: [{ at: 'Sep 16', t: 'Counted 8 on shelf' }, { at: 'Sep 2', t: 'Check received $200' }] },
   { id: 'c-sunrise', store: 'Sunrise Grocers', price: 8.5, sent: 36, returned: 0, paid: 255, counted: 4, countedDate: '2026-09-13', diagnosis: '', cycle: 1, lastContact: '2026-09-13', restock: 'soon', notes: 'New buyer contact — trial going well so far.', log: [{ at: 'Sep 13', t: 'Counted 4 on shelf' }, { at: 'Sep 3', t: 'Check received $255' }] },
   { id: 'c-harbor', store: 'Harbor Foods', price: 8.5, sent: 44, returned: 0, paid: 340, counted: 4, countedDate: '2026-09-13', diagnosis: '', cycle: 1, lastContact: '2026-09-13', restock: 'good', notes: 'Clean account, always pays on time.', log: [{ at: 'Sep 13', t: 'Counted 4 — reconciles clean' }, { at: 'Sep 3', t: 'Check received $340' }] },
   { id: 'c-greenfield', store: 'Greenfield Grocery', price: 8, sent: 30, returned: 0, paid: 160, counted: 9, countedDate: '2026-09-12', diagnosis: '', cycle: 1, lastContact: '2026-09-05', restock: 'soon', notes: 'Slower mover — try a sampler display by the register.', log: [{ at: 'Sep 12', t: 'Counted 9 on shelf' }, { at: 'Sep 1', t: 'Check received $160' }] },
@@ -448,7 +451,7 @@ export default function Demo({ demoEmbed = false }) {
     </select>
   )
 
-  const TABS = [['overview', 'Overview'], ['consign', 'Consignment'], ['direct', 'Direct Sales'], ['ads', 'Advertising'], ['pnl', 'P&L']]
+  const TABS = [['overview', 'Overview'], ['consign', 'Consignment'], ['direct', 'Direct Sales'], ['ads', 'Ads'], ['pnl', 'P&L']]
   const EXTRA = [['expenses', 'Personal card'], ['quickbooks', 'QuickBooks sync'], ['close', 'Monthly close'], ['askai', 'Answers']]
   const currentLabel = ([...TABS, ...EXTRA].find(t => t[0] === tab) || ['', ''])[1]
 
@@ -471,11 +474,11 @@ export default function Demo({ demoEmbed = false }) {
         <style>{`*{box-sizing:border-box;margin:0;padding:0}${DEMO_RENDER_HINTS}body{background:${CREAM};color:${INK}}::placeholder{color:#A99A82}
 .jm-shell{display:flex;min-height:100vh;align-items:stretch}
 .jm-side{width:236px;flex-shrink:0;background:${CHAR};color:${CREAM};display:flex;flex-direction:column;padding:22px 14px;position:sticky;top:0;height:100vh}
-.jm-nav{display:flex;flex-direction:column;gap:3px;flex:1}
+.jm-nav{display:flex;flex-direction:column;gap:3px}.jm-nav--tabs{flex:1}
 .jm-navbtn{display:block;width:100%;text-align:left;padding:11px 14px;border-radius:10px;border:none;background:transparent;color:#B6A78C;font-family:${DEMO_UI};font-size:14px;font-weight:500;cursor:pointer;white-space:nowrap;transition:background .15s}
 .jm-navbtn:hover{background:rgba(255,255,255,.08);color:${CREAM}}
 .jm-main{flex:1;min-width:0;max-width:1180px;padding:24px 30px 60px}
-@media(max-width:860px){.jm-shell{flex-direction:column}.jm-side{width:auto;height:auto;position:static;flex-direction:column;padding:14px 12px 10px}.jm-nav{flex-direction:row;overflow-x:auto;gap:6px;padding:2px 2px 8px;-webkit-overflow-scrolling:touch;scrollbar-width:none}.jm-nav::-webkit-scrollbar{display:none}.jm-navbtn{width:auto;padding:8px 15px;border-radius:18px;background:rgba(255,255,255,.07);flex-shrink:0}.jm-store-chips{display:flex!important;flex-direction:row!important;flex-wrap:wrap;align-items:center;justify-content:flex-end;gap:6px!important}.jm-main{padding:18px 16px 52px;max-width:100%}}`}</style>
+@media(max-width:860px){.jm-shell{flex-direction:column}.jm-side{width:auto;height:auto;position:static;flex-direction:column;padding:14px 12px 10px}.jm-nav--tabs,.jm-nav--tools{flex-direction:row;overflow-x:auto;gap:6px;padding:4px 4px 10px;-webkit-overflow-scrolling:touch;scrollbar-width:none;scroll-padding-inline-end:20px}.jm-nav--tabs::after,.jm-nav--tools::after{content:'';flex:0 0 16px}.jm-nav::-webkit-scrollbar{display:none}.jm-tools-label{margin:8px 4px 4px!important;padding:0 4px}.jm-navbtn{width:auto;padding:8px 14px;border-radius:18px;background:rgba(255,255,255,.07);flex-shrink:0;font-size:13px}.jm-store-chips{display:flex!important;flex-direction:row!important;flex-wrap:wrap;align-items:center;justify-content:flex-end;gap:6px!important}.jm-main{padding:18px 16px 52px;max-width:100%}}`}</style>
       </Head>
 
       {!demoEmbed && <DemoLobby />}
@@ -489,7 +492,7 @@ export default function Demo({ demoEmbed = false }) {
             </div>
             <div style={{ ...lbl, color: '#B6A78C', marginTop: '7px' }}>Dashboard</div>
           </div>
-          <nav className="jm-nav">
+          <nav className="jm-nav jm-nav--tabs" aria-label="Dashboard sections">
             {TABS.map(([id, label]) => {
               const active = tab === id
               return (
@@ -499,7 +502,9 @@ export default function Demo({ demoEmbed = false }) {
                 </button>
               )
             })}
-            <div style={{ ...lbl, color: '#7A6A52', fontSize: '10px', margin: '16px 14px 6px' }}>Tools</div>
+          </nav>
+          <div className="jm-tools-label" style={{ ...lbl, color: '#7A6A52', fontSize: '10px', margin: '16px 14px 6px' }}>Tools</div>
+          <nav className="jm-nav jm-nav--tools" aria-label="Tools">
             {EXTRA.map(([id, label]) => {
               const active = tab === id
               return (
