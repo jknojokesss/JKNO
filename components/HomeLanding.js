@@ -94,7 +94,6 @@ export default function HomeLanding({
             <li><strong>Setup</strong> — connect QuickBooks and your tools, build your screens, launch on real data.</li>
             <li><strong>Ongoing</strong> — sync keeps running; tune screens as you grow. Bookkeeping help only if you want it.</li>
             <li><strong>Timing</strong> — most first portals land in a few weeks; exact scope comes out of the kickoff call.</li>
-            <li><strong>Pricing</strong> — flat setup quote after kickoff (in writing before build starts). Many first portals land in the <strong>$12k–$28k</strong> setup range depending on integrations; optional monthly support is quoted separately.</li>
           </ul>
         </section>
 
