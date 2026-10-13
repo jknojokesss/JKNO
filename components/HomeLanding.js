@@ -84,7 +84,7 @@ export default function HomeLanding({
             className="m-jk-home__btn m-jk-home__btn--ghost m-jk-home__btn--ops"
             onClick={() => router.push('/operations-portal')}
           >
-            Operations portal — see sample
+            Operations portal — sample
           </button>
         </div>
       </header>
@@ -112,7 +112,7 @@ export default function HomeLanding({
 
         <section className="m-jk-home__panel" id="samples">
           <p className="m-jk-story__kicker">Samples</p>
-          <h2 className="m-jk-story__title">Open a sample shop</h2>
+          <h2 className="m-jk-story__title">Open a sample</h2>
           <p className="m-jk-story__body m-jk-story__body--tight">
             Fictitious names, real screen layouts. No password — pick one and look around.
           </p>
