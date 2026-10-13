@@ -6,7 +6,7 @@ export default function BaylineLeasingRedirect() {
   const router = useRouter()
   useEffect(() => {
     const q = router.asPath.includes('?') ? router.asPath.slice(router.asPath.indexOf('?')) : ''
-    router.replace(`/buckle-up${q}`)
+    router.replace(`/westview-auto${q}`)
   }, [router])
   return null
 }
