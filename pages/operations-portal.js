@@ -1,123 +1,44 @@
 import { useMemo, useState } from 'react'
-import Head from 'next/head'
-import DemoFontLinks from '../components/DemoFontLinks'
-import DemoLobby from '../components/DemoLobby'
-import { DEMO_HEAD, DEMO_MONO, DEMO_PORTAL_ROOT_CLASS, DEMO_RENDER_HINTS, DEMO_UI } from '../lib/demoFonts'
+import { useRouter } from 'next/router'
+import MarketingShell from '../components/MarketingShell'
+import { BOOKING_URL } from '../lib/marketing'
 
-const BIZ = 'Hayfield Global'
-const HUB_PAGE = '#ECEEF2'
-const HUB_INK = '#2C3440'
-const HUB_MUTED = '#7A8494'
-const HUB_CARD = '#FFFFFF'
-const HUB_BTN = '#3D4858'
-const NAVY = '#152238'
-const OPS_BAR = '#4A6270'
-const ACCENT = '#4A7FD4'
-const BG = '#E8EAED'
-const SHEET = '#FFFFFF'
-const BORDER = '#D4DAE4'
-const INK = '#1A2433'
-const MUTED = '#5E6A7C'
-const OCT_BG = '#FDF6E3'
-const OCT_INK = '#9A7B1A'
-const NOV_BG = '#E8F0FA'
-const NOV_INK = '#2E5F9E'
-const WARN = '#B84A3A'
-const BOOK = 'https://calendly.com/jk-jknojokes/30min'
+// Public sample — fictitious companies. Only the operations cash desk is interactive.
+const SAMPLE_CLIENT = 'Hayfield Global'
 
-const money = (n) => '$' + Math.round(n).toLocaleString('en-US')
-
-const ART_GREY = '#B4BCC8'
-const BADGE_BG = '#2F3844'
-
-/** Illustrated desk icons — same idea as the real portal cards, sample-only artwork. */
-function HubBadge({ x, y, text }) {
-  return (
-    <g>
-      <circle cx={x} cy={y} r="14" fill={BADGE_BG} />
-      <text x={x} y={y + 4} textAnchor="middle" fill="#fff" fontSize="9" fontFamily="IBM Plex Mono, monospace" fontWeight="600">{text}</text>
-    </g>
-  )
-}
-
-function HubArt({ type }) {
-  if (type === 'ops') {
-    return (
-      <svg viewBox="0 0 200 120" width="100%" height="120" aria-hidden>
-        <rect x="28" y="38" width="72" height="52" rx="4" fill={ART_GREY} opacity="0.35" />
-        <path d="M36 38V28h20l8 10" fill={ART_GREY} opacity="0.5" />
-        <rect x="44" y="52" width="14" height="10" rx="1" fill={ART_GREY} />
-        <rect x="64" y="52" width="14" height="10" rx="1" fill={ART_GREY} />
-        <rect x="44" y="68" width="14" height="10" rx="1" fill={ART_GREY} />
-        <rect x="64" y="68" width="14" height="10" rx="1" fill={ART_GREY} />
-        <rect x="108" y="44" width="48" height="58" rx="3" fill="#fff" stroke={ART_GREY} strokeWidth="2" />
-        <path d="M118 58h28M118 68h28M118 78h18" stroke={ART_GREY} strokeWidth="2" strokeLinecap="round" />
-        <HubBadge x={168} y={36} text="OPS" />
-      </svg>
-    )
-  }
-  if (type === 'house') {
-    return (
-      <svg viewBox="0 0 200 120" width="100%" height="120" aria-hidden>
-        <path d="M100 28 52 58v42h96V58L100 28z" fill={ART_GREY} opacity="0.4" />
-        <rect x="78" y="68" width="44" height="32" fill="#fff" stroke={ART_GREY} strokeWidth="2" />
-        <rect x="88" y="78" width="12" height="22" fill={ART_GREY} opacity="0.6" />
-        <HubBadge x={148} y={40} text="RE" />
-      </svg>
-    )
-  }
-  if (type === 'warehouse') {
-    return (
-      <svg viewBox="0 0 200 120" width="100%" height="120" aria-hidden>
-        <rect x="40" y="48" width="120" height="48" rx="2" fill={ART_GREY} opacity="0.35" />
-        <path d="M40 48 L100 28 L160 48" fill="none" stroke={ART_GREY} strokeWidth="2" />
-        <rect x="58" y="62" width="28" height="34" fill="#fff" stroke={ART_GREY} strokeWidth="2" />
-        <rect x="114" y="62" width="28" height="34" fill="#fff" stroke={ART_GREY} strokeWidth="2" />
-        <path d="M72 62v34M114 62v34" stroke={ART_GREY} strokeWidth="1.5" />
-      </svg>
-    )
-  }
-  if (type === 'globe') {
-    return (
-      <svg viewBox="0 0 200 120" width="100%" height="120" aria-hidden>
-        <rect x="68" y="22" width="64" height="64" rx="14" fill="#fff" stroke={ART_GREY} strokeWidth="2" />
-        <circle cx="100" cy="54" r="22" fill="none" stroke={ART_GREY} strokeWidth="2" />
-        <ellipse cx="100" cy="54" rx="10" ry="22" fill="none" stroke={ART_GREY} strokeWidth="1.5" />
-        <path d="M78 54h44" stroke={ART_GREY} strokeWidth="1.5" />
-      </svg>
-    )
-  }
-  if (type === 'partners') {
-    return (
-      <svg viewBox="0 0 200 120" width="100%" height="120" aria-hidden>
-        <circle cx="88" cy="58" r="26" fill={BADGE_BG} />
-        <circle cx="118" cy="58" r="26" fill="#5A6575" />
-        <text x="88" y="63" textAnchor="middle" fill="#fff" fontSize="14" fontFamily="IBM Plex Mono, monospace" fontWeight="600">AK</text>
-        <text x="118" y="63" textAnchor="middle" fill="#fff" fontSize="14" fontFamily="IBM Plex Mono, monospace" fontWeight="600">JR</text>
-      </svg>
-    )
-  }
-  return null
-}
-
-function HubLogo() {
-  return (
-    <svg width="36" height="36" viewBox="0 0 36 36" aria-hidden>
-      <rect width="36" height="36" rx="9" fill="#fff" stroke="#D8DEE6" strokeWidth="1" />
-      <circle cx="18" cy="18" r="11" fill="none" stroke="#8A96A8" strokeWidth="1.5" />
-      <ellipse cx="18" cy="18" rx="5" ry="11" fill="none" stroke="#8A96A8" strokeWidth="1" />
-      <path d="M7 18h22" stroke="#8A96A8" strokeWidth="1" />
-    </svg>
-  )
-}
-
-/** Owner portal hub — layout mirrors multi-desk ops sites; only Operations center is live in the sample. */
-const PORTAL_DESKS = [
-  { id: 'operations', kicker: 'Liabilities, payables & cash flow', title: 'Operations center', live: true, art: 'ops' },
-  { id: 'realestate', kicker: 'Multi-family · Northeast', title: 'Real estate', live: false, art: 'house' },
-  { id: 'usre', kicker: 'Commercial · warehouse', title: 'US real estate', live: false, art: 'warehouse' },
-  { id: 'inventory', kicker: 'Hayfield Global', title: 'Inventory', live: false, art: 'globe' },
-  { id: 'partners', kicker: '2026 report', title: 'Partners', live: false, art: 'partners' },
+const DESKS = [
+  {
+    id: 'operations',
+    emoji: '📊',
+    kicker: 'Liabilities, payables & cash',
+    title: 'Operations center',
+    blurb: 'Bank balances, card schedule, loans, and monthly outflow — workbook upload.',
+    live: true,
+  },
+  {
+    id: 'realestate',
+    emoji: '🏠',
+    kicker: 'Rent roll & vacancies',
+    title: 'Lakeview Property Co.',
+    blurb: 'Doors, delinquency, and owner statements — property management slice.',
+    live: false,
+  },
+  {
+    id: 'barber',
+    emoji: '✂️',
+    kicker: 'Chairs & retail mix',
+    title: 'Main Street Barbers',
+    blurb: 'Daily tickets, product sales, and chair utilization — shop-floor view.',
+    live: false,
+  },
+  {
+    id: 'supply',
+    emoji: '📦',
+    kicker: 'Wholesale & delivery',
+    title: 'Northline Supply',
+    blurb: 'Open orders, margin by SKU, and who still owes on net-30.',
+    live: false,
+  },
 ]
 
 const BANKS = [
@@ -152,7 +73,7 @@ const US_OUTFLOW = [
   { month: 'Nov 2026', payroll: 142000, rent: 28000, debt: 19200, other: 19800 },
 ]
 
-const DESK_SECTIONS = [
+const SECTIONS = [
   { id: 'banks', label: 'Banks' },
   { id: 'cards', label: 'Cards' },
   { id: 'loans', label: 'Loans' },
@@ -160,105 +81,7 @@ const DESK_SECTIONS = [
   { id: 'calendar', label: 'Calendar' },
 ]
 
-function Icon({ name, size = 28, color = 'currentColor' }) {
-  const s = { width: size, height: size, stroke: color, fill: 'none', strokeWidth: 1.75, strokeLinecap: 'round', strokeLinejoin: 'round' }
-  if (name === 'cash') {
-    return (
-      <svg viewBox="0 0 24 24" style={s} aria-hidden>
-        <rect x="2" y="6" width="20" height="12" rx="2" />
-        <circle cx="12" cy="12" r="3" />
-        <path d="M6 10h.01M18 14h.01" />
-      </svg>
-    )
-  }
-  if (name === 'boxes') {
-    return (
-      <svg viewBox="0 0 24 24" style={s} aria-hidden>
-        <path d="M12 3 3 7.5 12 12l9-4.5L12 3z" />
-        <path d="M3 7.5V16.5L12 21l9-4.5V7.5" />
-        <path d="M12 12v9" />
-      </svg>
-    )
-  }
-  if (name === 'building') {
-    return (
-      <svg viewBox="0 0 24 24" style={s} aria-hidden>
-        <path d="M4 21V5a1 1 0 0 1 1-1h5v17" />
-        <path d="M10 21V9h10v12" />
-        <path d="M7 9h1M7 13h1M7 17h1M14 13h2M14 17h2" />
-      </svg>
-    )
-  }
-  if (name === 'users') {
-    return (
-      <svg viewBox="0 0 24 24" style={s} aria-hidden>
-        <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
-        <circle cx="9" cy="7" r="4" />
-        <path d="M22 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75" />
-      </svg>
-    )
-  }
-  if (name === 'upload') {
-    return (
-      <svg viewBox="0 0 24 24" style={s} aria-hidden>
-        <path d="M12 3v12" />
-        <path d="m7 8 5-5 5 5" />
-        <path d="M5 21h14" />
-      </svg>
-    )
-  }
-  if (name === 'bank') {
-    return (
-      <svg viewBox="0 0 24 24" style={s} aria-hidden>
-        <path d="M3 10h18" />
-        <path d="M5 10V20M9 10V20M15 10V20M19 10V20" />
-        <path d="M2 20h20" />
-        <path d="M12 3 2 10h20L12 3z" />
-      </svg>
-    )
-  }
-  if (name === 'card') {
-    return (
-      <svg viewBox="0 0 24 24" style={s} aria-hidden>
-        <rect x="2" y="5" width="20" height="14" rx="2" />
-        <path d="M2 10h20" />
-      </svg>
-    )
-  }
-  if (name === 'loan') {
-    return (
-      <svg viewBox="0 0 24 24" style={s} aria-hidden>
-        <path d="M12 2v20" />
-        <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7H14a3.5 3.5 0 0 1 0 7H6" />
-      </svg>
-    )
-  }
-  if (name === 'chart') {
-    return (
-      <svg viewBox="0 0 24 24" style={s} aria-hidden>
-        <path d="M3 3v18h18" />
-        <path d="M7 16V9M12 16V5M17 16v-3" />
-      </svg>
-    )
-  }
-  if (name === 'calendar') {
-    return (
-      <svg viewBox="0 0 24 24" style={s} aria-hidden>
-        <rect x="3" y="5" width="18" height="16" rx="2" />
-        <path d="M16 3v4M8 3v4M3 11h18" />
-      </svg>
-    )
-  }
-  return null
-}
-
-const SECTION_ICON = {
-  banks: 'bank',
-  cards: 'card',
-  loans: 'loan',
-  outflow: 'chart',
-  calendar: 'calendar',
-}
+const money = (n) => '$' + Math.round(n).toLocaleString('en-US')
 
 function dueMonthKey(iso) {
   const d = new Date(iso + 'T12:00:00')
@@ -267,9 +90,9 @@ function dueMonthKey(iso) {
 
 function dueStyle(iso) {
   const m = new Date(iso + 'T12:00:00').getMonth()
-  if (m === 9) return { bg: OCT_BG, color: OCT_INK }
-  if (m === 10) return { bg: NOV_BG, color: NOV_INK }
-  return { bg: '#F3F4F6', color: MUTED }
+  if (m === 9) return { bg: '#FDF6E3', color: '#9A7B1A' }
+  if (m === 10) return { bg: '#E8F0FA', color: '#2E5F9E' }
+  return { bg: '#F3F4F6', color: '#5E6A7C' }
 }
 
 function fmtDue(iso) {
@@ -294,7 +117,8 @@ function buildCalCells() {
 const CAL_CELLS = buildCalCells()
 
 export default function OperationsPortalDemo() {
-  const [hubOpen, setHubOpen] = useState(true)
+  const router = useRouter()
+  const [deskOpen, setDeskOpen] = useState(false)
   const [toast, setToast] = useState('')
   const [cardView, setCardView] = useState('sheet')
   const [monthFilter, setMonthFilter] = useState('all')
@@ -327,17 +151,13 @@ export default function OperationsPortalDemo() {
     setTimeout(() => setToast(''), 4000)
   }
 
-  const openDesk = () => {
-    setHubOpen(false)
-    setActiveSection('banks')
-  }
-
-  const hubPick = (desk) => {
-    if (desk.id === 'operations') {
-      openDesk()
+  const pickDesk = (d) => {
+    if (d.live) {
+      setDeskOpen(true)
+      setTimeout(() => document.getElementById('ops-desk')?.scrollIntoView({ behavior: 'smooth' }), 80)
       return
     }
-    ping('Sample portal — only Operations center is wired in this demo.')
+    ping(`${d.title} is a placeholder in this sample — only Operations center is wired.`)
   }
 
   const jumpSection = (id) => {
@@ -351,234 +171,155 @@ export default function OperationsPortalDemo() {
     document.getElementById(`section-${id}`)?.scrollIntoView({ behavior: 'smooth', block: 'start' })
   }
 
-  const th = {
-    padding: '10px 14px',
-    fontSize: '10px',
-    color: MUTED,
-    background: '#EEF1F6',
-    fontWeight: 600,
-    letterSpacing: '0.07em',
-    textTransform: 'uppercase',
-    borderBottom: `1px solid ${BORDER}`,
-    fontFamily: DEMO_MONO,
-    whiteSpace: 'nowrap',
-    textAlign: 'left',
-  }
-  const td = {
-    padding: '11px 14px',
-    borderBottom: '1px solid #ECEFF4',
-    color: INK,
-    fontSize: '13px',
-    fontFamily: DEMO_UI,
-  }
-
   return (
-    <>
-      <Head>
-        <title>{BIZ} — Operations Portal (Sample)</title>
-        <meta name="description" content="Sample operations portal with desk hub, cash flow, banks, cards, and workbook layout — fictitious data." />
-        <meta name="viewport" content="width=device-width, initial-scale=1" />
-        <DemoFontLinks />
-        <style>{`
-          *{box-sizing:border-box;margin:0;padding:0}
-          ${DEMO_RENDER_HINTS}
-          body{background:${hubOpen ? HUB_PAGE : BG};color:${INK}}
-          .op-hub{min-height:calc(100vh - 48px);background:linear-gradient(180deg,#F4F5F8 0%,${HUB_PAGE} 120px,${HUB_PAGE} 100%);color:${HUB_INK}}
-          .op-hub__bar{background:${HUB_CARD};border-bottom:1px solid #DDE2EA;padding:16px 24px;display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
-          .op-hub__brand{display:flex;align-items:center;gap:12px}
-          .op-hub__brand-name{font-family:${DEMO_HEAD};font-size:15px;font-weight:600;letter-spacing:.06em;color:${HUB_INK}}
-          .op-hub__sample{font-family:${DEMO_MONO};font-size:9px;letter-spacing:.12em;text-transform:uppercase;color:${HUB_MUTED};background:#F0F2F6;border:1px solid #E0E4EC;border-radius:20px;padding:6px 12px}
-          .op-hub__intro{text-align:center;padding:28px 20px 8px;max-width:520px;margin:0 auto}
-          .op-hub__intro p{font-family:${DEMO_UI};font-size:13px;color:${HUB_MUTED}}
-          .op-hub__grid{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:20px;width:100%;max-width:980px;margin:28px auto 48px;padding:0 20px}
-          .op-hub__card{grid-column:span 2;background:${HUB_CARD};border:1px solid #E4E8EF;border-radius:16px;padding:0 0 20px;display:flex;flex-direction:column;text-align:left;cursor:pointer;transition:transform .18s ease,box-shadow .18s ease,border-color .18s ease;box-shadow:0 2px 8px rgba(35,45,60,.05),0 14px 36px rgba(35,45,60,.05);overflow:hidden;min-height:310px}
-          .op-hub__card--live{border-color:#B8CCE8;box-shadow:0 2px 8px rgba(74,127,212,.12),0 16px 40px rgba(35,45,60,.07)}
-          .op-hub__card:hover{transform:translateY(-4px);border-color:#C8D0DC;box-shadow:0 6px 16px rgba(35,45,60,.08),0 24px 48px rgba(35,45,60,.09)}
-          .op-hub__live-tag{position:absolute;top:14px;right:14px;font-family:${DEMO_MONO};font-size:8px;letter-spacing:.12em;text-transform:uppercase;color:#2E5F9E;background:#E8F0FA;border:1px solid #C5D8EF;border-radius:20px;padding:4px 8px}
-          .op-hub__card-wrap{position:relative}
-          .op-hub__card:focus-visible{outline:2px solid ${ACCENT};outline-offset:3px}
-          .op-hub__art{padding:8px 12px 0;min-height:128px;display:flex;align-items:center;justify-content:center;background:linear-gradient(180deg,#FAFBFC 0%,#fff 100%)}
-          .op-hub__body{padding:4px 22px 0;flex:1;display:flex;flex-direction:column}
-          .op-hub__kicker{font-family:${DEMO_MONO};font-size:9px;letter-spacing:.14em;text-transform:uppercase;color:${HUB_MUTED};margin-top:8px;line-height:1.5}
-          .op-hub__title{font-family:${DEMO_HEAD};font-size:22px;font-weight:600;color:${HUB_INK};margin-top:10px;line-height:1.2}
-          .op-hub__enter{margin:18px 22px 0;width:calc(100% - 44px);background:${HUB_BTN};color:#fff;border:none;border-radius:10px;padding:13px 16px;font-family:${DEMO_UI};font-size:13px;font-weight:600;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;transition:background .15s}
-          .op-hub__card:hover .op-hub__enter{background:#2f3844}
-          .op-hub__foot{text-align:center;padding-bottom:32px;font-family:${DEMO_MONO};font-size:10px}
-          .op-hub__foot a{color:#5A7FA8;text-decoration:none}
-          .op-desk-header{background:${OPS_BAR};color:#fff;padding:14px 22px;display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:12px;position:sticky;top:0;z-index:20;box-shadow:0 1px 0 rgba(0,0,0,.08)}
-          .op-desk-rail{background:${SHEET};border-bottom:1px solid ${BORDER};padding:10px 20px;display:flex;gap:8px;overflow-x:auto;position:sticky;top:56px;z-index:19;-webkit-overflow-scrolling:touch;max-width:1100px;margin:0 auto;width:100%}
-          .op-summary{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin-bottom:18px}
-          .op-summary-item{background:${SHEET};border:1px solid ${BORDER};border-radius:10px;padding:14px 16px}
-          .op-summary-item strong{display:block;font-family:${DEMO_HEAD};font-size:22px;font-weight:600;margin-top:6px;font-variant-numeric:tabular-nums}
-          .op-workbook{background:${SHEET};border:1px solid ${BORDER};border-radius:12px;overflow:hidden;box-shadow:0 1px 0 rgba(21,34,56,.04)}
-          .op-workbook-section{padding:20px 22px;border-bottom:1px solid #ECEFF4}
-          .op-workbook-section:last-child{border-bottom:none}
-          .op-cc-totals{display:flex;flex-wrap:wrap;gap:16px 28px;margin-bottom:14px;padding:12px 14px;background:#F7F9FC;border:1px solid #E8ECF2;border-radius:8px;font-family:${DEMO_MONO};font-size:11px;color:${MUTED}}
-          .op-cc-totals b{color:${INK};font-size:13px;margin-left:6px;font-variant-numeric:tabular-nums}
-          .op-row-oct{background:${OCT_BG}!important}
-          .op-row-nov{background:${NOV_BG}!important}
-          .op-rail-btn{flex-shrink:0;display:flex;flex-direction:column;align-items:center;gap:4px;min-width:64px;padding:8px 10px;border-radius:10px;border:1px solid transparent;background:transparent;cursor:pointer;font-family:${DEMO_UI};color:${MUTED}}
-          .op-rail-btn.on{background:#EEF3FA;border-color:#C5D4EA;color:${INK}}
-          .op-rail-btn span{font-size:10px;font-weight:600}
-          .op-main{padding:20px 16px 56px;max-width:1100px;margin:0 auto}
-          .op-banks{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px}
-          .op-bank{background:#FAFBFD;border:1px solid #E2E7EF;border-radius:8px;padding:16px 18px}
-          .op-bank-total{background:#F0F5FC;border-color:#C5D4EA}
-          .op-panel{scroll-margin-top:130px}
-          .op-seg{display:inline-flex;border:1px solid ${BORDER};border-radius:8px;overflow:hidden;background:#F7F8FB}
-          .op-seg button{border:none;background:transparent;padding:8px 16px;font-family:${DEMO_UI};font-size:12px;font-weight:600;color:${MUTED};cursor:pointer}
-          .op-seg button.on{background:${NAVY};color:#fff}
-          .op-toolbar{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin:16px 0 14px}
-          .op-toolbar select,.op-linkbtn{font-family:${DEMO_UI};font-size:12px;padding:8px 12px;border-radius:8px;border:1px solid ${BORDER};background:#fff;color:${INK}}
-          .op-linkbtn{cursor:pointer}
-          .op-scroll{overflow-x:auto;-webkit-overflow-scrolling:touch;border:1px solid ${BORDER};border-radius:8px}
-          .op-scroll table{width:100%;border-collapse:collapse;min-width:560px}
-          .op-due-pill{display:inline-block;padding:3px 8px;border-radius:4px;font-size:12px;font-weight:600;font-family:${DEMO_MONO}}
-          .op-legend{display:flex;flex-wrap:wrap;gap:12px;font-family:${DEMO_MONO};font-size:10px;color:${MUTED};margin-bottom:12px}
-          .op-legend span{display:inline-flex;align-items:center;gap:6px}
-          .op-legend i{width:12px;height:12px;border-radius:3px;display:inline-block}
-          .op-cal-wrap{border:1px solid ${BORDER};border-radius:8px;padding:14px;background:#FAFBFD}
-          .op-cal-head{display:grid;grid-template-columns:repeat(7,1fr);gap:4px;margin-bottom:6px}
-          .op-cal-head div{font-family:${DEMO_MONO};font-size:9px;color:${MUTED};text-align:center}
-          .op-cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:4px}
-          .op-cal-grid button{aspect-ratio:1;border:1px solid transparent;background:#fff;border-radius:6px;font-family:${DEMO_UI};font-size:12px;cursor:pointer;min-height:42px;position:relative}
-          .op-cal-grid button.has-due{background:${OCT_BG};border-color:#E8D9A8}
-          .op-cal-grid button.sel{outline:2px solid ${ACCENT};font-weight:700}
-          .op-cal-grid button .dot{position:absolute;bottom:4px;left:50%;transform:translateX(-50%);width:4px;height:4px;border-radius:50%;background:${ACCENT}}
-          .op-row-2{display:grid;grid-template-columns:1fr 300px;gap:18px}
-          @media(max-width:900px){
-            .op-hub__grid{grid-template-columns:1fr;max-width:400px}
-            .op-hub__card{grid-column:1/-1}
-            .op-main{padding:16px 14px 48px}
-            .op-row-2{grid-template-columns:1fr}
-            .op-desk-rail{top:88px}
-          }
-        `}</style>
-      </Head>
+    <MarketingShell
+      title="Operations portal sample | JK No Jokes Financials"
+      description="JK No Jokes sample owner portal — pick a fictitious business. Operations cash desk is live; other desks are placeholders."
+      padTop={false}
+      jkTheme
+    >
+      <style>{`
+        .ops-sample-hero{min-height:auto;padding:3.5rem 1.5rem 1.5rem;text-align:center}
+        .ops-sample-hero .m-jk-home__h1{max-width:22ch;font-size:clamp(1.85rem,5vw,2.75rem)}
+        .ops-sample-hero .m-jk-home__lead{max-width:42ch;margin-left:auto;margin-right:auto}
+        .ops-desk-grid{display:grid;gap:.65rem;grid-template-columns:repeat(auto-fill,minmax(11.5rem,1fr))}
+        .ops-desk-card{display:flex;flex-direction:column;align-items:flex-start;text-align:left;width:100%;padding:1rem 1.1rem;border-radius:10px;border:1px solid rgba(42,51,68,.12);background:#fff;cursor:pointer;font:inherit;color:inherit;transition:transform .15s,box-shadow .15s;border-left:3px solid var(--jk-orange-mid)}
+        .ops-desk-card:hover{transform:translateY(-2px);box-shadow:0 8px 24px rgba(0,0,0,.12);border-left-color:var(--jk-gold)}
+        .ops-desk-card__emoji{font-size:1.5rem;line-height:1;margin-bottom:.5rem}
+        .ops-desk-card__kicker{font-family:'DM Mono',monospace;font-size:.65rem;letter-spacing:.12em;text-transform:uppercase;color:#64748b;margin-bottom:.35rem}
+        .ops-desk-card__title{font-family:var(--jk-display);font-size:1.05rem;font-weight:600;color:var(--jk-ink);margin:0 0 .4rem}
+        .ops-desk-card__blurb{font-size:.82rem;line-height:1.45;color:#64748b;margin:0 0 .65rem}
+        .ops-desk-card__go{font-family:'DM Mono',monospace;font-size:.65rem;letter-spacing:.08em;text-transform:uppercase;color:#8f3d18}
+        .ops-desk-card--live{box-shadow:inset 0 0 0 1px rgba(201,168,76,.35)}
+        .ops-tabs{display:flex;flex-wrap:wrap;gap:.4rem;margin-bottom:1rem}
+        .ops-tabs button{font-family:var(--jk-body);font-size:.8rem;font-weight:600;padding:.45rem .85rem;border-radius:6px;border:1px solid rgba(42,51,68,.15);background:#fff;color:#64748b;cursor:pointer}
+        .ops-tabs button.is-active{background:var(--jk-ink);color:#fff;border-color:var(--jk-ink)}
+        .ops-kpi-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:.65rem;margin-bottom:1rem}
+        .ops-kpi{padding:.85rem 1rem;border-radius:8px;border:1px solid rgba(42,51,68,.1);background:#faf9f6}
+        .ops-kpi span{display:block;font-family:'DM Mono',monospace;font-size:.62rem;letter-spacing:.1em;text-transform:uppercase;color:#64748b}
+        .ops-kpi strong{display:block;margin-top:.35rem;font-family:var(--jk-display);font-size:1.35rem;font-variant-numeric:tabular-nums;color:var(--jk-ink)}
+        .ops-table-wrap{overflow-x:auto;border:1px solid rgba(42,51,68,.12);border-radius:8px;-webkit-overflow-scrolling:touch}
+        .ops-table{width:100%;border-collapse:collapse;min-width:520px;font-size:.88rem}
+        .ops-table th{text-align:left;padding:.55rem .75rem;font-family:'DM Mono',monospace;font-size:.62rem;letter-spacing:.08em;text-transform:uppercase;color:#64748b;background:#f0ede6;border-bottom:1px solid rgba(42,51,68,.1)}
+        .ops-table td{padding:.55rem .75rem;border-bottom:1px solid #ebe8e0;color:var(--jk-ink);font-variant-numeric:tabular-nums}
+        .ops-row-oct{background:#fdf6e3!important}
+        .ops-row-nov{background:#e8f0fa!important}
+        .ops-pill{display:inline-block;padding:2px 7px;border-radius:4px;font-size:.78rem;font-weight:600;font-family:'DM Mono',monospace}
+        .ops-banks{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:.65rem}
+        .ops-bank{padding:.85rem 1rem;border-radius:8px;border:1px solid rgba(42,51,68,.1);background:#faf9f6}
+        .ops-toolbar{display:flex;flex-wrap:wrap;gap:.5rem;align-items:center;margin:1rem 0}
+        .ops-toolbar select,.ops-toolbar button{font-family:var(--jk-body);font-size:.8rem;padding:.4rem .65rem;border-radius:6px;border:1px solid rgba(42,51,68,.15);background:#fff}
+        .ops-seg{display:inline-flex;border:1px solid rgba(42,51,68,.15);border-radius:6px;overflow:hidden}
+        .ops-seg button{border:none;background:transparent;padding:.4rem .75rem;font-size:.8rem;font-weight:600;color:#64748b;cursor:pointer}
+        .ops-seg button.on{background:var(--jk-ink);color:#fff}
+        .ops-cal{display:grid;grid-template-columns:repeat(7,1fr);gap:4px}
+        .ops-cal button{aspect-ratio:1;min-height:38px;border:1px solid transparent;background:#fff;border-radius:6px;font-size:.78rem;cursor:pointer;position:relative}
+        .ops-cal button.has{background:#fdf6e3;border-color:#e8d9a8}
+        .ops-cal button.sel{outline:2px solid var(--jk-gold);font-weight:700}
+        .ops-toast{text-align:center;padding:.65rem 1rem;background:var(--jk-ink);color:#fff;font-size:.88rem}
+        .ops-cc-meta{display:flex;flex-wrap:wrap;gap:1rem 1.5rem;margin:.75rem 0;padding:.65rem .85rem;background:#f5f2eb;border-radius:8px;font-family:'DM Mono',monospace;font-size:.72rem;color:#64748b}
+        .ops-cc-meta b{color:var(--jk-ink);margin-left:.35rem}
+      `}</style>
 
-      <DemoLobby />
+      {toast && <div className="ops-toast">{toast}</div>}
 
-      {toast && (
-        <div style={{ background: NAVY, color: '#fff', textAlign: 'center', padding: '10px 16px', fontFamily: DEMO_UI, fontSize: 13, zIndex: 30, position: 'relative' }}>
-          {toast}
-        </div>
-      )}
+      <div className="m-jk-home">
+        <header className="ops-sample-hero m-jk-home__hero">
+          <p className="m-jk-home__mark" aria-hidden="true">
+            JK<span className="m-jk-home__mark-dot">.</span>
+          </p>
+          <p className="m-jk-story__kicker" style={{ color: 'var(--jk-gold-hi)', textShadow: '0 1px 12px rgba(8,12,24,.35)' }}>
+            Sample owner portal
+          </p>
+          <h1 className="m-jk-home__h1">One login, different desks.</h1>
+          <p className="m-jk-home__lead">
+            Fictitious businesses — same build pattern I ship for real clients. Tap a desk; only the operations cash-flow screen is live here.
+          </p>
+        </header>
 
-      <div className={DEMO_PORTAL_ROOT_CLASS}>
-        {hubOpen ? (
-          <div className="op-hub">
-            <header className="op-hub__bar">
-              <div className="op-hub__brand">
-                <HubLogo />
-                <span className="op-hub__brand-name">{BIZ.toUpperCase()}</span>
-              </div>
-              <span className="op-hub__sample">Public sample · fictitious data</span>
-            </header>
-            <div className="op-hub__intro">
-              <p>Owner portal · tap where you&rsquo;re going</p>
+        <div className="m-jk-home__flow">
+          <section className="m-jk-home__panel m-jk-home__panel--story">
+            <p className="m-jk-story__kicker">Pick a desk</p>
+            <h2 className="m-jk-story__title">Where do you want to go?</h2>
+            <p className="m-jk-story__body m-jk-story__body--tight">
+              Real estate, barbershop, wholesale, or finance ops — each client gets their own screens. This demo opens <strong>{SAMPLE_CLIENT}</strong> operations only.
+            </p>
+            <div className="ops-desk-grid m-jk-stagger-cards" style={{ marginTop: '1.1rem' }}>
+              {DESKS.map((d) => (
+                <button
+                  key={d.id}
+                  type="button"
+                  className={`ops-desk-card${d.live ? ' ops-desk-card--live' : ''}`}
+                  onClick={() => pickDesk(d)}
+                >
+                  <span className="ops-desk-card__emoji" aria-hidden>{d.emoji}</span>
+                  <span className="ops-desk-card__kicker">{d.kicker}</span>
+                  <span className="ops-desk-card__title">{d.title}</span>
+                  <p className="ops-desk-card__blurb">{d.blurb}</p>
+                  <span className="ops-desk-card__go">{d.live ? 'Open sample →' : 'Placeholder'}</span>
+                </button>
+              ))}
             </div>
-            <div className="op-hub__grid" role="navigation" aria-label="Portal desks">
-              {PORTAL_DESKS.map((d) => (
-                <div key={d.id} className="op-hub__card-wrap">
-                  {d.live && <span className="op-hub__live-tag">Live in sample</span>}
-                  <button
-                    type="button"
-                    className={`op-hub__card${d.live ? ' op-hub__card--live' : ''}`}
-                    onClick={() => hubPick(d)}
-                    style={{ font: 'inherit', width: '100%' }}
-                  >
-                    <div className="op-hub__art">
-                      <HubArt type={d.art} />
-                    </div>
-                    <div className="op-hub__body">
-                      <div className="op-hub__kicker">{d.kicker}</div>
-                      <div className="op-hub__title">{d.title}</div>
-                    </div>
-                    <span className="op-hub__enter">Enter <span aria-hidden="true">›</span></span>
+          </section>
+
+          {deskOpen && (
+            <section id="ops-desk" className="m-jk-home__panel">
+              <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'space-between', gap: '12px', alignItems: 'flex-start', marginBottom: '1rem' }}>
+                <div>
+                  <p className="m-jk-story__kicker">{SAMPLE_CLIENT}</p>
+                  <h2 className="m-jk-story__title" style={{ marginBottom: 0 }}>Operations center</h2>
+                  <p className="m-jk-story__body" style={{ marginTop: '0.5rem', fontSize: '0.92rem' }}>
+                    Workbook-style cash desk — not live bank feeds.
+                  </p>
+                </div>
+                <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+                  <button type="button" className="m-jk-home__btn m-jk-home__btn--ghost" style={{ color: 'var(--jk-ink)', borderColor: 'rgba(42,51,68,.25)', background: '#fff' }} onClick={() => setDeskOpen(false)}>
+                    Back to desks
+                  </button>
+                  <button type="button" className="m-jk-home__btn m-jk-home__btn--primary" onClick={() => ping('Production portals refresh from an .xlsx upload — no redeploy.')}>
+                    Upload workbook
                   </button>
                 </div>
-              ))}
-            </div>
-            <div className="op-hub__foot">
-              <a href={BOOK} target="_blank" rel="noopener noreferrer">Built by JK No Jokes Financials →</a>
-            </div>
-          </div>
-        ) : (
-          <>
-            <header className="op-desk-header">
-              <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
-                <button type="button" onClick={() => setHubOpen(true)} style={{ background: 'transparent', border: '1px solid rgba(255,255,255,.25)', color: '#fff', borderRadius: 8, padding: '6px 10px', fontFamily: DEMO_MONO, fontSize: 10, cursor: 'pointer' }}>
-                  ← Desks
-                </button>
-                <div>
-                  <div style={{ fontFamily: DEMO_HEAD, fontSize: 17, fontWeight: 600 }}>Operations center</div>
-                  <div style={{ fontFamily: DEMO_MONO, fontSize: 9, opacity: 0.75, letterSpacing: '.1em' }}>{BIZ.toUpperCase()}</div>
-                </div>
-              </div>
-              <button type="button" onClick={() => ping('Sample — production refreshes from workbook upload.')} style={{ background: ACCENT, color: '#fff', border: 'none', borderRadius: 8, padding: '8px 14px', fontFamily: DEMO_MONO, fontSize: 10, letterSpacing: '.06em', cursor: 'pointer' }}>
-                UPLOAD WORKBOOK
-              </button>
-            </header>
-
-            <nav className="op-desk-rail" aria-label="Cash flow sections">
-              {DESK_SECTIONS.map((s) => (
-                <button key={s.id} type="button" className={`op-rail-btn${activeSection === s.id ? ' on' : ''}`} onClick={() => jumpSection(s.id)}>
-                  <Icon name={SECTION_ICON[s.id]} size={22} color={activeSection === s.id ? ACCENT : '#8A96A8'} />
-                  <span>{s.label}</span>
-                </button>
-              ))}
-            </nav>
-
-            <main className="op-main">
-              <div className="op-summary">
-                <div className="op-summary-item">
-                  <span style={{ fontFamily: DEMO_MONO, fontSize: 9, color: MUTED, letterSpacing: '.08em', textTransform: 'uppercase' }}>Combined liquid</span>
-                  <strong>{money(bankTotal)}</strong>
-                </div>
-                <div className="op-summary-item">
-                  <span style={{ fontFamily: DEMO_MONO, fontSize: 9, color: MUTED, letterSpacing: '.08em', textTransform: 'uppercase' }}>Card payables (view)</span>
-                  <strong>{money(ccTotal)}</strong>
-                </div>
-                <div className="op-summary-item">
-                  <span style={{ fontFamily: DEMO_MONO, fontSize: 9, color: MUTED, letterSpacing: '.08em', textTransform: 'uppercase' }}>Amount going out</span>
-                  <strong>{money(goingOut)}</strong>
-                </div>
-                <div className="op-summary-item">
-                  <span style={{ fontFamily: DEMO_MONO, fontSize: 9, color: MUTED, letterSpacing: '.08em', textTransform: 'uppercase' }}>Shortage flag</span>
-                  <strong style={{ color: shortage > 0 ? WARN : '#1E7A4A' }}>{shortage > 0 ? money(shortage) : '—'}</strong>
-                </div>
               </div>
 
-              <div className="op-workbook">
-              <section id="section-banks" className="op-workbook-section op-panel">
-                <h2 style={{ fontFamily: DEMO_HEAD, fontSize: 20, fontWeight: 600, marginBottom: 14 }}>Bank balances</h2>
-                <div className="op-banks">
+              <nav className="ops-tabs" aria-label="Sections">
+                {SECTIONS.map((s) => (
+                  <button key={s.id} type="button" className={activeSection === s.id ? 'is-active' : ''} onClick={() => jumpSection(s.id)}>
+                    {s.label}
+                  </button>
+                ))}
+              </nav>
+
+              <div className="ops-kpi-row">
+                <div className="ops-kpi"><span>Combined liquid</span><strong>{money(bankTotal)}</strong></div>
+                <div className="ops-kpi"><span>Card payables</span><strong>{money(ccTotal)}</strong></div>
+                <div className="ops-kpi"><span>Going out</span><strong>{money(goingOut)}</strong></div>
+                <div className="ops-kpi"><span>Shortage flag</span><strong style={{ color: shortage > 0 ? '#b84a3a' : '#1e7a4a' }}>{shortage > 0 ? money(shortage) : '—'}</strong></div>
+              </div>
+
+              <div id="section-banks" style={{ scrollMarginTop: '5rem', marginBottom: '1.5rem' }}>
+                <h3 className="m-jk-story__title" style={{ fontSize: '1.15rem' }}>Bank balances</h3>
+                <div className="ops-banks">
                   {BANKS.map((b) => (
-                    <div key={b.id} className="op-bank">
-                      <div style={{ fontFamily: DEMO_MONO, fontSize: 9, color: MUTED, letterSpacing: '.1em', textTransform: 'uppercase' }}>{b.name}</div>
-                      <div style={{ fontFamily: DEMO_MONO, fontSize: 10, color: '#8A96A8', marginTop: 4 }}>{b.account}</div>
-                      <div style={{ fontFamily: DEMO_HEAD, fontSize: 26, fontWeight: 600, marginTop: 8, fontVariantNumeric: 'tabular-nums' }}>{money(b.balance)}</div>
-                      <div style={{ fontFamily: DEMO_MONO, fontSize: 10, color: MUTED, marginTop: 8 }}>Last entered {b.entered}</div>
+                    <div key={b.id} className="ops-bank">
+                      <span style={{ fontFamily: 'DM Mono, monospace', fontSize: '.62rem', letterSpacing: '.1em', textTransform: 'uppercase', color: '#64748b' }}>{b.name}</span>
+                      <div style={{ fontFamily: 'DM Mono, monospace', fontSize: '.72rem', color: '#94a3b8', marginTop: '.25rem' }}>{b.account}</div>
+                      <strong style={{ display: 'block', fontFamily: 'var(--jk-display)', fontSize: '1.45rem', marginTop: '.4rem' }}>{money(b.balance)}</strong>
+                      <span style={{ fontFamily: 'DM Mono, monospace', fontSize: '.68rem', color: '#64748b' }}>Last entered {b.entered}</span>
                     </div>
                   ))}
                 </div>
-              </section>
+              </div>
 
-              <section id="section-cards" className="op-workbook-section op-panel">
-                <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'space-between', gap: 12, marginBottom: 8 }}>
-                  <h2 style={{ fontFamily: DEMO_HEAD, fontSize: 20, fontWeight: 600 }}>Credit card payables</h2>
+              <div id="section-cards" style={{ scrollMarginTop: '5rem', marginBottom: '1.5rem' }}>
+                <h3 className="m-jk-story__title" style={{ fontSize: '1.15rem' }}>Credit card payables</h3>
+                <div className="ops-cc-meta">
+                  <span>Filtered<b>{money(ccTotal)}</b></span>
+                  <span>October<b>{money(octDue)}</b></span>
+                  <span>November<b>{money(novDue)}</b></span>
                 </div>
-                <div className="op-cc-totals">
-                  <span>Filtered total<b>{money(ccTotal)}</b></span>
-                  <span>October dues<b>{money(octDue)}</b></span>
-                  <span>November dues<b>{money(novDue)}</b></span>
-                </div>
-                <div className="op-legend">
-                  <span><i style={{ background: OCT_BG, border: `1px solid ${OCT_INK}` }} /> October row color</span>
-                  <span><i style={{ background: NOV_BG, border: `1px solid ${NOV_INK}` }} /> November row color</span>
-                </div>
-                <div className="op-toolbar">
-                  <div className="op-seg">
+                <div className="ops-toolbar">
+                  <div className="ops-seg">
                     <button type="button" className={cardView === 'sheet' ? 'on' : ''} onClick={() => setCardView('sheet')}>Sheet</button>
                     <button type="button" className={cardView === 'calendar' ? 'on' : ''} onClick={() => setCardView('calendar')}>Calendar</button>
                   </div>
@@ -593,30 +334,30 @@ export default function OperationsPortalDemo() {
                       <option key={c.id} value={c.id}>{c.label}</option>
                     ))}
                   </select>
-                  <button type="button" className="op-linkbtn" onClick={() => setSortAsc((s) => !s)}>Due {sortAsc ? '↑' : '↓'}</button>
+                  <button type="button" onClick={() => setSortAsc((s) => !s)}>Due {sortAsc ? '↑' : '↓'}</button>
                 </div>
                 {cardView === 'sheet' ? (
-                  <div className="op-scroll">
-                    <table>
+                  <div className="ops-table-wrap">
+                    <table className="ops-table">
                       <thead>
                         <tr>
-                          <th style={th}>Card</th>
-                          <th style={th}>Vendor</th>
-                          <th style={th}>Due</th>
-                          <th style={{ ...th, textAlign: 'right' }}>Amount</th>
+                          <th>Card</th>
+                          <th>Vendor</th>
+                          <th>Due</th>
+                          <th style={{ textAlign: 'right' }}>Amount</th>
                         </tr>
                       </thead>
                       <tbody>
                         {filtered.map((r, i) => {
                           const ds = dueStyle(r.due)
                           const m = new Date(r.due + 'T12:00:00').getMonth()
-                          const rowClass = m === 9 ? 'op-row-oct' : m === 10 ? 'op-row-nov' : ''
+                          const rowClass = m === 9 ? 'ops-row-oct' : m === 10 ? 'ops-row-nov' : ''
                           return (
                             <tr key={i} className={rowClass}>
-                              <td style={td}>{CARDS.find((c) => c.id === r.card)?.label}</td>
-                              <td style={td}>{r.vendor}</td>
-                              <td style={td}><span className="op-due-pill" style={{ background: ds.bg, color: ds.color }}>{fmtDue(r.due)}</span></td>
-                              <td style={{ ...td, textAlign: 'right', fontWeight: 600, fontVariantNumeric: 'tabular-nums' }}>{money(r.amount)}</td>
+                              <td>{CARDS.find((c) => c.id === r.card)?.label}</td>
+                              <td>{r.vendor}</td>
+                              <td><span className="ops-pill" style={{ background: ds.bg, color: ds.color }}>{fmtDue(r.due)}</span></td>
+                              <td style={{ textAlign: 'right', fontWeight: 600 }}>{money(r.amount)}</td>
                             </tr>
                           )
                         })}
@@ -624,110 +365,120 @@ export default function OperationsPortalDemo() {
                     </table>
                   </div>
                 ) : (
-                  <div id="section-calendar" style={{ display: 'grid', gridTemplateColumns: 'minmax(260px,1fr) minmax(220px,1fr)', gap: 18 }}>
-                    <div className="op-cal-wrap">
-                      <div style={{ fontFamily: DEMO_HEAD, fontSize: 16, fontWeight: 600, marginBottom: 10 }}>October 2026</div>
-                      <div className="op-cal-head">{['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map((d) => <div key={d}>{d}</div>)}</div>
-                      <div className="op-cal-grid">
+                  <div id="section-calendar" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(240px,1fr))', gap: '1rem' }}>
+                    <div className="ops-bank">
+                      <strong style={{ fontFamily: 'var(--jk-display)' }}>October 2026</strong>
+                      <div className="ops-cal" style={{ marginTop: '.75rem' }}>
                         {CAL_CELLS.map((c, i) => {
-                          if (c.type === 'pad') return <div key={`p${i}`} className="pad" />
+                          if (c.type === 'pad') return <div key={`p${i}`} />
                           const sel = calDay === c.iso
                           return (
-                            <button key={c.iso} type="button" className={`${c.count ? 'has-due' : ''}${sel ? ' sel' : ''}`} onClick={() => setCalDay(c.iso)}>
+                            <button key={c.iso} type="button" className={`${c.count ? 'has' : ''}${sel ? ' sel' : ''}`} onClick={() => setCalDay(c.iso)}>
                               {c.day}
-                              {c.count > 0 && <span className="dot" />}
                             </button>
                           )
                         })}
                       </div>
                     </div>
-                    <div className="op-cal-wrap">
-                      <div style={{ fontFamily: DEMO_MONO, fontSize: 9, color: MUTED, marginBottom: 8 }}>{fmtDueLong(calDay)}</div>
+                    <div className="ops-bank">
+                      <span style={{ fontFamily: 'DM Mono, monospace', fontSize: '.65rem', color: '#64748b' }}>{fmtDueLong(calDay)}</span>
                       {dayRows.length === 0 ? (
-                        <p style={{ color: MUTED, fontSize: 13 }}>No card payments this day.</p>
+                        <p style={{ marginTop: '.5rem', color: '#64748b', fontSize: '.88rem' }}>No card payments this day.</p>
                       ) : (
                         dayRows.map((r, i) => (
-                          <div key={i} style={{ padding: '10px 0', borderBottom: `1px solid ${BORDER}` }}>
-                            <div style={{ fontFamily: DEMO_MONO, fontSize: 10, color: ACCENT }}>{CARDS.find((c) => c.id === r.card)?.short}</div>
-                            <div style={{ fontSize: 14, fontWeight: 600 }}>{r.vendor}</div>
-                            <div style={{ fontSize: 13, color: MUTED, marginTop: 4 }}>{money(r.amount)}</div>
+                          <div key={i} style={{ padding: '.5rem 0', borderBottom: '1px solid #ebe8e0' }}>
+                            <div style={{ fontFamily: 'DM Mono, monospace', fontSize: '.65rem', color: '#8f3d18' }}>{CARDS.find((c) => c.id === r.card)?.short}</div>
+                            <div style={{ fontWeight: 600 }}>{r.vendor}</div>
+                            <div style={{ color: '#64748b' }}>{money(r.amount)}</div>
                           </div>
                         ))
                       )}
                     </div>
                   </div>
                 )}
-              </section>
+              </div>
 
-              <section id="section-loans" className="op-workbook-section op-panel">
-                <div className="op-row-2">
-                  <div>
-                    <h2 style={{ fontFamily: DEMO_HEAD, fontSize: 18, fontWeight: 600, marginBottom: 12 }}>Short-term loans</h2>
-                    <div className="op-scroll">
-                      <table>
-                        <thead>
-                          <tr>
-                            <th style={th}>Facility</th>
-                            <th style={th}>Due</th>
-                            <th style={{ ...th, textAlign: 'right' }}>Payment</th>
+              <div id="section-loans" style={{ scrollMarginTop: '5rem', marginBottom: '1.5rem' }}>
+                <h3 className="m-jk-story__title" style={{ fontSize: '1.15rem' }}>Short-term loans & outflow</h3>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(260px,1fr))', gap: '1rem' }}>
+                  <div className="ops-table-wrap">
+                    <table className="ops-table">
+                      <thead>
+                        <tr>
+                          <th>Facility</th>
+                          <th>Due</th>
+                          <th style={{ textAlign: 'right' }}>Payment</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {STL.map((r, i) => (
+                          <tr key={i}>
+                            <td>{r.lender}</td>
+                            <td>{fmtDue(r.due)}</td>
+                            <td style={{ textAlign: 'right' }}>{money(r.payment)}</td>
                           </tr>
-                        </thead>
-                        <tbody>
-                          {STL.map((r, i) => (
-                            <tr key={i}>
-                              <td style={td}>{r.lender}</td>
-                              <td style={td}>{fmtDue(r.due)}</td>
-                              <td style={{ ...td, textAlign: 'right', fontVariantNumeric: 'tabular-nums' }}>{money(r.payment)}</td>
-                            </tr>
-                          ))}
-                        </tbody>
-                      </table>
-                    </div>
+                        ))}
+                      </tbody>
+                    </table>
                   </div>
-                  <div style={{ background: '#F7F9FC', borderRadius: 10, padding: 16, border: `1px solid ${BORDER}`, alignSelf: 'start' }}>
-                    <div style={{ fontFamily: DEMO_MONO, fontSize: 9, color: MUTED, letterSpacing: '.1em' }}>OUTFLOW CHECK</div>
-                    <div style={{ marginTop: 12, fontSize: 14, lineHeight: 1.85 }}>
-                      <div style={{ display: 'flex', justifyContent: 'space-between' }}><span style={{ color: MUTED }}>Cards</span><strong>{money(ccTotal)}</strong></div>
-                      <div style={{ display: 'flex', justifyContent: 'space-between' }}><span style={{ color: MUTED }}>Loans</span><strong>{money(stlDue)}</strong></div>
-                      <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: 8, paddingTop: 10, borderTop: `1px solid ${BORDER}` }}><span style={{ color: MUTED }}>Going out</span><strong>{money(goingOut)}</strong></div>
-                      <div style={{ display: 'flex', justifyContent: 'space-between', color: cushion < 0 ? WARN : '#1E7A4A' }}><span>Cushion</span><strong>{cushion < 0 ? `(${money(Math.abs(cushion))})` : money(cushion)}</strong></div>
+                  <div className="ops-bank">
+                    <span style={{ fontFamily: 'DM Mono, monospace', fontSize: '.62rem', letterSpacing: '.1em', textTransform: 'uppercase', color: '#64748b' }}>Outflow check</span>
+                    <div style={{ marginTop: '.65rem', fontSize: '.9rem', lineHeight: 1.75 }}>
+                      <div style={{ display: 'flex', justifyContent: 'space-between' }}><span style={{ color: '#64748b' }}>Cards</span><strong>{money(ccTotal)}</strong></div>
+                      <div style={{ display: 'flex', justifyContent: 'space-between' }}><span style={{ color: '#64748b' }}>Loans</span><strong>{money(stlDue)}</strong></div>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '.5rem', paddingTop: '.5rem', borderTop: '1px solid #e0dcd4' }}><span style={{ color: '#64748b' }}>Cushion</span><strong>{cushion < 0 ? `(${money(Math.abs(cushion))})` : money(cushion)}</strong></div>
                     </div>
                   </div>
                 </div>
-              </section>
+              </div>
 
-              <section id="section-outflow" className="op-workbook-section op-panel">
-                <h2 style={{ fontFamily: DEMO_HEAD, fontSize: 18, fontWeight: 600, marginBottom: 12 }}>US monthly outflow</h2>
-                <div className="op-scroll">
-                  <table>
+              <div id="section-outflow" style={{ scrollMarginTop: '5rem' }}>
+                <h3 className="m-jk-story__title" style={{ fontSize: '1.15rem' }}>US monthly outflow</h3>
+                <div className="ops-table-wrap">
+                  <table className="ops-table">
                     <thead>
                       <tr>
-                        <th style={th}>Month</th>
-                        <th style={{ ...th, textAlign: 'right' }}>Payroll</th>
-                        <th style={{ ...th, textAlign: 'right' }}>Rent</th>
-                        <th style={{ ...th, textAlign: 'right' }}>Debt</th>
-                        <th style={{ ...th, textAlign: 'right' }}>Other</th>
+                        <th>Month</th>
+                        <th style={{ textAlign: 'right' }}>Payroll</th>
+                        <th style={{ textAlign: 'right' }}>Rent</th>
+                        <th style={{ textAlign: 'right' }}>Debt</th>
+                        <th style={{ textAlign: 'right' }}>Other</th>
                       </tr>
                     </thead>
                     <tbody>
                       {US_OUTFLOW.map((r) => (
                         <tr key={r.month}>
-                          <td style={td}>{r.month}</td>
-                          <td style={{ ...td, textAlign: 'right', fontVariantNumeric: 'tabular-nums' }}>{money(r.payroll)}</td>
-                          <td style={{ ...td, textAlign: 'right', fontVariantNumeric: 'tabular-nums' }}>{money(r.rent)}</td>
-                          <td style={{ ...td, textAlign: 'right', fontVariantNumeric: 'tabular-nums' }}>{money(r.debt)}</td>
-                          <td style={{ ...td, textAlign: 'right', fontVariantNumeric: 'tabular-nums' }}>{money(r.other)}</td>
+                          <td>{r.month}</td>
+                          <td style={{ textAlign: 'right' }}>{money(r.payroll)}</td>
+                          <td style={{ textAlign: 'right' }}>{money(r.rent)}</td>
+                          <td style={{ textAlign: 'right' }}>{money(r.debt)}</td>
+                          <td style={{ textAlign: 'right' }}>{money(r.other)}</td>
                         </tr>
                       ))}
                     </tbody>
                   </table>
                 </div>
-              </section>
               </div>
-            </main>
-          </>
-        )}
+            </section>
+          )}
+
+          <section className="m-jk-home__panel m-jk-home__panel--story">
+            <p className="m-jk-story__kicker">Want this for your shop?</p>
+            <h2 className="m-jk-story__title">I build the desk, you keep the spreadsheet.</h2>
+            <p className="m-jk-story__body">
+              Same pattern for trades, property, wholesale, or finance ops — one login, your workbook or QuickBooks behind it.
+            </p>
+            <div className="m-jk-home__hero-actions" style={{ justifyContent: 'flex-start', marginTop: '1rem' }}>
+              <button type="button" className="m-jk-home__btn m-jk-home__btn--primary" onClick={() => router.push('/#contact')}>
+                Tell me what you need
+              </button>
+              <a href={BOOKING_URL} target="_blank" rel="noopener noreferrer" className="m-jk-home__btn m-jk-home__btn--ghost">
+                Book a call
+              </a>
+            </div>
+          </section>
+        </div>
       </div>
-    </>
+    </MarketingShell>
   )
 }
