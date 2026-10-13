@@ -5,6 +5,8 @@ export default function DemoGalleryCard({
   pain,
   here = false,
   compact = false,
+  featured = false,
+  featuredLabel = 'Start here',
   onDark = false,
   variant = 'default',
   emoji = '✦',
@@ -34,9 +36,13 @@ export default function DemoGalleryCard({
         'm-demo-card',
         here && 'm-demo-card--here',
         compact && 'm-demo-card--compact',
+        featured && 'm-demo-card--featured',
         onDark && 'm-demo-card--on-dark',
       ].filter(Boolean).join(' ')}
     >
+      {featured ? (
+        <span className="m-demo-card__badge">{featuredLabel}</span>
+      ) : null}
       {pain ? (
         <>
           <span className="m-demo-card__pain">{pain}</span>

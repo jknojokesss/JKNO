@@ -693,6 +693,20 @@ html.jk-scroll-motion .m-jk-page [data-fly-in]:not(.is-visible) .m-jk-steps li {
   grid-template-columns: 1fr;
 }
 
+.m-jk-home__demos--lead .m-demo-card--featured {
+  grid-column: 1 / -1;
+}
+
+.m-jk-home__panel--spotlight {
+  border-left: 4px solid var(--jk-gold);
+}
+
+.m-jk-home__btn--inline {
+  margin-top: 0.75rem;
+  width: auto;
+  max-width: 100%;
+}
+
 @media (min-width: 640px) {
   .m-jk-home__demos--lead {
     grid-template-columns: repeat(2, minmax(0, 1fr));

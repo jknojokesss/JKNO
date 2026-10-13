@@ -62,12 +62,14 @@ export default function DemoGalleryIndex() {
         <div className="m-wrap">
           <p className="m-kicker" style={{ marginBottom: 12 }}>Start here</p>
           <p className="m-about-p" style={{ marginTop: 0, marginBottom: 16, maxWidth: '42rem' }}>
-            Four common builds — each opens a sample shop that answers one money question. Pick what sounds like you.
+            <strong>Owner portfolio</strong> is the hub we build most for multi-entity owners — then single-trade samples
+            for one shop. Each answers one money question.
           </p>
-          <div className="m-demo-grid m-demo-grid--gallery">
+          <div className="m-demo-grid m-demo-grid--gallery m-demo-grid--starters">
             {STARTER_DEMOS.map((s) => {
               const row = ALL_DEMOS.find((d) => d.href === s.href)
               if (!row) return null
+              const featured = s.href === '/operations-portal'
               return (
                 <DemoGalleryCard
                   key={s.href}
@@ -75,6 +77,8 @@ export default function DemoGalleryIndex() {
                   biz={row.biz}
                   pain={s.pain || painLineForDemo(s.href)}
                   compact
+                  featured={featured}
+                  featuredLabel="Flagship sample"
                 />
               )
             })}

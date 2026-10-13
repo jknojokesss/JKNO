@@ -2953,6 +2953,40 @@
   padding: 0.75rem 0.85rem;
 }
 
+.m-demo-card--featured {
+  border-left-width: 4px;
+  border-left-color: var(--m-gold);
+  background: linear-gradient(135deg, #fffef8 0%, #fff 55%);
+  box-shadow: 0 4px 20px rgba(124, 92, 18, 0.12);
+}
+
+.m-demo-card__badge {
+  align-self: flex-start;
+  margin-bottom: 0.15rem;
+  padding: 0.2rem 0.45rem;
+  border-radius: 3px;
+  font-size: 0.62rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: #5c4510;
+  background: rgba(201, 168, 76, 0.28);
+}
+
+.m-demo-grid--starters .m-demo-card--featured {
+  grid-column: 1 / -1;
+}
+
+@media (min-width: 720px) {
+  .m-demo-grid--starters {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .m-demo-grid--starters .m-demo-card--featured {
+    grid-column: 1 / -1;
+  }
+}
+
 .m-demo-card__industry {
   font-size: 0.65rem;
   letter-spacing: 0.12em;

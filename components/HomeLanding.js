@@ -18,7 +18,10 @@ const START_STEPS = [
   'You sign in on real data; we adjust until it clicks.',
 ]
 
+const PORTFOLIO_HREF = '/operations-portal'
+
 const TRADES = [
+  'Multiple businesses / portfolio',
   'Tire / auto',
   'Contractor / trades',
   'Import / wholesale',
@@ -59,18 +62,26 @@ export default function HomeLanding({
           JK<span className="m-jk-home__mark-dot">.</span>
         </p>
         <h1 className="m-jk-home__h1">
-          One login for the numbers that run your shop.
+          One login across the businesses you run.
         </h1>
         <p className="m-jk-home__lead">
-          Owner portals wired to QuickBooks and the tools you already run — one login instead of spreadsheets and a pile of tabs.
+          One shop or several — barber, rentals, retail, cafe — owner portals on QuickBooks and the tools you already use.
+          No more spreadsheet tabs and three different logins.
         </p>
         <div className="m-jk-home__hero-actions">
           <button
             type="button"
             className="m-jk-home__btn m-jk-home__btn--primary"
+            onClick={() => router.push(PORTFOLIO_HREF)}
+          >
+            Owner portfolio — open sample
+          </button>
+          <button
+            type="button"
+            className="m-jk-home__btn m-jk-home__btn--ghost"
             onClick={() => scrollTo('samples')}
           >
-            See sample portals
+            More sample portals
           </button>
           <button
             type="button"
@@ -79,17 +90,27 @@ export default function HomeLanding({
           >
             Tell me what you need
           </button>
-          <button
-            type="button"
-            className="m-jk-home__btn m-jk-home__btn--ghost m-jk-home__btn--ops"
-            onClick={() => router.push('/operations-portal')}
-          >
-            Owner portfolio — sample
-          </button>
         </div>
       </header>
 
       <div className="m-jk-home__flow">
+        <section className="m-jk-home__panel m-jk-home__panel--story m-jk-home__panel--spotlight" id="portfolio">
+          <p className="m-jk-story__kicker">Flagship sample</p>
+          <h2 className="m-jk-story__title">Owner portfolio hub</h2>
+          <p className="m-jk-story__body">
+            Multiple entities, one sign-in. Pick a business from the hub — books &amp; cash shows card due dates, bank
+            balance, and whether you have room to pay the cards this week. Other desks in the sample are layout previews;
+            we wire yours live when you are ready.
+          </p>
+          <button
+            type="button"
+            className="m-jk-home__btn m-jk-home__btn--primary m-jk-home__btn--inline"
+            onClick={() => router.push(`${PORTFOLIO_HREF}?desk=operations`)}
+          >
+            Open Books &amp; cash desk
+          </button>
+        </section>
+
         <section className="m-jk-home__panel m-jk-home__panel--story" id="offer">
           <p className="m-jk-story__kicker">Two ways to work together</p>
           <h2 className="m-jk-story__title">Portal first — books optional</h2>
@@ -114,7 +135,7 @@ export default function HomeLanding({
           <p className="m-jk-story__kicker">Samples</p>
           <h2 className="m-jk-story__title">Open a sample</h2>
           <p className="m-jk-story__body m-jk-story__body--tight">
-            Fictitious names, real screen layouts. No password — pick one and look around.
+            Fictitious names, real screen layouts. No password — start with the portfolio hub or pick a single-trade sample.
           </p>
           <div className="m-jk-home__demos m-jk-home__demos--lead m-jk-stagger-cards">
             {HERO_SAMPLE_BARS.map((p) => (
@@ -124,6 +145,8 @@ export default function HomeLanding({
                 biz={p.name}
                 pain={painLineForDemo(p.href)}
                 compact
+                featured={p.href === PORTFOLIO_HREF}
+                featuredLabel="Flagship sample"
               />
             ))}
           </div>
@@ -224,7 +247,7 @@ export default function HomeLanding({
                 The screen you want
                 <textarea
                   rows={3}
-                  placeholder="Profit per order, jobs in progress, what's on the shelf…"
+                  placeholder="Multi-business hub, profit per order, card due dates vs. cash…"
                   value={form.message}
                   onChange={(e) => setForm({ ...form, message: e.target.value })}
                 />
