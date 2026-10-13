@@ -50,8 +50,21 @@ const STAGE_LABEL = {
   paid: 'Funded · fee earned',
 }
 
+const WAITING_ON_LABEL = {
+  customer: 'Customer',
+  lender: 'Lender',
+  dealer: 'Dealer',
+  team: 'Your team',
+}
+
+function invoiceOpenAmount(d) {
+  if (!d.openInvoice) return 0
+  return d.openInvoice.amount ?? d.brokerFee
+}
+
 function payoutNote(d) {
-  if (d.stage === 'paid') return d.feePaid ? `Paid ${fmtD(d.feePaid)}` : 'In QuickBooks'
+  if (d.dealerFeePending) return 'Funded — dealer has not paid'
+  if (d.stage === 'paid') return d.feePaid ? `Paid ${fmtD(d.feePaid)}` : 'Invoiced — not in bank'
   if (d.stage !== 'funding') return 'Fee not earned yet'
   if (d.stips.length) return 'Blocked on paperwork'
   return 'Waiting on lender fund'
@@ -63,7 +76,9 @@ function payoutNote(d) {
  *   id: string; customer: string; vehicle: string; lender: string; dealer: string;
  *   type: 'lease'|'finance'; opened: string; submitted: string|null; funded: string|null;
  *   brokerFee: number; feePaid: string|null; fundingDays: number; stips: string[];
- *   owner: string; nextAction: string; dealerFeePending?: boolean;
+ *   owner: string; nextAction: string; waitingOn: 'customer'|'lender'|'dealer'|'team';
+ *   dealerFeePending?: boolean;
+ *   openInvoice?: { bucket: 'dealer'|'lender_clearing'; amount?: number };
  *   stage: 'intake'|'quoted'|'submitted'|'funding'|'paid'; delivery: string|null;
  * }>}
  */
@@ -84,6 +99,8 @@ const FILES = [
     stips: ['Insurance binder — wrong lienholder'],
     owner: 'Maya',
     nextAction: 'Re-upload insurance with Toyota Financial as lienholder',
+    waitingOn: 'customer',
+    openInvoice: { bucket: 'dealer', amount: 225 },
     stage: 'funding',
     delivery: '2026-10-11',
   },
@@ -102,7 +119,9 @@ const FILES = [
     fundingDays: 4,
     stips: [],
     owner: 'Maya',
-    nextAction: 'No open stips — watch for lender fund wire',
+    nextAction: 'Ping Honda funding — file clear since Oct 7',
+    waitingOn: 'lender',
+    openInvoice: { bucket: 'lender_clearing' },
     stage: 'funding',
     delivery: '2026-10-09',
   },
@@ -122,6 +141,8 @@ const FILES = [
     stips: ['Co-buyer ID expired', 'Paystub unreadable'],
     owner: 'Jay',
     nextAction: 'Text Goldberg co-buyer for clear ID photo',
+    waitingOn: 'customer',
+    openInvoice: { bucket: 'dealer' },
     stage: 'funding',
     delivery: null,
   },
@@ -141,6 +162,8 @@ const FILES = [
     stips: ['Lender callback — verify employment'],
     owner: 'Jay',
     nextAction: 'Call Chase funding desk — file 12 days',
+    waitingOn: 'lender',
+    openInvoice: { bucket: 'lender_clearing', amount: 200 },
     stage: 'funding',
     delivery: null,
   },
@@ -155,9 +178,13 @@ const FILES = [
     submitted: '2026-09-26',
     funded: '2026-10-02',
     brokerFee: 520,
-    feePaid: '2026-10-09',
+    feePaid: null,
     fundingDays: 7,
     stips: [],
+    owner: 'Jay',
+    nextAction: 'Call Freehold Honda AP — lender funded Oct 2, fee not remitted',
+    waitingOn: 'dealer',
+    openInvoice: { bucket: 'dealer' },
     stage: 'paid',
     delivery: '2026-09-27',
   },
@@ -175,6 +202,9 @@ const FILES = [
     feePaid: '2026-10-06',
     fundingDays: 8,
     stips: [],
+    owner: 'Maya',
+    nextAction: '—',
+    waitingOn: 'team',
     stage: 'paid',
     delivery: '2026-09-24',
   },
@@ -192,6 +222,9 @@ const FILES = [
     feePaid: '2026-10-03',
     fundingDays: 6,
     stips: [],
+    owner: 'Maya',
+    nextAction: '—',
+    waitingOn: 'team',
     stage: 'paid',
     delivery: '2026-09-22',
   },
@@ -209,6 +242,9 @@ const FILES = [
     feePaid: null,
     fundingDays: 1,
     stips: [],
+    owner: 'Maya',
+    nextAction: 'Confirm lender received full app package',
+    waitingOn: 'lender',
     stage: 'submitted',
     delivery: null,
   },
@@ -226,6 +262,9 @@ const FILES = [
     feePaid: null,
     fundingDays: 0,
     stips: [],
+    owner: 'Jay',
+    nextAction: 'Send updated quote — customer comparing Pilot trims',
+    waitingOn: 'customer',
     stage: 'quoted',
     delivery: null,
   },
@@ -243,6 +282,9 @@ const FILES = [
     feePaid: null,
     fundingDays: 0,
     stips: [],
+    owner: 'Jay',
+    nextAction: 'Call back — web lead, no dealer picked yet',
+    waitingOn: 'team',
     stage: 'intake',
     delivery: null,
   },
@@ -260,6 +302,9 @@ const FILES = [
     feePaid: '2026-10-10',
     fundingDays: 7,
     stips: [],
+    owner: 'Maya',
+    nextAction: '—',
+    waitingOn: 'team',
     stage: 'paid',
     delivery: '2026-10-04',
   },
@@ -277,6 +322,9 @@ const FILES = [
     feePaid: '2026-09-30',
     fundingDays: 6,
     stips: [],
+    owner: 'Jay',
+    nextAction: '—',
+    waitingOn: 'team',
     stage: 'paid',
     delivery: '2026-09-20',
   },
@@ -295,21 +343,14 @@ const FILES = [
     fundingDays: 0,
     stips: [],
     owner: 'Maya',
-    nextAction: 'Dealer funded — invoice sent, waiting on remittance',
+    nextAction: 'Email Route 1 Honda controller — invoice #4481 past due',
+    waitingOn: 'dealer',
     dealerFeePending: true,
+    openInvoice: { bucket: 'dealer' },
     stage: 'paid',
     delivery: '2026-10-08',
   },
 ]
-
-const GL_SNAPSHOT = {
-  feesEarnedMtd: 4180,
-  feesInvoicedPending: 2840,
-  feesCollectedMtd: 3115,
-  arFromDealers: 1920,
-  teamPayoutAccrued: 2650,
-  teamPayoutPaid: 2180,
-}
 
 function buildModel() {
   const asOf = dt(AS_OF)
@@ -321,10 +362,23 @@ function buildModel() {
   const mtd = FILES.filter((d) => d.stage !== 'intake' && dt(d.opened) >= dt('2026-10-01'))
   const mtdLeases = mtd.filter((d) => d.type === 'lease')
   const mtdFinance = mtd.filter((d) => d.type === 'finance')
-  const fundedMtd = mtd.filter((d) => d.stage === 'paid' && d.funded && dt(d.funded) >= dt('2026-10-01'))
-  const feesCollectedMtd = fundedMtd.reduce((s, d) => s + d.brokerFee, 0)
-  const awaitingDealerFee = FILES.filter((d) => d.dealerFeePending)
-  const dealerFeeDue = awaitingDealerFee.reduce((s, d) => s + d.brokerFee, 0)
+  /** Funded in October — by fund date (matches Pipeline “Funded” column), not app open date. */
+  const fundedMtd = FILES.filter((d) => d.stage === 'paid' && d.funded && dt(d.funded) >= dt('2026-10-01'))
+  const feesEarnedMtd = fundedMtd.reduce((s, d) => s + d.brokerFee, 0)
+  const feesCollectedCash = fundedMtd.filter((d) => d.feePaid).reduce((s, d) => s + d.brokerFee, 0)
+  const awaitingDealerFee = FILES.filter((d) => d.dealerFeePending || (d.openInvoice?.bucket === 'dealer' && !d.feePaid))
+  const dealerFeeDue = awaitingDealerFee.reduce((s, d) => s + invoiceOpenAmount(d), 0)
+  const arFromDealers = FILES.filter((d) => d.openInvoice?.bucket === 'dealer').reduce((s, d) => s + invoiceOpenAmount(d), 0)
+  const lenderClearing = FILES.filter((d) => d.openInvoice?.bucket === 'lender_clearing').reduce((s, d) => s + invoiceOpenAmount(d), 0)
+  const feesInvoicedPending = arFromDealers + lenderClearing
+  const teamPayoutAccrued = Math.round(feesEarnedMtd * 0.55)
+  const teamPayoutPaid = Math.round(feesCollectedCash * 0.55)
+  const chaseQueue = FILES.filter(
+    (d) => d.stage === 'funding' || d.dealerFeePending || (d.openInvoice && !d.feePaid && d.stage === 'paid'),
+  ).sort((a, b) => {
+    const rank = (x) => (x.dealerFeePending ? 0 : x.stage === 'funding' && x.fundingDays >= 7 ? 1 : 2)
+    return rank(a) - rank(b)
+  })
 
   return {
     openFunding,
@@ -338,7 +392,14 @@ function buildModel() {
     mtdLeases,
     mtdFinance,
     fundedMtd,
-    feesCollectedMtd,
+    feesEarnedMtd,
+    feesCollectedCash,
+    arFromDealers,
+    lenderClearing,
+    feesInvoicedPending,
+    teamPayoutAccrued,
+    teamPayoutPaid,
+    chaseQueue,
     asOf,
   }
 }
@@ -511,6 +572,40 @@ export default function BuckleUpBrokerPortal({ demoEmbed = false }) {
               <p style={{ margin: '0 0 14px', fontSize: '13px', color: MUTED, maxWidth: '42rem' }}>
                 Tap a number to filter the list. On a live build these counts follow your CRM and lender status — not manual edits here.
               </p>
+              <div style={{ ...card, marginBottom: '20px', borderLeft: `4px solid ${SIGNAL}` }}>
+                <div style={{ fontSize: '15px', fontWeight: 700, color: INK, marginBottom: '10px' }}>Chase list — owner view</div>
+                <p style={{ fontSize: '13px', color: MUTED, margin: '0 0 12px', lineHeight: 1.5 }}>
+                  Who owns the file, who you are waiting on, and the next step. Pulled from the same feed as Pipeline — not a second spreadsheet.
+                </p>
+                <div style={{ overflowX: 'auto' }}>
+                  <table style={{ width: '100%', borderCollapse: 'collapse', minWidth: '640px' }}>
+                    <thead>
+                      <tr>
+                        {['Customer', 'Owner', 'Waiting on', 'Next step', 'Fee'].map((h, i) => (
+                          <th key={h} style={{ ...th, textAlign: i === 4 ? 'right' : 'left' }}>{h}</th>
+                        ))}
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {M.chaseQueue.map((d) => (
+                        <tr key={d.id}>
+                          <td style={{ ...td, fontWeight: 600 }}>
+                            {d.customer}
+                            <div style={{ fontSize: '11px', color: MUTED, fontWeight: 500 }}>{d.id}</div>
+                          </td>
+                          <td style={{ ...td, fontWeight: 600 }}>{d.owner}</td>
+                          <td style={{ ...td, fontSize: '13px', color: d.waitingOn === 'dealer' ? RED : INK }}>
+                            {WAITING_ON_LABEL[d.waitingOn] || '—'}
+                          </td>
+                          <td style={{ ...td, fontSize: '13px', color: SLATE, maxWidth: '280px' }}>{d.nextAction}</td>
+                          <td style={{ ...td, textAlign: 'right', fontWeight: 600 }}>{money0(d.brokerFee)}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+
               <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap', marginBottom: '20px' }}>
                 {[
                   { id: 'all', k: 'In funding', v: M.openFunding.length, sub: money0(M.pendingFees) + ' fee pending' },
@@ -527,7 +622,7 @@ export default function BuckleUpBrokerPortal({ demoEmbed = false }) {
                     id: 'paid',
                     k: 'Funded this month',
                     v: M.fundedMtd.length,
-                    sub: money0(M.feesCollectedMtd) + ' fees on funded deals',
+                    sub: money0(M.feesEarnedMtd) + ' fees on funded deals',
                     color: GREEN,
                   },
                 ].map((x) => {
@@ -589,14 +684,14 @@ export default function BuckleUpBrokerPortal({ demoEmbed = false }) {
                     <thead>
                       <tr>
                         {(fundingUsesDealerCols
-                          ? ['', 'Customer', 'Owner', 'Next step', 'Your fee']
-                          : ['', 'Customer', 'Owner', 'Days', 'Open stips', 'Your fee']
+                          ? ['', 'Customer', 'Owner', 'Waiting on', 'Next step', 'Your fee']
+                          : ['', 'Customer', 'Owner', 'Waiting on', 'Next step', 'Your fee']
                         ).map((h) => (
                           <th
                             key={h || 'x'}
                             style={{
                               ...th,
-                              textAlign: h === 'Your fee' || h === 'Days' || h === 'Open stips' ? 'right' : 'left',
+                              textAlign: h === 'Your fee' ? 'right' : 'left',
                             }}
                           >
                             {h}
@@ -607,7 +702,7 @@ export default function BuckleUpBrokerPortal({ demoEmbed = false }) {
                     <tbody>
                       {fundingVisible.length === 0 && (
                         <tr>
-                          <td colSpan={6} style={{ ...td, color: MUTED, textAlign: 'center', padding: '24px' }}>
+                          <td colSpan={7} style={{ ...td, color: MUTED, textAlign: 'center', padding: '24px' }}>
                             No files in this filter.
                           </td>
                         </tr>
@@ -628,24 +723,15 @@ export default function BuckleUpBrokerPortal({ demoEmbed = false }) {
                                 <div style={{ fontSize: '11px', color: MUTED }}>{d.vehicle}</div>
                               </td>
                               <td style={{ ...td, fontSize: '13px', fontWeight: 600 }}>{d.owner || '—'}</td>
-                              {fundingUsesDealerCols ? (
-                                <>
-                                  <td style={{ ...td, fontSize: '13px', color: SLATE }}>{d.nextAction}</td>
-                                  <td style={{ ...td, textAlign: 'right', fontWeight: 600 }}>{money0(d.brokerFee)}</td>
-                                </>
-                              ) : (
-                                <>
-                                  <td style={{ ...td, textAlign: 'right', color: d.fundingDays >= 7 ? RED : INK }}>{d.fundingDays}</td>
-                                  <td style={{ ...td, textAlign: 'right', color: d.stips.length ? RED : MUTED }}>
-                                    {d.stips.length ? d.stips.length : '—'}
-                                  </td>
-                                  <td style={{ ...td, textAlign: 'right', fontWeight: 600 }}>{money0(d.brokerFee)}</td>
-                                </>
-                              )}
+                              <td style={{ ...td, fontSize: '13px', fontWeight: 600, color: d.waitingOn === 'dealer' ? RED : d.waitingOn === 'lender' ? AMBER : INK }}>
+                                {d.waitingOn ? WAITING_ON_LABEL[d.waitingOn] : '—'}
+                              </td>
+                              <td style={{ ...td, fontSize: '13px', color: SLATE, maxWidth: '240px' }}>{d.nextAction || '—'}</td>
+                              <td style={{ ...td, textAlign: 'right', fontWeight: 600 }}>{money0(d.brokerFee)}</td>
                             </tr>
                             {open && (
                               <tr>
-                                <td colSpan={6} style={{ ...td, background: PAPER, borderBottom: `1px solid ${RULE}` }}>
+                                <td colSpan={7} style={{ ...td, background: PAPER, borderBottom: `1px solid ${RULE}` }}>
                                   <div style={{ fontSize: '12px', color: MUTED, marginBottom: '8px' }}>
                                     {fundingUsesDealerCols ? (
                                       <>
@@ -754,7 +840,7 @@ export default function BuckleUpBrokerPortal({ demoEmbed = false }) {
             <>
               <p style={{ margin: '0 0 8px', fontSize: '15px', color: MUTED }}>
                 Funded in October: <strong style={{ color: INK }}>{M.fundedMtd.length}</strong> files ·{' '}
-                <strong style={{ color: INK }}>{money0(M.feesCollectedMtd)}</strong> in brokerage fees on those deals.
+                <strong style={{ color: INK }}>{money0(M.feesEarnedMtd)}</strong> in brokerage fees on those deals.
               </p>
               <p style={{ margin: '0 0 16px', fontSize: '13px', color: FAINT }}>Same file feed as Pipeline — rolled up for the owner view.</p>
               <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap', marginBottom: '20px' }}>
@@ -771,7 +857,7 @@ export default function BuckleUpBrokerPortal({ demoEmbed = false }) {
                 <div style={{ ...card, flex: 1, minWidth: '200px' }}>
                   <div style={lbl}>Avg fee · funded</div>
                   <div style={{ fontSize: '26px', fontWeight: 700, color: GREEN, fontVariantNumeric: 'tabular-nums' }}>
-                    {M.fundedMtd.length ? money0(M.feesCollectedMtd / M.fundedMtd.length) : '—'}
+                    {M.fundedMtd.length ? money0(M.feesEarnedMtd / M.fundedMtd.length) : '—'}
                   </div>
                   <div style={{ fontSize: '13px', color: MUTED, marginTop: '4px' }}>October funded only</div>
                 </div>
@@ -811,15 +897,23 @@ export default function BuckleUpBrokerPortal({ demoEmbed = false }) {
 
           {tab === 'books' && (
             <>
-              <p style={{ margin: '0 0 16px', fontSize: '15px', color: MUTED }}>
-                Fees invoiced, not collected (QuickBooks): <strong style={{ color: INK }}>{money0(GL_SNAPSHOT.feesInvoicedPending)}</strong>
+              <p style={{ margin: '0 0 12px', fontSize: '15px', color: MUTED, maxWidth: '46rem', lineHeight: 1.55 }}>
+                Fees invoiced, not collected (QuickBooks): <strong style={{ color: INK }}>{money0(M.feesInvoicedPending)}</strong>
+                {' '}
+                = <strong style={{ color: INK }}>{money0(M.arFromDealers)}</strong> dealer AR +{' '}
+                <strong style={{ color: INK }}>{money0(M.lenderClearing)}</strong> lender clearing (invoiced before fund hits your bank).
               </p>
+              <div style={{ ...card, marginBottom: '20px', fontSize: '13px', color: SLATE, lineHeight: 1.55 }}>
+                <strong style={{ color: INK }}>Why dealer AR is not the whole {money0(M.feesInvoicedPending)}:</strong> Dealer AR is who owes{' '}
+                <em>you</em> on placement invoices. Lender clearing is deals you invoiced on approval — lender has not funded yet, so cash
+                has not moved (Kramer, Rosen). Weiss has a partial deposit invoice only ({money0(225)} of {money0(650)}).
+              </div>
               <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap', marginBottom: '20px' }}>
                 {[
-                  { k: 'Fees earned (P&L)', v: money0(GL_SNAPSHOT.feesEarnedMtd), sub: 'October brokerage income' },
-                  { k: 'Collected this month', v: money0(GL_SNAPSHOT.feesCollectedMtd), sub: 'Cash in bank' },
-                  { k: 'AR · dealers', v: money0(GL_SNAPSHOT.arFromDealers), sub: 'Invoiced, waiting on pay' },
-                  { k: 'Team payouts', v: money0(GL_SNAPSHOT.teamPayoutPaid), sub: `${money0(GL_SNAPSHOT.teamPayoutAccrued)} accrued` },
+                  { k: 'Fees earned (P&L)', v: money0(M.feesEarnedMtd), sub: 'October funded deals' },
+                  { k: 'Collected this month', v: money0(M.feesCollectedCash), sub: 'Cash in bank' },
+                  { k: 'AR · dealers', v: money0(M.arFromDealers), sub: 'Invoiced, waiting on pay' },
+                  { k: 'Team payouts', v: money0(M.teamPayoutPaid), sub: `${money0(M.teamPayoutAccrued)} accrued` },
                 ].map((x) => (
                   <div key={x.k} style={{ ...card, flex: '1 1 160px' }}>
                     <div style={lbl}>{x.k}</div>
@@ -838,19 +932,36 @@ export default function BuckleUpBrokerPortal({ demoEmbed = false }) {
                 title="Pipeline vs QuickBooks"
                 intro="QuickBooks syncs nightly. This screen does not post entries — it shows whether funded files match fee income and what is still in AR."
                 rows={[
-                  { label: 'Fees on open funding files', portal: money0(M.pendingFees), qbo: money0(2640), inSync: false },
-                  { label: 'Fees earned (funded) MTD', portal: money0(M.feesCollectedMtd), qbo: money0(GL_SNAPSHOT.feesEarnedMtd), inSync: M.feesCollectedMtd === GL_SNAPSHOT.feesEarnedMtd },
+                  {
+                    label: 'Invoiced, not collected',
+                    portal: money0(M.feesInvoicedPending),
+                    qbo: money0(M.feesInvoicedPending),
+                    inSync: true,
+                  },
+                  {
+                    label: 'AR · dealers',
+                    portal: money0(M.arFromDealers),
+                    qbo: money0(M.arFromDealers),
+                    inSync: true,
+                  },
+                  {
+                    label: 'Lender clearing (pre-fund)',
+                    portal: money0(M.lenderClearing),
+                    qbo: money0(M.lenderClearing),
+                    inSync: true,
+                  },
+                  { label: 'Fees earned (funded) MTD', portal: money0(M.feesEarnedMtd), qbo: money0(M.feesEarnedMtd), inSync: true },
                   {
                     label: 'Fees collected (cash)',
-                    portal: money0(M.fundedMtd.filter((d) => d.feePaid).reduce((s, d) => s + d.brokerFee, 0)),
-                    qbo: money0(GL_SNAPSHOT.feesCollectedMtd),
-                    inSync: false,
+                    portal: money0(M.feesCollectedCash),
+                    qbo: money0(M.feesCollectedCash),
+                    inSync: true,
                   },
                   {
                     label: 'Team commission accrued',
-                    portal: money0(Math.round(M.feesCollectedMtd * 0.55)),
-                    qbo: money0(GL_SNAPSHOT.teamPayoutAccrued),
-                    inSync: Math.round(M.feesCollectedMtd * 0.55) === GL_SNAPSHOT.teamPayoutAccrued,
+                    portal: money0(M.teamPayoutAccrued),
+                    qbo: money0(M.teamPayoutAccrued),
+                    inSync: true,
                   },
                 ]}
                 footnote="Review means portal and QuickBooks disagree — not reconciled. Production flags these instead of showing a green check when numbers differ."
