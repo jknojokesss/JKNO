@@ -312,7 +312,8 @@ export default function WestviewAutoPortal({ demoEmbed = false }) {
 
   const [tab, setTab] = useState('funding')
   const [expanded, setExpanded] = useState(null)
-  const [showAllCit, setShowAllCit] = useState(false)
+  /** @type {'attention' | 'all' | 'missing' | 'slow'} */
+  const [fundingFilter, setFundingFilter] = useState('attention')
 
   const M = useMemo(() => buildModel(), [])
 
@@ -322,7 +323,25 @@ export default function WestviewAutoPortal({ demoEmbed = false }) {
     return () => document.documentElement.classList.remove('demo-embed')
   }, [embedded])
 
-  const citVisible = showAllCit ? M.openCit : M.openCit.filter((d) => d.stips.length > 0 || d.fundingDays >= 6)
+  const citVisible = useMemo(() => {
+    switch (fundingFilter) {
+      case 'all':
+        return M.openCit
+      case 'missing':
+        return M.withStips
+      case 'slow':
+        return M.tierRisk
+      default:
+        return M.openCit.filter((d) => d.stips.length > 0 || d.fundingDays >= 6)
+    }
+  }, [M, fundingFilter])
+
+  const fundingTableTitle = {
+    attention: 'Needs attention',
+    all: 'Waiting on bank',
+    missing: 'Lender still needs paperwork',
+    slow: 'Slow — commission reduced',
+  }[fundingFilter]
 
   const lbl = { fontFamily: sans, fontSize: '12px', fontWeight: 600, color: MUTED }
   const card = { background: WHITE, border: `1px solid ${RULE}`, borderRadius: '10px', padding: '18px 20px', boxShadow: '0 1px 2px rgba(26,26,26,.04)' }
@@ -388,8 +407,25 @@ export default function WestviewAutoPortal({ demoEmbed = false }) {
               </button>
             ))}
           </nav>
-          <div style={{ borderTop: `1px solid ${RULE}`, paddingTop: '14px', fontSize: '12px', color: FAINT, lineHeight: 1.5 }}>
-            As of {fmtD(AS_OF)}
+          <div
+            style={{
+              borderTop: `1px solid ${RULE}`,
+              paddingTop: '16px',
+              marginTop: '8px',
+              fontSize: '12px',
+              color: MUTED,
+              lineHeight: 1.55,
+            }}
+          >
+            <div style={{ fontWeight: 700, color: INK, fontSize: '13px', marginBottom: '8px' }}>Where does the data come from?</div>
+            <p style={{ margin: '0 0 10px' }}>
+              <strong style={{ color: SLATE }}>Live store:</strong> Deals and stages feed from your desking system and finance office — sales does not type them in here. Bank
+              timing and missing items come from lender / F&amp;I status. Book totals sync from QuickBooks. Read-only view.
+            </p>
+            <p style={{ margin: 0, color: FAINT }}>
+              <strong style={{ color: MUTED }}>This sample:</strong> Fake deals in the demo file. Nothing connected.
+            </p>
+            <div style={{ marginTop: '12px', color: FAINT }}>As of {fmtD(AS_OF)}</div>
           </div>
         </aside>
 
@@ -417,31 +453,74 @@ export default function WestviewAutoPortal({ demoEmbed = false }) {
 
           {tab === 'funding' && (
             <>
+              <p style={{ margin: '0 0 14px', fontSize: '13px', color: MUTED, maxWidth: '40rem' }}>
+                Tap a number to filter the list. On a real build these counts update when your store systems sync — not when someone edits this page.
+              </p>
               <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap', marginBottom: '20px' }}>
                 {[
-                  { k: 'Waiting on bank', v: M.openCit.length, sub: money0(M.pendingCommission) + ' commission pending' },
-                  { k: 'Lender still needs', v: M.withStips.length, sub: 'Paperwork missing', color: RED },
-                  { k: 'Slow (6+ days)', v: M.tierRisk.length, sub: 'Commission reduced', color: AMBER },
-                  { k: 'Paid this month', v: M.mtd.filter((d) => d.stage === 'funded').length, sub: money0(M.commissionMtd) + ' in your check', color: GREEN },
-                ].map((x) => (
-                  <div key={x.k} style={{ ...card, flex: '1 1 140px', minWidth: '140px' }}>
-                    <div style={lbl}>{x.k}</div>
-                    <div style={{ fontSize: '28px', fontWeight: 700, color: x.color || INK, marginTop: '4px', ...tabNums }}>{x.v}</div>
-                    <div style={{ fontSize: '13px', color: MUTED, marginTop: '4px' }}>{x.sub}</div>
-                  </div>
-                ))}
+                  { id: 'all', k: 'Waiting on bank', v: M.openCit.length, sub: money0(M.pendingCommission) + ' commission pending' },
+                  { id: 'missing', k: 'Lender still needs', v: M.withStips.length, sub: 'Paperwork missing', color: RED },
+                  { id: 'slow', k: 'Slow (6+ days)', v: M.tierRisk.length, sub: 'Commission reduced', color: AMBER },
+                  {
+                    id: 'paid',
+                    k: 'Paid this month',
+                    v: M.mtd.filter((d) => d.stage === 'funded').length,
+                    sub: money0(M.commissionMtd) + ' in your check',
+                    color: GREEN,
+                  },
+                ].map((x) => {
+                  const active = x.id === 'paid' ? false : fundingFilter === x.id
+                  return (
+                    <button
+                      key={x.id}
+                      type="button"
+                      onClick={() => {
+                        if (x.id === 'paid') {
+                          setTab('desk')
+                          return
+                        }
+                        setFundingFilter(x.id)
+                        setExpanded(null)
+                      }}
+                      style={{
+                        ...card,
+                        flex: '1 1 140px',
+                        minWidth: '140px',
+                        textAlign: 'left',
+                        cursor: 'pointer',
+                        border: active ? `2px solid ${SIGNAL}` : `1px solid ${RULE}`,
+                        background: active ? '#FFFBF3' : WHITE,
+                        fontFamily: sans,
+                      }}
+                    >
+                      <div style={lbl}>{x.k}</div>
+                      <div style={{ fontSize: '28px', fontWeight: 700, color: x.color || INK, marginTop: '4px', ...tabNums }}>{x.v}</div>
+                      <div style={{ fontSize: '13px', color: MUTED, marginTop: '4px' }}>{x.sub}</div>
+                      {x.id !== 'paid' && (
+                        <div style={{ fontSize: '11px', color: active ? SIGNAL : FAINT, marginTop: '8px', fontWeight: 600 }}>
+                          {active ? 'Showing below' : 'Click to filter'}
+                        </div>
+                      )}
+                      {x.id === 'paid' && (
+                        <div style={{ fontSize: '11px', color: FAINT, marginTop: '8px', fontWeight: 600 }}>Click → Pipeline</div>
+                      )}
+                    </button>
+                  )
+                })}
               </div>
 
               <div style={card}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px', flexWrap: 'wrap', gap: '8px' }}>
-                  <div style={{ fontSize: '17px', fontWeight: 700, color: INK }}>Needs attention</div>
-                  <button
-                    type="button"
-                    onClick={() => setShowAllCit((s) => !s)}
-                    style={{ fontSize: '13px', fontWeight: 600, color: SIGNAL, background: 'none', border: 'none', cursor: 'pointer', textDecoration: 'underline' }}
-                  >
-                    {showAllCit ? 'Show exceptions only' : `Show all ${M.openCit.length} waiting on bank`}
-                  </button>
+                  <div style={{ fontSize: '17px', fontWeight: 700, color: INK }}>{fundingTableTitle}</div>
+                  {fundingFilter !== 'attention' && (
+                    <button
+                      type="button"
+                      onClick={() => setFundingFilter('attention')}
+                      style={{ fontSize: '13px', fontWeight: 600, color: SIGNAL, background: 'none', border: 'none', cursor: 'pointer', textDecoration: 'underline' }}
+                    >
+                      Back to needs attention
+                    </button>
+                  )}
                 </div>
                 <div style={{ overflowX: 'auto' }}>
                   <table style={{ width: '100%', borderCollapse: 'collapse', minWidth: '640px' }}>
@@ -453,6 +532,13 @@ export default function WestviewAutoPortal({ demoEmbed = false }) {
                       </tr>
                     </thead>
                     <tbody>
+                      {citVisible.length === 0 && (
+                        <tr>
+                          <td colSpan={6} style={{ ...td, color: MUTED, textAlign: 'center', padding: '24px' }}>
+                            No deals in this filter.
+                          </td>
+                        </tr>
+                      )}
                       {citVisible.map((d) => {
                         const open = expanded === d.id
                         return (
@@ -508,7 +594,8 @@ export default function WestviewAutoPortal({ demoEmbed = false }) {
 
           {tab === 'desk' && (
             <>
-              <p style={{ margin: '0 0 16px', fontSize: '15px', color: MUTED }}>{M.unitsMtd} cars sold this month — from first quote to bank paid.</p>
+              <p style={{ margin: '0 0 8px', fontSize: '15px', color: MUTED }}>{M.unitsMtd} cars sold this month — from first quote to bank paid.</p>
+              <p style={{ margin: '0 0 16px', fontSize: '13px', color: FAINT }}>Stages update from your desking / DMS feed — not typed on this screen.</p>
               <div style={{ display: 'grid', gap: '14px' }}>
                 {['quote', 'fi', 'cit', 'funded'].map((stage) => {
                   const label = { quote: 'Working the deal', fi: 'In finance office', cit: 'Sold — waiting on bank', funded: 'Bank paid this month' }[stage]
@@ -556,9 +643,10 @@ export default function WestviewAutoPortal({ demoEmbed = false }) {
 
           {tab === 'gross' && (
             <>
-              <p style={{ margin: '0 0 16px', fontSize: '15px', color: MUTED }}>
+              <p style={{ margin: '0 0 8px', fontSize: '15px', color: MUTED }}>
                 Desk profit this month: <strong style={{ color: INK }}>{money0(M.frontMtd)}</strong> (mostly leases — lower dollars per car).
               </p>
+              <p style={{ margin: '0 0 16px', fontSize: '13px', color: FAINT }}>Rolled up from the same deal feed as Pipeline — not a separate spreadsheet.</p>
               <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap', marginBottom: '20px' }}>
                 <div style={{ ...card, flex: 1, minWidth: '200px' }}>
                   <div style={lbl}>Avg desk profit · lease</div>
@@ -654,7 +742,7 @@ export default function WestviewAutoPortal({ demoEmbed = false }) {
           )}
 
           <p className="bu-foot" style={{ marginTop: '32px', fontSize: '12px', color: FAINT, maxWidth: '36rem', lineHeight: 1.5 }}>
-            Fictitious store · sample numbers only · nothing posts to QuickBooks from here.
+            Westview Auto Group is fictitious. Sample deals are hard-coded for the demo; a production portal reads your systems and QuickBooks — no double entry here.
           </p>
         </main>
       </div>
