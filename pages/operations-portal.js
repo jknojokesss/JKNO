@@ -4,14 +4,17 @@ import DemoFontLinks from '../components/DemoFontLinks'
 import DemoLobby from '../components/DemoLobby'
 import { DEMO_HEAD, DEMO_MONO, DEMO_PORTAL_ROOT_CLASS, DEMO_RENDER_HINTS, DEMO_UI } from '../lib/demoFonts'
 
-const BIZ = 'Hayfield Finance'
-const HUB_BG = '#0f1419'
-const HUB_MUTED = '#9aa8b5'
-const HUB_TILE = '#1a2332'
-const HUB_ACCENT = '#6b9cb8'
+const BIZ = 'Hayfield Global'
+const HUB_PAGE = '#ECEEF2'
+const HUB_INK = '#2C3440'
+const HUB_MUTED = '#7A8494'
+const HUB_CARD = '#FFFFFF'
+const HUB_BTN = '#3D4858'
 const NAVY = '#152238'
+const OPS_BAR = '#4A6270'
 const ACCENT = '#4A7FD4'
-const BG = '#F0F2F6'
+const BG = '#E8EAED'
+const SHEET = '#FFFFFF'
 const BORDER = '#D4DAE4'
 const INK = '#1A2433'
 const MUTED = '#5E6A7C'
@@ -24,13 +27,97 @@ const BOOK = 'https://calendly.com/jk-jknojokes/30min'
 
 const money = (n) => '$' + Math.round(n).toLocaleString('en-US')
 
-/** Five-desk hub — only Cash flow is interactive in this sample. */
-const HUB_DESKS = [
-  { id: 'cash-flow', label: 'Cash flow', sub: 'Banks & cards', live: true },
-  { id: 'inventory', label: 'Inventory', sub: 'SKU ledger', live: false },
-  { id: 'properties', label: 'Properties', sub: 'Rent roll', live: false },
-  { id: 'partners', label: 'Partners', sub: 'Statements', live: false },
-  { id: 'upload', label: 'Workbook', sub: 'Upload .xlsx', live: false },
+const ART_GREY = '#B4BCC8'
+const BADGE_BG = '#2F3844'
+
+/** Illustrated desk icons — same idea as the real portal cards, sample-only artwork. */
+function HubBadge({ x, y, text }) {
+  return (
+    <g>
+      <circle cx={x} cy={y} r="14" fill={BADGE_BG} />
+      <text x={x} y={y + 4} textAnchor="middle" fill="#fff" fontSize="9" fontFamily="IBM Plex Mono, monospace" fontWeight="600">{text}</text>
+    </g>
+  )
+}
+
+function HubArt({ type }) {
+  if (type === 'ops') {
+    return (
+      <svg viewBox="0 0 200 120" width="100%" height="120" aria-hidden>
+        <rect x="28" y="38" width="72" height="52" rx="4" fill={ART_GREY} opacity="0.35" />
+        <path d="M36 38V28h20l8 10" fill={ART_GREY} opacity="0.5" />
+        <rect x="44" y="52" width="14" height="10" rx="1" fill={ART_GREY} />
+        <rect x="64" y="52" width="14" height="10" rx="1" fill={ART_GREY} />
+        <rect x="44" y="68" width="14" height="10" rx="1" fill={ART_GREY} />
+        <rect x="64" y="68" width="14" height="10" rx="1" fill={ART_GREY} />
+        <rect x="108" y="44" width="48" height="58" rx="3" fill="#fff" stroke={ART_GREY} strokeWidth="2" />
+        <path d="M118 58h28M118 68h28M118 78h18" stroke={ART_GREY} strokeWidth="2" strokeLinecap="round" />
+        <HubBadge x={168} y={36} text="OPS" />
+      </svg>
+    )
+  }
+  if (type === 'house') {
+    return (
+      <svg viewBox="0 0 200 120" width="100%" height="120" aria-hidden>
+        <path d="M100 28 52 58v42h96V58L100 28z" fill={ART_GREY} opacity="0.4" />
+        <rect x="78" y="68" width="44" height="32" fill="#fff" stroke={ART_GREY} strokeWidth="2" />
+        <rect x="88" y="78" width="12" height="22" fill={ART_GREY} opacity="0.6" />
+        <HubBadge x={148} y={40} text="RE" />
+      </svg>
+    )
+  }
+  if (type === 'warehouse') {
+    return (
+      <svg viewBox="0 0 200 120" width="100%" height="120" aria-hidden>
+        <rect x="40" y="48" width="120" height="48" rx="2" fill={ART_GREY} opacity="0.35" />
+        <path d="M40 48 L100 28 L160 48" fill="none" stroke={ART_GREY} strokeWidth="2" />
+        <rect x="58" y="62" width="28" height="34" fill="#fff" stroke={ART_GREY} strokeWidth="2" />
+        <rect x="114" y="62" width="28" height="34" fill="#fff" stroke={ART_GREY} strokeWidth="2" />
+        <path d="M72 62v34M114 62v34" stroke={ART_GREY} strokeWidth="1.5" />
+      </svg>
+    )
+  }
+  if (type === 'globe') {
+    return (
+      <svg viewBox="0 0 200 120" width="100%" height="120" aria-hidden>
+        <rect x="68" y="22" width="64" height="64" rx="14" fill="#fff" stroke={ART_GREY} strokeWidth="2" />
+        <circle cx="100" cy="54" r="22" fill="none" stroke={ART_GREY} strokeWidth="2" />
+        <ellipse cx="100" cy="54" rx="10" ry="22" fill="none" stroke={ART_GREY} strokeWidth="1.5" />
+        <path d="M78 54h44" stroke={ART_GREY} strokeWidth="1.5" />
+      </svg>
+    )
+  }
+  if (type === 'partners') {
+    return (
+      <svg viewBox="0 0 200 120" width="100%" height="120" aria-hidden>
+        <circle cx="88" cy="58" r="26" fill={BADGE_BG} />
+        <circle cx="118" cy="58" r="26" fill="#5A6575" />
+        <text x="88" y="63" textAnchor="middle" fill="#fff" fontSize="14" fontFamily="IBM Plex Mono, monospace" fontWeight="600">AK</text>
+        <text x="118" y="63" textAnchor="middle" fill="#fff" fontSize="14" fontFamily="IBM Plex Mono, monospace" fontWeight="600">JR</text>
+      </svg>
+    )
+  }
+  return null
+}
+
+function HubLogo() {
+  return (
+    <svg width="36" height="36" viewBox="0 0 36 36" aria-hidden>
+      <rect width="36" height="36" rx="9" fill="#fff" stroke="#D8DEE6" strokeWidth="1" />
+      <circle cx="18" cy="18" r="11" fill="none" stroke="#8A96A8" strokeWidth="1.5" />
+      <ellipse cx="18" cy="18" rx="5" ry="11" fill="none" stroke="#8A96A8" strokeWidth="1" />
+      <path d="M7 18h22" stroke="#8A96A8" strokeWidth="1" />
+    </svg>
+  )
+}
+
+/** Owner portal hub — layout mirrors multi-desk ops sites; only Operations center is live in the sample. */
+const PORTAL_DESKS = [
+  { id: 'operations', kicker: 'Liabilities, payables & cash flow', title: 'Operations center', live: true, art: 'ops' },
+  { id: 'realestate', kicker: 'Multi-family · Northeast', title: 'Real estate', live: false, art: 'house' },
+  { id: 'usre', kicker: 'Commercial · warehouse', title: 'US real estate', live: false, art: 'warehouse' },
+  { id: 'inventory', kicker: 'Hayfield Global', title: 'Inventory', live: false, art: 'globe' },
+  { id: 'partners', kicker: '2026 report', title: 'Partners', live: false, art: 'partners' },
 ]
 
 const BANKS = [
@@ -165,14 +252,6 @@ function Icon({ name, size = 28, color = 'currentColor' }) {
   return null
 }
 
-const HUB_ICON = {
-  'cash-flow': 'cash',
-  inventory: 'boxes',
-  properties: 'building',
-  partners: 'users',
-  upload: 'upload',
-}
-
 const SECTION_ICON = {
   banks: 'bank',
   cards: 'card',
@@ -234,10 +313,13 @@ export default function OperationsPortalDemo() {
   }, [monthFilter, cardFilter, sortAsc])
 
   const ccTotal = filtered.reduce((s, r) => s + r.amount, 0)
+  const octDue = PAYABLES.filter((r) => dueMonthKey(r.due) === '2026-10').reduce((s, r) => s + r.amount, 0)
+  const novDue = PAYABLES.filter((r) => dueMonthKey(r.due) === '2026-11').reduce((s, r) => s + r.amount, 0)
   const bankTotal = BANKS.reduce((s, b) => s + b.balance, 0)
   const stlDue = STL.reduce((s, r) => s + r.payment, 0)
   const goingOut = ccTotal + stlDue
   const cushion = bankTotal - goingOut
+  const shortage = Math.max(0, goingOut - bankTotal * 0.12)
   const dayRows = PAYABLES.filter((p) => p.due === calDay)
 
   const ping = (msg) => {
@@ -251,11 +333,11 @@ export default function OperationsPortalDemo() {
   }
 
   const hubPick = (desk) => {
-    if (desk.id === 'cash-flow') {
+    if (desk.id === 'operations') {
       openDesk()
       return
     }
-    ping('Sample hub — only Cash flow is wired in this demo.')
+    ping('Sample portal — only Operations center is wired in this demo.')
   }
 
   const jumpSection = (id) => {
@@ -300,24 +382,49 @@ export default function OperationsPortalDemo() {
         <style>{`
           *{box-sizing:border-box;margin:0;padding:0}
           ${DEMO_RENDER_HINTS}
-          body{background:${hubOpen ? HUB_BG : BG};color:${INK}}
-          .op-hub{min-height:calc(100vh - 48px);background:${HUB_BG};color:#eef2f6;padding:48px 24px 64px;display:flex;flex-direction:column;align-items:center}
-          .op-hub__grid{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:14px;width:100%;max-width:720px;margin-top:36px}
-          .op-hub__tile{background:${HUB_TILE};border:1px solid rgba(255,255,255,.08);border-radius:14px;padding:22px 12px 18px;text-align:center;cursor:pointer;transition:transform .15s,border-color .15s,background .15s}
-          .op-hub__tile:hover{border-color:${HUB_ACCENT};transform:translateY(-2px);background:#222d3f}
-          .op-hub__icon{width:52px;height:52px;margin:0 auto 14px;border-radius:12px;background:rgba(107,156,184,.12);display:flex;align-items:center;justify-content:center;color:${HUB_ACCENT}}
-          .op-hub__label{font-family:${DEMO_UI};font-size:13px;font-weight:600;color:#fff}
-          .op-hub__sub{font-family:${DEMO_MONO};font-size:9px;color:${HUB_MUTED};margin-top:6px;letter-spacing:.06em}
-          .op-desk-header{background:${NAVY};color:#fff;padding:12px 20px;display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:12px;position:sticky;top:0;z-index:20}
-          .op-desk-rail{background:#fff;border-bottom:1px solid ${BORDER};padding:10px 16px;display:flex;gap:8px;overflow-x:auto;position:sticky;top:52px;z-index:19;-webkit-overflow-scrolling:touch}
+          body{background:${hubOpen ? HUB_PAGE : BG};color:${INK}}
+          .op-hub{min-height:calc(100vh - 48px);background:linear-gradient(180deg,#F4F5F8 0%,${HUB_PAGE} 120px,${HUB_PAGE} 100%);color:${HUB_INK}}
+          .op-hub__bar{background:${HUB_CARD};border-bottom:1px solid #DDE2EA;padding:16px 24px;display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
+          .op-hub__brand{display:flex;align-items:center;gap:12px}
+          .op-hub__brand-name{font-family:${DEMO_HEAD};font-size:15px;font-weight:600;letter-spacing:.06em;color:${HUB_INK}}
+          .op-hub__sample{font-family:${DEMO_MONO};font-size:9px;letter-spacing:.12em;text-transform:uppercase;color:${HUB_MUTED};background:#F0F2F6;border:1px solid #E0E4EC;border-radius:20px;padding:6px 12px}
+          .op-hub__intro{text-align:center;padding:28px 20px 8px;max-width:520px;margin:0 auto}
+          .op-hub__intro p{font-family:${DEMO_UI};font-size:13px;color:${HUB_MUTED}}
+          .op-hub__grid{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:20px;width:100%;max-width:980px;margin:28px auto 48px;padding:0 20px}
+          .op-hub__card{grid-column:span 2;background:${HUB_CARD};border:1px solid #E4E8EF;border-radius:16px;padding:0 0 20px;display:flex;flex-direction:column;text-align:left;cursor:pointer;transition:transform .18s ease,box-shadow .18s ease,border-color .18s ease;box-shadow:0 2px 8px rgba(35,45,60,.05),0 14px 36px rgba(35,45,60,.05);overflow:hidden;min-height:310px}
+          .op-hub__card--live{border-color:#B8CCE8;box-shadow:0 2px 8px rgba(74,127,212,.12),0 16px 40px rgba(35,45,60,.07)}
+          .op-hub__card:hover{transform:translateY(-4px);border-color:#C8D0DC;box-shadow:0 6px 16px rgba(35,45,60,.08),0 24px 48px rgba(35,45,60,.09)}
+          .op-hub__live-tag{position:absolute;top:14px;right:14px;font-family:${DEMO_MONO};font-size:8px;letter-spacing:.12em;text-transform:uppercase;color:#2E5F9E;background:#E8F0FA;border:1px solid #C5D8EF;border-radius:20px;padding:4px 8px}
+          .op-hub__card-wrap{position:relative}
+          .op-hub__card:focus-visible{outline:2px solid ${ACCENT};outline-offset:3px}
+          .op-hub__art{padding:8px 12px 0;min-height:128px;display:flex;align-items:center;justify-content:center;background:linear-gradient(180deg,#FAFBFC 0%,#fff 100%)}
+          .op-hub__body{padding:4px 22px 0;flex:1;display:flex;flex-direction:column}
+          .op-hub__kicker{font-family:${DEMO_MONO};font-size:9px;letter-spacing:.14em;text-transform:uppercase;color:${HUB_MUTED};margin-top:8px;line-height:1.5}
+          .op-hub__title{font-family:${DEMO_HEAD};font-size:22px;font-weight:600;color:${HUB_INK};margin-top:10px;line-height:1.2}
+          .op-hub__enter{margin:18px 22px 0;width:calc(100% - 44px);background:${HUB_BTN};color:#fff;border:none;border-radius:10px;padding:13px 16px;font-family:${DEMO_UI};font-size:13px;font-weight:600;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;transition:background .15s}
+          .op-hub__card:hover .op-hub__enter{background:#2f3844}
+          .op-hub__foot{text-align:center;padding-bottom:32px;font-family:${DEMO_MONO};font-size:10px}
+          .op-hub__foot a{color:#5A7FA8;text-decoration:none}
+          .op-desk-header{background:${OPS_BAR};color:#fff;padding:14px 22px;display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:12px;position:sticky;top:0;z-index:20;box-shadow:0 1px 0 rgba(0,0,0,.08)}
+          .op-desk-rail{background:${SHEET};border-bottom:1px solid ${BORDER};padding:10px 20px;display:flex;gap:8px;overflow-x:auto;position:sticky;top:56px;z-index:19;-webkit-overflow-scrolling:touch;max-width:1100px;margin:0 auto;width:100%}
+          .op-summary{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin-bottom:18px}
+          .op-summary-item{background:${SHEET};border:1px solid ${BORDER};border-radius:10px;padding:14px 16px}
+          .op-summary-item strong{display:block;font-family:${DEMO_HEAD};font-size:22px;font-weight:600;margin-top:6px;font-variant-numeric:tabular-nums}
+          .op-workbook{background:${SHEET};border:1px solid ${BORDER};border-radius:12px;overflow:hidden;box-shadow:0 1px 0 rgba(21,34,56,.04)}
+          .op-workbook-section{padding:20px 22px;border-bottom:1px solid #ECEFF4}
+          .op-workbook-section:last-child{border-bottom:none}
+          .op-cc-totals{display:flex;flex-wrap:wrap;gap:16px 28px;margin-bottom:14px;padding:12px 14px;background:#F7F9FC;border:1px solid #E8ECF2;border-radius:8px;font-family:${DEMO_MONO};font-size:11px;color:${MUTED}}
+          .op-cc-totals b{color:${INK};font-size:13px;margin-left:6px;font-variant-numeric:tabular-nums}
+          .op-row-oct{background:${OCT_BG}!important}
+          .op-row-nov{background:${NOV_BG}!important}
           .op-rail-btn{flex-shrink:0;display:flex;flex-direction:column;align-items:center;gap:4px;min-width:64px;padding:8px 10px;border-radius:10px;border:1px solid transparent;background:transparent;cursor:pointer;font-family:${DEMO_UI};color:${MUTED}}
           .op-rail-btn.on{background:#EEF3FA;border-color:#C5D4EA;color:${INK}}
           .op-rail-btn span{font-size:10px;font-weight:600}
-          .op-main{padding:24px 20px 56px;max-width:1100px;margin:0 auto}
-          .op-banks{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:14px;margin-bottom:22px}
-          .op-bank{background:#fff;border:1px solid ${BORDER};border-radius:10px;padding:18px 20px;box-shadow:0 1px 0 rgba(21,34,56,.04)}
-          .op-bank-total{border-color:${ACCENT}}
-          .op-panel{background:#fff;border:1px solid ${BORDER};border-radius:10px;padding:20px 22px;margin-bottom:18px;scroll-margin-top:120px}
+          .op-main{padding:20px 16px 56px;max-width:1100px;margin:0 auto}
+          .op-banks{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px}
+          .op-bank{background:#FAFBFD;border:1px solid #E2E7EF;border-radius:8px;padding:16px 18px}
+          .op-bank-total{background:#F0F5FC;border-color:#C5D4EA}
+          .op-panel{scroll-margin-top:130px}
           .op-seg{display:inline-flex;border:1px solid ${BORDER};border-radius:8px;overflow:hidden;background:#F7F8FB}
           .op-seg button{border:none;background:transparent;padding:8px 16px;font-family:${DEMO_UI};font-size:12px;font-weight:600;color:${MUTED};cursor:pointer}
           .op-seg button.on{background:${NAVY};color:#fff}
@@ -339,9 +446,9 @@ export default function OperationsPortalDemo() {
           .op-cal-grid button.sel{outline:2px solid ${ACCENT};font-weight:700}
           .op-cal-grid button .dot{position:absolute;bottom:4px;left:50%;transform:translateX(-50%);width:4px;height:4px;border-radius:50%;background:${ACCENT}}
           .op-row-2{display:grid;grid-template-columns:1fr 300px;gap:18px}
-          @media(max-width:800px){
-            .op-hub__grid{grid-template-columns:repeat(2,1fr);max-width:360px}
-            .op-hub__grid button:nth-child(5){grid-column:span 2;max-width:50%;margin:0 auto;width:100%}
+          @media(max-width:900px){
+            .op-hub__grid{grid-template-columns:1fr;max-width:400px}
+            .op-hub__card{grid-column:1/-1}
             .op-main{padding:16px 14px 48px}
             .op-row-2{grid-template-columns:1fr}
             .op-desk-rail{top:88px}
@@ -360,25 +467,41 @@ export default function OperationsPortalDemo() {
       <div className={DEMO_PORTAL_ROOT_CLASS}>
         {hubOpen ? (
           <div className="op-hub">
-            <p style={{ fontFamily: DEMO_MONO, fontSize: 10, letterSpacing: '.14em', color: HUB_MUTED, textTransform: 'uppercase' }}>Sample owner portal</p>
-            <h1 style={{ fontFamily: DEMO_HEAD, fontSize: 'clamp(28px,5vw,40px)', fontWeight: 600, marginTop: 10, textAlign: 'center', color: '#fff' }}>{BIZ}</h1>
-            <p style={{ fontFamily: DEMO_UI, fontSize: 14, color: HUB_MUTED, marginTop: 10, textAlign: 'center', maxWidth: 420 }}>
-              Pick a desk — same five-icon entry as a private ops portal. This public demo opens Cash flow only.
-            </p>
+            <header className="op-hub__bar">
+              <div className="op-hub__brand">
+                <HubLogo />
+                <span className="op-hub__brand-name">{BIZ.toUpperCase()}</span>
+              </div>
+              <span className="op-hub__sample">Public sample · fictitious data</span>
+            </header>
+            <div className="op-hub__intro">
+              <p>Owner portal · tap where you&rsquo;re going</p>
+            </div>
             <div className="op-hub__grid" role="navigation" aria-label="Portal desks">
-              {HUB_DESKS.map((d) => (
-                <button key={d.id} type="button" className="op-hub__tile" onClick={() => hubPick(d)} style={{ border: 'none', font: 'inherit' }}>
-                  <div className="op-hub__icon">
-                    <Icon name={HUB_ICON[d.id]} size={26} color={HUB_ACCENT} />
-                  </div>
-                  <div className="op-hub__label">{d.label}</div>
-                  <div className="op-hub__sub">{d.sub}</div>
-                </button>
+              {PORTAL_DESKS.map((d) => (
+                <div key={d.id} className="op-hub__card-wrap">
+                  {d.live && <span className="op-hub__live-tag">Live in sample</span>}
+                  <button
+                    type="button"
+                    className={`op-hub__card${d.live ? ' op-hub__card--live' : ''}`}
+                    onClick={() => hubPick(d)}
+                    style={{ font: 'inherit', width: '100%' }}
+                  >
+                    <div className="op-hub__art">
+                      <HubArt type={d.art} />
+                    </div>
+                    <div className="op-hub__body">
+                      <div className="op-hub__kicker">{d.kicker}</div>
+                      <div className="op-hub__title">{d.title}</div>
+                    </div>
+                    <span className="op-hub__enter">Enter <span aria-hidden="true">›</span></span>
+                  </button>
+                </div>
               ))}
             </div>
-            <a href={BOOK} target="_blank" rel="noopener noreferrer" style={{ marginTop: 32, fontFamily: DEMO_MONO, fontSize: 10, color: HUB_ACCENT, textDecoration: 'none' }}>
-              Built by JK No Jokes →
-            </a>
+            <div className="op-hub__foot">
+              <a href={BOOK} target="_blank" rel="noopener noreferrer">Built by JK No Jokes Financials →</a>
+            </div>
           </div>
         ) : (
           <>
@@ -388,7 +511,7 @@ export default function OperationsPortalDemo() {
                   ← Desks
                 </button>
                 <div>
-                  <div style={{ fontFamily: DEMO_HEAD, fontSize: 17, fontWeight: 600 }}>Cash flow desk</div>
+                  <div style={{ fontFamily: DEMO_HEAD, fontSize: 17, fontWeight: 600 }}>Operations center</div>
                   <div style={{ fontFamily: DEMO_MONO, fontSize: 9, opacity: 0.75, letterSpacing: '.1em' }}>{BIZ.toUpperCase()}</div>
                 </div>
               </div>
@@ -407,35 +530,52 @@ export default function OperationsPortalDemo() {
             </nav>
 
             <main className="op-main">
-              <section id="section-banks" className="op-panel">
+              <div className="op-summary">
+                <div className="op-summary-item">
+                  <span style={{ fontFamily: DEMO_MONO, fontSize: 9, color: MUTED, letterSpacing: '.08em', textTransform: 'uppercase' }}>Combined liquid</span>
+                  <strong>{money(bankTotal)}</strong>
+                </div>
+                <div className="op-summary-item">
+                  <span style={{ fontFamily: DEMO_MONO, fontSize: 9, color: MUTED, letterSpacing: '.08em', textTransform: 'uppercase' }}>Card payables (view)</span>
+                  <strong>{money(ccTotal)}</strong>
+                </div>
+                <div className="op-summary-item">
+                  <span style={{ fontFamily: DEMO_MONO, fontSize: 9, color: MUTED, letterSpacing: '.08em', textTransform: 'uppercase' }}>Amount going out</span>
+                  <strong>{money(goingOut)}</strong>
+                </div>
+                <div className="op-summary-item">
+                  <span style={{ fontFamily: DEMO_MONO, fontSize: 9, color: MUTED, letterSpacing: '.08em', textTransform: 'uppercase' }}>Shortage flag</span>
+                  <strong style={{ color: shortage > 0 ? WARN : '#1E7A4A' }}>{shortage > 0 ? money(shortage) : '—'}</strong>
+                </div>
+              </div>
+
+              <div className="op-workbook">
+              <section id="section-banks" className="op-workbook-section op-panel">
                 <h2 style={{ fontFamily: DEMO_HEAD, fontSize: 20, fontWeight: 600, marginBottom: 14 }}>Bank balances</h2>
                 <div className="op-banks">
                   {BANKS.map((b) => (
                     <div key={b.id} className="op-bank">
                       <div style={{ fontFamily: DEMO_MONO, fontSize: 9, color: MUTED, letterSpacing: '.1em', textTransform: 'uppercase' }}>{b.name}</div>
                       <div style={{ fontFamily: DEMO_MONO, fontSize: 10, color: '#8A96A8', marginTop: 4 }}>{b.account}</div>
-                      <div style={{ fontFamily: DEMO_HEAD, fontSize: 28, fontWeight: 600, marginTop: 8, fontVariantNumeric: 'tabular-nums' }}>{money(b.balance)}</div>
+                      <div style={{ fontFamily: DEMO_HEAD, fontSize: 26, fontWeight: 600, marginTop: 8, fontVariantNumeric: 'tabular-nums' }}>{money(b.balance)}</div>
                       <div style={{ fontFamily: DEMO_MONO, fontSize: 10, color: MUTED, marginTop: 8 }}>Last entered {b.entered}</div>
                     </div>
                   ))}
-                  <div className="op-bank op-bank-total">
-                    <div style={{ fontFamily: DEMO_MONO, fontSize: 9, color: ACCENT, letterSpacing: '.1em', textTransform: 'uppercase' }}>Combined liquid</div>
-                    <div style={{ fontFamily: DEMO_HEAD, fontSize: 28, fontWeight: 600, marginTop: 12, fontVariantNumeric: 'tabular-nums' }}>{money(bankTotal)}</div>
-                  </div>
                 </div>
               </section>
 
-              <section id="section-cards" className="op-panel">
-                <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'space-between', gap: 12, marginBottom: 4 }}>
-                  <h2 style={{ fontFamily: DEMO_HEAD, fontSize: 20, fontWeight: 600 }}>Card payables</h2>
-                  <div style={{ textAlign: 'right' }}>
-                    <div style={{ fontFamily: DEMO_MONO, fontSize: 9, color: MUTED }}>FILTERED TOTAL</div>
-                    <div style={{ fontFamily: DEMO_HEAD, fontSize: 22, fontWeight: 600 }}>{money(ccTotal)}</div>
-                  </div>
+              <section id="section-cards" className="op-workbook-section op-panel">
+                <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'space-between', gap: 12, marginBottom: 8 }}>
+                  <h2 style={{ fontFamily: DEMO_HEAD, fontSize: 20, fontWeight: 600 }}>Credit card payables</h2>
+                </div>
+                <div className="op-cc-totals">
+                  <span>Filtered total<b>{money(ccTotal)}</b></span>
+                  <span>October dues<b>{money(octDue)}</b></span>
+                  <span>November dues<b>{money(novDue)}</b></span>
                 </div>
                 <div className="op-legend">
-                  <span><i style={{ background: OCT_BG, border: `1px solid ${OCT_INK}` }} /> October dues</span>
-                  <span><i style={{ background: NOV_BG, border: `1px solid ${NOV_INK}` }} /> November dues</span>
+                  <span><i style={{ background: OCT_BG, border: `1px solid ${OCT_INK}` }} /> October row color</span>
+                  <span><i style={{ background: NOV_BG, border: `1px solid ${NOV_INK}` }} /> November row color</span>
                 </div>
                 <div className="op-toolbar">
                   <div className="op-seg">
@@ -469,8 +609,10 @@ export default function OperationsPortalDemo() {
                       <tbody>
                         {filtered.map((r, i) => {
                           const ds = dueStyle(r.due)
+                          const m = new Date(r.due + 'T12:00:00').getMonth()
+                          const rowClass = m === 9 ? 'op-row-oct' : m === 10 ? 'op-row-nov' : ''
                           return (
-                            <tr key={i} style={{ background: i % 2 ? '#FAFBFD' : '#fff' }}>
+                            <tr key={i} className={rowClass}>
                               <td style={td}>{CARDS.find((c) => c.id === r.card)?.label}</td>
                               <td style={td}>{r.vendor}</td>
                               <td style={td}><span className="op-due-pill" style={{ background: ds.bg, color: ds.color }}>{fmtDue(r.due)}</span></td>
@@ -517,7 +659,7 @@ export default function OperationsPortalDemo() {
                 )}
               </section>
 
-              <section id="section-loans" className="op-panel">
+              <section id="section-loans" className="op-workbook-section op-panel">
                 <div className="op-row-2">
                   <div>
                     <h2 style={{ fontFamily: DEMO_HEAD, fontSize: 18, fontWeight: 600, marginBottom: 12 }}>Short-term loans</h2>
@@ -554,7 +696,7 @@ export default function OperationsPortalDemo() {
                 </div>
               </section>
 
-              <section id="section-outflow" className="op-panel">
+              <section id="section-outflow" className="op-workbook-section op-panel">
                 <h2 style={{ fontFamily: DEMO_HEAD, fontSize: 18, fontWeight: 600, marginBottom: 12 }}>US monthly outflow</h2>
                 <div className="op-scroll">
                   <table>
@@ -581,6 +723,7 @@ export default function OperationsPortalDemo() {
                   </table>
                 </div>
               </section>
+              </div>
             </main>
           </>
         )}
