@@ -1,3 +1,7 @@
+## Marketing site voice
+
+Before editing `components/HomeLanding.js`, `pages/index.js`, or JK marketing CSS: read **`docs/MARKETING_VOICE.md`**. Subtraction over templates; no generic SaaS slogans; one hero CTA to samples; do not invent references or contradict one-company-per-login without the owner confirming.
+
 ## Client scope — READ BEFORE EDITING
 
 | Client | Allowed paths | Supabase ref | Never touch |

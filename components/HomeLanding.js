@@ -5,20 +5,11 @@ import { HERO_SAMPLE_BARS } from '../lib/samplePortals'
 import { painLineForDemo } from '../lib/homeSamplePains'
 import DemoGalleryCard from './DemoGalleryCard'
 
-const STORY = {
-  kicker: 'What you get',
-  title: 'Software that feels like your shop',
-  body:
-    'Not another dashboard template — your register, vendors, and QuickBooks wired into one login with the screens you keep describing on phone calls. Built on your numbers, tuned until you would actually use it every Monday. One company per account; you get me, not a ticket queue.',
-}
-
 const START_STEPS = [
-  'Quick call — what you sell and what would make your week easier.',
-  'I connect your books and tools, then build the portal around that.',
-  'You sign in on real data; we keep adjusting until it feels like yours.',
+  'Quick call — what you sell and what you want on screen.',
+  'I connect QuickBooks and your tools, then build your portal.',
+  'You sign in on real data; we adjust until it clicks.',
 ]
-
-const PORTFOLIO_HREF = '/operations-portal'
 
 const TRADES = [
   'Multiple businesses / portfolio',
@@ -62,11 +53,11 @@ export default function HomeLanding({
           JK<span className="m-jk-home__mark-dot">.</span>
         </p>
         <h1 className="m-jk-home__h1">
-          Run your business like you meant to.
+          Custom portals for owners, on your QuickBooks data.
         </h1>
         <p className="m-jk-home__lead">
-          You did not open a shop to fight spreadsheets at midnight. I build owner portals on your real QuickBooks and
-          the tools you already run — margin, cash, what is owed — one login, one tire shop or five businesses.
+          I wire your books and the tools you already run into one login — the screens you keep asking for on the phone.
+          Keep your bookkeeper, or have me handle the books too.
         </p>
         <div className="m-jk-home__hero-actions">
           <button
@@ -74,70 +65,25 @@ export default function HomeLanding({
             className="m-jk-home__btn m-jk-home__btn--primary"
             onClick={() => scrollTo('samples')}
           >
-            See it in 60 seconds — open a sample
-          </button>
-          <button
-            type="button"
-            className="m-jk-home__btn m-jk-home__btn--ghost"
-            onClick={() => scrollTo('contact')}
-          >
-            Tell me what you want built
-          </button>
-          <button
-            type="button"
-            className="m-jk-home__btn m-jk-home__btn--ghost m-jk-home__btn--ops"
-            onClick={() => router.push(PORTFOLIO_HREF)}
-          >
-            Multi-business sample
+            Open sample portals
           </button>
         </div>
+        <p className="m-jk-home__hero-secondary">
+          <button type="button" className="m-jk-home__link" onClick={() => scrollTo('contact')}>
+            Tell me what you need
+          </button>
+          {' · '}
+          <a href={BOOKING_URL} target="_blank" rel="noopener noreferrer" className="m-jk-home__link">
+            Book a call
+          </a>
+        </p>
       </header>
 
       <div className="m-jk-home__flow">
-        <section className="m-jk-home__panel m-jk-home__panel--story m-jk-home__panel--spotlight" id="portfolio">
-          <p className="m-jk-story__kicker">Run more than one business?</p>
-          <h2 className="m-jk-story__title">One hub, four doors</h2>
-          <p className="m-jk-story__body">
-            Three trade samples you can actually open — tires, rentals, roofing — plus an{' '}
-            <strong>Operations Center</strong> for cards, banks, and whether cash covers what is due. Every card clicks
-            through.
-          </p>
-          <button
-            type="button"
-            className="m-jk-home__btn m-jk-home__btn--primary m-jk-home__btn--inline"
-            onClick={() => router.push(PORTFOLIO_HREF)}
-          >
-            Open owner portfolio sample
-          </button>
-        </section>
-
-        <section className="m-jk-home__panel m-jk-home__panel--story" id="offer">
-          <p className="m-jk-story__kicker">How we work</p>
-          <h2 className="m-jk-story__title">I build it. You run the business.</h2>
-          <p className="m-jk-story__body">
-            Keep your bookkeeper or bring me the books — either way you get a portal that matches how you actually sell.
-            QuickBooks stays the books; your login is the cockpit. Same nightly sync, same person answering when something
-            looks off.
-          </p>
-          <ul className="m-jk-steps m-jk-steps--plain">
-            <li><strong>Setup</strong> — connect QuickBooks and your tools, build your screens, launch on real data.</li>
-            <li><strong>Ongoing</strong> — sync keeps running; tune screens as you grow. Bookkeeping help only if you want it.</li>
-            <li><strong>Timing</strong> — most first portals land in a few weeks; exact scope comes out of the kickoff call.</li>
-          </ul>
-        </section>
-
-        <section className="m-jk-home__panel m-jk-home__panel--story">
-          <p className="m-jk-story__kicker">{STORY.kicker}</p>
-          <h2 className="m-jk-story__title">{STORY.title}</h2>
-          <p className="m-jk-story__body">{STORY.body}</p>
-        </section>
-
-        <section className="m-jk-home__panel" id="samples">
-          <p className="m-jk-story__kicker">Samples</p>
-          <h2 className="m-jk-story__title">Click one — feel if this is you</h2>
+        <section className="m-jk-home__panel m-jk-home__panel--samples" id="samples">
+          <h2 className="m-jk-story__title">Sample portals</h2>
           <p className="m-jk-story__body m-jk-story__body--tight">
-            Fake company names, real layouts. No login. If a screen makes you think &ldquo;that&rsquo;s what I&rsquo;ve been asking for,&rdquo;
-            that&rsquo;s the conversation.
+            Fictitious company names. No password — click one and look around.
           </p>
           <div className="m-jk-home__demos m-jk-home__demos--lead m-jk-stagger-cards">
             {HERO_SAMPLE_BARS.map((p) => (
@@ -147,8 +93,6 @@ export default function HomeLanding({
                 biz={p.name}
                 pain={painLineForDemo(p.href)}
                 compact
-                featured={p.href === PORTFOLIO_HREF}
-                featuredLabel="Multi-business"
               />
             ))}
           </div>
@@ -157,23 +101,17 @@ export default function HomeLanding({
             className="m-jk-text-link"
             onClick={() => router.push('/demos')}
           >
-            All samples
+            All samples (including multi-business hub)
           </button>
         </section>
 
-        <section className="m-jk-home__panel m-jk-home__panel--story m-jk-home__panel--proof">
-          <p className="m-jk-story__kicker">References</p>
-          <h2 className="m-jk-story__title">Samples here are fake — ask for a real one</h2>
+        <section className="m-jk-home__plain" id="offer">
+          <h2 className="m-jk-story__title">Portal first — books optional</h2>
           <p className="m-jk-story__body">
-            Every demo on this site uses a made-up company so you can click around without a password. I don&rsquo;t put
-            client testimonials on a public page without permission — on a kickoff call I can share references from owners
-            already using this on their books.
+            Keep your bookkeeper or bring me the books — either way you get a portal built on your numbers, not a template
+            off the shelf. QuickBooks stays the books; the portal is where you actually look. One company per login on
+            production builds; you get me, not a ticket queue.
           </p>
-        </section>
-
-        <section className="m-jk-home__panel m-jk-home__panel--story" id="how">
-          <p className="m-jk-story__kicker">How it starts</p>
-          <h2 className="m-jk-story__title">Call, build, tune</h2>
           <ol className="m-jk-steps">
             {START_STEPS.map((step) => (
               <li key={step}>{step}</li>
@@ -184,17 +122,16 @@ export default function HomeLanding({
             className="m-jk-text-link"
             onClick={() => router.push('/how-it-works')}
           >
-            More detail
+            More on how it works
           </button>
         </section>
 
         <section className="m-jk-home__panel m-jk-home__panel--form" id="contact">
-          <h2>What would make your business easier?</h2>
+          <h2>Tell me what you need</h2>
           <p className="m-jk-home__lede">
-            One sentence is enough — the margin view, the cash picture, the thing your accountant can&rsquo;t pull out of
-            QuickBooks. I&rsquo;ll point you at the closest sample or{' '}
+            Your trade and the screen you wish you had — I&rsquo;ll send the closest sample or point you at{' '}
             <a href={BOOKING_URL} target="_blank" rel="noopener noreferrer">
-              get on a call
+              a call
             </a>
             .
           </p>
@@ -250,7 +187,7 @@ export default function HomeLanding({
                 The screen you want
                 <textarea
                   rows={3}
-                  placeholder="I want to see profit per ticket / who still owes me / if I can pay the cards this week…"
+                  placeholder="Profit per ticket, who still owes me, jobs in progress…"
                   value={form.message}
                   onChange={(e) => setForm({ ...form, message: e.target.value })}
                 />

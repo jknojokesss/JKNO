@@ -28,7 +28,7 @@ export default function Landing() {
       setForm((f) => ({
         ...f,
         trade: PORTFOLIO_TRADE,
-        message: f.message || 'Interested in the owner portfolio hub — multiple businesses, one login.',
+        message: f.message || 'Interested in the owner portfolio sample on /operations-portal.',
       }))
     }
   }, [router.isReady, router.query.portfolio, router.query.interest])
@@ -54,7 +54,7 @@ export default function Landing() {
     <>
       <MarketingShell
         title="JK No Jokes Financials | Owner portals for your shop"
-        description="Run your business like you meant to — owner portals on your real QuickBooks and tools. Open a sample in 60 seconds, no login."
+        description="Custom owner portals on your QuickBooks data. Keep your bookkeeper or have JK do the books. Open a sample portal — no login."
         marketingHome
         padTop={false}
       >
