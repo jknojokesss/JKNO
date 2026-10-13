@@ -12,7 +12,7 @@
 
 ## Do
 
-- Lead with what we do: **custom owner portals on the client’s QuickBooks data** (and tools they already run). **Keep your bookkeeper, or have JK do the books too.**
+- Lead with what we do: **custom owner portals for business owners** — their numbers, their login, wired to how they sell. **Do not put QuickBooks in the homepage hero** (owner finds QB noise in the first scroll). QB is fine lower on the page or on /what-we-do where books are the topic. **Keep your bookkeeper, or have JK do the books too.**
 - Use **specific money questions** as hooks (“who still owes you?”, “which jobs are losing money?”).
 - Keep human lines that sound like JK: “Keep your bookkeeper or bring me the books”, “you get me, not a ticket queue”, “Built in Jersey. No jokes.”
 - **Subtract** before adding: plain background, light shadows, not every paragraph in a decorative card. Cards only where they help compare samples.

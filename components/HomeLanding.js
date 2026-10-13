@@ -53,11 +53,11 @@ export default function HomeLanding({
           JK<span className="m-jk-home__mark-dot">.</span>
         </p>
         <h1 className="m-jk-home__h1">
-          Custom portals for owners, on your QuickBooks data.
+          Custom portals for owners — your numbers, your login.
         </h1>
         <p className="m-jk-home__lead">
-          I wire your books and the tools you already run into one login — the screens you keep asking for on the phone.
-          Keep your bookkeeper, or have me handle the books too.
+          I build the screens you keep asking for on the phone — margin, who owes you, what is in the bank — wired to
+          how you actually sell. Keep your bookkeeper, or have me handle the books too.
         </p>
         <div className="m-jk-home__hero-actions">
           <button
