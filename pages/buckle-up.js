@@ -1,7 +1,6 @@
 import React, { useState, useEffect, useMemo } from 'react'
 import Head from 'next/head'
 import { useRouter } from 'next/router'
-import DemoFontLinks from '../components/DemoFontLinks'
 import DemoLobby from '../components/DemoLobby'
 import DemoBooksPanel from '../components/DemoBooksPanel'
 import { DEMO_EMBED_HIDE_LOBBY_CSS, getDemoEmbedServerProps, isDemoEmbedQuery } from '../lib/demoEmbed'
@@ -18,10 +17,9 @@ const sans = "'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI'
 
 const BIZ = 'Buckle Up'
 const AS_OF = '2026-10-10'
-const REP = 'Marcus Chen'
 
-// Buckle Up Leasing — buckleupapplications.com palette (#FFA936 accent)
-const SIGNAL = '#FFA936'
+// Fictitious store — warm neutral desk UI (not a copy of any one dealer site)
+const SIGNAL = '#C4923A'
 const INK = '#1A1A1A'
 const SLATE = '#3D3D3D'
 const MUTED = '#6B6B6B'
@@ -33,7 +31,6 @@ const RED = '#C44A32'
 const AMBER = '#B07A12'
 const GREEN = '#2D6A4A'
 const SIDEBAR = '#FFFFFF'
-const LOGO_SRC = '/buckle-up-logo.png'
 
 const dt = (s) => new Date(s + 'T12:00:00')
 const fmtD = (s) => (s ? dt(s).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) : '—')
@@ -52,7 +49,7 @@ const tabNums = { fontVariantNumeric: 'tabular-nums' }
 const DEALS = [
   {
     id: 'D-44102',
-    customer: 'Alvarez family',
+    customer: 'Weiss family',
     stock: 'STK 8841 · 2026 RAV4 LE',
     type: 'lease',
     sold: '2026-10-08',
@@ -68,7 +65,7 @@ const DEALS = [
   },
   {
     id: 'D-44088',
-    customer: 'James Okonkwo',
+    customer: 'David Kramer',
     stock: 'STK 9012 · 2025 Camry SE',
     type: 'finance',
     sold: '2026-10-06',
@@ -84,7 +81,7 @@ const DEALS = [
   },
   {
     id: 'D-44071',
-    customer: 'Priya & Dev Shah',
+    customer: 'Rachel & Eli Goldberg',
     stock: 'STK 8770 · 2026 CR-V EX',
     type: 'lease',
     sold: '2026-10-03',
@@ -100,7 +97,7 @@ const DEALS = [
   },
   {
     id: 'D-44055',
-    customer: 'Mike Torres',
+    customer: 'Michael Rosen',
     stock: 'STK 8899 · 2024 Tacoma TRD',
     type: 'finance',
     sold: '2026-09-28',
@@ -116,7 +113,7 @@ const DEALS = [
   },
   {
     id: 'D-44041',
-    customer: 'Linda Wu',
+    customer: 'Sarah Feldman',
     stock: 'STK 9104 · 2026 Civic Sport',
     type: 'lease',
     sold: '2026-09-25',
@@ -148,7 +145,7 @@ const DEALS = [
   },
   {
     id: 'D-44010',
-    customer: 'Sandra Miles',
+    customer: 'Deborah Levy',
     stock: 'STK 9022 · 2026 Highlander',
     type: 'finance',
     sold: '2026-09-20',
@@ -164,7 +161,7 @@ const DEALS = [
   },
   {
     id: 'D-43998',
-    customer: 'Chris & Ana Bello',
+    customer: 'Josh & Shira Friedman',
     stock: 'STK 8811 · 2026 HR-V',
     type: 'lease',
     sold: '2026-10-09',
@@ -180,7 +177,7 @@ const DEALS = [
   },
   {
     id: 'D-43990',
-    customer: 'Daniel Frost',
+    customer: 'Aaron Stein',
     stock: 'STK 8701 · 2025 Pilot',
     type: 'finance',
     sold: '2026-10-07',
@@ -196,7 +193,7 @@ const DEALS = [
   },
   {
     id: 'D-43981',
-    customer: 'Up · walk-in',
+    customer: 'Walk-in',
     stock: 'STK 9200 · 2026 Corolla',
     type: 'lease',
     sold: '2026-10-10',
@@ -212,7 +209,7 @@ const DEALS = [
   },
   {
     id: 'D-43970',
-    customer: 'Hannah Reed',
+    customer: 'Miriam Cohen',
     stock: 'STK 8933 · 2026 Tucson',
     type: 'lease',
     sold: '2026-10-01',
@@ -228,7 +225,7 @@ const DEALS = [
   },
   {
     id: 'D-43955',
-    customer: 'George Patel',
+    customer: 'Jonathan Shapiro',
     stock: 'STK 8880 · 2025 Outback',
     type: 'finance',
     sold: '2026-09-18',
@@ -346,14 +343,13 @@ export default function BuckleUpPortal({ demoEmbed = false }) {
           .bl-side{width:232px;flex-shrink:0;background:${SIDEBAR};border-right:1px solid ${RULE};display:flex;flex-direction:column;padding:24px 16px 20px;position:sticky;top:${embedded ? 0 : 72}px;height:calc(100vh - ${embedded ? 0 : 72}px)}
           .bl-nav{width:100%;text-align:left;padding:10px 12px;border-radius:8px;border:none;background:transparent;color:${MUTED};font-size:14px;font-weight:500;cursor:pointer;margin-bottom:4px;font-family:${sans}}
           .bl-nav:hover{background:${PAPER};color:${INK}}
-          .bl-nav.on{background:#FFF6E8;color:${INK};font-weight:600;box-shadow:inset 3px 0 0 ${SIGNAL}}
+          .bl-nav.on{background:#F5F0E6;color:${INK};font-weight:600;box-shadow:inset 3px 0 0 ${SIGNAL}}
           .bl-main{flex:1;min-width:0;padding:32px 32px 56px;max-width:1100px}
           .bl-mtabs{display:none;position:sticky;top:${embedded ? 0 : 72}px;z-index:20;background:${WHITE};border-bottom:1px solid ${RULE};padding:8px 12px;gap:8px;overflow-x:auto}
           .bl-mtab{flex-shrink:0;border:1px solid ${RULE};border-radius:999px;padding:8px 16px;font-size:13px;font-weight:500;font-family:${sans};cursor:pointer;background:${WHITE};color:${MUTED}}
-          .bl-mtab.on{background:#FFF6E8;border-color:${SIGNAL};color:${INK};font-weight:600}
+          .bl-mtab.on{background:#F5F0E6;border-color:${SIGNAL};color:${INK};font-weight:600}
           .bl-chev{transition:transform .15s;display:inline-block;color:${FAINT}}
           .bl-chev.open{transform:rotate(90deg)}
-          .bu-logo{display:block;width:168px;height:auto;margin-bottom:6px}
           @media(max-width:820px){
             .bl-side{display:none}
             .bl-mtabs{display:flex}
@@ -375,8 +371,8 @@ export default function BuckleUpPortal({ demoEmbed = false }) {
 
         <aside className="bl-side">
           <div style={{ paddingBottom: '20px' }}>
-            <img className="bu-logo" src={LOGO_SRC} width={168} height={99} alt="Buckle Up Leasing" />
-            <div style={{ fontSize: '13px', color: MUTED, marginTop: '8px' }}>{REP}</div>
+            <div style={{ fontSize: '21px', fontWeight: 700, letterSpacing: '-0.02em', color: INK }}>{BIZ}</div>
+            <div style={{ fontSize: '13px', color: MUTED, marginTop: '6px' }}>Sales desk</div>
           </div>
           <nav style={{ flex: 1 }}>
             {NAV.map((n) => (
