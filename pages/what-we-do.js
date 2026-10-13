@@ -21,13 +21,15 @@ export default function WhatWeDo() {
           <p className="m-lead" style={{ maxWidth: '58ch', marginBottom: '24px' }}>
             Multi-entity owners start with the portfolio hub; everyone else picks a trade shape. The portal is custom; the pipe is the same — QuickBooks in the middle, sync at night, your login on top.
           </p>
-          <div className="m-demo-grid">
+          <div className="m-demo-grid m-demo-grid--starters">
             {SERVICE_PACKAGES.map((p) => (
               <DemoGalleryCard
                 key={p.title}
                 href={p.href}
                 biz={p.title}
                 industry={p.blurb}
+                featured={p.href === '/operations-portal'}
+                featuredLabel="Flagship sample"
               />
             ))}
           </div>
