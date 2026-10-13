@@ -146,6 +146,16 @@
   box-shadow: 0 6px 20px rgba(8, 12, 24, 0.35);
 }
 
+.m-jk-home__btn--ops {
+  border-color: rgba(232, 168, 76, 0.85);
+  color: #ffe8c4;
+}
+
+.m-jk-home__btn--ops:hover {
+  border-color: #e8a84c;
+  background: rgba(40, 48, 68, 0.92);
+}
+
 .m-jk-home__btn:active {
   transform: translateY(0);
 }

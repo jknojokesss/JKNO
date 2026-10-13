@@ -79,6 +79,13 @@ export default function HomeLanding({
           >
             Tell me what you need
           </button>
+          <button
+            type="button"
+            className="m-jk-home__btn m-jk-home__btn--ghost m-jk-home__btn--ops"
+            onClick={() => router.push('/operations-portal')}
+          >
+            Operations portal — see sample
+          </button>
         </div>
       </header>
 
