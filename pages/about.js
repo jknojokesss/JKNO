@@ -9,7 +9,7 @@ export default function About() {
       <PageHero
         kicker="About"
         title="I build the portal and keep the books."
-        lead="Small shop in Jersey. QuickBooks, register, vendors, wired to one login."
+        lead="I build the login owners wish they had — QuickBooks and your real tools, one screen that matches how you sell."
         align="center"
       />
 

@@ -11,7 +11,7 @@ export default function DemoGallery() {
       <PageHero
         kicker={`${ALL_DEMOS.length} samples · no login`}
         title={<>Open a sample.</>}
-        lead="Start with the owner portfolio hub if you run more than one business — then browse single-trade samples. Fictitious names, real layouts."
+        lead="No pitch deck — click a sample and see if it matches the business you are trying to run. Fictitious names, real layouts, no password."
         align="center"
       />
 

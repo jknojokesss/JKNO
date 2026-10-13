@@ -10,8 +10,8 @@ export default function WhatWeDo() {
     <MarketingShell title="What You Get | JK No Jokes Financials">
       <PageHero
         kicker="What we build"
-        title="One login — one shop or a whole portfolio."
-        lead="Not a template. Integrations, screens, and month-end wired to what you already run — hub first for multi-entity owners."
+        title="Built for how you actually sell."
+        lead="Not a template off the shelf — your QuickBooks, register, and vendors wired into screens you will open on Monday morning."
         align="center"
       />
 
@@ -29,7 +29,7 @@ export default function WhatWeDo() {
                 biz={p.title}
                 industry={p.blurb}
                 featured={p.href === '/operations-portal'}
-                featuredLabel="Flagship sample"
+                featuredLabel="Multi-business"
               />
             ))}
           </div>

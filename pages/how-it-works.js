@@ -27,8 +27,8 @@ export default function HowItWorks() {
     <MarketingShell title="How It Works | JK No Jokes Financials">
       <PageHero
         kicker="How it works"
-        title="Call, build, launch."
-        lead="A short call, a focused build, then you sign in and we fix what’s off. Your data keeps syncing after launch."
+        title="You talk. I build. You run."
+        lead="Thirty minutes to hear what would make your week easier — then a portal on your real data, tuned until you trust the numbers."
         align="center"
       />
 
