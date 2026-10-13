@@ -62,26 +62,26 @@ export default function HomeLanding({
           JK<span className="m-jk-home__mark-dot">.</span>
         </p>
         <h1 className="m-jk-home__h1">
-          One login across the businesses you run.
+          One login for the numbers that run your shop.
         </h1>
         <p className="m-jk-home__lead">
-          One shop or several — barber, rentals, retail, cafe — owner portals on QuickBooks and the tools you already use.
-          No more spreadsheet tabs and three different logins.
+          Owner portals on QuickBooks and the tools you already use — one tire shop or a whole portfolio of businesses,
+          same idea: your numbers on screen instead of spreadsheets and a pile of tabs.
         </p>
         <div className="m-jk-home__hero-actions">
           <button
             type="button"
             className="m-jk-home__btn m-jk-home__btn--primary"
-            onClick={() => router.push(PORTFOLIO_HREF)}
+            onClick={() => scrollTo('samples')}
           >
-            Owner portfolio — open sample
+            See sample portals
           </button>
           <button
             type="button"
-            className="m-jk-home__btn m-jk-home__btn--ghost"
-            onClick={() => scrollTo('samples')}
+            className="m-jk-home__btn m-jk-home__btn--ghost m-jk-home__btn--ops"
+            onClick={() => router.push(PORTFOLIO_HREF)}
           >
-            More sample portals
+            Multi-business hub — sample
           </button>
           <button
             type="button"
@@ -95,12 +95,12 @@ export default function HomeLanding({
 
       <div className="m-jk-home__flow">
         <section className="m-jk-home__panel m-jk-home__panel--story m-jk-home__panel--spotlight" id="portfolio">
-          <p className="m-jk-story__kicker">Flagship sample</p>
+          <p className="m-jk-story__kicker">Run more than one business?</p>
           <h2 className="m-jk-story__title">Owner portfolio hub</h2>
           <p className="m-jk-story__body">
-            Multiple entities, one sign-in. Pick a business from the hub — books &amp; cash shows card due dates, bank
-            balance, and whether you have room to pay the cards this week. Other desks in the sample are layout previews;
-            we wire yours live when you are ready.
+            One shop does not need this — but if you have several entities, one sign-in beats five QuickBooks tabs. Pick a
+            business from the hub; books &amp; cash shows card due dates, bank balance, and whether you can cover the cards
+            this week. Other desks in the sample are layout previews until you want them live.
           </p>
           <button
             type="button"
