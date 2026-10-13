@@ -96,18 +96,18 @@ export default function HomeLanding({
       <div className="m-jk-home__flow">
         <section className="m-jk-home__panel m-jk-home__panel--story m-jk-home__panel--spotlight" id="portfolio">
           <p className="m-jk-story__kicker">Run more than one business?</p>
-          <h2 className="m-jk-story__title">Owner portfolio hub</h2>
+          <h2 className="m-jk-story__title">One hub, four doors</h2>
           <p className="m-jk-story__body">
-            One shop does not need this — but if you have several entities, one sign-in beats five QuickBooks tabs. Pick a
-            business from the hub; books &amp; cash shows card due dates, bank balance, and whether you can cover the cards
-            this week. Other desks in the sample are layout previews until you want them live.
+            The Hartman sample is three real trade portals — tire shop, rentals, roofing — plus an{' '}
+            <strong>Operations Center</strong> for cards, banks, and whether cash covers what is due. Every card clicks
+            through; nothing is a greyed-out teaser.
           </p>
           <button
             type="button"
             className="m-jk-home__btn m-jk-home__btn--primary m-jk-home__btn--inline"
-            onClick={() => router.push(`${PORTFOLIO_HREF}?desk=operations`)}
+            onClick={() => router.push(PORTFOLIO_HREF)}
           >
-            Open Books &amp; cash desk
+            Open Hartman hub sample
           </button>
         </section>
 

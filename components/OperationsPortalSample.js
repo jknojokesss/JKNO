@@ -13,7 +13,8 @@ const JK_UI = "'DM Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-se
 const JK_MONO = "'DM Mono', ui-monospace, monospace"
 const DEMO_PORTAL_ROOT_CLASS = 'demo-portal-root op-portal-root'
 
-const BIZ = 'Owner portfolio'
+/** Fictitious multi-entity owner — not a real client. */
+const BIZ = 'Hartman Group'
 const HUB_PAGE = '#f2f0ea'
 const HUB_INK = '#0f1419'
 const HUB_MUTED = '#64748b'
@@ -97,12 +98,25 @@ function HubArt({ type }) {
       </svg>
     )
   }
-  if (type === 'cafe') {
+  if (type === 'tires') {
     return (
       <svg viewBox="0 0 200 120" width="100%" height="120" aria-hidden>
-        <path d="M72 44h56v48H72z" fill="#fff" stroke={ART_GREY} strokeWidth="2" />
-        <path d="M128 56h16a10 10 0 0 1 0 20h-16" fill="none" stroke={ART_GREY} strokeWidth="2" />
-        <path d="M92 36c4-8 24-8 28 0" fill="none" stroke={ART_GREY} strokeWidth="2" />
+        <circle cx="88" cy="72" r="22" fill="#fff" stroke={ART_GREY} strokeWidth="3" />
+        <circle cx="88" cy="72" r="10" fill={ART_GREY} opacity="0.35" />
+        <circle cx="128" cy="72" r="22" fill="#fff" stroke={ART_GREY} strokeWidth="3" />
+        <circle cx="128" cy="72" r="10" fill={ART_GREY} opacity="0.35" />
+        <path d="M62 52h76" stroke={ART_GREY} strokeWidth="2" strokeLinecap="round" />
+        <HubBadge x={158} y={38} text="RO" />
+      </svg>
+    )
+  }
+  if (type === 'roof') {
+    return (
+      <svg viewBox="0 0 200 120" width="100%" height="120" aria-hidden>
+        <path d="M48 68 100 36l52 32v36H48z" fill={ART_GREY} opacity="0.35" />
+        <rect x="72" y="72" width="56" height="28" fill="#fff" stroke={ART_GREY} strokeWidth="2" />
+        <path d="M88 72V60h24v12" fill="none" stroke={ART_GREY} strokeWidth="2" />
+        <HubBadge x={152} y={42} text="WIP" />
       </svg>
     )
   }
@@ -119,21 +133,44 @@ function HubLogo() {
   )
 }
 
-/** Five fictitious businesses — only Books & cash opens in this public sample. */
+/**
+ * Adar-style hub: Operations Center (in this file) + three trade portals we already ship as samples.
+ * Business cards navigate to those demos; Operations Center opens the cash workbook below.
+ */
 const PORTAL_DESKS = [
-  { id: 'operations', kicker: 'Banks, cards & what\'s due', title: 'Books & cash', live: true, art: 'ops' },
-  { id: 'barber', kicker: 'Two chairs · Lakewood', title: 'Kline Barber', live: false, art: 'barber' },
-  { id: 'realestate', kicker: 'Six units · rent roll', title: 'Real estate', live: false, art: 'house' },
-  { id: 'candy', kicker: 'Wholesale & gift shop', title: 'Sugar Lane Candy', live: false, art: 'candy' },
-  { id: 'cafe', kicker: 'One location · catering', title: 'Corner Cup Coffee', live: false, art: 'cafe' },
+  {
+    id: 'operations',
+    kicker: 'All entities · banks & cards',
+    title: 'Operations Center',
+    live: true,
+    art: 'ops',
+    enterLabel: 'Open workbook',
+  },
+  {
+    id: 'riverside',
+    kicker: 'Tires & auto · Lakewood',
+    title: 'Riverside Tires',
+    art: 'tires',
+    href: '/riverside-tires',
+    enterLabel: 'Open portal sample',
+  },
+  {
+    id: 'harborfield',
+    kicker: '12 doors · rent roll',
+    title: 'Harborfield Residential',
+    art: 'house',
+    href: '/harborfield-properties',
+    enterLabel: 'Open portal sample',
+  },
+  {
+    id: 'riverstone',
+    kicker: 'Commercial roofing',
+    title: 'Riverstone Roofing',
+    art: 'roof',
+    href: '/riverstone-roofing',
+    enterLabel: 'Open portal sample',
+  },
 ]
-
-const DESK_TOAST = {
-  barber: 'Barber desk — appointments, tips, and retail would show here in a full build.',
-  realestate: 'Rent roll — late rent and tickets, not a full property manager.',
-  candy: 'Retail desk — margins and reorder points from your POS.',
-  cafe: 'Cafe desk — daily sales vs food cost, same read-only pattern.',
-}
 
 const BANKS = [
   { id: 'lakeview', name: 'Lakeview National', account: 'Operating · 4821', balance: 284200, entered: 'Oct 13 · 8:42 AM' },
@@ -329,7 +366,7 @@ export default function OperationsPortalSample() {
   const [sortAsc, setSortAsc] = useState(true)
   const [calDay, setCalDay] = useState('2026-10-18')
   const [activeSection, setActiveSection] = useState('banks')
-  const [activeDeskTitle, setActiveDeskTitle] = useState('Books & cash')
+  const [activeDeskTitle, setActiveDeskTitle] = useState('Operations Center')
 
   const filtered = useMemo(() => {
     let rows = [...PAYABLES]
@@ -356,7 +393,7 @@ export default function OperationsPortalSample() {
   }
 
   const openDesk = (desk) => {
-    setActiveDeskTitle(desk?.title || 'Books & cash')
+    setActiveDeskTitle(desk?.title || 'Operations Center')
     setHubOpen(false)
     setActiveSection('banks')
     router.replace({ pathname: '/operations-portal', query: { desk: 'operations' } }, undefined, { shallow: true })
@@ -367,7 +404,11 @@ export default function OperationsPortalSample() {
       openDesk(desk)
       return
     }
-    ping(DESK_TOAST[desk.id] || 'Placeholder desk in this sample.')
+    if (desk.href) {
+      router.push(desk.href)
+      return
+    }
+    ping('That desk is not wired in this sample.')
   }
 
   const jumpSection = (id) => {
@@ -426,8 +467,8 @@ export default function OperationsPortalSample() {
   return (
     <div className="op-sample-root">
       <Head>
-        <title>{BIZ} — Operations portal (sample)</title>
-        <meta name="description" content="Owner portal sample — desk hub and cash-flow workbook. Fictitious data." />
+        <title>{BIZ} — owner hub (sample)</title>
+        <meta name="description" content="Sample multi-business hub — Operations Center plus Riverside Tires, Harborfield, Riverstone demos. Fictitious owner." />
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link href={JK_FONTS} rel="stylesheet" />
       </Head>
@@ -443,8 +484,9 @@ export default function OperationsPortalSample() {
           .op-hub__sample{font-family:${JK_UI};font-size:11px;font-weight:600;color:${HUB_MUTED};background:#F0F2F6;border:1px solid #E0E4EC;border-radius:20px;padding:6px 12px}
           .op-hub__intro{text-align:center;padding:28px 20px 8px;max-width:560px;margin:0 auto}
           .op-hub__intro p{font-family:${JK_UI};font-size:15px;font-weight:500;color:${HUB_MUTED};line-height:1.45}
-          .op-hub__grid{display:flex;flex-wrap:wrap;justify-content:center;gap:20px;width:100%;max-width:1040px;margin:28px auto 48px;padding:0 20px}
-          .op-hub__card-wrap{position:relative;flex:0 1 300px;max-width:300px;width:100%}
+          .op-hub__grid{display:grid;grid-template-columns:1fr;gap:18px;width:100%;max-width:720px;margin:28px auto 48px;padding:0 20px}
+          .op-hub__card-wrap{position:relative;width:100%;min-width:0}
+          @media(min-width:640px){.op-hub__grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:20px}}
           .op-hub__card{background:${HUB_CARD};border:1px solid #E4E8EF;border-radius:16px;padding:0 0 20px;display:flex;flex-direction:column;text-align:left;cursor:pointer;transition:transform .18s ease,box-shadow .18s ease,border-color .18s ease;box-shadow:0 2px 8px rgba(35,45,60,.05),0 14px 36px rgba(35,45,60,.05);overflow:hidden;min-height:300px;height:100%}
           .op-hub__card--live{border-color:rgba(201,168,76,.55);box-shadow:0 2px 8px rgba(201,168,76,.15),0 16px 40px rgba(35,45,60,.07)}
           .op-hub__card:hover{transform:translateY(-4px);border-color:#C8D0DC;box-shadow:0 6px 16px rgba(35,45,60,.08),0 24px 48px rgba(35,45,60,.09)}
@@ -500,8 +542,7 @@ export default function OperationsPortalSample() {
           .op-cal-grid button .dot{position:absolute;bottom:4px;left:50%;transform:translateX(-50%);width:4px;height:4px;border-radius:50%;background:${ACCENT}}
           .op-row-2{display:grid;grid-template-columns:1fr 300px;gap:18px}
           @media(max-width:900px){
-            .op-hub__grid{max-width:min(100%,360px)}
-            .op-hub__card-wrap{flex:1 1 100%;max-width:100%}
+            .op-hub__grid{max-width:min(100%,400px)}
             .op-main{padding:16px 14px 48px}
             .op-row-2{grid-template-columns:1fr}
             .op-desk-rail{top:88px}
@@ -528,14 +569,15 @@ export default function OperationsPortalSample() {
             </header>
             <div className="op-hub__intro">
               <p>
-                Your businesses in one login — pick a desk. Fictitious names; only{' '}
-                <strong style={{ color: HUB_INK, fontWeight: 700 }}>Books &amp; cash</strong> opens in this sample.
+                Hartman runs three companies from one login.{' '}
+                <strong style={{ color: HUB_INK, fontWeight: 700 }}>Operations Center</strong> is the consolidated cash
+                desk; each business card opens the trade sample we built for that shape of shop.
               </p>
             </div>
             <div className="op-hub__grid" role="navigation" aria-label="Portal desks">
               {PORTAL_DESKS.map((d) => (
                 <div key={d.id} className="op-hub__card-wrap">
-                  {d.live && <span className="op-hub__live-tag">Live in sample</span>}
+                  {d.live && <span className="op-hub__live-tag">Cash workbook</span>}
                   <button
                     type="button"
                     className={`op-hub__card${d.live ? ' op-hub__card--live' : ''}`}
@@ -549,7 +591,7 @@ export default function OperationsPortalSample() {
                       <div className="op-hub__kicker">{d.kicker}</div>
                       <div className="op-hub__title">{d.title}</div>
                     </div>
-                    <span className="op-hub__enter">Enter <span aria-hidden="true">›</span></span>
+                    <span className="op-hub__enter">{d.enterLabel || 'Enter'} <span aria-hidden="true">›</span></span>
                   </button>
                 </div>
               ))}
