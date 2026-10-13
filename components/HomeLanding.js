@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import Image from 'next/image'
 import { useRouter } from 'next/router'
 import { BOOKING_URL } from '../lib/marketing'
 import { HERO_SAMPLE_BARS } from '../lib/samplePortals'
@@ -8,7 +9,7 @@ import DemoGalleryCard from './DemoGalleryCard'
 const START_STEPS = [
   'Quick call — what you sell and what you want on screen.',
   'I connect QuickBooks and your tools, then build your portal.',
-  'You sign in on real data; we adjust until it clicks.',
+  'You sign in on real data; we fix what is off.',
 ]
 
 const TRADES = [
@@ -96,12 +97,35 @@ export default function HomeLanding({
               />
             ))}
           </div>
+
+          <div className="m-jk-home__multi">
+            <div className="m-jk-home__multi-inner">
+              <a href="/operations-portal" className="m-jk-home__multi-shot">
+                <Image
+                  src="/marketing/operations-portal-preview.png"
+                  alt="Sample owner hub with Operations Center and three business portals"
+                  width={960}
+                  height={540}
+                  sizes="(max-width: 768px) 100vw, 520px"
+                />
+              </a>
+              <div className="m-jk-home__multi-copy">
+                <h3>Own more than one business?</h3>
+                <p>
+                  See the multi-business sample — a hub with an Operations Center plus three trade portals you can open
+                  (fictitious data, same screens we ship on this site).
+                </p>
+                <a href="/operations-portal">Open multi-business sample →</a>
+              </div>
+            </div>
+          </div>
+
           <button
             type="button"
             className="m-jk-text-link"
             onClick={() => router.push('/demos')}
           >
-            All samples (including multi-business hub)
+            All samples
           </button>
         </section>
 
@@ -109,8 +133,7 @@ export default function HomeLanding({
           <h2 className="m-jk-story__title">Portal first — books optional</h2>
           <p className="m-jk-story__body">
             Keep your bookkeeper or bring me the books — either way you get a portal built on your numbers, not a template
-            off the shelf. QuickBooks stays the books; the portal is where you actually look. One company per login on
-            production builds; you get me, not a ticket queue.
+            off the shelf. QuickBooks stays the books; the portal is where you actually look. You get me, not a ticket queue.
           </p>
           <ol className="m-jk-steps">
             {START_STEPS.map((step) => (

@@ -3,17 +3,17 @@
 .m-jk-home {
   position: relative;
   z-index: 2;
-  color: var(--jk-ink);
+  color: #f7f4ef;
 }
 
 .m-jk-home__hero {
-  min-height: auto;
+  min-height: min(48vh, 460px);
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
   text-align: center;
-  padding: calc(3.5rem + env(safe-area-inset-top, 0px)) 1.5rem 1.5rem;
+  padding: calc(3.5rem + env(safe-area-inset-top, 0px)) 1.5rem 2rem;
 }
 
 .m-jk-home__eyebrow {
@@ -32,7 +32,7 @@
   font-family: 'Playfair Display', Georgia, serif;
   font-size: clamp(1.85rem, 4.5vw, 2.5rem);
   font-weight: 700;
-  color: var(--jk-ink);
+  color: #f7f4ef;
 }
 
 .m-jk-home__mark-dot {
@@ -49,8 +49,8 @@
   font-weight: 600;
   line-height: 1.15;
   letter-spacing: -0.02em;
-  color: var(--jk-ink);
-  text-shadow: none;
+  color: #fffaf5;
+  text-shadow: 0 1px 14px rgba(12, 18, 32, 0.35);
   -webkit-font-smoothing: antialiased;
 }
 
@@ -82,22 +82,22 @@
   font-weight: 500;
   line-height: 1.55;
   letter-spacing: 0;
-  color: #475569;
-  text-shadow: none;
+  color: #fff8f0;
+  text-shadow: 0 1px 10px rgba(12, 18, 32, 0.3);
   -webkit-font-smoothing: antialiased;
 }
 
 .m-jk-home__hero-secondary {
   margin: 1rem 0 0;
   font-size: 0.92rem;
-  color: #64748b;
+  color: rgba(255, 248, 240, 0.82);
 }
 
 .m-jk-home__link {
   font-family: var(--jk-body);
   font-size: inherit;
   font-weight: 600;
-  color: #8f3d18;
+  color: #ffe8c4;
   background: none;
   border: none;
   padding: 0;
@@ -107,7 +107,64 @@
 }
 
 .m-jk-home__link:hover {
+  color: #fff;
+}
+
+.m-jk-home__multi {
+  margin-top: 1.35rem;
+  padding-top: 1.35rem;
+  border-top: 1px solid rgba(42, 51, 68, 0.1);
+}
+
+.m-jk-home__multi-inner {
+  display: grid;
+  gap: 1.1rem;
+  align-items: center;
+}
+
+@media (min-width: 768px) {
+  .m-jk-home__multi-inner {
+    grid-template-columns: minmax(0, 1.15fr) minmax(0, 0.85fr);
+    gap: 1.25rem;
+  }
+}
+
+.m-jk-home__multi-shot {
+  display: block;
+  border-radius: 8px;
+  border: 1px solid rgba(42, 51, 68, 0.14);
+  overflow: hidden;
+  box-shadow: 0 4px 16px rgba(15, 20, 28, 0.08);
+  background: #f8f9fb;
+  line-height: 0;
+}
+
+.m-jk-home__multi-shot img {
+  width: 100%;
+  height: auto;
+  display: block;
+}
+
+.m-jk-home__multi-copy h3 {
+  margin: 0 0 0.5rem;
+  font-family: var(--jk-display);
+  font-size: 1.15rem;
+  font-weight: 600;
   color: var(--jk-ink);
+}
+
+.m-jk-home__multi-copy p {
+  margin: 0 0 0.75rem;
+  font-size: 0.95rem;
+  line-height: 1.55;
+  color: #475569;
+}
+
+.m-jk-home__multi-copy a {
+  font-weight: 600;
+  color: #8f3d18;
+  text-decoration: underline;
+  text-underline-offset: 0.12em;
 }
 
 .m-jk-home__hero-actions {

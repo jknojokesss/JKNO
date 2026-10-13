@@ -1,25 +1,30 @@
 # Marketing copy — permanent rules (jknojokes.com)
 
-**Audience:** business owners (not CPAs). **Tone:** casual, organic, like explaining across a table — not SaaS pitch deck.
+**Overrides:** newest owner brief wins when docs conflict. **Audience:** business owners (not CPAs). **Tone:** colorful, casual, specific — like explaining across a table. Not generic SaaS, not a bare gray document.
 
-## Do not (AI slop)
+## Visual
 
-- Generic slogans or forced metaphors (“run your business like you meant to”, “fight spreadsheets at midnight”, “your login is the cockpit”, “one hub four doors”, “click one — feel if this is you”, “see it in 60 seconds”).
-- Motivational speech, vague hype, or copy that could sell any business.
+- **Blue + gold JK identity** on the homepage: tasteful gradient, gold accents, readable hero text (light on sky). Not neon, not heavy shadow stacks, not every paragraph in its own card.
+- **Warmth and character** — personal business site, not a template. Sample cards and spacing are fine; hero stays copy + one primary CTA (no giant dashboard mock in hero).
+
+## Copy — do
+
+- Explain plainly: **custom owner portals** for owners — their numbers, their login; wired to how they sell.
+- **No QuickBooks in the homepage hero** (fine lower on the page / on /what-we-do).
+- Keep: “Keep your bookkeeper or bring me the books”, specific money questions on sample cards, “you get me, not a ticket queue”, “Built in Jersey. No jokes.”
+- **Show multi-business:** nav link to `/operations-portal`, one **preview with a real screenshot** near other samples, plain line: “Own more than one business? See the multi-business sample.” Don’t bury it only under “all samples”; don’t repeat the same pitch in four places.
+
+## Copy — do not
+
+- Motivational slogans, cockpit metaphors, forced cleverness (“run your business like you meant to”, “feel if this is you”, etc.).
 - Invented testimonials, “references from owners already using this”, stats, guarantees, or capabilities not verified.
-- Adding homepage sections or swapping in a new landing template when the ask is a **functional fix** or **subtraction pass**.
-- Restyling unrelated pages when only one surface was requested.
+- **“One company per login”** (or production login limits) on homepage/footer unless the owner explicitly approves that wording. Keep **demo** capabilities separate from claims about live customer builds.
+- Rewrite unrelated pages when the ask is a functional fix or one surface (e.g. homepage only).
 
-## Do
+## Instinct / critique
 
-- Lead with what we do: **custom owner portals for business owners** — their numbers, their login, wired to how they sell. **Do not put QuickBooks in the homepage hero** (owner finds QB noise in the first scroll). QB is fine lower on the page or on /what-we-do where books are the topic. **Keep your bookkeeper, or have JK do the books too.**
-- Use **specific money questions** as hooks (“who still owes you?”, “which jobs are losing money?”).
-- Keep human lines that sound like JK: “Keep your bookkeeper or bring me the books”, “you get me, not a ticket queue”, “Built in Jersey. No jokes.”
-- **Subtract** before adding: plain background, light shadows, not every paragraph in a decorative card. Cards only where they help compare samples.
-- **One primary hero CTA:** open samples. Contact is secondary.
-- **Multi-business / portfolio:** discoverable in `/demos` and the operations-portal sample — not repeated in nav + hero + panel + featured card on the homepage. Do **not** contradict “one company per login” on production portals without the owner confirming the product promise.
+Treat external critique (e.g. Instinct AI) as the bar: subtract slop, add specificity; restore color and showcase multi-business when the page goes too bare.
 
-## Product truth (do not contradict without asking)
+## Product notes (ask owner before promising)
 
-- **Production:** one portal login is scoped to **one company** on the server (`lib/portalAuth.js`).
-- **Sample only:** `/operations-portal` shows a **fictitious** multi-entity hub for prospects who run several businesses — not the default promise on the homepage hero.
+- Multi-business **sample** at `/operations-portal` is fictitious and showcases the hub pattern; do not invent production access rules in marketing copy.

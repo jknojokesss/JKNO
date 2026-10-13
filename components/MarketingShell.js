@@ -199,7 +199,7 @@ export default function MarketingShell({
                 lineHeight: 1.65,
               }}
             >
-              I build the portal, write the integrations, and keep the books. One company per login.
+              I build the portal, write the integrations, and keep the books when you want that.
             </p>
           </div>
           <div style={{ display: 'flex', gap: '40px', flexWrap: 'wrap' }}>

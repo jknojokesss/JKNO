@@ -331,7 +331,7 @@ A feature that has not been run is not finished, no matter how clean the diff.
   period. It is on merch, so it survives every redesign — don't restyle it,
   respell it, or swap its font, and keep it in the nav and the footer. The
   palette around it is fair game; the mark is not.
-- **Marketing copy:** follow `docs/MARKETING_VOICE.md` on every homepage and jknojokes.com pass — casual, specific, subtract slogans; never undo on the next edit.
+- **Marketing copy:** follow `docs/MARKETING_VOICE.md` on every homepage and jknojokes.com pass — **colorful blue/gold identity**, casual and specific, **multi-business sample visible** (nav + screenshot preview), subtract slogans; never undo on the next edit.
 - **Read the marketing site as a customer, not as an engineer.** Anything on
   jknojokes.com, a demo, or a client-facing screen gets judged by what a
   prospect concludes from it — not by whether it is technically accurate.
