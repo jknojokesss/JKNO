@@ -63,6 +63,7 @@ function payoutNote(d) {
  *   id: string; customer: string; vehicle: string; lender: string; dealer: string;
  *   type: 'lease'|'finance'; opened: string; submitted: string|null; funded: string|null;
  *   brokerFee: number; feePaid: string|null; fundingDays: number; stips: string[];
+ *   owner: string; nextAction: string; dealerFeePending?: boolean;
  *   stage: 'intake'|'quoted'|'submitted'|'funding'|'paid'; delivery: string|null;
  * }>}
  */
@@ -81,6 +82,8 @@ const FILES = [
     feePaid: null,
     fundingDays: 5,
     stips: ['Insurance binder — wrong lienholder'],
+    owner: 'Maya',
+    nextAction: 'Re-upload insurance with Toyota Financial as lienholder',
     stage: 'funding',
     delivery: '2026-10-11',
   },
@@ -98,6 +101,8 @@ const FILES = [
     feePaid: null,
     fundingDays: 4,
     stips: [],
+    owner: 'Maya',
+    nextAction: 'No open stips — watch for lender fund wire',
     stage: 'funding',
     delivery: '2026-10-09',
   },
@@ -115,6 +120,8 @@ const FILES = [
     feePaid: null,
     fundingDays: 8,
     stips: ['Co-buyer ID expired', 'Paystub unreadable'],
+    owner: 'Jay',
+    nextAction: 'Text Goldberg co-buyer for clear ID photo',
     stage: 'funding',
     delivery: null,
   },
@@ -132,6 +139,8 @@ const FILES = [
     feePaid: null,
     fundingDays: 12,
     stips: ['Lender callback — verify employment'],
+    owner: 'Jay',
+    nextAction: 'Call Chase funding desk — file 12 days',
     stage: 'funding',
     delivery: null,
   },
@@ -271,6 +280,26 @@ const FILES = [
     stage: 'paid',
     delivery: '2026-09-20',
   },
+  {
+    id: 'B-8788',
+    customer: 'Lisa & Mark Horowitz',
+    vehicle: '2026 Pilot Touring',
+    lender: 'Honda Financial',
+    dealer: 'Route 1 Honda · Woodbridge',
+    type: 'lease',
+    opened: '2026-10-01',
+    submitted: '2026-10-02',
+    funded: '2026-10-07',
+    brokerFee: 595,
+    feePaid: null,
+    fundingDays: 0,
+    stips: [],
+    owner: 'Maya',
+    nextAction: 'Dealer funded — invoice sent, waiting on remittance',
+    dealerFeePending: true,
+    stage: 'paid',
+    delivery: '2026-10-08',
+  },
 ]
 
 const GL_SNAPSHOT = {
@@ -294,6 +323,8 @@ function buildModel() {
   const mtdFinance = mtd.filter((d) => d.type === 'finance')
   const fundedMtd = mtd.filter((d) => d.stage === 'paid' && d.funded && dt(d.funded) >= dt('2026-10-01'))
   const feesCollectedMtd = fundedMtd.reduce((s, d) => s + d.brokerFee, 0)
+  const awaitingDealerFee = FILES.filter((d) => d.dealerFeePending)
+  const dealerFeeDue = awaitingDealerFee.reduce((s, d) => s + d.brokerFee, 0)
 
   return {
     openFunding,
@@ -301,6 +332,8 @@ function buildModel() {
     aging,
     feesAtRisk,
     pendingFees,
+    awaitingDealerFee,
+    dealerFeeDue,
     mtd,
     mtdLeases,
     mtdFinance,
@@ -319,7 +352,7 @@ export default function BuckleUpBrokerPortal({ demoEmbed = false }) {
 
   const [tab, setTab] = useState('funding')
   const [expanded, setExpanded] = useState(null)
-  /** @type {'attention' | 'all' | 'missing' | 'slow'} */
+  /** @type {'attention' | 'all' | 'missing' | 'slow' | 'dealer'} */
   const [fundingFilter, setFundingFilter] = useState('attention')
 
   const M = useMemo(() => buildModel(), [])
@@ -338,6 +371,8 @@ export default function BuckleUpBrokerPortal({ demoEmbed = false }) {
         return M.withStips
       case 'slow':
         return M.aging
+      case 'dealer':
+        return M.awaitingDealerFee
       default:
         return M.openFunding.filter((d) => d.stips.length > 0 || d.fundingDays >= 7)
     }
@@ -348,7 +383,10 @@ export default function BuckleUpBrokerPortal({ demoEmbed = false }) {
     all: 'Approved — not funded yet',
     missing: 'Lender still needs paperwork',
     slow: 'Stuck 7+ days in funding',
+    dealer: 'Funded — dealer has not paid your fee',
   }[fundingFilter]
+
+  const fundingUsesDealerCols = fundingFilter === 'dealer'
 
   const lbl = { fontFamily: sans, fontSize: '12px', fontWeight: 600, color: MUTED }
   const card = { background: WHITE, border: `1px solid ${RULE}`, borderRadius: '10px', padding: '18px 20px', boxShadow: '0 1px 2px rgba(26,26,26,.04)' }
@@ -370,8 +408,13 @@ export default function BuckleUpBrokerPortal({ demoEmbed = false }) {
           *{box-sizing:border-box;margin:0;padding:0}
           ${DEMO_RENDER_HINTS.replace(/font-family:[^;]+;/, `font-family:${sans};`)}
           body{background:${PAPER};font-family:${sans};color:${INK}}
+          html.demo-embed,html.demo-embed body{width:100%;max-width:100%;overflow-x:hidden}
           html.demo-embed .bu-foot{display:none}
-          .bl-shell{display:flex;min-height:100vh;font-family:${sans}}
+          html.demo-embed .bl-side{display:none!important}
+          html.demo-embed .bl-mtabs{display:flex!important}
+          html.demo-embed .bl-shell{flex-direction:column;width:100%;max-width:100vw;min-height:100vh}
+          html.demo-embed .bl-main{padding:16px 12px 40px;width:100%;max-width:100%}
+          .bl-shell{display:flex;min-height:100vh;font-family:${sans};width:100%}
           .bl-side{width:232px;flex-shrink:0;background:${SIDEBAR};border-right:1px solid ${RULE};display:flex;flex-direction:column;padding:24px 16px 20px;position:sticky;top:0;height:100vh}
           .bl-nav{width:100%;text-align:left;padding:10px 12px;border-radius:8px;border:none;background:transparent;color:${MUTED};font-size:14px;font-weight:500;cursor:pointer;margin-bottom:4px;font-family:${sans}}
           .bl-nav:hover{background:${PAPER};color:${INK}}
@@ -474,6 +517,13 @@ export default function BuckleUpBrokerPortal({ demoEmbed = false }) {
                   { id: 'missing', k: 'Paperwork open', v: M.withStips.length, sub: 'Stips blocking fund', color: RED },
                   { id: 'slow', k: 'Stuck 7+ days', v: M.aging.length, sub: 'Chase or escalate', color: AMBER },
                   {
+                    id: 'dealer',
+                    k: 'Dealer owes fee',
+                    v: M.awaitingDealerFee.length,
+                    sub: money0(M.dealerFeeDue) + ' invoiced',
+                    color: RED,
+                  },
+                  {
                     id: 'paid',
                     k: 'Funded this month',
                     v: M.fundedMtd.length,
@@ -535,11 +585,22 @@ export default function BuckleUpBrokerPortal({ demoEmbed = false }) {
                   )}
                 </div>
                 <div style={{ overflowX: 'auto' }}>
-                  <table style={{ width: '100%', borderCollapse: 'collapse', minWidth: '700px' }}>
+                  <table style={{ width: '100%', borderCollapse: 'collapse', minWidth: fundingUsesDealerCols ? '520px' : '640px' }}>
                     <thead>
                       <tr>
-                        {['', 'Customer', 'Days', 'Lender', 'Open stips', 'Your fee'].map((h) => (
-                          <th key={h || 'x'} style={{ ...th, textAlign: h === 'Your fee' || h === 'Days' || h === 'Open stips' ? 'right' : 'left' }}>{h}</th>
+                        {(fundingUsesDealerCols
+                          ? ['', 'Customer', 'Owner', 'Next step', 'Your fee']
+                          : ['', 'Customer', 'Owner', 'Days', 'Open stips', 'Your fee']
+                        ).map((h) => (
+                          <th
+                            key={h || 'x'}
+                            style={{
+                              ...th,
+                              textAlign: h === 'Your fee' || h === 'Days' || h === 'Open stips' ? 'right' : 'left',
+                            }}
+                          >
+                            {h}
+                          </th>
                         ))}
                       </tr>
                     </thead>
@@ -566,27 +627,51 @@ export default function BuckleUpBrokerPortal({ demoEmbed = false }) {
                                 <div style={{ fontWeight: 600 }}>{d.customer}</div>
                                 <div style={{ fontSize: '11px', color: MUTED }}>{d.vehicle}</div>
                               </td>
-                              <td style={{ ...td, textAlign: 'right', color: d.fundingDays >= 7 ? RED : INK }}>{d.fundingDays}</td>
-                              <td style={{ ...td, fontSize: '13px' }}>{d.lender}</td>
-                              <td style={{ ...td, textAlign: 'right', color: d.stips.length ? RED : MUTED }}>{d.stips.length ? d.stips.length : '—'}</td>
-                              <td style={{ ...td, textAlign: 'right', fontWeight: 600 }}>{money0(d.brokerFee)}</td>
+                              <td style={{ ...td, fontSize: '13px', fontWeight: 600 }}>{d.owner || '—'}</td>
+                              {fundingUsesDealerCols ? (
+                                <>
+                                  <td style={{ ...td, fontSize: '13px', color: SLATE }}>{d.nextAction}</td>
+                                  <td style={{ ...td, textAlign: 'right', fontWeight: 600 }}>{money0(d.brokerFee)}</td>
+                                </>
+                              ) : (
+                                <>
+                                  <td style={{ ...td, textAlign: 'right', color: d.fundingDays >= 7 ? RED : INK }}>{d.fundingDays}</td>
+                                  <td style={{ ...td, textAlign: 'right', color: d.stips.length ? RED : MUTED }}>
+                                    {d.stips.length ? d.stips.length : '—'}
+                                  </td>
+                                  <td style={{ ...td, textAlign: 'right', fontWeight: 600 }}>{money0(d.brokerFee)}</td>
+                                </>
+                              )}
                             </tr>
                             {open && (
                               <tr>
                                 <td colSpan={6} style={{ ...td, background: PAPER, borderBottom: `1px solid ${RULE}` }}>
                                   <div style={{ fontSize: '12px', color: MUTED, marginBottom: '8px' }}>
-                                    Opened {fmtD(d.opened)} · Submitted {d.submitted ? fmtD(d.submitted) : '—'} · {dealTypeLabel(d.type)} · Placed at {d.dealer}
-                                    {d.delivery ? ` · Delivery ${fmtD(d.delivery)}` : ''}
+                                    {fundingUsesDealerCols ? (
+                                      <>
+                                        Lender funded {d.funded ? fmtD(d.funded) : '—'} · {d.dealer} · Fee invoiced, not in bank yet
+                                      </>
+                                    ) : (
+                                      <>
+                                        Opened {fmtD(d.opened)} · Submitted {d.submitted ? fmtD(d.submitted) : '—'} · {dealTypeLabel(d.type)} ·{' '}
+                                        {d.lender} · {d.dealer}
+                                        {d.delivery ? ` · Delivery ${fmtD(d.delivery)}` : ''}
+                                      </>
+                                    )}
                                   </div>
-                                  {d.stips.length ? (
+                                  <div style={{ fontSize: '13px', fontWeight: 600, color: INK, marginBottom: '6px' }}>
+                                    Next: {d.nextAction || '—'}
+                                  </div>
+                                  {!fundingUsesDealerCols && d.stips.length ? (
                                     <ul style={{ margin: 0, paddingLeft: '18px', fontSize: '13px', color: SLATE }}>
                                       {d.stips.map((s) => (
                                         <li key={s}>{s}</li>
                                       ))}
                                     </ul>
-                                  ) : (
-                                    <div style={{ fontSize: '13px', color: MUTED }}>Lender has not flagged missing items — waiting on fund wire or dealer package.</div>
-                                  )}
+                                  ) : null}
+                                  {!fundingUsesDealerCols && !d.stips.length ? (
+                                    <div style={{ fontSize: '13px', color: MUTED }}>No open stips on file — waiting on lender fund.</div>
+                                  ) : null}
                                 </td>
                               </tr>
                             )}
@@ -753,12 +838,22 @@ export default function BuckleUpBrokerPortal({ demoEmbed = false }) {
                 title="Pipeline vs QuickBooks"
                 intro="QuickBooks syncs nightly. This screen does not post entries — it shows whether funded files match fee income and what is still in AR."
                 rows={[
-                  { label: 'Fees on open funding files', portal: money0(M.pendingFees), qbo: money0(2640) },
-                  { label: 'Fees earned (funded) MTD', portal: money0(M.feesCollectedMtd), qbo: money0(GL_SNAPSHOT.feesEarnedMtd) },
-                  { label: 'Fees collected (cash)', portal: money0(M.fundedMtd.filter((d) => d.feePaid).reduce((s, d) => s + d.brokerFee, 0)), qbo: money0(GL_SNAPSHOT.feesCollectedMtd) },
-                  { label: 'Team commission accrued', portal: money0(Math.round(M.feesCollectedMtd * 0.55)), qbo: money0(GL_SNAPSHOT.teamPayoutAccrued) },
+                  { label: 'Fees on open funding files', portal: money0(M.pendingFees), qbo: money0(2640), inSync: false },
+                  { label: 'Fees earned (funded) MTD', portal: money0(M.feesCollectedMtd), qbo: money0(GL_SNAPSHOT.feesEarnedMtd), inSync: M.feesCollectedMtd === GL_SNAPSHOT.feesEarnedMtd },
+                  {
+                    label: 'Fees collected (cash)',
+                    portal: money0(M.fundedMtd.filter((d) => d.feePaid).reduce((s, d) => s + d.brokerFee, 0)),
+                    qbo: money0(GL_SNAPSHOT.feesCollectedMtd),
+                    inSync: false,
+                  },
+                  {
+                    label: 'Team commission accrued',
+                    portal: money0(Math.round(M.feesCollectedMtd * 0.55)),
+                    qbo: money0(GL_SNAPSHOT.teamPayoutAccrued),
+                    inSync: Math.round(M.feesCollectedMtd * 0.55) === GL_SNAPSHOT.teamPayoutAccrued,
+                  },
                 ]}
-                footnote="Small timing gaps are normal between fund date, dealer remittance, and your invoice. Large gaps mean a funded file never hit the books."
+                footnote="Review means portal and QuickBooks disagree — not reconciled. Production flags these instead of showing a green check when numbers differ."
                 bullets={[
                   'Customers can pick up the car while your fee still waits on lender fund + dealer remittance',
                   'This layer sits on top of your CRM — it does not replace LeasingStack or your application form',

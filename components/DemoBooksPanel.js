@@ -5,7 +5,7 @@
  * @param {{
  *   title?: string
  *   intro: string
- *   rows: { label: string, portal: string, qbo: string }[]
+ *   rows: { label: string, portal: string, qbo: string, inSync?: boolean }[]
  *   footnote?: string
  *   bullets?: string[]
  *   headFont?: string
@@ -28,6 +28,7 @@ export default function DemoBooksPanel({
   muted = '#5C6B7A',
   green = '#1E7A4A',
   border = '#D8DEE6',
+  warn = '#B45309',
 }) {
   const card = {
     background: '#fff',
@@ -65,14 +66,27 @@ export default function DemoBooksPanel({
               <th style={th}>Line</th>
               <th style={{ ...th, textAlign: 'right' }}>Portal</th>
               <th style={{ ...th, textAlign: 'right' }}>QBO statement</th>
+              <th style={{ ...th, textAlign: 'right' }}>Status</th>
             </tr>
           </thead>
           <tbody>
-            {rows.map(({ label, portal, qbo }) => (
+            {rows.map(({ label, portal, qbo, inSync = portal === qbo }) => (
               <tr key={label}>
                 <td style={td}>{label}</td>
                 <td style={{ ...td, textAlign: 'right', fontFamily: monoFont }}>{portal}</td>
-                <td style={{ ...td, textAlign: 'right', fontFamily: monoFont, color: green }}>{qbo} ✓</td>
+                <td style={{ ...td, textAlign: 'right', fontFamily: monoFont }}>{qbo}</td>
+                <td
+                  style={{
+                    ...td,
+                    textAlign: 'right',
+                    fontFamily: monoFont,
+                    fontSize: '12px',
+                    fontWeight: 600,
+                    color: inSync ? green : warn,
+                  }}
+                >
+                  {inSync ? 'In sync' : 'Review'}
+                </td>
               </tr>
             ))}
           </tbody>
