@@ -16,6 +16,7 @@ const nextConfig = {
       { source: '/roofing', destination: '/riverstone-roofing', permanent: false },
       { source: '/srl', destination: '/riverstone-roofing', permanent: false },
       { source: '/quefence', destination: '/riverbend-fence', permanent: false },
+      { source: '/bayline-leasing', destination: '/buckle-up', permanent: false },
       ...['dental', 'law-firm', 'gym', 'barbershop', 'boutique', 'property-management'].map((slug) => ({
         source: `/demos/${slug}`,
         destination: '/demos',
