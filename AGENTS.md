@@ -1,6 +1,6 @@
 ## Marketing site voice
 
-Before editing `components/HomeLanding.js`, `pages/index.js`, or JK marketing CSS: read **`docs/MARKETING_VOICE.md`**. Subtraction over templates; no generic SaaS slogans; one hero CTA to samples; do not invent references or contradict one-company-per-login without the owner confirming.
+Before editing `components/HomeLanding.js`, `pages/index.js`, or JK marketing CSS: read **`docs/MARKETING_VOICE.md`**. Colorful blue/gold JK identity, casual and specific, multi-business sample visible (nav + screenshot preview); subtract slogans, not warmth; one hero CTA to samples; do not invent references or promise production login limits without the owner confirming.
 
 ## Client scope — READ BEFORE EDITING
 
