@@ -98,16 +98,16 @@ export default function HomeLanding({
           <p className="m-jk-story__kicker">Run more than one business?</p>
           <h2 className="m-jk-story__title">One hub, four doors</h2>
           <p className="m-jk-story__body">
-            The Hartman sample is three real trade portals — tire shop, rentals, roofing — plus an{' '}
+            Three trade samples you can actually open — tires, rentals, roofing — plus an{' '}
             <strong>Operations Center</strong> for cards, banks, and whether cash covers what is due. Every card clicks
-            through; nothing is a greyed-out teaser.
+            through.
           </p>
           <button
             type="button"
             className="m-jk-home__btn m-jk-home__btn--primary m-jk-home__btn--inline"
             onClick={() => router.push(PORTFOLIO_HREF)}
           >
-            Open Hartman hub sample
+            Open owner portfolio sample
           </button>
         </section>
 

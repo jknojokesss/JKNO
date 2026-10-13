@@ -13,8 +13,8 @@ const JK_UI = "'DM Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-se
 const JK_MONO = "'DM Mono', ui-monospace, monospace"
 const DEMO_PORTAL_ROOT_CLASS = 'demo-portal-root op-portal-root'
 
-/** Fictitious multi-entity owner — not a real client. */
-const BIZ = 'Hartman Group'
+/** Public sample — no real owner name on the hub. */
+const BIZ = 'Owner portfolio'
 const HUB_PAGE = '#f2f0ea'
 const HUB_INK = '#0f1419'
 const HUB_MUTED = '#64748b'
@@ -144,31 +144,31 @@ const PORTAL_DESKS = [
     title: 'Operations Center',
     live: true,
     art: 'ops',
-    enterLabel: 'Open workbook',
+    enterLabel: 'Open Operations Center',
   },
   {
     id: 'riverside',
-    kicker: 'Tires & auto · Lakewood',
+    kicker: 'Sample · tires & auto',
     title: 'Riverside Tires',
     art: 'tires',
     href: '/riverside-tires',
-    enterLabel: 'Open portal sample',
+    enterLabel: 'Open sample →',
   },
   {
     id: 'harborfield',
-    kicker: '12 doors · rent roll',
+    kicker: 'Sample · rent roll',
     title: 'Harborfield Residential',
     art: 'house',
     href: '/harborfield-properties',
-    enterLabel: 'Open portal sample',
+    enterLabel: 'Open sample →',
   },
   {
     id: 'riverstone',
-    kicker: 'Commercial roofing',
+    kicker: 'Sample · commercial jobs',
     title: 'Riverstone Roofing',
     art: 'roof',
     href: '/riverstone-roofing',
-    enterLabel: 'Open portal sample',
+    enterLabel: 'Open sample →',
   },
 ]
 
@@ -482,8 +482,9 @@ export default function OperationsPortalSample() {
           .op-hub__brand{display:flex;align-items:center;gap:12px}
           .op-hub__brand-name{font-family:${JK_UI};font-size:16px;font-weight:700;letter-spacing:.01em;color:${HUB_INK}}
           .op-hub__sample{font-family:${JK_UI};font-size:11px;font-weight:600;color:${HUB_MUTED};background:#F0F2F6;border:1px solid #E0E4EC;border-radius:20px;padding:6px 12px}
-          .op-hub__intro{text-align:center;padding:28px 20px 8px;max-width:560px;margin:0 auto}
-          .op-hub__intro p{font-family:${JK_UI};font-size:15px;font-weight:500;color:${HUB_MUTED};line-height:1.45}
+          .op-hub__intro{text-align:center;padding:32px 20px 4px;max-width:640px;margin:0 auto}
+          .op-hub__intro h1{font-family:${JK_HEAD};font-size:clamp(1.35rem,3.5vw,1.75rem);font-weight:700;color:${HUB_INK};letter-spacing:-.02em;line-height:1.2;margin:0 0 10px}
+          .op-hub__intro p{font-family:${JK_UI};font-size:15px;font-weight:500;color:${HUB_MUTED};line-height:1.5;margin:0}
           .op-hub__grid{display:grid;grid-template-columns:1fr;gap:18px;width:100%;max-width:720px;margin:28px auto 48px;padding:0 20px}
           .op-hub__card-wrap{position:relative;width:100%;min-width:0}
           @media(min-width:640px){.op-hub__grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:20px}}
@@ -568,16 +569,17 @@ export default function OperationsPortalSample() {
               <span className="op-hub__sample">Public sample · fictitious data</span>
             </header>
             <div className="op-hub__intro">
+              <h1>One login. Three businesses. One cash desk.</h1>
               <p>
-                Hartman runs three companies from one login.{' '}
-                <strong style={{ color: HUB_INK, fontWeight: 700 }}>Operations Center</strong> is the consolidated cash
-                desk; each business card opens the trade sample we built for that shape of shop.
+                Fictitious sample — click a company to open the trade portal we already ship on this site.{' '}
+                <strong style={{ color: HUB_INK, fontWeight: 700 }}>Operations Center</strong> is the consolidated
+                workbook: banks, cards, and whether you can cover what is due this week.
               </p>
             </div>
             <div className="op-hub__grid" role="navigation" aria-label="Portal desks">
               {PORTAL_DESKS.map((d) => (
                 <div key={d.id} className="op-hub__card-wrap">
-                  {d.live && <span className="op-hub__live-tag">Cash workbook</span>}
+                  {d.live && <span className="op-hub__live-tag">Operations Center</span>}
                   <button
                     type="button"
                     className={`op-hub__card${d.live ? ' op-hub__card--live' : ''}`}
