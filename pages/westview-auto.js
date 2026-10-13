@@ -36,11 +36,19 @@ const fmtD = (s) => (s ? dt(s).toLocaleDateString('en-US', { month: 'short', day
 const money0 = (n) => (n < 0 ? '−$' : '$') + Math.abs(Math.round(n)).toLocaleString('en-US')
 
 const NAV = [
-  { id: 'funding', label: 'Funding' },
-  { id: 'desk', label: 'My desk' },
-  { id: 'gross', label: 'Gross & units' },
-  { id: 'books', label: 'QuickBooks' },
+  { id: 'funding', label: 'Getting paid' },
+  { id: 'desk', label: 'Pipeline' },
+  { id: 'gross', label: 'Your month' },
+  { id: 'books', label: 'Books' },
 ]
+
+const dealTypeLabel = (t) => (t === 'lease' ? 'Lease' : t === 'finance' ? 'Loan' : t)
+
+function dealStatusNote(d) {
+  if (d.stage !== 'funded') return 'Bank has not paid yet'
+  if (d.mini) return 'Low-pay lease'
+  return 'In your check'
+}
 
 /** @type {import('react').CSSProperties} */
 const tabNums = { fontVariantNumeric: 'tabular-nums' }
@@ -388,14 +396,21 @@ export default function WestviewAutoPortal({ demoEmbed = false }) {
         <main className="bl-main">
           <header style={{ marginBottom: '24px' }}>
             <h1 style={{ fontSize: '26px', fontWeight: 700, color: INK, letterSpacing: '-0.02em', lineHeight: 1.2 }}>
-              {tab === 'funding' && 'Deals holding your check'}
-              {tab === 'desk' && 'Your desk'}
-              {tab === 'gross' && 'Units vs gross'}
-              {tab === 'books' && 'QuickBooks'}
+              {tab === 'funding' && 'When do you get paid?'}
+              {tab === 'desk' && 'Where each deal stands'}
+              {tab === 'gross' && 'Cars sold vs money you earn'}
+              {tab === 'books' && 'What QuickBooks shows'}
             </h1>
             {tab === 'funding' && (
-              <p style={{ marginTop: '8px', fontSize: '15px', color: MUTED, maxWidth: '36rem' }}>
-                <span style={{ color: SIGNAL, fontWeight: 700 }}>{money0(M.commissionAtRisk)}</span> commission haircut on deals past the funding tier.
+              <p style={{ marginTop: '8px', fontSize: '15px', color: MUTED, maxWidth: '40rem', lineHeight: 1.5 }}>
+                If the bank takes too long to pay the store, your commission gets cut. Right now that is{' '}
+                <span style={{ color: SIGNAL, fontWeight: 700 }}>{money0(M.commissionAtRisk)}</span> at risk on slow deals.
+              </p>
+            )}
+            {tab === 'gross' && (
+              <p style={{ marginTop: '8px', fontSize: '15px', color: MUTED, maxWidth: '40rem', lineHeight: 1.5 }}>
+                <strong style={{ color: INK, fontWeight: 600 }}>Desk profit</strong> is what the store makes on the car before expenses — not your whole paycheck.
+                Leases often show a full unit on the board but less profit per car.
               </p>
             )}
           </header>
@@ -406,8 +421,8 @@ export default function WestviewAutoPortal({ demoEmbed = false }) {
                 {[
                   { k: 'Waiting on bank', v: M.openCit.length, sub: money0(M.pendingCommission) + ' commission pending' },
                   { k: 'Lender still needs', v: M.withStips.length, sub: 'Paperwork missing', color: RED },
-                  { k: 'Past 6 business days', v: M.tierRisk.length, sub: 'Tier penalty active', color: AMBER },
-                  { k: 'Funded MTD', v: M.mtd.filter((d) => d.stage === 'funded').length, sub: money0(M.commissionMtd) + ' in pocket', color: GREEN },
+                  { k: 'Slow (6+ days)', v: M.tierRisk.length, sub: 'Commission reduced', color: AMBER },
+                  { k: 'Paid this month', v: M.mtd.filter((d) => d.stage === 'funded').length, sub: money0(M.commissionMtd) + ' in your check', color: GREEN },
                 ].map((x) => (
                   <div key={x.k} style={{ ...card, flex: '1 1 140px', minWidth: '140px' }}>
                     <div style={lbl}>{x.k}</div>
@@ -432,8 +447,8 @@ export default function WestviewAutoPortal({ demoEmbed = false }) {
                   <table style={{ width: '100%', borderCollapse: 'collapse', minWidth: '640px' }}>
                     <thead>
                       <tr>
-                        {['', 'Deal', 'Days', 'Pay %', 'Missing', 'Comm.'].map((h) => (
-                          <th key={h || 'x'} style={{ ...th, textAlign: h === 'Comm.' || h === 'Days' || h === 'Pay %' ? 'right' : 'left' }}>{h}</th>
+                        {['', 'Customer', 'Days waiting', 'You get', 'Missing', 'Commission'].map((h) => (
+                          <th key={h || 'x'} style={{ ...th, textAlign: h === 'Commission' || h === 'Days waiting' || h === 'You get' ? 'right' : 'left' }}>{h}</th>
                         ))}
                       </tr>
                     </thead>
@@ -461,7 +476,7 @@ export default function WestviewAutoPortal({ demoEmbed = false }) {
                             {open && (
                               <tr>
                                 <td colSpan={6} style={{ ...td, background: PAPER, borderBottom: `1px solid ${RULE}` }}>
-                                  <div style={{ fontSize: '12px', color: MUTED, marginBottom: '8px' }}>Sold {fmtD(d.sold)} · {d.type} · {d.delivery ? `Delivery ${fmtD(d.delivery)}` : 'Not scheduled'}</div>
+                                  <div style={{ fontSize: '12px', color: MUTED, marginBottom: '8px' }}>Sold {fmtD(d.sold)} · {dealTypeLabel(d.type)} · {d.delivery ? `Delivery ${fmtD(d.delivery)}` : 'Not scheduled'}</div>
                                   {d.stips.length ? (
                                     <ul style={{ margin: 0, paddingLeft: '18px', fontSize: '13px', color: SLATE }}>
                                       {d.stips.map((s) => (
@@ -472,8 +487,8 @@ export default function WestviewAutoPortal({ demoEmbed = false }) {
                                     <div style={{ fontSize: '13px', color: MUTED }}>Waiting on lender — nothing missing on file. F&amp;I last touched {fmtD(d.sold)}.</div>
                                   )}
                                   <div style={{ marginTop: '10px', fontSize: '12px', color: MUTED }}>
-                                    Front {money0(d.front)} · Back {money0(d.back)}
-                                    {d.mini ? ' · Mini deal' : ''}
+                                    Desk profit {money0(d.front)} · Finance products {money0(d.back)}
+                                    {d.mini ? ' · Low-pay lease' : ''}
                                   </div>
                                 </td>
                               </tr>
@@ -484,8 +499,8 @@ export default function WestviewAutoPortal({ demoEmbed = false }) {
                     </tbody>
                   </table>
                 </div>
-                <p style={{ margin: '14px 0 0', fontSize: '12px', color: MUTED, lineHeight: 1.5 }}>
-                  Store pay plan: 100% commission if funded within 5 business days, 75% by day 10, 50% by day 15, $0 after. F&amp;I runs the jacket — you still lose when the customer was promised a delivery date.
+                <p style={{ margin: '14px 0 0', fontSize: '13px', color: MUTED, lineHeight: 1.55 }}>
+                  Example pay plan: full commission if the bank pays within 5 business days, then 75%, 50%, and nothing after day 15. Slow bank = smaller check even if you already delivered the car.
                 </p>
               </div>
             </>
@@ -493,10 +508,10 @@ export default function WestviewAutoPortal({ demoEmbed = false }) {
 
           {tab === 'desk' && (
             <>
-              <p style={{ margin: '0 0 16px', fontSize: '15px', color: MUTED }}>{M.unitsMtd} units sold MTD — quote through funded.</p>
+              <p style={{ margin: '0 0 16px', fontSize: '15px', color: MUTED }}>{M.unitsMtd} cars sold this month — from first quote to bank paid.</p>
               <div style={{ display: 'grid', gap: '14px' }}>
                 {['quote', 'fi', 'cit', 'funded'].map((stage) => {
-                  const label = { quote: 'Working', fi: 'In F&I', cit: 'Sold · not funded', funded: 'Funded this month' }[stage]
+                  const label = { quote: 'Working the deal', fi: 'In finance office', cit: 'Sold — waiting on bank', funded: 'Bank paid this month' }[stage]
                   const rows = DEALS.filter((d) => d.stage === stage && (stage === 'funded' ? dt(d.sold) >= dt('2026-10-01') : true))
                   if (stage === 'funded') {
                     const extra = DEALS.filter((d) => d.stage === 'funded' && dt(d.sold) < dt('2026-10-01'))
@@ -509,7 +524,7 @@ export default function WestviewAutoPortal({ demoEmbed = false }) {
                         <table style={{ width: '100%', borderCollapse: 'collapse', minWidth: '520px' }}>
                           <thead>
                             <tr>
-                              {['Customer', 'Vehicle', 'Type', 'Front', 'Status'].map((h, i) => (
+                              {['Customer', 'Vehicle', 'Lease or loan', 'Desk profit', 'Status'].map((h, i) => (
                                 <th key={h} style={{ ...th, textAlign: i >= 3 ? 'right' : 'left' }}>{h}</th>
                               ))}
                             </tr>
@@ -519,10 +534,10 @@ export default function WestviewAutoPortal({ demoEmbed = false }) {
                               <tr key={d.id}>
                                 <td style={{ ...td, fontWeight: 600 }}>{d.customer}</td>
                                 <td style={{ ...td, fontSize: '12px', color: MUTED }}>{d.stock.replace(/^STK \d+ · /, '')}</td>
-                                <td style={{ ...td, textTransform: 'capitalize' }}>{d.type}</td>
+                                <td style={td}>{dealTypeLabel(d.type)}</td>
                                 <td style={{ ...td, textAlign: 'right', fontWeight: 600, color: d.front < 200 ? AMBER : INK }}>{money0(d.front)}</td>
                                 <td style={{ ...td, textAlign: 'right', fontSize: '13px', color: MUTED }}>
-                                  {d.stage === 'cit' ? `${d.fundingDays}d · bank` : d.stage === 'fi' ? 'With F&I' : d.stage === 'quote' ? 'First pencil' : fmtD(d.funded)}
+                                  {d.stage === 'cit' ? `${d.fundingDays} days · bank` : d.stage === 'fi' ? 'Finance office' : d.stage === 'quote' ? 'Quoting' : `Paid ${fmtD(d.funded)}`}
                                 </td>
                               </tr>
                             ))}
@@ -533,8 +548,8 @@ export default function WestviewAutoPortal({ demoEmbed = false }) {
                   )
                 })}
               </div>
-              <p style={{ marginTop: '16px', fontSize: '12px', color: MUTED, maxWidth: '40rem', lineHeight: 1.55 }}>
-                CRM shows leads; DMS shows inventory. This is the same deal from quote to funded — including what the bank still needs and whether accounting shows the money yet.
+              <p style={{ marginTop: '16px', fontSize: '13px', color: MUTED, maxWidth: '40rem', lineHeight: 1.55 }}>
+                One list for the whole store — same customer from first quote through bank payment and what accounting shows.
               </p>
             </>
           )}
@@ -542,32 +557,35 @@ export default function WestviewAutoPortal({ demoEmbed = false }) {
           {tab === 'gross' && (
             <>
               <p style={{ margin: '0 0 16px', fontSize: '15px', color: MUTED }}>
-                Front gross MTD <strong style={{ color: INK }}>{money0(M.frontMtd)}</strong> — lease-heavy month.
+                Desk profit this month: <strong style={{ color: INK }}>{money0(M.frontMtd)}</strong> (mostly leases — lower dollars per car).
               </p>
               <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap', marginBottom: '20px' }}>
                 <div style={{ ...card, flex: 1, minWidth: '200px' }}>
-                  <div style={lbl}>Lease front (avg)</div>
+                  <div style={lbl}>Avg desk profit · lease</div>
                   <div style={{ fontSize: '26px', fontWeight: 700, color: SIGNAL, ...tabNums }}>{money0(M.leaseFrontAvg)}</div>
-                  <div style={{ fontSize: '13px', color: MUTED, marginTop: '4px' }}>{M.mtdLeases.length} leases · mostly minis</div>
+                  <div style={{ fontSize: '13px', color: MUTED, marginTop: '4px' }}>{M.mtdLeases.length} leases</div>
                 </div>
                 <div style={{ ...card, flex: 1, minWidth: '200px' }}>
-                  <div style={lbl}>Finance front (avg)</div>
+                  <div style={lbl}>Avg desk profit · loan</div>
                   <div style={{ fontSize: '26px', fontWeight: 700, color: INK, ...tabNums }}>{money0(M.finFrontAvg)}</div>
-                  <div style={{ fontSize: '13px', color: MUTED, marginTop: '4px' }}>{M.mtdFinance.length} finance deals</div>
+                  <div style={{ fontSize: '13px', color: MUTED, marginTop: '4px' }}>{M.mtdFinance.length} loans</div>
                 </div>
                 <div style={{ ...card, flex: 1, minWidth: '200px' }}>
-                  <div style={lbl}>Quota pace</div>
+                  <div style={lbl}>Cars sold</div>
                   <div style={{ fontSize: '26px', fontWeight: 700, color: GREEN, ...tabNums }}>14 / 18</div>
-                  <div style={{ fontSize: '13px', color: MUTED, marginTop: '4px' }}>Units on track · gross behind</div>
+                  <div style={{ fontSize: '13px', color: MUTED, marginTop: '4px' }}>On pace for unit goal</div>
                 </div>
               </div>
               <div style={card}>
-                <div style={{ fontSize: '16px', fontWeight: 700, marginBottom: '12px' }}>October — front vs commission</div>
+                <div style={{ fontSize: '16px', fontWeight: 700, marginBottom: '4px' }}>October deals</div>
+                <p style={{ fontSize: '13px', color: MUTED, marginBottom: '12px', lineHeight: 1.45 }}>
+                  Desk profit = store margin on the car. Finance products = warranties, gap, etc. Your commission follows both — but only after the bank pays.
+                </p>
                 <div style={{ overflowX: 'auto' }}>
-                  <table style={{ width: '100%', borderCollapse: 'collapse', minWidth: '560px' }}>
+                  <table style={{ width: '100%', borderCollapse: 'collapse', minWidth: '620px' }}>
                     <thead>
                       <tr>
-                        {['Deal', 'Type', 'Front', 'Back', 'Est. comm.', 'Note'].map((h, i) => (
+                        {['Customer', 'Lease or loan', 'Desk profit', 'Finance products', 'Your commission', 'Status'].map((h, i) => (
                           <th key={h} style={{ ...th, textAlign: i >= 2 && i <= 4 ? 'right' : 'left' }}>{h}</th>
                         ))}
                       </tr>
@@ -576,21 +594,18 @@ export default function WestviewAutoPortal({ demoEmbed = false }) {
                       {M.mtd.map((d) => (
                         <tr key={d.id} style={d.mini && d.front < 200 ? { background: '#FFF9F0' } : undefined}>
                           <td style={td}>{d.customer}</td>
-                          <td style={{ ...td, textTransform: 'capitalize' }}>{d.type}</td>
+                          <td style={td}>{dealTypeLabel(d.type)}</td>
                           <td style={{ ...td, textAlign: 'right' }}>{money0(d.front)}</td>
                           <td style={{ ...td, textAlign: 'right' }}>{money0(d.back)}</td>
                           <td style={{ ...td, textAlign: 'right', fontWeight: 600, color: d.stage === 'funded' ? GREEN : MUTED }}>
                             {d.stage === 'funded' ? money0(commissionOnDeal(d)) : '—'}
                           </td>
-                          <td style={{ ...td, fontSize: '12px', color: MUTED }}>{d.mini ? 'Mini / subvented' : d.stage !== 'funded' ? 'Not funded' : '—'}</td>
+                          <td style={{ ...td, fontSize: '13px', color: MUTED }}>{dealStatusNote(d)}</td>
                         </tr>
                       ))}
                     </tbody>
                   </table>
                 </div>
-                <p style={{ margin: '14px 0 0', fontSize: '12px', color: MUTED, lineHeight: 1.55 }}>
-                  On subvented leases the payment moves in $50 chunks while gross disappears in the background. The board counts the unit; your check reflects the mini unless you held gross — these rows show where the month went.
-                </p>
               </div>
             </>
           )}
@@ -603,9 +618,9 @@ export default function WestviewAutoPortal({ demoEmbed = false }) {
               <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap', marginBottom: '20px' }}>
                 {[
                   { k: 'Sold · bank not paid', v: money0(GL_SNAPSHOT.citBalance), sub: `${money0(GL_SNAPSHOT.citOver10)} over 10 days` },
-                  { k: 'Floor plan (note)', v: money0(GL_SNAPSHOT.floorPlan), sub: 'Lender statement reconciled' },
-                  { k: 'Vehicle gross MTD', v: money0(GL_SNAPSHOT.mtdVehicleGross), sub: 'Desk + F&I recognized' },
-                  { k: 'F&I income MTD', v: money0(GL_SNAPSHOT.mtdFiIncome), sub: 'Reserve & products' },
+                  { k: 'Inventory loan balance', v: money0(GL_SNAPSHOT.floorPlan), sub: 'What you owe on cars on the lot' },
+                  { k: 'Sales profit (month)', v: money0(GL_SNAPSHOT.mtdVehicleGross), sub: 'From the P&amp;L' },
+                  { k: 'Finance product income', v: money0(GL_SNAPSHOT.mtdFiIncome), sub: 'Warranties, gap, etc.' },
                 ].map((x) => (
                   <div key={x.k} style={{ ...card, flex: '1 1 160px' }}>
                     <div style={lbl}>{x.k}</div>
@@ -621,26 +636,25 @@ export default function WestviewAutoPortal({ demoEmbed = false }) {
                 muted={MUTED}
                 green={GREEN}
                 border={RULE}
-                title="Desk view vs QuickBooks"
-                intro="Nightly QuickBooks sync. This does not post deals — it shows whether sold units are already cash in the bank or still waiting on the lender."
+                title="Sales desk vs QuickBooks"
+                intro="QuickBooks syncs nightly. Nothing posts from this screen — it is a read-only check that the cars you sold match what accounting shows."
                 rows={[
-                  { label: 'Waiting on bank (your deals)', portal: money0(M.openCit.reduce((s, d) => s + d.front + d.back, 0)), qbo: money0(186400) },
-                  { label: 'Commission accrued (payroll liab.)', portal: money0(M.commissionMtd + M.pendingCommission), qbo: money0(GL_SNAPSHOT.commissionAccrued) },
-                  { label: 'Commission paid MTD', portal: money0(M.commissionMtd), qbo: money0(GL_SNAPSHOT.commissionPaid) },
-                  { label: 'Vehicle gross MTD (P&L)', portal: money0(M.frontMtd + M.mtd.reduce((s, d) => s + d.back, 0)), qbo: money0(GL_SNAPSHOT.mtdVehicleGross + GL_SNAPSHOT.mtdFiIncome) },
+                  { label: 'Still waiting on bank', portal: money0(M.openCit.reduce((s, d) => s + d.front + d.back, 0)), qbo: money0(186400) },
+                  { label: 'Commission owed to sales', portal: money0(M.commissionMtd + M.pendingCommission), qbo: money0(GL_SNAPSHOT.commissionAccrued) },
+                  { label: 'Commission paid this month', portal: money0(M.commissionMtd), qbo: money0(GL_SNAPSHOT.commissionPaid) },
+                  { label: 'Total sales profit (P&L)', portal: money0(M.frontMtd + M.mtd.reduce((s, d) => s + d.back, 0)), qbo: money0(GL_SNAPSHOT.mtdVehicleGross + GL_SNAPSHOT.mtdFiIncome) },
                 ]}
-                footnote="Small differences are normal until the bank funds. Big gaps usually mean a car was delivered but never booked, or paperwork was unwound."
+                footnote="Small gaps are normal until the bank pays. Large gaps mean a car was delivered but never booked, or a deal was unwound."
                 bullets={[
-                  'When the bank pays, the deal moves from waiting to cash — your commission clock and the accounting clock start on different dates',
-                  'Lease cap cost hits inventory / payoff accounts — not the same line as front gross on the board',
-                  'One scoped login per store group — multi-rooftop rollups stay in the accountant shell',
+                  'You can be “done” with the customer before the bank pays the store — your commission usually waits on that',
+                  'Leases and loans hit different lines in QuickBooks than the number on your desk board',
                 ]}
               />
             </>
           )}
 
           <p className="bu-foot" style={{ marginTop: '32px', fontSize: '12px', color: FAINT, maxWidth: '36rem', lineHeight: 1.5 }}>
-            Sample data for demonstration. Reads across DMS, F&amp;I, and QuickBooks — nothing posts from here.
+            Fictitious store · sample numbers only · nothing posts to QuickBooks from here.
           </p>
         </main>
       </div>
