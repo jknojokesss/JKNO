@@ -13,7 +13,7 @@ const JK_UI = "'DM Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-se
 const JK_MONO = "'DM Mono', ui-monospace, monospace"
 const DEMO_PORTAL_ROOT_CLASS = 'demo-portal-root op-portal-root'
 
-const BIZ = 'Hayfield Global'
+const BIZ = 'Owner portfolio'
 const HUB_PAGE = '#f2f0ea'
 const HUB_INK = '#0f1419'
 const HUB_MUTED = '#64748b'
@@ -75,34 +75,34 @@ function HubArt({ type }) {
       </svg>
     )
   }
-  if (type === 'warehouse') {
+  if (type === 'barber') {
     return (
       <svg viewBox="0 0 200 120" width="100%" height="120" aria-hidden>
-        <rect x="40" y="48" width="120" height="48" rx="2" fill={ART_GREY} opacity="0.35" />
-        <path d="M40 48 L100 28 L160 48" fill="none" stroke={ART_GREY} strokeWidth="2" />
-        <rect x="58" y="62" width="28" height="34" fill="#fff" stroke={ART_GREY} strokeWidth="2" />
-        <rect x="114" y="62" width="28" height="34" fill="#fff" stroke={ART_GREY} strokeWidth="2" />
-        <path d="M72 62v34M114 62v34" stroke={ART_GREY} strokeWidth="1.5" />
+        <rect x="62" y="36" width="76" height="56" rx="8" fill="#fff" stroke={ART_GREY} strokeWidth="2" />
+        <path d="M78 52h44M78 64h32" stroke={ART_GREY} strokeWidth="2" strokeLinecap="round" />
+        <path d="M118 44l14-10 8 8-14 12z" fill={ART_GREY} opacity="0.65" />
+        <HubBadge x={48} y={44} text="CUT" />
       </svg>
     )
   }
-  if (type === 'globe') {
+  if (type === 'candy') {
     return (
       <svg viewBox="0 0 200 120" width="100%" height="120" aria-hidden>
-        <rect x="68" y="22" width="64" height="64" rx="14" fill="#fff" stroke={ART_GREY} strokeWidth="2" />
-        <circle cx="100" cy="54" r="22" fill="none" stroke={ART_GREY} strokeWidth="2" />
-        <ellipse cx="100" cy="54" rx="10" ry="22" fill="none" stroke={ART_GREY} strokeWidth="1.5" />
-        <path d="M78 54h44" stroke={ART_GREY} strokeWidth="1.5" />
+        <rect x="70" y="52" width="60" height="44" rx="6" fill="#fff" stroke={ART_GREY} strokeWidth="2" />
+        <rect x="78" y="60" width="12" height="12" rx="2" fill="#E8B4B8" />
+        <rect x="94" y="60" width="12" height="12" rx="2" fill="#C5D8EF" />
+        <rect x="110" y="60" width="12" height="12" rx="2" fill="#F0D9A8" />
+        <circle cx="100" cy="38" r="14" fill="none" stroke={ART_GREY} strokeWidth="2" />
+        <HubBadge x={148} y={40} text="GO" />
       </svg>
     )
   }
-  if (type === 'partners') {
+  if (type === 'cafe') {
     return (
       <svg viewBox="0 0 200 120" width="100%" height="120" aria-hidden>
-        <circle cx="88" cy="58" r="26" fill={BADGE_BG} />
-        <circle cx="118" cy="58" r="26" fill="#5A6575" />
-        <text x="88" y="63" textAnchor="middle" fill="#fff" fontSize="14" fontFamily="DM Mono, monospace" fontWeight="600">AK</text>
-        <text x="118" y="63" textAnchor="middle" fill="#fff" fontSize="14" fontFamily="DM Mono, monospace" fontWeight="600">JR</text>
+        <path d="M72 44h56v48H72z" fill="#fff" stroke={ART_GREY} strokeWidth="2" />
+        <path d="M128 56h16a10 10 0 0 1 0 20h-16" fill="none" stroke={ART_GREY} strokeWidth="2" />
+        <path d="M92 36c4-8 24-8 28 0" fill="none" stroke={ART_GREY} strokeWidth="2" />
       </svg>
     )
   }
@@ -119,15 +119,21 @@ function HubLogo() {
   )
 }
 
-/** Owner portal hub — layout mirrors multi-desk ops sites; only Operations center is live in the sample. */
-/** Same five-desk hub pattern as Adar HF — fictitious labels only. */
+/** Five fictitious businesses — only Books & cash opens in this public sample. */
 const PORTAL_DESKS = [
-  { id: 'operations', kicker: 'Liabilities, payables & cash flow', title: 'Operations center', live: true, art: 'ops' },
-  { id: 'realestate', kicker: 'Multi-family · Northeast', title: 'Real estate', live: false, art: 'house' },
-  { id: 'usre', kicker: 'Commercial · warehouse', title: 'US real estate', live: false, art: 'warehouse' },
-  { id: 'supply', kicker: 'Hayfield Global', title: 'Supply chain', live: false, art: 'globe' },
-  { id: 'partners', kicker: '2026 report', title: 'Partners', live: false, art: 'partners' },
+  { id: 'operations', kicker: 'Banks, cards & what\'s due', title: 'Books & cash', live: true, art: 'ops' },
+  { id: 'barber', kicker: 'Two chairs · Lakewood', title: 'Kline Barber', live: false, art: 'barber' },
+  { id: 'realestate', kicker: 'Six units · rent roll', title: 'Real estate', live: false, art: 'house' },
+  { id: 'candy', kicker: 'Wholesale & gift shop', title: 'Sugar Lane Candy', live: false, art: 'candy' },
+  { id: 'cafe', kicker: 'One location · catering', title: 'Corner Cup Coffee', live: false, art: 'cafe' },
 ]
+
+const DESK_TOAST = {
+  barber: 'Barber desk — appointments, tips, and retail would show here in a full build.',
+  realestate: 'Rent roll — late rent and tickets, not a full property manager.',
+  candy: 'Retail desk — margins and reorder points from your POS.',
+  cafe: 'Cafe desk — daily sales vs food cost, same read-only pattern.',
+}
 
 const BANKS = [
   { id: 'lakeview', name: 'Lakeview National', account: 'Operating · 4821', balance: 284200, entered: 'Oct 13 · 8:42 AM' },
@@ -323,6 +329,7 @@ export default function OperationsPortalSample() {
   const [sortAsc, setSortAsc] = useState(true)
   const [calDay, setCalDay] = useState('2026-10-18')
   const [activeSection, setActiveSection] = useState('banks')
+  const [activeDeskTitle, setActiveDeskTitle] = useState('Books & cash')
 
   const filtered = useMemo(() => {
     let rows = [...PAYABLES]
@@ -348,7 +355,8 @@ export default function OperationsPortalSample() {
     setTimeout(() => setToast(''), 4000)
   }
 
-  const openDesk = () => {
+  const openDesk = (desk) => {
+    setActiveDeskTitle(desk?.title || 'Books & cash')
     setHubOpen(false)
     setActiveSection('banks')
     router.replace({ pathname: '/operations-portal', query: { desk: 'operations' } }, undefined, { shallow: true })
@@ -356,10 +364,10 @@ export default function OperationsPortalSample() {
 
   const hubPick = (desk) => {
     if (desk.id === 'operations') {
-      openDesk()
+      openDesk(desk)
       return
     }
-    ping('Sample portal — only Operations center is wired in this demo.')
+    ping(DESK_TOAST[desk.id] || 'Placeholder desk in this sample.')
   }
 
   const jumpSection = (id) => {
@@ -431,22 +439,22 @@ export default function OperationsPortalSample() {
           .op-hub{min-height:calc(100vh - 48px);background:linear-gradient(180deg,#F4F5F8 0%,${HUB_PAGE} 120px,${HUB_PAGE} 100%);color:${HUB_INK}}
           .op-hub__bar{background:${HUB_CARD};border-bottom:1px solid #DDE2EA;padding:16px 24px;display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
           .op-hub__brand{display:flex;align-items:center;gap:12px}
-          .op-hub__brand-name{font-family:${JK_HEAD};font-size:15px;font-weight:600;letter-spacing:.06em;color:${HUB_INK}}
-          .op-hub__sample{font-family:${JK_MONO};font-size:9px;letter-spacing:.12em;text-transform:uppercase;color:${HUB_MUTED};background:#F0F2F6;border:1px solid #E0E4EC;border-radius:20px;padding:6px 12px}
-          .op-hub__intro{text-align:center;padding:28px 20px 8px;max-width:520px;margin:0 auto}
-          .op-hub__intro p{font-family:${JK_UI};font-size:13px;color:${HUB_MUTED}}
-          .op-hub__grid{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:20px;width:100%;max-width:980px;margin:28px auto 48px;padding:0 20px}
-          .op-hub__card{grid-column:span 2;background:${HUB_CARD};border:1px solid #E4E8EF;border-radius:16px;padding:0 0 20px;display:flex;flex-direction:column;text-align:left;cursor:pointer;transition:transform .18s ease,box-shadow .18s ease,border-color .18s ease;box-shadow:0 2px 8px rgba(35,45,60,.05),0 14px 36px rgba(35,45,60,.05);overflow:hidden;min-height:310px}
+          .op-hub__brand-name{font-family:${JK_UI};font-size:16px;font-weight:700;letter-spacing:.01em;color:${HUB_INK}}
+          .op-hub__sample{font-family:${JK_UI};font-size:11px;font-weight:600;color:${HUB_MUTED};background:#F0F2F6;border:1px solid #E0E4EC;border-radius:20px;padding:6px 12px}
+          .op-hub__intro{text-align:center;padding:28px 20px 8px;max-width:560px;margin:0 auto}
+          .op-hub__intro p{font-family:${JK_UI};font-size:15px;font-weight:500;color:${HUB_MUTED};line-height:1.45}
+          .op-hub__grid{display:flex;flex-wrap:wrap;justify-content:center;gap:20px;width:100%;max-width:1040px;margin:28px auto 48px;padding:0 20px}
+          .op-hub__card-wrap{position:relative;flex:0 1 300px;max-width:300px;width:100%}
+          .op-hub__card{background:${HUB_CARD};border:1px solid #E4E8EF;border-radius:16px;padding:0 0 20px;display:flex;flex-direction:column;text-align:left;cursor:pointer;transition:transform .18s ease,box-shadow .18s ease,border-color .18s ease;box-shadow:0 2px 8px rgba(35,45,60,.05),0 14px 36px rgba(35,45,60,.05);overflow:hidden;min-height:300px;height:100%}
           .op-hub__card--live{border-color:rgba(201,168,76,.55);box-shadow:0 2px 8px rgba(201,168,76,.15),0 16px 40px rgba(35,45,60,.07)}
           .op-hub__card:hover{transform:translateY(-4px);border-color:#C8D0DC;box-shadow:0 6px 16px rgba(35,45,60,.08),0 24px 48px rgba(35,45,60,.09)}
-          .op-hub__live-tag{position:absolute;top:14px;right:14px;font-family:${JK_MONO};font-size:8px;letter-spacing:.12em;text-transform:uppercase;color:#8f3d18;background:#fdf6e3;border:1px solid rgba(201,168,76,.45);border-radius:20px;padding:4px 8px}
-          .op-hub__card-wrap{position:relative}
+          .op-hub__live-tag{position:absolute;top:14px;right:14px;z-index:2;font-family:${JK_UI};font-size:10px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;color:#6b5420;background:#fdf6e3;border:1px solid rgba(201,168,76,.45);border-radius:20px;padding:5px 10px}
           .op-hub__card:focus-visible{outline:2px solid ${ACCENT};outline-offset:3px}
           .op-hub__art{padding:8px 12px 0;min-height:128px;display:flex;align-items:center;justify-content:center;background:linear-gradient(180deg,#FAFBFC 0%,#fff 100%)}
           .op-hub__body{padding:4px 22px 0;flex:1;display:flex;flex-direction:column}
-          .op-hub__kicker{font-family:${JK_MONO};font-size:9px;letter-spacing:.14em;text-transform:uppercase;color:${HUB_MUTED};margin-top:8px;line-height:1.5}
-          .op-hub__title{font-family:${JK_HEAD};font-size:22px;font-weight:600;color:${HUB_INK};margin-top:10px;line-height:1.2}
-          .op-hub__enter{margin:18px 22px 0;width:calc(100% - 44px);background:${HUB_BTN};color:#fff;border:none;border-radius:10px;padding:13px 16px;font-family:${JK_UI};font-size:13px;font-weight:600;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;transition:background .15s}
+          .op-hub__kicker{font-family:${JK_UI};font-size:12px;font-weight:600;color:${HUB_MUTED};margin-top:10px;line-height:1.4}
+          .op-hub__title{font-family:${JK_UI};font-size:23px;font-weight:700;color:${HUB_INK};margin-top:6px;line-height:1.15;letter-spacing:-.02em}
+          .op-hub__enter{margin:16px 22px 0;width:calc(100% - 44px);background:${HUB_BTN};color:#fff;border:none;border-radius:10px;padding:13px 16px;font-family:${JK_UI};font-size:14px;font-weight:600;pointer-events:none;display:flex;align-items:center;justify-content:center;gap:8px;transition:background .15s}
           .op-hub__card:hover .op-hub__enter{background:#2f3844}
           .op-hub__foot{text-align:center;padding-bottom:32px;font-family:${JK_MONO};font-size:10px}
           .op-hub__foot a{color:${NAVY};text-decoration:none;font-weight:600}
@@ -491,13 +499,9 @@ export default function OperationsPortalSample() {
           .op-cal-grid button.sel{outline:2px solid ${ACCENT};font-weight:700}
           .op-cal-grid button .dot{position:absolute;bottom:4px;left:50%;transform:translateX(-50%);width:4px;height:4px;border-radius:50%;background:${ACCENT}}
           .op-row-2{display:grid;grid-template-columns:1fr 300px;gap:18px}
-          .op-hub__grid .op-hub__card-wrap:nth-child(4){grid-column:2 / span 2}
-          .op-hub__grid .op-hub__card-wrap:nth-child(5){grid-column:4 / span 2}
           @media(max-width:900px){
-            .op-hub__grid{grid-template-columns:1fr;max-width:400px}
-            .op-hub__card{grid-column:1/-1}
-            .op-hub__grid .op-hub__card-wrap:nth-child(4),
-            .op-hub__grid .op-hub__card-wrap:nth-child(5){grid-column:1/-1}
+            .op-hub__grid{max-width:min(100%,360px)}
+            .op-hub__card-wrap{flex:1 1 100%;max-width:100%}
             .op-main{padding:16px 14px 48px}
             .op-row-2{grid-template-columns:1fr}
             .op-desk-rail{top:88px}
@@ -518,12 +522,15 @@ export default function OperationsPortalSample() {
             <header className="op-hub__bar">
               <div className="op-hub__brand">
                 <HubLogo />
-                <span className="op-hub__brand-name">{BIZ.toUpperCase()}</span>
+                <span className="op-hub__brand-name">{BIZ}</span>
               </div>
               <span className="op-hub__sample">Public sample · fictitious data</span>
             </header>
             <div className="op-hub__intro">
-              <p>Owner portal · tap where you&rsquo;re going</p>
+              <p>
+                Your businesses in one login — pick a desk. Fictitious names; only{' '}
+                <strong style={{ color: HUB_INK, fontWeight: 700 }}>Books &amp; cash</strong> opens in this sample.
+              </p>
             </div>
             <div className="op-hub__grid" role="navigation" aria-label="Portal desks">
               {PORTAL_DESKS.map((d) => (
@@ -566,8 +573,8 @@ export default function OperationsPortalSample() {
                   ← Desks
                 </button>
                 <div>
-                  <div style={{ fontFamily: JK_HEAD, fontSize: 17, fontWeight: 600 }}>Operations center</div>
-                  <div style={{ fontFamily: JK_MONO, fontSize: 9, opacity: 0.75, letterSpacing: '.1em' }}>{BIZ.toUpperCase()}</div>
+                  <div style={{ fontFamily: JK_UI, fontSize: 18, fontWeight: 700 }}>{activeDeskTitle}</div>
+                  <div style={{ fontFamily: JK_UI, fontSize: 11, opacity: 0.9, fontWeight: 600 }}>{BIZ}</div>
                 </div>
               </div>
               <button type="button" onClick={() => ping('Sample — production refreshes from workbook upload.')} style={{ background: ACCENT_ACTION, color: '#fff', border: 'none', borderRadius: 8, padding: '8px 14px', fontFamily: JK_MONO, fontSize: 10, letterSpacing: '.06em', cursor: 'pointer' }}>
