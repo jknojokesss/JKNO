@@ -5,11 +5,11 @@ import DemoLobby from './DemoLobby'
 import { BOOKING_URL } from '../lib/marketing'
 
 const JK_FONTS =
-  'https://fonts.googleapis.com/css2?family=Bitter:wght@600;700&family=DM+Mono:wght@400;500&family=DM+Sans:wght@400;500;600;700&display=swap'
+  'https://fonts.googleapis.com/css2?family=DM+Mono:wght@500;600&family=Inter:wght@500;600;700&display=swap'
 
-// Adar-style portal layout; JK site color + typography only (Bitter / DM Sans / DM Mono).
-const JK_HEAD = "'Bitter', Georgia, serif"
-const JK_UI = "'DM Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif"
+// Adar-style hub layout — Inter for crisp UI type; DM Mono for labels and figures.
+const JK_HEAD = "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif"
+const JK_UI = JK_HEAD
 const JK_MONO = "'DM Mono', ui-monospace, monospace"
 const DEMO_PORTAL_ROOT_CLASS = 'demo-portal-root op-portal-root'
 
@@ -127,7 +127,7 @@ function HubLogo() {
   return (
     <svg width="36" height="36" viewBox="0 0 36 36" aria-hidden>
       <rect width="36" height="36" rx="9" fill="#fff" stroke="rgba(42,51,68,.15)" strokeWidth="1" />
-      <text x="11" y="24" fontFamily="Bitter, Georgia, serif" fontSize="16" fontWeight="700" fill="#0f1419">JK</text>
+      <text x="11" y="24" fontFamily="Inter, sans-serif" fontSize="15" fontWeight="700" fill="#0f1419">JK</text>
       <circle cx="26" cy="24" r="2.5" fill="#c9a84c" />
     </svg>
   )
@@ -434,10 +434,10 @@ export default function OperationsPortalSample() {
   const th = {
     padding: '10px 14px',
     fontSize: '10px',
-    color: MUTED,
+    color: '#4b5563',
     background: '#EEF1F6',
     fontWeight: 600,
-    letterSpacing: '0.07em',
+    letterSpacing: '0.08em',
     textTransform: 'uppercase',
     borderBottom: `1px solid ${BORDER}`,
     fontFamily: JK_MONO,
@@ -449,12 +449,13 @@ export default function OperationsPortalSample() {
     borderBottom: '1px solid #ECEFF4',
     color: INK,
     fontSize: '13px',
+    fontWeight: 500,
     fontFamily: JK_UI,
   }
 
   const renderHints =
-    'html{-webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility}' +
-    `.${DEMO_PORTAL_ROOT_CLASS}{font-family:${JK_UI};font-variant-numeric:tabular-nums}`
+    'html{-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale;text-rendering:optimizeLegibility}' +
+    `.${DEMO_PORTAL_ROOT_CLASS}{font-family:${JK_UI};font-variant-numeric:tabular-nums;font-feature-settings:"cv02","cv03","cv04","cv11";font-optical-sizing:auto}`
 
   if (!mounted) {
     return (
@@ -480,11 +481,11 @@ export default function OperationsPortalSample() {
           .op-hub{min-height:calc(100vh - 48px);background:linear-gradient(180deg,#F4F5F8 0%,${HUB_PAGE} 120px,${HUB_PAGE} 100%);color:${HUB_INK}}
           .op-hub__bar{background:${HUB_CARD};border-bottom:1px solid #DDE2EA;padding:16px 24px;display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
           .op-hub__brand{display:flex;align-items:center;gap:12px}
-          .op-hub__brand-name{font-family:${JK_UI};font-size:16px;font-weight:700;letter-spacing:.01em;color:${HUB_INK}}
-          .op-hub__sample{font-family:${JK_UI};font-size:11px;font-weight:600;color:${HUB_MUTED};background:#F0F2F6;border:1px solid #E0E4EC;border-radius:20px;padding:6px 12px}
+          .op-hub__brand-name{font-family:${JK_UI};font-size:16px;font-weight:700;letter-spacing:-.02em;color:${HUB_INK}}
+          .op-hub__sample{font-family:${JK_MONO};font-size:10px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:${HUB_MUTED};background:#F0F2F6;border:1px solid #E0E4EC;border-radius:20px;padding:6px 12px}
           .op-hub__intro{text-align:center;padding:32px 20px 4px;max-width:640px;margin:0 auto}
-          .op-hub__intro h1{font-family:${JK_HEAD};font-size:clamp(1.35rem,3.5vw,1.75rem);font-weight:700;color:${HUB_INK};letter-spacing:-.02em;line-height:1.2;margin:0 0 10px}
-          .op-hub__intro p{font-family:${JK_UI};font-size:15px;font-weight:500;color:${HUB_MUTED};line-height:1.5;margin:0}
+          .op-hub__intro h1{font-family:${JK_HEAD};font-size:clamp(1.35rem,3.5vw,1.75rem);font-weight:700;color:${HUB_INK};letter-spacing:-.03em;line-height:1.15;margin:0 0 10px}
+          .op-hub__intro p{font-family:${JK_UI};font-size:15px;font-weight:500;color:#4b5563;line-height:1.5;margin:0}
           .op-hub__grid{display:grid;grid-template-columns:1fr;gap:18px;width:100%;max-width:720px;margin:28px auto 48px;padding:0 20px}
           .op-hub__card-wrap{position:relative;width:100%;min-width:0}
           @media(min-width:640px){.op-hub__grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:20px}}
@@ -495,9 +496,9 @@ export default function OperationsPortalSample() {
           .op-hub__card:focus-visible{outline:2px solid ${ACCENT};outline-offset:3px}
           .op-hub__art{padding:8px 12px 0;min-height:128px;display:flex;align-items:center;justify-content:center;background:linear-gradient(180deg,#FAFBFC 0%,#fff 100%)}
           .op-hub__body{padding:4px 22px 0;flex:1;display:flex;flex-direction:column}
-          .op-hub__kicker{font-family:${JK_UI};font-size:12px;font-weight:600;color:${HUB_MUTED};margin-top:10px;line-height:1.4}
-          .op-hub__title{font-family:${JK_UI};font-size:23px;font-weight:700;color:${HUB_INK};margin-top:6px;line-height:1.15;letter-spacing:-.02em}
-          .op-hub__enter{margin:16px 22px 0;width:calc(100% - 44px);background:${HUB_BTN};color:#fff;border:none;border-radius:10px;padding:13px 16px;font-family:${JK_UI};font-size:14px;font-weight:600;pointer-events:none;display:flex;align-items:center;justify-content:center;gap:8px;transition:background .15s}
+          .op-hub__kicker{font-family:${JK_MONO};font-size:10px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:#6b7280;margin-top:10px;line-height:1.4}
+          .op-hub__title{font-family:${JK_UI};font-size:22px;font-weight:700;color:${HUB_INK};margin-top:8px;line-height:1.12;letter-spacing:-.03em}
+          .op-hub__enter{margin:16px 22px 0;width:calc(100% - 44px);background:${HUB_BTN};color:#fff;border:none;border-radius:10px;padding:13px 16px;font-family:${JK_UI};font-size:13px;font-weight:600;letter-spacing:-.01em;pointer-events:none;display:flex;align-items:center;justify-content:center;gap:8px;transition:background .15s}
           .op-hub__card:hover .op-hub__enter{background:#2f3844}
           .op-hub__foot{text-align:center;padding-bottom:32px;font-family:${JK_MONO};font-size:10px}
           .op-hub__foot a{color:${NAVY};text-decoration:none;font-weight:600}
@@ -505,7 +506,9 @@ export default function OperationsPortalSample() {
           .op-desk-rail{background:${SHEET};border-bottom:1px solid ${BORDER};padding:10px 20px;display:flex;gap:8px;overflow-x:auto;position:sticky;top:56px;z-index:19;-webkit-overflow-scrolling:touch;max-width:1100px;margin:0 auto;width:100%}
           .op-summary{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin-bottom:18px}
           .op-summary-item{background:${SHEET};border:1px solid ${BORDER};border-radius:10px;padding:14px 16px}
-          .op-summary-item strong{display:block;font-family:${JK_HEAD};font-size:22px;font-weight:600;margin-top:6px;font-variant-numeric:tabular-nums}
+          .op-summary-item strong{display:block;font-family:${JK_UI};font-size:22px;font-weight:700;letter-spacing:-.03em;margin-top:6px;font-variant-numeric:tabular-nums}
+          .op-summary-item label,.op-summary-item span.op-lbl{font-family:${JK_MONO};font-size:10px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:${MUTED}}
+          .op-section-title{font-family:${JK_UI};font-size:18px;font-weight:700;letter-spacing:-.025em;color:${INK}}
           .op-workbook{background:${SHEET};border:1px solid ${BORDER};border-radius:12px;overflow:hidden;box-shadow:0 1px 0 rgba(21,34,56,.04)}
           .op-workbook-section{padding:20px 22px;border-bottom:1px solid #ECEFF4}
           .op-workbook-section:last-child{border-bottom:none}
@@ -515,7 +518,8 @@ export default function OperationsPortalSample() {
           .op-row-nov{background:${NOV_BG}!important}
           .op-rail-btn{flex-shrink:0;display:flex;flex-direction:column;align-items:center;gap:4px;min-width:64px;padding:8px 10px;border-radius:10px;border:1px solid transparent;background:transparent;cursor:pointer;font-family:${JK_UI};color:${MUTED}}
           .op-rail-btn.on{background:#fdf6e3;border-color:rgba(201,168,76,.4);color:${INK}}
-          .op-rail-btn span{font-size:10px;font-weight:600}
+          .op-rail-btn span{font-size:10px;font-weight:600;letter-spacing:.02em}
+          .op-desk-header,.op-desk-header *{letter-spacing:-.01em}
           .op-main{padding:20px 16px 56px;max-width:1100px;margin:0 auto}
           .op-banks{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px}
           .op-bank{background:#FAFBFD;border:1px solid #E2E7EF;border-radius:8px;padding:16px 18px}
@@ -657,13 +661,13 @@ export default function OperationsPortalSample() {
 
               <div className="op-workbook">
               <section id="section-banks" className="op-workbook-section op-panel">
-                <h2 style={{ fontFamily: JK_HEAD, fontSize: 20, fontWeight: 600, marginBottom: 14 }}>Bank balances</h2>
+                <h2 className="op-section-title" style={{ marginBottom: 14 }}>Bank balances</h2>
                 <div className="op-banks">
                   {BANKS.map((b) => (
                     <div key={b.id} className="op-bank">
                       <div style={{ fontFamily: JK_MONO, fontSize: 9, color: MUTED, letterSpacing: '.1em', textTransform: 'uppercase' }}>{b.name}</div>
                       <div style={{ fontFamily: JK_MONO, fontSize: 10, color: '#8A96A8', marginTop: 4 }}>{b.account}</div>
-                      <div style={{ fontFamily: JK_HEAD, fontSize: 26, fontWeight: 600, marginTop: 8, fontVariantNumeric: 'tabular-nums' }}>{money(b.balance)}</div>
+                      <div style={{ fontFamily: JK_UI, fontSize: 26, fontWeight: 700, letterSpacing: '-0.03em', marginTop: 8, fontVariantNumeric: 'tabular-nums' }}>{money(b.balance)}</div>
                       <div style={{ fontFamily: JK_MONO, fontSize: 10, color: MUTED, marginTop: 8 }}>Last entered {b.entered}</div>
                     </div>
                   ))}
@@ -672,7 +676,7 @@ export default function OperationsPortalSample() {
 
               <section id="section-cards" className="op-workbook-section op-panel">
                 <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'space-between', gap: 12, marginBottom: 8 }}>
-                  <h2 style={{ fontFamily: JK_HEAD, fontSize: 20, fontWeight: 600 }}>Credit card payables</h2>
+                  <h2 className="op-section-title">Credit card payables</h2>
                 </div>
                 <div className="op-cc-totals">
                   <span>Filtered total<b>{money(ccTotal)}</b></span>
@@ -732,7 +736,7 @@ export default function OperationsPortalSample() {
                 ) : (
                   <div id="section-calendar" style={{ display: 'grid', gridTemplateColumns: 'minmax(260px,1fr) minmax(220px,1fr)', gap: 18 }}>
                     <div className="op-cal-wrap">
-                      <div style={{ fontFamily: JK_HEAD, fontSize: 16, fontWeight: 600, marginBottom: 10 }}>October 2026</div>
+                      <div style={{ fontFamily: JK_UI, fontSize: 16, fontWeight: 700, letterSpacing: '-0.02em', marginBottom: 10 }}>October 2026</div>
                       <div className="op-cal-head">{['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map((d) => <div key={d}>{d}</div>)}</div>
                       <div className="op-cal-grid">
                         {CAL_CELLS.map((c, i) => {
@@ -768,7 +772,7 @@ export default function OperationsPortalSample() {
               <section id="section-loans" className="op-workbook-section op-panel">
                 <div className="op-row-2">
                   <div>
-                    <h2 style={{ fontFamily: JK_HEAD, fontSize: 18, fontWeight: 600, marginBottom: 12 }}>Short-term loans</h2>
+                    <h2 className="op-section-title" style={{ marginBottom: 12 }}>Short-term loans</h2>
                     <div className="op-scroll">
                       <table>
                         <thead>
@@ -803,7 +807,7 @@ export default function OperationsPortalSample() {
               </section>
 
               <section id="section-outflow" className="op-workbook-section op-panel">
-                <h2 style={{ fontFamily: JK_HEAD, fontSize: 18, fontWeight: 600, marginBottom: 12 }}>US monthly outflow</h2>
+                <h2 className="op-section-title" style={{ marginBottom: 12 }}>US monthly outflow</h2>
                 <div className="op-scroll">
                   <table>
                     <thead>
