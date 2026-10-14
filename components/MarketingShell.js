@@ -153,8 +153,24 @@ export default function MarketingShell({
             ))}
             <button type="button" className="m-mobile-nav-link" onClick={() => go('/#contact')}>Contact</button>
             <div className="m-mobile-menu__actions">
-              <button type="button" className="m-btn m-btn--secondary" style={{ flex: 1 }} onClick={() => { setMenuOpen(false); router.push('/login') }}>Log in</button>
-              <a href={BOOKING_URL} target="_blank" rel="noopener noreferrer" className="m-btn m-btn--primary" style={{ flex: 1 }} onClick={() => setMenuOpen(false)}>Book a call</a>
+              <button
+                type="button"
+                className={`m-btn${useJK ? ' m-btn--ghost-light' : ' m-btn--secondary'}`}
+                style={{ flex: 1 }}
+                onClick={() => { setMenuOpen(false); router.push('/login') }}
+              >
+                Log in
+              </button>
+              <a
+                href={BOOKING_URL}
+                target="_blank"
+                rel="noopener noreferrer"
+                className={`m-btn${useJK ? ' m-btn--gold' : ' m-btn--primary'}`}
+                style={{ flex: 1 }}
+                onClick={() => setMenuOpen(false)}
+              >
+                Book a call
+              </a>
             </div>
           </nav>
         </div>
