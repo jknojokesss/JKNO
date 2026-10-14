@@ -292,17 +292,6 @@ html:has(.marketing-site--jk) {
   border-top: 1px solid rgba(255, 255, 255, 0.14);
 }
 
-/* JK site: same sky menu on desktop — one nav pattern, readable on the gradient */
-.marketing-site--jk .m-header__nav--desktop {
-  display: none !important;
-}
-
-.marketing-site--jk .m-menu-toggle--mobile {
-  display: flex !important;
-  align-items: center;
-  justify-content: center;
-}
-
 .marketing-site--jk .m-footer-flight {
   position: relative;
   z-index: 1;
