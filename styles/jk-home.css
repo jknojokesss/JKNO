@@ -132,10 +132,10 @@
 .m-jk-home__multi-shot {
   display: block;
   border-radius: 8px;
-  border: 1px solid rgba(42, 51, 68, 0.14);
+  border: 1px solid rgba(42, 51, 68, 0.12);
   overflow: hidden;
   box-shadow: 0 4px 16px rgba(15, 20, 28, 0.08);
-  background: #f8f9fb;
+  background: #ebe4d8;
   line-height: 0;
 }
 
@@ -604,13 +604,14 @@ html.jk-scroll-motion .m-jk-page [data-fly-in]:not(.is-visible) .m-jk-steps li {
 
 .m-jk-home__flow {
   padding: 0 1.25rem 3rem;
-  margin-top: 0.25rem;
+  margin-top: 0;
+  /* Tint over the sky — avoid an opaque white band in the scroll */
   background: linear-gradient(
     180deg,
-    transparent 0,
-    rgba(242, 240, 234, 0.55) 6%,
-    rgba(242, 240, 234, 0.92) 14%,
-    rgba(242, 240, 234, 0.97) 100%
+    transparent 0%,
+    rgba(42, 68, 120, 0.08) 10%,
+    rgba(180, 150, 110, 0.1) 45%,
+    rgba(72, 52, 44, 0.14) 100%
   );
 }
 
@@ -620,12 +621,20 @@ html.jk-scroll-motion .m-jk-page [data-fly-in]:not(.is-visible) .m-jk-steps li {
   margin: 0 auto 1.35rem;
   padding: clamp(1.75rem, 3.5vw, 2.25rem) clamp(1.5rem, 3vw, 2rem);
   border-radius: 10px;
-  border: 1px solid rgba(42, 51, 68, 0.12);
+  border: 1px solid rgba(255, 255, 255, 0.22);
   border-top: none;
-  background: #fff;
+  background: rgba(247, 241, 232, 0.82);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
   color: var(--jk-ink);
-  box-shadow: 0 1px 3px rgba(15, 20, 28, 0.06);
+  box-shadow: 0 2px 14px rgba(22, 28, 40, 0.1);
   scroll-margin-top: 5rem;
+}
+
+@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+  .m-jk-home__panel {
+    background: #f3ebe2;
+  }
 }
 
 .m-jk-home__panel--samples {
@@ -858,13 +867,16 @@ html.jk-scroll-motion .m-jk-home__panel .m-jk-steps li {
   grid-template-columns: repeat(auto-fill, minmax(11.5rem, 1fr));
 }
 
-.m-jk-home__panel .m-demo-card {
+.marketing-site--jk .m-jk-home__panel .m-demo-card {
   border-left: 3px solid var(--jk-orange-mid);
   height: 100%;
+  background: rgba(255, 250, 243, 0.88);
+  border-color: rgba(42, 51, 68, 0.1);
 }
 
-.m-jk-home__panel .m-demo-card:hover {
+.marketing-site--jk .m-jk-home__panel .m-demo-card:hover {
   border-left-color: var(--jk-gold);
+  background: rgba(255, 252, 246, 0.95);
 }
 
 .m-jk-home__panel--form .m-label {
@@ -874,8 +886,8 @@ html.jk-scroll-motion .m-jk-home__panel .m-jk-steps li {
 .m-jk-home__panel--form input,
 .m-jk-home__panel--form textarea,
 .m-jk-home__panel--form .m-select {
-  background: #fff;
-  border: 1px solid #cbd5e1;
+  background: rgba(255, 252, 247, 0.95);
+  border: 1px solid rgba(42, 51, 68, 0.16);
   color: var(--jk-ink);
 }
 
