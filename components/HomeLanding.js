@@ -129,7 +129,7 @@ export default function HomeLanding({
           </button>
         </section>
 
-        <section className="m-jk-home__plain" id="offer">
+        <section className="m-jk-home__panel m-jk-home__panel--offer" id="offer">
           <h2 className="m-jk-story__title">Portal first — books optional</h2>
           <p className="m-jk-story__body">
             Keep your bookkeeper or bring me the books — either way you get a portal built on your numbers, not a template
