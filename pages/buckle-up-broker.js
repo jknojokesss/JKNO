@@ -3,10 +3,18 @@ import Head from 'next/head'
 import { useRouter } from 'next/router'
 import DemoBooksPanel from '../components/DemoBooksPanel'
 import { DEMO_EMBED_HIDE_LOBBY_CSS, getDemoEmbedServerProps, isDemoEmbedQuery } from '../lib/demoEmbed'
-import { DEMO_PORTAL_ROOT_CLASS, DEMO_RENDER_HINTS } from '../lib/demoFonts'
+import {
+  DEMO_FONT_LINK,
+  DEMO_HEAD,
+  DEMO_MONO,
+  DEMO_PORTAL_ROOT_CLASS,
+  DEMO_RENDER_HINTS,
+  DEMO_UI,
+} from '../lib/demoFonts'
 
-const FONT_LINK = 'https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap'
-const sans = "'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif"
+const UI = DEMO_UI
+const HEAD = DEMO_HEAD
+const MONO = DEMO_MONO
 
 // ─────────────────────────────────────────────────────────────────────────
 // Buckle Up Leasing — private broker pitch sample (not on jknojokes gallery).
@@ -520,10 +528,45 @@ export default function BuckleUpBrokerPortal({ demoEmbed = false }) {
 
   const fundingUsesDealerCols = fundingFilter === 'dealer'
 
-  const lbl = { fontFamily: sans, fontSize: '12px', fontWeight: 600, color: MUTED }
-  const card = { background: WHITE, border: `1px solid ${RULE}`, borderRadius: '10px', padding: '18px 20px', boxShadow: '0 1px 2px rgba(26,26,26,.04)' }
-  const th = { fontFamily: sans, fontSize: '11px', fontWeight: 600, color: MUTED, textAlign: 'left', padding: '10px 10px', borderBottom: `1px solid ${RULE}` }
-  const td = { fontSize: '14px', color: INK, padding: '11px 10px', borderBottom: `1px solid ${PAPER}`, verticalAlign: 'top', ...{ fontVariantNumeric: 'tabular-nums' } }
+  const lbl = {
+    fontFamily: MONO,
+    fontSize: '10px',
+    fontWeight: 500,
+    letterSpacing: '0.07em',
+    textTransform: 'uppercase',
+    color: MUTED,
+  }
+  const card = { background: WHITE, border: `1px solid ${RULE}`, borderRadius: '8px', padding: '18px 20px', boxShadow: '0 1px 2px rgba(26,26,26,.04)' }
+  const th = {
+    fontFamily: MONO,
+    fontSize: '10px',
+    fontWeight: 500,
+    letterSpacing: '0.06em',
+    textTransform: 'uppercase',
+    color: MUTED,
+    textAlign: 'left',
+    padding: '10px 10px',
+    borderBottom: `1px solid ${RULE}`,
+  }
+  const td = {
+    fontFamily: UI,
+    fontSize: '13px',
+    color: INK,
+    padding: '11px 10px',
+    borderBottom: `1px solid ${PAPER}`,
+    verticalAlign: 'top',
+    fontVariantNumeric: 'tabular-nums',
+  }
+  const pageTitle = {
+    fontFamily: HEAD,
+    fontSize: '1.625rem',
+    fontWeight: 600,
+    letterSpacing: '0.02em',
+    color: INK,
+    lineHeight: 1.2,
+  }
+  const sectionTitle = { fontFamily: HEAD, fontSize: '1.0625rem', fontWeight: 600, letterSpacing: '0.02em', color: INK }
+  const kpiValue = { fontFamily: MONO, fontWeight: 600, fontVariantNumeric: 'tabular-nums' }
 
   return (
     <>
@@ -534,33 +577,35 @@ export default function BuckleUpBrokerPortal({ demoEmbed = false }) {
         <meta name="description" content="Private sample — which files are funded and which brokerage fees are still waiting." />
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
-        <link href={FONT_LINK} rel="stylesheet" />
+        <link href={DEMO_FONT_LINK} rel="stylesheet" />
         {embedded ? <style>{DEMO_EMBED_HIDE_LOBBY_CSS}</style> : null}
         <style>{`
           *{box-sizing:border-box;margin:0;padding:0}
-          ${DEMO_RENDER_HINTS.replace(/font-family:[^;]+;/, `font-family:${sans};`)}
-          body{background:${PAPER};font-family:${sans};color:${INK}}
+          ${DEMO_RENDER_HINTS}
+          body{background:${PAPER};font-family:${UI};color:${INK};font-size:15px;line-height:1.5}
           html.demo-embed,html.demo-embed body{width:100%;max-width:100%;overflow-x:hidden}
           html.demo-embed .bu-foot{display:none}
           html.demo-embed .bl-side{display:none!important}
           html.demo-embed .bl-mtabs{display:flex!important}
           html.demo-embed .bl-shell{flex-direction:column;width:100%;max-width:100vw;min-height:100vh}
           html.demo-embed .bl-main{padding:16px 12px 40px;width:100%;max-width:100%}
-          .bl-shell{display:flex;min-height:100vh;font-family:${sans};width:100%}
+          .bl-shell{display:flex;min-height:100vh;font-family:${UI};width:100%}
+          .bl-brand{font-family:${HEAD};font-size:1.35rem;font-weight:600;letter-spacing:0.03em;color:${INK};line-height:1.15}
+          .bl-brand-sub{font-family:${UI};font-size:13px;font-weight:500;color:${MUTED};margin-top:6px}
           .bl-side{width:232px;flex-shrink:0;background:${SIDEBAR};border-right:1px solid ${RULE};display:flex;flex-direction:column;padding:24px 16px 20px;position:sticky;top:0;height:100vh}
-          .bl-nav{width:100%;text-align:left;padding:10px 12px;border-radius:8px;border:none;background:transparent;color:${MUTED};font-size:14px;font-weight:500;cursor:pointer;margin-bottom:4px;font-family:${sans}}
+          .bl-nav{width:100%;text-align:left;padding:10px 12px;border-radius:6px;border:none;background:transparent;color:${MUTED};font-size:13px;font-weight:500;cursor:pointer;margin-bottom:4px;font-family:${UI}}
           .bl-nav:hover{background:${PAPER};color:${INK}}
           .bl-nav.on{background:#EEF3FA;color:${INK};font-weight:600;box-shadow:inset 3px 0 0 ${SIGNAL}}
           .bl-main{flex:1;min-width:0;padding:32px 32px 56px;max-width:1100px}
           .bl-mtabs{display:none;position:sticky;top:0;z-index:20;background:${WHITE};border-bottom:1px solid ${RULE};padding:8px 12px;gap:8px;overflow-x:auto}
-          .bl-mtab{flex-shrink:0;border:1px solid ${RULE};border-radius:999px;padding:8px 16px;font-size:13px;font-weight:500;font-family:${sans};cursor:pointer;background:${WHITE};color:${MUTED}}
+          .bl-mtab{flex-shrink:0;border:1px solid ${RULE};border-radius:6px;padding:8px 14px;font-size:12px;font-weight:500;font-family:${UI};cursor:pointer;background:${WHITE};color:${MUTED}}
           .bl-mtab.on{background:#EEF3FA;border-color:${SIGNAL};color:${INK};font-weight:600}
           .bl-chev{transition:transform .15s;display:inline-block;color:${FAINT}}
           .bl-chev.open{transform:rotate(90deg)}
-          .bl-demo-hint{font-size:13px;color:${SLATE};background:#EEF3FA;border:1px solid #C5D8EF;border-radius:10px;padding:12px 14px;line-height:1.5;margin-bottom:18px}
-          .bl-input,.bl-textarea{width:100%;font-family:${sans};font-size:14px;border:1px solid ${RULE};border-radius:8px;padding:8px 10px;color:${INK};background:${WHITE}}
+          .bl-demo-hint{font-size:13px;font-weight:500;color:${SLATE};background:#f4f6f9;border:1px solid ${RULE};border-radius:8px;padding:12px 14px;line-height:1.55;margin-bottom:18px}
+          .bl-input,.bl-textarea{width:100%;font-family:${UI};font-size:14px;border:1px solid ${RULE};border-radius:6px;padding:8px 10px;color:${INK};background:${WHITE}}
           .bl-input:focus,.bl-textarea:focus{outline:2px solid ${SIGNAL};outline-offset:1px;border-color:${SIGNAL}}
-          .bl-btn-sm{font-family:${sans};font-size:13px;font-weight:600;border-radius:8px;padding:6px 12px;cursor:pointer;border:1px solid ${RULE};background:${WHITE};color:${INK}}
+          .bl-btn-sm{font-family:${UI};font-size:12px;font-weight:600;border-radius:6px;padding:6px 12px;cursor:pointer;border:1px solid ${RULE};background:${WHITE};color:${INK}}
           .bl-btn-sm--primary{background:${SIGNAL};border-color:${SIGNAL};color:${WHITE}}
           .bl-stip{display:flex;align-items:flex-start;gap:8px;margin-bottom:6px;font-size:13px;color:${SLATE}}
           .bl-stip input{margin-top:3px;accent-color:${SIGNAL}}
@@ -585,8 +630,8 @@ export default function BuckleUpBrokerPortal({ demoEmbed = false }) {
 
         <aside className="bl-side">
           <div style={{ paddingBottom: '20px' }}>
-            <div style={{ fontSize: '21px', fontWeight: 700, letterSpacing: '-0.02em', color: INK }}>{BIZ}</div>
-            <div style={{ fontSize: '13px', color: MUTED, marginTop: '6px' }}>Lease &amp; finance broker</div>
+            <div className="bl-brand">{BIZ}</div>
+            <div className="bl-brand-sub">Lease &amp; finance broker</div>
           </div>
           <nav style={{ flex: 1 }}>
             {NAV.map((n) => (
@@ -619,7 +664,7 @@ export default function BuckleUpBrokerPortal({ demoEmbed = false }) {
 
         <main className="bl-main">
           <header style={{ marginBottom: '24px' }}>
-            <h1 style={{ fontSize: '26px', fontWeight: 700, color: INK, letterSpacing: '-0.02em', lineHeight: 1.2 }}>
+            <h1 style={pageTitle}>
               {tab === 'funding' && 'When is your brokerage fee collected?'}
               {tab === 'pipeline' && 'Every file, one queue'}
               {tab === 'month' && 'Deals closed vs fees in the bank'}
@@ -656,7 +701,7 @@ export default function BuckleUpBrokerPortal({ demoEmbed = false }) {
                 Tap a number to filter the list.
               </p>
               <div style={{ ...card, marginBottom: '20px', borderLeft: `4px solid ${SIGNAL}` }}>
-                <div style={{ fontSize: '15px', fontWeight: 700, color: INK, marginBottom: '10px' }}>Chase list — owner view</div>
+                <div style={{ ...sectionTitle, marginBottom: '10px' }}>Chase list — owner view</div>
                 <p style={{ fontSize: '13px', color: MUTED, margin: '0 0 12px', lineHeight: 1.5 }}>
                   Who owns the file, who you are waiting on, and the next step. Pulled from the same feed as Pipeline — not a second spreadsheet.
                 </p>
@@ -746,11 +791,11 @@ export default function BuckleUpBrokerPortal({ demoEmbed = false }) {
                         cursor: 'pointer',
                         border: active ? `2px solid ${SIGNAL}` : `1px solid ${RULE}`,
                         background: active ? '#F4F8FD' : WHITE,
-                        fontFamily: sans,
+                        fontFamily: UI,
                       }}
                     >
                       <div style={lbl}>{x.k}</div>
-                      <div style={{ fontSize: '28px', fontWeight: 700, color: x.color || INK, marginTop: '4px', fontVariantNumeric: 'tabular-nums' }}>{x.v}</div>
+                      <div style={{ ...kpiValue, fontSize: '1.65rem', color: x.color || INK, marginTop: '4px' }}>{x.v}</div>
                       <div style={{ fontSize: '13px', color: MUTED, marginTop: '4px' }}>{x.sub}</div>
                       {x.id !== 'paid' && (
                         <div style={{ fontSize: '11px', color: active ? SIGNAL : FAINT, marginTop: '8px', fontWeight: 600 }}>
@@ -767,7 +812,7 @@ export default function BuckleUpBrokerPortal({ demoEmbed = false }) {
 
               <div style={card}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px', flexWrap: 'wrap', gap: '8px' }}>
-                  <div style={{ fontSize: '17px', fontWeight: 700, color: INK }}>{fundingTableTitle}</div>
+                  <div style={sectionTitle}>{fundingTableTitle}</div>
                   {fundingFilter !== 'attention' && (
                     <button
                       type="button"
@@ -914,7 +959,7 @@ export default function BuckleUpBrokerPortal({ demoEmbed = false }) {
           {tab === 'pipeline' && (
             <>
               <div style={{ ...card, marginBottom: '18px' }}>
-                <div style={{ fontSize: '16px', fontWeight: 700, color: INK, marginBottom: '8px' }}>Log a new application</div>
+                <div style={{ ...sectionTitle, marginBottom: '8px' }}>Log a new application</div>
                 <p style={{ fontSize: '13px', color: MUTED, margin: '0 0 12px', lineHeight: 1.5 }}>
                   Sample only — adds a row to Intake below. Production pulls from your CRM or application form.
                 </p>
@@ -969,7 +1014,7 @@ export default function BuckleUpBrokerPortal({ demoEmbed = false }) {
                   if (stage === 'paid' && !rows.length) return null
                   return (
                     <div key={stage} style={card}>
-                      <div style={{ fontSize: '16px', fontWeight: 700, color: INK, marginBottom: '10px' }}>{label}</div>
+                      <div style={{ ...sectionTitle, marginBottom: '10px' }}>{label}</div>
                       <div style={{ overflowX: 'auto' }}>
                         <table style={{ width: '100%', borderCollapse: 'collapse', minWidth: '560px' }}>
                           <thead>
@@ -1026,24 +1071,24 @@ export default function BuckleUpBrokerPortal({ demoEmbed = false }) {
               <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap', marginBottom: '20px' }}>
                 <div style={{ ...card, flex: 1, minWidth: '200px' }}>
                   <div style={lbl}>Leases</div>
-                  <div style={{ fontSize: '26px', fontWeight: 700, color: SIGNAL, fontVariantNumeric: 'tabular-nums' }}>{M.mtdLeases.length}</div>
+                  <div style={{ ...kpiValue, fontSize: '1.65rem', color: SIGNAL }}>{M.mtdLeases.length}</div>
                   <div style={{ fontSize: '13px', color: MUTED, marginTop: '4px' }}>Quotes &amp; apps this month</div>
                 </div>
                 <div style={{ ...card, flex: 1, minWidth: '200px' }}>
                   <div style={lbl}>Loans</div>
-                  <div style={{ fontSize: '26px', fontWeight: 700, color: INK, fontVariantNumeric: 'tabular-nums' }}>{M.mtdFinance.length}</div>
+                  <div style={{ ...kpiValue, fontSize: '1.65rem', color: INK }}>{M.mtdFinance.length}</div>
                   <div style={{ fontSize: '13px', color: MUTED, marginTop: '4px' }}>Quotes &amp; apps this month</div>
                 </div>
                 <div style={{ ...card, flex: 1, minWidth: '200px' }}>
                   <div style={lbl}>Avg fee · funded</div>
-                  <div style={{ fontSize: '26px', fontWeight: 700, color: GREEN, fontVariantNumeric: 'tabular-nums' }}>
+                  <div style={{ ...kpiValue, fontSize: '1.65rem', color: GREEN }}>
                     {M.fundedMtd.length ? money0(M.feesEarnedMtd / M.fundedMtd.length) : '—'}
                   </div>
                   <div style={{ fontSize: '13px', color: MUTED, marginTop: '4px' }}>October funded only</div>
                 </div>
               </div>
               <div style={card}>
-                <div style={{ fontSize: '16px', fontWeight: 700, marginBottom: '4px' }}>October files</div>
+                <div style={{ ...sectionTitle, marginBottom: '4px' }}>October files</div>
                 <p style={{ fontSize: '13px', color: MUTED, marginBottom: '12px', lineHeight: 1.45 }}>
                   Brokerage fee is your revenue line — separate from the customer&apos;s payment and the dealer&apos;s invoice.
                 </p>
@@ -1095,14 +1140,14 @@ export default function BuckleUpBrokerPortal({ demoEmbed = false }) {
                 ].map((x) => (
                   <div key={x.k} style={{ ...card, flex: '1 1 160px' }}>
                     <div style={lbl}>{x.k}</div>
-                    <div style={{ fontSize: '22px', fontWeight: 700, marginTop: '4px', fontVariantNumeric: 'tabular-nums' }}>{x.v}</div>
+                    <div style={{ ...kpiValue, fontSize: '1.35rem', marginTop: '4px' }}>{x.v}</div>
                     <div style={{ fontSize: '13px', color: MUTED, marginTop: '4px' }}>{x.sub}</div>
                   </div>
                 ))}
               </div>
               <DemoBooksPanel
-                headFont={sans}
-                monoFont={sans}
+                headFont={HEAD}
+                monoFont={MONO}
                 ink={INK}
                 muted={MUTED}
                 green={GREEN}
