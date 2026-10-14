@@ -37,7 +37,7 @@ const NAV = [
   { id: 'funding', label: 'Getting paid' },
   { id: 'pipeline', label: 'Pipeline' },
   { id: 'month', label: 'Your month' },
-  { id: 'books', label: 'Books' },
+  { id: 'books', label: 'Cash & fees' },
 ]
 
 const dealTypeLabel = (t) => (t === 'lease' ? 'Lease' : t === 'finance' ? 'Loan' : t)
@@ -608,7 +608,7 @@ export default function BuckleUpBrokerPortal({ demoEmbed = false }) {
             <div style={{ fontWeight: 700, color: INK, fontSize: '13px', marginBottom: '8px' }}>Where does the data come from?</div>
             <p style={{ margin: '0 0 10px' }}>
               <strong style={{ color: SLATE }}>Live brokerage:</strong> Applications and stages from your broker CRM (LeasingStack, RouteOne inbox, etc.). Lender conditions from
-              lender portals or your funding desk. Fees and payouts from your books. Read-only — no second place to type deals.
+              lender portals or your funding desk. Fees owed, paid, and still in the pipeline — tied to bank deposits when you wire that up. Read-only — no second place to type deals.
             </p>
             <p style={{ margin: 0, color: FAINT }}>
               <strong style={{ color: MUTED }}>This sample:</strong> Fictional starting data. Mark stips, edit next steps, log notes, add an intake — saved in this browser until you refresh.
@@ -623,7 +623,7 @@ export default function BuckleUpBrokerPortal({ demoEmbed = false }) {
               {tab === 'funding' && 'When is your brokerage fee collected?'}
               {tab === 'pipeline' && 'Every file, one queue'}
               {tab === 'month' && 'Deals closed vs fees in the bank'}
-              {tab === 'books' && 'What your books show'}
+              {tab === 'books' && 'Cash and fees — one roll-up'}
             </h1>
             {tab === 'funding' && (
               <p style={{ marginTop: '8px', fontSize: '15px', color: MUTED, maxWidth: '42rem', lineHeight: 1.5 }}>
@@ -650,7 +650,7 @@ export default function BuckleUpBrokerPortal({ demoEmbed = false }) {
           {tab === 'funding' && (
             <>
               <div className="bl-demo-hint">
-                <strong style={{ color: INK }}>Try the desk:</strong> expand a file, check off paperwork as it arrives, change the next step, log a call note. Counts update in this session. Production reads your CRM and books — you do not re-type deals there.
+                <strong style={{ color: INK }}>Try the desk:</strong> expand a file, check off paperwork as it arrives, change the next step, log a call note. Counts update in this session. A live build pulls from your CRM and lenders — however you track fees today (spreadsheet, accountant, or nothing formal yet).
               </div>
               <p style={{ margin: '0 0 14px', fontSize: '13px', color: MUTED, maxWidth: '42rem' }}>
                 Tap a number to filter the list.
@@ -1078,21 +1078,19 @@ export default function BuckleUpBrokerPortal({ demoEmbed = false }) {
           {tab === 'books' && (
             <>
               <p style={{ margin: '0 0 12px', fontSize: '15px', color: MUTED, maxWidth: '46rem', lineHeight: 1.55 }}>
-                Fees invoiced, not collected (books): <strong style={{ color: INK }}>{money0(M.feesInvoicedPending)}</strong>
+                Fees you billed but have not been paid yet: <strong style={{ color: INK }}>{money0(M.feesInvoicedPending)}</strong>
                 {' '}
-                = <strong style={{ color: INK }}>{money0(M.arFromDealers)}</strong> dealer AR +{' '}
-                <strong style={{ color: INK }}>{money0(M.lenderClearing)}</strong> lender clearing (invoiced before fund hits your bank).
+                — <strong style={{ color: INK }}>{money0(M.arFromDealers)}</strong> dealers still owe you +{' '}
+                <strong style={{ color: INK }}>{money0(M.lenderClearing)}</strong> approved by lender, not funded to your account yet.
               </p>
               <div style={{ ...card, marginBottom: '20px', fontSize: '13px', color: SLATE, lineHeight: 1.55 }}>
-                <strong style={{ color: INK }}>Why dealer AR is not the whole {money0(M.feesInvoicedPending)}:</strong> Dealer AR is who owes{' '}
-                <em>you</em> on placement invoices. Lender clearing is deals you invoiced on approval — lender has not funded yet, so cash
-                has not moved (Kramer, Rosen). Weiss has a partial deposit invoice only ({money0(225)} of {money0(650)}).
+                <strong style={{ color: INK }}>Why the dealer piece is not the whole {money0(M.feesInvoicedPending)}:</strong> Some of it is dealers who have not sent your placement fee yet. Some is lender-approved deals where the fund has not hit yet (Kramer, Rosen). Weiss is only a partial bill so far ({money0(225)} of {money0(650)}).
               </div>
               <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap', marginBottom: '20px' }}>
                 {[
-                  { k: 'Fees earned (P&L)', v: money0(M.feesEarnedMtd), sub: 'October funded deals' },
-                  { k: 'Collected this month', v: money0(M.feesCollectedCash), sub: 'Cash in bank' },
-                  { k: 'AR · dealers', v: money0(M.arFromDealers), sub: 'Invoiced, waiting on pay' },
+                  { k: 'Fees earned (funded)', v: money0(M.feesEarnedMtd), sub: 'October funded deals' },
+                  { k: 'In your account (MTD)', v: money0(M.feesCollectedCash), sub: 'Deposits you marked paid' },
+                  { k: 'Owed by dealers', v: money0(M.arFromDealers), sub: 'Billed, not paid yet' },
                   { k: 'Team payouts', v: money0(M.teamPayoutPaid), sub: `${money0(M.teamPayoutAccrued)} accrued` },
                 ].map((x) => (
                   <div key={x.k} style={{ ...card, flex: '1 1 160px' }}>
@@ -1109,43 +1107,43 @@ export default function BuckleUpBrokerPortal({ demoEmbed = false }) {
                 muted={MUTED}
                 green={GREEN}
                 border={RULE}
-                title="Pipeline vs books"
-                statementColumnLabel="Books"
-                intro="Your accounting syncs nightly. This screen does not post entries — it shows whether funded files match fee income and what is still in AR."
+                title="Pipeline vs your totals"
+                statementColumnLabel="What you track"
+                intro="Same files as Pipeline, rolled up. This screen does not move money — it shows earned fees, what is still owed, and whether your bank deposits match the funded deals."
                 rows={[
                   {
-                    label: 'Invoiced, not collected',
+                    label: 'Billed, not paid yet',
                     portal: money0(M.feesInvoicedPending),
                     qbo: money0(M.feesInvoicedPending),
                     inSync: true,
                   },
                   {
-                    label: 'AR · dealers',
+                    label: 'Owed by dealers',
                     portal: money0(M.arFromDealers),
                     qbo: money0(M.arFromDealers),
                     inSync: true,
                   },
                   {
-                    label: 'Lender clearing (pre-fund)',
+                    label: 'Approved, not funded yet',
                     portal: money0(M.lenderClearing),
                     qbo: money0(M.lenderClearing),
                     inSync: true,
                   },
                   { label: 'Fees earned (funded) MTD', portal: money0(M.feesEarnedMtd), qbo: money0(M.feesEarnedMtd), inSync: true },
                   {
-                    label: 'Fees collected (cash)',
+                    label: 'In your account (MTD)',
                     portal: money0(M.feesCollectedCash),
                     qbo: money0(M.feesCollectedCash),
                     inSync: true,
                   },
                   {
-                    label: 'Team commission accrued',
+                    label: 'Team share accrued',
                     portal: money0(M.teamPayoutAccrued),
                     qbo: money0(M.teamPayoutAccrued),
                     inSync: true,
                   },
                 ]}
-                footnote="Review means portal and books disagree — not reconciled. Production flags these instead of showing a green check when numbers differ."
+                footnote="Review means the roll-up and what you track disagree — worth a look before you pay team or file taxes. Production flags these instead of showing a green check when numbers differ."
                 bullets={[
                   'Customers can pick up the car while your fee still waits on lender fund + dealer remittance',
                   'This layer sits on top of your CRM — it does not replace LeasingStack or your application form',
@@ -1155,7 +1153,7 @@ export default function BuckleUpBrokerPortal({ demoEmbed = false }) {
           )}
 
           <p className="bu-foot" style={{ marginTop: '32px', fontSize: '12px', color: FAINT, maxWidth: '36rem', lineHeight: 1.5 }}>
-            Private sample built for outreach. Fictional deals; production reads your broker systems and books. Not listed on the public JK No Jokes demo gallery.
+            Private sample built for outreach. Fictional deals; a live build connects to your CRM, lenders, and however you track fees and payouts today. Not listed on the public JK No Jokes demo gallery.
           </p>
         </main>
       </div>
