@@ -15,20 +15,21 @@
   --jk-body: 'DM Sans', var(--m-font);
   --jk-sky-top: #2a4478;
   --jk-sky-mid: #8a9cc4;
-  --jk-sky-warm: #e88848;
-  --jk-sky-gold: #f5a85c;
-  --jk-sky-bottom: #ffe4b8;
+  --jk-sky-warm: #f07838;
+  --jk-sky-gold: #ff9a4a;
+  --jk-sky-bottom: #ffd4a8;
   background-color: var(--jk-sky-bottom);
   background-image:
-    radial-gradient(120% 90% at 50% 105%, rgba(180, 130, 90, 0.28), transparent 55%),
+    radial-gradient(120% 90% at 50% 105%, rgba(255, 130, 70, 0.38), transparent 55%),
     radial-gradient(80% 50% at 20% 0%, rgba(140, 160, 200, 0.15), transparent 50%),
     linear-gradient(
       180deg,
       var(--jk-sky-top) 0%,
-      #4a6288 18%,
-      #8a9ab8 32%,
-      #c8a080 52%,
-      #e0c8a0 78%,
+      #4a6288 16%,
+      #8a9ab8 28%,
+      #e88858 46%,
+      #f5a060 68%,
+      #ffc888 88%,
       var(--jk-sky-bottom) 100%
     );
   background-attachment: fixed;
@@ -52,15 +53,16 @@ html:has(.marketing-site--jk) {
   inset: 0;
   overflow: hidden;
   background:
-    radial-gradient(115% 85% at 50% 100%, rgba(180, 130, 90, 0.32), transparent 58%),
+    radial-gradient(115% 85% at 50% 100%, rgba(255, 125, 65, 0.4), transparent 58%),
     radial-gradient(70% 45% at 85% 15%, rgba(160, 175, 205, 0.18), transparent 52%),
     linear-gradient(
       180deg,
       var(--jk-sky-top) 0%,
       #4a6288 14%,
-      #8a9ab0 26%,
-      #c0a080 48%,
-      #e0c8a0 78%,
+      #8a9ab0 24%,
+      #e88858 44%,
+      #f5a060 66%,
+      #ffc888 86%,
       var(--jk-sky-bottom) 100%
     );
 }
@@ -69,7 +71,7 @@ html:has(.marketing-site--jk) {
   content: '';
   position: absolute;
   inset: -8%;
-  background: radial-gradient(55% 40% at 30% 70%, rgba(255, 175, 90, 0.22), transparent 55%);
+  background: radial-gradient(55% 40% at 30% 70%, rgba(255, 140, 60, 0.32), transparent 55%);
   animation: m-jk-sky-glow 18s ease-in-out infinite alternate;
   pointer-events: none;
 }
