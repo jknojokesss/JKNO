@@ -352,33 +352,35 @@ const FILES = [
   },
 ]
 
-function buildModel() {
+function buildModel(files) {
   const asOf = dt(AS_OF)
-  const openFunding = FILES.filter((d) => d.stage === 'funding')
+  const openFunding = files.filter((d) => d.stage === 'funding')
   const withStips = openFunding.filter((d) => d.stips.length > 0)
   const aging = openFunding.filter((d) => d.fundingDays >= 7)
   const feesAtRisk = aging.reduce((s, d) => s + d.brokerFee, 0)
   const pendingFees = openFunding.reduce((s, d) => s + d.brokerFee, 0)
-  const mtd = FILES.filter((d) => d.stage !== 'intake' && dt(d.opened) >= dt('2026-10-01'))
+  const mtd = files.filter((d) => d.stage !== 'intake' && dt(d.opened) >= dt('2026-10-01'))
   const mtdLeases = mtd.filter((d) => d.type === 'lease')
   const mtdFinance = mtd.filter((d) => d.type === 'finance')
   /** Funded in October — by fund date (matches Pipeline “Funded” column), not app open date. */
-  const fundedMtd = FILES.filter((d) => d.stage === 'paid' && d.funded && dt(d.funded) >= dt('2026-10-01'))
+  const fundedMtd = files.filter((d) => d.stage === 'paid' && d.funded && dt(d.funded) >= dt('2026-10-01'))
   const feesEarnedMtd = fundedMtd.reduce((s, d) => s + d.brokerFee, 0)
   const feesCollectedCash = fundedMtd.filter((d) => d.feePaid).reduce((s, d) => s + d.brokerFee, 0)
-  const awaitingDealerFee = FILES.filter((d) => d.dealerFeePending || (d.openInvoice?.bucket === 'dealer' && !d.feePaid))
+  const awaitingDealerFee = files.filter((d) => d.dealerFeePending || (d.openInvoice?.bucket === 'dealer' && !d.feePaid))
   const dealerFeeDue = awaitingDealerFee.reduce((s, d) => s + invoiceOpenAmount(d), 0)
-  const arFromDealers = FILES.filter((d) => d.openInvoice?.bucket === 'dealer').reduce((s, d) => s + invoiceOpenAmount(d), 0)
-  const lenderClearing = FILES.filter((d) => d.openInvoice?.bucket === 'lender_clearing').reduce((s, d) => s + invoiceOpenAmount(d), 0)
+  const arFromDealers = files.filter((d) => d.openInvoice?.bucket === 'dealer').reduce((s, d) => s + invoiceOpenAmount(d), 0)
+  const lenderClearing = files.filter((d) => d.openInvoice?.bucket === 'lender_clearing').reduce((s, d) => s + invoiceOpenAmount(d), 0)
   const feesInvoicedPending = arFromDealers + lenderClearing
   const teamPayoutAccrued = Math.round(feesEarnedMtd * 0.55)
   const teamPayoutPaid = Math.round(feesCollectedCash * 0.55)
-  const chaseQueue = FILES.filter(
-    (d) => d.stage === 'funding' || d.dealerFeePending || (d.openInvoice && !d.feePaid && d.stage === 'paid'),
-  ).sort((a, b) => {
-    const rank = (x) => (x.dealerFeePending ? 0 : x.stage === 'funding' && x.fundingDays >= 7 ? 1 : 2)
-    return rank(a) - rank(b)
-  })
+  const chaseQueue = files
+    .filter(
+      (d) => d.stage === 'funding' || d.dealerFeePending || (d.openInvoice && !d.feePaid && d.stage === 'paid'),
+    )
+    .sort((a, b) => {
+      const rank = (x) => (x.dealerFeePending ? 0 : x.stage === 'funding' && x.fundingDays >= 7 ? 1 : 2)
+      return rank(a) - rank(b)
+    })
 
   return {
     openFunding,
@@ -415,8 +417,77 @@ export default function BuckleUpBrokerPortal({ demoEmbed = false }) {
   const [expanded, setExpanded] = useState(null)
   /** @type {'attention' | 'all' | 'missing' | 'slow' | 'dealer'} */
   const [fundingFilter, setFundingFilter] = useState('attention')
+  const [files, setFiles] = useState(() => FILES.map((f) => ({ ...f, activity: f.activity || [] })))
+  const [chasedIds, setChasedIds] = useState(() => new Set())
+  const [noteDraft, setNoteDraft] = useState({})
+  const [intake, setIntake] = useState({ customer: '', vehicle: '', dealer: '', type: 'lease' })
 
-  const M = useMemo(() => buildModel(), [])
+  const M = useMemo(() => buildModel(files), [files])
+  const chaseVisible = useMemo(() => M.chaseQueue.filter((d) => !chasedIds.has(d.id)), [M.chaseQueue, chasedIds])
+
+  const patchFile = (id, patch) => {
+    setFiles((prev) => prev.map((f) => (f.id === id ? { ...f, ...patch } : f)))
+  }
+
+  const receiveStip = (id, stip) => {
+    setFiles((prev) =>
+      prev.map((f) => {
+        if (f.id !== id) return f
+        const stips = f.stips.filter((s) => s !== stip)
+        const next = { stips }
+        if (stips.length === 0 && f.stage === 'funding' && f.waitingOn === 'customer') {
+          next.waitingOn = 'lender'
+          next.nextAction = 'Ping lender — paperwork clear on file'
+        }
+        return { ...f, ...next }
+      }),
+    )
+  }
+
+  const logNote = (id) => {
+    const text = (noteDraft[id] || '').trim()
+    if (!text) return
+    setFiles((prev) =>
+      prev.map((f) =>
+        f.id === id
+          ? { ...f, activity: [...(f.activity || []), { at: new Date().toISOString(), text }] }
+          : f,
+      ),
+    )
+    setNoteDraft((d) => ({ ...d, [id]: '' }))
+  }
+
+  const addIntakeFile = () => {
+    const customer = intake.customer.trim()
+    const vehicle = intake.vehicle.trim()
+    const dealer = intake.dealer.trim()
+    if (!customer || !vehicle) return
+    const id = `B-${8850 + files.length}`
+    const row = {
+      id,
+      customer,
+      vehicle,
+      lender: '—',
+      dealer: dealer || 'Dealer TBD',
+      type: intake.type,
+      opened: AS_OF,
+      submitted: null,
+      funded: null,
+      brokerFee: 0,
+      feePaid: null,
+      fundingDays: 0,
+      stips: [],
+      owner: 'You',
+      nextAction: 'First call — confirm dealer and pull credit app',
+      waitingOn: 'team',
+      stage: 'intake',
+      delivery: null,
+      activity: [{ at: new Date().toISOString(), text: 'Logged from sample intake form' }],
+    }
+    setFiles((prev) => [row, ...prev])
+    setIntake({ customer: '', vehicle: '', dealer: '', type: 'lease' })
+    setTab('pipeline')
+  }
 
   useEffect(() => {
     if (!embedded) return
@@ -486,6 +557,15 @@ export default function BuckleUpBrokerPortal({ demoEmbed = false }) {
           .bl-mtab.on{background:#EEF3FA;border-color:${SIGNAL};color:${INK};font-weight:600}
           .bl-chev{transition:transform .15s;display:inline-block;color:${FAINT}}
           .bl-chev.open{transform:rotate(90deg)}
+          .bl-demo-hint{font-size:13px;color:${SLATE};background:#EEF3FA;border:1px solid #C5D8EF;border-radius:10px;padding:12px 14px;line-height:1.5;margin-bottom:18px}
+          .bl-input,.bl-textarea{width:100%;font-family:${sans};font-size:14px;border:1px solid ${RULE};border-radius:8px;padding:8px 10px;color:${INK};background:${WHITE}}
+          .bl-input:focus,.bl-textarea:focus{outline:2px solid ${SIGNAL};outline-offset:1px;border-color:${SIGNAL}}
+          .bl-btn-sm{font-family:${sans};font-size:13px;font-weight:600;border-radius:8px;padding:6px 12px;cursor:pointer;border:1px solid ${RULE};background:${WHITE};color:${INK}}
+          .bl-btn-sm--primary{background:${SIGNAL};border-color:${SIGNAL};color:${WHITE}}
+          .bl-stip{display:flex;align-items:flex-start;gap:8px;margin-bottom:6px;font-size:13px;color:${SLATE}}
+          .bl-stip input{margin-top:3px;accent-color:${SIGNAL}}
+          .bl-activity{margin:10px 0 0;padding:0;list-style:none;font-size:12px;color:${MUTED}}
+          .bl-activity li{padding:6px 0;border-top:1px solid ${RULE}}
           @media(max-width:820px){
             .bl-side{display:none}
             .bl-mtabs{display:flex}
@@ -531,7 +611,7 @@ export default function BuckleUpBrokerPortal({ demoEmbed = false }) {
               lender portals or your funding desk. Fees and payouts from QuickBooks. Read-only — no second place to type deals.
             </p>
             <p style={{ margin: 0, color: FAINT }}>
-              <strong style={{ color: MUTED }}>This sample:</strong> Fictional files in the page source. Nothing connected.
+              <strong style={{ color: MUTED }}>This sample:</strong> Fictional starting data. Mark stips, edit next steps, log notes, add an intake — saved in this browser until you refresh.
             </p>
             <div style={{ marginTop: '12px', color: FAINT }}>As of {fmtD(AS_OF)}</div>
           </div>
@@ -569,8 +649,11 @@ export default function BuckleUpBrokerPortal({ demoEmbed = false }) {
 
           {tab === 'funding' && (
             <>
+              <div className="bl-demo-hint">
+                <strong style={{ color: INK }}>Try the desk:</strong> expand a file, check off paperwork as it arrives, change the next step, log a call note. Counts update in this session. Production reads your CRM and QuickBooks — you do not re-type deals there.
+              </div>
               <p style={{ margin: '0 0 14px', fontSize: '13px', color: MUTED, maxWidth: '42rem' }}>
-                Tap a number to filter the list. On a live build these counts follow your CRM and lender status — not manual edits here.
+                Tap a number to filter the list.
               </p>
               <div style={{ ...card, marginBottom: '20px', borderLeft: `4px solid ${SIGNAL}` }}>
                 <div style={{ fontSize: '15px', fontWeight: 700, color: INK, marginBottom: '10px' }}>Chase list — owner view</div>
@@ -581,13 +664,20 @@ export default function BuckleUpBrokerPortal({ demoEmbed = false }) {
                   <table style={{ width: '100%', borderCollapse: 'collapse', minWidth: '640px' }}>
                     <thead>
                       <tr>
-                        {['Customer', 'Owner', 'Waiting on', 'Next step', 'Fee'].map((h, i) => (
-                          <th key={h} style={{ ...th, textAlign: i === 4 ? 'right' : 'left' }}>{h}</th>
+                        {['Customer', 'Owner', 'Waiting on', 'Next step', 'Fee', ''].map((h, i) => (
+                          <th key={h || 'act'} style={{ ...th, textAlign: i >= 4 ? 'right' : 'left' }}>{h}</th>
                         ))}
                       </tr>
                     </thead>
                     <tbody>
-                      {M.chaseQueue.map((d) => (
+                      {chaseVisible.length === 0 && (
+                        <tr>
+                          <td colSpan={6} style={{ ...td, color: MUTED, textAlign: 'center', padding: '16px' }}>
+                            Nothing left on today&apos;s chase list — expand files below or reset by refreshing.
+                          </td>
+                        </tr>
+                      )}
+                      {chaseVisible.map((d) => (
                         <tr key={d.id}>
                           <td style={{ ...td, fontWeight: 600 }}>
                             {d.customer}
@@ -599,6 +689,15 @@ export default function BuckleUpBrokerPortal({ demoEmbed = false }) {
                           </td>
                           <td style={{ ...td, fontSize: '13px', color: SLATE, maxWidth: '280px' }}>{d.nextAction}</td>
                           <td style={{ ...td, textAlign: 'right', fontWeight: 600 }}>{money0(d.brokerFee)}</td>
+                          <td style={{ ...td, textAlign: 'right', width: 120 }}>
+                            <button
+                              type="button"
+                              className="bl-btn-sm"
+                              onClick={() => setChasedIds((s) => new Set(s).add(d.id))}
+                            >
+                              Chased today
+                            </button>
+                          </td>
                         </tr>
                       ))}
                     </tbody>
@@ -731,7 +830,7 @@ export default function BuckleUpBrokerPortal({ demoEmbed = false }) {
                             </tr>
                             {open && (
                               <tr>
-                                <td colSpan={7} style={{ ...td, background: PAPER, borderBottom: `1px solid ${RULE}` }}>
+                                <td colSpan={7} style={{ ...td, background: PAPER, borderBottom: `1px solid ${RULE}` }} onClick={(e) => e.stopPropagation()}>
                                   <div style={{ fontSize: '12px', color: MUTED, marginBottom: '8px' }}>
                                     {fundingUsesDealerCols ? (
                                       <>
@@ -745,19 +844,57 @@ export default function BuckleUpBrokerPortal({ demoEmbed = false }) {
                                       </>
                                     )}
                                   </div>
-                                  <div style={{ fontSize: '13px', fontWeight: 600, color: INK, marginBottom: '6px' }}>
-                                    Next: {d.nextAction || '—'}
-                                  </div>
+                                  <label style={{ display: 'block', fontSize: '12px', fontWeight: 600, color: MUTED, marginBottom: '4px' }}>
+                                    Next step
+                                  </label>
+                                  <input
+                                    className="bl-input"
+                                    type="text"
+                                    value={d.nextAction || ''}
+                                    onChange={(e) => patchFile(d.id, { nextAction: e.target.value })}
+                                    style={{ marginBottom: '12px', maxWidth: '520px' }}
+                                  />
                                   {!fundingUsesDealerCols && d.stips.length ? (
-                                    <ul style={{ margin: 0, paddingLeft: '18px', fontSize: '13px', color: SLATE }}>
+                                    <div style={{ marginBottom: '10px' }}>
+                                      <div style={{ fontSize: '12px', fontWeight: 600, color: MUTED, marginBottom: '6px' }}>Paperwork — mark received</div>
                                       {d.stips.map((s) => (
-                                        <li key={s}>{s}</li>
+                                        <label key={s} className="bl-stip">
+                                          <input type="checkbox" onChange={() => receiveStip(d.id, s)} />
+                                          <span>{s}</span>
+                                        </label>
                                       ))}
-                                    </ul>
+                                    </div>
                                   ) : null}
                                   {!fundingUsesDealerCols && !d.stips.length ? (
-                                    <div style={{ fontSize: '13px', color: MUTED }}>No open stips on file — waiting on lender fund.</div>
+                                    <div style={{ fontSize: '13px', color: MUTED, marginBottom: '10px' }}>No open stips on file — waiting on lender fund.</div>
                                   ) : null}
+                                  <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', alignItems: 'flex-end', maxWidth: '520px' }}>
+                                    <div style={{ flex: '1 1 200px' }}>
+                                      <label style={{ display: 'block', fontSize: '12px', fontWeight: 600, color: MUTED, marginBottom: '4px' }}>
+                                        Log note (call, text, email)
+                                      </label>
+                                      <input
+                                        className="bl-input"
+                                        type="text"
+                                        placeholder="Left VM with customer…"
+                                        value={noteDraft[d.id] || ''}
+                                        onChange={(e) => setNoteDraft((n) => ({ ...n, [d.id]: e.target.value }))}
+                                        onKeyDown={(e) => {
+                                          if (e.key === 'Enter') logNote(d.id)
+                                        }}
+                                      />
+                                    </div>
+                                    <button type="button" className="bl-btn-sm bl-btn-sm--primary" onClick={() => logNote(d.id)}>
+                                      Add note
+                                    </button>
+                                  </div>
+                                  {(d.activity || []).length > 0 && (
+                                    <ul className="bl-activity">
+                                      {[...(d.activity || [])].reverse().map((a, i) => (
+                                        <li key={i}>{a.text}</li>
+                                      ))}
+                                    </ul>
+                                  )}
                                 </td>
                               </tr>
                             )}
@@ -776,6 +913,49 @@ export default function BuckleUpBrokerPortal({ demoEmbed = false }) {
 
           {tab === 'pipeline' && (
             <>
+              <div style={{ ...card, marginBottom: '18px' }}>
+                <div style={{ fontSize: '16px', fontWeight: 700, color: INK, marginBottom: '8px' }}>Log a new application</div>
+                <p style={{ fontSize: '13px', color: MUTED, margin: '0 0 12px', lineHeight: 1.5 }}>
+                  Sample only — adds a row to Intake below. Production pulls from your CRM or application form.
+                </p>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(160px, 1fr))', gap: '10px', maxWidth: '720px' }}>
+                  <input
+                    className="bl-input"
+                    placeholder="Customer name"
+                    value={intake.customer}
+                    onChange={(e) => setIntake({ ...intake, customer: e.target.value })}
+                  />
+                  <input
+                    className="bl-input"
+                    placeholder="Vehicle"
+                    value={intake.vehicle}
+                    onChange={(e) => setIntake({ ...intake, vehicle: e.target.value })}
+                  />
+                  <input
+                    className="bl-input"
+                    placeholder="Placing dealer"
+                    value={intake.dealer}
+                    onChange={(e) => setIntake({ ...intake, dealer: e.target.value })}
+                  />
+                  <select
+                    className="bl-input"
+                    value={intake.type}
+                    onChange={(e) => setIntake({ ...intake, type: e.target.value })}
+                  >
+                    <option value="lease">Lease</option>
+                    <option value="finance">Loan</option>
+                  </select>
+                </div>
+                <button
+                  type="button"
+                  className="bl-btn-sm bl-btn-sm--primary"
+                  style={{ marginTop: '12px' }}
+                  disabled={!intake.customer.trim() || !intake.vehicle.trim()}
+                  onClick={addIntakeFile}
+                >
+                  Add to intake
+                </button>
+              </div>
               <p style={{ margin: '0 0 8px', fontSize: '15px', color: MUTED }}>{M.mtd.length} active files this month — intake through funded.</p>
               <p style={{ margin: '0 0 16px', fontSize: '13px', color: FAINT }}>Stages mirror your application queue — not a separate spreadsheet.</p>
               <div style={{ display: 'grid', gap: '14px' }}>
@@ -783,8 +963,8 @@ export default function BuckleUpBrokerPortal({ demoEmbed = false }) {
                   const label = STAGE_LABEL[stage]
                   const rows =
                     stage === 'paid'
-                      ? FILES.filter((d) => d.stage === 'paid' && d.funded && dt(d.funded) >= dt('2026-10-01'))
-                      : FILES.filter((d) => d.stage === stage)
+                      ? files.filter((d) => d.stage === 'paid' && d.funded && dt(d.funded) >= dt('2026-10-01'))
+                      : files.filter((d) => d.stage === stage)
                   if (!rows.length && stage !== 'paid') return null
                   if (stage === 'paid' && !rows.length) return null
                   return (
