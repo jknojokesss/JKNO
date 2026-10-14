@@ -609,9 +609,9 @@ html.jk-scroll-motion .m-jk-page [data-fly-in]:not(.is-visible) .m-jk-steps li {
   background: linear-gradient(
     180deg,
     transparent 0%,
-    rgba(42, 68, 120, 0.08) 10%,
-    rgba(180, 150, 110, 0.1) 45%,
-    rgba(72, 52, 44, 0.14) 100%
+    rgba(42, 68, 120, 0.06) 8%,
+    rgba(255, 150, 80, 0.14) 42%,
+    rgba(255, 175, 100, 0.22) 100%
   );
 }
 

@@ -5,7 +5,7 @@ import DemoLobby from './DemoLobby'
 import { BOOKING_URL } from '../lib/marketing'
 
 const JK_FONTS =
-  'https://fonts.googleapis.com/css2?family=DM+Mono:wght@500;600&family=Inter:wght@500;600;700&display=swap'
+  'https://fonts.googleapis.com/css2?family=DM+Mono:wght@500;600&family=Inter:wght@500;600;700&family=Playfair+Display:wght@600;700&display=swap'
 
 // Adar-style hub layout — Inter for crisp UI type; DM Mono for labels and figures.
 const JK_HEAD = "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif"
@@ -133,11 +133,11 @@ function HubArt({ type }) {
 
 function HubLogo() {
   return (
-    <svg width="36" height="36" viewBox="0 0 36 36" aria-hidden>
-      <rect width="36" height="36" rx="9" fill="#fff" stroke="rgba(42,51,68,.15)" strokeWidth="1" />
-      <text x="11" y="24" fontFamily="Inter, sans-serif" fontSize="15" fontWeight="700" fill="#0f1419">JK</text>
-      <circle cx="26" cy="24" r="2.5" fill="#c9a84c" />
-    </svg>
+    <span className="op-hub__logo-mark" aria-hidden>
+      <span className="op-hub__logo-jk">
+        JK<span className="op-hub__logo-dot">.</span>
+      </span>
+    </span>
   )
 }
 
@@ -489,6 +489,9 @@ export default function OperationsPortalSample() {
           .op-hub{min-height:calc(100vh - 48px);background:linear-gradient(180deg,#F4F5F8 0%,${HUB_PAGE} 120px,${HUB_PAGE} 100%);color:${HUB_INK}}
           .op-hub__bar{background:${HUB_CARD};border-bottom:1px solid #DDE2EA;padding:16px 24px;display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
           .op-hub__brand{display:flex;align-items:center;gap:12px}
+          .op-hub__logo-mark{display:flex;align-items:center;justify-content:center;width:36px;height:36px;border-radius:9px;background:#fff;border:1px solid rgba(42,51,68,.15);flex-shrink:0}
+          .op-hub__logo-jk{font-family:'Playfair Display',Georgia,serif;font-size:15px;font-weight:700;color:${HUB_INK};line-height:1;letter-spacing:-.02em}
+          .op-hub__logo-dot{color:${ACCENT}}
           .op-hub__brand-name{font-family:${JK_UI};font-size:16px;font-weight:700;letter-spacing:-.02em;color:${HUB_INK}}
           .op-hub__sample{font-family:${JK_MONO};font-size:10px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:${HUB_MUTED};background:#F0F2F6;border:1px solid #E0E4EC;border-radius:20px;padding:6px 12px}
           .op-hub__intro{text-align:center;padding:32px 20px 4px;max-width:640px;margin:0 auto}
