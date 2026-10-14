@@ -608,7 +608,7 @@ export default function BuckleUpBrokerPortal({ demoEmbed = false }) {
             <div style={{ fontWeight: 700, color: INK, fontSize: '13px', marginBottom: '8px' }}>Where does the data come from?</div>
             <p style={{ margin: '0 0 10px' }}>
               <strong style={{ color: SLATE }}>Live brokerage:</strong> Applications and stages from your broker CRM (LeasingStack, RouteOne inbox, etc.). Lender conditions from
-              lender portals or your funding desk. Fees and payouts from QuickBooks. Read-only — no second place to type deals.
+              lender portals or your funding desk. Fees and payouts from your books. Read-only — no second place to type deals.
             </p>
             <p style={{ margin: 0, color: FAINT }}>
               <strong style={{ color: MUTED }}>This sample:</strong> Fictional starting data. Mark stips, edit next steps, log notes, add an intake — saved in this browser until you refresh.
@@ -623,7 +623,7 @@ export default function BuckleUpBrokerPortal({ demoEmbed = false }) {
               {tab === 'funding' && 'When is your brokerage fee collected?'}
               {tab === 'pipeline' && 'Every file, one queue'}
               {tab === 'month' && 'Deals closed vs fees in the bank'}
-              {tab === 'books' && 'What QuickBooks shows'}
+              {tab === 'books' && 'What your books show'}
             </h1>
             {tab === 'funding' && (
               <p style={{ marginTop: '8px', fontSize: '15px', color: MUTED, maxWidth: '42rem', lineHeight: 1.5 }}>
@@ -650,7 +650,7 @@ export default function BuckleUpBrokerPortal({ demoEmbed = false }) {
           {tab === 'funding' && (
             <>
               <div className="bl-demo-hint">
-                <strong style={{ color: INK }}>Try the desk:</strong> expand a file, check off paperwork as it arrives, change the next step, log a call note. Counts update in this session. Production reads your CRM and QuickBooks — you do not re-type deals there.
+                <strong style={{ color: INK }}>Try the desk:</strong> expand a file, check off paperwork as it arrives, change the next step, log a call note. Counts update in this session. Production reads your CRM and books — you do not re-type deals there.
               </div>
               <p style={{ margin: '0 0 14px', fontSize: '13px', color: MUTED, maxWidth: '42rem' }}>
                 Tap a number to filter the list.
@@ -1078,7 +1078,7 @@ export default function BuckleUpBrokerPortal({ demoEmbed = false }) {
           {tab === 'books' && (
             <>
               <p style={{ margin: '0 0 12px', fontSize: '15px', color: MUTED, maxWidth: '46rem', lineHeight: 1.55 }}>
-                Fees invoiced, not collected (QuickBooks): <strong style={{ color: INK }}>{money0(M.feesInvoicedPending)}</strong>
+                Fees invoiced, not collected (books): <strong style={{ color: INK }}>{money0(M.feesInvoicedPending)}</strong>
                 {' '}
                 = <strong style={{ color: INK }}>{money0(M.arFromDealers)}</strong> dealer AR +{' '}
                 <strong style={{ color: INK }}>{money0(M.lenderClearing)}</strong> lender clearing (invoiced before fund hits your bank).
@@ -1109,8 +1109,9 @@ export default function BuckleUpBrokerPortal({ demoEmbed = false }) {
                 muted={MUTED}
                 green={GREEN}
                 border={RULE}
-                title="Pipeline vs QuickBooks"
-                intro="QuickBooks syncs nightly. This screen does not post entries — it shows whether funded files match fee income and what is still in AR."
+                title="Pipeline vs books"
+                statementColumnLabel="Books"
+                intro="Your accounting syncs nightly. This screen does not post entries — it shows whether funded files match fee income and what is still in AR."
                 rows={[
                   {
                     label: 'Invoiced, not collected',
@@ -1144,7 +1145,7 @@ export default function BuckleUpBrokerPortal({ demoEmbed = false }) {
                     inSync: true,
                   },
                 ]}
-                footnote="Review means portal and QuickBooks disagree — not reconciled. Production flags these instead of showing a green check when numbers differ."
+                footnote="Review means portal and books disagree — not reconciled. Production flags these instead of showing a green check when numbers differ."
                 bullets={[
                   'Customers can pick up the car while your fee still waits on lender fund + dealer remittance',
                   'This layer sits on top of your CRM — it does not replace LeasingStack or your application form',
@@ -1154,7 +1155,7 @@ export default function BuckleUpBrokerPortal({ demoEmbed = false }) {
           )}
 
           <p className="bu-foot" style={{ marginTop: '32px', fontSize: '12px', color: FAINT, maxWidth: '36rem', lineHeight: 1.5 }}>
-            Private sample built for outreach. Fictional deals; production reads your broker systems and QuickBooks. Not listed on the public JK No Jokes demo gallery.
+            Private sample built for outreach. Fictional deals; production reads your broker systems and books. Not listed on the public JK No Jokes demo gallery.
           </p>
         </main>
       </div>
