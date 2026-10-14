@@ -1,6 +1,8 @@
 /* JK marketing — navy + gold + soft orange horizon; fun motion, trades-shop tone (site-wide) */
 
 .marketing-site--jk {
+  overflow-x: clip;
+  max-width: 100%;
   --jk-ink: #0f1419;
   --jk-paper: #f2f0ea;
   --jk-gold: #c9a84c;
@@ -37,8 +39,15 @@
   color: #f7f4ef;
 }
 
+@media (max-width: 899px) {
+  .marketing-site--jk {
+    background-attachment: scroll;
+  }
+}
+
 html:has(.marketing-site--jk) {
   background-color: var(--jk-sky-bottom);
+  overflow-x: clip;
 }
 
 .m-jk-chrome {
@@ -134,6 +143,8 @@ html:has(.marketing-site--jk) {
 
 .marketing-site--jk .m-jk-page {
   background: transparent;
+  max-width: 100%;
+  overflow-x: clip;
 }
 
 .marketing-site--jk .m-jk-home {
