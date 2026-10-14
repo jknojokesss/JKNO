@@ -57,8 +57,7 @@ export default function HomeLanding({
           Custom portals for owners — your numbers, your login.
         </h1>
         <p className="m-jk-home__lead">
-          I build the screens you keep asking for on the phone — margin, who owes you, what is in the bank — wired to
-          how you actually sell. Keep your bookkeeper, or have me handle the books too.
+          Built for how you sell. Keep your bookkeeper, or have me handle the books.
         </p>
         <div className="m-jk-home__hero-actions">
           <button
