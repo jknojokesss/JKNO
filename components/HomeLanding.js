@@ -72,7 +72,6 @@ export default function HomeLanding({
           <button type="button" className="m-jk-home__link" onClick={() => scrollTo('contact')}>
             Tell me what you need
           </button>
-          {' · '}
           <a href={BOOKING_URL} target="_blank" rel="noopener noreferrer" className="m-jk-home__link">
             Book a call
           </a>
@@ -131,8 +130,8 @@ export default function HomeLanding({
         <section className="m-jk-home__panel m-jk-home__panel--offer" id="offer">
           <h2 className="m-jk-story__title">Portal first — books optional</h2>
           <p className="m-jk-story__body">
-            Keep your bookkeeper or bring me the books — either way you get a portal built on your numbers, not a template
-            off the shelf. QuickBooks stays the books; the portal is where you actually look. You get me, not a ticket queue.
+            Keep your bookkeeper or bring me the books — either way you get a portal built on your numbers. QuickBooks stays
+            the books; the portal is where you actually look. You get me, not a ticket queue.
           </p>
           <ol className="m-jk-steps">
             {START_STEPS.map((step) => (
