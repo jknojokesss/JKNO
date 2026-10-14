@@ -99,26 +99,32 @@
 }
 
 .m-jk-home__hero-secondary {
-  margin: 1rem 0 0;
-  font-size: 0.92rem;
-  color: rgba(255, 248, 240, 0.82);
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem 0.65rem;
+  justify-content: center;
+  align-items: center;
+  margin: 1.1rem 0 0;
+  font-size: 0.88rem;
 }
 
 .m-jk-home__link {
   font-family: var(--jk-body);
   font-size: inherit;
   font-weight: 600;
-  color: #ffe8c4;
-  background: none;
-  border: none;
-  padding: 0;
+  color: var(--jk-ink);
+  background: rgba(255, 251, 245, 0.94);
+  border: 1px solid rgba(255, 255, 255, 0.5);
+  border-radius: 6px;
+  padding: 0.42rem 0.9rem;
   cursor: pointer;
-  text-decoration: underline;
-  text-underline-offset: 0.15em;
+  text-decoration: none;
+  box-shadow: 0 1px 5px rgba(18, 28, 48, 0.14);
 }
 
 .m-jk-home__link:hover {
-  color: #fff;
+  color: var(--jk-sky-top, #2a4478);
+  background: #fff;
 }
 
 .m-jk-home__multi {
