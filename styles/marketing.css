@@ -288,6 +288,33 @@
   color: var(--m-ink);
 }
 
+.m-menu-toggle--mobile {
+  display: none;
+  flex-shrink: 0;
+  position: relative;
+  z-index: 2;
+  min-width: 44px;
+  min-height: 44px;
+  padding: 10px;
+  margin: -6px -8px -6px 0;
+}
+
+.m-header__nav--desktop {
+  display: flex;
+}
+
+@media (max-width: 899px) {
+  .m-header__nav--desktop {
+    display: none !important;
+  }
+
+  .m-menu-toggle--mobile {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+}
+
 .m-menu-toggle--light {
   color: #F7F4EF;
 }
