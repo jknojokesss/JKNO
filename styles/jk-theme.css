@@ -151,12 +151,18 @@ html:has(.marketing-site--jk) {
   background: transparent;
 }
 
-.marketing-site--jk .m-header--jk.is-solid,
-.marketing-site--jk .m-header--jk.is-menu-open {
+.marketing-site--jk .m-header--jk.is-solid:not(.is-menu-open) {
   background: rgba(255, 235, 210, 0.94);
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
   border-bottom: 1px solid rgba(255, 158, 96, 0.45);
+}
+
+.marketing-site--jk .m-header--jk.is-menu-open {
+  background: rgba(32, 48, 82, 0.88);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  border-bottom: 1px solid rgba(255, 190, 140, 0.28);
 }
 
 .marketing-site--jk .m-header--jk.m-header--hero .m-nav-link {
@@ -189,42 +195,47 @@ html:has(.marketing-site--jk) {
   border-color: rgba(255, 255, 255, 0.35);
 }
 
-.marketing-site--jk .m-header--jk.is-solid .m-nav-link,
-.marketing-site--jk .m-header--jk.is-menu-open .m-nav-link {
+.marketing-site--jk .m-header--jk.is-solid:not(.is-menu-open) .m-nav-link {
   color: rgba(15, 20, 25, 0.82);
 }
 
-.marketing-site--jk .m-header--jk.is-solid .m-nav-link:hover,
-.marketing-site--jk .m-header--jk.is-menu-open .m-nav-link:hover {
+.marketing-site--jk .m-header--jk.is-solid:not(.is-menu-open) .m-nav-link:hover {
   color: #b85a28;
 }
 
-.marketing-site--jk .m-header--jk.is-solid .m-nav-link.is-active,
-.marketing-site--jk .m-header--jk.is-menu-open .m-nav-link.is-active {
+.marketing-site--jk .m-header--jk.is-solid:not(.is-menu-open) .m-nav-link.is-active {
   color: var(--jk-ink);
   text-shadow: none;
 }
 
-.marketing-site--jk .m-header--jk.is-solid .m-logo__jk,
-.marketing-site--jk .m-header--jk.is-menu-open .m-logo__jk {
+.marketing-site--jk .m-header--jk.is-solid:not(.is-menu-open) .m-logo__jk {
   color: var(--jk-ink);
 }
 
-.marketing-site--jk .m-header--jk.is-solid .m-logo__dot,
-.marketing-site--jk .m-header--jk.is-menu-open .m-logo__dot {
+.marketing-site--jk .m-header--jk.is-solid:not(.is-menu-open) .m-logo__dot {
   color: var(--jk-gold);
 }
 
-.marketing-site--jk .m-header--jk.is-solid .m-btn--ghost-light,
-.marketing-site--jk .m-header--jk.is-menu-open .m-btn--ghost-light {
+.marketing-site--jk .m-header--jk.is-solid:not(.is-menu-open) .m-btn--ghost-light {
   color: var(--jk-ink);
   border-color: rgba(42, 51, 68, 0.28);
 }
 
-.marketing-site--jk .m-header--jk.is-solid .m-menu-toggle,
-.marketing-site--jk .m-header--jk.is-menu-open .m-menu-toggle {
+.marketing-site--jk .m-header--jk.is-solid:not(.is-menu-open) .m-menu-toggle {
   color: var(--jk-ink);
   border-color: rgba(42, 51, 68, 0.25);
+}
+
+.marketing-site--jk .m-header--jk.is-menu-open .m-logo__jk {
+  color: #f7f4ef;
+}
+
+.marketing-site--jk .m-header--jk.is-menu-open .m-logo__dot {
+  color: var(--jk-gold);
+}
+
+.marketing-site--jk .m-header--jk.is-menu-open .m-menu-toggle {
+  color: #f7f4ef;
 }
 
 .marketing-site--jk .m-header--jk .m-btn--gold {
@@ -239,12 +250,57 @@ html:has(.marketing-site--jk) {
 }
 
 .marketing-site--jk .m-mobile-menu {
-  background: rgba(255, 235, 210, 0.98);
-  border-bottom: 1px solid rgba(255, 158, 96, 0.45);
+  background-color: var(--jk-sky-top);
+  background-image:
+    radial-gradient(85% 55% at 50% 0%, rgba(140, 160, 200, 0.22), transparent 52%),
+    radial-gradient(90% 70% at 50% 100%, rgba(255, 130, 70, 0.38), transparent 58%),
+    linear-gradient(
+      180deg,
+      var(--jk-sky-top) 0%,
+      #4a6288 20%,
+      #8a9ab8 38%,
+      #e88858 58%,
+      #f5a060 78%,
+      var(--jk-sky-bottom) 100%
+    );
+  border-top: 1px solid rgba(255, 190, 140, 0.28);
+}
+
+.marketing-site--jk .m-mobile-menu__nav {
+  padding-top: 12px;
+  padding-bottom: 40px;
 }
 
 .marketing-site--jk .m-mobile-nav-link {
-  color: var(--jk-ink);
+  color: rgba(255, 248, 242, 0.92);
+  border-bottom-color: rgba(255, 255, 255, 0.14);
+  font-size: 17px;
+}
+
+.marketing-site--jk .m-mobile-nav-link:hover,
+.marketing-site--jk .m-mobile-nav-link.is-active {
+  color: #fff;
+}
+
+.marketing-site--jk .m-mobile-nav-link.is-active {
+  font-weight: 600;
+}
+
+.marketing-site--jk .m-mobile-menu__actions {
+  margin-top: 12px;
+  padding-top: 18px;
+  border-top: 1px solid rgba(255, 255, 255, 0.14);
+}
+
+/* JK site: same sky menu on desktop — one nav pattern, readable on the gradient */
+.marketing-site--jk .m-header__nav--desktop {
+  display: none !important;
+}
+
+.marketing-site--jk .m-menu-toggle--mobile {
+  display: flex !important;
+  align-items: center;
+  justify-content: center;
 }
 
 .marketing-site--jk .m-footer-flight {
