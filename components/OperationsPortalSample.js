@@ -98,15 +98,23 @@ function HubArt({ type }) {
       </svg>
     )
   }
-  if (type === 'tires') {
+  if (type === 'car') {
     return (
       <svg viewBox="0 0 200 120" width="100%" height="120" aria-hidden>
-        <circle cx="88" cy="72" r="22" fill="#fff" stroke={ART_GREY} strokeWidth="3" />
-        <circle cx="88" cy="72" r="10" fill={ART_GREY} opacity="0.35" />
-        <circle cx="128" cy="72" r="22" fill="#fff" stroke={ART_GREY} strokeWidth="3" />
-        <circle cx="128" cy="72" r="10" fill={ART_GREY} opacity="0.35" />
-        <path d="M62 52h76" stroke={ART_GREY} strokeWidth="2" strokeLinecap="round" />
-        <HubBadge x={158} y={38} text="RO" />
+        <path
+          d="M52 78h96c2 0 4-2 4-4V66c0-2-1-4-3-5l-14-10c-2-1-4-2-6-2H71c-2 0-4 1-6 2l-14 10c-2 1-3 3-3 5v8c0 2 2 4 4 4z"
+          fill="#fff"
+          stroke={ART_GREY}
+          strokeWidth="2"
+          strokeLinejoin="round"
+        />
+        <path d="M78 54h20l10 8H68l10-8z" fill={ART_GREY} opacity="0.45" />
+        <rect x="86" y="58" width="18" height="10" rx="1" fill="#fff" stroke={ART_GREY} strokeWidth="1.5" opacity="0.9" />
+        <circle cx="72" cy="78" r="11" fill="#fff" stroke={ART_GREY} strokeWidth="2.5" />
+        <circle cx="72" cy="78" r="4" fill={ART_GREY} opacity="0.4" />
+        <circle cx="128" cy="78" r="11" fill="#fff" stroke={ART_GREY} strokeWidth="2.5" />
+        <circle cx="128" cy="78" r="4" fill={ART_GREY} opacity="0.4" />
+        <HubBadge x={158} y={38} text="RT" />
       </svg>
     )
   }
@@ -150,7 +158,7 @@ const PORTAL_DESKS = [
     id: 'riverside',
     kicker: 'Sample · tires & auto',
     title: 'Riverside Tires',
-    art: 'tires',
+    art: 'car',
     href: '/riverside-tires',
     enterLabel: 'Open sample →',
   },
