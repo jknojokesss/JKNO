@@ -7,6 +7,7 @@
  *   intro: string
  *   rows: { label: string, portal: string, qbo: string, inSync?: boolean }[]
  *   footnote?: string
+ *   statementColumnLabel?: string
  *   bullets?: string[]
  *   headFont?: string
  *   monoFont?: string
@@ -21,6 +22,7 @@ export default function DemoBooksPanel({
   intro,
   rows,
   footnote = 'Nightly sync on P&L, balance sheet, and GL — month-end journal entries post when you approve.',
+  statementColumnLabel = 'QBO statement',
   bullets,
   headFont = "'Inter', sans-serif",
   monoFont = "'IBM Plex Mono', monospace",
@@ -65,7 +67,7 @@ export default function DemoBooksPanel({
             <tr>
               <th style={th}>Line</th>
               <th style={{ ...th, textAlign: 'right' }}>Portal</th>
-              <th style={{ ...th, textAlign: 'right' }}>QBO statement</th>
+              <th style={{ ...th, textAlign: 'right' }}>{statementColumnLabel}</th>
               <th style={{ ...th, textAlign: 'right' }}>Status</th>
             </tr>
           </thead>
