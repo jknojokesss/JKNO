@@ -2,18 +2,18 @@ import { useEffect, useMemo, useState } from 'react'
 import Head from 'next/head'
 import { useRouter } from 'next/router'
 import DemoLobby from './DemoLobby'
-import DemoFontLinks from './DemoFontLinks'
 import { BOOKING_URL } from '../lib/marketing'
 import { isDemoEmbedQuery } from '../lib/demoEmbed'
-import {
-  DEMO_HEAD,
-  DEMO_MONO,
-  DEMO_PORTAL_ROOT_CLASS,
-  DEMO_RENDER_HINTS,
-  DEMO_UI,
-} from '../lib/demoFonts'
+import { DEMO_PORTAL_ROOT_CLASS } from '../lib/demoFonts'
 
-// Same stack as Riverside / Harborfield / Buckle Up — Barlow headings, Plex labels, Inter UI.
+// adar-hf portal fonts: hub = Outfit; operations desk = Source Sans 3 + Source Serif 4 (millwork theme).
+const ADAR_HUB_UI = "'Outfit', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif"
+const ADAR_SANS = "'Source Sans 3', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif"
+const ADAR_SERIF = "'Source Serif 4', 'Times New Roman', Georgia, serif"
+const ADAR_MONO = "'IBM Plex Mono', ui-monospace, monospace"
+const ADAR_FONT_LINK =
+  'https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=Outfit:wght@400;500;600;700&family=Playfair+Display:wght@600;700&family=Source+Sans+3:wght@400;500;600;700&family=Source+Serif+4:opsz,wght@8..60,400;600;700&display=swap'
+
 const PORTAL_ROOT_CLASS = `${DEMO_PORTAL_ROOT_CLASS} op-portal-root`
 
 /** Public sample — no real owner name on the hub. */
@@ -469,15 +469,15 @@ export default function OperationsPortalSample() {
   }, [hubOpen, cardView])
 
   const th = {
-    padding: '10px 14px',
-    fontSize: '10px',
-    color: '#4b5563',
+    padding: '8px 12px',
+    fontSize: '11px',
+    color: MUTED,
     background: '#EEF1F6',
     fontWeight: 600,
-    letterSpacing: '0.1em',
+    letterSpacing: '0.025em',
     textTransform: 'uppercase',
     borderBottom: `1px solid ${BORDER}`,
-    fontFamily: DEMO_MONO,
+    fontFamily: ADAR_SANS,
     whiteSpace: 'nowrap',
     textAlign: 'left',
   }
@@ -487,17 +487,18 @@ export default function OperationsPortalSample() {
     color: INK,
     fontSize: '13px',
     fontWeight: 500,
-    fontFamily: DEMO_UI,
+    fontFamily: ADAR_SANS,
   }
 
   const renderHints =
-    DEMO_RENDER_HINTS +
-    `.op-portal-root button,.op-portal-root select{font-family:${DEMO_UI}}` +
-    `.op-portal-root .op-num{font-family:${DEMO_MONO};font-variant-numeric:tabular-nums}`
+    'html{-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale;text-rendering:optimizeLegibility}' +
+    `.op-portal-root{font-family:${ADAR_SANS};font-variant-numeric:tabular-nums lining-nums}` +
+    `.op-portal-root .op-num{font-family:${ADAR_SANS};font-variant-numeric:tabular-nums lining-nums}` +
+    `.op-portal-root .op-lbl,.op-portal-root .op-eyebrow{font-family:${ADAR_SANS};font-size:11px;font-weight:600;letter-spacing:.025em;text-transform:uppercase}`
 
   if (!mounted) {
     return (
-      <div className="op-sample-loading" style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: HUB_PAGE, color: HUB_MUTED, fontFamily: DEMO_UI }}>
+      <div className="op-sample-loading" style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: HUB_PAGE, color: HUB_MUTED, fontFamily: ADAR_HUB_UI }}>
         Loading…
       </div>
     )
@@ -508,7 +509,9 @@ export default function OperationsPortalSample() {
       <Head>
         <title>{BIZ} — owner hub (sample)</title>
         <meta name="description" content="Sample multi-business hub — Operations Center plus Riverside Tires, Harborfield, Riverstone demos. Fictitious owner." />
-        <DemoFontLinks />
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
+        <link href={ADAR_FONT_LINK} rel="stylesheet" />
       </Head>
         <style>{`
           .op-sample-root{--jk-gold:#c9a84c;--jk-ink:#0f1419;--op-lobby-h:46px;--op-desk-h:58px;min-height:100vh;background:${hubOpen ? HUB_PAGE : BG}}
@@ -522,55 +525,55 @@ export default function OperationsPortalSample() {
           .op-hub__logo-mark{display:flex;align-items:center;justify-content:center;width:36px;height:36px;border-radius:9px;background:#fff;border:1px solid rgba(42,51,68,.15);flex-shrink:0}
           .op-hub__logo-jk{font-family:'Playfair Display',Georgia,serif;font-size:15px;font-weight:700;color:${HUB_INK};line-height:1;letter-spacing:-.02em}
           .op-hub__logo-dot{color:${ACCENT}}
-          .op-hub__brand-name{font-family:${DEMO_UI};font-size:16px;font-weight:700;letter-spacing:-.02em;color:${HUB_INK}}
-          .op-hub__sample{font-family:${DEMO_MONO};font-size:10px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:${HUB_MUTED};background:#F0F2F6;border:1px solid #E0E4EC;border-radius:20px;padding:6px 12px}
+          .op-hub__brand-name{font-family:${ADAR_HUB_UI};font-size:16px;font-weight:600;letter-spacing:-.01em;color:${HUB_INK}}
+          .op-hub__sample{font-family:${ADAR_HUB_UI};font-size:11px;font-weight:600;letter-spacing:.025em;text-transform:uppercase;color:${HUB_MUTED};background:#F0F2F6;border:1px solid #E0E4EC;border-radius:20px;padding:6px 12px}
           .op-hub__intro{text-align:center;padding:32px 20px 4px;max-width:640px;margin:0 auto}
-          .op-hub__intro h1{font-family:${DEMO_HEAD};font-size:clamp(1.4rem,3.5vw,1.85rem);font-weight:600;color:${HUB_INK};letter-spacing:.01em;line-height:1.12;margin:0 0 10px}
-          .op-hub__intro p{font-family:${DEMO_UI};font-size:15px;font-weight:500;color:#4b5563;line-height:1.5;margin:0}
+          .op-hub__intro h1{font-family:${ADAR_HUB_UI};font-size:clamp(1.5rem,3.5vw,2rem);font-weight:600;color:${HUB_INK};letter-spacing:-.02em;line-height:1.12;margin:0 0 10px}
+          .op-hub__intro p{font-family:${ADAR_HUB_UI};font-size:15px;font-weight:500;color:#4b5563;line-height:1.5;margin:0}
           .op-hub__grid{display:grid;grid-template-columns:1fr;gap:18px;width:100%;max-width:720px;margin:28px auto 48px;padding:0 20px}
           .op-hub__card-wrap{position:relative;width:100%;min-width:0}
           @media(min-width:640px){.op-hub__grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:20px}}
           .op-hub__card{background:${HUB_CARD};border:1px solid #E4E8EF;border-radius:16px;padding:0 0 20px;display:flex;flex-direction:column;text-align:left;cursor:pointer;transition:transform .18s ease,box-shadow .18s ease,border-color .18s ease;box-shadow:0 2px 8px rgba(35,45,60,.05),0 14px 36px rgba(35,45,60,.05);overflow:hidden;min-height:300px;height:100%}
           .op-hub__card--live{border-color:rgba(201,168,76,.55);box-shadow:0 2px 8px rgba(201,168,76,.15),0 16px 40px rgba(35,45,60,.07)}
           .op-hub__card:hover{transform:translateY(-4px);border-color:#C8D0DC;box-shadow:0 6px 16px rgba(35,45,60,.08),0 24px 48px rgba(35,45,60,.09)}
-          .op-hub__live-tag{position:absolute;top:14px;right:14px;z-index:2;font-family:${DEMO_UI};font-size:10px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;color:#6b5420;background:#fdf6e3;border:1px solid rgba(201,168,76,.45);border-radius:20px;padding:5px 10px}
+          .op-hub__live-tag{position:absolute;top:14px;right:14px;z-index:2;font-family:${ADAR_HUB_UI};font-size:11px;font-weight:600;letter-spacing:.025em;text-transform:uppercase;color:#6b5420;background:#fdf6e3;border:1px solid rgba(201,168,76,.45);border-radius:20px;padding:5px 10px}
           .op-hub__card:focus-visible{outline:2px solid ${ACCENT};outline-offset:3px}
           .op-hub__art{padding:8px 12px 0;min-height:128px;display:flex;align-items:center;justify-content:center;background:linear-gradient(180deg,#FAFBFC 0%,#fff 100%)}
           .op-hub__body{padding:4px 22px 0;flex:1;display:flex;flex-direction:column}
-          .op-hub__kicker{font-family:${DEMO_MONO};font-size:9px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:#6b7280;margin-top:10px;line-height:1.4}
-          .op-hub__title{font-family:${DEMO_HEAD};font-size:23px;font-weight:600;color:${HUB_INK};margin-top:8px;line-height:1.12;letter-spacing:.01em}
-          .op-hub__enter{margin:16px 22px 0;width:calc(100% - 44px);background:${HUB_BTN};color:#fff;border:none;border-radius:10px;padding:13px 16px;font-family:${DEMO_UI};font-size:13px;font-weight:600;letter-spacing:-.01em;pointer-events:none;display:flex;align-items:center;justify-content:center;gap:8px;transition:background .15s}
+          .op-hub__kicker{font-family:${ADAR_HUB_UI};font-size:11px;font-weight:600;letter-spacing:.025em;text-transform:uppercase;color:#6b7280;margin-top:10px;line-height:1.4}
+          .op-hub__title{font-family:${ADAR_HUB_UI};font-size:23px;font-weight:600;color:${HUB_INK};margin-top:8px;line-height:1.12;letter-spacing:-.02em}
+          .op-hub__enter{margin:16px 22px 0;width:calc(100% - 44px);background:${HUB_BTN};color:#fff;border:none;border-radius:10px;padding:13px 16px;font-family:${ADAR_HUB_UI};font-size:13px;font-weight:600;letter-spacing:-.01em;pointer-events:none;display:flex;align-items:center;justify-content:center;gap:8px;transition:background .15s}
           .op-hub__card:hover .op-hub__enter{background:#2f3844}
-          .op-hub__foot{text-align:center;padding-bottom:32px;font-family:${DEMO_MONO};font-size:10px}
+          .op-hub__foot{text-align:center;padding-bottom:32px;font-family:${ADAR_HUB_UI};font-size:11px}
           .op-hub__foot a{color:${NAVY};text-decoration:none;font-weight:600}
           .op-desk-header{background:${OPS_BAR};color:#fff;padding:14px 22px;display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:12px;position:sticky;top:var(--op-lobby-h);z-index:24;box-shadow:0 1px 0 rgba(0,0,0,.08)}
           .op-desk-rail-wrap{background:${SHEET};border-bottom:1px solid ${BORDER};position:sticky;top:calc(var(--op-lobby-h) + var(--op-desk-h));z-index:23}
           .op-desk-rail{padding:10px 20px;display:flex;gap:8px;overflow-x:auto;-webkit-overflow-scrolling:touch;max-width:1100px;margin:0 auto;width:100%}
-          .op-desk-back{background:transparent;border:1px solid rgba(255,255,255,.28);color:#fff;border-radius:8px;padding:7px 11px;font-family:${DEMO_MONO};font-size:10px;font-weight:600;letter-spacing:.04em;text-transform:uppercase;cursor:pointer;transition:border-color .15s,background .15s}
+          .op-desk-back{background:transparent;border:1px solid rgba(255,255,255,.28);color:#fff;border-radius:8px;padding:7px 11px;font-family:${ADAR_SANS};font-size:10px;font-weight:600;letter-spacing:.04em;text-transform:uppercase;cursor:pointer;transition:border-color .15s,background .15s}
           .op-desk-back:hover{background:rgba(255,255,255,.08);border-color:rgba(255,255,255,.4)}
-          .op-desk-title{font-family:${DEMO_HEAD};font-size:22px;font-weight:600;line-height:1.12;letter-spacing:.01em}
-          .op-desk-kicker{font-family:${DEMO_MONO};font-size:9px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;opacity:.92;margin-top:4px}
-          .op-upload-btn{display:inline-flex;align-items:center;gap:8px;background:${ACCENT_ACTION};color:#fff;border:none;border-radius:9px;padding:9px 14px;font-family:${DEMO_UI};font-size:12px;font-weight:600;letter-spacing:-.01em;cursor:pointer;box-shadow:0 1px 0 rgba(0,0,0,.12);transition:filter .15s,transform .12s}
+          .op-desk-title{font-family:${ADAR_SERIF};font-size:22px;font-weight:600;line-height:1.12;letter-spacing:.01em}
+          .op-desk-kicker{font-family:${ADAR_SANS};font-size:9px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;opacity:.92;margin-top:4px}
+          .op-upload-btn{display:inline-flex;align-items:center;gap:8px;background:${ACCENT_ACTION};color:#fff;border:none;border-radius:9px;padding:9px 14px;font-family:${ADAR_SANS};font-size:12px;font-weight:600;letter-spacing:-.01em;cursor:pointer;box-shadow:0 1px 0 rgba(0,0,0,.12);transition:filter .15s,transform .12s}
           .op-upload-btn:hover{filter:brightness(1.05)}
           .op-upload-btn:active{transform:translateY(1px)}
           .op-desk-meta{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:10px 16px;margin-bottom:16px;padding:0 2px}
-          .op-desk-meta p{margin:0;font-family:${DEMO_UI};font-size:13px;font-weight:500;color:${MUTED}}
-          .op-desk-meta time{font-family:${DEMO_MONO};font-size:11px;font-weight:600;color:#4b5563}
-          .op-desk-meta .op-sample-tag{font-family:${DEMO_MONO};font-size:9px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:${MUTED};background:#F3F4F6;border:1px solid #E5E7EB;border-radius:20px;padding:5px 10px}
+          .op-desk-meta p{margin:0;font-family:${ADAR_SANS};font-size:13px;font-weight:500;color:${MUTED}}
+          .op-desk-meta time{font-family:${ADAR_SANS};font-size:11px;font-weight:600;color:#4b5563}
+          .op-desk-meta .op-sample-tag{font-family:${ADAR_SANS};font-size:9px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:${MUTED};background:#F3F4F6;border:1px solid #E5E7EB;border-radius:20px;padding:5px 10px}
           .op-summary{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin-bottom:18px}
           .op-summary-item{background:${SHEET};border:1px solid ${BORDER};border-radius:10px;padding:14px 16px}
-          .op-summary-item strong{display:block;font-family:${DEMO_HEAD};font-size:26px;font-weight:600;letter-spacing:.01em;margin-top:6px;font-variant-numeric:tabular-nums;line-height:1}
-          .op-summary-item label,.op-summary-item span.op-lbl{font-family:${DEMO_MONO};font-size:9px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:${MUTED}}
-          .op-section-title{font-family:${DEMO_HEAD};font-size:20px;font-weight:600;letter-spacing:.01em;color:${INK}}
-          .op-bank-amt{font-family:${DEMO_HEAD};font-weight:600;letter-spacing:.01em;font-variant-numeric:tabular-nums;line-height:1.05}
+          .op-summary-item strong{display:block;font-family:${ADAR_SANS};font-size:1.75rem;font-weight:600;letter-spacing:-.025em;margin-top:6px;font-variant-numeric:tabular-nums lining-nums;line-height:1.1}
+          .op-summary-item label,.op-summary-item span.op-lbl{font-size:11px;font-weight:600;letter-spacing:.025em;text-transform:uppercase;color:${MUTED}}
+          .op-section-title{font-family:${ADAR_SERIF};font-size:1.25rem;font-weight:600;letter-spacing:0;color:${INK}}
+          .op-bank-amt{font-family:${ADAR_SANS};font-weight:600;letter-spacing:-.025em;font-variant-numeric:tabular-nums lining-nums;line-height:1.05}
           .op-workbook{background:${SHEET};border:1px solid ${BORDER};border-radius:12px;overflow:hidden;box-shadow:0 1px 0 rgba(21,34,56,.04)}
           .op-workbook-section{padding:20px 22px;border-bottom:1px solid #ECEFF4}
           .op-workbook-section:last-child{border-bottom:none}
-          .op-cc-totals{display:flex;flex-wrap:wrap;gap:16px 28px;margin-bottom:14px;padding:12px 14px;background:#F7F9FC;border:1px solid #E8ECF2;border-radius:8px;font-family:${DEMO_MONO};font-size:11px;color:${MUTED}}
-          .op-cc-totals b{color:${INK};font-size:13px;margin-left:6px;font-family:${DEMO_MONO};font-weight:600;font-variant-numeric:tabular-nums}
+          .op-cc-totals{display:flex;flex-wrap:wrap;gap:16px 28px;margin-bottom:14px;padding:12px 14px;background:#F7F9FC;border:1px solid #E8ECF2;border-radius:8px;font-family:${ADAR_SANS};font-size:11px;color:${MUTED}}
+          .op-cc-totals b{color:${INK};font-size:13px;margin-left:6px;font-family:${ADAR_SANS};font-weight:600;font-variant-numeric:tabular-nums}
           .op-row-oct{background:${OCT_BG}!important}
           .op-row-nov{background:${NOV_BG}!important}
-          .op-rail-btn{flex-shrink:0;display:flex;flex-direction:column;align-items:center;gap:4px;min-width:64px;padding:8px 10px;border-radius:10px;border:1px solid transparent;background:transparent;cursor:pointer;font-family:${DEMO_UI};color:${MUTED}}
+          .op-rail-btn{flex-shrink:0;display:flex;flex-direction:column;align-items:center;gap:4px;min-width:64px;padding:8px 10px;border-radius:10px;border:1px solid transparent;background:transparent;cursor:pointer;font-family:${ADAR_SANS};color:${MUTED}}
           .op-rail-btn.on{background:#fdf6e3;border-color:rgba(201,168,76,.4);color:${INK}}
           .op-rail-btn span{font-size:10px;font-weight:600;letter-spacing:.02em}
           .op-desk-header,.op-desk-header *{letter-spacing:-.01em}
@@ -586,22 +589,22 @@ export default function OperationsPortalSample() {
           .op-workbook-section h2{margin:0}
           .op-section-head{display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-between;gap:10px;margin-bottom:14px}
           .op-seg{display:inline-flex;border:1px solid ${BORDER};border-radius:8px;overflow:hidden;background:#F7F8FB}
-          .op-seg button{border:none;background:transparent;padding:8px 16px;font-family:${DEMO_UI};font-size:12px;font-weight:600;color:${MUTED};cursor:pointer}
+          .op-seg button{border:none;background:transparent;padding:8px 16px;font-family:${ADAR_SANS};font-size:12px;font-weight:600;color:${MUTED};cursor:pointer}
           .op-seg button.on{background:${NAVY};color:#fff}
           .op-toolbar{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin:16px 0 14px}
-          .op-toolbar select,.op-linkbtn{font-family:${DEMO_UI};font-size:12px;padding:8px 12px;border-radius:8px;border:1px solid ${BORDER};background:#fff;color:${INK}}
+          .op-toolbar select,.op-linkbtn{font-family:${ADAR_SANS};font-size:12px;padding:8px 12px;border-radius:8px;border:1px solid ${BORDER};background:#fff;color:${INK}}
           .op-linkbtn{cursor:pointer}
           .op-scroll{overflow-x:auto;-webkit-overflow-scrolling:touch;border:1px solid ${BORDER};border-radius:8px}
           .op-scroll table{width:100%;border-collapse:collapse;min-width:560px}
-          .op-due-pill{display:inline-block;padding:3px 8px;border-radius:4px;font-size:12px;font-weight:600;font-family:${DEMO_MONO}}
-          .op-legend{display:flex;flex-wrap:wrap;gap:12px;font-family:${DEMO_MONO};font-size:10px;color:${MUTED};margin-bottom:12px}
+          .op-due-pill{display:inline-block;padding:3px 8px;border-radius:4px;font-size:12px;font-weight:600;font-family:${ADAR_SANS}}
+          .op-legend{display:flex;flex-wrap:wrap;gap:12px;font-family:${ADAR_SANS};font-size:10px;color:${MUTED};margin-bottom:12px}
           .op-legend span{display:inline-flex;align-items:center;gap:6px}
           .op-legend i{width:12px;height:12px;border-radius:3px;display:inline-block}
           .op-cal-wrap{border:1px solid ${BORDER};border-radius:8px;padding:14px;background:#FAFBFD}
           .op-cal-head{display:grid;grid-template-columns:repeat(7,1fr);gap:4px;margin-bottom:6px}
-          .op-cal-head div{font-family:${DEMO_MONO};font-size:9px;color:${MUTED};text-align:center}
+          .op-cal-head div{font-family:${ADAR_SANS};font-size:9px;color:${MUTED};text-align:center}
           .op-cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:4px}
-          .op-cal-grid button{aspect-ratio:1;border:1px solid transparent;background:#fff;border-radius:6px;font-family:${DEMO_UI};font-size:12px;cursor:pointer;min-height:42px;position:relative}
+          .op-cal-grid button{aspect-ratio:1;border:1px solid transparent;background:#fff;border-radius:6px;font-family:${ADAR_SANS};font-size:12px;cursor:pointer;min-height:42px;position:relative}
           .op-cal-grid button.has-due{background:${OCT_BG};border-color:#E8D9A8}
           .op-cal-grid button.sel{outline:2px solid ${ACCENT};font-weight:700}
           .op-cal-grid button .dot{position:absolute;bottom:4px;left:50%;transform:translateX(-50%);width:4px;height:4px;border-radius:50%;background:${ACCENT}}
@@ -618,7 +621,7 @@ export default function OperationsPortalSample() {
       <DemoLobby />
 
       {toast && (
-        <div style={{ background: NAVY, color: '#fff', textAlign: 'center', padding: '10px 16px', fontFamily: DEMO_UI, fontSize: 13, zIndex: 30, position: 'relative' }}>
+        <div style={{ background: NAVY, color: '#fff', textAlign: 'center', padding: '10px 16px', fontFamily: ADAR_SANS, fontSize: 13, zIndex: 30, position: 'relative' }}>
           {toast}
         </div>
       )}
@@ -743,16 +746,16 @@ export default function OperationsPortalSample() {
                 <div className="op-banks">
                   {BANKS.map((b) => (
                     <div key={b.id} className="op-bank">
-                      <div style={{ fontFamily: DEMO_MONO, fontSize: 9, color: MUTED, letterSpacing: '.1em', textTransform: 'uppercase' }}>{b.name}</div>
-                      <div style={{ fontFamily: DEMO_MONO, fontSize: 10, color: '#8A96A8', marginTop: 4 }}>{b.account}</div>
+                      <div style={{ fontFamily: ADAR_SANS, fontSize: 9, color: MUTED, letterSpacing: '.1em', textTransform: 'uppercase' }}>{b.name}</div>
+                      <div style={{ fontFamily: ADAR_SANS, fontSize: 10, color: '#8A96A8', marginTop: 4 }}>{b.account}</div>
                       <div className="op-bank-amt" style={{ fontSize: 26, marginTop: 8 }}>{money(b.balance)}</div>
-                      <div style={{ fontFamily: DEMO_MONO, fontSize: 10, color: MUTED, marginTop: 8 }}>Last entered {b.entered}</div>
+                      <div style={{ fontFamily: ADAR_SANS, fontSize: 10, color: MUTED, marginTop: 8 }}>Last entered {b.entered}</div>
                     </div>
                   ))}
                   <div className="op-bank op-bank-total">
-                    <div style={{ fontFamily: DEMO_MONO, fontSize: 9, color: NAVY, letterSpacing: '.1em', textTransform: 'uppercase', fontWeight: 600 }}>Combined liquid</div>
+                    <div style={{ fontFamily: ADAR_SANS, fontSize: 9, color: NAVY, letterSpacing: '.1em', textTransform: 'uppercase', fontWeight: 600 }}>Combined liquid</div>
                     <div className="op-bank-amt" style={{ fontSize: 30, marginTop: 8 }}>{money(bankTotal)}</div>
-                    <div style={{ fontFamily: DEMO_MONO, fontSize: 10, color: MUTED, marginTop: 8 }}>All operating accounts · as of {WORKBOOK_AS_OF}</div>
+                    <div style={{ fontFamily: ADAR_SANS, fontSize: 10, color: MUTED, marginTop: 8 }}>All operating accounts · as of {WORKBOOK_AS_OF}</div>
                   </div>
                 </div>
               </section>
@@ -815,7 +818,7 @@ export default function OperationsPortalSample() {
                 ) : (
                   <div id="section-calendar" className="op-cal-layout" style={{ display: 'grid', gridTemplateColumns: 'minmax(260px,1fr) minmax(220px,1fr)', gap: 18 }}>
                     <div className="op-cal-wrap">
-                      <div style={{ fontFamily: DEMO_HEAD, fontSize: 18, fontWeight: 600, letterSpacing: '.01em', marginBottom: 10 }}>October 2026</div>
+                      <div style={{ fontFamily: ADAR_SERIF, fontSize: 18, fontWeight: 600, letterSpacing: '.01em', marginBottom: 10 }}>October 2026</div>
                       <div className="op-cal-head">{['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map((d) => <div key={d}>{d}</div>)}</div>
                       <div className="op-cal-grid">
                         {CAL_CELLS.map((c, i) => {
@@ -831,13 +834,13 @@ export default function OperationsPortalSample() {
                       </div>
                     </div>
                     <div className="op-cal-wrap">
-                      <div style={{ fontFamily: DEMO_MONO, fontSize: 9, color: MUTED, marginBottom: 8 }}>{fmtDueLong(calDay)}</div>
+                      <div style={{ fontFamily: ADAR_SANS, fontSize: 9, color: MUTED, marginBottom: 8 }}>{fmtDueLong(calDay)}</div>
                       {dayRows.length === 0 ? (
                         <p style={{ color: MUTED, fontSize: 13 }}>No card payments this day.</p>
                       ) : (
                         dayRows.map((r, i) => (
                           <div key={i} style={{ padding: '10px 0', borderBottom: `1px solid ${BORDER}` }}>
-                            <div style={{ fontFamily: DEMO_MONO, fontSize: 10, color: ACCENT }}>{CARDS.find((c) => c.id === r.card)?.short}</div>
+                            <div style={{ fontFamily: ADAR_SANS, fontSize: 10, color: ACCENT }}>{CARDS.find((c) => c.id === r.card)?.short}</div>
                             <div style={{ fontSize: 14, fontWeight: 600 }}>{r.vendor}</div>
                             <div style={{ fontSize: 13, color: MUTED, marginTop: 4 }}>{money(r.amount)}</div>
                           </div>
@@ -876,7 +879,7 @@ export default function OperationsPortalSample() {
                     </div>
                   </div>
                   <div style={{ background: '#F7F9FC', borderRadius: 10, padding: 16, border: `1px solid ${BORDER}`, alignSelf: 'start' }}>
-                    <div style={{ fontFamily: DEMO_MONO, fontSize: 9, color: MUTED, letterSpacing: '.1em' }}>OUTFLOW CHECK</div>
+                    <div style={{ fontFamily: ADAR_SANS, fontSize: 9, color: MUTED, letterSpacing: '.1em' }}>OUTFLOW CHECK</div>
                     <div style={{ marginTop: 12, fontSize: 14, lineHeight: 1.85 }}>
                       <div style={{ display: 'flex', justifyContent: 'space-between' }}><span style={{ color: MUTED }}>Cards</span><strong>{money(ccTotal)}</strong></div>
                       <div style={{ display: 'flex', justifyContent: 'space-between' }}><span style={{ color: MUTED }}>Loans</span><strong>{money(stlDue)}</strong></div>
