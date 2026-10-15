@@ -3,6 +3,7 @@ import Head from 'next/head'
 import { useRouter } from 'next/router'
 import DemoLobby from './DemoLobby'
 import { BOOKING_URL } from '../lib/marketing'
+import { isDemoEmbedQuery } from '../lib/demoEmbed'
 
 const JK_FONTS =
   'https://fonts.googleapis.com/css2?family=DM+Mono:wght@500;600&family=Inter:wght@500;600;700&family=Playfair+Display:wght@600;700&display=swap'
@@ -353,10 +354,13 @@ function buildCalCells() {
 
 const CAL_CELLS = buildCalCells()
 
+const WORKBOOK_AS_OF = 'Oct 13, 2026'
+
 export default function OperationsPortalSample() {
   const router = useRouter()
   const [hubOpen, setHubOpen] = useState(true)
   const [mounted, setMounted] = useState(false)
+  const embedded = router.isReady && isDemoEmbedQuery(router.query)
 
   useEffect(() => {
     setMounted(true)
@@ -439,6 +443,29 @@ export default function OperationsPortalSample() {
     }
   }, [router.isReady, router.query.desk])
 
+  useEffect(() => {
+    if (hubOpen || typeof IntersectionObserver === 'undefined') return
+    const sectionIds = ['banks', 'cards', 'loans', 'outflow']
+    const nodes = sectionIds.map((id) => document.getElementById(`section-${id}`)).filter(Boolean)
+    if (!nodes.length) return
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        const hit = entries
+          .filter((e) => e.isIntersecting)
+          .sort((a, b) => b.intersectionRatio - a.intersectionRatio)[0]
+        if (!hit) return
+        const id = hit.target.id.replace('section-', '')
+        if (id === 'cards' && cardView === 'calendar') setActiveSection('calendar')
+        else setActiveSection(id)
+      },
+      { root: null, rootMargin: '-42% 0px -48% 0px', threshold: [0, 0.12, 0.35] },
+    )
+
+    nodes.forEach((n) => observer.observe(n))
+    return () => observer.disconnect()
+  }, [hubOpen, cardView])
+
   const th = {
     padding: '10px 14px',
     fontSize: '10px',
@@ -474,7 +501,7 @@ export default function OperationsPortalSample() {
   }
 
   return (
-    <div className="op-sample-root">
+    <div className={`op-sample-root${!hubOpen ? ' op-desk-open' : ''}${embedded ? ' op-embed' : ''}`}>
       <Head>
         <title>{BIZ} — owner hub (sample)</title>
         <meta name="description" content="Sample multi-business hub — Operations Center plus Riverside Tires, Harborfield, Riverstone demos. Fictitious owner." />
@@ -482,7 +509,8 @@ export default function OperationsPortalSample() {
         <link href={JK_FONTS} rel="stylesheet" />
       </Head>
         <style>{`
-          .op-sample-root{--jk-gold:#c9a84c;--jk-ink:#0f1419;min-height:100vh;background:${hubOpen ? HUB_PAGE : BG}}
+          .op-sample-root{--jk-gold:#c9a84c;--jk-ink:#0f1419;--op-lobby-h:46px;--op-desk-h:58px;min-height:100vh;background:${hubOpen ? HUB_PAGE : BG}}
+          .op-sample-root.op-embed{--op-lobby-h:0px}
           *{box-sizing:border-box;margin:0;padding:0}
           ${renderHints}
           .op-portal-root{background:${hubOpen ? HUB_PAGE : BG};color:${INK};min-height:calc(100vh - 52px);position:relative;z-index:1}
@@ -513,8 +541,20 @@ export default function OperationsPortalSample() {
           .op-hub__card:hover .op-hub__enter{background:#2f3844}
           .op-hub__foot{text-align:center;padding-bottom:32px;font-family:${JK_MONO};font-size:10px}
           .op-hub__foot a{color:${NAVY};text-decoration:none;font-weight:600}
-          .op-desk-header{background:${OPS_BAR};color:#fff;padding:14px 22px;display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:12px;position:sticky;top:0;z-index:20;box-shadow:0 1px 0 rgba(0,0,0,.08)}
-          .op-desk-rail{background:${SHEET};border-bottom:1px solid ${BORDER};padding:10px 20px;display:flex;gap:8px;overflow-x:auto;position:sticky;top:56px;z-index:19;-webkit-overflow-scrolling:touch;max-width:1100px;margin:0 auto;width:100%}
+          .op-desk-header{background:${OPS_BAR};color:#fff;padding:14px 22px;display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:12px;position:sticky;top:var(--op-lobby-h);z-index:24;box-shadow:0 1px 0 rgba(0,0,0,.08)}
+          .op-desk-rail-wrap{background:${SHEET};border-bottom:1px solid ${BORDER};position:sticky;top:calc(var(--op-lobby-h) + var(--op-desk-h));z-index:23}
+          .op-desk-rail{padding:10px 20px;display:flex;gap:8px;overflow-x:auto;-webkit-overflow-scrolling:touch;max-width:1100px;margin:0 auto;width:100%}
+          .op-desk-back{background:transparent;border:1px solid rgba(255,255,255,.28);color:#fff;border-radius:8px;padding:7px 11px;font-family:${JK_MONO};font-size:10px;font-weight:600;letter-spacing:.04em;text-transform:uppercase;cursor:pointer;transition:border-color .15s,background .15s}
+          .op-desk-back:hover{background:rgba(255,255,255,.08);border-color:rgba(255,255,255,.4)}
+          .op-desk-title{font-family:${JK_UI};font-size:18px;font-weight:700;line-height:1.15}
+          .op-desk-kicker{font-family:${JK_MONO};font-size:10px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;opacity:.92;margin-top:3px}
+          .op-upload-btn{display:inline-flex;align-items:center;gap:8px;background:${ACCENT_ACTION};color:#fff;border:none;border-radius:9px;padding:9px 14px;font-family:${JK_UI};font-size:12px;font-weight:600;letter-spacing:-.01em;cursor:pointer;box-shadow:0 1px 0 rgba(0,0,0,.12);transition:filter .15s,transform .12s}
+          .op-upload-btn:hover{filter:brightness(1.05)}
+          .op-upload-btn:active{transform:translateY(1px)}
+          .op-desk-meta{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:10px 16px;margin-bottom:16px;padding:0 2px}
+          .op-desk-meta p{margin:0;font-family:${JK_UI};font-size:13px;font-weight:500;color:${MUTED}}
+          .op-desk-meta time{font-family:${JK_MONO};font-size:11px;font-weight:600;color:#4b5563}
+          .op-desk-meta .op-sample-tag{font-family:${JK_MONO};font-size:9px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:${MUTED};background:#F3F4F6;border:1px solid #E5E7EB;border-radius:20px;padding:5px 10px}
           .op-summary{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin-bottom:18px}
           .op-summary-item{background:${SHEET};border:1px solid ${BORDER};border-radius:10px;padding:14px 16px}
           .op-summary-item strong{display:block;font-family:${JK_UI};font-size:22px;font-weight:700;letter-spacing:-.03em;margin-top:6px;font-variant-numeric:tabular-nums}
@@ -534,8 +574,14 @@ export default function OperationsPortalSample() {
           .op-main{padding:20px 16px 56px;max-width:1100px;margin:0 auto}
           .op-banks{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px}
           .op-bank{background:#FAFBFD;border:1px solid #E2E7EF;border-radius:8px;padding:16px 18px}
-          .op-bank-total{background:#F0F5FC;border-color:#C5D4EA}
-          .op-panel{scroll-margin-top:130px}
+          .op-bank-total{background:#F0F5FC;border-color:#C5D4EA;grid-column:1/-1}
+          @media(min-width:640px){.op-bank-total{grid-column:span 2}}
+          .op-bank-total .op-bank-amt{font-size:30px}
+          .op-summary-item--warn{border-color:rgba(184,74,58,.35);background:#FDF8F7}
+          .op-summary-item--ok{border-color:rgba(30,122,74,.28);background:#F4FAF6}
+          .op-panel{scroll-margin-top:calc(var(--op-lobby-h) + var(--op-desk-h) + 52px)}
+          .op-workbook-section h2{margin:0}
+          .op-section-head{display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-between;gap:10px;margin-bottom:14px}
           .op-seg{display:inline-flex;border:1px solid ${BORDER};border-radius:8px;overflow:hidden;background:#F7F8FB}
           .op-seg button{border:none;background:transparent;padding:8px 16px;font-family:${JK_UI};font-size:12px;font-weight:600;color:${MUTED};cursor:pointer}
           .op-seg button.on{background:${NAVY};color:#fff}
@@ -561,7 +607,8 @@ export default function OperationsPortalSample() {
             .op-hub__grid{max-width:min(100%,400px)}
             .op-main{padding:16px 14px 48px}
             .op-row-2{grid-template-columns:1fr}
-            .op-desk-rail{top:88px}
+            .op-sample-root.op-desk-open{--op-desk-h:72px}
+            #section-calendar.op-cal-layout{grid-template-columns:1fr!important}
           }
         `}</style>
 
@@ -623,65 +670,87 @@ export default function OperationsPortalSample() {
               <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
                 <button
                   type="button"
+                  className="op-desk-back"
                   onClick={() => {
                     setHubOpen(true)
                     router.replace('/operations-portal', undefined, { shallow: true })
                   }}
-                  style={{ background: 'transparent', border: '1px solid rgba(255,255,255,.25)', color: '#fff', borderRadius: 8, padding: '6px 10px', fontFamily: JK_MONO, fontSize: 10, cursor: 'pointer' }}
                 >
                   ← Desks
                 </button>
                 <div>
-                  <div style={{ fontFamily: JK_UI, fontSize: 18, fontWeight: 700 }}>{activeDeskTitle}</div>
-                  <div style={{ fontFamily: JK_UI, fontSize: 11, opacity: 0.9, fontWeight: 600 }}>{BIZ}</div>
+                  <div className="op-desk-title">{activeDeskTitle}</div>
+                  <div className="op-desk-kicker">{BIZ} · all entities</div>
                 </div>
               </div>
-              <button type="button" onClick={() => ping('Sample — production refreshes from workbook upload.')} style={{ background: ACCENT_ACTION, color: '#fff', border: 'none', borderRadius: 8, padding: '8px 14px', fontFamily: JK_MONO, fontSize: 10, letterSpacing: '.06em', cursor: 'pointer' }}>
-                UPLOAD WORKBOOK
+              <button type="button" className="op-upload-btn" onClick={() => ping('Sample — production refreshes from workbook upload.')}>
+                <Icon name="upload" size={16} color="#fff" />
+                Upload workbook
               </button>
             </header>
 
-            <nav className="op-desk-rail" aria-label="Cash flow sections">
-              {DESK_SECTIONS.map((s) => (
-                <button key={s.id} type="button" className={`op-rail-btn${activeSection === s.id ? ' on' : ''}`} onClick={() => jumpSection(s.id)}>
-                  <Icon name={SECTION_ICON[s.id]} size={22} color={activeSection === s.id ? ACCENT : '#8A96A8'} />
-                  <span>{s.label}</span>
-                </button>
-              ))}
-            </nav>
+            <div className="op-desk-rail-wrap">
+              <nav className="op-desk-rail" aria-label="Cash flow sections">
+                {DESK_SECTIONS.map((s) => (
+                  <button key={s.id} type="button" className={`op-rail-btn${activeSection === s.id ? ' on' : ''}`} onClick={() => jumpSection(s.id)}>
+                    <Icon name={SECTION_ICON[s.id]} size={22} color={activeSection === s.id ? ACCENT : '#8A96A8'} />
+                    <span>{s.label}</span>
+                  </button>
+                ))}
+              </nav>
+            </div>
 
             <main className="op-main">
+              <div className="op-desk-meta">
+                <p>
+                  Cash workbook · as of <time dateTime="2026-10-13">{WORKBOOK_AS_OF}</time>
+                  {' · '}
+                  {BANKS.length} banks · {filtered.length} payables in view
+                </p>
+                <span className="op-sample-tag">Fictitious sample</span>
+              </div>
               <div className="op-summary">
                 <div className="op-summary-item">
-                  <span style={{ fontFamily: JK_MONO, fontSize: 9, color: MUTED, letterSpacing: '.08em', textTransform: 'uppercase' }}>Combined liquid</span>
+                  <span className="op-lbl">Combined liquid</span>
                   <strong>{money(bankTotal)}</strong>
                 </div>
                 <div className="op-summary-item">
-                  <span style={{ fontFamily: JK_MONO, fontSize: 9, color: MUTED, letterSpacing: '.08em', textTransform: 'uppercase' }}>Card payables (view)</span>
+                  <span className="op-lbl">Card payables (view)</span>
                   <strong>{money(ccTotal)}</strong>
                 </div>
                 <div className="op-summary-item">
-                  <span style={{ fontFamily: JK_MONO, fontSize: 9, color: MUTED, letterSpacing: '.08em', textTransform: 'uppercase' }}>Amount going out</span>
+                  <span className="op-lbl">Amount going out</span>
                   <strong>{money(goingOut)}</strong>
                 </div>
-                <div className="op-summary-item">
-                  <span style={{ fontFamily: JK_MONO, fontSize: 9, color: MUTED, letterSpacing: '.08em', textTransform: 'uppercase' }}>Shortage flag</span>
+                <div className={`op-summary-item${cushion < 0 ? ' op-summary-item--warn' : ' op-summary-item--ok'}`}>
+                  <span className="op-lbl">Cushion vs going out</span>
+                  <strong style={{ color: cushion < 0 ? WARN : '#1E7A4A' }}>{cushion < 0 ? `(${money(Math.abs(cushion))})` : money(cushion)}</strong>
+                </div>
+                <div className={`op-summary-item${shortage > 0 ? ' op-summary-item--warn' : ''}`}>
+                  <span className="op-lbl">Shortage flag</span>
                   <strong style={{ color: shortage > 0 ? WARN : '#1E7A4A' }}>{shortage > 0 ? money(shortage) : '—'}</strong>
                 </div>
               </div>
 
               <div className="op-workbook">
               <section id="section-banks" className="op-workbook-section op-panel">
-                <h2 className="op-section-title" style={{ marginBottom: 14 }}>Bank balances</h2>
+                <div className="op-section-head">
+                  <h2 className="op-section-title">Bank balances</h2>
+                </div>
                 <div className="op-banks">
                   {BANKS.map((b) => (
                     <div key={b.id} className="op-bank">
                       <div style={{ fontFamily: JK_MONO, fontSize: 9, color: MUTED, letterSpacing: '.1em', textTransform: 'uppercase' }}>{b.name}</div>
                       <div style={{ fontFamily: JK_MONO, fontSize: 10, color: '#8A96A8', marginTop: 4 }}>{b.account}</div>
-                      <div style={{ fontFamily: JK_UI, fontSize: 26, fontWeight: 700, letterSpacing: '-0.03em', marginTop: 8, fontVariantNumeric: 'tabular-nums' }}>{money(b.balance)}</div>
+                      <div className="op-bank-amt" style={{ fontFamily: JK_UI, fontSize: 26, fontWeight: 700, letterSpacing: '-0.03em', marginTop: 8, fontVariantNumeric: 'tabular-nums' }}>{money(b.balance)}</div>
                       <div style={{ fontFamily: JK_MONO, fontSize: 10, color: MUTED, marginTop: 8 }}>Last entered {b.entered}</div>
                     </div>
                   ))}
+                  <div className="op-bank op-bank-total">
+                    <div style={{ fontFamily: JK_MONO, fontSize: 9, color: NAVY, letterSpacing: '.1em', textTransform: 'uppercase', fontWeight: 600 }}>Combined liquid</div>
+                    <div className="op-bank-amt" style={{ fontFamily: JK_UI, fontWeight: 700, letterSpacing: '-0.03em', marginTop: 8, fontVariantNumeric: 'tabular-nums' }}>{money(bankTotal)}</div>
+                    <div style={{ fontFamily: JK_MONO, fontSize: 10, color: MUTED, marginTop: 8 }}>All operating accounts · as of {WORKBOOK_AS_OF}</div>
+                  </div>
                 </div>
               </section>
 
@@ -693,10 +762,6 @@ export default function OperationsPortalSample() {
                   <span>Filtered total<b>{money(ccTotal)}</b></span>
                   <span>October dues<b>{money(octDue)}</b></span>
                   <span>November dues<b>{money(novDue)}</b></span>
-                </div>
-                <div className="op-legend">
-                  <span><i style={{ background: OCT_BG, border: `1px solid ${OCT_INK}` }} /> October row color</span>
-                  <span><i style={{ background: NOV_BG, border: `1px solid ${NOV_INK}` }} /> November row color</span>
                 </div>
                 <div className="op-toolbar">
                   <div className="op-seg">
@@ -745,7 +810,7 @@ export default function OperationsPortalSample() {
                     </table>
                   </div>
                 ) : (
-                  <div id="section-calendar" style={{ display: 'grid', gridTemplateColumns: 'minmax(260px,1fr) minmax(220px,1fr)', gap: 18 }}>
+                  <div id="section-calendar" className="op-cal-layout" style={{ display: 'grid', gridTemplateColumns: 'minmax(260px,1fr) minmax(220px,1fr)', gap: 18 }}>
                     <div className="op-cal-wrap">
                       <div style={{ fontFamily: JK_UI, fontSize: 16, fontWeight: 700, letterSpacing: '-0.02em', marginBottom: 10 }}>October 2026</div>
                       <div className="op-cal-head">{['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map((d) => <div key={d}>{d}</div>)}</div>
@@ -789,6 +854,7 @@ export default function OperationsPortalSample() {
                         <thead>
                           <tr>
                             <th style={th}>Facility</th>
+                            <th style={{ ...th, textAlign: 'right' }}>Balance</th>
                             <th style={th}>Due</th>
                             <th style={{ ...th, textAlign: 'right' }}>Payment</th>
                           </tr>
@@ -797,8 +863,9 @@ export default function OperationsPortalSample() {
                           {STL.map((r, i) => (
                             <tr key={i}>
                               <td style={td}>{r.lender}</td>
+                              <td style={{ ...td, textAlign: 'right', fontVariantNumeric: 'tabular-nums' }}>{money(r.balance)}</td>
                               <td style={td}>{fmtDue(r.due)}</td>
-                              <td style={{ ...td, textAlign: 'right', fontVariantNumeric: 'tabular-nums' }}>{money(r.payment)}</td>
+                              <td style={{ ...td, textAlign: 'right', fontVariantNumeric: 'tabular-nums', fontWeight: 600 }}>{money(r.payment)}</td>
                             </tr>
                           ))}
                         </tbody>
