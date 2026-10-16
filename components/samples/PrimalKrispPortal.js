@@ -737,7 +737,7 @@ export default function PrimalKrispPortal() {
               <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap', marginBottom: '16px' }}>
                 <KPI k="Income to post" v={money(DATA.monthly_close.income_to_post_total)} accent={GREEN} />
                 <KPI k="COGS to post" v={money(DATA.monthly_close.cogs_to_post.amount)} />
-                <KPI k="AR at month end" v={money(DATA.monthly_close.ar_open_at_month_end)} accent={AMBER} />
+                <KPI k="AR at month end" v={money(liveStoreOwed)} accent={AMBER} />
               </div>
               <div style={{ ...card }}>
                 <div style={{ ...lbl, color: KRAFT, marginBottom: '6px' }}>Income to post</div>

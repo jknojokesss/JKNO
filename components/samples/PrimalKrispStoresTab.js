@@ -11,7 +11,7 @@ import {
   subtotalOwed,
   addDays,
 } from './primalKrispStoreBilling'
-import { SPICE, CHAR, KRAFT, CREAM, CARDBG, INK, MUTED, BORDER, AMBER, RED, GREEN, UI, MONO, money, fmtD, fmtInt, TieMark } from './primalKrispUtils'
+import { SPICE, CHAR, KRAFT, CREAM, CARDBG, INK, MUTED, BORDER, AMBER, RED, GREEN, UI, MONO, money, fmtAsOfLong, fmtInt, TieMark } from './primalKrispUtils'
 import { ArAgingBars } from './PrimalKrispCharts'
 
 const PRINT_CSS = `@media print{
@@ -66,8 +66,8 @@ function InvoiceSheet({ inv, store, onClose, onPrint }) {
         </div>
         <div style={{ textAlign: 'right', fontSize: 12, color: MUTED, fontFamily: MONO }}>
           <div>{inv.invoice}</div>
-          <div>Date {inv.issued}</div>
-          <div>Due {inv.due}</div>
+          <div>Date {fmtAsOfLong(inv.issued)}</div>
+          <div>Due {inv.due ? fmtAsOfLong(inv.due) : '—'}</div>
           <div>{inv.terms}</div>
         </div>
       </div>
@@ -196,7 +196,8 @@ export default function PrimalKrispStoresTab({
     return forms[name]
   }
 
-  const setForm = (name, patch) => setForms((f) => ({ ...f, [name]: { ...getForm(name, 0), ...patch } }))
+  const setForm = (name, defaultPrice, patch) =>
+    setForms((f) => ({ ...f, [name]: { ...getForm(name, defaultPrice), ...patch } }))
 
   const openPreview = (store, inv) => setPreview({ store, inv })
 
@@ -208,8 +209,8 @@ export default function PrimalKrispStoresTab({
         return (
           <div key={inv.invoice} style={{ display: 'flex', flexWrap: 'wrap', gap: 8, alignItems: 'center', padding: '10px 0', borderTop: `1px solid ${CREAM}` }}>
             <span style={{ fontFamily: MONO, fontWeight: 600, minWidth: 72 }}>{inv.invoice}</span>
-            <span style={{ fontSize: 12, color: MUTED }}>{fmtD(inv.issued)}</span>
-            <span style={{ fontSize: 12, color: MUTED }}>Due {inv.due ? fmtD(inv.due) : '—'}</span>
+            <span style={{ fontSize: 12, color: MUTED }}>{fmtAsOfLong(inv.issued)}</span>
+            <span style={{ fontSize: 12, color: MUTED }}>Due {inv.due ? fmtAsOfLong(inv.due) : '—'}</span>
             <span style={{ fontFamily: MONO }}>{money(inv.amount)}</span>
             <StatusPill status={stLabel} />
             <div style={{ display: 'flex', gap: 6, marginLeft: 'auto', flexWrap: 'wrap' }}>
@@ -445,7 +446,7 @@ export default function PrimalKrispStoresTab({
                           type="number"
                           min={1}
                           value={form.bags}
-                          onChange={(e) => setForm(st.name, { bags: e.target.value })}
+                          onChange={(e) => setForm(st.name, s.price_per_bag, { bags: e.target.value })}
                           style={{ ...inp, display: 'block', width: '100%', marginTop: 4, minHeight: 40 }}
                         />
                       </label>
@@ -455,7 +456,7 @@ export default function PrimalKrispStoresTab({
                           type="number"
                           step="0.01"
                           value={form.price}
-                          onChange={(e) => setForm(st.name, { price: e.target.value })}
+                          onChange={(e) => setForm(st.name, s.price_per_bag, { price: e.target.value })}
                           style={{ ...inp, display: 'block', width: '100%', marginTop: 4, minHeight: 40 }}
                         />
                       </label>
@@ -463,7 +464,7 @@ export default function PrimalKrispStoresTab({
                         Terms
                         <select
                           value={form.terms}
-                          onChange={(e) => setForm(st.name, { terms: e.target.value })}
+                          onChange={(e) => setForm(st.name, s.price_per_bag, { terms: e.target.value })}
                           style={{ ...inp, display: 'block', width: '100%', marginTop: 4, minHeight: 40 }}
                         >
                           <option value="Net 15">Net 15</option>
@@ -475,7 +476,7 @@ export default function PrimalKrispStoresTab({
                         <input
                           type="date"
                           value={form.issued}
-                          onChange={(e) => setForm(st.name, { issued: e.target.value })}
+                          onChange={(e) => setForm(st.name, s.price_per_bag, { issued: e.target.value })}
                           style={{ ...inp, display: 'block', width: '100%', marginTop: 4, minHeight: 40 }}
                         />
                       </label>
@@ -512,7 +513,7 @@ export default function PrimalKrispStoresTab({
                             terms: form.terms,
                             issued: form.issued,
                           })
-                          setForm(st.name, { bags: '' })
+                          setForm(st.name, s.price_per_bag, { bags: '' })
                         }}
                         style={{ ...btn, minHeight: 40, flex: 1, minWidth: 120, border: 'none', borderRadius: 2, background: SPICE, color: '#fff' }}
                       >

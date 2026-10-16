@@ -1060,7 +1060,7 @@
        "bags": 24
       },
       {
-       "invoice": "PK-P1000",
+       "invoice": "PK-1103",
        "issued": "2026-08-15",
        "amount": 106.56,
        "days_outstanding": 0,
@@ -1117,7 +1117,7 @@
      "sales_sept": 417.36,
      "invoices": [
       {
-       "invoice": "PK-P1001",
+       "invoice": "PK-1104",
        "issued": "2026-08-15",
        "amount": 213.12,
        "days_outstanding": 0,
@@ -1181,7 +1181,7 @@
      "sales_sept": 362.04,
      "invoices": [
       {
-       "invoice": "PK-P1002",
+       "invoice": "PK-1105",
        "issued": "2026-08-15",
        "amount": 310.32,
        "days_outstanding": 0,
@@ -1243,7 +1243,7 @@
        "bags": 36
       },
       {
-       "invoice": "PK-P1003",
+       "invoice": "PK-1106",
        "issued": "2026-08-15",
        "amount": 426.24,
        "days_outstanding": 0,
@@ -1287,7 +1287,7 @@
      "sales_sept": 177.6,
      "invoices": [
       {
-       "invoice": "PK-P1004",
+       "invoice": "PK-1107",
        "issued": "2026-08-15",
        "amount": 532.8,
        "days_outstanding": 0,
@@ -1348,7 +1348,7 @@
        "bags": 48
       },
       {
-       "invoice": "PK-P1005",
+       "invoice": "PK-1108",
        "issued": "2026-08-15",
        "amount": 106.56,
        "days_outstanding": 0,
@@ -1410,7 +1410,7 @@
        "bags": 36
       },
       {
-       "invoice": "PK-P1006",
+       "invoice": "PK-1109",
        "issued": "2026-08-15",
        "amount": 218.88,
        "days_outstanding": 0,
@@ -1461,7 +1461,7 @@
      "sales_sept": 719.28,
      "invoices": [
       {
-       "invoice": "PK-P1007",
+       "invoice": "PK-1110",
        "issued": "2026-08-15",
        "amount": 319.68,
        "days_outstanding": 0,
@@ -1523,7 +1523,7 @@
      "open_balance_label": "sold since last count, not yet paid",
      "invoices": [
       {
-       "invoice": "PK-P1008",
+       "invoice": "PK-1111",
        "issued": "2026-08-15",
        "amount": 426.24,
        "days_outstanding": 0,
@@ -1594,7 +1594,7 @@
        "bags": 72
       },
       {
-       "invoice": "PK-P1009",
+       "invoice": "PK-1112",
        "issued": "2026-08-15",
        "amount": 532.8,
        "days_outstanding": 0,
@@ -1656,7 +1656,7 @@
        "bags": 60
       },
       {
-       "invoice": "PK-P1010",
+       "invoice": "PK-1113",
        "issued": "2026-08-15",
        "amount": 105.12,
        "days_outstanding": 0,
@@ -1734,7 +1734,7 @@
        "bags": 24
       },
       {
-       "invoice": "PK-P1011",
+       "invoice": "PK-1114",
        "issued": "2026-08-15",
        "amount": 213.12,
        "days_outstanding": 0,
@@ -1796,7 +1796,7 @@
        "bags": 105
       },
       {
-       "invoice": "PK-P1012",
+       "invoice": "PK-1115",
        "issued": "2026-08-15",
        "amount": 306.72,
        "days_outstanding": 0,
@@ -1864,7 +1864,7 @@
        "bags": 48
       },
       {
-       "invoice": "PK-P1013",
+       "invoice": "PK-1116",
        "issued": "2026-08-15",
        "amount": 426.24,
        "days_outstanding": 0,
@@ -1936,7 +1936,7 @@
        "bags": 31
       },
       {
-       "invoice": "PK-P1014",
+       "invoice": "PK-1117",
        "issued": "2026-08-15",
        "amount": 525.6,
        "days_outstanding": 0,
