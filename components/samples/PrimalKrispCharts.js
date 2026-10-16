@@ -1,6 +1,9 @@
 import {
   BRICK,
   CHARCOAL,
+  SAGE,
+  BROWN,
+  RED,
   STONE,
   MUTED,
   INK,
