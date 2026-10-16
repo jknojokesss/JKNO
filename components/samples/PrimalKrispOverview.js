@@ -1,3 +1,4 @@
+import { useState, useEffect } from 'react'
 import { ResponsiveContainer, ComposedChart, Bar, Line, XAxis, YAxis, Tooltip, CartesianGrid, PieChart, Pie, Cell } from 'recharts'
 import DATA from '../../data/primal-krisp.json'
 import {
@@ -14,6 +15,7 @@ import {
   UI,
   MONO,
   money0,
+  fmtInt,
   pct1,
   BagIcon,
   CHANNEL_COLORS,
@@ -37,6 +39,11 @@ export default function PrimalKrispOverview({
   goTab,
   goStoresFilter,
 }) {
+  const [chartsReady, setChartsReady] = useState(false)
+  useEffect(() => {
+    setChartsReady(true)
+  }, [])
+
   const septPnl = DATA.pnl_by_month?.find((m) => m.month === '2026-09') || DATA.pnl_by_month?.slice(-1)[0]
   const chartMonths = (DATA.pnl_by_month || []).map((m) => ({
     name: m.label.replace(/ \d{2}$/, ''),
@@ -100,7 +107,7 @@ export default function PrimalKrispOverview({
           accent={SPICE}
           onClick={() => goTab('financials')}
         />
-        <KPI k="Bags sold" v={bagsPeriod.toLocaleString()} onClick={() => goTab('products')} />
+        <KPI k="Bags sold" v={fmtInt(bagsPeriod)} onClick={() => goTab('products')} />
         <KPI k="Active subscriptions" v={DATA.overview.active_subscriptions} accent={GREEN} onClick={() => goTab('subscriptions')} />
         <KPI
           k="Owed by stores"
@@ -120,16 +127,18 @@ export default function PrimalKrispOverview({
       <div style={{ ...card, marginBottom: '16px' }}>
         <div style={{ ...lbl, marginBottom: '12px' }}>Revenue &amp; net profit by month</div>
         <div style={{ width: '100%', height: 260 }}>
-          <ResponsiveContainer>
-            <ComposedChart data={chartMonths} margin={{ top: 6, right: 8, left: 4, bottom: 0 }}>
-              <CartesianGrid stroke={BORDER} vertical={false} />
-              <XAxis dataKey="name" tick={{ fontSize: 12, fill: MUTED }} axisLine={{ stroke: BORDER }} tickLine={false} />
-              <YAxis tickFormatter={(v) => '$' + Math.round(v / 1000) + 'k'} tick={{ fontSize: 11, fill: MUTED }} axisLine={false} tickLine={false} width={44} />
-              <Tooltip formatter={(v) => money0(v)} contentStyle={{ fontSize: '12px', borderRadius: '2px', border: `1px solid ${BORDER}` }} />
-              <Bar dataKey="Revenue" fill={KRAFT} radius={[2, 2, 0, 0]} maxBarSize={40} />
-              <Line type="monotone" dataKey="Net" stroke={GREEN} strokeWidth={2.5} dot={{ r: 3, fill: GREEN }} />
-            </ComposedChart>
-          </ResponsiveContainer>
+          {chartsReady ? (
+            <ResponsiveContainer width="100%" height={260}>
+              <ComposedChart data={chartMonths} margin={{ top: 6, right: 8, left: 4, bottom: 0 }}>
+                <CartesianGrid stroke={BORDER} vertical={false} />
+                <XAxis dataKey="name" tick={{ fontSize: 12, fill: MUTED }} axisLine={{ stroke: BORDER }} tickLine={false} />
+                <YAxis tickFormatter={(v) => '$' + Math.round(v / 1000) + 'k'} tick={{ fontSize: 11, fill: MUTED }} axisLine={false} tickLine={false} width={44} />
+                <Tooltip formatter={(v) => money0(v)} contentStyle={{ fontSize: '12px', borderRadius: '2px', border: `1px solid ${BORDER}` }} />
+                <Bar dataKey="Revenue" fill={KRAFT} radius={[2, 2, 0, 0]} maxBarSize={40} />
+                <Line type="monotone" dataKey="Net" stroke={GREEN} strokeWidth={2.5} dot={{ r: 3, fill: GREEN }} />
+              </ComposedChart>
+            </ResponsiveContainer>
+          ) : null}
         </div>
       </div>
 
@@ -137,16 +146,18 @@ export default function PrimalKrispOverview({
         <div style={{ ...lbl, marginBottom: '10px' }}>Revenue by channel</div>
         <div style={{ display: 'flex', gap: '18px', flexWrap: 'wrap', alignItems: 'center' }}>
           <div style={{ width: 180, height: 180, flexShrink: 0 }}>
-            <ResponsiveContainer>
-              <PieChart>
-                <Pie data={donut.filter((d) => d.value > 0)} dataKey="value" nameKey="name" innerRadius={48} outerRadius={80} paddingAngle={2} stroke="none">
-                  {donut.map((d, i) => (
-                    <Cell key={d.name} fill={CHANNEL_COLORS[d.name] || BAG_COLORS[i % BAG_COLORS.length]} />
-                  ))}
-                </Pie>
-                <Tooltip formatter={(v) => money0(v)} contentStyle={{ fontSize: '12px', borderRadius: '2px', border: `1px solid ${BORDER}` }} />
-              </PieChart>
-            </ResponsiveContainer>
+            {chartsReady ? (
+              <ResponsiveContainer width="100%" height={180}>
+                <PieChart>
+                  <Pie data={donut.filter((d) => d.value > 0)} dataKey="value" nameKey="name" innerRadius={48} outerRadius={80} paddingAngle={2} stroke="none">
+                    {donut.map((d, i) => (
+                      <Cell key={d.name} fill={CHANNEL_COLORS[d.name] || BAG_COLORS[i % BAG_COLORS.length]} />
+                    ))}
+                  </Pie>
+                  <Tooltip formatter={(v) => money0(v)} contentStyle={{ fontSize: '12px', borderRadius: '2px', border: `1px solid ${BORDER}` }} />
+                </PieChart>
+              </ResponsiveContainer>
+            ) : null}
           </div>
           <div style={{ flex: 1, minWidth: 220 }}>
             {donut.map((d) => (

@@ -25,6 +25,7 @@ import {
   pct1,
   fmtAsOfLong,
   fmtD,
+  fmtInt,
   TieMark,
   verdictPromo,
   TINT_RED,
@@ -372,12 +373,14 @@ export default function PrimalKrispPortal() {
     ? DATA.product_store_breakdown?.find((p) => p.product === drawerProduct)
     : null
 
-  return (
-    <>
-      <style>{`${SHELL_CSS({ CHAR, CREAM, INK, SPICE })}
+  const portalStyles = `${SHELL_CSS({ CHAR, CREAM, INK, SPICE })}
 .pk-drawer-backdrop{position:fixed;inset:0;background:rgba(43,32,24,.45);z-index:8000}
 .pk-drawer{position:fixed;top:0;right:0;height:100%;width:min(420px,100%);background:${CARDBG};border-left:1px solid ${BORDER};z-index:8001;display:flex;flex-direction:column;box-shadow:-8px 0 32px rgba(0,0,0,.12)}
-@media(max-width:860px){.pk-drawer{top:0;left:0;right:0;width:100%;border-left:none}}`}</style>
+@media(max-width:860px){.pk-drawer{top:0;left:0;right:0;width:100%;border-left:none}}`
+
+  return (
+    <>
+      <style dangerouslySetInnerHTML={{ __html: portalStyles }} />
 
       <DemoLobby />
 
@@ -489,7 +492,7 @@ export default function PrimalKrispPortal() {
                 <KPI k="Stores carrying" v={stores.count} />
                 <KPI
                   k={period === 'week' ? 'Bags sold this week' : 'Bags sold to stores'}
-                  v={storeKpis.bagsSold.toLocaleString()}
+                  v={fmtInt(storeKpis.bagsSold)}
                 />
                 <KPI
                   k="Owed by stores"
@@ -684,21 +687,21 @@ export default function PrimalKrispPortal() {
                   rows={DATA.subscriptions.by_interval.map((r) => ({ label: r.interval, n: r.active }))}
                   valueKey="n"
                   labelKey="label"
-                  formatValue={(v) => v.toLocaleString()}
+                  formatValue={(v) => fmtInt(v)}
                 />
                 <RankedBars
                   title="By what they get"
                   rows={DATA.subscriptions.by_what_they_get.map((r) => ({ label: r.item, n: r.active }))}
                   valueKey="n"
                   labelKey="label"
-                  formatValue={(v) => v.toLocaleString()}
+                  formatValue={(v) => fmtInt(v)}
                 />
                 <RankedBars
                   title="Cancel reasons (September)"
                   rows={DATA.subscriptions.cancel_reasons.map((r) => ({ label: r.reason, n: r.count }))}
                   valueKey="n"
                   labelKey="label"
-                  formatValue={(v) => v.toLocaleString()}
+                  formatValue={(v) => fmtInt(v)}
                 />
               </div>
             </>
@@ -1093,7 +1096,7 @@ export default function PrimalKrispPortal() {
               />
               <Row
                 l="Units"
-                v={productBreakdown.total_units.toLocaleString()}
+                v={fmtInt(productBreakdown.total_units)}
                 tieExpected={productBreakdown.store_channel_units}
                 tieActual={productBreakdown.total_units}
               />

@@ -24,14 +24,21 @@ export const STONE = '#C9C4B8'
 export const UI = "'Inter', sans-serif"
 export const MONO = "'IBM Plex Mono', monospace"
 
-export const money = (n) =>
-  '$' +
-  (Math.round(n * 100) / 100).toLocaleString(undefined, {
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 2,
-  })
+/** Fixed locale so SSR (Node) and browser hydrate the same text. */
+export const PK_LOCALE = 'en-US'
+export const PK_TZ = 'America/New_York'
 
-export const money0 = (n) => '$' + Math.round(n).toLocaleString()
+const intFormatter = new Intl.NumberFormat(PK_LOCALE, { maximumFractionDigits: 0 })
+const moneyFormatter = new Intl.NumberFormat(PK_LOCALE, {
+  minimumFractionDigits: 2,
+  maximumFractionDigits: 2,
+})
+
+export const fmtInt = (n) => intFormatter.format(Math.round(n))
+
+export const money = (n) => '$' + moneyFormatter.format(Math.round(n * 100) / 100)
+
+export const money0 = (n) => '$' + intFormatter.format(Math.round(n))
 
 export const moneyK = (n) => {
   const v = Math.abs(n)
@@ -41,9 +48,17 @@ export const moneyK = (n) => {
 
 export const pct1 = (n) => (Math.round(n * 10) / 10).toFixed(1) + '%'
 
+const asOfDateFormatter = new Intl.DateTimeFormat(PK_LOCALE, {
+  timeZone: PK_TZ,
+  month: 'short',
+  day: 'numeric',
+  year: 'numeric',
+})
+
+/** Noon UTC keeps calendar day stable across server (UTC) and US browsers. */
 export const fmtAsOfLong = (iso) => {
   if (!iso) return '—'
-  return new Date(iso + 'T00:00:00').toLocaleDateString([], { month: 'short', day: 'numeric', year: 'numeric' })
+  return asOfDateFormatter.format(new Date(`${iso}T12:00:00.000Z`))
 }
 
 export const fmtD = (s) => (s ? fmtAsOfLong(s).replace(/, \d{4}$/, '') : '—')

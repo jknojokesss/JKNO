@@ -322,8 +322,11 @@ export function RenewalBars14({ days, accent = BRICK }) {
 }
 
 function fmtShort(iso) {
-  const d = new Date(iso + 'T00:00:00')
-  return d.toLocaleDateString('en-US', { month: 'numeric', day: 'numeric' })
+  return new Intl.DateTimeFormat('en-US', {
+    timeZone: 'America/New_York',
+    month: 'numeric',
+    day: 'numeric',
+  }).format(new Date(`${iso}T12:00:00.000Z`))
 }
 
 export function TastingLiftChart({ tastings, accent = BRICK }) {
