@@ -1,20 +1,28 @@
-import { DEMO_MONO, DEMO_UI } from '../../lib/demoFonts'
-
-export const BRICK = '#B4292E'
-export const CHARCOAL = '#2B2B2B'
-export const SAGE = '#A8B88F'
-export const BROWN = '#976A49'
-export const CREAM = '#FBF4EC'
-export const CARDBG = '#FFFDFA'
-export const INK = CHARCOAL
-export const MUTED = '#8C7C82'
-export const BORDER = '#ECE0D8'
+/** Primal Krisp sample portal tokens — aligned with Jerky Munch dashboard look. */
+export const CHAR = '#2B2018'
+export const SPICE = '#C8462C'
+export const KRAFT = '#A9763A'
+export const CREAM = '#F6F0E6'
+export const CARDBG = '#FFFDF9'
+export const INK = '#2B2018'
+export const MUTED = '#8A7A66'
+export const BORDER = '#E6DBC8'
+export const GREEN = '#3E7C4F'
 export const AMBER = '#C98A2A'
 export const RED = '#C03A22'
+export const TINT_GREEN = '#EAF3EC'
+export const TINT_AMBER = '#FEF6E8'
+export const TINT_RED = '#FBEDE9'
+
+/** Legacy aliases used by charts */
+export const BRICK = SPICE
+export const CHARCOAL = CHAR
+export const SAGE = GREEN
+export const BROWN = KRAFT
 export const STONE = '#C9C4B8'
 
-export const MONO = DEMO_MONO
-export const UI = DEMO_UI
+export const UI = "'Inter', sans-serif"
+export const MONO = "'IBM Plex Mono', monospace"
 
 export const money = (n) =>
   '$' +
@@ -33,27 +41,21 @@ export const moneyK = (n) => {
 
 export const pct1 = (n) => (Math.round(n * 10) / 10).toFixed(1) + '%'
 
-export const fmtAsOf = (iso) => {
-  if (!iso) return '—'
-  return new Date(iso + 'T00:00:00').toLocaleDateString([], { month: 'short', day: 'numeric' })
-}
-
 export const fmtAsOfLong = (iso) => {
   if (!iso) return '—'
   return new Date(iso + 'T00:00:00').toLocaleDateString([], { month: 'short', day: 'numeric', year: 'numeric' })
 }
 
-export const fmtD = (s) => (s ? fmtAsOf(s) : '—')
+export const fmtD = (s) => (s ? fmtAsOfLong(s).replace(/, \d{4}$/, '') : '—')
 
 export const centsEqual = (a, b) => Math.abs(Math.round(a * 100) - Math.round(b * 100)) === 0
 
-/** Quiet tie indicator beside a footer total */
 export function TieMark({ expected, actual }) {
   const ok = centsEqual(expected, actual)
   const diff = Math.round((actual - expected) * 100) / 100
   if (ok) {
     return (
-      <span title="Ties to total" style={{ color: SAGE, fontSize: '12px', fontWeight: 600, lineHeight: 1 }}>
+      <span title="Ties to total" style={{ color: GREEN, fontSize: '12px', fontWeight: 600, lineHeight: 1 }}>
         ✓
       </span>
     )
@@ -62,12 +64,38 @@ export function TieMark({ expected, actual }) {
 }
 
 export const CHANNEL_COLORS = {
-  Website: BRICK,
-  Subscriptions: CHARCOAL,
-  Stores: SAGE,
-  'Wholesale & bulk': BROWN,
+  Website: SPICE,
+  Subscriptions: CHAR,
+  Stores: GREEN,
+  'Wholesale & bulk': KRAFT,
   'Tastings & events': STONE,
 }
 
 export const verdictPromo = (roas) =>
-  roas >= 2 ? { c: SAGE, t: 'Keep' } : roas >= 1 ? { c: AMBER, t: 'Watch' } : { c: RED, t: 'Cut' }
+  roas >= 2 ? { c: GREEN, t: 'Keep' } : roas >= 1 ? { c: AMBER, t: 'Watch' } : { c: RED, t: 'Cut' }
+
+export function BagIcon({ color = SPICE }) {
+  return (
+    <svg width="58" height="58" viewBox="0 0 64 64" style={{ display: 'block', margin: '0 auto' }} aria-hidden>
+      <rect x="13" y="8" width="38" height="9" rx="2" fill={color} opacity="0.5" />
+      <rect x="14" y="14" width="36" height="44" rx="6" fill={color} />
+      <rect x="14" y="14" width="36" height="11" rx="6" fill="#000" opacity="0.08" />
+      <rect x="20" y="28" width="24" height="20" rx="3" fill={CARDBG} opacity="0.95" />
+      <rect x="23" y="33" width="18" height="3" rx="1.5" fill={color} />
+      <rect x="23" y="39" width="12" height="3" rx="1.5" fill={color} opacity="0.55" />
+    </svg>
+  )
+}
+
+export const SHELL_CSS = (theme) => `*{box-sizing:border-box;margin:0;padding:0}
+html{-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale;text-rendering:optimizeLegibility}
+body{background:${theme.CREAM};font-family:${UI};color:${theme.INK}}
+.pk-shell{display:flex;min-height:100vh;align-items:stretch}
+.pk-side{width:236px;flex-shrink:0;background:${theme.CHAR};color:${theme.CREAM};display:flex;flex-direction:column;padding:22px 14px;position:sticky;top:0;height:100vh}
+.pk-nav{display:flex;flex-direction:column;gap:3px}.pk-nav--main{flex:1}
+.pk-navbtn{display:block;width:100%;text-align:left;padding:11px 14px;border-radius:2px;border:none;background:transparent;color:#B6A78C;font-family:${UI};font-size:14px;font-weight:500;cursor:pointer;white-space:nowrap}
+.pk-navbtn:hover{background:rgba(255,255,255,.08);color:${theme.CREAM}}
+.pk-main{flex:1;min-width:0;max-width:1180px;padding:24px 30px 60px}
+.pk-click{transition:box-shadow .12s}.pk-click:hover{box-shadow:inset 0 0 0 1.5px ${theme.SPICE}}
+@media(max-width:860px){.pk-shell{flex-direction:column}.pk-side{width:auto;height:auto;position:static;padding:14px 12px 10px}.pk-nav--main,.pk-nav--tools{flex-direction:row;overflow-x:auto;gap:6px;padding:4px 4px 10px;-webkit-overflow-scrolling:touch;scrollbar-width:none}.pk-nav::-webkit-scrollbar{display:none}.pk-tools-label{margin:8px 4px 4px!important}.pk-navbtn{width:auto;padding:8px 14px;border-radius:2px;background:rgba(255,255,255,.07);flex-shrink:0;font-size:13px;min-height:40px}.pk-main{padding:18px 16px 52px;max-width:100%}}
+@media(max-width:600px){input,select,textarea{font-size:16px!important}button{min-height:40px}}`
