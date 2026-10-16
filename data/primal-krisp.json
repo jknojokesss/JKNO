@@ -1,0 +1,3196 @@
+{
+ "meta": {
+  "portal": "Primal Krisp — owner portal (sample)",
+  "sample_label": "Sample — fictitious numbers",
+  "period": "September 2026",
+  "as_of": "2026-09-30",
+  "built_by": "JK No Jokes Financials",
+  "real_vs_fictitious": "Real (published by Primal Krisp): name, logo, brand colors, product names, flavors, bag size, retail prices, bundles, subscription terms, and the 43 stores on their own store locator (name, address, city, phone). Fictitious: every unit count, dollar amount, cost, margin, invoice, cash balance, subscriber count, tasting result, promo code result and production run in this file.",
+  "sources": [
+   "https://primalkrisp.com/products.json",
+   "https://primalkrisp.com/pages/store-locator (Stockist list: https://stockist.co/api/v1/map_w3rkr7yq/locations/all)",
+   "https://primalkrisp.com/products/brisket.js (subscription plans)",
+   "https://primalkrisp.com/pages/faq"
+  ],
+  "pulled": "2026-10-16"
+ },
+ "brand": {
+  "name": "Primal Krisp",
+  "tagline": "Meat you can hear.",
+  "product_line": "Glatt kosher beef and chicken meat chips, 2 oz bags",
+  "logo_file": "primal_krisp_logo.png",
+  "logo_white_file": "primal_krisp_logo_white.png",
+  "logo_url": "https://primalkrisp.com/cdn/shop/files/Primal_Krisp_logo_desktop.png",
+  "colors": {
+   "brick_red": "#B4292E",
+   "cream": "#EDE6DA",
+   "card_cream": "#F6F3EE",
+   "sage": "#A8B88F",
+   "brown": "#976A49",
+   "charcoal": "#2B2B2B",
+   "footer_black": "#121212"
+  },
+  "colors_source": "CSS variables on primalkrisp.com (accent #B4292E, background #EDE6DA, accent #A8B88F, card border #976A49, text #2B2B2B)"
+ },
+ "channels": [
+  "Website",
+  "Subscriptions",
+  "Stores",
+  "Wholesale & bulk",
+  "Tastings & events"
+ ],
+ "overview": {
+  "cash_on_hand": 38450.0,
+  "cash_note": "bank balance Sept 30 (sample)",
+  "sales_this_month": 55530.64,
+  "sales_last_month": 50770.0,
+  "bags_sold_this_month": 4952,
+  "sales_by_channel": [
+   {
+    "channel": "Website",
+    "sales": 19500.0,
+    "bags": 1394
+   },
+   {
+    "channel": "Subscriptions",
+    "sales": 12640.0,
+    "bags": 894
+   },
+   {
+    "channel": "Stores",
+    "sales": 17920.64,
+    "bags": 2014
+   },
+   {
+    "channel": "Wholesale & bulk",
+    "sales": 4320,
+    "bags": 531
+   },
+   {
+    "channel": "Tastings & events",
+    "sales": 1150,
+    "bags": 119
+   }
+  ],
+  "store_count": 43,
+  "open_store_balance": 14401.44,
+  "active_subscriptions": 412,
+  "needs_attention": [
+   {
+    "severity": "high",
+    "title": "Cash dips the week of Nov 9",
+    "detail": "The Chanukah meat buy and the bag & label reorder land the same week. Cash drops $15,090 to $22,799. Splitting the bag order to Nov 16 keeps it above $30K.",
+    "tab": "Overview"
+   },
+   {
+    "severity": "high",
+    "title": "Texas Heat runs out before its next run",
+    "detail": "11 days of stock at September's pace, so it's gone around Oct 11. The run is Oct 13. Shawarma Chicken has 12 days; its run is Oct 6.",
+    "tab": "Inventory & runs"
+   },
+   {
+    "severity": "medium",
+    "title": "5 store invoices past 60 days ($3,214.08)",
+    "detail": "Pomegranate, Gourmet Glatt South, Salt Market, Shalom Kosher, Seasons Queens.",
+    "tab": "Stores"
+   },
+   {
+    "severity": "medium",
+    "title": "7 stores need a reorder",
+    "detail": "Under 11 days of shelf stock at their September pace.",
+    "tab": "Stores"
+   },
+   {
+    "severity": "medium",
+    "title": "20 bags unaccounted at consignment stores",
+    "detail": "Count is lower than delivered minus paid. Invoice as sold or write off at close.",
+    "tab": "Stores"
+   },
+   {
+    "severity": "low",
+    "title": "Brisket into stores earns $2.30 a bag",
+    "detail": "Same bag earns $5.92 on the site. Chicken in stores earns $3.16.",
+    "tab": "Products & margins"
+   },
+   {
+    "severity": "low",
+    "title": "Subscription churn 6.7% in September",
+    "detail": "11 of 26 cancels said they had too much product. Default new subs to every 45 days?",
+    "tab": "Subscriptions"
+   }
+  ]
+ },
+ "monthly_sales_by_channel": [
+  {
+   "month": "2025-10",
+   "label": "Oct 25",
+   "Website": 9750.0,
+   "Subscriptions": 5640.0,
+   "Stores": 5700.0,
+   "Wholesale & bulk": 1740.0,
+   "Tastings & events": 1200,
+   "Total": 24030.0
+  },
+  {
+   "month": "2025-11",
+   "label": "Nov 25",
+   "Website": 11310.0,
+   "Subscriptions": 6160.0,
+   "Stores": 7200.0,
+   "Wholesale & bulk": 2030.0,
+   "Tastings & events": 800,
+   "Total": 27500.0
+  },
+  {
+   "month": "2025-12",
+   "label": "Dec 25",
+   "Website": 15120.0,
+   "Subscriptions": 6810.0,
+   "Stores": 10300.0,
+   "Wholesale & bulk": 3580.0,
+   "Tastings & events": 650,
+   "Total": 36460.0
+  },
+  {
+   "month": "2026-01",
+   "label": "Jan 26",
+   "Website": 10140.0,
+   "Subscriptions": 7240.0,
+   "Stores": 7300.0,
+   "Wholesale & bulk": 2720.0,
+   "Tastings & events": 950,
+   "Total": 28350.0
+  },
+  {
+   "month": "2026-02",
+   "label": "Feb 26",
+   "Website": 11130.0,
+   "Subscriptions": 7700.0,
+   "Stores": 8410.0,
+   "Wholesale & bulk": 2800.0,
+   "Tastings & events": 1100,
+   "Total": 31140.0
+  },
+  {
+   "month": "2026-03",
+   "label": "Mar 26",
+   "Website": 15380.0,
+   "Subscriptions": 8220.0,
+   "Stores": 12090.0,
+   "Wholesale & bulk": 2540.0,
+   "Tastings & events": 1100,
+   "Total": 39330.0
+  },
+  {
+   "month": "2026-04",
+   "label": "Apr 26",
+   "Website": 19740.0,
+   "Subscriptions": 8920.0,
+   "Stores": 16070.0,
+   "Wholesale & bulk": 2740.0,
+   "Tastings & events": 400,
+   "Total": 47870.0
+  },
+  {
+   "month": "2026-05",
+   "label": "May 26",
+   "Website": 14090.0,
+   "Subscriptions": 9750.0,
+   "Stores": 11820.0,
+   "Wholesale & bulk": 2720.0,
+   "Tastings & events": 1100,
+   "Total": 39480.0
+  },
+  {
+   "month": "2026-06",
+   "label": "Jun 26",
+   "Website": 15860.0,
+   "Subscriptions": 10490.0,
+   "Stores": 13670.0,
+   "Wholesale & bulk": 5160.0,
+   "Tastings & events": 650,
+   "Total": 45830.0
+  },
+  {
+   "month": "2026-07",
+   "label": "Jul 26",
+   "Website": 16280.0,
+   "Subscriptions": 11190.0,
+   "Stores": 14370.0,
+   "Wholesale & bulk": 3720.0,
+   "Tastings & events": 650,
+   "Total": 46210.0
+  },
+  {
+   "month": "2026-08",
+   "label": "Aug 26",
+   "Website": 17680.0,
+   "Subscriptions": 11930.0,
+   "Stores": 15940.0,
+   "Wholesale & bulk": 4020.0,
+   "Tastings & events": 1200,
+   "Total": 50770.0
+  },
+  {
+   "month": "2026-09",
+   "label": "Sep 26",
+   "Website": 19500.0,
+   "Subscriptions": 12640.0,
+   "Stores": 17920.64,
+   "Wholesale & bulk": 4320,
+   "Tastings & events": 1150,
+   "Total": 55530.64
+  }
+ ],
+ "cash_forecast_13_weeks": {
+  "starting_cash": 38450.0,
+  "weeks": [
+   {
+    "week_of": "2026-10-05",
+    "label": "10/5",
+    "cash_in": 11010.0,
+    "cash_in_detail": {
+     "Shopify payouts (site + subscriptions)": 6910.0,
+     "Store payments": 4100,
+     "Wholesale & bulk": 0
+    },
+    "cash_out": 11216.82,
+    "cash_out_detail": {
+     "Meat & production runs": 4926.82,
+     "Bags & labels": 0,
+     "Ads & creators": 1190.0,
+     "Payroll": 3200,
+     "Rent, software, other": 650,
+     "Shipping & card fees": 1250
+    },
+    "net": -206.82,
+    "ending_cash": 38243.18
+   },
+   {
+    "week_of": "2026-10-12",
+    "label": "10/12",
+    "cash_in": 12470.0,
+    "cash_in_detail": {
+     "Shopify payouts (site + subscriptions)": 7270.0,
+     "Store payments": 5200,
+     "Wholesale & bulk": 0
+    },
+    "cash_out": 9307.78,
+    "cash_out_detail": {
+     "Meat & production runs": 6237.78,
+     "Bags & labels": 0,
+     "Ads & creators": 1170.0,
+     "Payroll": 0,
+     "Rent, software, other": 650,
+     "Shipping & card fees": 1250
+    },
+    "net": 3162.22,
+    "ending_cash": 41405.4
+   },
+   {
+    "week_of": "2026-10-19",
+    "label": "10/19",
+    "cash_in": 12380.0,
+    "cash_in_detail": {
+     "Shopify payouts (site + subscriptions)": 8280.0,
+     "Store payments": 4100,
+     "Wholesale & bulk": 0
+    },
+    "cash_out": 13926.34,
+    "cash_out_detail": {
+     "Meat & production runs": 7796.34,
+     "Bags & labels": 0,
+     "Ads & creators": 1030.0,
+     "Payroll": 3200,
+     "Rent, software, other": 650,
+     "Shipping & card fees": 1250
+    },
+    "net": -1546.34,
+    "ending_cash": 39859.06
+   },
+   {
+    "week_of": "2026-10-26",
+    "label": "10/26",
+    "cash_in": 9700.0,
+    "cash_in_detail": {
+     "Shopify payouts (site + subscriptions)": 7000.0,
+     "Store payments": 1800,
+     "Wholesale & bulk": 900
+    },
+    "cash_out": 12180.0,
+    "cash_out_detail": {
+     "Meat & production runs": 9400,
+     "Bags & labels": 0,
+     "Ads & creators": 880.0,
+     "Payroll": 0,
+     "Rent, software, other": 650,
+     "Shipping & card fees": 1250
+    },
+    "net": -2480.0,
+    "ending_cash": 37379.06
+   },
+   {
+    "week_of": "2026-11-02",
+    "label": "11/2",
+    "cash_in": 14470.0,
+    "cash_in_detail": {
+     "Shopify payouts (site + subscriptions)": 7970.0,
+     "Store payments": 4100,
+     "Wholesale & bulk": 2400
+    },
+    "cash_out": 13960.0,
+    "cash_out_detail": {
+     "Meat & production runs": 7800,
+     "Bags & labels": 0,
+     "Ads & creators": 1060.0,
+     "Payroll": 3200,
+     "Rent, software, other": 650,
+     "Shipping & card fees": 1250
+    },
+    "net": 510.0,
+    "ending_cash": 37889.06
+   },
+   {
+    "week_of": "2026-11-09",
+    "label": "11/9",
+    "cash_in": 11650.0,
+    "cash_in_detail": {
+     "Shopify payouts (site + subscriptions)": 8150.0,
+     "Store payments": 2600,
+     "Wholesale & bulk": 900
+    },
+    "cash_out": 26740.0,
+    "cash_out_detail": {
+     "Meat & production runs": 14000,
+     "Bags & labels": 9600,
+     "Ads & creators": 1240.0,
+     "Payroll": 0,
+     "Rent, software, other": 650,
+     "Shipping & card fees": 1250
+    },
+    "net": -15090.0,
+    "ending_cash": 22799.06
+   },
+   {
+    "week_of": "2026-11-16",
+    "label": "11/16",
+    "cash_in": 14440.0,
+    "cash_in_detail": {
+     "Shopify payouts (site + subscriptions)": 7940.0,
+     "Store payments": 4100,
+     "Wholesale & bulk": 2400
+    },
+    "cash_out": 6000.0,
+    "cash_out_detail": {
+     "Meat & production runs": 0,
+     "Bags & labels": 0,
+     "Ads & creators": 900.0,
+     "Payroll": 3200,
+     "Rent, software, other": 650,
+     "Shipping & card fees": 1250
+    },
+    "net": 8440.0,
+    "ending_cash": 31239.06
+   },
+   {
+    "week_of": "2026-11-23",
+    "label": "11/23",
+    "cash_in": 12310.0,
+    "cash_in_detail": {
+     "Shopify payouts (site + subscriptions)": 7310.0,
+     "Store payments": 4100,
+     "Wholesale & bulk": 900
+    },
+    "cash_out": 10650.0,
+    "cash_out_detail": {
+     "Meat & production runs": 7800,
+     "Bags & labels": 0,
+     "Ads & creators": 950.0,
+     "Payroll": 0,
+     "Rent, software, other": 650,
+     "Shipping & card fees": 1250
+    },
+    "net": 1660.0,
+    "ending_cash": 32899.06
+   },
+   {
+    "week_of": "2026-11-30",
+    "label": "11/30",
+    "cash_in": 11420.0,
+    "cash_in_detail": {
+     "Shopify payouts (site + subscriptions)": 7120.0,
+     "Store payments": 3400,
+     "Wholesale & bulk": 900
+    },
+    "cash_out": 6300.0,
+    "cash_out_detail": {
+     "Meat & production runs": 0,
+     "Bags & labels": 0,
+     "Ads & creators": 1200.0,
+     "Payroll": 3200,
+     "Rent, software, other": 650,
+     "Shipping & card fees": 1250
+    },
+    "net": 5120.0,
+    "ending_cash": 38019.06
+   },
+   {
+    "week_of": "2026-12-07",
+    "label": "12/7",
+    "cash_in": 13350.0,
+    "cash_in_detail": {
+     "Shopify payouts (site + subscriptions)": 9950.0,
+     "Store payments": 3400,
+     "Wholesale & bulk": 0
+    },
+    "cash_out": 11740.0,
+    "cash_out_detail": {
+     "Meat & production runs": 8600,
+     "Bags & labels": 0,
+     "Ads & creators": 940.0,
+     "Payroll": 0,
+     "Rent, software, other": 650,
+     "Shipping & card fees": 1550
+    },
+    "net": 1610.0,
+    "ending_cash": 39629.06
+   },
+   {
+    "week_of": "2026-12-14",
+    "label": "12/14",
+    "cash_in": 15180.0,
+    "cash_in_detail": {
+     "Shopify payouts (site + subscriptions)": 10280.0,
+     "Store payments": 3400,
+     "Wholesale & bulk": 1500
+    },
+    "cash_out": 6500.0,
+    "cash_out_detail": {
+     "Meat & production runs": 0,
+     "Bags & labels": 0,
+     "Ads & creators": 1100.0,
+     "Payroll": 3200,
+     "Rent, software, other": 650,
+     "Shipping & card fees": 1550
+    },
+    "net": 8680.0,
+    "ending_cash": 48309.06
+   },
+   {
+    "week_of": "2026-12-21",
+    "label": "12/21",
+    "cash_in": 15890.0,
+    "cash_in_detail": {
+     "Shopify payouts (site + subscriptions)": 9390.0,
+     "Store payments": 4100,
+     "Wholesale & bulk": 2400
+    },
+    "cash_out": 12450.0,
+    "cash_out_detail": {
+     "Meat & production runs": 9400,
+     "Bags & labels": 0,
+     "Ads & creators": 850.0,
+     "Payroll": 0,
+     "Rent, software, other": 650,
+     "Shipping & card fees": 1550
+    },
+    "net": 3440.0,
+    "ending_cash": 51749.06
+   },
+   {
+    "week_of": "2026-12-28",
+    "label": "12/28",
+    "cash_in": 15660.0,
+    "cash_in_detail": {
+     "Shopify payouts (site + subscriptions)": 10660.0,
+     "Store payments": 4100,
+     "Wholesale & bulk": 900
+    },
+    "cash_out": 6440.0,
+    "cash_out_detail": {
+     "Meat & production runs": 0,
+     "Bags & labels": 0,
+     "Ads & creators": 1040.0,
+     "Payroll": 3200,
+     "Rent, software, other": 650,
+     "Shipping & card fees": 1550
+    },
+    "net": 9220.0,
+    "ending_cash": 60969.06
+   }
+  ],
+  "lowest_week": {
+   "week_of": "2026-11-09",
+   "ending_cash": 22799.06
+  }
+ },
+ "products": [
+  {
+   "sku_sample": "PK-1CB",
+   "name": "1st Cut Brisket",
+   "protein": "Beef",
+   "size": "2 oz bag",
+   "real": {
+    "price_per_bag_build_your_own": 15.99,
+    "pack_5": 79.95,
+    "pack_10": 159.9,
+    "pack_20": 319.8,
+    "price_per_bag_in_packs": 15.99,
+    "on_site_since": "2024-11",
+    "note": "Real, from primalkrisp.com, Oct 16 2026"
+   },
+   "fictitious": {
+    "cost_per_bag": {
+     "meat": 5.05,
+     "spices_salt": 0.08,
+     "bag_and_label": 0.42,
+     "co_pack_labor": 1.1,
+     "kosher_supervision": 0.2,
+     "total": 6.85
+    },
+    "store_price_per_bag": 9.5,
+    "tasting_price_per_bag": 10.0
+   }
+  },
+  {
+   "sku_sample": "PK-2CB",
+   "name": "2nd Cut Brisket",
+   "protein": "Beef",
+   "size": "2 oz bag",
+   "real": {
+    "price_per_bag_build_your_own": 15.99,
+    "pack_5": 79.95,
+    "pack_10": 159.9,
+    "pack_20": 319.8,
+    "price_per_bag_in_packs": 15.99,
+    "on_site_since": "2024-12",
+    "note": "Real, from primalkrisp.com, Oct 16 2026"
+   },
+   "fictitious": {
+    "cost_per_bag": {
+     "meat": 5.05,
+     "spices_salt": 0.08,
+     "bag_and_label": 0.42,
+     "co_pack_labor": 1.1,
+     "kosher_supervision": 0.2,
+     "total": 6.85
+    },
+    "store_price_per_bag": 9.5,
+    "tasting_price_per_bag": 10.0
+   }
+  },
+  {
+   "sku_sample": "PK-TXH",
+   "name": "Texas Heat",
+   "protein": "Beef",
+   "size": "2 oz bag",
+   "real": {
+    "price_per_bag_build_your_own": 15.99,
+    "pack_5": 79.95,
+    "pack_10": 159.9,
+    "pack_20": 319.8,
+    "price_per_bag_in_packs": 15.99,
+    "on_site_since": "2025-07",
+    "note": "Real, from primalkrisp.com, Oct 16 2026"
+   },
+   "fictitious": {
+    "cost_per_bag": {
+     "meat": 5.05,
+     "spices_salt": 0.08,
+     "bag_and_label": 0.42,
+     "co_pack_labor": 1.1,
+     "kosher_supervision": 0.2,
+     "total": 6.85
+    },
+    "store_price_per_bag": 9.5,
+    "tasting_price_per_bag": 10.0
+   }
+  },
+  {
+   "sku_sample": "PK-CLC",
+   "name": "Classic Chicken",
+   "protein": "Chicken",
+   "size": "2 oz bag",
+   "real": {
+    "price_per_bag_build_your_own": 13.99,
+    "pack_5": 69.95,
+    "pack_10": 139.9,
+    "pack_20": 279.8,
+    "price_per_bag_in_packs": 13.99,
+    "on_site_since": "2024-12",
+    "note": "Real, from primalkrisp.com, Oct 16 2026"
+   },
+   "fictitious": {
+    "cost_per_bag": {
+     "meat": 2.85,
+     "spices_salt": 0.22,
+     "bag_and_label": 0.42,
+     "co_pack_labor": 1.05,
+     "kosher_supervision": 0.2,
+     "total": 4.74
+    },
+    "store_price_per_bag": 8.25,
+    "tasting_price_per_bag": 9.0
+   }
+  },
+  {
+   "sku_sample": "PK-BBQ",
+   "name": "BBQ Chicken",
+   "protein": "Chicken",
+   "size": "2 oz bag",
+   "real": {
+    "price_per_bag_build_your_own": 13.99,
+    "pack_5": 69.95,
+    "pack_10": 139.9,
+    "pack_20": 279.8,
+    "price_per_bag_in_packs": 13.99,
+    "on_site_since": "2024-12",
+    "note": "Real, from primalkrisp.com, Oct 16 2026"
+   },
+   "fictitious": {
+    "cost_per_bag": {
+     "meat": 2.85,
+     "spices_salt": 0.22,
+     "bag_and_label": 0.42,
+     "co_pack_labor": 1.05,
+     "kosher_supervision": 0.2,
+     "total": 4.74
+    },
+    "store_price_per_bag": 8.25,
+    "tasting_price_per_bag": 9.0
+   }
+  },
+  {
+   "sku_sample": "PK-SHW",
+   "name": "Shawarma Chicken",
+   "protein": "Chicken",
+   "size": "2 oz bag",
+   "real": {
+    "price_per_bag_build_your_own": 13.99,
+    "pack_5": 69.95,
+    "pack_10": 139.9,
+    "pack_20": 279.8,
+    "price_per_bag_in_packs": 13.99,
+    "on_site_since": "2026-06",
+    "note": "Real, from primalkrisp.com, Oct 16 2026; newest flavor"
+   },
+   "fictitious": {
+    "cost_per_bag": {
+     "meat": 2.85,
+     "spices_salt": 0.22,
+     "bag_and_label": 0.42,
+     "co_pack_labor": 1.05,
+     "kosher_supervision": 0.2,
+     "total": 4.74
+    },
+    "store_price_per_bag": 8.25,
+    "tasting_price_per_bag": 9.0
+   }
+  }
+ ],
+ "bundles": [
+  {
+   "name": "Taster Bundle",
+   "contents": "5 bags, one of each flavor (per site; site lists 6 flavors now)",
+   "price": 79.99
+  },
+  {
+   "name": "Beef Variety Bundle",
+   "contents": "6 beef bags, 2 of each beef flavor",
+   "price": 89.99,
+   "compare_at": 91.94
+  },
+  {
+   "name": "Chicken Variety Bundle",
+   "contents": "6 chicken bags, 2 of each chicken flavor",
+   "price": 79.99,
+   "compare_at": 83.94
+  },
+  {
+   "name": "Build My Own Bundle",
+   "contents": "pick 5, 10 or 20 bags; beef $15.99/bag, chicken $13.99/bag",
+   "price": null
+  },
+  {
+   "name": "Gift Card",
+   "contents": "$50 to $500",
+   "price": null
+  }
+ ],
+ "subscription_terms_real": "Subscribe & Save: 6% off, every 14, 30, 45 or 60 days, free shipping on subscriptions, pause/skip/cancel anytime (real, from primalkrisp.com)",
+ "product_margins_by_channel": [
+  {
+   "product": "1st Cut Brisket",
+   "protein": "Beef",
+   "cost_per_bag": 6.85,
+   "channels": {
+    "Website": {
+     "net_price_per_bag": 14.87,
+     "landed_cost_per_bag": 8.95,
+     "margin_per_bag": 5.92,
+     "margin_pct": 39.8,
+     "bags_sold_sept": 335
+    },
+    "Subscriptions": {
+     "net_price_per_bag": 15.03,
+     "landed_cost_per_bag": 9.2,
+     "margin_per_bag": 5.83,
+     "margin_pct": 38.8,
+     "bags_sold_sept": 215
+    },
+    "Stores": {
+     "net_price_per_bag": 9.5,
+     "landed_cost_per_bag": 7.2,
+     "margin_per_bag": 2.3,
+     "margin_pct": 24.2,
+     "bags_sold_sept": 483
+    },
+    "Wholesale & bulk": {
+     "net_price_per_bag": 8.75,
+     "landed_cost_per_bag": 7.15,
+     "margin_per_bag": 1.6,
+     "margin_pct": 18.3,
+     "bags_sold_sept": 127
+    },
+    "Tastings & events": {
+     "net_price_per_bag": 10.0,
+     "landed_cost_per_bag": 7.15,
+     "margin_per_bag": 2.85,
+     "margin_pct": 28.5,
+     "bags_sold_sept": 29
+    }
+   },
+   "bags_sold_sept_all_channels": 1189
+  },
+  {
+   "product": "2nd Cut Brisket",
+   "protein": "Beef",
+   "cost_per_bag": 6.85,
+   "channels": {
+    "Website": {
+     "net_price_per_bag": 14.87,
+     "landed_cost_per_bag": 8.95,
+     "margin_per_bag": 5.92,
+     "margin_pct": 39.8,
+     "bags_sold_sept": 167
+    },
+    "Subscriptions": {
+     "net_price_per_bag": 15.03,
+     "landed_cost_per_bag": 9.2,
+     "margin_per_bag": 5.83,
+     "margin_pct": 38.8,
+     "bags_sold_sept": 107
+    },
+    "Stores": {
+     "net_price_per_bag": 9.5,
+     "landed_cost_per_bag": 7.2,
+     "margin_per_bag": 2.3,
+     "margin_pct": 24.2,
+     "bags_sold_sept": 242
+    },
+    "Wholesale & bulk": {
+     "net_price_per_bag": 8.75,
+     "landed_cost_per_bag": 7.15,
+     "margin_per_bag": 1.6,
+     "margin_pct": 18.3,
+     "bags_sold_sept": 64
+    },
+    "Tastings & events": {
+     "net_price_per_bag": 10.0,
+     "landed_cost_per_bag": 7.15,
+     "margin_per_bag": 2.85,
+     "margin_pct": 28.5,
+     "bags_sold_sept": 14
+    }
+   },
+   "bags_sold_sept_all_channels": 594
+  },
+  {
+   "product": "Texas Heat",
+   "protein": "Beef",
+   "cost_per_bag": 6.85,
+   "channels": {
+    "Website": {
+     "net_price_per_bag": 14.87,
+     "landed_cost_per_bag": 8.95,
+     "margin_per_bag": 5.92,
+     "margin_pct": 39.8,
+     "bags_sold_sept": 223
+    },
+    "Subscriptions": {
+     "net_price_per_bag": 15.03,
+     "landed_cost_per_bag": 9.2,
+     "margin_per_bag": 5.83,
+     "margin_pct": 38.8,
+     "bags_sold_sept": 143
+    },
+    "Stores": {
+     "net_price_per_bag": 9.5,
+     "landed_cost_per_bag": 7.2,
+     "margin_per_bag": 2.3,
+     "margin_pct": 24.2,
+     "bags_sold_sept": 322
+    },
+    "Wholesale & bulk": {
+     "net_price_per_bag": 8.75,
+     "landed_cost_per_bag": 7.15,
+     "margin_per_bag": 1.6,
+     "margin_pct": 18.3,
+     "bags_sold_sept": 85
+    },
+    "Tastings & events": {
+     "net_price_per_bag": 10.0,
+     "landed_cost_per_bag": 7.15,
+     "margin_per_bag": 2.85,
+     "margin_pct": 28.5,
+     "bags_sold_sept": 19
+    }
+   },
+   "bags_sold_sept_all_channels": 792
+  },
+  {
+   "product": "Classic Chicken",
+   "protein": "Chicken",
+   "cost_per_bag": 4.74,
+   "channels": {
+    "Website": {
+     "net_price_per_bag": 13.01,
+     "landed_cost_per_bag": 6.78,
+     "margin_per_bag": 6.23,
+     "margin_pct": 47.9,
+     "bags_sold_sept": 167
+    },
+    "Subscriptions": {
+     "net_price_per_bag": 13.15,
+     "landed_cost_per_bag": 7.03,
+     "margin_per_bag": 6.12,
+     "margin_pct": 46.5,
+     "bags_sold_sept": 107
+    },
+    "Stores": {
+     "net_price_per_bag": 8.25,
+     "landed_cost_per_bag": 5.09,
+     "margin_per_bag": 3.16,
+     "margin_pct": 38.3,
+     "bags_sold_sept": 242
+    },
+    "Wholesale & bulk": {
+     "net_price_per_bag": 7.5,
+     "landed_cost_per_bag": 5.04,
+     "margin_per_bag": 2.46,
+     "margin_pct": 32.8,
+     "bags_sold_sept": 64
+    },
+    "Tastings & events": {
+     "net_price_per_bag": 9.0,
+     "landed_cost_per_bag": 5.01,
+     "margin_per_bag": 3.99,
+     "margin_pct": 44.3,
+     "bags_sold_sept": 14
+    }
+   },
+   "bags_sold_sept_all_channels": 594
+  },
+  {
+   "product": "BBQ Chicken",
+   "protein": "Chicken",
+   "cost_per_bag": 4.74,
+   "channels": {
+    "Website": {
+     "net_price_per_bag": 13.01,
+     "landed_cost_per_bag": 6.78,
+     "margin_per_bag": 6.23,
+     "margin_pct": 47.9,
+     "bags_sold_sept": 209
+    },
+    "Subscriptions": {
+     "net_price_per_bag": 13.15,
+     "landed_cost_per_bag": 7.03,
+     "margin_per_bag": 6.12,
+     "margin_pct": 46.5,
+     "bags_sold_sept": 134
+    },
+    "Stores": {
+     "net_price_per_bag": 8.25,
+     "landed_cost_per_bag": 5.09,
+     "margin_per_bag": 3.16,
+     "margin_pct": 38.3,
+     "bags_sold_sept": 302
+    },
+    "Wholesale & bulk": {
+     "net_price_per_bag": 7.5,
+     "landed_cost_per_bag": 5.04,
+     "margin_per_bag": 2.46,
+     "margin_pct": 32.8,
+     "bags_sold_sept": 80
+    },
+    "Tastings & events": {
+     "net_price_per_bag": 9.0,
+     "landed_cost_per_bag": 5.01,
+     "margin_per_bag": 3.99,
+     "margin_pct": 44.3,
+     "bags_sold_sept": 18
+    }
+   },
+   "bags_sold_sept_all_channels": 743
+  },
+  {
+   "product": "Shawarma Chicken",
+   "protein": "Chicken",
+   "cost_per_bag": 4.74,
+   "channels": {
+    "Website": {
+     "net_price_per_bag": 13.01,
+     "landed_cost_per_bag": 6.78,
+     "margin_per_bag": 6.23,
+     "margin_pct": 47.9,
+     "bags_sold_sept": 293
+    },
+    "Subscriptions": {
+     "net_price_per_bag": 13.15,
+     "landed_cost_per_bag": 7.03,
+     "margin_per_bag": 6.12,
+     "margin_pct": 46.5,
+     "bags_sold_sept": 188
+    },
+    "Stores": {
+     "net_price_per_bag": 8.25,
+     "landed_cost_per_bag": 5.09,
+     "margin_per_bag": 3.16,
+     "margin_pct": 38.3,
+     "bags_sold_sept": 423
+    },
+    "Wholesale & bulk": {
+     "net_price_per_bag": 7.5,
+     "landed_cost_per_bag": 5.04,
+     "margin_per_bag": 2.46,
+     "margin_pct": 32.8,
+     "bags_sold_sept": 111
+    },
+    "Tastings & events": {
+     "net_price_per_bag": 9.0,
+     "landed_cost_per_bag": 5.01,
+     "margin_per_bag": 3.99,
+     "margin_pct": 44.3,
+     "bags_sold_sept": 25
+    }
+   },
+   "bags_sold_sept_all_channels": 1040
+  }
+ ],
+ "stores": {
+  "count": 43,
+  "by_region": {
+   "Brooklyn": 6,
+   "Five Towns, NY": 4,
+   "Florida": 5,
+   "Manhattan & Bronx": 2,
+   "North NJ": 3,
+   "Ocean & Monmouth, NJ": 10,
+   "Other states": 7,
+   "Queens": 3,
+   "Rockland, NY": 3
+  },
+  "terms_note": "Store terms are fictitious. Whether Primal Krisp sells to stores on invoice or consignment is not public; the sample shows both.",
+  "ar_aging": {
+   "0-30": 5320.08,
+   "31-60": 5867.28,
+   "61-90": 3214.08
+  },
+  "open_balance_total": 14401.44,
+  "list": [
+   {
+    "name": "Einhorn's Supermarket - Boro Park",
+    "address": "5216 16th Ave, Brooklyn, NY",
+    "city": "Brooklyn",
+    "state": "NY",
+    "region": "Brooklyn",
+    "phone": "(718) 851-7629",
+    "real": true,
+    "sample": {
+     "terms": "Consignment (paid on count)",
+     "price_per_bag": 8.88,
+     "cases_sent_sept": 5,
+     "bags_per_case": 12,
+     "bags_sold_sept": 45,
+     "on_shelf_last_count": 28,
+     "bags_unaccounted": 2,
+     "last_delivery": "2026-09-04",
+     "last_count": "2026-09-23",
+     "days_of_stock_on_shelf": 18.7,
+     "open_invoices": [
+      {
+       "invoice": "PK-1041",
+       "issued": "2026-09-22",
+       "amount": 639.36,
+       "days_outstanding": 8
+      },
+      {
+       "invoice": "PK-1042",
+       "issued": "2026-09-04",
+       "amount": 213.12,
+       "days_outstanding": 26
+      }
+     ],
+     "open_balance": 852.48,
+     "reorder_flag": "OK",
+     "count_flag": "2 bags unaccounted",
+     "best_seller_here": "1st Cut Brisket",
+     "sales_sept": 399.6,
+     "open_balance_label": "sold since last count, not yet paid"
+    }
+   },
+   {
+    "name": "Glatt Mart - Flatbush",
+    "address": "1205 Avenue M",
+    "city": "Brooklyn",
+    "state": "NY",
+    "region": "Brooklyn",
+    "phone": null,
+    "real": true,
+    "sample": {
+     "terms": "Consignment (paid on count)",
+     "price_per_bag": 8.88,
+     "cases_sent_sept": 5,
+     "bags_per_case": 12,
+     "bags_sold_sept": 49,
+     "on_shelf_last_count": 36,
+     "bags_unaccounted": 2,
+     "last_delivery": "2026-09-13",
+     "last_count": "2026-09-29",
+     "days_of_stock_on_shelf": 22.0,
+     "open_invoices": [
+      {
+       "invoice": "PK-1043",
+       "issued": "2026-09-22",
+       "amount": 639.36,
+       "days_outstanding": 8
+      },
+      {
+       "invoice": "PK-1044",
+       "issued": "2026-08-13",
+       "amount": 213.12,
+       "days_outstanding": 48
+      }
+     ],
+     "open_balance": 852.48,
+     "reorder_flag": "OK",
+     "count_flag": "2 bags unaccounted",
+     "best_seller_here": "1st Cut Brisket",
+     "sales_sept": 435.12,
+     "open_balance_label": "sold since last count, not yet paid"
+    }
+   },
+   {
+    "name": "Kahan's Superette - Crown Heights",
+    "address": "317 Kingston Ave",
+    "city": "Brooklyn",
+    "state": "NY",
+    "region": "Brooklyn",
+    "phone": "(718) 756-2999",
+    "real": true,
+    "sample": {
+     "terms": "Consignment (paid on count)",
+     "price_per_bag": 8.62,
+     "cases_sent_sept": 6,
+     "bags_per_case": 12,
+     "bags_sold_sept": 55,
+     "on_shelf_last_count": 59,
+     "bags_unaccounted": 0,
+     "last_delivery": "2026-09-16",
+     "last_count": "2026-09-26",
+     "days_of_stock_on_shelf": 32.2,
+     "open_invoices": [],
+     "open_balance": 0,
+     "reorder_flag": "OK",
+     "count_flag": null,
+     "best_seller_here": "Shawarma Chicken",
+     "sales_sept": 474.1,
+     "open_balance_label": "sold since last count, not yet paid"
+    }
+   },
+   {
+    "name": "Pomegranate - Flatbush",
+    "address": "1507 Coney Island Ave",
+    "city": "Brooklyn",
+    "state": "NY",
+    "region": "Brooklyn",
+    "phone": "(718) 951-7112",
+    "real": true,
+    "sample": {
+     "terms": "Net 30 invoice",
+     "price_per_bag": 8.88,
+     "cases_sent_sept": 5,
+     "bags_per_case": 12,
+     "bags_sold_sept": 47,
+     "on_shelf_last_count": 30,
+     "bags_unaccounted": 0,
+     "last_delivery": "2026-08-27",
+     "last_count": "2026-09-24",
+     "days_of_stock_on_shelf": 19.1,
+     "open_invoices": [
+      {
+       "invoice": "PK-1045",
+       "issued": "2026-08-13",
+       "amount": 426.24,
+       "days_outstanding": 48
+      },
+      {
+       "invoice": "PK-1046",
+       "issued": "2026-07-29",
+       "amount": 639.36,
+       "days_outstanding": 63
+      }
+     ],
+     "open_balance": 1065.6,
+     "reorder_flag": "OK",
+     "count_flag": null,
+     "best_seller_here": "BBQ Chicken",
+     "sales_sept": 417.36
+    }
+   },
+   {
+    "name": "Schwartz Appetizing - Flatbush",
+    "address": "3008 Avenue L",
+    "city": "Brooklyn",
+    "state": "NY",
+    "region": "Brooklyn",
+    "phone": "(718) 951-8575",
+    "real": true,
+    "sample": {
+     "terms": "Net 30 invoice",
+     "price_per_bag": 9.12,
+     "cases_sent_sept": 4,
+     "bags_per_case": 12,
+     "bags_sold_sept": 44,
+     "on_shelf_last_count": 30,
+     "bags_unaccounted": 0,
+     "last_delivery": "2026-09-06",
+     "last_count": "2026-09-28",
+     "days_of_stock_on_shelf": 20.5,
+     "open_invoices": [
+      {
+       "invoice": "PK-1047",
+       "issued": "2026-08-28",
+       "amount": 656.64,
+       "days_outstanding": 33
+      }
+     ],
+     "open_balance": 656.64,
+     "reorder_flag": "OK",
+     "count_flag": null,
+     "best_seller_here": "1st Cut Brisket",
+     "sales_sept": 401.28
+    }
+   },
+   {
+    "name": "The Market Place - Crown Heights",
+    "address": "589 E New York Ave",
+    "city": "Brooklyn",
+    "state": "NY",
+    "region": "Brooklyn",
+    "phone": "(718) 363-1300",
+    "real": true,
+    "sample": {
+     "terms": "Consignment (paid on count)",
+     "price_per_bag": 9.12,
+     "cases_sent_sept": 5,
+     "bags_per_case": 12,
+     "bags_sold_sept": 53,
+     "on_shelf_last_count": 40,
+     "bags_unaccounted": 1,
+     "last_delivery": "2026-09-25",
+     "last_count": "2026-09-21",
+     "days_of_stock_on_shelf": 22.6,
+     "open_invoices": [],
+     "open_balance": 0,
+     "reorder_flag": "OK",
+     "count_flag": "1 bags unaccounted",
+     "best_seller_here": "Classic Chicken",
+     "sales_sept": 483.36,
+     "open_balance_label": "sold since last count, not yet paid"
+    }
+   },
+   {
+    "name": "Gourmet Glatt - Cedarhurst",
+    "address": "137 Spruce St",
+    "city": "Cedarhurst",
+    "state": "NY",
+    "region": "Five Towns, NY",
+    "phone": "(516) 569-2662",
+    "real": true,
+    "sample": {
+     "terms": "Net 15 invoice",
+     "price_per_bag": 9.12,
+     "cases_sent_sept": 5,
+     "bags_per_case": 12,
+     "bags_sold_sept": 51,
+     "on_shelf_last_count": 19,
+     "bags_unaccounted": 0,
+     "last_delivery": "2026-08-29",
+     "last_count": "2026-09-28",
+     "days_of_stock_on_shelf": 11.2,
+     "open_invoices": [],
+     "open_balance": 0,
+     "reorder_flag": "OK",
+     "count_flag": null,
+     "best_seller_here": "Classic Chicken",
+     "sales_sept": 465.12
+    }
+   },
+   {
+    "name": "Gourmet Glatt - Woodmere",
+    "address": "1030 Railroad Ave",
+    "city": "Woodmere",
+    "state": "NY",
+    "region": "Five Towns, NY",
+    "phone": "(516) 295-6901",
+    "real": true,
+    "sample": {
+     "terms": "Net 30 invoice",
+     "price_per_bag": 8.62,
+     "cases_sent_sept": 5,
+     "bags_per_case": 12,
+     "bags_sold_sept": 65,
+     "on_shelf_last_count": 45,
+     "bags_unaccounted": 0,
+     "last_delivery": "2026-08-30",
+     "last_count": "2026-09-22",
+     "days_of_stock_on_shelf": 20.8,
+     "open_invoices": [
+      {
+       "invoice": "PK-1048",
+       "issued": "2026-08-13",
+       "amount": 413.76,
+       "days_outstanding": 48
+      }
+     ],
+     "open_balance": 413.76,
+     "reorder_flag": "OK",
+     "count_flag": null,
+     "best_seller_here": "1st Cut Brisket",
+     "sales_sept": 560.3
+    }
+   },
+   {
+    "name": "Manna Health Market - 5 Towns",
+    "address": "351 Central Ave",
+    "city": "Lawrence",
+    "state": "NY",
+    "region": "Five Towns, NY",
+    "phone": "(516) 758-7331",
+    "real": true,
+    "sample": {
+     "terms": "COD",
+     "price_per_bag": 8.62,
+     "cases_sent_sept": 4,
+     "bags_per_case": 12,
+     "bags_sold_sept": 42,
+     "on_shelf_last_count": 34,
+     "bags_unaccounted": 0,
+     "last_delivery": "2026-09-19",
+     "last_count": "2026-09-26",
+     "days_of_stock_on_shelf": 24.3,
+     "open_invoices": [],
+     "open_balance": 0,
+     "reorder_flag": "OK",
+     "count_flag": null,
+     "best_seller_here": "2nd Cut Brisket",
+     "sales_sept": 362.04
+    }
+   },
+   {
+    "name": "Seasons - Lawrence",
+    "address": "330 Central Ave",
+    "city": "Lawrence",
+    "state": "NY",
+    "region": "Five Towns, NY",
+    "phone": "(516) 295-3300",
+    "real": true,
+    "sample": {
+     "terms": "COD",
+     "price_per_bag": 9.12,
+     "cases_sent_sept": 4,
+     "bags_per_case": 12,
+     "bags_sold_sept": 44,
+     "on_shelf_last_count": 42,
+     "bags_unaccounted": 0,
+     "last_delivery": "2026-09-10",
+     "last_count": "2026-09-23",
+     "days_of_stock_on_shelf": 28.6,
+     "open_invoices": [],
+     "open_balance": 0,
+     "reorder_flag": "OK",
+     "count_flag": null,
+     "best_seller_here": "1st Cut Brisket",
+     "sales_sept": 401.28
+    }
+   },
+   {
+    "name": "Bereli - Hollywood FL",
+    "address": "2033 Thomas St",
+    "city": "Hollywood",
+    "state": "FL",
+    "region": "Florida",
+    "phone": "(305) 504-8585",
+    "real": true,
+    "sample": {
+     "terms": "COD",
+     "price_per_bag": 9.12,
+     "cases_sent_sept": 4,
+     "bags_per_case": 12,
+     "bags_sold_sept": 43,
+     "on_shelf_last_count": 12,
+     "bags_unaccounted": 0,
+     "last_delivery": "2026-09-13",
+     "last_count": "2026-09-28",
+     "days_of_stock_on_shelf": 8.4,
+     "open_invoices": [],
+     "open_balance": 0,
+     "reorder_flag": "Reorder soon",
+     "count_flag": null,
+     "best_seller_here": "1st Cut Brisket",
+     "sales_sept": 392.16
+    }
+   },
+   {
+    "name": "Kosher Kingdom - Aventura",
+    "address": "3017 NE 199th St",
+    "city": "Miami",
+    "state": "FL",
+    "region": "Florida",
+    "phone": "(305)-792-7988",
+    "real": true,
+    "sample": {
+     "terms": "Consignment (paid on count)",
+     "price_per_bag": 8.88,
+     "cases_sent_sept": 3,
+     "bags_per_case": 12,
+     "bags_sold_sept": 25,
+     "on_shelf_last_count": 12,
+     "bags_unaccounted": 2,
+     "last_delivery": "2026-09-11",
+     "last_count": "2026-09-21",
+     "days_of_stock_on_shelf": 14.4,
+     "open_invoices": [
+      {
+       "invoice": "PK-1049",
+       "issued": "2026-09-22",
+       "amount": 319.68,
+       "days_outstanding": 8
+      }
+     ],
+     "open_balance": 319.68,
+     "reorder_flag": "OK",
+     "count_flag": "2 bags unaccounted",
+     "best_seller_here": "BBQ Chicken",
+     "sales_sept": 222.0,
+     "open_balance_label": "sold since last count, not yet paid"
+    }
+   },
+   {
+    "name": "The Grove - Boca",
+    "address": "22191 Powerline Rd",
+    "city": "Boca Raton",
+    "state": "FL",
+    "region": "Florida",
+    "phone": "(561) 620-7999",
+    "real": true,
+    "sample": {
+     "terms": "Net 30 invoice",
+     "price_per_bag": 8.88,
+     "cases_sent_sept": 4,
+     "bags_per_case": 12,
+     "bags_sold_sept": 30,
+     "on_shelf_last_count": 9,
+     "bags_unaccounted": 0,
+     "last_delivery": "2026-08-29",
+     "last_count": "2026-09-22",
+     "days_of_stock_on_shelf": 9.0,
+     "open_invoices": [
+      {
+       "invoice": "PK-1050",
+       "issued": "2026-08-13",
+       "amount": 532.8,
+       "days_outstanding": 48
+      },
+      {
+       "invoice": "PK-1051",
+       "issued": "2026-08-13",
+       "amount": 532.8,
+       "days_outstanding": 48
+      }
+     ],
+     "open_balance": 1065.6,
+     "reorder_flag": "Reorder soon",
+     "count_flag": null,
+     "best_seller_here": "1st Cut Brisket",
+     "sales_sept": 266.4
+    }
+   },
+   {
+    "name": "The Grove - Hollywood",
+    "address": "2889 Stirling Rd",
+    "city": "Fort Lauderdale",
+    "state": "FL",
+    "region": "Florida",
+    "phone": "(954) 544-5210",
+    "real": true,
+    "sample": {
+     "terms": "Consignment (paid on count)",
+     "price_per_bag": 8.88,
+     "cases_sent_sept": 3,
+     "bags_per_case": 12,
+     "bags_sold_sept": 37,
+     "on_shelf_last_count": 36,
+     "bags_unaccounted": 1,
+     "last_delivery": "2026-09-20",
+     "last_count": "2026-09-27",
+     "days_of_stock_on_shelf": 29.2,
+     "open_invoices": [
+      {
+       "invoice": "PK-1052",
+       "issued": "2026-09-22",
+       "amount": 213.12,
+       "days_outstanding": 8
+      }
+     ],
+     "open_balance": 213.12,
+     "reorder_flag": "OK",
+     "count_flag": "1 bags unaccounted",
+     "best_seller_here": "1st Cut Brisket",
+     "sales_sept": 328.56,
+     "open_balance_label": "sold since last count, not yet paid"
+    }
+   },
+   {
+    "name": "The Grove - Surfside",
+    "address": "9467 Harding Ave",
+    "city": "Surfside",
+    "state": "FL",
+    "region": "Florida",
+    "phone": "(305) 866-6993",
+    "real": true,
+    "sample": {
+     "terms": "Net 30 invoice",
+     "price_per_bag": 9.12,
+     "cases_sent_sept": 3,
+     "bags_per_case": 12,
+     "bags_sold_sept": 35,
+     "on_shelf_last_count": 30,
+     "bags_unaccounted": 0,
+     "last_delivery": "2026-09-18",
+     "last_count": "2026-09-22",
+     "days_of_stock_on_shelf": 25.7,
+     "open_invoices": [
+      {
+       "invoice": "PK-1053",
+       "issued": "2026-08-20",
+       "amount": 656.64,
+       "days_outstanding": 41
+      }
+     ],
+     "open_balance": 656.64,
+     "reorder_flag": "OK",
+     "count_flag": null,
+     "best_seller_here": "Texas Heat",
+     "sales_sept": 319.2
+    }
+   },
+   {
+    "name": "Riverdale Kosher Market",
+    "address": "5683 Riverdale Ave",
+    "city": "Bronx",
+    "state": "NY",
+    "region": "Manhattan & Bronx",
+    "phone": "(718) 884-2222",
+    "real": true,
+    "sample": {
+     "terms": "COD",
+     "price_per_bag": 8.88,
+     "cases_sent_sept": 3,
+     "bags_per_case": 12,
+     "bags_sold_sept": 20,
+     "on_shelf_last_count": 5,
+     "bags_unaccounted": 0,
+     "last_delivery": "2026-09-18",
+     "last_count": "2026-09-24",
+     "days_of_stock_on_shelf": 7.5,
+     "open_invoices": [],
+     "open_balance": 0,
+     "reorder_flag": "Reorder soon",
+     "count_flag": null,
+     "best_seller_here": "1st Cut Brisket",
+     "sales_sept": 177.6
+    }
+   },
+   {
+    "name": "SIX 60 ONE - NYC",
+    "address": "661 Amsterdam Ave",
+    "city": "New York",
+    "state": "NY",
+    "region": "Manhattan & Bronx",
+    "phone": "(212) 222-6332",
+    "real": true,
+    "sample": {
+     "terms": "Net 30 invoice",
+     "price_per_bag": 8.62,
+     "cases_sent_sept": 4,
+     "bags_per_case": 12,
+     "bags_sold_sept": 34,
+     "on_shelf_last_count": 39,
+     "bags_unaccounted": 0,
+     "last_delivery": "2026-09-18",
+     "last_count": "2026-09-25",
+     "days_of_stock_on_shelf": 34.4,
+     "open_invoices": [
+      {
+       "invoice": "PK-1054",
+       "issued": "2026-09-22",
+       "amount": 620.64,
+       "days_outstanding": 8
+      },
+      {
+       "invoice": "PK-1055",
+       "issued": "2026-08-28",
+       "amount": 206.88,
+       "days_outstanding": 33
+      }
+     ],
+     "open_balance": 827.52,
+     "reorder_flag": "OK",
+     "count_flag": null,
+     "best_seller_here": "2nd Cut Brisket",
+     "sales_sept": 293.08
+    }
+   },
+   {
+    "name": "Aisle One - Passaic",
+    "address": "217 Brook Ave",
+    "city": "Passaic",
+    "state": "NJ",
+    "region": "North NJ",
+    "phone": "(973) 952-6500",
+    "real": true,
+    "sample": {
+     "terms": "Net 15 invoice",
+     "price_per_bag": 8.62,
+     "cases_sent_sept": 5,
+     "bags_per_case": 12,
+     "bags_sold_sept": 49,
+     "on_shelf_last_count": 55,
+     "bags_unaccounted": 0,
+     "last_delivery": "2026-09-13",
+     "last_count": "2026-09-21",
+     "days_of_stock_on_shelf": 33.7,
+     "open_invoices": [
+      {
+       "invoice": "PK-1056",
+       "issued": "2026-09-04",
+       "amount": 310.32,
+       "days_outstanding": 26
+      },
+      {
+       "invoice": "PK-1057",
+       "issued": "2026-08-13",
+       "amount": 310.32,
+       "days_outstanding": 48
+      }
+     ],
+     "open_balance": 620.64,
+     "reorder_flag": "OK",
+     "count_flag": null,
+     "best_seller_here": "1st Cut Brisket",
+     "sales_sept": 422.38
+    }
+   },
+   {
+    "name": "Cedar Market - Teaneck",
+    "address": "646 Cedar Ln",
+    "city": "Teaneck",
+    "state": "NJ",
+    "region": "North NJ",
+    "phone": "(201) 855-8500",
+    "real": true,
+    "sample": {
+     "terms": "Net 30 invoice",
+     "price_per_bag": 8.88,
+     "cases_sent_sept": 5,
+     "bags_per_case": 12,
+     "bags_sold_sept": 48,
+     "on_shelf_last_count": 39,
+     "bags_unaccounted": 0,
+     "last_delivery": "2026-09-05",
+     "last_count": "2026-09-26",
+     "days_of_stock_on_shelf": 24.4,
+     "open_invoices": [
+      {
+       "invoice": "PK-1058",
+       "issued": "2026-08-20",
+       "amount": 426.24,
+       "days_outstanding": 41
+      }
+     ],
+     "open_balance": 426.24,
+     "reorder_flag": "OK",
+     "count_flag": null,
+     "best_seller_here": "1st Cut Brisket",
+     "sales_sept": 426.24
+    }
+   },
+   {
+    "name": "Glatt Express - Teaneck",
+    "address": "1400 Queen Anne Rd",
+    "city": "Teaneck",
+    "state": "NJ",
+    "region": "North NJ",
+    "phone": "(201) 837-8110",
+    "real": true,
+    "sample": {
+     "terms": "Net 15 invoice",
+     "price_per_bag": 8.88,
+     "cases_sent_sept": 3,
+     "bags_per_case": 12,
+     "bags_sold_sept": 33,
+     "on_shelf_last_count": 26,
+     "bags_unaccounted": 0,
+     "last_delivery": "2026-08-28",
+     "last_count": "2026-09-26",
+     "days_of_stock_on_shelf": 23.6,
+     "open_invoices": [
+      {
+       "invoice": "PK-1059",
+       "issued": "2026-09-18",
+       "amount": 213.12,
+       "days_outstanding": 12
+      }
+     ],
+     "open_balance": 213.12,
+     "reorder_flag": "OK",
+     "count_flag": null,
+     "best_seller_here": "BBQ Chicken",
+     "sales_sept": 293.04
+    }
+   },
+   {
+    "name": "Evergreen - Lakewood",
+    "address": "945 River Ave",
+    "city": "Lakewood",
+    "state": "NJ",
+    "region": "Ocean & Monmouth, NJ",
+    "phone": "732-370-4500",
+    "real": true,
+    "sample": {
+     "terms": "Consignment (paid on count)",
+     "price_per_bag": 9.12,
+     "cases_sent_sept": 8,
+     "bags_per_case": 12,
+     "bags_sold_sept": 75,
+     "on_shelf_last_count": 26,
+     "bags_unaccounted": 3,
+     "last_delivery": "2026-08-29",
+     "last_count": "2026-09-27",
+     "days_of_stock_on_shelf": 10.4,
+     "open_invoices": [
+      {
+       "invoice": "PK-1060",
+       "issued": "2026-09-18",
+       "amount": 328.32,
+       "days_outstanding": 12
+      }
+     ],
+     "open_balance": 328.32,
+     "reorder_flag": "Reorder soon",
+     "count_flag": "3 bags unaccounted",
+     "best_seller_here": "1st Cut Brisket",
+     "sales_sept": 684.0,
+     "open_balance_label": "sold since last count, not yet paid"
+    }
+   },
+   {
+    "name": "Exxon Rt 9 Lakewood",
+    "address": "1690 Madison Avenue",
+    "city": "Lakewood",
+    "state": "NJ",
+    "region": "Ocean & Monmouth, NJ",
+    "phone": null,
+    "real": true,
+    "sample": {
+     "terms": "COD",
+     "price_per_bag": 9.12,
+     "cases_sent_sept": 3,
+     "bags_per_case": 12,
+     "bags_sold_sept": 21,
+     "on_shelf_last_count": 4,
+     "bags_unaccounted": 0,
+     "last_delivery": "2026-09-05",
+     "last_count": "2026-09-21",
+     "days_of_stock_on_shelf": 5.7,
+     "open_invoices": [],
+     "open_balance": 0,
+     "reorder_flag": "Reorder now",
+     "count_flag": null,
+     "best_seller_here": "1st Cut Brisket",
+     "sales_sept": 191.52
+    }
+   },
+   {
+    "name": "Freddy’s on Monmouth",
+    "address": "52 Monmouth Rd",
+    "city": "Oakhurst",
+    "state": "NJ",
+    "region": "Ocean & Monmouth, NJ",
+    "phone": "(732) 483-4700",
+    "real": true,
+    "sample": {
+     "terms": "Consignment (paid on count)",
+     "price_per_bag": 8.88,
+     "cases_sent_sept": 8,
+     "bags_per_case": 12,
+     "bags_sold_sept": 80,
+     "on_shelf_last_count": 56,
+     "bags_unaccounted": 3,
+     "last_delivery": "2026-08-31",
+     "last_count": "2026-09-26",
+     "days_of_stock_on_shelf": 21.0,
+     "open_invoices": [
+      {
+       "invoice": "PK-1061",
+       "issued": "2026-09-04",
+       "amount": 213.12,
+       "days_outstanding": 26
+      }
+     ],
+     "open_balance": 213.12,
+     "reorder_flag": "OK",
+     "count_flag": "3 bags unaccounted",
+     "best_seller_here": "Texas Heat",
+     "sales_sept": 710.4,
+     "open_balance_label": "sold since last count, not yet paid"
+    }
+   },
+   {
+    "name": "Gourmet Glatt - Jackson",
+    "address": "2275 W County Line Rd",
+    "city": "Jackson Township",
+    "state": "NJ",
+    "region": "Ocean & Monmouth, NJ",
+    "phone": "(732) 961-1710",
+    "real": true,
+    "sample": {
+     "terms": "Consignment (paid on count)",
+     "price_per_bag": 9.12,
+     "cases_sent_sept": 7,
+     "bags_per_case": 12,
+     "bags_sold_sept": 64,
+     "on_shelf_last_count": 16,
+     "bags_unaccounted": 2,
+     "last_delivery": "2026-09-19",
+     "last_count": "2026-09-24",
+     "days_of_stock_on_shelf": 7.5,
+     "open_invoices": [],
+     "open_balance": 0,
+     "reorder_flag": "Reorder soon",
+     "count_flag": "2 bags unaccounted",
+     "best_seller_here": "2nd Cut Brisket",
+     "sales_sept": 583.68,
+     "open_balance_label": "sold since last count, not yet paid"
+    }
+   },
+   {
+    "name": "Gourmet Glatt North - Lakewood",
+    "address": "1700 Madison Avenue",
+    "city": "Lakewood",
+    "state": "NJ",
+    "region": "Ocean & Monmouth, NJ",
+    "phone": "(732) 961-1700",
+    "real": true,
+    "sample": {
+     "terms": "COD",
+     "price_per_bag": 8.88,
+     "cases_sent_sept": 10,
+     "bags_per_case": 12,
+     "bags_sold_sept": 101,
+     "on_shelf_last_count": 38,
+     "bags_unaccounted": 0,
+     "last_delivery": "2026-09-26",
+     "last_count": "2026-09-22",
+     "days_of_stock_on_shelf": 11.3,
+     "open_invoices": [],
+     "open_balance": 0,
+     "reorder_flag": "OK",
+     "count_flag": null,
+     "best_seller_here": "Classic Chicken",
+     "sales_sept": 896.88
+    }
+   },
+   {
+    "name": "Gourmet Glatt South - Lakewood",
+    "address": "1328 River Ave",
+    "city": "Lakewood",
+    "state": "NJ",
+    "region": "Ocean & Monmouth, NJ",
+    "phone": "(732) 961-1750",
+    "real": true,
+    "sample": {
+     "terms": "Net 30 invoice",
+     "price_per_bag": 8.88,
+     "cases_sent_sept": 8,
+     "bags_per_case": 12,
+     "bags_sold_sept": 94,
+     "on_shelf_last_count": 40,
+     "bags_unaccounted": 0,
+     "last_delivery": "2026-09-24",
+     "last_count": "2026-09-22",
+     "days_of_stock_on_shelf": 12.8,
+     "open_invoices": [
+      {
+       "invoice": "PK-1062",
+       "issued": "2026-07-20",
+       "amount": 639.36,
+       "days_outstanding": 72
+      }
+     ],
+     "open_balance": 639.36,
+     "reorder_flag": "OK",
+     "count_flag": null,
+     "best_seller_here": "Shawarma Chicken",
+     "sales_sept": 834.72
+    }
+   },
+   {
+    "name": "Kosher West",
+    "address": "946 River Avenue",
+    "city": "Lakewood",
+    "state": "NJ",
+    "region": "Ocean & Monmouth, NJ",
+    "phone": "(732) 370-1119",
+    "real": true,
+    "sample": {
+     "terms": "Consignment (paid on count)",
+     "price_per_bag": 8.62,
+     "cases_sent_sept": 9,
+     "bags_per_case": 12,
+     "bags_sold_sept": 94,
+     "on_shelf_last_count": 21,
+     "bags_unaccounted": 0,
+     "last_delivery": "2026-09-25",
+     "last_count": "2026-09-22",
+     "days_of_stock_on_shelf": 6.7,
+     "open_invoices": [],
+     "open_balance": 0,
+     "reorder_flag": "Reorder soon",
+     "count_flag": null,
+     "best_seller_here": "Shawarma Chicken",
+     "sales_sept": 810.28,
+     "open_balance_label": "sold since last count, not yet paid"
+    }
+   },
+   {
+    "name": "Salt Market - Deal",
+    "address": "15 Morris Ave Suite 108",
+    "city": "Long Branch",
+    "state": "NJ",
+    "region": "Ocean & Monmouth, NJ",
+    "phone": "(732) 802-7258",
+    "real": true,
+    "sample": {
+     "terms": "Net 30 invoice",
+     "price_per_bag": 8.88,
+     "cases_sent_sept": 8,
+     "bags_per_case": 12,
+     "bags_sold_sept": 81,
+     "on_shelf_last_count": 52,
+     "bags_unaccounted": 0,
+     "last_delivery": "2026-09-10",
+     "last_count": "2026-09-22",
+     "days_of_stock_on_shelf": 19.3,
+     "open_invoices": [
+      {
+       "invoice": "PK-1063",
+       "issued": "2026-07-20",
+       "amount": 639.36,
+       "days_outstanding": 72
+      }
+     ],
+     "open_balance": 639.36,
+     "reorder_flag": "OK",
+     "count_flag": null,
+     "best_seller_here": "Classic Chicken",
+     "sales_sept": 719.28
+    }
+   },
+   {
+    "name": "Seasons - Lakewood",
+    "address": "711 Cedar Bridge Ave",
+    "city": "Lakewood",
+    "state": "NJ",
+    "region": "Ocean & Monmouth, NJ",
+    "phone": "+1 732-813-7700",
+    "real": true,
+    "sample": {
+     "terms": "Consignment (paid on count)",
+     "price_per_bag": 8.88,
+     "cases_sent_sept": 8,
+     "bags_per_case": 12,
+     "bags_sold_sept": 77,
+     "on_shelf_last_count": 48,
+     "bags_unaccounted": 0,
+     "last_delivery": "2026-08-30",
+     "last_count": "2026-09-22",
+     "days_of_stock_on_shelf": 18.7,
+     "open_invoices": [
+      {
+       "invoice": "PK-1064",
+       "issued": "2026-08-13",
+       "amount": 213.12,
+       "days_outstanding": 48
+      }
+     ],
+     "open_balance": 213.12,
+     "reorder_flag": "OK",
+     "count_flag": null,
+     "best_seller_here": "BBQ Chicken",
+     "sales_sept": 683.76,
+     "open_balance_label": "sold since last count, not yet paid"
+    }
+   },
+   {
+    "name": "Seasons - Toms River",
+    "address": "2088 Lakewood Rd",
+    "city": "Toms River",
+    "state": "NJ",
+    "region": "Ocean & Monmouth, NJ",
+    "phone": "+1 732-605-4455",
+    "real": true,
+    "sample": {
+     "terms": "COD",
+     "price_per_bag": 8.62,
+     "cases_sent_sept": 6,
+     "bags_per_case": 12,
+     "bags_sold_sept": 65,
+     "on_shelf_last_count": 65,
+     "bags_unaccounted": 0,
+     "last_delivery": "2026-09-20",
+     "last_count": "2026-09-27",
+     "days_of_stock_on_shelf": 30.0,
+     "open_invoices": [],
+     "open_balance": 0,
+     "reorder_flag": "OK",
+     "count_flag": null,
+     "best_seller_here": "Classic Chicken",
+     "sales_sept": 560.3
+    }
+   },
+   {
+    "name": "Koltuv Kosher - Chicago",
+    "address": "2938 W Devon Ave",
+    "city": "Chicago",
+    "state": "IL",
+    "region": "Other states",
+    "phone": "(773) 764-1800",
+    "real": true,
+    "sample": {
+     "terms": "Net 15 invoice",
+     "price_per_bag": 8.88,
+     "cases_sent_sept": 3,
+     "bags_per_case": 12,
+     "bags_sold_sept": 29,
+     "on_shelf_last_count": 20,
+     "bags_unaccounted": 0,
+     "last_delivery": "2026-08-29",
+     "last_count": "2026-09-27",
+     "days_of_stock_on_shelf": 20.7,
+     "open_invoices": [
+      {
+       "invoice": "PK-1065",
+       "issued": "2026-09-18",
+       "amount": 532.8,
+       "days_outstanding": 12
+      }
+     ],
+     "open_balance": 532.8,
+     "reorder_flag": "OK",
+     "count_flag": null,
+     "best_seller_here": "BBQ Chicken",
+     "sales_sept": 257.52
+    }
+   },
+   {
+    "name": "Midwest Premium Kosher - South Bend",
+    "address": "221 W Wayne St",
+    "city": "South Bend",
+    "state": "IN",
+    "region": "Other states",
+    "phone": "+15748551791",
+    "real": true,
+    "sample": {
+     "terms": "Net 30 invoice",
+     "price_per_bag": 9.12,
+     "cases_sent_sept": 4,
+     "bags_per_case": 12,
+     "bags_sold_sept": 30,
+     "on_shelf_last_count": 24,
+     "bags_unaccounted": 0,
+     "last_delivery": "2026-09-06",
+     "last_count": "2026-09-28",
+     "days_of_stock_on_shelf": 24.0,
+     "open_invoices": [
+      {
+       "invoice": "PK-1066",
+       "issued": "2026-09-04",
+       "amount": 437.76,
+       "days_outstanding": 26
+      }
+     ],
+     "open_balance": 437.76,
+     "reorder_flag": "OK",
+     "count_flag": null,
+     "best_seller_here": "Texas Heat",
+     "sales_sept": 273.6
+    }
+   },
+   {
+    "name": "Shalom Kosher - Silver Spring",
+    "address": "1361 Lamberton Drive",
+    "city": "Silver Spring",
+    "state": "MD",
+    "region": "Other states",
+    "phone": "301-946-6500",
+    "real": true,
+    "sample": {
+     "terms": "Consignment (paid on count)",
+     "price_per_bag": 8.88,
+     "cases_sent_sept": 3,
+     "bags_per_case": 12,
+     "bags_sold_sept": 25,
+     "on_shelf_last_count": 17,
+     "bags_unaccounted": 3,
+     "last_delivery": "2026-09-03",
+     "last_count": "2026-09-21",
+     "days_of_stock_on_shelf": 20.4,
+     "open_invoices": [
+      {
+       "invoice": "PK-1067",
+       "issued": "2026-07-20",
+       "amount": 639.36,
+       "days_outstanding": 72
+      }
+     ],
+     "open_balance": 639.36,
+     "reorder_flag": "OK",
+     "count_flag": "3 bags unaccounted",
+     "best_seller_here": "Texas Heat",
+     "sales_sept": 222.0,
+     "open_balance_label": "sold since last count, not yet paid"
+    }
+   },
+   {
+    "name": "The Grove - Cleveland",
+    "address": "1930 Warrensville Center Rd",
+    "city": "South Euclid",
+    "state": "OH",
+    "region": "Other states",
+    "phone": "(216) 353-6444",
+    "real": true,
+    "sample": {
+     "terms": "Consignment (paid on count)",
+     "price_per_bag": 8.88,
+     "cases_sent_sept": 3,
+     "bags_per_case": 12,
+     "bags_sold_sept": 30,
+     "on_shelf_last_count": 25,
+     "bags_unaccounted": 0,
+     "last_delivery": "2026-09-11",
+     "last_count": "2026-09-27",
+     "days_of_stock_on_shelf": 25.0,
+     "open_invoices": [
+      {
+       "invoice": "PK-1068",
+       "issued": "2026-09-22",
+       "amount": 319.68,
+       "days_outstanding": 8
+      }
+     ],
+     "open_balance": 319.68,
+     "reorder_flag": "OK",
+     "count_flag": null,
+     "best_seller_here": "Texas Heat",
+     "sales_sept": 266.4,
+     "open_balance_label": "sold since last count, not yet paid"
+    }
+   },
+   {
+    "name": "The Spicy Peach - Atlanta",
+    "address": "2887 N Druid Hills Rd",
+    "city": "Atlanta",
+    "state": "GA",
+    "region": "Other states",
+    "phone": "(404) 334-7200",
+    "real": true,
+    "sample": {
+     "terms": "Net 15 invoice",
+     "price_per_bag": 9.12,
+     "cases_sent_sept": 3,
+     "bags_per_case": 12,
+     "bags_sold_sept": 27,
+     "on_shelf_last_count": 17,
+     "bags_unaccounted": 0,
+     "last_delivery": "2026-09-07",
+     "last_count": "2026-09-29",
+     "days_of_stock_on_shelf": 18.9,
+     "open_invoices": [],
+     "open_balance": 0,
+     "reorder_flag": "OK",
+     "count_flag": null,
+     "best_seller_here": "Texas Heat",
+     "sales_sept": 246.24
+    }
+   },
+   {
+    "name": "Western Kosher Fairfax - LA",
+    "address": "444 N Fairfax Ave",
+    "city": "Los Angeles",
+    "state": "CA",
+    "region": "Other states",
+    "phone": "323-655-8870",
+    "real": true,
+    "sample": {
+     "terms": "Consignment (paid on count)",
+     "price_per_bag": 8.88,
+     "cases_sent_sept": 2,
+     "bags_per_case": 12,
+     "bags_sold_sept": 27,
+     "on_shelf_last_count": 13,
+     "bags_unaccounted": 0,
+     "last_delivery": "2026-09-11",
+     "last_count": "2026-09-26",
+     "days_of_stock_on_shelf": 14.4,
+     "open_invoices": [],
+     "open_balance": 0,
+     "reorder_flag": "OK",
+     "count_flag": null,
+     "best_seller_here": "Shawarma Chicken",
+     "sales_sept": 239.76,
+     "open_balance_label": "sold since last count, not yet paid"
+    }
+   },
+   {
+    "name": "Western Kosher Pico - LA",
+    "address": "4817 W Pico Blvd",
+    "city": "Los Angeles",
+    "state": "CA",
+    "region": "Other states",
+    "phone": "323-933-8283",
+    "real": true,
+    "sample": {
+     "terms": "COD",
+     "price_per_bag": 9.12,
+     "cases_sent_sept": 1,
+     "bags_per_case": 12,
+     "bags_sold_sept": 14,
+     "on_shelf_last_count": 16,
+     "bags_unaccounted": 0,
+     "last_delivery": "2026-09-10",
+     "last_count": "2026-09-27",
+     "days_of_stock_on_shelf": 34.3,
+     "open_invoices": [],
+     "open_balance": 0,
+     "reorder_flag": "OK",
+     "count_flag": null,
+     "best_seller_here": "Shawarma Chicken",
+     "sales_sept": 127.68
+    }
+   },
+   {
+    "name": "Aron's Kissena Farms",
+    "address": "72-15 Kissena Blvd",
+    "city": "Flushing",
+    "state": "NY",
+    "region": "Queens",
+    "phone": "(718) 380-7300",
+    "real": true,
+    "sample": {
+     "terms": "Net 30 invoice",
+     "price_per_bag": 8.88,
+     "cases_sent_sept": 2,
+     "bags_per_case": 12,
+     "bags_sold_sept": 21,
+     "on_shelf_last_count": 24,
+     "bags_unaccounted": 0,
+     "last_delivery": "2026-09-15",
+     "last_count": "2026-09-26",
+     "days_of_stock_on_shelf": 34.3,
+     "open_invoices": [
+      {
+       "invoice": "PK-1069",
+       "issued": "2026-08-28",
+       "amount": 639.36,
+       "days_outstanding": 33
+      }
+     ],
+     "open_balance": 639.36,
+     "reorder_flag": "OK",
+     "count_flag": null,
+     "best_seller_here": "Classic Chicken",
+     "sales_sept": 186.48
+    }
+   },
+   {
+    "name": "Lux Pharmacy - Queens",
+    "address": "71-16 Kissena Blvd",
+    "city": "Flushing",
+    "state": "NY",
+    "region": "Queens",
+    "phone": "(718) 480-3666",
+    "real": true,
+    "sample": {
+     "terms": "Net 30 invoice",
+     "price_per_bag": 8.88,
+     "cases_sent_sept": 2,
+     "bags_per_case": 12,
+     "bags_sold_sept": 13,
+     "on_shelf_last_count": 13,
+     "bags_unaccounted": 0,
+     "last_delivery": "2026-09-11",
+     "last_count": "2026-09-29",
+     "days_of_stock_on_shelf": 30.0,
+     "open_invoices": [],
+     "open_balance": 0,
+     "reorder_flag": "OK",
+     "count_flag": null,
+     "best_seller_here": "1st Cut Brisket",
+     "sales_sept": 115.44
+    }
+   },
+   {
+    "name": "Seasons - Queens",
+    "address": "68-18 Main St",
+    "city": "Flushing",
+    "state": "NY",
+    "region": "Queens",
+    "phone": "(718) 268-6469",
+    "real": true,
+    "sample": {
+     "terms": "Net 30 invoice",
+     "price_per_bag": 9.12,
+     "cases_sent_sept": 5,
+     "bags_per_case": 12,
+     "bags_sold_sept": 40,
+     "on_shelf_last_count": 35,
+     "bags_unaccounted": 0,
+     "last_delivery": "2026-09-21",
+     "last_count": "2026-09-23",
+     "days_of_stock_on_shelf": 26.2,
+     "open_invoices": [
+      {
+       "invoice": "PK-1070",
+       "issued": "2026-07-29",
+       "amount": 656.64,
+       "days_outstanding": 63
+      }
+     ],
+     "open_balance": 656.64,
+     "reorder_flag": "OK",
+     "count_flag": null,
+     "best_seller_here": "Classic Chicken",
+     "sales_sept": 364.8
+    }
+   },
+   {
+    "name": "Evergreen - Monsey",
+    "address": "59 NY-59",
+    "city": "Monsey",
+    "state": "NY",
+    "region": "Rockland, NY",
+    "phone": "(845) 352-4400",
+    "real": true,
+    "sample": {
+     "terms": "Net 30 invoice",
+     "price_per_bag": 8.88,
+     "cases_sent_sept": 5,
+     "bags_per_case": 12,
+     "bags_sold_sept": 59,
+     "on_shelf_last_count": 29,
+     "bags_unaccounted": 0,
+     "last_delivery": "2026-09-02",
+     "last_count": "2026-09-28",
+     "days_of_stock_on_shelf": 14.7,
+     "open_invoices": [
+      {
+       "invoice": "PK-1071",
+       "issued": "2026-09-22",
+       "amount": 319.68,
+       "days_outstanding": 8
+      }
+     ],
+     "open_balance": 319.68,
+     "reorder_flag": "OK",
+     "count_flag": null,
+     "best_seller_here": "1st Cut Brisket",
+     "sales_sept": 523.92
+    }
+   },
+   {
+    "name": "Evergreen - Pomona",
+    "address": "1581 US-202",
+    "city": "Pomona",
+    "state": "NY",
+    "region": "Rockland, NY",
+    "phone": "845-352-4400",
+    "real": true,
+    "sample": {
+     "terms": "COD",
+     "price_per_bag": 9.12,
+     "cases_sent_sept": 4,
+     "bags_per_case": 12,
+     "bags_sold_sept": 48,
+     "on_shelf_last_count": 20,
+     "bags_unaccounted": 0,
+     "last_delivery": "2026-09-09",
+     "last_count": "2026-09-26",
+     "days_of_stock_on_shelf": 12.5,
+     "open_invoices": [],
+     "open_balance": 0,
+     "reorder_flag": "OK",
+     "count_flag": null,
+     "best_seller_here": "Shawarma Chicken",
+     "sales_sept": 437.76
+    }
+   },
+   {
+    "name": "Wesley Kosher - Monsey",
+    "address": "455 NY-306",
+    "city": "Monsey",
+    "state": "NY",
+    "region": "Rockland, NY",
+    "phone": "(845) 364-7217",
+    "real": true,
+    "sample": {
+     "terms": "Consignment (paid on count)",
+     "price_per_bag": 8.88,
+     "cases_sent_sept": 5,
+     "bags_per_case": 12,
+     "bags_sold_sept": 50,
+     "on_shelf_last_count": 24,
+     "bags_unaccounted": 1,
+     "last_delivery": "2026-09-11",
+     "last_count": "2026-09-26",
+     "days_of_stock_on_shelf": 14.4,
+     "open_invoices": [
+      {
+       "invoice": "PK-1072",
+       "issued": "2026-08-20",
+       "amount": 639.36,
+       "days_outstanding": 41
+      }
+     ],
+     "open_balance": 639.36,
+     "reorder_flag": "OK",
+     "count_flag": "1 bags unaccounted",
+     "best_seller_here": "Texas Heat",
+     "sales_sept": 444.0,
+     "open_balance_label": "sold since last count, not yet paid"
+    }
+   }
+  ]
+ },
+ "subscriptions": {
+  "active": 412,
+  "new_sept": 49,
+  "cancelled_sept": 26,
+  "churn_sept_pct": 6.7,
+  "avg_order": 74.8,
+  "skipped_sept": 37,
+  "paused_now": 22,
+  "failed_payments_open": {
+   "count": 9,
+   "amount": 673.2
+  },
+  "by_interval": [
+   {
+    "interval": "Every 14 days",
+    "active": 38
+   },
+   {
+    "interval": "Every 30 days",
+    "active": 241
+   },
+   {
+    "interval": "Every 45 days",
+    "active": 81
+   },
+   {
+    "interval": "Every 60 days",
+    "active": 52
+   }
+  ],
+  "by_what_they_get": [
+   {
+    "item": "Build My Own Bundle (5 bags)",
+    "active": 134
+   },
+   {
+    "item": "Build My Own Bundle (10 bags)",
+    "active": 61
+   },
+   {
+    "item": "Beef Variety Bundle",
+    "active": 72
+   },
+   {
+    "item": "Taster Bundle",
+    "active": 58
+   },
+   {
+    "item": "Chicken Variety Bundle",
+    "active": 41
+   },
+   {
+    "item": "Single flavor 5-pack",
+    "active": 46
+   }
+  ],
+  "cancel_reasons": [
+   {
+    "reason": "Too much product / have extra",
+    "count": 11
+   },
+   {
+    "reason": "Price",
+    "count": 6
+   },
+   {
+    "reason": "Switching to buying in store",
+    "count": 4
+   },
+   {
+    "reason": "Other / no reason",
+    "count": 5
+   }
+  ],
+  "monthly": [
+   {
+    "label": "Oct 25",
+    "active_end": 184,
+    "new": 31,
+    "cancelled": 18,
+    "churn_pct": 10.5,
+    "revenue": 5640.0
+   },
+   {
+    "label": "Nov 25",
+    "active_end": 201,
+    "new": 29,
+    "cancelled": 12,
+    "churn_pct": 6.5,
+    "revenue": 6160.0
+   },
+   {
+    "label": "Dec 25",
+    "active_end": 222,
+    "new": 35,
+    "cancelled": 14,
+    "churn_pct": 7.0,
+    "revenue": 6810.0
+   },
+   {
+    "label": "Jan 26",
+    "active_end": 236,
+    "new": 27,
+    "cancelled": 13,
+    "churn_pct": 5.9,
+    "revenue": 7240.0
+   },
+   {
+    "label": "Feb 26",
+    "active_end": 251,
+    "new": 28,
+    "cancelled": 13,
+    "churn_pct": 5.5,
+    "revenue": 7700.0
+   },
+   {
+    "label": "Mar 26",
+    "active_end": 268,
+    "new": 33,
+    "cancelled": 16,
+    "churn_pct": 6.4,
+    "revenue": 8220.0
+   },
+   {
+    "label": "Apr 26",
+    "active_end": 291,
+    "new": 41,
+    "cancelled": 18,
+    "churn_pct": 6.7,
+    "revenue": 8920.0
+   },
+   {
+    "label": "May 26",
+    "active_end": 318,
+    "new": 45,
+    "cancelled": 18,
+    "churn_pct": 6.2,
+    "revenue": 9750.0
+   },
+   {
+    "label": "Jun 26",
+    "active_end": 342,
+    "new": 47,
+    "cancelled": 23,
+    "churn_pct": 7.2,
+    "revenue": 10490.0
+   },
+   {
+    "label": "Jul 26",
+    "active_end": 365,
+    "new": 44,
+    "cancelled": 21,
+    "churn_pct": 6.1,
+    "revenue": 11190.0
+   },
+   {
+    "label": "Aug 26",
+    "active_end": 389,
+    "new": 46,
+    "cancelled": 22,
+    "churn_pct": 6.0,
+    "revenue": 11930.0
+   },
+   {
+    "label": "Sep 26",
+    "active_end": 412,
+    "new": 49,
+    "cancelled": 26,
+    "churn_pct": 6.7,
+    "revenue": 12640.0
+   }
+  ],
+  "renewals_next_14_days": [
+   {
+    "date": "2026-10-01",
+    "renewals": 8,
+    "amount": 598.4
+   },
+   {
+    "date": "2026-10-02",
+    "renewals": 9,
+    "amount": 673.2
+   },
+   {
+    "date": "2026-10-03",
+    "renewals": 10,
+    "amount": 748.0
+   },
+   {
+    "date": "2026-10-04",
+    "renewals": 13,
+    "amount": 972.4
+   },
+   {
+    "date": "2026-10-05",
+    "renewals": 19,
+    "amount": 1421.2
+   },
+   {
+    "date": "2026-10-06",
+    "renewals": 14,
+    "amount": 1047.2
+   },
+   {
+    "date": "2026-10-07",
+    "renewals": 8,
+    "amount": 598.4
+   },
+   {
+    "date": "2026-10-08",
+    "renewals": 14,
+    "amount": 1047.2
+   },
+   {
+    "date": "2026-10-09",
+    "renewals": 11,
+    "amount": 822.8
+   },
+   {
+    "date": "2026-10-10",
+    "renewals": 14,
+    "amount": 1047.2
+   },
+   {
+    "date": "2026-10-11",
+    "renewals": 13,
+    "amount": 972.4
+   },
+   {
+    "date": "2026-10-12",
+    "renewals": 18,
+    "amount": 1346.4
+   },
+   {
+    "date": "2026-10-13",
+    "renewals": 10,
+    "amount": 748.0
+   },
+   {
+    "date": "2026-10-14",
+    "renewals": 7,
+    "amount": 523.6
+   }
+  ],
+  "real_terms": "Subscribe & Save: 6% off, every 14, 30, 45 or 60 days, free shipping on subscriptions, pause/skip/cancel anytime (real, from primalkrisp.com)",
+  "renewals_next_14_days_total": 12566.4
+ },
+ "tastings": [
+  {
+   "date": "2026-07-09",
+   "store": "Gourmet Glatt North - Lakewood",
+   "real_store": true,
+   "hours": "4–7 pm",
+   "bags_opened_for_samples": 7,
+   "bags_sold_at_tasting": 26,
+   "store_bags_4wk_before": 31,
+   "store_bags_4wk_after": 38,
+   "lift_pct": 23,
+   "cost": 148.77,
+   "extra_bags_after": 7
+  },
+  {
+   "date": "2026-07-23",
+   "store": "Evergreen - Lakewood",
+   "real_store": true,
+   "hours": "4–7 pm",
+   "bags_opened_for_samples": 6,
+   "bags_sold_at_tasting": 21,
+   "store_bags_4wk_before": 25,
+   "store_bags_4wk_after": 39,
+   "lift_pct": 56,
+   "cost": 144.66,
+   "extra_bags_after": 14
+  },
+  {
+   "date": "2026-08-06",
+   "store": "Seasons - Lakewood",
+   "real_store": true,
+   "hours": "4–7 pm",
+   "bags_opened_for_samples": 6,
+   "bags_sold_at_tasting": 19,
+   "store_bags_4wk_before": 21,
+   "store_bags_4wk_after": 23,
+   "lift_pct": 10,
+   "cost": 144.66,
+   "extra_bags_after": 2
+  },
+  {
+   "date": "2026-08-13",
+   "store": "Gourmet Glatt - Jackson",
+   "real_store": true,
+   "hours": "4–7 pm",
+   "bags_opened_for_samples": 11,
+   "bags_sold_at_tasting": 34,
+   "store_bags_4wk_before": 42,
+   "store_bags_4wk_after": 65,
+   "lift_pct": 55,
+   "cost": 165.21,
+   "extra_bags_after": 23
+  },
+  {
+   "date": "2026-08-27",
+   "store": "Seasons - Toms River",
+   "real_store": true,
+   "hours": "4–7 pm",
+   "bags_opened_for_samples": 12,
+   "bags_sold_at_tasting": 36,
+   "store_bags_4wk_before": 30,
+   "store_bags_4wk_after": 35,
+   "lift_pct": 17,
+   "cost": 169.32,
+   "extra_bags_after": 5
+  },
+  {
+   "date": "2026-09-03",
+   "store": "Kosher West",
+   "real_store": true,
+   "hours": "4–7 pm",
+   "bags_opened_for_samples": 8,
+   "bags_sold_at_tasting": 16,
+   "store_bags_4wk_before": 39,
+   "store_bags_4wk_after": 37,
+   "lift_pct": -5,
+   "cost": 152.88,
+   "extra_bags_after": -2
+  },
+  {
+   "date": "2026-09-10",
+   "store": "Cedar Market - Teaneck",
+   "real_store": true,
+   "hours": "4–7 pm",
+   "bags_opened_for_samples": 10,
+   "bags_sold_at_tasting": 19,
+   "store_bags_4wk_before": 28,
+   "store_bags_4wk_after": 43,
+   "lift_pct": 54,
+   "cost": 161.1,
+   "extra_bags_after": 15
+  },
+  {
+   "date": "2026-09-17",
+   "store": "Gourmet Glatt - Cedarhurst",
+   "real_store": true,
+   "hours": "4–7 pm",
+   "bags_opened_for_samples": 10,
+   "bags_sold_at_tasting": 17,
+   "store_bags_4wk_before": 21,
+   "store_bags_4wk_after": 26,
+   "lift_pct": 24,
+   "cost": 161.1,
+   "extra_bags_after": 5
+  },
+  {
+   "date": "2026-09-24",
+   "store": "Street tasting, Lakewood (sample location)",
+   "real_store": false,
+   "hours": "6–9 pm",
+   "bags_opened_for_samples": 15,
+   "bags_sold_at_tasting": 41,
+   "store_bags_4wk_before": null,
+   "store_bags_4wk_after": null,
+   "lift_pct": null,
+   "cost": 260.0,
+   "extra_bags_after": null,
+   "site_orders_with_code_next_7_days": 23,
+   "code": "STREET15"
+  }
+ ],
+ "promo_codes": [
+  {
+   "code": "WELCOME10",
+   "what": "10% off first order (site pop-up)",
+   "type": "Site offer",
+   "spend": 1584.0,
+   "orders": 214,
+   "revenue": 15840.0,
+   "discount_given": 1584.0,
+   "note": "Offer is real on their site; code name, orders and dollars are fictitious",
+   "return_per_dollar": 10.0,
+   "call": "Keep",
+   "period": "September 2026"
+  },
+  {
+   "code": "FIRSTBAG",
+   "what": "Free 1st Cut Brisket bag on first order",
+   "type": "Site offer",
+   "spend": 1287.8,
+   "orders": 188,
+   "revenue": 14100.0,
+   "discount_given": 3006.12,
+   "note": "Offer is real on their site; numbers fictitious",
+   "return_per_dollar": 10.9,
+   "call": "Keep",
+   "period": "September 2026"
+  },
+  {
+   "code": "REFER-*",
+   "what": "Referral program",
+   "type": "Referral",
+   "spend": 1240.0,
+   "orders": 63,
+   "revenue": 4790.0,
+   "discount_given": 1240.0,
+   "note": "Program is real; numbers fictitious",
+   "return_per_dollar": 3.9,
+   "call": "Keep",
+   "period": "September 2026"
+  },
+  {
+   "code": "CREATORA",
+   "what": "Creator A (sample)",
+   "type": "Influencer",
+   "spend": 750.0,
+   "orders": 71,
+   "revenue": 5180.0,
+   "discount_given": 518.0,
+   "return_per_dollar": 6.9,
+   "call": "Keep",
+   "period": "September 2026"
+  },
+  {
+   "code": "CREATORB",
+   "what": "Creator B (sample)",
+   "type": "Influencer",
+   "spend": 500.0,
+   "orders": 18,
+   "revenue": 1290.0,
+   "discount_given": 129.0,
+   "return_per_dollar": 2.6,
+   "call": "Watch",
+   "period": "September 2026"
+  },
+  {
+   "code": "CREATORC",
+   "what": "Creator C (sample)",
+   "type": "Influencer",
+   "spend": 400.0,
+   "orders": 6,
+   "revenue": 430.0,
+   "discount_given": 43.0,
+   "return_per_dollar": 1.1,
+   "call": "Cut",
+   "period": "September 2026"
+  },
+  {
+   "code": "STREET15",
+   "what": "Street tasting card",
+   "type": "Tasting",
+   "spend": 260.0,
+   "orders": 23,
+   "revenue": 1720.0,
+   "discount_given": 258.0,
+   "return_per_dollar": 6.6,
+   "call": "Keep",
+   "period": "September 2026"
+  },
+  {
+   "code": "(Meta pixel)",
+   "what": "Meta ads, no code",
+   "type": "Paid ads",
+   "spend": 2400.0,
+   "orders": 64,
+   "revenue": 4610.0,
+   "discount_given": 0,
+   "note": "pixel attribution, est.",
+   "return_per_dollar": 1.9,
+   "call": "Watch",
+   "period": "September 2026"
+  }
+ ],
+ "inventory": {
+  "as_of": "2026-09-30",
+  "by_product": [
+   {
+    "product": "1st Cut Brisket",
+    "bags_on_hand": 1340,
+    "cases_on_hand": 111,
+    "avg_bags_per_day": 39.6,
+    "days_of_stock": 33.8,
+    "reorder_point_days": 21,
+    "next_run": "2026-10-20",
+    "status": "OK",
+    "value_at_cost": 9179.0
+   },
+   {
+    "product": "2nd Cut Brisket",
+    "bags_on_hand": 610,
+    "cases_on_hand": 50,
+    "avg_bags_per_day": 19.8,
+    "days_of_stock": 30.8,
+    "reorder_point_days": 21,
+    "next_run": "2026-11-03",
+    "status": "OK",
+    "value_at_cost": 4178.5
+   },
+   {
+    "product": "Texas Heat",
+    "bags_on_hand": 290,
+    "cases_on_hand": 24,
+    "avg_bags_per_day": 26.4,
+    "days_of_stock": 11.0,
+    "reorder_point_days": 21,
+    "next_run": "2026-10-13",
+    "status": "Short",
+    "value_at_cost": 1986.5
+   },
+   {
+    "product": "Classic Chicken",
+    "bags_on_hand": 880,
+    "cases_on_hand": 73,
+    "avg_bags_per_day": 19.8,
+    "days_of_stock": 44.4,
+    "reorder_point_days": 21,
+    "next_run": "2026-11-10",
+    "status": "OK",
+    "value_at_cost": 4171.2
+   },
+   {
+    "product": "BBQ Chicken",
+    "bags_on_hand": 720,
+    "cases_on_hand": 60,
+    "avg_bags_per_day": 24.8,
+    "days_of_stock": 29.0,
+    "reorder_point_days": 21,
+    "next_run": "2026-10-27",
+    "status": "OK",
+    "value_at_cost": 3412.8
+   },
+   {
+    "product": "Shawarma Chicken",
+    "bags_on_hand": 410,
+    "cases_on_hand": 34,
+    "avg_bags_per_day": 34.7,
+    "days_of_stock": 11.8,
+    "reorder_point_days": 21,
+    "next_run": "2026-10-06",
+    "status": "Short",
+    "value_at_cost": 1943.4
+   }
+  ],
+  "note": "Raw 7 oz brisket per 2 oz bag is real (product page). Chicken 6 oz is a sample assumption."
+ },
+ "production_runs": [
+  {
+   "run": "Run 118",
+   "date": "2026-08-04",
+   "product": "1st Cut Brisket",
+   "raw_meat_lbs": 400,
+   "raw_oz_per_bag": 7.0,
+   "bags_planned": 914,
+   "bags_packed": 903,
+   "yield_vs_plan_pct": 98.9,
+   "total_cost": 6218.31,
+   "cost_per_bag": 6.89,
+   "status": "Packed"
+  },
+  {
+   "run": "Run 119",
+   "date": "2026-08-11",
+   "product": "Shawarma Chicken",
+   "raw_meat_lbs": 300,
+   "raw_oz_per_bag": 6.0,
+   "bags_planned": 800,
+   "bags_packed": 730,
+   "yield_vs_plan_pct": 91.3,
+   "total_cost": 3572.1,
+   "cost_per_bag": 4.89,
+   "status": "Packed"
+  },
+  {
+   "run": "Run 120",
+   "date": "2026-08-18",
+   "product": "BBQ Chicken",
+   "raw_meat_lbs": 400,
+   "raw_oz_per_bag": 6.0,
+   "bags_planned": 1066,
+   "bags_packed": 988,
+   "yield_vs_plan_pct": 92.7,
+   "total_cost": 4788.76,
+   "cost_per_bag": 4.85,
+   "status": "Packed"
+  },
+  {
+   "run": "Run 121",
+   "date": "2026-08-25",
+   "product": "Texas Heat",
+   "raw_meat_lbs": 400,
+   "raw_oz_per_bag": 7.0,
+   "bags_planned": 914,
+   "bags_packed": 883,
+   "yield_vs_plan_pct": 96.7,
+   "total_cost": 6182.91,
+   "cost_per_bag": 7.0,
+   "status": "Packed"
+  },
+  {
+   "run": "Run 122",
+   "date": "2026-09-01",
+   "product": "2nd Cut Brisket",
+   "raw_meat_lbs": 500,
+   "raw_oz_per_bag": 7.0,
+   "bags_planned": 1142,
+   "bags_packed": 1036,
+   "yield_vs_plan_pct": 90.8,
+   "total_cost": 7608.72,
+   "cost_per_bag": 7.34,
+   "status": "Packed"
+  },
+  {
+   "run": "Run 123",
+   "date": "2026-09-08",
+   "product": "1st Cut Brisket",
+   "raw_meat_lbs": 550,
+   "raw_oz_per_bag": 7.0,
+   "bags_planned": 1257,
+   "bags_packed": 1192,
+   "yield_vs_plan_pct": 94.9,
+   "total_cost": 8462.34,
+   "cost_per_bag": 7.1,
+   "status": "Packed"
+  },
+  {
+   "run": "Run 124",
+   "date": "2026-09-15",
+   "product": "Classic Chicken",
+   "raw_meat_lbs": 350,
+   "raw_oz_per_bag": 6.0,
+   "bags_planned": 933,
+   "bags_packed": 881,
+   "yield_vs_plan_pct": 94.5,
+   "total_cost": 4219.37,
+   "cost_per_bag": 4.79,
+   "status": "Packed"
+  },
+  {
+   "run": "Run 125",
+   "date": "2026-09-22",
+   "product": "Shawarma Chicken",
+   "raw_meat_lbs": 350,
+   "raw_oz_per_bag": 6.0,
+   "bags_planned": 933,
+   "bags_packed": 900,
+   "yield_vs_plan_pct": 96.5,
+   "total_cost": 4253.0,
+   "cost_per_bag": 4.73,
+   "status": "Packed"
+  },
+  {
+   "run": "Run 126",
+   "date": "2026-09-29",
+   "product": "1st Cut Brisket",
+   "raw_meat_lbs": 550,
+   "raw_oz_per_bag": 7.0,
+   "bags_planned": 1257,
+   "bags_packed": 1243,
+   "yield_vs_plan_pct": 98.9,
+   "total_cost": 8552.61,
+   "cost_per_bag": 6.88,
+   "status": "Packed"
+  },
+  {
+   "run": "Run 127",
+   "date": "2026-10-06",
+   "product": "Shawarma Chicken",
+   "raw_meat_lbs": 400,
+   "raw_oz_per_bag": 6.0,
+   "bags_planned": 1066,
+   "bags_packed": null,
+   "yield_vs_plan_pct": null,
+   "total_cost": 4926.82,
+   "cost_per_bag": 4.62,
+   "status": "Scheduled"
+  },
+  {
+   "run": "Run 128",
+   "date": "2026-10-13",
+   "product": "Texas Heat",
+   "raw_meat_lbs": 400,
+   "raw_oz_per_bag": 7.0,
+   "bags_planned": 914,
+   "bags_packed": null,
+   "yield_vs_plan_pct": null,
+   "total_cost": 6237.78,
+   "cost_per_bag": 6.82,
+   "status": "Scheduled"
+  },
+  {
+   "run": "Run 129",
+   "date": "2026-10-20",
+   "product": "1st Cut Brisket",
+   "raw_meat_lbs": 500,
+   "raw_oz_per_bag": 7.0,
+   "bags_planned": 1142,
+   "bags_packed": null,
+   "yield_vs_plan_pct": null,
+   "total_cost": 7796.34,
+   "cost_per_bag": 6.83,
+   "status": "Scheduled"
+  }
+ ],
+ "pnl": {
+  "period": "September 2026",
+  "basis": "Accrual (sample)",
+  "revenue": {
+   "Website": 19500.0,
+   "Subscriptions": 12640.0,
+   "Stores": 17920.64,
+   "Wholesale & bulk": 4320,
+   "Tastings & events": 1150
+  },
+  "revenue_total": 55530.64,
+  "cogs": 28905.73,
+  "cogs_note": "bags sold × cost per bag (meat, spices, bag & label, co-pack labor, kosher supervision)",
+  "gross_profit": 26624.91,
+  "gross_margin_pct": 47.9,
+  "operating_expenses": {
+   "Shipping & packing": 4862.9,
+   "Card & Shopify fees": 998.7,
+   "Ads & creators": 4050,
+   "Discounts & free bags (promo cost)": 2527.8,
+   "Tastings (samples + staff)": 735.08,
+   "Payroll": 6400.0,
+   "Rent & storage": 1200.0,
+   "Insurance & kosher fees": 780.0,
+   "Software (store, subscriptions, other)": 640.0
+  },
+  "operating_expenses_total": 22194.48,
+  "net_profit": 4430.43,
+  "net_margin_pct": 8.0
+ },
+ "monthly_close": {
+  "period": "September 2026",
+  "booked_through_shopify_do_not_reenter": {
+   "Website orders": 19500.0,
+   "Subscription renewals": 12640.0
+  },
+  "income_to_post": {
+   "Store invoices and consignment counts": 17920.64,
+   "Wholesale & bulk invoices": 4320,
+   "Tasting cash and card sales": 1150
+  },
+  "income_to_post_total": 23390.64,
+  "cogs_to_post": {
+   "bags": 4952,
+   "amount": 28905.73
+  },
+  "ar_open_at_month_end": 14401.44,
+  "ar_aging": {
+   "0-30": 5320.08,
+   "31-60": 5867.28,
+   "61-90": 3214.08
+  },
+  "inventory_at_cost_month_end": 24871.4,
+  "journal_entries_preview": [
+   {
+    "memo": "Sept store and wholesale sales",
+    "debit": "Accounts receivable",
+    "credit": "Sales - Stores / Sales - Wholesale",
+    "amount": 22240.64
+   },
+   {
+    "memo": "Sept tasting sales",
+    "debit": "Undeposited funds",
+    "credit": "Sales - Tastings & events",
+    "amount": 1150
+   },
+   {
+    "memo": "Sept cost of goods sold",
+    "debit": "Cost of goods sold",
+    "credit": "Inventory - finished bags",
+    "amount": 28905.73
+   },
+   {
+    "memo": "Write off unaccounted consignment bags",
+    "debit": "Shrink & samples",
+    "credit": "Inventory - finished bags",
+    "amount": 120.0
+   }
+  ]
+ },
+ "answers": [
+  {
+   "q": "Which store owes me the most?",
+   "a": "Pomegranate in Flatbush and The Grove in Boca, $1,065.60 each. Pomegranate's oldest invoice is 63 days. Stores owe $14,401.44 in total, $3,214.08 of it past 60 days."
+  },
+  {
+   "q": "Which channel makes me the most per bag?",
+   "a": "The site. A 1st Cut Brisket bag clears $5.92 there after shipping and fees, $5.83 on subscription, $2.30 in a store and $1.60 wholesale."
+  },
+  {
+   "q": "Did the tastings pay off?",
+   "a": "Six of eight store tastings lifted that store's next 4 weeks. Evergreen Lakewood, Gourmet Glatt Jackson and Cedar Market Teaneck were up more than 50%. Kosher West was flat, so skip a repeat there."
+  },
+  {
+   "q": "Did I make money in September?",
+   "a": "Yes, $4,430.43 on $55,530.64 of sales (8%). Shipping on free-shipping orders cost $4,863, more than ads."
+  }
+ ]
+}
