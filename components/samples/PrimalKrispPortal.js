@@ -44,7 +44,7 @@ const AS_OF = DATA.meta.as_of
 const BIZ = DATA.brand.name
 
 export default function PrimalKrispPortal() {
-  const [tab, setTab] = useState('financials')
+  const [tab, setTab] = useState('overview')
   const [period, setPeriod] = useState('month')
   const [drawerStore, setDrawerStore] = useState(null)
   const [drawerProduct, setDrawerProduct] = useState(null)
@@ -330,8 +330,8 @@ export default function PrimalKrispPortal() {
   }
 
   const TABS = [
-    ['financials', 'Financials'],
     ['overview', 'Overview'],
+    ['financials', 'Financials'],
     ['stores', 'Stores'],
     ['products', 'Products'],
     ['subscriptions', 'Online & subscriptions'],
