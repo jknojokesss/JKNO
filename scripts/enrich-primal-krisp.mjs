@@ -104,11 +104,17 @@ const pnlByMonth = ['2026-04', '2026-05', '2026-06', '2026-07', '2026-08', '2026
   const revenue_total = round2(mRow.Total)
 
   if (monthKey === '2026-09') {
-    return {
-      month: monthKey,
-      label: mRow.label,
-      period: monthNames[monthKey],
-      basis: pnlTemplate.basis,
+    const cogs_entries = DATA.product_margins_by_channel.map((p) => ({
+      l: p.product,
+      n: round2(p.bags_sold_sept_all_channels * p.cost_per_bag),
+    }))
+    const operating_expenses_entries = Object.entries(pnlTemplate.operating_expenses).map(([k, v]) => ({
+      l: k,
+      n: v,
+    }))
+    return buildPnlMonth({
+      monthKey,
+      mRow,
       revenue: { ...pnlTemplate.revenue },
       revenue_total: pnlTemplate.revenue_total,
       cogs: pnlTemplate.cogs,
@@ -116,15 +122,10 @@ const pnlByMonth = ['2026-04', '2026-05', '2026-06', '2026-07', '2026-08', '2026
       operating_expenses: { ...pnlTemplate.operating_expenses },
       operating_expenses_total: pnlTemplate.operating_expenses_total,
       net_profit: pnlTemplate.net_profit,
-      cogs_entries: DATA.product_margins_by_channel.map((p) => ({
-        l: p.product,
-        n: round2(p.bags_sold_sept_all_channels * p.cost_per_bag),
-      })),
-      operating_expenses_entries: Object.entries(pnlTemplate.operating_expenses).map(([k, v]) => ({
-        l: k,
-        n: v,
-      })),
-    }
+      cogs_entries,
+      operating_expenses_entries,
+      basis: pnlTemplate.basis,
+    })
   }
 
   const scale = revenue_total / pnlTemplate.revenue_total
@@ -148,11 +149,9 @@ const pnlByMonth = ['2026-04', '2026-05', '2026-06', '2026-07', '2026-08', '2026
 
   const operating_expenses_entries = Object.entries(operating_expenses).map(([k, v]) => ({ l: k, n: v }))
 
-  return {
-    month: monthKey,
-    label: mRow.label,
-    period: monthNames[monthKey],
-    basis: pnlTemplate.basis,
+  return buildPnlMonth({
+    monthKey,
+    mRow,
     revenue,
     revenue_total,
     cogs,
@@ -162,8 +161,56 @@ const pnlByMonth = ['2026-04', '2026-05', '2026-06', '2026-07', '2026-08', '2026
     net_profit,
     cogs_entries,
     operating_expenses_entries,
-  }
+    basis: pnlTemplate.basis,
+  })
 })
+
+function buildPnlMonth(row) {
+  const days = [3, 8, 12, 17, 22, 26]
+  const mkLedger = (parts, prefix) =>
+    parts.map((p, i) => ({
+      date: `${row.monthKey}-${String(days[i % days.length]).padStart(2, '0')}`,
+      description: `${prefix}${p.l}`,
+      amount: round2(p.n),
+    }))
+
+  const revParts = Object.entries(row.revenue).map(([l, n]) => ({ l, n }))
+  const revLedger = mkLedger(revParts, '')
+  const cogsLedger = mkLedger(row.cogs_entries, 'COGS · ')
+  const opexLedger = mkLedger(row.operating_expenses_entries, '')
+  const grossLedger = [
+    { date: `${row.monthKey}-28`, description: 'Gross profit (revenue − COGS)', amount: row.gross_profit },
+  ]
+  const netLedger = [
+    { date: `${row.monthKey}-28`, description: 'Net profit after operating expenses', amount: row.net_profit },
+  ]
+
+  return {
+    month: row.monthKey,
+    label: row.mRow.label,
+    period: monthNames[row.monthKey],
+    basis: row.basis,
+    revenue: row.revenue,
+    revenue_total: row.revenue_total,
+    cogs: row.cogs,
+    gross_profit: row.gross_profit,
+    operating_expenses: row.operating_expenses,
+    operating_expenses_total: row.operating_expenses_total,
+    net_profit: row.net_profit,
+    cogs_entries: row.cogs_entries,
+    operating_expenses_entries: row.operating_expenses_entries,
+    drill_ledgers: {
+      revenue_total: revLedger,
+      cogs_total: cogsLedger,
+      gross_profit: grossLedger,
+      operating_expenses_total: opexLedger,
+      net_profit: netLedger,
+      ...Object.fromEntries(revParts.map((p) => [`rev_${p.l}`, mkLedger([p], '')])),
+      ...Object.fromEntries(row.cogs_entries.map((p) => [`cogs_${p.l}`, mkLedger([p], 'COGS · ')])),
+      ...Object.fromEntries(row.operating_expenses_entries.map((p) => [`opex_${p.l}`, mkLedger([p], '')])),
+    },
+  }
+}
 
 DATA.pnl_by_month = pnlByMonth
 

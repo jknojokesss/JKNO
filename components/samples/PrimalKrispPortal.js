@@ -1,14 +1,13 @@
 import { useState, useMemo, useEffect, Fragment } from 'react'
 import Image from 'next/image'
-import DemoFontLinks from '../DemoFontLinks'
 import DemoLobby from '../DemoLobby'
-import { DEMO_PORTAL_ROOT_CLASS, DEMO_RENDER_HINTS, DEMO_UI } from '../../lib/demoFonts'
 import DATA from '../../data/primal-krisp.json'
+import PrimalKrispOverview from './PrimalKrispOverview'
+import PrimalKrispFinancials from './PrimalKrispFinancials'
 import {
-  BRICK,
-  CHARCOAL,
-  SAGE,
-  BROWN,
+  SPICE,
+  CHAR,
+  KRAFT,
   CREAM,
   CARDBG,
   INK,
@@ -16,8 +15,10 @@ import {
   BORDER,
   AMBER,
   RED,
+  GREEN,
   MONO,
   UI,
+  SHELL_CSS,
   money,
   money0,
   moneyK,
@@ -26,10 +27,9 @@ import {
   fmtD,
   TieMark,
   verdictPromo,
+  TINT_RED,
 } from './primalKrispUtils'
 import {
-  StackedSalesByChannel,
-  CashForecast13,
   SubscriberLineChart,
   RenewalBars14,
   TastingLiftChart,
@@ -43,10 +43,8 @@ const AS_OF = DATA.meta.as_of
 const BIZ = DATA.brand.name
 
 export default function PrimalKrispPortal() {
-  const [tab, setTab] = useState('overview')
+  const [tab, setTab] = useState('financials')
   const [period, setPeriod] = useState('month')
-  const [pnlMonthIdx, setPnlMonthIdx] = useState(() => (DATA.pnl_by_month?.length || 1) - 1)
-  const [pnlOpen, setPnlOpen] = useState(null)
   const [drawerStore, setDrawerStore] = useState(null)
   const [drawerProduct, setDrawerProduct] = useState(null)
   const [regionFilter, setRegionFilter] = useState('All')
@@ -56,12 +54,11 @@ export default function PrimalKrispPortal() {
   const [storeSort, setStoreSort] = useState({ key: 'balance', dir: 'desc' })
   const [costOpen, setCostOpen] = useState(null)
   const [promoSort, setPromoSort] = useState({ key: 'revenue', dir: 'desc' })
+  const [invSort, setInvSort] = useState({ key: 'date', dir: 'desc' })
 
   const ov = DATA.overview
   const periodSlice = period === 'week' ? DATA.period_slices?.overview : null
   const stores = DATA.stores
-  const months = DATA.monthly_sales_by_channel
-
   const storeList = stores.list
 
   const storeKpis = useMemo(() => {
@@ -136,33 +133,22 @@ export default function PrimalKrispPortal() {
     if (period === 'week' && periodSlice?.sales_by_channel) return periodSlice.sales_by_channel
     return ov.sales_by_channel.map((c) => ({ channel: c.channel, sales: c.sales, bags: c.bags }))
   }, [period, periodSlice, ov.sales_by_channel])
-  const channelSumPeriod = useMemo(() => channelRowsPeriod.reduce((s, c) => s + c.sales, 0), [channelRowsPeriod])
-  const chartMonths = useMemo(() => {
-    if (period === 'week' && DATA.weekly_in_september) return DATA.weekly_in_september
-    return months
-  }, [period, months])
-
-  const pnlSelected = useMemo(() => {
-    const rows = DATA.pnl_by_month || []
-    return rows[pnlMonthIdx] || rows[rows.length - 1]
-  }, [pnlMonthIdx])
-
   const regions = useMemo(() => ['All', ...Object.keys(stores.by_region)], [stores.by_region])
 
-  const revLines = useMemo(() => {
-    if (!pnlSelected) return []
-    return Object.entries(pnlSelected.revenue).map(([k, v]) => ({ l: k, v: money(v), n: v }))
-  }, [pnlSelected])
-
-  const cogsLines = useMemo(() => {
-    if (!pnlSelected?.cogs_entries) return []
-    return pnlSelected.cogs_entries.map((e) => ({ l: e.l, v: money(-e.n), n: e.n }))
-  }, [pnlSelected])
-
-  const opexLines = useMemo(() => {
-    if (!pnlSelected?.operating_expenses_entries) return []
-    return pnlSelected.operating_expenses_entries.map((e) => ({ l: e.l, v: money(-e.n), n: e.n }))
-  }, [pnlSelected])
+  const sortedRuns = useMemo(() => {
+    const dir = invSort.dir === 'asc' ? 1 : -1
+    return [...DATA.production_runs].sort((a, b) => {
+      let va = a[invSort.key]
+      let vb = b[invSort.key]
+      if (invSort.key === 'date') {
+        va = a.date || ''
+        vb = b.date || ''
+        return va.localeCompare(vb) * dir
+      }
+      if (typeof va === 'string') return va.localeCompare(vb) * dir
+      return ((va || 0) - (vb || 0)) * dir
+    })
+  }, [invSort])
 
   useEffect(() => {
     if (!drawerStore && !drawerProduct) return
@@ -176,14 +162,14 @@ export default function PrimalKrispPortal() {
     return () => window.removeEventListener('keydown', onKey)
   }, [drawerStore, drawerProduct])
 
-  const card = { background: CARDBG, border: `1px solid ${BORDER}`, borderRadius: '14px', padding: '20px' }
+  const card = { background: CARDBG, border: `1px solid ${BORDER}`, borderRadius: '2px', padding: '20px' }
   const lbl = {
     fontFamily: UI,
     fontSize: '11px',
     fontWeight: 600,
     letterSpacing: '0.7px',
     textTransform: 'uppercase',
-    color: '#96866C',
+    color: KRAFT,
   }
   const big = { fontFamily: UI, fontWeight: 700, letterSpacing: '-0.4px' }
   const btn = { fontFamily: UI, fontWeight: 600, fontSize: '13px', cursor: 'pointer' }
@@ -191,7 +177,7 @@ export default function PrimalKrispPortal() {
     padding: '10px 12px',
     fontSize: '14px',
     border: `1px solid ${BORDER}`,
-    borderRadius: '9px',
+    borderRadius: '2px',
     background: CREAM,
     color: INK,
     outline: 'none',
@@ -212,6 +198,7 @@ export default function PrimalKrispPortal() {
     return (
       <button
         type="button"
+        className="pk-click"
         onClick={onClick}
         style={{
           ...card,
@@ -221,9 +208,11 @@ export default function PrimalKrispPortal() {
           textAlign: 'left',
           cursor: 'pointer',
           border: `1px solid ${BORDER}`,
+          position: 'relative',
         }}
       >
         {inner}
+        <span style={{ position: 'absolute', top: 11, right: 13, color: '#C6B79A', fontSize: 15 }}>›</span>
       </button>
     )
   }
@@ -239,7 +228,7 @@ export default function PrimalKrispPortal() {
             gap: '8px',
             padding: '6px 12px',
             borderRadius: '18px',
-            background: CHARCOAL,
+            background: CHAR,
             color: CREAM,
             fontSize: '12px',
             fontWeight: 600,
@@ -285,8 +274,8 @@ export default function PrimalKrispPortal() {
           padding: '8px 12px',
           minHeight: '40px',
           borderRadius: '8px',
-          border: `1px solid ${active ? CHARCOAL : BORDER}`,
-          background: active ? CHARCOAL : CARDBG,
+          border: `1px solid ${active ? CHAR : BORDER}`,
+          background: active ? CHAR : CARDBG,
           color: active ? CREAM : MUTED,
           fontSize: '12px',
         }}
@@ -317,58 +306,7 @@ export default function PrimalKrispPortal() {
     </div>
   )
 
-  const DrillRow = ({ k, l, v, items, tieTotal }) => {
-    const open = pnlOpen === k
-    const has = items && items.length > 0
-    const subSum = has ? items.reduce((s, it) => s + (it.n || 0), 0) : 0
-    return (
-      <>
-        <div
-          onClick={() => has && setPnlOpen(open ? null : k)}
-          style={{
-            display: 'flex',
-            justifyContent: 'space-between',
-            alignItems: 'center',
-            padding: '6px 0',
-            cursor: has ? 'pointer' : 'default',
-          }}
-        >
-          <span style={{ fontSize: '13px', color: MUTED, display: 'inline-flex', alignItems: 'center', gap: '7px' }}>
-            {has && (
-              <span style={{ color: BRICK, fontSize: '9px', display: 'inline-block', transform: open ? 'rotate(90deg)' : 'none' }}>
-                ▶
-              </span>
-            )}
-            {l}
-          </span>
-          <span style={{ fontFamily: MONO, fontSize: '13px', color: MUTED, display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
-            {has && tieTotal != null && <TieMark expected={tieTotal} actual={subSum} />}
-            {v}
-          </span>
-        </div>
-        {open && has && (
-          <div style={{ margin: '0 0 12px 17px', padding: '4px 12px', background: CREAM, border: `1px solid ${BORDER}`, borderRadius: '9px' }}>
-            {items.map((it, i) => (
-              <div
-                key={i}
-                style={{
-                  display: 'flex',
-                  justifyContent: 'space-between',
-                  padding: '6px 0',
-                  borderTop: i ? `1px solid ${BORDER}` : 'none',
-                }}
-              >
-                <span style={{ fontSize: '12px', color: INK }}>{it.l}</span>
-                <span style={{ fontFamily: MONO, fontSize: '12px', color: INK }}>{it.v}</span>
-              </div>
-            ))}
-          </div>
-        )}
-      </>
-    )
-  }
-
-  const RankedBars = ({ title, rows, valueKey, labelKey, formatValue, footerTotal, tieExpected, tieActual }) => {
+  const RankedBars = ({ title, rows, valueKey, labelKey, formatValue }) => {
     const sorted = [...rows].sort((a, b) => b[valueKey] - a[valueKey])
     const max = sorted[0]?.[valueKey] || 1
     const fmt = formatValue || ((v) => money(v))
@@ -379,36 +317,26 @@ export default function PrimalKrispPortal() {
           <div key={r[labelKey]} style={{ padding: '9px 0', borderTop: i ? `1px solid ${CREAM}` : 'none' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '6px', gap: '8px' }}>
               <span style={{ fontWeight: 600, fontSize: '14px', color: INK }}>{r[labelKey]}</span>
-              <span style={{ ...big, fontSize: '15px', color: INK }}>{fmt(r[valueKey])}</span>
+              <span style={{ ...big, fontSize: '15px', color: INK, fontFamily: MONO }}>{fmt(r[valueKey])}</span>
             </div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-              <div style={{ flex: 1, height: '6px', background: CREAM, borderRadius: '4px', overflow: 'hidden' }}>
-                <div style={{ width: `${Math.round((r[valueKey] / max) * 100)}%`, height: '100%', background: BRICK }} />
-              </div>
+            <div style={{ flex: 1, height: '6px', background: CREAM, borderRadius: '2px', overflow: 'hidden' }}>
+              <div style={{ width: `${Math.round((r[valueKey] / max) * 100)}%`, height: '100%', background: KRAFT }} />
             </div>
           </div>
         ))}
-        {footerTotal != null && (
-          <Row l="Total" v={money(footerTotal)} bold top tieExpected={tieExpected} tieActual={tieActual} />
-        )}
       </div>
     )
   }
 
   const TABS = [
+    ['financials', 'Financials'],
     ['overview', 'Overview'],
     ['stores', 'Stores'],
+    ['products', 'Products'],
     ['subscriptions', 'Online & subscriptions'],
-    ['tastings', 'Tastings & promos'],
-    ['products', 'Products & margins'],
-    ['inventory', 'Inventory & runs'],
-    ['pnl', 'P&L'],
+    ['advertising', 'Advertising / promos'],
   ]
-  const EXTRA = [
-    ['quickbooks', 'QuickBooks sync'],
-    ['close', 'Monthly close'],
-    ['askai', 'Answers'],
-  ]
+  const EXTRA = [['close', 'Monthly close']]
   const currentLabel = [...TABS, ...EXTRA].find((t) => t[0] === tab)?.[1] || ''
 
   const salesDelta = salesPrior > 0 ? ((salesPeriod - salesPrior) / salesPrior) * 100 : 0
@@ -422,9 +350,14 @@ export default function PrimalKrispPortal() {
           ? 'Unaccounted bags'
           : null
 
-  const goOverviewLink = (targetTab, filter) => {
-    setTab(targetTab)
-    if (filter) setListFilter(filter)
+  const goTab = (id) => {
+    setTab(id)
+    setDrawerStore(null)
+    setDrawerProduct(null)
+  }
+  const goStoresFilter = (filter) => {
+    setTab('stores')
+    setListFilter(filter)
     setDrawerStore(null)
   }
 
@@ -441,23 +374,15 @@ export default function PrimalKrispPortal() {
 
   return (
     <>
-      <DemoFontLinks />
-      <style>{`*{box-sizing:border-box;margin:0;padding:0}${DEMO_RENDER_HINTS}body{background:${CREAM};color:${INK}}
-.jm-shell{display:flex;min-height:100vh;align-items:stretch}
-.jm-side{width:236px;flex-shrink:0;background:${CHARCOAL};color:${CREAM};display:flex;flex-direction:column;padding:22px 14px;position:sticky;top:0;height:100vh}
-.jm-nav{display:flex;flex-direction:column;gap:3px}.jm-nav--tabs{flex:1}
-.jm-navbtn{display:block;width:100%;text-align:left;padding:11px 14px;border-radius:10px;border:none;background:transparent;color:#B6A78C;font-family:${DEMO_UI};font-size:14px;font-weight:500;cursor:pointer;white-space:nowrap}
-.jm-navbtn:hover{background:rgba(255,255,255,.08);color:${CREAM}}
-.jm-main{flex:1;min-width:0;max-width:1180px;padding:24px 30px 60px}
-@media(max-width:860px){.jm-shell{flex-direction:column}.jm-side{width:auto;height:auto;position:static;padding:14px 12px 10px}.jm-nav--tabs,.jm-nav--tools{flex-direction:row;overflow-x:auto;gap:6px;padding:4px 4px 10px;-webkit-overflow-scrolling:touch;scrollbar-width:none}.jm-nav::-webkit-scrollbar{display:none}.jm-tools-label{margin:8px 4px 4px!important}.jm-navbtn{width:auto;padding:8px 14px;border-radius:18px;background:rgba(255,255,255,.07);flex-shrink:0;font-size:13px}.jm-main{padding:18px 16px 52px;max-width:100%}}
-.pk-drawer-backdrop{position:fixed;inset:0;background:rgba(27,24,21,.45);z-index:8000}
+      <style>{`${SHELL_CSS({ CHAR, CREAM, INK, SPICE })}
+.pk-drawer-backdrop{position:fixed;inset:0;background:rgba(43,32,24,.45);z-index:8000}
 .pk-drawer{position:fixed;top:0;right:0;height:100%;width:min(420px,100%);background:${CARDBG};border-left:1px solid ${BORDER};z-index:8001;display:flex;flex-direction:column;box-shadow:-8px 0 32px rgba(0,0,0,.12)}
 @media(max-width:860px){.pk-drawer{top:0;left:0;right:0;width:100%;border-left:none}}`}</style>
 
-      <DemoLobby suppress />
+      <DemoLobby />
 
-      <div className={`jm-shell ${DEMO_PORTAL_ROOT_CLASS}`}>
-        <aside className="jm-side">
+      <div className="pk-shell">
+        <aside className="pk-side">
           <div style={{ padding: '2px 8px 16px' }}>
             <Image
               src="/samples/primal-krisp/primal_krisp_logo_white.png"
@@ -468,13 +393,13 @@ export default function PrimalKrispPortal() {
             />
             <div style={{ ...lbl, color: '#B6A78C', marginTop: '12px' }}>Dashboard</div>
           </div>
-          <nav className="jm-nav jm-nav--tabs" aria-label="Dashboard sections">
+          <nav className="pk-nav pk-nav--main" aria-label="Dashboard sections">
             {TABS.map(([id, label]) => {
               const active = tab === id
               return (
                 <button
                   key={id}
-                  className="jm-navbtn"
+                  className="pk-navbtn"
                   onClick={() => {
                     setTab(id)
                     setDrawerStore(null)
@@ -482,7 +407,7 @@ export default function PrimalKrispPortal() {
                   }}
                   style={
                     active
-                      ? { background: 'rgba(255,255,255,.12)', color: CREAM, boxShadow: `inset 3px 0 0 ${BRICK}` }
+                      ? { background: 'rgba(255,255,255,.12)', color: CREAM, boxShadow: `inset 3px 0 0 ${SPICE}` }
                       : undefined
                   }
                 >
@@ -491,27 +416,24 @@ export default function PrimalKrispPortal() {
               )
             })}
           </nav>
-          <div className="jm-tools-label" style={{ ...lbl, color: '#7A6A52', fontSize: '10px', margin: '16px 14px 6px' }}>
+          <div className="pk-tools-label" style={{ ...lbl, color: '#7A6A52', fontSize: '10px', margin: '16px 14px 6px' }}>
             Tools
           </div>
-          <nav className="jm-nav jm-nav--tools" aria-label="Tools">
+          <nav className="pk-nav pk-nav--tools" aria-label="Tools">
             {EXTRA.map(([id, label]) => {
               const active = tab === id
               return (
                 <button
                   key={id}
-                  className="jm-navbtn"
+                  className="pk-navbtn"
                   onClick={() => setTab(id)}
                   style={
                     active
-                      ? { background: 'rgba(255,255,255,.12)', color: CREAM, boxShadow: `inset 3px 0 0 ${BRICK}` }
+                      ? { background: 'rgba(255,255,255,.12)', color: CREAM, boxShadow: `inset 3px 0 0 ${SPICE}` }
                       : undefined
                   }
                 >
                   {label}
-                  {id === 'quickbooks' ? (
-                    <span style={{ width: '7px', height: '7px', borderRadius: '50%', background: SAGE, marginLeft: '8px', display: 'inline-block' }} />
-                  ) : null}
                 </button>
               )
             })}
@@ -519,97 +441,42 @@ export default function PrimalKrispPortal() {
           <div style={{ padding: '12px 10px 0', borderTop: '1px solid rgba(255,255,255,.1)', marginTop: '8px' }}>
             <div style={{ fontFamily: MONO, fontSize: '9px', color: '#8A7A66', lineHeight: 1.7 }}>
               SAMPLE DASHBOARD<br />
-              <span style={{ color: BRICK, fontWeight: 600 }}>{DATA.meta.built_by}</span>
+              <span style={{ color: SPICE, fontWeight: 600 }}>{DATA.meta.built_by}</span>
             </div>
           </div>
         </aside>
 
-        <main className="jm-main">
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '10px', marginBottom: '16px' }}>
-            <div>
-              <div style={{ ...lbl, color: BRICK }}>{BIZ}</div>
-              <h1 style={{ ...big, fontSize: '28px', color: INK, lineHeight: 1.1, marginTop: '4px' }}>{currentLabel}</h1>
-              <div style={{ fontSize: '12px', color: MUTED, marginTop: '6px' }}>{sampleHeader}</div>
-            </div>
-            <div style={{ textAlign: 'right' }}>
-              <div style={{ display: 'inline-flex', border: `1px solid ${BORDER}`, borderRadius: '8px', overflow: 'hidden', marginBottom: '8px' }}>
-                {[['week', 'This week'], ['month', 'This month']].map(([p, l]) => (
-                  <button
-                    key={p}
-                    onClick={() => setPeriod(p)}
-                    style={{
-                      padding: '4px 11px',
-                      border: 'none',
-                      background: period === p ? CHARCOAL : 'transparent',
-                      color: period === p ? CREAM : MUTED,
-                      fontSize: '11px',
-                      fontWeight: 600,
-                      cursor: 'pointer',
-                    }}
-                  >
-                    {l}
-                  </button>
-                ))}
-              </div>
-              <div style={{ ...big, fontSize: '24px', color: BRICK }}>{money0(salesPeriod)}</div>
-              <div style={{ ...lbl, color: '#9A8868' }}>{period === 'week' ? 'REVENUE THIS WEEK' : 'REVENUE THIS MONTH'}</div>
-            </div>
+        <main className="pk-main">
+          <div style={{ marginBottom: '22px' }}>
+            <div style={{ ...lbl, color: SPICE }}>{BIZ}</div>
+            <h1 style={{ ...big, fontSize: '28px', color: INK, letterSpacing: '0.3px', lineHeight: 1.1, marginTop: '4px' }}>{currentLabel}</h1>
+            <div style={{ fontSize: '12px', color: MUTED, marginTop: '6px' }}>{sampleHeader}</div>
           </div>
 
           {tab === 'stores' && (
             <FilterChip label={listFilterLabel} onClear={() => setListFilter(null)} />
           )}
 
+          {tab === 'financials' && (
+            <PrimalKrispFinancials card={card} lbl={lbl} big={big} btn={btn} inp={inp} KPI={KPI} />
+          )}
+
           {tab === 'overview' && (
-            <>
-              <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap', marginBottom: '16px' }}>
-                <KPI k="Cash on hand" v={money0(ov.cash_on_hand)} onClick={() => setTab('pnl')} />
-                <KPI
-                  k={period === 'week' ? 'Sales this week' : 'Sales this month'}
-                  v={money0(salesPeriod)}
-                  sub={`${salesDelta >= 0 ? '+' : ''}${pct1(salesDelta)} vs ${period === 'week' ? 'prior week' : 'last month'}`}
-                  accent={BRICK}
-                  onClick={() => setTab('pnl')}
-                />
-                <KPI k="Bags sold" v={bagsPeriod.toLocaleString()} onClick={() => goOverviewLink('products', null)} />
-                <KPI
-                  k="Active subscriptions"
-                  v={ov.active_subscriptions}
-                  accent={SAGE}
-                  onClick={() => setTab('subscriptions')}
-                />
-                <KPI
-                  k="Owed by stores"
-                  v={money(ov.open_store_balance)}
-                  accent={ov.open_store_balance ? AMBER : INK}
-                  onClick={() => goOverviewLink('stores', 'open_balance')}
-                />
-              </div>
-
-              <div style={{ ...card, marginBottom: '16px', overflowX: 'auto' }}>
-                <div style={{ ...lbl, marginBottom: '8px' }}>
-                  {period === 'week' ? 'Sales by channel — September weeks' : 'Sales by channel — trailing 12 months'}
-                </div>
-                <StackedSalesByChannel months={chartMonths} channels={CHANNELS} />
-              </div>
-
-              <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap', marginBottom: '16px' }}>
-                <RankedBars
-                  title={period === 'week' ? 'Sales this week, by channel' : 'Sales this month, by channel'}
-                  rows={channelRowsPeriod.map((c) => ({ channel: c.channel, sales: c.sales }))}
-                  valueKey="sales"
-                  labelKey="channel"
-                  footerTotal={channelSumPeriod}
-                  tieExpected={salesPeriod}
-                  tieActual={channelSumPeriod}
-                />
-              </div>
-
-              <div style={{ ...card, marginBottom: '16px', overflowX: 'auto' }}>
-                <div style={{ ...lbl, marginBottom: '8px' }}>13-week cash forecast</div>
-                <CashForecast13 forecast={DATA.cash_forecast_13_weeks} />
-              </div>
-            </>
+            <PrimalKrispOverview
+              card={card}
+              lbl={lbl}
+              big={big}
+              KPI={KPI}
+              period={period}
+              setPeriod={setPeriod}
+              salesPeriod={salesPeriod}
+              salesPrior={salesPrior}
+              salesDelta={salesDelta}
+              bagsPeriod={bagsPeriod}
+              channelRowsPeriod={channelRowsPeriod}
+              goTab={goTab}
+              goStoresFilter={goStoresFilter}
+            />
           )}
 
           {tab === 'stores' && (
@@ -639,7 +506,7 @@ export default function PrimalKrispPortal() {
                 <KPI
                   k="Bags unaccounted"
                   v={storeKpis.unaccounted}
-                  accent={storeKpis.unaccounted ? RED : SAGE}
+                  accent={storeKpis.unaccounted ? RED : GREEN}
                   onClick={() => setListFilter('unaccounted')}
                 />
               </div>
@@ -685,8 +552,8 @@ export default function PrimalKrispPortal() {
                     style={{
                       padding: '6px 14px',
                       borderRadius: '18px',
-                      border: `1px solid ${regionFilter === r ? CHARCOAL : BORDER}`,
-                      background: regionFilter === r ? CHARCOAL : CARDBG,
+                      border: `1px solid ${regionFilter === r ? CHAR : BORDER}`,
+                      background: regionFilter === r ? CHAR : CARDBG,
                       color: regionFilter === r ? CREAM : MUTED,
                       ...btn,
                       fontSize: '12px',
@@ -704,8 +571,8 @@ export default function PrimalKrispPortal() {
                     style={{
                       padding: '6px 14px',
                       borderRadius: '18px',
-                      border: `1px solid ${termsFilter === t ? BRICK : BORDER}`,
-                      background: termsFilter === t ? BRICK : CARDBG,
+                      border: `1px solid ${termsFilter === t ? SPICE : BORDER}`,
+                      background: termsFilter === t ? SPICE : CARDBG,
                       color: termsFilter === t ? '#fff' : MUTED,
                       ...btn,
                       fontSize: '12px',
@@ -725,7 +592,10 @@ export default function PrimalKrispPortal() {
                     ? { c: RED, t: 'Reorder now' }
                     : s.reorder_flag === 'Reorder soon'
                       ? { c: AMBER, t: 'Reorder soon' }
-                      : { c: SAGE, t: 'OK' }
+                      : { c: GREEN, t: 'OK' }
+                const overdue = (s.invoices || s.open_invoices || []).some(
+                  (inv) => inv.status !== 'Paid' && inv.days_outstanding > 60,
+                )
                 return (
                   <button
                     type="button"
@@ -740,12 +610,13 @@ export default function PrimalKrispPortal() {
                       cursor: 'pointer',
                       textAlign: 'left',
                       minHeight: '44px',
-                      borderColor: drawerStore?.name === st.name ? CHARCOAL : BORDER,
+                      borderColor: drawerStore?.name === st.name ? CHAR : overdue ? '#E7C3B8' : BORDER,
+                      background: overdue ? TINT_RED : CARDBG,
                     }}
                   >
                     <div style={{ display: 'flex', justifyContent: 'space-between', gap: '12px', flexWrap: 'wrap' }}>
                       <div>
-                        <div style={{ ...big, fontSize: '18px', color: INK }}>{st.name}</div>
+                        <div style={{ ...big, fontSize: '20px', color: INK }}>{st.name}</div>
                         <div style={{ fontSize: '12px', color: MUTED, marginTop: '4px' }}>
                           {st.city} · {s.terms} · {money(s.price_per_bag)}/bag
                         </div>
@@ -787,7 +658,7 @@ export default function PrimalKrispPortal() {
                       ? channelRowsPeriod.find((c) => c.channel === 'Subscriptions')?.sales || 0
                       : ov.sales_by_channel.find((c) => c.channel === 'Subscriptions')?.sales || 0,
                   )}
-                  accent={BRICK}
+                  accent={SPICE}
                 />
                 <KPI k="Active subs" v={DATA.subscriptions.active} />
                 <KPI k="September churn" v={pct1(DATA.subscriptions.churn_sept_pct)} />
@@ -833,7 +704,7 @@ export default function PrimalKrispPortal() {
             </>
           )}
 
-          {tab === 'tastings' && (
+          {tab === 'advertising' && (
             <>
               <div style={{ ...card, marginBottom: '16px', overflowX: 'auto' }}>
                 <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '13px' }}>
@@ -959,7 +830,7 @@ export default function PrimalKrispPortal() {
                                 style={{
                                   background: 'none',
                                   border: 'none',
-                                  color: BRICK,
+                                  color: SPICE,
                                   cursor: 'pointer',
                                   fontWeight: 600,
                                   fontSize: '12px',
@@ -995,15 +866,11 @@ export default function PrimalKrispPortal() {
                 </table>
               </div>
 
-              <div style={{ ...card, overflowX: 'auto' }}>
+              <div style={{ ...card, marginBottom: '16px', overflowX: 'auto' }}>
                 <div style={{ ...lbl, marginBottom: '8px' }}>Margin per bag by channel</div>
                 <MarginByChannelChart products={DATA.product_margins_by_channel} channels={CHANNELS} />
               </div>
-            </>
-          )}
 
-          {tab === 'inventory' && (
-            <>
               <div style={{ ...card, marginBottom: '16px', overflowX: 'auto' }}>
                 <div style={{ ...lbl, marginBottom: '8px' }}>Days of stock per product</div>
                 <InventoryDaysChart rows={DATA.inventory.by_product} />
@@ -1013,22 +880,43 @@ export default function PrimalKrispPortal() {
                 <table style={{ width: '100%', minWidth: '720px', borderCollapse: 'collapse', fontSize: '12px' }}>
                   <thead>
                     <tr style={{ borderBottom: `1px solid ${BORDER}` }}>
-                      {['Run', 'Date', 'Product', 'Raw lbs', 'Planned', 'Packed', 'Yield', 'Cost / bag', 'Status'].map((h) => (
-                        <th key={h} style={{ ...lbl, padding: '8px 4px', textAlign: 'left' }}>{h}</th>
+                      {[
+                        ['Run', 'run'],
+                        ['Date', 'date'],
+                        ['Product', 'product'],
+                        ['Raw lbs', 'raw_meat_lbs'],
+                        ['Planned', 'bags_planned'],
+                        ['Packed', 'bags_packed'],
+                        ['Yield', 'yield_vs_plan_pct'],
+                        ['Cost / bag', 'cost_per_bag'],
+                        ['Status', 'status'],
+                      ].map(([h, key]) => (
+                        <th key={h} style={{ ...lbl, padding: '8px 4px', textAlign: 'left', color: KRAFT }}>
+                          <button
+                            type="button"
+                            onClick={() =>
+                              setInvSort((s) => ({ key, dir: s.key === key && s.dir === 'desc' ? 'asc' : 'desc' }))
+                            }
+                            style={{ border: 'none', background: 'none', cursor: 'pointer', ...lbl, color: invSort.key === key ? INK : KRAFT, minHeight: 40 }}
+                          >
+                            {h}
+                            {invSort.key === key ? (invSort.dir === 'asc' ? ' ↑' : ' ↓') : ''}
+                          </button>
+                        </th>
                       ))}
                     </tr>
                   </thead>
                   <tbody>
-                    {DATA.production_runs.map((r) => (
+                    {sortedRuns.map((r) => (
                       <tr key={r.run} style={{ borderBottom: `1px solid ${CREAM}` }}>
-                        <td style={{ padding: '8px 4px', fontWeight: 600 }}>{r.run}</td>
-                        <td style={{ padding: '8px 4px' }}>{fmtD(r.date)}</td>
+                        <td style={{ padding: '8px 4px', fontWeight: 600, position: 'sticky', left: 0, background: CARDBG }}>{r.run}</td>
+                        <td style={{ padding: '8px 4px', fontFamily: MONO }}>{fmtD(r.date)}</td>
                         <td style={{ padding: '8px 4px' }}>{r.product}</td>
-                        <td style={{ padding: '8px 4px', fontFamily: MONO }}>{r.raw_meat_lbs}</td>
-                        <td style={{ padding: '8px 4px', fontFamily: MONO }}>{r.bags_planned}</td>
-                        <td style={{ padding: '8px 4px', fontFamily: MONO }}>{r.bags_packed ?? '—'}</td>
-                        <td style={{ padding: '8px 4px', fontFamily: MONO }}>{r.yield_vs_plan_pct != null ? pct1(r.yield_vs_plan_pct) : '—'}</td>
-                        <td style={{ padding: '8px 4px', fontFamily: MONO }}>{r.cost_per_bag != null ? money(r.cost_per_bag) : '—'}</td>
+                        <td style={{ padding: '8px 4px', fontFamily: MONO, textAlign: 'right' }}>{r.raw_meat_lbs}</td>
+                        <td style={{ padding: '8px 4px', fontFamily: MONO, textAlign: 'right' }}>{r.bags_planned}</td>
+                        <td style={{ padding: '8px 4px', fontFamily: MONO, textAlign: 'right' }}>{r.bags_packed ?? '—'}</td>
+                        <td style={{ padding: '8px 4px', fontFamily: MONO, textAlign: 'right' }}>{r.yield_vs_plan_pct != null ? pct1(r.yield_vs_plan_pct) : '—'}</td>
+                        <td style={{ padding: '8px 4px', fontFamily: MONO, textAlign: 'right' }}>{r.cost_per_bag != null ? money(r.cost_per_bag) : '—'}</td>
                         <td style={{ padding: '8px 4px' }}>{r.status}</td>
                       </tr>
                     ))}
@@ -1038,117 +926,32 @@ export default function PrimalKrispPortal() {
             </>
           )}
 
-          {tab === 'pnl' && pnlSelected && (
-            <>
-              <div style={{ display: 'flex', gap: '10px', marginBottom: '16px', flexWrap: 'wrap', alignItems: 'center' }}>
-                <span style={{ ...lbl }}>Month</span>
-                <select
-                  value={pnlMonthIdx}
-                  onChange={(e) => {
-                    setPnlMonthIdx(Number(e.target.value))
-                    setPnlOpen(null)
-                  }}
-                  style={{ ...inp, cursor: 'pointer', minHeight: '40px' }}
-                >
-                  {(DATA.pnl_by_month || []).map((m, i) => (
-                    <option key={m.month} value={i}>
-                      {m.label} — {m.period}
-                    </option>
-                  ))}
-                </select>
-              </div>
-
-              <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap', marginBottom: '16px' }}>
-                <KPI k="Revenue" v={money(pnlSelected.revenue_total)} accent={SAGE} />
-                <KPI k="Gross profit" v={money(pnlSelected.gross_profit)} />
-                <KPI k="Net profit" v={money(pnlSelected.net_profit)} accent={BRICK} />
-              </div>
-              <div style={{ ...card }}>
-                <div style={{ ...lbl, marginBottom: '12px' }}>
-                  Profit &amp; loss — {pnlSelected.period} ({pnlSelected.basis})
-                </div>
-                <DrillRow
-                  k={`rev-${pnlSelected.month}`}
-                  l="Revenue by channel"
-                  v={money(pnlSelected.revenue_total)}
-                  items={revLines}
-                  tieTotal={pnlSelected.revenue_total}
-                />
-                <DrillRow
-                  k={`cogs-${pnlSelected.month}`}
-                  l="Cost of goods sold"
-                  v={money(-pnlSelected.cogs)}
-                  items={cogsLines}
-                  tieTotal={pnlSelected.cogs}
-                />
-                <Row l="Gross profit" v={money(pnlSelected.gross_profit)} bold top />
-                <DrillRow
-                  k={`opex-${pnlSelected.month}`}
-                  l="Operating expenses"
-                  v={money(-pnlSelected.operating_expenses_total)}
-                  items={opexLines}
-                  tieTotal={pnlSelected.operating_expenses_total}
-                />
-                <Row l="Net profit" v={money(pnlSelected.net_profit)} bold top />
-              </div>
-            </>
-          )}
-
-          {tab === 'quickbooks' && (
-            <>
-              <div style={{ ...card, marginBottom: '16px' }}>
-                <div style={{ ...big, fontSize: '18px', color: INK }}>QuickBooks Online</div>
-                <div style={{ fontSize: '13px', color: MUTED, marginTop: '6px' }}>{BIZ} · last sync 02:14 ET</div>
-              </div>
-              {['Synced reports', 'Operating hooks', 'Close workflow'].map((title) => (
-                <div key={title} style={{ ...card, marginBottom: '12px', fontWeight: 600, fontSize: '15px', color: INK }}>
-                  {title}
-                </div>
-              ))}
-            </>
-          )}
-
           {tab === 'close' && (
             <>
               <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap', marginBottom: '16px' }}>
-                <KPI k="Income to post" v={money(DATA.monthly_close.income_to_post_total)} accent={SAGE} />
+                <KPI k="Income to post" v={money(DATA.monthly_close.income_to_post_total)} accent={GREEN} />
                 <KPI k="COGS to post" v={money(DATA.monthly_close.cogs_to_post.amount)} />
                 <KPI k="AR at month end" v={money(DATA.monthly_close.ar_open_at_month_end)} accent={AMBER} />
               </div>
               <div style={{ ...card }}>
-                <div style={{ ...lbl, color: BROWN, marginBottom: '6px' }}>Income to post</div>
+                <div style={{ ...lbl, color: KRAFT, marginBottom: '6px' }}>Income to post</div>
                 {Object.entries(DATA.monthly_close.income_to_post).map(([k, v]) => (
                   <Row key={k} l={k} v={money(v)} />
                 ))}
                 <Row l="Total" v={money(DATA.monthly_close.income_to_post_total)} bold top />
-                <div style={{ marginTop: '16px', padding: '12px 14px', background: CREAM, borderRadius: '10px', border: `1px dashed ${BORDER}` }}>
-                  <div style={{ ...lbl, marginBottom: '6px' }}>Booked elsewhere — do NOT re-enter</div>
+                <div style={{ marginTop: '16px', padding: '12px 14px', background: CREAM, borderRadius: '2px', border: `1px dashed ${BORDER}` }}>
+                  <div style={{ ...lbl, marginBottom: '6px' }}>Booked elsewhere</div>
                   {Object.entries(DATA.monthly_close.booked_through_shopify_do_not_reenter).map(([k, v]) => (
                     <Row key={k} l={k} v={money(v)} />
                   ))}
                 </div>
-                <div style={{ ...lbl, color: BROWN, margin: '16px 0 6px' }}>Journal entry preview</div>
+                <div style={{ ...lbl, color: KRAFT, margin: '16px 0 6px' }}>Journal entry preview</div>
                 {DATA.monthly_close.journal_entries_preview.map((je, i) => (
                   <div key={i} style={{ fontSize: '12px', color: MUTED, padding: '6px 0', borderTop: i ? `1px solid ${CREAM}` : 'none' }}>
                     <span style={{ color: INK, fontWeight: 600 }}>{je.memo}</span> · Dr {je.debit} / Cr {je.credit} · {money(je.amount)}
                   </div>
                 ))}
               </div>
-            </>
-          )}
-
-          {tab === 'askai' && (
-            <>
-              {DATA.answers.map((item, i) => (
-                <div key={i} style={{ marginBottom: '16px' }}>
-                  <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: '8px' }}>
-                    <div style={{ background: CHARCOAL, color: CREAM, padding: '10px 14px', borderRadius: '14px 14px 4px 14px', maxWidth: '85%', fontSize: '14px' }}>
-                      {item.q}
-                    </div>
-                  </div>
-                  <div style={{ ...card, padding: '13px 15px', fontSize: '14px', lineHeight: 1.55, maxWidth: '90%' }}>{item.a}</div>
-                </div>
-              ))}
             </>
           )}
         </main>
@@ -1208,7 +1011,7 @@ export default function PrimalKrispPortal() {
                       <td style={{ padding: '10px 4px', fontWeight: 600 }}>{inv.invoice}</td>
                       <td style={{ padding: '10px 4px', textAlign: 'right', fontFamily: MONO, fontSize: '12px' }}>{fmtD(inv.issued)}</td>
                       <td style={{ padding: '10px 4px', textAlign: 'right', fontFamily: MONO }}>{money(inv.amount)}</td>
-                      <td style={{ padding: '10px 4px', textAlign: 'right', fontSize: '12px', color: inv.status === 'Paid' ? SAGE : AMBER }}>
+                      <td style={{ padding: '10px 4px', textAlign: 'right', fontSize: '12px', color: inv.status === 'Paid' ? GREEN : AMBER }}>
                         {inv.status || 'Open'}
                       </td>
                       <td style={{ padding: '10px 4px', textAlign: 'right', fontFamily: MONO, fontSize: '12px' }}>

@@ -4024,7 +4024,269 @@
      "l": "Software (store, subscriptions, other)",
      "n": 551.71
     }
-   ]
+   ],
+   "drill_ledgers": {
+    "revenue_total": [
+     {
+      "date": "2026-04-03",
+      "description": "Website",
+      "amount": 19740
+     },
+     {
+      "date": "2026-04-08",
+      "description": "Subscriptions",
+      "amount": 8920
+     },
+     {
+      "date": "2026-04-12",
+      "description": "Stores",
+      "amount": 16070
+     },
+     {
+      "date": "2026-04-17",
+      "description": "Wholesale & bulk",
+      "amount": 2740
+     },
+     {
+      "date": "2026-04-22",
+      "description": "Tastings & events",
+      "amount": 400
+     }
+    ],
+    "cogs_total": [
+     {
+      "date": "2026-04-03",
+      "description": "COGS · 1st Cut Brisket",
+      "amount": 7021.07
+     },
+     {
+      "date": "2026-04-08",
+      "description": "COGS · 2nd Cut Brisket",
+      "amount": 3507.58
+     },
+     {
+      "date": "2026-04-12",
+      "description": "COGS · Texas Heat",
+      "amount": 4676.78
+     },
+     {
+      "date": "2026-04-17",
+      "description": "COGS · Classic Chicken",
+      "amount": 2427.14
+     },
+     {
+      "date": "2026-04-22",
+      "description": "COGS · BBQ Chicken",
+      "amount": 3035.97
+     },
+     {
+      "date": "2026-04-26",
+      "description": "COGS · Shawarma Chicken",
+      "amount": 4249.55
+     }
+    ],
+    "gross_profit": [
+     {
+      "date": "2026-04-28",
+      "description": "Gross profit (revenue − COGS)",
+      "amount": 22951.91
+     }
+    ],
+    "operating_expenses_total": [
+     {
+      "date": "2026-04-03",
+      "description": "Shipping & packing",
+      "amount": 4192.05
+     },
+     {
+      "date": "2026-04-08",
+      "description": "Card & Shopify fees",
+      "amount": 860.93
+     },
+     {
+      "date": "2026-04-12",
+      "description": "Ads & creators",
+      "amount": 3491.29
+     },
+     {
+      "date": "2026-04-17",
+      "description": "Discounts & free bags (promo cost)",
+      "amount": 2179.08
+     },
+     {
+      "date": "2026-04-22",
+      "description": "Tastings (samples + staff)",
+      "amount": 633.67
+     },
+     {
+      "date": "2026-04-26",
+      "description": "Payroll",
+      "amount": 5517.1
+     },
+     {
+      "date": "2026-04-03",
+      "description": "Rent & storage",
+      "amount": 1034.46
+     },
+     {
+      "date": "2026-04-08",
+      "description": "Insurance & kosher fees",
+      "amount": 672.4
+     },
+     {
+      "date": "2026-04-12",
+      "description": "Software (store, subscriptions, other)",
+      "amount": 551.71
+     }
+    ],
+    "net_profit": [
+     {
+      "date": "2026-04-28",
+      "description": "Net profit after operating expenses",
+      "amount": 3819.22
+     }
+    ],
+    "rev_Website": [
+     {
+      "date": "2026-04-03",
+      "description": "Website",
+      "amount": 19740
+     }
+    ],
+    "rev_Subscriptions": [
+     {
+      "date": "2026-04-03",
+      "description": "Subscriptions",
+      "amount": 8920
+     }
+    ],
+    "rev_Stores": [
+     {
+      "date": "2026-04-03",
+      "description": "Stores",
+      "amount": 16070
+     }
+    ],
+    "rev_Wholesale & bulk": [
+     {
+      "date": "2026-04-03",
+      "description": "Wholesale & bulk",
+      "amount": 2740
+     }
+    ],
+    "rev_Tastings & events": [
+     {
+      "date": "2026-04-03",
+      "description": "Tastings & events",
+      "amount": 400
+     }
+    ],
+    "cogs_1st Cut Brisket": [
+     {
+      "date": "2026-04-03",
+      "description": "COGS · 1st Cut Brisket",
+      "amount": 7021.07
+     }
+    ],
+    "cogs_2nd Cut Brisket": [
+     {
+      "date": "2026-04-03",
+      "description": "COGS · 2nd Cut Brisket",
+      "amount": 3507.58
+     }
+    ],
+    "cogs_Texas Heat": [
+     {
+      "date": "2026-04-03",
+      "description": "COGS · Texas Heat",
+      "amount": 4676.78
+     }
+    ],
+    "cogs_Classic Chicken": [
+     {
+      "date": "2026-04-03",
+      "description": "COGS · Classic Chicken",
+      "amount": 2427.14
+     }
+    ],
+    "cogs_BBQ Chicken": [
+     {
+      "date": "2026-04-03",
+      "description": "COGS · BBQ Chicken",
+      "amount": 3035.97
+     }
+    ],
+    "cogs_Shawarma Chicken": [
+     {
+      "date": "2026-04-03",
+      "description": "COGS · Shawarma Chicken",
+      "amount": 4249.55
+     }
+    ],
+    "opex_Shipping & packing": [
+     {
+      "date": "2026-04-03",
+      "description": "Shipping & packing",
+      "amount": 4192.05
+     }
+    ],
+    "opex_Card & Shopify fees": [
+     {
+      "date": "2026-04-03",
+      "description": "Card & Shopify fees",
+      "amount": 860.93
+     }
+    ],
+    "opex_Ads & creators": [
+     {
+      "date": "2026-04-03",
+      "description": "Ads & creators",
+      "amount": 3491.29
+     }
+    ],
+    "opex_Discounts & free bags (promo cost)": [
+     {
+      "date": "2026-04-03",
+      "description": "Discounts & free bags (promo cost)",
+      "amount": 2179.08
+     }
+    ],
+    "opex_Tastings (samples + staff)": [
+     {
+      "date": "2026-04-03",
+      "description": "Tastings (samples + staff)",
+      "amount": 633.67
+     }
+    ],
+    "opex_Payroll": [
+     {
+      "date": "2026-04-03",
+      "description": "Payroll",
+      "amount": 5517.1
+     }
+    ],
+    "opex_Rent & storage": [
+     {
+      "date": "2026-04-03",
+      "description": "Rent & storage",
+      "amount": 1034.46
+     }
+    ],
+    "opex_Insurance & kosher fees": [
+     {
+      "date": "2026-04-03",
+      "description": "Insurance & kosher fees",
+      "amount": 672.4
+     }
+    ],
+    "opex_Software (store, subscriptions, other)": [
+     {
+      "date": "2026-04-03",
+      "description": "Software (store, subscriptions, other)",
+      "amount": 551.71
+     }
+    ]
+   }
   },
   {
    "month": "2026-05",
@@ -4117,7 +4379,269 @@
      "l": "Software (store, subscriptions, other)",
      "n": 455.01
     }
-   ]
+   ],
+   "drill_ledgers": {
+    "revenue_total": [
+     {
+      "date": "2026-05-03",
+      "description": "Website",
+      "amount": 14090
+     },
+     {
+      "date": "2026-05-08",
+      "description": "Subscriptions",
+      "amount": 9750
+     },
+     {
+      "date": "2026-05-12",
+      "description": "Stores",
+      "amount": 11820
+     },
+     {
+      "date": "2026-05-17",
+      "description": "Wholesale & bulk",
+      "amount": 2720
+     },
+     {
+      "date": "2026-05-22",
+      "description": "Tastings & events",
+      "amount": 1100
+     }
+    ],
+    "cogs_total": [
+     {
+      "date": "2026-05-03",
+      "description": "COGS · 1st Cut Brisket",
+      "amount": 5790.51
+     },
+     {
+      "date": "2026-05-08",
+      "description": "COGS · 2nd Cut Brisket",
+      "amount": 2892.82
+     },
+     {
+      "date": "2026-05-12",
+      "description": "COGS · Texas Heat",
+      "amount": 3857.09
+     },
+     {
+      "date": "2026-05-17",
+      "description": "COGS · Classic Chicken",
+      "amount": 2001.75
+     },
+     {
+      "date": "2026-05-22",
+      "description": "COGS · BBQ Chicken",
+      "amount": 2503.87
+     },
+     {
+      "date": "2026-05-26",
+      "description": "COGS · Shawarma Chicken",
+      "amount": 3504.74
+     }
+    ],
+    "gross_profit": [
+     {
+      "date": "2026-05-28",
+      "description": "Gross profit (revenue − COGS)",
+      "amount": 18929.22
+     }
+    ],
+    "operating_expenses_total": [
+     {
+      "date": "2026-05-03",
+      "description": "Shipping & packing",
+      "amount": 3457.32
+     },
+     {
+      "date": "2026-05-08",
+      "description": "Card & Shopify fees",
+      "amount": 710.03
+     },
+     {
+      "date": "2026-05-12",
+      "description": "Ads & creators",
+      "amount": 2879.38
+     },
+     {
+      "date": "2026-05-17",
+      "description": "Discounts & free bags (promo cost)",
+      "amount": 1797.16
+     },
+     {
+      "date": "2026-05-22",
+      "description": "Tastings (samples + staff)",
+      "amount": 522.61
+     },
+     {
+      "date": "2026-05-26",
+      "description": "Payroll",
+      "amount": 4550.14
+     },
+     {
+      "date": "2026-05-03",
+      "description": "Rent & storage",
+      "amount": 853.15
+     },
+     {
+      "date": "2026-05-08",
+      "description": "Insurance & kosher fees",
+      "amount": 554.55
+     },
+     {
+      "date": "2026-05-12",
+      "description": "Software (store, subscriptions, other)",
+      "amount": 455.01
+     }
+    ],
+    "net_profit": [
+     {
+      "date": "2026-05-28",
+      "description": "Net profit after operating expenses",
+      "amount": 3149.87
+     }
+    ],
+    "rev_Website": [
+     {
+      "date": "2026-05-03",
+      "description": "Website",
+      "amount": 14090
+     }
+    ],
+    "rev_Subscriptions": [
+     {
+      "date": "2026-05-03",
+      "description": "Subscriptions",
+      "amount": 9750
+     }
+    ],
+    "rev_Stores": [
+     {
+      "date": "2026-05-03",
+      "description": "Stores",
+      "amount": 11820
+     }
+    ],
+    "rev_Wholesale & bulk": [
+     {
+      "date": "2026-05-03",
+      "description": "Wholesale & bulk",
+      "amount": 2720
+     }
+    ],
+    "rev_Tastings & events": [
+     {
+      "date": "2026-05-03",
+      "description": "Tastings & events",
+      "amount": 1100
+     }
+    ],
+    "cogs_1st Cut Brisket": [
+     {
+      "date": "2026-05-03",
+      "description": "COGS · 1st Cut Brisket",
+      "amount": 5790.51
+     }
+    ],
+    "cogs_2nd Cut Brisket": [
+     {
+      "date": "2026-05-03",
+      "description": "COGS · 2nd Cut Brisket",
+      "amount": 2892.82
+     }
+    ],
+    "cogs_Texas Heat": [
+     {
+      "date": "2026-05-03",
+      "description": "COGS · Texas Heat",
+      "amount": 3857.09
+     }
+    ],
+    "cogs_Classic Chicken": [
+     {
+      "date": "2026-05-03",
+      "description": "COGS · Classic Chicken",
+      "amount": 2001.75
+     }
+    ],
+    "cogs_BBQ Chicken": [
+     {
+      "date": "2026-05-03",
+      "description": "COGS · BBQ Chicken",
+      "amount": 2503.87
+     }
+    ],
+    "cogs_Shawarma Chicken": [
+     {
+      "date": "2026-05-03",
+      "description": "COGS · Shawarma Chicken",
+      "amount": 3504.74
+     }
+    ],
+    "opex_Shipping & packing": [
+     {
+      "date": "2026-05-03",
+      "description": "Shipping & packing",
+      "amount": 3457.32
+     }
+    ],
+    "opex_Card & Shopify fees": [
+     {
+      "date": "2026-05-03",
+      "description": "Card & Shopify fees",
+      "amount": 710.03
+     }
+    ],
+    "opex_Ads & creators": [
+     {
+      "date": "2026-05-03",
+      "description": "Ads & creators",
+      "amount": 2879.38
+     }
+    ],
+    "opex_Discounts & free bags (promo cost)": [
+     {
+      "date": "2026-05-03",
+      "description": "Discounts & free bags (promo cost)",
+      "amount": 1797.16
+     }
+    ],
+    "opex_Tastings (samples + staff)": [
+     {
+      "date": "2026-05-03",
+      "description": "Tastings (samples + staff)",
+      "amount": 522.61
+     }
+    ],
+    "opex_Payroll": [
+     {
+      "date": "2026-05-03",
+      "description": "Payroll",
+      "amount": 4550.14
+     }
+    ],
+    "opex_Rent & storage": [
+     {
+      "date": "2026-05-03",
+      "description": "Rent & storage",
+      "amount": 853.15
+     }
+    ],
+    "opex_Insurance & kosher fees": [
+     {
+      "date": "2026-05-03",
+      "description": "Insurance & kosher fees",
+      "amount": 554.55
+     }
+    ],
+    "opex_Software (store, subscriptions, other)": [
+     {
+      "date": "2026-05-03",
+      "description": "Software (store, subscriptions, other)",
+      "amount": 455.01
+     }
+    ]
+   }
   },
   {
    "month": "2026-06",
@@ -4210,7 +4734,269 @@
      "l": "Software (store, subscriptions, other)",
      "n": 528.2
     }
-   ]
+   ],
+   "drill_ledgers": {
+    "revenue_total": [
+     {
+      "date": "2026-06-03",
+      "description": "Website",
+      "amount": 15860
+     },
+     {
+      "date": "2026-06-08",
+      "description": "Subscriptions",
+      "amount": 10490
+     },
+     {
+      "date": "2026-06-12",
+      "description": "Stores",
+      "amount": 13670
+     },
+     {
+      "date": "2026-06-17",
+      "description": "Wholesale & bulk",
+      "amount": 5160
+     },
+     {
+      "date": "2026-06-22",
+      "description": "Tastings & events",
+      "amount": 650
+     }
+    ],
+    "cogs_total": [
+     {
+      "date": "2026-06-03",
+      "description": "COGS · 1st Cut Brisket",
+      "amount": 6721.86
+     },
+     {
+      "date": "2026-06-08",
+      "description": "COGS · 2nd Cut Brisket",
+      "amount": 3358.1
+     },
+     {
+      "date": "2026-06-12",
+      "description": "COGS · Texas Heat",
+      "amount": 4477.47
+     },
+     {
+      "date": "2026-06-17",
+      "description": "COGS · Classic Chicken",
+      "amount": 2323.71
+     },
+     {
+      "date": "2026-06-22",
+      "description": "COGS · BBQ Chicken",
+      "amount": 2906.59
+     },
+     {
+      "date": "2026-06-26",
+      "description": "COGS · Shawarma Chicken",
+      "amount": 4068.46
+     }
+    ],
+    "gross_profit": [
+     {
+      "date": "2026-06-28",
+      "description": "Gross profit (revenue − COGS)",
+      "amount": 21973.81
+     }
+    ],
+    "operating_expenses_total": [
+     {
+      "date": "2026-06-03",
+      "description": "Shipping & packing",
+      "amount": 4013.4
+     },
+     {
+      "date": "2026-06-08",
+      "description": "Card & Shopify fees",
+      "amount": 824.24
+     },
+     {
+      "date": "2026-06-12",
+      "description": "Ads & creators",
+      "amount": 3342.51
+     },
+     {
+      "date": "2026-06-17",
+      "description": "Discounts & free bags (promo cost)",
+      "amount": 2086.22
+     },
+     {
+      "date": "2026-06-22",
+      "description": "Tastings (samples + staff)",
+      "amount": 606.67
+     },
+     {
+      "date": "2026-06-26",
+      "description": "Payroll",
+      "amount": 5281.98
+     },
+     {
+      "date": "2026-06-03",
+      "description": "Rent & storage",
+      "amount": 990.37
+     },
+     {
+      "date": "2026-06-08",
+      "description": "Insurance & kosher fees",
+      "amount": 643.74
+     },
+     {
+      "date": "2026-06-12",
+      "description": "Software (store, subscriptions, other)",
+      "amount": 528.2
+     }
+    ],
+    "net_profit": [
+     {
+      "date": "2026-06-28",
+      "description": "Net profit after operating expenses",
+      "amount": 3656.48
+     }
+    ],
+    "rev_Website": [
+     {
+      "date": "2026-06-03",
+      "description": "Website",
+      "amount": 15860
+     }
+    ],
+    "rev_Subscriptions": [
+     {
+      "date": "2026-06-03",
+      "description": "Subscriptions",
+      "amount": 10490
+     }
+    ],
+    "rev_Stores": [
+     {
+      "date": "2026-06-03",
+      "description": "Stores",
+      "amount": 13670
+     }
+    ],
+    "rev_Wholesale & bulk": [
+     {
+      "date": "2026-06-03",
+      "description": "Wholesale & bulk",
+      "amount": 5160
+     }
+    ],
+    "rev_Tastings & events": [
+     {
+      "date": "2026-06-03",
+      "description": "Tastings & events",
+      "amount": 650
+     }
+    ],
+    "cogs_1st Cut Brisket": [
+     {
+      "date": "2026-06-03",
+      "description": "COGS · 1st Cut Brisket",
+      "amount": 6721.86
+     }
+    ],
+    "cogs_2nd Cut Brisket": [
+     {
+      "date": "2026-06-03",
+      "description": "COGS · 2nd Cut Brisket",
+      "amount": 3358.1
+     }
+    ],
+    "cogs_Texas Heat": [
+     {
+      "date": "2026-06-03",
+      "description": "COGS · Texas Heat",
+      "amount": 4477.47
+     }
+    ],
+    "cogs_Classic Chicken": [
+     {
+      "date": "2026-06-03",
+      "description": "COGS · Classic Chicken",
+      "amount": 2323.71
+     }
+    ],
+    "cogs_BBQ Chicken": [
+     {
+      "date": "2026-06-03",
+      "description": "COGS · BBQ Chicken",
+      "amount": 2906.59
+     }
+    ],
+    "cogs_Shawarma Chicken": [
+     {
+      "date": "2026-06-03",
+      "description": "COGS · Shawarma Chicken",
+      "amount": 4068.46
+     }
+    ],
+    "opex_Shipping & packing": [
+     {
+      "date": "2026-06-03",
+      "description": "Shipping & packing",
+      "amount": 4013.4
+     }
+    ],
+    "opex_Card & Shopify fees": [
+     {
+      "date": "2026-06-03",
+      "description": "Card & Shopify fees",
+      "amount": 824.24
+     }
+    ],
+    "opex_Ads & creators": [
+     {
+      "date": "2026-06-03",
+      "description": "Ads & creators",
+      "amount": 3342.51
+     }
+    ],
+    "opex_Discounts & free bags (promo cost)": [
+     {
+      "date": "2026-06-03",
+      "description": "Discounts & free bags (promo cost)",
+      "amount": 2086.22
+     }
+    ],
+    "opex_Tastings (samples + staff)": [
+     {
+      "date": "2026-06-03",
+      "description": "Tastings (samples + staff)",
+      "amount": 606.67
+     }
+    ],
+    "opex_Payroll": [
+     {
+      "date": "2026-06-03",
+      "description": "Payroll",
+      "amount": 5281.98
+     }
+    ],
+    "opex_Rent & storage": [
+     {
+      "date": "2026-06-03",
+      "description": "Rent & storage",
+      "amount": 990.37
+     }
+    ],
+    "opex_Insurance & kosher fees": [
+     {
+      "date": "2026-06-03",
+      "description": "Insurance & kosher fees",
+      "amount": 643.74
+     }
+    ],
+    "opex_Software (store, subscriptions, other)": [
+     {
+      "date": "2026-06-03",
+      "description": "Software (store, subscriptions, other)",
+      "amount": 528.2
+     }
+    ]
+   }
   },
   {
    "month": "2026-07",
@@ -4303,7 +5089,269 @@
      "l": "Software (store, subscriptions, other)",
      "n": 532.58
     }
-   ]
+   ],
+   "drill_ledgers": {
+    "revenue_total": [
+     {
+      "date": "2026-07-03",
+      "description": "Website",
+      "amount": 16280
+     },
+     {
+      "date": "2026-07-08",
+      "description": "Subscriptions",
+      "amount": 11190
+     },
+     {
+      "date": "2026-07-12",
+      "description": "Stores",
+      "amount": 14370
+     },
+     {
+      "date": "2026-07-17",
+      "description": "Wholesale & bulk",
+      "amount": 3720
+     },
+     {
+      "date": "2026-07-22",
+      "description": "Tastings & events",
+      "amount": 650
+     }
+    ],
+    "cogs_total": [
+     {
+      "date": "2026-07-03",
+      "description": "COGS · 1st Cut Brisket",
+      "amount": 6777.6
+     },
+     {
+      "date": "2026-07-08",
+      "description": "COGS · 2nd Cut Brisket",
+      "amount": 3385.95
+     },
+     {
+      "date": "2026-07-12",
+      "description": "COGS · Texas Heat",
+      "amount": 4514.6
+     },
+     {
+      "date": "2026-07-17",
+      "description": "COGS · Classic Chicken",
+      "amount": 2342.98
+     },
+     {
+      "date": "2026-07-22",
+      "description": "COGS · BBQ Chicken",
+      "amount": 2930.69
+     },
+     {
+      "date": "2026-07-26",
+      "description": "COGS · Shawarma Chicken",
+      "amount": 4102.18
+     }
+    ],
+    "gross_profit": [
+     {
+      "date": "2026-07-28",
+      "description": "Gross profit (revenue − COGS)",
+      "amount": 22156
+     }
+    ],
+    "operating_expenses_total": [
+     {
+      "date": "2026-07-03",
+      "description": "Shipping & packing",
+      "amount": 4046.68
+     },
+     {
+      "date": "2026-07-08",
+      "description": "Card & Shopify fees",
+      "amount": 831.07
+     },
+     {
+      "date": "2026-07-12",
+      "description": "Ads & creators",
+      "amount": 3370.22
+     },
+     {
+      "date": "2026-07-17",
+      "description": "Discounts & free bags (promo cost)",
+      "amount": 2103.52
+     },
+     {
+      "date": "2026-07-22",
+      "description": "Tastings (samples + staff)",
+      "amount": 611.7
+     },
+     {
+      "date": "2026-07-26",
+      "description": "Payroll",
+      "amount": 5325.78
+     },
+     {
+      "date": "2026-07-03",
+      "description": "Rent & storage",
+      "amount": 998.58
+     },
+     {
+      "date": "2026-07-08",
+      "description": "Insurance & kosher fees",
+      "amount": 649.08
+     },
+     {
+      "date": "2026-07-12",
+      "description": "Software (store, subscriptions, other)",
+      "amount": 532.58
+     }
+    ],
+    "net_profit": [
+     {
+      "date": "2026-07-28",
+      "description": "Net profit after operating expenses",
+      "amount": 3686.79
+     }
+    ],
+    "rev_Website": [
+     {
+      "date": "2026-07-03",
+      "description": "Website",
+      "amount": 16280
+     }
+    ],
+    "rev_Subscriptions": [
+     {
+      "date": "2026-07-03",
+      "description": "Subscriptions",
+      "amount": 11190
+     }
+    ],
+    "rev_Stores": [
+     {
+      "date": "2026-07-03",
+      "description": "Stores",
+      "amount": 14370
+     }
+    ],
+    "rev_Wholesale & bulk": [
+     {
+      "date": "2026-07-03",
+      "description": "Wholesale & bulk",
+      "amount": 3720
+     }
+    ],
+    "rev_Tastings & events": [
+     {
+      "date": "2026-07-03",
+      "description": "Tastings & events",
+      "amount": 650
+     }
+    ],
+    "cogs_1st Cut Brisket": [
+     {
+      "date": "2026-07-03",
+      "description": "COGS · 1st Cut Brisket",
+      "amount": 6777.6
+     }
+    ],
+    "cogs_2nd Cut Brisket": [
+     {
+      "date": "2026-07-03",
+      "description": "COGS · 2nd Cut Brisket",
+      "amount": 3385.95
+     }
+    ],
+    "cogs_Texas Heat": [
+     {
+      "date": "2026-07-03",
+      "description": "COGS · Texas Heat",
+      "amount": 4514.6
+     }
+    ],
+    "cogs_Classic Chicken": [
+     {
+      "date": "2026-07-03",
+      "description": "COGS · Classic Chicken",
+      "amount": 2342.98
+     }
+    ],
+    "cogs_BBQ Chicken": [
+     {
+      "date": "2026-07-03",
+      "description": "COGS · BBQ Chicken",
+      "amount": 2930.69
+     }
+    ],
+    "cogs_Shawarma Chicken": [
+     {
+      "date": "2026-07-03",
+      "description": "COGS · Shawarma Chicken",
+      "amount": 4102.18
+     }
+    ],
+    "opex_Shipping & packing": [
+     {
+      "date": "2026-07-03",
+      "description": "Shipping & packing",
+      "amount": 4046.68
+     }
+    ],
+    "opex_Card & Shopify fees": [
+     {
+      "date": "2026-07-03",
+      "description": "Card & Shopify fees",
+      "amount": 831.07
+     }
+    ],
+    "opex_Ads & creators": [
+     {
+      "date": "2026-07-03",
+      "description": "Ads & creators",
+      "amount": 3370.22
+     }
+    ],
+    "opex_Discounts & free bags (promo cost)": [
+     {
+      "date": "2026-07-03",
+      "description": "Discounts & free bags (promo cost)",
+      "amount": 2103.52
+     }
+    ],
+    "opex_Tastings (samples + staff)": [
+     {
+      "date": "2026-07-03",
+      "description": "Tastings (samples + staff)",
+      "amount": 611.7
+     }
+    ],
+    "opex_Payroll": [
+     {
+      "date": "2026-07-03",
+      "description": "Payroll",
+      "amount": 5325.78
+     }
+    ],
+    "opex_Rent & storage": [
+     {
+      "date": "2026-07-03",
+      "description": "Rent & storage",
+      "amount": 998.58
+     }
+    ],
+    "opex_Insurance & kosher fees": [
+     {
+      "date": "2026-07-03",
+      "description": "Insurance & kosher fees",
+      "amount": 649.08
+     }
+    ],
+    "opex_Software (store, subscriptions, other)": [
+     {
+      "date": "2026-07-03",
+      "description": "Software (store, subscriptions, other)",
+      "amount": 532.58
+     }
+    ]
+   }
   },
   {
    "month": "2026-08",
@@ -4396,7 +5444,269 @@
      "l": "Software (store, subscriptions, other)",
      "n": 585.13
     }
-   ]
+   ],
+   "drill_ledgers": {
+    "revenue_total": [
+     {
+      "date": "2026-08-03",
+      "description": "Website",
+      "amount": 17680
+     },
+     {
+      "date": "2026-08-08",
+      "description": "Subscriptions",
+      "amount": 11930
+     },
+     {
+      "date": "2026-08-12",
+      "description": "Stores",
+      "amount": 15940
+     },
+     {
+      "date": "2026-08-17",
+      "description": "Wholesale & bulk",
+      "amount": 4020
+     },
+     {
+      "date": "2026-08-22",
+      "description": "Tastings & events",
+      "amount": 1200
+     }
+    ],
+    "cogs_total": [
+     {
+      "date": "2026-08-03",
+      "description": "COGS · 1st Cut Brisket",
+      "amount": 7446.41
+     },
+     {
+      "date": "2026-08-08",
+      "description": "COGS · 2nd Cut Brisket",
+      "amount": 3720.07
+     },
+     {
+      "date": "2026-08-12",
+      "description": "COGS · Texas Heat",
+      "amount": 4960.1
+     },
+     {
+      "date": "2026-08-17",
+      "description": "COGS · Classic Chicken",
+      "amount": 2574.18
+     },
+     {
+      "date": "2026-08-22",
+      "description": "COGS · BBQ Chicken",
+      "amount": 3219.89
+     },
+     {
+      "date": "2026-08-26",
+      "description": "COGS · Shawarma Chicken",
+      "amount": 4506.99
+     }
+    ],
+    "gross_profit": [
+     {
+      "date": "2026-08-28",
+      "description": "Gross profit (revenue − COGS)",
+      "amount": 24342.36
+     }
+    ],
+    "operating_expenses_total": [
+     {
+      "date": "2026-08-03",
+      "description": "Shipping & packing",
+      "amount": 4446
+     },
+     {
+      "date": "2026-08-08",
+      "description": "Card & Shopify fees",
+      "amount": 913.08
+     },
+     {
+      "date": "2026-08-12",
+      "description": "Ads & creators",
+      "amount": 3702.79
+     },
+     {
+      "date": "2026-08-17",
+      "description": "Discounts & free bags (promo cost)",
+      "amount": 2311.09
+     },
+     {
+      "date": "2026-08-22",
+      "description": "Tastings (samples + staff)",
+      "amount": 672.06
+     },
+     {
+      "date": "2026-08-26",
+      "description": "Payroll",
+      "amount": 5851.33
+     },
+     {
+      "date": "2026-08-03",
+      "description": "Rent & storage",
+      "amount": 1097.12
+     },
+     {
+      "date": "2026-08-08",
+      "description": "Insurance & kosher fees",
+      "amount": 713.13
+     },
+     {
+      "date": "2026-08-12",
+      "description": "Software (store, subscriptions, other)",
+      "amount": 585.13
+     }
+    ],
+    "net_profit": [
+     {
+      "date": "2026-08-28",
+      "description": "Net profit after operating expenses",
+      "amount": 4050.63
+     }
+    ],
+    "rev_Website": [
+     {
+      "date": "2026-08-03",
+      "description": "Website",
+      "amount": 17680
+     }
+    ],
+    "rev_Subscriptions": [
+     {
+      "date": "2026-08-03",
+      "description": "Subscriptions",
+      "amount": 11930
+     }
+    ],
+    "rev_Stores": [
+     {
+      "date": "2026-08-03",
+      "description": "Stores",
+      "amount": 15940
+     }
+    ],
+    "rev_Wholesale & bulk": [
+     {
+      "date": "2026-08-03",
+      "description": "Wholesale & bulk",
+      "amount": 4020
+     }
+    ],
+    "rev_Tastings & events": [
+     {
+      "date": "2026-08-03",
+      "description": "Tastings & events",
+      "amount": 1200
+     }
+    ],
+    "cogs_1st Cut Brisket": [
+     {
+      "date": "2026-08-03",
+      "description": "COGS · 1st Cut Brisket",
+      "amount": 7446.41
+     }
+    ],
+    "cogs_2nd Cut Brisket": [
+     {
+      "date": "2026-08-03",
+      "description": "COGS · 2nd Cut Brisket",
+      "amount": 3720.07
+     }
+    ],
+    "cogs_Texas Heat": [
+     {
+      "date": "2026-08-03",
+      "description": "COGS · Texas Heat",
+      "amount": 4960.1
+     }
+    ],
+    "cogs_Classic Chicken": [
+     {
+      "date": "2026-08-03",
+      "description": "COGS · Classic Chicken",
+      "amount": 2574.18
+     }
+    ],
+    "cogs_BBQ Chicken": [
+     {
+      "date": "2026-08-03",
+      "description": "COGS · BBQ Chicken",
+      "amount": 3219.89
+     }
+    ],
+    "cogs_Shawarma Chicken": [
+     {
+      "date": "2026-08-03",
+      "description": "COGS · Shawarma Chicken",
+      "amount": 4506.99
+     }
+    ],
+    "opex_Shipping & packing": [
+     {
+      "date": "2026-08-03",
+      "description": "Shipping & packing",
+      "amount": 4446
+     }
+    ],
+    "opex_Card & Shopify fees": [
+     {
+      "date": "2026-08-03",
+      "description": "Card & Shopify fees",
+      "amount": 913.08
+     }
+    ],
+    "opex_Ads & creators": [
+     {
+      "date": "2026-08-03",
+      "description": "Ads & creators",
+      "amount": 3702.79
+     }
+    ],
+    "opex_Discounts & free bags (promo cost)": [
+     {
+      "date": "2026-08-03",
+      "description": "Discounts & free bags (promo cost)",
+      "amount": 2311.09
+     }
+    ],
+    "opex_Tastings (samples + staff)": [
+     {
+      "date": "2026-08-03",
+      "description": "Tastings (samples + staff)",
+      "amount": 672.06
+     }
+    ],
+    "opex_Payroll": [
+     {
+      "date": "2026-08-03",
+      "description": "Payroll",
+      "amount": 5851.33
+     }
+    ],
+    "opex_Rent & storage": [
+     {
+      "date": "2026-08-03",
+      "description": "Rent & storage",
+      "amount": 1097.12
+     }
+    ],
+    "opex_Insurance & kosher fees": [
+     {
+      "date": "2026-08-03",
+      "description": "Insurance & kosher fees",
+      "amount": 713.13
+     }
+    ],
+    "opex_Software (store, subscriptions, other)": [
+     {
+      "date": "2026-08-03",
+      "description": "Software (store, subscriptions, other)",
+      "amount": 585.13
+     }
+    ]
+   }
   },
   {
    "month": "2026-09",
@@ -4489,7 +5799,269 @@
      "l": "Software (store, subscriptions, other)",
      "n": 640
     }
-   ]
+   ],
+   "drill_ledgers": {
+    "revenue_total": [
+     {
+      "date": "2026-09-03",
+      "description": "Website",
+      "amount": 19500
+     },
+     {
+      "date": "2026-09-08",
+      "description": "Subscriptions",
+      "amount": 12640
+     },
+     {
+      "date": "2026-09-12",
+      "description": "Stores",
+      "amount": 17920.64
+     },
+     {
+      "date": "2026-09-17",
+      "description": "Wholesale & bulk",
+      "amount": 4320
+     },
+     {
+      "date": "2026-09-22",
+      "description": "Tastings & events",
+      "amount": 1150
+     }
+    ],
+    "cogs_total": [
+     {
+      "date": "2026-09-03",
+      "description": "COGS · 1st Cut Brisket",
+      "amount": 8144.65
+     },
+     {
+      "date": "2026-09-08",
+      "description": "COGS · 2nd Cut Brisket",
+      "amount": 4068.9
+     },
+     {
+      "date": "2026-09-12",
+      "description": "COGS · Texas Heat",
+      "amount": 5425.2
+     },
+     {
+      "date": "2026-09-17",
+      "description": "COGS · Classic Chicken",
+      "amount": 2815.56
+     },
+     {
+      "date": "2026-09-22",
+      "description": "COGS · BBQ Chicken",
+      "amount": 3521.82
+     },
+     {
+      "date": "2026-09-26",
+      "description": "COGS · Shawarma Chicken",
+      "amount": 4929.6
+     }
+    ],
+    "gross_profit": [
+     {
+      "date": "2026-09-28",
+      "description": "Gross profit (revenue − COGS)",
+      "amount": 26624.91
+     }
+    ],
+    "operating_expenses_total": [
+     {
+      "date": "2026-09-03",
+      "description": "Shipping & packing",
+      "amount": 4862.9
+     },
+     {
+      "date": "2026-09-08",
+      "description": "Card & Shopify fees",
+      "amount": 998.7
+     },
+     {
+      "date": "2026-09-12",
+      "description": "Ads & creators",
+      "amount": 4050
+     },
+     {
+      "date": "2026-09-17",
+      "description": "Discounts & free bags (promo cost)",
+      "amount": 2527.8
+     },
+     {
+      "date": "2026-09-22",
+      "description": "Tastings (samples + staff)",
+      "amount": 735.08
+     },
+     {
+      "date": "2026-09-26",
+      "description": "Payroll",
+      "amount": 6400
+     },
+     {
+      "date": "2026-09-03",
+      "description": "Rent & storage",
+      "amount": 1200
+     },
+     {
+      "date": "2026-09-08",
+      "description": "Insurance & kosher fees",
+      "amount": 780
+     },
+     {
+      "date": "2026-09-12",
+      "description": "Software (store, subscriptions, other)",
+      "amount": 640
+     }
+    ],
+    "net_profit": [
+     {
+      "date": "2026-09-28",
+      "description": "Net profit after operating expenses",
+      "amount": 4430.43
+     }
+    ],
+    "rev_Website": [
+     {
+      "date": "2026-09-03",
+      "description": "Website",
+      "amount": 19500
+     }
+    ],
+    "rev_Subscriptions": [
+     {
+      "date": "2026-09-03",
+      "description": "Subscriptions",
+      "amount": 12640
+     }
+    ],
+    "rev_Stores": [
+     {
+      "date": "2026-09-03",
+      "description": "Stores",
+      "amount": 17920.64
+     }
+    ],
+    "rev_Wholesale & bulk": [
+     {
+      "date": "2026-09-03",
+      "description": "Wholesale & bulk",
+      "amount": 4320
+     }
+    ],
+    "rev_Tastings & events": [
+     {
+      "date": "2026-09-03",
+      "description": "Tastings & events",
+      "amount": 1150
+     }
+    ],
+    "cogs_1st Cut Brisket": [
+     {
+      "date": "2026-09-03",
+      "description": "COGS · 1st Cut Brisket",
+      "amount": 8144.65
+     }
+    ],
+    "cogs_2nd Cut Brisket": [
+     {
+      "date": "2026-09-03",
+      "description": "COGS · 2nd Cut Brisket",
+      "amount": 4068.9
+     }
+    ],
+    "cogs_Texas Heat": [
+     {
+      "date": "2026-09-03",
+      "description": "COGS · Texas Heat",
+      "amount": 5425.2
+     }
+    ],
+    "cogs_Classic Chicken": [
+     {
+      "date": "2026-09-03",
+      "description": "COGS · Classic Chicken",
+      "amount": 2815.56
+     }
+    ],
+    "cogs_BBQ Chicken": [
+     {
+      "date": "2026-09-03",
+      "description": "COGS · BBQ Chicken",
+      "amount": 3521.82
+     }
+    ],
+    "cogs_Shawarma Chicken": [
+     {
+      "date": "2026-09-03",
+      "description": "COGS · Shawarma Chicken",
+      "amount": 4929.6
+     }
+    ],
+    "opex_Shipping & packing": [
+     {
+      "date": "2026-09-03",
+      "description": "Shipping & packing",
+      "amount": 4862.9
+     }
+    ],
+    "opex_Card & Shopify fees": [
+     {
+      "date": "2026-09-03",
+      "description": "Card & Shopify fees",
+      "amount": 998.7
+     }
+    ],
+    "opex_Ads & creators": [
+     {
+      "date": "2026-09-03",
+      "description": "Ads & creators",
+      "amount": 4050
+     }
+    ],
+    "opex_Discounts & free bags (promo cost)": [
+     {
+      "date": "2026-09-03",
+      "description": "Discounts & free bags (promo cost)",
+      "amount": 2527.8
+     }
+    ],
+    "opex_Tastings (samples + staff)": [
+     {
+      "date": "2026-09-03",
+      "description": "Tastings (samples + staff)",
+      "amount": 735.08
+     }
+    ],
+    "opex_Payroll": [
+     {
+      "date": "2026-09-03",
+      "description": "Payroll",
+      "amount": 6400
+     }
+    ],
+    "opex_Rent & storage": [
+     {
+      "date": "2026-09-03",
+      "description": "Rent & storage",
+      "amount": 1200
+     }
+    ],
+    "opex_Insurance & kosher fees": [
+     {
+      "date": "2026-09-03",
+      "description": "Insurance & kosher fees",
+      "amount": 780
+     }
+    ],
+    "opex_Software (store, subscriptions, other)": [
+     {
+      "date": "2026-09-03",
+      "description": "Software (store, subscriptions, other)",
+      "amount": 640
+     }
+    ]
+   }
   }
  ],
  "product_store_breakdown": [
