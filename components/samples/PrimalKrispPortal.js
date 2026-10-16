@@ -484,10 +484,6 @@ export default function PrimalKrispPortal() {
 
           {tab === 'stores' && (
             <>
-              <div style={{ ...card, marginBottom: '16px', padding: '12px 16px', fontSize: '13px', color: MUTED }}>
-                Store names are real (primalkrisp.com store locator). All numbers are fictitious.
-              </div>
-
               <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap', marginBottom: '16px' }}>
                 <KPI k="Stores carrying" v={stores.count} />
                 <KPI

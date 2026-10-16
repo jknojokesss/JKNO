@@ -5,7 +5,7 @@
   "period": "September 2026",
   "as_of": "2026-09-30",
   "built_by": "JK No Jokes Financials",
-  "real_vs_fictitious": "Real (published by Primal Krisp): name, logo, brand colors, product names, flavors, bag size, retail prices, bundles, subscription terms, and the 43 stores on their own store locator (name, address, city, phone). Fictitious: every unit count, dollar amount, cost, margin, invoice, cash balance, subscriber count, tasting result, promo code result and production run in this file.",
+  "real_vs_fictitious": "Fictitious sample: every unit count, dollar amount, cost, margin, invoice, cash balance, subscriber count, tasting result, promo code result and production run. Store list is a shortened mix of sample names (not a full store locator export).",
   "sources": [
    "https://primalkrisp.com/products.json",
    "https://primalkrisp.com/pages/store-locator (Stockist list: https://stockist.co/api/v1/map_w3rkr7yq/locations/all)",
@@ -72,8 +72,8 @@
     "bags": 119
    }
   ],
-  "store_count": 43,
-  "open_store_balance": 14401.44,
+  "store_count": 15,
+  "open_store_balance": 8307.24,
   "active_subscriptions": 412,
   "needs_attention": [
    {
@@ -90,8 +90,8 @@
    },
    {
     "severity": "medium",
-    "title": "5 store invoices past 60 days ($3,214.08)",
-    "detail": "Pomegranate, Gourmet Glatt South, Salt Market, Shalom Kosher, Seasons Queens.",
+    "title": "4 store invoices past 60 days ($2,557.44)",
+    "detail": "Pomegranate, Rockland Kosher Supermarket, Salt Market, Shalom Kosher, Bingo Wholesale.",
     "tab": "Stores"
    },
    {
@@ -979,25 +979,25 @@
   }
  ],
  "stores": {
-  "count": 43,
+  "count": 15,
   "by_region": {
-   "Brooklyn": 6,
-   "Five Towns, NY": 4,
-   "Florida": 5,
-   "Manhattan & Bronx": 2,
-   "North NJ": 3,
-   "Ocean & Monmouth, NJ": 10,
-   "Other states": 7,
-   "Queens": 3,
-   "Rockland, NY": 3
+   "Brooklyn": 5,
+   "Five Towns, NY": 1,
+   "Florida": 1,
+   "Manhattan & Bronx": 1,
+   "North NJ": 1,
+   "Ocean & Monmouth, NJ": 3,
+   "Other states": 1,
+   "Queens": 1,
+   "Rockland, NY": 1
   },
   "terms_note": "Store terms are fictitious. Whether Primal Krisp sells to stores on invoice or consignment is not public; the sample shows both.",
   "ar_aging": {
-   "0-30": 5320.08,
-   "31-60": 5867.28,
-   "61-90": 3214.08
+   "0-30": 3363.24,
+   "31-60": 2386.56,
+   "61-90": 2557.44
   },
-  "open_balance_total": 14401.44,
+  "open_balance_total": 8307.24,
   "list": [
    {
     "name": "Einhorn's Supermarket - Boro Park",
@@ -1061,110 +1061,7 @@
        "status": "Paid"
       }
      ],
-     "bags_sold_week": 14
-    }
-   },
-   {
-    "name": "Glatt Mart - Flatbush",
-    "address": "1205 Avenue M",
-    "city": "Brooklyn",
-    "state": "NY",
-    "region": "Brooklyn",
-    "phone": null,
-    "real": true,
-    "sample": {
-     "terms": "Consignment (paid on count)",
-     "price_per_bag": 8.88,
-     "cases_sent_sept": 5,
-     "bags_per_case": 12,
-     "bags_sold_sept": 49,
-     "on_shelf_last_count": 36,
-     "bags_unaccounted": 2,
-     "last_delivery": "2026-09-13",
-     "last_count": "2026-09-29",
-     "days_of_stock_on_shelf": 22,
-     "open_invoices": [
-      {
-       "invoice": "PK-1043",
-       "issued": "2026-09-22",
-       "amount": 639.36,
-       "days_outstanding": 8
-      },
-      {
-       "invoice": "PK-1044",
-       "issued": "2026-08-13",
-       "amount": 213.12,
-       "days_outstanding": 48
-      }
-     ],
-     "open_balance": 852.48,
-     "reorder_flag": "OK",
-     "count_flag": "2 bags unaccounted",
-     "best_seller_here": "1st Cut Brisket",
-     "sales_sept": 435.12,
-     "open_balance_label": "sold since last count, not yet paid",
-     "invoices": [
-      {
-       "invoice": "PK-1043",
-       "issued": "2026-09-22",
-       "amount": 639.36,
-       "days_outstanding": 8,
-       "status": "Open"
-      },
-      {
-       "invoice": "PK-P1001",
-       "issued": "2026-08-15",
-       "amount": 213.12,
-       "days_outstanding": 0,
-       "status": "Paid"
-      },
-      {
-       "invoice": "PK-1044",
-       "issued": "2026-08-13",
-       "amount": 213.12,
-       "days_outstanding": 48,
-       "status": "Open"
-      }
-     ],
-     "bags_sold_week": 14
-    }
-   },
-   {
-    "name": "Kahan's Superette - Crown Heights",
-    "address": "317 Kingston Ave",
-    "city": "Brooklyn",
-    "state": "NY",
-    "region": "Brooklyn",
-    "phone": "(718) 756-2999",
-    "real": true,
-    "sample": {
-     "terms": "Consignment (paid on count)",
-     "price_per_bag": 8.62,
-     "cases_sent_sept": 6,
-     "bags_per_case": 12,
-     "bags_sold_sept": 55,
-     "on_shelf_last_count": 59,
-     "bags_unaccounted": 0,
-     "last_delivery": "2026-09-16",
-     "last_count": "2026-09-26",
-     "days_of_stock_on_shelf": 32.2,
-     "open_invoices": [],
-     "open_balance": 0,
-     "reorder_flag": "OK",
-     "count_flag": null,
-     "best_seller_here": "Shawarma Chicken",
-     "sales_sept": 474.1,
-     "open_balance_label": "sold since last count, not yet paid",
-     "invoices": [
-      {
-       "invoice": "PK-P1002",
-       "issued": "2026-08-15",
-       "amount": 310.32,
-       "days_outstanding": 0,
-       "status": "Paid"
-      }
-     ],
-     "bags_sold_week": 15
+     "bags_sold_week": 395
     }
    },
    {
@@ -1207,9 +1104,9 @@
      "sales_sept": 417.36,
      "invoices": [
       {
-       "invoice": "PK-P1003",
+       "invoice": "PK-P1001",
        "issued": "2026-08-15",
-       "amount": 426.24,
+       "amount": 213.12,
        "days_outstanding": 0,
        "status": "Paid"
       },
@@ -1229,183 +1126,6 @@
       }
      ],
      "bags_sold_week": 13
-    }
-   },
-   {
-    "name": "Schwartz Appetizing - Flatbush",
-    "address": "3008 Avenue L",
-    "city": "Brooklyn",
-    "state": "NY",
-    "region": "Brooklyn",
-    "phone": "(718) 951-8575",
-    "real": true,
-    "sample": {
-     "terms": "Net 30 invoice",
-     "price_per_bag": 9.12,
-     "cases_sent_sept": 4,
-     "bags_per_case": 12,
-     "bags_sold_sept": 44,
-     "on_shelf_last_count": 30,
-     "bags_unaccounted": 0,
-     "last_delivery": "2026-09-06",
-     "last_count": "2026-09-28",
-     "days_of_stock_on_shelf": 20.5,
-     "open_invoices": [
-      {
-       "invoice": "PK-1047",
-       "issued": "2026-08-28",
-       "amount": 656.64,
-       "days_outstanding": 33
-      }
-     ],
-     "open_balance": 656.64,
-     "reorder_flag": "OK",
-     "count_flag": null,
-     "best_seller_here": "1st Cut Brisket",
-     "sales_sept": 401.28,
-     "invoices": [
-      {
-       "invoice": "PK-1047",
-       "issued": "2026-08-28",
-       "amount": 656.64,
-       "days_outstanding": 33,
-       "status": "Open"
-      },
-      {
-       "invoice": "PK-P1004",
-       "issued": "2026-08-15",
-       "amount": 547.2,
-       "days_outstanding": 0,
-       "status": "Paid"
-      }
-     ],
-     "bags_sold_week": 12
-    }
-   },
-   {
-    "name": "The Market Place - Crown Heights",
-    "address": "589 E New York Ave",
-    "city": "Brooklyn",
-    "state": "NY",
-    "region": "Brooklyn",
-    "phone": "(718) 363-1300",
-    "real": true,
-    "sample": {
-     "terms": "Consignment (paid on count)",
-     "price_per_bag": 9.12,
-     "cases_sent_sept": 5,
-     "bags_per_case": 12,
-     "bags_sold_sept": 53,
-     "on_shelf_last_count": 40,
-     "bags_unaccounted": 1,
-     "last_delivery": "2026-09-25",
-     "last_count": "2026-09-21",
-     "days_of_stock_on_shelf": 22.6,
-     "open_invoices": [],
-     "open_balance": 0,
-     "reorder_flag": "OK",
-     "count_flag": "1 bags unaccounted",
-     "best_seller_here": "Classic Chicken",
-     "sales_sept": 483.36,
-     "open_balance_label": "sold since last count, not yet paid",
-     "invoices": [
-      {
-       "invoice": "PK-P1005",
-       "issued": "2026-08-15",
-       "amount": 109.44,
-       "days_outstanding": 0,
-       "status": "Paid"
-      }
-     ],
-     "bags_sold_week": 15
-    }
-   },
-   {
-    "name": "Gourmet Glatt - Cedarhurst",
-    "address": "137 Spruce St",
-    "city": "Cedarhurst",
-    "state": "NY",
-    "region": "Five Towns, NY",
-    "phone": "(516) 569-2662",
-    "real": true,
-    "sample": {
-     "terms": "Net 15 invoice",
-     "price_per_bag": 9.12,
-     "cases_sent_sept": 5,
-     "bags_per_case": 12,
-     "bags_sold_sept": 51,
-     "on_shelf_last_count": 19,
-     "bags_unaccounted": 0,
-     "last_delivery": "2026-08-29",
-     "last_count": "2026-09-28",
-     "days_of_stock_on_shelf": 11.2,
-     "open_invoices": [],
-     "open_balance": 0,
-     "reorder_flag": "OK",
-     "count_flag": null,
-     "best_seller_here": "Classic Chicken",
-     "sales_sept": 465.12,
-     "invoices": [
-      {
-       "invoice": "PK-P1006",
-       "issued": "2026-08-15",
-       "amount": 218.88,
-       "days_outstanding": 0,
-       "status": "Paid"
-      }
-     ],
-     "bags_sold_week": 14
-    }
-   },
-   {
-    "name": "Gourmet Glatt - Woodmere",
-    "address": "1030 Railroad Ave",
-    "city": "Woodmere",
-    "state": "NY",
-    "region": "Five Towns, NY",
-    "phone": "(516) 295-6901",
-    "real": true,
-    "sample": {
-     "terms": "Net 30 invoice",
-     "price_per_bag": 8.62,
-     "cases_sent_sept": 5,
-     "bags_per_case": 12,
-     "bags_sold_sept": 65,
-     "on_shelf_last_count": 45,
-     "bags_unaccounted": 0,
-     "last_delivery": "2026-08-30",
-     "last_count": "2026-09-22",
-     "days_of_stock_on_shelf": 20.8,
-     "open_invoices": [
-      {
-       "invoice": "PK-1048",
-       "issued": "2026-08-13",
-       "amount": 413.76,
-       "days_outstanding": 48
-      }
-     ],
-     "open_balance": 413.76,
-     "reorder_flag": "OK",
-     "count_flag": null,
-     "best_seller_here": "1st Cut Brisket",
-     "sales_sept": 560.3,
-     "invoices": [
-      {
-       "invoice": "PK-P1007",
-       "issued": "2026-08-15",
-       "amount": 310.32,
-       "days_outstanding": 0,
-       "status": "Paid"
-      },
-      {
-       "invoice": "PK-1048",
-       "issued": "2026-08-13",
-       "amount": 413.76,
-       "days_outstanding": 48,
-       "status": "Open"
-      }
-     ],
-     "bags_sold_week": 18
     }
    },
    {
@@ -1435,83 +1155,9 @@
      "sales_sept": 362.04,
      "invoices": [
       {
-       "invoice": "PK-P1008",
+       "invoice": "PK-P1002",
        "issued": "2026-08-15",
-       "amount": 413.76,
-       "days_outstanding": 0,
-       "status": "Paid"
-      }
-     ],
-     "bags_sold_week": 12
-    }
-   },
-   {
-    "name": "Seasons - Lawrence",
-    "address": "330 Central Ave",
-    "city": "Lawrence",
-    "state": "NY",
-    "region": "Five Towns, NY",
-    "phone": "(516) 295-3300",
-    "real": true,
-    "sample": {
-     "terms": "COD",
-     "price_per_bag": 9.12,
-     "cases_sent_sept": 4,
-     "bags_per_case": 12,
-     "bags_sold_sept": 44,
-     "on_shelf_last_count": 42,
-     "bags_unaccounted": 0,
-     "last_delivery": "2026-09-10",
-     "last_count": "2026-09-23",
-     "days_of_stock_on_shelf": 28.6,
-     "open_invoices": [],
-     "open_balance": 0,
-     "reorder_flag": "OK",
-     "count_flag": null,
-     "best_seller_here": "1st Cut Brisket",
-     "sales_sept": 401.28,
-     "invoices": [
-      {
-       "invoice": "PK-P1009",
-       "issued": "2026-08-15",
-       "amount": 547.2,
-       "days_outstanding": 0,
-       "status": "Paid"
-      }
-     ],
-     "bags_sold_week": 12
-    }
-   },
-   {
-    "name": "Bereli - Hollywood FL",
-    "address": "2033 Thomas St",
-    "city": "Hollywood",
-    "state": "FL",
-    "region": "Florida",
-    "phone": "(305) 504-8585",
-    "real": true,
-    "sample": {
-     "terms": "COD",
-     "price_per_bag": 9.12,
-     "cases_sent_sept": 4,
-     "bags_per_case": 12,
-     "bags_sold_sept": 43,
-     "on_shelf_last_count": 12,
-     "bags_unaccounted": 0,
-     "last_delivery": "2026-09-13",
-     "last_count": "2026-09-28",
-     "days_of_stock_on_shelf": 8.4,
-     "open_invoices": [],
-     "open_balance": 0,
-     "reorder_flag": "Reorder soon",
-     "count_flag": null,
-     "best_seller_here": "1st Cut Brisket",
-     "sales_sept": 392.16,
-     "invoices": [
-      {
-       "invoice": "PK-P1010",
-       "issued": "2026-08-15",
-       "amount": 109.44,
+       "amount": 310.32,
        "days_outstanding": 0,
        "status": "Paid"
       }
@@ -1561,181 +1207,14 @@
        "status": "Open"
       },
       {
-       "invoice": "PK-P1011",
-       "issued": "2026-08-15",
-       "amount": 213.12,
-       "days_outstanding": 0,
-       "status": "Paid"
-      }
-     ],
-     "bags_sold_week": 7
-    }
-   },
-   {
-    "name": "The Grove - Boca",
-    "address": "22191 Powerline Rd",
-    "city": "Boca Raton",
-    "state": "FL",
-    "region": "Florida",
-    "phone": "(561) 620-7999",
-    "real": true,
-    "sample": {
-     "terms": "Net 30 invoice",
-     "price_per_bag": 8.88,
-     "cases_sent_sept": 4,
-     "bags_per_case": 12,
-     "bags_sold_sept": 30,
-     "on_shelf_last_count": 9,
-     "bags_unaccounted": 0,
-     "last_delivery": "2026-08-29",
-     "last_count": "2026-09-22",
-     "days_of_stock_on_shelf": 9,
-     "open_invoices": [
-      {
-       "invoice": "PK-1050",
-       "issued": "2026-08-13",
-       "amount": 532.8,
-       "days_outstanding": 48
-      },
-      {
-       "invoice": "PK-1051",
-       "issued": "2026-08-13",
-       "amount": 532.8,
-       "days_outstanding": 48
-      }
-     ],
-     "open_balance": 1065.6,
-     "reorder_flag": "Reorder soon",
-     "count_flag": null,
-     "best_seller_here": "1st Cut Brisket",
-     "sales_sept": 266.4,
-     "invoices": [
-      {
-       "invoice": "PK-P1012",
-       "issued": "2026-08-15",
-       "amount": 319.68,
-       "days_outstanding": 0,
-       "status": "Paid"
-      },
-      {
-       "invoice": "PK-1051",
-       "issued": "2026-08-13",
-       "amount": 532.8,
-       "days_outstanding": 48,
-       "status": "Open"
-      },
-      {
-       "invoice": "PK-1050",
-       "issued": "2026-08-13",
-       "amount": 532.8,
-       "days_outstanding": 48,
-       "status": "Open"
-      }
-     ],
-     "bags_sold_week": 8
-    }
-   },
-   {
-    "name": "The Grove - Hollywood",
-    "address": "2889 Stirling Rd",
-    "city": "Fort Lauderdale",
-    "state": "FL",
-    "region": "Florida",
-    "phone": "(954) 544-5210",
-    "real": true,
-    "sample": {
-     "terms": "Consignment (paid on count)",
-     "price_per_bag": 8.88,
-     "cases_sent_sept": 3,
-     "bags_per_case": 12,
-     "bags_sold_sept": 37,
-     "on_shelf_last_count": 36,
-     "bags_unaccounted": 1,
-     "last_delivery": "2026-09-20",
-     "last_count": "2026-09-27",
-     "days_of_stock_on_shelf": 29.2,
-     "open_invoices": [
-      {
-       "invoice": "PK-1052",
-       "issued": "2026-09-22",
-       "amount": 213.12,
-       "days_outstanding": 8
-      }
-     ],
-     "open_balance": 213.12,
-     "reorder_flag": "OK",
-     "count_flag": "1 bags unaccounted",
-     "best_seller_here": "1st Cut Brisket",
-     "sales_sept": 328.56,
-     "open_balance_label": "sold since last count, not yet paid",
-     "invoices": [
-      {
-       "invoice": "PK-1052",
-       "issued": "2026-09-22",
-       "amount": 213.12,
-       "days_outstanding": 8,
-       "status": "Open"
-      },
-      {
-       "invoice": "PK-P1013",
+       "invoice": "PK-P1003",
        "issued": "2026-08-15",
        "amount": 426.24,
        "days_outstanding": 0,
        "status": "Paid"
       }
      ],
-     "bags_sold_week": 10
-    }
-   },
-   {
-    "name": "The Grove - Surfside",
-    "address": "9467 Harding Ave",
-    "city": "Surfside",
-    "state": "FL",
-    "region": "Florida",
-    "phone": "(305) 866-6993",
-    "real": true,
-    "sample": {
-     "terms": "Net 30 invoice",
-     "price_per_bag": 9.12,
-     "cases_sent_sept": 3,
-     "bags_per_case": 12,
-     "bags_sold_sept": 35,
-     "on_shelf_last_count": 30,
-     "bags_unaccounted": 0,
-     "last_delivery": "2026-09-18",
-     "last_count": "2026-09-22",
-     "days_of_stock_on_shelf": 25.7,
-     "open_invoices": [
-      {
-       "invoice": "PK-1053",
-       "issued": "2026-08-20",
-       "amount": 656.64,
-       "days_outstanding": 41
-      }
-     ],
-     "open_balance": 656.64,
-     "reorder_flag": "OK",
-     "count_flag": null,
-     "best_seller_here": "Texas Heat",
-     "sales_sept": 319.2,
-     "invoices": [
-      {
-       "invoice": "PK-1053",
-       "issued": "2026-08-20",
-       "amount": 656.64,
-       "days_outstanding": 41,
-       "status": "Open"
-      },
-      {
-       "invoice": "PK-P1014",
-       "issued": "2026-08-15",
-       "amount": 547.2,
-       "days_outstanding": 0,
-       "status": "Paid"
-      }
-     ],
-     "bags_sold_week": 10
+     "bags_sold_week": 7
     }
    },
    {
@@ -1765,142 +1244,14 @@
      "sales_sept": 177.6,
      "invoices": [
       {
-       "invoice": "PK-P1015",
+       "invoice": "PK-P1004",
        "issued": "2026-08-15",
-       "amount": 106.56,
+       "amount": 532.8,
        "days_outstanding": 0,
        "status": "Paid"
       }
      ],
      "bags_sold_week": 6
-    }
-   },
-   {
-    "name": "SIX 60 ONE - NYC",
-    "address": "661 Amsterdam Ave",
-    "city": "New York",
-    "state": "NY",
-    "region": "Manhattan & Bronx",
-    "phone": "(212) 222-6332",
-    "real": true,
-    "sample": {
-     "terms": "Net 30 invoice",
-     "price_per_bag": 8.62,
-     "cases_sent_sept": 4,
-     "bags_per_case": 12,
-     "bags_sold_sept": 34,
-     "on_shelf_last_count": 39,
-     "bags_unaccounted": 0,
-     "last_delivery": "2026-09-18",
-     "last_count": "2026-09-25",
-     "days_of_stock_on_shelf": 34.4,
-     "open_invoices": [
-      {
-       "invoice": "PK-1054",
-       "issued": "2026-09-22",
-       "amount": 620.64,
-       "days_outstanding": 8
-      },
-      {
-       "invoice": "PK-1055",
-       "issued": "2026-08-28",
-       "amount": 206.88,
-       "days_outstanding": 33
-      }
-     ],
-     "open_balance": 827.52,
-     "reorder_flag": "OK",
-     "count_flag": null,
-     "best_seller_here": "2nd Cut Brisket",
-     "sales_sept": 293.08,
-     "invoices": [
-      {
-       "invoice": "PK-1054",
-       "issued": "2026-09-22",
-       "amount": 620.64,
-       "days_outstanding": 8,
-       "status": "Open"
-      },
-      {
-       "invoice": "PK-1055",
-       "issued": "2026-08-28",
-       "amount": 206.88,
-       "days_outstanding": 33,
-       "status": "Open"
-      },
-      {
-       "invoice": "PK-P1016",
-       "issued": "2026-08-15",
-       "amount": 206.88,
-       "days_outstanding": 0,
-       "status": "Paid"
-      }
-     ],
-     "bags_sold_week": 10
-    }
-   },
-   {
-    "name": "Aisle One - Passaic",
-    "address": "217 Brook Ave",
-    "city": "Passaic",
-    "state": "NJ",
-    "region": "North NJ",
-    "phone": "(973) 952-6500",
-    "real": true,
-    "sample": {
-     "terms": "Net 15 invoice",
-     "price_per_bag": 8.62,
-     "cases_sent_sept": 5,
-     "bags_per_case": 12,
-     "bags_sold_sept": 49,
-     "on_shelf_last_count": 55,
-     "bags_unaccounted": 0,
-     "last_delivery": "2026-09-13",
-     "last_count": "2026-09-21",
-     "days_of_stock_on_shelf": 33.7,
-     "open_invoices": [
-      {
-       "invoice": "PK-1056",
-       "issued": "2026-09-04",
-       "amount": 310.32,
-       "days_outstanding": 26
-      },
-      {
-       "invoice": "PK-1057",
-       "issued": "2026-08-13",
-       "amount": 310.32,
-       "days_outstanding": 48
-      }
-     ],
-     "open_balance": 620.64,
-     "reorder_flag": "OK",
-     "count_flag": null,
-     "best_seller_here": "1st Cut Brisket",
-     "sales_sept": 422.38,
-     "invoices": [
-      {
-       "invoice": "PK-1056",
-       "issued": "2026-09-04",
-       "amount": 310.32,
-       "days_outstanding": 26,
-       "status": "Open"
-      },
-      {
-       "invoice": "PK-P1017",
-       "issued": "2026-08-15",
-       "amount": 310.32,
-       "days_outstanding": 0,
-       "status": "Paid"
-      },
-      {
-       "invoice": "PK-1057",
-       "issued": "2026-08-13",
-       "amount": 310.32,
-       "days_outstanding": 48,
-       "status": "Open"
-      }
-     ],
-     "bags_sold_week": 14
     }
    },
    {
@@ -1944,65 +1295,14 @@
        "status": "Open"
       },
       {
-       "invoice": "PK-P1018",
+       "invoice": "PK-P1005",
        "issued": "2026-08-15",
-       "amount": 426.24,
+       "amount": 106.56,
        "days_outstanding": 0,
        "status": "Paid"
       }
      ],
      "bags_sold_week": 13
-    }
-   },
-   {
-    "name": "Glatt Express - Teaneck",
-    "address": "1400 Queen Anne Rd",
-    "city": "Teaneck",
-    "state": "NJ",
-    "region": "North NJ",
-    "phone": "(201) 837-8110",
-    "real": true,
-    "sample": {
-     "terms": "Net 15 invoice",
-     "price_per_bag": 8.88,
-     "cases_sent_sept": 3,
-     "bags_per_case": 12,
-     "bags_sold_sept": 33,
-     "on_shelf_last_count": 26,
-     "bags_unaccounted": 0,
-     "last_delivery": "2026-08-28",
-     "last_count": "2026-09-26",
-     "days_of_stock_on_shelf": 23.6,
-     "open_invoices": [
-      {
-       "invoice": "PK-1059",
-       "issued": "2026-09-18",
-       "amount": 213.12,
-       "days_outstanding": 12
-      }
-     ],
-     "open_balance": 213.12,
-     "reorder_flag": "OK",
-     "count_flag": null,
-     "best_seller_here": "BBQ Chicken",
-     "sales_sept": 293.04,
-     "invoices": [
-      {
-       "invoice": "PK-1059",
-       "issued": "2026-09-18",
-       "amount": 213.12,
-       "days_outstanding": 12,
-       "status": "Open"
-      },
-      {
-       "invoice": "PK-P1019",
-       "issued": "2026-08-15",
-       "amount": 532.8,
-       "days_outstanding": 0,
-       "status": "Paid"
-      }
-     ],
-     "bags_sold_week": 9
     }
    },
    {
@@ -2047,267 +1347,14 @@
        "status": "Open"
       },
       {
-       "invoice": "PK-P1020",
-       "issued": "2026-08-15",
-       "amount": 109.44,
-       "days_outstanding": 0,
-       "status": "Paid"
-      }
-     ],
-     "bags_sold_week": 21
-    }
-   },
-   {
-    "name": "Exxon Rt 9 Lakewood",
-    "address": "1690 Madison Avenue",
-    "city": "Lakewood",
-    "state": "NJ",
-    "region": "Ocean & Monmouth, NJ",
-    "phone": null,
-    "real": true,
-    "sample": {
-     "terms": "COD",
-     "price_per_bag": 9.12,
-     "cases_sent_sept": 3,
-     "bags_per_case": 12,
-     "bags_sold_sept": 21,
-     "on_shelf_last_count": 4,
-     "bags_unaccounted": 0,
-     "last_delivery": "2026-09-05",
-     "last_count": "2026-09-21",
-     "days_of_stock_on_shelf": 5.7,
-     "open_invoices": [],
-     "open_balance": 0,
-     "reorder_flag": "Reorder now",
-     "count_flag": null,
-     "best_seller_here": "1st Cut Brisket",
-     "sales_sept": 191.52,
-     "invoices": [
-      {
-       "invoice": "PK-P1021",
+       "invoice": "PK-P1006",
        "issued": "2026-08-15",
        "amount": 218.88,
        "days_outstanding": 0,
        "status": "Paid"
       }
      ],
-     "bags_sold_week": 6
-    }
-   },
-   {
-    "name": "Freddy’s on Monmouth",
-    "address": "52 Monmouth Rd",
-    "city": "Oakhurst",
-    "state": "NJ",
-    "region": "Ocean & Monmouth, NJ",
-    "phone": "(732) 483-4700",
-    "real": true,
-    "sample": {
-     "terms": "Consignment (paid on count)",
-     "price_per_bag": 8.88,
-     "cases_sent_sept": 8,
-     "bags_per_case": 12,
-     "bags_sold_sept": 80,
-     "on_shelf_last_count": 56,
-     "bags_unaccounted": 3,
-     "last_delivery": "2026-08-31",
-     "last_count": "2026-09-26",
-     "days_of_stock_on_shelf": 21,
-     "open_invoices": [
-      {
-       "invoice": "PK-1061",
-       "issued": "2026-09-04",
-       "amount": 213.12,
-       "days_outstanding": 26
-      }
-     ],
-     "open_balance": 213.12,
-     "reorder_flag": "OK",
-     "count_flag": "3 bags unaccounted",
-     "best_seller_here": "Texas Heat",
-     "sales_sept": 710.4,
-     "open_balance_label": "sold since last count, not yet paid",
-     "invoices": [
-      {
-       "invoice": "PK-1061",
-       "issued": "2026-09-04",
-       "amount": 213.12,
-       "days_outstanding": 26,
-       "status": "Open"
-      },
-      {
-       "invoice": "PK-P1022",
-       "issued": "2026-08-15",
-       "amount": 319.68,
-       "days_outstanding": 0,
-       "status": "Paid"
-      }
-     ],
-     "bags_sold_week": 22
-    }
-   },
-   {
-    "name": "Gourmet Glatt - Jackson",
-    "address": "2275 W County Line Rd",
-    "city": "Jackson Township",
-    "state": "NJ",
-    "region": "Ocean & Monmouth, NJ",
-    "phone": "(732) 961-1710",
-    "real": true,
-    "sample": {
-     "terms": "Consignment (paid on count)",
-     "price_per_bag": 9.12,
-     "cases_sent_sept": 7,
-     "bags_per_case": 12,
-     "bags_sold_sept": 64,
-     "on_shelf_last_count": 16,
-     "bags_unaccounted": 2,
-     "last_delivery": "2026-09-19",
-     "last_count": "2026-09-24",
-     "days_of_stock_on_shelf": 7.5,
-     "open_invoices": [],
-     "open_balance": 0,
-     "reorder_flag": "Reorder soon",
-     "count_flag": "2 bags unaccounted",
-     "best_seller_here": "2nd Cut Brisket",
-     "sales_sept": 583.68,
-     "open_balance_label": "sold since last count, not yet paid",
-     "invoices": [
-      {
-       "invoice": "PK-P1023",
-       "issued": "2026-08-15",
-       "amount": 437.76,
-       "days_outstanding": 0,
-       "status": "Paid"
-      }
-     ],
-     "bags_sold_week": 18
-    }
-   },
-   {
-    "name": "Gourmet Glatt North - Lakewood",
-    "address": "1700 Madison Avenue",
-    "city": "Lakewood",
-    "state": "NJ",
-    "region": "Ocean & Monmouth, NJ",
-    "phone": "(732) 961-1700",
-    "real": true,
-    "sample": {
-     "terms": "COD",
-     "price_per_bag": 8.88,
-     "cases_sent_sept": 10,
-     "bags_per_case": 12,
-     "bags_sold_sept": 101,
-     "on_shelf_last_count": 38,
-     "bags_unaccounted": 0,
-     "last_delivery": "2026-09-26",
-     "last_count": "2026-09-22",
-     "days_of_stock_on_shelf": 11.3,
-     "open_invoices": [],
-     "open_balance": 0,
-     "reorder_flag": "OK",
-     "count_flag": null,
-     "best_seller_here": "Classic Chicken",
-     "sales_sept": 896.88,
-     "invoices": [
-      {
-       "invoice": "PK-P1024",
-       "issued": "2026-08-15",
-       "amount": 532.8,
-       "days_outstanding": 0,
-       "status": "Paid"
-      }
-     ],
-     "bags_sold_week": 28
-    }
-   },
-   {
-    "name": "Gourmet Glatt South - Lakewood",
-    "address": "1328 River Ave",
-    "city": "Lakewood",
-    "state": "NJ",
-    "region": "Ocean & Monmouth, NJ",
-    "phone": "(732) 961-1750",
-    "real": true,
-    "sample": {
-     "terms": "Net 30 invoice",
-     "price_per_bag": 8.88,
-     "cases_sent_sept": 8,
-     "bags_per_case": 12,
-     "bags_sold_sept": 94,
-     "on_shelf_last_count": 40,
-     "bags_unaccounted": 0,
-     "last_delivery": "2026-09-24",
-     "last_count": "2026-09-22",
-     "days_of_stock_on_shelf": 12.8,
-     "open_invoices": [
-      {
-       "invoice": "PK-1062",
-       "issued": "2026-07-20",
-       "amount": 639.36,
-       "days_outstanding": 72
-      }
-     ],
-     "open_balance": 639.36,
-     "reorder_flag": "OK",
-     "count_flag": null,
-     "best_seller_here": "Shawarma Chicken",
-     "sales_sept": 834.72,
-     "invoices": [
-      {
-       "invoice": "PK-P1025",
-       "issued": "2026-08-15",
-       "amount": 106.56,
-       "days_outstanding": 0,
-       "status": "Paid"
-      },
-      {
-       "invoice": "PK-1062",
-       "issued": "2026-07-20",
-       "amount": 639.36,
-       "days_outstanding": 72,
-       "status": "Open"
-      }
-     ],
-     "bags_sold_week": 26
-    }
-   },
-   {
-    "name": "Kosher West",
-    "address": "946 River Avenue",
-    "city": "Lakewood",
-    "state": "NJ",
-    "region": "Ocean & Monmouth, NJ",
-    "phone": "(732) 370-1119",
-    "real": true,
-    "sample": {
-     "terms": "Consignment (paid on count)",
-     "price_per_bag": 8.62,
-     "cases_sent_sept": 9,
-     "bags_per_case": 12,
-     "bags_sold_sept": 94,
-     "on_shelf_last_count": 21,
-     "bags_unaccounted": 0,
-     "last_delivery": "2026-09-25",
-     "last_count": "2026-09-22",
-     "days_of_stock_on_shelf": 6.7,
-     "open_invoices": [],
-     "open_balance": 0,
-     "reorder_flag": "Reorder soon",
-     "count_flag": null,
-     "best_seller_here": "Shawarma Chicken",
-     "sales_sept": 810.28,
-     "open_balance_label": "sold since last count, not yet paid",
-     "invoices": [
-      {
-       "invoice": "PK-P1026",
-       "issued": "2026-08-15",
-       "amount": 206.88,
-       "days_outstanding": 0,
-       "status": "Paid"
-      }
-     ],
-     "bags_sold_week": 26
+     "bags_sold_week": 21
     }
    },
    {
@@ -2344,7 +1391,7 @@
      "sales_sept": 719.28,
      "invoices": [
       {
-       "invoice": "PK-P1027",
+       "invoice": "PK-P1007",
        "issued": "2026-08-15",
        "amount": 319.68,
        "days_outstanding": 0,
@@ -2359,197 +1406,6 @@
       }
      ],
      "bags_sold_week": 23
-    }
-   },
-   {
-    "name": "Seasons - Lakewood",
-    "address": "711 Cedar Bridge Ave",
-    "city": "Lakewood",
-    "state": "NJ",
-    "region": "Ocean & Monmouth, NJ",
-    "phone": "+1 732-813-7700",
-    "real": true,
-    "sample": {
-     "terms": "Consignment (paid on count)",
-     "price_per_bag": 8.88,
-     "cases_sent_sept": 8,
-     "bags_per_case": 12,
-     "bags_sold_sept": 77,
-     "on_shelf_last_count": 48,
-     "bags_unaccounted": 0,
-     "last_delivery": "2026-08-30",
-     "last_count": "2026-09-22",
-     "days_of_stock_on_shelf": 18.7,
-     "open_invoices": [
-      {
-       "invoice": "PK-1064",
-       "issued": "2026-08-13",
-       "amount": 213.12,
-       "days_outstanding": 48
-      }
-     ],
-     "open_balance": 213.12,
-     "reorder_flag": "OK",
-     "count_flag": null,
-     "best_seller_here": "BBQ Chicken",
-     "sales_sept": 683.76,
-     "open_balance_label": "sold since last count, not yet paid",
-     "invoices": [
-      {
-       "invoice": "PK-P1028",
-       "issued": "2026-08-15",
-       "amount": 426.24,
-       "days_outstanding": 0,
-       "status": "Paid"
-      },
-      {
-       "invoice": "PK-1064",
-       "issued": "2026-08-13",
-       "amount": 213.12,
-       "days_outstanding": 48,
-       "status": "Open"
-      }
-     ],
-     "bags_sold_week": 22
-    }
-   },
-   {
-    "name": "Seasons - Toms River",
-    "address": "2088 Lakewood Rd",
-    "city": "Toms River",
-    "state": "NJ",
-    "region": "Ocean & Monmouth, NJ",
-    "phone": "+1 732-605-4455",
-    "real": true,
-    "sample": {
-     "terms": "COD",
-     "price_per_bag": 8.62,
-     "cases_sent_sept": 6,
-     "bags_per_case": 12,
-     "bags_sold_sept": 65,
-     "on_shelf_last_count": 65,
-     "bags_unaccounted": 0,
-     "last_delivery": "2026-09-20",
-     "last_count": "2026-09-27",
-     "days_of_stock_on_shelf": 30,
-     "open_invoices": [],
-     "open_balance": 0,
-     "reorder_flag": "OK",
-     "count_flag": null,
-     "best_seller_here": "Classic Chicken",
-     "sales_sept": 560.3,
-     "invoices": [
-      {
-       "invoice": "PK-P1029",
-       "issued": "2026-08-15",
-       "amount": 517.2,
-       "days_outstanding": 0,
-       "status": "Paid"
-      }
-     ],
-     "bags_sold_week": 18
-    }
-   },
-   {
-    "name": "Koltuv Kosher - Chicago",
-    "address": "2938 W Devon Ave",
-    "city": "Chicago",
-    "state": "IL",
-    "region": "Other states",
-    "phone": "(773) 764-1800",
-    "real": true,
-    "sample": {
-     "terms": "Net 15 invoice",
-     "price_per_bag": 8.88,
-     "cases_sent_sept": 3,
-     "bags_per_case": 12,
-     "bags_sold_sept": 29,
-     "on_shelf_last_count": 20,
-     "bags_unaccounted": 0,
-     "last_delivery": "2026-08-29",
-     "last_count": "2026-09-27",
-     "days_of_stock_on_shelf": 20.7,
-     "open_invoices": [
-      {
-       "invoice": "PK-1065",
-       "issued": "2026-09-18",
-       "amount": 532.8,
-       "days_outstanding": 12
-      }
-     ],
-     "open_balance": 532.8,
-     "reorder_flag": "OK",
-     "count_flag": null,
-     "best_seller_here": "BBQ Chicken",
-     "sales_sept": 257.52,
-     "invoices": [
-      {
-       "invoice": "PK-1065",
-       "issued": "2026-09-18",
-       "amount": 532.8,
-       "days_outstanding": 12,
-       "status": "Open"
-      },
-      {
-       "invoice": "PK-P1030",
-       "issued": "2026-08-15",
-       "amount": 106.56,
-       "days_outstanding": 0,
-       "status": "Paid"
-      }
-     ],
-     "bags_sold_week": 8
-    }
-   },
-   {
-    "name": "Midwest Premium Kosher - South Bend",
-    "address": "221 W Wayne St",
-    "city": "South Bend",
-    "state": "IN",
-    "region": "Other states",
-    "phone": "+15748551791",
-    "real": true,
-    "sample": {
-     "terms": "Net 30 invoice",
-     "price_per_bag": 9.12,
-     "cases_sent_sept": 4,
-     "bags_per_case": 12,
-     "bags_sold_sept": 30,
-     "on_shelf_last_count": 24,
-     "bags_unaccounted": 0,
-     "last_delivery": "2026-09-06",
-     "last_count": "2026-09-28",
-     "days_of_stock_on_shelf": 24,
-     "open_invoices": [
-      {
-       "invoice": "PK-1066",
-       "issued": "2026-09-04",
-       "amount": 437.76,
-       "days_outstanding": 26
-      }
-     ],
-     "open_balance": 437.76,
-     "reorder_flag": "OK",
-     "count_flag": null,
-     "best_seller_here": "Texas Heat",
-     "sales_sept": 273.6,
-     "invoices": [
-      {
-       "invoice": "PK-1066",
-       "issued": "2026-09-04",
-       "amount": 437.76,
-       "days_outstanding": 26,
-       "status": "Open"
-      },
-      {
-       "invoice": "PK-P1031",
-       "issued": "2026-08-15",
-       "amount": 218.88,
-       "days_outstanding": 0,
-       "status": "Paid"
-      }
-     ],
-     "bags_sold_week": 8
     }
    },
    {
@@ -2587,9 +1443,9 @@
      "open_balance_label": "sold since last count, not yet paid",
      "invoices": [
       {
-       "invoice": "PK-P1032",
+       "invoice": "PK-P1008",
        "issued": "2026-08-15",
-       "amount": 319.68,
+       "amount": 426.24,
        "days_outstanding": 0,
        "status": "Paid"
       },
@@ -2602,170 +1458,6 @@
       }
      ],
      "bags_sold_week": 7
-    }
-   },
-   {
-    "name": "The Grove - Cleveland",
-    "address": "1930 Warrensville Center Rd",
-    "city": "South Euclid",
-    "state": "OH",
-    "region": "Other states",
-    "phone": "(216) 353-6444",
-    "real": true,
-    "sample": {
-     "terms": "Consignment (paid on count)",
-     "price_per_bag": 8.88,
-     "cases_sent_sept": 3,
-     "bags_per_case": 12,
-     "bags_sold_sept": 30,
-     "on_shelf_last_count": 25,
-     "bags_unaccounted": 0,
-     "last_delivery": "2026-09-11",
-     "last_count": "2026-09-27",
-     "days_of_stock_on_shelf": 25,
-     "open_invoices": [
-      {
-       "invoice": "PK-1068",
-       "issued": "2026-09-22",
-       "amount": 319.68,
-       "days_outstanding": 8
-      }
-     ],
-     "open_balance": 319.68,
-     "reorder_flag": "OK",
-     "count_flag": null,
-     "best_seller_here": "Texas Heat",
-     "sales_sept": 266.4,
-     "open_balance_label": "sold since last count, not yet paid",
-     "invoices": [
-      {
-       "invoice": "PK-1068",
-       "issued": "2026-09-22",
-       "amount": 319.68,
-       "days_outstanding": 8,
-       "status": "Open"
-      },
-      {
-       "invoice": "PK-P1033",
-       "issued": "2026-08-15",
-       "amount": 426.24,
-       "days_outstanding": 0,
-       "status": "Paid"
-      }
-     ],
-     "bags_sold_week": 8
-    }
-   },
-   {
-    "name": "The Spicy Peach - Atlanta",
-    "address": "2887 N Druid Hills Rd",
-    "city": "Atlanta",
-    "state": "GA",
-    "region": "Other states",
-    "phone": "(404) 334-7200",
-    "real": true,
-    "sample": {
-     "terms": "Net 15 invoice",
-     "price_per_bag": 9.12,
-     "cases_sent_sept": 3,
-     "bags_per_case": 12,
-     "bags_sold_sept": 27,
-     "on_shelf_last_count": 17,
-     "bags_unaccounted": 0,
-     "last_delivery": "2026-09-07",
-     "last_count": "2026-09-29",
-     "days_of_stock_on_shelf": 18.9,
-     "open_invoices": [],
-     "open_balance": 0,
-     "reorder_flag": "OK",
-     "count_flag": null,
-     "best_seller_here": "Texas Heat",
-     "sales_sept": 246.24,
-     "invoices": [
-      {
-       "invoice": "PK-P1034",
-       "issued": "2026-08-15",
-       "amount": 547.2,
-       "days_outstanding": 0,
-       "status": "Paid"
-      }
-     ],
-     "bags_sold_week": 8
-    }
-   },
-   {
-    "name": "Western Kosher Fairfax - LA",
-    "address": "444 N Fairfax Ave",
-    "city": "Los Angeles",
-    "state": "CA",
-    "region": "Other states",
-    "phone": "323-655-8870",
-    "real": true,
-    "sample": {
-     "terms": "Consignment (paid on count)",
-     "price_per_bag": 8.88,
-     "cases_sent_sept": 2,
-     "bags_per_case": 12,
-     "bags_sold_sept": 27,
-     "on_shelf_last_count": 13,
-     "bags_unaccounted": 0,
-     "last_delivery": "2026-09-11",
-     "last_count": "2026-09-26",
-     "days_of_stock_on_shelf": 14.4,
-     "open_invoices": [],
-     "open_balance": 0,
-     "reorder_flag": "OK",
-     "count_flag": null,
-     "best_seller_here": "Shawarma Chicken",
-     "sales_sept": 239.76,
-     "open_balance_label": "sold since last count, not yet paid",
-     "invoices": [
-      {
-       "invoice": "PK-P1035",
-       "issued": "2026-08-15",
-       "amount": 106.56,
-       "days_outstanding": 0,
-       "status": "Paid"
-      }
-     ],
-     "bags_sold_week": 8
-    }
-   },
-   {
-    "name": "Western Kosher Pico - LA",
-    "address": "4817 W Pico Blvd",
-    "city": "Los Angeles",
-    "state": "CA",
-    "region": "Other states",
-    "phone": "323-933-8283",
-    "real": true,
-    "sample": {
-     "terms": "COD",
-     "price_per_bag": 9.12,
-     "cases_sent_sept": 1,
-     "bags_per_case": 12,
-     "bags_sold_sept": 14,
-     "on_shelf_last_count": 16,
-     "bags_unaccounted": 0,
-     "last_delivery": "2026-09-10",
-     "last_count": "2026-09-27",
-     "days_of_stock_on_shelf": 34.3,
-     "open_invoices": [],
-     "open_balance": 0,
-     "reorder_flag": "OK",
-     "count_flag": null,
-     "best_seller_here": "Shawarma Chicken",
-     "sales_sept": 127.68,
-     "invoices": [
-      {
-       "invoice": "PK-P1036",
-       "issued": "2026-08-15",
-       "amount": 218.88,
-       "days_outstanding": 0,
-       "status": "Paid"
-      }
-     ],
-     "bags_sold_week": 4
     }
    },
    {
@@ -2809,9 +1501,9 @@
        "status": "Open"
       },
       {
-       "invoice": "PK-P1037",
+       "invoice": "PK-P1009",
        "issued": "2026-08-15",
-       "amount": 319.68,
+       "amount": 532.8,
        "days_outstanding": 0,
        "status": "Paid"
       }
@@ -2820,231 +1512,289 @@
     }
    },
    {
-    "name": "Lux Pharmacy - Queens",
-    "address": "71-16 Kissena Blvd",
-    "city": "Flushing",
+    "name": "Moisha's Kosher",
+    "address": "6324 18th Ave, Brooklyn, NY",
+    "city": "Brooklyn",
     "state": "NY",
-    "region": "Queens",
-    "phone": "(718) 480-3666",
-    "real": true,
+    "region": "Brooklyn",
+    "phone": "(718) 331-2200",
+    "real": false,
     "sample": {
-     "terms": "Net 30 invoice",
-     "price_per_bag": 8.88,
-     "cases_sent_sept": 2,
+     "terms": "Invoice (Net 30)",
+     "price_per_bag": 8.76,
+     "cases_sent_sept": 4,
      "bags_per_case": 12,
-     "bags_sold_sept": 13,
-     "on_shelf_last_count": 13,
+     "bags_sold_sept": 38,
+     "on_shelf_last_count": 22,
      "bags_unaccounted": 0,
      "last_delivery": "2026-09-11",
-     "last_count": "2026-09-29",
-     "days_of_stock_on_shelf": 30,
-     "open_invoices": [],
-     "open_balance": 0,
-     "reorder_flag": "OK",
-     "count_flag": null,
-     "best_seller_here": "1st Cut Brisket",
-     "sales_sept": 115.44,
-     "invoices": [
-      {
-       "invoice": "PK-P1038",
-       "issued": "2026-08-15",
-       "amount": 426.24,
-       "days_outstanding": 0,
-       "status": "Paid"
-      }
-     ],
-     "bags_sold_week": 4
-    }
-   },
-   {
-    "name": "Seasons - Queens",
-    "address": "68-18 Main St",
-    "city": "Flushing",
-    "state": "NY",
-    "region": "Queens",
-    "phone": "(718) 268-6469",
-    "real": true,
-    "sample": {
-     "terms": "Net 30 invoice",
-     "price_per_bag": 9.12,
-     "cases_sent_sept": 5,
-     "bags_per_case": 12,
-     "bags_sold_sept": 40,
-     "on_shelf_last_count": 35,
-     "bags_unaccounted": 0,
-     "last_delivery": "2026-09-21",
-     "last_count": "2026-09-23",
-     "days_of_stock_on_shelf": 26.2,
+     "last_count": "2026-09-25",
+     "days_of_stock_on_shelf": 14.2,
      "open_invoices": [
       {
-       "invoice": "PK-1070",
-       "issued": "2026-07-29",
-       "amount": 656.64,
-       "days_outstanding": 63
+       "invoice": "PK-1088",
+       "issued": "2026-09-12",
+       "amount": 525.6,
+       "days_outstanding": 18
       }
      ],
-     "open_balance": 656.64,
+     "open_balance": 525.6,
      "reorder_flag": "OK",
-     "count_flag": null,
-     "best_seller_here": "Classic Chicken",
-     "sales_sept": 364.8,
+     "count_flag": "OK",
+     "best_seller_here": "Texas Heat Brisket",
+     "sales_sept": 332.88,
+     "open_balance_label": "sold since last count, not yet paid",
      "invoices": [
       {
-       "invoice": "PK-P1039",
-       "issued": "2026-08-15",
-       "amount": 547.2,
-       "days_outstanding": 0,
-       "status": "Paid"
+       "invoice": "PK-1088",
+       "issued": "2026-09-12",
+       "amount": 525.6,
+       "days_outstanding": 18,
+       "status": "Open"
       },
       {
-       "invoice": "PK-1070",
-       "issued": "2026-07-29",
-       "amount": 656.64,
-       "days_outstanding": 63,
-       "status": "Open"
+       "invoice": "PK-P1010",
+       "issued": "2026-08-15",
+       "amount": 105.12,
+       "days_outstanding": 0,
+       "status": "Paid"
       }
      ],
      "bags_sold_week": 11
     }
    },
    {
-    "name": "Evergreen - Monsey",
-    "address": "59 NY-59",
-    "city": "Monsey",
+    "name": "Breadberry",
+    "address": "1681 61st St, Brooklyn, NY",
+    "city": "Brooklyn",
     "state": "NY",
-    "region": "Rockland, NY",
-    "phone": "(845) 352-4400",
-    "real": true,
+    "region": "Brooklyn",
+    "phone": "(718) 232-0600",
+    "real": false,
     "sample": {
-     "terms": "Net 30 invoice",
+     "terms": "Consignment (paid on count)",
      "price_per_bag": 8.88,
      "cases_sent_sept": 5,
      "bags_per_case": 12,
-     "bags_sold_sept": 59,
-     "on_shelf_last_count": 29,
-     "bags_unaccounted": 0,
-     "last_delivery": "2026-09-02",
-     "last_count": "2026-09-28",
-     "days_of_stock_on_shelf": 14.7,
+     "bags_sold_sept": 42,
+     "on_shelf_last_count": 26,
+     "bags_unaccounted": 1,
+     "last_delivery": "2026-09-06",
+     "last_count": "2026-09-24",
+     "days_of_stock_on_shelf": 16.5,
      "open_invoices": [
       {
-       "invoice": "PK-1071",
-       "issued": "2026-09-22",
-       "amount": 319.68,
-       "days_outstanding": 8
+       "invoice": "PK-1091",
+       "issued": "2026-09-20",
+       "amount": 426.24,
+       "days_outstanding": 10
+      },
+      {
+       "invoice": "PK-1092",
+       "issued": "2026-09-05",
+       "amount": 213.12,
+       "days_outstanding": 25
       }
      ],
-     "open_balance": 319.68,
-     "reorder_flag": "OK",
-     "count_flag": null,
+     "open_balance": 639.36,
+     "reorder_flag": "Reorder soon",
+     "count_flag": "1 bag unaccounted",
      "best_seller_here": "1st Cut Brisket",
-     "sales_sept": 523.92,
+     "sales_sept": 373.04,
+     "open_balance_label": "sold since last count, not yet paid",
      "invoices": [
       {
-       "invoice": "PK-1071",
-       "issued": "2026-09-22",
-       "amount": 319.68,
-       "days_outstanding": 8,
+       "invoice": "PK-1091",
+       "issued": "2026-09-20",
+       "amount": 426.24,
+       "days_outstanding": 10,
        "status": "Open"
       },
       {
-       "invoice": "PK-P1040",
+       "invoice": "PK-1092",
+       "issued": "2026-09-05",
+       "amount": 213.12,
+       "days_outstanding": 25,
+       "status": "Open"
+      },
+      {
+       "invoice": "PK-P1011",
        "issued": "2026-08-15",
-       "amount": 106.56,
+       "amount": 213.12,
        "days_outstanding": 0,
        "status": "Paid"
       }
      ],
-     "bags_sold_week": 17
+     "bags_sold_week": 12
     }
    },
    {
-    "name": "Evergreen - Pomona",
-    "address": "1581 US-202",
-    "city": "Pomona",
-    "state": "NY",
-    "region": "Rockland, NY",
-    "phone": "845-352-4400",
-    "real": true,
+    "name": "Bingo Wholesale",
+    "address": "1900 Swarthmore Ave, Lakewood, NJ",
+    "city": "Lakewood",
+    "state": "NJ",
+    "region": "Ocean & Monmouth, NJ",
+    "phone": "(732) 364-9200",
+    "real": false,
     "sample": {
-     "terms": "COD",
-     "price_per_bag": 9.12,
-     "cases_sent_sept": 4,
+     "terms": "Invoice (Net 30)",
+     "price_per_bag": 8.52,
+     "cases_sent_sept": 8,
      "bags_per_case": 12,
-     "bags_sold_sept": 48,
-     "on_shelf_last_count": 20,
+     "bags_sold_sept": 56,
+     "on_shelf_last_count": 40,
      "bags_unaccounted": 0,
-     "last_delivery": "2026-09-09",
+     "last_delivery": "2026-09-03",
      "last_count": "2026-09-26",
-     "days_of_stock_on_shelf": 12.5,
-     "open_invoices": [],
-     "open_balance": 0,
+     "days_of_stock_on_shelf": 21.4,
+     "open_invoices": [
+      {
+       "invoice": "PK-1095",
+       "issued": "2026-08-28",
+       "amount": 894.72,
+       "days_outstanding": 33
+      }
+     ],
+     "open_balance": 894.72,
      "reorder_flag": "OK",
-     "count_flag": null,
+     "count_flag": "OK",
      "best_seller_here": "Shawarma Chicken",
-     "sales_sept": 437.76,
+     "sales_sept": 477.12,
+     "open_balance_label": "open invoice",
      "invoices": [
       {
-       "invoice": "PK-P1041",
+       "invoice": "PK-1095",
+       "issued": "2026-08-28",
+       "amount": 894.72,
+       "days_outstanding": 33,
+       "status": "Open"
+      },
+      {
+       "invoice": "PK-P1012",
        "issued": "2026-08-15",
-       "amount": 218.88,
+       "amount": 306.72,
        "days_outstanding": 0,
        "status": "Paid"
+      }
+     ],
+     "bags_sold_week": 16
+    }
+   },
+   {
+    "name": "Rockland Kosher Supermarket",
+    "address": "27 Orchard St, Monsey, NY",
+    "city": "Monsey",
+    "state": "NY",
+    "region": "Rockland, NY",
+    "phone": "(845) 352-7000",
+    "real": false,
+    "sample": {
+     "terms": "Invoice (Net 30)",
+     "price_per_bag": 8.88,
+     "cases_sent_sept": 6,
+     "bags_per_case": 12,
+     "bags_sold_sept": 48,
+     "on_shelf_last_count": 31,
+     "bags_unaccounted": 0,
+     "last_delivery": "2026-09-08",
+     "last_count": "2026-09-27",
+     "days_of_stock_on_shelf": 19.3,
+     "open_invoices": [
+      {
+       "invoice": "PK-1098",
+       "issued": "2026-07-29",
+       "amount": 639.36,
+       "days_outstanding": 63
+      },
+      {
+       "invoice": "PK-1099",
+       "issued": "2026-09-18",
+       "amount": 426.24,
+       "days_outstanding": 12
+      }
+     ],
+     "open_balance": 1065.6,
+     "reorder_flag": "OK",
+     "count_flag": "OK",
+     "best_seller_here": "1st Cut Brisket",
+     "sales_sept": 426.24,
+     "open_balance_label": "open invoices",
+     "invoices": [
+      {
+       "invoice": "PK-1099",
+       "issued": "2026-09-18",
+       "amount": 426.24,
+       "days_outstanding": 12,
+       "status": "Open"
+      },
+      {
+       "invoice": "PK-P1013",
+       "issued": "2026-08-15",
+       "amount": 426.24,
+       "days_outstanding": 0,
+       "status": "Paid"
+      },
+      {
+       "invoice": "PK-1098",
+       "issued": "2026-07-29",
+       "amount": 639.36,
+       "days_outstanding": 63,
+       "status": "Open"
       }
      ],
      "bags_sold_week": 13
     }
    },
    {
-    "name": "Wesley Kosher - Monsey",
-    "address": "455 NY-306",
-    "city": "Monsey",
+    "name": "Kosher Experience",
+    "address": "1501 Coney Island Ave, Brooklyn, NY",
+    "city": "Brooklyn",
     "state": "NY",
-    "region": "Rockland, NY",
-    "phone": "(845) 364-7217",
-    "real": true,
+    "region": "Brooklyn",
+    "phone": "(718) 377-2400",
+    "real": false,
     "sample": {
      "terms": "Consignment (paid on count)",
-     "price_per_bag": 8.88,
-     "cases_sent_sept": 5,
+     "price_per_bag": 8.76,
+     "cases_sent_sept": 3,
      "bags_per_case": 12,
-     "bags_sold_sept": 50,
-     "on_shelf_last_count": 24,
-     "bags_unaccounted": 1,
-     "last_delivery": "2026-09-11",
-     "last_count": "2026-09-26",
-     "days_of_stock_on_shelf": 14.4,
+     "bags_sold_sept": 31,
+     "on_shelf_last_count": 19,
+     "bags_unaccounted": 0,
+     "last_delivery": "2026-09-14",
+     "last_count": "2026-09-28",
+     "days_of_stock_on_shelf": 17.8,
      "open_invoices": [
       {
-       "invoice": "PK-1072",
-       "issued": "2026-08-20",
-       "amount": 639.36,
-       "days_outstanding": 41
+       "invoice": "PK-1102",
+       "issued": "2026-09-22",
+       "amount": 271.56,
+       "days_outstanding": 8
       }
      ],
-     "open_balance": 639.36,
+     "open_balance": 271.56,
      "reorder_flag": "OK",
-     "count_flag": "1 bags unaccounted",
-     "best_seller_here": "Texas Heat",
-     "sales_sept": 444,
+     "count_flag": "OK",
+     "best_seller_here": "Pastrami Style Brisket",
+     "sales_sept": 271.56,
      "open_balance_label": "sold since last count, not yet paid",
      "invoices": [
       {
-       "invoice": "PK-1072",
-       "issued": "2026-08-20",
-       "amount": 639.36,
-       "days_outstanding": 41,
+       "invoice": "PK-1102",
+       "issued": "2026-09-22",
+       "amount": 271.56,
+       "days_outstanding": 8,
        "status": "Open"
       },
       {
-       "invoice": "PK-P1042",
+       "invoice": "PK-P1014",
        "issued": "2026-08-15",
-       "amount": 319.68,
+       "amount": 525.6,
        "days_outstanding": 0,
        "status": "Paid"
       }
      ],
-     "bags_sold_week": 14
+     "bags_sold_week": 9
     }
    }
   ]
@@ -3298,19 +2048,6 @@
  },
  "tastings": [
   {
-   "date": "2026-07-09",
-   "store": "Gourmet Glatt North - Lakewood",
-   "real_store": true,
-   "hours": "4–7 pm",
-   "bags_opened_for_samples": 7,
-   "bags_sold_at_tasting": 26,
-   "store_bags_4wk_before": 31,
-   "store_bags_4wk_after": 38,
-   "lift_pct": 23,
-   "cost": 148.77,
-   "extra_bags_after": 7
-  },
-  {
    "date": "2026-07-23",
    "store": "Evergreen - Lakewood",
    "real_store": true,
@@ -3324,58 +2061,6 @@
    "extra_bags_after": 14
   },
   {
-   "date": "2026-08-06",
-   "store": "Seasons - Lakewood",
-   "real_store": true,
-   "hours": "4–7 pm",
-   "bags_opened_for_samples": 6,
-   "bags_sold_at_tasting": 19,
-   "store_bags_4wk_before": 21,
-   "store_bags_4wk_after": 23,
-   "lift_pct": 10,
-   "cost": 144.66,
-   "extra_bags_after": 2
-  },
-  {
-   "date": "2026-08-13",
-   "store": "Gourmet Glatt - Jackson",
-   "real_store": true,
-   "hours": "4–7 pm",
-   "bags_opened_for_samples": 11,
-   "bags_sold_at_tasting": 34,
-   "store_bags_4wk_before": 42,
-   "store_bags_4wk_after": 65,
-   "lift_pct": 55,
-   "cost": 165.21,
-   "extra_bags_after": 23
-  },
-  {
-   "date": "2026-08-27",
-   "store": "Seasons - Toms River",
-   "real_store": true,
-   "hours": "4–7 pm",
-   "bags_opened_for_samples": 12,
-   "bags_sold_at_tasting": 36,
-   "store_bags_4wk_before": 30,
-   "store_bags_4wk_after": 35,
-   "lift_pct": 17,
-   "cost": 169.32,
-   "extra_bags_after": 5
-  },
-  {
-   "date": "2026-09-03",
-   "store": "Kosher West",
-   "real_store": true,
-   "hours": "4–7 pm",
-   "bags_opened_for_samples": 8,
-   "bags_sold_at_tasting": 16,
-   "store_bags_4wk_before": 39,
-   "store_bags_4wk_after": 37,
-   "lift_pct": -5,
-   "cost": 152.88,
-   "extra_bags_after": -2
-  },
-  {
    "date": "2026-09-10",
    "store": "Cedar Market - Teaneck",
    "real_store": true,
@@ -3387,19 +2072,6 @@
    "lift_pct": 54,
    "cost": 161.1,
    "extra_bags_after": 15
-  },
-  {
-   "date": "2026-09-17",
-   "store": "Gourmet Glatt - Cedarhurst",
-   "real_store": true,
-   "hours": "4–7 pm",
-   "bags_opened_for_samples": 10,
-   "bags_sold_at_tasting": 17,
-   "store_bags_4wk_before": 21,
-   "store_bags_4wk_after": 26,
-   "lift_pct": 24,
-   "cost": 161.1,
-   "extra_bags_after": 5
   },
   {
    "date": "2026-09-24",
@@ -3795,11 +2467,11 @@
    "bags": 4952,
    "amount": 28905.73
   },
-  "ar_open_at_month_end": 14401.44,
+  "ar_open_at_month_end": 8307.24,
   "ar_aging": {
-   "0-30": 5320.08,
-   "31-60": 5867.28,
-   "61-90": 3214.08
+   "0-30": 3190.68,
+   "31-60": 2559.12,
+   "61-90": 2557.44
   },
   "inventory_at_cost_month_end": 24871.4,
   "journal_entries_preview": [
@@ -3832,7 +2504,7 @@
  "answers": [
   {
    "q": "Which store owes me the most?",
-   "a": "Pomegranate in Flatbush and The Grove in Boca, $1,065.60 each. Pomegranate's oldest invoice is 63 days. Stores owe $14,401.44 in total, $3,214.08 of it past 60 days."
+   "a": "Pomegranate in Flatbush and Rockland Kosher Supermarket in Monsey, $1,065.60 each. Pomegranate's oldest invoice is 63 days. Stores owe $8,307.24 in total, $2,557.44 of it past 60 days."
   },
   {
    "q": "Which channel makes me the most per bag?",
@@ -3840,7 +2512,7 @@
   },
   {
    "q": "Did the tastings pay off?",
-   "a": "Six of eight store tastings lifted that store's next 4 weeks. Evergreen Lakewood, Gourmet Glatt Jackson and Cedar Market Teaneck were up more than 50%. Kosher West was flat, so skip a repeat there."
+   "a": "Six of eight store tastings lifted that store's next 4 weeks. Evergreen Lakewood, Salt Market Deal and Cedar Market Teaneck were up more than 50%. Riverdale Kosher Market was flat, so skip a repeat there."
   },
   {
    "q": "Did I make money in September?",
@@ -3927,7 +2599,7 @@
      "bags": 33
     }
    ],
-   "open_store_balance": 14401.44,
+   "open_store_balance": 8307.24,
    "active_subscriptions": 412,
    "cash_on_hand": 38450
   }
@@ -6073,260 +4745,92 @@
     {
      "store": "Evergreen - Lakewood",
      "city": "Lakewood",
-     "units": 22,
-     "dollars": 209
-    },
-    {
-     "store": "Gourmet Glatt North - Lakewood",
-     "city": "Lakewood",
-     "units": 22,
-     "dollars": 209
-    },
-    {
-     "store": "Gourmet Glatt South - Lakewood",
-     "city": "Lakewood",
-     "units": 20,
-     "dollars": 190
-    },
-    {
-     "store": "Kosher West",
-     "city": "Lakewood",
-     "units": 20,
-     "dollars": 190
-    },
-    {
-     "store": "Gourmet Glatt - Woodmere",
-     "city": "Woodmere",
-     "units": 19,
-     "dollars": 180.5
-    },
-    {
-     "store": "Freddy’s on Monmouth",
-     "city": "Oakhurst",
-     "units": 17,
-     "dollars": 161.5
+     "units": 66,
+     "dollars": 627
     },
     {
      "store": "Salt Market - Deal",
      "city": "Long Branch",
-     "units": 17,
-     "dollars": 161.5
-    },
-    {
-     "store": "Seasons - Lakewood",
-     "city": "Lakewood",
-     "units": 17,
-     "dollars": 161.5
-    },
-    {
-     "store": "Evergreen - Monsey",
-     "city": "Monsey",
-     "units": 17,
-     "dollars": 161.5
-    },
-    {
-     "store": "Einhorn's Supermarket - Boro Park",
-     "city": "Brooklyn",
-     "units": 14,
-     "dollars": 133
-    },
-    {
-     "store": "Glatt Mart - Flatbush",
-     "city": "Brooklyn",
-     "units": 14,
-     "dollars": 133
-    },
-    {
-     "store": "Aisle One - Passaic",
-     "city": "Passaic",
-     "units": 14,
-     "dollars": 133
+     "units": 53,
+     "dollars": 503.5
     },
     {
      "store": "Cedar Market - Teaneck",
      "city": "Teaneck",
-     "units": 14,
-     "dollars": 133
+     "units": 42,
+     "dollars": 399
     },
     {
-     "store": "Gourmet Glatt - Jackson",
-     "city": "Jackson Township",
-     "units": 14,
-     "dollars": 133
-    },
-    {
-     "store": "Seasons - Toms River",
-     "city": "Toms River",
-     "units": 14,
-     "dollars": 133
-    },
-    {
-     "store": "Schwartz Appetizing - Flatbush",
-     "city": "Brooklyn",
-     "units": 13,
-     "dollars": 123.5
-    },
-    {
-     "store": "Seasons - Lawrence",
-     "city": "Lawrence",
-     "units": 13,
-     "dollars": 123.5
-    },
-    {
-     "store": "Bereli - Hollywood FL",
-     "city": "Hollywood",
-     "units": 13,
-     "dollars": 123.5
-    },
-    {
-     "store": "Kahan's Superette - Crown Heights",
-     "city": "Brooklyn",
-     "units": 12,
-     "dollars": 114
-    },
-    {
-     "store": "The Market Place - Crown Heights",
-     "city": "Brooklyn",
-     "units": 11,
-     "dollars": 104.5
-    },
-    {
-     "store": "Gourmet Glatt - Cedarhurst",
-     "city": "Cedarhurst",
-     "units": 11,
-     "dollars": 104.5
-    },
-    {
-     "store": "The Grove - Hollywood",
-     "city": "Fort Lauderdale",
-     "units": 11,
-     "dollars": 104.5
-    },
-    {
-     "store": "Wesley Kosher - Monsey",
+     "store": "Rockland Kosher Supermarket",
      "city": "Monsey",
-     "units": 11,
-     "dollars": 104.5
+     "units": 42,
+     "dollars": 399
+    },
+    {
+     "store": "Einhorn's Supermarket - Boro Park",
+     "city": "Brooklyn",
+     "units": 40,
+     "dollars": 380
+    },
+    {
+     "store": "Breadberry",
+     "city": "Brooklyn",
+     "units": 37,
+     "dollars": 351.5
+    },
+    {
+     "store": "Bingo Wholesale",
+     "city": "Lakewood",
+     "units": 36,
+     "dollars": 342
     },
     {
      "store": "Pomegranate - Flatbush",
      "city": "Brooklyn",
-     "units": 10,
-     "dollars": 95
-    },
-    {
-     "store": "Evergreen - Pomona",
-     "city": "Pomona",
-     "units": 10,
-     "dollars": 95
+     "units": 31,
+     "dollars": 294.5
     },
     {
      "store": "Manna Health Market - 5 Towns",
      "city": "Lawrence",
-     "units": 9,
-     "dollars": 85.5
+     "units": 27,
+     "dollars": 256.5
     },
     {
-     "store": "The Grove - Boca",
-     "city": "Boca Raton",
-     "units": 9,
-     "dollars": 85.5
+     "store": "Moisha's Kosher",
+     "city": "Brooklyn",
+     "units": 25,
+     "dollars": 237.5
     },
     {
-     "store": "Seasons - Queens",
-     "city": "Flushing",
-     "units": 9,
-     "dollars": 85.5
-    },
-    {
-     "store": "The Grove - Surfside",
-     "city": "Surfside",
-     "units": 8,
-     "dollars": 76
-    },
-    {
-     "store": "SIX 60 ONE - NYC",
-     "city": "New York",
-     "units": 7,
-     "dollars": 66.5
-    },
-    {
-     "store": "Glatt Express - Teaneck",
-     "city": "Teaneck",
-     "units": 7,
-     "dollars": 66.5
+     "store": "Kosher Experience",
+     "city": "Brooklyn",
+     "units": 20,
+     "dollars": 190
     },
     {
      "store": "Riverdale Kosher Market",
      "city": "Bronx",
-     "units": 6,
-     "dollars": 57
-    },
-    {
-     "store": "Exxon Rt 9 Lakewood",
-     "city": "Lakewood",
-     "units": 6,
-     "dollars": 57
-    },
-    {
-     "store": "Koltuv Kosher - Chicago",
-     "city": "Chicago",
-     "units": 6,
-     "dollars": 57
-    },
-    {
-     "store": "Midwest Premium Kosher - South Bend",
-     "city": "South Bend",
-     "units": 6,
-     "dollars": 57
-    },
-    {
-     "store": "The Grove - Cleveland",
-     "city": "South Euclid",
-     "units": 6,
-     "dollars": 57
-    },
-    {
-     "store": "The Spicy Peach - Atlanta",
-     "city": "Atlanta",
-     "units": 6,
-     "dollars": 57
-    },
-    {
-     "store": "Western Kosher Fairfax - LA",
-     "city": "Los Angeles",
-     "units": 6,
-     "dollars": 57
+     "units": 18,
+     "dollars": 171
     },
     {
      "store": "Kosher Kingdom - Aventura",
      "city": "Miami",
-     "units": 5,
-     "dollars": 47.5
+     "units": 16,
+     "dollars": 152
     },
     {
      "store": "Shalom Kosher - Silver Spring",
      "city": "Silver Spring",
-     "units": 5,
-     "dollars": 47.5
+     "units": 16,
+     "dollars": 152
     },
     {
      "store": "Aron's Kissena Farms",
      "city": "Flushing",
-     "units": 5,
-     "dollars": 47.5
-    },
-    {
-     "store": "Lux Pharmacy - Queens",
-     "city": "Flushing",
-     "units": 4,
-     "dollars": 38
-    },
-    {
-     "store": "Western Kosher Pico - LA",
-     "city": "Los Angeles",
-     "units": 3,
-     "dollars": 28.5
+     "units": 14,
+     "dollars": 133
     }
    ],
    "total_units": 483,
@@ -6338,262 +4842,94 @@
    "store_channel_dollars": 2299,
    "stores": [
     {
-     "store": "Gourmet Glatt North - Lakewood",
-     "city": "Lakewood",
-     "units": 12,
-     "dollars": 114
-    },
-    {
-     "store": "Gourmet Glatt South - Lakewood",
-     "city": "Lakewood",
-     "units": 11,
-     "dollars": 104.5
-    },
-    {
-     "store": "Kosher West",
-     "city": "Lakewood",
-     "units": 11,
-     "dollars": 104.5
-    },
-    {
-     "store": "Gourmet Glatt - Jackson",
-     "city": "Jackson Township",
-     "units": 10,
-     "dollars": 95
-    },
-    {
      "store": "Salt Market - Deal",
      "city": "Long Branch",
-     "units": 10,
-     "dollars": 95
+     "units": 30,
+     "dollars": 285
     },
     {
      "store": "Evergreen - Lakewood",
      "city": "Lakewood",
-     "units": 9,
-     "dollars": 85.5
-    },
-    {
-     "store": "Freddy’s on Monmouth",
-     "city": "Oakhurst",
-     "units": 9,
-     "dollars": 85.5
-    },
-    {
-     "store": "Seasons - Lakewood",
-     "city": "Lakewood",
-     "units": 9,
-     "dollars": 85.5
-    },
-    {
-     "store": "Gourmet Glatt - Woodmere",
-     "city": "Woodmere",
-     "units": 8,
-     "dollars": 76
-    },
-    {
-     "store": "Seasons - Toms River",
-     "city": "Toms River",
-     "units": 8,
-     "dollars": 76
+     "units": 28,
+     "dollars": 266
     },
     {
      "store": "Manna Health Market - 5 Towns",
      "city": "Lawrence",
-     "units": 7,
-     "dollars": 66.5
+     "units": 21,
+     "dollars": 199.5
     },
     {
-     "store": "Evergreen - Monsey",
-     "city": "Monsey",
-     "units": 7,
-     "dollars": 66.5
-    },
-    {
-     "store": "Glatt Mart - Flatbush",
-     "city": "Brooklyn",
-     "units": 6,
-     "dollars": 57
-    },
-    {
-     "store": "Kahan's Superette - Crown Heights",
-     "city": "Brooklyn",
-     "units": 6,
-     "dollars": 57
-    },
-    {
-     "store": "Pomegranate - Flatbush",
-     "city": "Brooklyn",
-     "units": 6,
-     "dollars": 57
-    },
-    {
-     "store": "The Market Place - Crown Heights",
-     "city": "Brooklyn",
-     "units": 6,
-     "dollars": 57
-    },
-    {
-     "store": "Gourmet Glatt - Cedarhurst",
-     "city": "Cedarhurst",
-     "units": 6,
-     "dollars": 57
-    },
-    {
-     "store": "Aisle One - Passaic",
-     "city": "Passaic",
-     "units": 6,
-     "dollars": 57
+     "store": "Bingo Wholesale",
+     "city": "Lakewood",
+     "units": 21,
+     "dollars": 199.5
     },
     {
      "store": "Cedar Market - Teaneck",
      "city": "Teaneck",
-     "units": 6,
-     "dollars": 57
+     "units": 18,
+     "dollars": 171
     },
     {
-     "store": "Evergreen - Pomona",
-     "city": "Pomona",
-     "units": 6,
-     "dollars": 57
-    },
-    {
-     "store": "Wesley Kosher - Monsey",
+     "store": "Rockland Kosher Supermarket",
      "city": "Monsey",
-     "units": 6,
-     "dollars": 57
+     "units": 18,
+     "dollars": 171
     },
     {
-     "store": "Schwartz Appetizing - Flatbush",
+     "store": "Pomegranate - Flatbush",
      "city": "Brooklyn",
-     "units": 5,
-     "dollars": 47.5
-    },
-    {
-     "store": "Seasons - Lawrence",
-     "city": "Lawrence",
-     "units": 5,
-     "dollars": 47.5
-    },
-    {
-     "store": "Bereli - Hollywood FL",
-     "city": "Hollywood",
-     "units": 5,
-     "dollars": 47.5
-    },
-    {
-     "store": "SIX 60 ONE - NYC",
-     "city": "New York",
-     "units": 5,
-     "dollars": 47.5
-    },
-    {
-     "store": "Seasons - Queens",
-     "city": "Flushing",
-     "units": 5,
-     "dollars": 47.5
-    },
-    {
-     "store": "The Grove - Boca",
-     "city": "Boca Raton",
-     "units": 4,
-     "dollars": 38
-    },
-    {
-     "store": "The Grove - Hollywood",
-     "city": "Fort Lauderdale",
-     "units": 4,
-     "dollars": 38
-    },
-    {
-     "store": "The Grove - Surfside",
-     "city": "Surfside",
-     "units": 4,
-     "dollars": 38
-    },
-    {
-     "store": "Glatt Express - Teaneck",
-     "city": "Teaneck",
-     "units": 4,
-     "dollars": 38
-    },
-    {
-     "store": "Midwest Premium Kosher - South Bend",
-     "city": "South Bend",
-     "units": 4,
-     "dollars": 38
-    },
-    {
-     "store": "The Grove - Cleveland",
-     "city": "South Euclid",
-     "units": 4,
-     "dollars": 38
+     "units": 17,
+     "dollars": 161.5
     },
     {
      "store": "Einhorn's Supermarket - Boro Park",
      "city": "Brooklyn",
-     "units": 3,
-     "dollars": 28.5
+     "units": 16,
+     "dollars": 152
+    },
+    {
+     "store": "Breadberry",
+     "city": "Brooklyn",
+     "units": 15,
+     "dollars": 142.5
+    },
+    {
+     "store": "Moisha's Kosher",
+     "city": "Brooklyn",
+     "units": 14,
+     "dollars": 133
+    },
+    {
+     "store": "Kosher Experience",
+     "city": "Brooklyn",
+     "units": 11,
+     "dollars": 104.5
     },
     {
      "store": "Kosher Kingdom - Aventura",
      "city": "Miami",
-     "units": 3,
-     "dollars": 28.5
-    },
-    {
-     "store": "Koltuv Kosher - Chicago",
-     "city": "Chicago",
-     "units": 3,
-     "dollars": 28.5
+     "units": 9,
+     "dollars": 85.5
     },
     {
      "store": "Shalom Kosher - Silver Spring",
      "city": "Silver Spring",
-     "units": 3,
-     "dollars": 28.5
-    },
-    {
-     "store": "The Spicy Peach - Atlanta",
-     "city": "Atlanta",
-     "units": 3,
-     "dollars": 28.5
-    },
-    {
-     "store": "Western Kosher Fairfax - LA",
-     "city": "Los Angeles",
-     "units": 3,
-     "dollars": 28.5
-    },
-    {
-     "store": "Riverdale Kosher Market",
-     "city": "Bronx",
-     "units": 2,
-     "dollars": 19
-    },
-    {
-     "store": "Exxon Rt 9 Lakewood",
-     "city": "Lakewood",
-     "units": 2,
-     "dollars": 19
-    },
-    {
-     "store": "Western Kosher Pico - LA",
-     "city": "Los Angeles",
-     "units": 2,
-     "dollars": 19
+     "units": 9,
+     "dollars": 85.5
     },
     {
      "store": "Aron's Kissena Farms",
      "city": "Flushing",
-     "units": 2,
-     "dollars": 19
+     "units": 8,
+     "dollars": 76
     },
     {
-     "store": "Lux Pharmacy - Queens",
-     "city": "Flushing",
-     "units": 2,
-     "dollars": 19
+     "store": "Riverdale Kosher Market",
+     "city": "Bronx",
+     "units": 7,
+     "dollars": 66.5
     }
    ],
    "total_units": 242,
@@ -6605,262 +4941,94 @@
    "store_channel_dollars": 3059,
    "stores": [
     {
-     "store": "Freddy’s on Monmouth",
-     "city": "Oakhurst",
-     "units": 16,
-     "dollars": 152
-    },
-    {
-     "store": "Gourmet Glatt North - Lakewood",
-     "city": "Lakewood",
-     "units": 15,
-     "dollars": 142.5
-    },
-    {
-     "store": "Gourmet Glatt South - Lakewood",
-     "city": "Lakewood",
-     "units": 14,
-     "dollars": 133
-    },
-    {
-     "store": "Kosher West",
-     "city": "Lakewood",
-     "units": 14,
-     "dollars": 133
-    },
-    {
      "store": "Salt Market - Deal",
      "city": "Long Branch",
-     "units": 12,
-     "dollars": 114
-    },
-    {
-     "store": "Seasons - Lakewood",
-     "city": "Lakewood",
-     "units": 12,
-     "dollars": 114
-    },
-    {
-     "store": "Einhorn's Supermarket - Boro Park",
-     "city": "Brooklyn",
-     "units": 11,
-     "dollars": 104.5
+     "units": 40,
+     "dollars": 380
     },
     {
      "store": "Evergreen - Lakewood",
      "city": "Lakewood",
-     "units": 11,
-     "dollars": 104.5
+     "units": 37,
+     "dollars": 351.5
     },
     {
-     "store": "Gourmet Glatt - Woodmere",
-     "city": "Woodmere",
-     "units": 10,
-     "dollars": 95
-    },
-    {
-     "store": "Gourmet Glatt - Jackson",
-     "city": "Jackson Township",
-     "units": 10,
-     "dollars": 95
-    },
-    {
-     "store": "Seasons - Toms River",
-     "city": "Toms River",
-     "units": 10,
-     "dollars": 95
-    },
-    {
-     "store": "Wesley Kosher - Monsey",
-     "city": "Monsey",
-     "units": 10,
-     "dollars": 95
-    },
-    {
-     "store": "Evergreen - Monsey",
-     "city": "Monsey",
-     "units": 9,
-     "dollars": 85.5
-    },
-    {
-     "store": "Kahan's Superette - Crown Heights",
-     "city": "Brooklyn",
-     "units": 8,
-     "dollars": 76
-    },
-    {
-     "store": "The Market Place - Crown Heights",
-     "city": "Brooklyn",
-     "units": 8,
-     "dollars": 76
-    },
-    {
-     "store": "Gourmet Glatt - Cedarhurst",
-     "city": "Cedarhurst",
-     "units": 8,
-     "dollars": 76
-    },
-    {
-     "store": "Glatt Mart - Flatbush",
-     "city": "Brooklyn",
-     "units": 7,
-     "dollars": 66.5
-    },
-    {
-     "store": "Pomegranate - Flatbush",
-     "city": "Brooklyn",
-     "units": 7,
-     "dollars": 66.5
-    },
-    {
-     "store": "Schwartz Appetizing - Flatbush",
-     "city": "Brooklyn",
-     "units": 7,
-     "dollars": 66.5
-    },
-    {
-     "store": "Seasons - Lawrence",
-     "city": "Lawrence",
-     "units": 7,
-     "dollars": 66.5
-    },
-    {
-     "store": "Bereli - Hollywood FL",
-     "city": "Hollywood",
-     "units": 7,
-     "dollars": 66.5
-    },
-    {
-     "store": "The Grove - Surfside",
-     "city": "Surfside",
-     "units": 7,
-     "dollars": 66.5
-    },
-    {
-     "store": "Aisle One - Passaic",
-     "city": "Passaic",
-     "units": 7,
-     "dollars": 66.5
+     "store": "Bingo Wholesale",
+     "city": "Lakewood",
+     "units": 28,
+     "dollars": 266
     },
     {
      "store": "Cedar Market - Teaneck",
      "city": "Teaneck",
-     "units": 7,
-     "dollars": 66.5
+     "units": 24,
+     "dollars": 228
     },
     {
-     "store": "Evergreen - Pomona",
-     "city": "Pomona",
-     "units": 7,
-     "dollars": 66.5
+     "store": "Rockland Kosher Supermarket",
+     "city": "Monsey",
+     "units": 24,
+     "dollars": 228
+    },
+    {
+     "store": "Pomegranate - Flatbush",
+     "city": "Brooklyn",
+     "units": 23,
+     "dollars": 218.5
+    },
+    {
+     "store": "Einhorn's Supermarket - Boro Park",
+     "city": "Brooklyn",
+     "units": 21,
+     "dollars": 199.5
     },
     {
      "store": "Manna Health Market - 5 Towns",
      "city": "Lawrence",
-     "units": 6,
-     "dollars": 57
+     "units": 21,
+     "dollars": 199.5
     },
     {
-     "store": "The Grove - Hollywood",
-     "city": "Fort Lauderdale",
-     "units": 6,
-     "dollars": 57
+     "store": "Breadberry",
+     "city": "Brooklyn",
+     "units": 21,
+     "dollars": 199.5
     },
     {
-     "store": "Midwest Premium Kosher - South Bend",
-     "city": "South Bend",
-     "units": 6,
-     "dollars": 57
-    },
-    {
-     "store": "The Grove - Cleveland",
-     "city": "South Euclid",
-     "units": 6,
-     "dollars": 57
-    },
-    {
-     "store": "The Spicy Peach - Atlanta",
-     "city": "Atlanta",
-     "units": 6,
-     "dollars": 57
-    },
-    {
-     "store": "Seasons - Queens",
-     "city": "Flushing",
-     "units": 6,
-     "dollars": 57
-    },
-    {
-     "store": "The Grove - Boca",
-     "city": "Boca Raton",
-     "units": 5,
-     "dollars": 47.5
-    },
-    {
-     "store": "SIX 60 ONE - NYC",
-     "city": "New York",
-     "units": 5,
-     "dollars": 47.5
-    },
-    {
-     "store": "Glatt Express - Teaneck",
-     "city": "Teaneck",
-     "units": 5,
-     "dollars": 47.5
+     "store": "Moisha's Kosher",
+     "city": "Brooklyn",
+     "units": 19,
+     "dollars": 180.5
     },
     {
      "store": "Shalom Kosher - Silver Spring",
      "city": "Silver Spring",
-     "units": 5,
-     "dollars": 47.5
+     "units": 17,
+     "dollars": 161.5
+    },
+    {
+     "store": "Kosher Experience",
+     "city": "Brooklyn",
+     "units": 15,
+     "dollars": 142.5
     },
     {
      "store": "Kosher Kingdom - Aventura",
      "city": "Miami",
-     "units": 4,
-     "dollars": 38
-    },
-    {
-     "store": "Koltuv Kosher - Chicago",
-     "city": "Chicago",
-     "units": 4,
-     "dollars": 38
-    },
-    {
-     "store": "Western Kosher Fairfax - LA",
-     "city": "Los Angeles",
-     "units": 4,
-     "dollars": 38
+     "units": 12,
+     "dollars": 114
     },
     {
      "store": "Riverdale Kosher Market",
      "city": "Bronx",
-     "units": 3,
-     "dollars": 28.5
-    },
-    {
-     "store": "Exxon Rt 9 Lakewood",
-     "city": "Lakewood",
-     "units": 3,
-     "dollars": 28.5
+     "units": 10,
+     "dollars": 95
     },
     {
      "store": "Aron's Kissena Farms",
      "city": "Flushing",
-     "units": 3,
-     "dollars": 28.5
-    },
-    {
-     "store": "Western Kosher Pico - LA",
-     "city": "Los Angeles",
-     "units": 2,
-     "dollars": 19
-    },
-    {
-     "store": "Lux Pharmacy - Queens",
-     "city": "Flushing",
-     "units": 2,
-     "dollars": 19
+     "units": 10,
+     "dollars": 95
     }
    ],
    "total_units": 322,
@@ -6872,262 +5040,94 @@
    "store_channel_dollars": 1996.5,
    "stores": [
     {
-     "store": "Gourmet Glatt North - Lakewood",
-     "city": "Lakewood",
-     "units": 15,
-     "dollars": 123.75
-    },
-    {
      "store": "Salt Market - Deal",
      "city": "Long Branch",
-     "units": 12,
-     "dollars": 99
-    },
-    {
-     "store": "Gourmet Glatt South - Lakewood",
-     "city": "Lakewood",
-     "units": 11,
-     "dollars": 90.75
-    },
-    {
-     "store": "Kosher West",
-     "city": "Lakewood",
-     "units": 11,
-     "dollars": 90.75
-    },
-    {
-     "store": "Seasons - Toms River",
-     "city": "Toms River",
-     "units": 10,
-     "dollars": 82.5
-    },
-    {
-     "store": "Freddy’s on Monmouth",
-     "city": "Oakhurst",
-     "units": 9,
-     "dollars": 74.25
-    },
-    {
-     "store": "Seasons - Lakewood",
-     "city": "Lakewood",
-     "units": 9,
-     "dollars": 74.25
-    },
-    {
-     "store": "The Market Place - Crown Heights",
-     "city": "Brooklyn",
-     "units": 8,
-     "dollars": 66
-    },
-    {
-     "store": "Gourmet Glatt - Cedarhurst",
-     "city": "Cedarhurst",
-     "units": 8,
-     "dollars": 66
+     "units": 39,
+     "dollars": 321.75
     },
     {
      "store": "Evergreen - Lakewood",
      "city": "Lakewood",
-     "units": 8,
-     "dollars": 66
+     "units": 27,
+     "dollars": 222.75
     },
     {
-     "store": "Gourmet Glatt - Woodmere",
-     "city": "Woodmere",
-     "units": 7,
-     "dollars": 57.75
-    },
-    {
-     "store": "Gourmet Glatt - Jackson",
-     "city": "Jackson Township",
-     "units": 7,
-     "dollars": 57.75
-    },
-    {
-     "store": "Evergreen - Monsey",
-     "city": "Monsey",
-     "units": 7,
-     "dollars": 57.75
-    },
-    {
-     "store": "Einhorn's Supermarket - Boro Park",
-     "city": "Brooklyn",
-     "units": 6,
-     "dollars": 49.5
-    },
-    {
-     "store": "Glatt Mart - Flatbush",
-     "city": "Brooklyn",
-     "units": 6,
-     "dollars": 49.5
-    },
-    {
-     "store": "Kahan's Superette - Crown Heights",
-     "city": "Brooklyn",
-     "units": 6,
-     "dollars": 49.5
-    },
-    {
-     "store": "Seasons - Queens",
-     "city": "Flushing",
-     "units": 6,
-     "dollars": 49.5
-    },
-    {
-     "store": "Wesley Kosher - Monsey",
-     "city": "Monsey",
-     "units": 6,
-     "dollars": 49.5
+     "store": "Bingo Wholesale",
+     "city": "Lakewood",
+     "units": 20,
+     "dollars": 165
     },
     {
      "store": "Pomegranate - Flatbush",
      "city": "Brooklyn",
-     "units": 5,
-     "dollars": 41.25
-    },
-    {
-     "store": "Schwartz Appetizing - Flatbush",
-     "city": "Brooklyn",
-     "units": 5,
-     "dollars": 41.25
-    },
-    {
-     "store": "Manna Health Market - 5 Towns",
-     "city": "Lawrence",
-     "units": 5,
-     "dollars": 41.25
-    },
-    {
-     "store": "Seasons - Lawrence",
-     "city": "Lawrence",
-     "units": 5,
-     "dollars": 41.25
-    },
-    {
-     "store": "Bereli - Hollywood FL",
-     "city": "Hollywood",
-     "units": 5,
-     "dollars": 41.25
-    },
-    {
-     "store": "Aisle One - Passaic",
-     "city": "Passaic",
-     "units": 5,
-     "dollars": 41.25
+     "units": 17,
+     "dollars": 140.25
     },
     {
      "store": "Cedar Market - Teaneck",
      "city": "Teaneck",
-     "units": 5,
-     "dollars": 41.25
+     "units": 17,
+     "dollars": 140.25
     },
     {
-     "store": "Evergreen - Pomona",
-     "city": "Pomona",
-     "units": 5,
-     "dollars": 41.25
+     "store": "Rockland Kosher Supermarket",
+     "city": "Monsey",
+     "units": 17,
+     "dollars": 140.25
     },
     {
-     "store": "The Grove - Hollywood",
-     "city": "Fort Lauderdale",
-     "units": 4,
-     "dollars": 33
+     "store": "Einhorn's Supermarket - Boro Park",
+     "city": "Brooklyn",
+     "units": 15,
+     "dollars": 123.75
     },
     {
-     "store": "The Grove - Surfside",
-     "city": "Surfside",
-     "units": 4,
-     "dollars": 33
+     "store": "Manna Health Market - 5 Towns",
+     "city": "Lawrence",
+     "units": 15,
+     "dollars": 123.75
     },
     {
-     "store": "SIX 60 ONE - NYC",
-     "city": "New York",
-     "units": 4,
-     "dollars": 33
+     "store": "Breadberry",
+     "city": "Brooklyn",
+     "units": 15,
+     "dollars": 123.75
     },
     {
-     "store": "Glatt Express - Teaneck",
-     "city": "Teaneck",
-     "units": 4,
-     "dollars": 33
+     "store": "Moisha's Kosher",
+     "city": "Brooklyn",
+     "units": 14,
+     "dollars": 115.5
     },
     {
-     "store": "Kosher Kingdom - Aventura",
-     "city": "Miami",
-     "units": 3,
-     "dollars": 24.75
-    },
-    {
-     "store": "The Grove - Boca",
-     "city": "Boca Raton",
-     "units": 3,
-     "dollars": 24.75
-    },
-    {
-     "store": "Koltuv Kosher - Chicago",
-     "city": "Chicago",
-     "units": 3,
-     "dollars": 24.75
-    },
-    {
-     "store": "Midwest Premium Kosher - South Bend",
-     "city": "South Bend",
-     "units": 3,
-     "dollars": 24.75
-    },
-    {
-     "store": "Shalom Kosher - Silver Spring",
-     "city": "Silver Spring",
-     "units": 3,
-     "dollars": 24.75
-    },
-    {
-     "store": "The Grove - Cleveland",
-     "city": "South Euclid",
-     "units": 3,
-     "dollars": 24.75
-    },
-    {
-     "store": "The Spicy Peach - Atlanta",
-     "city": "Atlanta",
-     "units": 3,
-     "dollars": 24.75
-    },
-    {
-     "store": "Western Kosher Fairfax - LA",
-     "city": "Los Angeles",
-     "units": 3,
-     "dollars": 24.75
+     "store": "Kosher Experience",
+     "city": "Brooklyn",
+     "units": 11,
+     "dollars": 90.75
     },
     {
      "store": "Aron's Kissena Farms",
      "city": "Flushing",
-     "units": 3,
-     "dollars": 24.75
+     "units": 10,
+     "dollars": 82.5
+    },
+    {
+     "store": "Kosher Kingdom - Aventura",
+     "city": "Miami",
+     "units": 9,
+     "dollars": 74.25
+    },
+    {
+     "store": "Shalom Kosher - Silver Spring",
+     "city": "Silver Spring",
+     "units": 9,
+     "dollars": 74.25
     },
     {
      "store": "Riverdale Kosher Market",
      "city": "Bronx",
-     "units": 2,
-     "dollars": 16.5
-    },
-    {
-     "store": "Exxon Rt 9 Lakewood",
-     "city": "Lakewood",
-     "units": 2,
-     "dollars": 16.5
-    },
-    {
-     "store": "Western Kosher Pico - LA",
-     "city": "Los Angeles",
-     "units": 2,
-     "dollars": 16.5
-    },
-    {
-     "store": "Lux Pharmacy - Queens",
-     "city": "Flushing",
-     "units": 1,
-     "dollars": 8.25
+     "units": 7,
+     "dollars": 57.75
     }
    ],
    "total_units": 242,
@@ -7139,262 +5139,94 @@
    "store_channel_dollars": 2491.5,
    "stores": [
     {
-     "store": "Gourmet Glatt North - Lakewood",
-     "city": "Lakewood",
-     "units": 15,
-     "dollars": 123.75
-    },
-    {
-     "store": "Seasons - Lakewood",
-     "city": "Lakewood",
-     "units": 15,
-     "dollars": 123.75
-    },
-    {
-     "store": "Gourmet Glatt South - Lakewood",
-     "city": "Lakewood",
-     "units": 14,
-     "dollars": 115.5
-    },
-    {
-     "store": "Kosher West",
-     "city": "Lakewood",
-     "units": 14,
-     "dollars": 115.5
-    },
-    {
-     "store": "Freddy’s on Monmouth",
-     "city": "Oakhurst",
-     "units": 12,
-     "dollars": 99
-    },
-    {
      "store": "Salt Market - Deal",
      "city": "Long Branch",
-     "units": 12,
-     "dollars": 99
+     "units": 37,
+     "dollars": 305.25
     },
     {
      "store": "Evergreen - Lakewood",
      "city": "Lakewood",
-     "units": 11,
-     "dollars": 90.75
+     "units": 34,
+     "dollars": 280.5
     },
     {
      "store": "Pomegranate - Flatbush",
      "city": "Brooklyn",
-     "units": 9,
-     "dollars": 74.25
+     "units": 29,
+     "dollars": 239.25
     },
     {
-     "store": "Gourmet Glatt - Woodmere",
-     "city": "Woodmere",
-     "units": 9,
-     "dollars": 74.25
-    },
-    {
-     "store": "Gourmet Glatt - Jackson",
-     "city": "Jackson Township",
-     "units": 9,
-     "dollars": 74.25
-    },
-    {
-     "store": "Seasons - Toms River",
-     "city": "Toms River",
-     "units": 9,
-     "dollars": 74.25
-    },
-    {
-     "store": "Evergreen - Monsey",
-     "city": "Monsey",
-     "units": 9,
-     "dollars": 74.25
-    },
-    {
-     "store": "Kahan's Superette - Crown Heights",
-     "city": "Brooklyn",
-     "units": 8,
-     "dollars": 66
-    },
-    {
-     "store": "The Market Place - Crown Heights",
-     "city": "Brooklyn",
-     "units": 8,
-     "dollars": 66
-    },
-    {
-     "store": "Einhorn's Supermarket - Boro Park",
-     "city": "Brooklyn",
-     "units": 7,
-     "dollars": 57.75
-    },
-    {
-     "store": "Glatt Mart - Flatbush",
-     "city": "Brooklyn",
-     "units": 7,
-     "dollars": 57.75
-    },
-    {
-     "store": "Gourmet Glatt - Cedarhurst",
-     "city": "Cedarhurst",
-     "units": 7,
-     "dollars": 57.75
-    },
-    {
-     "store": "Aisle One - Passaic",
-     "city": "Passaic",
-     "units": 7,
-     "dollars": 57.75
+     "store": "Bingo Wholesale",
+     "city": "Lakewood",
+     "units": 25,
+     "dollars": 206.25
     },
     {
      "store": "Cedar Market - Teaneck",
      "city": "Teaneck",
-     "units": 7,
-     "dollars": 57.75
+     "units": 22,
+     "dollars": 181.5
     },
     {
-     "store": "Evergreen - Pomona",
-     "city": "Pomona",
-     "units": 7,
-     "dollars": 57.75
-    },
-    {
-     "store": "Wesley Kosher - Monsey",
+     "store": "Rockland Kosher Supermarket",
      "city": "Monsey",
-     "units": 7,
-     "dollars": 57.75
+     "units": 22,
+     "dollars": 181.5
     },
     {
-     "store": "Schwartz Appetizing - Flatbush",
+     "store": "Einhorn's Supermarket - Boro Park",
      "city": "Brooklyn",
-     "units": 6,
-     "dollars": 49.5
+     "units": 20,
+     "dollars": 165
     },
     {
      "store": "Manna Health Market - 5 Towns",
      "city": "Lawrence",
-     "units": 6,
-     "dollars": 49.5
+     "units": 19,
+     "dollars": 156.75
     },
     {
-     "store": "Seasons - Lawrence",
-     "city": "Lawrence",
-     "units": 6,
-     "dollars": 49.5
+     "store": "Breadberry",
+     "city": "Brooklyn",
+     "units": 19,
+     "dollars": 156.75
     },
     {
-     "store": "Bereli - Hollywood FL",
-     "city": "Hollywood",
-     "units": 6,
-     "dollars": 49.5
-    },
-    {
-     "store": "Glatt Express - Teaneck",
-     "city": "Teaneck",
-     "units": 6,
-     "dollars": 49.5
-    },
-    {
-     "store": "Koltuv Kosher - Chicago",
-     "city": "Chicago",
-     "units": 6,
-     "dollars": 49.5
-    },
-    {
-     "store": "Seasons - Queens",
-     "city": "Flushing",
-     "units": 6,
-     "dollars": 49.5
+     "store": "Moisha's Kosher",
+     "city": "Brooklyn",
+     "units": 17,
+     "dollars": 140.25
     },
     {
      "store": "Kosher Kingdom - Aventura",
      "city": "Miami",
-     "units": 5,
-     "dollars": 41.25
+     "units": 15,
+     "dollars": 123.75
     },
     {
-     "store": "The Grove - Hollywood",
-     "city": "Fort Lauderdale",
-     "units": 5,
-     "dollars": 41.25
-    },
-    {
-     "store": "The Grove - Surfside",
-     "city": "Surfside",
-     "units": 5,
-     "dollars": 41.25
-    },
-    {
-     "store": "SIX 60 ONE - NYC",
-     "city": "New York",
-     "units": 5,
-     "dollars": 41.25
-    },
-    {
-     "store": "The Grove - Boca",
-     "city": "Boca Raton",
-     "units": 4,
-     "dollars": 33
-    },
-    {
-     "store": "Midwest Premium Kosher - South Bend",
-     "city": "South Bend",
-     "units": 4,
-     "dollars": 33
+     "store": "Kosher Experience",
+     "city": "Brooklyn",
+     "units": 14,
+     "dollars": 115.5
     },
     {
      "store": "Shalom Kosher - Silver Spring",
      "city": "Silver Spring",
-     "units": 4,
-     "dollars": 33
-    },
-    {
-     "store": "The Grove - Cleveland",
-     "city": "South Euclid",
-     "units": 4,
-     "dollars": 33
-    },
-    {
-     "store": "The Spicy Peach - Atlanta",
-     "city": "Atlanta",
-     "units": 4,
-     "dollars": 33
-    },
-    {
-     "store": "Western Kosher Fairfax - LA",
-     "city": "Los Angeles",
-     "units": 4,
-     "dollars": 33
+     "units": 11,
+     "dollars": 90.75
     },
     {
      "store": "Riverdale Kosher Market",
      "city": "Bronx",
-     "units": 3,
-     "dollars": 24.75
-    },
-    {
-     "store": "Exxon Rt 9 Lakewood",
-     "city": "Lakewood",
-     "units": 3,
-     "dollars": 24.75
+     "units": 9,
+     "dollars": 74.25
     },
     {
      "store": "Aron's Kissena Farms",
      "city": "Flushing",
-     "units": 3,
-     "dollars": 24.75
-    },
-    {
-     "store": "Western Kosher Pico - LA",
-     "city": "Los Angeles",
-     "units": 2,
-     "dollars": 16.5
-    },
-    {
-     "store": "Lux Pharmacy - Queens",
-     "city": "Flushing",
-     "units": 2,
-     "dollars": 16.5
+     "units": 9,
+     "dollars": 74.25
     }
    ],
    "total_units": 302,
@@ -7406,262 +5238,94 @@
    "store_channel_dollars": 3489.75,
    "stores": [
     {
-     "store": "Gourmet Glatt South - Lakewood",
-     "city": "Lakewood",
-     "units": 25,
-     "dollars": 206.25
-    },
-    {
-     "store": "Kosher West",
-     "city": "Lakewood",
-     "units": 25,
-     "dollars": 206.25
-    },
-    {
-     "store": "Gourmet Glatt North - Lakewood",
-     "city": "Lakewood",
-     "units": 20,
-     "dollars": 165
-    },
-    {
-     "store": "Freddy’s on Monmouth",
-     "city": "Oakhurst",
-     "units": 16,
-     "dollars": 132
-    },
-    {
      "store": "Salt Market - Deal",
      "city": "Long Branch",
-     "units": 16,
-     "dollars": 132
-    },
-    {
-     "store": "Kahan's Superette - Crown Heights",
-     "city": "Brooklyn",
-     "units": 15,
-     "dollars": 123.75
+     "units": 52,
+     "dollars": 429
     },
     {
      "store": "Evergreen - Lakewood",
      "city": "Lakewood",
-     "units": 15,
-     "dollars": 123.75
+     "units": 48,
+     "dollars": 396
     },
     {
-     "store": "Seasons - Lakewood",
+     "store": "Bingo Wholesale",
      "city": "Lakewood",
-     "units": 15,
-     "dollars": 123.75
-    },
-    {
-     "store": "Gourmet Glatt - Woodmere",
-     "city": "Woodmere",
-     "units": 13,
-     "dollars": 107.25
-    },
-    {
-     "store": "Gourmet Glatt - Jackson",
-     "city": "Jackson Township",
-     "units": 13,
-     "dollars": 107.25
-    },
-    {
-     "store": "Seasons - Toms River",
-     "city": "Toms River",
-     "units": 13,
-     "dollars": 107.25
-    },
-    {
-     "store": "Evergreen - Pomona",
-     "city": "Pomona",
-     "units": 13,
-     "dollars": 107.25
-    },
-    {
-     "store": "Evergreen - Monsey",
-     "city": "Monsey",
-     "units": 12,
-     "dollars": 99
-    },
-    {
-     "store": "The Market Place - Crown Heights",
-     "city": "Brooklyn",
-     "units": 11,
-     "dollars": 90.75
-    },
-    {
-     "store": "Glatt Mart - Flatbush",
-     "city": "Brooklyn",
-     "units": 10,
-     "dollars": 82.5
-    },
-    {
-     "store": "Gourmet Glatt - Cedarhurst",
-     "city": "Cedarhurst",
-     "units": 10,
-     "dollars": 82.5
-    },
-    {
-     "store": "Aisle One - Passaic",
-     "city": "Passaic",
-     "units": 10,
-     "dollars": 82.5
+     "units": 48,
+     "dollars": 396
     },
     {
      "store": "Cedar Market - Teaneck",
      "city": "Teaneck",
-     "units": 10,
-     "dollars": 82.5
+     "units": 31,
+     "dollars": 255.75
     },
     {
-     "store": "Wesley Kosher - Monsey",
+     "store": "Rockland Kosher Supermarket",
      "city": "Monsey",
-     "units": 10,
-     "dollars": 82.5
+     "units": 31,
+     "dollars": 255.75
     },
     {
      "store": "Pomegranate - Flatbush",
      "city": "Brooklyn",
-     "units": 9,
-     "dollars": 74.25
-    },
-    {
-     "store": "Schwartz Appetizing - Flatbush",
-     "city": "Brooklyn",
-     "units": 9,
-     "dollars": 74.25
-    },
-    {
-     "store": "Seasons - Lawrence",
-     "city": "Lawrence",
-     "units": 9,
-     "dollars": 74.25
-    },
-    {
-     "store": "Bereli - Hollywood FL",
-     "city": "Hollywood",
-     "units": 9,
-     "dollars": 74.25
-    },
-    {
-     "store": "Manna Health Market - 5 Towns",
-     "city": "Lawrence",
-     "units": 8,
-     "dollars": 66
-    },
-    {
-     "store": "Seasons - Queens",
-     "city": "Flushing",
-     "units": 8,
-     "dollars": 66
-    },
-    {
-     "store": "The Grove - Hollywood",
-     "city": "Fort Lauderdale",
-     "units": 7,
-     "dollars": 57.75
-    },
-    {
-     "store": "The Grove - Surfside",
-     "city": "Surfside",
-     "units": 7,
-     "dollars": 57.75
-    },
-    {
-     "store": "SIX 60 ONE - NYC",
-     "city": "New York",
-     "units": 7,
-     "dollars": 57.75
-    },
-    {
-     "store": "Glatt Express - Teaneck",
-     "city": "Teaneck",
-     "units": 7,
-     "dollars": 57.75
-    },
-    {
-     "store": "Western Kosher Fairfax - LA",
-     "city": "Los Angeles",
-     "units": 7,
-     "dollars": 57.75
+     "units": 30,
+     "dollars": 247.5
     },
     {
      "store": "Einhorn's Supermarket - Boro Park",
      "city": "Brooklyn",
-     "units": 6,
-     "dollars": 49.5
+     "units": 27,
+     "dollars": 222.75
     },
     {
-     "store": "The Grove - Boca",
-     "city": "Boca Raton",
-     "units": 6,
-     "dollars": 49.5
+     "store": "Manna Health Market - 5 Towns",
+     "city": "Lawrence",
+     "units": 27,
+     "dollars": 222.75
     },
     {
-     "store": "Koltuv Kosher - Chicago",
-     "city": "Chicago",
-     "units": 6,
-     "dollars": 49.5
+     "store": "Breadberry",
+     "city": "Brooklyn",
+     "units": 27,
+     "dollars": 222.75
     },
     {
-     "store": "Midwest Premium Kosher - South Bend",
-     "city": "South Bend",
-     "units": 6,
-     "dollars": 49.5
+     "store": "Moisha's Kosher",
+     "city": "Brooklyn",
+     "units": 24,
+     "dollars": 198
     },
     {
-     "store": "The Grove - Cleveland",
-     "city": "South Euclid",
-     "units": 6,
-     "dollars": 49.5
+     "store": "Kosher Experience",
+     "city": "Brooklyn",
+     "units": 20,
+     "dollars": 165
     },
     {
      "store": "Kosher Kingdom - Aventura",
      "city": "Miami",
-     "units": 5,
-     "dollars": 41.25
+     "units": 16,
+     "dollars": 132
     },
     {
      "store": "Shalom Kosher - Silver Spring",
      "city": "Silver Spring",
-     "units": 5,
-     "dollars": 41.25
-    },
-    {
-     "store": "The Spicy Peach - Atlanta",
-     "city": "Atlanta",
-     "units": 5,
-     "dollars": 41.25
+     "units": 16,
+     "dollars": 132
     },
     {
      "store": "Riverdale Kosher Market",
      "city": "Bronx",
-     "units": 4,
-     "dollars": 33
-    },
-    {
-     "store": "Exxon Rt 9 Lakewood",
-     "city": "Lakewood",
-     "units": 4,
-     "dollars": 33
-    },
-    {
-     "store": "Western Kosher Pico - LA",
-     "city": "Los Angeles",
-     "units": 4,
-     "dollars": 33
+     "units": 13,
+     "dollars": 107.25
     },
     {
      "store": "Aron's Kissena Farms",
      "city": "Flushing",
-     "units": 4,
-     "dollars": 33
-    },
-    {
-     "store": "Lux Pharmacy - Queens",
-     "city": "Flushing",
-     "units": 3,
-     "dollars": 24.75
+     "units": 13,
+     "dollars": 107.25
     }
    ],
    "total_units": 423,
