@@ -38,66 +38,27 @@ export const fmtAsOf = (iso) => {
   return new Date(iso + 'T00:00:00').toLocaleDateString([], { month: 'short', day: 'numeric' })
 }
 
-export const fmtD = (s) => (s ? fmtAsOf(s) : '—')
-
-export const daysBetween = (fromIso, toIso) => {
-  if (!fromIso || !toIso) return null
-  return Math.round(
-    (new Date(toIso + 'T00:00:00').getTime() - new Date(fromIso + 'T00:00:00').getTime()) / 86400000,
-  )
+export const fmtAsOfLong = (iso) => {
+  if (!iso) return '—'
+  return new Date(iso + 'T00:00:00').toLocaleDateString([], { month: 'short', day: 'numeric', year: 'numeric' })
 }
+
+export const fmtD = (s) => (s ? fmtAsOf(s) : '—')
 
 export const centsEqual = (a, b) => Math.abs(Math.round(a * 100) - Math.round(b * 100)) === 0
 
-export function TieCheck({ expected, actual, label }) {
+/** Quiet tie indicator beside a footer total */
+export function TieMark({ expected, actual }) {
   const ok = centsEqual(expected, actual)
   const diff = Math.round((actual - expected) * 100) / 100
-  return (
-    <div
-      style={{
-        display: 'flex',
-        flexWrap: 'wrap',
-        alignItems: 'center',
-        gap: '8px',
-        marginTop: '10px',
-        fontSize: '12px',
-      }}
-    >
-      {label && <span style={{ color: MUTED }}>{label}</span>}
-      <span
-        style={{
-          fontFamily: UI,
-          fontSize: '11px',
-          fontWeight: 600,
-          padding: '4px 10px',
-          borderRadius: '20px',
-          background: ok ? SAGE + '33' : '#FBEDE9',
-          color: ok ? CHARCOAL : RED,
-        }}
-      >
-        {ok ? `Ties to total · ${money(expected)}` : `Off by ${money(Math.abs(diff))} · expected ${money(expected)}, got ${money(actual)}`}
+  if (ok) {
+    return (
+      <span title="Ties to total" style={{ color: SAGE, fontSize: '12px', fontWeight: 600, lineHeight: 1 }}>
+        ✓
       </span>
-    </div>
-  )
-}
-
-export function DataAsOf({ iso, style }) {
-  return (
-    <div
-      style={{
-        fontFamily: UI,
-        fontSize: '11px',
-        fontWeight: 600,
-        letterSpacing: '0.06em',
-        textTransform: 'uppercase',
-        color: '#A2937A',
-        marginTop: '10px',
-        ...style,
-      }}
-    >
-      Data as of {fmtAsOf(iso)}
-    </div>
-  )
+    )
+  }
+  return <span style={{ color: RED, fontSize: '11px', fontWeight: 600 }}>Off by {money(Math.abs(diff))}</span>
 }
 
 export const CHANNEL_COLORS = {

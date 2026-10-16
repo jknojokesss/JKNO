@@ -1,12 +1,14 @@
 import {
   BRICK,
   CHARCOAL,
+  SAGE,
+  BROWN,
+  RED,
   STONE,
   MUTED,
   INK,
   MONO,
   UI,
-  money,
   moneyK,
   CHANNEL_COLORS,
   AMBER,
@@ -14,13 +16,34 @@ import {
 
 const sans = UI
 
+function ChartLegend({ items }) {
+  return (
+    <g fontFamily={sans} fontSize="9.5" fill={CHARCOAL}>
+      {items.map((it, i) => {
+        const row = Math.floor(i / 3)
+        const col = i % 3
+        const x = 16 + col * 155
+        const y = 198 + row * 15
+        return (
+          <g key={it.label} transform={`translate(${x}, ${y})`}>
+            <rect width={10} height={10} fill={it.color} />
+            <text x={14} y={9}>{it.label}</text>
+          </g>
+        )
+      })}
+    </g>
+  )
+}
+
 export function StackedSalesByChannel({ months, channels, accent = BRICK }) {
   const totals = months.map((m) => channels.reduce((s, ch) => s + (m[ch] || 0), 0))
   const max = Math.max(...totals, 1)
   const w = 58
   const vbW = 16 + months.length * w
+  const vbH = 228
+  const legendItems = channels.map((ch) => ({ label: ch, color: CHANNEL_COLORS[ch] || accent }))
   return (
-    <svg viewBox={`0 0 ${vbW} 190`} style={{ width: '100%', minWidth: '520px', display: 'block' }}>
+    <svg viewBox={`0 0 ${vbW} ${vbH}`} style={{ width: '100%', minWidth: '520px', display: 'block' }}>
       {months.map((m, i) => {
         const x = 16 + i * w
         let y = 148
@@ -42,14 +65,7 @@ export function StackedSalesByChannel({ months, channels, accent = BRICK }) {
           </g>
         )
       })}
-      <g fontFamily={sans} fontSize="9.5" fill={CHARCOAL}>
-        {channels.slice(0, 3).map((ch, i) => (
-          <g key={ch} transform={`translate(${16 + i * 130}, 184)`}>
-            <rect width={10} height={10} fill={CHANNEL_COLORS[ch]} />
-            <text x={14} y={9}>{ch}</text>
-          </g>
-        ))}
-      </g>
+      <ChartLegend items={legendItems} />
     </svg>
   )
 }
@@ -59,19 +75,17 @@ export function CashForecast13({ forecast, accent = BRICK }) {
   const wMax = Math.max(...weeks.map((w) => Math.max(w.cash_in, w.cash_out)), 1)
   const cumMin = Math.min(...weeks.map((w) => w.ending_cash), forecast.starting_cash)
   const cumMax = Math.max(...weeks.map((w) => w.ending_cash), forecast.starting_cash)
-  const lowest = forecast.lowest_week?.week_of
   const vbW = 20 + weeks.length * 58
+  const vbH = 210
   return (
-    <svg viewBox={`0 0 ${vbW} 200`} style={{ width: '100%', minWidth: '640px', display: 'block' }}>
+    <svg viewBox={`0 0 ${vbW} ${vbH}`} style={{ width: '100%', minWidth: '640px', display: 'block' }}>
       {weeks.map((w, i) => {
         const x = 20 + i * 58
         const inH = (w.cash_in / wMax) * 92
         const outH = (w.cash_out / wMax) * 92
-        const isLow = w.week_of === lowest
         return (
           <g key={w.week_of}>
-            {isLow && <rect x={x - 4} y={12} width={51} height={142} fill="#FBEDE9" rx={2} />}
-            <rect x={x} y={118 - inH} width={20} height={inH} fill={isLow ? accent : CHARCOAL} />
+            <rect x={x} y={118 - inH} width={20} height={inH} fill={CHARCOAL} />
             <rect x={x + 23} y={118 - outH} width={20} height={outH} fill={STONE} />
             <text x={x + 21} y={132} textAnchor="middle" fontSize="9.5" fill={MUTED} fontFamily={sans}>
               {w.label}
@@ -97,7 +111,7 @@ export function CashForecast13({ forecast, accent = BRICK }) {
         points={weeks
           .map(
             (w, i) =>
-              `${41 + i * 58},${182 - ((w.ending_cash - cumMin) / Math.max(1, cumMax - cumMin)) * 26}`,
+              `${41 + i * 58},${168 - ((w.ending_cash - cumMin) / Math.max(1, cumMax - cumMin)) * 26}`,
           )
           .join(' ')}
       />
@@ -105,12 +119,17 @@ export function CashForecast13({ forecast, accent = BRICK }) {
         <circle
           key={w.week_of}
           cx={41 + i * 58}
-          cy={182 - ((w.ending_cash - cumMin) / Math.max(1, cumMax - cumMin)) * 26}
-          r={w.week_of === lowest ? 3.5 : 2}
-          fill={w.week_of === lowest ? accent : CHARCOAL}
+          cy={168 - ((w.ending_cash - cumMin) / Math.max(1, cumMax - cumMin)) * 26}
+          r="2"
+          fill={CHARCOAL}
         />
       ))}
-      <text x={20} y={170} fontSize="9.5" fill={MUTED} fontFamily={sans}>ending cash →</text>
+      <ChartLegend
+        items={[
+          { label: 'Cash in', color: CHARCOAL },
+          { label: 'Cash out', color: STONE },
+        ]}
+      />
     </svg>
   )
 }
@@ -120,9 +139,10 @@ export function SubscriberLineChart({ monthly, accent = BRICK }) {
   const maxA = Math.max(...pts.map((p) => p.active_end), 1)
   const w = 58
   const vbW = 30 + pts.length * w
-  const lineY = (v) => 120 - (v / maxA) * 95
+  const vbH = 200
+  const lineY = (v) => 110 - (v / maxA) * 85
   return (
-    <svg viewBox={`0 0 ${vbW} 175`} style={{ width: '100%', minWidth: '520px', display: 'block' }}>
+    <svg viewBox={`0 0 ${vbW} ${vbH}`} style={{ width: '100%', minWidth: '520px', display: 'block' }}>
       <polyline
         fill="none"
         stroke={accent}
@@ -132,26 +152,32 @@ export function SubscriberLineChart({ monthly, accent = BRICK }) {
       {pts.map((p, i) => (
         <g key={p.label}>
           <circle cx={44 + i * w} cy={lineY(p.active_end)} r="2.5" fill={accent} />
-          <text x={44 + i * w} y={138} textAnchor="middle" fontSize="9" fill={MUTED} fontFamily={sans}>
+          <text x={44 + i * w} y={128} textAnchor="middle" fontSize="9" fill={MUTED} fontFamily={sans}>
             {p.label}
           </text>
-          <text x={44 + i * w} y={150} textAnchor="middle" fontSize="9.5" fontWeight="600" fill={INK} fontFamily={sans}>
+          <text x={44 + i * w} y={140} textAnchor="middle" fontSize="9.5" fontWeight="600" fill={INK} fontFamily={sans}>
             {p.active_end}
           </text>
         </g>
       ))}
       {pts.map((p, i) => {
         const x = 44 + i * w
-        const newH = (p.new / Math.max(...pts.map((x) => x.new), 1)) * 18
-        const canH = (p.cancelled / Math.max(...pts.map((x) => x.cancelled), 1)) * 18
+        const newH = (p.new / Math.max(...pts.map((x) => x.new), 1)) * 16
+        const canH = (p.cancelled / Math.max(...pts.map((x) => x.cancelled), 1)) * 16
         return (
           <g key={`bars-${p.label}`}>
-            <rect x={x - 10} y={158 - newH} width={8} height={newH} fill={SAGE} />
-            <rect x={x + 2} y={158 - canH} width={8} height={canH} fill={STONE} />
+            <rect x={x - 10} y={148 - newH} width={8} height={newH} fill={SAGE} />
+            <rect x={x + 2} y={148 - canH} width={8} height={canH} fill={STONE} />
           </g>
         )
       })}
-      <text x={30} y={168} fontSize="9" fill={MUTED} fontFamily={sans}>new / cancelled under line</text>
+      <ChartLegend
+        items={[
+          { label: 'Active', color: accent },
+          { label: 'New', color: SAGE },
+          { label: 'Cancelled', color: STONE },
+        ]}
+      />
     </svg>
   )
 }
@@ -190,7 +216,7 @@ export function TastingLiftChart({ tastings, accent = BRICK }) {
   const rows = (tastings || []).filter((t) => t.store_bags_4wk_before != null)
   const maxB = Math.max(...rows.flatMap((t) => [t.store_bags_4wk_before, t.store_bags_4wk_after]), 1)
   const rowH = 36
-  const vbH = 30 + rows.length * rowH
+  const vbH = 44 + rows.length * rowH
   const vbW = 420
   return (
     <svg viewBox={`0 0 ${vbW} ${vbH}`} style={{ width: '100%', minWidth: '360px', display: 'block' }}>
@@ -210,13 +236,17 @@ export function TastingLiftChart({ tastings, accent = BRICK }) {
           </g>
         )
       })}
-      <text x={140} y={vbH - 4} fontSize="9" fill={MUTED} fontFamily={sans}>stone = 4 wk before · brick = after</text>
+      <g transform={`translate(140, ${vbH - 14})`} fontFamily={sans} fontSize="9.5" fill={CHARCOAL}>
+        <rect width={10} height={10} fill={STONE} />
+        <text x={14} y={9}>4 wk before</text>
+        <rect x={90} width={10} height={10} fill={accent} />
+        <text x={104} y={9}>4 wk after</text>
+      </g>
     </svg>
   )
 }
 
 export function MarginByChannelChart({ products, channels, accent = BRICK }) {
-  const names = products.map((p) => p.product)
   const maxM = Math.max(
     ...products.flatMap((p) => channels.map((ch) => p.channels[ch]?.margin_per_bag || 0)),
     1,
@@ -225,8 +255,9 @@ export function MarginByChannelChart({ products, channels, accent = BRICK }) {
   const gw = 72
   const vbW = 40 + groups * gw
   const chW = 8
+  const seriesColors = [accent, CHARCOAL, SAGE, BROWN, STONE]
   return (
-    <svg viewBox={`0 0 ${vbW} 200`} style={{ width: '100%', minWidth: '520px', display: 'block' }}>
+    <svg viewBox={`0 0 ${vbW} 228`} style={{ width: '100%', minWidth: '520px', display: 'block' }}>
       {products.map((p, gi) => {
         const gx = 36 + gi * gw
         return (
@@ -234,7 +265,6 @@ export function MarginByChannelChart({ products, channels, accent = BRICK }) {
             {channels.map((ch, ci) => {
               const m = p.channels[ch]?.margin_per_bag || 0
               const h = (m / maxM) * 130
-              const colors = [accent, CHARCOAL, SAGE, BROWN, STONE]
               return (
                 <rect
                   key={ch}
@@ -242,7 +272,7 @@ export function MarginByChannelChart({ products, channels, accent = BRICK }) {
                   y={150 - h}
                   width={chW}
                   height={h}
-                  fill={colors[ci % colors.length]}
+                  fill={seriesColors[ci % seriesColors.length]}
                 />
               )
             })}
@@ -252,7 +282,7 @@ export function MarginByChannelChart({ products, channels, accent = BRICK }) {
           </g>
         )
       })}
-      <text x={4} y={12} fontSize="9" fill={MUTED} fontFamily={sans}>margin $/bag by channel</text>
+      <ChartLegend items={channels.map((ch, i) => ({ label: ch, color: seriesColors[i % seriesColors.length] }))} />
     </svg>
   )
 }
