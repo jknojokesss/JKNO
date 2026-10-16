@@ -175,7 +175,7 @@ const PORTAL_DESKS = [
     title: 'Riverside Tires',
     art: 'car',
     href: '/riverside-tires',
-    enterLabel: 'Open sample →',
+    enterLabel: 'Open sample',
   },
   {
     id: 'harborfield',
@@ -183,7 +183,7 @@ const PORTAL_DESKS = [
     title: 'Harborfield Residential',
     art: 'house',
     href: '/harborfield-properties',
-    enterLabel: 'Open sample →',
+    enterLabel: 'Open sample',
   },
   {
     id: 'riverstone',
@@ -191,7 +191,7 @@ const PORTAL_DESKS = [
     title: 'Riverstone Roofing',
     art: 'roof',
     href: '/riverstone-roofing',
-    enterLabel: 'Open sample →',
+    enterLabel: 'Open sample',
   },
 ]
 
@@ -594,8 +594,7 @@ export default function OperationsPortalSample() {
           .op-hub__intro p{font-family:${ADAR_HUB_UI};font-size:14px;font-weight:500;color:#4b5563;line-height:1.45;margin:0;max-width:52ch}
           .op-hub__grid{display:grid;grid-template-columns:1fr;gap:16px;width:100%;max-width:1100px;margin:18px auto 40px;padding:0 24px}
           .op-hub__card-wrap{width:100%;min-width:0}
-          @media(min-width:640px){.op-hub__grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:18px}}
-          @media(min-width:1024px){.op-hub__grid{grid-template-columns:repeat(3,minmax(0,1fr));gap:20px}}
+          @media(min-width:640px){.op-hub__grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:18px;max-width:920px}}
           .op-hub__card{background:${HUB_CARD};border:1px solid #E4E8EF;border-radius:14px;padding:0 0 16px;display:flex;flex-direction:column;text-align:left;cursor:pointer;transition:transform .18s ease,box-shadow .18s ease,border-color .18s ease;box-shadow:0 2px 8px rgba(35,45,60,.05),0 10px 28px rgba(35,45,60,.05);overflow:hidden;min-height:240px;height:100%}
           .op-hub__card--ops{background:linear-gradient(180deg,#faf8f3 0%,#fff 55%);border-color:rgba(42,68,120,.35)}
           .op-hub__card--live{border-color:rgba(201,168,76,.55);box-shadow:0 2px 8px rgba(201,168,76,.12),0 12px 32px rgba(35,45,60,.06)}
