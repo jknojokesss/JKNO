@@ -1,9 +1,11 @@
-import { useState, useMemo, useEffect, Fragment } from 'react'
+import { useState, useMemo, useEffect, useReducer, Fragment } from 'react'
 import Image from 'next/image'
 import DemoLobby from '../DemoLobby'
 import DATA from '../../data/primal-krisp.json'
 import PrimalKrispOverview from './PrimalKrispOverview'
 import PrimalKrispFinancials from './PrimalKrispFinancials'
+import PrimalKrispStoresTab from './PrimalKrispStoresTab'
+import { initBillingFromData, billingReducer, totalOwed } from './primalKrispStoreBilling'
 import {
   SPICE,
   CHAR,
@@ -28,7 +30,6 @@ import {
   fmtInt,
   TieMark,
   verdictPromo,
-  TINT_RED,
 } from './primalKrispUtils'
 import {
   SubscriberLineChart,
@@ -36,7 +37,6 @@ import {
   TastingLiftChart,
   MarginByChannelChart,
   InventoryDaysChart,
-  ArAgingBars,
 } from './PrimalKrispCharts'
 
 const CHANNELS = DATA.channels
@@ -46,10 +46,9 @@ const BIZ = DATA.brand.name
 export default function PrimalKrispPortal() {
   const [tab, setTab] = useState('overview')
   const [period, setPeriod] = useState('month')
-  const [drawerStore, setDrawerStore] = useState(null)
+  const [billingState, dispatchBilling] = useReducer(billingReducer, undefined, () => initBillingFromData(DATA))
   const [drawerProduct, setDrawerProduct] = useState(null)
   const [regionFilter, setRegionFilter] = useState('All')
-  const [termsFilter, setTermsFilter] = useState('All')
   const [listFilter, setListFilter] = useState(null)
   const [storeSearch, setStoreSearch] = useState('')
   const [storeSort, setStoreSort] = useState({ key: 'balance', dir: 'desc' })
@@ -60,7 +59,8 @@ export default function PrimalKrispPortal() {
   const ov = DATA.overview
   const periodSlice = period === 'week' ? DATA.period_slices?.overview : null
   const stores = DATA.stores
-  const storeList = stores.list
+  const storeList = billingState.stores
+  const liveStoreOwed = totalOwed(storeList)
 
   const storeKpis = useMemo(() => {
     let bagsSold = 0
@@ -76,56 +76,6 @@ export default function PrimalKrispPortal() {
     })
     return { bagsSold, unaccounted, past60 }
   }, [storeList, period])
-
-  const agingTotal = useMemo(
-    () => Object.values(stores.ar_aging).reduce((a, b) => a + b, 0),
-    [stores.ar_aging],
-  )
-
-  const openBalanceSum = useMemo(
-    () => storeList.reduce((s, st) => s + (st.sample.open_balance || 0), 0),
-    [storeList],
-  )
-
-  const filteredStores = useMemo(() => {
-    const q = storeSearch.trim().toLowerCase()
-    let rows = storeList.filter((s) => {
-      if (regionFilter !== 'All' && s.region !== regionFilter) return false
-      if (termsFilter === 'Consignment' && !s.sample.terms.includes('Consignment')) return false
-      if (termsFilter === 'Invoice' && !s.sample.terms.includes('invoice')) return false
-      if (listFilter === 'open_balance' && !(s.sample.open_balance > 0)) return false
-      if (listFilter === 'past60') {
-        const has = (s.sample.invoices || s.sample.open_invoices || []).some(
-          (inv) => inv.status !== 'Paid' && inv.days_outstanding > 60,
-        )
-        if (!has) return false
-      }
-      if (listFilter === 'unaccounted' && !(s.sample.bags_unaccounted > 0)) return false
-      if (q && !(`${s.name} ${s.city}`.toLowerCase().includes(q))) return false
-      return true
-    })
-    const dir = storeSort.dir === 'asc' ? 1 : -1
-    rows = [...rows].sort((a, b) => {
-      const sa = a.sample
-      const sb = b.sample
-      let va
-      let vb
-      if (storeSort.key === 'name') {
-        va = a.name
-        vb = b.name
-        return va.localeCompare(vb) * dir
-      }
-      if (storeSort.key === 'bags') {
-        va = period === 'week' ? sa.bags_sold_week || 0 : sa.bags_sold_sept || 0
-        vb = period === 'week' ? sb.bags_sold_week || 0 : sb.bags_sold_sept || 0
-      } else {
-        va = sa.open_balance || 0
-        vb = sb.open_balance || 0
-      }
-      return (va - vb) * dir
-    })
-    return rows
-  }, [storeList, regionFilter, termsFilter, listFilter, storeSearch, storeSort, period])
 
   const salesPeriod = periodSlice?.sales ?? ov.sales_this_month
   const salesPrior = periodSlice?.sales_prior_week ?? ov.sales_last_month
@@ -152,16 +102,13 @@ export default function PrimalKrispPortal() {
   }, [invSort])
 
   useEffect(() => {
-    if (!drawerStore && !drawerProduct) return
+    if (!drawerProduct) return
     const onKey = (e) => {
-      if (e.key === 'Escape') {
-        setDrawerStore(null)
-        setDrawerProduct(null)
-      }
+      if (e.key === 'Escape') setDrawerProduct(null)
     }
     window.addEventListener('keydown', onKey)
     return () => window.removeEventListener('keydown', onKey)
-  }, [drawerStore, drawerProduct])
+  }, [drawerProduct])
 
   const card = { background: CARDBG, border: `1px solid ${BORDER}`, borderRadius: '2px', padding: '20px' }
   const lbl = {
@@ -353,21 +300,14 @@ export default function PrimalKrispPortal() {
 
   const goTab = (id) => {
     setTab(id)
-    setDrawerStore(null)
     setDrawerProduct(null)
   }
   const goStoresFilter = (filter) => {
     setTab('stores')
     setListFilter(filter)
-    setDrawerStore(null)
   }
 
   const sampleHeader = `Sample — fictitious numbers · as of ${fmtAsOfLong(AS_OF)}`
-
-  const storeDrawerInvoices = drawerStore?.sample?.invoices || drawerStore?.sample?.open_invoices || []
-  const storeDrawerOpenSum = storeDrawerInvoices
-    .filter((inv) => inv.status !== 'Paid')
-    .reduce((a, inv) => a + inv.amount, 0)
 
   const productBreakdown = drawerProduct
     ? DATA.product_store_breakdown?.find((p) => p.product === drawerProduct)
@@ -405,7 +345,6 @@ export default function PrimalKrispPortal() {
                   className="pk-navbtn"
                   onClick={() => {
                     setTab(id)
-                    setDrawerStore(null)
                     setDrawerProduct(null)
                   }}
                   style={
@@ -456,10 +395,6 @@ export default function PrimalKrispPortal() {
             <div style={{ fontSize: '12px', color: MUTED, marginTop: '6px' }}>{sampleHeader}</div>
           </div>
 
-          {tab === 'stores' && (
-            <FilterChip label={listFilterLabel} onClear={() => setListFilter(null)} />
-          )}
-
           {tab === 'financials' && (
             <PrimalKrispFinancials card={card} lbl={lbl} big={big} btn={btn} inp={inp} KPI={KPI} />
           )}
@@ -479,164 +414,36 @@ export default function PrimalKrispPortal() {
               channelRowsPeriod={channelRowsPeriod}
               goTab={goTab}
               goStoresFilter={goStoresFilter}
+              openStoreBalance={liveStoreOwed}
             />
           )}
 
           {tab === 'stores' && (
-            <>
-              <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap', marginBottom: '16px' }}>
-                <KPI k="Stores carrying" v={stores.count} />
-                <KPI
-                  k={period === 'week' ? 'Bags sold this week' : 'Bags sold to stores'}
-                  v={fmtInt(storeKpis.bagsSold)}
-                />
-                <KPI
-                  k="Owed by stores"
-                  v={money(ov.open_store_balance)}
-                  accent={AMBER}
-                  onClick={() => setListFilter('open_balance')}
-                />
-                <KPI
-                  k="Past 60 days"
-                  v={money(storeKpis.past60)}
-                  accent={storeKpis.past60 ? RED : INK}
-                  onClick={() => setListFilter('past60')}
-                />
-                <KPI
-                  k="Bags unaccounted"
-                  v={storeKpis.unaccounted}
-                  accent={storeKpis.unaccounted ? RED : GREEN}
-                  onClick={() => setListFilter('unaccounted')}
-                />
-              </div>
-
-              <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap', marginBottom: '12px', alignItems: 'center' }}>
-                <input
-                  type="search"
-                  placeholder="Search store or city"
-                  value={storeSearch}
-                  onChange={(e) => setStoreSearch(e.target.value)}
-                  style={{ ...inp, flex: '1 1 200px', minHeight: '40px' }}
-                  aria-label="Search stores"
-                />
-                <SortBtn label="Balance" sortKey="balance" current={storeSort} onSort={setStoreSort} />
-                <SortBtn label="Name" sortKey="name" current={storeSort} onSort={setStoreSort} />
-                <SortBtn label="Bags sold" sortKey="bags" current={storeSort} onSort={setStoreSort} />
-              </div>
-
-              <div style={{ ...card, marginBottom: '16px' }}>
-                <div style={{ ...lbl, marginBottom: '10px' }}>AR aging — open store balances</div>
-                <ArAgingBars aging={stores.ar_aging} />
-                <Row
-                  l="Total"
-                  v={money(stores.open_balance_total)}
-                  bold
-                  top
-                  tieExpected={stores.open_balance_total}
-                  tieActual={agingTotal}
-                />
-                <Row
-                  l="Store cards"
-                  v={money(openBalanceSum)}
-                  tieExpected={ov.open_store_balance}
-                  tieActual={openBalanceSum}
-                />
-              </div>
-
-              <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', marginBottom: '16px' }}>
-                {regions.map((r) => (
-                  <button
-                    key={r}
-                    onClick={() => setRegionFilter(r)}
-                    style={{
-                      padding: '6px 14px',
-                      borderRadius: '18px',
-                      border: `1px solid ${regionFilter === r ? CHAR : BORDER}`,
-                      background: regionFilter === r ? CHAR : CARDBG,
-                      color: regionFilter === r ? CREAM : MUTED,
-                      ...btn,
-                      fontSize: '12px',
-                    }}
-                  >
-                    {r}
-                  </button>
-                ))}
-              </div>
-              <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', marginBottom: '16px' }}>
-                {['All', 'Consignment', 'Invoice'].map((t) => (
-                  <button
-                    key={t}
-                    onClick={() => setTermsFilter(t)}
-                    style={{
-                      padding: '6px 14px',
-                      borderRadius: '18px',
-                      border: `1px solid ${termsFilter === t ? SPICE : BORDER}`,
-                      background: termsFilter === t ? SPICE : CARDBG,
-                      color: termsFilter === t ? '#fff' : MUTED,
-                      ...btn,
-                      fontSize: '12px',
-                    }}
-                  >
-                    {t === 'Invoice' ? 'Net 30 invoice' : t}
-                  </button>
-                ))}
-              </div>
-
-              {filteredStores.map((st) => {
-                const s = st.sample
-                const sent = (s.cases_sent_sept || 0) * (s.bags_per_case || 12)
-                const bagsSold = period === 'week' ? s.bags_sold_week || 0 : s.bags_sold_sept
-                const pill =
-                  s.reorder_flag === 'Reorder now'
-                    ? { c: RED, t: 'Reorder now' }
-                    : s.reorder_flag === 'Reorder soon'
-                      ? { c: AMBER, t: 'Reorder soon' }
-                      : { c: GREEN, t: 'OK' }
-                const overdue = (s.invoices || s.open_invoices || []).some(
-                  (inv) => inv.status !== 'Paid' && inv.days_outstanding > 60,
-                )
-                return (
-                  <button
-                    type="button"
-                    key={st.name}
-                    onClick={() => setDrawerStore(st)}
-                    style={{
-                      ...card,
-                      display: 'block',
-                      width: '100%',
-                      marginBottom: '12px',
-                      padding: '15px 18px',
-                      cursor: 'pointer',
-                      textAlign: 'left',
-                      minHeight: '44px',
-                      borderColor: drawerStore?.name === st.name ? CHAR : overdue ? '#E7C3B8' : BORDER,
-                      background: overdue ? TINT_RED : CARDBG,
-                    }}
-                  >
-                    <div style={{ display: 'flex', justifyContent: 'space-between', gap: '12px', flexWrap: 'wrap' }}>
-                      <div>
-                        <div style={{ ...big, fontSize: '20px', color: INK }}>{st.name}</div>
-                        <div style={{ fontSize: '12px', color: MUTED, marginTop: '4px' }}>
-                          {st.city} · {s.terms} · {money(s.price_per_bag)}/bag
-                        </div>
-                        <div style={{ fontSize: '12px', color: INK, marginTop: '6px' }}>
-                          Sent {sent} · Sold {bagsSold} · On shelf {s.on_shelf_last_count}
-                          {s.bags_unaccounted ? ` · ${s.bags_unaccounted} unaccounted` : ''}
-                        </div>
-                      </div>
-                      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '6px' }}>
-                        <span style={{ fontSize: '12px', fontWeight: 600, color: '#fff', background: pill.c, padding: '5px 11px', borderRadius: '20px' }}>
-                          {pill.t}
-                        </span>
-                        {s.open_balance > 0 && (
-                          <span style={{ ...big, fontSize: '15px', color: INK }}>{money(s.open_balance)}</span>
-                        )}
-                      </div>
-                    </div>
-                  </button>
-                )
-              })}
-            </>
+            <PrimalKrispStoresTab
+              billingState={billingState}
+              dispatch={dispatchBilling}
+              card={card}
+              lbl={lbl}
+              big={big}
+              btn={btn}
+              inp={inp}
+              KPI={KPI}
+              Row={Row}
+              period={period}
+              storeKpis={storeKpis}
+              listFilter={listFilter}
+              setListFilter={setListFilter}
+              listFilterLabel={listFilterLabel}
+              FilterChip={FilterChip}
+              regions={regions}
+              regionFilter={regionFilter}
+              setRegionFilter={setRegionFilter}
+              storeSearch={storeSearch}
+              setStoreSearch={setStoreSearch}
+              storeSort={storeSort}
+              setStoreSort={setStoreSort}
+              SortBtn={SortBtn}
+            />
           )}
 
           {tab === 'subscriptions' && (
@@ -955,81 +762,12 @@ export default function PrimalKrispPortal() {
           )}
         </main>
 
-        {(drawerStore || drawerProduct) && (
+        {drawerProduct && (
           <div
             className="pk-drawer-backdrop"
             role="presentation"
-            onClick={() => {
-              setDrawerStore(null)
-              setDrawerProduct(null)
-            }}
+            onClick={() => setDrawerProduct(null)}
           />
-        )}
-
-        {drawerStore && (
-          <aside className="pk-drawer" aria-label="Store detail">
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', padding: '18px 18px 12px', borderBottom: `1px solid ${BORDER}` }}>
-              <div>
-                <div style={{ ...big, fontSize: '20px', color: INK }}>{drawerStore.name}</div>
-                <div style={{ fontSize: '13px', color: MUTED, marginTop: '4px' }}>{drawerStore.city}</div>
-              </div>
-              <button
-                type="button"
-                aria-label="Close"
-                onClick={() => setDrawerStore(null)}
-                style={{
-                  border: 'none',
-                  background: CREAM,
-                  borderRadius: '8px',
-                  width: '40px',
-                  height: '40px',
-                  cursor: 'pointer',
-                  fontSize: '22px',
-                  lineHeight: 1,
-                  color: INK,
-                }}
-              >
-                ×
-              </button>
-            </div>
-            <div style={{ flex: 1, overflowY: 'auto', padding: '12px 18px 24px' }}>
-              <div style={{ ...lbl, marginBottom: '10px' }}>Invoices</div>
-              <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '13px' }}>
-                <thead>
-                  <tr style={{ borderBottom: `1px solid ${BORDER}` }}>
-                    {['Invoice', 'Date', 'Amount', 'Status', 'Days'].map((h) => (
-                      <th key={h} style={{ ...lbl, textAlign: h === 'Invoice' ? 'left' : 'right', padding: '8px 4px', fontSize: '10px' }}>
-                        {h}
-                      </th>
-                    ))}
-                  </tr>
-                </thead>
-                <tbody>
-                  {storeDrawerInvoices.map((inv) => (
-                    <tr key={inv.invoice} style={{ borderBottom: `1px solid ${CREAM}` }}>
-                      <td style={{ padding: '10px 4px', fontWeight: 600 }}>{inv.invoice}</td>
-                      <td style={{ padding: '10px 4px', textAlign: 'right', fontFamily: MONO, fontSize: '12px' }}>{fmtD(inv.issued)}</td>
-                      <td style={{ padding: '10px 4px', textAlign: 'right', fontFamily: MONO }}>{money(inv.amount)}</td>
-                      <td style={{ padding: '10px 4px', textAlign: 'right', fontSize: '12px', color: inv.status === 'Paid' ? GREEN : AMBER }}>
-                        {inv.status || 'Open'}
-                      </td>
-                      <td style={{ padding: '10px 4px', textAlign: 'right', fontFamily: MONO, fontSize: '12px' }}>
-                        {inv.status === 'Paid' ? '—' : inv.days_outstanding}
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-              <Row
-                l="Open balance"
-                v={money(drawerStore.sample.open_balance)}
-                bold
-                top
-                tieExpected={drawerStore.sample.open_balance}
-                tieActual={storeDrawerOpenSum}
-              />
-            </div>
-          </aside>
         )}
 
         {drawerProduct && productBreakdown && (

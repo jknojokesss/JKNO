@@ -1044,24 +1044,37 @@
        "issued": "2026-09-22",
        "amount": 639.36,
        "days_outstanding": 8,
-       "status": "Open"
+       "status": "Open",
+       "due": "2026-10-22",
+       "terms": "Net 30",
+       "bags": 72
       },
       {
        "invoice": "PK-1042",
        "issued": "2026-09-04",
        "amount": 213.12,
        "days_outstanding": 26,
-       "status": "Open"
+       "status": "Open",
+       "due": "2026-10-04",
+       "terms": "Net 30",
+       "bags": 24
       },
       {
        "invoice": "PK-P1000",
        "issued": "2026-08-15",
        "amount": 106.56,
        "days_outstanding": 0,
-       "status": "Paid"
+       "status": "Paid",
+       "due": "2026-09-14",
+       "terms": "Net 30",
+       "bags": 12
       }
      ],
-     "bags_sold_week": 395
+     "bags_sold_week": 395,
+     "shelf_sent": 60,
+     "shelf_on_shelf": 28,
+     "shelf_returned": 2,
+     "bags_billed": 30
     }
    },
    {
@@ -1108,24 +1121,37 @@
        "issued": "2026-08-15",
        "amount": 213.12,
        "days_outstanding": 0,
-       "status": "Paid"
+       "status": "Paid",
+       "due": "2026-09-14",
+       "terms": "Net 30",
+       "bags": 24
       },
       {
        "invoice": "PK-1045",
        "issued": "2026-08-13",
        "amount": 426.24,
        "days_outstanding": 48,
-       "status": "Open"
+       "status": "Open",
+       "due": "2026-09-12",
+       "terms": "Net 30",
+       "bags": 48
       },
       {
        "invoice": "PK-1046",
        "issued": "2026-07-29",
        "amount": 639.36,
        "days_outstanding": 63,
-       "status": "Open"
+       "status": "Open",
+       "due": "2026-08-28",
+       "terms": "Net 30",
+       "bags": 72
       }
      ],
-     "bags_sold_week": 13
+     "bags_sold_week": 13,
+     "shelf_sent": 60,
+     "shelf_on_shelf": 30,
+     "shelf_returned": 0,
+     "bags_billed": 144
     }
    },
    {
@@ -1159,10 +1185,17 @@
        "issued": "2026-08-15",
        "amount": 310.32,
        "days_outstanding": 0,
-       "status": "Paid"
+       "status": "Paid",
+       "due": "2026-09-14",
+       "terms": "Net 30",
+       "bags": 36
       }
      ],
-     "bags_sold_week": 12
+     "bags_sold_week": 12,
+     "shelf_sent": 48,
+     "shelf_on_shelf": 34,
+     "shelf_returned": 0,
+     "bags_billed": 36
     }
    },
    {
@@ -1204,17 +1237,27 @@
        "issued": "2026-09-22",
        "amount": 319.68,
        "days_outstanding": 8,
-       "status": "Open"
+       "status": "Open",
+       "due": "2026-10-22",
+       "terms": "Net 30",
+       "bags": 36
       },
       {
        "invoice": "PK-P1003",
        "issued": "2026-08-15",
        "amount": 426.24,
        "days_outstanding": 0,
-       "status": "Paid"
+       "status": "Paid",
+       "due": "2026-09-14",
+       "terms": "Net 30",
+       "bags": 48
       }
      ],
-     "bags_sold_week": 7
+     "bags_sold_week": 7,
+     "shelf_sent": 36,
+     "shelf_on_shelf": 12,
+     "shelf_returned": 2,
+     "bags_billed": 22
     }
    },
    {
@@ -1248,10 +1291,17 @@
        "issued": "2026-08-15",
        "amount": 532.8,
        "days_outstanding": 0,
-       "status": "Paid"
+       "status": "Paid",
+       "due": "2026-09-14",
+       "terms": "Net 30",
+       "bags": 60
       }
      ],
-     "bags_sold_week": 6
+     "bags_sold_week": 6,
+     "shelf_sent": 36,
+     "shelf_on_shelf": 5,
+     "shelf_returned": 0,
+     "bags_billed": 60
     }
    },
    {
@@ -1292,17 +1342,27 @@
        "issued": "2026-08-20",
        "amount": 426.24,
        "days_outstanding": 41,
-       "status": "Open"
+       "status": "Open",
+       "due": "2026-09-19",
+       "terms": "Net 30",
+       "bags": 48
       },
       {
        "invoice": "PK-P1005",
        "issued": "2026-08-15",
        "amount": 106.56,
        "days_outstanding": 0,
-       "status": "Paid"
+       "status": "Paid",
+       "due": "2026-09-14",
+       "terms": "Net 30",
+       "bags": 12
       }
      ],
-     "bags_sold_week": 13
+     "bags_sold_week": 13,
+     "shelf_sent": 60,
+     "shelf_on_shelf": 39,
+     "shelf_returned": 0,
+     "bags_billed": 60
     }
    },
    {
@@ -1344,17 +1404,27 @@
        "issued": "2026-09-18",
        "amount": 328.32,
        "days_outstanding": 12,
-       "status": "Open"
+       "status": "Open",
+       "due": "2026-10-18",
+       "terms": "Net 30",
+       "bags": 36
       },
       {
        "invoice": "PK-P1006",
        "issued": "2026-08-15",
        "amount": 218.88,
        "days_outstanding": 0,
-       "status": "Paid"
+       "status": "Paid",
+       "due": "2026-09-14",
+       "terms": "Net 30",
+       "bags": 24
       }
      ],
-     "bags_sold_week": 21
+     "bags_sold_week": 21,
+     "shelf_sent": 96,
+     "shelf_on_shelf": 26,
+     "shelf_returned": 3,
+     "bags_billed": 60
     }
    },
    {
@@ -1395,17 +1465,27 @@
        "issued": "2026-08-15",
        "amount": 319.68,
        "days_outstanding": 0,
-       "status": "Paid"
+       "status": "Paid",
+       "due": "2026-09-14",
+       "terms": "Net 30",
+       "bags": 36
       },
       {
        "invoice": "PK-1063",
        "issued": "2026-07-20",
        "amount": 639.36,
        "days_outstanding": 72,
-       "status": "Open"
+       "status": "Open",
+       "due": "2026-08-19",
+       "terms": "Net 30",
+       "bags": 72
       }
      ],
-     "bags_sold_week": 23
+     "bags_sold_week": 23,
+     "shelf_sent": 96,
+     "shelf_on_shelf": 52,
+     "shelf_returned": 0,
+     "bags_billed": 108
     }
    },
    {
@@ -1447,17 +1527,27 @@
        "issued": "2026-08-15",
        "amount": 426.24,
        "days_outstanding": 0,
-       "status": "Paid"
+       "status": "Paid",
+       "due": "2026-09-14",
+       "terms": "Net 30",
+       "bags": 48
       },
       {
        "invoice": "PK-1067",
        "issued": "2026-07-20",
        "amount": 639.36,
        "days_outstanding": 72,
-       "status": "Open"
+       "status": "Open",
+       "due": "2026-08-19",
+       "terms": "Net 30",
+       "bags": 72
       }
      ],
-     "bags_sold_week": 7
+     "bags_sold_week": 7,
+     "shelf_sent": 36,
+     "shelf_on_shelf": 17,
+     "shelf_returned": 3,
+     "bags_billed": 16
     }
    },
    {
@@ -1498,17 +1588,27 @@
        "issued": "2026-08-28",
        "amount": 639.36,
        "days_outstanding": 33,
-       "status": "Open"
+       "status": "Open",
+       "due": "2026-09-27",
+       "terms": "Net 30",
+       "bags": 72
       },
       {
        "invoice": "PK-P1009",
        "issued": "2026-08-15",
        "amount": 532.8,
        "days_outstanding": 0,
-       "status": "Paid"
+       "status": "Paid",
+       "due": "2026-09-14",
+       "terms": "Net 30",
+       "bags": 60
       }
      ],
-     "bags_sold_week": 6
+     "bags_sold_week": 6,
+     "shelf_sent": 24,
+     "shelf_on_shelf": 24,
+     "shelf_returned": 0,
+     "bags_billed": 132
     }
    },
    {
@@ -1550,17 +1650,27 @@
        "issued": "2026-09-12",
        "amount": 525.6,
        "days_outstanding": 18,
-       "status": "Open"
+       "status": "Open",
+       "due": "2026-10-12",
+       "terms": "Net 30",
+       "bags": 60
       },
       {
        "invoice": "PK-P1010",
        "issued": "2026-08-15",
        "amount": 105.12,
        "days_outstanding": 0,
-       "status": "Paid"
+       "status": "Paid",
+       "due": "2026-09-14",
+       "terms": "Net 30",
+       "bags": 12
       }
      ],
-     "bags_sold_week": 11
+     "bags_sold_week": 11,
+     "shelf_sent": 48,
+     "shelf_on_shelf": 22,
+     "shelf_returned": 0,
+     "bags_billed": 72
     }
    },
    {
@@ -1608,24 +1718,37 @@
        "issued": "2026-09-20",
        "amount": 426.24,
        "days_outstanding": 10,
-       "status": "Open"
+       "status": "Open",
+       "due": "2026-10-20",
+       "terms": "Net 30",
+       "bags": 48
       },
       {
        "invoice": "PK-1092",
        "issued": "2026-09-05",
        "amount": 213.12,
        "days_outstanding": 25,
-       "status": "Open"
+       "status": "Open",
+       "due": "2026-10-05",
+       "terms": "Net 30",
+       "bags": 24
       },
       {
        "invoice": "PK-P1011",
        "issued": "2026-08-15",
        "amount": 213.12,
        "days_outstanding": 0,
-       "status": "Paid"
+       "status": "Paid",
+       "due": "2026-09-14",
+       "terms": "Net 30",
+       "bags": 24
       }
      ],
-     "bags_sold_week": 12
+     "bags_sold_week": 12,
+     "shelf_sent": 60,
+     "shelf_on_shelf": 26,
+     "shelf_returned": 1,
+     "bags_billed": 33
     }
    },
    {
@@ -1667,17 +1790,27 @@
        "issued": "2026-08-28",
        "amount": 894.72,
        "days_outstanding": 33,
-       "status": "Open"
+       "status": "Open",
+       "due": "2026-09-27",
+       "terms": "Net 30",
+       "bags": 105
       },
       {
        "invoice": "PK-P1012",
        "issued": "2026-08-15",
        "amount": 306.72,
        "days_outstanding": 0,
-       "status": "Paid"
+       "status": "Paid",
+       "due": "2026-09-14",
+       "terms": "Net 30",
+       "bags": 36
       }
      ],
-     "bags_sold_week": 16
+     "bags_sold_week": 16,
+     "shelf_sent": 96,
+     "shelf_on_shelf": 40,
+     "shelf_returned": 0,
+     "bags_billed": 141
     }
    },
    {
@@ -1725,24 +1858,37 @@
        "issued": "2026-09-18",
        "amount": 426.24,
        "days_outstanding": 12,
-       "status": "Open"
+       "status": "Open",
+       "due": "2026-10-18",
+       "terms": "Net 30",
+       "bags": 48
       },
       {
        "invoice": "PK-P1013",
        "issued": "2026-08-15",
        "amount": 426.24,
        "days_outstanding": 0,
-       "status": "Paid"
+       "status": "Paid",
+       "due": "2026-09-14",
+       "terms": "Net 30",
+       "bags": 48
       },
       {
        "invoice": "PK-1098",
        "issued": "2026-07-29",
        "amount": 639.36,
        "days_outstanding": 63,
-       "status": "Open"
+       "status": "Open",
+       "due": "2026-08-28",
+       "terms": "Net 30",
+       "bags": 72
       }
      ],
-     "bags_sold_week": 13
+     "bags_sold_week": 13,
+     "shelf_sent": 72,
+     "shelf_on_shelf": 31,
+     "shelf_returned": 0,
+     "bags_billed": 168
     }
    },
    {
@@ -1784,17 +1930,27 @@
        "issued": "2026-09-22",
        "amount": 271.56,
        "days_outstanding": 8,
-       "status": "Open"
+       "status": "Open",
+       "due": "2026-10-22",
+       "terms": "Net 30",
+       "bags": 31
       },
       {
        "invoice": "PK-P1014",
        "issued": "2026-08-15",
        "amount": 525.6,
        "days_outstanding": 0,
-       "status": "Paid"
+       "status": "Paid",
+       "due": "2026-09-14",
+       "terms": "Net 30",
+       "bags": 60
       }
      ],
-     "bags_sold_week": 9
+     "bags_sold_week": 9,
+     "shelf_sent": 36,
+     "shelf_on_shelf": 19,
+     "shelf_returned": 0,
+     "bags_billed": 17
     }
    }
   ]

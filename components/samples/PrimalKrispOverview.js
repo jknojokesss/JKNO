@@ -38,6 +38,7 @@ export default function PrimalKrispOverview({
   channelRowsPeriod,
   goTab,
   goStoresFilter,
+  openStoreBalance,
 }) {
   const [chartsReady, setChartsReady] = useState(false)
   useEffect(() => {
@@ -111,7 +112,7 @@ export default function PrimalKrispOverview({
         <KPI k="Active subscriptions" v={DATA.overview.active_subscriptions} accent={GREEN} onClick={() => goTab('subscriptions')} />
         <KPI
           k="Owed by stores"
-          v={money0(DATA.overview.open_store_balance)}
+          v={money0(openStoreBalance ?? DATA.overview.open_store_balance)}
           accent={AMBER}
           onClick={() => goStoresFilter('open_balance')}
         />
