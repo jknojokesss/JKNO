@@ -11,7 +11,7 @@ export default function WhatWeDo() {
       <PageHero
         kicker="What we build"
         title="Built for how you actually sell."
-        lead="Not a template off the shelf — your QuickBooks, register, and vendors wired into screens you will open on Monday morning."
+        lead="Not a template off the shelf: your QuickBooks, register, and vendors wired into screens you will open on Monday morning."
         align="center"
       />
 
@@ -19,7 +19,7 @@ export default function WhatWeDo() {
         <div className="m-wrap">
           <h2 className="m-h2" style={{ marginBottom: '12px' }}>Common builds</h2>
           <p className="m-lead" style={{ maxWidth: '58ch', marginBottom: '24px' }}>
-            Multi-entity owners start with the portfolio hub; everyone else picks a trade shape. The portal is custom; the pipe is the same — QuickBooks in the middle, sync at night, your login on top.
+            Multi-entity owners start with the portfolio hub; everyone else picks a trade shape. The portal is custom; the pipe is the same: QuickBooks in the middle, sync at night, your login on top.
           </p>
           <div className="m-demo-grid m-demo-grid--starters">
             {SERVICE_PACKAGES.map((p) => (

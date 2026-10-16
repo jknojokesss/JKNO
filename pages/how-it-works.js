@@ -9,7 +9,7 @@ const HOW = [
   },
   {
     title: 'Wire-up',
-    body: 'QuickBooks, register, vendors, bank — whatever you run on. I write the connections; they sync every night.',
+    body: 'QuickBooks, register, vendors, bank: whatever you run on. I write the connections; they sync every night.',
   },
   {
     title: 'Go live',
@@ -17,7 +17,7 @@ const HOW = [
   },
   {
     title: 'After launch',
-    body: 'Sync keeps running. Optional support for month-end and bookkeeping if you want it — your bookkeeper can stay in the picture either way.',
+    body: 'Sync keeps running. Optional support for month-end and bookkeeping if you want it. Your bookkeeper can stay in the picture either way.',
   },
 ]
 
@@ -28,7 +28,7 @@ export default function HowItWorks() {
       <PageHero
         kicker="How it works"
         title="You talk. I build. You run."
-        lead="Thirty minutes to hear what would make your week easier — then a portal on your real data, tuned until you trust the numbers."
+        lead="Thirty minutes to hear what would make your week easier, then a portal on your real data, tuned until you trust the numbers."
         align="center"
       />
 

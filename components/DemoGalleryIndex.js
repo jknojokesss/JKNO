@@ -27,12 +27,12 @@ export default function DemoGalleryIndex() {
       >
         <div className="m-wrap m-ship-intro__inner">
           <p className="m-ship-hook">
-            You run the shop — <strong>I wire the numbers</strong> into one login you will actually open. Bookkeeper
+            You run the shop: <strong>I wire the numbers</strong> into one login you will actually open. Bookkeeper
             optional; <strong>your business, clearer every week.</strong>
           </p>
           <ul className="m-ship-chain" aria-label="How a build ships">
             <li>
-              <span className="m-ship-chain__verb">Kickoff</span> 30 min — what you sell, what you want on screen
+              <span className="m-ship-chain__verb">Kickoff</span> 30 min: what you sell, what you want on screen
             </li>
             <li>
               <span className="m-ship-chain__verb">Build</span> connect QuickBooks + your tools, nightly sync
@@ -62,7 +62,7 @@ export default function DemoGalleryIndex() {
         <div className="m-wrap">
           <p className="m-kicker" style={{ marginBottom: 12 }}>Start here</p>
           <p className="m-about-p" style={{ marginTop: 0, marginBottom: 16, maxWidth: '42rem' }}>
-            Pick the question that keeps you up at night — margin, cash, who owes you. One shop or several businesses;
+            Pick the question that keeps you up at night: margin, cash, who owes you. One shop or several businesses;
             each sample is a real screen layout, not a slide deck.
           </p>
           <div className="m-demo-grid m-demo-grid--gallery m-demo-grid--starters">
@@ -122,7 +122,7 @@ export default function DemoGalleryIndex() {
       <section className="m-cta-slab">
         <div className="m-wrap m-cta-slab__inner">
           <h2 className="m-h2 m-cta-slab__title">Want this on your name and your data?</h2>
-          <p className="m-cta-slab__lead">Describe the screen in your head — I&rsquo;ll show you the closest sample or sketch yours first.</p>
+          <p className="m-cta-slab__lead">Describe the screen in your head. I&rsquo;ll show you the closest sample or sketch yours first.</p>
           <div className="m-cta-slab__actions">
             <button type="button" className="m-btn m-btn--primary m-btn--pop" onClick={() => router.push('/#contact')}>Tell me what you need</button>
             <a href={BOOKING_URL} target="_blank" rel="noopener noreferrer" className="m-btn m-btn--secondary m-btn--pop-dark">Book a call</a>

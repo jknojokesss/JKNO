@@ -7,7 +7,7 @@ import { painLineForDemo } from '../lib/homeSamplePains'
 import DemoGalleryCard from './DemoGalleryCard'
 
 const START_STEPS = [
-  'Quick call — what you sell and what you want on screen.',
+  'Quick call: what you sell and what you want on screen.',
   'I connect QuickBooks and your tools, then build your portal.',
   'You sign in on real data; we fix what is off.',
 ]
@@ -54,7 +54,7 @@ export default function HomeLanding({
           JK<span className="m-jk-home__mark-dot">.</span>
         </p>
         <h1 className="m-jk-home__h1">
-          Custom portals for owners — your numbers, your login.
+          Custom portals for owners: your numbers, your login.
         </h1>
         <p className="m-jk-home__lead">
           Built for how you sell. Keep your bookkeeper, or have me handle the books.
@@ -82,7 +82,7 @@ export default function HomeLanding({
         <section className="m-jk-home__panel m-jk-home__panel--samples" id="samples">
           <h2 className="m-jk-story__title">Sample portals</h2>
           <p className="m-jk-story__body m-jk-story__body--tight">
-            Fictitious company names. No password — click one and look around.
+            Fictitious company names. No password: click one and look around.
           </p>
           <div className="m-jk-home__demos m-jk-home__demos--lead m-jk-stagger-cards">
             {HERO_SAMPLE_BARS.map((p) => (
@@ -110,7 +110,7 @@ export default function HomeLanding({
               <div className="m-jk-home__multi-copy">
                 <h3>Own more than one business?</h3>
                 <p>
-                  See the multi-business sample — a hub with an Operations Center plus three trade portals you can open
+                  See the multi-business sample: a hub with an Operations Center plus three trade portals you can open
                   (fictitious data, same screens we ship on this site).
                 </p>
                 <a href="/operations-portal">Open multi-business sample →</a>
@@ -128,9 +128,9 @@ export default function HomeLanding({
         </section>
 
         <section className="m-jk-home__panel m-jk-home__panel--offer" id="offer">
-          <h2 className="m-jk-story__title">Portal first — books optional</h2>
+          <h2 className="m-jk-story__title">Portal first, books optional</h2>
           <p className="m-jk-story__body">
-            Keep your bookkeeper or bring me the books — either way you get a portal built on your numbers. QuickBooks stays
+            Keep your bookkeeper or bring me the books. Either way you get a portal built on your numbers. QuickBooks stays
             the books; the portal is where you actually look. You get me, not a ticket queue.
           </p>
           <ol className="m-jk-steps">
@@ -150,7 +150,7 @@ export default function HomeLanding({
         <section className="m-jk-home__panel m-jk-home__panel--form" id="contact">
           <h2>Tell me what you need</h2>
           <p className="m-jk-home__lede">
-            Your trade and the screen you wish you had — I&rsquo;ll send the closest sample or point you at{' '}
+            Your trade and the screen you wish you had. I&rsquo;ll send the closest sample or point you at{' '}
             <a href={BOOKING_URL} target="_blank" rel="noopener noreferrer">
               a call
             </a>

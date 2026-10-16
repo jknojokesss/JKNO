@@ -3,7 +3,7 @@ import MarketingShell from './MarketingShell'
 export default function LegalDoc({ title, sections }) {
   return (
     <MarketingShell
-      title={`${title} — JK No Jokes Financials`}
+      title={`${title} | JK No Jokes Financials`}
       description={`${title} for JK No Jokes Financials`}
     >
       <main className="m-legal-doc">
@@ -47,7 +47,7 @@ export default function LegalDoc({ title, sections }) {
                     {s.boldItems.map((b) => (
                       <li key={b.label} className="m-legal-doc__li">
                         <strong>{b.label}</strong>
-                        {' — '}
+                        {': '}
                         {b.desc ?? b.text}
                       </li>
                     ))}
