@@ -67,13 +67,28 @@ export const SCHEDULE_MONTH_KEYS = ['2026-10', '2026-11', '2026-12']
 
 export function formatMoney(n) {
   const v = Number(n) || 0
-  return (
-    '$' +
-    v.toLocaleString('en-US', {
-      minimumFractionDigits: 2,
-      maximumFractionDigits: 2,
-    })
-  )
+  const abs = Math.abs(v).toLocaleString('en-US', {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  })
+  if (v < 0) return `-$${abs}`
+  return `$${abs}`
+}
+
+/** Bank balance input display (no currency symbol). */
+export function formatBalanceField(n) {
+  const v = Number(n) || 0
+  return v.toLocaleString('en-US', {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  })
+}
+
+export function parseBalanceInput(raw) {
+  const cleaned = String(raw).replace(/,/g, '').trim()
+  if (!cleaned) return 0
+  const n = parseFloat(cleaned)
+  return Number.isFinite(n) ? n : 0
 }
 
 export function formatMoneyCompact(n) {

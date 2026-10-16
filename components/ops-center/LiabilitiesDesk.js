@@ -401,15 +401,17 @@ export default function LiabilitiesDesk({ cashTotal }) {
           </div>
         </div>
         <div className="grid grid-cols-2 border-t border-white/10">
-          <div className="border-r border-white/15 px-4 py-4 sm:px-5">
+          <div className="min-w-0 border-r border-white/15 px-4 py-4 sm:px-5">
             <p className="ops-eyebrow-navy">CC SCHEDULE</p>
             <p className="ops-heading mt-1 text-3xl tabular-nums sm:text-4xl" style={{ color: GOLD_ON_NAVY }}>
               {formatMoney(ccTotal)}
             </p>
           </div>
-          <div className="px-4 py-4 text-right sm:px-5">
+          <div className="min-w-0 overflow-hidden px-4 py-4 text-right sm:px-5">
             <p className="ops-eyebrow-navy">SHORT-TERM LOANS (STL)</p>
-            <p className="ops-heading mt-1 text-3xl tabular-nums text-white sm:text-4xl">{formatMoney(stl)}</p>
+            <p className="ops-heading mt-1 text-3xl tabular-nums text-white max-sm:text-2xl max-sm:leading-none sm:text-4xl">
+              {formatMoney(stl)}
+            </p>
           </div>
         </div>
         <div className="flex flex-wrap gap-1 border-t border-white/10 px-3 py-2 sm:px-4">

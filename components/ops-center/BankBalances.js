@@ -1,10 +1,19 @@
 import { useEffect, useMemo, useState } from 'react'
 import { OPS_SAMPLE } from '../../data/ops-center-sample.js'
-import { formatMoney, NAVY_GRADIENT, GOLD_ON_NAVY, useRefreshSpin } from './utils'
+import {
+  formatMoney,
+  formatBalanceField,
+  parseBalanceInput,
+  NAVY_GRADIENT,
+  GOLD_ON_NAVY,
+  useRefreshSpin,
+} from './utils'
 import { IconRefresh } from './icons'
 
 export default function BankBalances({ onTotalChange }) {
   const [balances, setBalances] = useState(() => OPS_SAMPLE.banks.map((b) => b.balance))
+  const [focusedIndex, setFocusedIndex] = useState(null)
+  const [editDraft, setEditDraft] = useState('')
   const [spinning, setSpinning] = useState(false)
   const [saving, setSaving] = useState(false)
   const refresh = useRefreshSpin(setSpinning)
@@ -17,6 +26,7 @@ export default function BankBalances({ onTotalChange }) {
 
   const handleReload = () => {
     refresh()
+    setFocusedIndex(null)
     setBalances(OPS_SAMPLE.banks.map((b) => b.balance))
   }
 
@@ -54,14 +64,20 @@ export default function BankBalances({ onTotalChange }) {
             <label key={bank.name} className="block">
               <span className="mb-1 block text-xs font-semibold text-[#5c7280]">{bank.name}</span>
               <input
-                type="number"
-                step="0.01"
+                type="text"
+                inputMode="decimal"
                 className="ops-input w-full tabular-nums"
-                value={balances[i]}
-                onChange={(e) => {
+                value={focusedIndex === i ? editDraft : formatBalanceField(balances[i])}
+                onFocus={() => {
+                  setFocusedIndex(i)
+                  setEditDraft(String(balances[i]))
+                }}
+                onChange={(e) => setEditDraft(e.target.value)}
+                onBlur={() => {
                   const next = [...balances]
-                  next[i] = parseFloat(e.target.value) || 0
+                  next[i] = parseBalanceInput(editDraft)
                   setBalances(next)
+                  setFocusedIndex(null)
                 }}
               />
             </label>
