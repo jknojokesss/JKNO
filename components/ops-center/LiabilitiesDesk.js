@@ -9,6 +9,8 @@ import {
   monthBuckets,
   cardCounts,
   stlTotal,
+  stlMonthlyTotal,
+  stlEarliestPayoffLabel,
   poTotal,
   ccScheduleTotal,
   sortPayables,
@@ -29,10 +31,10 @@ import {
   IconArrowDownAZ,
   IconUpload,
   IconFilter,
-  IconLoan,
   IconOutflow,
 } from './icons'
 import { PayableRow, CompactPayableRow } from './PayableCells'
+import ShortTermLoansSection from './ShortTermLoans'
 
 const VIEWS = [
   { id: 'sheet', label: 'Sheet', Icon: IconLayoutGrid },
@@ -226,53 +228,27 @@ function LoanRunway({ cashTotal }) {
   const loansPayables = stl
   const totalOut = loansPayables + monthOut.reduce((s, m) => s + m.amount, 0) + po
   const shortage = totalOut - cashTotal
+  const monthlyLoans = stlMonthlyTotal()
+  const earliestPayoff = stlEarliestPayoffLabel()
+
+  const statCells = [
+    { label: 'Loans net balance', value: formatMoney(stl) },
+    { label: 'Monthly loan payments', value: formatMoney(monthlyLoans) },
+    { label: 'Earliest payoff', value: earliestPayoff },
+  ]
 
   return (
     <div className="border-t border-[#c5d0d6]/40 bg-gradient-to-b from-[#e8eef1]/30 to-white px-3 py-4 sm:px-5 sm:py-5">
       <p className="ops-eyebrow mb-3 text-[10px] tracking-widest text-[#5c7280]">LOAN RUNWAY</p>
-      <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
-        <div className="ops-card overflow-hidden">
-          <div className="flex items-center gap-2 px-4 py-3 text-white" style={{ background: NAVY_GRADIENT }}>
-            <span className="flex size-8 items-center justify-center rounded-lg bg-white/12 ring-1 ring-white/20 text-[#e8c97a]">
-              <IconLoan />
-            </span>
-            <h3 className="ops-heading text-base font-semibold">Short-term loans</h3>
-          </div>
-          <div className="overflow-x-auto">
-            <table className="ops-table w-full min-w-[240px]">
-              <thead>
-                <tr className="bg-[#e8eef1]/80 text-[10px] font-semibold uppercase tracking-wide text-[#5c7280]">
-                  <th className="px-3 py-2 text-left">Lender</th>
-                  <th className="px-3 py-2 text-right">Amount</th>
-                  <th className="px-3 py-2 text-left">Due</th>
-                </tr>
-              </thead>
-              <tbody>
-                {OPS_SAMPLE.shortTermLoans.map((r) => (
-                  <tr key={r.lender} className="border-t border-[#c5d0d6]/30">
-                    <td className="px-3 py-2 text-sm font-medium text-[#2f4049]">{r.lender}</td>
-                    <td className="px-3 py-2 text-right text-sm tabular-nums">{formatMoney(r.amount)}</td>
-                    <td className="px-3 py-2 text-[13px] text-[#5c7280]">{r.due}</td>
-                  </tr>
-                ))}
-                <tr className="border-t-2 border-[#c5d0d6]/50 bg-[#e8eef1]/50 font-semibold">
-                  <td className="px-3 py-2 text-sm">Total</td>
-                  <td className="px-3 py-2 text-right text-sm tabular-nums">{formatMoney(stl)}</td>
-                  <td />
-                </tr>
-              </tbody>
-            </table>
-          </div>
-        </div>
-
-        <div className="ops-card overflow-hidden">
+      <div className="grid grid-cols-1 gap-4 lg:grid-cols-[1fr_minmax(12rem,16rem)]">
+        <div className="ops-card min-w-0 overflow-hidden">
           <div className="flex items-center gap-2 px-4 py-3 text-white" style={{ background: NAVY_GRADIENT }}>
             <span className="flex size-8 items-center justify-center rounded-lg bg-white/12 ring-1 ring-white/20 text-[#e8c97a]">
               <IconOutflow />
             </span>
             <h3 className="ops-heading text-base font-semibold">Amount going out</h3>
           </div>
-          <div className="overflow-x-auto">
+          <div className="max-w-full overflow-x-auto">
             <table className="ops-table w-full min-w-[240px]">
               <thead>
                 <tr className="bg-[#e8eef1]/80 text-[10px] font-semibold uppercase tracking-wide text-[#5c7280]">
@@ -315,6 +291,22 @@ function LoanRunway({ cashTotal }) {
               </tbody>
             </table>
           </div>
+        </div>
+
+        <div className="grid grid-cols-3 gap-2 lg:grid-cols-1 lg:gap-3">
+          {statCells.map((cell) => (
+            <div
+              key={cell.label}
+              className="rounded-xl border border-[#c5d0d6]/50 bg-white px-3 py-3 shadow-sm lg:px-4"
+            >
+              <p className="text-[10px] font-semibold uppercase leading-snug tracking-wide text-[#5c7280]">
+                {cell.label}
+              </p>
+              <p className="ops-heading mt-1 text-sm font-semibold tabular-nums text-[#2f4049] sm:text-base">
+                {cell.value}
+              </p>
+            </div>
+          ))}
         </div>
       </div>
     </div>
@@ -408,7 +400,7 @@ export default function LiabilitiesDesk({ cashTotal }) {
             </p>
           </div>
           <div className="min-w-0 overflow-hidden px-4 py-4 text-right sm:px-5">
-            <p className="ops-eyebrow-navy">SHORT-TERM LOANS (STL)</p>
+            <p className="ops-eyebrow-navy normal-case">Short-term loans</p>
             <p className="ops-heading mt-1 text-3xl tabular-nums text-white max-sm:text-2xl max-sm:leading-none sm:text-4xl">
               {formatMoney(stl)}
             </p>
@@ -603,6 +595,7 @@ export default function LiabilitiesDesk({ cashTotal }) {
         ) : null}
       </div>
 
+      <ShortTermLoansSection heroTotal={stl} />
       <LoanRunway cashTotal={cashTotal} />
     </section>
   )

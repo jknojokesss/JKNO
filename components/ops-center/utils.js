@@ -181,8 +181,60 @@ export function cardCounts(payables) {
   return [...map.entries()].sort((a, b) => a[0].localeCompare(b[0]))
 }
 
+export const STL_ENTITY_ORDER = ['Northgate', 'Bayline', 'Pinecrest', 'Harborview']
+
 export function stlTotal() {
-  return OPS_SAMPLE.shortTermLoans.reduce((s, r) => s + r.amount, 0)
+  return OPS_SAMPLE.shortTermLoans.reduce((s, r) => s + r.balance, 0)
+}
+
+export function stlOriginalTotal() {
+  return OPS_SAMPLE.shortTermLoans.reduce((s, r) => s + r.original, 0)
+}
+
+export function stlMonthlyTotal() {
+  return OPS_SAMPLE.shortTermLoans.reduce((s, r) => s + r.monthly, 0)
+}
+
+export function shortTermLoansByEntity() {
+  const map = new Map()
+  OPS_SAMPLE.shortTermLoans.forEach((loan) => {
+    if (!map.has(loan.entity)) map.set(loan.entity, [])
+    map.get(loan.entity).push(loan)
+  })
+  return STL_ENTITY_ORDER.filter((e) => map.has(e)).map((entity) => ({
+    entity,
+    loans: map.get(entity),
+    balance: map.get(entity).reduce((s, r) => s + r.balance, 0),
+  }))
+}
+
+export function stlPaidPercent(original, balance) {
+  if (original <= 0 || balance < 0) return null
+  return Math.round(((original - balance) / original) * 100)
+}
+
+export function fmtLoanDate(iso) {
+  if (!iso) return '—'
+  return new Date(`${iso}T12:00:00`).toLocaleDateString('en-US', {
+    month: 'short',
+    day: 'numeric',
+    year: 'numeric',
+  })
+}
+
+export function fmtLoanPayoff(iso) {
+  if (!iso) return '—'
+  return new Date(`${iso}T12:00:00`).toLocaleDateString('en-US', {
+    month: 'short',
+    year: 'numeric',
+  })
+}
+
+export function stlEarliestPayoffLabel() {
+  const dates = OPS_SAMPLE.shortTermLoans.map((r) => r.payoff).filter(Boolean)
+  if (!dates.length) return '—'
+  dates.sort()
+  return fmtLoanPayoff(dates[0])
 }
 
 export function poTotal() {
