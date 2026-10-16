@@ -9,7 +9,7 @@ export default function About() {
       <PageHero
         kicker="About"
         title="I build the portal and keep the books."
-        lead="I build the login owners wish they had — QuickBooks and your real tools, one screen that matches how you sell."
+        lead="I build the login owners wish they had: QuickBooks and your real tools, one screen that matches how you sell."
         align="center"
       />
 
@@ -31,17 +31,17 @@ export default function About() {
             You get me, not a ticket queue. Nothing goes live until it matches QuickBooks.
           </p>
           <p className="m-about-p">
-            Background is shop-floor finance — tire and auto, import, property, consignment — wired to QuickBooks Online for
+            Background is shop-floor finance: tire and auto, import, property, consignment, wired to QuickBooks Online for
             real operating businesses. The samples on this site use fictitious names; live portals run on owner data with
             the same patterns.
           </p>
           <p className="m-about-p m-about-p--proof">
-            <strong>References:</strong> Ask on a call — I can point you at owners already on this stack. Public demos are
+            <strong>References:</strong> Ask on a call. I can point you at owners already on this stack. Public demos are
             fictitious; I don&rsquo;t post quotes here without permission.
           </p>
           <p className="m-about-p">
             <strong>How your data is handled:</strong> QuickBooks tokens and book data stay in a private Supabase project
-            with row-level security on client tables. Portal logins are scoped server-side to one company — a user cannot
+            with row-level security on client tables. Portal logins are scoped server-side to one company: a user cannot
             name or open another client&rsquo;s books. I use the service role only on the server for sync and admin tasks,
             never in the browser bundle.
           </p>

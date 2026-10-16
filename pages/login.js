@@ -146,7 +146,7 @@ export default function Login() {
         title="Sign in"
         lead={
           phase === 'email'
-            ? 'Enter your email — we\u2019ll send you to the right portal, or finish sign-in here when your books live on JK No Jokes.'
+            ? 'Enter your email. We\u2019ll send you to the right portal, or finish sign-in here when your books live on JK No Jokes.'
             : `Password for ${destinationLabel(destination)}.`
         }
         align="center"
@@ -236,7 +236,7 @@ export default function Login() {
               </p>
             ) : (
               <p className="m-login-card__foot">
-                Staff with admin access use the same email here — you&apos;ll be routed to admin after password.
+                Staff with admin access use the same email here. You&apos;ll be routed to admin after password.
               </p>
             )}
           </div>
