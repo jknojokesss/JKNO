@@ -1,4 +1,4 @@
-import { OPS_SAMPLE } from '../../data/ops-center-sample'
+import { OPS_SAMPLE } from '../../data/ops-center-sample.js'
 
 export const NAVY_GRADIENT = 'linear-gradient(135deg, #172f4d 0%, #1e3a5f 42%, #2a4d73 100%)'
 export const DESK_NAVY = '#1e3a5f'

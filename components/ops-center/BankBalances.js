@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react'
-import { OPS_SAMPLE } from '../../data/ops-center-sample'
+import { OPS_SAMPLE } from '../../data/ops-center-sample.js'
 import { formatMoney, NAVY_GRADIENT, GOLD_ON_NAVY, useRefreshSpin } from './utils'
 import { IconRefresh } from './icons'
 

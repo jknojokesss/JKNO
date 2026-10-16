@@ -72,4 +72,4 @@ export const OPS_SAMPLE = {
     { entity: 'Pinecrest', building: '240 Bay Rd (16 units)', rent: 27840.0, debtSvc: 7105.0, balance: 1067500.0, net: 20735.0 },
     { entity: 'Pinecrest', building: '9 Mill Ln (6 units)', rent: 9150.0, debtSvc: 0.0, balance: 0.0, net: 9150.0 },
   ],
-} as const
+}

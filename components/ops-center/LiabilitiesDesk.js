@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react'
-import { OPS_SAMPLE } from '../../data/ops-center-sample'
+import { OPS_SAMPLE } from '../../data/ops-center-sample.js'
 import {
   NAVY_GRADIENT,
   GOLD_ON_NAVY,
@@ -192,7 +192,7 @@ function CalendarDayDetail({ day, payables }) {
   return (
     <div className="rounded-xl border border-amber-400/40 bg-amber-50/40 p-4">
       <h4 className="ops-heading text-sm font-semibold text-[#2f4049]">Due {fmtDueGroupTitle(day)}</h4>
-      <p className="mb-3 text-xs text-[#5c7280]">{rows.length} payables · {formatMoney(sumPayables(rows).total)}</p>
+      <p className="mb-3 text-xs tabular-nums text-[#5c7280]">{formatMoney(sumPayables(rows).total)} · {rows.length} due</p>
       <div className="space-y-3">
         {[...byCard.entries()].map(([card, cardRows]) => {
           const sub = sumPayables(cardRows)
@@ -202,7 +202,7 @@ function CalendarDayDetail({ day, payables }) {
                 <span className="ops-heading text-xs font-semibold text-[#2f4049]">{card}</span>
                 <span className="text-xs font-semibold tabular-nums">{formatMoney(sub.total)}</span>
               </div>
-              <p className="text-[10px] text-[#5c7280]">{cardRows.length} charges on this card</p>
+              <p className="text-[10px] text-[#5c7280]">{cardRows.length} due</p>
               <div className="mt-2 border-l-2 border-amber-400/50 pl-2">
                 {cardRows.map((r, i) => <CompactPayableRow key={i} row={r} index={i} />)}
               </div>

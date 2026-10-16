@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import Link from 'next/link'
 import { Outfit } from 'next/font/google'
-import { OPS_SAMPLE } from '../../data/ops-center-sample'
+import { OPS_SAMPLE } from '../../data/ops-center-sample.js'
 import BankBalances from './BankBalances'
 import LiabilitiesDesk from './LiabilitiesDesk'
 import { FixedObligations, RentalBuildings } from './SimpleSections'
@@ -30,6 +30,8 @@ export default function OpsCenterDesk() {
           color: var(--ops-ink);
           min-height: calc(100vh - 52px);
           font-variant-numeric: tabular-nums lining-nums;
+          overflow-x: hidden;
+          max-width: 100%;
         }
         .ops-center-root .ops-heading { font-family: inherit; font-weight: 600; letter-spacing: -0.02em; }
         .ops-center-root .ops-eyebrow-navy {

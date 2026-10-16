@@ -1,4 +1,4 @@
-import { OPS_SAMPLE } from '../../data/ops-center-sample'
+import { OPS_SAMPLE } from '../../data/ops-center-sample.js'
 import { formatMoney } from './utils'
 
 function SimpleCard({ title, headers, rows, footerCols }) {
