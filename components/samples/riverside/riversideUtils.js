@@ -12,8 +12,9 @@ export const C = {
   neg: '#b0483a',
 }
 
-export const head = "'Barlow Semi Condensed', sans-serif"
 export const ui = "'DM Sans', system-ui, sans-serif"
+/** Headings use the same face as body (no condensed / display fonts). */
+export const head = ui
 export const mono = ui
 
 export const fmtC = (n) =>
@@ -49,7 +50,7 @@ export const hcell = (align = 'left') => ({
   color: C.muted,
   background: '#ECE7DD',
   fontWeight: 400,
-  letterSpacing: '0.1em',
+  letterSpacing: '0.06em',
   textTransform: 'uppercase',
   borderBottom: `1px solid ${C.hair}`,
   fontFamily: ui,

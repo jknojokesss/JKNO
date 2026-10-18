@@ -4,8 +4,7 @@ import { useRouter } from 'next/router'
 import DATA from '../../../data/riverside-tires.json'
 import { isDemoEmbedQuery } from '../../../lib/demoEmbed'
 import { PHONE_DEMO_MSG, isPhoneDemoUrl } from '../../../lib/phoneDemoPostMessage'
-import { DEMO_PORTAL_ROOT_CLASS, DEMO_RENDER_HINTS } from '../../../lib/demoFonts'
-import DemoFontLinks from '../../DemoFontLinks'
+import { DEMO_PORTAL_ROOT_CLASS } from '../../../lib/demoFonts'
 import SampleJkLogoLink from '../SampleJkLogoLink'
 import {
   THEME,
@@ -26,6 +25,12 @@ import {
   panel,
   NAV,
 } from './riversideUtils'
+
+const RT_FONT_LINK =
+  'https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&display=swap'
+const RT_RENDER_HINTS =
+  'html{-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale;text-rendering:optimizeLegibility}' +
+  `.${DEMO_PORTAL_ROOT_CLASS}{font-family:${ui};font-variant-numeric:tabular-nums;-webkit-font-smoothing:antialiased}`
 
 const BIZ = 'Riverside Tires'
 
@@ -290,7 +295,7 @@ function Pill({ on, onClick, children, disabled }) {
 function Kpi({ label, value, sub, color = C.ink, tie }) {
   return (
     <div className="rt-kpi-tile" style={{ flex: '1 1 150px', background: C.card, border: `1px solid ${C.hair}`, padding: '14px 16px' }}>
-      <div style={{ fontSize: 9, color: C.muted, letterSpacing: '0.15em', marginBottom: 6, fontFamily: ui, textTransform: 'uppercase' }}>{label}</div>
+      <div style={{ fontSize: 9, color: C.muted, letterSpacing: '0.06em', marginBottom: 6, fontFamily: ui, textTransform: 'uppercase' }}>{label}</div>
       <div style={{ fontSize: 18, color, fontWeight: 600, fontFamily: ui, lineHeight: 1.2, fontVariantNumeric: 'tabular-nums' }}>
         {value}
         {tie ? <TieMark ok /> : null}
@@ -315,7 +320,7 @@ function SubTabs({ active, onChange, tabs }) {
 function PanelTitle({ children, right }) {
   return (
     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', gap: 8, marginBottom: 12 }}>
-      <div style={{ fontFamily: head, fontSize: 13, fontWeight: 700, color: C.ink, letterSpacing: '0.08em', textTransform: 'uppercase' }}>{children}</div>
+      <div style={{ fontFamily: head, fontSize: 13, fontWeight: 700, color: C.ink, letterSpacing: '0.06em', textTransform: 'uppercase' }}>{children}</div>
       {right}
     </div>
   )
@@ -346,7 +351,7 @@ function BarChart({ items, fmt, label }) {
             <text x={x + w / 2} y={y - 5} textAnchor="middle" fontSize="9" fontFamily={mono} fill={last ? C.ink : C.sub}>
               {fmt(it.value)}
             </text>
-            <text x={x + w / 2} y={H - 8} textAnchor="middle" fontSize="9" fontFamily={ui} fill={C.muted} letterSpacing="0.08em">
+            <text x={x + w / 2} y={H - 8} textAnchor="middle" fontSize="9" fontFamily={ui} fill={C.muted} letterSpacing="0.06em">
               {it.label}
             </text>
           </g>
@@ -501,7 +506,7 @@ function LineChart({ items, fmt, label }) {
           <text x={p.x} y={p.y - 8} textAnchor="middle" fontSize="9" fontFamily={mono} fill={C.sub}>
             {fmt(p.value)}
           </text>
-          <text x={p.x} y={H - 8} textAnchor="middle" fontSize="9" fontFamily={ui} fill={C.muted} letterSpacing="0.08em">
+          <text x={p.x} y={H - 8} textAnchor="middle" fontSize="9" fontFamily={ui} fill={C.muted} letterSpacing="0.06em">
             {p.label}
           </text>
         </g>
@@ -605,7 +610,7 @@ function StmtHead({ compare, current, prior }) {
 
 function StmtSection({ children }) {
   return (
-    <div style={{ fontSize: 9, color: C.muted, letterSpacing: '0.14em', fontWeight: 700, padding: '16px 8px 4px', fontFamily: ui, textTransform: 'uppercase' }}>
+    <div style={{ fontSize: 9, color: C.muted, letterSpacing: '0.06em', fontWeight: 700, padding: '16px 8px 4px', fontFamily: ui, textTransform: 'uppercase' }}>
       {children}
     </div>
   )
@@ -1158,7 +1163,7 @@ function DashboardTab({ period, setPeriod, onOpenOrders, onOpenFinancials, onOpe
         onKeyDown={(e) => (e.key === 'Enter' || e.key === ' ') && (e.preventDefault(), onOpenOrders())}
       >
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 10, flexWrap: 'wrap', marginBottom: 12 }}>
-          <div style={{ fontFamily: head, fontSize: 13, fontWeight: 700, color: C.ink, letterSpacing: '0.08em', textTransform: 'uppercase' }}>
+          <div style={{ fontFamily: head, fontSize: 13, fontWeight: 700, color: C.ink, letterSpacing: '0.06em', textTransform: 'uppercase' }}>
             Open period · {monthName} · through {fmtDate(AS_OF).replace(/, \d{4}$/, '')}
           </div>
           <div style={{ display: 'flex', gap: 6 }} onClick={(e) => e.stopPropagation()} onKeyDown={(e) => e.stopPropagation()}>
@@ -1200,10 +1205,10 @@ function DashboardTab({ period, setPeriod, onOpenOrders, onOpenFinancials, onOpe
         </div>
       </div>
 
-      <div style={{ fontFamily: head, fontSize: 13, fontWeight: 600, color: C.red, letterSpacing: '0.18em', textTransform: 'uppercase' }}>
+      <div style={{ fontFamily: head, fontSize: 13, fontWeight: 600, color: C.red, letterSpacing: '0.06em', textTransform: 'uppercase' }}>
         Net profit · {monthYear(m)}
       </div>
-      <div className="rt-hero" style={{ fontFamily: head, fontSize: 72, fontWeight: 700, color: C.ink, lineHeight: 1, margin: '6px 0 16px' }}>
+      <div className="rt-hero" style={{ fontSize: 72, color: C.ink, lineHeight: 1, margin: '6px 0 16px' }}>
         {fmt0(m.profit)}
         <TieMark ok={netTie} />
       </div>
@@ -1410,7 +1415,7 @@ function SalesItemsTab({ seed }) {
             </button>
             {compareOn ? (
               <>
-                <span style={{ fontSize: 9, color: C.muted, letterSpacing: '0.12em' }}>COMPARE TO</span>
+                <span style={{ fontSize: 9, color: C.muted, letterSpacing: '0.06em' }}>COMPARE TO</span>
                 {MONTHS.map((m) => (
                   <Pill key={m.month} on={compareKey === m.month} onClick={() => setCompareKey(m.month)}>
                     {m.label}
@@ -1429,7 +1434,7 @@ function SalesItemsTab({ seed }) {
               style={{ ...selectStyle, flex: '1 1 160px', minWidth: 0 }}
             />
             <div className="rt-filters rt-filters-chips">
-              <span style={{ fontSize: 9, color: C.muted, letterSpacing: '0.12em' }}>SORT</span>
+              <span style={{ fontSize: 9, color: C.muted, letterSpacing: '0.06em' }}>SORT</span>
               {[
                 ['revenue', 'Revenue'],
                 ['units', 'Units'],
@@ -1518,7 +1523,7 @@ function SalesItemsTab({ seed }) {
       )}
       {view === 'month' && (
         <>
-          <div style={{ fontFamily: head, fontSize: 13, fontWeight: 700, color: C.ink, letterSpacing: '0.08em', textTransform: 'uppercase', marginBottom: 12 }}>Sales by month</div>
+          <div style={{ fontFamily: head, fontSize: 13, fontWeight: 700, color: C.ink, letterSpacing: '0.06em', textTransform: 'uppercase', marginBottom: 12 }}>Sales by month</div>
           <div style={{ background: C.card, border: `1px solid ${C.hair}`, padding: '8px 12px' }}>
             {MONTHS.map((x) => (
               <div key={x.month} style={{ display: 'grid', gridTemplateColumns: '88px 1fr auto', gap: 10, alignItems: 'center', padding: '8px 0', borderBottom: `1px solid ${C.line}` }}>
@@ -1723,7 +1728,7 @@ function OrdersTab({ initialPeriod }) {
           <Pill on={hideEst} onClick={() => setHideEst((v) => !v)}>
             Hide est.
           </Pill>
-          <span style={{ fontSize: 9, color: C.muted, letterSpacing: '0.12em' }}>SORT</span>
+          <span style={{ fontSize: 9, color: C.muted, letterSpacing: '0.06em' }}>SORT</span>
           {[
             ['date', 'Date'],
             ['profit', 'Profit'],
@@ -1866,7 +1871,7 @@ function StockTab() {
           style={{ ...selectStyle, flex: '1 1 140px', minWidth: 0 }}
         />
         <div className="rt-filters-scroll rt-stock-asof-row">
-          <label className="rt-filters-asof" style={{ display: 'flex', alignItems: 'center', gap: 8, fontFamily: ui, fontSize: 11, color: C.muted, letterSpacing: '0.1em', textTransform: 'uppercase', flexShrink: 0 }}>
+          <label className="rt-filters-asof" style={{ display: 'flex', alignItems: 'center', gap: 8, fontFamily: ui, fontSize: 11, color: C.muted, letterSpacing: '0.06em', textTransform: 'uppercase', flexShrink: 0 }}>
             As of
             <select value={asOf} onChange={(e) => setAsOf(e.target.value)} style={selectStyle} aria-label="Stock as of">
               {STOCK_MONTH_IDS.map((id) => (
@@ -1992,7 +1997,7 @@ function AskTab() {
           ))}
         </div>
         <div style={{ ...panel, padding: 0, marginBottom: 0 }}>
-          <div style={{ padding: '12px 14px', borderBottom: `1px solid ${C.hair}`, fontFamily: head, fontSize: 12, fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase' }}>Conversation</div>
+          <div style={{ padding: '12px 14px', borderBottom: `1px solid ${C.hair}`, fontFamily: head, fontSize: 12, fontWeight: 700, letterSpacing: '0.06em', textTransform: 'uppercase' }}>Conversation</div>
           <div className="rt-convo" aria-live="polite">
             {messages.length === 0 ? (
               <div style={{ color: C.muted, fontFamily: ui, fontSize: 13, textAlign: 'center', margin: 'auto' }}>Start with a question</div>
@@ -2061,8 +2066,8 @@ function Shell({ tab, setTab, embed, children }) {
               R
             </span>
             <div style={{ lineHeight: 1 }}>
-              <div style={{ fontSize: 20, fontWeight: 700, color: '#fff', letterSpacing: '0.04em', fontFamily: head }}>RIVERSIDE</div>
-              <div style={{ fontSize: 9, color: '#7C766B', letterSpacing: '0.3em', fontFamily: head, fontWeight: 500, marginTop: 3 }}>TIRE &amp; AUTO</div>
+              <div style={{ fontSize: 20, fontWeight: 600, color: '#fff', letterSpacing: '0.04em', fontFamily: ui }}>RIVERSIDE</div>
+              <div style={{ fontSize: 9, color: '#7C766B', letterSpacing: '0.06em', fontFamily: ui, fontWeight: 500, marginTop: 3 }}>TIRE &amp; AUTO</div>
             </div>
           </div>
         </div>
@@ -2094,7 +2099,7 @@ function Shell({ tab, setTab, embed, children }) {
 
 const PORTAL_CSS = `
   *{box-sizing:border-box;margin:0;padding:0}
-  ${DEMO_RENDER_HINTS}
+  ${RT_RENDER_HINTS}
   html.rt-phone-embed,body.rt-phone-embed{height:100%;overflow:hidden}
   body{background:${C.paper};color:${C.ink};font-family:${ui}}
   .rt-shell td,.rt-shell th,.rt-drill-td-amt{font-variant-numeric:tabular-nums}
@@ -2107,7 +2112,9 @@ const PORTAL_CSS = `
   .rt-foot{padding:12px 8px 0;border-top:1px solid ${THEME.border};margin-top:8px}
   .rt-main{flex:1;min-width:0;background:${C.paper};overflow-x:hidden;max-width:100%}
   .rt-status{display:flex;align-items:center;border-bottom:1px solid ${C.hair};padding:12px 30px;gap:12px;flex-wrap:wrap}
-  .rt-sample-line{font-family:${mono};font-size:11px;color:${C.muted};letter-spacing:.05em;line-height:1.3}
+  .rt-sample-line{font-family:${ui};font-size:11px;color:${C.muted};letter-spacing:.05em;line-height:1.3;font-weight:400}
+  .rt-hero{font-family:${ui};font-weight:600;font-variant-numeric:tabular-nums}
+  .rt-shell svg text{font-family:${ui};font-variant-numeric:tabular-nums}
   .rt-reg-kpis{display:flex;flex-wrap:wrap}
   .rt-reg-kpi{flex:1 1 120px;padding:10px 14px}
   .rt-reg-kpi:not(:first-child){border-left:1px solid ${C.line}}
@@ -2124,22 +2131,22 @@ const PORTAL_CSS = `
   .rt-mobilenav{display:none}
   .rt-order-cards,.rt-order-cards-total{display:none}
   .rt-order-card{background:${C.card};border:1px solid ${C.hair};padding:14px 16px}
-  .rt-order-card__top{display:flex;justify-content:space-between;gap:12px;margin-bottom:8px;font-family:${mono};font-size:11px;color:${C.muted}}
+  .rt-order-card__top{display:flex;justify-content:space-between;gap:12px;margin-bottom:8px;font-family:${ui};font-size:11px;color:${C.muted}}
   .rt-order-card__ticket{color:${C.ink};font-weight:600;white-space:nowrap}
   .rt-order-card__date{white-space:nowrap}
   .rt-order-card__item{font-size:14px;line-height:1.4;margin:0 0 12px;color:${C.ink}}
   .rt-order-card__nums{display:grid;grid-template-columns:1fr 1fr;gap:10px 16px;margin:0}
   .rt-order-card__nums dt{font-family:${ui};font-size:10px;color:${C.muted};text-transform:uppercase;letter-spacing:.06em}
-  .rt-order-card__nums dd{margin:2px 0 0;font-family:${mono};font-size:15px;font-weight:500;color:${C.ink}}
+  .rt-order-card__nums dd{margin:2px 0 0;font-family:${ui};font-size:15px;font-weight:500;color:${C.ink}}
   .rt-order-card__profit{color:${C.green}!important;font-weight:600!important}
   .rt-order-card__match{margin:12px 0 0;font-size:11px;color:${C.sub}}
   .rt-fintabs{display:flex;gap:2px;border-bottom:1px solid ${C.hair};margin-bottom:18px;overflow-x:auto;-webkit-overflow-scrolling:touch}
-  .rt-fintabs button{padding:8px 14px;font-size:10px;font-family:${ui};letter-spacing:.08em;text-transform:uppercase;background:none;border:none;cursor:pointer;color:${C.muted};border-bottom:2px solid transparent;margin-bottom:-1px;white-space:nowrap}
+  .rt-fintabs button{padding:8px 14px;font-size:10px;font-family:${ui};letter-spacing:.06em;text-transform:uppercase;background:none;border:none;cursor:pointer;color:${C.muted};border-bottom:2px solid transparent;margin-bottom:-1px;white-space:nowrap}
   .rt-fintabs button.on{color:${C.ink};border-bottom-color:${THEME.side}}
   .rt-fin-pills{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:16px;align-items:center}
-  .rt-fin-pills>span{font-size:9px;color:${C.muted};letter-spacing:.14em;font-weight:600;margin-right:2px;font-family:${ui}}
+  .rt-fin-pills>span{font-size:9px;color:${C.muted};letter-spacing:.06em;font-weight:600;margin-right:2px;font-family:${ui}}
   .rt-filters{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:14px}
-  .rt-pill{font-family:${mono};font-size:10px;padding:6px 10px;border:1px solid ${C.hair};background:${C.card};color:${C.sub};cursor:pointer;white-space:nowrap}
+  .rt-pill{font-family:${ui};font-size:10px;padding:6px 10px;border:1px solid ${C.hair};background:${C.card};color:${C.sub};cursor:pointer;white-space:nowrap}
   .rt-pill.on{border-color:${THEME.side};background:${THEME.side};color:#fff}
   .rt-pill:disabled{opacity:.5}
   .rt-linkbtn{background:none;border:none;padding:0;font-family:${ui};font-size:11px;font-weight:600;color:${C.ink};text-decoration:underline;text-underline-offset:2px;cursor:pointer;letter-spacing:inherit;text-transform:inherit}
@@ -2150,7 +2157,7 @@ const PORTAL_CSS = `
   .rt-profit-row{display:grid;grid-template-columns:72px 1fr auto;gap:10px;width:100%;text-align:left;padding:10px 12px;border:none;border-bottom:1px solid ${C.line};background:${C.card};font-family:${ui};font-size:12px;cursor:pointer;color:${C.ink}}
   .rt-profit-row.total{cursor:default;background:#FAF8F4;font-weight:600}
   .rt-profit-row:hover:not(.total){background:#FAF8F4}
-  .rt-acct-head{width:100%;display:flex;align-items:center;gap:8px;text-align:left;padding:12px 14px;border:none;background:#ECE7DD;font-family:${head};font-size:11px;font-weight:700;letter-spacing:.12em;color:${C.ink};cursor:pointer}
+  .rt-acct-head{width:100%;display:flex;align-items:center;gap:8px;text-align:left;padding:12px 14px;border:none;background:#ECE7DD;font-family:${head};font-size:11px;font-weight:700;letter-spacing:.06em;color:${C.ink};cursor:pointer}
   .rt-compare-row{overflow-x:auto;-webkit-overflow-scrolling:touch;flex-wrap:nowrap;padding-bottom:2px}
   .rt-compare-row .rt-pill{flex-shrink:0}
   .rt-open-period-card{cursor:pointer;transition:background .15s}
@@ -2175,12 +2182,12 @@ const PORTAL_CSS = `
   .rt-stmt{--cols:1fr 120px}
   .rt-stmt.cmp{--cols:1fr 104px 104px 92px}
   .rt-stmt__row{display:grid;grid-template-columns:var(--cols);gap:8px;padding:6px 8px;font-family:${ui};font-size:12px;align-items:baseline}
-  .rt-stmt__row .num{text-align:right;font-family:${mono};font-variant-numeric:tabular-nums}
+  .rt-stmt__row .num{text-align:right;font-family:${ui};font-variant-numeric:tabular-nums}
   .rt-stmt__row.total{border-top:1px solid ${C.hair};margin-top:2px;padding-top:9px}
   .rt-stmt__row.click{cursor:pointer}
   .rt-stmt__row.click:hover,.rt-clickrow:hover{background:#FAF8F4}
   .rt-clickrow{cursor:pointer}
-  .rt-stmt__head{font-size:9px;color:${C.muted};letter-spacing:.1em;text-transform:uppercase;padding-top:10px}
+  .rt-stmt__head{font-size:9px;color:${C.muted};letter-spacing:.06em;text-transform:uppercase;padding-top:10px}
   .rt-stmt__head span{text-align:right}
   .rt-modal{position:fixed;inset:0;background:rgba(27,24,21,.45);z-index:1000;display:flex;align-items:center;justify-content:center;padding:16px}
   .rt-modal__box{background:${C.card};border:1px solid ${C.hair};padding:18px 20px;width:100%;max-width:640px;max-height:90vh}
@@ -2298,7 +2305,7 @@ const PORTAL_CSS = `
     .rt-monthly-table tbody tr:nth-child(even) .rt-monthly-sticky{background:#FAF8F4}
     .rt-monthly-table tr[style*="ECE7DD"] .rt-monthly-sticky,.rt-monthly-table tfoot .rt-monthly-sticky{background:#ECE7DD}
     .rt-status{padding:8px 10px;flex-wrap:nowrap}
-    .rt-sample-line{font-family:${mono};font-size:10.5px;letter-spacing:0;white-space:nowrap;line-height:1.25;display:block;width:100%;overflow:hidden}
+    .rt-sample-line{font-family:${ui};font-size:10.5px;letter-spacing:0;white-space:nowrap;line-height:1.25;display:block;width:100%;overflow:hidden}
     .rt-content input,.rt-content select{font-size:16px!important}
     .rt-mobilenav,.rt-embed .rt-mobilenav{display:grid!important;grid-template-columns:repeat(3,minmax(0,1fr));grid-auto-rows:auto;overflow-x:hidden;gap:2px;padding:6px 4px}
     .rt-mobilenav button,.rt-embed .rt-mobilenav button{flex:none;width:100%;min-width:0;font-family:${head};font-size:11px;font-weight:500;padding:8px 4px;letter-spacing:.04em;line-height:1.2;white-space:nowrap;text-align:center;display:flex;align-items:center;justify-content:center;min-height:36px;text-transform:uppercase;overflow:hidden;text-overflow:ellipsis}
@@ -2337,7 +2344,7 @@ const PORTAL_CSS = `
     .rt-metric-tile>div:nth-child(2){font-size:16px!important;margin-top:4px!important}
     .rt-kpi-row{gap:8px;margin-bottom:18px;flex-wrap:wrap}
     .rt-kpi-tile{flex:1 1 calc(50% - 4px)!important;min-width:calc(50% - 4px)!important;padding:10px 8px!important;border:none!important;background:transparent!important}
-    .rt-kpi-tile>div:first-child{font-size:9px!important;letter-spacing:.1em!important;margin-bottom:4px!important}
+    .rt-kpi-tile>div:first-child{font-size:9px!important;letter-spacing:.06em!important;margin-bottom:4px!important}
     .rt-kpi-tile>div:nth-child(2){font-size:17px!important}
     .rt-order-card{padding:12px 10px;border:none;border-bottom:1px solid ${C.hair};background:transparent}
     .rt-order-cards{gap:0;border:1px solid ${C.hair};background:${C.card}}
@@ -2469,7 +2476,9 @@ export default function RiversideTiresPortal() {
       <Head>
         <title>{`${BIZ} — ${navItem.label}`}</title>
         <meta name="viewport" content="width=device-width, initial-scale=1" />
-        <DemoFontLinks />
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
+        <link href={RT_FONT_LINK} rel="stylesheet" />
       </Head>
       <style dangerouslySetInnerHTML={{ __html: PORTAL_CSS }} />
 
