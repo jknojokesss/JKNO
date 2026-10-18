@@ -57,6 +57,17 @@ export const fmtAsOfLong = (iso) => {
   return asOfDateFormatter.format(new Date(`${iso}T12:00:00.000Z`))
 }
 
+const weekEndingFormatter = new Intl.DateTimeFormat(AU_LOCALE, {
+  timeZone: AU_TZ,
+  month: 'short',
+  day: 'numeric',
+})
+
+export const fmtWeekEnding = (iso) => {
+  if (!iso) return '—'
+  return `Week ending ${weekEndingFormatter.format(new Date(`${iso}T12:00:00.000Z`))}`
+}
+
 export const centsEqual = (a, b) => Math.abs(Math.round(a * 100) - Math.round(b * 100)) === 0
 
 export const roundCents = (n) => Math.round(n * 100) / 100

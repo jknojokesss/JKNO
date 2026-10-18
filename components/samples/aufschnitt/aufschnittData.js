@@ -124,6 +124,40 @@ PRODUCT_DEFS.forEach((p) => {
 
 const WEEKLY_CASE_PATTERN = [0.82, 1.12, 0.91, 1.08, 0.86, 1.15, 0.94, 1.02]
 
+/** Week-ending Saturdays for the 8 weeks before Sep 30, 2026 (oldest first). */
+const STOCK_WEEK_ENDINGS = [
+  '2026-08-08',
+  '2026-08-15',
+  '2026-08-22',
+  '2026-08-29',
+  '2026-09-05',
+  '2026-09-12',
+  '2026-09-19',
+  '2026-09-26',
+]
+
+/** Relative store size for Stores channel splits (largest distributors / Lakewood). */
+const STORE_SALES_WEIGHT = {
+  'Brooklyn store 1': 0.92,
+  'Brooklyn store 2': 0.88,
+  'Brooklyn store 3': 0.9,
+  'Brooklyn store 4': 0.86,
+  'Monsey store 1': 0.94,
+  'Monsey store 2': 0.91,
+  'Lakewood store 1': 1.28,
+  'Lakewood store 2': 1.22,
+  'Five Towns store 1': 0.84,
+  'Five Towns store 2': 0.68,
+  'Teaneck store 1': 1.02,
+  'Passaic store 1': 0.82,
+  'Queens store 1': 0.87,
+  'Queens store 2': 1.06,
+  'Baltimore store 1': 1.08,
+  'Baltimore store 2': 0.85,
+  'Staten Island store 1': 0.66,
+  'Distributor NJ 1': 1.32,
+}
+
 function roundCases(n) {
   const t = Math.round(n * 10) / 10
   return Math.abs(t - Math.round(t)) < 0.05 ? Math.round(t) : t
@@ -333,7 +367,47 @@ function buildSalesRows() {
     Amazon: 3_134.62,
     'Own site': 1_591.56,
   })
+  dedupeChannelProductRevenues(rows)
   return rows
+}
+
+/** Nudge duplicate product revenues within the same month × brand × channel (totals unchanged). */
+function dedupeChannelProductRevenues(rows) {
+  const groups = new Map()
+  rows.forEach((r) => {
+    const k = `${r.month}|${r.brand}|${r.channel}`
+    if (!groups.has(k)) groups.set(k, [])
+    groups.get(k).push(r)
+  })
+  groups.forEach((grp) => {
+    const target = sumCents(grp, (r) => r.revenue)
+    const byVal = new Map()
+    grp.forEach((r) => {
+      const key = r.revenue.toFixed(2)
+      if (!byVal.has(key)) byVal.set(key, [])
+      byVal.get(key).push(r)
+    })
+    byVal.forEach((dupes) => {
+      if (dupes.length < 2) return
+      dupes.forEach((r, i) => {
+        const nudge = roundCents((i - (dupes.length - 1) / 2) * 0.19 + ((hash(r.productId) % 5) - 2) * 0.03)
+        if (nudge) r.revenue = roundCents(Math.max(0.01, r.revenue + nudge))
+      })
+    })
+    let fix = roundCents(target - sumCents(grp, (r) => r.revenue))
+    if (fix) {
+      const anchor = [...grp].sort((a, b) => b.revenue - a.revenue)[0]
+      if (anchor) anchor.revenue = roundCents(anchor.revenue + fix)
+    }
+  })
+  MONTHS.forEach((m) => {
+    const got = sumCents(rows.filter((r) => r.month === m.id), (r) => r.revenue)
+    const diff = roundCents(MONTH_TOTAL[m.id] - got)
+    if (diff) {
+      const top = rows.filter((r) => r.month === m.id).sort((a, b) => b.revenue - a.revenue)[0]
+      if (top) top.revenue = roundCents(top.revenue + diff)
+    }
+  })
 }
 
 function brandFilter(brand, row) {
@@ -599,6 +673,7 @@ function buildStock(salesRows, opts = {}) {
       ],
       weeklyUnits,
       weeklyCases,
+      weeklyWeekEndings: STOCK_WEEK_ENDINGS,
       incoming,
     }
   })
@@ -671,6 +746,71 @@ function bucketDueDate(bucket) {
   return '2026-06-08'
 }
 
+function daysPastDueFromDue(dueDate) {
+  return Math.max(0, daysBetween(dueDate, AS_OF))
+}
+
+function bucketFromDaysPastDue(dpd) {
+  if (dpd === 0) return 'current'
+  if (dpd <= 30) return 'd1_30'
+  if (dpd <= 60) return 'd31_60'
+  if (dpd <= 90) return 'd61_90'
+  return 'd90p'
+}
+
+function buildStoreRevenueSplits(salesRows, arAccounts, monthId, brandKey) {
+  const total =
+    brandKey === 'All brands'
+      ? sumSales(salesRows, { month: monthId, channel: 'Stores' })
+      : sumSales(salesRows, { month: monthId, channel: 'Stores', brand: brandKey })
+  const arByName = {}
+  arAccounts.forEach((a) => {
+    arByName[a.name] = a.buckets.total
+  })
+  const weights = {}
+  STORE_ACCOUNTS.forEach((name) => {
+    const ar = arByName[name] || 8000
+    const ratio = 0.42 + (hash(`${name}-${monthId}-${brandKey}`) % 89) / 100
+    const target = ar * Math.min(1.3, Math.max(0.4, ratio))
+    weights[name] = target * (STORE_SALES_WEIGHT[name] || 1)
+  })
+  let split = allocateByWeight(total, weights)
+  const maxShare = 0.12
+  const cap = roundCents(total * maxShare)
+  for (let pass = 0; pass < 8; pass++) {
+    let excess = 0
+    const under = []
+    STORE_ACCOUNTS.forEach((name) => {
+      const v = split[name] || 0
+      if (v > cap + 0.005) {
+        excess += v - cap
+        split[name] = cap
+      } else if (v < cap - 0.005) {
+        under.push(name)
+      }
+    })
+    if (excess < 0.01 || under.length === 0) break
+    const addW = {}
+    under.forEach((name) => {
+      addW[name] = weights[name] || 1
+    })
+    const portion = allocateByWeight(excess, addW)
+    under.forEach((name) => {
+      split[name] = roundCents((split[name] || 0) + (portion[name] || 0))
+    })
+  }
+  const got = sumCents(STORE_ACCOUNTS.map((name) => split[name] || 0))
+  const fix = roundCents(total - got)
+  if (fix) {
+    const tail = STORE_ACCOUNTS.find((name) => (split[name] || 0) < cap - 0.01) || STORE_ACCOUNTS[0]
+    split[tail] = roundCents((split[tail] || 0) + fix)
+  }
+  return STORE_ACCOUNTS.map((name) => ({
+    store: name,
+    revenue: split[name] || 0,
+  }))
+}
+
 function buildReceivables() {
   const raw = STORE_ACCOUNTS.map((name) => {
     const b = AR_BUCKET_SPEC[name]
@@ -724,25 +864,25 @@ function buildReceivables() {
       ['d90p', acct.buckets.d90p],
     ].filter(([, amt]) => amt > 0)
     parts.forEach(([bucket, amount], bi) => {
-      const dueDate = bucketDueDate(bucket)
-      const invDate = addDays(dueDate, -30)
-      const daysPastDue = Math.max(0, daysBetween(dueDate, AS_OF))
+      const baseDue = bucketDueDate(bucket)
       const brandsOn = BRANDS.filter((_, idx) => (hash(acct.name + bucket) + idx) % 3 !== 0)
       if (brandsOn.length === 0) brandsOn.push(BRANDS[ai % 3])
       const splitAmt =
         amount > 2400 && bi === 0
-          ? [
-              roundCents(amount * 0.58),
-              roundCents(amount * 0.42),
-            ]
+          ? [roundCents(amount * 0.58), roundCents(amount * 0.42)]
           : [amount]
       splitAmt.forEach((amt, si) => {
+        const dueDate = si ? addDays(baseDue, -si * 3) : baseDue
+        const invDate = addDays(dueDate, -30)
+        const due = addDays(invDate, 30)
+        const daysPastDue = daysPastDueFromDue(due)
         invoices.push({
           account: acct.name,
           invoiceNo: `INV-${invSeq++}`,
-          date: si ? addDays(invDate, -4) : invDate,
-          dueDate: si ? addDays(dueDate, 2) : dueDate,
-          daysPastDue: Math.max(0, daysBetween(si ? addDays(dueDate, 2) : dueDate, AS_OF)),
+          date: invDate,
+          dueDate: due,
+          daysPastDue,
+          bucket: bucketFromDaysPastDue(daysPastDue),
           brands: brandsOn,
           amount: amt,
         })
@@ -785,7 +925,15 @@ function buildReceivables() {
   }
 }
 
-function buildChannelDetails(salesRows) {
+function buildChannelDetails(salesRows, arAccounts) {
+  const storeSplits = {}
+  ;['2026-09', '2026-08'].forEach((monthId) => {
+    storeSplits[monthId] = {}
+    storeSplits[monthId]['All brands'] = buildStoreRevenueSplits(salesRows, arAccounts, monthId, 'All brands')
+    BRANDS.forEach((b) => {
+      storeSplits[monthId][b] = buildStoreRevenueSplits(salesRows, arAccounts, monthId, b)
+    })
+  })
   return CHANNELS.map((ch) => {
     const sep = '2026-09'
     const aug = '2026-08'
@@ -828,13 +976,8 @@ function buildChannelDetails(salesRows) {
       extra.ownSite = { singleBags: roundCents(bags), casePacks: roundCents(cases) }
     }
     if (ch === 'Stores') {
-      extra.stores = STORE_ACCOUNTS.map((name, i) => ({
-        store: name,
-        revenue: roundCents((curRev * (0.4 + (hash(name) % 35) / 100)) / (18 + (i % 3))),
-      }))
-      const storeSum = sumCents(extra.stores, (s) => s.revenue)
-      const adj = roundCents(curRev - storeSum)
-      extra.stores[0].revenue = roundCents(extra.stores[0].revenue + adj)
+      extra.stores = storeSplits[sep]['All brands']
+      extra.storeSplits = storeSplits
     }
     return {
       channel: ch,
@@ -880,7 +1023,7 @@ function buildModel() {
   const stock = buildStock(salesRows)
   const stockAug = buildStock(salesRows, { velocityMonth: '2026-08', weeksScale: 0.96, skipValueScale: true })
   const receivables = buildReceivables()
-  const channels = buildChannelDetails(salesRows)
+  const channels = buildChannelDetails(salesRows, receivables.accounts)
 
   const sep = '2026-09'
   const aug = '2026-08'

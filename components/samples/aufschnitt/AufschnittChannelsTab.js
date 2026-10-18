@@ -60,6 +60,10 @@ export function ChannelDetail({ detail, card, lbl, big, onBack }) {
   const products =
     brand === 'All brands' ? ch.byProduct : ch.byProduct.filter((p) => p.brand === brand)
   const brands = brand === 'All brands' ? ch.byBrand : ch.byBrand.filter((b) => b.brand === brand)
+  const storeRows =
+    ch.channel === 'Stores' && ch.extra.storeSplits
+      ? ch.extra.storeSplits['2026-09'][brand]
+      : ch.extra.stores
 
   return (
     <div>
@@ -105,10 +109,10 @@ export function ChannelDetail({ detail, card, lbl, big, onBack }) {
         </div>
       )}
 
-      {ch.channel === 'Stores' && ch.extra.stores && (
+      {ch.channel === 'Stores' && storeRows && (
         <div style={{ ...card, marginBottom: 12 }}>
           <div style={{ ...lbl, marginBottom: 8 }}>By store account</div>
-          {ch.extra.stores.map((s) => (
+          {storeRows.map((s) => (
             <div key={s.store} style={{ display: 'flex', justifyContent: 'space-between', padding: '5px 0', fontSize: 13, borderTop: `1px solid ${CREAM}` }}>
               <span>{s.store}</span>
               <span style={{ fontFamily: MONO }}>{money0(s.revenue)}</span>

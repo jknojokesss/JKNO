@@ -1,5 +1,23 @@
 import DATA from './aufschnittData.js'
-import { BRANDS, CHANNELS, MONTHS, COGS_LINES, SHARED_OPEX, STORE_ACCOUNTS } from './aufschnittCatalog.js'
+import { AS_OF, BRANDS, CHANNELS, MONTHS, COGS_LINES, SHARED_OPEX, STORE_ACCOUNTS } from './aufschnittCatalog.js'
+
+const addDays = (iso, days) => {
+  const d = new Date(`${iso}T12:00:00.000Z`)
+  d.setUTCDate(d.getUTCDate() + days)
+  return d.toISOString().slice(0, 10)
+}
+const daysBetween = (a, b) => {
+  const da = new Date(`${a}T12:00:00.000Z`)
+  const db = new Date(`${b}T12:00:00.000Z`)
+  return Math.round((db - da) / 86400000)
+}
+const bucketFromDpd = (dpd) => {
+  if (dpd === 0) return 'current'
+  if (dpd <= 30) return 'd1_30'
+  if (dpd <= 60) return 'd31_60'
+  if (dpd <= 90) return 'd61_90'
+  return 'd90p'
+}
 
 const roundCents = (n) => Math.round(n * 100) / 100
 const sum = (arr, fn = (x) => x) => roundCents(arr.reduce((s, x) => s + fn(x), 0))
@@ -125,9 +143,56 @@ DATA.stock.forEach((r) => {
 DATA.channels.forEach((ch) => {
   const prod = sum(ch.byProduct, (p) => p.revenue)
   ok(`Channel ${ch.channel} products`, prod === ch.curRev)
-  if (ch.channel === 'Stores' && ch.extra.stores) {
-    ok(`Stores accounts`, sum(ch.extra.stores, (s) => s.revenue) === ch.curRev)
+  if (ch.channel === 'Stores' && ch.extra.storeSplits) {
+    const sepStores = ch.extra.storeSplits['2026-09']['All brands']
+    const augStores = ch.extra.storeSplits['2026-08']['All brands']
+    const augCh = DATA.salesRows.filter((r) => r.month === '2026-08' && r.channel === 'Stores').reduce((s, r) => s + r.revenue, 0)
+    ok(`Stores accounts Sep sum`, sum(sepStores, (s) => s.revenue) === ch.curRev)
+    ok(`Stores accounts Aug sum`, sum(augStores, (s) => s.revenue) === roundCents(augCh))
+    sepStores.forEach((s) => {
+      const pct = s.revenue / ch.curRev
+      ok(`Store max 12% ${s.store}`, pct <= 0.1201)
+    })
+    BRANDS.forEach((b) => {
+      const brandStores = ch.extra.storeSplits['2026-09'][b]
+      const brandStoresRev = DATA.salesRows
+        .filter((r) => r.month === '2026-09' && r.channel === 'Stores' && r.brand === b)
+        .reduce((s, r) => s + r.revenue, 0)
+      ok(`Stores ${b} accounts sum`, sum(brandStores, (x) => x.revenue) === roundCents(brandStoresRev))
+    })
   }
+})
+
+CHANNELS.forEach((ch) => {
+  ;['2026-09', '2026-08'].forEach((monthId) => {
+    const grpRows = DATA.salesRows.filter((r) => r.month === monthId && r.channel === ch)
+    const byBrandCh = new Map()
+    grpRows.forEach((r) => {
+      const k = `${r.brand}|${r.channel}`
+      if (!byBrandCh.has(k)) byBrandCh.set(k, [])
+      byBrandCh.get(k).push(r.revenue)
+    })
+    byBrandCh.forEach((revs, k) => {
+      const uniq = new Set(revs.map((v) => v.toFixed(2)))
+      ok(`No dup product rev ${monthId} ${k}`, uniq.size === revs.length)
+    })
+  })
+})
+
+ar.invoices.forEach((inv) => {
+  ok(`Invoice net30 ${inv.invoiceNo}`, inv.dueDate === addDays(inv.date, 30))
+  const dpd = Math.max(0, daysBetween(inv.dueDate, AS_OF))
+  ok(`Invoice dpd ${inv.invoiceNo}`, inv.daysPastDue === dpd)
+  const bucket = bucketFromDpd(dpd)
+  ok(`Invoice bucket ${inv.invoiceNo}`, inv.bucket === bucket)
+})
+
+DATA.stock.forEach((r) => {
+  if (!r.weeklyCases?.length) return
+  const avg = roundCents(r.weeklyCases.reduce((a, b) => a + b, 0) / r.weeklyCases.length)
+  const avgOne = Math.round(avg * 10) / 10
+  const rowAvg = Math.round(r.avgWeeklyCases * 10) / 10
+  ok(`Weekly cases avg ${r.productId}`, avgOne === rowAvg)
 })
 
 const sep = DATA.pnlViews['All brands'].find((p) => p.month === '2026-09')
@@ -186,6 +251,14 @@ console.log('\nStock table (product, cases, avg/wk, weeks, value):')
 DATA.stock.forEach((r) => {
   console.log(`  ${r.name} | ${r.onHandCases} | ${r.avgWeeklyCases} | ${r.weeksSupply} | ${r.valueAtCost.toFixed(2)}`)
 })
+
+const storesCh = DATA.channels.find((c) => c.channel === 'Stores')
+if (storesCh?.extra?.storeSplits) {
+  console.log('\nSeptember Stores by account:')
+  storesCh.extra.storeSplits['2026-09']['All brands'].forEach((s) => {
+    console.log(`  ${s.store} | ${s.revenue.toFixed(2)}`)
+  })
+}
 
 console.log('\nOwed by stores:')
 ar.accounts.forEach((a) => {

@@ -1,5 +1,5 @@
 import DATA from './aufschnittData'
-import { INK, MUTED, BORDER, CREAM, MONO, money, money0, AGING_CSS } from './aufschnittUtils'
+import { INK, MUTED, BORDER, CREAM, MONO, money, money0, fmtAsOfLong, AGING_CSS } from './aufschnittUtils'
 
 export default function AufschnittReceivablesTab({ card, lbl, onOpen }) {
   const { accounts } = DATA.receivables
@@ -116,7 +116,7 @@ export function ReceivableAccountDetail({ detail, card, lbl, big, onBack }) {
               <span style={{ fontFamily: MONO }}>{money(inv.amount)}</span>
             </div>
             <div style={{ fontSize: 11, color: MUTED, marginTop: 4 }}>
-              {inv.date} · due {inv.dueDate} · {inv.daysPastDue} days past due
+              {fmtAsOfLong(inv.date)} · due {fmtAsOfLong(inv.dueDate)} · {inv.daysPastDue} days past due
             </div>
             <div style={{ fontSize: 11, color: MUTED, marginTop: 2 }}>{inv.brands.join(', ')}</div>
           </div>
@@ -134,7 +134,7 @@ export function ReceivableAccountDetail({ detail, card, lbl, big, onBack }) {
         ) : (
           payments.map((p) => (
             <div key={p.reference} style={{ display: 'flex', justifyContent: 'space-between', padding: '8px 0', borderTop: `1px solid ${CREAM}`, fontSize: 13 }}>
-              <span>{p.date} · {p.reference}</span>
+              <span>{fmtAsOfLong(p.date)} · {p.reference}</span>
               <span style={{ fontFamily: MONO }}>{money(p.amount)}</span>
             </div>
           ))

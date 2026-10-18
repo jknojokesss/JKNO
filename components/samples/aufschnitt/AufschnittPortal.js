@@ -300,32 +300,57 @@ function DetailView({ detail, card, lbl, big, onBack }) {
 }
 
 function PnlDrillDetail({ detail, card, lbl, big, onBack }) {
-  const sum = detail.rows.reduce((s, r) => s + r.amount, 0)
+  const periodLabel = detail.period || 'September 2026'
+  const monthRollup = detail.rows?.length && /^2026-\d{2}$/.test(detail.rows[0].date)
+  const monthSum = detail.rows?.reduce((s, r) => s + r.amount, 0) ?? 0
+  const productSum = !monthRollup ? detail.rows?.reduce((s, r) => s + r.amount, 0) ?? 0 : 0
+
   return (
     <div>
       <button type="button" className="au-detail-back" onClick={onBack}>← Back</button>
       <h2 style={{ ...big, fontSize: 20, marginBottom: 4 }}>{detail.title}</h2>
-      <div style={{ fontSize: 12, color: MUTED, marginBottom: 14 }}>{detail.period} · {money0(detail.total)}</div>
+      <div style={{ fontSize: 12, color: MUTED, marginBottom: 14 }}>{periodLabel} · {money0(detail.total)}</div>
       {detail.brandRows?.length ? (
         <div style={{ ...card, marginBottom: 12 }}>
-          <div style={{ ...lbl, marginBottom: 8 }}>By brand</div>
+          <div style={{ ...lbl, marginBottom: 8 }}>By brand · {periodLabel}</div>
           {detail.brandRows.map((r) => (
             <Row key={r.description} l={r.description} v={money(r.amount)} />
           ))}
+          <div style={{ display: 'flex', justifyContent: 'space-between', paddingTop: 10, fontWeight: 700, borderTop: `1px solid ${BORDER}` }}>
+            <span>Total</span>
+            <span style={{ fontFamily: MONO }}>{money(detail.total)}</span>
+          </div>
         </div>
       ) : null}
-      <div style={{ ...card }}>
-        {detail.rows.map((r, i) => (
-          <div key={i} style={{ display: 'flex', justifyContent: 'space-between', gap: 10, padding: '8px 0', borderTop: i ? `1px solid ${BORDER}` : 'none' }}>
-            <div style={{ minWidth: 0, fontSize: 13 }}>{r.description}</div>
-            <div style={{ fontFamily: MONO, fontSize: 13, whiteSpace: 'nowrap' }}>{money(r.amount)}</div>
+      {monthRollup ? (
+        <div style={{ ...card }}>
+          <div style={{ ...lbl, marginBottom: 8 }}>By month</div>
+          {detail.rows.map((r, i) => (
+            <div key={i} style={{ display: 'flex', justifyContent: 'space-between', gap: 10, padding: '8px 0', borderTop: i ? `1px solid ${BORDER}` : 'none' }}>
+              <div style={{ minWidth: 0, fontSize: 13 }}>{r.description}</div>
+              <div style={{ fontFamily: MONO, fontSize: 13, whiteSpace: 'nowrap' }}>{money(r.amount)}</div>
+            </div>
+          ))}
+          <div style={{ display: 'flex', justifyContent: 'space-between', paddingTop: 10, fontWeight: 700, borderTop: `1px solid ${BORDER}` }}>
+            <span>Apr–Sep total</span>
+            <span style={{ fontFamily: MONO }}>{money(monthSum)}</span>
           </div>
-        ))}
-        <div style={{ display: 'flex', justifyContent: 'space-between', paddingTop: 10, fontWeight: 700, borderTop: `1px solid ${BORDER}` }}>
-          <span>Total</span>
-          <span style={{ fontFamily: MONO }}>{money(sum)}</span>
         </div>
-      </div>
+      ) : (
+        <div style={{ ...card }}>
+          <div style={{ ...lbl, marginBottom: 8 }}>By product · {periodLabel}</div>
+          {detail.rows.map((r, i) => (
+            <div key={i} style={{ display: 'flex', justifyContent: 'space-between', gap: 10, padding: '8px 0', borderTop: i ? `1px solid ${BORDER}` : 'none' }}>
+              <div style={{ minWidth: 0, fontSize: 13 }}>{r.description}</div>
+              <div style={{ fontFamily: MONO, fontSize: 13, whiteSpace: 'nowrap' }}>{money(r.amount)}</div>
+            </div>
+          ))}
+          <div style={{ display: 'flex', justifyContent: 'space-between', paddingTop: 10, fontWeight: 700, borderTop: `1px solid ${BORDER}` }}>
+            <span>Total</span>
+            <span style={{ fontFamily: MONO }}>{money(productSum)}</span>
+          </div>
+        </div>
+      )}
     </div>
   )
 }

@@ -1,6 +1,6 @@
 import { useMemo } from 'react'
 import DATA from './aufschnittData'
-import { INK, MUTED, BORDER, CREAM, RED, MONO, money, money0, fmtCases } from './aufschnittUtils'
+import { INK, MUTED, BORDER, CREAM, RED, MONO, money, money0, fmtCases, fmtAsOfLong, fmtWeekEnding } from './aufschnittUtils'
 
 export default function AufschnittStockTab({ card, lbl, brand, onOpen, sort, setSort }) {
   const rows = useMemo(() => {
@@ -102,24 +102,30 @@ export function StockDetail({ detail, card, lbl, big, onBack }) {
       </div>
 
       <div style={{ ...card, marginBottom: 12 }}>
-        <div style={{ ...lbl, marginBottom: 8 }}>Last 8 weeks sold (units)</div>
+        <div style={{ ...lbl, marginBottom: 8 }}>Last 8 weeks sold (cases)</div>
         <table style={{ width: '100%', fontSize: 12, borderCollapse: 'collapse' }}>
           <tbody>
-            {r.weeklyUnits.map((u, i) => (
+            {(r.weeklyCases || []).map((c, i) => (
               <tr key={i} style={{ borderBottom: `1px solid ${CREAM}` }}>
-                <td style={{ padding: '4px 0', color: MUTED }}>Week {8 - i}</td>
-                <td style={{ padding: '4px 0', textAlign: 'right', fontFamily: MONO }}>{u}</td>
+                <td style={{ padding: '4px 0', color: MUTED }}>
+                  {r.weeklyWeekEndings?.[i] ? fmtWeekEnding(r.weeklyWeekEndings[i]) : `Week ${i + 1}`}
+                </td>
+                <td style={{ padding: '4px 0', textAlign: 'right', fontFamily: MONO }}>{fmtCases(c)}</td>
               </tr>
             ))}
           </tbody>
         </table>
+        <div style={{ display: 'flex', justifyContent: 'space-between', paddingTop: 8, fontSize: 12, fontWeight: 600 }}>
+          <span>Average</span>
+          <span style={{ fontFamily: MONO }}>{fmtCases(r.avgWeeklyCases)} / wk</span>
+        </div>
       </div>
 
       {r.incoming && (
         <div style={{ ...card, marginBottom: 12 }}>
           <div style={{ ...lbl, marginBottom: 8 }}>Incoming on order</div>
           <div style={{ fontSize: 13 }}>
-            {r.incoming.cases} cases · expected {r.incoming.expected}
+            {r.incoming.cases} cases · expected {fmtAsOfLong(r.incoming.expected)}
           </div>
         </div>
       )}
