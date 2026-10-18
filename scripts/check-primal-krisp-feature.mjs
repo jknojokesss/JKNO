@@ -88,6 +88,21 @@ ok('table total detail kind', /kind === 'tableTotal'/.test(fs.readFileSync(path.
 ok('deposits table total opens breakdown', /kind: 'tableTotal'/.test(fs.readFileSync(path.join(root, 'components/samples/primal-krisp/PrimalKrispDepositsTab.js'), 'utf8')))
 ok('stores aging total tappable', /tableName: 'AR aging/.test(fs.readFileSync(path.join(root, 'components/samples/PrimalKrispStoresTab.js'), 'utf8')))
 ok('ranked bars total row', /onTotalClick/.test(portalSrc))
+
+const chartsSrc = fs.readFileSync(path.join(root, 'components/samples/PrimalKrispCharts.js'), 'utf8')
+ok('subscriber chart single series', /SubscriberLineChart/.test(chartsSrc) && !/Cancelled/.test(chartsSrc.split('export function SubscriberLineChart')[1]?.split('export function RenewalBars14')[0] || ''))
+ok('subscriber chart no min width scroll', !/SubscriberLineChart[\s\S]*minWidth:\s*'520px'/.test(chartsSrc))
+
+const mc = DATA.monthly_close
+const srcSum = round2((mc.september_sales_sources || []).reduce((s, r) => s + r.amount, 0))
+ok('month end tab label', /'Month end'/.test(portalSrc))
+ok('month end no journal ui', !/Journal entry/.test(portalSrc) && !/\bDr\b/.test(portalSrc) && !/\bCr\b/.test(portalSrc))
+ok('month end no to post copy', !/to post/i.test(portalSrc))
+ok('month end section 1 total', mc.total_sales === 55530.64 && srcSum === mc.total_sales)
+ok('month end ties overview sales', round2(DATA.overview.sales_this_month) === mc.total_sales)
+ok('month end gross profit', round2(mc.total_sales - mc.cost_of_goods) === round2(mc.gross_profit))
+ok('month end detail handlers', /monthEndSalesTotal/.test(fs.readFileSync(path.join(root, 'components/samples/PrimalKrispOverviewDetail.js'), 'utf8')))
+
 for (const p of DATA.promo_codes) {
   ok(`promo no call field ${p.code}`, p.call === undefined)
 }

@@ -231,78 +231,64 @@ export default function PrimalKrispOverviewDetail({ detail, onBack, onClose, sto
     )
   }
 
-  if (detail.kind === 'closeIncome') {
+  if (detail.kind === 'monthEndSource') {
     const mc = DATA.monthly_close
-    const rows = Object.entries(mc.income_to_post).map(([k, v]) => ({ label: k, value: v, key: k }))
+    const row = (mc.september_sales_sources || []).find((r) => r.id === detail.id)
+    if (!row) return null
+    const label = `${row.label} from ${row.from}`
     return (
-      <Shell title={money(mc.income_to_post_total)} sub="Income to post" {...shell}>
-        <Lines rows={rows} totalLabel="Total" totalValue={mc.income_to_post_total} format={money} />
+      <Shell title={money(row.amount)} sub={label} {...shell}>
+        <Lines rows={[{ label, value: row.amount }]} totalLabel="Total" totalValue={row.amount} format={money} />
       </Shell>
     )
   }
 
-  if (detail.kind === 'closeIncomeLine') {
-    const v = DATA.monthly_close.income_to_post[detail.key]
+  if (detail.kind === 'monthEndSalesTotal') {
+    const mc = DATA.monthly_close
+    const rows = (mc.september_sales_sources || []).map((r) => ({
+      label: `${r.label} from ${r.from}`,
+      value: r.amount,
+      key: r.id,
+    }))
     return (
-      <Shell title={money(v)} sub={detail.key} {...shell}>
-        <Lines rows={[{ label: detail.key, value: v }]} totalLabel="Total" totalValue={v} format={money} />
+      <Shell title="Total Where September's sales came from" sub={money(mc.total_sales)} {...shell}>
+        <Lines rows={rows} totalLabel="Total" totalValue={mc.total_sales} format={money} />
       </Shell>
     )
   }
 
-  if (detail.kind === 'closeCogs') {
-    const c = DATA.monthly_close.cogs_to_post
+  if (detail.kind === 'monthEndCogs') {
+    const mc = DATA.monthly_close
+    const sep = DATA.pnl_by_month?.find((m) => m.month === '2026-09')
+    const rows = (sep?.cogs_entries || []).map((e) => ({ label: e.l, value: e.n, key: e.l }))
+    const total = mc.cost_of_goods
+    return (
+      <Shell title={money(total)} sub="Cost of goods" {...shell}>
+        <Lines rows={rows.length ? rows : [{ label: 'September COGS', value: total }]} totalLabel="Total" totalValue={total} format={money} />
+      </Shell>
+    )
+  }
+
+  if (detail.kind === 'monthEndGrossProfit') {
+    const mc = DATA.monthly_close
     const rows = [
-      { label: 'Bags', value: c.bags },
-      { label: 'Amount at cost', value: c.amount },
+      { label: 'Total sales', value: mc.total_sales, key: 'sales' },
+      { label: 'Cost of goods', value: -mc.cost_of_goods, key: 'cogs' },
     ]
     return (
-      <Shell title={money(c.amount)} sub="COGS to post" {...shell}>
-        <Lines rows={[{ label: 'Bags', value: c.bags }]} totalLabel="COGS" totalValue={c.amount} format={money} />
+      <Shell title={money(mc.gross_profit)} sub="Gross profit" {...shell}>
+        <Lines rows={rows} totalLabel="Gross profit" totalValue={mc.gross_profit} format={money} />
       </Shell>
     )
   }
 
-  if (detail.kind === 'closeBooked') {
-    const booked = DATA.monthly_close.booked_through_shopify_do_not_reenter
-    const rows = Object.entries(booked).map(([k, v]) => ({ label: k, value: v, key: k }))
-    const total = rows.reduce((s, r) => s + r.value, 0)
+  if (detail.kind === 'monthEndStoreOwed') {
+    const owing = storeList.filter((s) => openInvoiceTotal(s) > 0).sort((a, b) => openInvoiceTotal(b) - openInvoiceTotal(a))
+    const total = openStoreBalance ?? DATA.monthly_close.store_owed_at_month_end
+    const rows = owing.map((s) => ({ label: s.name, value: openInvoiceTotal(s), key: s.name }))
     return (
-      <Shell title={money0(total)} sub="Booked elsewhere" {...shell}>
+      <Shell title={money0(total)} sub="Owed by stores at month end" {...shell}>
         <Lines rows={rows} totalLabel="Total" totalValue={total} />
-      </Shell>
-    )
-  }
-
-  if (detail.kind === 'closeBookedLine') {
-    const v = DATA.monthly_close.booked_through_shopify_do_not_reenter[detail.key]
-    return (
-      <Shell title={money0(v)} sub={detail.key} {...shell}>
-        <Lines rows={[{ label: detail.key, value: v }]} totalLabel="Total" totalValue={v} />
-      </Shell>
-    )
-  }
-
-  if (detail.kind === 'closeAR') {
-    const owing = storeList.filter((s) => (s.sample?.open_balance || 0) > 0).sort((a, b) => b.sample.open_balance - a.sample.open_balance)
-    const total = openStoreBalance ?? DATA.monthly_close.ar_open_at_month_end
-    const rows = owing.map((s) => ({ label: s.name, value: s.sample.open_balance, key: s.name }))
-    return (
-      <Shell title={money0(total)} sub="AR at month end" {...shell}>
-        <Lines rows={rows} totalLabel="Total" totalValue={total} />
-      </Shell>
-    )
-  }
-
-  if (detail.kind === 'closeJournal') {
-    const je = DATA.monthly_close.journal_entries_preview[detail.index]
-    const rows = [
-      { label: `Debit · ${je.debit}`, value: je.amount },
-      { label: `Credit · ${je.credit}`, value: je.amount },
-    ]
-    return (
-      <Shell title={money(je.amount)} sub={je.memo} {...shell}>
-        <Lines rows={rows} totalLabel="Amount" totalValue={je.amount} format={money} />
       </Shell>
     )
   }

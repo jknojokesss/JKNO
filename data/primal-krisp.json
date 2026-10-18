@@ -3164,53 +3164,49 @@
  },
  "monthly_close": {
   "period": "September 2026",
-  "booked_through_shopify_do_not_reenter": {
-   "Website orders": 19500,
-   "Subscription renewals": 12640
-  },
-  "income_to_post": {
-   "Store invoices and consignment counts": 17920.64,
-   "Wholesale & bulk invoices": 4320,
-   "Tasting cash and card sales": 1150
-  },
-  "income_to_post_total": 23390.64,
-  "cogs_to_post": {
-   "bags": 4952,
-   "amount": 28905.73
-  },
+  "september_sales_sources": [
+   {
+    "id": "website",
+    "label": "Website orders",
+    "from": "Shopify",
+    "amount": 19500
+   },
+   {
+    "id": "subscriptions",
+    "label": "Subscription renewals",
+    "from": "Shopify subscriptions",
+    "amount": 12640
+   },
+   {
+    "id": "stores",
+    "label": "Store invoices and consignment counts",
+    "from": "the store app",
+    "amount": 17920.64
+   },
+   {
+    "id": "wholesale",
+    "label": "Wholesale & bulk",
+    "from": "the store app",
+    "amount": 4320
+   },
+   {
+    "id": "tastings",
+    "label": "Tastings & events",
+    "from": "Square",
+    "amount": 1150
+   }
+  ],
+  "total_sales": 55530.64,
+  "cost_of_goods": 28905.73,
+  "gross_profit": 26624.91,
+  "store_owed_at_month_end": 8307.24,
   "ar_open_at_month_end": 8307.24,
   "ar_aging": {
    "0-30": 3190.68,
    "31-60": 2559.12,
    "61-90": 2557.44
   },
-  "inventory_at_cost_month_end": 24871.4,
-  "journal_entries_preview": [
-   {
-    "memo": "Sept store and wholesale sales",
-    "debit": "Accounts receivable",
-    "credit": "Sales - Stores / Sales - Wholesale",
-    "amount": 22240.64
-   },
-   {
-    "memo": "Sept tasting sales",
-    "debit": "Undeposited funds",
-    "credit": "Sales - Tastings & events",
-    "amount": 1150
-   },
-   {
-    "memo": "Sept cost of goods sold",
-    "debit": "Cost of goods sold",
-    "credit": "Inventory - finished bags",
-    "amount": 28905.73
-   },
-   {
-    "memo": "Write off unaccounted consignment bags",
-    "debit": "Shrink & samples",
-    "credit": "Inventory - finished bags",
-    "amount": 120
-   }
-  ]
+  "inventory_at_cost_month_end": 24871.4
  },
  "answers": [
   {

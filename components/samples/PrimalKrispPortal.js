@@ -39,6 +39,7 @@ import {
 } from './PrimalKrispCharts'
 import PrimalKrispDepositsTab from './primal-krisp/PrimalKrispDepositsTab'
 import PrimalKrispDepositsDetail from './primal-krisp/PrimalKrispDepositsDetail'
+import PrimalKrispMonthEndTab from './primal-krisp/PrimalKrispMonthEndTab'
 import { allocateWholeDollars } from './sampleWholeDollarDisplay.js'
 
 const CHANNELS = DATA.channels
@@ -355,7 +356,7 @@ export default function PrimalKrispPortal() {
     ['deposits', 'Deposits', 'Deposits'],
     ['advertising', 'Advertising / promos', 'Ads'],
   ]
-  const EXTRA = [['close', 'Monthly close', 'Close']]
+  const EXTRA = [['close', 'Month end', 'Month end']]
   const currentLabel = [...TABS, ...EXTRA].find((t) => t[0] === tab)?.[1] || ''
 
   const salesDelta = salesPrior > 0 ? ((salesPeriod - salesPrior) / salesPrior) * 100 : 0
@@ -586,25 +587,33 @@ export default function PrimalKrispPortal() {
                 Subscribe & save: 6% off, free shipping
               </div>
 
-              <button
-                type="button"
-                className="pk-click"
-                onClick={() => openDetail({ kind: 'subMonthly' })}
-                style={{ ...card, marginBottom: '16px', overflowX: 'auto', width: '100%', textAlign: 'left', cursor: 'pointer' }}
-              >
-                <div style={{ ...lbl, marginBottom: '8px' }}>Active subscribers — 12 months</div>
+              <div style={{ ...card, marginBottom: '16px', width: '100%', overflowX: 'hidden' }}>
+                <div
+                  role="button"
+                  tabIndex={0}
+                  className="pk-click"
+                  onClick={() => openDetail({ kind: 'subMonthly' })}
+                  onKeyDown={(e) => e.key === 'Enter' && openDetail({ kind: 'subMonthly' })}
+                  style={{ ...lbl, marginBottom: '8px', cursor: 'pointer', display: 'inline-block' }}
+                >
+                  Active subscribers, 12 months
+                </div>
                 <SubscriberLineChart monthly={DATA.subscriptions.monthly} />
-              </button>
+              </div>
 
-              <button
-                type="button"
-                className="pk-click"
-                onClick={() => openDetail({ kind: 'subRenewals' })}
-                style={{ ...card, marginBottom: '16px', overflowX: 'auto', width: '100%', textAlign: 'left', cursor: 'pointer' }}
-              >
-                <div style={{ ...lbl, marginBottom: '8px' }}>Renewals — next 14 days</div>
+              <div style={{ ...card, marginBottom: '16px', width: '100%', overflowX: 'hidden' }}>
+                <div
+                  role="button"
+                  tabIndex={0}
+                  className="pk-click"
+                  onClick={() => openDetail({ kind: 'subRenewals' })}
+                  onKeyDown={(e) => e.key === 'Enter' && openDetail({ kind: 'subRenewals' })}
+                  style={{ ...lbl, marginBottom: '8px', cursor: 'pointer', display: 'inline-block' }}
+                >
+                  Renewals, next 14 days
+                </div>
                 <RenewalBars14 days={DATA.subscriptions.renewals_next_14_days} />
-              </button>
+              </div>
 
               <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
                 <RankedBars
@@ -955,71 +964,7 @@ export default function PrimalKrispPortal() {
           )}
 
           {tab === 'close' && !overviewDetail && (
-            <>
-              <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap', marginBottom: '16px' }}>
-                <KPI k="Income to post" v={money(DATA.monthly_close.income_to_post_total)} accent={GREEN} onClick={() => openDetail({ kind: 'closeIncome' })} />
-                <KPI k="COGS to post" v={money(DATA.monthly_close.cogs_to_post.amount)} onClick={() => openDetail({ kind: 'closeCogs' })} />
-                <KPI k="AR at month end" v={money(liveStoreOwed)} accent={AMBER} onClick={() => openDetail({ kind: 'closeAR' })} />
-              </div>
-              <div style={{ ...card }}>
-                <div style={{ ...lbl, color: KRAFT, marginBottom: '6px' }}>Income to post</div>
-                {Object.entries(DATA.monthly_close.income_to_post).map(([k, v]) => (
-                  <button
-                    key={k}
-                    type="button"
-                    className="pk-click"
-                    onClick={() => openDetail({ kind: 'closeIncomeLine', key: k })}
-                    style={{ display: 'block', width: '100%', border: 'none', background: 'transparent', padding: 0, cursor: 'pointer', textAlign: 'left' }}
-                  >
-                    <Row l={k} v={money(v)} />
-                  </button>
-                ))}
-                <button
-                  type="button"
-                  className="pk-click"
-                  onClick={() => openDetail({ kind: 'closeIncome' })}
-                  style={{ display: 'block', width: '100%', border: 'none', background: 'transparent', padding: 0, cursor: 'pointer', textAlign: 'left' }}
-                >
-                  <Row l="Total" v={money(DATA.monthly_close.income_to_post_total)} bold top />
-                </button>
-                <div style={{ marginTop: '16px', padding: '12px 14px', background: CREAM, borderRadius: '2px', border: `1px dashed ${BORDER}` }}>
-                  <div style={{ ...lbl, marginBottom: '6px' }}>Booked elsewhere</div>
-                  {Object.entries(DATA.monthly_close.booked_through_shopify_do_not_reenter).map(([k, v]) => (
-                    <button
-                      key={k}
-                      type="button"
-                      className="pk-click"
-                      onClick={() => openDetail({ kind: 'closeBookedLine', key: k })}
-                      style={{ display: 'block', width: '100%', border: 'none', background: 'transparent', padding: 0, cursor: 'pointer', textAlign: 'left' }}
-                    >
-                      <Row l={k} v={money(v)} />
-                    </button>
-                  ))}
-                  <button
-                    type="button"
-                    className="pk-click"
-                    onClick={() => openDetail({ kind: 'closeBooked' })}
-                    style={{ display: 'block', width: '100%', border: 'none', background: 'transparent', padding: 0, cursor: 'pointer', textAlign: 'left' }}
-                  >
-                    <Row l="Total booked" v={money0(Object.values(DATA.monthly_close.booked_through_shopify_do_not_reenter).reduce((s, n) => s + n, 0))} bold top />
-                  </button>
-                </div>
-                <div style={{ ...lbl, color: KRAFT, margin: '16px 0 6px' }}>Journal entry preview</div>
-                {DATA.monthly_close.journal_entries_preview.map((je, i) => (
-                  <button
-                    key={i}
-                    type="button"
-                    className="pk-click"
-                    onClick={() => openDetail({ kind: 'closeJournal', index: i })}
-                    style={{ display: 'block', width: '100%', border: 'none', background: 'transparent', padding: '6px 0', cursor: 'pointer', textAlign: 'left', borderTop: i ? `1px solid ${CREAM}` : 'none' }}
-                  >
-                    <span style={{ fontSize: '12px', color: MUTED }}>
-                      <span style={{ color: INK, fontWeight: 600 }}>{je.memo}</span> · Dr {je.debit} / Cr {je.credit} · {money(je.amount)}
-                    </span>
-                  </button>
-                ))}
-              </div>
-            </>
+            <PrimalKrispMonthEndTab card={card} lbl={lbl} onOpenDetail={openDetail} storeOwed={liveStoreOwed} />
           )}
         </main>
 

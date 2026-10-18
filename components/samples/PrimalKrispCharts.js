@@ -84,18 +84,19 @@ function TipRect({ show, hide, x, y, width, height, fill, opacity, label, value,
   )
 }
 
-function ChartLegend({ items, yBase = 198 }) {
+function ChartLegend({ items, yBase = 198, vbW = 520 }) {
   return (
     <g fontFamily={sans} fontSize="9.5" fill={CHARCOAL}>
       {items.map((it, i) => {
         const row = Math.floor(i / 3)
         const col = i % 3
-        const x = 16 + col * 155
+        const colW = Math.max(120, (vbW - 32) / 3)
+        const x = 16 + col * colW
         const y = yBase + row * 15
         return (
           <g key={it.label} transform={`translate(${x}, ${y})`}>
             <rect width={10} height={10} fill={it.color} />
-            <text x={14} y={9}>{it.label}</text>
+            <text x={14} y={9} fill={CHARCOAL}>{it.label}</text>
           </g>
         )
       })}
@@ -109,11 +110,12 @@ export function StackedSalesByChannel({ months, channels, accent = BRICK }) {
   const max = Math.max(...totals, 1)
   const w = 58
   const vbW = 16 + months.length * w
-  const vbH = 248
   const legendItems = channels.map((ch) => ({ label: ch, color: CHANNEL_COLORS[ch] || accent }))
+  const legendY = 208
+  const vbH = legendY + 28
   return (
-    <ChartFrame tip={node} hide={hide}>
-      <svg viewBox={`0 0 ${vbW} ${vbH}`} style={{ width: '100%', minWidth: '520px', display: 'block' }}>
+    <ChartFrame tip={node} hide={hide} style={{ width: '100%', maxWidth: '100%' }}>
+      <svg viewBox={`0 0 ${vbW} ${vbH}`} preserveAspectRatio="xMidYMid meet" style={{ width: '100%', maxWidth: '100%', height: 'auto', display: 'block' }}>
         {months.map((m, i) => {
           const x = 16 + i * w
           let y = 148
@@ -148,7 +150,7 @@ export function StackedSalesByChannel({ months, channels, accent = BRICK }) {
             </g>
           )
         })}
-        <ChartLegend items={legendItems} yBase={208} />
+        <ChartLegend items={legendItems} yBase={legendY} vbW={vbW} />
       </svg>
     </ChartFrame>
   )
@@ -161,10 +163,11 @@ export function CashForecast13({ forecast, accent = BRICK }) {
   const cumMin = Math.min(...weeks.map((w) => w.ending_cash), forecast.starting_cash)
   const cumMax = Math.max(...weeks.map((w) => w.ending_cash), forecast.starting_cash)
   const vbW = 20 + weeks.length * 58
-  const vbH = 210
+  const legendY = 188
+  const vbH = legendY + 24
   return (
-    <ChartFrame tip={node} hide={hide}>
-      <svg viewBox={`0 0 ${vbW} ${vbH}`} style={{ width: '100%', minWidth: '640px', display: 'block' }}>
+    <ChartFrame tip={node} hide={hide} style={{ width: '100%', maxWidth: '100%' }}>
+      <svg viewBox={`0 0 ${vbW} ${vbH}`} preserveAspectRatio="xMidYMid meet" style={{ width: '100%', maxWidth: '100%', height: 'auto', display: 'block' }}>
         {weeks.map((w, i) => {
           const x = 20 + i * 58
           const inH = (w.cash_in / wMax) * 92
@@ -225,6 +228,8 @@ export function CashForecast13({ forecast, accent = BRICK }) {
           />
         ))}
         <ChartLegend
+          vbW={vbW}
+          yBase={legendY}
           items={[
             { label: 'Cash in', color: CHARCOAL },
             { label: 'Cash out', color: STONE },
@@ -238,57 +243,57 @@ export function CashForecast13({ forecast, accent = BRICK }) {
 export function SubscriberLineChart({ monthly, accent = BRICK }) {
   const { show, hide, node } = useChartTip()
   const pts = monthly || []
+  if (!pts.length) return null
   const maxA = Math.max(...pts.map((p) => p.active_end), 1)
-  const w = 58
-  const vbW = 30 + pts.length * w
-  const vbH = 200
-  const lineY = (v) => 110 - (v / maxA) * 85
+  const padL = 36
+  const padR = 20
+  const padT = 20
+  const labelH = 44
+  const plotH = 100
+  const n = pts.length
+  const step = n > 1 ? Math.min(52, Math.max(36, 480 / (n - 1))) : 0
+  const innerW = n > 1 ? step * (n - 1) : 0
+  const vbW = padL + innerW + padR
+  const plotBottom = padT + plotH
+  const vbH = plotBottom + labelH
+  const xAt = (i) => padL + (n <= 1 ? innerW / 2 : i * step)
+  const yAt = (v) => plotBottom - (v / maxA) * (plotH - 4)
   return (
-    <ChartFrame tip={node} hide={hide}>
-      <svg viewBox={`0 0 ${vbW} ${vbH}`} style={{ width: '100%', minWidth: '520px', display: 'block' }}>
+    <ChartFrame tip={node} hide={hide} style={{ width: '100%', maxWidth: '100%' }}>
+      <svg
+        viewBox={`0 0 ${vbW} ${vbH}`}
+        preserveAspectRatio="xMidYMid meet"
+        style={{ width: '100%', maxWidth: '100%', height: 'auto', display: 'block' }}
+        role="img"
+        aria-label="Active subscribers over 12 months"
+      >
+        <line x1={padL} y1={plotBottom} x2={vbW - padR} y2={plotBottom} stroke={STONE} strokeWidth="1" />
         <polyline
           fill="none"
           stroke={accent}
           strokeWidth="2"
-          points={pts.map((p, i) => `${44 + i * w},${lineY(p.active_end)}`).join(' ')}
+          points={pts.map((p, i) => `${xAt(i)},${yAt(p.active_end)}`).join(' ')}
         />
         {pts.map((p, i) => (
           <g key={p.label}>
             <circle
-              cx={44 + i * w}
-              cy={lineY(p.active_end)}
-              r="5"
+              cx={xAt(i)}
+              cy={yAt(p.active_end)}
+              r="4.5"
               fill={accent}
-              onMouseEnter={(e) => show(e, `${p.label} · Active`, p.active_end)}
-              onTouchStart={(e) => show(e, `${p.label} · Active`, p.active_end)}
+              onMouseEnter={(e) => show(e, `${p.label} active`, fmtInt(p.active_end))}
+              onMouseMove={(e) => show(e, `${p.label} active`, fmtInt(p.active_end))}
+              onTouchStart={(e) => show(e, `${p.label} active`, fmtInt(p.active_end))}
               style={{ cursor: 'pointer' }}
             />
-            <text x={44 + i * w} y={128} textAnchor="middle" fontSize="9" fill={MUTED} fontFamily={sans}>
+            <text x={xAt(i)} y={plotBottom + 16} textAnchor="middle" fontSize="9" fill={MUTED} fontFamily={sans}>
               {p.label}
             </text>
-            <text x={44 + i * w} y={140} textAnchor="middle" fontSize="9.5" fontWeight="600" fill={INK} fontFamily={sans}>
-              {p.active_end}
+            <text x={xAt(i)} y={plotBottom + 30} textAnchor="middle" fontSize="10" fontWeight="600" fill={INK} fontFamily={sans}>
+              {fmtInt(p.active_end)}
             </text>
           </g>
         ))}
-        {pts.map((p, i) => {
-          const x = 44 + i * w
-          const newH = (p.new / Math.max(...pts.map((x) => x.new), 1)) * 16
-          const canH = (p.cancelled / Math.max(...pts.map((x) => x.cancelled), 1)) * 16
-          return (
-            <g key={`bars-${p.label}`}>
-              <TipRect show={show} hide={hide} x={x - 10} y={148 - newH} width={8} height={newH} fill={SAGE} label={`${p.label} · New`} value={p.new} />
-              <TipRect show={show} hide={hide} x={x + 2} y={148 - canH} width={8} height={canH} fill={STONE} label={`${p.label} · Cancelled`} value={p.cancelled} />
-            </g>
-          )
-        })}
-        <ChartLegend
-          items={[
-            { label: 'Active', color: accent },
-            { label: 'New', color: SAGE },
-            { label: 'Cancelled', color: STONE },
-          ]}
-        />
       </svg>
     </ChartFrame>
   )
@@ -301,7 +306,7 @@ export function RenewalBars14({ days, accent = BRICK }) {
   const vbW = 20 + days.length * w
   return (
     <ChartFrame tip={node} hide={hide}>
-      <svg viewBox={`0 0 ${vbW} 150`} style={{ width: '100%', minWidth: '480px', display: 'block' }}>
+      <svg viewBox={`0 0 ${vbW} 150`} preserveAspectRatio="xMidYMid meet" style={{ width: '100%', maxWidth: '100%', height: 'auto', display: 'block' }}>
         {days.map((d, i) => {
           const x = 20 + i * w
           const h = (d.renewals / maxR) * 100
@@ -391,7 +396,7 @@ export function MarginByChannelChart({ products, channels, accent = BRICK }) {
   const seriesColors = [accent, CHARCOAL, SAGE, BROWN, STONE]
   return (
     <ChartFrame tip={node} hide={hide}>
-      <svg viewBox={`0 0 ${vbW} 248`} style={{ width: '100%', minWidth: '520px', display: 'block' }}>
+      <svg viewBox={`0 0 ${vbW} 260`} preserveAspectRatio="xMidYMid meet" style={{ width: '100%', maxWidth: '100%', height: 'auto', display: 'block' }}>
         {products.map((p, gi) => {
           const gx = 36 + gi * gw
           return (
@@ -420,7 +425,7 @@ export function MarginByChannelChart({ products, channels, accent = BRICK }) {
             </g>
           )
         })}
-        <ChartLegend items={channels.map((ch, i) => ({ label: ch, color: seriesColors[i % seriesColors.length] }))} yBase={208} />
+        <ChartLegend items={channels.map((ch, i) => ({ label: ch, color: seriesColors[i % seriesColors.length] }))} yBase={208} vbW={vbW} />
       </svg>
     </ChartFrame>
   )
