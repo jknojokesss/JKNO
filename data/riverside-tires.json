@@ -1,7 +1,8 @@
 {
   "meta": {
     "as_of": "2026-09-25",
-    "sample_header": "Sample — fictitious numbers · as of Sep 25, 2026"
+    "sample_header": "Sample — fictitious numbers · as of Sep 25, 2026",
+    "week_start": "2026-09-19"
   },
   "monthly": [
     {
@@ -74,7 +75,7 @@
       "cogs": 14400,
       "opex": 9100,
       "profit": 13600,
-      "tiresSold": 462
+      "tiresSold": 418
     }
   ],
   "pl_by_month": {
@@ -2304,100 +2305,613 @@
     }
   },
   "balance_sheet": {
-    "2026-08": {
-      "month": "2026-08",
-      "label": "Aug 31, 2026",
+    "2026-01": {
+      "label": "Jan 31, 2026",
       "assets": [
         {
           "label": "Business checking",
-          "amount": 45200,
-          "drill": [
-            {
-              "date": "2026-08-31",
-              "description": "Bank balance per statement",
-              "type": "Balance",
-              "amount": 45200
-            }
-          ]
+          "amount": 42800
         },
         {
           "label": "Inventory",
-          "amount": 19200,
-          "drill": [
-            {
-              "date": "2026-08-31",
-              "description": "Finished tires on hand",
-              "type": "Balance",
-              "amount": 19200
-            }
-          ]
+          "amount": 2694
         },
         {
           "label": "Accounts receivable",
-          "amount": 3800,
-          "drill": [
-            {
-              "date": "2026-08-31",
-              "description": "Open customer invoices",
-              "type": "Balance",
-              "amount": 3800
-            }
-          ]
+          "amount": 3200
         }
       ],
       "liabilities": [
         {
           "label": "Accounts payable",
-          "amount": 10800
+          "amount": 9800
         },
         {
           "label": "Credit cards",
-          "amount": 6400
+          "amount": 6100
         },
         {
           "label": "Sales tax payable",
-          "amount": 2200
+          "amount": 2000
         }
       ],
       "equity": [
         {
           "label": "Owner's equity",
-          "amount": 48800
+          "amount": 30794
+        }
+      ]
+    },
+    "2026-02": {
+      "label": "Feb 28, 2026",
+      "assets": [
+        {
+          "label": "Business checking",
+          "amount": 43150
+        },
+        {
+          "label": "Inventory",
+          "amount": 2834
+        },
+        {
+          "label": "Accounts receivable",
+          "amount": 3320
+        }
+      ],
+      "liabilities": [
+        {
+          "label": "Accounts payable",
+          "amount": 9940
+        },
+        {
+          "label": "Credit cards",
+          "amount": 6180
+        },
+        {
+          "label": "Sales tax payable",
+          "amount": 2030
+        }
+      ],
+      "equity": [
+        {
+          "label": "Owner's equity",
+          "amount": 31154
+        }
+      ]
+    },
+    "2026-03": {
+      "label": "Mar 31, 2026",
+      "assets": [
+        {
+          "label": "Business checking",
+          "amount": 43500
+        },
+        {
+          "label": "Inventory",
+          "amount": 3039
+        },
+        {
+          "label": "Accounts receivable",
+          "amount": 3440
+        }
+      ],
+      "liabilities": [
+        {
+          "label": "Accounts payable",
+          "amount": 10080
+        },
+        {
+          "label": "Credit cards",
+          "amount": 6260
+        },
+        {
+          "label": "Sales tax payable",
+          "amount": 2060
+        }
+      ],
+      "equity": [
+        {
+          "label": "Owner's equity",
+          "amount": 31579
+        }
+      ]
+    },
+    "2026-04": {
+      "label": "Apr 30, 2026",
+      "assets": [
+        {
+          "label": "Business checking",
+          "amount": 43850
+        },
+        {
+          "label": "Inventory",
+          "amount": 3039
+        },
+        {
+          "label": "Accounts receivable",
+          "amount": 3560
+        }
+      ],
+      "liabilities": [
+        {
+          "label": "Accounts payable",
+          "amount": 10220
+        },
+        {
+          "label": "Credit cards",
+          "amount": 6340
+        },
+        {
+          "label": "Sales tax payable",
+          "amount": 2090
+        }
+      ],
+      "equity": [
+        {
+          "label": "Owner's equity",
+          "amount": 31799
+        }
+      ]
+    },
+    "2026-05": {
+      "label": "May 31, 2026",
+      "assets": [
+        {
+          "label": "Business checking",
+          "amount": 44200
+        },
+        {
+          "label": "Inventory",
+          "amount": 3408
+        },
+        {
+          "label": "Accounts receivable",
+          "amount": 3680
+        }
+      ],
+      "liabilities": [
+        {
+          "label": "Accounts payable",
+          "amount": 10360
+        },
+        {
+          "label": "Credit cards",
+          "amount": 6420
+        },
+        {
+          "label": "Sales tax payable",
+          "amount": 2120
+        }
+      ],
+      "equity": [
+        {
+          "label": "Owner's equity",
+          "amount": 32388
+        }
+      ]
+    },
+    "2026-06": {
+      "label": "Jun 30, 2026",
+      "assets": [
+        {
+          "label": "Business checking",
+          "amount": 44550
+        },
+        {
+          "label": "Inventory",
+          "amount": 2982
+        },
+        {
+          "label": "Accounts receivable",
+          "amount": 3800
+        }
+      ],
+      "liabilities": [
+        {
+          "label": "Accounts payable",
+          "amount": 10500
+        },
+        {
+          "label": "Credit cards",
+          "amount": 6500
+        },
+        {
+          "label": "Sales tax payable",
+          "amount": 2150
+        }
+      ],
+      "equity": [
+        {
+          "label": "Owner's equity",
+          "amount": 32182
+        }
+      ]
+    },
+    "2026-07": {
+      "label": "Jul 31, 2026",
+      "assets": [
+        {
+          "label": "Business checking",
+          "amount": 44850
+        },
+        {
+          "label": "Inventory",
+          "amount": 3037
+        },
+        {
+          "label": "Accounts receivable",
+          "amount": 3920
+        }
+      ],
+      "liabilities": [
+        {
+          "label": "Accounts payable",
+          "amount": 10640
+        },
+        {
+          "label": "Credit cards",
+          "amount": 6580
+        },
+        {
+          "label": "Sales tax payable",
+          "amount": 2180
+        }
+      ],
+      "equity": [
+        {
+          "label": "Owner's equity",
+          "amount": 32407
+        }
+      ]
+    },
+    "2026-08": {
+      "label": "Aug 31, 2026",
+      "assets": [
+        {
+          "label": "Business checking",
+          "amount": 45200
+        },
+        {
+          "label": "Inventory",
+          "amount": 3170
+        },
+        {
+          "label": "Accounts receivable",
+          "amount": 4040
+        }
+      ],
+      "liabilities": [
+        {
+          "label": "Accounts payable",
+          "amount": 10780
+        },
+        {
+          "label": "Credit cards",
+          "amount": 6660
+        },
+        {
+          "label": "Sales tax payable",
+          "amount": 2210
+        }
+      ],
+      "equity": [
+        {
+          "label": "Owner's equity",
+          "amount": 32760
         }
       ]
     }
   },
   "cash_flow": {
+    "2026-01": {
+      "operating": [
+        {
+          "label": "Net income",
+          "amount": 12100
+        },
+        {
+          "label": "Accounts receivable change",
+          "amount": -350
+        },
+        {
+          "label": "Inventory change",
+          "amount": 0
+        },
+        {
+          "label": "Accounts payable change",
+          "amount": 420
+        }
+      ],
+      "investing": [
+        {
+          "label": "Shop equipment",
+          "amount": -800
+        }
+      ],
+      "financing": [
+        {
+          "label": "Owner draw",
+          "amount": -10670
+        }
+      ],
+      "cashStart": 42100,
+      "cashEnd": 42800,
+      "netChange": 700
+    },
+    "2026-02": {
+      "operating": [
+        {
+          "label": "Net income",
+          "amount": 12500
+        },
+        {
+          "label": "Accounts receivable change",
+          "amount": 280
+        },
+        {
+          "label": "Inventory change",
+          "amount": -140
+        },
+        {
+          "label": "Accounts payable change",
+          "amount": -180
+        }
+      ],
+      "investing": [
+        {
+          "label": "Shop equipment",
+          "amount": -900
+        }
+      ],
+      "financing": [
+        {
+          "label": "Owner draw",
+          "amount": -11210
+        }
+      ],
+      "cashStart": 42800,
+      "cashEnd": 43150,
+      "netChange": 350
+    },
+    "2026-03": {
+      "operating": [
+        {
+          "label": "Net income",
+          "amount": 12800
+        },
+        {
+          "label": "Accounts receivable change",
+          "amount": -350
+        },
+        {
+          "label": "Inventory change",
+          "amount": -205
+        },
+        {
+          "label": "Accounts payable change",
+          "amount": -180
+        }
+      ],
+      "investing": [
+        {
+          "label": "Shop equipment",
+          "amount": -1000
+        }
+      ],
+      "financing": [
+        {
+          "label": "Owner draw",
+          "amount": -10715
+        }
+      ],
+      "cashStart": 43150,
+      "cashEnd": 43500,
+      "netChange": 350
+    },
+    "2026-04": {
+      "operating": [
+        {
+          "label": "Net income",
+          "amount": 12800
+        },
+        {
+          "label": "Accounts receivable change",
+          "amount": 280
+        },
+        {
+          "label": "Inventory change",
+          "amount": 0
+        },
+        {
+          "label": "Accounts payable change",
+          "amount": 420
+        }
+      ],
+      "investing": [
+        {
+          "label": "Shop equipment",
+          "amount": -1100
+        }
+      ],
+      "financing": [
+        {
+          "label": "Owner draw",
+          "amount": -12050
+        }
+      ],
+      "cashStart": 43500,
+      "cashEnd": 43850,
+      "netChange": 350
+    },
+    "2026-05": {
+      "operating": [
+        {
+          "label": "Net income",
+          "amount": 14200
+        },
+        {
+          "label": "Accounts receivable change",
+          "amount": -350
+        },
+        {
+          "label": "Inventory change",
+          "amount": -369
+        },
+        {
+          "label": "Accounts payable change",
+          "amount": -180
+        }
+      ],
+      "investing": [
+        {
+          "label": "Shop equipment",
+          "amount": -800
+        }
+      ],
+      "financing": [
+        {
+          "label": "Owner draw",
+          "amount": -12151
+        }
+      ],
+      "cashStart": 43850,
+      "cashEnd": 44200,
+      "netChange": 350
+    },
+    "2026-06": {
+      "operating": [
+        {
+          "label": "Net income",
+          "amount": 13000
+        },
+        {
+          "label": "Accounts receivable change",
+          "amount": 280
+        },
+        {
+          "label": "Inventory change",
+          "amount": 426
+        },
+        {
+          "label": "Accounts payable change",
+          "amount": -180
+        }
+      ],
+      "investing": [
+        {
+          "label": "Shop equipment",
+          "amount": -900
+        }
+      ],
+      "financing": [
+        {
+          "label": "Owner draw",
+          "amount": -12276
+        }
+      ],
+      "cashStart": 44200,
+      "cashEnd": 44550,
+      "netChange": 350
+    },
+    "2026-07": {
+      "operating": [
+        {
+          "label": "Net income",
+          "amount": 13200
+        },
+        {
+          "label": "Accounts receivable change",
+          "amount": -350
+        },
+        {
+          "label": "Inventory change",
+          "amount": -55
+        },
+        {
+          "label": "Accounts payable change",
+          "amount": 420
+        }
+      ],
+      "investing": [
+        {
+          "label": "Shop equipment",
+          "amount": -1000
+        }
+      ],
+      "financing": [
+        {
+          "label": "Owner draw",
+          "amount": -11915
+        }
+      ],
+      "cashStart": 44550,
+      "cashEnd": 44850,
+      "netChange": 300
+    },
     "2026-08": {
-      "month": "2026-08",
       "operating": [
         {
           "label": "Net income",
           "amount": 13600
         },
         {
-          "label": "Inventory change",
-          "amount": -800
+          "label": "Accounts receivable change",
+          "amount": 280
         },
         {
-          "label": "Accounts receivable change",
-          "amount": -400
+          "label": "Inventory change",
+          "amount": -133
         },
         {
           "label": "Accounts payable change",
-          "amount": 600
+          "amount": -180
         }
       ],
       "investing": [
         {
           "label": "Shop equipment",
-          "amount": -1200
+          "amount": -1100
         }
       ],
       "financing": [
         {
           "label": "Owner draw",
-          "amount": -2500
+          "amount": -12117
+        }
+      ],
+      "cashStart": 44850,
+      "cashEnd": 45200,
+      "netChange": 350
+    },
+    "all": {
+      "operating": [
+        {
+          "label": "Net income",
+          "amount": 104200
+        },
+        {
+          "label": "Accounts receivable change",
+          "amount": -280
+        },
+        {
+          "label": "Inventory change",
+          "amount": -476
+        },
+        {
+          "label": "Accounts payable change",
+          "amount": 360
+        }
+      ],
+      "investing": [
+        {
+          "label": "Shop equipment",
+          "amount": -7600
+        }
+      ],
+      "financing": [
+        {
+          "label": "Owner draw",
+          "amount": -93104
         }
       ],
       "cashStart": 42100,
@@ -2408,61 +2922,61 @@
   "sales_mix_aug": [
     {
       "name": "New Tires",
-      "pct": 62.4,
-      "revenue": 23150
+      "revenue": 23150,
+      "pct": 62.4
     },
     {
       "name": "Service & Repair",
-      "pct": 22.1,
-      "revenue": 8200
+      "revenue": 8200,
+      "pct": 22.1
     },
     {
       "name": "Used Tires",
-      "pct": 10.5,
-      "revenue": 3900
+      "revenue": 3900,
+      "pct": 10.5
     },
     {
       "name": "Other",
-      "pct": 5,
-      "revenue": 1850
+      "revenue": 1850,
+      "pct": 5
     }
   ],
   "top_tire_sizes_aug": [
     {
       "rank": 1,
       "size": "235/65R17",
-      "units": 86,
-      "revenue": 11200
+      "units": 72,
+      "revenue": 5040
     },
     {
       "rank": 2,
       "size": "225/60R17",
-      "units": 72,
-      "revenue": 9800
+      "units": 58,
+      "revenue": 4060
     },
     {
       "rank": 3,
       "size": "245/70R17",
-      "units": 58,
-      "revenue": 8900
+      "units": 48,
+      "revenue": 3840
     },
     {
       "rank": 4,
       "size": "205/55R16",
-      "units": 54,
-      "revenue": 6200
+      "units": 44,
+      "revenue": 3080
     },
     {
       "rank": 5,
       "size": "265/70R17",
-      "units": 41,
-      "revenue": 7100
+      "units": 36,
+      "revenue": 2880
     },
     {
       "rank": 6,
       "size": "275/55R20",
-      "units": 36,
-      "revenue": 6800
+      "units": 28,
+      "revenue": 2520
     }
   ],
   "stock": [
@@ -2470,46 +2984,46 @@
       "size": "235/65/17",
       "desc": "All-season touring",
       "onHand": 8,
-      "unitCost": 454.26250000000005
+      "unitCost": 75
     },
     {
       "size": "205/55/16",
       "desc": "Grand touring",
       "onHand": 6,
-      "unitCost": 393.69
+      "unitCost": 65
     },
     {
       "size": "225/60/17",
       "desc": "All-season",
       "onHand": 10,
-      "unitCost": 423.97
+      "unitCost": 70
     },
     {
       "size": "245/70/17",
       "desc": "All-terrain",
       "onHand": 6,
-      "unitCost": 514.83
+      "unitCost": 85
     },
     {
       "size": "265/70/17",
       "desc": "Highway terrain",
       "onHand": 2,
-      "unitCost": 514.83
+      "unitCost": 85
     },
     {
       "size": "255/50/20",
       "desc": "Performance SUV",
       "onHand": 4,
-      "unitCost": 696.53
+      "unitCost": 115
     },
     {
       "size": "215/55/17",
       "desc": "Standard touring",
       "onHand": 5,
-      "unitCost": 411.86
+      "unitCost": 68
     }
   ],
-  "inventory_value_aug": 19200,
+  "inventory_value_aug": 3170,
   "orders": [
     {
       "date": "2026-09-25",
@@ -2792,5 +3306,517 @@
       "sizes": "Top size in August was 235/65R17 — 86 units and $11,200 revenue.",
       "month": "September register through Sep 25 shows $7,757 in sales on 22 tickets (estimates)."
     }
-  }
+  },
+  "aug_tire_sales": {
+    "new_tire_revenue": 23150,
+    "used_tire_revenue": 3900,
+    "tire_revenue_total": 27050,
+    "tires_sold_units": 418,
+    "top_six_revenue": 21420,
+    "top_six_units": 286
+  },
+  "stock_by_month": {
+    "2026-01": {
+      "label": "Jan 30, 2026",
+      "rows": [
+        {
+          "size": "235/65/17",
+          "desc": "All-season touring",
+          "unitCost": 75,
+          "onHand": 5,
+          "value": 375
+        },
+        {
+          "size": "205/55/16",
+          "desc": "Grand touring",
+          "unitCost": 65,
+          "onHand": 4,
+          "value": 260
+        },
+        {
+          "size": "225/60/17",
+          "desc": "All-season",
+          "unitCost": 70,
+          "onHand": 9,
+          "value": 630
+        },
+        {
+          "size": "245/70/17",
+          "desc": "All-terrain",
+          "unitCost": 85,
+          "onHand": 6,
+          "value": 510
+        },
+        {
+          "size": "265/70/17",
+          "desc": "Highway terrain",
+          "unitCost": 85,
+          "onHand": 3,
+          "value": 255
+        },
+        {
+          "size": "255/50/20",
+          "desc": "Performance SUV",
+          "unitCost": 115,
+          "onHand": 4,
+          "value": 460
+        },
+        {
+          "size": "215/55/17",
+          "desc": "Standard touring",
+          "unitCost": 68,
+          "onHand": 3,
+          "value": 204
+        }
+      ],
+      "inventory_value": 2694
+    },
+    "2026-02": {
+      "label": "Feb 30, 2026",
+      "rows": [
+        {
+          "size": "235/65/17",
+          "desc": "All-season touring",
+          "unitCost": 75,
+          "onHand": 6,
+          "value": 450
+        },
+        {
+          "size": "205/55/16",
+          "desc": "Grand touring",
+          "unitCost": 65,
+          "onHand": 5,
+          "value": 325
+        },
+        {
+          "size": "225/60/17",
+          "desc": "All-season",
+          "unitCost": 70,
+          "onHand": 9,
+          "value": 630
+        },
+        {
+          "size": "245/70/17",
+          "desc": "All-terrain",
+          "unitCost": 85,
+          "onHand": 6,
+          "value": 510
+        },
+        {
+          "size": "265/70/17",
+          "desc": "Highway terrain",
+          "unitCost": 85,
+          "onHand": 3,
+          "value": 255
+        },
+        {
+          "size": "255/50/20",
+          "desc": "Performance SUV",
+          "unitCost": 115,
+          "onHand": 4,
+          "value": 460
+        },
+        {
+          "size": "215/55/17",
+          "desc": "Standard touring",
+          "unitCost": 68,
+          "onHand": 3,
+          "value": 204
+        }
+      ],
+      "inventory_value": 2834
+    },
+    "2026-03": {
+      "label": "Mar 30, 2026",
+      "rows": [
+        {
+          "size": "235/65/17",
+          "desc": "All-season touring",
+          "unitCost": 75,
+          "onHand": 6,
+          "value": 450
+        },
+        {
+          "size": "205/55/16",
+          "desc": "Grand touring",
+          "unitCost": 65,
+          "onHand": 4,
+          "value": 260
+        },
+        {
+          "size": "225/60/17",
+          "desc": "All-season",
+          "unitCost": 70,
+          "onHand": 10,
+          "value": 700
+        },
+        {
+          "size": "245/70/17",
+          "desc": "All-terrain",
+          "unitCost": 85,
+          "onHand": 7,
+          "value": 595
+        },
+        {
+          "size": "265/70/17",
+          "desc": "Highway terrain",
+          "unitCost": 85,
+          "onHand": 3,
+          "value": 255
+        },
+        {
+          "size": "255/50/20",
+          "desc": "Performance SUV",
+          "unitCost": 115,
+          "onHand": 5,
+          "value": 575
+        },
+        {
+          "size": "215/55/17",
+          "desc": "Standard touring",
+          "unitCost": 68,
+          "onHand": 3,
+          "value": 204
+        }
+      ],
+      "inventory_value": 3039
+    },
+    "2026-04": {
+      "label": "Apr 30, 2026",
+      "rows": [
+        {
+          "size": "235/65/17",
+          "desc": "All-season touring",
+          "unitCost": 75,
+          "onHand": 6,
+          "value": 450
+        },
+        {
+          "size": "205/55/16",
+          "desc": "Grand touring",
+          "unitCost": 65,
+          "onHand": 4,
+          "value": 260
+        },
+        {
+          "size": "225/60/17",
+          "desc": "All-season",
+          "unitCost": 70,
+          "onHand": 10,
+          "value": 700
+        },
+        {
+          "size": "245/70/17",
+          "desc": "All-terrain",
+          "unitCost": 85,
+          "onHand": 7,
+          "value": 595
+        },
+        {
+          "size": "265/70/17",
+          "desc": "Highway terrain",
+          "unitCost": 85,
+          "onHand": 3,
+          "value": 255
+        },
+        {
+          "size": "255/50/20",
+          "desc": "Performance SUV",
+          "unitCost": 115,
+          "onHand": 5,
+          "value": 575
+        },
+        {
+          "size": "215/55/17",
+          "desc": "Standard touring",
+          "unitCost": 68,
+          "onHand": 3,
+          "value": 204
+        }
+      ],
+      "inventory_value": 3039
+    },
+    "2026-05": {
+      "label": "May 31, 2026",
+      "rows": [
+        {
+          "size": "235/65/17",
+          "desc": "All-season touring",
+          "unitCost": 75,
+          "onHand": 9,
+          "value": 675
+        },
+        {
+          "size": "205/55/16",
+          "desc": "Grand touring",
+          "unitCost": 65,
+          "onHand": 7,
+          "value": 455
+        },
+        {
+          "size": "225/60/17",
+          "desc": "All-season",
+          "unitCost": 70,
+          "onHand": 8,
+          "value": 560
+        },
+        {
+          "size": "245/70/17",
+          "desc": "All-terrain",
+          "unitCost": 85,
+          "onHand": 6,
+          "value": 510
+        },
+        {
+          "size": "265/70/17",
+          "desc": "Highway terrain",
+          "unitCost": 85,
+          "onHand": 4,
+          "value": 340
+        },
+        {
+          "size": "255/50/20",
+          "desc": "Performance SUV",
+          "unitCost": 115,
+          "onHand": 4,
+          "value": 460
+        },
+        {
+          "size": "215/55/17",
+          "desc": "Standard touring",
+          "unitCost": 68,
+          "onHand": 6,
+          "value": 408
+        }
+      ],
+      "inventory_value": 3408
+    },
+    "2026-06": {
+      "label": "Jun 30, 2026",
+      "rows": [
+        {
+          "size": "235/65/17",
+          "desc": "All-season touring",
+          "unitCost": 75,
+          "onHand": 7,
+          "value": 525
+        },
+        {
+          "size": "205/55/16",
+          "desc": "Grand touring",
+          "unitCost": 65,
+          "onHand": 6,
+          "value": 390
+        },
+        {
+          "size": "225/60/17",
+          "desc": "All-season",
+          "unitCost": 70,
+          "onHand": 11,
+          "value": 770
+        },
+        {
+          "size": "245/70/17",
+          "desc": "All-terrain",
+          "unitCost": 85,
+          "onHand": 5,
+          "value": 425
+        },
+        {
+          "size": "265/70/17",
+          "desc": "Highway terrain",
+          "unitCost": 85,
+          "onHand": 3,
+          "value": 255
+        },
+        {
+          "size": "255/50/20",
+          "desc": "Performance SUV",
+          "unitCost": 115,
+          "onHand": 3,
+          "value": 345
+        },
+        {
+          "size": "215/55/17",
+          "desc": "Standard touring",
+          "unitCost": 68,
+          "onHand": 4,
+          "value": 272
+        }
+      ],
+      "inventory_value": 2982
+    },
+    "2026-07": {
+      "label": "Jul 31, 2026",
+      "rows": [
+        {
+          "size": "235/65/17",
+          "desc": "All-season touring",
+          "unitCost": 75,
+          "onHand": 8,
+          "value": 600
+        },
+        {
+          "size": "205/55/16",
+          "desc": "Grand touring",
+          "unitCost": 65,
+          "onHand": 5,
+          "value": 325
+        },
+        {
+          "size": "225/60/17",
+          "desc": "All-season",
+          "unitCost": 70,
+          "onHand": 10,
+          "value": 700
+        },
+        {
+          "size": "245/70/17",
+          "desc": "All-terrain",
+          "unitCost": 85,
+          "onHand": 6,
+          "value": 510
+        },
+        {
+          "size": "265/70/17",
+          "desc": "Highway terrain",
+          "unitCost": 85,
+          "onHand": 2,
+          "value": 170
+        },
+        {
+          "size": "255/50/20",
+          "desc": "Performance SUV",
+          "unitCost": 115,
+          "onHand": 4,
+          "value": 460
+        },
+        {
+          "size": "215/55/17",
+          "desc": "Standard touring",
+          "unitCost": 68,
+          "onHand": 4,
+          "value": 272
+        }
+      ],
+      "inventory_value": 3037
+    },
+    "2026-08": {
+      "label": "Aug 31, 2026",
+      "rows": [
+        {
+          "size": "235/65/17",
+          "desc": "All-season touring",
+          "unitCost": 75,
+          "onHand": 8,
+          "value": 600
+        },
+        {
+          "size": "205/55/16",
+          "desc": "Grand touring",
+          "unitCost": 65,
+          "onHand": 6,
+          "value": 390
+        },
+        {
+          "size": "225/60/17",
+          "desc": "All-season",
+          "unitCost": 70,
+          "onHand": 10,
+          "value": 700
+        },
+        {
+          "size": "245/70/17",
+          "desc": "All-terrain",
+          "unitCost": 85,
+          "onHand": 6,
+          "value": 510
+        },
+        {
+          "size": "265/70/17",
+          "desc": "Highway terrain",
+          "unitCost": 85,
+          "onHand": 2,
+          "value": 170
+        },
+        {
+          "size": "255/50/20",
+          "desc": "Performance SUV",
+          "unitCost": 115,
+          "onHand": 4,
+          "value": 460
+        },
+        {
+          "size": "215/55/17",
+          "desc": "Standard touring",
+          "unitCost": 68,
+          "onHand": 5,
+          "value": 340
+        }
+      ],
+      "inventory_value": 3170
+    }
+  },
+  "sales_items_aug": [
+    {
+      "item": "235/65R17",
+      "units": 72,
+      "revenue": 5040,
+      "category": "New tire"
+    },
+    {
+      "item": "225/60R17",
+      "units": 58,
+      "revenue": 4060,
+      "category": "New tire"
+    },
+    {
+      "item": "245/70R17",
+      "units": 48,
+      "revenue": 3840,
+      "category": "New tire"
+    },
+    {
+      "item": "205/55R16",
+      "units": 44,
+      "revenue": 3080,
+      "category": "New tire"
+    },
+    {
+      "item": "265/70R17",
+      "units": 36,
+      "revenue": 2880,
+      "category": "New tire"
+    },
+    {
+      "item": "275/55R20",
+      "units": 28,
+      "revenue": 2520,
+      "category": "New tire"
+    },
+    {
+      "item": "Other new tire sizes",
+      "units": 132,
+      "revenue": 1730,
+      "category": "New tire"
+    },
+    {
+      "item": "Used tires (assorted)",
+      "units": 52,
+      "revenue": 3900,
+      "category": "Used tire"
+    },
+    {
+      "item": "Service & labor",
+      "units": 186,
+      "revenue": 8200,
+      "category": "Service"
+    },
+    {
+      "item": "Parts & other",
+      "units": 94,
+      "revenue": 1850,
+      "category": "Other"
+    }
+  ]
 }

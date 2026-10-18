@@ -48,11 +48,16 @@ const sumBy = (rows, key = 'amount') => rows.reduce((s, r) => s + r[key], 0)
 
 /* ---------- Orders helpers ---------- */
 
-const WEEK_START = (() => {
-  const d = new Date(`${AS_OF}T00:00:00.000Z`)
-  d.setUTCDate(d.getUTCDate() - 6)
-  return d.toISOString().slice(0, 10)
-})()
+const WEEK_START = DATA.meta.week_start
+
+const CF_PERIOD_KEYS = [...MONTHS.map((m) => m.month), 'all']
+const STOCK_MONTH_IDS = ['2026-04', '2026-05', '2026-06', '2026-07', '2026-08']
+
+const cfPeriodLabel = (key) => (key === 'all' ? 'Jan–Aug 2026' : monthYear(MONTHS.find((m) => m.month === key) || LAST_MONTH))
+const cfPillLabel = (key) => (key === 'all' ? 'All time' : MONTHS.find((m) => m.month === key)?.label || key)
+const plNetForCfKey = (key) => (key === 'all' ? sumBy(MONTHS, 'profit') : MONTHS.find((m) => m.month === key)?.profit || 0)
+const bsForCfKey = (key) => DATA.balance_sheet[key === 'all' ? '2026-08' : key]
+const inventoryOnBs = (key) => bsForCfKey(key)?.assets.find((a) => a.label === 'Inventory')?.amount
 
 const ORDER_PERIODS = [
   { id: '7d', label: '7 days' },
@@ -85,20 +90,11 @@ const SIZES = [...new Set(ORDERS.map((o) => o.size))].sort()
 
 /* ---------- Stock helpers ---------- */
 
-const STOCK_AS_OF = [
-  { id: '2026-04', label: 'Apr 30, 2026', units: [6, 4, 10, 7, 3, 5, 3] },
-  { id: '2026-05', label: 'May 31, 2026', units: [9, 7, 8, 6, 4, 4, 6] },
-  { id: '2026-06', label: 'Jun 30, 2026', units: [7, 6, 11, 5, 3, 3, 4] },
-  { id: '2026-07', label: 'Jul 31, 2026', units: [8, 5, 10, 6, 2, 4, 4] },
-  { id: '2026-08', label: 'Aug 31, 2026', units: DATA.stock.map((s) => s.onHand) },
-]
+const stockSnapFor = (id) => DATA.stock_by_month[id] || DATA.stock_by_month[STOCK_MONTH_IDS[STOCK_MONTH_IDS.length - 1]]
 
 const stockRowsFor = (id) => {
-  const snap = STOCK_AS_OF.find((s) => s.id === id) || STOCK_AS_OF[STOCK_AS_OF.length - 1]
-  return DATA.stock.map((s, i) => {
-    const onHand = snap.units[i] ?? s.onHand
-    return { ...s, onHand, value: onHand * s.unitCost }
-  })
+  const snap = stockSnapFor(id)
+  return snap.rows.map((r) => ({ size: r.size, desc: r.desc, unitCost: r.unitCost, onHand: r.onHand, value: r.value }))
 }
 
 /* ---------- Statement helpers ---------- */
@@ -516,30 +512,37 @@ function PlView({ onDrill, periodId, setPeriodId }) {
 }
 
 function CashFlowView() {
-  const keys = Object.keys(DATA.cash_flow)
-  const [key, setKey] = useState(keys[keys.length - 1])
+  const [key, setKey] = useState(CF_PERIOD_KEYS[CF_PERIOD_KEYS.length - 1])
   const cf = DATA.cash_flow[key]
-  const bs = DATA.balance_sheet[key]
+  const bs = bsForCfKey(key)
   const checking = bs?.assets.find((a) => a.label === 'Business checking')?.amount
   const opTotal = sumBy(cf.operating)
   const invTotal = sumBy(cf.investing)
   const finTotal = sumBy(cf.financing)
-  const period = monthYear(MONTHS.find((m) => m.month === key) || LAST_MONTH)
+  const plNet = plNetForCfKey(key)
+  const period = cfPeriodLabel(key)
+  const headLabel = key === 'all' ? 'YTD' : monthShort(MONTHS.find((m) => m.month === key)?.label || '')
   return (
     <>
       <PeriodBar compare={false} onCompare={() => {}} compareDisabled>
-        {keys.map((k) => (
+        {CF_PERIOD_KEYS.map((k) => (
           <Pill key={k} on={k === key} onClick={() => setKey(k)}>
-            {MONTHS.find((m) => m.month === k)?.label || k}
+            {cfPillLabel(k)}
           </Pill>
         ))}
       </PeriodBar>
       <StmtPanel title="Cash Flow" period={period}>
         <Stmt>
-          <StmtHead current={monthShort(MONTHS.find((m) => m.month === key)?.label || '')} />
+          <StmtHead current={headLabel} />
           <StmtSection>Operating activities</StmtSection>
           {cf.operating.map((l) => (
-            <StmtLine key={l.label} label={l.label} amount={l.amount} indent />
+            <StmtLine
+              key={l.label}
+              label={l.label}
+              amount={l.amount}
+              indent
+              tie={l.label === 'Net income' ? Math.abs(l.amount - plNet) < 1 : undefined}
+            />
           ))}
           <StmtLine label="Net cash from operating activities" amount={opTotal} total />
           <StmtSection>Investing activities</StmtSection>
@@ -554,7 +557,13 @@ function CashFlowView() {
           <StmtLine label="Net cash from financing activities" amount={finTotal} total />
           <StmtLine label="Net change in cash" amount={cf.netChange} total strong tie={Math.abs(opTotal + invTotal + finTotal - cf.netChange) < 1} />
           <StmtLine label="Cash at beginning of period" amount={cf.cashStart} indent />
-          <StmtLine label="Cash at end of period" amount={cf.cashEnd} total strong tie={checking != null && Math.abs(checking - cf.cashEnd) < 1} />
+          <StmtLine
+            label="Cash at end of period"
+            amount={cf.cashEnd}
+            total
+            strong
+            tie={checking != null && Math.abs(checking - cf.cashEnd) < 1 && Math.abs(cf.cashStart + cf.netChange - cf.cashEnd) < 1}
+          />
         </Stmt>
       </StmtPanel>
     </>
@@ -768,6 +777,16 @@ function DashboardTab({ period, setPeriod, onOpenOrders }) {
   const plAug = buildPL([m.month])
   const netTie = Math.abs(plAug.net - m.profit) < 1
   const monthName = MONTH_NAMES[Number(AS_OF.slice(5, 7)) - 1]
+  const augTires = DATA.aug_tire_sales
+  const mixTotal = sumBy(DATA.sales_mix_aug, 'revenue')
+  const mixTie = mixTotal === m.revenue
+  const topSixRev = sumBy(DATA.top_tire_sizes_aug, 'revenue')
+  const topSixUnits = sumBy(DATA.top_tire_sizes_aug, 'units')
+  const topSixTie =
+    topSixRev === augTires.top_six_revenue &&
+    topSixUnits === augTires.top_six_units &&
+    topSixRev < augTires.new_tire_revenue &&
+    topSixUnits < augTires.tires_sold_units
 
   const strip = [
     ['Revenue', fmt0(m.revenue)],
@@ -827,7 +846,10 @@ function DashboardTab({ period, setPeriod, onOpenOrders }) {
         {strip.map(([l, v]) => (
           <div key={l} style={{ ...panel, flex: '1 1 140px', marginBottom: 0 }}>
             <div style={{ fontFamily: ui, fontSize: 10, color: C.muted }}>{l}</div>
-            <div style={{ fontFamily: mono, fontSize: 18, marginTop: 6, fontWeight: 500 }}>{v}</div>
+            <div style={{ fontFamily: mono, fontSize: 18, marginTop: 6, fontWeight: 500 }}>
+              {v}
+              {l === 'Tires sold' ? <TieMark ok={m.tiresSold === augTires.tires_sold_units} /> : null}
+            </div>
           </div>
         ))}
       </div>
@@ -855,7 +877,17 @@ function DashboardTab({ period, setPeriod, onOpenOrders }) {
 
       <div className="rt-chartrow">
         <div style={{ ...panel, marginBottom: 0 }}>
-          <PanelTitle>Sales mix · {monthShort(m.label)}</PanelTitle>
+          <PanelTitle
+            right={
+              mixTie ? (
+                <span style={{ fontFamily: mono, fontSize: 10, color: C.muted }}>
+                  {fmt0(mixTotal)} total <TieMark ok />
+                </span>
+              ) : null
+            }
+          >
+            Sales mix · {monthShort(m.label)}
+          </PanelTitle>
           {DATA.sales_mix_aug.map((s) => (
             <div key={s.name} style={{ marginBottom: 12 }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', fontFamily: ui, fontSize: 12, marginBottom: 4 }}>
@@ -871,8 +903,16 @@ function DashboardTab({ period, setPeriod, onOpenOrders }) {
           ))}
         </div>
         <div style={{ ...panel, marginBottom: 0, overflow: 'auto' }}>
-          <PanelTitle>Top sizes · {monthShort(m.label)}</PanelTitle>
-          <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+          <PanelTitle
+            right={
+              <span style={{ fontFamily: mono, fontSize: 10, color: C.muted }}>
+                {fmt0(topSixRev)} · {topSixUnits} units <TieMark ok={topSixTie} />
+              </span>
+            }
+          >
+            Top sizes · {monthShort(m.label)}
+          </PanelTitle>
+          <table style={{ width: '100%', borderCollapse: 'collapse', minWidth: 280 }}>
             <thead>
               <tr>
                 <th style={hcell()}>#</th>
@@ -904,15 +944,19 @@ function SalesItemsTab() {
   const [view, setView] = useState('ranked')
   const [sort, setSort] = useState('revenue')
   const m = LAST_MONTH
-  const top = DATA.top_tire_sizes_aug
-  const ranked = [...top].sort((a, b) => b[sort] - a[sort])
+  const items = DATA.sales_items_aug
+  const ranked = [...items].sort((a, b) => b[sort] - a[sort])
+  const augTires = DATA.aug_tire_sales
+  const newTireLines = items.filter((i) => i.category === 'New tire')
+  const newRev = sumBy(newTireLines, 'revenue')
   const best = [...MONTHS].sort((a, b) => b.profit - a.profit)[0]
   return (
     <>
       <PageHead title={NAV.find((n) => n.id === 'inventory').title} />
       <div style={{ display: 'flex', gap: 12, marginBottom: 20, flexWrap: 'wrap' }}>
-        <Kpi label={`${monthShort(m.label)} revenue`} value={fmt0(m.revenue)} />
-        <Kpi label={`Tires sold · ${monthShort(m.label)}`} value={String(m.tiresSold)} />
+        <Kpi label={`${monthShort(m.label)} revenue`} value={fmt0(m.revenue)} tie={sumBy(items, 'revenue') === m.revenue} />
+        <Kpi label={`Tires sold · ${monthShort(m.label)}`} value={String(m.tiresSold)} tie={m.tiresSold === augTires.tires_sold_units} />
+        <Kpi label="New tire revenue" value={fmt0(augTires.new_tire_revenue)} tie={newRev === augTires.new_tire_revenue} />
         <Kpi label="YTD revenue" value={fmt0(DATA.ytd_revenue)} tie={sumBy(MONTHS, 'revenue') === DATA.ytd_revenue} />
         <Kpi label="Best month · net" value={`${monthShort(best.label)} · ${fmt0(best.profit)}`} />
       </div>
@@ -940,7 +984,8 @@ function SalesItemsTab() {
               <thead>
                 <tr>
                   <th style={hcell()}>#</th>
-                  <th style={hcell()}>Tire size</th>
+                  <th style={hcell()}>Item</th>
+                  <th style={hcell()}>Category</th>
                   <th style={hcell('right')}>Units</th>
                   <th style={hcell('right')}>Revenue</th>
                   <th style={hcell('right')}>Per unit</th>
@@ -948,12 +993,13 @@ function SalesItemsTab() {
               </thead>
               <tbody>
                 {ranked.map((t, i) => (
-                  <tr key={t.size} style={{ background: i % 2 ? '#FAF8F4' : C.card }}>
+                  <tr key={t.item} style={{ background: i % 2 ? '#FAF8F4' : C.card }}>
                     <td style={cell('left', { fontFamily: mono, color: C.muted })}>{i + 1}</td>
-                    <td style={cell('left', { fontFamily: mono })}>{t.size}</td>
+                    <td style={cell('left', { fontFamily: mono })}>{t.item}</td>
+                    <td style={cell('left', { color: C.sub, fontSize: 11 })}>{t.category}</td>
                     <td style={cell('right', { fontFamily: mono })}>{t.units}</td>
                     <td style={cell('right', { fontFamily: mono, fontWeight: 600 })}>{fmt0(t.revenue)}</td>
-                    <td style={cell('right', { fontFamily: mono, color: C.sub })}>{fmtC(t.revenue / t.units)}</td>
+                    <td style={cell('right', { fontFamily: mono, color: C.sub })}>{t.units ? fmtC(t.revenue / t.units) : '—'}</td>
                   </tr>
                 ))}
               </tbody>
@@ -1203,12 +1249,13 @@ function OrdersTab({ initialPeriod }) {
 /* ---------- Stock ---------- */
 
 function StockTab() {
-  const [asOf, setAsOf] = useState(STOCK_AS_OF[STOCK_AS_OF.length - 1].id)
-  const snap = STOCK_AS_OF.find((s) => s.id === asOf)
+  const [asOf, setAsOf] = useState(STOCK_MONTH_IDS[STOCK_MONTH_IDS.length - 1])
+  const snap = stockSnapFor(asOf)
   const rows = stockRowsFor(asOf)
   const units = sumBy(rows, 'onHand')
-  const value = sumBy(rows, 'value')
-  const isLatest = asOf === STOCK_AS_OF[STOCK_AS_OF.length - 1].id
+  const value = snap.inventory_value
+  const bsInv = inventoryOnBs(asOf)
+  const invTie = bsInv != null && value === bsInv
 
   const exportCsv = () => {
     downloadCsv(`riverside-tires-stock-${asOf}.csv`, [
@@ -1221,7 +1268,7 @@ function StockTab() {
     <>
       <PageHead title={NAV.find((n) => n.id === 'stock').title} />
       <div style={{ display: 'flex', gap: 12, marginBottom: 20, flexWrap: 'wrap' }}>
-        <Kpi label="Inventory value" value={fmt0(value)} tie={isLatest && Math.abs(value - DATA.inventory_value_aug) < 1} />
+        <Kpi label="Inventory value" value={fmt0(value)} tie={invTie} sub={snap.label} />
         <Kpi label="Units on hand" value={String(units)} />
         <Kpi label="Sizes stocked" value={String(rows.length)} />
       </div>
@@ -1229,9 +1276,9 @@ function StockTab() {
         <label style={{ display: 'flex', alignItems: 'center', gap: 8, fontFamily: ui, fontSize: 11, color: C.muted, letterSpacing: '0.1em', textTransform: 'uppercase' }}>
           As of
           <select value={asOf} onChange={(e) => setAsOf(e.target.value)} style={selectStyle} aria-label="Stock as of">
-            {STOCK_AS_OF.map((s) => (
-              <option key={s.id} value={s.id}>
-                {s.label}
+            {STOCK_MONTH_IDS.map((id) => (
+              <option key={id} value={id}>
+                {stockSnapFor(id).label}
               </option>
             ))}
           </select>
@@ -1439,7 +1486,7 @@ const PORTAL_CSS = `
   .rt-navbtn{display:block;width:100%;text-align:left;padding:10px 11px;border:none;border-left:2px solid transparent;background:transparent;color:#948D81;font-family:${head};font-size:13px;font-weight:500;letter-spacing:.06em;text-transform:uppercase;cursor:pointer;white-space:nowrap;transition:background .15s,color .15s}
   .rt-navbtn:hover{background:rgba(255,255,255,.05);color:#EDEBE6}
   .rt-foot{padding:12px 8px 0;border-top:1px solid ${THEME.border};margin-top:8px}
-  .rt-main{flex:1;min-width:0;background:${C.paper}}
+  .rt-main{flex:1;min-width:0;background:${C.paper};overflow-x:hidden;max-width:100%}
   .rt-status{display:flex;align-items:center;border-bottom:1px solid ${C.hair};padding:12px 30px;gap:12px;flex-wrap:wrap}
   .rt-content{padding:26px 30px 56px;max-width:1160px}
   .rt-mobilenav{display:none}
@@ -1511,6 +1558,19 @@ const PORTAL_CSS = `
   .rt-embed .rt-foot{display:none}
   .rt-embed .rt-main{flex:1 1 auto;min-height:0;overflow-y:auto;-webkit-overflow-scrolling:touch}
   .rt-embed .rt-mobilenav{flex-shrink:0}
+  @media(max-width:430px){
+    .rt-shell{overflow-x:hidden;max-width:100vw}
+    .rt-content{padding:16px 12px 40px;overflow-x:hidden}
+    .rt-hero{font-size:46px!important}
+    .rt-chartrow{grid-template-columns:1fr}
+    .rt-modal{padding:10px;align-items:flex-end}
+    .rt-modal__box{max-width:min(100%,calc(100vw - 16px));padding:14px 12px;max-height:92vh}
+    .rt-modal__box table{min-width:300px}
+    .rt-stmt{--cols:1fr 72px}
+    .rt-stmt.cmp{--cols:1fr 64px 64px 56px}
+    .rt-status span{font-size:10px;line-height:1.35;word-break:break-word}
+    .rt-content input,.rt-content select{font-size:16px!important}
+  }
 `
 
 /* ---------- Portal ---------- */
@@ -1615,7 +1675,7 @@ export default function RiversideTiresPortal() {
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <DemoFontLinks />
       </Head>
-      <style>{PORTAL_CSS}</style>
+      <style dangerouslySetInnerHTML={{ __html: PORTAL_CSS }} />
 
       <DemoLobby />
 
