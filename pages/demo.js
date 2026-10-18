@@ -19,6 +19,8 @@ const DEMO_AS_OF = '2026-09-30'
 const fmtAsOfLong = (iso) => new Date(`${iso}T00:00:00`).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
 const SAMPLE_HEADER = `Sample — fictitious numbers · as of ${fmtAsOfLong(DEMO_AS_OF)}`
 const todayStr = DEMO_AS_OF
+const DEMO_MONTH_SHORT = new Date(`${DEMO_AS_OF}T00:00:00`).toLocaleDateString('en-US', { month: 'short' })
+const demoLogStamp = () => fmtD(DEMO_AS_OF)
 const demoNowMs = () => new Date(`${DEMO_AS_OF}T12:00:00`).getTime()
 const fmtD = (s) => s ? new Date(s + 'T00:00:00').toLocaleDateString([], { month: 'short', day: 'numeric' }) : '—'
 const daysSince = (s) => s ? Math.round((demoNowMs() - new Date(s + 'T00:00:00').getTime()) / 86400000) : null
@@ -81,17 +83,17 @@ const SEED_EXPENSES = [
 
 // 11 prior months (current month is appended live) for the multi-month P&L
 const MONTH_SERIES = [
-  { m: 'Jul', directRev: 1200, consignRev: 900, cogs: 1450, adSpend: 700, opexNonAd: 480 },
-  { m: 'Aug', directRev: 1320, consignRev: 980, cogs: 1520, adSpend: 780, opexNonAd: 500 },
-  { m: 'Sep', directRev: 1450, consignRev: 1050, cogs: 1600, adSpend: 850, opexNonAd: 510 },
-  { m: 'Oct', directRev: 1600, consignRev: 1150, cogs: 1720, adSpend: 950, opexNonAd: 520 },
-  { m: 'Nov', directRev: 1800, consignRev: 1300, cogs: 1900, adSpend: 1200, opexNonAd: 560 },
-  { m: 'Dec', directRev: 2200, consignRev: 1600, cogs: 2150, adSpend: 1500, opexNonAd: 620 },
-  { m: 'Jan', directRev: 1500, consignRev: 1100, cogs: 1700, adSpend: 900, opexNonAd: 520 },
-  { m: 'Feb', directRev: 1650, consignRev: 1200, cogs: 1780, adSpend: 1050, opexNonAd: 540 },
-  { m: 'Mar', directRev: 1820, consignRev: 1380, cogs: 2050, adSpend: 1350, opexNonAd: 600 },
-  { m: 'Apr', directRev: 1900, consignRev: 1450, cogs: 2180, adSpend: 1500, opexNonAd: 620 },
-  { m: 'May', directRev: 1980, consignRev: 1510, cogs: 2280, adSpend: 1650, opexNonAd: 640 },
+  { m: 'Oct', directRev: 1200, consignRev: 900, cogs: 1450, adSpend: 700, opexNonAd: 480 },
+  { m: 'Nov', directRev: 1320, consignRev: 980, cogs: 1520, adSpend: 780, opexNonAd: 500 },
+  { m: 'Dec', directRev: 1450, consignRev: 1050, cogs: 1600, adSpend: 850, opexNonAd: 510 },
+  { m: 'Jan', directRev: 1600, consignRev: 1150, cogs: 1720, adSpend: 950, opexNonAd: 520 },
+  { m: 'Feb', directRev: 1800, consignRev: 1300, cogs: 1900, adSpend: 1200, opexNonAd: 560 },
+  { m: 'Mar', directRev: 2200, consignRev: 1600, cogs: 2150, adSpend: 1500, opexNonAd: 620 },
+  { m: 'Apr', directRev: 1500, consignRev: 1100, cogs: 1700, adSpend: 900, opexNonAd: 520 },
+  { m: 'May', directRev: 1650, consignRev: 1200, cogs: 1780, adSpend: 1050, opexNonAd: 540 },
+  { m: 'Jun', directRev: 1820, consignRev: 1380, cogs: 2050, adSpend: 1350, opexNonAd: 600 },
+  { m: 'Jul', directRev: 1900, consignRev: 1450, cogs: 2180, adSpend: 1500, opexNonAd: 620 },
+  { m: 'Aug', directRev: 1980, consignRev: 1510, cogs: 2280, adSpend: 1650, opexNonAd: 640 },
 ]
 const mLine = (mo) => {
   const rev = mo.directRev + mo.consignRev, gross = rev - mo.cogs, opex = mo.adSpend + mo.opexNonAd
@@ -284,12 +286,12 @@ export default function Demo({ demoEmbed = false }) {
   const dv = (k) => draft[k] || ''
   const setDv = (k, v) => setDraft({ ...draft, [k]: v })
   const upd = (id, patch, logEntry) => setConsign(consign.map(c => c.id === id
-    ? { ...c, ...patch, log: logEntry ? [{ at: new Date().toLocaleDateString([], { month: 'short', day: 'numeric' }), t: logEntry }, ...(c.log || [])] : c.log } : c))
+    ? { ...c, ...patch, log: logEntry ? [{ at: demoLogStamp(), t: logEntry }, ...(c.log || [])] : c.log } : c))
 
   const logCheck = (id) => { const a = Number(dv(id + '_chk')); if (a > 0) { const c = consign.find(x => x.id === id); upd(id, { paid: c.paid + a }, `Check received ${m0(a)}`); setDv(id + '_chk', '') } }
   const logCount = (id) => { const n = dv(id + '_cnt'); if (n !== '') { upd(id, { counted: Number(n), countedDate: todayStr }, `Counted ${n} on shelf`); setDv(id + '_cnt', '') } }
   const shipMore = (id) => { const n = Number(dv(id + '_shp')); if (n > 0) { const c = consign.find(x => x.id === id); upd(id, { sent: c.sent + n }, `Shipped ${n} more units`); setDv(id + '_shp', '') } }
-  const addPartner = () => { if (!cf.store.trim()) return; setConsign([{ id: uid(), store: cf.store.trim(), price: Number(cf.price) || 0, sent: Number(cf.sent) || 0, returned: 0, paid: 0, counted: null, countedDate: '', diagnosis: '', cycle: 1, log: [{ at: new Date().toLocaleDateString([], { month: 'short', day: 'numeric' }), t: 'Added consignment partner' }] }, ...consign]); setCf({ store: '', price: '', sent: '' }); setAdding(false) }
+  const addPartner = () => { if (!cf.store.trim()) return; setConsign([{ id: uid(), store: cf.store.trim(), price: Number(cf.price) || 0, sent: Number(cf.sent) || 0, returned: 0, paid: 0, counted: null, countedDate: '', diagnosis: '', cycle: 1, log: [{ at: demoLogStamp(), t: 'Added consignment partner' }] }, ...consign]); setCf({ store: '', price: '', sent: '' }); setAdding(false) }
   const closeOut = (id) => {
     const c = consign.find(x => x.id === id); if (!c) return
     const { variance, varVal } = recon(c)
@@ -347,8 +349,7 @@ export default function Demo({ demoEmbed = false }) {
   const closeAR = R.filter(c => c.variance > 0 && c.diagnosis === 'Sold but not reported (store owes me)').reduce((s, c) => s + c.varVal, 0)
 
   // multi-month series — current month appended live so interactivity flows through
-  const thisMonth = new Date().toLocaleString('en-US', { month: 'short' })
-  const monthsAll = [...MONTH_SERIES, { m: thisMonth, directRev, consignRev: cashCollected, cogs, adSpend, opexNonAd }]
+  const monthsAll = [...MONTH_SERIES, { m: DEMO_MONTH_SHORT, directRev, consignRev: cashCollected, cogs, adSpend, opexNonAd }]
   const lines = monthsAll.slice(-pnlMonths).map(mLine)
   const lastL = lines[lines.length - 1]
   const baseL = lines[0]
