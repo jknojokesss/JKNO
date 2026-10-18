@@ -496,8 +496,12 @@ export function InventoryDaysChart({ rows, accent = BRICK, refDays = 21 }) {
   const rowH = 22
   const valueCol = 44
   const topPad = 14
-  const labelCol = W > 0 ? Math.min(108, Math.floor(W * 0.28)) : 108
-  const barX = labelCol + 6
+  const longestName = rows.reduce((m, r) => Math.max(m, r.product.length), 0)
+  const labelFromName = Math.ceil(longestName * 6.1) + 4
+  const minBarW = 36
+  const labelColMax = W > 0 ? W - valueCol - minBarW - 10 : 108
+  const labelCol = W > 0 ? Math.min(labelColMax, Math.max(72, labelFromName)) : 108
+  const barX = labelCol + 8
   const barMaxW = W > 0 ? Math.max(36, W - barX - valueCol - 4) : 36
   const H = topPad + rows.length * rowH + 6
   const refX = barX + (refDays / maxD) * barMaxW

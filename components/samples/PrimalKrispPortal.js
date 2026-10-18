@@ -399,6 +399,18 @@ export default function PrimalKrispPortal() {
 .pk-promo-table th.pk-promo-rev,.pk-promo-table td.pk-promo-rev{width:23%}
 .pk-promo-table th.pk-promo-return,.pk-promo-table td.pk-promo-return{width:22%}
 .pk-promo-return-head{display:inline-flex;flex-direction:column;align-items:flex-end;line-height:1.2;text-align:right}
+}
+.pk-prod-summary-card{overflow-x:hidden!important}
+.pk-prod-summary-table{width:100%;table-layout:fixed;border-collapse:collapse;font-size:13px}
+.pk-prod-summary-table th,.pk-prod-summary-table td{padding:8px 4px;vertical-align:top}
+.pk-prod-summary-table th.pk-num,.pk-prod-summary-table td.pk-num{text-align:right}
+.pk-prod-summary-table td.pk-name{font-weight:600;line-height:1.3;word-break:break-word}
+.pk-prod-summary-table th.pk-sold-head{white-space:normal;line-height:1.2;text-align:right}
+@media(max-width:480px){
+.pk-prod-summary-table{font-size:12px}
+.pk-prod-summary-table th,.pk-prod-summary-table td{padding:8px 2px}
+.pk-prod-summary-table th.pk-cost-head{white-space:normal;line-height:1.2;font-size:10px;text-align:right}
+.pk-prod-summary-table th.pk-sold-head{font-size:10px}
 }`
 
   return (
@@ -824,13 +836,28 @@ export default function PrimalKrispPortal() {
 
           {tab === 'products' && !overviewDetail && (
             <>
-              <div style={{ ...card, marginBottom: '16px', overflowX: 'auto' }}>
-                <table style={{ width: '100%', minWidth: '520px', borderCollapse: 'collapse', fontSize: '13px' }}>
+              <div className="pk-prod-summary-card" style={{ ...card, marginBottom: '16px' }}>
+                <table className="pk-prod-summary-table">
                   <thead>
                     <tr style={{ borderBottom: `1px solid ${BORDER}` }}>
-                      {['Product', 'Retail', 'Cost / bag', period === 'week' ? 'Bags sold (week)' : 'Bags sold (Sept)'].map((h) => (
-                        <th key={h} style={{ ...lbl, textAlign: 'left', padding: '8px 6px' }}>{h}</th>
-                      ))}
+                      <th style={{ ...lbl, textAlign: 'left', width: '34%' }}>Product</th>
+                      <th className="pk-num" style={{ ...lbl, width: '20%' }}>Retail</th>
+                      <th className="pk-num pk-cost-head" style={{ ...lbl, width: '24%' }}>Cost / bag</th>
+                      <th className="pk-num pk-sold-head" style={{ ...lbl, width: '22%' }}>
+                        {period === 'week' ? (
+                          <>
+                            Sold
+                            <br />
+                            (week)
+                          </>
+                        ) : (
+                          <>
+                            Sold
+                            <br />
+                            (Sept)
+                          </>
+                        )}
+                      </th>
                     </tr>
                   </thead>
                   <tbody>
@@ -858,9 +885,10 @@ export default function PrimalKrispPortal() {
                           tabIndex={0}
                           role="button"
                         >
-                          <td style={{ padding: '10px 6px', fontWeight: 600 }}>{p.name}</td>
+                          <td className="pk-name">{p.name}</td>
                           <td
-                            style={{ padding: '10px 6px', fontFamily: MONO }}
+                            className="pk-num"
+                            style={{ fontFamily: MONO }}
                             onClick={(e) => {
                               e.stopPropagation()
                               openChannel()
@@ -868,9 +896,10 @@ export default function PrimalKrispPortal() {
                           >
                             {retail ? money(retail) : '—'}
                           </td>
-                          <td style={{ padding: '10px 6px', fontFamily: MONO }} onClick={openCost}>{money(cost.total)}</td>
+                          <td className="pk-num" style={{ fontFamily: MONO }} onClick={openCost}>{money(cost.total)}</td>
                           <td
-                            style={{ padding: '10px 6px', fontFamily: MONO }}
+                            className="pk-num"
+                            style={{ fontFamily: MONO }}
                             onClick={(e) => {
                               e.stopPropagation()
                               openChannel()
