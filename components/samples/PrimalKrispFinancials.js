@@ -57,6 +57,7 @@ export default function PrimalKrispFinancials({ card, lbl, big, btn, inp, KPI })
 
   const cur = months[pnlMonthIdx]
   const prev = pnlMonthIdx > 0 ? months[pnlMonthIdx - 1] : null
+  const pnlMonthShort = (period) => (period ? String(period).split(' ')[0] : '')
 
   const openDrill = (title, ledgerKey, total) => {
     const rows = cur?.drill_ledgers?.[ledgerKey] || []
@@ -174,8 +175,8 @@ export default function PrimalKrispFinancials({ card, lbl, big, btn, inp, KPI })
         {prev && (
           <div className="pk-pnl-head">
             <span />
-            <span className="pk-pnl-num">This month</span>
-            <span className="pk-pnl-num">Prior mo.</span>
+            <span className="pk-pnl-num">{pnlMonthShort(cur.period)}</span>
+            <span className="pk-pnl-num">{pnlMonthShort(prev.period)}</span>
             <span className="pk-pnl-num">Change</span>
           </div>
         )}

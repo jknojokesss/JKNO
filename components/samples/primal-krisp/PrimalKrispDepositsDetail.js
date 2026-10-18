@@ -76,7 +76,7 @@ export default function PrimalKrispDepositsDetail({ detail, onBack, onClose }) {
     ]
     const payoutRows = payouts.map((p) => ({ label: `${fmtD(p.date)} · ${p.source}`, value: payoutTotals(p).deposit, key: p.id }))
     return (
-      <Shell title={money(summary.deposited_this_month)} sub="Deposited this month" {...shell}>
+      <Shell title={money(summary.deposited_this_month)} sub="Deposited Oct 1-17" {...shell}>
         <Lines rows={bridgeRows} totalLabel="Deposited" totalValue={bridge.deposited} />
         <div style={{ marginTop: 20, fontSize: 12, color: MUTED, fontWeight: 600, letterSpacing: '0.5px', textTransform: 'uppercase', marginBottom: 8 }}>By payout</div>
         <Lines rows={payoutRows} />

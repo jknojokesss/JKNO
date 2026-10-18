@@ -105,16 +105,16 @@ export default function PrimalKrispOverview({
       <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap', marginBottom: '16px' }}>
         <KPI k="Cash on hand" v={money0(DATA.overview.cash_on_hand)} onClick={() => onOpenDetail({ kind: 'cash' })} />
         <KPI
-          k={period === 'week' ? 'Sales this week' : 'Sales this month'}
+          k={period === 'week' ? 'Sales this week' : 'Sales · September'}
           v={money0(salesPeriod)}
-          sub={`${salesDelta >= 0 ? '+' : ''}${pct1(salesDelta)} vs ${period === 'week' ? 'prior week' : 'last month'}`}
+          sub={`${salesDelta >= 0 ? '+' : ''}${pct1(salesDelta)} vs ${period === 'week' ? 'prior week' : 'August'}`}
           accent={salesDelta >= 0 ? GREEN : RED}
           subColor={deltaColor(salesDelta)}
           onClick={() =>
             onOpenDetail({
               kind: 'sales',
               total: salesPeriod,
-              periodLabel: period === 'week' ? 'Sales this week' : 'Sales this month',
+              periodLabel: period === 'week' ? 'Sales this week' : 'Sales · September',
               rows: channelRowsPeriod,
             })
           }
@@ -126,7 +126,7 @@ export default function PrimalKrispOverview({
             onOpenDetail({
               kind: 'bags',
               total: bagsPeriod,
-              periodLabel: period === 'week' ? 'Bags sold this week' : 'Bags sold this month',
+              periodLabel: period === 'week' ? 'Bags sold this week' : 'Bags sold · September',
               products: products.map((p) => ({ name: p.name, bags: p[period] })),
             })
           }
@@ -244,7 +244,7 @@ export default function PrimalKrispOverview({
 
       <div style={{ ...card }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 8, marginBottom: 16 }}>
-          <div style={lbl}>Bags sold this month by product</div>
+          <div style={lbl}>{period === 'week' ? 'Bags sold this week by product' : 'Bags sold · September by product'}</div>
           <MiniToggle />
         </div>
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(148px, 1fr))', gap: 12 }}>

@@ -42,7 +42,7 @@ export default function PrimalKrispDepositsTab({ KPI, card, lbl, onOpenDetail })
     <>
       <style dangerouslySetInnerHTML={{ __html: DEPOSITS_CSS }} />
       <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap', marginBottom: '16px' }}>
-        <KPI k="Deposited this month" v={money(summary.deposited_this_month)} onClick={openDeposited} />
+        <KPI k="Deposited Oct 1-17" v={money(summary.deposited_this_month)} onClick={openDeposited} />
         <KPI k="Fees" v={money(summary.fees)} onClick={() => onOpenDetail({ kind: 'depFees' })} />
         <KPI k="Orders matched" v={fmtInt(summary.orders_matched)} onClick={() => onOpenDetail({ kind: 'depOrdersMatched' })} />
         <KPI
