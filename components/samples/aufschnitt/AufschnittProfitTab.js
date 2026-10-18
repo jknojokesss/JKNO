@@ -10,6 +10,7 @@ import {
   money0,
   pct1,
   PROFIT_TABLE_CSS,
+  fmtMonthDay,
 } from './aufschnittUtils'
 
 export default function AufschnittProfitTab({ card, lbl, onOpen }) {
@@ -32,9 +33,7 @@ export default function AufschnittProfitTab({ card, lbl, onOpen }) {
   return (
     <div style={{ ...card }}>
       <style>{PROFIT_TABLE_CSS}</style>
-      <div style={{ fontSize: 13, color: MUTED, marginBottom: 14 }}>
-        September 2026 · after product cost, shipping, discounts, and channel fees
-      </div>
+      <div style={{ fontSize: 13, color: MUTED, marginBottom: 14 }}>September 2026</div>
 
       {pp.shippingLossCount > 0 && (
         <button
@@ -136,11 +135,10 @@ export function ProfitChannelDetail({ detail, card, lbl, big, onOpen, onBack }) 
     <div>
       <button type="button" className="au-detail-back" onClick={onBack}>← Back</button>
       <h2 style={{ ...big, fontSize: 22, marginBottom: 4 }}>{detail.channel}</h2>
-      <div style={{ fontSize: 12, color: MUTED, marginBottom: 14 }}>
-        Recent orders · September · {money0(row?.revenue)}
-      </div>
+      <div style={{ fontSize: 12, color: MUTED, marginBottom: 14 }}>Recent orders · September 2026</div>
 
       <div style={{ ...card }}>
+        <div style={{ ...lbl, marginBottom: 10 }}>Recent orders</div>
         <style>{PROFIT_TABLE_CSS}</style>
         <div className="au-profit-orders-wrap">
           <table className="au-profit-orders">
@@ -171,7 +169,7 @@ export function ProfitChannelDetail({ detail, card, lbl, big, onOpen, onBack }) 
                   }
                 >
                   <td>{o.orderNo}</td>
-                  <td>{o.date.slice(5).replace('-', '/')}</td>
+                  <td>{fmtMonthDay(o.date)}</td>
                   <td className="au-profit-cust">{o.customer}</td>
                   <td className="au-profit-items">{o.items}</td>
                   <td>{money(o.orderTotal)}</td>
@@ -197,7 +195,7 @@ export function ProfitChannelDetail({ detail, card, lbl, big, onOpen, onBack }) 
                 <span style={{ fontWeight: 600 }}>{o.orderNo}</span>
                 <span style={{ color: o.profit < 0 ? RED : INK }}>{money(o.profit)}</span>
               </div>
-              <div style={{ fontSize: 12, color: MUTED }}>{o.date} · {o.customer}</div>
+              <div style={{ fontSize: 12, color: MUTED }}>{fmtMonthDay(o.date)} · {o.customer}</div>
               <div style={{ fontSize: 12, marginTop: 4 }}>{o.items}</div>
               {o.lostOnShipping ? (
                 <div style={{ fontSize: 11, color: MUTED, marginTop: 6 }}>Lost money on shipping</div>
@@ -220,7 +218,7 @@ export function ProfitOrderDetail({ detail, card, lbl, big, onBack }) {
       <button type="button" className="au-detail-back" onClick={onBack}>← Back</button>
       <h2 style={{ ...big, fontSize: 20, marginBottom: 4 }}>{order.orderNo}</h2>
       <div style={{ fontSize: 12, color: MUTED, marginBottom: 14 }}>
-        {order.date} · {order.customer}
+        {fmtMonthDay(order.date)} · {order.customer}
       </div>
       {order.lostOnShipping ? (
         <div style={{ fontSize: 12, color: MUTED, marginBottom: 12 }}>Lost money on shipping</div>
@@ -240,7 +238,9 @@ export function ProfitOrderDetail({ detail, card, lbl, big, onBack }) {
               fontSize: 13,
             }}
           >
-            <span style={{ minWidth: 0 }}>{line.description}</span>
+            <span style={{ minWidth: 0 }}>
+              {line.description} · {line.qty} × {money(line.unitPrice)}
+            </span>
             <span style={{ fontVariantNumeric: 'tabular-nums' }}>{money(line.revenue)}</span>
           </div>
         ))}
@@ -286,7 +286,7 @@ export function ProfitShippingLossDetail({ card, lbl, big, onOpen, onBack }) {
               <span style={{ fontWeight: 600, fontSize: 13 }}>{o.orderNo}</span>
               <span style={{ color: RED, fontVariantNumeric: 'tabular-nums' }}>{money(o.profit)}</span>
             </div>
-            <div style={{ fontSize: 12, color: MUTED }}>{o.channel} · {o.date}</div>
+            <div style={{ fontSize: 12, color: MUTED }}>{o.channel} · {fmtMonthDay(o.date)}</div>
           </button>
         ))}
       </div>

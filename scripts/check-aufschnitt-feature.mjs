@@ -1,5 +1,5 @@
 /**
- * Profit-per-order totals for /aufschnitt — channel rows, sample orders, P&L ties.
+ * Profit-per-order totals for /aufschnitt — channel rows tie to P&L; recent orders are a sample.
  * Run: node scripts/check-aufschnitt-feature.mjs
  */
 import DATA from '../components/samples/aufschnitt/aufschnittData.js'
@@ -51,25 +51,46 @@ ok('store promos on Stores discounts', chRows.find((r) => r.channel === 'Stores'
 ok('shipping split', totalShip === shipping)
 ok('fees amazon+card', totalFees === round2(amazonFees + card))
 
+const banned = /salmon|fish|bresaola/i
+
 CHANNELS.forEach((ch) => {
-  const row = chRows.find((r) => r.channel === ch)
   const orders = pp.ordersByChannel[ch]
   ok(`${ch} sample orders`, orders.length >= 10 && orders.length <= 12)
-  ok(`${ch} orders revenue`, sum(orders, (o) => o.orderTotal) === row.revenue)
-  ok(`${ch} orders cost`, sum(orders, (o) => o.productCost) === row.productCost)
-  ok(`${ch} orders shipping`, sum(orders, (o) => o.shipping) === row.shipping)
-  ok(`${ch} orders discounts`, sum(orders, (o) => o.discount) === row.discounts)
-  ok(`${ch} orders fees`, sum(orders, (o) => o.fees) === row.fees)
-  ok(`${ch} orders profit`, sum(orders, (o) => o.profit) === row.profit)
+  const sampleRev = sum(orders, (o) => o.orderTotal)
+  const row = chRows.find((r) => r.channel === ch)
+  ok(`${ch} sample < month revenue`, sampleRev < row.revenue)
+
   orders.forEach((o) => {
     const calc = round2(o.orderTotal - o.productCost - o.shipping - o.discount - o.fees)
     ok(`${o.orderNo} profit math`, calc === o.profit)
-    if (o.lostOnShipping) ok(`${o.orderNo} shipping loss negative`, o.profit < 0)
+    ok(`${o.orderNo} no fish`, !banned.test(o.items))
+    o.lines.forEach((line) => {
+      ok(`${o.orderNo} line qty×unit`, round2(line.qty * line.unitPrice) === line.revenue)
+      ok(`${o.orderNo} lines sum`, sum(o.lines, (l) => l.revenue) === o.orderTotal)
+    })
+    if (o.lostOnShipping) {
+      ok(`${o.orderNo} shipping loss negative`, o.profit < 0 && o.profit >= -15 && o.profit <= -3)
+    }
+    if (ch === 'Own site' && !o.lostOnShipping) {
+      ok(`${o.orderNo} web total band`, o.orderTotal >= 35 && o.orderTotal <= 160)
+      ok(`${o.orderNo} web ship band`, o.shipping >= 7 && o.shipping <= 18)
+      ok(`${o.orderNo} web profit band`, o.profit >= 8 && o.profit <= 45)
+    }
+    if (ch === 'Amazon') {
+      ok(`${o.orderNo} amz total band`, o.orderTotal >= 25 && o.orderTotal <= 90)
+      ok(`${o.orderNo} amz profit modest`, o.profit >= 1 && o.profit <= 18)
+    }
+    if (ch === 'Stores' && !o.lostOnShipping) {
+      ok(`${o.orderNo} ws total band`, o.orderTotal >= 300 && o.orderTotal <= 1200)
+      ok(`${o.orderNo} ws ship band`, o.shipping >= 20 && o.shipping <= 60)
+    }
   })
 })
 
-ok('shipping loss count 2-3', pp.shippingLossCount >= 2 && pp.shippingLossCount <= 3)
-ok('shipping loss list', pp.shippingLossOrders.length === pp.shippingLossCount)
+ok('shipping loss count 3', pp.shippingLossCount === 3)
+ok('shipping loss list', pp.shippingLossOrders.length === 3)
+ok('shipping loss own 2', pp.shippingLossOrders.filter((o) => o.channel === 'Own site').length === 2)
+ok('shipping loss stores 1', pp.shippingLossOrders.filter((o) => o.channel === 'Stores').length === 1)
 ok(
   'shipping loss total',
   sum(pp.shippingLossOrders, (o) => o.profit) === pp.shippingLossTotal

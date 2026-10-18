@@ -68,6 +68,12 @@ export const fmtWeekEnding = (iso) => {
   return `Week ending ${weekEndingFormatter.format(new Date(`${iso}T12:00:00.000Z`))}`
 }
 
+/** Sample order dates in copy: "Sep 18" */
+export const fmtMonthDay = (iso) => {
+  if (!iso) return '—'
+  return weekEndingFormatter.format(new Date(`${iso}T12:00:00.000Z`))
+}
+
 export const centsEqual = (a, b) => Math.abs(Math.round(a * 100) - Math.round(b * 100)) === 0
 
 export const roundCents = (n) => Math.round(n * 100) / 100
