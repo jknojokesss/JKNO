@@ -185,6 +185,41 @@ export const AGING_CSS = `
 }
 `
 
+export const PROFIT_TABLE_CSS = `
+.au-profit-ship-note{
+  display:block;width:100%;text-align:left;border:none;background:transparent;
+  font-family:${UI};font-size:13px;color:${MUTED};padding:0 0 14px;cursor:pointer;
+}
+.au-profit-table-wrap{overflow-x:auto}
+.au-profit-table{width:100%;border-collapse:collapse;font-size:13px;font-weight:400}
+.au-profit-table th,.au-profit-table td{padding:8px 6px;text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
+.au-profit-table th:first-child,.au-profit-table td:first-child{text-align:left}
+.au-profit-table thead th{font-size:10px;text-transform:uppercase;letter-spacing:.5px;color:${MUTED};border-bottom:1px solid ${BORDER}}
+.au-profit-table tbody tr{border-bottom:1px solid ${CREAM};cursor:pointer}
+.au-profit-table .au-profit-ch{font-weight:600;color:${INK}}
+.au-profit-table .au-profit-total{font-weight:600;border-top:2px solid ${BORDER}}
+.au-profit-cards{display:none}
+@media(max-width:720px){
+  .au-profit-table-wrap{display:none}
+  .au-profit-cards{display:flex;flex-direction:column;gap:10px;margin-top:4px}
+  .au-profit-card{border:1px solid ${BORDER};border-radius:2px;padding:14px;background:${CARDBG};text-align:left;cursor:pointer;width:100%}
+  .au-profit-card-row{display:flex;justify-content:space-between;gap:8px;font-size:13px;padding:3px 0;font-variant-numeric:tabular-nums}
+}
+.au-profit-orders-wrap{overflow-x:auto}
+.au-profit-orders{width:100%;border-collapse:collapse;font-size:12px}
+.au-profit-orders th,.au-profit-orders td{padding:7px 4px;text-align:right;font-variant-numeric:tabular-nums}
+.au-profit-orders th:first-child,.au-profit-orders td:first-child,.au-profit-orders .au-profit-cust,.au-profit-orders .au-profit-items{text-align:left}
+.au-profit-orders .au-profit-items{max-width:9rem;white-space:normal;line-height:1.35}
+.au-profit-orders thead th{font-size:9px;text-transform:uppercase;letter-spacing:.4px;color:${MUTED};border-bottom:1px solid ${BORDER}}
+.au-profit-orders tbody tr{border-bottom:1px solid ${CREAM};cursor:pointer}
+.au-profit-order-cards{display:none}
+@media(max-width:720px){
+  .au-profit-orders-wrap{display:none}
+  .au-profit-order-cards{display:flex;flex-direction:column;gap:8px}
+  .au-profit-order-card{border:1px solid ${BORDER};border-radius:2px;padding:12px;background:${CARDBG};text-align:left;width:100%;cursor:pointer}
+}
+`
+
 export const CHANNEL_ROW_CSS = `
 .au-ch-row{
   display:grid;grid-template-columns:minmax(0,1fr) 4.5rem 5.5rem 1rem;

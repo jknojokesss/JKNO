@@ -7,7 +7,7 @@ const TABS = [
   ['pnl', 'P&L', 'P&L'],
   ['channels', 'Sales by channel', 'Channels'],
   ['stock', 'Stock', 'Stock'],
-  ['receivables', 'Owed by stores', 'Owed'],
+  ['profit', 'Profit per order', 'Profit'],
 ]
 
 async function metrics(page) {

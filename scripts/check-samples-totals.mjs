@@ -111,40 +111,16 @@ function checkStoreAgingRules(prefix, rows) {
   console.log('popinsanity', { owed, buckets: Object.fromEntries(Object.entries(buckets).map(([k, v]) => [k, round2(v)])) })
 }
 
-// --- Aufschnitt ---
+// --- Aufschnitt (profit per order — no store receivables) ---
 {
   const { default: DATA } = await import('../components/samples/aufschnitt/aufschnittData.js')
-  const ar = DATA.receivables
-  const totals = { current: 0, d1_30: 0, d31_60: 0, d61_90: 0, d90p: 0, total: 0 }
-  const auAgingRows = []
-  for (const a of ar.accounts) {
-    const b = a.buckets
-    const row = b.current + b.d1_30 + b.d31_60 + b.d61_90 + b.d90p
-    auAgingRows.push({
-      name: a.name,
-      total: round2(b.total),
-      b31: round2(b.d31_60),
-      b61plus: round2(b.d61_90 + b.d90p),
-    })
-    ok(`AU ${a.name}`, round2(b.total) === round2(row))
-    totals.current += b.current
-    totals.d1_30 += b.d1_30
-    totals.d31_60 += b.d31_60
-    totals.d61_90 += b.d61_90
-    totals.d90p += b.d90p
-    totals.total += b.total
-  }
-  Object.keys(totals).forEach((k) => {
-    totals[k] = round2(totals[k])
-  })
-  ok('AU overview owed', round2(DATA.overview.owedTotal) === totals.total)
-  ok('AU 61-90+0', totals.d61_90 === 0 && totals.d90p === 0)
-  const arTotals = ar.accounts.map((a) => a.buckets.total).sort((a, b) => a - b)
-  const med = arTotals[Math.floor(arTotals.length / 2)]
-  ok('AU max ~1.8x median', Math.max(...arTotals) <= med * 1.8 + 0.02)
-  ok('AU owed ~94828', totals.total === 94827.63)
-  checkStoreAgingRules('AU', auAgingRows)
-  console.log('aufschnitt', { owed: totals.total, buckets: totals })
+  const sep = DATA.pnlViews['All brands'].find((m) => m.month === '2026-09')
+  const pp = DATA.profitPerOrder
+  const chProfit = round2(pp.channelSummary.reduce((s, r) => s + r.profit, 0))
+  ok('AU profit ties contribution', chProfit === pp.contributionAfterFulfillment)
+  ok('AU overview profit avg', round2(DATA.overview.profitPerOrderAvg) === round2(pp.blendedAvgProfitPerOrder))
+  ok('AU channel rev sum', round2(pp.channelSummary.reduce((s, r) => s + r.revenue, 0)) === round2(sep.revenue_total))
+  console.log('aufschnitt', { profitContribution: chProfit, avgPerOrder: pp.blendedAvgProfitPerOrder })
 }
 
 // --- Mr. Dipz ---

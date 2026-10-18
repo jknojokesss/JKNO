@@ -94,27 +94,12 @@ DATA.salesRows
     ok(`SKU cap ${r.productId}`, byProd <= sepBrandRev[r.brand] * 0.1801 + 0.02)
   })
 
-const ar = DATA.receivables
-ok('AR total 90-100k', ar.targetTotal >= 90_000 && ar.targetTotal <= 100_000)
-ok('AR accounts=total', sum(ar.accounts, (a) => a.buckets.total) === ar.targetTotal)
-const bucketSum = sum(ar.accounts, (a) => a.buckets.current + a.buckets.d1_30 + a.buckets.d31_60 + a.buckets.d61_90 + a.buckets.d90p)
-ok('AR buckets=total', bucketSum === ar.targetTotal)
-ar.accounts.forEach((a) => {
-  const invSum = sum(ar.invoices.filter((i) => i.account === a.name), (i) => i.amount)
-  ok(`Invoices ${a.name}`, invSum === a.buckets.total)
-  ok(`AR size ${a.name}`, a.buckets.total >= 900 && a.buckets.total <= 9_500)
-})
-const totalsSorted = ar.accounts.map((a) => a.buckets.total).sort((a, b) => a - b)
-const medianAr = totalsSorted[Math.floor(totalsSorted.length / 2)]
-ok('AR max ~1.8x median', Math.max(...totalsSorted) <= medianAr * 1.8 + 0.02)
-const fullyCurrent = ar.accounts.filter(
-  (a) => a.buckets.d1_30 === 0 && a.buckets.d31_60 === 0 && a.buckets.d61_90 === 0 && a.buckets.d90p === 0
-)
-ok('AR 5 fully current', fullyCurrent.length === 5)
-ok('AR 31-60 count', ar.accounts.filter((a) => a.buckets.d31_60 > 0).length >= 4)
-ok('AR 61-90 count', ar.accounts.filter((a) => a.buckets.d61_90 > 0).length === 0)
-ok('AR 90+ count', ar.accounts.filter((a) => a.buckets.d90p > 0).length === 0)
-ok('AR Lev Fresh modest', ar.accounts.find((a) => a.name === 'Lev Fresh - Queens').buckets.total < 5_200)
+const pp = DATA.profitPerOrder
+const sepPnl = DATA.pnlViews['All brands'].find((p) => p.month === '2026-09')
+ok('Profit channel revenue', sum(pp.channelSummary, (r) => r.revenue) === sepPnl.revenue_total)
+ok('Profit product cost', sum(pp.channelSummary, (r) => r.productCost) === sepPnl.cogs)
+ok('Profit contribution', sum(pp.channelSummary, (r) => r.profit) === pp.contributionAfterFulfillment)
+ok('Overview profit avg', DATA.overview.profitPerOrderAvg === pp.blendedAvgProfitPerOrder)
 
 const stockVal = sum(DATA.stock, (r) => r.valueAtCost)
 ok('Stock value', stockVal === DATA.overview.stockValue)
@@ -190,14 +175,6 @@ CHANNELS.forEach((ch) => {
   })
 })
 
-ar.invoices.forEach((inv) => {
-  ok(`Invoice net30 ${inv.invoiceNo}`, inv.dueDate === addDays(inv.date, 30))
-  const dpd = Math.max(0, daysBetween(inv.dueDate, AS_OF))
-  ok(`Invoice dpd ${inv.invoiceNo}`, inv.daysPastDue === dpd)
-  const bucket = bucketFromDpd(dpd)
-  ok(`Invoice bucket ${inv.invoiceNo}`, inv.bucket === bucket)
-})
-
 DATA.stock.forEach((r) => {
   if (!r.weeklyCases?.length) return
   ok(
@@ -258,10 +235,8 @@ BRANDS.forEach((b) => {
   console.log(`  ${b}: ${p.net_profit.toFixed(2)}`)
 })
 
-console.log(`\nReceivables total: ${ar.targetTotal.toFixed(2)}`)
-console.log(
-  `Aging: current ${sum(ar.accounts, (a) => a.buckets.current).toFixed(2)} | 1-30 ${sum(ar.accounts, (a) => a.buckets.d1_30).toFixed(2)} | 31-60 ${sum(ar.accounts, (a) => a.buckets.d31_60).toFixed(2)} | 61-90 ${sum(ar.accounts, (a) => a.buckets.d61_90).toFixed(2)} | 90+ ${sum(ar.accounts, (a) => a.buckets.d90p).toFixed(2)}`
-)
+console.log(`\nProfit per order avg: ${pp.blendedAvgProfitPerOrder.toFixed(2)}`)
+console.log(`Contribution after fulfillment: ${pp.contributionAfterFulfillment.toFixed(2)}`)
 console.log(`Stock at cost: ${DATA.overview.stockValue.toFixed(2)}`)
 
 console.log('\nStock table (product, cases, avg/wk, weeks, value):')
@@ -276,13 +251,6 @@ if (storesCh?.extra?.storeSplits) {
     console.log(`  ${s.store} | ${s.revenue.toFixed(2)}`)
   })
 }
-
-console.log('\nOwed by stores:')
-ar.accounts.forEach((a) => {
-  console.log(
-    `  ${a.name} | ${a.buckets.current.toFixed(2)} | ${a.buckets.d1_30.toFixed(2)} | ${a.buckets.d31_60.toFixed(2)} | ${a.buckets.d61_90.toFixed(2)} | ${a.buckets.d90p.toFixed(2)} | ${a.buckets.total.toFixed(2)}`
-  )
-})
 
 if (errors) {
   console.error(`\n${errors} check(s) failed`)

@@ -9,6 +9,7 @@ import {
   GREEN,
   RED,
   MONO,
+  money,
   money0,
   pct1,
   pctChange,
@@ -58,7 +59,7 @@ export default function AufschnittOverview({ card, lbl, KPI, brand, onOpen }) {
 
   const chartData = brand === 'All brands' ? ov.chartMonths : MONTH_CHART(brand)
 
-  const owedDelta = pctChange(ov.owedTotal, ov.priorOwedTotal)
+  const ppoDelta = pctChange(ov.profitPerOrderAvg, ov.priorProfitPerOrderAvg)
 
   return (
     <>
@@ -98,11 +99,11 @@ export default function AufschnittOverview({ card, lbl, KPI, brand, onOpen }) {
         />
         {brand === 'All brands' && (
           <KPI
-            k="Owed by stores"
-            v={money0(ov.owedTotal)}
-            sub={`${owedDelta >= 0 ? '+' : ''}${pct1(owedDelta)} vs August`}
-            subColor={MUTED}
-            onClick={() => onOpen({ type: 'owed-summary', total: ov.owedTotal, prior: ov.priorOwedTotal, over60: ov.owedOver60 })}
+            k="Profit per order"
+            v={money(DATA.profitPerOrder.blendedAvgProfitPerOrder)}
+            sub={`${ppoDelta >= 0 ? '+' : ''}${pct1(ppoDelta)} vs August`}
+            subColor={changeColor(ppoDelta)}
+            onClick={() => onOpen({ type: 'goto-profit' })}
           />
         )}
       </div>

@@ -6,7 +6,11 @@ import AufschnittOverview from './AufschnittOverview'
 import AufschnittFinancials from './AufschnittFinancials'
 import AufschnittChannelsTab, { ChannelDetail } from './AufschnittChannelsTab'
 import AufschnittStockTab, { StockDetail } from './AufschnittStockTab'
-import AufschnittReceivablesTab, { ReceivableAccountDetail } from './AufschnittReceivablesTab'
+import AufschnittProfitTab, {
+  ProfitChannelDetail,
+  ProfitOrderDetail,
+  ProfitShippingLossDetail,
+} from './AufschnittProfitTab'
 import {
   SPICE,
   CHAR,
@@ -32,7 +36,7 @@ const TABS = [
   ['pnl', 'P&L', 'P&L'],
   ['channels', 'Sales by channel', 'Channels'],
   ['stock', 'Stock', 'Stock'],
-  ['receivables', 'Owed by stores', 'Owed'],
+  ['profit', 'Profit per order', 'Profit'],
 ]
 
 export default function AufschnittPortal() {
@@ -83,6 +87,10 @@ export default function AufschnittPortal() {
   )
 
   const onBack = () => {
+    if (detail?._parent) {
+      setDetail(detail._parent)
+      return
+    }
     if (detail?._restore) {
       const r = detail._restore
       setTab(r.tab)
@@ -126,8 +134,8 @@ export default function AufschnittPortal() {
   }
 
   const onOverviewOpen = (d) => {
-    if (d.type === 'goto-ar') {
-      setTab('receivables')
+    if (d.type === 'goto-profit') {
+      setTab('profit')
       return
     }
     if (d.type === 'channel') {
@@ -139,7 +147,7 @@ export default function AufschnittPortal() {
 
   const currentLabel = TABS.find((t) => t[0] === tab)?.[1] || ''
 
-  const brandPills = tab !== 'receivables' && (
+  const brandPills = tab !== 'profit' && (
     <div className="au-brand-pills">
       {[BRAND_ALL, ...BRANDS].map((b) => (
         <button
@@ -205,7 +213,7 @@ export default function AufschnittPortal() {
           {!detail && brandPills}
 
           {detail ? (
-            <DetailView detail={detail} card={card} lbl={lbl} big={big} onBack={onBack} />
+            <DetailView detail={detail} card={card} lbl={lbl} big={big} onBack={onBack} onOpen={openDetail} />
           ) : (
             <>
               {tab === 'overview' && (
@@ -239,7 +247,7 @@ export default function AufschnittPortal() {
                   setSort={setStockSort}
                 />
               )}
-              {tab === 'receivables' && <AufschnittReceivablesTab card={card} lbl={lbl} onOpen={openDetail} />}
+              {tab === 'profit' && <AufschnittProfitTab card={card} lbl={lbl} onOpen={openDetail} />}
             </>
           )}
         </main>
@@ -248,15 +256,40 @@ export default function AufschnittPortal() {
   )
 }
 
-function DetailView({ detail, card, lbl, big, onBack }) {
+function DetailView({ detail, card, lbl, big, onBack, onOpen }) {
+  const openChild = (payload) => onOpen({ ...payload, _parent: detail })
+
   if (detail.type === 'channel-detail') {
     return <ChannelDetail detail={detail} card={card} lbl={lbl} big={big} onBack={onBack} />
   }
   if (detail.type === 'stock') {
     return <StockDetail detail={detail} card={card} lbl={lbl} big={big} onBack={onBack} />
   }
-  if (detail.type === 'ar-account') {
-    return <ReceivableAccountDetail detail={detail} card={card} lbl={lbl} big={big} onBack={onBack} />
+  if (detail.type === 'profit-channel') {
+    return (
+      <ProfitChannelDetail
+        detail={detail}
+        card={card}
+        lbl={lbl}
+        big={big}
+        onBack={onBack}
+        onOpen={openChild}
+      />
+    )
+  }
+  if (detail.type === 'profit-order') {
+    return <ProfitOrderDetail detail={detail} card={card} lbl={lbl} big={big} onBack={onBack} />
+  }
+  if (detail.type === 'profit-shipping-losses') {
+    return (
+      <ProfitShippingLossDetail
+        card={card}
+        lbl={lbl}
+        big={big}
+        onBack={onBack}
+        onOpen={openChild}
+      />
+    )
   }
   if (detail.type === 'pnl') {
     return <PnlDrillDetail detail={detail} card={card} lbl={lbl} big={big} onBack={onBack} />
@@ -415,21 +448,16 @@ function GenericOverviewDetail({ detail, card, lbl }) {
       </>
     )
   }
-  if (detail.type === 'owed-summary') {
-    const owedDelta =
-      detail.prior > 0 ? ((detail.total - detail.prior) / detail.prior) * 100 : 0
+  if (detail.type === 'profit-summary') {
+    const pp = DATA.profitPerOrder
     return (
       <>
-        <h2 style={{ fontSize: 20, fontWeight: 700, marginBottom: 12 }}>Owed by stores</h2>
+        <h2 style={{ fontSize: 20, fontWeight: 700, marginBottom: 12 }}>Profit per order</h2>
         <div style={{ ...card }}>
-          <Row l="Total open" v={money0(detail.total)} bold />
-          <Row l="Over 60 days" v={money0(detail.over60)} />
-          <Row l="August total" v={money0(detail.prior)} />
-          <Row
-            l="Change vs August"
-            v={`${owedDelta >= 0 ? '+' : ''}${owedDelta.toFixed(1)}%`}
-            accent={MUTED}
-          />
+          <Row l="Blended avg September" v={money(pp.blendedAvgProfitPerOrder)} bold />
+          <Row l="Orders September" v={String(pp.totalOrders)} />
+          <Row l="Profit after fulfillment" v={money0(pp.contributionAfterFulfillment)} />
+          <Row l="Prior month avg" v={money(detail.prior)} />
         </div>
       </>
     )

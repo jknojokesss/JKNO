@@ -13,6 +13,7 @@ import {
   STOCK_LOCATIONS,
 } from './aufschnittCatalog.js'
 import { allocateByWeight, roundCents, sumCents } from './aufschnittUtils.js'
+import { buildProfitPerOrder } from './aufschnittProfitOrders.js'
 
 const MONTH_TOTAL = {
   '2026-04': 198_432.17,
@@ -729,60 +730,6 @@ function buildStock(salesRows, opts = {}) {
   return rows
 }
 
-function addDays(iso, days) {
-  const d = new Date(`${iso}T12:00:00.000Z`)
-  d.setUTCDate(d.getUTCDate() + days)
-  return d.toISOString().slice(0, 10)
-}
-
-function daysBetween(a, b) {
-  const da = new Date(`${a}T12:00:00.000Z`)
-  const db = new Date(`${b}T12:00:00.000Z`)
-  return Math.round((db - da) / 86400000)
-}
-
-/** Bucket amounts per store — sums to ~94.8k; mostly current aging. */
-const AR_BUCKET_SPEC = {
-  'Tamar Market - Flatbush': { current: 2142.33, d1_30: 1827.44, d31_60: 0, d61_90: 0, d90p: 0 },
-  'Zissel\'s - Brooklyn': { current: 712.18, d1_30: 2229.11, d31_60: 401.08, d61_90: 0, d90p: 0 },
-  'Nachas Foods - Brooklyn': { current: 1628.67, d1_30: 1384.22, d31_60: 0, d61_90: 0, d90p: 0 },
-  'Ner Market - Brooklyn': { current: 484.11, d1_30: 2581.97, d31_60: 418.1, d61_90: 0, d90p: 0 },
-  'Gan Eden Market - Monsey': { current: 824.56, d1_30: 2931.21, d31_60: 0, d61_90: 0, d90p: 0 },
-  'Tova Supermarket - Wesley Hills': { current: 598.22, d1_30: 2568.73, d31_60: 431.86, d61_90: 0, d90p: 0 },
-  'Meged Glatt - Lakewood': { current: 1809.83, d1_30: 4461.69, d31_60: 0, d61_90: 0, d90p: 0 },
-  'Nitzan Market - Lakewood': { current: 3218.34, d1_30: 3350.18, d31_60: 0, d61_90: 0, d90p: 0 },
-  'Achdus Foods - Cedarhurst': { current: 2486.33, d1_30: 1042.18, d31_60: 0, d61_90: 0, d90p: 0 },
-  'Gitty\'s Market - Lawrence': { current: 2434.38, d1_30: 0, d31_60: 0, d61_90: 0, d90p: 0 },
-  'Shoresh Market - Teaneck': { current: 3511.1, d1_30: 0, d31_60: 0, d61_90: 0, d90p: 0 },
-  'Dvir Market - Deal': { current: 1817.33, d1_30: 1997.43, d31_60: 0, d61_90: 0, d90p: 0 },
-  'Golden Basket Kosher - Lawrence': { current: 1941.07, d1_30: 2271.66, d31_60: 0, d61_90: 0, d90p: 0 },
-  'Shefa Market - Monsey': { current: 3313, d1_30: 0, d31_60: 0, d61_90: 0, d90p: 0 },
-  'Ahava Market - Baltimore': { current: 4129.62, d1_30: 0, d31_60: 0, d61_90: 0, d90p: 0 },
-  'Simcha Foods - Baltimore': { current: 1827.56, d1_30: 2048.78, d31_60: 351.47, d61_90: 0, d90p: 0 },
-  'Lev Fresh - Queens': { current: 2536.96, d1_30: 0, d31_60: 0, d61_90: 0, d90p: 0 },
-  'Keren Wholesale - Lakewood': { current: 1704.7, d1_30: 4416.82, d31_60: 0, d61_90: 0, d90p: 0 },
-}
-
-function bucketDueDate(bucket) {
-  if (bucket === 'current') return '2026-10-12'
-  if (bucket === 'd1_30') return '2026-09-18'
-  if (bucket === 'd31_60') return '2026-08-22'
-  if (bucket === 'd61_90') return '2026-07-19'
-  return '2026-06-08'
-}
-
-function daysPastDueFromDue(dueDate) {
-  return Math.max(0, daysBetween(dueDate, AS_OF))
-}
-
-function bucketFromDaysPastDue(dpd) {
-  if (dpd === 0) return 'current'
-  if (dpd <= 30) return 'd1_30'
-  if (dpd <= 60) return 'd31_60'
-  if (dpd <= 90) return 'd61_90'
-  return 'd90p'
-}
-
 function reconcileStoreSplitTotal(split, total, cap) {
   let fix = roundCents(total - sumCents(STORE_ACCOUNTS.map((n) => split[n] || 0)))
   if (!fix) return
@@ -817,15 +764,11 @@ function enforceUniqueStoreRevenues(split, total, cap) {
   reconcileStoreSplitTotal(split, total, cap)
 }
 
-function buildStoreRevenueSplits(salesRows, arAccounts, monthId, brandKey) {
+function buildStoreRevenueSplits(salesRows, monthId, brandKey) {
   const total =
     brandKey === 'All brands'
       ? sumSales(salesRows, { month: monthId, channel: 'Stores' })
       : sumSales(salesRows, { month: monthId, channel: 'Stores', brand: brandKey })
-  const arByName = {}
-  arAccounts.forEach((a) => {
-    arByName[a.name] = a.buckets.total
-  })
   const cap = roundCents(total * 0.12)
   const split = {}
   let pinned = 0
@@ -840,8 +783,7 @@ function buildStoreRevenueSplits(salesRows, arAccounts, monthId, brandKey) {
   const others = STORE_ACCOUNTS.filter((n) => !TOP_STORE_NAMES.includes(n))
   const weights = {}
   others.forEach((name) => {
-    const ar = arByName[name] || 5000
-    weights[name] = (STORE_SALES_WEIGHT[name] || 1) * ar
+    weights[name] = STORE_SALES_WEIGHT[name] || 1
   })
   const otherAlloc = allocateByWeight(Math.max(0, remainder), weights)
   others.forEach((name) => {
@@ -854,127 +796,13 @@ function buildStoreRevenueSplits(salesRows, arAccounts, monthId, brandKey) {
   }))
 }
 
-function buildReceivables() {
-  const raw = STORE_ACCOUNTS.map((name) => {
-    const b = AR_BUCKET_SPEC[name]
-    return {
-      name,
-      buckets: {
-        current: roundCents(b.current),
-        d1_30: roundCents(b.d1_30),
-        d31_60: roundCents(b.d31_60),
-        d61_90: roundCents(b.d61_90),
-        d90p: roundCents(b.d90p),
-        total: roundCents(b.current + b.d1_30 + b.d31_60 + b.d61_90 + b.d90p),
-      },
-    }
-  })
-  const rawTotal = sumCents(raw, (a) => a.buckets.total)
-  const targetGoal = 94_827.63
-  const scale = targetGoal / rawTotal
-  const accounts = raw.map((a) => {
-    const buckets = {
-      current: roundCents(a.buckets.current * scale),
-      d1_30: roundCents(a.buckets.d1_30 * scale),
-      d31_60: roundCents(a.buckets.d31_60 * scale),
-      d61_90: roundCents(a.buckets.d61_90 * scale),
-      d90p: roundCents(a.buckets.d90p * scale),
-      total: 0,
-    }
-    buckets.total = roundCents(buckets.current + buckets.d1_30 + buckets.d31_60 + buckets.d61_90 + buckets.d90p)
-    return { name: a.name, buckets }
-  })
-  const fix = roundCents(targetGoal - sumCents(accounts, (a) => a.buckets.total))
-  if (fix) {
-    accounts.find((a) => a.name === 'Keren Wholesale - Lakewood').buckets.d1_30 = roundCents(
-      accounts.find((a) => a.name === 'Keren Wholesale - Lakewood').buckets.d1_30 + fix
-    )
-    accounts.find((a) => a.name === 'Keren Wholesale - Lakewood').buckets.total = roundCents(
-      accounts.find((a) => a.name === 'Keren Wholesale - Lakewood').buckets.total + fix
-    )
-  }
-  const targetTotal = sumCents(accounts, (a) => a.buckets.total)
-
-  const invoices = []
-  const payments = []
-  let invSeq = 10482
-  accounts.forEach((acct, ai) => {
-    const parts = [
-      ['current', acct.buckets.current],
-      ['d1_30', acct.buckets.d1_30],
-      ['d31_60', acct.buckets.d31_60],
-      ['d61_90', acct.buckets.d61_90],
-      ['d90p', acct.buckets.d90p],
-    ].filter(([, amt]) => amt > 0)
-    parts.forEach(([bucket, amount], bi) => {
-      const baseDue = bucketDueDate(bucket)
-      const brandsOn = BRANDS.filter((_, idx) => (hash(acct.name + bucket) + idx) % 3 !== 0)
-      if (brandsOn.length === 0) brandsOn.push(BRANDS[ai % 3])
-      const splitAmt =
-        amount > 2400 && bi === 0
-          ? [roundCents(amount * 0.58), roundCents(amount * 0.42)]
-          : [amount]
-      splitAmt.forEach((amt, si) => {
-        const dueDate = si ? addDays(baseDue, -si * 3) : baseDue
-        const invDate = addDays(dueDate, -30)
-        const due = addDays(invDate, 30)
-        const daysPastDue = daysPastDueFromDue(due)
-        invoices.push({
-          account: acct.name,
-          invoiceNo: `INV-${invSeq++}`,
-          date: invDate,
-          dueDate: due,
-          daysPastDue,
-          bucket: bucketFromDaysPastDue(daysPastDue),
-          brands: brandsOn,
-          amount: amt,
-        })
-      })
-    })
-    const payAmt = roundCents(acct.buckets.total * (0.14 + (hash(acct.name) % 17) / 100))
-    if (payAmt > 80 && ai % 5 !== 2) {
-      payments.push({
-        account: acct.name,
-        date: `2026-08-${String(6 + (ai % 21)).padStart(2, '0')}`,
-        amount: payAmt,
-        reference: `PMT-${2184 + ai * 3}`,
-      })
-    }
-    if (ai % 7 === 1) {
-      payments.push({
-        account: acct.name,
-        date: `2026-09-${String(4 + (ai % 12)).padStart(2, '0')}`,
-        amount: roundCents(payAmt * 0.62),
-        reference: `PMT-${3400 + ai}`,
-      })
-    }
-  })
-
-  accounts.forEach((acct) => {
-    const invSum = sumCents(invoices.filter((i) => i.account === acct.name), (i) => i.amount)
-    const diff = roundCents(acct.buckets.total - invSum)
-    if (diff && invoices.length) {
-      const last = invoices.filter((i) => i.account === acct.name).pop()
-      if (last) last.amount = roundCents(last.amount + diff)
-    }
-  })
-
-  return {
-    accounts,
-    invoices,
-    payments,
-    targetTotal,
-    priorTotal: roundCents(targetTotal * 0.971),
-  }
-}
-
-function buildChannelDetails(salesRows, arAccounts) {
+function buildChannelDetails(salesRows) {
   const storeSplits = {}
   ;['2026-09', '2026-08'].forEach((monthId) => {
     storeSplits[monthId] = {}
-    storeSplits[monthId]['All brands'] = buildStoreRevenueSplits(salesRows, arAccounts, monthId, 'All brands')
+    storeSplits[monthId]['All brands'] = buildStoreRevenueSplits(salesRows, monthId, 'All brands')
     BRANDS.forEach((b) => {
-      storeSplits[monthId][b] = buildStoreRevenueSplits(salesRows, arAccounts, monthId, b)
+      storeSplits[monthId][b] = buildStoreRevenueSplits(salesRows, monthId, b)
     })
   })
   return CHANNELS.map((ch) => {
@@ -1063,12 +891,12 @@ function buildModel() {
   addPnlView('All brands', (id) => pnlByMonth[id])
   BRANDS.forEach((b) => addPnlView(b, (id) => pnlByBrandMonth[`${id}:${b}`]))
 
-  const stock = buildStock(salesRows)
-  const receivables = buildReceivables()
-  const channels = buildChannelDetails(salesRows, receivables.accounts)
-
   const sep = '2026-09'
   const aug = '2026-08'
+
+  const stock = buildStock(salesRows)
+  const channels = buildChannelDetails(salesRows)
+  const profitPerOrder = buildProfitPerOrder(pnlByMonth[sep])
   const combinedSep = pnlByMonth[sep]
   const combinedAug = pnlByMonth[aug]
 
@@ -1105,8 +933,8 @@ function buildModel() {
     salesRows,
     pnlViews,
     stock,
-    receivables,
     channels,
+    profitPerOrder,
     brandSummary,
     overview: {
       sepSales: combinedSep.revenue_total,
@@ -1121,9 +949,8 @@ function buildModel() {
         const w = stock.reduce((s, r) => s + r.weeksSupply, 0) / stock.length
         return Math.round(w * 10) / 10
       })(),
-      owedTotal: receivables.targetTotal,
-      priorOwedTotal: receivables.priorTotal,
-      owedOver60: sumCents(receivables.accounts, (a) => a.buckets.d61_90 + a.buckets.d90p),
+      profitPerOrderAvg: profitPerOrder.blendedAvgProfitPerOrder,
+      priorProfitPerOrderAvg: roundCents(profitPerOrder.blendedAvgProfitPerOrder * 0.962),
       channelSalesSep: CHANNELS.map((ch) => ({
         channel: ch,
         revenue: sumSales(salesRows, { month: sep, channel: ch }),
