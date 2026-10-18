@@ -138,8 +138,9 @@ export default function PrimalKrispFinancials({ card, lbl, big, btn, inp, KPI })
         textAlign: 'left',
       }}
     >
-      <span style={{ color: SPICE, fontSize: 10 }}>{pnlExpand[id] ? '▼' : '▶'}</span>
-      {label}
+      <span style={{ color: pnlExpand[id] ? SPICE : MUTED, fontWeight: pnlExpand[id] ? 700 : 600, textDecoration: pnlExpand[id] ? 'underline' : 'none', textUnderlineOffset: 3 }}>
+        {label}
+      </span>
     </button>
   )
 

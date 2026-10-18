@@ -82,14 +82,8 @@ export const centsEqual = (a, b) => Math.abs(Math.round(a * 100) - Math.round(b 
 
 export function TieMark({ expected, actual }) {
   const ok = centsEqual(expected, actual)
+  if (ok) return null
   const diff = Math.round((actual - expected) * 100) / 100
-  if (ok) {
-    return (
-      <span title="Ties to total" style={{ color: GREEN, fontSize: '12px', fontWeight: 600, lineHeight: 1 }}>
-        ✓
-      </span>
-    )
-  }
   return <span style={{ color: RED, fontSize: '11px', fontWeight: 600 }}>Off by {money(Math.abs(diff))}</span>
 }
 

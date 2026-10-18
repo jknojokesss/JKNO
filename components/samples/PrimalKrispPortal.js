@@ -211,7 +211,6 @@ export default function PrimalKrispPortal() {
 
   const SortBtn = ({ label, sortKey, current, onSort }) => {
     const active = current.key === sortKey
-    const arrow = active ? (current.dir === 'asc' ? ' ↑' : ' ↓') : ''
     return (
       <button
         type="button"
@@ -230,10 +229,12 @@ export default function PrimalKrispPortal() {
           background: active ? CHAR : CARDBG,
           color: active ? CREAM : MUTED,
           fontSize: '12px',
+          fontWeight: active ? 700 : 600,
+          textDecoration: active ? 'underline' : 'none',
+          textUnderlineOffset: 3,
         }}
       >
-        {label}
-        {arrow}
+        {active ? `Sort: ${label}` : label}
       </button>
     )
   }
@@ -549,10 +550,12 @@ export default function PrimalKrispPortal() {
                                 minHeight: '40px',
                                 width: '100%',
                                 color: promoSort.key === key ? INK : '#96866C',
+                                fontWeight: promoSort.key === key ? 700 : 600,
+                                textDecoration: promoSort.key === key ? 'underline' : 'none',
+                                textUnderlineOffset: 3,
                               }}
                             >
                               {h}
-                              {promoSort.key === key ? (promoSort.dir === 'asc' ? ' ↑' : ' ↓') : ''}
                             </button>
                           ) : (
                             h
@@ -709,10 +712,19 @@ export default function PrimalKrispPortal() {
                             onClick={() =>
                               setInvSort((s) => ({ key, dir: s.key === key && s.dir === 'desc' ? 'asc' : 'desc' }))
                             }
-                            style={{ border: 'none', background: 'none', cursor: 'pointer', ...lbl, color: invSort.key === key ? INK : KRAFT, minHeight: 40 }}
+                            style={{
+                              border: 'none',
+                              background: 'none',
+                              cursor: 'pointer',
+                              ...lbl,
+                              color: invSort.key === key ? INK : KRAFT,
+                              minHeight: 40,
+                              fontWeight: invSort.key === key ? 700 : 600,
+                              textDecoration: invSort.key === key ? 'underline' : 'none',
+                              textUnderlineOffset: 3,
+                            }}
                           >
                             {h}
-                            {invSort.key === key ? (invSort.dir === 'asc' ? ' ↑' : ' ↓') : ''}
                           </button>
                         </th>
                       ))}

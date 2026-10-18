@@ -5,6 +5,8 @@
 import fs from 'fs'
 import path from 'path'
 import { fileURLToPath } from 'url'
+
+const GLYPH_RE = /[✓✔↓↑▲▼▶]/
 import {
   getDueToReorderStores,
   daysBetween,
@@ -70,6 +72,24 @@ for (const st of due) {
     const septAmt = septOrderAmountInHistory(st)
     ok(`sept sales tie ${st.store_name}`, sales != null && round2(septAmt) === round2(sales))
   }
+}
+
+const pkFiles = [
+  path.join(root, 'pages/primal-krisp.js'),
+  path.join(root, 'data/primal-krisp.json'),
+  ...fs
+    .readdirSync(path.join(root, 'components/samples'))
+    .filter((f) => f.startsWith('PrimalKrisp') || f.startsWith('primalKrisp'))
+    .map((f) => path.join(root, 'components/samples', f)),
+  ...fs.readdirSync(path.join(root, 'components/samples/primal-krisp')).map((f) =>
+    path.join(root, 'components/samples/primal-krisp', f),
+  ),
+]
+for (const file of pkFiles) {
+  if (!fs.existsSync(file) || file.endsWith('.png')) continue
+  const text = fs.readFileSync(file, 'utf8')
+  const stripped = text.replace(/←/g, '').replace(/›/g, '')
+  ok(`no icon glyphs in ${path.relative(root, file)}`, !GLYPH_RE.test(stripped))
 }
 
 console.log('primal-krisp due to reorder', {
