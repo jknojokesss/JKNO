@@ -160,6 +160,7 @@ export default function PrimalKrispStoresTab({
   setStoreSort,
   SortBtn,
   reorderFocus,
+  onOpenDetail,
 }) {
   const [side, setSide] = useState('consignment')
   const [reorderDetail, setReorderDetail] = useState(false)
@@ -325,7 +326,12 @@ export default function PrimalKrispStoresTab({
       <FilterChip label={filterChipLabel} onClear={() => setListFilter(null)} />
 
       <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap', marginBottom: '16px' }}>
-        <KPI k="Owed by stores" v={money(owedTotal)} accent={AMBER} onClick={() => setListFilter('open_balance')} />
+        <KPI
+          k="Owed by stores"
+          v={money(owedTotal)}
+          accent={AMBER}
+          onClick={() => (onOpenDetail ? onOpenDetail({ kind: 'storeOwedCard' }) : setListFilter('open_balance'))}
+        />
         <KPI
           k={side === 'consignment' ? 'Consignment owed' : 'Invoice owed'}
           v={money(side === 'consignment' ? consignmentOwed : invoiceOwed)}
@@ -334,7 +340,12 @@ export default function PrimalKrispStoresTab({
           k={period === 'week' ? 'Bags sold this week' : 'Bags sold to stores'}
           v={fmtInt(storeKpis.bagsSold)}
         />
-        <KPI k="Past 60 days" v={money(aging['61-90'])} accent={aging['61-90'] ? RED : INK} onClick={() => setListFilter('past60')} />
+        <KPI
+          k="Past 60 days"
+          v={money(aging['61-90'])}
+          accent={aging['61-90'] ? RED : INK}
+          onClick={() => (onOpenDetail ? onOpenDetail({ kind: 'storePast60Card' }) : setListFilter('past60'))}
+        />
       </div>
 
       <div style={{ ...card, marginBottom: '16px' }}>

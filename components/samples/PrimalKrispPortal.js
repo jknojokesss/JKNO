@@ -140,7 +140,7 @@ export default function PrimalKrispPortal() {
     const inner = (
       <>
         <div style={lbl}>{k}</div>
-        <div style={{ ...big, fontSize: '29px', color: accent || INK, lineHeight: 1.15, marginTop: '4px' }}>{v}</div>
+        <div className="pk-kpi-val" style={{ ...big, fontSize: '29px', color: accent || INK, lineHeight: 1.15, marginTop: '4px' }}>{v}</div>
         {sub ? (
           <div style={{ fontFamily: UI, fontSize: '12px', color: subColor || '#A2937A', marginTop: '3px', fontWeight: subColor ? 600 : 400 }}>
             {sub}
@@ -430,7 +430,8 @@ export default function PrimalKrispPortal() {
             <PrimalKrispFinancials card={card} lbl={lbl} big={big} btn={btn} inp={inp} KPI={KPI} />
           )}
 
-          {(tab === 'overview' || tab === 'subscriptions' || tab === 'close') && overviewDetail ? (
+          {(tab === 'overview' || tab === 'subscriptions' || tab === 'close' || tab === 'stores' || tab === 'products' || tab === 'advertising') &&
+          overviewDetail ? (
             <PrimalKrispOverviewDetail
               detail={overviewDetail}
               onBack={() => setOverviewDetail(null)}
@@ -464,7 +465,7 @@ export default function PrimalKrispPortal() {
             />
           )}
 
-          {tab === 'stores' && (
+          {tab === 'stores' && !overviewDetail && (
             <PrimalKrispStoresTab
               billingState={billingState}
               dispatch={dispatchBilling}
@@ -490,6 +491,7 @@ export default function PrimalKrispPortal() {
               setStoreSort={setStoreSort}
               SortBtn={SortBtn}
               reorderFocus={reorderFocus}
+              onOpenDetail={openDetail}
             />
           )}
 
@@ -624,7 +626,7 @@ export default function PrimalKrispPortal() {
             <PrimalKrispDepositsTab card={card} lbl={lbl} KPI={KPI} onOpenDetail={openDetail} />
           )}
 
-          {tab === 'advertising' && (
+          {tab === 'advertising' && !overviewDetail && (
             <>
               <div style={{ ...card, marginBottom: '16px', overflowX: 'auto' }}>
                 <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '13px' }}>
@@ -683,7 +685,15 @@ export default function PrimalKrispPortal() {
                       .map((p) => {
                       const vd = verdictPromo(p.return_per_dollar)
                       return (
-                        <tr key={p.code} style={{ borderBottom: `1px solid ${CREAM}` }}>
+                        <tr
+                          key={p.code}
+                          className="pk-click"
+                          style={{ borderBottom: `1px solid ${CREAM}`, cursor: 'pointer' }}
+                          onClick={() => openDetail({ kind: 'promoCode', code: p.code })}
+                          onKeyDown={(e) => e.key === 'Enter' && openDetail({ kind: 'promoCode', code: p.code })}
+                          tabIndex={0}
+                          role="button"
+                        >
                           <td style={{ padding: '10px 6px', fontWeight: 600, color: INK }}>{p.code}</td>
                           <td style={{ padding: '10px 6px', textAlign: 'right', fontFamily: MONO }}>{money(p.spend)}</td>
                           <td style={{ padding: '10px 6px', textAlign: 'right', fontFamily: MONO }}>{p.orders}</td>
@@ -708,7 +718,7 @@ export default function PrimalKrispPortal() {
             </>
           )}
 
-          {tab === 'products' && (
+          {tab === 'products' && !overviewDetail && (
             <>
               <div style={{ ...card, marginBottom: '16px', overflowX: 'auto' }}>
                 <table style={{ width: '100%', minWidth: '640px', borderCollapse: 'collapse', fontSize: '13px' }}>
@@ -839,7 +849,15 @@ export default function PrimalKrispPortal() {
                   </thead>
                   <tbody>
                     {sortedRuns.map((r) => (
-                      <tr key={r.run} style={{ borderBottom: `1px solid ${CREAM}` }}>
+                      <tr
+                        key={r.run}
+                        className="pk-click"
+                        style={{ borderBottom: `1px solid ${CREAM}`, cursor: 'pointer' }}
+                        onClick={() => openDetail({ kind: 'prodRun', run: r.run })}
+                        onKeyDown={(e) => e.key === 'Enter' && openDetail({ kind: 'prodRun', run: r.run })}
+                        tabIndex={0}
+                        role="button"
+                      >
                         <td style={{ padding: '8px 4px', fontWeight: 600, position: 'sticky', left: 0, background: CARDBG }}>{r.run}</td>
                         <td style={{ padding: '8px 4px', fontFamily: MONO }}>{fmtD(r.date)}</td>
                         <td style={{ padding: '8px 4px' }}>{r.product}</td>

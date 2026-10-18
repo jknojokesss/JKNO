@@ -1,5 +1,6 @@
 import DATA from '../../data/primal-krisp.json'
 import { getDueToReorderStores } from './primal-krisp/primalKrispReorderData'
+import { openInvoiceTotal, daysBetween, AS_OF } from './primalKrispStoreBilling'
 import { BORDER, INK, MUTED, UI, MONO, money, money0, fmtInt, pct1, fmtD } from './primalKrispUtils'
 
 function Shell({ title, sub, onBack, onClose, children }) {
@@ -286,6 +287,109 @@ export default function PrimalKrispOverviewDetail({ detail, onBack, onClose, sto
     return (
       <Shell title={money(je.amount)} sub={je.memo} {...shell}>
         <Lines rows={rows} totalLabel="Amount" totalValue={je.amount} format={money} />
+      </Shell>
+    )
+  }
+
+  if (detail.kind === 'prodRun') {
+    const r = DATA.production_runs.find((x) => x.run === detail.run)
+    if (!r) return null
+    const product = DATA.products.find((p) => p.name === r.product)
+    const cost = product?.fictitious?.cost_per_bag
+    const metricRows = [
+      { label: 'Date', value: fmtD(r.date) },
+      { label: 'Product', value: r.product },
+      { label: 'Raw meat (lbs)', value: fmtInt(r.raw_meat_lbs) },
+      { label: 'Bags planned', value: fmtInt(r.bags_planned) },
+      { label: 'Bags packed', value: r.bags_packed != null ? fmtInt(r.bags_packed) : '—' },
+      { label: 'Yield vs plan', value: r.yield_vs_plan_pct != null ? pct1(r.yield_vs_plan_pct) : '—' },
+    ]
+    const costRows = cost
+      ? Object.entries(cost)
+          .filter(([k]) => k !== 'total')
+          .map(([k, v]) => ({ label: k.replace(/_/g, ' '), value: v, key: k }))
+      : []
+    return (
+      <Shell title={r.run} sub="Production run" {...shell}>
+        <div style={{ border: `1px solid ${BORDER}`, borderRadius: 2, padding: '4px 14px', marginBottom: costRows.length ? 14 : 0 }}>
+          {metricRows.map((row, i) => (
+            <div key={row.label} style={{ display: 'flex', justifyContent: 'space-between', gap: 12, padding: '8px 0', borderTop: i ? `1px solid ${BORDER}` : 'none', fontSize: 13 }}>
+              <span>{row.label}</span>
+              <span style={{ fontFamily: MONO }}>{row.value}</span>
+            </div>
+          ))}
+          <div style={{ display: 'flex', justifyContent: 'space-between', gap: 12, padding: '10px 0', borderTop: `1px solid ${BORDER}`, fontWeight: 700, fontSize: 13 }}>
+            <span>Cost per bag</span>
+            <span style={{ fontFamily: MONO }}>{r.cost_per_bag != null ? money(r.cost_per_bag) : '—'}</span>
+          </div>
+        </div>
+        {costRows.length ? (
+          <>
+            <div style={{ fontSize: 11, fontWeight: 600, letterSpacing: '0.6px', textTransform: 'uppercase', color: MUTED, marginBottom: 8 }}>Cost per bag breakdown</div>
+            <Lines rows={costRows} totalLabel="Cost per bag" totalValue={cost?.total ?? r.cost_per_bag} format={money} />
+          </>
+        ) : null}
+      </Shell>
+    )
+  }
+
+  if (detail.kind === 'promoCode') {
+    const p = DATA.promo_codes.find((c) => c.code === detail.code)
+    if (!p) return null
+    const promoRows = [
+      { label: 'Spend', display: money(p.spend) },
+      { label: 'Orders', display: fmtInt(p.orders) },
+      { label: 'Revenue', display: money(p.revenue) },
+    ]
+    return (
+      <Shell title={p.code} sub="Promo code" {...shell}>
+        <div style={{ border: `1px solid ${BORDER}`, borderRadius: 2, padding: '4px 14px' }}>
+          {promoRows.map((row, i) => (
+            <div key={row.label} style={{ display: 'flex', justifyContent: 'space-between', gap: 12, padding: '8px 0', borderTop: i ? `1px solid ${BORDER}` : 'none', fontSize: 13 }}>
+              <span>{row.label}</span>
+              <span style={{ fontFamily: MONO }}>{row.display}</span>
+            </div>
+          ))}
+          <div style={{ display: 'flex', justifyContent: 'space-between', gap: 12, padding: '10px 0', borderTop: `1px solid ${BORDER}`, fontWeight: 700, fontSize: 13 }}>
+            <span>Return per $1</span>
+            <span style={{ fontFamily: MONO }}>{p.return_per_dollar.toFixed(1)}</span>
+          </div>
+        </div>
+      </Shell>
+    )
+  }
+
+  if (detail.kind === 'storeOwedCard') {
+    const owing = storeList.filter((s) => openInvoiceTotal(s) > 0).sort((a, b) => openInvoiceTotal(b) - openInvoiceTotal(a))
+    const total = openStoreBalance ?? owing.reduce((s, st) => s + openInvoiceTotal(st), 0)
+    const rows = owing.map((s) => ({ label: s.name, value: openInvoiceTotal(s), key: s.name }))
+    return (
+      <Shell title={money0(total)} sub="Owed by stores" {...shell}>
+        <Lines rows={rows} totalLabel="Total" totalValue={total} />
+      </Shell>
+    )
+  }
+
+  if (detail.kind === 'storePast60Card') {
+    const rows = []
+    let total = 0
+    for (const st of storeList) {
+      let amt = 0
+      for (const inv of st.sample.invoices || []) {
+        if (inv.status !== 'Open') continue
+        if (daysBetween(inv.issued, AS_OF) > 60) amt += inv.amount
+      }
+      amt = Math.round(amt * 100) / 100
+      if (amt > 0) {
+        rows.push({ label: st.name, value: amt, key: st.name })
+        total += amt
+      }
+    }
+    total = Math.round(total * 100) / 100
+    rows.sort((a, b) => b.value - a.value)
+    return (
+      <Shell title={money0(total)} sub="Past 60 days" {...shell}>
+        <Lines rows={rows} totalLabel="Total" totalValue={total} />
       </Shell>
     )
   }

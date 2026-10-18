@@ -106,7 +106,7 @@ export default function AufschnittPortal() {
     const inner = (
       <>
         <div style={lbl}>{k}</div>
-        <div style={{ ...big, fontSize: '29px', color: accent || INK, lineHeight: 1.15, marginTop: '4px' }}>{v}</div>
+        <div className="au-kpi-val" style={{ ...big, fontSize: '29px', color: accent || INK, lineHeight: 1.15, marginTop: '4px' }}>{v}</div>
         {sub ? <div style={{ fontFamily: UI, fontSize: '12px', color: subColor || '#A2937A', marginTop: '3px' }}>{sub}</div> : null}
       </>
     )

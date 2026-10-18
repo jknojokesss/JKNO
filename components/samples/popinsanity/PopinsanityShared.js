@@ -34,7 +34,7 @@ export function KPI({ k, v, sub, subColor, accent, onClick, card, lbl, big }) {
   const inner = (
     <>
       <div style={lbl}>{k}</div>
-      <div style={{ ...big, fontSize: '29px', color: accent || INK, lineHeight: 1.15, marginTop: '4px' }}>{v}</div>
+      <div className="pop-kpi-val" style={{ ...big, fontSize: '29px', color: accent || INK, lineHeight: 1.15, marginTop: '4px' }}>{v}</div>
       {sub ? (
         <div
           style={{

@@ -109,8 +109,9 @@ export const pctChange = (cur, prior) => (prior > 0 ? ((cur - prior) / prior) * 
 export const SHELL_CSS = (theme) => `*{box-sizing:border-box;margin:0;padding:0}
 html{-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale;text-rendering:optimizeLegibility}
 body{background:${theme.CREAM};font-family:${UI};color:${theme.INK};overflow-x:hidden}
-.au-shell td,.au-shell th,.au-kpi-val{font-variant-numeric:tabular-nums}
+.au-shell td,.au-shell th,.au-kpi-val{font-variant-numeric:tabular-nums;font-feature-settings:"tnum"}
 .au-shell{max-width:100%;overflow-x:hidden;font-variant-numeric:tabular-nums}
+.au-shell button{font-variant-numeric:tabular-nums;font-feature-settings:"tnum"}
 .au-prospect-credit{margin:0;padding:10px 16px 0;max-width:1180px;font-family:${UI};font-size:11px;font-weight:500;color:${MUTED};line-height:1.35;background:${theme.CREAM}}
 .au-prospect-credit__link{color:inherit;text-decoration:none;font-weight:inherit}
 .au-prospect-credit__link:hover{text-decoration:underline}

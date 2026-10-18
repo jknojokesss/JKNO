@@ -114,7 +114,7 @@ export default function CloseoutExplosionPortal() {
     const inner = (
       <>
         <div style={{ ...lbl, ...(onClick ? { lineHeight: 1.3 } : {}) }}>{k}</div>
-        <div style={{ ...big, fontSize: '26px', color: valueColor || INK, lineHeight: 1.15, marginTop: '4px' }}>{v}</div>
+        <div className="ce-kpi-val" style={{ ...big, fontSize: '26px', color: valueColor || INK, lineHeight: 1.15, marginTop: '4px' }}>{v}</div>
         {sub ? (
           <div style={{ fontFamily: UI, fontSize: '12px', color: sub.color || '#A2937A', marginTop: '3px' }}>{sub.text}</div>
         ) : null}
@@ -898,7 +898,7 @@ export default function CloseoutExplosionPortal() {
                   <span style={{ paddingRight: 8, minWidth: 0, flex: 1 }}>
                     <BuyerLabel name={b.name} />
                   </span>
-                  <span style={{ fontFamily: MONO, flexShrink: 0 }}>{money(b.total)}</span>
+                  <span className="ce-num" style={{ flexShrink: 0 }}>{money(b.total)}</span>
                 </button>
               ))}
             </div>
