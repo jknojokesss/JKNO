@@ -25,6 +25,14 @@ import {
   panel,
   NAV,
 } from './riversideUtils'
+import { buildDailyCloseModel } from './riversideDailyClose.js'
+import {
+  DailyCloseSection,
+  DailyCloseDayDetail,
+  DailyCloseJePreview,
+  DashboardMetricSheet,
+  DAILY_CLOSE_CSS,
+} from './RiversideDailyCloseUI.js'
 
 const RT_FONT_LINK =
   'https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&display=swap'
@@ -630,7 +638,6 @@ function StmtLine({ label, amount, prior, compare, indent, total, strong, onDril
     >
       <span>
         {label}
-        {clickable ? <span style={{ color: C.muted, marginLeft: 6 }}>›</span> : null}
       </span>
       <span className="num" style={{ color: C.ink, fontWeight: total || strong ? 700 : 400 }}>
         {paren(amount)}
@@ -860,7 +867,7 @@ function AcctSectionHead({ title, open, onToggle, count, total }) {
   return (
     <button type="button" className="rt-acct-head" onClick={onToggle} aria-expanded={open}>
       <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}>
-        <span>{open ? '▾' : '▸'}</span>
+        <span className="rt-acct-caret">{open ? 'Open' : 'Closed'}</span>
         {title}
       </span>
       <span style={{ marginLeft: 'auto', fontFamily: mono, fontSize: 11, fontWeight: 500, color: C.sub }}>
@@ -948,8 +955,8 @@ function MonthlyTableView({ onPickMonth }) {
     inProgress: false,
   }
   const sepRow = {
-    month: '2026-09',
-    label: 'September',
+    month: '2026-10',
+    label: 'October',
     revenue: null,
     cogs: null,
     gross: null,
@@ -1118,10 +1125,16 @@ function FinancialsTab({ fin, setFin, plPeriod, setPlPeriod }) {
 /* ---------- Dashboard ---------- */
 
 function DashboardTab({ period, setPeriod, onOpenOrders, onOpenFinancials, onOpenSalesItems, onOpenSalesItemsSize }) {
+  const [dailyDay, setDailyDay] = useState(null)
+  const [jeDay, setJeDay] = useState(null)
+  const [metricDetail, setMetricDetail] = useState(null)
+
   const rows = ORDERS.filter((o) => inPeriod(o, period))
   const reg = totalsOf(rows)
   const ordersView = totalsOf(ORDERS.filter((o) => inPeriod(o, period)))
   const tied = reg.sale === ordersView.sale && reg.cost === ordersView.cost && reg.tickets === ordersView.tickets
+
+  const dailyCloseModel = useMemo(() => buildDailyCloseModel(DATA, ORDERS), [])
 
   const m = LAST_MONTH
   const plAug = buildPL([m.month])
@@ -1151,6 +1164,46 @@ function DashboardTab({ period, setPeriod, onOpenOrders, onOpenFinancials, onOpe
   const profitTotal = sumBy(profitRows, 'profit')
 
   const openSalesMix = () => onOpenSalesItems({ periodKey: STOCK_AUG_ID, q: '' })
+
+  const openAugPl = (focus) => {
+    const lines = []
+    if (focus === 'revenue' || focus === 'gross' || focus === 'net') {
+      plAug.income.forEach((l) => lines.push({ label: l.label, value: fmt0(l.amount) }))
+      if (focus === 'gross' || focus === 'net') {
+        plAug.cogs.forEach((l) => lines.push({ label: l.label, value: fmt0(l.amount), valueStyle: { color: C.neg } }))
+        lines.push({ label: 'Gross profit', value: fmt0(plAug.gross), valueStyle: { fontWeight: 600 } })
+      }
+      if (focus === 'net') {
+        plAug.expense.forEach((l) => lines.push({ label: l.label, value: fmt0(l.amount), valueStyle: { color: C.neg } }))
+        lines.push({ label: 'Net profit', value: fmt0(plAug.net), valueStyle: { fontWeight: 600, color: C.green } })
+      }
+    }
+    if (focus === 'margin') {
+      lines.push({ label: 'Net profit', value: fmt0(m.profit) })
+      lines.push({ label: 'Revenue', value: fmt0(m.revenue) })
+      lines.push({ label: 'Net margin', value: pct((m.profit / m.revenue) * 100), valueStyle: { fontWeight: 600 } })
+    }
+    if (focus === 'ytd') {
+      MONTHS.forEach((x) => lines.push({ label: monthYear(x), value: fmt0(x.revenue) }))
+      lines.push({ label: 'YTD revenue', value: fmt0(DATA.ytd_revenue), valueStyle: { fontWeight: 600 } })
+    }
+    if (focus === 'tires') {
+      const t = DATA.aug_tire_sales
+      lines.push({ label: 'New tire units', value: String(t.new_tire_units) })
+      lines.push({ label: 'Used tire units', value: String(t.used_tire_units) })
+      lines.push({ label: 'Tire revenue', value: fmt0(t.tire_revenue_total) })
+      lines.push({ label: 'Tires sold (Aug)', value: String(t.tires_sold_units), valueStyle: { fontWeight: 600 } })
+    }
+    const titles = {
+      revenue: 'Revenue',
+      gross: 'Gross profit',
+      net: 'Net profit',
+      margin: 'Net margin',
+      ytd: 'YTD revenue',
+      tires: 'Tires sold',
+    }
+    setMetricDetail({ title: titles[focus], subtitle: monthYear(m), rows: lines })
+  }
 
   return (
     <>
@@ -1200,29 +1253,42 @@ function DashboardTab({ period, setPeriod, onOpenOrders, onOpenFinancials, onOpe
               onOpenOrders()
             }}
           >
-            View these {reg.tickets} tickets in Orders →
+            View these {reg.tickets} tickets in Orders
           </button>
         </div>
       </div>
 
-      <div style={{ fontFamily: head, fontSize: 13, fontWeight: 600, color: C.red, letterSpacing: '0.06em', textTransform: 'uppercase' }}>
-        Net profit · {monthYear(m)}
-      </div>
-      <div className="rt-hero" style={{ fontSize: 72, color: C.ink, lineHeight: 1, margin: '6px 0 16px' }}>
-        {fmt0(m.profit)}
-        <TieMark ok={netTie} />
-      </div>
+      <DailyCloseSection model={dailyCloseModel} onSelectDay={(day) => setDailyDay(day)} />
+
+      <button
+        type="button"
+        className="rt-metric-tile rt-metric-tile-btn"
+        style={{ display: 'block', width: '100%', textAlign: 'left', marginBottom: 16, cursor: 'pointer' }}
+        onClick={() => openAugPl('net')}
+      >
+        <div style={{ fontFamily: head, fontSize: 13, fontWeight: 600, color: C.red, letterSpacing: '0.06em', textTransform: 'uppercase' }}>
+          Net profit · {monthYear(m)}
+        </div>
+        <div className="rt-hero" style={{ fontSize: 72, color: C.ink, lineHeight: 1, margin: '6px 0 0' }}>
+          {fmt0(m.profit)}
+          <TieMark ok={netTie} />
+        </div>
+      </button>
       <div className="rt-dash-metrics">
-        {strip.map(([l, v]) => (
-          <div key={l} className="rt-metric-tile">
-            <div style={{ fontFamily: ui, fontSize: 10, color: C.muted }}>{l}</div>
-            <div style={{ fontFamily: mono, fontSize: 18, marginTop: 6, fontWeight: 500 }}>
-              {v}
-              {l === 'YTD revenue' ? <TieMark ok={DATA.ytd_revenue === sumBy(MONTHS, 'revenue')} /> : null}
-              {l === 'Tires sold' ? <TieMark ok={m.tiresSold === augTires.tires_sold_units} /> : null}
-            </div>
-          </div>
-        ))}
+        {strip.map(([l, v]) => {
+          const focus =
+            l === 'Revenue' ? 'revenue' : l === 'Gross profit' ? 'gross' : l === 'Net margin' ? 'margin' : l === 'YTD revenue' ? 'ytd' : 'tires'
+          return (
+            <button key={l} type="button" className="rt-metric-tile rt-metric-tile-btn" onClick={() => openAugPl(focus)}>
+              <div style={{ fontFamily: ui, fontSize: 10, color: C.muted }}>{l}</div>
+              <div style={{ fontFamily: mono, fontSize: 18, marginTop: 6, fontWeight: 500 }}>
+                {v}
+                {l === 'YTD revenue' ? <TieMark ok={DATA.ytd_revenue === sumBy(MONTHS, 'revenue')} /> : null}
+                {l === 'Tires sold' ? <TieMark ok={m.tiresSold === augTires.tires_sold_units} /> : null}
+              </div>
+            </button>
+          )
+        })}
       </div>
 
       <div className="rt-dash-main">
@@ -1264,7 +1330,7 @@ function DashboardTab({ period, setPeriod, onOpenOrders, onOpenFinancials, onOpe
               <span style={{ display: 'inline-flex', alignItems: 'baseline', gap: 8 }}>
                 {mixTie ? <TieMark ok /> : null}
                 <button type="button" className="rt-linkbtn" onClick={openSalesMix}>
-                  Items →
+                  Items
                 </button>
               </span>
             }
@@ -1351,6 +1417,12 @@ function DashboardTab({ period, setPeriod, onOpenOrders, onOpenFinancials, onOpe
           </table>
         </div>
       </div>
+
+      {dailyDay && !jeDay ? (
+        <DailyCloseDayDetail day={dailyDay} onBack={() => setDailyDay(null)} onPreviewJe={(day) => setJeDay(day)} />
+      ) : null}
+      {jeDay ? <DailyCloseJePreview day={jeDay} onClose={() => setJeDay(null)} /> : null}
+      {metricDetail ? <DashboardMetricSheet detail={metricDetail} onClose={() => setMetricDetail(null)} /> : null}
     </>
   )
 }
@@ -2100,6 +2172,7 @@ function Shell({ tab, setTab, embed, children }) {
 const PORTAL_CSS = `
   *{box-sizing:border-box;margin:0;padding:0}
   ${RT_RENDER_HINTS}
+  ${DAILY_CLOSE_CSS}
   html.rt-phone-embed,body.rt-phone-embed{height:100%;overflow:hidden}
   body{background:${C.paper};color:${C.ink};font-family:${ui}}
   .rt-shell td,.rt-shell th,.rt-drill-td-amt{font-variant-numeric:tabular-nums}
@@ -2120,6 +2193,9 @@ const PORTAL_CSS = `
   .rt-reg-kpi:not(:first-child){border-left:1px solid ${C.line}}
   .rt-dash-metrics{display:flex;gap:12px;flex-wrap:wrap;margin-bottom:20px}
   .rt-metric-tile{background:${C.card};border:1px solid ${C.hair};padding:18px 20px;flex:1 1 120px;margin-bottom:0}
+  .rt-metric-tile-btn{cursor:pointer;text-align:left;font:inherit;color:inherit;transition:background .15s}
+  .rt-metric-tile-btn:hover{background:#FAF8F4}
+  .rt-acct-caret{font-size:9px;color:${C.muted};font-weight:500;min-width:42px}
   .rt-kpi-row{display:flex;gap:12px;flex-wrap:wrap;margin-bottom:20px}
   .rt-filter-stack{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin-bottom:14px;width:100%}
   .rt-filter-stack .rt-filters-chips{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-bottom:0}
