@@ -12,7 +12,10 @@
       "cogs": 13050,
       "opex": 8650,
       "profit": 12100,
-      "tiresSold": 412
+      "tiresSold": 239,
+      "newTireUnits": 168,
+      "usedTireUnits": 71,
+      "ticketCount": 95
     },
     {
       "month": "2026-02",
@@ -21,7 +24,10 @@
       "cogs": 13380,
       "opex": 8720,
       "profit": 12500,
-      "tiresSold": 428
+      "tiresSold": 245,
+      "newTireUnits": 172,
+      "usedTireUnits": 73,
+      "ticketCount": 97
     },
     {
       "month": "2026-03",
@@ -30,7 +36,10 @@
       "cogs": 13620,
       "opex": 8780,
       "profit": 12800,
-      "tiresSold": 435
+      "tiresSold": 249,
+      "newTireUnits": 175,
+      "usedTireUnits": 74,
+      "ticketCount": 99
     },
     {
       "month": "2026-04",
@@ -39,7 +48,10 @@
       "cogs": 13800,
       "opex": 9000,
       "profit": 12800,
-      "tiresSold": 440
+      "tiresSold": 252,
+      "newTireUnits": 177,
+      "usedTireUnits": 75,
+      "ticketCount": 100
     },
     {
       "month": "2026-05",
@@ -48,7 +60,10 @@
       "cogs": 14750,
       "opex": 9150,
       "profit": 14200,
-      "tiresSold": 468
+      "tiresSold": 269,
+      "newTireUnits": 189,
+      "usedTireUnits": 80,
+      "ticketCount": 107
     },
     {
       "month": "2026-06",
@@ -57,7 +72,10 @@
       "cogs": 13500,
       "opex": 8300,
       "profit": 13000,
-      "tiresSold": 430
+      "tiresSold": 246,
+      "newTireUnits": 173,
+      "usedTireUnits": 73,
+      "ticketCount": 98
     },
     {
       "month": "2026-07",
@@ -66,7 +84,10 @@
       "cogs": 14000,
       "opex": 9000,
       "profit": 13200,
-      "tiresSold": 448
+      "tiresSold": 256,
+      "newTireUnits": 180,
+      "usedTireUnits": 76,
+      "ticketCount": 102
     },
     {
       "month": "2026-08",
@@ -75,7 +96,10 @@
       "cogs": 14400,
       "opex": 9100,
       "profit": 13600,
-      "tiresSold": 418
+      "tiresSold": 262,
+      "newTireUnits": 184,
+      "usedTireUnits": 78,
+      "ticketCount": 105
     }
   ],
   "pl_by_month": {
@@ -2314,7 +2338,7 @@
         },
         {
           "label": "Inventory",
-          "amount": 2694
+          "amount": 15457
         },
         {
           "label": "Accounts receivable",
@@ -2324,23 +2348,32 @@
       "liabilities": [
         {
           "label": "Accounts payable",
-          "amount": 9800
+          "amount": 11950
         },
         {
           "label": "Credit cards",
-          "amount": 6100
+          "amount": 7438
         },
         {
           "label": "Sales tax payable",
-          "amount": 2000
+          "amount": 2439
         }
       ],
       "equity": [
         {
-          "label": "Owner's equity",
-          "amount": 30794
+          "label": "Opening equity",
+          "amount": 38200
+        },
+        {
+          "label": "Net income (current year)",
+          "amount": 12100
+        },
+        {
+          "label": "Owner draws (year to date)",
+          "amount": -10670
         }
-      ]
+      ],
+      "totalEquity": 39630
     },
     "2026-02": {
       "label": "Feb 28, 2026",
@@ -2351,7 +2384,7 @@
         },
         {
           "label": "Inventory",
-          "amount": 2834
+          "amount": 15532
         },
         {
           "label": "Accounts receivable",
@@ -2361,23 +2394,32 @@
       "liabilities": [
         {
           "label": "Accounts payable",
-          "amount": 9940
+          "amount": 11582
         },
         {
           "label": "Credit cards",
-          "amount": 6180
+          "amount": 7200
         },
         {
           "label": "Sales tax payable",
-          "amount": 2030
+          "amount": 2365
         }
       ],
       "equity": [
         {
-          "label": "Owner's equity",
-          "amount": 31154
+          "label": "Opening equity",
+          "amount": 38200
+        },
+        {
+          "label": "Net income (current year)",
+          "amount": 24600
+        },
+        {
+          "label": "Owner draws (year to date)",
+          "amount": -21945
         }
-      ]
+      ],
+      "totalEquity": 40855
     },
     "2026-03": {
       "label": "Mar 31, 2026",
@@ -2388,7 +2430,7 @@
         },
         {
           "label": "Inventory",
-          "amount": 3039
+          "amount": 16987
         },
         {
           "label": "Accounts receivable",
@@ -2398,23 +2440,32 @@
       "liabilities": [
         {
           "label": "Accounts payable",
-          "amount": 10080
+          "amount": 10812
         },
         {
           "label": "Credit cards",
-          "amount": 6260
+          "amount": 6715
         },
         {
           "label": "Sales tax payable",
-          "amount": 2060
+          "amount": 2210
         }
       ],
       "equity": [
         {
-          "label": "Owner's equity",
-          "amount": 31579
+          "label": "Opening equity",
+          "amount": 38200
+        },
+        {
+          "label": "Net income (current year)",
+          "amount": 37400
+        },
+        {
+          "label": "Owner draws (year to date)",
+          "amount": -31410
         }
-      ]
+      ],
+      "totalEquity": 44190
     },
     "2026-04": {
       "label": "Apr 30, 2026",
@@ -2425,7 +2476,7 @@
         },
         {
           "label": "Inventory",
-          "amount": 3039
+          "amount": 17052
         },
         {
           "label": "Accounts receivable",
@@ -2435,23 +2486,32 @@
       "liabilities": [
         {
           "label": "Accounts payable",
-          "amount": 10220
+          "amount": 10663
         },
         {
           "label": "Credit cards",
-          "amount": 6340
+          "amount": 6614
         },
         {
           "label": "Sales tax payable",
-          "amount": 2090
+          "amount": 2180
         }
       ],
       "equity": [
         {
-          "label": "Owner's equity",
-          "amount": 31799
+          "label": "Opening equity",
+          "amount": 38200
+        },
+        {
+          "label": "Net income (current year)",
+          "amount": 50200
+        },
+        {
+          "label": "Owner draws (year to date)",
+          "amount": -43395
         }
-      ]
+      ],
+      "totalEquity": 45005
     },
     "2026-05": {
       "label": "May 31, 2026",
@@ -2462,7 +2522,7 @@
         },
         {
           "label": "Inventory",
-          "amount": 3408
+          "amount": 18735
         },
         {
           "label": "Accounts receivable",
@@ -2472,23 +2532,32 @@
       "liabilities": [
         {
           "label": "Accounts payable",
-          "amount": 10360
+          "amount": 10002
         },
         {
           "label": "Credit cards",
-          "amount": 6420
+          "amount": 6198
         },
         {
           "label": "Sales tax payable",
-          "amount": 2120
+          "amount": 2047
         }
       ],
       "equity": [
         {
-          "label": "Owner's equity",
-          "amount": 32388
+          "label": "Opening equity",
+          "amount": 38200
+        },
+        {
+          "label": "Net income (current year)",
+          "amount": 64400
+        },
+        {
+          "label": "Owner draws (year to date)",
+          "amount": -54232
         }
-      ]
+      ],
+      "totalEquity": 48368
     },
     "2026-06": {
       "label": "Jun 30, 2026",
@@ -2499,7 +2568,7 @@
         },
         {
           "label": "Inventory",
-          "amount": 2982
+          "amount": 17197
         },
         {
           "label": "Accounts receivable",
@@ -2509,23 +2578,32 @@
       "liabilities": [
         {
           "label": "Accounts payable",
-          "amount": 10500
+          "amount": 9632
         },
         {
           "label": "Credit cards",
-          "amount": 6500
+          "amount": 5963
         },
         {
           "label": "Sales tax payable",
-          "amount": 2150
+          "amount": 1972
         }
       ],
       "equity": [
         {
-          "label": "Owner's equity",
-          "amount": 32182
+          "label": "Opening equity",
+          "amount": 38200
+        },
+        {
+          "label": "Net income (current year)",
+          "amount": 77400
+        },
+        {
+          "label": "Owner draws (year to date)",
+          "amount": -67620
         }
-      ]
+      ],
+      "totalEquity": 47980
     },
     "2026-07": {
       "label": "Jul 31, 2026",
@@ -2536,7 +2614,7 @@
         },
         {
           "label": "Inventory",
-          "amount": 3037
+          "amount": 17312
         },
         {
           "label": "Accounts receivable",
@@ -2546,23 +2624,32 @@
       "liabilities": [
         {
           "label": "Accounts payable",
-          "amount": 10640
+          "amount": 9190
         },
         {
           "label": "Credit cards",
-          "amount": 6580
+          "amount": 5684
         },
         {
           "label": "Sales tax payable",
-          "amount": 2180
+          "amount": 1883
         }
       ],
       "equity": [
         {
-          "label": "Owner's equity",
-          "amount": 32407
+          "label": "Opening equity",
+          "amount": 38200
+        },
+        {
+          "label": "Net income (current year)",
+          "amount": 90600
+        },
+        {
+          "label": "Owner draws (year to date)",
+          "amount": -79475
         }
-      ]
+      ],
+      "totalEquity": 49325
     },
     "2026-08": {
       "label": "Aug 31, 2026",
@@ -2573,7 +2660,7 @@
         },
         {
           "label": "Inventory",
-          "amount": 3170
+          "amount": 17767
         },
         {
           "label": "Accounts receivable",
@@ -2583,23 +2670,32 @@
       "liabilities": [
         {
           "label": "Accounts payable",
-          "amount": 10780
+          "amount": 8710
         },
         {
           "label": "Credit cards",
-          "amount": 6660
+          "amount": 5381
         },
         {
           "label": "Sales tax payable",
-          "amount": 2210
+          "amount": 1786
         }
       ],
       "equity": [
         {
-          "label": "Owner's equity",
-          "amount": 32760
+          "label": "Opening equity",
+          "amount": 38200
+        },
+        {
+          "label": "Net income (current year)",
+          "amount": 104200
+        },
+        {
+          "label": "Owner draws (year to date)",
+          "amount": -91270
         }
-      ]
+      ],
+      "totalEquity": 51130
     }
   },
   "cash_flow": {
@@ -2650,7 +2746,7 @@
         },
         {
           "label": "Inventory change",
-          "amount": -140
+          "amount": -75
         },
         {
           "label": "Accounts payable change",
@@ -2666,7 +2762,7 @@
       "financing": [
         {
           "label": "Owner draw",
-          "amount": -11210
+          "amount": -11275
         }
       ],
       "cashStart": 42800,
@@ -2685,7 +2781,7 @@
         },
         {
           "label": "Inventory change",
-          "amount": -205
+          "amount": -1455
         },
         {
           "label": "Accounts payable change",
@@ -2701,7 +2797,7 @@
       "financing": [
         {
           "label": "Owner draw",
-          "amount": -10715
+          "amount": -9465
         }
       ],
       "cashStart": 43150,
@@ -2720,7 +2816,7 @@
         },
         {
           "label": "Inventory change",
-          "amount": 0
+          "amount": -65
         },
         {
           "label": "Accounts payable change",
@@ -2736,7 +2832,7 @@
       "financing": [
         {
           "label": "Owner draw",
-          "amount": -12050
+          "amount": -11985
         }
       ],
       "cashStart": 43500,
@@ -2755,7 +2851,7 @@
         },
         {
           "label": "Inventory change",
-          "amount": -369
+          "amount": -1683
         },
         {
           "label": "Accounts payable change",
@@ -2771,7 +2867,7 @@
       "financing": [
         {
           "label": "Owner draw",
-          "amount": -12151
+          "amount": -10837
         }
       ],
       "cashStart": 43850,
@@ -2790,7 +2886,7 @@
         },
         {
           "label": "Inventory change",
-          "amount": 426
+          "amount": 1538
         },
         {
           "label": "Accounts payable change",
@@ -2806,7 +2902,7 @@
       "financing": [
         {
           "label": "Owner draw",
-          "amount": -12276
+          "amount": -13388
         }
       ],
       "cashStart": 44200,
@@ -2825,7 +2921,7 @@
         },
         {
           "label": "Inventory change",
-          "amount": -55
+          "amount": -115
         },
         {
           "label": "Accounts payable change",
@@ -2841,7 +2937,7 @@
       "financing": [
         {
           "label": "Owner draw",
-          "amount": -11915
+          "amount": -11855
         }
       ],
       "cashStart": 44550,
@@ -2860,7 +2956,7 @@
         },
         {
           "label": "Inventory change",
-          "amount": -133
+          "amount": -455
         },
         {
           "label": "Accounts payable change",
@@ -2876,7 +2972,7 @@
       "financing": [
         {
           "label": "Owner draw",
-          "amount": -12117
+          "amount": -11795
         }
       ],
       "cashStart": 44850,
@@ -2895,7 +2991,7 @@
         },
         {
           "label": "Inventory change",
-          "amount": -476
+          "amount": -2310
         },
         {
           "label": "Accounts payable change",
@@ -2911,7 +3007,7 @@
       "financing": [
         {
           "label": "Owner draw",
-          "amount": -93104
+          "amount": -91270
         }
       ],
       "cashStart": 42100,
@@ -2923,21 +3019,25 @@
     {
       "name": "New Tires",
       "revenue": 23150,
+      "color": "#B0281C",
       "pct": 62.4
     },
     {
       "name": "Service & Repair",
       "revenue": 8200,
+      "color": "#8A8577",
       "pct": 22.1
     },
     {
       "name": "Used Tires",
       "revenue": 3900,
+      "color": "#B9AE9A",
       "pct": 10.5
     },
     {
       "name": "Other",
       "revenue": 1850,
+      "color": "#D3CBBA",
       "pct": 5
     }
   ],
@@ -2945,85 +3045,139 @@
     {
       "rank": 1,
       "size": "235/65R17",
-      "units": 72,
-      "revenue": 5040
+      "units": 44,
+      "revenue": 5506
     },
     {
       "rank": 2,
       "size": "225/60R17",
-      "units": 58,
-      "revenue": 4060
+      "units": 28,
+      "revenue": 3181
     },
     {
       "rank": 3,
       "size": "245/70R17",
-      "units": 48,
-      "revenue": 3840
+      "units": 24,
+      "revenue": 3050
     },
     {
       "rank": 4,
       "size": "205/55R16",
-      "units": 44,
-      "revenue": 3080
+      "units": 20,
+      "revenue": 2214
     },
     {
       "rank": 5,
       "size": "265/70R17",
-      "units": 36,
-      "revenue": 2880
+      "units": 18,
+      "revenue": 2287
     },
     {
       "rank": 6,
       "size": "275/55R20",
-      "units": 28,
-      "revenue": 2520
+      "units": 20,
+      "revenue": 2272
     }
   ],
   "stock": [
     {
       "size": "235/65/17",
       "desc": "All-season touring",
-      "onHand": 8,
+      "onHand": 18,
       "unitCost": 75
     },
     {
       "size": "205/55/16",
       "desc": "Grand touring",
-      "onHand": 6,
+      "onHand": 16,
       "unitCost": 65
     },
     {
       "size": "225/60/17",
       "desc": "All-season",
-      "onHand": 10,
+      "onHand": 20,
       "unitCost": 70
     },
     {
       "size": "245/70/17",
       "desc": "All-terrain",
-      "onHand": 6,
+      "onHand": 15,
       "unitCost": 85
     },
     {
       "size": "265/70/17",
       "desc": "Highway terrain",
-      "onHand": 2,
+      "onHand": 12,
       "unitCost": 85
     },
     {
       "size": "255/50/20",
       "desc": "Performance SUV",
-      "onHand": 4,
+      "onHand": 10,
       "unitCost": 115
     },
     {
       "size": "215/55/17",
       "desc": "Standard touring",
-      "onHand": 5,
+      "onHand": 14,
       "unitCost": 68
+    },
+    {
+      "size": "275/55/20",
+      "desc": "Crossover",
+      "onHand": 12,
+      "unitCost": 115
+    },
+    {
+      "size": "195/65/15",
+      "desc": "Compact touring",
+      "onHand": 13,
+      "unitCost": 62
+    },
+    {
+      "size": "235/60/18",
+      "desc": "Touring",
+      "onHand": 16,
+      "unitCost": 78
+    },
+    {
+      "size": "245/45/18",
+      "desc": "Performance",
+      "onHand": 11,
+      "unitCost": 92
+    },
+    {
+      "size": "265/60/18",
+      "desc": "SUV highway",
+      "onHand": 12,
+      "unitCost": 88
+    },
+    {
+      "size": "275/65/18",
+      "desc": "LT highway",
+      "onHand": 10,
+      "unitCost": 95
+    },
+    {
+      "size": "285/45/22",
+      "desc": "Performance plus",
+      "onHand": 8,
+      "unitCost": 130
+    },
+    {
+      "size": "225/65/17",
+      "desc": "Crossover touring",
+      "onHand": 14,
+      "unitCost": 72
+    },
+    {
+      "size": "245/75/16",
+      "desc": "Light truck",
+      "onHand": 12,
+      "unitCost": 90
     }
   ],
-  "inventory_value_aug": 3170,
+  "inventory_value_aug": 17767,
   "orders": [
     {
       "date": "2026-09-25",
@@ -3301,185 +3455,379 @@
     ],
     "answers": {
       "best_month": "May 2026 was the strongest closed month at $14,200 net profit on $38,100 revenue (37.3% margin).",
-      "cash": "Business checking was $45,200 at Aug 31. August net cash from operations was about $3,100.",
-      "mix": "In August, new tire sales were $23,150 (62.4% of revenue). Service and repair added $8,200.",
-      "sizes": "Top size in August was 235/65R17 — 86 units and $11,200 revenue.",
-      "month": "September register through Sep 25 shows $7,757 in sales on 22 tickets (estimates)."
+      "cash": "Business checking was $45,200 at Aug 31. August net cash from operations was about $350 after draws.",
+      "mix": "In August, new tire sales were $23,150 (184 units). Used tires added $3,900 (78 units). Service and repair was $8,200.",
+      "sizes": "Top size in August was 235/65R17 — 44 units and $5,720 revenue at about $130 per tire.",
+      "month": "September register through Sep 25 shows about $7,750 in sales on 22 tickets (estimates)."
     }
   },
   "aug_tire_sales": {
     "new_tire_revenue": 23150,
     "used_tire_revenue": 3900,
+    "new_tire_units": 184,
+    "used_tire_units": 78,
     "tire_revenue_total": 27050,
-    "tires_sold_units": 418,
-    "top_six_revenue": 21420,
-    "top_six_units": 286
+    "tires_sold_units": 262,
+    "top_six_revenue": 18510,
+    "top_six_units": 154
   },
   "stock_by_month": {
     "2026-01": {
-      "label": "Jan 30, 2026",
+      "label": "Jan 31, 2026",
       "rows": [
         {
           "size": "235/65/17",
           "desc": "All-season touring",
           "unitCost": 75,
-          "onHand": 5,
-          "value": 375
+          "onHand": 16,
+          "value": 1200
         },
         {
           "size": "205/55/16",
           "desc": "Grand touring",
           "unitCost": 65,
-          "onHand": 4,
-          "value": 260
+          "onHand": 14,
+          "value": 910
         },
         {
           "size": "225/60/17",
           "desc": "All-season",
           "unitCost": 70,
-          "onHand": 9,
-          "value": 630
+          "onHand": 18,
+          "value": 1260
         },
         {
           "size": "245/70/17",
           "desc": "All-terrain",
           "unitCost": 85,
-          "onHand": 6,
-          "value": 510
+          "onHand": 15,
+          "value": 1275
         },
         {
           "size": "265/70/17",
           "desc": "Highway terrain",
           "unitCost": 85,
-          "onHand": 3,
-          "value": 255
+          "onHand": 11,
+          "value": 935
         },
         {
           "size": "255/50/20",
           "desc": "Performance SUV",
           "unitCost": 115,
-          "onHand": 4,
-          "value": 460
+          "onHand": 9,
+          "value": 1035
         },
         {
           "size": "215/55/17",
           "desc": "Standard touring",
           "unitCost": 68,
-          "onHand": 3,
-          "value": 204
+          "onHand": 12,
+          "value": 816
+        },
+        {
+          "size": "275/55/20",
+          "desc": "Crossover",
+          "unitCost": 115,
+          "onHand": 10,
+          "value": 1150
+        },
+        {
+          "size": "195/65/15",
+          "desc": "Compact touring",
+          "unitCost": 62,
+          "onHand": 11,
+          "value": 682
+        },
+        {
+          "size": "235/60/18",
+          "desc": "Touring",
+          "unitCost": 78,
+          "onHand": 14,
+          "value": 1092
+        },
+        {
+          "size": "245/45/18",
+          "desc": "Performance",
+          "unitCost": 92,
+          "onHand": 9,
+          "value": 828
+        },
+        {
+          "size": "265/60/18",
+          "desc": "SUV highway",
+          "unitCost": 88,
+          "onHand": 10,
+          "value": 880
+        },
+        {
+          "size": "275/65/18",
+          "desc": "LT highway",
+          "unitCost": 95,
+          "onHand": 8,
+          "value": 760
+        },
+        {
+          "size": "285/45/22",
+          "desc": "Performance plus",
+          "unitCost": 130,
+          "onHand": 6,
+          "value": 780
+        },
+        {
+          "size": "225/65/17",
+          "desc": "Crossover touring",
+          "unitCost": 72,
+          "onHand": 12,
+          "value": 864
+        },
+        {
+          "size": "245/75/16",
+          "desc": "Light truck",
+          "unitCost": 90,
+          "onHand": 11,
+          "value": 990
         }
       ],
-      "inventory_value": 2694
+      "inventory_value": 15457,
+      "units_on_hand": 186
     },
     "2026-02": {
-      "label": "Feb 30, 2026",
+      "label": "Feb 28, 2026",
       "rows": [
         {
           "size": "235/65/17",
           "desc": "All-season touring",
           "unitCost": 75,
-          "onHand": 6,
-          "value": 450
+          "onHand": 17,
+          "value": 1275
         },
         {
           "size": "205/55/16",
           "desc": "Grand touring",
           "unitCost": 65,
-          "onHand": 5,
-          "value": 325
+          "onHand": 14,
+          "value": 910
         },
         {
           "size": "225/60/17",
           "desc": "All-season",
           "unitCost": 70,
-          "onHand": 9,
-          "value": 630
+          "onHand": 18,
+          "value": 1260
         },
         {
           "size": "245/70/17",
           "desc": "All-terrain",
           "unitCost": 85,
-          "onHand": 6,
-          "value": 510
+          "onHand": 15,
+          "value": 1275
         },
         {
           "size": "265/70/17",
           "desc": "Highway terrain",
           "unitCost": 85,
-          "onHand": 3,
-          "value": 255
+          "onHand": 11,
+          "value": 935
         },
         {
           "size": "255/50/20",
           "desc": "Performance SUV",
           "unitCost": 115,
-          "onHand": 4,
-          "value": 460
+          "onHand": 9,
+          "value": 1035
         },
         {
           "size": "215/55/17",
           "desc": "Standard touring",
           "unitCost": 68,
-          "onHand": 3,
-          "value": 204
+          "onHand": 12,
+          "value": 816
+        },
+        {
+          "size": "275/55/20",
+          "desc": "Crossover",
+          "unitCost": 115,
+          "onHand": 10,
+          "value": 1150
+        },
+        {
+          "size": "195/65/15",
+          "desc": "Compact touring",
+          "unitCost": 62,
+          "onHand": 11,
+          "value": 682
+        },
+        {
+          "size": "235/60/18",
+          "desc": "Touring",
+          "unitCost": 78,
+          "onHand": 14,
+          "value": 1092
+        },
+        {
+          "size": "245/45/18",
+          "desc": "Performance",
+          "unitCost": 92,
+          "onHand": 9,
+          "value": 828
+        },
+        {
+          "size": "265/60/18",
+          "desc": "SUV highway",
+          "unitCost": 88,
+          "onHand": 10,
+          "value": 880
+        },
+        {
+          "size": "275/65/18",
+          "desc": "LT highway",
+          "unitCost": 95,
+          "onHand": 8,
+          "value": 760
+        },
+        {
+          "size": "285/45/22",
+          "desc": "Performance plus",
+          "unitCost": 130,
+          "onHand": 6,
+          "value": 780
+        },
+        {
+          "size": "225/65/17",
+          "desc": "Crossover touring",
+          "unitCost": 72,
+          "onHand": 12,
+          "value": 864
+        },
+        {
+          "size": "245/75/16",
+          "desc": "Light truck",
+          "unitCost": 90,
+          "onHand": 11,
+          "value": 990
         }
       ],
-      "inventory_value": 2834
+      "inventory_value": 15532,
+      "units_on_hand": 187
     },
     "2026-03": {
-      "label": "Mar 30, 2026",
+      "label": "Mar 31, 2026",
       "rows": [
         {
           "size": "235/65/17",
           "desc": "All-season touring",
           "unitCost": 75,
-          "onHand": 6,
-          "value": 450
+          "onHand": 18,
+          "value": 1350
         },
         {
           "size": "205/55/16",
           "desc": "Grand touring",
           "unitCost": 65,
-          "onHand": 4,
-          "value": 260
+          "onHand": 15,
+          "value": 975
         },
         {
           "size": "225/60/17",
           "desc": "All-season",
           "unitCost": 70,
-          "onHand": 10,
-          "value": 700
+          "onHand": 20,
+          "value": 1400
         },
         {
           "size": "245/70/17",
           "desc": "All-terrain",
           "unitCost": 85,
-          "onHand": 7,
-          "value": 595
+          "onHand": 16,
+          "value": 1360
         },
         {
           "size": "265/70/17",
           "desc": "Highway terrain",
           "unitCost": 85,
-          "onHand": 3,
-          "value": 255
+          "onHand": 12,
+          "value": 1020
         },
         {
           "size": "255/50/20",
           "desc": "Performance SUV",
           "unitCost": 115,
-          "onHand": 5,
-          "value": 575
+          "onHand": 10,
+          "value": 1150
         },
         {
           "size": "215/55/17",
           "desc": "Standard touring",
           "unitCost": 68,
-          "onHand": 3,
-          "value": 204
+          "onHand": 13,
+          "value": 884
+        },
+        {
+          "size": "275/55/20",
+          "desc": "Crossover",
+          "unitCost": 115,
+          "onHand": 11,
+          "value": 1265
+        },
+        {
+          "size": "195/65/15",
+          "desc": "Compact touring",
+          "unitCost": 62,
+          "onHand": 12,
+          "value": 744
+        },
+        {
+          "size": "235/60/18",
+          "desc": "Touring",
+          "unitCost": 78,
+          "onHand": 15,
+          "value": 1170
+        },
+        {
+          "size": "245/45/18",
+          "desc": "Performance",
+          "unitCost": 92,
+          "onHand": 10,
+          "value": 920
+        },
+        {
+          "size": "265/60/18",
+          "desc": "SUV highway",
+          "unitCost": 88,
+          "onHand": 11,
+          "value": 968
+        },
+        {
+          "size": "275/65/18",
+          "desc": "LT highway",
+          "unitCost": 95,
+          "onHand": 9,
+          "value": 855
+        },
+        {
+          "size": "285/45/22",
+          "desc": "Performance plus",
+          "unitCost": 130,
+          "onHand": 7,
+          "value": 910
+        },
+        {
+          "size": "225/65/17",
+          "desc": "Crossover touring",
+          "unitCost": 72,
+          "onHand": 13,
+          "value": 936
+        },
+        {
+          "size": "245/75/16",
+          "desc": "Light truck",
+          "unitCost": 90,
+          "onHand": 12,
+          "value": 1080
         }
       ],
-      "inventory_value": 3039
+      "inventory_value": 16987,
+      "units_on_hand": 204
     },
     "2026-04": {
       "label": "Apr 30, 2026",
@@ -3488,53 +3836,117 @@
           "size": "235/65/17",
           "desc": "All-season touring",
           "unitCost": 75,
-          "onHand": 6,
-          "value": 450
+          "onHand": 18,
+          "value": 1350
         },
         {
           "size": "205/55/16",
           "desc": "Grand touring",
           "unitCost": 65,
-          "onHand": 4,
-          "value": 260
+          "onHand": 16,
+          "value": 1040
         },
         {
           "size": "225/60/17",
           "desc": "All-season",
           "unitCost": 70,
-          "onHand": 10,
-          "value": 700
+          "onHand": 20,
+          "value": 1400
         },
         {
           "size": "245/70/17",
           "desc": "All-terrain",
           "unitCost": 85,
-          "onHand": 7,
-          "value": 595
+          "onHand": 16,
+          "value": 1360
         },
         {
           "size": "265/70/17",
           "desc": "Highway terrain",
           "unitCost": 85,
-          "onHand": 3,
-          "value": 255
+          "onHand": 12,
+          "value": 1020
         },
         {
           "size": "255/50/20",
           "desc": "Performance SUV",
           "unitCost": 115,
-          "onHand": 5,
-          "value": 575
+          "onHand": 10,
+          "value": 1150
         },
         {
           "size": "215/55/17",
           "desc": "Standard touring",
           "unitCost": 68,
-          "onHand": 3,
-          "value": 204
+          "onHand": 13,
+          "value": 884
+        },
+        {
+          "size": "275/55/20",
+          "desc": "Crossover",
+          "unitCost": 115,
+          "onHand": 11,
+          "value": 1265
+        },
+        {
+          "size": "195/65/15",
+          "desc": "Compact touring",
+          "unitCost": 62,
+          "onHand": 12,
+          "value": 744
+        },
+        {
+          "size": "235/60/18",
+          "desc": "Touring",
+          "unitCost": 78,
+          "onHand": 15,
+          "value": 1170
+        },
+        {
+          "size": "245/45/18",
+          "desc": "Performance",
+          "unitCost": 92,
+          "onHand": 10,
+          "value": 920
+        },
+        {
+          "size": "265/60/18",
+          "desc": "SUV highway",
+          "unitCost": 88,
+          "onHand": 11,
+          "value": 968
+        },
+        {
+          "size": "275/65/18",
+          "desc": "LT highway",
+          "unitCost": 95,
+          "onHand": 9,
+          "value": 855
+        },
+        {
+          "size": "285/45/22",
+          "desc": "Performance plus",
+          "unitCost": 130,
+          "onHand": 7,
+          "value": 910
+        },
+        {
+          "size": "225/65/17",
+          "desc": "Crossover touring",
+          "unitCost": 72,
+          "onHand": 13,
+          "value": 936
+        },
+        {
+          "size": "245/75/16",
+          "desc": "Light truck",
+          "unitCost": 90,
+          "onHand": 12,
+          "value": 1080
         }
       ],
-      "inventory_value": 3039
+      "inventory_value": 17052,
+      "units_on_hand": 205
     },
     "2026-05": {
       "label": "May 31, 2026",
@@ -3543,53 +3955,117 @@
           "size": "235/65/17",
           "desc": "All-season touring",
           "unitCost": 75,
-          "onHand": 9,
-          "value": 675
+          "onHand": 20,
+          "value": 1500
         },
         {
           "size": "205/55/16",
           "desc": "Grand touring",
           "unitCost": 65,
-          "onHand": 7,
-          "value": 455
+          "onHand": 17,
+          "value": 1105
         },
         {
           "size": "225/60/17",
           "desc": "All-season",
           "unitCost": 70,
-          "onHand": 8,
-          "value": 560
+          "onHand": 22,
+          "value": 1540
         },
         {
           "size": "245/70/17",
           "desc": "All-terrain",
           "unitCost": 85,
-          "onHand": 6,
-          "value": 510
+          "onHand": 17,
+          "value": 1445
         },
         {
           "size": "265/70/17",
           "desc": "Highway terrain",
           "unitCost": 85,
-          "onHand": 4,
-          "value": 340
+          "onHand": 14,
+          "value": 1190
         },
         {
           "size": "255/50/20",
           "desc": "Performance SUV",
           "unitCost": 115,
-          "onHand": 4,
-          "value": 460
+          "onHand": 11,
+          "value": 1265
         },
         {
           "size": "215/55/17",
           "desc": "Standard touring",
           "unitCost": 68,
-          "onHand": 6,
-          "value": 408
+          "onHand": 15,
+          "value": 1020
+        },
+        {
+          "size": "275/55/20",
+          "desc": "Crossover",
+          "unitCost": 115,
+          "onHand": 12,
+          "value": 1380
+        },
+        {
+          "size": "195/65/15",
+          "desc": "Compact touring",
+          "unitCost": 62,
+          "onHand": 13,
+          "value": 806
+        },
+        {
+          "size": "235/60/18",
+          "desc": "Touring",
+          "unitCost": 78,
+          "onHand": 16,
+          "value": 1248
+        },
+        {
+          "size": "245/45/18",
+          "desc": "Performance",
+          "unitCost": 92,
+          "onHand": 11,
+          "value": 1012
+        },
+        {
+          "size": "265/60/18",
+          "desc": "SUV highway",
+          "unitCost": 88,
+          "onHand": 12,
+          "value": 1056
+        },
+        {
+          "size": "275/65/18",
+          "desc": "LT highway",
+          "unitCost": 95,
+          "onHand": 10,
+          "value": 950
+        },
+        {
+          "size": "285/45/22",
+          "desc": "Performance plus",
+          "unitCost": 130,
+          "onHand": 8,
+          "value": 1040
+        },
+        {
+          "size": "225/65/17",
+          "desc": "Crossover touring",
+          "unitCost": 72,
+          "onHand": 14,
+          "value": 1008
+        },
+        {
+          "size": "245/75/16",
+          "desc": "Light truck",
+          "unitCost": 90,
+          "onHand": 13,
+          "value": 1170
         }
       ],
-      "inventory_value": 3408
+      "inventory_value": 18735,
+      "units_on_hand": 225
     },
     "2026-06": {
       "label": "Jun 30, 2026",
@@ -3598,53 +4074,117 @@
           "size": "235/65/17",
           "desc": "All-season touring",
           "unitCost": 75,
-          "onHand": 7,
-          "value": 525
+          "onHand": 19,
+          "value": 1425
         },
         {
           "size": "205/55/16",
           "desc": "Grand touring",
           "unitCost": 65,
-          "onHand": 6,
-          "value": 390
+          "onHand": 16,
+          "value": 1040
         },
         {
           "size": "225/60/17",
           "desc": "All-season",
           "unitCost": 70,
-          "onHand": 11,
-          "value": 770
+          "onHand": 21,
+          "value": 1470
         },
         {
           "size": "245/70/17",
           "desc": "All-terrain",
           "unitCost": 85,
-          "onHand": 5,
-          "value": 425
+          "onHand": 16,
+          "value": 1360
         },
         {
           "size": "265/70/17",
           "desc": "Highway terrain",
           "unitCost": 85,
-          "onHand": 3,
-          "value": 255
+          "onHand": 12,
+          "value": 1020
         },
         {
           "size": "255/50/20",
           "desc": "Performance SUV",
           "unitCost": 115,
-          "onHand": 3,
-          "value": 345
+          "onHand": 10,
+          "value": 1150
         },
         {
           "size": "215/55/17",
           "desc": "Standard touring",
           "unitCost": 68,
-          "onHand": 4,
-          "value": 272
+          "onHand": 13,
+          "value": 884
+        },
+        {
+          "size": "275/55/20",
+          "desc": "Crossover",
+          "unitCost": 115,
+          "onHand": 11,
+          "value": 1265
+        },
+        {
+          "size": "195/65/15",
+          "desc": "Compact touring",
+          "unitCost": 62,
+          "onHand": 12,
+          "value": 744
+        },
+        {
+          "size": "235/60/18",
+          "desc": "Touring",
+          "unitCost": 78,
+          "onHand": 15,
+          "value": 1170
+        },
+        {
+          "size": "245/45/18",
+          "desc": "Performance",
+          "unitCost": 92,
+          "onHand": 10,
+          "value": 920
+        },
+        {
+          "size": "265/60/18",
+          "desc": "SUV highway",
+          "unitCost": 88,
+          "onHand": 11,
+          "value": 968
+        },
+        {
+          "size": "275/65/18",
+          "desc": "LT highway",
+          "unitCost": 95,
+          "onHand": 9,
+          "value": 855
+        },
+        {
+          "size": "285/45/22",
+          "desc": "Performance plus",
+          "unitCost": 130,
+          "onHand": 7,
+          "value": 910
+        },
+        {
+          "size": "225/65/17",
+          "desc": "Crossover touring",
+          "unitCost": 72,
+          "onHand": 13,
+          "value": 936
+        },
+        {
+          "size": "245/75/16",
+          "desc": "Light truck",
+          "unitCost": 90,
+          "onHand": 12,
+          "value": 1080
         }
       ],
-      "inventory_value": 2982
+      "inventory_value": 17197,
+      "units_on_hand": 207
     },
     "2026-07": {
       "label": "Jul 31, 2026",
@@ -3653,53 +4193,117 @@
           "size": "235/65/17",
           "desc": "All-season touring",
           "unitCost": 75,
-          "onHand": 8,
-          "value": 600
+          "onHand": 19,
+          "value": 1425
         },
         {
           "size": "205/55/16",
           "desc": "Grand touring",
           "unitCost": 65,
-          "onHand": 5,
-          "value": 325
+          "onHand": 16,
+          "value": 1040
         },
         {
           "size": "225/60/17",
           "desc": "All-season",
           "unitCost": 70,
-          "onHand": 10,
-          "value": 700
+          "onHand": 21,
+          "value": 1470
         },
         {
           "size": "245/70/17",
           "desc": "All-terrain",
           "unitCost": 85,
-          "onHand": 6,
-          "value": 510
+          "onHand": 16,
+          "value": 1360
         },
         {
           "size": "265/70/17",
           "desc": "Highway terrain",
           "unitCost": 85,
-          "onHand": 2,
-          "value": 170
+          "onHand": 12,
+          "value": 1020
         },
         {
           "size": "255/50/20",
           "desc": "Performance SUV",
           "unitCost": 115,
-          "onHand": 4,
-          "value": 460
+          "onHand": 11,
+          "value": 1265
         },
         {
           "size": "215/55/17",
           "desc": "Standard touring",
           "unitCost": 68,
-          "onHand": 4,
-          "value": 272
+          "onHand": 13,
+          "value": 884
+        },
+        {
+          "size": "275/55/20",
+          "desc": "Crossover",
+          "unitCost": 115,
+          "onHand": 11,
+          "value": 1265
+        },
+        {
+          "size": "195/65/15",
+          "desc": "Compact touring",
+          "unitCost": 62,
+          "onHand": 12,
+          "value": 744
+        },
+        {
+          "size": "235/60/18",
+          "desc": "Touring",
+          "unitCost": 78,
+          "onHand": 15,
+          "value": 1170
+        },
+        {
+          "size": "245/45/18",
+          "desc": "Performance",
+          "unitCost": 92,
+          "onHand": 10,
+          "value": 920
+        },
+        {
+          "size": "265/60/18",
+          "desc": "SUV highway",
+          "unitCost": 88,
+          "onHand": 11,
+          "value": 968
+        },
+        {
+          "size": "275/65/18",
+          "desc": "LT highway",
+          "unitCost": 95,
+          "onHand": 9,
+          "value": 855
+        },
+        {
+          "size": "285/45/22",
+          "desc": "Performance plus",
+          "unitCost": 130,
+          "onHand": 7,
+          "value": 910
+        },
+        {
+          "size": "225/65/17",
+          "desc": "Crossover touring",
+          "unitCost": 72,
+          "onHand": 13,
+          "value": 936
+        },
+        {
+          "size": "245/75/16",
+          "desc": "Light truck",
+          "unitCost": 90,
+          "onHand": 12,
+          "value": 1080
         }
       ],
-      "inventory_value": 3037
+      "inventory_value": 17312,
+      "units_on_hand": 208
     },
     "2026-08": {
       "label": "Aug 31, 2026",
@@ -3708,115 +4312,2435 @@
           "size": "235/65/17",
           "desc": "All-season touring",
           "unitCost": 75,
-          "onHand": 8,
-          "value": 600
+          "onHand": 18,
+          "value": 1350
         },
         {
           "size": "205/55/16",
           "desc": "Grand touring",
           "unitCost": 65,
-          "onHand": 6,
-          "value": 390
+          "onHand": 16,
+          "value": 1040
         },
         {
           "size": "225/60/17",
           "desc": "All-season",
           "unitCost": 70,
-          "onHand": 10,
-          "value": 700
+          "onHand": 20,
+          "value": 1400
         },
         {
           "size": "245/70/17",
           "desc": "All-terrain",
           "unitCost": 85,
-          "onHand": 6,
-          "value": 510
+          "onHand": 15,
+          "value": 1275
         },
         {
           "size": "265/70/17",
           "desc": "Highway terrain",
           "unitCost": 85,
-          "onHand": 2,
-          "value": 170
+          "onHand": 12,
+          "value": 1020
         },
         {
           "size": "255/50/20",
           "desc": "Performance SUV",
           "unitCost": 115,
-          "onHand": 4,
-          "value": 460
+          "onHand": 10,
+          "value": 1150
         },
         {
           "size": "215/55/17",
           "desc": "Standard touring",
           "unitCost": 68,
-          "onHand": 5,
-          "value": 340
+          "onHand": 14,
+          "value": 952
+        },
+        {
+          "size": "275/55/20",
+          "desc": "Crossover",
+          "unitCost": 115,
+          "onHand": 12,
+          "value": 1380
+        },
+        {
+          "size": "195/65/15",
+          "desc": "Compact touring",
+          "unitCost": 62,
+          "onHand": 13,
+          "value": 806
+        },
+        {
+          "size": "235/60/18",
+          "desc": "Touring",
+          "unitCost": 78,
+          "onHand": 16,
+          "value": 1248
+        },
+        {
+          "size": "245/45/18",
+          "desc": "Performance",
+          "unitCost": 92,
+          "onHand": 11,
+          "value": 1012
+        },
+        {
+          "size": "265/60/18",
+          "desc": "SUV highway",
+          "unitCost": 88,
+          "onHand": 12,
+          "value": 1056
+        },
+        {
+          "size": "275/65/18",
+          "desc": "LT highway",
+          "unitCost": 95,
+          "onHand": 10,
+          "value": 950
+        },
+        {
+          "size": "285/45/22",
+          "desc": "Performance plus",
+          "unitCost": 130,
+          "onHand": 8,
+          "value": 1040
+        },
+        {
+          "size": "225/65/17",
+          "desc": "Crossover touring",
+          "unitCost": 72,
+          "onHand": 14,
+          "value": 1008
+        },
+        {
+          "size": "245/75/16",
+          "desc": "Light truck",
+          "unitCost": 90,
+          "onHand": 12,
+          "value": 1080
         }
       ],
-      "inventory_value": 3170
+      "inventory_value": 17767,
+      "units_on_hand": 213
     }
   },
   "sales_items_aug": [
     {
       "item": "235/65R17",
-      "units": 72,
-      "revenue": 5040,
-      "category": "New tire"
+      "units": 44,
+      "revenue": 5506,
+      "category": "New tire",
+      "unitPrice": 125.14,
+      "unitCost": 75
     },
     {
       "item": "225/60R17",
-      "units": 58,
-      "revenue": 4060,
-      "category": "New tire"
+      "units": 28,
+      "revenue": 3181,
+      "category": "New tire",
+      "unitPrice": 113.61,
+      "unitCost": 70
     },
     {
       "item": "245/70R17",
-      "units": 48,
-      "revenue": 3840,
-      "category": "New tire"
+      "units": 24,
+      "revenue": 3050,
+      "category": "New tire",
+      "unitPrice": 127.08,
+      "unitCost": 85
     },
     {
       "item": "205/55R16",
-      "units": 44,
-      "revenue": 3080,
-      "category": "New tire"
+      "units": 20,
+      "revenue": 2214,
+      "category": "New tire",
+      "unitPrice": 110.7,
+      "unitCost": 65
     },
     {
       "item": "265/70R17",
-      "units": 36,
-      "revenue": 2880,
-      "category": "New tire"
+      "units": 18,
+      "revenue": 2287,
+      "category": "New tire",
+      "unitPrice": 127.06,
+      "unitCost": 85
     },
     {
       "item": "275/55R20",
-      "units": 28,
-      "revenue": 2520,
-      "category": "New tire"
+      "units": 20,
+      "revenue": 2272,
+      "category": "New tire",
+      "unitPrice": 113.6,
+      "unitCost": 95
     },
     {
-      "item": "Other new tire sizes",
-      "units": 132,
-      "revenue": 1730,
-      "category": "New tire"
+      "item": "255/50R20",
+      "units": 8,
+      "unitPrice": 202.13,
+      "unitCost": 115,
+      "category": "New tire",
+      "revenue": 1617
+    },
+    {
+      "item": "195/65R15",
+      "units": 8,
+      "unitPrice": 111.63,
+      "unitCost": 62,
+      "category": "New tire",
+      "revenue": 893
+    },
+    {
+      "item": "215/55R17",
+      "units": 8,
+      "unitPrice": 123.25,
+      "unitCost": 68,
+      "category": "New tire",
+      "revenue": 986
+    },
+    {
+      "item": "285/45R22",
+      "units": 6,
+      "unitPrice": 190.67,
+      "unitCost": 130,
+      "category": "New tire",
+      "revenue": 1144
     },
     {
       "item": "Used tires (assorted)",
-      "units": 52,
+      "units": 78,
       "revenue": 3900,
+      "unitPrice": 50,
+      "unitCost": 32,
       "category": "Used tire"
     },
     {
       "item": "Service & labor",
       "units": 186,
       "revenue": 8200,
+      "unitPrice": 44,
+      "unitCost": 18,
       "category": "Service"
     },
     {
       "item": "Parts & other",
       "units": 94,
       "revenue": 1850,
+      "unitPrice": 20,
+      "unitCost": 8,
       "category": "Other"
     }
-  ]
+  ],
+  "sales_items_by_month": {
+    "2026-08": [
+      {
+        "item": "235/65R17",
+        "units": 44,
+        "revenue": 5506,
+        "category": "New tire",
+        "unitPrice": 125.14,
+        "unitCost": 75
+      },
+      {
+        "item": "225/60R17",
+        "units": 28,
+        "revenue": 3181,
+        "category": "New tire",
+        "unitPrice": 113.61,
+        "unitCost": 70
+      },
+      {
+        "item": "245/70R17",
+        "units": 24,
+        "revenue": 3050,
+        "category": "New tire",
+        "unitPrice": 127.08,
+        "unitCost": 85
+      },
+      {
+        "item": "205/55R16",
+        "units": 20,
+        "revenue": 2214,
+        "category": "New tire",
+        "unitPrice": 110.7,
+        "unitCost": 65
+      },
+      {
+        "item": "265/70R17",
+        "units": 18,
+        "revenue": 2287,
+        "category": "New tire",
+        "unitPrice": 127.06,
+        "unitCost": 85
+      },
+      {
+        "item": "275/55R20",
+        "units": 20,
+        "revenue": 2272,
+        "category": "New tire",
+        "unitPrice": 113.6,
+        "unitCost": 95
+      },
+      {
+        "item": "255/50R20",
+        "units": 8,
+        "unitPrice": 202.13,
+        "unitCost": 115,
+        "category": "New tire",
+        "revenue": 1617
+      },
+      {
+        "item": "195/65R15",
+        "units": 8,
+        "unitPrice": 111.63,
+        "unitCost": 62,
+        "category": "New tire",
+        "revenue": 893
+      },
+      {
+        "item": "215/55R17",
+        "units": 8,
+        "unitPrice": 123.25,
+        "unitCost": 68,
+        "category": "New tire",
+        "revenue": 986
+      },
+      {
+        "item": "285/45R22",
+        "units": 6,
+        "unitPrice": 190.67,
+        "unitCost": 130,
+        "category": "New tire",
+        "revenue": 1144
+      },
+      {
+        "item": "Used tires (assorted)",
+        "units": 78,
+        "revenue": 3900,
+        "unitPrice": 50,
+        "unitCost": 32,
+        "category": "Used tire"
+      },
+      {
+        "item": "Service & labor",
+        "units": 186,
+        "revenue": 8200,
+        "unitPrice": 44,
+        "unitCost": 18,
+        "category": "Service"
+      },
+      {
+        "item": "Parts & other",
+        "units": 94,
+        "revenue": 1850,
+        "unitPrice": 20,
+        "unitCost": 8,
+        "category": "Other"
+      }
+    ],
+    "2026-01": [
+      {
+        "item": "235/65R17",
+        "units": 40,
+        "revenue": 5016,
+        "category": "New tire",
+        "unitPrice": 125.4,
+        "unitCost": 75
+      },
+      {
+        "item": "225/60R17",
+        "units": 26,
+        "revenue": 2898,
+        "category": "New tire",
+        "unitPrice": 111.46,
+        "unitCost": 70
+      },
+      {
+        "item": "245/70R17",
+        "units": 22,
+        "revenue": 2779,
+        "category": "New tire",
+        "unitPrice": 126.32,
+        "unitCost": 85
+      },
+      {
+        "item": "205/55R16",
+        "units": 18,
+        "revenue": 2017,
+        "category": "New tire",
+        "unitPrice": 112.06,
+        "unitCost": 65
+      },
+      {
+        "item": "265/70R17",
+        "units": 16,
+        "revenue": 2084,
+        "category": "New tire",
+        "unitPrice": 130.25,
+        "unitCost": 85
+      },
+      {
+        "item": "275/55R20",
+        "units": 18,
+        "revenue": 2070,
+        "category": "New tire",
+        "unitPrice": 115,
+        "unitCost": 95
+      },
+      {
+        "item": "255/50R20",
+        "units": 7,
+        "unitPrice": 210.43,
+        "unitCost": 115,
+        "category": "New tire",
+        "revenue": 1473
+      },
+      {
+        "item": "195/65R15",
+        "units": 7,
+        "unitPrice": 116.29,
+        "unitCost": 62,
+        "category": "New tire",
+        "revenue": 814
+      },
+      {
+        "item": "215/55R17",
+        "units": 7,
+        "unitPrice": 128.29,
+        "unitCost": 68,
+        "category": "New tire",
+        "revenue": 898
+      },
+      {
+        "item": "285/45R22",
+        "units": 5,
+        "unitPrice": 208.4,
+        "unitCost": 130,
+        "category": "New tire",
+        "revenue": 1042
+      },
+      {
+        "item": "Used tires (assorted)",
+        "units": 71,
+        "revenue": 3553,
+        "unitPrice": 50.04,
+        "unitCost": 32,
+        "category": "Used tire"
+      },
+      {
+        "item": "Service & labor",
+        "units": 169,
+        "revenue": 7471,
+        "unitPrice": 44.21,
+        "unitCost": 18,
+        "category": "Service"
+      },
+      {
+        "item": "Parts & other",
+        "units": 86,
+        "revenue": 1685,
+        "unitPrice": 19.59,
+        "unitCost": 8,
+        "category": "Other"
+      }
+    ],
+    "2026-02": [
+      {
+        "item": "235/65R17",
+        "units": 41,
+        "revenue": 5135,
+        "category": "New tire",
+        "unitPrice": 125.24,
+        "unitCost": 75
+      },
+      {
+        "item": "225/60R17",
+        "units": 26,
+        "revenue": 2967,
+        "category": "New tire",
+        "unitPrice": 114.12,
+        "unitCost": 70
+      },
+      {
+        "item": "245/70R17",
+        "units": 22,
+        "revenue": 2844,
+        "category": "New tire",
+        "unitPrice": 129.27,
+        "unitCost": 85
+      },
+      {
+        "item": "205/55R16",
+        "units": 19,
+        "revenue": 2065,
+        "category": "New tire",
+        "unitPrice": 108.68,
+        "unitCost": 65
+      },
+      {
+        "item": "265/70R17",
+        "units": 17,
+        "revenue": 2133,
+        "category": "New tire",
+        "unitPrice": 125.47,
+        "unitCost": 85
+      },
+      {
+        "item": "275/55R20",
+        "units": 19,
+        "revenue": 2119,
+        "category": "New tire",
+        "unitPrice": 111.53,
+        "unitCost": 95
+      },
+      {
+        "item": "255/50R20",
+        "units": 7,
+        "unitPrice": 215.43,
+        "unitCost": 115,
+        "category": "New tire",
+        "revenue": 1508
+      },
+      {
+        "item": "195/65R15",
+        "units": 7,
+        "unitPrice": 119,
+        "unitCost": 62,
+        "category": "New tire",
+        "revenue": 833
+      },
+      {
+        "item": "215/55R17",
+        "units": 7,
+        "unitPrice": 131.43,
+        "unitCost": 68,
+        "category": "New tire",
+        "revenue": 920
+      },
+      {
+        "item": "285/45R22",
+        "units": 6,
+        "unitPrice": 177.83,
+        "unitCost": 130,
+        "category": "New tire",
+        "revenue": 1067
+      },
+      {
+        "item": "Used tires (assorted)",
+        "units": 73,
+        "revenue": 3637,
+        "unitPrice": 49.82,
+        "unitCost": 32,
+        "category": "Used tire"
+      },
+      {
+        "item": "Service & labor",
+        "units": 173,
+        "revenue": 7647,
+        "unitPrice": 44.2,
+        "unitCost": 18,
+        "category": "Service"
+      },
+      {
+        "item": "Parts & other",
+        "units": 88,
+        "revenue": 1725,
+        "unitPrice": 19.6,
+        "unitCost": 8,
+        "category": "Other"
+      }
+    ],
+    "2026-03": [
+      {
+        "item": "235/65R17",
+        "units": 42,
+        "revenue": 5224,
+        "category": "New tire",
+        "unitPrice": 124.38,
+        "unitCost": 75
+      },
+      {
+        "item": "225/60R17",
+        "units": 27,
+        "revenue": 3018,
+        "category": "New tire",
+        "unitPrice": 111.78,
+        "unitCost": 70
+      },
+      {
+        "item": "245/70R17",
+        "units": 23,
+        "revenue": 2894,
+        "category": "New tire",
+        "unitPrice": 125.83,
+        "unitCost": 85
+      },
+      {
+        "item": "205/55R16",
+        "units": 19,
+        "revenue": 2101,
+        "category": "New tire",
+        "unitPrice": 110.58,
+        "unitCost": 65
+      },
+      {
+        "item": "265/70R17",
+        "units": 17,
+        "revenue": 2170,
+        "category": "New tire",
+        "unitPrice": 127.65,
+        "unitCost": 85
+      },
+      {
+        "item": "275/55R20",
+        "units": 19,
+        "revenue": 2156,
+        "category": "New tire",
+        "unitPrice": 113.47,
+        "unitCost": 95
+      },
+      {
+        "item": "255/50R20",
+        "units": 8,
+        "unitPrice": 191.75,
+        "unitCost": 115,
+        "category": "New tire",
+        "revenue": 1534
+      },
+      {
+        "item": "195/65R15",
+        "units": 8,
+        "unitPrice": 105.88,
+        "unitCost": 62,
+        "category": "New tire",
+        "revenue": 847
+      },
+      {
+        "item": "215/55R17",
+        "units": 8,
+        "unitPrice": 117,
+        "unitCost": 68,
+        "category": "New tire",
+        "revenue": 936
+      },
+      {
+        "item": "285/45R22",
+        "units": 6,
+        "unitPrice": 180.83,
+        "unitCost": 130,
+        "category": "New tire",
+        "revenue": 1085
+      },
+      {
+        "item": "Used tires (assorted)",
+        "units": 74,
+        "revenue": 3700,
+        "unitPrice": 50,
+        "unitCost": 32,
+        "category": "Used tire"
+      },
+      {
+        "item": "Service & labor",
+        "units": 176,
+        "revenue": 7780,
+        "unitPrice": 44.2,
+        "unitCost": 18,
+        "category": "Service"
+      },
+      {
+        "item": "Parts & other",
+        "units": 89,
+        "revenue": 1755,
+        "unitPrice": 19.72,
+        "unitCost": 8,
+        "category": "Other"
+      }
+    ],
+    "2026-04": [
+      {
+        "item": "235/65R17",
+        "units": 42,
+        "revenue": 5283,
+        "category": "New tire",
+        "unitPrice": 125.79,
+        "unitCost": 75
+      },
+      {
+        "item": "225/60R17",
+        "units": 27,
+        "revenue": 3052,
+        "category": "New tire",
+        "unitPrice": 113.04,
+        "unitCost": 70
+      },
+      {
+        "item": "245/70R17",
+        "units": 23,
+        "revenue": 2927,
+        "category": "New tire",
+        "unitPrice": 127.26,
+        "unitCost": 85
+      },
+      {
+        "item": "205/55R16",
+        "units": 19,
+        "revenue": 2124,
+        "category": "New tire",
+        "unitPrice": 111.79,
+        "unitCost": 65
+      },
+      {
+        "item": "265/70R17",
+        "units": 17,
+        "revenue": 2195,
+        "category": "New tire",
+        "unitPrice": 129.12,
+        "unitCost": 85
+      },
+      {
+        "item": "275/55R20",
+        "units": 19,
+        "revenue": 2180,
+        "category": "New tire",
+        "unitPrice": 114.74,
+        "unitCost": 95
+      },
+      {
+        "item": "255/50R20",
+        "units": 8,
+        "unitPrice": 194,
+        "unitCost": 115,
+        "category": "New tire",
+        "revenue": 1552
+      },
+      {
+        "item": "195/65R15",
+        "units": 8,
+        "unitPrice": 107.13,
+        "unitCost": 62,
+        "category": "New tire",
+        "revenue": 857
+      },
+      {
+        "item": "215/55R17",
+        "units": 8,
+        "unitPrice": 118.25,
+        "unitCost": 68,
+        "category": "New tire",
+        "revenue": 946
+      },
+      {
+        "item": "285/45R22",
+        "units": 6,
+        "unitPrice": 183,
+        "unitCost": 130,
+        "category": "New tire",
+        "revenue": 1098
+      },
+      {
+        "item": "Used tires (assorted)",
+        "units": 75,
+        "revenue": 3742,
+        "unitPrice": 49.89,
+        "unitCost": 32,
+        "category": "Used tire"
+      },
+      {
+        "item": "Service & labor",
+        "units": 178,
+        "revenue": 7868,
+        "unitPrice": 44.2,
+        "unitCost": 18,
+        "category": "Service"
+      },
+      {
+        "item": "Parts & other",
+        "units": 90,
+        "revenue": 1775,
+        "unitPrice": 19.72,
+        "unitCost": 8,
+        "category": "Other"
+      }
+    ],
+    "2026-05": [
+      {
+        "item": "235/65R17",
+        "units": 45,
+        "revenue": 5654,
+        "category": "New tire",
+        "unitPrice": 125.64,
+        "unitCost": 75
+      },
+      {
+        "item": "225/60R17",
+        "units": 29,
+        "revenue": 3267,
+        "category": "New tire",
+        "unitPrice": 112.66,
+        "unitCost": 70
+      },
+      {
+        "item": "245/70R17",
+        "units": 25,
+        "revenue": 3132,
+        "category": "New tire",
+        "unitPrice": 125.28,
+        "unitCost": 85
+      },
+      {
+        "item": "205/55R16",
+        "units": 21,
+        "revenue": 2274,
+        "category": "New tire",
+        "unitPrice": 108.29,
+        "unitCost": 65
+      },
+      {
+        "item": "265/70R17",
+        "units": 18,
+        "revenue": 2349,
+        "category": "New tire",
+        "unitPrice": 130.5,
+        "unitCost": 85
+      },
+      {
+        "item": "275/55R20",
+        "units": 21,
+        "revenue": 2333,
+        "category": "New tire",
+        "unitPrice": 111.1,
+        "unitCost": 95
+      },
+      {
+        "item": "255/50R20",
+        "units": 8,
+        "unitPrice": 207.63,
+        "unitCost": 115,
+        "category": "New tire",
+        "revenue": 1661
+      },
+      {
+        "item": "195/65R15",
+        "units": 8,
+        "unitPrice": 114.63,
+        "unitCost": 62,
+        "category": "New tire",
+        "revenue": 917
+      },
+      {
+        "item": "215/55R17",
+        "units": 8,
+        "unitPrice": 126.63,
+        "unitCost": 68,
+        "category": "New tire",
+        "revenue": 1013
+      },
+      {
+        "item": "285/45R22",
+        "units": 6,
+        "unitPrice": 195.83,
+        "unitCost": 130,
+        "category": "New tire",
+        "revenue": 1175
+      },
+      {
+        "item": "Used tires (assorted)",
+        "units": 80,
+        "revenue": 4005,
+        "unitPrice": 50.06,
+        "unitCost": 32,
+        "category": "Used tire"
+      },
+      {
+        "item": "Service & labor",
+        "units": 191,
+        "revenue": 8421,
+        "unitPrice": 44.09,
+        "unitCost": 18,
+        "category": "Service"
+      },
+      {
+        "item": "Parts & other",
+        "units": 97,
+        "revenue": 1900,
+        "unitPrice": 19.59,
+        "unitCost": 8,
+        "category": "Other"
+      }
+    ],
+    "2026-06": [
+      {
+        "item": "235/65R17",
+        "units": 41,
+        "revenue": 5165,
+        "category": "New tire",
+        "unitPrice": 125.98,
+        "unitCost": 75
+      },
+      {
+        "item": "225/60R17",
+        "units": 26,
+        "revenue": 2984,
+        "category": "New tire",
+        "unitPrice": 114.77,
+        "unitCost": 70
+      },
+      {
+        "item": "245/70R17",
+        "units": 23,
+        "revenue": 2861,
+        "category": "New tire",
+        "unitPrice": 124.39,
+        "unitCost": 85
+      },
+      {
+        "item": "205/55R16",
+        "units": 19,
+        "revenue": 2077,
+        "category": "New tire",
+        "unitPrice": 109.32,
+        "unitCost": 65
+      },
+      {
+        "item": "265/70R17",
+        "units": 17,
+        "revenue": 2145,
+        "category": "New tire",
+        "unitPrice": 126.18,
+        "unitCost": 85
+      },
+      {
+        "item": "275/55R20",
+        "units": 19,
+        "revenue": 2131,
+        "category": "New tire",
+        "unitPrice": 112.16,
+        "unitCost": 95
+      },
+      {
+        "item": "255/50R20",
+        "units": 8,
+        "unitPrice": 189.63,
+        "unitCost": 115,
+        "category": "New tire",
+        "revenue": 1517
+      },
+      {
+        "item": "195/65R15",
+        "units": 8,
+        "unitPrice": 104.75,
+        "unitCost": 62,
+        "category": "New tire",
+        "revenue": 838
+      },
+      {
+        "item": "215/55R17",
+        "units": 8,
+        "unitPrice": 115.63,
+        "unitCost": 68,
+        "category": "New tire",
+        "revenue": 925
+      },
+      {
+        "item": "285/45R22",
+        "units": 6,
+        "unitPrice": 178.83,
+        "unitCost": 130,
+        "category": "New tire",
+        "revenue": 1073
+      },
+      {
+        "item": "Used tires (assorted)",
+        "units": 73,
+        "revenue": 3658,
+        "unitPrice": 50.11,
+        "unitCost": 32,
+        "category": "Used tire"
+      },
+      {
+        "item": "Service & labor",
+        "units": 174,
+        "revenue": 7692,
+        "unitPrice": 44.21,
+        "unitCost": 18,
+        "category": "Service"
+      },
+      {
+        "item": "Parts & other",
+        "units": 88,
+        "revenue": 1735,
+        "unitPrice": 19.72,
+        "unitCost": 8,
+        "category": "Other"
+      }
+    ],
+    "2026-07": [
+      {
+        "item": "235/65R17",
+        "units": 43,
+        "revenue": 5372,
+        "category": "New tire",
+        "unitPrice": 124.93,
+        "unitCost": 75
+      },
+      {
+        "item": "225/60R17",
+        "units": 27,
+        "revenue": 3104,
+        "category": "New tire",
+        "unitPrice": 114.96,
+        "unitCost": 70
+      },
+      {
+        "item": "245/70R17",
+        "units": 23,
+        "revenue": 2976,
+        "category": "New tire",
+        "unitPrice": 129.39,
+        "unitCost": 85
+      },
+      {
+        "item": "205/55R16",
+        "units": 20,
+        "revenue": 2160,
+        "category": "New tire",
+        "unitPrice": 108,
+        "unitCost": 65
+      },
+      {
+        "item": "265/70R17",
+        "units": 18,
+        "revenue": 2232,
+        "category": "New tire",
+        "unitPrice": 124,
+        "unitCost": 85
+      },
+      {
+        "item": "275/55R20",
+        "units": 20,
+        "revenue": 2217,
+        "category": "New tire",
+        "unitPrice": 110.85,
+        "unitCost": 95
+      },
+      {
+        "item": "255/50R20",
+        "units": 8,
+        "unitPrice": 197.25,
+        "unitCost": 115,
+        "category": "New tire",
+        "revenue": 1578
+      },
+      {
+        "item": "195/65R15",
+        "units": 8,
+        "unitPrice": 108.88,
+        "unitCost": 62,
+        "category": "New tire",
+        "revenue": 871
+      },
+      {
+        "item": "215/55R17",
+        "units": 8,
+        "unitPrice": 120.25,
+        "unitCost": 68,
+        "category": "New tire",
+        "revenue": 962
+      },
+      {
+        "item": "285/45R22",
+        "units": 6,
+        "unitPrice": 186,
+        "unitCost": 130,
+        "category": "New tire",
+        "revenue": 1116
+      },
+      {
+        "item": "Used tires (assorted)",
+        "units": 76,
+        "revenue": 3805,
+        "unitPrice": 50.07,
+        "unitCost": 32,
+        "category": "Used tire"
+      },
+      {
+        "item": "Service & labor",
+        "units": 181,
+        "revenue": 8001,
+        "unitPrice": 44.2,
+        "unitCost": 18,
+        "category": "Service"
+      },
+      {
+        "item": "Parts & other",
+        "units": 92,
+        "revenue": 1805,
+        "unitPrice": 19.62,
+        "unitCost": 8,
+        "category": "Other"
+      }
+    ],
+    "all": [
+      {
+        "item": "235/65R17",
+        "units": 338,
+        "revenue": 42355,
+        "category": "New tire",
+        "unitPrice": 125.31,
+        "unitCost": 75
+      },
+      {
+        "item": "225/60R17",
+        "units": 216,
+        "revenue": 24471,
+        "category": "New tire",
+        "unitPrice": 113.29,
+        "unitCost": 70
+      },
+      {
+        "item": "245/70R17",
+        "units": 185,
+        "revenue": 23463,
+        "category": "New tire",
+        "unitPrice": 126.83,
+        "unitCost": 85
+      },
+      {
+        "item": "205/55R16",
+        "units": 155,
+        "revenue": 17032,
+        "category": "New tire",
+        "unitPrice": 109.88,
+        "unitCost": 65
+      },
+      {
+        "item": "265/70R17",
+        "units": 138,
+        "revenue": 17595,
+        "category": "New tire",
+        "unitPrice": 127.5,
+        "unitCost": 85
+      },
+      {
+        "item": "275/55R20",
+        "units": 155,
+        "revenue": 17478,
+        "category": "New tire",
+        "unitPrice": 112.76,
+        "unitCost": 95
+      },
+      {
+        "item": "255/50R20",
+        "units": 62,
+        "unitPrice": 200.65,
+        "unitCost": 115,
+        "category": "New tire",
+        "revenue": 12440
+      },
+      {
+        "item": "195/65R15",
+        "units": 62,
+        "unitPrice": 110.81,
+        "unitCost": 62,
+        "category": "New tire",
+        "revenue": 6870
+      },
+      {
+        "item": "215/55R17",
+        "units": 62,
+        "unitPrice": 122.35,
+        "unitCost": 68,
+        "category": "New tire",
+        "revenue": 7586
+      },
+      {
+        "item": "285/45R22",
+        "units": 47,
+        "unitPrice": 187.23,
+        "unitCost": 130,
+        "category": "New tire",
+        "revenue": 8800
+      },
+      {
+        "item": "Used tires (assorted)",
+        "units": 600,
+        "revenue": 30000,
+        "unitPrice": 50,
+        "unitCost": 32,
+        "category": "Used tire"
+      },
+      {
+        "item": "Service & labor",
+        "units": 1428,
+        "revenue": 63080,
+        "unitPrice": 44.17,
+        "unitCost": 18,
+        "category": "Service"
+      },
+      {
+        "item": "Parts & other",
+        "units": 724,
+        "revenue": 14230,
+        "unitPrice": 19.65,
+        "unitCost": 8,
+        "category": "Other"
+      }
+    ]
+  },
+  "accounts_ytd": {
+    "income": [
+      {
+        "label": "Tire sales",
+        "amount": 234028,
+        "drill": [
+          {
+            "date": "2026-01-08",
+            "description": "Tire sales · week 1",
+            "type": "Journal",
+            "amount": 6098
+          },
+          {
+            "date": "2026-01-15",
+            "description": "Tire sales · week 2",
+            "type": "Journal",
+            "amount": 7206
+          },
+          {
+            "date": "2026-01-22",
+            "description": "Tire sales · week 3",
+            "type": "Journal",
+            "amount": 7760
+          },
+          {
+            "date": "2026-01-28",
+            "description": "Tire sales · week 4",
+            "type": "Journal",
+            "amount": 6652
+          },
+          {
+            "date": "2026-02-08",
+            "description": "Tire sales · week 1",
+            "type": "Journal",
+            "amount": 6242
+          },
+          {
+            "date": "2026-02-15",
+            "description": "Tire sales · week 2",
+            "type": "Journal",
+            "amount": 7377
+          },
+          {
+            "date": "2026-02-22",
+            "description": "Tire sales · week 3",
+            "type": "Journal",
+            "amount": 7944
+          },
+          {
+            "date": "2026-02-28",
+            "description": "Tire sales · week 4",
+            "type": "Journal",
+            "amount": 6809
+          },
+          {
+            "date": "2026-03-08",
+            "description": "Tire sales · week 1",
+            "type": "Journal",
+            "amount": 6350
+          },
+          {
+            "date": "2026-03-15",
+            "description": "Tire sales · week 2",
+            "type": "Journal",
+            "amount": 7505
+          },
+          {
+            "date": "2026-03-22",
+            "description": "Tire sales · week 3",
+            "type": "Journal",
+            "amount": 8082
+          },
+          {
+            "date": "2026-03-28",
+            "description": "Tire sales · week 4",
+            "type": "Journal",
+            "amount": 6927
+          },
+          {
+            "date": "2026-04-08",
+            "description": "Tire sales · week 1",
+            "type": "Journal",
+            "amount": 6422
+          },
+          {
+            "date": "2026-04-15",
+            "description": "Tire sales · week 2",
+            "type": "Journal",
+            "amount": 7590
+          },
+          {
+            "date": "2026-04-22",
+            "description": "Tire sales · week 3",
+            "type": "Journal",
+            "amount": 8174
+          },
+          {
+            "date": "2026-04-28",
+            "description": "Tire sales · week 4",
+            "type": "Journal",
+            "amount": 7006
+          },
+          {
+            "date": "2026-05-08",
+            "description": "Tire sales · week 1",
+            "type": "Journal",
+            "amount": 6873
+          },
+          {
+            "date": "2026-05-15",
+            "description": "Tire sales · week 2",
+            "type": "Journal",
+            "amount": 8123
+          },
+          {
+            "date": "2026-05-22",
+            "description": "Tire sales · week 3",
+            "type": "Journal",
+            "amount": 8748
+          },
+          {
+            "date": "2026-05-28",
+            "description": "Tire sales · week 4",
+            "type": "Journal",
+            "amount": 7498
+          },
+          {
+            "date": "2026-06-08",
+            "description": "Tire sales · week 1",
+            "type": "Journal",
+            "amount": 6278
+          },
+          {
+            "date": "2026-06-15",
+            "description": "Tire sales · week 2",
+            "type": "Journal",
+            "amount": 7419
+          },
+          {
+            "date": "2026-06-22",
+            "description": "Tire sales · week 3",
+            "type": "Journal",
+            "amount": 7990
+          },
+          {
+            "date": "2026-06-28",
+            "description": "Tire sales · week 4",
+            "type": "Journal",
+            "amount": 6849
+          },
+          {
+            "date": "2026-07-08",
+            "description": "Tire sales · week 1",
+            "type": "Journal",
+            "amount": 6530
+          },
+          {
+            "date": "2026-07-15",
+            "description": "Tire sales · week 2",
+            "type": "Journal",
+            "amount": 7718
+          },
+          {
+            "date": "2026-07-22",
+            "description": "Tire sales · week 3",
+            "type": "Journal",
+            "amount": 8312
+          },
+          {
+            "date": "2026-07-28",
+            "description": "Tire sales · week 4",
+            "type": "Journal",
+            "amount": 7124
+          },
+          {
+            "date": "2026-08-08",
+            "description": "Tire sales · week 1",
+            "type": "Journal",
+            "amount": 6693
+          },
+          {
+            "date": "2026-08-15",
+            "description": "Tire sales · week 2",
+            "type": "Journal",
+            "amount": 7910
+          },
+          {
+            "date": "2026-08-22",
+            "description": "Tire sales · week 3",
+            "type": "Journal",
+            "amount": 8518
+          },
+          {
+            "date": "2026-08-28",
+            "description": "Tire sales · week 4",
+            "type": "Journal",
+            "amount": 7301
+          }
+        ]
+      },
+      {
+        "label": "Service & labor",
+        "amount": 39956,
+        "drill": [
+          {
+            "date": "2026-01-08",
+            "description": "Service & labor · week 1",
+            "type": "Journal",
+            "amount": 1041
+          },
+          {
+            "date": "2026-01-15",
+            "description": "Service & labor · week 2",
+            "type": "Journal",
+            "amount": 1230
+          },
+          {
+            "date": "2026-01-22",
+            "description": "Service & labor · week 3",
+            "type": "Journal",
+            "amount": 1325
+          },
+          {
+            "date": "2026-01-28",
+            "description": "Service & labor · week 4",
+            "type": "Journal",
+            "amount": 1136
+          },
+          {
+            "date": "2026-02-08",
+            "description": "Service & labor · week 1",
+            "type": "Journal",
+            "amount": 1066
+          },
+          {
+            "date": "2026-02-15",
+            "description": "Service & labor · week 2",
+            "type": "Journal",
+            "amount": 1259
+          },
+          {
+            "date": "2026-02-22",
+            "description": "Service & labor · week 3",
+            "type": "Journal",
+            "amount": 1356
+          },
+          {
+            "date": "2026-02-28",
+            "description": "Service & labor · week 4",
+            "type": "Journal",
+            "amount": 1163
+          },
+          {
+            "date": "2026-03-08",
+            "description": "Service & labor · week 1",
+            "type": "Journal",
+            "amount": 1084
+          },
+          {
+            "date": "2026-03-15",
+            "description": "Service & labor · week 2",
+            "type": "Journal",
+            "amount": 1281
+          },
+          {
+            "date": "2026-03-22",
+            "description": "Service & labor · week 3",
+            "type": "Journal",
+            "amount": 1380
+          },
+          {
+            "date": "2026-03-28",
+            "description": "Service & labor · week 4",
+            "type": "Journal",
+            "amount": 1183
+          },
+          {
+            "date": "2026-04-08",
+            "description": "Service & labor · week 1",
+            "type": "Journal",
+            "amount": 1096
+          },
+          {
+            "date": "2026-04-15",
+            "description": "Service & labor · week 2",
+            "type": "Journal",
+            "amount": 1296
+          },
+          {
+            "date": "2026-04-22",
+            "description": "Service & labor · week 3",
+            "type": "Journal",
+            "amount": 1396
+          },
+          {
+            "date": "2026-04-28",
+            "description": "Service & labor · week 4",
+            "type": "Journal",
+            "amount": 1196
+          },
+          {
+            "date": "2026-05-08",
+            "description": "Service & labor · week 1",
+            "type": "Journal",
+            "amount": 1173
+          },
+          {
+            "date": "2026-05-15",
+            "description": "Service & labor · week 2",
+            "type": "Journal",
+            "amount": 1387
+          },
+          {
+            "date": "2026-05-22",
+            "description": "Service & labor · week 3",
+            "type": "Journal",
+            "amount": 1494
+          },
+          {
+            "date": "2026-05-28",
+            "description": "Service & labor · week 4",
+            "type": "Journal",
+            "amount": 1280
+          },
+          {
+            "date": "2026-06-08",
+            "description": "Service & labor · week 1",
+            "type": "Journal",
+            "amount": 1072
+          },
+          {
+            "date": "2026-06-15",
+            "description": "Service & labor · week 2",
+            "type": "Journal",
+            "amount": 1267
+          },
+          {
+            "date": "2026-06-22",
+            "description": "Service & labor · week 3",
+            "type": "Journal",
+            "amount": 1364
+          },
+          {
+            "date": "2026-06-28",
+            "description": "Service & labor · week 4",
+            "type": "Journal",
+            "amount": 1169
+          },
+          {
+            "date": "2026-07-08",
+            "description": "Service & labor · week 1",
+            "type": "Journal",
+            "amount": 1115
+          },
+          {
+            "date": "2026-07-15",
+            "description": "Service & labor · week 2",
+            "type": "Journal",
+            "amount": 1318
+          },
+          {
+            "date": "2026-07-22",
+            "description": "Service & labor · week 3",
+            "type": "Journal",
+            "amount": 1419
+          },
+          {
+            "date": "2026-07-28",
+            "description": "Service & labor · week 4",
+            "type": "Journal",
+            "amount": 1216
+          },
+          {
+            "date": "2026-08-08",
+            "description": "Service & labor · week 1",
+            "type": "Journal",
+            "amount": 1143
+          },
+          {
+            "date": "2026-08-15",
+            "description": "Service & labor · week 2",
+            "type": "Journal",
+            "amount": 1350
+          },
+          {
+            "date": "2026-08-22",
+            "description": "Service & labor · week 3",
+            "type": "Journal",
+            "amount": 1454
+          },
+          {
+            "date": "2026-08-28",
+            "description": "Service & labor · week 4",
+            "type": "Journal",
+            "amount": 1247
+          }
+        ]
+      },
+      {
+        "label": "Parts & accessories",
+        "amount": 11416,
+        "drill": [
+          {
+            "date": "2026-01-08",
+            "description": "Parts & accessories · week 1",
+            "type": "Journal",
+            "amount": 297
+          },
+          {
+            "date": "2026-01-15",
+            "description": "Parts & accessories · week 2",
+            "type": "Journal",
+            "amount": 352
+          },
+          {
+            "date": "2026-01-22",
+            "description": "Parts & accessories · week 3",
+            "type": "Journal",
+            "amount": 379
+          },
+          {
+            "date": "2026-01-28",
+            "description": "Parts & accessories · week 4",
+            "type": "Journal",
+            "amount": 324
+          },
+          {
+            "date": "2026-02-08",
+            "description": "Parts & accessories · week 1",
+            "type": "Journal",
+            "amount": 304
+          },
+          {
+            "date": "2026-02-15",
+            "description": "Parts & accessories · week 2",
+            "type": "Journal",
+            "amount": 360
+          },
+          {
+            "date": "2026-02-22",
+            "description": "Parts & accessories · week 3",
+            "type": "Journal",
+            "amount": 388
+          },
+          {
+            "date": "2026-02-28",
+            "description": "Parts & accessories · week 4",
+            "type": "Journal",
+            "amount": 332
+          },
+          {
+            "date": "2026-03-08",
+            "description": "Parts & accessories · week 1",
+            "type": "Journal",
+            "amount": 310
+          },
+          {
+            "date": "2026-03-15",
+            "description": "Parts & accessories · week 2",
+            "type": "Journal",
+            "amount": 366
+          },
+          {
+            "date": "2026-03-22",
+            "description": "Parts & accessories · week 3",
+            "type": "Journal",
+            "amount": 394
+          },
+          {
+            "date": "2026-03-28",
+            "description": "Parts & accessories · week 4",
+            "type": "Journal",
+            "amount": 338
+          },
+          {
+            "date": "2026-04-08",
+            "description": "Parts & accessories · week 1",
+            "type": "Journal",
+            "amount": 313
+          },
+          {
+            "date": "2026-04-15",
+            "description": "Parts & accessories · week 2",
+            "type": "Journal",
+            "amount": 370
+          },
+          {
+            "date": "2026-04-22",
+            "description": "Parts & accessories · week 3",
+            "type": "Journal",
+            "amount": 399
+          },
+          {
+            "date": "2026-04-28",
+            "description": "Parts & accessories · week 4",
+            "type": "Journal",
+            "amount": 342
+          },
+          {
+            "date": "2026-05-08",
+            "description": "Parts & accessories · week 1",
+            "type": "Journal",
+            "amount": 335
+          },
+          {
+            "date": "2026-05-15",
+            "description": "Parts & accessories · week 2",
+            "type": "Journal",
+            "amount": 396
+          },
+          {
+            "date": "2026-05-22",
+            "description": "Parts & accessories · week 3",
+            "type": "Journal",
+            "amount": 427
+          },
+          {
+            "date": "2026-05-28",
+            "description": "Parts & accessories · week 4",
+            "type": "Journal",
+            "amount": 366
+          },
+          {
+            "date": "2026-06-08",
+            "description": "Parts & accessories · week 1",
+            "type": "Journal",
+            "amount": 306
+          },
+          {
+            "date": "2026-06-15",
+            "description": "Parts & accessories · week 2",
+            "type": "Journal",
+            "amount": 362
+          },
+          {
+            "date": "2026-06-22",
+            "description": "Parts & accessories · week 3",
+            "type": "Journal",
+            "amount": 390
+          },
+          {
+            "date": "2026-06-28",
+            "description": "Parts & accessories · week 4",
+            "type": "Journal",
+            "amount": 334
+          },
+          {
+            "date": "2026-07-08",
+            "description": "Parts & accessories · week 1",
+            "type": "Journal",
+            "amount": 319
+          },
+          {
+            "date": "2026-07-15",
+            "description": "Parts & accessories · week 2",
+            "type": "Journal",
+            "amount": 376
+          },
+          {
+            "date": "2026-07-22",
+            "description": "Parts & accessories · week 3",
+            "type": "Journal",
+            "amount": 405
+          },
+          {
+            "date": "2026-07-28",
+            "description": "Parts & accessories · week 4",
+            "type": "Journal",
+            "amount": 348
+          },
+          {
+            "date": "2026-08-08",
+            "description": "Parts & accessories · week 1",
+            "type": "Journal",
+            "amount": 326
+          },
+          {
+            "date": "2026-08-15",
+            "description": "Parts & accessories · week 2",
+            "type": "Journal",
+            "amount": 386
+          },
+          {
+            "date": "2026-08-22",
+            "description": "Parts & accessories · week 3",
+            "type": "Journal",
+            "amount": 416
+          },
+          {
+            "date": "2026-08-28",
+            "description": "Parts & accessories · week 4",
+            "type": "Journal",
+            "amount": 356
+          }
+        ]
+      }
+    ],
+    "expense": [
+      {
+        "label": "Rent",
+        "amount": 35350,
+        "drill": [
+          {
+            "date": "2026-01-08",
+            "description": "Rent · week 1",
+            "type": "Journal",
+            "amount": 952
+          },
+          {
+            "date": "2026-01-15",
+            "description": "Rent · week 2",
+            "type": "Journal",
+            "amount": 1125
+          },
+          {
+            "date": "2026-01-22",
+            "description": "Rent · week 3",
+            "type": "Journal",
+            "amount": 1211
+          },
+          {
+            "date": "2026-01-28",
+            "description": "Rent · week 4",
+            "type": "Journal",
+            "amount": 1037
+          },
+          {
+            "date": "2026-02-08",
+            "description": "Rent · week 1",
+            "type": "Journal",
+            "amount": 959
+          },
+          {
+            "date": "2026-02-15",
+            "description": "Rent · week 2",
+            "type": "Journal",
+            "amount": 1134
+          },
+          {
+            "date": "2026-02-22",
+            "description": "Rent · week 3",
+            "type": "Journal",
+            "amount": 1221
+          },
+          {
+            "date": "2026-02-28",
+            "description": "Rent · week 4",
+            "type": "Journal",
+            "amount": 1046
+          },
+          {
+            "date": "2026-03-08",
+            "description": "Rent · week 1",
+            "type": "Journal",
+            "amount": 966
+          },
+          {
+            "date": "2026-03-15",
+            "description": "Rent · week 2",
+            "type": "Journal",
+            "amount": 1141
+          },
+          {
+            "date": "2026-03-22",
+            "description": "Rent · week 3",
+            "type": "Journal",
+            "amount": 1229
+          },
+          {
+            "date": "2026-03-28",
+            "description": "Rent · week 4",
+            "type": "Journal",
+            "amount": 1054
+          },
+          {
+            "date": "2026-04-08",
+            "description": "Rent · week 1",
+            "type": "Journal",
+            "amount": 990
+          },
+          {
+            "date": "2026-04-15",
+            "description": "Rent · week 2",
+            "type": "Journal",
+            "amount": 1170
+          },
+          {
+            "date": "2026-04-22",
+            "description": "Rent · week 3",
+            "type": "Journal",
+            "amount": 1260
+          },
+          {
+            "date": "2026-04-28",
+            "description": "Rent · week 4",
+            "type": "Journal",
+            "amount": 1080
+          },
+          {
+            "date": "2026-05-08",
+            "description": "Rent · week 1",
+            "type": "Journal",
+            "amount": 1007
+          },
+          {
+            "date": "2026-05-15",
+            "description": "Rent · week 2",
+            "type": "Journal",
+            "amount": 1190
+          },
+          {
+            "date": "2026-05-22",
+            "description": "Rent · week 3",
+            "type": "Journal",
+            "amount": 1281
+          },
+          {
+            "date": "2026-05-28",
+            "description": "Rent · week 4",
+            "type": "Journal",
+            "amount": 1097
+          },
+          {
+            "date": "2026-06-08",
+            "description": "Rent · week 1",
+            "type": "Journal",
+            "amount": 913
+          },
+          {
+            "date": "2026-06-15",
+            "description": "Rent · week 2",
+            "type": "Journal",
+            "amount": 1079
+          },
+          {
+            "date": "2026-06-22",
+            "description": "Rent · week 3",
+            "type": "Journal",
+            "amount": 1162
+          },
+          {
+            "date": "2026-06-28",
+            "description": "Rent · week 4",
+            "type": "Journal",
+            "amount": 996
+          },
+          {
+            "date": "2026-07-08",
+            "description": "Rent · week 1",
+            "type": "Journal",
+            "amount": 990
+          },
+          {
+            "date": "2026-07-15",
+            "description": "Rent · week 2",
+            "type": "Journal",
+            "amount": 1170
+          },
+          {
+            "date": "2026-07-22",
+            "description": "Rent · week 3",
+            "type": "Journal",
+            "amount": 1260
+          },
+          {
+            "date": "2026-07-28",
+            "description": "Rent · week 4",
+            "type": "Journal",
+            "amount": 1080
+          },
+          {
+            "date": "2026-08-08",
+            "description": "Rent · week 1",
+            "type": "Journal",
+            "amount": 1001
+          },
+          {
+            "date": "2026-08-15",
+            "description": "Rent · week 2",
+            "type": "Journal",
+            "amount": 1183
+          },
+          {
+            "date": "2026-08-22",
+            "description": "Rent · week 3",
+            "type": "Journal",
+            "amount": 1274
+          },
+          {
+            "date": "2026-08-28",
+            "description": "Rent · week 4",
+            "type": "Journal",
+            "amount": 1092
+          }
+        ]
+      },
+      {
+        "label": "Payroll — shop",
+        "amount": 24038,
+        "drill": [
+          {
+            "date": "2026-01-08",
+            "description": "Payroll · week 1",
+            "type": "Journal",
+            "amount": 647
+          },
+          {
+            "date": "2026-01-15",
+            "description": "Payroll · week 2",
+            "type": "Journal",
+            "amount": 765
+          },
+          {
+            "date": "2026-01-22",
+            "description": "Payroll · week 3",
+            "type": "Journal",
+            "amount": 823
+          },
+          {
+            "date": "2026-01-28",
+            "description": "Payroll · week 4",
+            "type": "Journal",
+            "amount": 706
+          },
+          {
+            "date": "2026-02-08",
+            "description": "Payroll · week 1",
+            "type": "Journal",
+            "amount": 652
+          },
+          {
+            "date": "2026-02-15",
+            "description": "Payroll · week 2",
+            "type": "Journal",
+            "amount": 771
+          },
+          {
+            "date": "2026-02-22",
+            "description": "Payroll · week 3",
+            "type": "Journal",
+            "amount": 830
+          },
+          {
+            "date": "2026-02-28",
+            "description": "Payroll · week 4",
+            "type": "Journal",
+            "amount": 712
+          },
+          {
+            "date": "2026-03-08",
+            "description": "Payroll · week 1",
+            "type": "Journal",
+            "amount": 657
+          },
+          {
+            "date": "2026-03-15",
+            "description": "Payroll · week 2",
+            "type": "Journal",
+            "amount": 776
+          },
+          {
+            "date": "2026-03-22",
+            "description": "Payroll · week 3",
+            "type": "Journal",
+            "amount": 836
+          },
+          {
+            "date": "2026-03-28",
+            "description": "Payroll · week 4",
+            "type": "Journal",
+            "amount": 716
+          },
+          {
+            "date": "2026-04-08",
+            "description": "Payroll · week 1",
+            "type": "Journal",
+            "amount": 673
+          },
+          {
+            "date": "2026-04-15",
+            "description": "Payroll · week 2",
+            "type": "Journal",
+            "amount": 796
+          },
+          {
+            "date": "2026-04-22",
+            "description": "Payroll · week 3",
+            "type": "Journal",
+            "amount": 857
+          },
+          {
+            "date": "2026-04-28",
+            "description": "Payroll · week 4",
+            "type": "Journal",
+            "amount": 734
+          },
+          {
+            "date": "2026-05-08",
+            "description": "Payroll · week 1",
+            "type": "Journal",
+            "amount": 684
+          },
+          {
+            "date": "2026-05-15",
+            "description": "Payroll · week 2",
+            "type": "Journal",
+            "amount": 809
+          },
+          {
+            "date": "2026-05-22",
+            "description": "Payroll · week 3",
+            "type": "Journal",
+            "amount": 871
+          },
+          {
+            "date": "2026-05-28",
+            "description": "Payroll · week 4",
+            "type": "Journal",
+            "amount": 747
+          },
+          {
+            "date": "2026-06-08",
+            "description": "Payroll · week 1",
+            "type": "Journal",
+            "amount": 621
+          },
+          {
+            "date": "2026-06-15",
+            "description": "Payroll · week 2",
+            "type": "Journal",
+            "amount": 734
+          },
+          {
+            "date": "2026-06-22",
+            "description": "Payroll · week 3",
+            "type": "Journal",
+            "amount": 790
+          },
+          {
+            "date": "2026-06-28",
+            "description": "Payroll · week 4",
+            "type": "Journal",
+            "amount": 677
+          },
+          {
+            "date": "2026-07-08",
+            "description": "Payroll · week 1",
+            "type": "Journal",
+            "amount": 673
+          },
+          {
+            "date": "2026-07-15",
+            "description": "Payroll · week 2",
+            "type": "Journal",
+            "amount": 796
+          },
+          {
+            "date": "2026-07-22",
+            "description": "Payroll · week 3",
+            "type": "Journal",
+            "amount": 857
+          },
+          {
+            "date": "2026-07-28",
+            "description": "Payroll · week 4",
+            "type": "Journal",
+            "amount": 734
+          },
+          {
+            "date": "2026-08-08",
+            "description": "Payroll · week 1",
+            "type": "Journal",
+            "amount": 681
+          },
+          {
+            "date": "2026-08-15",
+            "description": "Payroll · week 2",
+            "type": "Journal",
+            "amount": 804
+          },
+          {
+            "date": "2026-08-22",
+            "description": "Payroll · week 3",
+            "type": "Journal",
+            "amount": 866
+          },
+          {
+            "date": "2026-08-28",
+            "description": "Payroll · week 4",
+            "type": "Journal",
+            "amount": 743
+          }
+        ]
+      },
+      {
+        "label": "Other operating",
+        "amount": 11312,
+        "drill": [
+          {
+            "date": "2026-01-08",
+            "description": "Other operating · week 1",
+            "type": "Journal",
+            "amount": 304
+          },
+          {
+            "date": "2026-01-15",
+            "description": "Other operating · week 2",
+            "type": "Journal",
+            "amount": 360
+          },
+          {
+            "date": "2026-01-22",
+            "description": "Other operating · week 3",
+            "type": "Journal",
+            "amount": 388
+          },
+          {
+            "date": "2026-01-28",
+            "description": "Other operating · week 4",
+            "type": "Journal",
+            "amount": 332
+          },
+          {
+            "date": "2026-02-08",
+            "description": "Other operating · week 1",
+            "type": "Journal",
+            "amount": 307
+          },
+          {
+            "date": "2026-02-15",
+            "description": "Other operating · week 2",
+            "type": "Journal",
+            "amount": 363
+          },
+          {
+            "date": "2026-02-22",
+            "description": "Other operating · week 3",
+            "type": "Journal",
+            "amount": 391
+          },
+          {
+            "date": "2026-02-28",
+            "description": "Other operating · week 4",
+            "type": "Journal",
+            "amount": 334
+          },
+          {
+            "date": "2026-03-08",
+            "description": "Other operating · week 1",
+            "type": "Journal",
+            "amount": 309
+          },
+          {
+            "date": "2026-03-15",
+            "description": "Other operating · week 2",
+            "type": "Journal",
+            "amount": 365
+          },
+          {
+            "date": "2026-03-22",
+            "description": "Other operating · week 3",
+            "type": "Journal",
+            "amount": 393
+          },
+          {
+            "date": "2026-03-28",
+            "description": "Other operating · week 4",
+            "type": "Journal",
+            "amount": 338
+          },
+          {
+            "date": "2026-04-08",
+            "description": "Other operating · week 1",
+            "type": "Journal",
+            "amount": 317
+          },
+          {
+            "date": "2026-04-15",
+            "description": "Other operating · week 2",
+            "type": "Journal",
+            "amount": 374
+          },
+          {
+            "date": "2026-04-22",
+            "description": "Other operating · week 3",
+            "type": "Journal",
+            "amount": 403
+          },
+          {
+            "date": "2026-04-28",
+            "description": "Other operating · week 4",
+            "type": "Journal",
+            "amount": 346
+          },
+          {
+            "date": "2026-05-08",
+            "description": "Other operating · week 1",
+            "type": "Journal",
+            "amount": 322
+          },
+          {
+            "date": "2026-05-15",
+            "description": "Other operating · week 2",
+            "type": "Journal",
+            "amount": 381
+          },
+          {
+            "date": "2026-05-22",
+            "description": "Other operating · week 3",
+            "type": "Journal",
+            "amount": 410
+          },
+          {
+            "date": "2026-05-28",
+            "description": "Other operating · week 4",
+            "type": "Journal",
+            "amount": 351
+          },
+          {
+            "date": "2026-06-08",
+            "description": "Other operating · week 1",
+            "type": "Journal",
+            "amount": 292
+          },
+          {
+            "date": "2026-06-15",
+            "description": "Other operating · week 2",
+            "type": "Journal",
+            "amount": 345
+          },
+          {
+            "date": "2026-06-22",
+            "description": "Other operating · week 3",
+            "type": "Journal",
+            "amount": 372
+          },
+          {
+            "date": "2026-06-28",
+            "description": "Other operating · week 4",
+            "type": "Journal",
+            "amount": 319
+          },
+          {
+            "date": "2026-07-08",
+            "description": "Other operating · week 1",
+            "type": "Journal",
+            "amount": 317
+          },
+          {
+            "date": "2026-07-15",
+            "description": "Other operating · week 2",
+            "type": "Journal",
+            "amount": 374
+          },
+          {
+            "date": "2026-07-22",
+            "description": "Other operating · week 3",
+            "type": "Journal",
+            "amount": 403
+          },
+          {
+            "date": "2026-07-28",
+            "description": "Other operating · week 4",
+            "type": "Journal",
+            "amount": 346
+          },
+          {
+            "date": "2026-08-08",
+            "description": "Other operating · week 1",
+            "type": "Journal",
+            "amount": 320
+          },
+          {
+            "date": "2026-08-15",
+            "description": "Other operating · week 2",
+            "type": "Journal",
+            "amount": 379
+          },
+          {
+            "date": "2026-08-22",
+            "description": "Other operating · week 3",
+            "type": "Journal",
+            "amount": 408
+          },
+          {
+            "date": "2026-08-28",
+            "description": "Other operating · week 4",
+            "type": "Journal",
+            "amount": 349
+          }
+        ]
+      }
+    ]
+  },
+  "equity_summary_aug": {
+    "opening": 38200,
+    "net_income_ytd": 104200,
+    "owner_draws_ytd": 91270,
+    "total": 51130
+  },
+  "period_stats": {
+    "2026-01": {
+      "revenue": 33800,
+      "unitsSold": 492,
+      "uniqueItems": 13,
+      "ticketCount": 95
+    },
+    "2026-02": {
+      "revenue": 34600,
+      "unitsSold": 505,
+      "uniqueItems": 13,
+      "ticketCount": 97
+    },
+    "2026-03": {
+      "revenue": 35200,
+      "unitsSold": 516,
+      "uniqueItems": 13,
+      "ticketCount": 99
+    },
+    "2026-04": {
+      "revenue": 35600,
+      "unitsSold": 520,
+      "uniqueItems": 13,
+      "ticketCount": 100
+    },
+    "2026-05": {
+      "revenue": 38100,
+      "unitsSold": 557,
+      "uniqueItems": 13,
+      "ticketCount": 107
+    },
+    "2026-06": {
+      "revenue": 34800,
+      "unitsSold": 510,
+      "uniqueItems": 13,
+      "ticketCount": 98
+    },
+    "2026-07": {
+      "revenue": 36200,
+      "unitsSold": 530,
+      "uniqueItems": 13,
+      "ticketCount": 102
+    },
+    "2026-08": {
+      "revenue": 37100,
+      "unitsSold": 542,
+      "uniqueItems": 13,
+      "ticketCount": 105
+    },
+    "all": {
+      "revenue": 285400,
+      "unitsSold": 2018,
+      "uniqueItems": 13,
+      "ticketCount": 803
+    }
+  }
 }

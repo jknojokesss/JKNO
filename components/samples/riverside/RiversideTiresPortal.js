@@ -50,7 +50,8 @@ const sumBy = (rows, key = 'amount') => rows.reduce((s, r) => s + r[key], 0)
 
 const WEEK_START = DATA.meta.week_start
 
-const CF_PERIOD_KEYS = [...MONTHS.map((m) => m.month), 'all']
+const CF_PERIOD_KEYS = ['all', ...MONTHS.map((m) => m.month)]
+const ITEM_PERIOD_KEYS = CF_PERIOD_KEYS
 const STOCK_MONTH_IDS = ['2026-04', '2026-05', '2026-06', '2026-07', '2026-08']
 
 const cfPeriodLabel = (key) => (key === 'all' ? 'Jan–Aug 2026' : monthYear(MONTHS.find((m) => m.month === key) || LAST_MONTH))
@@ -78,6 +79,9 @@ const withProfit = (o) => {
 
 const ORDERS = DATA.orders.map(withProfit)
 
+const isNewTireOrder = (o) => o.size && !['Service', 'Parts'].includes(o.size) && !/used/i.test(o.item)
+const isUsedTireOrder = (o) => /used/i.test(o.item)
+
 const totalsOf = (rows) => {
   const sale = sumBy(rows, 'sale')
   const cost = sumBy(rows, 'cost')
@@ -100,6 +104,7 @@ const stockRowsFor = (id) => {
 /* ---------- Statement helpers ---------- */
 
 const PL_PERIODS = [
+  { id: 'all', label: 'All time', full: 'Jan–Aug 2026', keys: MONTHS.map((m) => m.month), prior: null },
   ...MONTHS.map((m, i) => ({
     id: m.month,
     label: m.label,
@@ -107,14 +112,6 @@ const PL_PERIODS = [
     keys: [m.month],
     prior: i > 0 ? [MONTHS[i - 1].month] : null,
   })),
-  {
-    id: 'Q2',
-    label: 'Q2',
-    full: 'Q2 2026 (Apr–Jun)',
-    keys: ['2026-04', '2026-05', '2026-06'],
-    prior: ['2026-01', '2026-02', '2026-03'],
-  },
-  { id: 'YTD', label: 'YTD', full: `Jan–${monthShort(LAST_MONTH.label)} 2026`, keys: MONTHS.map((m) => m.month), prior: null },
 ]
 
 function buildPL(keys) {
@@ -250,6 +247,114 @@ function BarChart({ items, fmt, label }) {
         )
       })}
     </svg>
+  )
+}
+
+const MIX_COLORS = ['#B0281C', '#8A8577', '#B9AE9A', '#D3CBBA']
+
+function ComboRevExpProfitChart({ months, onFullPl }) {
+  const W = 420
+  const H = 200
+  const padL = 36
+  const padR = 12
+  const padT = 28
+  const padB = 28
+  const innerW = W - padL - padR
+  const innerH = H - padT - padB
+  const maxY = Math.max(...months.map((m) => Math.max(m.revenue, m.cogs + m.opex, m.profit)), 1)
+  const slot = innerW / months.length
+  const y = (v) => padT + innerH - (v / maxY) * innerH
+  const fmtK = (v) => `$${(v / 1000).toFixed(0)}K`
+  return (
+    <div>
+      <div style={{ display: 'flex', gap: 14, flexWrap: 'wrap', marginBottom: 10, fontFamily: ui, fontSize: 10, color: C.sub }}>
+        {[
+          ['Revenue', '#B0281C'],
+          ['Expenses', '#CBC2B0'],
+          ['Profit', '#1C7A4E'],
+        ].map(([l, c]) => (
+          <span key={l} style={{ display: 'inline-flex', alignItems: 'center', gap: 5 }}>
+            <span style={{ width: 10, height: 10, background: c, display: 'inline-block' }} />
+            {l}
+          </span>
+        ))}
+        <button type="button" className="rt-linkbtn" style={{ marginLeft: 'auto' }} onClick={onFullPl}>
+          Full P&L
+        </button>
+      </div>
+      <svg viewBox={`0 0 ${W} ${H}`} width="100%" role="img" aria-label="Revenue, expenses, and profit by month" style={{ display: 'block', maxHeight: 220 }}>
+        {[0, 0.25, 0.5, 0.75, 1].map((t) => {
+          const yy = padT + innerH * (1 - t)
+          const val = maxY * t
+          return (
+            <g key={t}>
+              <line x1={padL} x2={W - padR} y1={yy} y2={yy} stroke={C.line} strokeWidth="0.5" />
+              <text x={padL - 4} y={yy + 3} textAnchor="end" fontSize="8" fontFamily={mono} fill={C.muted}>
+                {fmtK(val)}
+              </text>
+            </g>
+          )
+        })}
+        {months.map((m, i) => {
+          const cx = padL + i * slot + slot / 2
+          const bw = slot * 0.28
+          const exp = m.cogs + m.opex
+          return (
+            <g key={m.month}>
+              <rect x={cx - bw - 2} y={y(m.revenue)} width={bw} height={padT + innerH - y(m.revenue)} fill="#B0281C" />
+              <rect x={cx + 2} y={y(exp)} width={bw} height={padT + innerH - y(exp)} fill="#CBC2B0" />
+              <circle cx={cx} cy={y(m.profit)} r={3} fill="#1C7A4E" />
+              {i > 0 ? (
+                <line
+                  x1={padL + (i - 1) * slot + slot / 2}
+                  y1={y(months[i - 1].profit)}
+                  x2={cx}
+                  y2={y(m.profit)}
+                  stroke="#1C7A4E"
+                  strokeWidth="1.2"
+                />
+              ) : null}
+              <text x={cx} y={H - 8} textAnchor="middle" fontSize="8" fontFamily={ui} fill={C.muted}>
+                {m.label}
+              </text>
+            </g>
+          )
+        })}
+      </svg>
+    </div>
+  )
+}
+
+function StackedMixBar({ segments }) {
+  return (
+    <div style={{ display: 'flex', height: 10, width: '100%', marginBottom: 14, overflow: 'hidden' }}>
+      {segments.map((s, i) => (
+        <div key={s.name} style={{ width: `${s.pct}%`, background: MIX_COLORS[i] || C.line, minWidth: s.pct > 0 ? 2 : 0 }} title={`${s.name} ${s.pct}%`} />
+      ))}
+    </div>
+  )
+}
+
+function MarginBadge({ margin }) {
+  const bg = margin >= 38 ? C.green : margin >= 22 ? '#6A655C' : THEME.accent
+  return (
+    <span className="rt-margin-badge" style={{ fontFamily: mono, fontSize: 10, fontWeight: 600, color: '#fff', background: bg, padding: '2px 7px', borderRadius: 2 }}>
+      {pct(margin)}
+    </span>
+  )
+}
+
+function SourcePill({ source }) {
+  const tone =
+    source.includes('Distributor') || source.includes('Inventory')
+      ? { bg: '#E8F2EC', color: '#1C7A4E' }
+      : source.includes('Service')
+        ? { bg: '#EEEAE3', color: '#6A655C' }
+        : { bg: '#F3E8E6', color: '#B0281C' }
+  return (
+    <span style={{ fontFamily: mono, fontSize: 9, padding: '3px 7px', background: tone.bg, color: tone.color, whiteSpace: 'nowrap' }}>
+      {source.replace(' · matched', '').replace(' · same-day', '')}
+    </span>
   )
 }
 
@@ -512,7 +617,7 @@ function PlView({ onDrill, periodId, setPeriodId }) {
 }
 
 function CashFlowView() {
-  const [key, setKey] = useState(CF_PERIOD_KEYS[CF_PERIOD_KEYS.length - 1])
+  const [key, setKey] = useState('all')
   const cf = DATA.cash_flow[key]
   const bs = bsForCfKey(key)
   const checking = bs?.assets.find((a) => a.label === 'Business checking')?.amount
@@ -613,59 +718,79 @@ function BalanceSheetView({ onDrill }) {
 }
 
 function MonthlyTableView({ onPickMonth }) {
-  const rows = MONTHS.map((m) => {
-    const gross = m.revenue - m.cogs
-    return { ...m, gross, margin: (m.profit / m.revenue) * 100 }
-  })
-  const ytd = {
+  const rows = MONTHS.map((m) => ({
+    ...m,
+    gross: m.revenue - m.cogs,
+    margin: (m.profit / m.revenue) * 100,
+    inProgress: false,
+  }))
+  const total = {
+    month: 'total',
+    label: 'TOTAL',
     revenue: sumBy(rows, 'revenue'),
     cogs: sumBy(rows, 'cogs'),
     gross: sumBy(rows, 'gross'),
-    opex: sumBy(rows, 'opex'),
     profit: sumBy(rows, 'profit'),
-    tiresSold: sumBy(rows, 'tiresSold'),
+    margin: (sumBy(rows, 'profit') / sumBy(rows, 'revenue')) * 100,
+    inProgress: false,
   }
-  ytd.margin = (ytd.profit / ytd.revenue) * 100
-  const lines = [
-    { label: 'Revenue', get: (r) => paren(r.revenue) },
-    { label: 'Cost of goods sold', get: (r) => paren(-r.cogs) },
-    { label: 'Gross profit', get: (r) => paren(r.gross), strong: true },
-    { label: 'Operating expenses', get: (r) => paren(-r.opex) },
-    { label: 'Net income', get: (r) => paren(r.profit), strong: true },
-    { label: 'Net margin', get: (r) => pct(r.margin) },
-    { label: 'Tires sold', get: (r) => String(r.tiresSold) },
-  ]
+  const sepRow = {
+    month: '2026-09',
+    label: 'September',
+    revenue: null,
+    cogs: null,
+    gross: null,
+    profit: null,
+    margin: null,
+    inProgress: true,
+  }
   return (
     <div style={{ background: C.card, border: `1px solid ${C.hair}`, overflow: 'auto' }}>
-      <table style={{ width: '100%', borderCollapse: 'collapse', minWidth: 860 }}>
+      <table style={{ width: '100%', borderCollapse: 'collapse', minWidth: 520 }}>
         <thead>
           <tr>
-            <th style={hcell()}>2026</th>
-            {rows.map((m) => (
-              <th key={m.month} style={hcell('right')}>
-                <button type="button" className="rt-linkbtn" onClick={() => onPickMonth(m.month)} title={`Open ${monthYear(m)} P&L`}>
-                  {m.label}
-                </button>
-              </th>
-            ))}
-            <th style={{ ...hcell('right'), color: C.ink }}>YTD</th>
+            <th style={hcell()}>Month</th>
+            <th style={hcell('right')}>Revenue</th>
+            <th style={hcell('right')}>COGS</th>
+            <th style={hcell('right')}>Gross Profit</th>
+            <th style={hcell('right')}>Net Profit</th>
+            <th style={hcell('right')}>Margin</th>
           </tr>
         </thead>
         <tbody>
-          {lines.map((l) => (
-            <tr key={l.label}>
-              <td style={cell('left', { fontWeight: l.strong ? 600 : 400, whiteSpace: 'nowrap' })}>{l.label}</td>
-              {rows.map((m) => (
-                <td key={m.month} style={cell('right', { fontFamily: mono, fontWeight: l.strong ? 600 : 400 })}>
-                  {l.get(m)}
-                </td>
-              ))}
-              <td style={cell('right', { fontFamily: mono, fontWeight: 700, background: '#FAF8F4' })}>
-                {l.get(ytd)}
-                {l.label === 'Revenue' ? <TieMark ok={ytd.revenue === DATA.ytd_revenue} /> : null}
+          {rows.map((m, i) => (
+            <tr key={m.month} style={{ background: i % 2 ? '#FAF8F4' : C.card }}>
+              <td style={cell('left')}>
+                <button type="button" className="rt-linkbtn" onClick={() => onPickMonth(m.month)}>
+                  {monthYear(m)}
+                </button>
               </td>
+              <td style={cell('right', { fontFamily: mono })}>{fmt0(m.revenue)}</td>
+              <td style={cell('right', { fontFamily: mono })}>{fmt0(m.cogs)}</td>
+              <td style={cell('right', { fontFamily: mono, fontWeight: 600 })}>{fmt0(m.gross)}</td>
+              <td style={cell('right', { fontFamily: mono, fontWeight: 600 })}>{fmt0(m.profit)}</td>
+              <td style={cell('right', { fontFamily: mono, color: C.sub })}>{pct(m.margin)}</td>
             </tr>
           ))}
+          <tr style={{ opacity: 0.55 }}>
+            <td style={cell('left', { fontStyle: 'italic' })}>{sepRow.label} · In progress</td>
+            <td style={cell('right', { fontFamily: mono })}>—</td>
+            <td style={cell('right', { fontFamily: mono })}>—</td>
+            <td style={cell('right', { fontFamily: mono })}>—</td>
+            <td style={cell('right', { fontFamily: mono })}>—</td>
+            <td style={cell('right', { fontFamily: mono })}>—</td>
+          </tr>
+          <tr style={{ background: '#ECE7DD' }}>
+            <td style={cell('left', { fontWeight: 700, borderBottom: 'none' })}>{total.label}</td>
+            <td style={cell('right', { fontFamily: mono, fontWeight: 700, borderBottom: 'none' })}>
+              {fmt0(total.revenue)}
+              <TieMark ok={total.revenue === DATA.ytd_revenue} />
+            </td>
+            <td style={cell('right', { fontFamily: mono, fontWeight: 700, borderBottom: 'none' })}>{fmt0(total.cogs)}</td>
+            <td style={cell('right', { fontFamily: mono, fontWeight: 700, borderBottom: 'none' })}>{fmt0(total.gross)}</td>
+            <td style={cell('right', { fontFamily: mono, fontWeight: 700, borderBottom: 'none' })}>{fmt0(total.profit)}</td>
+            <td style={cell('right', { fontFamily: mono, fontWeight: 700, borderBottom: 'none' })}>{pct(total.margin)}</td>
+          </tr>
         </tbody>
       </table>
     </div>
@@ -673,76 +798,71 @@ function MonthlyTableView({ onPickMonth }) {
 }
 
 function AccountBalancesView({ onDrill }) {
-  const key = Object.keys(DATA.balance_sheet).slice(-1)[0]
+  const key = '2026-08'
   const bs = DATA.balance_sheet[key]
-  const groups = [
-    { type: 'Asset', rows: bs.assets },
-    { type: 'Liability', rows: bs.liabilities },
-    { type: 'Equity', rows: bs.equity },
-  ]
+  const [open, setOpen] = useState({ ASSETS: true, LIABILITIES: true, EQUITY: true, INCOME: false, EXPENSES: false })
   const assets = sumBy(bs.assets)
   const liab = sumBy(bs.liabilities)
   const eq = sumBy(bs.equity)
+  const balanced = Math.abs(assets - liab - eq) < 2
+
+  const sections = [
+    { id: 'ASSETS', title: 'ASSETS', rows: bs.assets.map((l) => ({ ...l, type: 'Asset' })) },
+    { id: 'LIABILITIES', title: 'LIABILITIES', rows: bs.liabilities.map((l) => ({ ...l, type: 'Liability' })) },
+    { id: 'EQUITY', title: 'EQUITY', rows: bs.equity.map((l) => ({ ...l, type: 'Equity' })) },
+    { id: 'INCOME', title: 'INCOME', rows: (DATA.accounts_ytd?.income || []).map((l) => ({ ...l, type: 'Income' })) },
+    { id: 'EXPENSES', title: 'EXPENSES', rows: (DATA.accounts_ytd?.expense || []).map((l) => ({ ...l, type: 'Expense' })) },
+  ]
+
+  const toggle = (id) => setOpen((o) => ({ ...o, [id]: !o[id] }))
+
   return (
     <div style={{ background: C.card, border: `1px solid ${C.hair}`, overflow: 'auto', maxWidth: 760 }}>
-      <table style={{ width: '100%', borderCollapse: 'collapse', minWidth: 460 }}>
-        <thead>
-          <tr>
-            <th style={hcell()}>Account</th>
-            <th style={hcell()}>Type</th>
-            <th style={hcell('right')}>Balance · {bs.label}</th>
-          </tr>
-        </thead>
-        <tbody>
-          {groups.flatMap((g) =>
-            g.rows.map((l) => {
-              const canDrill = !!l.drill?.length
-              return (
-                <tr
-                  key={`${g.type}-${l.label}`}
-                  className={canDrill ? 'rt-clickrow' : undefined}
-                  tabIndex={canDrill ? 0 : undefined}
-                  onClick={canDrill ? () => onDrill({ title: l.label, period: `As of ${bs.label}`, rows: l.drill, total: l.amount }) : undefined}
-                  onKeyDown={canDrill ? (e) => e.key === 'Enter' && onDrill({ title: l.label, period: `As of ${bs.label}`, rows: l.drill, total: l.amount }) : undefined}
-                >
-                  <td style={cell()}>
-                    {l.label}
-                    {canDrill ? <span style={{ color: C.muted, marginLeft: 6 }}>›</span> : null}
-                  </td>
-                  <td style={cell('left', { color: C.sub })}>{g.type}</td>
-                  <td style={cell('right', { fontFamily: mono })}>{paren(l.amount)}</td>
-                </tr>
-              )
-            }),
-          )}
-        </tbody>
-        <tfoot>
-          <tr>
-            <td colSpan={2} style={cell('left', { fontWeight: 600, borderBottom: 'none' })}>
-              Net worth (assets less liabilities)
-            </td>
-            <td style={cell('right', { fontFamily: mono, fontWeight: 700, borderBottom: 'none' })}>
-              {paren(assets - liab)}
-              <TieMark ok={Math.abs(assets - liab - eq) < 1} />
-            </td>
-          </tr>
-        </tfoot>
-      </table>
+      {sections.map((sec) => (
+        <div key={sec.id} style={{ borderBottom: `1px solid ${C.hair}` }}>
+          <button type="button" className="rt-acct-head" onClick={() => toggle(sec.id)} aria-expanded={open[sec.id]}>
+            <span>{open[sec.id] ? '▾' : '▸'}</span> {sec.title}
+          </button>
+          {open[sec.id] ? (
+            <table style={{ width: '100%', borderCollapse: 'collapse', minWidth: 420 }}>
+              <tbody>
+                {sec.rows.map((l) => {
+                  const canDrill = !!l.drill?.length
+                  const period = sec.id === 'ASSETS' || sec.id === 'LIABILITIES' || sec.id === 'EQUITY' ? `As of ${bs.label}` : 'Jan–Aug 2026 YTD'
+                  return (
+                    <tr
+                      key={`${sec.id}-${l.label}`}
+                      className={canDrill ? 'rt-clickrow' : undefined}
+                      tabIndex={canDrill ? 0 : undefined}
+                      onClick={canDrill ? () => onDrill({ title: l.label, period, rows: l.drill, total: l.amount }) : undefined}
+                      onKeyDown={canDrill ? (e) => e.key === 'Enter' && onDrill({ title: l.label, period, rows: l.drill, total: l.amount }) : undefined}
+                    >
+                      <td style={cell()}>{l.label}</td>
+                      <td style={cell('right', { fontFamily: mono, width: 120 })}>{paren(l.amount)}</td>
+                    </tr>
+                  )
+                })}
+              </tbody>
+            </table>
+          ) : null}
+        </div>
+      ))}
+      <div style={{ padding: '12px 14px', fontFamily: ui, fontSize: 12, color: C.sub, textAlign: 'right' }}>
+        In balance <TieMark ok={balanced} />
+      </div>
     </div>
   )
 }
 
 const FIN_TABS = [
-  { id: 'pl', label: 'P&L' },
+  { id: 'pl', label: 'Profit & Loss' },
   { id: 'cf', label: 'Cash Flow' },
   { id: 'bs', label: 'Balance Sheet' },
   { id: 'monthly', label: 'Monthly Table' },
   { id: 'accounts', label: 'Account Balances' },
 ]
 
-function FinancialsTab() {
-  const [fin, setFin] = useState('pl')
-  const [plPeriod, setPlPeriod] = useState(LAST_MONTH.month)
+function FinancialsTab({ fin, setFin, plPeriod, setPlPeriod }) {
   const [drill, setDrill] = useState(null)
   return (
     <>
@@ -767,7 +887,7 @@ function FinancialsTab() {
 
 /* ---------- Dashboard ---------- */
 
-function DashboardTab({ period, setPeriod, onOpenOrders }) {
+function DashboardTab({ period, setPeriod, onOpenOrders, onOpenFinancials, onOpenSalesItems }) {
   const rows = ORDERS.filter((o) => inPeriod(o, period))
   const reg = totalsOf(rows)
   const ordersView = totalsOf(ORDERS.filter((o) => inPeriod(o, period)))
@@ -786,15 +906,19 @@ function DashboardTab({ period, setPeriod, onOpenOrders }) {
     topSixRev === augTires.top_six_revenue &&
     topSixUnits === augTires.top_six_units &&
     topSixRev < augTires.new_tire_revenue &&
-    topSixUnits < augTires.tires_sold_units
+    topSixUnits < augTires.new_tire_units
 
+  const grossAug = m.revenue - m.cogs
   const strip = [
     ['Revenue', fmt0(m.revenue)],
-    ['COGS', fmt0(m.cogs)],
-    ['Operating', fmt0(m.opex)],
+    ['Gross profit', fmt0(grossAug)],
     ['Net margin', pct((m.profit / m.revenue) * 100)],
+    ['YTD revenue', fmt0(DATA.ytd_revenue)],
     ['Tires sold', String(m.tiresSold)],
   ]
+
+  const profitRows = MONTHS.map((x) => ({ ...x, margin: (x.profit / x.revenue) * 100 }))
+  const profitTotal = sumBy(profitRows, 'profit')
 
   return (
     <>
@@ -844,60 +968,63 @@ function DashboardTab({ period, setPeriod, onOpenOrders }) {
       </div>
       <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap', marginBottom: 20 }}>
         {strip.map(([l, v]) => (
-          <div key={l} style={{ ...panel, flex: '1 1 140px', marginBottom: 0 }}>
+          <div key={l} style={{ ...panel, flex: '1 1 120px', marginBottom: 0 }}>
             <div style={{ fontFamily: ui, fontSize: 10, color: C.muted }}>{l}</div>
             <div style={{ fontFamily: mono, fontSize: 18, marginTop: 6, fontWeight: 500 }}>
               {v}
+              {l === 'YTD revenue' ? <TieMark ok={DATA.ytd_revenue === sumBy(MONTHS, 'revenue')} /> : null}
               {l === 'Tires sold' ? <TieMark ok={m.tiresSold === augTires.tires_sold_units} /> : null}
             </div>
           </div>
         ))}
       </div>
 
-      <div className="rt-chartrow">
+      <div className="rt-dash-main">
         <div style={{ ...panel, marginBottom: 0 }}>
-          <PanelTitle>Revenue by month</PanelTitle>
-          <BarChart label="Revenue by month" items={MONTHS.map((x) => ({ label: x.label, value: x.revenue }))} fmt={(v) => `${(v / 1000).toFixed(1)}k`} />
+          <PanelTitle>Revenue, Expenses &amp; Profit</PanelTitle>
+          <ComboRevExpProfitChart months={MONTHS} onFullPl={() => onOpenFinancials('all')} />
         </div>
         <div style={{ ...panel, marginBottom: 0 }}>
-          <PanelTitle>Net profit by month</PanelTitle>
-          <BarChart label="Net profit by month" items={MONTHS.map((x) => ({ label: x.label, value: x.profit }))} fmt={(v) => `${(v / 1000).toFixed(1)}k`} />
-        </div>
-      </div>
-      <div className="rt-chartrow">
-        <div style={{ ...panel, marginBottom: 0 }}>
-          <PanelTitle>Net margin</PanelTitle>
-          <LineChart label="Net margin by month" items={MONTHS.map((x) => ({ label: x.label, value: (x.profit / x.revenue) * 100 }))} fmt={(v) => `${v.toFixed(1)}%`} />
-        </div>
-        <div style={{ ...panel, marginBottom: 0 }}>
-          <PanelTitle>Tires sold</PanelTitle>
-          <BarChart label="Tires sold by month" items={MONTHS.map((x) => ({ label: x.label, value: x.tiresSold }))} fmt={(v) => String(v)} />
+          <PanelTitle>Profit by Month</PanelTitle>
+          <div style={{ border: `1px solid ${C.hair}` }}>
+            {profitRows.map((x) => (
+              <button
+                key={x.month}
+                type="button"
+                className="rt-profit-row"
+                onClick={() => onOpenFinancials(x.month)}
+              >
+                <span>{monthShort(x.label)}</span>
+                <span style={{ fontFamily: mono }}>{fmt0(x.profit)}</span>
+                <span style={{ fontFamily: mono, color: C.sub }}>{pct(x.margin)}</span>
+              </button>
+            ))}
+            <div className="rt-profit-row total">
+              <span>Total</span>
+              <span style={{ fontFamily: mono, fontWeight: 700 }}>
+                {fmt0(profitTotal)}
+                <TieMark ok={profitTotal === sumBy(MONTHS, 'profit')} />
+              </span>
+              <span />
+            </div>
+          </div>
         </div>
       </div>
 
-      <div className="rt-chartrow">
+      <div className="rt-chartrow" style={{ marginTop: 16 }}>
         <div style={{ ...panel, marginBottom: 0 }}>
-          <PanelTitle
-            right={
-              mixTie ? (
-                <span style={{ fontFamily: mono, fontSize: 10, color: C.muted }}>
-                  {fmt0(mixTotal)} total <TieMark ok />
-                </span>
-              ) : null
-            }
-          >
-            Sales mix · {monthShort(m.label)}
-          </PanelTitle>
-          {DATA.sales_mix_aug.map((s) => (
-            <div key={s.name} style={{ marginBottom: 12 }}>
+          <PanelTitle right={mixTie ? <TieMark ok /> : null}>Sales Mix · Aug 2026</PanelTitle>
+          <StackedMixBar segments={DATA.sales_mix_aug} />
+          {DATA.sales_mix_aug.map((s, i) => (
+            <div key={s.name} style={{ marginBottom: 10 }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', fontFamily: ui, fontSize: 12, marginBottom: 4 }}>
                 <span style={{ color: C.ink }}>{s.name}</span>
                 <span style={{ fontFamily: mono, color: C.sub }}>
                   {fmt0(s.revenue)} · {pct(s.pct)}
                 </span>
               </div>
-              <div style={{ height: 6, background: C.line }}>
-                <div style={{ width: `${s.pct}%`, height: '100%', background: THEME.side }} />
+              <div style={{ height: 5, background: C.line }}>
+                <div style={{ width: `${s.pct}%`, height: '100%', background: MIX_COLORS[i] }} />
               </div>
             </div>
           ))}
@@ -905,12 +1032,12 @@ function DashboardTab({ period, setPeriod, onOpenOrders }) {
         <div style={{ ...panel, marginBottom: 0, overflow: 'auto' }}>
           <PanelTitle
             right={
-              <span style={{ fontFamily: mono, fontSize: 10, color: C.muted }}>
-                {fmt0(topSixRev)} · {topSixUnits} units <TieMark ok={topSixTie} />
-              </span>
+              <button type="button" className="rt-linkbtn" onClick={onOpenSalesItems}>
+                All
+              </button>
             }
           >
-            Top sizes · {monthShort(m.label)}
+            Top Tire Sizes · Aug 2026
           </PanelTitle>
           <table style={{ width: '100%', borderCollapse: 'collapse', minWidth: 280 }}>
             <thead>
@@ -931,6 +1058,16 @@ function DashboardTab({ period, setPeriod, onOpenOrders }) {
                 </tr>
               ))}
             </tbody>
+            <tfoot>
+              <tr>
+                <td colSpan={2} style={cell('left', { fontWeight: 600, borderBottom: 'none' })}>
+                  Top six
+                  <TieMark ok={topSixTie} />
+                </td>
+                <td style={cell('right', { fontFamily: mono, fontWeight: 600, borderBottom: 'none' })}>{topSixUnits}</td>
+                <td style={cell('right', { fontFamily: mono, fontWeight: 600, borderBottom: 'none' })}>{fmt0(topSixRev)}</td>
+              </tr>
+            </tfoot>
           </table>
         </div>
       </div>
@@ -942,23 +1079,32 @@ function DashboardTab({ period, setPeriod, onOpenOrders }) {
 
 function SalesItemsTab() {
   const [view, setView] = useState('ranked')
+  const [periodKey, setPeriodKey] = useState('2026-08')
+  const [compareOn, setCompareOn] = useState(false)
+  const [compareKey, setCompareKey] = useState('2026-07')
   const [sort, setSort] = useState('revenue')
-  const m = LAST_MONTH
-  const items = DATA.sales_items_aug
-  const ranked = [...items].sort((a, b) => b[sort] - a[sort])
-  const augTires = DATA.aug_tire_sales
-  const newTireLines = items.filter((i) => i.category === 'New tire')
-  const newRev = sumBy(newTireLines, 'revenue')
-  const best = [...MONTHS].sort((a, b) => b.profit - a.profit)[0]
+  const [sortDir, setSortDir] = useState(-1)
+  const [q, setQ] = useState('')
+
+  const stats = DATA.period_stats?.[periodKey] || DATA.period_stats?.['2026-08']
+  const items = (DATA.sales_items_by_month?.[periodKey] || DATA.sales_items_aug).filter((it) => !q.trim() || it.item.toLowerCase().includes(q.trim().toLowerCase()))
+  const sortKey = sort === 'avg' ? 'avgSale' : sort
+  const withAvg = items.map((it) => ({ ...it, avgSale: it.units ? it.revenue / it.units : 0 }))
+  const ranked = [...withAvg].sort((a, b) => (a[sortKey] - b[sortKey]) * sortDir)
+
+  const compareItems = compareOn ? DATA.sales_items_by_month?.[compareKey] || [] : []
+  const compareMap = new Map(compareItems.map((it) => [it.item, it]))
+
+  const maxMonthRev = Math.max(...MONTHS.map((m) => m.revenue), 1)
+
   return (
     <>
       <PageHead title={NAV.find((n) => n.id === 'inventory').title} />
       <div style={{ display: 'flex', gap: 12, marginBottom: 20, flexWrap: 'wrap' }}>
-        <Kpi label={`${monthShort(m.label)} revenue`} value={fmt0(m.revenue)} tie={sumBy(items, 'revenue') === m.revenue} />
-        <Kpi label={`Tires sold · ${monthShort(m.label)}`} value={String(m.tiresSold)} tie={m.tiresSold === augTires.tires_sold_units} />
-        <Kpi label="New tire revenue" value={fmt0(augTires.new_tire_revenue)} tie={newRev === augTires.new_tire_revenue} />
-        <Kpi label="YTD revenue" value={fmt0(DATA.ytd_revenue)} tie={sumBy(MONTHS, 'revenue') === DATA.ytd_revenue} />
-        <Kpi label="Best month · net" value={`${monthShort(best.label)} · ${fmt0(best.profit)}`} />
+        <Kpi label="Revenue" value={fmt0(stats?.revenue || 0)} />
+        <Kpi label="Units sold" value={String(stats?.unitsSold || 0)} />
+        <Kpi label="Unique items" value={String(stats?.uniqueItems || items.length)} />
+        <Kpi label="Avg ticket" value={fmtC(stats?.ticketCount ? stats.revenue / stats.ticketCount : 0)} />
       </div>
       <SubTabs
         active={view}
@@ -971,67 +1117,115 @@ function SalesItemsTab() {
       {view === 'ranked' && (
         <>
           <div className="rt-fin-pills">
-            <span>RANK BY</span>
-            <Pill on={sort === 'revenue'} onClick={() => setSort('revenue')}>
-              Revenue
-            </Pill>
-            <Pill on={sort === 'units'} onClick={() => setSort('units')}>
-              Units
-            </Pill>
+            <span>PERIOD</span>
+            {ITEM_PERIOD_KEYS.map((k) => (
+              <Pill key={k} on={k === periodKey} onClick={() => setPeriodKey(k)}>
+                {cfPillLabel(k)}
+              </Pill>
+            ))}
+            <button type="button" className="rt-pill" style={{ marginLeft: 8 }} onClick={() => setCompareOn((v) => !v)}>
+              {compareOn ? 'Compare on' : 'Compare'}
+            </button>
+            {compareOn ? (
+              <>
+                <span style={{ fontSize: 9, color: C.muted, letterSpacing: '0.12em' }}>COMPARE TO</span>
+                {MONTHS.map((m) => (
+                  <Pill key={m.month} on={compareKey === m.month} onClick={() => setCompareKey(m.month)}>
+                    {m.label}
+                  </Pill>
+                ))}
+              </>
+            ) : null}
+          </div>
+          <div className="rt-filters">
+            <input value={q} onChange={(e) => setQ(e.target.value)} placeholder="Search items" aria-label="Search items" style={{ ...selectStyle, flex: '1 1 160px', minWidth: 0 }} />
+            <span style={{ fontSize: 9, color: C.muted, letterSpacing: '0.12em' }}>SORT</span>
+            {[
+              ['revenue', 'Revenue'],
+              ['units', 'Units'],
+              ['avg', 'Avg sale'],
+            ].map(([id, label]) => (
+              <Pill
+                key={id}
+                on={sort === id}
+                onClick={() => {
+                  if (sort === id) setSortDir((d) => -d)
+                  else {
+                    setSort(id)
+                    setSortDir(-1)
+                  }
+                }}
+              >
+                {label}
+              </Pill>
+            ))}
           </div>
           <div style={{ background: C.card, border: `1px solid ${C.hair}`, overflow: 'auto' }}>
-            <table style={{ width: '100%', borderCollapse: 'collapse', minWidth: 460 }}>
+            <table style={{ width: '100%', borderCollapse: 'collapse', minWidth: compareOn ? 720 : 460 }}>
               <thead>
                 <tr>
                   <th style={hcell()}>#</th>
                   <th style={hcell()}>Item</th>
-                  <th style={hcell()}>Category</th>
                   <th style={hcell('right')}>Units</th>
                   <th style={hcell('right')}>Revenue</th>
-                  <th style={hcell('right')}>Per unit</th>
+                  <th style={hcell('right')}>Avg sale</th>
+                  {compareOn ? (
+                    <>
+                      <th style={hcell('right')}>Units B</th>
+                      <th style={hcell('right')}>Rev B</th>
+                      <th style={hcell('right')}>Δ Units</th>
+                    </>
+                  ) : null}
                 </tr>
               </thead>
               <tbody>
-                {ranked.map((t, i) => (
-                  <tr key={t.item} style={{ background: i % 2 ? '#FAF8F4' : C.card }}>
-                    <td style={cell('left', { fontFamily: mono, color: C.muted })}>{i + 1}</td>
-                    <td style={cell('left', { fontFamily: mono })}>{t.item}</td>
-                    <td style={cell('left', { color: C.sub, fontSize: 11 })}>{t.category}</td>
-                    <td style={cell('right', { fontFamily: mono })}>{t.units}</td>
-                    <td style={cell('right', { fontFamily: mono, fontWeight: 600 })}>{fmt0(t.revenue)}</td>
-                    <td style={cell('right', { fontFamily: mono, color: C.sub })}>{t.units ? fmtC(t.revenue / t.units) : '—'}</td>
-                  </tr>
-                ))}
+                {ranked.map((t, i) => {
+                  const b = compareMap.get(t.item)
+                  return (
+                    <tr key={t.item} style={{ background: i % 2 ? '#FAF8F4' : C.card }}>
+                      <td style={cell('left', { fontFamily: mono, color: C.muted })}>{i + 1}</td>
+                      <td style={cell('left', { fontFamily: mono })}>{t.item}</td>
+                      <td style={cell('right', { fontFamily: mono })}>{t.units}</td>
+                      <td style={cell('right', { fontFamily: mono, fontWeight: 600 })}>{fmt0(t.revenue)}</td>
+                      <td style={cell('right', { fontFamily: mono, color: C.sub })}>{t.units ? fmtC(t.avgSale) : '—'}</td>
+                      {compareOn ? (
+                        <>
+                          <td style={cell('right', { fontFamily: mono })}>{b?.units ?? '—'}</td>
+                          <td style={cell('right', { fontFamily: mono })}>{b ? fmt0(b.revenue) : '—'}</td>
+                          <td style={cell('right', { fontFamily: mono })}>{b ? b.units - t.units : '—'}</td>
+                        </>
+                      ) : null}
+                    </tr>
+                  )
+                })}
               </tbody>
             </table>
           </div>
         </>
       )}
       {view === 'month' && (
-        <div style={{ background: C.card, border: `1px solid ${C.hair}`, overflow: 'auto' }}>
-          <table style={{ width: '100%', borderCollapse: 'collapse', minWidth: 520 }}>
-            <thead>
-              <tr>
-                <th style={hcell()}>Month</th>
-                <th style={hcell('right')}>Revenue</th>
-                <th style={hcell('right')}>Tires sold</th>
-                <th style={hcell('right')}>Net income</th>
-                <th style={hcell('right')}>Margin</th>
-              </tr>
-            </thead>
-            <tbody>
-              {MONTHS.map((x, i) => (
-                <tr key={x.month} style={{ background: i % 2 ? '#FAF8F4' : C.card }}>
-                  <td style={cell('left', { fontFamily: mono })}>{monthYear(x)}</td>
-                  <td style={cell('right', { fontFamily: mono })}>{fmt0(x.revenue)}</td>
-                  <td style={cell('right', { fontFamily: mono })}>{x.tiresSold}</td>
-                  <td style={cell('right', { fontFamily: mono, fontWeight: 600 })}>{fmt0(x.profit)}</td>
-                  <td style={cell('right', { fontFamily: mono, color: C.sub })}>{pct((x.profit / x.revenue) * 100)}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+        <>
+          <div style={{ fontFamily: head, fontSize: 13, fontWeight: 700, color: C.ink, letterSpacing: '0.08em', textTransform: 'uppercase', marginBottom: 12 }}>Sales by month</div>
+          <div style={{ background: C.card, border: `1px solid ${C.hair}`, padding: '8px 12px' }}>
+            {MONTHS.map((x) => (
+              <div key={x.month} style={{ display: 'grid', gridTemplateColumns: '88px 1fr auto', gap: 10, alignItems: 'center', padding: '8px 0', borderBottom: `1px solid ${C.line}` }}>
+                <span style={{ fontFamily: mono, fontSize: 11 }}>{monthShort(x.label)}</span>
+                <div style={{ height: 8, background: C.line }}>
+                  <div style={{ width: `${(x.revenue / maxMonthRev) * 100}%`, height: '100%', background: '#B0281C' }} />
+                </div>
+                <span style={{ fontFamily: mono, fontSize: 11, whiteSpace: 'nowrap' }}>
+                  {fmt0(x.revenue)} · {x.tiresSold} sold
+                </span>
+              </div>
+            ))}
+            <div style={{ display: 'flex', justifyContent: 'space-between', padding: '10px 0 4px', fontFamily: mono, fontWeight: 700 }}>
+              <span>TOTAL</span>
+              <span>
+                {fmt0(DATA.ytd_revenue)} <TieMark ok={DATA.ytd_revenue === sumBy(MONTHS, 'revenue')} />
+              </span>
+            </div>
+          </div>
+        </>
       )}
     </>
   )
@@ -1093,27 +1287,54 @@ function OrdersTab({ initialPeriod }) {
   const [source, setSource] = useState('all')
   const [size, setSize] = useState('all')
   const [flaggedOnly, setFlaggedOnly] = useState(false)
-  const [estOnly, setEstOnly] = useState(false)
+  const [hideEst, setHideEst] = useState(false)
+  const [sortKey, setSortKey] = useState('date')
+  const [sortDir, setSortDir] = useState(-1)
 
   const rows = ORDERS.filter((o) => {
     if (!inPeriod(o, period)) return false
     if (source !== 'all' && o.source !== source) return false
     if (size !== 'all' && o.size !== size) return false
     if (flaggedOnly && !o.flagged) return false
-    if (estOnly && !o.est) return false
+    if (hideEst && o.est) return false
     const needle = q.trim().toLowerCase()
     if (needle && !`${o.ticket} ${o.item} ${o.size} ${o.source}`.toLowerCase().includes(needle)) return false
     return true
+  }).sort((a, b) => {
+    const dir = sortDir
+    if (sortKey === 'date') return (a.date < b.date ? -1 : 1) * dir
+    if (sortKey === 'profit') return (a.profit - b.profit) * dir
+    if (sortKey === 'margin') return (a.margin - b.margin) * dir
+    if (sortKey === 'sale') return (a.sale - b.sale) * dir
+    return 0
   })
+
   const t = totalsOf(rows)
-  const filtered = q.trim() || source !== 'all' || size !== 'all' || flaggedOnly || estOnly
+  const newRows = rows.filter(isNewTireOrder)
+  const usedRows = rows.filter(isUsedTireOrder)
+  const newProfit = newRows.length ? sumBy(newRows, 'profit') / newRows.length : 0
+  const usedProfit = usedRows.length ? sumBy(usedRows, 'profit') / usedRows.length : 0
+  const bestMargin = rows.reduce((best, r) => (r.margin > (best?.margin || -1) ? r : best), null)
+  const flaggedCount = rows.filter((r) => r.flagged).length
+  const estCount = rows.filter((r) => r.est).length
+  const bySource = SOURCES.map((s) => ({ source: s, count: rows.filter((r) => r.source === s).length })).filter((x) => x.count)
+
+  const filtered = q.trim() || source !== 'all' || size !== 'all' || flaggedOnly || hideEst
 
   const reset = () => {
     setQ('')
     setSource('all')
     setSize('all')
     setFlaggedOnly(false)
-    setEstOnly(false)
+    setHideEst(false)
+  }
+
+  const toggleSort = (key) => {
+    if (sortKey === key) setSortDir((d) => -d)
+    else {
+      setSortKey(key)
+      setSortDir(-1)
+    }
   }
 
   const exportCsv = () => {
@@ -1127,10 +1348,11 @@ function OrdersTab({ initialPeriod }) {
     <>
       <PageHead title={NAV.find((n) => n.id === 'orders').title} />
       <div style={{ display: 'flex', gap: 12, marginBottom: 20, flexWrap: 'wrap' }}>
-        <Kpi label="Tickets" value={String(t.tickets)} />
-        <Kpi label="Sales" value={fmt0(t.sale)} />
-        <Kpi label="Est. cost" value={fmt0(t.cost)} color={C.sub} />
-        <Kpi label="Est. gross" value={fmt0(t.profit)} color={C.green} sub={`${pct(t.margin)} est. margin`} />
+        <Kpi label="Total orders" value={String(t.tickets)} />
+        <Kpi label="Profit / new tire" value={fmtC(newProfit)} />
+        <Kpi label="Profit / used tire" value={usedRows.length ? fmtC(usedProfit) : '—'} />
+        <Kpi label="Best margin size" value={bestMargin ? bestMargin.size : '—'} sub={bestMargin ? pct(bestMargin.margin) : undefined} />
+        <Kpi label="Est. profit" value={fmt0(t.profit)} color={C.green} />
       </div>
 
       <div className="rt-filters">
@@ -1165,11 +1387,22 @@ function OrdersTab({ initialPeriod }) {
           ))}
         </select>
         <Pill on={flaggedOnly} onClick={() => setFlaggedOnly((v) => !v)}>
-          Review only
+          Flagged
         </Pill>
-        <Pill on={estOnly} onClick={() => setEstOnly((v) => !v)}>
-          Est. cost only
+        <Pill on={hideEst} onClick={() => setHideEst((v) => !v)}>
+          Hide est.
         </Pill>
+        <span style={{ fontSize: 9, color: C.muted, letterSpacing: '0.12em' }}>SORT</span>
+        {[
+          ['date', 'Date'],
+          ['profit', 'Profit'],
+          ['margin', 'Margin'],
+          ['sale', 'Sale'],
+        ].map(([id, label]) => (
+          <Pill key={id} on={sortKey === id} onClick={() => toggleSort(id)}>
+            {label}
+          </Pill>
+        ))}
         {filtered ? (
           <button type="button" className="rt-linkbtn" onClick={reset}>
             Clear
@@ -1194,48 +1427,49 @@ function OrdersTab({ initialPeriod }) {
             {t.tickets} tickets · {fmt0(t.sale)} sales · {fmt0(t.profit)} est. gross
           </div>
           <div className="rt-order-table" style={{ background: C.card, border: `1px solid ${C.hair}`, overflow: 'auto' }}>
-            <table style={{ width: '100%', borderCollapse: 'collapse', minWidth: 780 }}>
+            <table style={{ width: '100%', borderCollapse: 'collapse', minWidth: 720 }}>
               <thead>
                 <tr>
                   <th style={hcell()}>Date</th>
-                  <th style={hcell()}>Ticket</th>
-                  <th style={hcell()}>Line</th>
+                  <th style={hcell()}>Tire / Item</th>
+                  <th style={hcell()}>Source</th>
+                  <th style={hcell('right')}>Qty</th>
                   <th style={hcell('right')}>Sale</th>
-                  <th style={hcell('right')}>Est. cost</th>
-                  <th style={hcell('right')}>Est. profit</th>
+                  <th style={hcell('right')}>Cost</th>
+                  <th style={hcell('right')}>Profit</th>
                   <th style={hcell('right')}>Margin</th>
-                  <th style={hcell()}>Match</th>
                 </tr>
               </thead>
               <tbody>
                 {rows.map((r, i) => (
                   <tr key={r.ticket} style={{ background: i % 2 ? '#FAF8F4' : C.card }}>
                     <td style={cell('left', { fontFamily: mono, fontSize: 10, color: C.muted, whiteSpace: 'nowrap' })}>{fmtDate(r.date)}</td>
-                    <td style={cell('left', { fontFamily: mono, fontSize: 10 })}>{r.ticket}</td>
-                    <td style={cell()}>
-                      {r.item}
-                      {r.flagged ? (
-                        <span style={{ marginLeft: 8, fontFamily: mono, fontSize: 9, color: C.sub, border: `1px solid ${C.hair}`, padding: '1px 5px' }}>Review</span>
-                      ) : null}
+                    <td style={cell()}>{r.item}</td>
+                    <td style={cell('left')}>
+                      <SourcePill source={r.source} />
                     </td>
+                    <td style={cell('right', { fontFamily: mono })}>{r.qty}</td>
                     <td style={cell('right', { fontFamily: mono, fontWeight: 500 })}>{fmtC(r.sale)}</td>
-                    <td style={cell('right', { fontFamily: mono, color: C.sub })}>{fmtC(r.cost)}</td>
+                    <td style={cell('right', { fontFamily: mono, color: C.sub })}>
+                      {fmtC(r.cost)}
+                      {r.est ? '*' : ''}
+                    </td>
                     <td style={cell('right', { fontFamily: mono, fontWeight: 600, color: C.green })}>{fmtC(r.profit)}</td>
-                    <td style={cell('right', { fontFamily: mono, color: C.green })}>{pct(r.margin)}</td>
-                    <td style={cell('left', { fontSize: 10, color: C.sub })}>{r.source}</td>
+                    <td style={cell('right')}>
+                      <MarginBadge margin={r.margin} />
+                    </td>
                   </tr>
                 ))}
               </tbody>
               <tfoot>
                 <tr style={{ background: '#ECE7DD' }}>
-                  <td colSpan={3} style={cell('left', { fontWeight: 600, borderBottom: 'none' })}>
-                    {t.tickets} ticket{t.tickets === 1 ? '' : 's'}
+                  <td colSpan={8} style={cell('left', { fontWeight: 500, borderBottom: 'none', fontSize: 10, lineHeight: 1.5 })}>
+                    {bySource.map((x) => `${x.source}: ${x.count}`).join(' · ')}
+                    {flaggedCount ? ` · Flagged: ${flaggedCount}` : ''}
+                    {estCount ? ` · * estimated cost (${estCount})` : ''}
+                    {' · '}
+                    <strong>Total est. profit {fmtC(t.profit)}</strong>
                   </td>
-                  <td style={cell('right', { fontFamily: mono, fontWeight: 700, borderBottom: 'none' })}>{fmtC(t.sale)}</td>
-                  <td style={cell('right', { fontFamily: mono, fontWeight: 700, borderBottom: 'none' })}>{fmtC(t.cost)}</td>
-                  <td style={cell('right', { fontFamily: mono, fontWeight: 700, color: C.green, borderBottom: 'none' })}>{fmtC(t.profit)}</td>
-                  <td style={cell('right', { fontFamily: mono, fontWeight: 700, color: C.green, borderBottom: 'none' })}>{pct(t.margin)}</td>
-                  <td style={cell('left', { borderBottom: 'none' })} />
                 </tr>
               </tfoot>
             </table>
@@ -1250,9 +1484,18 @@ function OrdersTab({ initialPeriod }) {
 
 function StockTab() {
   const [asOf, setAsOf] = useState(STOCK_MONTH_IDS[STOCK_MONTH_IDS.length - 1])
+  const [q, setQ] = useState('')
+  const [sort, setSort] = useState('value')
+  const [sortDir, setSortDir] = useState(-1)
   const snap = stockSnapFor(asOf)
-  const rows = stockRowsFor(asOf)
-  const units = sumBy(rows, 'onHand')
+  let rows = stockRowsFor(asOf).filter((r) => !q.trim() || `${r.size} ${r.desc}`.toLowerCase().includes(q.trim().toLowerCase()))
+  rows = [...rows].sort((a, b) => {
+    const dir = sortDir
+    if (sort === 'value') return (a.value - b.value) * dir
+    if (sort === 'onHand') return (a.onHand - b.onHand) * dir
+    return a.size.localeCompare(b.size) * dir
+  })
+  const units = sumBy(stockRowsFor(asOf), 'onHand')
   const value = snap.inventory_value
   const bsInv = inventoryOnBs(asOf)
   const invTie = bsInv != null && value === bsInv
@@ -1264,13 +1507,21 @@ function StockTab() {
     ])
   }
 
+  const toggleStockSort = (key) => {
+    if (sort === key) setSortDir((d) => -d)
+    else {
+      setSort(key)
+      setSortDir(-1)
+    }
+  }
+
   return (
     <>
       <PageHead title={NAV.find((n) => n.id === 'stock').title} />
       <div style={{ display: 'flex', gap: 12, marginBottom: 20, flexWrap: 'wrap' }}>
-        <Kpi label="Inventory value" value={fmt0(value)} tie={invTie} sub={snap.label} />
-        <Kpi label="Units on hand" value={String(units)} />
-        <Kpi label="Sizes stocked" value={String(rows.length)} />
+        <Kpi label="On hand" value={String(units)} />
+        <Kpi label="Stock value" value={fmt0(value)} tie={invTie} />
+        <Kpi label="Sizes" value={String(stockRowsFor(asOf).length)} />
       </div>
       <div className="rt-filters">
         <label style={{ display: 'flex', alignItems: 'center', gap: 8, fontFamily: ui, fontSize: 11, color: C.muted, letterSpacing: '0.1em', textTransform: 'uppercase' }}>
@@ -1283,26 +1534,37 @@ function StockTab() {
             ))}
           </select>
         </label>
+        <input value={q} onChange={(e) => setQ(e.target.value)} placeholder="Search stock" aria-label="Search stock" style={{ ...selectStyle, flex: '1 1 140px', minWidth: 0 }} />
+        {[
+          ['value', 'Value'],
+          ['onHand', 'On hand'],
+          ['size', 'Size'],
+        ].map(([id, label]) => (
+          <Pill key={id} on={sort === id} onClick={() => toggleStockSort(id)}>
+            {label}
+          </Pill>
+        ))}
         <button type="button" className="rt-pill" style={{ marginLeft: 'auto' }} onClick={exportCsv}>
           Export CSV
         </button>
       </div>
       <div style={{ background: C.card, border: `1px solid ${C.hair}`, overflow: 'auto' }}>
-        <table style={{ width: '100%', borderCollapse: 'collapse', minWidth: 520 }}>
+        <table style={{ width: '100%', borderCollapse: 'collapse', minWidth: 420 }}>
           <thead>
             <tr>
-              <th style={hcell()}>Size</th>
-              <th style={hcell()}>Description</th>
+              <th style={hcell()}>Size / Item</th>
               <th style={hcell('right')}>On hand</th>
               <th style={hcell('right')}>Unit cost</th>
-              <th style={hcell('right')}>Value</th>
+              <th style={hcell('right')}>Stock value</th>
             </tr>
           </thead>
           <tbody>
             {rows.map((s, i) => (
               <tr key={s.size} style={{ background: i % 2 ? '#FAF8F4' : C.card }}>
-                <td style={cell('left', { fontFamily: mono })}>{s.size}</td>
-                <td style={cell()}>{s.desc}</td>
+                <td style={cell('left')}>
+                  <div style={{ fontFamily: mono }}>{s.size}</div>
+                  <div style={{ fontSize: 10, color: C.sub }}>{s.desc}</div>
+                </td>
                 <td style={cell('right', { fontFamily: mono, fontWeight: 600 })}>{s.onHand}</td>
                 <td style={cell('right', { fontFamily: mono, color: C.sub })}>{fmtC(s.unitCost)}</td>
                 <td style={cell('right', { fontFamily: mono })}>{fmtC(s.value)}</td>
@@ -1311,9 +1573,7 @@ function StockTab() {
           </tbody>
           <tfoot>
             <tr style={{ background: '#ECE7DD' }}>
-              <td colSpan={2} style={cell('left', { fontWeight: 600, borderBottom: 'none' })}>
-                Total
-              </td>
+              <td style={cell('left', { fontWeight: 600, borderBottom: 'none' })}>{stockRowsFor(asOf).length} sizes</td>
               <td style={cell('right', { fontFamily: mono, fontWeight: 700, borderBottom: 'none' })}>{units}</td>
               <td style={cell('right', { borderBottom: 'none' })} />
               <td style={cell('right', { fontFamily: mono, fontWeight: 700, borderBottom: 'none' })}>{fmtC(value)}</td>
@@ -1371,9 +1631,10 @@ function AskTab() {
           ))}
         </div>
         <div style={{ ...panel, padding: 0, marginBottom: 0 }}>
+          <div style={{ padding: '12px 14px', borderBottom: `1px solid ${C.hair}`, fontFamily: head, fontSize: 12, fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase' }}>Conversation</div>
           <div className="rt-convo" aria-live="polite">
             {messages.length === 0 ? (
-              <div style={{ color: C.muted, fontFamily: ui, fontSize: 13, textAlign: 'center', margin: 'auto' }}>Pick a question or type your own.</div>
+              <div style={{ color: C.muted, fontFamily: ui, fontSize: 13, textAlign: 'center', margin: 'auto' }}>Start with a question</div>
             ) : (
               messages.map((m, i) => (
                 <div key={i} className={`rt-msg ${m.role}`}>
@@ -1393,7 +1654,7 @@ function AskTab() {
             <input
               value={input}
               onChange={(e) => setInput(e.target.value)}
-              placeholder="Ask about your books"
+              placeholder="Ask about sales, cash, margins…"
               aria-label="Ask a question"
               style={{ flex: 1, padding: '10px 12px', border: `1px solid ${C.hair}`, fontFamily: ui, fontSize: 14, outline: 'none', background: C.card, minWidth: 0 }}
             />
@@ -1514,6 +1775,11 @@ const PORTAL_CSS = `
   .rt-chip{font-family:${ui};font-size:12px;padding:8px 12px;border:1px solid ${C.hair};background:${C.card};color:${C.ink};cursor:pointer;text-align:left}
   .rt-chip:hover{border-color:${THEME.side}}
   .rt-chartrow{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:16px;margin-bottom:16px}
+  .rt-dash-main{display:grid;grid-template-columns:minmax(0,1.3fr) minmax(0,1fr);gap:16px;margin-bottom:16px}
+  .rt-profit-row{display:grid;grid-template-columns:72px 1fr auto;gap:10px;width:100%;text-align:left;padding:10px 12px;border:none;border-bottom:1px solid ${C.line};background:${C.card};font-family:${ui};font-size:12px;cursor:pointer;color:${C.ink}}
+  .rt-profit-row.total{cursor:default;background:#FAF8F4;font-weight:600}
+  .rt-profit-row:hover:not(.total){background:#FAF8F4}
+  .rt-acct-head{width:100%;text-align:left;padding:12px 14px;border:none;background:#ECE7DD;font-family:${head};font-size:11px;font-weight:700;letter-spacing:.12em;color:${C.ink};cursor:pointer}
   .rt-stmt{--cols:1fr 120px}
   .rt-stmt.cmp{--cols:1fr 104px 104px 92px}
   .rt-stmt__row{display:grid;grid-template-columns:var(--cols);gap:8px;padding:6px 8px;font-family:${ui};font-size:12px;align-items:baseline}
@@ -1563,6 +1829,7 @@ const PORTAL_CSS = `
     .rt-content{padding:16px 12px 40px;overflow-x:hidden}
     .rt-hero{font-size:46px!important}
     .rt-chartrow{grid-template-columns:1fr}
+    .rt-dash-main{grid-template-columns:1fr}
     .rt-modal{padding:10px;align-items:flex-end}
     .rt-modal__box{max-width:min(100%,calc(100vw - 16px));padding:14px 12px;max-height:92vh}
     .rt-modal__box table{min-width:300px}
@@ -1581,6 +1848,8 @@ export default function RiversideTiresPortal() {
   const phoneDemo = isPhoneDemoUrl() || router.asPath.includes('phone=1') || router.query?.phone === '1'
   const [tab, setTab] = useState('dashboard')
   const [openPeriod, setOpenPeriod] = useState('7d')
+  const [finTab, setFinTab] = useState('pl')
+  const [plPeriod, setPlPeriod] = useState('all')
   const [phoneTourActive, setPhoneTourActive] = useState(false)
   const phoneTabTimerRef = useRef(null)
   const phoneScrollTimerRef = useRef(null)
@@ -1680,8 +1949,20 @@ export default function RiversideTiresPortal() {
       <DemoLobby />
 
       <Shell embed={embed} tab={tab} setTab={setTab}>
-        {tab === 'dashboard' && <DashboardTab period={openPeriod} setPeriod={setOpenPeriod} onOpenOrders={() => setTab('orders')} />}
-        {tab === 'financials' && <FinancialsTab />}
+        {tab === 'dashboard' && (
+          <DashboardTab
+            period={openPeriod}
+            setPeriod={setOpenPeriod}
+            onOpenOrders={() => setTab('orders')}
+            onOpenFinancials={(p) => {
+              setTab('financials')
+              setFinTab('pl')
+              setPlPeriod(p || 'all')
+            }}
+            onOpenSalesItems={() => setTab('inventory')}
+          />
+        )}
+        {tab === 'financials' && <FinancialsTab fin={finTab} setFin={setFinTab} plPeriod={plPeriod} setPlPeriod={setPlPeriod} />}
         {tab === 'inventory' && <SalesItemsTab />}
         {tab === 'orders' && <OrdersTab initialPeriod={openPeriod} />}
         {tab === 'stock' && <StockTab />}
