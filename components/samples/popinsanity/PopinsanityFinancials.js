@@ -6,45 +6,11 @@ import {
   INK,
   BORDER,
   UI,
-  MONO,
   money,
   pct1,
   changeColor,
 } from './popinsanityUtils'
-
-const PNL_SHEET_CSS = `
-.pop-pnl-wrap{
-  --pop-pnl-c1:5.5rem;--pop-pnl-c2:5.5rem;--pop-pnl-c3:5.5rem;--pop-pnl-gap:6px;
-  --pop-pnl-fs:12px;--pop-pnl-fs-cur:13px;--pop-pnl-fs-head:10px;
-}
-@media(max-width:480px){
-  .pop-pnl-wrap{
-    --pop-pnl-c1:4.25rem;--pop-pnl-c2:4.25rem;--pop-pnl-c3:4.75rem;--pop-pnl-gap:6px;
-    --pop-pnl-fs:10px;--pop-pnl-fs-cur:10px;--pop-pnl-fs-head:9px;
-    padding:12px 8px!important;
-  }
-  .pop-pnl-label{font-size:12px}
-  .pop-pnl-head,.pop-pnl-line{padding-right:0}
-  .pop-pnl-line .pop-pnl-num:last-child{font-size:9px}
-}
-.pop-pnl-wrap{max-width:100%;box-sizing:border-box}
-.pop-pnl-head,.pop-pnl-line{
-  display:grid;grid-template-columns:minmax(0,1fr) var(--pop-pnl-c1) var(--pop-pnl-c2) var(--pop-pnl-c3);
-  column-gap:var(--pop-pnl-gap);align-items:center;padding-right:6px;box-sizing:border-box;
-}
-.pop-pnl-head{padding:0 6px 8px;font-size:var(--pop-pnl-fs-head);color:${MUTED};text-transform:uppercase;letter-spacing:.6px}
-.pop-pnl-line{padding:8px 6px;border-radius:2px}
-.pop-pnl-line--indent .pop-pnl-label{padding-left:20px}
-.pop-pnl-line--sub{border-top:1px solid ${BORDER}}
-.pop-pnl-label{min-width:0;font-size:13px;line-height:1.35}
-.pop-pnl-num{
-  font-family:${MONO};font-size:var(--pop-pnl-fs);text-align:right;justify-self:stretch;
-  width:100%;max-width:100%;box-sizing:border-box;white-space:nowrap;overflow:hidden;
-  font-variant-numeric:tabular-nums;
-}
-.pop-pnl-num--cur{font-size:var(--pop-pnl-fs-cur)}
-.pop-pnl-head .pop-pnl-num{font-size:var(--pop-pnl-fs-head);font-family:${UI};font-weight:600;overflow:visible}
-`
+import { COMPARE_SHEET_CSS } from './popinsanitySheetCss'
 
 function PnlLine({ label, thisVal, priorVal, cost, bold, indent, onClick }) {
   const delta = priorVal != null ? thisVal - priorVal : null
@@ -57,13 +23,13 @@ function PnlLine({ label, thisVal, priorVal, cost, bold, indent, onClick }) {
       className={['pop-pnl-line', indent ? 'pop-pnl-line--indent' : '', bold ? 'pop-pnl-line--sub' : '', clickable ? 'pop-click' : ''].filter(Boolean).join(' ')}
       onClick={onClick}
       onKeyDown={clickable ? (e) => e.key === 'Enter' && onClick() : undefined}
-      style={{ cursor: clickable ? 'pointer' : 'default' }}
+      style={{ cursor: clickable ? 'pointer' : 'default', alignItems: indent ? 'start' : undefined }}
     >
       <span className="pop-pnl-label" style={{ fontWeight: bold ? 700 : 400, color: indent ? MUTED : INK }}>
         {label}
         {clickable ? <span style={{ color: '#C9BBA0', fontSize: 11 }}> ›</span> : null}
       </span>
-      <span className="pop-pnl-num pop-pnl-num--cur" style={{ fontWeight: bold ? 700 : 400, color: cost && !bold ? INK : INK }}>
+      <span className="pop-pnl-num pop-pnl-num--cur" style={{ fontWeight: bold ? 700 : 400 }}>
         {money(thisVal)}
       </span>
       <span className="pop-pnl-num" style={{ color: MUTED }}>{money(priorVal)}</span>
@@ -106,7 +72,7 @@ export default function PopinsanityFinancials({ styles, openPnlLine }) {
 
   return (
     <div className="pop-pnl-wrap" style={{ ...card }}>
-      <style>{PNL_SHEET_CSS}</style>
+      <style>{COMPARE_SHEET_CSS}</style>
       <div style={{ ...lbl, marginBottom: 8 }}>Profit &amp; loss · {DATA.meta.this_month}</div>
       <div className="pop-pnl-head">
         <span />

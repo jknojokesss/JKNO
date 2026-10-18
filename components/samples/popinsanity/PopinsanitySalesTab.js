@@ -1,5 +1,6 @@
 import { allChannelSales } from './popinsanityComputed'
 import { ClickRow, ChangeCell } from './PopinsanityShared'
+import { CompareSheet } from './PopinsanityCompareSheet'
 import { money, money0, SPICE, STONE, MUTED, CREAM, MONO, UI } from './popinsanityUtils'
 
 function HorizontalChannelChart({ rows }) {
@@ -36,6 +37,13 @@ export default function PopinsanitySalesTab({ styles, openChannel }) {
   const sales = allChannelSales()
   const totalThis = sales.thisMonth
   const totalPrior = sales.prior
+  const sheetRows = sales.rows.map((r) => ({
+    key: r.id,
+    label: r.name,
+    this: r.this,
+    prior: r.prior,
+    meta: r,
+  }))
 
   return (
     <>
@@ -43,38 +51,50 @@ export default function PopinsanitySalesTab({ styles, openChannel }) {
         <HorizontalChannelChart rows={sales.rows} />
       </div>
       <div style={{ ...card, overflowX: 'auto' }}>
-        <table className="pop-table">
-          <thead>
-            <tr>
-              <th className="pop-th">Channel</th>
-              <th className="pop-th pop-th--r">This month</th>
-              <th className="pop-th pop-th--r">Prior mo.</th>
-              <th className="pop-th pop-th--r">Change</th>
-            </tr>
-          </thead>
-          <tbody>
-            {sales.rows.map((r) => (
-              <ClickRow key={r.id} onClick={() => openChannel(r.id)}>
-                <td className="pop-td">{r.name}</td>
-                <td className="pop-td pop-td--r">{money(r.this)}</td>
-                <td className="pop-td pop-td--r">{money(r.prior)}</td>
+        <div className="pop-sales-table-wrap">
+          <table className="pop-table">
+            <thead>
+              <tr>
+                <th className="pop-th">Channel</th>
+                <th className="pop-th pop-th--r">This month</th>
+                <th className="pop-th pop-th--r">Prior mo.</th>
+                <th className="pop-th pop-th--r">Change</th>
+              </tr>
+            </thead>
+            <tbody>
+              {sales.rows.map((r) => (
+                <ClickRow key={r.id} onClick={() => openChannel(r.id)}>
+                  <td className="pop-td">{r.name}</td>
+                  <td className="pop-td pop-td--r">{money(r.this)}</td>
+                  <td className="pop-td pop-td--r">{money(r.prior)}</td>
+                  <td className="pop-td pop-td--r">
+                    <ChangeCell thisVal={r.this} priorVal={r.prior} />
+                  </td>
+                </ClickRow>
+              ))}
+            </tbody>
+            <tfoot>
+              <tr className="pop-tfoot">
+                <td className="pop-td">Total</td>
+                <td className="pop-td pop-td--r">{money(totalThis)}</td>
+                <td className="pop-td pop-td--r">{money(totalPrior)}</td>
                 <td className="pop-td pop-td--r">
-                  <ChangeCell thisVal={r.this} priorVal={r.prior} />
+                  <ChangeCell thisVal={totalThis} priorVal={totalPrior} />
                 </td>
-              </ClickRow>
-            ))}
-          </tbody>
-          <tfoot>
-            <tr className="pop-tfoot">
-              <td className="pop-td">Total</td>
-              <td className="pop-td pop-td--r">{money(totalThis)}</td>
-              <td className="pop-td pop-td--r">{money(totalPrior)}</td>
-              <td className="pop-td pop-td--r">
-                <ChangeCell thisVal={totalThis} priorVal={totalPrior} />
-              </td>
-            </tr>
-          </tfoot>
-        </table>
+              </tr>
+            </tfoot>
+          </table>
+        </div>
+        <div className="pop-compare-mobile">
+          <CompareSheet
+            thisCol="This month"
+            priorCol="Prior mo."
+            changeCol="Change"
+            rows={sheetRows}
+            footer={{ label: 'Total', this: totalThis, prior: totalPrior }}
+            onRow={(r) => openChannel(r.meta.id)}
+          />
+        </div>
       </div>
     </>
   )

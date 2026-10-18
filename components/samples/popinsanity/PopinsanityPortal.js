@@ -1,11 +1,11 @@
 import { useState, useCallback } from 'react'
-import PopinsanityLobby from './PopinsanityLobby'
 import { DATA } from './popinsanityComputed'
 import {
   SPICE,
   CHAR,
   CREAM,
   INK,
+  MUTED,
   SHELL_CSS,
 } from './popinsanityUtils'
 import { useStyles } from './PopinsanityShared'
@@ -163,7 +163,6 @@ export default function PopinsanityPortal() {
   return (
     <>
       <style dangerouslySetInnerHTML={{ __html: portalStyles }} />
-      <PopinsanityLobby />
       <div className="pop-shell">
         <aside className="pop-side">
           <div style={{ padding: '2px 8px 16px' }}>
@@ -229,6 +228,9 @@ export default function PopinsanityPortal() {
 
         <main className="pop-main">
           <div style={{ marginBottom: '22px' }}>
+            <div style={{ fontFamily: styles.lbl.fontFamily, fontSize: '12px', color: MUTED, marginBottom: '6px', fontWeight: 500 }}>
+              JK No Jokes Financials
+            </div>
             <div style={{ ...styles.lbl, color: SPICE }}>{BIZ}</div>
             <h1 style={{ ...styles.big, fontSize: '28px', color: INK, letterSpacing: '0.3px', lineHeight: 1.1, marginTop: '4px' }}>
               {top ? (top.kind === 'order' ? 'Order detail' : top.kind === 'tier' ? 'Tier detail' : top.kind === 'channel' ? 'Channel detail' : top.kind === 'day' ? 'Cash due' : 'Line detail') : currentLabel}

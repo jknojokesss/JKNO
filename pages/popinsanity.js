@@ -1,9 +1,14 @@
 import Head from 'next/head'
 import PopinsanityPortal from '../components/samples/popinsanity/PopinsanityPortal'
 
+const HIDE_SITE_CHROME = `
+.popinsanity-page .m-sample-lobby,
+.popinsanity-page nav.m-sample-lobby{display:none!important}
+`
+
 export default function PopinsanityPage() {
   return (
-    <>
+    <div className="popinsanity-page">
       <Head>
         <title>Popinsanity — owner portal (sample)</title>
         <meta name="description" content="Sample owner portal for Popinsanity: holiday corporate gifts, channel sales, cash timing, and month-end P&amp;L." />
@@ -14,7 +19,8 @@ export default function PopinsanityPage() {
           rel="stylesheet"
         />
       </Head>
+      <style dangerouslySetInnerHTML={{ __html: HIDE_SITE_CHROME }} />
       <PopinsanityPortal />
-    </>
+    </div>
   )
 }

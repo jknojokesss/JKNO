@@ -7,6 +7,7 @@ import {
   pnlComputed,
 } from './popinsanityComputed'
 import { DetailShell, RowLine, ClickRow } from './PopinsanityShared'
+import { CompareSheet } from './PopinsanityCompareSheet'
 import {
   money,
   fmtD,
@@ -174,50 +175,76 @@ export function ChannelDetail({ channelId, onBack, onOrder, onProductLine, card,
   }
   const thisT = channelTotal(ch)
   const priorT = channelPrior(ch)
+  const sheetRows = ch.lines.map((ln) => ({
+    key: ln.label,
+    label: ln.label,
+    this: ln.this,
+    prior: ln.prior,
+    meta: ln,
+  }))
   return (
     <DetailShell title={ch.name} onBack={onBack} card={card} big={big}>
-      <table className="pop-table">
-        <thead>
-          <tr>
-            <th className="pop-th">Product</th>
-            <th className="pop-th pop-th--r">{DATA.meta.this_short}</th>
-            <th className="pop-th pop-th--r">{DATA.meta.prior_short}</th>
-            <th className="pop-th pop-th--r">Change</th>
-          </tr>
-        </thead>
-        <tbody>
-          {ch.lines.map((ln) => {
-            const d = ln.this - ln.prior
-            const color = changeColor(d, { cost: false })
-            return (
-              <ClickRow
-                key={ln.label}
-                onClick={() =>
-                  onProductLine?.({
-                    channel: ch.name,
-                    label: ln.label,
-                    this: ln.this,
-                    prior: ln.prior,
-                  })
-                }
-              >
-                <td className="pop-td">{ln.label}</td>
-                <td className="pop-td pop-td--r">{money(ln.this)}</td>
-                <td className="pop-td pop-td--r">{money(ln.prior)}</td>
-                <td className="pop-td pop-td--r" style={{ color }}>{money(d)}</td>
-              </ClickRow>
-            )
-          })}
-        </tbody>
-        <tfoot>
-          <tr className="pop-tfoot">
-            <td className="pop-td">Total</td>
-            <td className="pop-td pop-td--r">{money(thisT)}</td>
-            <td className="pop-td pop-td--r">{money(priorT)}</td>
-            <td className="pop-td pop-td--r" style={{ color: changeColor(thisT - priorT) }}>{money(thisT - priorT)}</td>
-          </tr>
-        </tfoot>
-      </table>
+      <div className="pop-channel-table-wrap">
+        <table className="pop-table">
+          <thead>
+            <tr>
+              <th className="pop-th">Product</th>
+              <th className="pop-th pop-th--r">{DATA.meta.this_short}</th>
+              <th className="pop-th pop-th--r">{DATA.meta.prior_short}</th>
+              <th className="pop-th pop-th--r">Change</th>
+            </tr>
+          </thead>
+          <tbody>
+            {ch.lines.map((ln) => {
+              const d = ln.this - ln.prior
+              const color = changeColor(d, { cost: false })
+              return (
+                <ClickRow
+                  key={ln.label}
+                  onClick={() =>
+                    onProductLine?.({
+                      channel: ch.name,
+                      label: ln.label,
+                      this: ln.this,
+                      prior: ln.prior,
+                    })
+                  }
+                >
+                  <td className="pop-td">{ln.label}</td>
+                  <td className="pop-td pop-td--r">{money(ln.this)}</td>
+                  <td className="pop-td pop-td--r">{money(ln.prior)}</td>
+                  <td className="pop-td pop-td--r" style={{ color }}>{money(d)}</td>
+                </ClickRow>
+              )
+            })}
+          </tbody>
+          <tfoot>
+            <tr className="pop-tfoot">
+              <td className="pop-td">Total</td>
+              <td className="pop-td pop-td--r">{money(thisT)}</td>
+              <td className="pop-td pop-td--r">{money(priorT)}</td>
+              <td className="pop-td pop-td--r" style={{ color: changeColor(thisT - priorT) }}>{money(thisT - priorT)}</td>
+            </tr>
+          </tfoot>
+        </table>
+      </div>
+      <div className="pop-compare-mobile">
+        <CompareSheet
+          thisCol={DATA.meta.this_short}
+          priorCol={DATA.meta.prior_short}
+          changeCol="Change"
+          rows={sheetRows}
+          footer={{ label: 'Total', this: thisT, prior: priorT }}
+          onRow={(r) =>
+            onProductLine?.({
+              channel: ch.name,
+              label: r.meta.label,
+              this: r.meta.this,
+              prior: r.meta.prior,
+            })
+          }
+        />
+      </div>
     </DetailShell>
   )
 }
