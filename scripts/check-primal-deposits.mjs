@@ -110,7 +110,8 @@ const notMatchedDollars = round2(
 
 ok('card deposited', summary.deposited_this_month === sumDeposit)
 ok('card fees', summary.fees === sumFees)
-ok('card orders matched', summary.orders_matched === totalOrderRows - 1)
+ok('card orders matched', summary.orders_matched === totalOrderRows)
+ok('orders matched equals table total orders', summary.orders_matched === table.order_count)
 ok('card not matched item count', summary.not_matched.order_count === 2)
 ok('not matched items list', nmItems.length === 2)
 ok('card not matched dollars', summary.not_matched.dollars === 105.58)

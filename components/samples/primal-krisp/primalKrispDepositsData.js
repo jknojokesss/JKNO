@@ -98,7 +98,6 @@ export function buildDepositsSummary(payouts) {
   let deposited = 0
   let fees = 0
   let totalOrders = 0
-  let chargebackOrderHits = 0
   let notMatchedDollars = 0
   for (const p of payouts) {
     const t = payoutTotals(p)
@@ -106,13 +105,10 @@ export function buildDepositsSummary(payouts) {
     fees = round2(fees + t.fees)
     totalOrders += t.order_count
     if (!p.matched) notMatchedDollars = round2(notMatchedDollars + t.mismatch_amount)
-    for (const a of payoutAdjustmentRows(p)) {
-      if (a.type === 'chargeback') chargebackOrderHits += 1
-    }
   }
   const nmItems = notMatchedItems(payouts)
   const notMatchedCount = nmItems.filter((x) => x.adjustment.type === 'earlier_refund' || x.adjustment.type === 'chargeback').length
-  const orders_matched = totalOrders - chargebackOrderHits
+  const orders_matched = totalOrders
   return {
     deposited_this_month: deposited,
     fees,
