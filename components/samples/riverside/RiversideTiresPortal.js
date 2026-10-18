@@ -560,9 +560,14 @@ function DrillModal({ drill, onClose }) {
             <span style={{ fontFamily: head, fontSize: 15, fontWeight: 700, letterSpacing: '0.04em', textTransform: 'uppercase' }}>{drill.title}</span>
             <span style={{ fontFamily: ui, fontSize: 11, color: C.muted, marginLeft: 10 }}>{drill.period}</span>
           </div>
-          <button type="button" className="rt-pill" onClick={onClose} aria-label="Close detail">
-            Close
-          </button>
+          <div style={{ display: 'flex', gap: 8, flexShrink: 0 }}>
+            <button type="button" className="rt-pill" onClick={onClose}>
+              Back
+            </button>
+            <button type="button" className="rt-pill on" onClick={onClose}>
+              Close
+            </button>
+          </div>
         </div>
         <div className="rt-drill-wrap" style={{ border: `1px solid ${C.hair}`, maxHeight: '58vh' }}>
           <table className="rt-drill-table" style={{ width: '100%', borderCollapse: 'collapse', minWidth: 0 }}>

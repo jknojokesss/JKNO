@@ -1,4 +1,5 @@
 import DATA from './aufschnittData'
+import AufschnittDetailNav from './AufschnittDetailNav'
 import {
   INK,
   MUTED,
@@ -137,7 +138,7 @@ export function ProfitChannelDetail({ detail, card, lbl, big, onOpen, onBack }) 
 
   return (
     <div>
-      <button type="button" className="au-detail-back" onClick={onBack}>Back</button>
+      <AufschnittDetailNav onBack={onBack} />
       <h2 style={{ ...big, fontSize: 22, marginBottom: 4 }}>{detail.channel}</h2>
       <div style={{ fontSize: 12, color: MUTED, marginBottom: 14 }}>Recent orders · September 2026</div>
 
@@ -236,7 +237,7 @@ export function ProfitOrderDetail({ detail, card, lbl, big, onBack }) {
 
   return (
     <div>
-      <button type="button" className="au-detail-back" onClick={onBack}>Back</button>
+      <AufschnittDetailNav onBack={onBack} />
       <h2 style={{ ...big, fontSize: 20, marginBottom: 4 }}>{order.orderNo}</h2>
       <div style={{ fontSize: 12, color: MUTED, marginBottom: 14 }}>
         {fmtMonthDay(order.date)} · {order.customer}
@@ -283,7 +284,7 @@ export function ProfitShippingLossDetail({ card, lbl, big, onOpen, onBack }) {
   const list = DATA.profitPerOrder.shippingLossOrders
   return (
     <div>
-      <button type="button" className="au-detail-back" onClick={onBack}>Back</button>
+      <AufschnittDetailNav onBack={onBack} />
       <h2 style={{ ...big, fontSize: 20, marginBottom: 14 }}>Lost money on shipping</h2>
       <div style={{ ...card }}>
         {list.map((o, i) => (

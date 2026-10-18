@@ -90,6 +90,7 @@ body{background:${theme.CREAM};font-family:${UI};font-variant-numeric:tabular-nu
 .ce-table tr.ce-rowbtn:hover td{background:rgba(200,70,44,.04)}
 .ce-total td{font-weight:700;border-top:2px solid ${BORDER}}
 .ce-detail{max-width:640px;width:100%}
+.ce-detail-nav{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:4px}
 .ce-back{display:inline-flex;align-items:center;gap:6px;border:none;background:transparent;color:${MUTED};font-family:${UI};font-size:13px;font-weight:600;cursor:pointer;padding:0 0 14px;min-height:40px;text-decoration:underline;text-underline-offset:3px}
 .ce-back:hover{color:${INK}}
 .ce-invoice-overlay{position:fixed;inset:0;background:rgba(43,32,24,.45);z-index:40;display:flex;align-items:flex-end;justify-content:center;padding:12px}

@@ -129,9 +129,15 @@ export function ClickRow({ children, onClick, style }) {
 }
 
 export function DetailShell({ title, onBack, children, card, big }) {
+  const close = onBack
   return (
     <div>
-      <BackButton onBack={onBack} />
+      <div className="pop-detail-nav">
+        <BackButton onBack={onBack} />
+        <button type="button" className="pop-back" onClick={close}>
+          Close
+        </button>
+      </div>
       <div style={{ ...card }}>
         {title ? <div className="pop-client-name" style={{ ...big, fontSize: '20px', color: INK, marginBottom: '14px' }}>{title}</div> : null}
         {children}

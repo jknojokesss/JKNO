@@ -1,5 +1,6 @@
 import { useMemo } from 'react'
 import DATA from './aufschnittData'
+import AufschnittDetailNav from './AufschnittDetailNav'
 import { INK, MUTED, BORDER, CREAM, RED, MONO, money, money0, fmtCases, fmtInt, fmtAsOfLong, fmtWeekEnding } from './aufschnittUtils'
 
 export default function AufschnittStockTab({ card, lbl, brand, onOpen, sort, setSort }) {
@@ -83,7 +84,7 @@ export function StockDetail({ detail, card, lbl, big, onBack }) {
   const r = detail.row
   return (
     <div>
-      <button type="button" className="au-detail-back" onClick={onBack}>Back</button>
+      <AufschnittDetailNav onBack={onBack} />
       <h2 style={{ ...big, fontSize: 20, marginBottom: 4 }}>{r.name}</h2>
       <div style={{ fontSize: 13, color: MUTED, marginBottom: 16 }}>{r.brand}</div>
 

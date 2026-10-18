@@ -193,9 +193,14 @@ export function InvoicePreviewDetail({ orderId, kind, onClose, card, big, lbl })
   const invoiceTotal = isDeposit ? o.deposit_amount : o.balance_due
   return (
     <div>
-      <button type="button" className="pop-back" onClick={onClose}>
-        Close
-      </button>
+      <div className="pop-detail-nav">
+        <button type="button" className="pop-back" onClick={onClose}>
+          Back
+        </button>
+        <button type="button" className="pop-back" onClick={onClose}>
+          Close
+        </button>
+      </div>
       <div style={{ ...card }}>
         <div className="pop-client-name" style={{ ...big, fontSize: '20px', color: INK, marginBottom: '14px' }}>
           {isDeposit ? 'Deposit invoice preview' : 'Balance invoice preview'}

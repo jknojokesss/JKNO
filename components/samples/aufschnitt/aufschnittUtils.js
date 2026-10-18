@@ -126,6 +126,7 @@ body{background:${theme.CREAM};font-family:${UI};color:${theme.INK};overflow-x:h
 .au-brand-pills{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:16px}
 .au-pill{padding:8px 14px;min-height:40px;border-radius:18px;border:1px solid ${BORDER};background:${CARDBG};color:${MUTED};font-family:${UI};font-size:13px;font-weight:600;cursor:pointer}
 .au-pill--on{background:${CHAR};color:${CREAM};border-color:${CHAR}}
+.au-detail-nav{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:4px}
 .au-detail-back{display:inline-flex;align-items:center;gap:6px;border:none;background:transparent;color:${SPICE};font-family:${UI};font-size:14px;font-weight:600;cursor:pointer;padding:0 0 14px;min-height:40px}
 @media(max-width:860px){.au-shell{flex-direction:column}.au-side{width:auto;height:auto;position:static;padding:14px 12px 10px}.au-nav--main{flex-direction:row;flex-wrap:nowrap;justify-content:space-between;overflow-x:visible;gap:4px;padding:4px 2px 10px;width:100%}.au-navbtn{width:auto;flex:1 1 0;min-width:0;padding:8px 6px;border-radius:2px;background:rgba(255,255,255,.07);flex-shrink:1;font-size:12px;min-height:40px;text-align:center;white-space:nowrap}.au-main{padding:18px 16px 52px;max-width:100%}}
 @media(max-width:600px){input,select,textarea{font-size:16px!important}button{min-height:40px}.au-nav--main .au-navbtn{font-size:11px;padding:8px 4px}}`

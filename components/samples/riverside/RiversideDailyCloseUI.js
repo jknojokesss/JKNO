@@ -152,7 +152,7 @@ export function DailyCloseJePreview({ day, onClose }) {
   if (!day) return null
   const je = buildDailyCloseJournal(day)
   return (
-    <Sheet title="Journal entry preview" subtitle={fmtDate(day.date)} onClose={onClose}>
+    <Sheet title="Journal entry preview" subtitle={fmtDate(day.date)} onBack={onClose} onClose={onClose}>
       <p style={{ fontFamily: ui, fontSize: 12, color: C.sub, marginBottom: 16 }}>Goes into QuickBooks as a journal entry</p>
       <div className="rt-je-table-wrap">
         <table className="rt-je-table">

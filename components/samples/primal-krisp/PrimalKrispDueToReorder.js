@@ -24,25 +24,43 @@ const REORDER_CSS = `
 }
 `
 
-function BackBar({ onBack, label }) {
+function DetailNav({ onBack, onClose }) {
+  const close = onClose || onBack
   return (
-    <button
-      type="button"
-      onClick={onBack}
-      style={{
-        border: 'none',
-        background: 'transparent',
-        color: SPICE,
-        fontFamily: UI,
-        fontWeight: 600,
-        fontSize: 13,
-        cursor: 'pointer',
-        padding: '4px 0 14px',
-        minHeight: 40,
-      }}
-    >
-      {label}
-    </button>
+    <div style={{ display: 'flex', gap: 8, marginBottom: 14 }}>
+      <button
+        type="button"
+        className="pk-click"
+        onClick={onBack}
+        style={{
+          border: `1px solid ${BORDER}`,
+          background: 'transparent',
+          padding: '8px 12px',
+          fontFamily: UI,
+          fontWeight: 600,
+          fontSize: 13,
+          cursor: 'pointer',
+        }}
+      >
+        Back
+      </button>
+      <button
+        type="button"
+        className="pk-click"
+        onClick={close}
+        style={{
+          border: `1px solid ${BORDER}`,
+          background: 'transparent',
+          padding: '8px 12px',
+          fontFamily: UI,
+          fontWeight: 600,
+          fontSize: 13,
+          cursor: 'pointer',
+        }}
+      >
+        Close
+      </button>
+    </div>
   )
 }
 
@@ -118,11 +136,11 @@ function InvoicePreview({ store, onClose }) {
   )
 }
 
-function StoreDetail({ store, card, lbl, btn, onBack, onPreview }) {
+function StoreDetail({ store, card, lbl, btn, onBack, onClose, onPreview }) {
   const u = store.usual_order
   return (
     <div>
-      <BackBar onBack={onBack} label="Due to reorder" />
+      <DetailNav onBack={onBack} onClose={onClose} />
       <div style={{ ...card, marginBottom: 16 }}>
         <div style={{ fontFamily: UI, fontWeight: 600, fontSize: 22, color: INK }}>{store.store_name}</div>
         <div style={{ fontSize: 13, color: MUTED, marginTop: 4 }}>{store.region}</div>
@@ -207,10 +225,7 @@ export default function PrimalKrispDueToReorder({ card, lbl, btn, focusScroll, o
       return (
         <>
           <style dangerouslySetInnerHTML={{ __html: REORDER_CSS }} />
-          <BackBar
-            onBack={() => setInvoiceOpen(false)}
-            label={selected.store_name}
-          />
+          <DetailNav onBack={() => setInvoiceOpen(false)} onClose={() => setInvoiceOpen(false)} />
           <InvoicePreview store={selected} onClose={() => setInvoiceOpen(false)} />
         </>
       )
@@ -224,6 +239,7 @@ export default function PrimalKrispDueToReorder({ card, lbl, btn, focusScroll, o
           lbl={lbl}
           btn={btn}
           onBack={() => setSelected(null)}
+          onClose={() => setSelected(null)}
           onPreview={() => setInvoiceOpen(true)}
         />
       </>

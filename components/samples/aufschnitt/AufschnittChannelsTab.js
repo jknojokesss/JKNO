@@ -1,4 +1,5 @@
 import DATA from './aufschnittData'
+import AufschnittDetailNav from './AufschnittDetailNav'
 import { RevenueNetChart } from './AufschnittCharts'
 import { INK, MUTED, BORDER, CREAM, MONO, money, money0, pct1, pctChange, changeColor } from './aufschnittUtils'
 
@@ -66,7 +67,7 @@ export function ChannelDetail({ detail, card, lbl, big, onBack }) {
 
   return (
     <div>
-      <button type="button" className="au-detail-back" onClick={onBack}>Back</button>
+      <AufschnittDetailNav onBack={onBack} />
       <h2 style={{ ...big, fontSize: 22, marginBottom: 16 }}>{ch.channel}</h2>
 
       <div style={{ ...card, marginBottom: 12 }}>

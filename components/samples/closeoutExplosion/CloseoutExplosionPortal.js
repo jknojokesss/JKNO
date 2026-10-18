@@ -183,10 +183,15 @@ export default function CloseoutExplosionPortal() {
 
   const portalStyles = SHELL_CSS({ CHAR, CREAM, INK, SPICE })
 
-  const DetailBack = () => (
-    <button type="button" className="ce-back" onClick={pop}>
-      Back
-    </button>
+  const DetailNav = () => (
+    <div className="ce-detail-nav">
+      <button type="button" className="ce-back" onClick={pop}>
+        Back
+      </button>
+      <button type="button" className="ce-back" onClick={pop}>
+        Close
+      </button>
+    </div>
   )
 
   const LotDetail = ({ id }) => {
@@ -207,7 +212,7 @@ export default function CloseoutExplosionPortal() {
 
     return (
       <div className="ce-detail">
-        <DetailBack />
+        <DetailNav />
         <div style={{ ...lbl, color: SPICE }}>{lot.id}</div>
         <h2 style={{ ...big, fontSize: '22px', marginTop: 4, marginBottom: 12 }}>{lot.desc}</h2>
         <div style={{ fontSize: 13, color: MUTED, marginBottom: 16, lineHeight: 1.5 }}>
@@ -332,7 +337,7 @@ export default function CloseoutExplosionPortal() {
     }
     return (
       <div className="ce-detail">
-        <DetailBack />
+        <DetailNav />
         <div style={{ ...lbl, color: SPICE }}>{isInvoiced(sale) ? sale.invoice : 'Shipment'}</div>
         <h2 style={{ ...big, fontSize: 20, marginTop: 4, marginBottom: 8 }}>
           <BuyerLabel name={sale.buyer} />
@@ -418,9 +423,14 @@ export default function CloseoutExplosionPortal() {
             <div style={{ marginTop: 10 }}><span style={{ color: MUTED }}>Terms</span><br />Net {terms}</div>
           </div>
           <p className="ce-status-line">{statusLine}</p>
-          <button type="button" className="ce-btn-secondary" onClick={pop}>
-            Close
-          </button>
+          <div className="ce-detail-nav" style={{ marginTop: 16 }}>
+            <button type="button" className="ce-btn-secondary" onClick={pop}>
+              Back
+            </button>
+            <button type="button" className="ce-btn-secondary" onClick={pop}>
+              Close
+            </button>
+          </div>
         </div>
       </div>
     )
@@ -438,7 +448,7 @@ export default function CloseoutExplosionPortal() {
     )
     return (
       <div className="ce-detail">
-        <DetailBack />
+        <DetailNav />
         <div style={{ ...lbl, color: SPICE }}>Buyer</div>
         <h2 style={{ ...big, fontSize: '20px', marginTop: 4, marginBottom: 4 }}>{name}</h2>
         {buyerType ? (
@@ -547,7 +557,7 @@ export default function CloseoutExplosionPortal() {
     const total = mode === 'sales' ? rows.reduce((s, r) => s + r.amount, 0) : rows.reduce((s, r) => s + r.cost, 0)
     return (
       <div className="ce-detail">
-        <DetailBack />
+        <DetailNav />
         <div style={{ ...lbl }}>{mode === 'sales' ? 'Sales' : 'Cost of goods sold'} · {label}</div>
         <div style={{ ...big, fontSize: 22, margin: '8px 0 16px' }}>{money(total)}</div>
         <div className="ce-stack-only">
@@ -610,7 +620,7 @@ export default function CloseoutExplosionPortal() {
     const fmtTotal = wholeDollarTie ? money0(total) : format(total)
     return (
       <div className="ce-detail">
-        <DetailBack />
+        <DetailNav />
         <div style={{ ...lbl }}>{sub}</div>
         <h2 style={{ ...big, fontSize: 22, margin: '8px 0 16px' }}>{fmtTotal}</h2>
         <div style={{ ...card }}>
@@ -672,7 +682,7 @@ export default function CloseoutExplosionPortal() {
     const delta = line.this - line.prior
     return (
       <div className="ce-detail">
-        <DetailBack />
+        <DetailNav />
         <div style={{ ...lbl }}>Operating expense</div>
         <h2 style={{ ...big, fontSize: 20, margin: '8px 0 16px' }}>{name}</h2>
         <div style={{ ...card }}>
