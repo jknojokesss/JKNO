@@ -88,19 +88,31 @@ export default function SbaLending() {
         <title>{BIZ} — Pipeline Dashboard Demo</title>
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <DemoFontLinks />
-        <style>{`*{box-sizing:border-box;margin:0;padding:0}${DEMO_RENDER_HINTS}body{background:${BG}}::placeholder{color:#A7B2BD}
-          .sb-shell{display:flex;min-height:100vh}
+        <style>{`*{box-sizing:border-box;margin:0;padding:0}${DEMO_RENDER_HINTS}html{overflow-x:hidden}body{background:${BG}}::placeholder{color:#A7B2BD}
+          .sb-shell{display:flex;min-height:100vh;min-width:0;max-width:100%;overflow-x:hidden}
           .sb-side{width:200px;flex-shrink:0;background:${DARK};display:flex;flex-direction:column;padding:20px 12px;position:sticky;top:0;height:100vh;overflow-y:auto}
           .sb-nav-btn{display:block;width:100%;text-align:left;padding:9px 12px;border-radius:6px;border:none;background:transparent;color:#5A7080;font-family:${DEMO_UI};font-size:13px;cursor:pointer;margin-bottom:2px}
           .sb-nav-btn:hover{background:rgba(255,255,255,.06);color:#ccc}
           .sb-nav-btn.on{background:rgba(255,255,255,.09);color:#fff;box-shadow:inset 3px 0 0 ${GREEN}}
-          .sb-main{flex:1;min-width:0;padding:28px 28px 60px}
-          @media(max-width:640px){.sb-side{display:none}.sb-main{padding:16px 14px 48px}}`}</style>
+          .sb-main{flex:1;min-width:0;padding:28px 28px 60px;max-width:100%;overflow-x:hidden}
+          .bl-mtabs{display:none;position:sticky;z-index:18;background:${CARD};border-bottom:1px solid #DCE3EB;padding:8px 12px;gap:8px;overflow-x:auto;-webkit-overflow-scrolling:touch;width:100%;max-width:100%;scrollbar-width:none;margin-bottom:16px}
+          .bl-mtabs::-webkit-scrollbar{display:none}
+          .bl-mtabs::after{content:'';flex:0 0 8px}
+          .bl-mtab{flex-shrink:0;border:1px solid #DCE3EB;border-radius:999px;padding:8px 16px;font-size:13px;font-weight:500;font-family:${DEMO_UI};cursor:pointer;background:${CARD};color:${MUTED};white-space:nowrap}
+          .bl-mtab.on{background:#E8F5EE;border-color:${GREEN};color:${INK};font-weight:600}
+          @media(max-width:640px){
+            .sb-side{display:none}
+            .sb-main{padding:16px 14px 48px}
+            .sb-page-head{margin-bottom:12px!important}
+            .bl-mtabs{display:flex;top:var(--demo-lobby-h, 56px)}
+            .bl-mtab{padding:8px 12px;font-size:12px}
+            .sb-kpi-row>div{flex:1 1 calc(50% - 6px)!important;min-width:0!important}
+          }`}</style>
       </Head>
 
       <DemoLobby />
 
-      <div className={`sb-shell ${DEMO_PORTAL_ROOT_CLASS}`}>
+      <div className={`sb-shell ${DEMO_PORTAL_ROOT_CLASS}`} style={{ ['--demo-lobby-h']: '56px' }}>
         <aside className="sb-side">
           <div style={{ paddingBottom: '20px' }}>
             <div style={{ fontFamily: DEMO_HEAD, fontSize: '16px', fontWeight: 600, color: '#fff', lineHeight: 1.2 }}>Riverbank<br />Funding</div>
@@ -120,18 +132,25 @@ export default function SbaLending() {
         </aside>
 
         <main className="sb-main">
-          <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:'24px', flexWrap:'wrap', gap:'8px' }}>
+          <div className="sb-page-head" style={{ display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:'24px', flexWrap:'wrap', gap:'8px' }}>
             <div>
               <div style={{ fontFamily:'DM Mono, monospace', fontSize:'9px', color:FAINT, letterSpacing:'.1em', textTransform:'uppercase', marginBottom:'3px' }}>September 2026</div>
               <div style={{ fontFamily: DEMO_HEAD, fontSize:'22px', fontWeight:600, color:INK }}>{tabs.find(t=>t.id===tab)?.label || 'Dashboard'}</div>
             </div>
             <div style={{ fontFamily:'DM Mono, monospace', fontSize:'10px', color:FAINT, background:'#EEF2F7', padding:'5px 12px', borderRadius:'20px' }}>Sample · JK No Jokes</div>
           </div>
+          <div className="bl-mtabs" role="tablist">
+            {tabs.map((t) => (
+              <button key={t.id} type="button" role="tab" className={`bl-mtab${tab === t.id ? ' on' : ''}`} onClick={() => setTab(t.id)}>
+                {t.label}
+              </button>
+            ))}
+          </div>
 
         {/* LEADS */}
         {tab === 'leads' && (
           <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-            <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
+            <div className="sb-kpi-row" style={{ display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
               <Kpi k="TO CALL" v={toCall.length} sub="First contact" color={GREEN} />
               <Kpi k="FOLLOW-UPS DUE" v={followUp.length} sub="Already called" color={NAVY} />
               <Kpi k="LOANS DISBURSED" v={deals.length} sub={usd0(disbursed)} />
@@ -200,7 +219,7 @@ export default function SbaLending() {
         {/* DEALS */}
         {tab === 'deals' && (
           <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-            <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
+            <div className="sb-kpi-row" style={{ display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
               <Kpi k="LOANS DISBURSED" v={deals.length} sub="Active" />
               <Kpi k="TOTAL DISBURSED" v={usd0(disbursed)} sub="Across all deals" color={GREEN} />
               <Kpi k="AVG RATE" v={weightedAvgRate} />
@@ -245,7 +264,7 @@ export default function SbaLending() {
         {/* FEES */}
         {tab === 'financials' && (
           <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-            <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
+            <div className="sb-kpi-row" style={{ display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
               <Kpi k="FEES (YTD)" v={usd0(feesYtd)} sub="Total brought in" color={GREEN} />
               <Kpi k="DEALS CLOSED" v={fees.length} sub="Fee-earning" />
               <Kpi k="AVG FEE" v={fees.length ? usd0(feesYtd / fees.length) : '—'} sub="Per deal" />

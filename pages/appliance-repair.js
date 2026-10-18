@@ -110,19 +110,31 @@ export default function ApplianceRepair() {
         <title>{BIZ} — Job Dashboard Demo</title>
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <DemoFontLinks />
-        <style>{`*{box-sizing:border-box;margin:0;padding:0}${DEMO_RENDER_HINTS}body{background:${BG}}::placeholder{color:#A8B2BE}
-          .ar-shell{display:flex;min-height:100vh}
+        <style>{`*{box-sizing:border-box;margin:0;padding:0}${DEMO_RENDER_HINTS}html{overflow-x:hidden}body{background:${BG}}::placeholder{color:#A8B2BE}
+          .ar-shell{display:flex;min-height:100vh;min-width:0;max-width:100%;overflow-x:hidden}
           .ar-side{width:200px;flex-shrink:0;background:${DARK};display:flex;flex-direction:column;padding:20px 12px;position:sticky;top:0;height:100vh;overflow-y:auto}
           .ar-nav-btn{display:block;width:100%;text-align:left;padding:9px 12px;border-radius:6px;border:none;background:transparent;color:#6A7A88;font-family:${DEMO_UI};font-size:13px;cursor:pointer;margin-bottom:2px}
           .ar-nav-btn:hover{background:rgba(255,255,255,.06);color:#ccc}
           .ar-nav-btn.on{background:rgba(255,255,255,.09);color:#fff;box-shadow:inset 3px 0 0 ${ORANGE}}
-          .ar-main{flex:1;min-width:0;padding:28px 28px 60px}
-          @media(max-width:640px){.ar-side{display:none}.ar-main{padding:16px 14px 48px}}`}</style>
+          .ar-main{flex:1;min-width:0;padding:28px 28px 60px;max-width:100%;overflow-x:hidden}
+          .bl-mtabs{display:none;position:sticky;z-index:18;background:${CARD};border-bottom:1px solid #DDE3EA;padding:8px 12px;gap:8px;overflow-x:auto;-webkit-overflow-scrolling:touch;width:100%;max-width:100%;scrollbar-width:none;margin-bottom:16px}
+          .bl-mtabs::-webkit-scrollbar{display:none}
+          .bl-mtabs::after{content:'';flex:0 0 8px}
+          .bl-mtab{flex-shrink:0;border:1px solid #DDE3EA;border-radius:999px;padding:8px 16px;font-size:13px;font-weight:500;font-family:${DEMO_UI};cursor:pointer;background:${CARD};color:${MUTED};white-space:nowrap}
+          .bl-mtab.on{background:#FBEDE3;border-color:${ORANGE};color:${INK};font-weight:600}
+          @media(max-width:640px){
+            .ar-side{display:none}
+            .ar-main{padding:16px 14px 48px}
+            .ar-page-head{margin-bottom:12px!important}
+            .bl-mtabs{display:flex;top:var(--demo-lobby-h, 56px)}
+            .bl-mtab{padding:8px 12px;font-size:12px}
+            .ar-kpi-row>div{flex:1 1 calc(50% - 6px)!important;min-width:0!important}
+          }`}</style>
       </Head>
 
       <DemoLobby />
 
-      <div className={`ar-shell ${DEMO_PORTAL_ROOT_CLASS}`}>
+      <div className={`ar-shell ${DEMO_PORTAL_ROOT_CLASS}`} style={{ ['--demo-lobby-h']: '56px' }}>
         <aside className="ar-side">
           <div style={{ paddingBottom: '20px' }}>
             <div style={{ fontFamily: DEMO_HEAD, fontSize: '16px', fontWeight: 600, color: '#fff', lineHeight: 1.2 }}>Riverside<br />Appliance</div>
@@ -142,18 +154,25 @@ export default function ApplianceRepair() {
         </aside>
 
         <main className="ar-main">
-          <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:'24px', flexWrap:'wrap', gap:'8px' }}>
+          <div className="ar-page-head" style={{ display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:'24px', flexWrap:'wrap', gap:'8px' }}>
             <div>
               <div style={{ fontFamily:'DM Mono, monospace', fontSize:'9px', color:FAINT, letterSpacing:'.1em', textTransform:'uppercase', marginBottom:'3px' }}>September 2026</div>
               <div style={{ fontFamily: DEMO_HEAD, fontSize:'22px', fontWeight:600, color:INK }}>{tabs.find(t=>t.id===tab)?.label || 'Dashboard'}</div>
             </div>
             <div style={{ fontFamily:'DM Mono, monospace', fontSize:'10px', color:FAINT, background:'#EEF1F5', padding:'5px 12px', borderRadius:'20px' }}>Sample · JK No Jokes</div>
           </div>
+          <div className="bl-mtabs" role="tablist">
+            {tabs.map((t) => (
+              <button key={t.id} type="button" role="tab" className={`bl-mtab${tab === t.id ? ' on' : ''}`} onClick={() => setTab(t.id)}>
+                {t.label}
+              </button>
+            ))}
+          </div>
 
         {/* JOBS */}
         {tab === 'jobs' && (
           <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-            <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
+            <div className="ar-kpi-row" style={{ display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
               <Kpi k="OPEN JOBS" v={open.length} sub="In the pipeline" />
               <Kpi k="WAITING ON PARTS" v={waiting.length} sub="Need a part ordered" color={ORANGE} />
               <Kpi k="BILLED (MTD)" v={usd0(billed)} sub="Across all jobs" />
