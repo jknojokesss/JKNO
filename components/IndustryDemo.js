@@ -373,7 +373,6 @@ export default function IndustryDemo({ cfg }) {
                           <span style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: '11px', color: MUTED }}>{usd0(amt)}</span>
                         </div>
                       ))}
-                      <div style={{ fontFamily: "'Inter', sans-serif", fontSize: '11px', color: FAINT, padding: '7px 0' }}>Sample transactions — in your portal this is every real charge, straight from your bank &amp; card feeds.</div>
                     </div>
                   )}
                 </div>
@@ -388,7 +387,7 @@ export default function IndustryDemo({ cfg }) {
             <div style={card}>
               <div style={{ ...serif, fontSize: '18px', fontWeight: 600, color: INK, marginBottom: '4px' }}>QuickBooks connection (sample)</div>
               <div style={{ fontFamily: "'Inter', sans-serif", fontSize: '12px', color: MUTED, marginBottom: '14px' }}>
-                In production we OAuth to your QuickBooks Online company and refresh tokens nightly. No CSV uploads — the portal and the official statement read the same pipe.
+                Synced nightly from QuickBooks Online.
               </div>
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(200px,1fr))', gap: '10px' }}>
                 <div style={{ border: '1px solid #E2E7ED', borderRadius: '6px', padding: '12px 14px', background: '#F7F9FB' }}>
@@ -440,16 +439,13 @@ export default function IndustryDemo({ cfg }) {
                   </tbody>
                 </table>
               </div>
-              <div style={{ fontFamily: "'Inter', sans-serif", fontSize: '11px', color: FAINT, marginTop: '12px' }}>
-                Production portals flag any line that drifts — unsigned bank rec does not hide a closed month.
-              </div>
             </div>
             <div style={{ ...card, borderLeft: `3px solid ${A}` }}>
-              <div style={{ ...lbl, marginBottom: '8px' }}>Month-end (when you close)</div>
+              <div style={{ ...lbl, marginBottom: '8px' }}>Month-end close</div>
               <ul style={{ margin: 0, paddingLeft: '18px', fontSize: '13px', color: '#3A4552', lineHeight: 1.6 }}>
-                <li>Inventory / COGS journal entry drafted from layers or movement method</li>
-                <li>Operating captures (personal card, field logs) reviewed → posted to QBO</li>
-                <li>Portal month locks to the official statement after you sign off</li>
+                <li>Draft inventory COGS from stock layers</li>
+                <li>Review field captures, post to QuickBooks</li>
+                <li>Lock month when statement matches</li>
               </ul>
             </div>
           </div>
@@ -731,7 +727,6 @@ export default function IndustryDemo({ cfg }) {
                       <div style={{ flex: 1, minWidth: '160px', background: `${A}12`, border: `1px solid ${A}55`, borderRadius: '8px', padding: '14px' }}>
                         <div style={{ ...lbl, color: A }}>EXTRA PROFIT</div>
                         <div style={{ ...serif, fontSize: '24px', color: GREEN, marginTop: '4px' }}>+{usd0(delta)}/mo</div>
-                        <div style={{ fontFamily: "'Inter', sans-serif", fontSize: '11px', color: FAINT, marginTop: '4px' }}>{usd0(delta * 12)}/year — same shelf, same store</div>
                       </div>
                     </div>
                     {m.note && <div style={{ fontFamily: "'Inter', sans-serif", fontSize: '11px', color: FAINT, marginTop: '12px' }}>{m.note}</div>}
@@ -803,7 +798,7 @@ export default function IndustryDemo({ cfg }) {
                   <div style={{ ...lbl, marginBottom: '8px' }}>{ask === 'free' ? `"${typed.toUpperCase().slice(0, 60)}"` : askQs[ask].q.toUpperCase()}</div>
                   <div style={{ fontSize: '14px', color: '#2A3542', lineHeight: 1.7 }}>
                     {ask === 'free'
-                      ? `In production this runs against your nightly QuickBooks sync — no model bill. This page is sample data only; use the questions above or book a call to walk your company.`
+                      ? 'Sample data only. Pick a suggested question or book a call.'
                       : askQs[ask].a}
                   </div>
                 </div>
