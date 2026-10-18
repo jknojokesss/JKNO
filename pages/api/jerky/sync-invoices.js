@@ -8,9 +8,6 @@ import { getLiveToken } from '../../../lib/qboAuth'
 import { fetchCustomerRefs, resolveCustomer, fetchInvoicesForCustomer, invoiceToRow } from '../../../lib/qboWrite'
 import { requireJerkyUser } from '../../../lib/requireJerkyUser'
 
-const SYNC_SKIP_MS = 10 * 60 * 1000
-const syncOkCache = new Map() // realmId -> { at } — skip repeat QB pulls, not mirror writes
-
 export default async function handler(req, res) {
   if (req.method !== 'POST') return res.status(405).json({ error: 'POST only' })
   const gate = await requireJerkyUser(req)
@@ -18,12 +15,6 @@ export default async function handler(req, res) {
 
   try {
     const { env, token, realmId } = await getLiveToken('jerky')
-    const body = req.body && typeof req.body === 'object' ? req.body : {}
-    const force = req.query.force === '1' || body.force === true
-    const hit = syncOkCache.get(realmId)
-    if (!force && hit && Date.now() - hit.at < SYNC_SKIP_MS) {
-      return res.status(200).json({ ok: true, skipped: true, upserted: 0, removed: 0, stores: 0, unmatched: [] })
-    }
     const customers = await fetchCustomerRefs(env, token, realmId)
 
     // invoice-type stores are the ones with a QB A/R relationship
@@ -69,7 +60,6 @@ export default async function handler(req, res) {
       }
     }
 
-    syncOkCache.set(realmId, { at: Date.now() })
     return res.status(200).json({ ok: true, upserted, removed, stores: syncedPartnerIds.length, unmatched })
   } catch (e) {
     return res.status(e.needsReconnect ? 409 : 500).json({ error: String(e.message || e) })
