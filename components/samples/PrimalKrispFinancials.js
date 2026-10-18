@@ -19,7 +19,7 @@ import {
 
 const PNL_SHEET_CSS = `
 .pk-pnl-wrap{
-  --pk-pnl-c1:5.5rem;--pk-pnl-c2:5.5rem;--pk-pnl-c3:4.25rem;--pk-pnl-gap:6px;
+  --pk-pnl-c1:5.5rem;--pk-pnl-c2:5.5rem;--pk-pnl-c3:5.5rem;--pk-pnl-gap:6px;
   --pk-pnl-fs:12px;--pk-pnl-fs-cur:13px;--pk-pnl-fs-head:10px;
 }
 @media(max-width:480px){
