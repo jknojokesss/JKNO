@@ -28,7 +28,7 @@ export default function DemoGalleryIndex() {
         <div className="m-wrap m-ship-intro__inner">
           <p className="m-ship-hook">
             You run the shop: <strong>I wire the numbers</strong> into one login you will actually open. Bookkeeper
-            optional; <strong>your business, clearer every week.</strong>
+            optional.
           </p>
           <ul className="m-ship-chain" aria-label="How a build ships">
             <li>
@@ -62,8 +62,8 @@ export default function DemoGalleryIndex() {
         <div className="m-wrap">
           <p className="m-kicker" style={{ marginBottom: 12 }}>Start here</p>
           <p className="m-about-p" style={{ marginTop: 0, marginBottom: 16, maxWidth: '42rem' }}>
-            Pick the question that keeps you up at night: margin, cash, who owes you. One shop or several businesses;
-            each sample is a real screen layout, not a slide deck.
+            Pick the question you actually ask: margin, cash, who owes you. One shop or several businesses; each sample
+            is a real screen layout, not a slide deck.
           </p>
           <div className="m-demo-grid m-demo-grid--gallery m-demo-grid--starters">
             {STARTER_DEMOS.map((s) => {

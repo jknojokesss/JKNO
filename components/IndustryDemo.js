@@ -3,6 +3,11 @@ import Head from 'next/head'
 import DemoFontLinks from './DemoFontLinks'
 import DemoLobby from './DemoLobby'
 import { DEMO_PORTAL_ROOT_CLASS, DEMO_RENDER_HINTS, DEMO_UI, DEMO_MONO } from '../lib/demoFonts'
+import { DEMO_AS_OF_ISO } from '../lib/demoAsOf'
+
+const fmtAsOfLong = (iso) =>
+  new Date(`${iso}T12:00:00`).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
+const SAMPLE_HEADER = `Sample — fictitious numbers · as of ${fmtAsOfLong(DEMO_AS_OF_ISO)}`
 
 // ─────────────────────────────────────────────────────────────────────────
 // Config-driven sample dashboard — one polished template, one config per
@@ -35,7 +40,7 @@ const STATUS_SETS = {
 }
 
 export default function IndustryDemo({ cfg }) {
-  const { slug, biz, industry, emoji, theme, months, revCats, expLines, extraKpi, insights, ops } = cfg
+  const { biz, industry, theme, months, revCats, expLines, extraKpi, ops } = cfg
   const [tab, setTab] = useState('dash')
   const [mi, setMi] = useState(11)
   const [openLine, setOpenLine] = useState(null)
@@ -76,17 +81,11 @@ export default function IndustryDemo({ cfg }) {
     { q: 'What was my best month this year?', a: `${MONTHS[bestMi]} — ${usd0(rev[bestMi])} in revenue, ${usd0(profit[bestMi])} in profit. Your slowest was ${MONTHS[worstMi]} at ${usd0(rev[worstMi])}. That gap is the number to plan cash around.` },
     { q: 'Where is most of my money going?', a: `${topExp[0].n} is your biggest line at ${usd0(topExp[0].a)} last month — about ${Math.round((topExp[0].a / exp[11]) * 100)}% of everything you spent. ${topExp[1].n} is next at ${usd0(topExp[1].a)}. Click either one on the P&L tab to see every transaction behind it.` },
     { q: 'Am I doing better than three months ago?', a: q3d >= 0 ? `Yes — profit is up ${usd0(q3d)} vs ${MONTHS[8]} (${usd0(profit[8])} → ${usd0(profit[11])}), on ${usd0(rev[11] - rev[8])} more revenue. Keep doing whatever you changed.` : `Not quite — profit is down ${usd0(q3d)} vs ${MONTHS[8]} (${usd0(profit[8])} → ${usd0(profit[11])}). Flip the P&L to the 3-month view and you can see exactly which line moved.` },
-    { q: 'What should I be watching right now?', a: insights ? insights[0] : `Your margin is running ${margin}% — the biggest lever in the business is ${topExp[0].n.toLowerCase()}.` },
+    { q: 'What should I be watching right now?', a: `Margin is ${margin}% last month. ${topExp[0].n} is the largest expense at ${usd0(topExp[0].a * eScale)}.` },
   ]
   const askIt = (i) => { setAsk(i) }
   const simProfit = Math.round(rev[mi] * (1 + whatIf.r / 100) - exp[mi] * (1 + whatIf.e / 100))
-  const NARRATIVE_BY_OPS = {
-    jobs: 'register or job tickets, vendor invoices, and cost matched to what you sold',
-    orders: 'purchase orders, inventory layers, and margin on each order',
-    clients: 'customer accounts, collections, and receivables aging',
-    sales: 'product cost and sales mix by channel',
-  }
-  const opsHook = NARRATIVE_BY_OPS[ops.type] || 'your operating data'
+  const profitDelta = simProfit - profit[mi]
 
   const D = theme.dark, A = theme.accent
   const INK = '#1F2A36', MUTED = '#647082', FAINT = '#97A3B2'
@@ -179,7 +178,7 @@ export default function IndustryDemo({ cfg }) {
             })}
           </nav>
           <div style={{ padding: '16px 16px 22px' }}>
-            <a href={BOOK} target="_blank" rel="noopener noreferrer" style={{ display: 'block', textAlign: 'center', background: A, color: '#fff', textDecoration: 'none', borderRadius: '6px', padding: '11px 12px', fontFamily: "'Inter', sans-serif", fontSize: '12px', fontWeight: 600, letterSpacing: '0.3px' }}>GET THIS BUILT →</a>
+            <a href={BOOK} target="_blank" rel="noopener noreferrer" style={{ display: 'block', textAlign: 'center', background: A, color: '#fff', textDecoration: 'none', borderRadius: '6px', padding: '11px 12px', fontFamily: "'Inter', sans-serif", fontSize: '12px', fontWeight: 600, letterSpacing: '0.3px' }}>Book a call</a>
             <div style={{ fontFamily: "'Inter', sans-serif", fontSize: '9.5px', fontWeight: 600, letterSpacing: '0.6px', color: '#5A6478', textAlign: 'center', marginTop: '12px', lineHeight: 1.5 }}>SAMPLE DATA · NO LOGIN<br />BY JK NO JOKES FINANCIALS</div>
           </div>
         </aside>
@@ -190,7 +189,7 @@ export default function IndustryDemo({ cfg }) {
             <div style={{ minWidth: 0, fontFamily: "'Inter', sans-serif", fontWeight: 700, fontSize: '18px', letterSpacing: '-0.4px', color: '#EAF0F6', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
               <span style={{ color: A }}>{biz.split(' ')[0]}</span> {biz.split(' ').slice(1).join(' ')}
             </div>
-            <a href={BOOK} target="_blank" rel="noopener noreferrer" style={{ background: A, color: '#fff', textDecoration: 'none', borderRadius: '4px', padding: '7px 11px', fontFamily: "'Inter', sans-serif", fontSize: '11px', fontWeight: 600, letterSpacing: '0.4px', whiteSpace: 'nowrap' }}>GET THIS BUILT →</a>
+            <a href={BOOK} target="_blank" rel="noopener noreferrer" style={{ background: A, color: '#fff', textDecoration: 'none', borderRadius: '4px', padding: '7px 11px', fontFamily: "'Inter', sans-serif", fontSize: '11px', fontWeight: 600, letterSpacing: '0.4px', whiteSpace: 'nowrap' }}>Book a call</a>
           </div>
           <nav className="id-tabs" style={{ display: 'flex', gap: '4px', padding: '0 16px', overflowX: 'auto', borderBottom: '1px solid rgba(255,255,255,0.1)', marginTop: '10px' }}>
             {tabs.map((t) => (
@@ -204,13 +203,7 @@ export default function IndustryDemo({ cfg }) {
         </div>
 
         <div className="id-main">
-        <div style={{ background: '#f7f5f0', border: '1px solid #d8d4cc', borderLeft: `3px solid ${A}`, padding: '14px 18px', marginBottom: '18px', borderRadius: '2px' }}>
-          <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: '10px', fontWeight: 600, letterSpacing: '0.1em', textTransform: 'uppercase', color: '#6b6560', marginBottom: '6px' }}>Production shape</div>
-          <div style={{ fontFamily: "'Inter', sans-serif", fontSize: '14px', fontWeight: 600, color: INK, marginBottom: '6px' }}>QuickBooks stays the book of record</div>
-          <div style={{ fontFamily: "'Inter', sans-serif", fontSize: '13px', color: '#4a4540', lineHeight: 1.55 }}>
-            We connect to your QuickBooks company, pull statements and GL on a schedule, and layer in {opsHook}. You run the month on these screens; close reconciles to the official QBO numbers.
-          </div>
-        </div>
+        <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: '11px', color: MUTED, marginBottom: '16px' }}>{SAMPLE_HEADER}</div>
 
         {/* DASHBOARD */}
         {tab === 'dash' && (
@@ -226,7 +219,6 @@ export default function IndustryDemo({ cfg }) {
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', flexWrap: 'wrap', gap: '8px' }}>
                 <div>
                   <div style={{ ...serif, fontSize: '20px', fontWeight: 600, color: INK }}>Revenue, last 12 months</div>
-                  <div style={{ fontFamily: "'Inter', sans-serif", fontSize: '12px', color: MUTED }}>Tap a month — every number on this page updates</div>
                 </div>
                 <div style={{ fontFamily: "'Inter', sans-serif", fontSize: '12px', color: MUTED }}>
                   {MONTHS[mi]}: <span style={{ color: INK }}>{usd0(rev[mi])}</span> rev · <span style={{ color: GREEN }}>{usd0(profit[mi])}</span> profit
@@ -255,24 +247,6 @@ export default function IndustryDemo({ cfg }) {
                 ))}
               </div>
             </div>
-
-            {insights && (
-              <div style={{ ...card, borderLeft: `3px solid ${A}`, background: '#FDFCFA' }}>
-                <div style={{ display: 'flex', alignItems: 'baseline', gap: '10px', marginBottom: '12px' }}>
-                  <span style={{ color: A, fontSize: '16px' }}>◈</span>
-                  <div>
-                    <div style={{ ...serif, fontSize: '18px', fontWeight: 600, color: INK }}>What your numbers are saying</div>
-                    <div style={{ fontFamily: "'Inter', sans-serif", fontSize: '10.5px', fontWeight: 600, letterSpacing: '0.7px', color: FAINT }}>FROM SYNCED QUICKBOOKS + {ops.label.toUpperCase()} — NOT GENERATED COPY</div>
-                  </div>
-                </div>
-                {insights.map((t, i) => (
-                  <div key={i} style={{ display: 'flex', gap: '10px', padding: '9px 0', borderTop: i > 0 ? '1px solid #EEF1F5' : 'none' }}>
-                    <span style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: '10px', color: A, lineHeight: '19px' }}>0{i + 1}</span>
-                    <span style={{ fontSize: '13px', color: '#3A4552', lineHeight: 1.6 }}>{t}</span>
-                  </div>
-                ))}
-              </div>
-            )}
 
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(300px,1fr))', gap: '16px' }}>
               <div style={card}>
@@ -315,7 +289,6 @@ export default function IndustryDemo({ cfg }) {
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '8px', marginBottom: '14px' }}>
                 <div>
                   <div style={{ ...serif, fontSize: '20px', fontWeight: 600, color: INK }}>Profit &amp; loss{pnlView === 'month' ? ` — ${MONTHS[mi]}` : ''}</div>
-                  <div style={{ fontFamily: "'Inter', sans-serif", fontSize: '12px', color: MUTED }}>{pnlView === 'month' ? 'Click any expense line to see the transactions behind it' : 'Three months side by side — watch which line moved'}</div>
                 </div>
                 <div style={{ display: 'flex', gap: '6px' }}>
                   {[['month', 'THIS MONTH'], ['compare', '3-MONTH VIEW']].map(([v, t]) => (
@@ -364,7 +337,6 @@ export default function IndustryDemo({ cfg }) {
                         </tr>
                       </tbody>
                     </table>
-                    <div style={{ fontFamily: "'Inter', sans-serif", fontSize: '11px', color: FAINT, marginTop: '10px' }}>Tap a different month on the Dashboard chart and this view follows it.</div>
                   </div>
                 )
               })()}
@@ -441,9 +413,7 @@ export default function IndustryDemo({ cfg }) {
           <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
             <div style={card}>
               <div style={{ ...serif, fontSize: '20px', fontWeight: 600, color: INK, marginBottom: '4px' }}>{MONTHS[mi]} — operating view vs QuickBooks</div>
-              <div style={{ fontFamily: "'Inter', sans-serif", fontSize: '12px', color: MUTED, marginBottom: '14px', lineHeight: 1.55 }}>
-                You run the week on {ops.label.toLowerCase()} and dashboards. QuickBooks stays the book of record — nightly sync mirrors P&amp;L and GL; month-end posts (inventory, payroll accruals, etc.) go back when you approve.
-              </div>
+              <div style={{ fontFamily: "'Inter', sans-serif", fontSize: '12px', color: MUTED, marginBottom: '14px' }}>From your QuickBooks.</div>
               <div style={{ overflowX: 'auto' }}>
                 <table style={{ width: '100%', borderCollapse: 'collapse', minWidth: '420px' }}>
                   <thead>
@@ -539,7 +509,6 @@ export default function IndustryDemo({ cfg }) {
                   </tbody>
                 </table>
               </div>
-              <div style={{ fontFamily: "'Inter', sans-serif", fontSize: '11px', color: FAINT, marginTop: '10px' }}>Fully interactive — change a status above. In your build this syncs to your real workflow.</div>
             </div>
           </div>
         )}
@@ -590,7 +559,6 @@ export default function IndustryDemo({ cfg }) {
                   </tbody>
                 </table>
               </div>
-              <div style={{ fontFamily: "'Inter', sans-serif", fontSize: '11px', color: FAINT, marginTop: '10px' }}>In your build this flows in automatically from your POS — Clover, Square, Toast, or whatever you run.</div>
             </div>
           </div>
         )}
@@ -804,11 +772,8 @@ export default function IndustryDemo({ cfg }) {
         {tab === 'ask' && (
           <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
             <div style={{ ...card, borderLeft: `3px solid ${A}`, background: '#FDFCFA' }}>
-              <div style={{ display: 'flex', alignItems: 'baseline', gap: '10px', marginBottom: '4px' }}>
-                <span style={{ color: A, fontSize: '16px' }}>◈</span>
-                <div style={{ ...serif, fontSize: '20px', fontWeight: 600, color: INK }}>Answers from your books</div>
-              </div>
-              <div style={{ fontFamily: "'Inter', sans-serif", fontSize: '12px', color: MUTED, marginBottom: '16px' }}>Computed from synced QuickBooks data — not a chatbot. This demo uses canned Q&amp;A on sample numbers; your portal runs the same idea on live GL.</div>
+              <div style={{ ...serif, fontSize: '20px', fontWeight: 600, color: INK, marginBottom: '8px' }}>Answers</div>
+              <div style={{ fontFamily: "'Inter', sans-serif", fontSize: '12px', color: MUTED, marginBottom: '16px' }}>Answers come from your books.</div>
 
               <div style={{ display: 'flex', gap: '8px', marginBottom: '14px', flexWrap: 'wrap' }}>
                 <input
@@ -847,8 +812,7 @@ export default function IndustryDemo({ cfg }) {
 
             {/* WHAT-IF */}
             <div style={card}>
-              <div style={{ ...serif, fontSize: '18px', fontWeight: 600, color: INK, marginBottom: '4px' }}>Try a decision before you make it</div>
-              <div style={{ fontFamily: "'Inter', sans-serif", fontSize: '12px', color: MUTED, marginBottom: '18px' }}>Drag the sliders — what happens to {MONTHS[mi]}'s profit if revenue or spending moves?</div>
+              <div style={{ ...lbl, marginBottom: '18px' }}>What if</div>
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(220px,1fr))', gap: '18px', marginBottom: '18px' }}>
                 {[['r', 'REVENUE'], ['e', 'EXPENSES']].map(([k, label]) => (
                   <div key={k}>
@@ -873,32 +837,22 @@ export default function IndustryDemo({ cfg }) {
                   <div style={{ ...lbl, color: A }}>PROFIT IF YOU DO IT</div>
                   <div style={{ ...serif, fontSize: '24px', fontWeight: 600, color: simProfit >= profit[mi] ? GREEN : RED, marginTop: '4px' }}>
                     {usd0(simProfit)}
-                    <span style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: '11px', marginLeft: '8px' }}>
-                      {simProfit >= profit[mi] ? '▲' : '▼'} {usd0(simProfit - profit[mi])}
-                    </span>
+                    {profitDelta !== 0 && (
+                      <span style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: '11px', marginLeft: '8px' }}>
+                        {profitDelta > 0 ? '▲' : '▼'} {usd0(profitDelta)}
+                      </span>
+                    )}
                   </div>
                 </div>
               </div>
-              <div style={{ fontFamily: "'Inter', sans-serif", fontSize: '11px', color: FAINT, marginTop: '12px' }}>This is the kind of question your portal answers before you sign the lease, hire the tech, or raise the price.</div>
             </div>
           </div>
         )}
 
-        {/* CLOSING CTA */}
-        <div style={{ marginTop: '28px', background: D, borderRadius: '8px', padding: '28px 24px', textAlign: 'center' }}>
-          <div style={{ ...serif, fontSize: '22px', fontWeight: 600, color: '#EAF0F6', marginBottom: '8px' }}>
-            Want this for your {industry.toLowerCase()} business — with your real numbers?
-          </div>
-          <div style={{ fontFamily: "'Inter', sans-serif", fontSize: '13px', color: '#8C9AAA', marginBottom: '18px' }}>
-            Built custom for you, wired into your POS and your books. Free consult.
-          </div>
-          <a href={BOOK} target="_blank" rel="noopener noreferrer" style={{ background: A, color: '#fff', textDecoration: 'none', borderRadius: '5px', padding: '12px 24px', fontFamily: "'Inter', sans-serif", fontSize: '12.5px', fontWeight: 600, letterSpacing: '0.3px', display: 'inline-block' }}>
-            BOOK A 10-MINUTE CALL →
-          </a>
-          <div style={{ marginTop: '14px' }}>
-            <a href="/demos" style={{ fontFamily: "'Inter', sans-serif", fontSize: '11px', fontWeight: 600, color: '#8C9AAA', letterSpacing: '0.4px' }}>← ALL INDUSTRY DEMOS</a>
-          </div>
-        </div>
+        <p style={{ marginTop: '32px', fontFamily: "'Inter', sans-serif", fontSize: '13px', color: MUTED, textAlign: 'center' }}>
+          Want this on your numbers?{' '}
+          <a href={BOOK} target="_blank" rel="noopener noreferrer" style={{ color: A, fontWeight: 600 }}>Book a call</a>
+        </p>
         </div>
       </div>
     </>

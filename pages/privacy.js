@@ -32,7 +32,7 @@ const SECTIONS = [
     boldItems: [
       { label: 'Supabase', desc: 'secure cloud database storage' },
       { label: 'Plaid', desc: 'bank account connectivity and transaction data (jknojokes.com/plaid-privacy)' },
-      { label: 'Anthropic', desc: 'AI-powered financial insights and analysis' },
+      { label: 'Anthropic', desc: 'answers and reports computed from your books' },
       { label: 'Vercel', desc: 'website hosting' },
     ],
     footer: 'Each third party has their own privacy policy governing their use of your data.',

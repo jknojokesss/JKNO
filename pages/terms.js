@@ -11,7 +11,7 @@ const SECTIONS = [
     bullets: [
       'Custom financial dashboards and client portals',
       'Bookkeeping and financial reporting services',
-      'AI-powered financial insights and analysis',
+      'Answers and reports computed from your books',
       'Bank account connectivity via Plaid',
       'POS system integration (Clover and others)',
     ],

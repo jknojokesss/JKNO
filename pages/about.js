@@ -40,10 +40,8 @@ export default function About() {
             fictitious; I don&rsquo;t post quotes here without permission.
           </p>
           <p className="m-about-p">
-            <strong>How your data is handled:</strong> QuickBooks tokens and book data stay in a private Supabase project
-            with row-level security on client tables. Portal logins are scoped server-side to one company: a user cannot
-            name or open another client&rsquo;s books. I use the service role only on the server for sync and admin tasks,
-            never in the browser bundle.
+            <strong>How your data is handled:</strong> Your QuickBooks connection and your books sit in a private database.
+            Each login sees only its own company.
           </p>
           <p className="m-about-p" style={{ marginBottom: '28px' }}>
             If margin, inventory, and the profit-and-loss live in three places and never agree, that&rsquo;s what I fix.

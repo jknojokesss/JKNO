@@ -135,7 +135,7 @@ export default function Login() {
   return (
     <MarketingShell
       title="Client login | JK No Jokes Financials"
-      description="Sign in to your client portal or get routed to the right app."
+      description="Sign in to your portal."
     >
       <Head>
         <meta name="robots" content="noindex" />

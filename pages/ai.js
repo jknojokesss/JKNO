@@ -81,7 +81,7 @@ export default function Ask() {
         <div style={{ padding: '32px 34px', maxWidth: 760 }}>
           <div style={{ fontFamily: head, fontSize: 30, fontWeight: 700, color: C.ink, letterSpacing: '0.01em', textTransform: 'uppercase' }}>Ask</div>
           <div style={{ fontFamily: ui, fontSize: 15, color: C.sub, marginTop: 8, maxWidth: 600, lineHeight: 1.5 }}>
-            Ask about your shop’s numbers. Answers come from your books and Clover — not a chatbot.
+            Ask about your shop’s numbers. Answers come from your books and Clover.
           </div>
 
           <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, marginTop: 18 }}>
