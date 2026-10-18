@@ -885,7 +885,26 @@ function DeductionDisputePreview({ model, id, close }) {
   }
 }
 
+function TableTotalDetail({ tableName, columns, rows, totalCells }) {
+  return {
+    title: `Total ${tableName}`,
+    sub: tableName,
+    body: (
+      <Card title={tableName}>
+        <MdTable
+          columns={columns}
+          rows={[
+            ...rows,
+            { key: 'total', kind: 'total', name: 'Total', cells: totalCells },
+          ]}
+        />
+      </Card>
+    ),
+  }
+}
+
 const VIEWS = {
+  tableTotal: TableTotalDetail,
   area: AreaDetail,
   store: StoreDetail,
   storeProduct: StoreProductDetail,

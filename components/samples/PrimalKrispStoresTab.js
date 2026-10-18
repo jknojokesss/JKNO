@@ -351,7 +351,26 @@ export default function PrimalKrispStoresTab({
       <div style={{ ...card, marginBottom: '16px' }}>
         <div style={{ ...lbl, marginBottom: '10px' }}>AR aging — open store balances</div>
         <ArAgingBars aging={aging} onBarClick={setListFilter} />
-        <Row l="Total" v={money(owedTotal)} bold top tieExpected={owedTotal} tieActual={agingSum} />
+        <button
+          type="button"
+          className="pk-click"
+          onClick={() =>
+            onOpenDetail?.({
+              kind: 'tableTotal',
+              tableName: 'AR aging — open store balances',
+              rows: [
+                { label: '0-30 days', value: aging['0-30'], key: '0-30' },
+                { label: '31-60 days', value: aging['31-60'], key: '31-60' },
+                { label: '61-90 days', value: aging['61-90'], key: '61-90' },
+              ],
+              total: owedTotal,
+              format: money,
+            })
+          }
+          style={{ display: 'block', width: '100%', border: 'none', background: 'transparent', padding: 0, cursor: 'pointer', textAlign: 'left' }}
+        >
+          <Row l="Total" v={money(owedTotal)} bold top tieExpected={owedTotal} tieActual={agingSum} />
+        </button>
       </div>
 
       <div ref={listAnchorRef} style={{ display: 'flex', gap: '10px', flexWrap: 'wrap', marginBottom: '12px', alignItems: 'center', scrollMarginTop: 72 }}>

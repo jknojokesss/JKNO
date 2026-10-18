@@ -62,7 +62,10 @@ html.md-sample-page .m-sample-lobby,html.md-sample-page .m-header,html.md-sample
 .md-preview-v{font-family:${UI};font-size:14px;line-height:1.4;overflow-wrap:anywhere;word-break:break-word;max-width:100%;font-variant-numeric:tabular-nums}
 .md-preview-row--total .md-preview-v{font-weight:700}
 @media(min-width:861px){.md-t-row{column-gap:1.5rem}}
-@media(max-width:860px){.md-shell{flex-direction:column}.md-side{width:auto;height:auto;position:static;padding:14px 12px 10px}.md-nav--main{flex-direction:row;overflow-x:auto;gap:6px;padding:4px 4px 10px;-webkit-overflow-scrolling:touch;scrollbar-width:none}.md-nav::-webkit-scrollbar{display:none}.md-navbtn{width:auto;padding:8px 14px;border-radius:2px;background:rgba(255,255,255,.07);flex-shrink:0;font-size:13px;min-height:40px}.md-main{padding:18px 16px 52px;max-width:100%}}
+@media(max-width:860px){.md-shell{flex-direction:column}.md-side{width:auto;height:auto;position:static;padding:14px 12px 10px}.md-nav--main{flex-direction:row;flex-wrap:wrap;overflow-x:visible;gap:4px;padding:4px 2px 10px;width:100%;max-width:100%}.md-navbtn{width:auto;flex:1 1 0;min-width:0;padding:8px 6px;border-radius:2px;background:rgba(255,255,255,.07);flex-shrink:1;font-size:12px;min-height:40px;text-align:center;white-space:nowrap}.md-main{padding:18px 16px 52px;max-width:100%}}
+@media(max-width:390px){.md-nav--main .md-navbtn{font-size:12px;padding:7px 4px}}
+.md-ded-row--total.md-click{cursor:pointer}
+.md-t-row--total.md-click{cursor:pointer}
 @media(max-width:600px){button{min-height:40px}.md-card{padding:14px}.md-kpi{padding:13px 14px}.md-kpi-v{font-size:21px}.md-stat-v{font-size:17px}
 .md-t{font-size:var(--md-fs-m)}
 .md-t-row{grid-template-columns:var(--md-cols-m);column-gap:var(--md-col-gap-m,6px);padding:9px 2px}
@@ -202,7 +205,7 @@ export function MdTable({ columns, rows, stackAt = 4 }) {
   )
 }
 
-export function DeductionRemittanceList({ rows, totalLabel, totalAmount, onRowClick }) {
+export function DeductionRemittanceList({ rows, totalLabel, totalAmount, onRowClick, onTotalClick }) {
   return (
     <div className="md-ded-list">
       {rows.map((r) => (
@@ -219,12 +222,21 @@ export function DeductionRemittanceList({ rows, totalLabel, totalAmount, onRowCl
           <div className="md-ded-line2">{r.meta}</div>
         </button>
       ))}
-      <div className="md-ded-row md-ded-row--total">
-        <div className="md-ded-line1">
-          <span className="md-ded-ref">{totalLabel}</span>
-          <span className="md-ded-amt">{totalAmount}</span>
+      {onTotalClick ? (
+        <button type="button" className="md-ded-row md-ded-row--total md-click" onClick={onTotalClick}>
+          <div className="md-ded-line1">
+            <span className="md-ded-ref">{totalLabel}</span>
+            <span className="md-ded-amt">{totalAmount}</span>
+          </div>
+        </button>
+      ) : (
+        <div className="md-ded-row md-ded-row--total">
+          <div className="md-ded-line1">
+            <span className="md-ded-ref">{totalLabel}</span>
+            <span className="md-ded-amt">{totalAmount}</span>
+          </div>
         </div>
-      </div>
+      )}
     </div>
   )
 }

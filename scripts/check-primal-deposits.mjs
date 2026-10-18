@@ -128,7 +128,7 @@ ok('has Amazon Pay', sources.has('Amazon Pay'))
 
 const portalPath = path.join(root, '../components/samples/PrimalKrispPortal.js')
 const portalSrc = fs.readFileSync(portalPath, 'utf8')
-ok('deposits tab in nav', portalSrc.includes("['deposits', 'Deposits']"))
+ok('deposits tab in nav', /\[['"]deposits['"],\s*['"]Deposits['"]/.test(portalSrc))
 ok('after subscriptions', /subscriptions.*\n.*deposits/.test(portalSrc))
 
 const glyph = /[×✓✔↓↑▲▼▶]/

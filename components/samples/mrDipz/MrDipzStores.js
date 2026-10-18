@@ -23,12 +23,30 @@ export default function MrDipzStores({ model, open }) {
       })
     })
   })
+  const storeBodyRows = []
+  model.areas.forEach((a) => {
+    a.storeIds.forEach((id) => {
+      const s = model.storeById[id]
+      storeBodyRows.push({
+        key: s.id,
+        name: s.name,
+        cells: [money(s.sales), money(s.credits), pct1(s.pct), money(s.net)],
+      })
+    })
+  })
   rows.push({
     key: 'total',
     kind: 'total',
     name: 'Total',
     cells: [money(t.sales), money(t.credits), pct1(t.pct), money(t.net)],
-    onClick: () => open({ type: 'pnl', id: 'gross' }),
+    onClick: () =>
+      open({
+        type: 'tableTotal',
+        tableName: 'Sales by store · September',
+        columns: ['Store', 'Sales', 'Credits', 'Credit %', 'Net'],
+        rows: storeBodyRows,
+        totalCells: [money(t.sales), money(t.credits), pct1(t.pct), money(t.net)],
+      }),
   })
 
   return (

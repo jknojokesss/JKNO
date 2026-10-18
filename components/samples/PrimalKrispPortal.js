@@ -59,6 +59,7 @@ export default function PrimalKrispPortal() {
   const [invSort, setInvSort] = useState({ key: 'date', dir: 'desc' })
   const [reorderFocus, setReorderFocus] = useState(false)
   const [overviewDetail, setOverviewDetail] = useState(null)
+  const [narrowNav, setNarrowNav] = useState(false)
 
   const ov = DATA.overview
   const periodSlice = period === 'week' ? DATA.period_slices?.overview : null
@@ -113,6 +114,14 @@ export default function PrimalKrispPortal() {
     window.addEventListener('keydown', onKey)
     return () => window.removeEventListener('keydown', onKey)
   }, [drawerProduct])
+
+  useEffect(() => {
+    const mq = window.matchMedia('(max-width: 860px)')
+    const sync = () => setNarrowNav(mq.matches)
+    sync()
+    mq.addEventListener('change', sync)
+    return () => mq.removeEventListener('change', sync)
+  }, [])
 
   const card = { background: CARDBG, border: `1px solid ${BORDER}`, borderRadius: '2px', padding: '20px' }
   const lbl = {
@@ -262,7 +271,7 @@ export default function PrimalKrispPortal() {
     </div>
   )
 
-  const RankedBars = ({ title, rows, valueKey, labelKey, formatValue, onRowClick, onCardClick, wholeDollarTotal = null }) => {
+  const RankedBars = ({ title, rows, valueKey, labelKey, formatValue, onRowClick, onCardClick, onTotalClick, wholeDollarTotal = null }) => {
     const sorted = [...rows].sort((a, b) => b[valueKey] - a[valueKey])
     const max = sorted[0]?.[valueKey] || 1
     const total = sorted.reduce((s, r) => s + (r[valueKey] || 0), 0)
@@ -271,22 +280,32 @@ export default function PrimalKrispPortal() {
         ? allocateWholeDollars(sorted.map((r) => r[valueKey]), wholeDollarTotal)
         : null
     const fmt = formatValue || ((v, i) => (wholeParts ? money0(wholeParts[i]) : money(v)))
-    return (
+    const totalFmt = wholeDollarTotal != null && !formatValue ? money0(wholeDollarTotal) : fmt(total)
+    const cardStyle = { ...card, flex: 1, minWidth: '290px', textAlign: 'left' }
+    const titleBtn = onCardClick ? (
       <button
         type="button"
         className="pk-click"
         onClick={onCardClick}
-        style={{ ...card, flex: 1, minWidth: '290px', textAlign: 'left', cursor: onCardClick || onRowClick ? 'pointer' : 'default' }}
+        style={{ border: 'none', background: 'transparent', padding: 0, marginBottom: 14, cursor: 'pointer', textAlign: 'left', width: '100%' }}
       >
-        <div style={{ ...lbl, marginBottom: '14px' }}>{title}</div>
+        <div style={lbl}>{title}</div>
+      </button>
+    ) : (
+      <div style={{ ...lbl, marginBottom: '14px' }}>{title}</div>
+    )
+    return (
+      <div style={cardStyle}>
+        {titleBtn}
         {sorted.map((r, i) => (
           <div
             key={r[labelKey]}
             role={onRowClick ? 'button' : undefined}
             tabIndex={onRowClick ? 0 : undefined}
-            onClick={onRowClick ? (e) => { e.stopPropagation(); onRowClick(r) } : undefined}
+            onClick={onRowClick ? () => onRowClick(r) : undefined}
             onKeyDown={onRowClick ? (e) => e.key === 'Enter' && onRowClick(r) : undefined}
-            style={{ padding: '9px 0', borderTop: i ? `1px solid ${CREAM}` : 'none' }}
+            className={onRowClick ? 'pk-click' : undefined}
+            style={{ padding: '9px 0', borderTop: i ? `1px solid ${CREAM}` : 'none', cursor: onRowClick ? 'pointer' : 'default' }}
           >
             <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '6px', gap: '8px' }}>
               <span style={{ fontWeight: 600, fontSize: '14px', color: INK }}>{r[labelKey]}</span>
@@ -297,28 +316,46 @@ export default function PrimalKrispPortal() {
             </div>
           </div>
         ))}
-        {onCardClick ? (
-          <div style={{ display: 'flex', justifyContent: 'space-between', paddingTop: 10, marginTop: 6, borderTop: `1px solid ${BORDER}`, fontWeight: 700, fontSize: 13 }}>
+        {onTotalClick ? (
+          <button
+            type="button"
+            className="pk-click"
+            onClick={onTotalClick}
+            style={{
+              display: 'flex',
+              justifyContent: 'space-between',
+              width: '100%',
+              paddingTop: 10,
+              marginTop: 6,
+              border: 'none',
+              borderTop: `1px solid ${BORDER}`,
+              background: 'transparent',
+              fontWeight: 700,
+              fontSize: 13,
+              cursor: 'pointer',
+              color: INK,
+            }}
+          >
             <span>Total</span>
-            <span style={{ fontFamily: MONO }}>{wholeDollarTotal != null && !formatValue ? money0(wholeDollarTotal) : fmt(total)}</span>
-          </div>
+            <span style={{ fontFamily: MONO }}>{totalFmt}</span>
+          </button>
         ) : null}
-      </button>
+      </div>
     )
   }
 
   const openDetail = (d) => setOverviewDetail(d)
 
   const TABS = [
-    ['overview', 'Overview'],
-    ['financials', 'Financials'],
-    ['stores', 'Stores'],
-    ['products', 'Products'],
-    ['subscriptions', 'Online & subscriptions'],
-    ['deposits', 'Deposits'],
-    ['advertising', 'Advertising / promos'],
+    ['overview', 'Overview', 'Overview'],
+    ['financials', 'Financials', 'Financials'],
+    ['stores', 'Stores', 'Stores'],
+    ['products', 'Products', 'Products'],
+    ['subscriptions', 'Online & subscriptions', 'Online'],
+    ['deposits', 'Deposits', 'Deposits'],
+    ['advertising', 'Advertising / promos', 'Ads'],
   ]
-  const EXTRA = [['close', 'Monthly close']]
+  const EXTRA = [['close', 'Monthly close', 'Close']]
   const currentLabel = [...TABS, ...EXTRA].find((t) => t[0] === tab)?.[1] || ''
 
   const salesDelta = salesPrior > 0 ? ((salesPeriod - salesPrior) / salesPrior) * 100 : 0
@@ -389,8 +426,9 @@ export default function PrimalKrispPortal() {
             />
           </div>
           <nav className="pk-nav pk-nav--main" aria-label="Sections">
-            {TABS.map(([id, label]) => {
+            {TABS.map(([id, longLabel, shortLabel]) => {
               const active = tab === id
+              const navLabel = narrowNav ? shortLabel : longLabel
               return (
                 <button
                   key={id}
@@ -407,7 +445,7 @@ export default function PrimalKrispPortal() {
                       : undefined
                   }
                 >
-                  {label}
+                  {navLabel}
                 </button>
               )
             })}
@@ -416,8 +454,9 @@ export default function PrimalKrispPortal() {
             Tools
           </div>
           <nav className="pk-nav pk-nav--tools" aria-label="Tools">
-            {EXTRA.map(([id, label]) => {
+            {EXTRA.map(([id, longLabel, shortLabel]) => {
               const active = tab === id
+              const navLabel = narrowNav ? shortLabel : longLabel
               return (
                 <button
                   key={id}
@@ -429,7 +468,7 @@ export default function PrimalKrispPortal() {
                       : undefined
                   }
                 >
-                  {label}
+                  {navLabel}
                 </button>
               )
             })}
@@ -583,6 +622,15 @@ export default function PrimalKrispPortal() {
                       rows: DATA.subscriptions.by_interval.map((r) => ({ label: r.interval, value: r.active })),
                     })
                   }
+                  onTotalClick={() =>
+                    openDetail({
+                      kind: 'tableTotal',
+                      tableName: 'By interval',
+                      rows: DATA.subscriptions.by_interval.map((r) => ({ label: r.interval, value: r.active, key: r.interval })),
+                      total: DATA.subscriptions.active,
+                      format: (v) => fmtInt(v),
+                    })
+                  }
                   onRowClick={(r) =>
                     openDetail({
                       kind: 'subBar',
@@ -608,6 +656,17 @@ export default function PrimalKrispPortal() {
                       rows: DATA.subscriptions.by_what_they_get.map((r) => ({ label: r.item, value: r.active })),
                     })
                   }
+                  onTotalClick={() => {
+                    const rows = DATA.subscriptions.by_what_they_get
+                    const total = rows.reduce((s, r) => s + r.active, 0)
+                    openDetail({
+                      kind: 'tableTotal',
+                      tableName: 'By what they get',
+                      rows: rows.map((r) => ({ label: r.item, value: r.active, key: r.item })),
+                      total,
+                      format: (v) => fmtInt(v),
+                    })
+                  }}
                   onRowClick={(r) =>
                     openDetail({
                       kind: 'subBar',
@@ -625,6 +684,17 @@ export default function PrimalKrispPortal() {
                   labelKey="label"
                   formatValue={(v) => fmtInt(v)}
                   onCardClick={() => openDetail({ kind: 'subChurn' })}
+                  onTotalClick={() => {
+                    const rows = DATA.subscriptions.cancel_reasons
+                    const total = rows.reduce((s, r) => s + r.count, 0)
+                    openDetail({
+                      kind: 'tableTotal',
+                      tableName: 'Cancel reasons (September)',
+                      rows: rows.map((r) => ({ label: r.reason, value: r.count, key: r.reason })),
+                      total,
+                      format: (v) => fmtInt(v),
+                    })
+                  }}
                   onRowClick={(r) =>
                     openDetail({
                       kind: 'subBar',
@@ -1011,14 +1081,33 @@ export default function PrimalKrispPortal() {
                   ))}
                 </tbody>
               </table>
-              <Row
-                l="Total"
-                v={money(productBreakdown.total_dollars)}
-                bold
-                top
-                tieExpected={productBreakdown.store_channel_dollars}
-                tieActual={productBreakdown.total_dollars}
-              />
+              <button
+                type="button"
+                className="pk-click"
+                onClick={() =>
+                  openDetail({
+                    kind: 'tableTotal',
+                    tableName: `${drawerProduct} · store channel`,
+                    rows: productBreakdown.stores.map((r) => ({
+                      label: r.store,
+                      value: r.dollars,
+                      key: r.store,
+                    })),
+                    total: productBreakdown.total_dollars,
+                    format: money,
+                  })
+                }
+                style={{ display: 'block', width: '100%', border: 'none', background: 'transparent', padding: 0, cursor: 'pointer', textAlign: 'left' }}
+              >
+                <Row
+                  l="Total"
+                  v={money(productBreakdown.total_dollars)}
+                  bold
+                  top
+                  tieExpected={productBreakdown.store_channel_dollars}
+                  tieActual={productBreakdown.total_dollars}
+                />
+              </button>
               <Row
                 l="Units"
                 v={fmtInt(productBreakdown.total_units)}

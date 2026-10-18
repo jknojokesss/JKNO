@@ -16,13 +16,13 @@ import MrDipzDetail from './MrDipzDetail'
 const BIZ = 'Mr. Dipz'
 
 const TABS = [
-  ['overview', 'Overview'],
-  ['stores', 'Stores'],
-  ['credits', 'Credits'],
-  ['deductions', 'Distributor deductions'],
-  ['products', 'Products'],
-  ['owed', 'Owed by stores'],
-  ['financials', 'Financials'],
+  ['overview', 'Overview', 'Overview'],
+  ['stores', 'Stores', 'Stores'],
+  ['credits', 'Credits', 'Credits'],
+  ['deductions', 'Distributor deductions', 'Deductions'],
+  ['products', 'Products', 'Products'],
+  ['owed', 'Owed by stores', 'Owed'],
+  ['financials', 'Financials', 'P&L'],
 ]
 
 const TAB_BODY = {
@@ -39,6 +39,7 @@ export default function MrDipzSample() {
   const [tab, setTab] = useState('overview')
   const [deductionFilter, setDeductionFilter] = useState(null)
   const [stack, setStack] = useState([])
+  const [narrowNav, setNarrowNav] = useState(false)
   const model = useMemo(() => buildMrDipzModel(), [])
 
   const scrollTop = () => {
@@ -69,6 +70,14 @@ export default function MrDipzSample() {
   }, [])
 
   useEffect(() => {
+    const mq = window.matchMedia('(max-width: 860px)')
+    const sync = () => setNarrowNav(mq.matches)
+    sync()
+    mq.addEventListener('change', sync)
+    return () => mq.removeEventListener('change', sync)
+  }, [])
+
+  useEffect(() => {
     if (!stack.length) return undefined
     const onKey = (e) => {
       if (e.key === 'Escape') setStack((s) => s.slice(0, -1))
@@ -95,8 +104,9 @@ export default function MrDipzSample() {
             </div>
           </div>
           <nav className="md-nav md-nav--main" aria-label="Sections">
-            {TABS.map(([id, label]) => {
+            {TABS.map(([id, longLabel, shortLabel]) => {
               const active = tab === id
+              const navLabel = narrowNav ? shortLabel : longLabel
               return (
                 <button
                   key={id}
@@ -105,7 +115,7 @@ export default function MrDipzSample() {
                   onClick={() => goTab(id)}
                   style={active ? { background: 'rgba(255,255,255,.12)', color: CREAM, boxShadow: `inset 3px 0 0 ${SPICE}` } : undefined}
                 >
-                  {label}
+                  {navLabel}
                 </button>
               )
             })}

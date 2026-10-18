@@ -65,6 +65,15 @@ export default function PrimalKrispDepositsDetail({ detail, onBack, onClose }) {
   const { payouts, summary } = enrichPayouts(DATA.deposits)
   const shell = { onBack, onClose }
 
+  if (detail.kind === 'tableTotal') {
+    const format = detail.format || money
+    return (
+      <Shell title={`Total ${detail.tableName}`} sub={detail.tableName} {...shell}>
+        <Lines rows={detail.rows} totalLabel="Total" totalValue={detail.total} format={format} />
+      </Shell>
+    )
+  }
+
   if (detail.kind === 'depDeposited') {
     const bridge = buildDepositedMonthBridge(payouts)
     const bridgeRows = [

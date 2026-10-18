@@ -45,7 +45,18 @@ export default function MrDipzCredits({ model, open }) {
               name: 'Total',
               cells: [money(t.credits), pct1(t.pct), pct1(t.priorPct)],
               colors: [null, deltaColor(pctDelta, { cost: true }), MUTED],
-              onClick: () => open({ type: 'pnl', id: 'credits' }),
+              onClick: () =>
+                open({
+                  type: 'tableTotal',
+                  tableName: 'By store',
+                  columns: ['Store', 'Credits', 'Credit %', 'Last month %'],
+                  rows: byStore.map((s) => ({
+                    key: s.id,
+                    name: s.name,
+                    cells: [money(s.credits), pct1(s.pct), pct1(s.priorPct)],
+                  })),
+                  totalCells: [money(t.credits), pct1(t.pct), pct1(t.priorPct)],
+                }),
             },
           ]}
         />
@@ -66,7 +77,18 @@ export default function MrDipzCredits({ model, open }) {
               kind: 'total',
               name: 'Total',
               cells: [fmtInt(t.expUnits), money(t.credits), pct1(pctOf(t.credits, t.sales))],
-              onClick: () => open({ type: 'pnl', id: 'credits' }),
+              onClick: () =>
+                open({
+                  type: 'tableTotal',
+                  tableName: 'By product',
+                  columns: ['Product', 'Expired', 'Credits', '% of sales'],
+                  rows: byProduct.map((p) => ({
+                    key: p.id,
+                    name: p.name,
+                    cells: [fmtInt(p.expUnits), money(p.credits), pct1(p.pct)],
+                  })),
+                  totalCells: [fmtInt(t.expUnits), money(t.credits), pct1(pctOf(t.credits, t.sales))],
+                }),
             },
           ]}
         />
@@ -87,7 +109,18 @@ export default function MrDipzCredits({ model, open }) {
               kind: 'total',
               name: 'Total',
               cells: [fmtInt(t.expUnits), money(t.credits), pct1(t.pct)],
-              onClick: () => open({ type: 'pnl', id: 'credits' }),
+              onClick: () =>
+                open({
+                  type: 'tableTotal',
+                  tableName: 'By week',
+                  columns: ['Week', 'Expired', 'Credits', '% of sales'],
+                  rows: model.weeks.map((w) => ({
+                    key: w.id,
+                    name: w.label,
+                    cells: [fmtInt(w.expUnits), money(w.credits), pct1(w.pct)],
+                  })),
+                  totalCells: [fmtInt(t.expUnits), money(t.credits), pct1(t.pct)],
+                }),
             },
           ]}
         />

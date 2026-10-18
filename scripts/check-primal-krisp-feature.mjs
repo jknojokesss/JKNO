@@ -82,6 +82,12 @@ ok('no verdictPromo helper', !/verdictPromo/.test(utilsSrc))
 ok('advertising table no Keep Watch Cut', !/\bKeep\b|\bWatch\b|\bCut\b/.test(portalSrc))
 ok('promo ads narrow layout CSS', /@media\(max-width:390px\)/.test(portalSrc) && /\.pk-promo-table/.test(portalSrc) && /\.pk-promo-roas-label/.test(portalSrc))
 ok('promo ads card no narrow scroll', /\.pk-promo-card\{overflow-x:visible!important/.test(portalSrc))
+ok('nav no horizontal scroll at phone', /\.pk-nav--main[^}]*overflow-x:visible/.test(utilsSrc))
+ok('nav short labels at 860', /narrowNav \? shortLabel/.test(portalSrc))
+ok('table total detail kind', /kind === 'tableTotal'/.test(fs.readFileSync(path.join(root, 'components/samples/PrimalKrispOverviewDetail.js'), 'utf8')))
+ok('deposits table total opens breakdown', /kind: 'tableTotal'/.test(fs.readFileSync(path.join(root, 'components/samples/primal-krisp/PrimalKrispDepositsTab.js'), 'utf8')))
+ok('stores aging total tappable', /tableName: 'AR aging/.test(fs.readFileSync(path.join(root, 'components/samples/PrimalKrispStoresTab.js'), 'utf8')))
+ok('ranked bars total row', /onTotalClick/.test(portalSrc))
 for (const p of DATA.promo_codes) {
   ok(`promo no call field ${p.code}`, p.call === undefined)
 }

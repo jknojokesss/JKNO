@@ -37,6 +37,18 @@ export default function PrimalKrispDepositsTab({ KPI, card, lbl, onOpenDetail })
   const nm = summary.not_matched
   const totals = aggregatePayoutTable(payouts)
   const openDeposited = () => onOpenDetail({ kind: 'depDeposited' })
+  const openPayoutsTotal = () =>
+    onOpenDetail({
+      kind: 'tableTotal',
+      tableName: 'Payouts',
+      rows: payouts.map((p) => ({
+        label: `${fmtD(p.date)} · ${p.source}`,
+        value: payoutTotals(p).deposit,
+        key: p.id,
+      })),
+      total: totals.deposit,
+      format: money,
+    })
 
   return (
     <>
@@ -96,8 +108,8 @@ export default function PrimalKrispDepositsTab({ KPI, card, lbl, onOpenDetail })
               className="pk-dep-total pk-click"
               role="button"
               tabIndex={0}
-              onClick={openDeposited}
-              onKeyDown={(e) => e.key === 'Enter' && openDeposited()}
+              onClick={openPayoutsTotal}
+              onKeyDown={(e) => e.key === 'Enter' && openPayoutsTotal()}
               style={{ cursor: 'pointer' }}
             >
               <td className="pk-dep-head" data-label="Date">Total</td>

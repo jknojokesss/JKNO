@@ -47,12 +47,24 @@ export default function MrDipzProducts({ model, open }) {
       })
     })
   })
+  const productBodyRows = model.products.map((p) => ({
+    key: p.id,
+    name: p.name,
+    cells: cellsFor(p),
+  }))
   rows.push({
     key: 'total',
     kind: 'total',
     name: 'Total',
     cells: cellsFor(model.totals),
-    onClick: () => open({ type: 'pnl', id: 'gross' }),
+    onClick: () =>
+      open({
+        type: 'tableTotal',
+        tableName: 'Products · September',
+        columns: ['Product', 'Units', 'Sales', 'Expired', 'Credits', 'Credit %', 'Net'],
+        rows: productBodyRows,
+        totalCells: cellsFor(model.totals),
+      }),
   })
 
   return (

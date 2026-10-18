@@ -1,8 +1,16 @@
 /**
  * Asserts Mr. Dipz distributor-deductions feature ties to the rest of the sample.
  */
+import fs from 'fs'
+import path from 'path'
+import { fileURLToPath } from 'url'
 import { buildMrDipzModel } from '../components/samples/mrDipz/mrDipzUtils.js'
 import { DISTRIBUTOR_DEDUCTIONS, DEDUCTION_AS_OF } from '../components/samples/mrDipz/mrDipzDeductionsData.js'
+
+const root = path.dirname(path.dirname(fileURLToPath(import.meta.url)))
+const kitSrc = fs.readFileSync(path.join(root, 'components/samples/mrDipz/MrDipzKit.js'), 'utf8')
+const sampleSrc = fs.readFileSync(path.join(root, 'components/samples/mrDipz/MrDipzSample.js'), 'utf8')
+const detailSrc = fs.readFileSync(path.join(root, 'components/samples/mrDipz/MrDipzDetail.js'), 'utf8')
 
 const failures = []
 const ok = (label, cond, detail = '') => {
@@ -66,6 +74,11 @@ for (const raw of DISTRIBUTOR_DEDUCTIONS) {
   const built = d.byId[raw.id]
   ok(`${raw.id} amount`, built.amount === cents(raw.invoiceAmount) - cents(raw.paidAmount))
 }
+
+ok('nav no horizontal scroll at phone', /\.md-nav--main[^}]*overflow-x:visible/.test(kitSrc))
+ok('nav short labels at 860', /narrowNav \? shortLabel/.test(sampleSrc))
+ok('table total detail view', /tableTotal: TableTotalDetail/.test(detailSrc))
+ok('remittance total tappable', /onTotalClick/.test(kitSrc) && /onTotalClick=\{/.test(fs.readFileSync(path.join(root, 'components/samples/mrDipz/MrDipzDeductions.js'), 'utf8')))
 
 if (failures.length) {
   console.error('check-mr-dipz-feature FAILED:\n', failures.join('\n'))

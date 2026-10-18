@@ -30,7 +30,18 @@ export default function MrDipzOwed({ model, open }) {
               kind: 'total',
               name: 'Total',
               cells: agingCells(t.aging),
-              onClick: () => open({ type: 'bucket', id: 'all' }),
+              onClick: () =>
+                open({
+                  type: 'tableTotal',
+                  tableName: 'By store',
+                  columns: ['Store', ...BUCKETS.map((b) => b.short), 'Total'],
+                  rows: owing.map((s) => ({
+                    key: s.id,
+                    name: s.name,
+                    cells: agingCells(s.aging),
+                  })),
+                  totalCells: agingCells(t.aging),
+                }),
             },
           ]}
         />

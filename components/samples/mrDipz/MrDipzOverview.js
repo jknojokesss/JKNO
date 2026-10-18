@@ -53,7 +53,18 @@ export default function MrDipzOverview({ model, open }) {
               kind: 'total',
               name: 'Total',
               cells: [money(t.sales), money(t.credits), pct1(t.pct), money(t.net)],
-              onClick: () => open({ type: 'pnl', id: 'gross' }),
+              onClick: () =>
+                open({
+                  type: 'tableTotal',
+                  tableName: 'By area',
+                  columns: ['Area', 'Sales', 'Credits', 'Credit %', 'Net'],
+                  rows: model.areas.map((a) => ({
+                    key: a.id,
+                    name: a.name,
+                    cells: [money(a.sales), money(a.credits), pct1(a.pct), money(a.net)],
+                  })),
+                  totalCells: [money(t.sales), money(t.credits), pct1(t.pct), money(t.net)],
+                }),
             },
           ]}
         />
@@ -74,7 +85,18 @@ export default function MrDipzOverview({ model, open }) {
               kind: 'total',
               name: 'Total',
               cells: [fmtInt(t.expUnits), money(t.credits)],
-              onClick: () => open({ type: 'pnl', id: 'credits' }),
+              onClick: () =>
+                open({
+                  type: 'tableTotal',
+                  tableName: 'Credits by week',
+                  columns: ['Week', 'Expired', 'Credits'],
+                  rows: model.weeks.map((w) => ({
+                    key: w.id,
+                    name: w.label,
+                    cells: [fmtInt(w.expUnits), money(w.credits)],
+                  })),
+                  totalCells: [fmtInt(t.expUnits), money(t.credits)],
+                }),
             },
           ]}
         />

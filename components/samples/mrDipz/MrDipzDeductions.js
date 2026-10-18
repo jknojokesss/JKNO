@@ -52,6 +52,19 @@ export default function MrDipzDeductions({ model, open, initialFilter }) {
           totalLabel={filter === 'all' ? 'Total' : 'Filtered total'}
           totalAmount={money(filter === 'all' ? d.summary.total : filteredTotal)}
           onRowClick={(r) => open({ type: 'deduction', id: r.id })}
+          onTotalClick={() =>
+            open({
+              type: 'tableTotal',
+              tableName: 'Remittances · last 90 days',
+              columns: ['Remittance', 'Amount'],
+              rows: rows.map((r) => ({
+                key: r.id,
+                name: r.ref,
+                cells: [money(r.amount)],
+              })),
+              totalCells: [money(filter === 'all' ? d.summary.total : filteredTotal)],
+            })
+          }
         />
       </Card>
 
@@ -74,7 +87,22 @@ export default function MrDipzDeductions({ model, open, initialFilter }) {
                 fmtInt(model.totals.expUnits),
                 pct1(pctOf(model.totals.expUnits, model.totals.units)),
               ],
-              onClick: () => open({ type: 'pnl', id: 'credits' }),
+              onClick: () =>
+                open({
+                  type: 'tableTotal',
+                  tableName: 'Expired % by flavor',
+                  columns: ['Flavor', 'Sold', 'Expired', 'Expired %'],
+                  rows: model.expiredByFlavor.map((r) => ({
+                    key: r.productId,
+                    name: r.name,
+                    cells: [fmtInt(r.sold), fmtInt(r.expired), pct1(r.expiredPct)],
+                  })),
+                  totalCells: [
+                    fmtInt(model.totals.units),
+                    fmtInt(model.totals.expUnits),
+                    pct1(pctOf(model.totals.expUnits, model.totals.units)),
+                  ],
+                }),
             },
           ]}
         />

@@ -52,6 +52,15 @@ export default function PrimalKrispOverviewDetail({ detail, onBack, onClose, sto
   const ov = DATA.overview
   const shell = { onBack, onClose }
 
+  if (detail.kind === 'tableTotal') {
+    const format = detail.format || money0
+    return (
+      <Shell title={`Total ${detail.tableName}`} sub={detail.tableName} {...shell}>
+        <Lines rows={detail.rows} totalLabel="Total" totalValue={detail.total} format={format} />
+      </Shell>
+    )
+  }
+
   if (detail.kind === 'cash') {
     const checking = Math.round((ov.cash_on_hand - ov.open_store_balance) * 100) / 100
     const rows = [
