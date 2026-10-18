@@ -208,7 +208,7 @@ export default function PrimalKrispOverview({
             >
               <div style={{ display: 'flex', justifyContent: 'space-between', gap: 8 }}>
                 <span style={{ fontWeight: 600, fontSize: 14 }}>{f.name}</span>
-                <span style={{ fontFamily: MONO }}>{f.bags} bags</span>
+                <span style={{ fontFamily: MONO }}>{fmtInt(f.bags)} bags</span>
               </div>
             </div>
           ))}
@@ -217,7 +217,7 @@ export default function PrimalKrispOverview({
 
       <div style={{ ...card }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 8, marginBottom: 16 }}>
-          <div style={lbl}>Sold this {period}, by product</div>
+          <div style={lbl}>Bags sold this month by product</div>
           <MiniToggle />
         </div>
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(148px, 1fr))', gap: 12 }}>
@@ -227,8 +227,7 @@ export default function PrimalKrispOverview({
               <div key={p.name} style={{ border: `1px solid ${BORDER}`, borderRadius: 2, padding: '16px 12px 14px', textAlign: 'center', background: CREAM }}>
                 <BagIcon color={p.color} />
                 <div style={{ fontWeight: 600, marginTop: 8, fontSize: 14 }}>{p.name}</div>
-                <div style={{ ...big, fontSize: 26, marginTop: 4 }}>{p[period]}</div>
-                <div style={{ fontSize: 11, color: MUTED }}>bags this {period}</div>
+                <div style={{ ...big, fontSize: 26, marginTop: 4, fontFamily: MONO }}>{fmtInt(p[period])} bags</div>
               </div>
             ))}
         </div>

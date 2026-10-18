@@ -8,7 +8,7 @@ import { DEMO_LOBBY_FONT_LINK } from '../lib/demoFonts'
  * Minimal escape hatch above a sample portal (gallery lives on /demos).
  * Hidden when ?embed=1 (homepage / marketing iframe — show the app only).
  */
-export default function DemoLobby({ suppress = false }) {
+export default function DemoLobby({ suppress = false, hideAllSamplesLink = false }) {
   const router = useRouter()
   if (suppress) return null
   const embedded =
@@ -33,9 +33,11 @@ export default function DemoLobby({ suppress = false }) {
             <span className="m-sample-lobby__co">No Jokes Financials</span>
           </Link>
           <div className="m-sample-lobby__nav">
-            <Link href="/demos" className="m-sample-lobby__back">
-              ← All samples
-            </Link>
+            {!hideAllSamplesLink ? (
+              <Link href="/demos" className="m-sample-lobby__back">
+                ← All samples
+              </Link>
+            ) : null}
             <Link href="/" className="m-sample-lobby__home">
               Home
             </Link>

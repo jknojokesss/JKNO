@@ -25,7 +25,6 @@ import {
   money0,
   moneyK,
   pct1,
-  fmtAsOfLong,
   fmtD,
   fmtInt,
   TieMark,
@@ -307,7 +306,7 @@ export default function PrimalKrispPortal() {
     setListFilter(filter)
   }
 
-  const sampleHeader = `Sample — fictitious numbers · as of ${fmtAsOfLong(AS_OF)}`
+  const sampleHeader = 'Sample — fictitious numbers · as of Oct 2026'
 
   const productBreakdown = drawerProduct
     ? DATA.product_store_breakdown?.find((p) => p.product === drawerProduct)
@@ -322,7 +321,7 @@ export default function PrimalKrispPortal() {
     <>
       <style dangerouslySetInnerHTML={{ __html: portalStyles }} />
 
-      <DemoLobby />
+      <DemoLobby hideAllSamplesLink />
 
       <div className="pk-shell">
         <aside className="pk-side">
@@ -380,12 +379,6 @@ export default function PrimalKrispPortal() {
               )
             })}
           </nav>
-          <div style={{ padding: '12px 10px 0', borderTop: '1px solid rgba(255,255,255,.1)', marginTop: '8px' }}>
-            <div style={{ fontFamily: MONO, fontSize: '9px', color: '#8A7A66', lineHeight: 1.7 }}>
-              SAMPLE DASHBOARD<br />
-              <span style={{ color: SPICE, fontWeight: 600 }}>{DATA.meta.built_by}</span>
-            </div>
-          </div>
         </aside>
 
         <main className="pk-main">
@@ -625,7 +618,7 @@ export default function PrimalKrispPortal() {
                             <td style={{ padding: '10px 6px', fontWeight: 600 }}>{p.name}</td>
                             <td style={{ padding: '10px 6px', fontFamily: MONO }}>{retail ? money(retail) : '—'}</td>
                             <td style={{ padding: '10px 6px', fontFamily: MONO }}>{money(cost.total)}</td>
-                            <td style={{ padding: '10px 6px', fontFamily: MONO }}>{bags}</td>
+                            <td style={{ padding: '10px 6px', fontFamily: MONO }}>{fmtInt(bags)}</td>
                             <td style={{ padding: '10px 6px' }}>
                               <button
                                 type="button"
@@ -719,8 +712,8 @@ export default function PrimalKrispPortal() {
                         <td style={{ padding: '8px 4px', fontFamily: MONO }}>{fmtD(r.date)}</td>
                         <td style={{ padding: '8px 4px' }}>{r.product}</td>
                         <td style={{ padding: '8px 4px', fontFamily: MONO, textAlign: 'right' }}>{r.raw_meat_lbs}</td>
-                        <td style={{ padding: '8px 4px', fontFamily: MONO, textAlign: 'right' }}>{r.bags_planned}</td>
-                        <td style={{ padding: '8px 4px', fontFamily: MONO, textAlign: 'right' }}>{r.bags_packed ?? '—'}</td>
+                        <td style={{ padding: '8px 4px', fontFamily: MONO, textAlign: 'right' }}>{fmtInt(r.bags_planned)}</td>
+                        <td style={{ padding: '8px 4px', fontFamily: MONO, textAlign: 'right' }}>{r.bags_packed != null ? fmtInt(r.bags_packed) : '—'}</td>
                         <td style={{ padding: '8px 4px', fontFamily: MONO, textAlign: 'right' }}>{r.yield_vs_plan_pct != null ? pct1(r.yield_vs_plan_pct) : '—'}</td>
                         <td style={{ padding: '8px 4px', fontFamily: MONO, textAlign: 'right' }}>{r.cost_per_bag != null ? money(r.cost_per_bag) : '—'}</td>
                         <td style={{ padding: '8px 4px' }}>{r.status}</td>
@@ -814,7 +807,7 @@ export default function PrimalKrispPortal() {
                         <div style={{ fontWeight: 600 }}>{r.store}</div>
                         <div style={{ fontSize: '11px', color: MUTED }}>{r.city}</div>
                       </td>
-                      <td style={{ padding: '10px 4px', textAlign: 'right', fontFamily: MONO }}>{r.units}</td>
+                      <td style={{ padding: '10px 4px', textAlign: 'right', fontFamily: MONO }}>{fmtInt(r.units)}</td>
                       <td style={{ padding: '10px 4px', textAlign: 'right', fontFamily: MONO }}>{money(r.dollars)}</td>
                     </tr>
                   ))}

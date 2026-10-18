@@ -112,7 +112,7 @@ function InvoiceSheet({ inv, store, onClose, onPrint }) {
         <tbody>
           <tr>
             <td style={{ padding: '10px 4px' }}>Primal Krisp, assorted flavors</td>
-            <td style={{ padding: '10px 4px', textAlign: 'right', fontFamily: MONO }}>{inv.bags}</td>
+            <td style={{ padding: '10px 4px', textAlign: 'right', fontFamily: MONO }}>{fmtInt(inv.bags)}</td>
             <td style={{ padding: '10px 4px', textAlign: 'right', fontFamily: MONO }}>{money(store.sample.price_per_bag)}</td>
             <td style={{ padding: '10px 4px', textAlign: 'right', fontFamily: MONO }}>{money(inv.amount)}</td>
           </tr>

@@ -2473,7 +2473,7 @@ export default function RiversideTiresPortal() {
       </Head>
       <style dangerouslySetInnerHTML={{ __html: PORTAL_CSS }} />
 
-      <DemoLobby />
+      <DemoLobby hideAllSamplesLink />
 
       <Shell embed={embed} tab={tab} setTab={setTab}>
         {tab === 'dashboard' && (
