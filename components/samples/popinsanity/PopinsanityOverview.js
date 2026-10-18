@@ -3,7 +3,7 @@ import { pnlComputed } from './popinsanityComputed'
 import { KPI, RankedBars } from './PopinsanityShared'
 import { money0, money, pct1, changePct, changeColor, kpiValueColor, RED, GREEN } from './popinsanityUtils'
 
-export default function PopinsanityOverview({ styles, goTab, setCalendarMonth, openChannel, openTier }) {
+export default function PopinsanityOverview({ styles, goTab, setCalendarMonth, openChannel, openTier, openHolidayOverview }) {
   const { card, lbl, big } = styles
   const hol = holidayTotals()
   const ws = wholesaleStats()
@@ -39,10 +39,24 @@ export default function PopinsanityOverview({ styles, goTab, setCalendarMonth, o
           k="Holiday orders booked"
           v={money0(hol.booked)}
           sub={`${hol.count} orders · ${hol.units.toLocaleString('en-US')} units`}
-          onClick={() => goTab('orders')}
+          onClick={() => (openHolidayOverview ? openHolidayOverview('booked') : goTab('orders'))}
         />
-        <KPI card={card} lbl={lbl} big={big} k="Deposits received" v={money0(hol.deposits)} onClick={() => goTab('orders')} />
-        <KPI card={card} lbl={lbl} big={big} k="Balance due" v={money0(hol.balance)} onClick={() => goTab('orders')} />
+        <KPI
+          card={card}
+          lbl={lbl}
+          big={big}
+          k="Deposits received"
+          v={money0(hol.deposits)}
+          onClick={() => (openHolidayOverview ? openHolidayOverview('deposits') : goTab('orders'))}
+        />
+        <KPI
+          card={card}
+          lbl={lbl}
+          big={big}
+          k="Balance due"
+          v={money0(hol.balance)}
+          onClick={() => (openHolidayOverview ? openHolidayOverview('balance') : goTab('orders'))}
+        />
         <KPI card={card} lbl={lbl} big={big} k="Owed by stores" v={money(ws.owed)} onClick={() => goTab('stores')} />
         <KPI
           card={card}

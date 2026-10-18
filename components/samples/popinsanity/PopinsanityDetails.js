@@ -10,6 +10,10 @@ import {
   wholesaleInvoicesFiltered,
   storeOldestDays,
   PNL_CHANNEL_MAP,
+  ORDER_STAGES,
+  recipientShippedCounts,
+  daysToTarget,
+  holidayTotals,
 } from './popinsanityComputed'
 import { DetailShell, RowLine, ClickRow } from './PopinsanityShared'
 import { CompareSheet } from './PopinsanityCompareSheet'
@@ -32,28 +36,38 @@ import {
   MONO,
 } from './popinsanityUtils'
 
-export function OrderDetail({ orderId, onBack, onTier, onClient, card, big, lbl }) {
+const stageLabel = (id) => ORDER_STAGES.find((s) => s.id === id)?.label || id
+
+export function OrderDetail({ orderId, onBack, onTier, onInvoicePreview, card, big, lbl }) {
   const o = DATA.holiday_orders.find((x) => x.id === orderId)
   if (!o) return null
   const tier = tierById[o.tier]
-  const cashSum = sumBy(o.cash_due, 'amount')
   const depositDue = o.cash_due.find((c) => c.type === 'Deposit')
+  const { shipped, total: recipTotal } = recipientShippedCounts(o)
+  const days = daysToTarget(o.ship_date)
+  const daysLabel = days == null ? '—' : days === 0 ? 'Today' : days > 0 ? `${days} days` : `${Math.abs(days)} days ago`
+  const showDepositInvoice = o.stage === 'quote' || o.stage === 'deposit_invoiced'
+  const showBalanceInvoice = o.stage === 'shipping' || o.stage === 'balance_invoiced'
+
   return (
     <DetailShell title={o.client} onBack={onBack} card={card} big={big}>
-      <RowLine l="Order" v={o.id} />
+      <RowLine l="Order" v={o.id} mono={false} />
+      <RowLine l="Stage" v={stageLabel(o.stage)} mono={false} />
       <RowLine
         l="Tier"
         v={
-          <button type="button" onClick={() => onTier(o.tier)} style={{ border: 'none', background: 'none', color: SPICE, fontWeight: 600, cursor: 'pointer', fontFamily: MONO, fontSize: 13, padding: 0 }}>
+          <button type="button" onClick={() => onTier(o.tier)} style={{ border: 'none', background: 'none', color: SPICE, fontWeight: 600, cursor: 'pointer', fontSize: 13, padding: 0 }}>
             {tier.name}
           </button>
         }
+        mono={false}
       />
       <div style={{ fontSize: '12px', color: MUTED, marginBottom: 8 }}>{tier.contents}</div>
-      <RowLine l="Units × price" v={`${fmtInt(o.units)} × ${money(o.price)} = ${money(o.units * o.price)}`} />
-      <RowLine l="Booked" v={fmtD(o.booked)} />
-      <RowLine l="Ship date" v={fmtD(o.ship_date)} />
-      <RowLine l="Deposit" v={`${o.deposit_pct}% · ${money(o.deposit_amount)}`} />
+      <RowLine l="Tins × price" v={`${fmtInt(o.units)} × ${money(o.price)} = ${money(o.order_total)}`} mono={false} />
+      <RowLine l="Booked" v={fmtD(o.booked)} mono={false} />
+      <RowLine l="Target delivery" v={fmtD(o.ship_date)} mono={false} />
+      <RowLine l="Days to target" v={daysLabel} mono={false} />
+      <RowLine l="Deposit" v={`${o.deposit_pct}% · ${money(o.deposit_amount)}`} mono={false} />
       <RowLine
         l="Deposit received"
         v={
@@ -63,12 +77,189 @@ export function OrderDetail({ orderId, onBack, onTier, onClient, card, big, lbl 
               ? `Not received, due ${fmtD(depositDue.date)}`
               : 'Not received'
         }
+        mono={false}
       />
+      <RowLine l="Balance due" v={money(o.balance_due)} bold mono={false} />
+      <RowLine l="Recipients shipped" v={`${fmtInt(shipped)} of ${fmtInt(recipTotal)}`} mono={false} />
+      <div style={{ marginTop: 12, ...lbl, marginBottom: 6 }}>Recipients</div>
+      <div style={{ maxHeight: 280, overflowY: 'auto', border: `1px solid ${BORDER}`, borderRadius: 2, padding: '4px 10px' }}>
+        {o.recipients.map((r, i) => (
+          <div
+            key={i}
+            style={{
+              display: 'flex',
+              justifyContent: 'space-between',
+              gap: 10,
+              padding: '7px 0',
+              borderTop: i ? `1px solid ${CREAM}` : 'none',
+              fontSize: 13,
+            }}
+          >
+            <span>{r.name}</span>
+            <span style={{ color: MUTED, flexShrink: 0 }}>{r.status}</span>
+          </div>
+        ))}
+      </div>
       <div style={{ marginTop: 12, ...lbl, marginBottom: 6 }}>Cash due</div>
       {o.cash_due.map((c, i) => (
-        <RowLine key={i} l={`${fmtD(c.date)} · ${c.type}`} v={money(c.amount)} />
+        <RowLine key={i} l={`${fmtD(c.date)} · ${c.type}`} v={money(c.amount)} mono={false} />
       ))}
-      <RowLine l="Balance due" v={money(cashSum)} bold />
+      {showDepositInvoice ? (
+        <button
+          type="button"
+          className="pop-click"
+          onClick={() => onInvoicePreview?.({ orderId: o.id, kind: 'deposit' })}
+          style={{
+            marginTop: 16,
+            border: `1px solid ${BORDER}`,
+            background: CARDBG,
+            color: SPICE,
+            fontWeight: 600,
+            cursor: 'pointer',
+            fontSize: 13,
+            padding: '10px 14px',
+            borderRadius: 2,
+            width: '100%',
+            textAlign: 'left',
+          }}
+        >
+          Create deposit invoice
+        </button>
+      ) : null}
+      {showBalanceInvoice ? (
+        <button
+          type="button"
+          className="pop-click"
+          onClick={() => onInvoicePreview?.({ orderId: o.id, kind: 'balance' })}
+          style={{
+            marginTop: showDepositInvoice ? 8 : 16,
+            border: `1px solid ${BORDER}`,
+            background: CARDBG,
+            color: SPICE,
+            fontWeight: 600,
+            cursor: 'pointer',
+            fontSize: 13,
+            padding: '10px 14px',
+            borderRadius: 2,
+            width: '100%',
+            textAlign: 'left',
+          }}
+        >
+          Create balance invoice
+        </button>
+      ) : null}
+    </DetailShell>
+  )
+}
+
+export function InvoicePreviewDetail({ orderId, kind, onClose, card, big, lbl }) {
+  const o = DATA.holiday_orders.find((x) => x.id === orderId)
+  if (!o) return null
+  const isDeposit = kind === 'deposit'
+  const lineAmount = isDeposit ? o.deposit_amount : o.balance_due
+  const lineLabel = isDeposit ? 'Deposit' : 'Balance'
+  const invoiceDate = '2026-10-18'
+  return (
+    <div>
+      <button type="button" className="pop-back" onClick={onClose}>
+        Close
+      </button>
+      <div style={{ ...card }}>
+        <div className="pop-client-name" style={{ ...big, fontSize: '20px', color: INK, marginBottom: '14px' }}>
+          {isDeposit ? 'Deposit invoice preview' : 'Balance invoice preview'}
+        </div>
+        <RowLine l="Bill to" v={o.client} mono={false} />
+        <RowLine l="Invoice date" v={fmtD(invoiceDate)} mono={false} />
+        <RowLine l="Order" v={o.id} mono={false} />
+        <div style={{ marginTop: 12, ...lbl, marginBottom: 8 }}>Line items</div>
+        <RowLine l={`${fmtInt(o.units)} tins @ ${money(o.price)}`} v={money(o.order_total)} mono={false} />
+        <RowLine l={lineLabel} v={money(lineAmount)} mono={false} />
+        <RowLine l="Invoice total" v={money(lineAmount)} bold mono={false} />
+        <div style={{ marginTop: 14, fontSize: 13, color: MUTED }}>Goes into QuickBooks as an invoice</div>
+      </div>
+    </div>
+  )
+}
+
+export function HolidayOverviewDetail({ focus, onBack, onOrder, onGoOrders, card, big, lbl }) {
+  const hol = holidayTotals()
+  const orders = DATA.holiday_orders
+  const title =
+    focus === 'booked'
+      ? 'Holiday orders booked'
+      : focus === 'deposits'
+        ? 'Deposits received'
+        : focus === 'balance'
+          ? 'Balance due'
+          : 'Holiday orders'
+  const rows =
+    focus === 'deposits'
+      ? orders.filter((o) => o.deposit_received > 0)
+      : focus === 'balance'
+        ? orders.filter((o) => o.balance_due > 0)
+        : orders
+  const total =
+    focus === 'booked'
+      ? hol.booked
+      : focus === 'deposits'
+        ? hol.deposits
+        : focus === 'balance'
+          ? hol.balance
+          : hol.booked
+
+  return (
+    <DetailShell title={title} onBack={onBack} card={card} big={big}>
+      {focus === 'booked' ? (
+        <RowLine l="Orders" v={`${hol.count} · ${fmtInt(hol.units)} units`} mono={false} />
+      ) : null}
+      {focus === 'deposits' ? (
+        <RowLine l="Rule" v="Deposit paid stage or later" mono={false} />
+      ) : null}
+      <div style={{ marginTop: 8, ...lbl, marginBottom: 8 }}>By order</div>
+      <table className="pop-table">
+        <thead>
+          <tr>
+            <th className="pop-th">Client</th>
+            <th className="pop-th pop-th--r">{focus === 'booked' ? 'Order total' : focus === 'deposits' ? 'Deposit' : 'Balance'}</th>
+          </tr>
+        </thead>
+        <tbody>
+          {rows.map((o) => (
+            <ClickRow key={o.id} onClick={() => onOrder(o.id)}>
+              <td className="pop-td"><span className="pop-client-name">{o.client}</span></td>
+              <td className="pop-td pop-td--r">
+                {money(focus === 'booked' ? o.order_total : focus === 'deposits' ? o.deposit_received : o.balance_due)}
+              </td>
+            </ClickRow>
+          ))}
+        </tbody>
+        <tfoot>
+          <tr className="pop-tfoot">
+            <td className="pop-td">Total</td>
+            <td className="pop-td pop-td--r">{money(total)}</td>
+          </tr>
+        </tfoot>
+      </table>
+      <button
+        type="button"
+        className="pop-click"
+        onClick={onGoOrders}
+        style={{
+          marginTop: 16,
+          border: `1px solid ${BORDER}`,
+          background: CARDBG,
+          color: SPICE,
+          fontWeight: 600,
+          cursor: 'pointer',
+          fontSize: 13,
+          padding: '10px 14px',
+          borderRadius: 2,
+          width: '100%',
+          textAlign: 'left',
+        }}
+      >
+        Open corporate orders board
+      </button>
     </DetailShell>
   )
 }

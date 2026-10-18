@@ -132,12 +132,467 @@
       "deposit_received": 10625,
       "deposit_date": "2026-09-29",
       "balance_due": 10625,
-      "status": "Deposit received",
+      "status": "Deposit paid",
       "cash_due": [
         {
           "date": "2026-11-20",
           "type": "Final balance",
           "amount": 10625
+        }
+      ],
+      "stage": "deposit_paid",
+      "recipients": [
+        {
+          "name": "Rivky - Monsey",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Malky - Flatbush",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Chaya - Queens",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Suri - Passaic",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Esther - Boro Park",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Leah - Teaneck",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Bracha - Monroe",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Dina - Lakewood",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Faigy - Spring Valley",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Tziporah - Lawrence",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Shaindy - Monsey",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Rochel - Flatbush",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Yehudis - Queens",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Miriam - Passaic",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Sheindy - Boro Park",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Rivky - Teaneck",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Malky - Monroe",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Chaya - Lakewood",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Suri - Spring Valley",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Esther - Lawrence",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Leah - Monsey",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Bracha - Flatbush",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Dina - Queens",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Faigy - Passaic",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Tziporah - Boro Park",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Shaindy - Teaneck",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Rochel - Monroe",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Yehudis - Lakewood",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Miriam - Spring Valley",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Sheindy - Lawrence",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Rivky - Monsey",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Malky - Flatbush",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Chaya - Queens",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Suri - Passaic",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Esther - Boro Park",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Leah - Teaneck",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Bracha - Monroe",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Dina - Lakewood",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Faigy - Spring Valley",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Tziporah - Lawrence",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Shaindy - Monsey",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Rochel - Flatbush",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Yehudis - Queens",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Miriam - Passaic",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Sheindy - Boro Park",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Rivky - Teaneck",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Malky - Monroe",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Chaya - Lakewood",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Suri - Spring Valley",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Esther - Lawrence",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Leah - Monsey",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Bracha - Flatbush",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Dina - Queens",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Faigy - Passaic",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Tziporah - Boro Park",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Shaindy - Teaneck",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Rochel - Monroe",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Yehudis - Lakewood",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Miriam - Spring Valley",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Sheindy - Lawrence",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Rivky - Monsey",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Malky - Flatbush",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Chaya - Queens",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Suri - Passaic",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Esther - Boro Park",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Leah - Teaneck",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Bracha - Monroe",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Dina - Lakewood",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Faigy - Spring Valley",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Tziporah - Lawrence",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Shaindy - Monsey",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Rochel - Flatbush",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Yehudis - Queens",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Miriam - Passaic",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Sheindy - Boro Park",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Rivky - Teaneck",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Malky - Monroe",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Chaya - Lakewood",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Suri - Spring Valley",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Esther - Lawrence",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Leah - Monsey",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Bracha - Flatbush",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Dina - Queens",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Faigy - Passaic",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Tziporah - Boro Park",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Shaindy - Teaneck",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Rochel - Monroe",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Yehudis - Lakewood",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Miriam - Spring Valley",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Sheindy - Lawrence",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Rivky - Monsey",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Malky - Flatbush",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Chaya - Queens",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Suri - Passaic",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Esther - Boro Park",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Leah - Teaneck",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Bracha - Monroe",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Dina - Lakewood",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Faigy - Spring Valley",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Tziporah - Lawrence",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Shaindy - Monsey",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Rochel - Flatbush",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Yehudis - Queens",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Miriam - Passaic",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Sheindy - Boro Park",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Rivky - Teaneck",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Malky - Monroe",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Chaya - Lakewood",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Suri - Spring Valley",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Esther - Lawrence",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Leah - Monsey",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Bracha - Flatbush",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Dina - Queens",
+          "status": "Not shipped"
         }
       ]
     },
@@ -155,12 +610,575 @@
       "deposit_received": 10800,
       "deposit_date": "2026-10-02",
       "balance_due": 10800,
-      "status": "Deposit received",
+      "status": "Deposit paid",
       "cash_due": [
         {
           "date": "2026-12-01",
           "type": "Final balance",
           "amount": 10800
+        }
+      ],
+      "stage": "deposit_paid",
+      "recipients": [
+        {
+          "name": "Rivky - Monsey",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Malky - Flatbush",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Chaya - Queens",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Suri - Passaic",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Esther - Boro Park",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Leah - Teaneck",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Bracha - Monroe",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Dina - Lakewood",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Faigy - Spring Valley",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Tziporah - Lawrence",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Shaindy - Monsey",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Rochel - Flatbush",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Yehudis - Queens",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Miriam - Passaic",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Sheindy - Boro Park",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Rivky - Teaneck",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Malky - Monroe",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Chaya - Lakewood",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Suri - Spring Valley",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Esther - Lawrence",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Leah - Monsey",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Bracha - Flatbush",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Dina - Queens",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Faigy - Passaic",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Tziporah - Boro Park",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Shaindy - Teaneck",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Rochel - Monroe",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Yehudis - Lakewood",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Miriam - Spring Valley",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Sheindy - Lawrence",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Rivky - Monsey",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Malky - Flatbush",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Chaya - Queens",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Suri - Passaic",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Esther - Boro Park",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Leah - Teaneck",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Bracha - Monroe",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Dina - Lakewood",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Faigy - Spring Valley",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Tziporah - Lawrence",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Shaindy - Monsey",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Rochel - Flatbush",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Yehudis - Queens",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Miriam - Passaic",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Sheindy - Boro Park",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Rivky - Teaneck",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Malky - Monroe",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Chaya - Lakewood",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Suri - Spring Valley",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Esther - Lawrence",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Leah - Monsey",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Bracha - Flatbush",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Dina - Queens",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Faigy - Passaic",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Tziporah - Boro Park",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Shaindy - Teaneck",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Rochel - Monroe",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Yehudis - Lakewood",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Miriam - Spring Valley",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Sheindy - Lawrence",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Rivky - Monsey",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Malky - Flatbush",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Chaya - Queens",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Suri - Passaic",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Esther - Boro Park",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Leah - Teaneck",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Bracha - Monroe",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Dina - Lakewood",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Faigy - Spring Valley",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Tziporah - Lawrence",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Shaindy - Monsey",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Rochel - Flatbush",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Yehudis - Queens",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Miriam - Passaic",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Sheindy - Boro Park",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Rivky - Teaneck",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Malky - Monroe",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Chaya - Lakewood",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Suri - Spring Valley",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Esther - Lawrence",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Leah - Monsey",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Bracha - Flatbush",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Dina - Queens",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Faigy - Passaic",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Tziporah - Boro Park",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Shaindy - Teaneck",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Rochel - Monroe",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Yehudis - Lakewood",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Miriam - Spring Valley",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Sheindy - Lawrence",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Rivky - Monsey",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Malky - Flatbush",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Chaya - Queens",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Suri - Passaic",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Esther - Boro Park",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Leah - Teaneck",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Bracha - Monroe",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Dina - Lakewood",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Faigy - Spring Valley",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Tziporah - Lawrence",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Shaindy - Monsey",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Rochel - Flatbush",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Yehudis - Queens",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Miriam - Passaic",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Sheindy - Boro Park",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Rivky - Teaneck",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Malky - Monroe",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Chaya - Lakewood",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Suri - Spring Valley",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Esther - Lawrence",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Leah - Monsey",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Bracha - Flatbush",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Dina - Queens",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Faigy - Passaic",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Tziporah - Boro Park",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Shaindy - Teaneck",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Rochel - Monroe",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Yehudis - Lakewood",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Miriam - Spring Valley",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Sheindy - Lawrence",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Rivky - Monsey",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Malky - Flatbush",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Chaya - Queens",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Suri - Passaic",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Esther - Boro Park",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Leah - Teaneck",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Bracha - Monroe",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Dina - Lakewood",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Faigy - Spring Valley",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Tziporah - Lawrence",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Shaindy - Monsey",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Rochel - Flatbush",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Yehudis - Queens",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Miriam - Passaic",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Sheindy - Boro Park",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Rivky - Teaneck",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Malky - Monroe",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Chaya - Lakewood",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Suri - Spring Valley",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Esther - Lawrence",
+          "status": "Not shipped"
         }
       ]
     },
@@ -178,12 +1196,335 @@
       "deposit_received": 5600,
       "deposit_date": "2026-10-06",
       "balance_due": 5600,
-      "status": "Deposit received",
+      "status": "Shipping",
       "cash_due": [
         {
           "date": "2026-12-04",
           "type": "Final balance",
           "amount": 5600
+        }
+      ],
+      "stage": "shipping",
+      "recipients": [
+        {
+          "name": "Rivky - Monsey",
+          "status": "Delivered"
+        },
+        {
+          "name": "Malky - Flatbush",
+          "status": "Delivered"
+        },
+        {
+          "name": "Chaya - Queens",
+          "status": "Delivered"
+        },
+        {
+          "name": "Suri - Passaic",
+          "status": "Delivered"
+        },
+        {
+          "name": "Esther - Boro Park",
+          "status": "Delivered"
+        },
+        {
+          "name": "Leah - Teaneck",
+          "status": "Delivered"
+        },
+        {
+          "name": "Bracha - Monroe",
+          "status": "Delivered"
+        },
+        {
+          "name": "Dina - Lakewood",
+          "status": "Delivered"
+        },
+        {
+          "name": "Faigy - Spring Valley",
+          "status": "Delivered"
+        },
+        {
+          "name": "Tziporah - Lawrence",
+          "status": "Delivered"
+        },
+        {
+          "name": "Shaindy - Monsey",
+          "status": "Delivered"
+        },
+        {
+          "name": "Rochel - Flatbush",
+          "status": "Delivered"
+        },
+        {
+          "name": "Yehudis - Queens",
+          "status": "Delivered"
+        },
+        {
+          "name": "Miriam - Passaic",
+          "status": "Delivered"
+        },
+        {
+          "name": "Sheindy - Boro Park",
+          "status": "Shipped"
+        },
+        {
+          "name": "Rivky - Teaneck",
+          "status": "Shipped"
+        },
+        {
+          "name": "Malky - Monroe",
+          "status": "Shipped"
+        },
+        {
+          "name": "Chaya - Lakewood",
+          "status": "Shipped"
+        },
+        {
+          "name": "Suri - Spring Valley",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Esther - Lawrence",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Leah - Monsey",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Bracha - Flatbush",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Dina - Queens",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Faigy - Passaic",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Tziporah - Boro Park",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Shaindy - Teaneck",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Rochel - Monroe",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Yehudis - Lakewood",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Miriam - Spring Valley",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Sheindy - Lawrence",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Rivky - Monsey",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Malky - Flatbush",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Chaya - Queens",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Suri - Passaic",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Esther - Boro Park",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Leah - Teaneck",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Bracha - Monroe",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Dina - Lakewood",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Faigy - Spring Valley",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Tziporah - Lawrence",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Shaindy - Monsey",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Rochel - Flatbush",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Yehudis - Queens",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Miriam - Passaic",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Sheindy - Boro Park",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Rivky - Teaneck",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Malky - Monroe",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Chaya - Lakewood",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Suri - Spring Valley",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Esther - Lawrence",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Leah - Monsey",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Bracha - Flatbush",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Dina - Queens",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Faigy - Passaic",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Tziporah - Boro Park",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Shaindy - Teaneck",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Rochel - Monroe",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Yehudis - Lakewood",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Miriam - Spring Valley",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Sheindy - Lawrence",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Rivky - Monsey",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Malky - Flatbush",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Chaya - Queens",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Suri - Passaic",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Esther - Boro Park",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Leah - Teaneck",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Bracha - Monroe",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Dina - Lakewood",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Faigy - Spring Valley",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Tziporah - Lawrence",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Shaindy - Monsey",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Rochel - Flatbush",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Yehudis - Queens",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Miriam - Passaic",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Sheindy - Boro Park",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Rivky - Teaneck",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Malky - Monroe",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Chaya - Lakewood",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Suri - Spring Valley",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Esther - Lawrence",
+          "status": "Not shipped"
         }
       ]
     },
@@ -201,12 +1542,615 @@
       "deposit_received": 5760,
       "deposit_date": "2026-10-08",
       "balance_due": 13440,
-      "status": "Deposit received",
+      "status": "Shipping",
       "cash_due": [
         {
           "date": "2026-11-25",
           "type": "Final balance",
           "amount": 13440
+        }
+      ],
+      "stage": "shipping",
+      "recipients": [
+        {
+          "name": "Rivky - Monsey",
+          "status": "Delivered"
+        },
+        {
+          "name": "Malky - Flatbush",
+          "status": "Delivered"
+        },
+        {
+          "name": "Chaya - Queens",
+          "status": "Delivered"
+        },
+        {
+          "name": "Suri - Passaic",
+          "status": "Delivered"
+        },
+        {
+          "name": "Esther - Boro Park",
+          "status": "Delivered"
+        },
+        {
+          "name": "Leah - Teaneck",
+          "status": "Delivered"
+        },
+        {
+          "name": "Bracha - Monroe",
+          "status": "Delivered"
+        },
+        {
+          "name": "Dina - Lakewood",
+          "status": "Delivered"
+        },
+        {
+          "name": "Faigy - Spring Valley",
+          "status": "Delivered"
+        },
+        {
+          "name": "Tziporah - Lawrence",
+          "status": "Delivered"
+        },
+        {
+          "name": "Shaindy - Monsey",
+          "status": "Delivered"
+        },
+        {
+          "name": "Rochel - Flatbush",
+          "status": "Delivered"
+        },
+        {
+          "name": "Yehudis - Queens",
+          "status": "Delivered"
+        },
+        {
+          "name": "Miriam - Passaic",
+          "status": "Delivered"
+        },
+        {
+          "name": "Sheindy - Boro Park",
+          "status": "Delivered"
+        },
+        {
+          "name": "Rivky - Teaneck",
+          "status": "Delivered"
+        },
+        {
+          "name": "Malky - Monroe",
+          "status": "Delivered"
+        },
+        {
+          "name": "Chaya - Lakewood",
+          "status": "Delivered"
+        },
+        {
+          "name": "Suri - Spring Valley",
+          "status": "Delivered"
+        },
+        {
+          "name": "Esther - Lawrence",
+          "status": "Delivered"
+        },
+        {
+          "name": "Leah - Monsey",
+          "status": "Delivered"
+        },
+        {
+          "name": "Bracha - Flatbush",
+          "status": "Delivered"
+        },
+        {
+          "name": "Dina - Queens",
+          "status": "Delivered"
+        },
+        {
+          "name": "Faigy - Passaic",
+          "status": "Delivered"
+        },
+        {
+          "name": "Tziporah - Boro Park",
+          "status": "Delivered"
+        },
+        {
+          "name": "Shaindy - Teaneck",
+          "status": "Delivered"
+        },
+        {
+          "name": "Rochel - Monroe",
+          "status": "Delivered"
+        },
+        {
+          "name": "Yehudis - Lakewood",
+          "status": "Delivered"
+        },
+        {
+          "name": "Miriam - Spring Valley",
+          "status": "Delivered"
+        },
+        {
+          "name": "Sheindy - Lawrence",
+          "status": "Shipped"
+        },
+        {
+          "name": "Rivky - Monsey",
+          "status": "Shipped"
+        },
+        {
+          "name": "Malky - Flatbush",
+          "status": "Shipped"
+        },
+        {
+          "name": "Chaya - Queens",
+          "status": "Shipped"
+        },
+        {
+          "name": "Suri - Passaic",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Esther - Boro Park",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Leah - Teaneck",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Bracha - Monroe",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Dina - Lakewood",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Faigy - Spring Valley",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Tziporah - Lawrence",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Shaindy - Monsey",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Rochel - Flatbush",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Yehudis - Queens",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Miriam - Passaic",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Sheindy - Boro Park",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Rivky - Teaneck",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Malky - Monroe",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Chaya - Lakewood",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Suri - Spring Valley",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Esther - Lawrence",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Leah - Monsey",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Bracha - Flatbush",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Dina - Queens",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Faigy - Passaic",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Tziporah - Boro Park",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Shaindy - Teaneck",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Rochel - Monroe",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Yehudis - Lakewood",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Miriam - Spring Valley",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Sheindy - Lawrence",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Rivky - Monsey",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Malky - Flatbush",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Chaya - Queens",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Suri - Passaic",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Esther - Boro Park",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Leah - Teaneck",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Bracha - Monroe",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Dina - Lakewood",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Faigy - Spring Valley",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Tziporah - Lawrence",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Shaindy - Monsey",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Rochel - Flatbush",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Yehudis - Queens",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Miriam - Passaic",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Sheindy - Boro Park",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Rivky - Teaneck",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Malky - Monroe",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Chaya - Lakewood",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Suri - Spring Valley",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Esther - Lawrence",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Leah - Monsey",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Bracha - Flatbush",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Dina - Queens",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Faigy - Passaic",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Tziporah - Boro Park",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Shaindy - Teaneck",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Rochel - Monroe",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Yehudis - Lakewood",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Miriam - Spring Valley",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Sheindy - Lawrence",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Rivky - Monsey",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Malky - Flatbush",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Chaya - Queens",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Suri - Passaic",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Esther - Boro Park",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Leah - Teaneck",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Bracha - Monroe",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Dina - Lakewood",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Faigy - Spring Valley",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Tziporah - Lawrence",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Shaindy - Monsey",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Rochel - Flatbush",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Yehudis - Queens",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Miriam - Passaic",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Sheindy - Boro Park",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Rivky - Teaneck",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Malky - Monroe",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Chaya - Lakewood",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Suri - Spring Valley",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Esther - Lawrence",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Leah - Monsey",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Bracha - Flatbush",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Dina - Queens",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Faigy - Passaic",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Tziporah - Boro Park",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Shaindy - Teaneck",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Rochel - Monroe",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Yehudis - Lakewood",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Miriam - Spring Valley",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Sheindy - Lawrence",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Rivky - Monsey",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Malky - Flatbush",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Chaya - Queens",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Suri - Passaic",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Esther - Boro Park",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Leah - Teaneck",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Bracha - Monroe",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Dina - Lakewood",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Faigy - Spring Valley",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Tziporah - Lawrence",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Shaindy - Monsey",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Rochel - Flatbush",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Yehudis - Queens",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Miriam - Passaic",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Sheindy - Boro Park",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Rivky - Teaneck",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Malky - Monroe",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Chaya - Lakewood",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Suri - Spring Valley",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Esther - Lawrence",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Leah - Monsey",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Bracha - Flatbush",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Dina - Queens",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Faigy - Passaic",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Tziporah - Boro Park",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Shaindy - Teaneck",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Rochel - Monroe",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Yehudis - Lakewood",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Miriam - Spring Valley",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Sheindy - Lawrence",
+          "status": "Not shipped"
         }
       ]
     },
@@ -224,12 +2168,375 @@
       "deposit_received": 6375,
       "deposit_date": "2026-10-09",
       "balance_due": 6375,
-      "status": "Deposit received",
+      "status": "Deposit paid",
       "cash_due": [
         {
           "date": "2026-12-10",
           "type": "Final balance",
           "amount": 6375
+        }
+      ],
+      "stage": "deposit_paid",
+      "recipients": [
+        {
+          "name": "Rivky - Monsey",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Malky - Flatbush",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Chaya - Queens",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Suri - Passaic",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Esther - Boro Park",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Leah - Teaneck",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Bracha - Monroe",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Dina - Lakewood",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Faigy - Spring Valley",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Tziporah - Lawrence",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Shaindy - Monsey",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Rochel - Flatbush",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Yehudis - Queens",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Miriam - Passaic",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Sheindy - Boro Park",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Rivky - Teaneck",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Malky - Monroe",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Chaya - Lakewood",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Suri - Spring Valley",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Esther - Lawrence",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Leah - Monsey",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Bracha - Flatbush",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Dina - Queens",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Faigy - Passaic",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Tziporah - Boro Park",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Shaindy - Teaneck",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Rochel - Monroe",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Yehudis - Lakewood",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Miriam - Spring Valley",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Sheindy - Lawrence",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Rivky - Monsey",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Malky - Flatbush",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Chaya - Queens",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Suri - Passaic",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Esther - Boro Park",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Leah - Teaneck",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Bracha - Monroe",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Dina - Lakewood",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Faigy - Spring Valley",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Tziporah - Lawrence",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Shaindy - Monsey",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Rochel - Flatbush",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Yehudis - Queens",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Miriam - Passaic",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Sheindy - Boro Park",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Rivky - Teaneck",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Malky - Monroe",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Chaya - Lakewood",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Suri - Spring Valley",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Esther - Lawrence",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Leah - Monsey",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Bracha - Flatbush",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Dina - Queens",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Faigy - Passaic",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Tziporah - Boro Park",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Shaindy - Teaneck",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Rochel - Monroe",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Yehudis - Lakewood",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Miriam - Spring Valley",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Sheindy - Lawrence",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Rivky - Monsey",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Malky - Flatbush",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Chaya - Queens",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Suri - Passaic",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Esther - Boro Park",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Leah - Teaneck",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Bracha - Monroe",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Dina - Lakewood",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Faigy - Spring Valley",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Tziporah - Lawrence",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Shaindy - Monsey",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Rochel - Flatbush",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Yehudis - Queens",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Miriam - Passaic",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Sheindy - Boro Park",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Rivky - Teaneck",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Malky - Monroe",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Chaya - Lakewood",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Suri - Spring Valley",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Esther - Lawrence",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Leah - Monsey",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Bracha - Flatbush",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Dina - Queens",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Faigy - Passaic",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Tziporah - Boro Park",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Shaindy - Teaneck",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Rochel - Monroe",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Yehudis - Lakewood",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Miriam - Spring Valley",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Sheindy - Lawrence",
+          "status": "Not shipped"
         }
       ]
     },
@@ -247,12 +2554,411 @@
       "deposit_received": 5940,
       "deposit_date": "2026-10-13",
       "balance_due": 5940,
-      "status": "Deposit received",
+      "status": "Shipping",
       "cash_due": [
         {
           "date": "2026-11-16",
           "type": "Final balance",
           "amount": 5940
+        }
+      ],
+      "stage": "shipping",
+      "recipients": [
+        {
+          "name": "Rivky - Monsey",
+          "status": "Delivered"
+        },
+        {
+          "name": "Malky - Flatbush",
+          "status": "Delivered"
+        },
+        {
+          "name": "Chaya - Queens",
+          "status": "Delivered"
+        },
+        {
+          "name": "Suri - Passaic",
+          "status": "Delivered"
+        },
+        {
+          "name": "Esther - Boro Park",
+          "status": "Delivered"
+        },
+        {
+          "name": "Leah - Teaneck",
+          "status": "Delivered"
+        },
+        {
+          "name": "Bracha - Monroe",
+          "status": "Delivered"
+        },
+        {
+          "name": "Dina - Lakewood",
+          "status": "Delivered"
+        },
+        {
+          "name": "Faigy - Spring Valley",
+          "status": "Delivered"
+        },
+        {
+          "name": "Tziporah - Lawrence",
+          "status": "Delivered"
+        },
+        {
+          "name": "Shaindy - Monsey",
+          "status": "Delivered"
+        },
+        {
+          "name": "Rochel - Flatbush",
+          "status": "Delivered"
+        },
+        {
+          "name": "Yehudis - Queens",
+          "status": "Delivered"
+        },
+        {
+          "name": "Miriam - Passaic",
+          "status": "Delivered"
+        },
+        {
+          "name": "Sheindy - Boro Park",
+          "status": "Delivered"
+        },
+        {
+          "name": "Rivky - Teaneck",
+          "status": "Delivered"
+        },
+        {
+          "name": "Malky - Monroe",
+          "status": "Delivered"
+        },
+        {
+          "name": "Chaya - Lakewood",
+          "status": "Delivered"
+        },
+        {
+          "name": "Suri - Spring Valley",
+          "status": "Shipped"
+        },
+        {
+          "name": "Esther - Lawrence",
+          "status": "Shipped"
+        },
+        {
+          "name": "Leah - Monsey",
+          "status": "Shipped"
+        },
+        {
+          "name": "Bracha - Flatbush",
+          "status": "Shipped"
+        },
+        {
+          "name": "Dina - Queens",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Faigy - Passaic",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Tziporah - Boro Park",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Shaindy - Teaneck",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Rochel - Monroe",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Yehudis - Lakewood",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Miriam - Spring Valley",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Sheindy - Lawrence",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Rivky - Monsey",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Malky - Flatbush",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Chaya - Queens",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Suri - Passaic",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Esther - Boro Park",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Leah - Teaneck",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Bracha - Monroe",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Dina - Lakewood",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Faigy - Spring Valley",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Tziporah - Lawrence",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Shaindy - Monsey",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Rochel - Flatbush",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Yehudis - Queens",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Miriam - Passaic",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Sheindy - Boro Park",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Rivky - Teaneck",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Malky - Monroe",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Chaya - Lakewood",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Suri - Spring Valley",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Esther - Lawrence",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Leah - Monsey",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Bracha - Flatbush",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Dina - Queens",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Faigy - Passaic",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Tziporah - Boro Park",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Shaindy - Teaneck",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Rochel - Monroe",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Yehudis - Lakewood",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Miriam - Spring Valley",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Sheindy - Lawrence",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Rivky - Monsey",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Malky - Flatbush",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Chaya - Queens",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Suri - Passaic",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Esther - Boro Park",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Leah - Teaneck",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Bracha - Monroe",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Dina - Lakewood",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Faigy - Spring Valley",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Tziporah - Lawrence",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Shaindy - Monsey",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Rochel - Flatbush",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Yehudis - Queens",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Miriam - Passaic",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Sheindy - Boro Park",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Rivky - Teaneck",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Malky - Monroe",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Chaya - Lakewood",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Suri - Spring Valley",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Esther - Lawrence",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Leah - Monsey",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Bracha - Flatbush",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Dina - Queens",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Faigy - Passaic",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Tziporah - Boro Park",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Shaindy - Teaneck",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Rochel - Monroe",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Yehudis - Lakewood",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Miriam - Spring Valley",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Sheindy - Lawrence",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Rivky - Monsey",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Malky - Flatbush",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Chaya - Queens",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Suri - Passaic",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Esther - Boro Park",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Leah - Teaneck",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Bracha - Monroe",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Dina - Lakewood",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Faigy - Spring Valley",
+          "status": "Not shipped"
         }
       ]
     },
@@ -270,7 +2976,7 @@
       "deposit_received": 0,
       "deposit_date": null,
       "balance_due": 11200,
-      "status": "Awaiting deposit",
+      "status": "Deposit invoiced",
       "cash_due": [
         {
           "date": "2026-10-23",
@@ -281,6 +2987,497 @@
           "date": "2026-12-07",
           "type": "Final balance",
           "amount": 5600
+        }
+      ],
+      "stage": "deposit_invoiced",
+      "recipients": [
+        {
+          "name": "Rivky - Monsey",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Malky - Flatbush",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Chaya - Queens",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Suri - Passaic",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Esther - Boro Park",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Leah - Teaneck",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Bracha - Monroe",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Dina - Lakewood",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Faigy - Spring Valley",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Tziporah - Lawrence",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Shaindy - Monsey",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Rochel - Flatbush",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Yehudis - Queens",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Miriam - Passaic",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Sheindy - Boro Park",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Rivky - Teaneck",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Malky - Monroe",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Chaya - Lakewood",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Suri - Spring Valley",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Esther - Lawrence",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Leah - Monsey",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Bracha - Flatbush",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Dina - Queens",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Faigy - Passaic",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Tziporah - Boro Park",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Shaindy - Teaneck",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Rochel - Monroe",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Yehudis - Lakewood",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Miriam - Spring Valley",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Sheindy - Lawrence",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Rivky - Monsey",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Malky - Flatbush",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Chaya - Queens",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Suri - Passaic",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Esther - Boro Park",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Leah - Teaneck",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Bracha - Monroe",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Dina - Lakewood",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Faigy - Spring Valley",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Tziporah - Lawrence",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Shaindy - Monsey",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Rochel - Flatbush",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Yehudis - Queens",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Miriam - Passaic",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Sheindy - Boro Park",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Rivky - Teaneck",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Malky - Monroe",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Chaya - Lakewood",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Suri - Spring Valley",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Esther - Lawrence",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Leah - Monsey",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Bracha - Flatbush",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Dina - Queens",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Faigy - Passaic",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Tziporah - Boro Park",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Shaindy - Teaneck",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Rochel - Monroe",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Yehudis - Lakewood",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Miriam - Spring Valley",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Sheindy - Lawrence",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Rivky - Monsey",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Malky - Flatbush",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Chaya - Queens",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Suri - Passaic",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Esther - Boro Park",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Leah - Teaneck",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Bracha - Monroe",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Dina - Lakewood",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Faigy - Spring Valley",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Tziporah - Lawrence",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Shaindy - Monsey",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Rochel - Flatbush",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Yehudis - Queens",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Miriam - Passaic",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Sheindy - Boro Park",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Rivky - Teaneck",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Malky - Monroe",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Chaya - Lakewood",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Suri - Spring Valley",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Esther - Lawrence",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Leah - Monsey",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Bracha - Flatbush",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Dina - Queens",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Faigy - Passaic",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Tziporah - Boro Park",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Shaindy - Teaneck",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Rochel - Monroe",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Yehudis - Lakewood",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Miriam - Spring Valley",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Sheindy - Lawrence",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Rivky - Monsey",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Malky - Flatbush",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Chaya - Queens",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Suri - Passaic",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Esther - Boro Park",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Leah - Teaneck",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Bracha - Monroe",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Dina - Lakewood",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Faigy - Spring Valley",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Tziporah - Lawrence",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Shaindy - Monsey",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Rochel - Flatbush",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Yehudis - Queens",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Miriam - Passaic",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Sheindy - Boro Park",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Rivky - Teaneck",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Malky - Monroe",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Chaya - Lakewood",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Suri - Spring Valley",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Esther - Lawrence",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Leah - Monsey",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Bracha - Flatbush",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Dina - Queens",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Faigy - Passaic",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Tziporah - Boro Park",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Shaindy - Teaneck",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Rochel - Monroe",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Yehudis - Lakewood",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Miriam - Spring Valley",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Sheindy - Lawrence",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Rivky - Monsey",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Malky - Flatbush",
+          "status": "Not shipped"
         }
       ]
     },
@@ -298,12 +3495,255 @@
       "deposit_received": 4200,
       "deposit_date": "2026-10-14",
       "balance_due": 4200,
-      "status": "Deposit received",
+      "status": "Deposit paid",
       "cash_due": [
         {
           "date": "2026-12-15",
           "type": "Final balance",
           "amount": 4200
+        }
+      ],
+      "stage": "deposit_paid",
+      "recipients": [
+        {
+          "name": "Rivky - Monsey",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Malky - Flatbush",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Chaya - Queens",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Suri - Passaic",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Esther - Boro Park",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Leah - Teaneck",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Bracha - Monroe",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Dina - Lakewood",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Faigy - Spring Valley",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Tziporah - Lawrence",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Shaindy - Monsey",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Rochel - Flatbush",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Yehudis - Queens",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Miriam - Passaic",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Sheindy - Boro Park",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Rivky - Teaneck",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Malky - Monroe",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Chaya - Lakewood",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Suri - Spring Valley",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Esther - Lawrence",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Leah - Monsey",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Bracha - Flatbush",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Dina - Queens",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Faigy - Passaic",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Tziporah - Boro Park",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Shaindy - Teaneck",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Rochel - Monroe",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Yehudis - Lakewood",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Miriam - Spring Valley",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Sheindy - Lawrence",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Rivky - Monsey",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Malky - Flatbush",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Chaya - Queens",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Suri - Passaic",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Esther - Boro Park",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Leah - Teaneck",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Bracha - Monroe",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Dina - Lakewood",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Faigy - Spring Valley",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Tziporah - Lawrence",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Shaindy - Monsey",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Rochel - Flatbush",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Yehudis - Queens",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Miriam - Passaic",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Sheindy - Boro Park",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Rivky - Teaneck",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Malky - Monroe",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Chaya - Lakewood",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Suri - Spring Valley",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Esther - Lawrence",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Leah - Monsey",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Bracha - Flatbush",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Dina - Queens",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Faigy - Passaic",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Tziporah - Boro Park",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Shaindy - Teaneck",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Rochel - Monroe",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Yehudis - Lakewood",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Miriam - Spring Valley",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Sheindy - Lawrence",
+          "status": "Not shipped"
         }
       ]
     },
@@ -321,7 +3761,7 @@
       "deposit_received": 0,
       "deposit_date": null,
       "balance_due": 9720,
-      "status": "Awaiting deposit",
+      "status": "Deposit invoiced",
       "cash_due": [
         {
           "date": "2026-10-30",
@@ -332,6 +3772,333 @@
           "date": "2026-12-18",
           "type": "Final balance",
           "amount": 6804
+        }
+      ],
+      "stage": "deposit_invoiced",
+      "recipients": [
+        {
+          "name": "Rivky - Monsey",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Malky - Flatbush",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Chaya - Queens",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Suri - Passaic",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Esther - Boro Park",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Leah - Teaneck",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Bracha - Monroe",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Dina - Lakewood",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Faigy - Spring Valley",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Tziporah - Lawrence",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Shaindy - Monsey",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Rochel - Flatbush",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Yehudis - Queens",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Miriam - Passaic",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Sheindy - Boro Park",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Rivky - Teaneck",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Malky - Monroe",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Chaya - Lakewood",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Suri - Spring Valley",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Esther - Lawrence",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Leah - Monsey",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Bracha - Flatbush",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Dina - Queens",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Faigy - Passaic",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Tziporah - Boro Park",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Shaindy - Teaneck",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Rochel - Monroe",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Yehudis - Lakewood",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Miriam - Spring Valley",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Sheindy - Lawrence",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Rivky - Monsey",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Malky - Flatbush",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Chaya - Queens",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Suri - Passaic",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Esther - Boro Park",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Leah - Teaneck",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Bracha - Monroe",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Dina - Lakewood",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Faigy - Spring Valley",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Tziporah - Lawrence",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Shaindy - Monsey",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Rochel - Flatbush",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Yehudis - Queens",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Miriam - Passaic",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Sheindy - Boro Park",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Rivky - Teaneck",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Malky - Monroe",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Chaya - Lakewood",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Suri - Spring Valley",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Esther - Lawrence",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Leah - Monsey",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Bracha - Flatbush",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Dina - Queens",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Faigy - Passaic",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Tziporah - Boro Park",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Shaindy - Teaneck",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Rochel - Monroe",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Yehudis - Lakewood",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Miriam - Spring Valley",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Sheindy - Lawrence",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Rivky - Monsey",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Malky - Flatbush",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Chaya - Queens",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Suri - Passaic",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Esther - Boro Park",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Leah - Teaneck",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Bracha - Monroe",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Dina - Lakewood",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Faigy - Spring Valley",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Tziporah - Lawrence",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Shaindy - Monsey",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Rochel - Flatbush",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Yehudis - Queens",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Miriam - Passaic",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Sheindy - Boro Park",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Rivky - Teaneck",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Malky - Monroe",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Chaya - Lakewood",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Suri - Spring Valley",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Esther - Lawrence",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Leah - Monsey",
+          "status": "Not shipped"
         }
       ]
     },
@@ -349,12 +4116,303 @@
       "deposit_received": 5100,
       "deposit_date": "2026-10-15",
       "balance_due": 5100,
-      "status": "Deposit received",
+      "status": "Balance invoiced",
       "cash_due": [
         {
           "date": "2026-11-30",
           "type": "Final balance",
           "amount": 5100
+        }
+      ],
+      "stage": "balance_invoiced",
+      "recipients": [
+        {
+          "name": "Rivky - Monsey",
+          "status": "Delivered"
+        },
+        {
+          "name": "Malky - Flatbush",
+          "status": "Delivered"
+        },
+        {
+          "name": "Chaya - Queens",
+          "status": "Delivered"
+        },
+        {
+          "name": "Suri - Passaic",
+          "status": "Delivered"
+        },
+        {
+          "name": "Esther - Boro Park",
+          "status": "Delivered"
+        },
+        {
+          "name": "Leah - Teaneck",
+          "status": "Delivered"
+        },
+        {
+          "name": "Bracha - Monroe",
+          "status": "Delivered"
+        },
+        {
+          "name": "Dina - Lakewood",
+          "status": "Delivered"
+        },
+        {
+          "name": "Faigy - Spring Valley",
+          "status": "Delivered"
+        },
+        {
+          "name": "Tziporah - Lawrence",
+          "status": "Delivered"
+        },
+        {
+          "name": "Shaindy - Monsey",
+          "status": "Delivered"
+        },
+        {
+          "name": "Rochel - Flatbush",
+          "status": "Delivered"
+        },
+        {
+          "name": "Yehudis - Queens",
+          "status": "Delivered"
+        },
+        {
+          "name": "Miriam - Passaic",
+          "status": "Delivered"
+        },
+        {
+          "name": "Sheindy - Boro Park",
+          "status": "Delivered"
+        },
+        {
+          "name": "Rivky - Teaneck",
+          "status": "Delivered"
+        },
+        {
+          "name": "Malky - Monroe",
+          "status": "Delivered"
+        },
+        {
+          "name": "Chaya - Lakewood",
+          "status": "Delivered"
+        },
+        {
+          "name": "Suri - Spring Valley",
+          "status": "Delivered"
+        },
+        {
+          "name": "Esther - Lawrence",
+          "status": "Delivered"
+        },
+        {
+          "name": "Leah - Monsey",
+          "status": "Delivered"
+        },
+        {
+          "name": "Bracha - Flatbush",
+          "status": "Delivered"
+        },
+        {
+          "name": "Dina - Queens",
+          "status": "Delivered"
+        },
+        {
+          "name": "Faigy - Passaic",
+          "status": "Delivered"
+        },
+        {
+          "name": "Tziporah - Boro Park",
+          "status": "Delivered"
+        },
+        {
+          "name": "Shaindy - Teaneck",
+          "status": "Delivered"
+        },
+        {
+          "name": "Rochel - Monroe",
+          "status": "Delivered"
+        },
+        {
+          "name": "Yehudis - Lakewood",
+          "status": "Delivered"
+        },
+        {
+          "name": "Miriam - Spring Valley",
+          "status": "Delivered"
+        },
+        {
+          "name": "Sheindy - Lawrence",
+          "status": "Delivered"
+        },
+        {
+          "name": "Rivky - Monsey",
+          "status": "Delivered"
+        },
+        {
+          "name": "Malky - Flatbush",
+          "status": "Delivered"
+        },
+        {
+          "name": "Chaya - Queens",
+          "status": "Delivered"
+        },
+        {
+          "name": "Suri - Passaic",
+          "status": "Delivered"
+        },
+        {
+          "name": "Esther - Boro Park",
+          "status": "Delivered"
+        },
+        {
+          "name": "Leah - Teaneck",
+          "status": "Delivered"
+        },
+        {
+          "name": "Bracha - Monroe",
+          "status": "Delivered"
+        },
+        {
+          "name": "Dina - Lakewood",
+          "status": "Delivered"
+        },
+        {
+          "name": "Faigy - Spring Valley",
+          "status": "Delivered"
+        },
+        {
+          "name": "Tziporah - Lawrence",
+          "status": "Delivered"
+        },
+        {
+          "name": "Shaindy - Monsey",
+          "status": "Delivered"
+        },
+        {
+          "name": "Rochel - Flatbush",
+          "status": "Delivered"
+        },
+        {
+          "name": "Yehudis - Queens",
+          "status": "Delivered"
+        },
+        {
+          "name": "Miriam - Passaic",
+          "status": "Delivered"
+        },
+        {
+          "name": "Sheindy - Boro Park",
+          "status": "Delivered"
+        },
+        {
+          "name": "Rivky - Teaneck",
+          "status": "Delivered"
+        },
+        {
+          "name": "Malky - Monroe",
+          "status": "Delivered"
+        },
+        {
+          "name": "Chaya - Lakewood",
+          "status": "Delivered"
+        },
+        {
+          "name": "Suri - Spring Valley",
+          "status": "Delivered"
+        },
+        {
+          "name": "Esther - Lawrence",
+          "status": "Delivered"
+        },
+        {
+          "name": "Leah - Monsey",
+          "status": "Delivered"
+        },
+        {
+          "name": "Bracha - Flatbush",
+          "status": "Delivered"
+        },
+        {
+          "name": "Dina - Queens",
+          "status": "Delivered"
+        },
+        {
+          "name": "Faigy - Passaic",
+          "status": "Delivered"
+        },
+        {
+          "name": "Tziporah - Boro Park",
+          "status": "Delivered"
+        },
+        {
+          "name": "Shaindy - Teaneck",
+          "status": "Delivered"
+        },
+        {
+          "name": "Rochel - Monroe",
+          "status": "Delivered"
+        },
+        {
+          "name": "Yehudis - Lakewood",
+          "status": "Delivered"
+        },
+        {
+          "name": "Miriam - Spring Valley",
+          "status": "Delivered"
+        },
+        {
+          "name": "Sheindy - Lawrence",
+          "status": "Shipped"
+        },
+        {
+          "name": "Rivky - Monsey",
+          "status": "Shipped"
+        },
+        {
+          "name": "Malky - Flatbush",
+          "status": "Shipped"
+        },
+        {
+          "name": "Chaya - Queens",
+          "status": "Shipped"
+        },
+        {
+          "name": "Suri - Passaic",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Esther - Boro Park",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Leah - Teaneck",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Bracha - Monroe",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Dina - Lakewood",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Faigy - Spring Valley",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Tziporah - Lawrence",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Shaindy - Monsey",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Rochel - Flatbush",
+          "status": "Not shipped"
         }
       ]
     },
@@ -372,7 +4430,7 @@
       "deposit_received": 0,
       "deposit_date": null,
       "balance_due": 16000,
-      "status": "Awaiting deposit",
+      "status": "Quote",
       "cash_due": [
         {
           "date": "2026-11-06",
@@ -383,6 +4441,509 @@
           "date": "2026-12-11",
           "type": "Final balance",
           "amount": 8000
+        }
+      ],
+      "stage": "quote",
+      "recipients": [
+        {
+          "name": "Rivky - Monsey",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Malky - Flatbush",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Chaya - Queens",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Suri - Passaic",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Esther - Boro Park",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Leah - Teaneck",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Bracha - Monroe",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Dina - Lakewood",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Faigy - Spring Valley",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Tziporah - Lawrence",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Shaindy - Monsey",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Rochel - Flatbush",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Yehudis - Queens",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Miriam - Passaic",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Sheindy - Boro Park",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Rivky - Teaneck",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Malky - Monroe",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Chaya - Lakewood",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Suri - Spring Valley",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Esther - Lawrence",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Leah - Monsey",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Bracha - Flatbush",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Dina - Queens",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Faigy - Passaic",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Tziporah - Boro Park",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Shaindy - Teaneck",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Rochel - Monroe",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Yehudis - Lakewood",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Miriam - Spring Valley",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Sheindy - Lawrence",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Rivky - Monsey",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Malky - Flatbush",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Chaya - Queens",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Suri - Passaic",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Esther - Boro Park",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Leah - Teaneck",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Bracha - Monroe",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Dina - Lakewood",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Faigy - Spring Valley",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Tziporah - Lawrence",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Shaindy - Monsey",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Rochel - Flatbush",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Yehudis - Queens",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Miriam - Passaic",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Sheindy - Boro Park",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Rivky - Teaneck",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Malky - Monroe",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Chaya - Lakewood",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Suri - Spring Valley",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Esther - Lawrence",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Leah - Monsey",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Bracha - Flatbush",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Dina - Queens",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Faigy - Passaic",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Tziporah - Boro Park",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Shaindy - Teaneck",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Rochel - Monroe",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Yehudis - Lakewood",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Miriam - Spring Valley",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Sheindy - Lawrence",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Rivky - Monsey",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Malky - Flatbush",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Chaya - Queens",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Suri - Passaic",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Esther - Boro Park",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Leah - Teaneck",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Bracha - Monroe",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Dina - Lakewood",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Faigy - Spring Valley",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Tziporah - Lawrence",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Shaindy - Monsey",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Rochel - Flatbush",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Yehudis - Queens",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Miriam - Passaic",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Sheindy - Boro Park",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Rivky - Teaneck",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Malky - Monroe",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Chaya - Lakewood",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Suri - Spring Valley",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Esther - Lawrence",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Leah - Monsey",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Bracha - Flatbush",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Dina - Queens",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Faigy - Passaic",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Tziporah - Boro Park",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Shaindy - Teaneck",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Rochel - Monroe",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Yehudis - Lakewood",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Miriam - Spring Valley",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Sheindy - Lawrence",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Rivky - Monsey",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Malky - Flatbush",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Chaya - Queens",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Suri - Passaic",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Esther - Boro Park",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Leah - Teaneck",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Bracha - Monroe",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Dina - Lakewood",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Faigy - Spring Valley",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Tziporah - Lawrence",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Shaindy - Monsey",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Rochel - Flatbush",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Yehudis - Queens",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Miriam - Passaic",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Sheindy - Boro Park",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Rivky - Teaneck",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Malky - Monroe",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Chaya - Lakewood",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Suri - Spring Valley",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Esther - Lawrence",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Leah - Monsey",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Bracha - Flatbush",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Dina - Queens",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Faigy - Passaic",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Tziporah - Boro Park",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Shaindy - Teaneck",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Rochel - Monroe",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Yehudis - Lakewood",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Miriam - Spring Valley",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Sheindy - Lawrence",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Rivky - Monsey",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Malky - Flatbush",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Chaya - Queens",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Suri - Passaic",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Esther - Boro Park",
+          "status": "Not shipped"
         }
       ]
     },
@@ -400,7 +4961,7 @@
       "deposit_received": 0,
       "deposit_date": null,
       "balance_due": 7650,
-      "status": "Awaiting deposit",
+      "status": "Quote",
       "cash_due": [
         {
           "date": "2026-11-13",
@@ -411,6 +4972,225 @@
           "date": "2026-12-21",
           "type": "Final balance",
           "amount": 3825
+        }
+      ],
+      "stage": "quote",
+      "recipients": [
+        {
+          "name": "Rivky - Monsey",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Malky - Flatbush",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Chaya - Queens",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Suri - Passaic",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Esther - Boro Park",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Leah - Teaneck",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Bracha - Monroe",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Dina - Lakewood",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Faigy - Spring Valley",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Tziporah - Lawrence",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Shaindy - Monsey",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Rochel - Flatbush",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Yehudis - Queens",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Miriam - Passaic",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Sheindy - Boro Park",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Rivky - Teaneck",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Malky - Monroe",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Chaya - Lakewood",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Suri - Spring Valley",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Esther - Lawrence",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Leah - Monsey",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Bracha - Flatbush",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Dina - Queens",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Faigy - Passaic",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Tziporah - Boro Park",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Shaindy - Teaneck",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Rochel - Monroe",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Yehudis - Lakewood",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Miriam - Spring Valley",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Sheindy - Lawrence",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Rivky - Monsey",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Malky - Flatbush",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Chaya - Queens",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Suri - Passaic",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Esther - Boro Park",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Leah - Teaneck",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Bracha - Monroe",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Dina - Lakewood",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Faigy - Spring Valley",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Tziporah - Lawrence",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Shaindy - Monsey",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Rochel - Flatbush",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Yehudis - Queens",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Miriam - Passaic",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Sheindy - Boro Park",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Rivky - Teaneck",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Malky - Monroe",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Chaya - Lakewood",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Suri - Spring Valley",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Esther - Lawrence",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Leah - Monsey",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Bracha - Flatbush",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Dina - Queens",
+          "status": "Not shipped"
+        },
+        {
+          "name": "Faigy - Passaic",
+          "status": "Not shipped"
         }
       ]
     }

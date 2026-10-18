@@ -1,91 +1,168 @@
-import { DATA } from './popinsanityComputed'
-import { ClickRow } from './PopinsanityShared'
-import { money, fmtInt, tierShort, sumBy } from './popinsanityUtils'
+import { useState } from 'react'
+import {
+  ORDER_STAGES,
+  ordersByStage,
+  stageColumnTotals,
+  recipientShippedCounts,
+  daysToTarget,
+  holidayTotals,
+} from './popinsanityComputed'
+import { money, fmtInt, fmtD } from './popinsanityUtils'
+import { MUTED, INK } from './popinsanityUtils'
 
-function CardField({ k, v }) {
+function OrderBoardCard({ order, onOpen }) {
+  const { shipped, total: recipTotal } = recipientShippedCounts(order)
+  const days = daysToTarget(order.ship_date)
+  const daysLabel = days == null ? '—' : days === 0 ? 'Today' : days > 0 ? `${days} days` : `${Math.abs(days)} days ago`
+
   return (
-    <div>
-      <div className="pop-card-k">{k}</div>
-      <div className="pop-card-v">{v}</div>
+    <button type="button" className="pop-board-card" onClick={() => onOpen(order.id)}>
+      <div className="pop-client-name pop-board-card-title">{order.client}</div>
+      <div className="pop-board-card-grid">
+        <div>
+          <div className="pop-card-k">Tins</div>
+          <div className="pop-card-v pop-board-num">{fmtInt(order.units)}</div>
+        </div>
+        <div>
+          <div className="pop-card-k">Per tin</div>
+          <div className="pop-card-v pop-board-num">{money(order.price)}</div>
+        </div>
+        <div>
+          <div className="pop-card-k">Order total</div>
+          <div className="pop-card-v pop-board-num">{money(order.order_total)}</div>
+        </div>
+        <div>
+          <div className="pop-card-k">Deposit</div>
+          <div className="pop-card-v pop-board-num">{money(order.deposit_received)}</div>
+        </div>
+        <div>
+          <div className="pop-card-k">Balance</div>
+          <div className="pop-card-v pop-board-num">{money(order.balance_due)}</div>
+        </div>
+        <div>
+          <div className="pop-card-k">Target delivery</div>
+          <div className="pop-card-v pop-board-num pop-board-num--left">{fmtD(order.ship_date)}</div>
+        </div>
+        <div className="pop-board-card-span">
+          <div className="pop-card-k">Recipients shipped</div>
+          <div className="pop-card-v pop-board-num pop-board-num--left">
+            {fmtInt(shipped)} of {fmtInt(recipTotal)}
+          </div>
+        </div>
+        <div>
+          <div className="pop-card-k">Days to target</div>
+          <div className="pop-card-v pop-board-num pop-board-num--left">{daysLabel}</div>
+        </div>
+      </div>
+    </button>
+  )
+}
+
+function StageColumn({ stage, orders, onOpen }) {
+  const { count, dollars } = stageColumnTotals(stage.id, orders)
+  return (
+    <div className="pop-board-col">
+      <div className="pop-board-col-head">
+        <div className="pop-board-col-title">{stage.label}</div>
+        <div className="pop-board-col-meta">
+          <span>{count}</span>
+          <span className="pop-board-col-amt">{money(dollars)}</span>
+        </div>
+      </div>
+      <div className="pop-board-col-body">
+        {orders.map((o) => (
+          <OrderBoardCard key={o.id} order={o} onOpen={onOpen} />
+        ))}
+      </div>
     </div>
   )
 }
 
-export default function PopinsanityOrdersTab({ styles, openOrder }) {
-  const { card } = styles
-  const orders = DATA.holiday_orders
-  const totals = {
-    units: sumBy(orders, 'units'),
-    order_total: sumBy(orders, 'order_total'),
-    deposit_received: sumBy(orders, 'deposit_received'),
-    balance_due: sumBy(orders, 'balance_due'),
-  }
+export default function PopinsanityOrdersTab({ styles, openOrder, openHolidaySummary }) {
+  const { card, lbl } = styles
+  const byStage = ordersByStage()
+  const hol = holidayTotals()
+  const [mobileStage, setMobileStage] = useState('all')
+
+  const summaryRow = (
+    <button
+      type="button"
+      className="pop-board-summary pop-click"
+      onClick={() => openHolidaySummary?.()}
+      style={{ ...card, width: '100%', textAlign: 'left', marginBottom: 14, cursor: openHolidaySummary ? 'pointer' : 'default' }}
+    >
+      <div style={{ ...lbl, marginBottom: 8 }}>Holiday pipeline</div>
+      <div className="pop-board-summary-grid">
+        <div>
+          <div className="pop-card-k">Orders booked</div>
+          <div className="pop-board-summary-val">{money(hol.booked)}</div>
+        </div>
+        <div>
+          <div className="pop-card-k">Units</div>
+          <div className="pop-board-summary-val">{fmtInt(hol.units)}</div>
+        </div>
+        <div>
+          <div className="pop-card-k">Deposits received</div>
+          <div className="pop-board-summary-val">{money(hol.deposits)}</div>
+        </div>
+        <div>
+          <div className="pop-card-k">Balance due</div>
+          <div className="pop-board-summary-val">{money(hol.balance)}</div>
+        </div>
+      </div>
+    </button>
+  )
 
   return (
-    <div style={{ ...card, overflowX: 'auto' }}>
-      <div className="pop-order-table-wrap">
-        <table className="pop-table">
-          <thead>
-            <tr>
-              <th className="pop-th">Client</th>
-              <th className="pop-th">Tier</th>
-              <th className="pop-th pop-th--r">Units</th>
-              <th className="pop-th pop-th--r">Order total</th>
-              <th className="pop-th pop-th--r">Deposit received</th>
-              <th className="pop-th pop-th--r">Balance due</th>
-              <th className="pop-th">Status</th>
-            </tr>
-          </thead>
-          <tbody>
-            {orders.map((o) => (
-              <ClickRow key={o.id} onClick={() => openOrder(o.id)}>
-                <td className="pop-td">
-                  <div className="pop-client-name">{o.client}</div>
-                </td>
-                <td className="pop-td">{tierShort(o.tier)}</td>
-                <td className="pop-td pop-td--r">{fmtInt(o.units)}</td>
-                <td className="pop-td pop-td--r">{money(o.order_total)}</td>
-                <td className="pop-td pop-td--r">{money(o.deposit_received)}</td>
-                <td className="pop-td pop-td--r">{money(o.balance_due)}</td>
-                <td className="pop-td">{o.status}</td>
-              </ClickRow>
-            ))}
-          </tbody>
-          <tfoot>
-            <tr className="pop-tfoot">
-              <td className="pop-td" colSpan={2}>Total</td>
-              <td className="pop-td pop-td--r">{fmtInt(totals.units)}</td>
-              <td className="pop-td pop-td--r">{money(totals.order_total)}</td>
-              <td className="pop-td pop-td--r">{money(totals.deposit_received)}</td>
-              <td className="pop-td pop-td--r">{money(totals.balance_due)}</td>
-              <td />
-            </tr>
-          </tfoot>
-        </table>
-      </div>
-
-      <div className="pop-order-cards">
-        {orders.map((o) => (
-          <button key={o.id} type="button" className="pop-order-card" onClick={() => openOrder(o.id)}>
-            <div className="pop-card-title pop-client-name">{o.client}</div>
-            <div className="pop-order-sub">{tierShort(o.tier)} · {o.status}</div>
-            <div className="pop-card-grid" style={{ marginTop: 10 }}>
-              <CardField k="Units" v={fmtInt(o.units)} />
-              <CardField k="Order total" v={money(o.order_total)} />
-              <CardField k="Deposit received" v={money(o.deposit_received)} />
-              <CardField k="Balance due" v={money(o.balance_due)} />
-            </div>
+    <div>
+      {summaryRow}
+      <div className="pop-board-filter" role="tablist" aria-label="Stage filter">
+        <button
+          type="button"
+          className={mobileStage === 'all' ? 'pop-board-filter--on' : ''}
+          onClick={() => setMobileStage('all')}
+        >
+          All
+        </button>
+        {ORDER_STAGES.map((s) => (
+          <button
+            key={s.id}
+            type="button"
+            className={mobileStage === s.id ? 'pop-board-filter--on' : ''}
+            onClick={() => setMobileStage(s.id)}
+          >
+            {s.label}
           </button>
         ))}
-        <div className="pop-order-card" style={{ cursor: 'default' }}>
-          <div className="pop-card-title">Total</div>
-          <div className="pop-card-grid">
-            <CardField k="Units" v={fmtInt(totals.units)} />
-            <CardField k="Order total" v={money(totals.order_total)} />
-            <CardField k="Deposit received" v={money(totals.deposit_received)} />
-            <CardField k="Balance due" v={money(totals.balance_due)} />
-          </div>
+      </div>
+
+      <div className="pop-board-desktop">
+        <div className="pop-board-cols">
+          {ORDER_STAGES.map((stage) => (
+            <StageColumn key={stage.id} stage={stage} orders={byStage[stage.id]} onOpen={openOrder} />
+          ))}
         </div>
+      </div>
+
+      <div className="pop-board-mobile">
+        {(mobileStage === 'all' ? ORDER_STAGES : ORDER_STAGES.filter((s) => s.id === mobileStage)).map((stage) => {
+          const orders = byStage[stage.id]
+          if (!orders.length) return null
+          const { count, dollars } = stageColumnTotals(stage.id, orders)
+          return (
+            <div key={stage.id} className="pop-board-mobile-group" style={card}>
+              <div className="pop-board-mobile-head">
+                <span style={{ fontWeight: 600, fontSize: 14, color: INK }}>{stage.label}</span>
+                <span style={{ fontSize: 13, color: MUTED }}>
+                  {count} · {money(dollars)}
+                </span>
+              </div>
+              {orders.map((o) => (
+                <OrderBoardCard key={o.id} order={o} onOpen={openOrder} />
+              ))}
+            </div>
+          )
+        })}
       </div>
     </div>
   )

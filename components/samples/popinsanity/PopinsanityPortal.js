@@ -27,6 +27,8 @@ import {
   ProductLineDetail,
   StoresListDetail,
   StoreInvoiceListDetail,
+  InvoicePreviewDetail,
+  HolidayOverviewDetail,
 } from './PopinsanityDetails'
 
 const TABS = [
@@ -68,6 +70,8 @@ export default function PopinsanityPortal() {
   const openPnlLine = useCallback((line) => push({ kind: 'pnl', line }), [push])
   const openStoresList = useCallback(() => push({ kind: 'storesList' }), [push])
   const openInvoiceList = useCallback((filter, title) => push({ kind: 'storeInvoices', filter, title }), [push])
+  const openHolidayOverview = useCallback((focus) => push({ kind: 'holidayOverview', focus }), [push])
+  const openInvoicePreview = useCallback((payload) => push({ kind: 'invoicePreview', ...payload }), [push])
 
   const top = stack[stack.length - 1]
 
@@ -83,6 +87,30 @@ export default function PopinsanityPortal() {
             orderId={top.orderId}
             onBack={back}
             onTier={(id) => push({ kind: 'tier', tierId: id })}
+            onInvoicePreview={openInvoicePreview}
+            card={styles.card}
+            big={styles.big}
+            lbl={styles.lbl}
+          />,
+        )
+      case 'invoicePreview':
+        return wrap(
+          <InvoicePreviewDetail
+            orderId={top.orderId}
+            kind={top.kind}
+            onClose={back}
+            card={styles.card}
+            big={styles.big}
+            lbl={styles.lbl}
+          />,
+        )
+      case 'holidayOverview':
+        return wrap(
+          <HolidayOverviewDetail
+            focus={top.focus}
+            onBack={back}
+            onOrder={openOrder}
+            onGoOrders={() => goTab('orders')}
             card={styles.card}
             big={styles.big}
             lbl={styles.lbl}
@@ -161,10 +189,17 @@ export default function PopinsanityPortal() {
             setCalendarMonth={setCalendarMonth}
             openChannel={openChannel}
             openTier={openTier}
+            openHolidayOverview={openHolidayOverview}
           />
         )
       case 'orders':
-        return <PopinsanityOrdersTab styles={styles} openOrder={openOrder} />
+        return (
+          <PopinsanityOrdersTab
+            styles={styles}
+            openOrder={openOrder}
+            openHolidaySummary={() => openHolidayOverview('booked')}
+          />
+        )
       case 'stores':
         return (
           <PopinsanityStoresTab
@@ -258,7 +293,11 @@ export default function PopinsanityPortal() {
               {top
                 ? top.kind === 'order'
                   ? 'Order detail'
-                  : top.kind === 'store'
+                  : top.kind === 'invoicePreview'
+                    ? 'Invoice preview'
+                    : top.kind === 'holidayOverview'
+                      ? 'Holiday orders'
+                      : top.kind === 'store'
                     ? 'Store detail'
                     : top.kind === 'tier'
                       ? 'Tier detail'

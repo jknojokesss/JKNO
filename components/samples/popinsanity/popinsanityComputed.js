@@ -83,14 +83,69 @@ export function wholesaleInvoicesFiltered(filter = 'all') {
   return rows
 }
 
+export const ORDER_STAGES = [
+  { id: 'quote', label: 'Quote' },
+  { id: 'deposit_invoiced', label: 'Deposit invoiced' },
+  { id: 'deposit_paid', label: 'Deposit paid' },
+  { id: 'shipping', label: 'Shipping' },
+  { id: 'balance_invoiced', label: 'Balance invoiced' },
+  { id: 'paid', label: 'Paid' },
+]
+
+export const STAGE_INDEX = Object.fromEntries(ORDER_STAGES.map((s, i) => [s.id, i]))
+
+/** Deposits on overview count only after deposit is paid (stage index ≥ deposit_paid). */
+export function orderDepositsForCard(orders = DATA.holiday_orders) {
+  const minIdx = STAGE_INDEX.deposit_paid
+  return orders
+    .filter((o) => (STAGE_INDEX[o.stage] ?? -1) >= minIdx)
+    .reduce((s, o) => s + (o.deposit_received || 0), 0)
+}
+
+export function recipientShippedCounts(order) {
+  const list = order.recipients || []
+  const shipped = list.filter((r) => r.status === 'Shipped' || r.status === 'Delivered').length
+  return { shipped, total: list.length }
+}
+
+export const AS_OF_ISO = '2026-10-18'
+
+export function daysToTarget(shipDateIso) {
+  if (!shipDateIso) return null
+  const [y, m, d] = AS_OF_ISO.split('-').map(Number)
+  const [y2, m2, d2] = shipDateIso.split('-').map(Number)
+  const asOf = Date.UTC(y, m - 1, d)
+  const target = Date.UTC(y2, m2 - 1, d2)
+  return Math.round((target - asOf) / 86400000)
+}
+
 export function holidayTotals() {
   const orders = DATA.holiday_orders
   return {
     booked: sumBy(orders, 'order_total'),
-    deposits: sumBy(orders, 'deposit_received'),
+    deposits: orderDepositsForCard(orders),
     balance: sumBy(orders, 'balance_due'),
     units: sumBy(orders, 'units'),
     count: orders.length,
+  }
+}
+
+export function ordersByStage() {
+  const map = {}
+  ORDER_STAGES.forEach((s) => {
+    map[s.id] = []
+  })
+  DATA.holiday_orders.forEach((o) => {
+    if (map[o.stage]) map[o.stage].push(o)
+  })
+  return map
+}
+
+export function stageColumnTotals(stageId, orders) {
+  const rows = orders || ordersByStage()[stageId] || []
+  return {
+    count: rows.length,
+    dollars: sumBy(rows, 'order_total'),
   }
 }
 
