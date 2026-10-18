@@ -425,7 +425,7 @@ export default function PrimalKrispOverviewDetail({ detail, onBack, onClose, sto
   }
 
   if (detail.kind === 'netProfit') {
-    const p = DATA.pnl_by_month.find((m) => m.month === '2026-09')
+    const p = DATA.pnl_by_month.find((m) => m.month === (detail.month || '2026-09'))
     if (!p) return null
     const rows = [
       { label: 'Revenue', value: p.revenue_total },
@@ -435,7 +435,7 @@ export default function PrimalKrispOverviewDetail({ detail, onBack, onClose, sto
       { label: 'Net profit', value: p.net_profit },
     ]
     return (
-      <Shell title={money0(p.net_profit)} sub="Net profit · September" {...shell}>
+      <Shell title={money0(p.net_profit)} sub={`Net profit · ${p.period}`} {...shell}>
         <Lines rows={rows.slice(0, -1)} totalLabel="Net profit" totalValue={p.net_profit} format={money} />
       </Shell>
     )

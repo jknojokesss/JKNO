@@ -115,7 +115,7 @@ body{background:${theme.CREAM};font-family:${UI};color:${theme.INK}}
 .pk-shell{display:flex;min-height:100vh;align-items:stretch;font-variant-numeric:tabular-nums}
 .pk-shell button{font-variant-numeric:tabular-nums;font-feature-settings:"tnum"}
 .pk-side{width:236px;flex-shrink:0;background:${theme.CHAR};color:${theme.CREAM};display:flex;flex-direction:column;padding:22px 14px}
-.pk-nav{display:flex;flex-direction:column;gap:3px}.pk-nav--main{flex:1}
+.pk-nav{display:flex;flex-direction:column;gap:3px}.pk-nav--main{flex:0 0 auto}
 .pk-navbtn{display:block;width:100%;text-align:left;padding:11px 14px;border-radius:2px;border:none;background:transparent;color:#B6A78C;font-family:${UI};font-size:14px;font-weight:500;cursor:pointer;white-space:nowrap}
 .pk-navbtn:hover{background:rgba(255,255,255,.08);color:${theme.CREAM}}
 .pk-main{flex:1;min-width:0;max-width:1180px;padding:24px 30px 60px}

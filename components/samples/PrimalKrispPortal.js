@@ -465,7 +465,7 @@ export default function PrimalKrispPortal() {
           ) : (
             <>
               <nav className="pk-nav pk-nav--main" aria-label="Sections">
-                {TABS.map(([id, longLabel, shortLabel]) => {
+                {[...TABS, ...EXTRA].map(([id, longLabel]) => {
                   const active = tab === id
                   return (
                     <button
@@ -476,28 +476,6 @@ export default function PrimalKrispPortal() {
                         setReorderFocus(false)
                         setOverviewDetail(null)
                       }}
-                      style={
-                        active
-                          ? { background: 'rgba(255,255,255,.12)', color: CREAM, boxShadow: `inset 3px 0 0 ${SPICE}` }
-                          : undefined
-                      }
-                    >
-                      {longLabel}
-                    </button>
-                  )
-                })}
-              </nav>
-              <div className="pk-tools-label" style={{ ...lbl, color: '#7A6A52', fontSize: '10px', margin: '16px 14px 6px' }}>
-                Tools
-              </div>
-              <nav className="pk-nav pk-nav--tools" aria-label="Tools">
-                {EXTRA.map(([id, longLabel]) => {
-                  const active = tab === id
-                  return (
-                    <button
-                      key={id}
-                      className="pk-navbtn"
-                      onClick={() => setTab(id)}
                       style={
                         active
                           ? { background: 'rgba(255,255,255,.12)', color: CREAM, boxShadow: `inset 3px 0 0 ${SPICE}` }

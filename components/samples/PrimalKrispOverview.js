@@ -50,9 +50,15 @@ export default function PrimalKrispOverview({
   const septPnl = DATA.pnl_by_month?.find((m) => m.month === '2026-09') || DATA.pnl_by_month?.slice(-1)[0]
   const chartMonths = (DATA.pnl_by_month || []).map((m) => ({
     name: m.label.replace(/ \d{2}$/, ''),
+    monthKey: m.month,
+    period: m.period,
     Revenue: m.revenue_total,
     Net: m.net_profit,
   }))
+  const openNetMonth = (row) => {
+    if (!row?.monthKey) return
+    onOpenDetail({ kind: 'netProfit', month: row.monthKey })
+  }
   const donut = channelRowsPeriod.map((c) => ({ name: c.channel, value: c.sales }))
   const channelWhole = allocateWholeDollars(donut.map((d) => d.value), salesPeriod)
   const topStores = [...DATA.stores.list]
@@ -157,13 +163,38 @@ export default function PrimalKrispOverview({
         <div style={{ width: '100%', height: 260 }}>
           {chartsReady ? (
             <ResponsiveContainer width="100%" height={260}>
-              <ComposedChart data={chartMonths} margin={{ top: 6, right: 8, left: 4, bottom: 0 }}>
+              <ComposedChart data={chartMonths} margin={{ top: 6, right: 12, left: 4, bottom: 0 }}>
                 <CartesianGrid stroke={BORDER} vertical={false} />
                 <XAxis dataKey="name" tick={{ fontSize: 12, fill: MUTED }} axisLine={{ stroke: BORDER }} tickLine={false} />
-                <YAxis tickFormatter={(v) => '$' + Math.round(v / 1000) + 'k'} tick={{ fontSize: 11, fill: MUTED }} axisLine={false} tickLine={false} width={44} />
+                <YAxis
+                  yAxisId="revenue"
+                  tickFormatter={(v) => '$' + Math.round(v / 1000) + 'k'}
+                  tick={{ fontSize: 11, fill: MUTED }}
+                  axisLine={false}
+                  tickLine={false}
+                  width={44}
+                />
+                <YAxis
+                  yAxisId="net"
+                  orientation="right"
+                  tickFormatter={(v) => '$' + Math.round(v / 1000) + 'k'}
+                  tick={{ fontSize: 11, fill: GREEN }}
+                  axisLine={false}
+                  tickLine={false}
+                  width={40}
+                />
                 <Tooltip formatter={(v) => money0(v)} contentStyle={{ fontSize: '12px', borderRadius: '2px', border: `1px solid ${BORDER}` }} />
-                <Bar dataKey="Revenue" fill={KRAFT} radius={[2, 2, 0, 0]} maxBarSize={40} />
-                <Line type="monotone" dataKey="Net" stroke={GREEN} strokeWidth={2.5} dot={{ r: 3, fill: GREEN }} />
+                <Bar yAxisId="revenue" dataKey="Revenue" fill={KRAFT} radius={[2, 2, 0, 0]} maxBarSize={40} onClick={(row) => openNetMonth(row)} style={{ cursor: 'pointer' }} />
+                <Line
+                  yAxisId="net"
+                  type="linear"
+                  dataKey="Net"
+                  stroke={GREEN}
+                  strokeWidth={2.5}
+                  connectNulls
+                  dot={{ r: 3, fill: GREEN, cursor: 'pointer', onClick: (_, row) => openNetMonth(row?.payload) }}
+                  activeDot={{ r: 5, cursor: 'pointer', onClick: (_, row) => openNetMonth(row?.payload) }}
+                />
               </ComposedChart>
             </ResponsiveContainer>
           ) : null}
