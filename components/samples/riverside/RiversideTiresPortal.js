@@ -143,7 +143,7 @@ function buildLiveStockSnap() {
     value: Math.round(r.onHand * r.unitCost * 100) / 100,
   }))
   return {
-    label: 'Live · current on-hand after Aug 31, 2026',
+    label: 'Live · current on-hand',
     rows,
     inventory_value: sumBy(rows, 'value'),
     units_on_hand: sumBy(rows, 'onHand'),
@@ -283,7 +283,7 @@ function Pill({ on, onClick, children, disabled }) {
 
 function Kpi({ label, value, sub, color = C.ink, tie }) {
   return (
-    <div style={{ flex: '1 1 150px', background: C.card, border: `1px solid ${C.hair}`, padding: '14px 16px' }}>
+    <div className="rt-kpi-tile" style={{ flex: '1 1 150px', background: C.card, border: `1px solid ${C.hair}`, padding: '14px 16px' }}>
       <div style={{ fontSize: 9, color: C.muted, letterSpacing: '0.15em', marginBottom: 6, fontFamily: ui, textTransform: 'uppercase' }}>{label}</div>
       <div style={{ fontSize: 18, color, fontWeight: 600, fontFamily: ui, lineHeight: 1.2, fontVariantNumeric: 'tabular-nums' }}>
         {value}
@@ -1146,7 +1146,7 @@ function DashboardTab({ period, setPeriod, onOpenOrders, onOpenFinancials, onOpe
             ))}
           </div>
         </div>
-        <div style={{ display: 'flex', flexWrap: 'wrap' }}>
+        <div className="rt-reg-kpis">
           {[
             ['Sales', fmt0(reg.sale), C.ink],
             ['Est. cost', fmt0(reg.cost), C.ink],
@@ -1154,7 +1154,7 @@ function DashboardTab({ period, setPeriod, onOpenOrders, onOpenFinancials, onOpe
             ['Est. margin', pct(reg.margin), C.ink],
             ['Tickets', String(reg.tickets), C.ink],
           ].map(([l, v, color], i) => (
-            <div key={l} style={{ flex: '1 1 120px', padding: '10px 14px', borderLeft: i ? `1px solid ${C.line}` : 'none' }}>
+            <div key={l} className="rt-reg-kpi">
               <div style={{ fontFamily: ui, fontSize: 10.5, color: C.muted }}>{l}</div>
               <div style={{ fontFamily: mono, fontSize: 16, color, fontWeight: 500, marginTop: 4 }}>
                 {v}
@@ -1184,9 +1184,9 @@ function DashboardTab({ period, setPeriod, onOpenOrders, onOpenFinancials, onOpe
         {fmt0(m.profit)}
         <TieMark ok={netTie} />
       </div>
-      <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap', marginBottom: 20 }}>
+      <div className="rt-dash-metrics">
         {strip.map(([l, v]) => (
-          <div key={l} style={{ ...panel, flex: '1 1 120px', marginBottom: 0 }}>
+          <div key={l} className="rt-metric-tile">
             <div style={{ fontFamily: ui, fontSize: 10, color: C.muted }}>{l}</div>
             <div style={{ fontFamily: mono, fontSize: 18, marginTop: 6, fontWeight: 500 }}>
               {v}
@@ -1198,11 +1198,11 @@ function DashboardTab({ period, setPeriod, onOpenOrders, onOpenFinancials, onOpe
       </div>
 
       <div className="rt-dash-main">
-        <div style={{ ...panel, marginBottom: 0 }}>
+        <div className="rt-section-card" style={{ ...panel, marginBottom: 0 }}>
           <PanelTitle>Revenue, Expenses &amp; Profit</PanelTitle>
           <ComboRevExpProfitChart months={MONTHS} onFullPl={() => onOpenFinancials('all')} />
         </div>
-        <div style={{ ...panel, marginBottom: 0 }}>
+        <div className="rt-section-card" style={{ ...panel, marginBottom: 0 }}>
           <PanelTitle>Profit by Month</PanelTitle>
           <div style={{ border: `1px solid ${C.hair}` }}>
             {profitRows.map((x) => (
@@ -1230,7 +1230,7 @@ function DashboardTab({ period, setPeriod, onOpenOrders, onOpenFinancials, onOpe
       </div>
 
       <div className="rt-chartrow" style={{ marginTop: 16 }}>
-        <div style={{ ...panel, marginBottom: 0 }}>
+        <div className="rt-section-card" style={{ ...panel, marginBottom: 0 }}>
           <PanelTitle
             right={
               <span style={{ display: 'inline-flex', alignItems: 'baseline', gap: 8 }}>
@@ -1258,7 +1258,7 @@ function DashboardTab({ period, setPeriod, onOpenOrders, onOpenFinancials, onOpe
             </button>
           ))}
         </div>
-        <div style={{ ...panel, marginBottom: 0, overflow: 'auto' }}>
+        <div className="rt-section-card" style={{ ...panel, marginBottom: 0, overflow: 'auto' }}>
           <PanelTitle
             right={
               <button type="button" className="rt-linkbtn" onClick={() => onOpenSalesItems({ periodKey: STOCK_AUG_ID, q: '' })}>
@@ -1343,7 +1343,7 @@ function SalesItemsTab({ seed }) {
   return (
     <>
       <PageHead title={NAV.find((n) => n.id === 'inventory').title} />
-      <div style={{ display: 'flex', gap: 12, marginBottom: 20, flexWrap: 'wrap' }}>
+      <div className="rt-kpi-row">
         <Kpi label="Revenue" value={fmt0(stats?.revenue || 0)} />
         <Kpi label="Units sold" value={String(stats?.unitsSold || 0)} />
         <Kpi label="Unique items" value={String(stats?.uniqueItems || items.length)} />
@@ -1601,7 +1601,7 @@ function OrdersTab({ initialPeriod }) {
   return (
     <>
       <PageHead title={NAV.find((n) => n.id === 'orders').title} />
-      <div style={{ display: 'flex', gap: 12, marginBottom: 20, flexWrap: 'wrap' }}>
+      <div className="rt-kpi-row">
         <Kpi label="Total orders" value={String(t.tickets)} />
         <Kpi label="Profit / new tire" value={fmtC(newProfit)} />
         <Kpi label="Profit / used tire" value={usedRows.length ? fmtC(usedProfit) : '—'} />
@@ -1776,7 +1776,7 @@ function StockTab() {
   return (
     <>
       <PageHead title={NAV.find((n) => n.id === 'stock').title} />
-      <div style={{ display: 'flex', gap: 12, marginBottom: 20, flexWrap: 'wrap' }}>
+      <div className="rt-kpi-row">
         <Kpi label="On hand" value={String(units)} />
         <Kpi label="Stock value" value={fmt0(value)} tie={invTie} />
         <Kpi label="Sizes" value={String(stockRowsFor(asOf).length)} />
@@ -1987,7 +1987,7 @@ function Shell({ tab, setTab, embed, children }) {
       </aside>
       <main className="rt-main">
         <div className="rt-status">
-          <span style={{ fontFamily: mono, fontSize: 11, color: C.muted, letterSpacing: '0.05em' }}>{DATA.meta.sample_header}</span>
+          <span className="rt-sample-line">{DATA.meta.sample_header}</span>
         </div>
         <div className="rt-content">{children}</div>
       </main>
@@ -2009,6 +2009,13 @@ const PORTAL_CSS = `
   .rt-foot{padding:12px 8px 0;border-top:1px solid ${THEME.border};margin-top:8px}
   .rt-main{flex:1;min-width:0;background:${C.paper};overflow-x:hidden;max-width:100%}
   .rt-status{display:flex;align-items:center;border-bottom:1px solid ${C.hair};padding:12px 30px;gap:12px;flex-wrap:wrap}
+  .rt-sample-line{font-family:${mono};font-size:11px;color:${C.muted};letter-spacing:.05em;line-height:1.3}
+  .rt-reg-kpis{display:flex;flex-wrap:wrap}
+  .rt-reg-kpi{flex:1 1 120px;padding:10px 14px}
+  .rt-reg-kpi:not(:first-child){border-left:1px solid ${C.line}}
+  .rt-dash-metrics{display:flex;gap:12px;flex-wrap:wrap;margin-bottom:20px}
+  .rt-metric-tile{background:${C.card};border:1px solid ${C.hair};padding:18px 20px;flex:1 1 120px;margin-bottom:0}
+  .rt-kpi-row{display:flex;gap:12px;flex-wrap:wrap;margin-bottom:20px}
   .rt-content{padding:26px 30px 56px;max-width:1160px}
   .rt-mobilenav{display:none}
   .rt-order-cards,.rt-order-cards-total{display:none}
@@ -2096,17 +2103,57 @@ const PORTAL_CSS = `
   .rt-embed .rt-mobilenav{flex-shrink:0}
   @media(max-width:430px){
     .rt-shell{overflow-x:hidden;max-width:100vw}
-    .rt-content{padding:16px 12px 40px;overflow-x:hidden}
+    .rt-main{overflow-x:hidden}
+    .rt-content{padding:14px 12px 36px;overflow-x:hidden}
     .rt-hero{font-size:46px!important}
-    .rt-chartrow{grid-template-columns:1fr}
-    .rt-dash-main{grid-template-columns:1fr}
+    .rt-chartrow{grid-template-columns:1fr;gap:18px;margin-bottom:18px}
+    .rt-dash-main{grid-template-columns:1fr;gap:18px;margin-bottom:18px}
     .rt-modal{padding:10px;align-items:flex-end}
     .rt-modal__box{max-width:min(100%,calc(100vw - 16px));padding:14px 12px;max-height:92vh}
     .rt-modal__box table{min-width:300px}
     .rt-stmt{--cols:1fr 72px}
     .rt-stmt.cmp{--cols:1fr 64px 64px 56px}
-    .rt-status span{font-size:10px;line-height:1.35;word-break:break-word}
+    .rt-status{padding:8px 10px;flex-wrap:nowrap}
+    .rt-sample-line{font-size:8.5px;letter-spacing:0;white-space:nowrap;line-height:1.25;display:block;width:100%;overflow:hidden;text-overflow:clip;transform-origin:left center}
     .rt-content input,.rt-content select{font-size:16px!important}
+    .rt-mobilenav,.rt-embed .rt-mobilenav{display:grid!important;grid-template-columns:repeat(6,minmax(0,1fr));overflow-x:hidden;gap:1px;padding:5px 3px;scrollbar-width:none;-ms-overflow-style:none}
+    .rt-mobilenav::-webkit-scrollbar,.rt-embed .rt-mobilenav::-webkit-scrollbar{display:none}
+    .rt-mobilenav button,.rt-embed .rt-mobilenav button{flex:none;width:100%;min-width:0;font-size:8px;padding:5px 1px;letter-spacing:0;line-height:1.15;white-space:normal;text-align:center;display:flex;align-items:center;justify-content:center;min-height:34px;hyphens:auto;overflow-wrap:anywhere}
+    .rt-scroll-row{flex-wrap:nowrap!important;overflow-x:auto;overflow-y:hidden;-webkit-overflow-scrolling:touch;scrollbar-width:none;-ms-overflow-style:none;max-width:100%;padding-bottom:2px}
+    .rt-scroll-row::-webkit-scrollbar{display:none}
+    .rt-filters.rt-scroll-row{align-items:stretch;gap:6px;margin-left:0;margin-right:0}
+    .rt-filters.rt-scroll-row>*{flex-shrink:0}
+    .rt-filters.rt-scroll-row .rt-pill[style*="marginLeft"]{margin-left:0!important}
+    .rt-fin-pills.rt-scroll-row{margin-bottom:14px;gap:5px}
+    .rt-fin-pills.rt-scroll-row .rt-pill,.rt-fin-pills.rt-scroll-row .rt-compare-toggle{flex-shrink:0}
+    .rt-fin-pills:not(.rt-scroll-row){flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none;-ms-overflow-style:none;max-width:100%}
+    .rt-fin-pills:not(.rt-scroll-row)::-webkit-scrollbar{display:none}
+    .rt-fin-pills:not(.rt-scroll-row) .rt-pill,.rt-fin-pills:not(.rt-scroll-row) .rt-compare-toggle{flex-shrink:0}
+    .rt-filters{flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none;-ms-overflow-style:none;max-width:100%}
+    .rt-filters::-webkit-scrollbar{display:none}
+    .rt-filters>*{flex-shrink:0}
+    .rt-filters .rt-pill[style*="marginLeft"]{margin-left:0!important}
+    .rt-open-period-card{padding:12px 10px!important;margin-bottom:18px!important}
+    .rt-section-card{padding:12px 10px!important;margin-bottom:0!important}
+    .rt-reg-kpis{display:grid!important;grid-template-columns:1fr 1fr;gap:0;border-top:1px solid ${C.line}}
+    .rt-reg-kpi{border-left:none!important;padding:8px 8px!important;border-bottom:1px solid ${C.line}}
+    .rt-reg-kpi:nth-child(odd){border-right:1px solid ${C.line}}
+    .rt-reg-kpi:last-child{grid-column:1/-1;border-right:none!important}
+    .rt-reg-kpi>div:first-child{font-size:10px!important}
+    .rt-reg-kpi>div:nth-child(2){font-size:15px!important;margin-top:2px!important}
+    .rt-filters>div{display:flex;flex-shrink:0;gap:6px;align-items:center}
+    .rt-filters button.rt-pill{margin-left:0!important}
+    .rt-dash-metrics{gap:8px;margin-bottom:18px}
+    .rt-metric-tile{padding:10px 8px!important;border:none;background:transparent;flex:1 1 calc(50% - 4px);min-width:calc(50% - 4px)}
+    .rt-metric-tile>div:first-child{font-size:10px!important}
+    .rt-metric-tile>div:nth-child(2){font-size:16px!important;margin-top:4px!important}
+    .rt-kpi-row{gap:8px;margin-bottom:18px;flex-wrap:wrap}
+    .rt-kpi-tile{flex:1 1 calc(50% - 4px)!important;min-width:calc(50% - 4px)!important;padding:10px 8px!important;border:none!important;background:transparent!important}
+    .rt-kpi-tile>div:first-child{font-size:9px!important;letter-spacing:.1em!important;margin-bottom:4px!important}
+    .rt-kpi-tile>div:nth-child(2){font-size:17px!important}
+    .rt-order-card{padding:12px 10px;border:none;border-bottom:1px solid ${C.hair};background:transparent}
+    .rt-order-cards{gap:0;border:1px solid ${C.hair};background:${C.card}}
+    .rt-chartrow .rt-section-card{border:none;background:${C.card}}
   }
 `
 
