@@ -36,9 +36,17 @@ const moneyFormatter = new Intl.NumberFormat(PK_LOCALE, {
 
 export const fmtInt = (n) => intFormatter.format(Math.round(n))
 
-export const money = (n) => '$' + moneyFormatter.format(Math.round(n * 100) / 100)
+export const money = (n) => {
+  const v = Math.round(n * 100) / 100
+  if (v < 0) return '-$' + moneyFormatter.format(Math.abs(v))
+  return '$' + moneyFormatter.format(v)
+}
 
-export const money0 = (n) => '$' + intFormatter.format(Math.round(n))
+export const money0 = (n) => {
+  const v = Math.round(n)
+  if (v < 0) return '-$' + intFormatter.format(Math.abs(v))
+  return '$' + intFormatter.format(v)
+}
 
 export const moneyK = (n) => {
   const v = Math.abs(n)

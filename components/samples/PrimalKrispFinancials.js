@@ -24,9 +24,10 @@ const PNL_SHEET_CSS = `
 }
 @media(max-width:480px){
   .pk-pnl-wrap{
-    --pk-pnl-c1:4.75rem;--pk-pnl-c2:4.75rem;--pk-pnl-c3:3.375rem;--pk-pnl-gap:4px;
+    --pk-pnl-c1:4.5rem;--pk-pnl-c2:4.5rem;--pk-pnl-c3:4rem;--pk-pnl-gap:8px;
     --pk-pnl-fs:10px;--pk-pnl-fs-cur:10px;--pk-pnl-fs-head:9px;
   }
+  .pk-pnl-label{font-size:12px}
 }
 .pk-pnl-head,.pk-pnl-line{
   display:grid;grid-template-columns:minmax(0,1fr) var(--pk-pnl-c1) var(--pk-pnl-c2) var(--pk-pnl-c3);
@@ -68,6 +69,18 @@ export default function PrimalKrispFinancials({ card, lbl, big, btn, inp, KPI })
     const delta = prior != null ? amount - prior : null
     const show = cost ? -amount : amount
     const showPrior = prior != null ? (cost ? -prior : prior) : null
+    const changeColor =
+      delta == null
+        ? MUTED
+        : delta > 0
+          ? cost
+            ? RED
+            : GREEN
+          : delta < 0
+            ? cost
+              ? GREEN
+              : RED
+            : MUTED
     const lineClass = [
       'pk-pnl-line',
       indent ? 'pk-pnl-line--indent' : '',
@@ -97,7 +110,7 @@ export default function PrimalKrispFinancials({ card, lbl, big, btn, inp, KPI })
           <span className="pk-pnl-num" style={{ color: MUTED }}>{money(showPrior)}</span>
         ) : null}
         {prev ? (
-          <span className="pk-pnl-num" style={{ color: delta > 0 ? GREEN : delta < 0 ? RED : MUTED }}>
+          <span className="pk-pnl-num pk-pnl-num--delta" style={{ color: changeColor }}>
             {delta != null ? money(delta) : '—'}
           </span>
         ) : null}
