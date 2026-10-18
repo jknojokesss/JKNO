@@ -24,26 +24,45 @@ const ok = (label, cond) => {
   return cond
 }
 
+/** Per-store: ≤15% of balance in 31–60; nothing in 61+. */
+function checkStoreAgingRules(prefix, rows) {
+  for (const { name, total, b31, b61plus } of rows) {
+    if (total <= 0) continue
+    ok(`${prefix} ${name} 31-60<=15%`, b31 / total <= 0.15 + 1e-6)
+    ok(`${prefix} ${name} no 61+`, round2(b61plus) === 0)
+  }
+}
+
 // --- Primal Krisp ---
 {
   const data = JSON.parse(fs.readFileSync(path.join(root, 'data/primal-krisp.json'), 'utf8'))
   const AS_OF = '2026-09-30'
   const aging = { '0-30': 0, '31-60': 0, '61-90': 0 }
   let owed = 0
+  const pkAgingRows = []
   for (const st of data.stores.list) {
     let storeOpen = 0
+    let b31 = 0
+    let b61 = 0
     for (const inv of st.sample.invoices || []) {
       if (inv.status !== 'Open') continue
       storeOpen += inv.amount
       const days = daysBetween(inv.issued, AS_OF)
       if (days <= 30) aging['0-30'] += inv.amount
-      else if (days <= 60) aging['31-60'] += inv.amount
-      else aging['61-90'] += inv.amount
+      else if (days <= 60) {
+        aging['31-60'] += inv.amount
+        b31 += inv.amount
+      } else {
+        aging['61-90'] += inv.amount
+        b61 += inv.amount
+      }
     }
     storeOpen = round2(storeOpen)
+    pkAgingRows.push({ name: st.name, total: storeOpen, b31: round2(b31), b61plus: round2(b61) })
     ok(`PK ${st.name} open`, round2(st.sample.open_balance) === storeOpen)
     owed += storeOpen
   }
+  checkStoreAgingRules('PK', pkAgingRows)
   owed = round2(owed)
   Object.keys(aging).forEach((k) => {
     aging[k] = round2(aging[k])
@@ -63,19 +82,29 @@ const ok = (label, cond) => {
   const asOf = ws.as_of_for_age
   let owed = 0
   const buckets = { b0: 0, b31: 0, b61: 0 }
+  const popAgingRows = []
   for (const st of ws.stores) {
     let sOwed = 0
+    let sb31 = 0
+    let sb61 = 0
     for (const inv of st.open_invoices || []) {
       sOwed += inv.amount
       const age = inv.age_days ?? daysBetween(inv.date, asOf)
       if (age <= 30) buckets.b0 += inv.amount
-      else if (age <= 60) buckets.b31 += inv.amount
-      else buckets.b61 += inv.amount
+      else if (age <= 60) {
+        buckets.b31 += inv.amount
+        sb31 += inv.amount
+      } else {
+        buckets.b61 += inv.amount
+        sb61 += inv.amount
+      }
     }
     sOwed = round2(sOwed)
+    popAgingRows.push({ name: st.name, total: sOwed, b31: round2(sb31), b61plus: round2(sb61) })
     ok(`POP ${st.name}`, round2(st.owed) === sOwed)
     owed += sOwed
   }
+  checkStoreAgingRules('POP', popAgingRows)
   owed = round2(owed)
   ok('POP bucket61 zero', round2(buckets.b61) === 0)
   ok('POP 31-60 under 12%', owed > 0 && buckets.b31 / owed < 0.12)
@@ -87,9 +116,16 @@ const ok = (label, cond) => {
   const { default: DATA } = await import('../components/samples/aufschnitt/aufschnittData.js')
   const ar = DATA.receivables
   const totals = { current: 0, d1_30: 0, d31_60: 0, d61_90: 0, d90p: 0, total: 0 }
+  const auAgingRows = []
   for (const a of ar.accounts) {
     const b = a.buckets
     const row = b.current + b.d1_30 + b.d31_60 + b.d61_90 + b.d90p
+    auAgingRows.push({
+      name: a.name,
+      total: round2(b.total),
+      b31: round2(b.d31_60),
+      b61plus: round2(b.d61_90 + b.d90p),
+    })
     ok(`AU ${a.name}`, round2(b.total) === round2(row))
     totals.current += b.current
     totals.d1_30 += b.d1_30
@@ -107,6 +143,7 @@ const ok = (label, cond) => {
   const med = arTotals[Math.floor(arTotals.length / 2)]
   ok('AU max ~1.8x median', Math.max(...arTotals) <= med * 1.8 + 0.02)
   ok('AU owed ~94828', totals.total === 94827.63)
+  checkStoreAgingRules('AU', auAgingRows)
   console.log('aufschnitt', { owed: totals.total, buckets: totals })
 }
 
@@ -115,14 +152,22 @@ const ok = (label, cond) => {
   const { buildMrDipzModel } = await import('../components/samples/mrDipz/mrDipzUtils.js')
   const m = buildMrDipzModel()
   let owed = 0
+  const mdAgingRows = []
   for (const s of m.stores) {
     const invSum = round2(sum(s.openInvoices, (i) => i.amount) / 100)
     const storeOwed = round2(s.owed / 100)
+    mdAgingRows.push({
+      name: s.name,
+      total: storeOwed,
+      b31: round2(s.aging.b1 / 100),
+      b61plus: round2((s.aging.b2 + s.aging.b3) / 100),
+    })
     ok(`MD ${s.name} invoices`, invSum === storeOwed)
     const bucketSum = round2((s.aging.b0 + s.aging.b1 + s.aging.b2 + s.aging.b3) / 100)
     ok(`MD ${s.name} buckets`, bucketSum === storeOwed)
     owed += storeOwed
   }
+  checkStoreAgingRules('MD', mdAgingRows)
   owed = round2(owed)
   const credits = round2(m.totals.credits / 100)
   const sales = round2(m.totals.sales / 100)
@@ -134,7 +179,7 @@ const ok = (label, cond) => {
   ok('MD Ateres credit mid', ateres.pct >= 8 && ateres.pct <= 9.1)
   let b1 = 0
   for (const s of m.stores) b1 += s.aging.b1
-  ok('MD 31-60 under 8%', b1 / m.totals.owed < 0.08)
+  ok('MD 31-60 under 4%', b1 / m.totals.owed < 0.04)
   ok('MD max store share', Math.max(...m.stores.map((s) => s.owed)) / m.totals.owed <= 0.11)
   console.log('mr-dipz', { owed, sales, credits, pct: m.totals.pct })
 }
