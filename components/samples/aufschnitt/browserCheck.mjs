@@ -1,53 +1,94 @@
 import { chromium } from 'playwright'
 
-const BASE = 'http://localhost:3456/aufschnitt'
-const TABS = ['Overview', 'P&L', 'Sales by channel', 'Stock', 'Owed by stores']
+const BASE = 'http://localhost:3457/aufschnitt'
+const WIDTHS = [390, 768, 1440]
+const TABS = [
+  ['overview', 'Overview', 'Overview'],
+  ['pnl', 'P&L', 'P&L'],
+  ['channels', 'Sales by channel', 'Channels'],
+  ['stock', 'Stock', 'Stock'],
+  ['receivables', 'Owed by stores', 'Owed'],
+]
 
 async function metrics(page) {
   return page.evaluate(() => ({
     scrollW: document.documentElement.scrollWidth,
     clientW: document.documentElement.clientWidth,
-    badCells: [...document.querySelectorAll('td, th, .au-pnl-num')].filter((el) => el.scrollWidth > el.clientWidth + 1).length,
+    badCells: [...document.querySelectorAll('td, th, .au-pnl-num, .au-ch-amt, .au-ch-pct')].filter(
+      (el) => el.scrollWidth > el.clientWidth + 1
+    ).length,
   }))
 }
 
 const browser = await chromium.launch({ headless: true, channel: 'chrome' })
 const results = []
 
-for (const w of [390, 1440]) {
+for (const w of WIDTHS) {
   const page = await browser.newPage({ viewport: { width: w, height: 900 } })
-  await page.goto(BASE, { waitUntil: 'networkidle' })
-  for (const tab of TABS) {
-    await page.getByRole('button', { name: tab, exact: true }).click()
-    await page.waitForTimeout(350)
-    const m = await metrics(page)
-    results.push({ w, tab, view: 'main', ...m, overflow: m.scrollW > m.clientW })
+  await page.goto(BASE, { waitUntil: 'domcontentloaded', timeout: 60000 })
+  const useShort = w <= 860
 
-    const clickables = page.locator('button.au-click:visible, tr.au-click:visible').first()
-    if (await clickables.count()) {
-      await clickables.click()
-      await page.waitForTimeout(300)
+  for (const [id, long, short] of TABS) {
+    await page.locator(`.au-nav--main button[data-tab="${id}"]`).evaluate((el) => el.click())
+    await page.waitForTimeout(300)
+    const m = await metrics(page)
+    results.push({ w, tab: long, view: 'main', ...m, overflow: m.scrollW > m.clientW })
+
+    if (id === 'pnl') {
+      for (const pill of ['All brands', "Abraham's", 'Essiccata']) {
+        await page.getByRole('button', { name: pill, exact: true }).click()
+        await page.waitForTimeout(120)
+        for (let mi = 0; mi < 6; mi++) {
+          await page.locator('select').selectOption({ index: mi })
+          await page.waitForTimeout(60)
+          const pm = await metrics(page)
+          results.push({ w, tab: `P&L ${pill} m${mi}`, ...pm, overflow: pm.scrollW > pm.clientW })
+        }
+      }
+    }
+
+    const click = page.locator('main button.au-click:visible, main tr.au-click:visible, main .au-ch-row:visible').first()
+    if (await click.count()) {
+      await click.click()
+      await page.waitForTimeout(250)
       const d = await metrics(page)
-      results.push({ w, tab, view: 'detail', ...d, overflow: d.scrollW > d.clientW })
-      const back = page.getByRole('button', { name: '← Back' })
-      if (await back.count()) await back.click()
+      results.push({ w, tab: long, view: 'detail', ...d, overflow: d.scrollW > d.clientW })
+      await page.getByRole('button', { name: '← Back' }).click()
+      await page.waitForTimeout(200)
     }
   }
+
   if (w === 390) {
-    await page.getByRole('button', { name: 'Overview', exact: true }).click()
-    for (const pill of ["Abraham's", 'Essiccata']) {
-      await page.getByRole('button', { name: pill, exact: true }).click()
-      await page.waitForTimeout(200)
-      const m = await metrics(page)
-      results.push({ w, tab: `pill ${pill}`, view: 'main', ...m, overflow: m.scrollW > m.clientW })
-    }
+    const navBtns = await page.locator('.au-nav--main .au-navbtn').count()
+    const navScroll = await page.evaluate(() => document.querySelector('.au-nav--main')?.scrollWidth)
+    results.push({ w, tab: 'nav', count: navBtns, navScroll })
   }
   await page.close()
 }
 
+const page = await browser.newPage({ viewport: { width: 390, height: 900 } })
+await page.goto(BASE, { waitUntil: 'networkidle' })
+await page.locator('.au-nav--main button[data-tab="stock"]').click()
+await page.locator('th button', { hasText: 'Wks' }).click()
+const sortBefore = await page.locator('th button', { hasText: 'Wks' }).textContent()
+await page.locator('main tr.au-click').first().click()
+await page.getByRole('button', { name: '← Back' }).click()
+const sortAfter = await page.locator('th button', { hasText: 'Wks' }).textContent()
+results.push({ test: 'stock-back-sort', ok: sortBefore === sortAfter, sortBefore, sortAfter })
+
+await page.locator('.au-nav--main button[data-tab="channels"]').click()
+await page.locator('main button.au-click').first().click()
+await page.getByRole('button', { name: '← Back' }).click()
+const channelsActive = await page
+  .locator('.au-nav--main')
+  .locator('button[data-tab="channels"]')
+  .evaluate((el) => getComputedStyle(el).boxShadow.includes('inset'))
+results.push({ test: 'channel-back-tab', channelsActive })
+
 await browser.close()
-console.log(JSON.stringify(results, null, 2))
-const fails = results.filter((r) => r.overflow || (r.w === 390 && r.badCells > 0))
-console.log('FAILURES', JSON.stringify(fails))
-console.log('fails', fails.length)
-if (fails.length) process.exit(1)
+
+console.log(JSON.stringify(results.filter((r) => r.overflow || r.badCells > 0), null, 2))
+const fails = results.filter((r) => r.overflow || (r.badCells > 0 && r.w))
+const backFails = results.filter((r) => r.test && (r.ok === false || r.channelsActive === false))
+console.log('layout fails', fails.length, 'back fails', backFails.length)
+if (fails.length || backFails.length) process.exit(1)

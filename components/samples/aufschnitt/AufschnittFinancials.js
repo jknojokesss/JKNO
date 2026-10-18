@@ -1,4 +1,3 @@
-import { useState } from 'react'
 import DATA from './aufschnittData'
 import {
   SPICE,
@@ -13,10 +12,20 @@ import {
   PNL_SHEET_CSS,
 } from './aufschnittUtils'
 
-export default function AufschnittFinancials({ card, lbl, big, inp, KPI, brand, onDrill }) {
+export default function AufschnittFinancials({
+  card,
+  lbl,
+  big,
+  inp,
+  KPI,
+  brand,
+  onDrill,
+  pnlMonthIdx,
+  setPnlMonthIdx,
+  pnlExpand,
+  setPnlExpand,
+}) {
   const months = DATA.pnlViews[brand] || []
-  const [pnlMonthIdx, setPnlMonthIdx] = useState(months.length - 1)
-  const [pnlExpand, setPnlExpand] = useState({ revenue: true, cogs: true, opex: true })
 
   const cur = months[pnlMonthIdx]
   const prev = pnlMonthIdx > 0 ? months[pnlMonthIdx - 1] : null

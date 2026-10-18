@@ -16,6 +16,7 @@ import {
   INK,
   MUTED,
   BORDER,
+  RED,
   UI,
   MONO,
   SHELL_CSS,
@@ -28,17 +29,20 @@ const BIZ = DATA.meta.name
 const AS_OF = DATA.meta.as_of
 
 const TABS = [
-  ['overview', 'Overview'],
-  ['pnl', 'P&L'],
-  ['channels', 'Sales by channel'],
-  ['stock', 'Stock'],
-  ['receivables', 'Owed by stores'],
+  ['overview', 'Overview', 'Overview'],
+  ['pnl', 'P&L', 'P&L'],
+  ['channels', 'Sales by channel', 'Channels'],
+  ['stock', 'Stock', 'Stock'],
+  ['receivables', 'Owed by stores', 'Owed'],
 ]
 
 export default function AufschnittPortal() {
   const [tab, setTab] = useState('overview')
   const [brand, setBrand] = useState(BRAND_ALL)
   const [detail, setDetail] = useState(null)
+  const [pnlMonthIdx, setPnlMonthIdx] = useState(5)
+  const [pnlExpand, setPnlExpand] = useState({ revenue: true, cogs: true, opex: true })
+  const [stockSort, setStockSort] = useState({ key: 'weeksSupply', dir: 'asc' })
 
   const card = { background: CARDBG, border: `1px solid ${BORDER}`, borderRadius: '2px', padding: '20px' }
   const lbl = {
@@ -59,6 +63,27 @@ export default function AufschnittPortal() {
     color: INK,
     outline: 'none',
     fontFamily: 'inherit',
+  }
+
+  const snapshot = () => ({ tab, brand, pnlMonthIdx, pnlExpand, stockSort })
+
+  const openDetail = useCallback(
+    (payload) => {
+      setDetail({ ...payload, _restore: snapshot() })
+    },
+    [tab, brand, pnlMonthIdx, pnlExpand, stockSort]
+  )
+
+  const onBack = () => {
+    if (detail?._restore) {
+      const r = detail._restore
+      setTab(r.tab)
+      setBrand(r.brand)
+      setPnlMonthIdx(r.pnlMonthIdx)
+      setPnlExpand(r.pnlExpand)
+      setStockSort(r.stockSort)
+    }
+    setDetail(null)
   }
 
   const KPI = ({ k, v, sub, subColor, accent, onClick }) => {
@@ -92,19 +117,16 @@ export default function AufschnittPortal() {
     )
   }
 
-  const openDetail = useCallback((d) => setDetail(d), [])
-  const onBack = () => setDetail(null)
-
   const onOverviewOpen = (d) => {
     if (d.type === 'goto-ar') {
       setTab('receivables')
       return
     }
     if (d.type === 'channel') {
-      setDetail({ type: 'channel-detail', channel: d.channel, brand })
+      openDetail({ type: 'channel-detail', channel: d.channel, brand })
       return
     }
-    setDetail(d)
+    openDetail(d)
   }
 
   const currentLabel = TABS.find((t) => t[0] === tab)?.[1] || ''
@@ -142,11 +164,13 @@ export default function AufschnittPortal() {
             <div style={{ ...lbl, color: '#B6A78C', marginTop: '12px' }}>Owner portal</div>
           </div>
           <nav className="au-nav au-nav--main" aria-label="Dashboard sections">
-            {TABS.map(([id, label]) => {
+            {TABS.map(([id, longLabel, shortLabel]) => {
               const active = tab === id
               return (
                 <button
                   key={id}
+                  type="button"
+                  data-tab={id}
                   className="au-navbtn"
                   onClick={() => {
                     setTab(id)
@@ -158,7 +182,8 @@ export default function AufschnittPortal() {
                       : undefined
                   }
                 >
-                  {label}
+                  <span className="au-nav-label-long">{longLabel}</span>
+                  <span className="au-nav-label-short">{shortLabel}</span>
                 </button>
               )
             })}
@@ -192,12 +217,33 @@ export default function AufschnittPortal() {
                 <AufschnittOverview card={card} lbl={lbl} big={big} KPI={KPI} brand={brand} onOpen={onOverviewOpen} />
               )}
               {tab === 'pnl' && (
-                <AufschnittFinancials card={card} lbl={lbl} big={big} inp={inp} KPI={KPI} brand={brand} onDrill={openDetail} />
+                <AufschnittFinancials
+                  card={card}
+                  lbl={lbl}
+                  big={big}
+                  inp={inp}
+                  KPI={KPI}
+                  brand={brand}
+                  onDrill={openDetail}
+                  pnlMonthIdx={pnlMonthIdx}
+                  setPnlMonthIdx={setPnlMonthIdx}
+                  pnlExpand={pnlExpand}
+                  setPnlExpand={setPnlExpand}
+                />
               )}
               {tab === 'channels' && (
                 <AufschnittChannelsTab card={card} lbl={lbl} brand={brand} onOpen={openDetail} />
               )}
-              {tab === 'stock' && <AufschnittStockTab card={card} lbl={lbl} brand={brand} onOpen={openDetail} />}
+              {tab === 'stock' && (
+                <AufschnittStockTab
+                  card={card}
+                  lbl={lbl}
+                  brand={brand}
+                  onOpen={openDetail}
+                  sort={stockSort}
+                  setSort={setStockSort}
+                />
+              )}
               {tab === 'receivables' && <AufschnittReceivablesTab card={card} lbl={lbl} onOpen={openDetail} />}
             </>
           )}
@@ -230,8 +276,8 @@ function DetailView({ detail, card, lbl, big, onBack }) {
         <div style={{ ...card, marginBottom: 12 }}>
           <div style={{ ...lbl, marginBottom: 8 }}>P&amp;L summary · September</div>
           <Row l="Revenue" v={money0(b.sales)} />
-          <Row l="Gross profit" v={money(pnl.gross_profit)} />
-          <Row l="Net profit" v={money(b.netProfit)} bold />
+          <Row l="Gross profit" v={money0(pnl.gross_profit)} />
+          <Row l="Net profit" v={money0(b.netProfit)} bold accent={b.netProfit < 0 ? RED : INK} />
         </div>
         <div style={{ ...card, marginBottom: 12 }}>
           <div style={{ ...lbl, marginBottom: 8 }}>Channels</div>
@@ -296,7 +342,7 @@ function GenericOverviewDetail({ detail, card, lbl }) {
         <div style={{ ...card }}>
           <Row l="September" v={money0(detail.salesCur)} />
           <Row l="August" v={money0(detail.salesPrior)} />
-          <Row l="Change" v={money(detail.salesCur - detail.salesPrior)} bold />
+          <Row l="Change" v={money0(detail.salesCur - detail.salesPrior)} bold />
         </div>
       </>
     )
@@ -307,8 +353,8 @@ function GenericOverviewDetail({ detail, card, lbl }) {
       <>
         <h2 style={{ fontSize: 20, fontWeight: 700, marginBottom: 12 }}>Gross margin</h2>
         <div style={{ ...card }}>
-          <Row l="Gross margin %" v={`${((detail.grossPct * 10) / 10).toFixed(1)}%`} />
-          <Row l="Gross profit" v={money(p.gross_profit)} />
+          <Row l="Gross margin %" v={`${detail.grossPct.toFixed(1)}%`} />
+          <Row l="Gross profit" v={money0(p.gross_profit)} />
           <Row l="Revenue" v={money0(p.revenue_total)} />
         </div>
       </>
@@ -321,10 +367,10 @@ function GenericOverviewDetail({ detail, card, lbl }) {
       <>
         <h2 style={{ fontSize: 20, fontWeight: 700, marginBottom: 12 }}>Net profit · September</h2>
         <div style={{ ...card }}>
-          <Row l="Net profit" v={money(p.net_profit)} bold />
-          <Row l="Prior month" v={money(prior.net_profit)} />
-          <Row l="Operating expenses" v={money(p.operating_expenses_total)} />
-          <Row l="Gross profit" v={money(p.gross_profit)} />
+          <Row l="Net profit" v={money0(p.net_profit)} bold accent={p.net_profit < 0 ? RED : INK} />
+          <Row l="Prior month" v={money0(prior.net_profit)} />
+          <Row l="Operating expenses" v={money0(p.operating_expenses_total)} />
+          <Row l="Gross profit" v={money0(p.gross_profit)} />
         </div>
       </>
     )
@@ -341,14 +387,26 @@ function GenericOverviewDetail({ detail, card, lbl }) {
       </>
     )
   }
+  if (detail.type === 'owed-summary') {
+    return (
+      <>
+        <h2 style={{ fontSize: 20, fontWeight: 700, marginBottom: 12 }}>Owed by stores</h2>
+        <div style={{ ...card }}>
+          <Row l="Total open" v={money0(detail.total)} bold />
+          <Row l="Over 60 days" v={money0(detail.over60)} />
+          <Row l="August total" v={money0(detail.prior)} />
+        </div>
+      </>
+    )
+  }
   return null
 }
 
-function Row({ l, v, bold }) {
+function Row({ l, v, bold, accent }) {
   return (
     <div style={{ display: 'flex', justifyContent: 'space-between', padding: '6px 0', fontSize: 13, fontWeight: bold ? 700 : 400 }}>
       <span style={{ color: MUTED }}>{l}</span>
-      <span style={{ fontFamily: MONO, color: INK }}>{v}</span>
+      <span style={{ fontFamily: MONO, color: accent || INK }}>{v}</span>
     </div>
   )
 }

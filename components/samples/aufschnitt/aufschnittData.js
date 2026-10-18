@@ -14,7 +14,41 @@ import {
 } from './aufschnittCatalog.js'
 import { allocateByWeight, roundCents, sumCents } from './aufschnittUtils.js'
 
-const COGS_SPLIT = {
+const MONTH_TOTAL = {
+  '2026-04': 198_432.17,
+  '2026-05': 207_891.44,
+  '2026-06': 201_118.76,
+  '2026-07': 228_104.33,
+  '2026-08': 221_387.62,
+  '2026-09': 236_148.91,
+}
+
+/** September brand revenue (≈55 / 30 / 15 %) */
+const BRAND_SEP = {
+  Aufschnitt: 129_881.9,
+  "Abraham's": 70_844.67,
+  Essiccata: 35_422.34,
+}
+
+const BRAND_AUG_GROWTH = { Aufschnitt: 1.098, "Abraham's": 1.041, Essiccata: 0.968 }
+
+const CHANNEL_SHARE = {
+  Aufschnitt: { Stores: 0.62, Amazon: 0.26, 'Own site': 0.12 },
+  "Abraham's": { Stores: 0.6, Amazon: 0.25, 'Own site': 0.15 },
+  Essiccata: { Stores: 0.4, Amazon: 0.45, 'Own site': 0.15 },
+}
+
+/** Combined channel mix shifts slightly month to month (Aug own site higher → Sep down) */
+const COMBINED_CH_TILT = {
+  '2026-04': { Stores: 0.57, Amazon: 0.285, 'Own site': 0.145 },
+  '2026-05': { Stores: 0.575, Amazon: 0.288, 'Own site': 0.137 },
+  '2026-06': { Stores: 0.56, Amazon: 0.292, 'Own site': 0.148 },
+  '2026-07': { Stores: 0.582, Amazon: 0.29, 'Own site': 0.128 },
+  '2026-08': { Stores: 0.566, Amazon: 0.284, 'Own site': 0.15 },
+  '2026-09': { Stores: 0.58, Amazon: 0.29, 'Own site': 0.13 },
+}
+
+const COGS_BASE_SPLIT = {
   'Meat and fish': 0.548,
   Packaging: 0.162,
   'Co-packing': 0.118,
@@ -22,26 +56,31 @@ const COGS_SPLIT = {
   'Inbound freight': 0.08,
 }
 
-const MONTH_TARGETS = {
-  '2026-04': 198_432.17,
-  '2026-05': 207_891.44,
-  '2026-06': 214_556.88,
-  '2026-07': 228_104.33,
-  '2026-08': 221_387.62,
-  '2026-09': 236_148.91,
+/** Line mix vs prior month — Sep vs Aug: meat up, packaging & freight down, co-pack flat */
+const COGS_LINE_TILT = {
+  '2026-09': { 'Meat and fish': 1.034, Packaging: 0.972, 'Co-packing': 1.002, 'Kosher supervision': 1.008, 'Inbound freight': 0.961 },
+  '2026-08': { 'Meat and fish': 0.991, Packaging: 1.014, 'Co-packing': 0.998, 'Kosher supervision': 1.0, 'Inbound freight': 1.012 },
+  '2026-07': { 'Meat and fish': 1.018, Packaging: 0.988, 'Co-packing': 1.005, 'Kosher supervision': 1.002, 'Inbound freight': 0.995 },
+  '2026-06': { 'Meat and fish': 1.022, Packaging: 1.006, 'Co-packing': 0.994, 'Kosher supervision': 1.001, 'Inbound freight': 1.008 },
+  '2026-05': { 'Meat and fish': 0.996, Packaging: 1.01, 'Co-packing': 1.001, 'Kosher supervision': 0.999, 'Inbound freight': 1.003 },
+  '2026-04': { 'Meat and fish': 1.0, Packaging: 1.0, 'Co-packing': 1.0, 'Kosher supervision': 1.0, 'Inbound freight': 1.0 },
 }
 
-const BRAND_SHARE_SEP = { Aufschnitt: 0.548, "Abraham's": 0.297, Essiccata: 0.155 }
-
-const CHANNEL_SHARE = {
-  Aufschnitt: { Stores: 0.58, Amazon: 0.29, 'Own site': 0.13 },
-  "Abraham's": { Stores: 0.57, Amazon: 0.3, 'Own site': 0.13 },
-  Essiccata: { Stores: 0.42, Amazon: 0.43, 'Own site': 0.15 },
+const COGS_RATE = {
+  Aufschnitt: { '2026-04': 0.594, '2026-05': 0.601, '2026-06': 0.608, '2026-07': 0.596, '2026-08': 0.599, '2026-09': 0.603 },
+  "Abraham's": { '2026-04': 0.612, '2026-05': 0.618, '2026-06': 0.621, '2026-07': 0.609, '2026-08': 0.614, '2026-09': 0.617 },
+  Essiccata: { '2026-04': 0.578, '2026-05': 0.584, '2026-06': 0.592, '2026-07': 0.586, '2026-08': 0.588, '2026-09': 0.624 },
 }
 
-const COGS_RATE = { Aufschnitt: 0.638, "Abraham's": 0.662, Essiccata: 0.604 }
+const OPEX_RATE = {
+  amazonFee: { '2026-04': 0.302, '2026-05': 0.308, '2026-06': 0.312, '2026-07': 0.315, '2026-08': 0.318, '2026-09': 0.321 },
+  storePromo: { '2026-04': 0.038, '2026-05': 0.039, '2026-06': 0.041, '2026-07': 0.04, '2026-08': 0.042, '2026-09': 0.043 },
+  shipping: { '2026-04': 0.132, '2026-05': 0.138, '2026-06': 0.145, '2026-07': 0.141, '2026-08': 0.148, '2026-09': 0.136 },
+  cardProc: 0.03,
+}
 
-/** Per-product unit price (wholesale-weighted avg) and relative velocity */
+const ESSICCATA_SEP_NET = -612.4
+
 const PRODUCT_META = {}
 PRODUCT_DEFS.forEach((p, i) => {
   const base = 4.25 + (i % 7) * 0.37 + (p.brand === 'Essiccata' ? 1.1 : 0)
@@ -60,47 +99,143 @@ function hash(s) {
   return Math.abs(h)
 }
 
-function monthIndex(id) {
-  return MONTHS.findIndex((m) => m.id === id)
+function buildBrandMonthTargets() {
+  const augRaw = {}
+  BRANDS.forEach((b) => {
+    augRaw[b] = roundCents(BRAND_SEP[b] / BRAND_AUG_GROWTH[b])
+  })
+  const augSum = sumCents(Object.values(augRaw))
+  const augScale = MONTH_TOTAL['2026-08'] / augSum
+  const brandAug = {}
+  BRANDS.forEach((b) => {
+    brandAug[b] = roundCents(augRaw[b] * augScale)
+  })
+  let fix = roundCents(MONTH_TOTAL['2026-08'] - sumCents(Object.values(brandAug)))
+  if (fix) brandAug.Aufschnitt = roundCents(brandAug.Aufschnitt + fix)
+
+  const out = {
+    '2026-08': brandAug,
+    '2026-09': { ...BRAND_SEP },
+  }
+
+  const monthIds = MONTHS.map((m) => m.id)
+  const iAug = monthIds.indexOf('2026-08')
+  const iSep = monthIds.indexOf('2026-09')
+  for (let i = 0; i < iAug; i++) {
+    const id = monthIds[i]
+    const t = MONTH_TOTAL[id]
+    const wobble = { Aufschnitt: 0.54 + (i % 3) * 0.02, "Abraham's": 0.3 - (i % 2) * 0.01, Essiccata: 0.16 }
+    const alloc = allocateByWeight(t, wobble)
+    out[id] = alloc
+  }
+  for (let i = iSep + 1; i < monthIds.length; i++) {
+    out[monthIds[i]] = out['2026-09']
+  }
+  const iJun = monthIds.indexOf('2026-06')
+  if (out[monthIds[iJun]]) {
+    out[monthIds[iJun]].Essiccata = roundCents(out[monthIds[iJun]].Essiccata * 0.94)
+    out[monthIds[iJun]].Aufschnitt = roundCents(out[monthIds[iJun]].Aufschnitt * 1.012)
+    const t = MONTH_TOTAL['2026-06']
+    const s = sumCents(Object.values(out[monthIds[iJun]]))
+    out[monthIds[iJun]].Aufschnitt = roundCents(out[monthIds[iJun]].Aufschnitt + (t - s))
+  }
+  return out
 }
 
-/** Raw unit weights before scaling to revenue target */
-function rawUnits(productId, channel, monthId) {
-  const mi = monthIndex(monthId)
-  const meta = PRODUCT_META[productId]
-  const season = [0.91, 0.95, 0.98, 1.04, 1.0, 1.07][mi] || 1
-  const chBump = channel === 'Amazon' ? 1.04 : channel === 'Own site' ? 0.96 : 1
-  const wobble = 0.88 + (hash(`${productId}-${channel}-${monthId}`) % 24) / 100
-  return meta.velocity * season * chBump * wobble * 420
+const BRAND_MONTH = buildBrandMonthTargets()
+
+/** Product Sep vs Aug revenue multiplier (several down) */
+function productMoM(productId, monthId) {
+  if (monthId === '2026-09') {
+    const h = hash(productId) % 10
+    if (h === 0) return 0.912
+    if (h === 1) return 0.945
+    if (h === 2) return 0.968
+    if (h >= 7) return 1.082
+    return 1.018 + (h % 4) * 0.011
+  }
+  if (monthId === '2026-08') return 1
+  const mi = MONTHS.findIndex((m) => m.id === monthId)
+  return 0.94 + (hash(`${productId}-${monthId}`) % 13) / 100
+}
+
+function channelTargets(monthId, brand, brandRev) {
+  const base = CHANNEL_SHARE[brand]
+  const tilt = COMBINED_CH_TILT[monthId]
+  const blended = {}
+  CHANNELS.forEach((ch) => {
+    blended[ch] = base[ch] * 0.72 + tilt[ch] * 0.28
+  })
+  const s = CHANNELS.reduce((a, ch) => a + blended[ch], 0)
+  CHANNELS.forEach((ch) => {
+    blended[ch] /= s
+  })
+  const alloc = allocateByWeight(brandRev, blended)
+  return alloc
+}
+
+function shiftChannelRevenue(rows, monthId, shifts) {
+  CHANNELS.forEach((ch) => {
+    const delta = shifts[ch] || 0
+    if (!delta) return
+    const chRows = rows.filter((r) => r.month === monthId && r.channel === ch)
+    const total = sumCents(chRows, (r) => r.revenue)
+    if (total <= 0) return
+    if (delta > 0) {
+      chRows.forEach((r) => {
+        r.revenue = roundCents(r.revenue + (delta * r.revenue) / total)
+      })
+    } else {
+      chRows.forEach((r) => {
+        r.revenue = roundCents(r.revenue + (delta * r.revenue) / total)
+      })
+    }
+    const got = sumCents(chRows, (r) => r.revenue)
+    const fix = roundCents(total + delta - got)
+    if (fix && chRows[0]) chRows[0].revenue = roundCents(chRows[0].revenue + fix)
+  })
 }
 
 function buildSalesRows() {
   const rows = []
   MONTHS.forEach((m) => {
-    const target = MONTH_TARGETS[m.id]
-    const raw = []
-    let rawRev = 0
-    PRODUCT_DEFS.forEach((p) => {
+    BRANDS.forEach((brand) => {
+      const brandRev = BRAND_MONTH[m.id][brand]
+      const chTargets = channelTargets(m.id, brand, brandRev)
       CHANNELS.forEach((ch) => {
-        const units = Math.max(1, Math.round(rawUnits(p.id, ch, m.id)))
-        const rev = roundCents(units * PRODUCT_META[p.id].unitPrice)
-        raw.push({ month: m.id, productId: p.id, brand: p.brand, channel: ch, units, revenue: rev })
-        rawRev += rev
+        const chRev = chTargets[ch]
+        const products = PRODUCT_DEFS.filter((p) => p.brand === brand)
+        const weights = {}
+        products.forEach((p) => {
+          weights[p.id] = PRODUCT_META[p.id].velocity * productMoM(p.id, m.id)
+        })
+        const split = allocateByWeight(chRev, weights)
+        products.forEach((p) => {
+          const revenue = split[p.id] || 0
+          if (revenue <= 0) return
+          const units = Math.max(1, Math.round(revenue / PRODUCT_META[p.id].unitPrice))
+          rows.push({
+            month: m.id,
+            productId: p.id,
+            brand,
+            channel: ch,
+            units,
+            revenue,
+          })
+        })
       })
     })
-    const scale = target / rawRev
-    raw.forEach((r) => {
-      const revenue = roundCents(r.revenue * scale)
-      const units = Math.max(1, Math.round(r.units * scale))
-      rows.push({ ...r, units, revenue })
-    })
-    // fix cent drift on month total
-    const got = sumCents(rows.filter((x) => x.month === m.id), (x) => x.revenue)
-    const diff = roundCents(target - got)
-    if (diff !== 0) {
-      const last = rows.filter((x) => x.month === m.id).sort((a, b) => b.revenue - a.revenue)[0]
-      if (last) last.revenue = roundCents(last.revenue + diff)
+    const got = sumCents(rows.filter((r) => r.month === m.id), (r) => r.revenue)
+    const diff = roundCents(MONTH_TOTAL[m.id] - got)
+    if (diff) {
+      const top = rows.filter((r) => r.month === m.id).sort((a, b) => b.revenue - a.revenue)[0]
+      if (top) top.revenue = roundCents(top.revenue + diff)
     }
+  })
+  shiftChannelRevenue(rows, '2026-08', {
+    Stores: -4_726.18,
+    Amazon: 3_134.62,
+    'Own site': 1_591.56,
   })
   return rows
 }
@@ -110,20 +245,20 @@ function brandFilter(brand, row) {
   return row.brand === brand
 }
 
-function sumSales(rows, { month, brand, channel, productId } = {}) {
+function sumSales(rows, opts = {}) {
   return sumCents(
     rows.filter(
       (r) =>
-        (!month || r.month === month) &&
-        (!channel || r.channel === channel) &&
-        (!productId || r.productId === productId) &&
-        brandFilter(brand, r)
+        (!opts.month || r.month === opts.month) &&
+        (!opts.channel || r.channel === opts.channel) &&
+        (!opts.productId || r.productId === opts.productId) &&
+        brandFilter(opts.brand, r)
     ),
     (r) => r.revenue
   )
 }
 
-function sumUnits(rows, opts) {
+function sumUnits(rows, opts = {}) {
   return rows
     .filter(
       (r) =>
@@ -151,15 +286,19 @@ function buildBrandPnl(salesRows, monthId, brand) {
   })
   const revenueTotal = sumCents(Object.values(rev))
 
-  const cogsTotal = roundCents(revenueTotal * COGS_RATE[brand])
-  const cogs_entries = COGS_LINES.map((l) => ({ l, n: roundCents(cogsTotal * COGS_SPLIT[l]) }))
+  const rate = COGS_RATE[brand][monthId]
+  const cogsTotal = roundCents(revenueTotal * rate)
+  const tilt = COGS_LINE_TILT[monthId] || COGS_LINE_TILT['2026-04']
+  const raw = COGS_LINES.map((l) => ({ l, w: COGS_BASE_SPLIT[l] * (tilt[l] || 1) }))
+  const wSum = raw.reduce((s, x) => s + x.w, 0)
+  let cogs_entries = raw.map((x) => ({ l: x.l, n: roundCents((cogsTotal * x.w) / wSum) }))
   let cogsFix = roundCents(cogsTotal - sumCents(cogs_entries, (e) => e.n))
   if (cogsFix) cogs_entries[0].n = roundCents(cogs_entries[0].n + cogsFix)
 
-  const amazonFees = roundCents(rev.Amazon * 0.1532)
-  const storePromos = roundCents(rev.Stores * 0.0247)
-  const shipping = roundCents(rev['Own site'] * 0.1184)
-  const cardProc = roundCents((rev.Amazon + rev['Own site']) * 0.0291)
+  const amazonFees = roundCents(rev.Amazon * OPEX_RATE.amazonFee[monthId])
+  const storePromos = roundCents(rev.Stores * OPEX_RATE.storePromo[monthId])
+  const shipping = roundCents(rev['Own site'] * OPEX_RATE.shipping[monthId])
+  const cardProc = roundCents(rev['Own site'] * OPEX_RATE.cardProc)
 
   const shared = SHARED_OPEX_MONTHLY[monthId]
   const allBrandRev = {}
@@ -172,16 +311,40 @@ function buildBrandPnl(salesRows, monthId, brand) {
     allocatedShared[line] = split[brand] || 0
   })
 
-  const operating_expenses_entries = [
+  let operating_expenses_entries = [
     { l: 'Amazon fees', n: amazonFees },
     { l: 'Store promos and credits', n: storePromos },
     { l: 'Shipping to customers', n: shipping },
     { l: 'Card processing', n: cardProc },
     ...SHARED_OPEX.map((l) => ({ l, n: allocatedShared[l] })),
   ]
-  const operating_expenses_total = sumCents(operating_expenses_entries, (e) => e.n)
-  const gross_profit = roundCents(revenueTotal - cogsTotal)
-  const net_profit = roundCents(gross_profit - operating_expenses_total)
+  let operating_expenses_total = sumCents(operating_expenses_entries, (e) => e.n)
+  let gross_profit = roundCents(revenueTotal - cogsTotal)
+  let net_profit = roundCents(gross_profit - operating_expenses_total)
+
+  if (brand === 'Essiccata' && monthId === '2026-09') {
+    const adj = roundCents(net_profit - ESSICCATA_SEP_NET)
+    if (adj !== 0) {
+      cogs_entries = cogs_entries.map((e, i) =>
+        i === 0 ? { ...e, n: roundCents(e.n + adj) } : e
+      )
+      const cogs = sumCents(cogs_entries, (e) => e.n)
+      gross_profit = roundCents(revenueTotal - cogs)
+      net_profit = roundCents(gross_profit - operating_expenses_total)
+      return {
+        month: monthId,
+        brand,
+        revenue: rev,
+        revenue_total: revenueTotal,
+        cogs_entries,
+        cogs,
+        gross_profit,
+        operating_expenses_entries,
+        operating_expenses_total,
+        net_profit,
+      }
+    }
+  }
 
   return {
     month: monthId,
@@ -211,7 +374,6 @@ function buildCombinedPnl(salesRows, monthId) {
   }))
   const cogs = sumCents(cogs_entries, (e) => e.n)
 
-  const variableLines = ['Amazon fees', 'Store promos and credits', 'Shipping to customers', 'Card processing']
   const operating_expenses_entries = OPEX_LINES.map((l) => {
     if (SHARED_OPEX.includes(l)) return { l, n: SHARED_OPEX_MONTHLY[monthId][l] }
     return { l, n: sumCents(byBrand, (b) => b.operating_expenses_entries.find((e) => e.l === l).n) }
@@ -288,17 +450,15 @@ function buildStock(salesRows) {
   const endMonth = '2026-09'
   const rows = PRODUCT_DEFS.map((p) => {
     const meta = PRODUCT_META[p.id]
+    const monthUnits = sumUnits(salesRows, { productId: p.id, month: endMonth })
+    const avgWeeklyUnits = monthUnits / 4.33
     const weeklyUnits = []
     for (let w = 0; w < 8; w++) {
-      const u = Math.max(
-        1,
-        Math.round(
-          sumUnits(salesRows, { productId: p.id, month: endMonth }) / 4.33 * (0.86 + (hash(`${p.id}-w${w}`) % 28) / 100)
-        )
-      )
+      const u = Math.max(1, Math.round(avgWeeklyUnits * (0.92 + (hash(`${p.id}-w${w}`) % 17) / 100)))
       weeklyUnits.push(u)
     }
-    const avgWeeklyCases = roundCents((weeklyUnits.reduce((a, b) => a + b, 0) / 8) / meta.unitsPerCase)
+    const avgFromWeeks = weeklyUnits.reduce((a, b) => a + b, 0) / 8
+    const avgWeeklyCases = roundCents(avgFromWeeks / meta.unitsPerCase)
     const owingsCases = Math.max(2, Math.round(avgWeeklyCases * (2.1 + (hash(p.id) % 18) / 10)))
     const fbaCases = Math.max(1, Math.round(avgWeeklyCases * (1.4 + (hash(p.id + 'fba') % 12) / 10)))
     const onHandCases = owingsCases + fbaCases
@@ -330,8 +490,7 @@ function buildStock(salesRows) {
   return rows
 }
 
-function buildReceivables(salesRows) {
-  const storesSep = sumSales(salesRows, { month: '2026-09', channel: 'Stores' })
+function buildReceivables() {
   const targetTotal = 96_118.54
   const weights = STORE_ACCOUNTS.map((name, i) => 0.55 + (hash(name) % 45) / 100 + (i % 4) * 0.08)
   const wSum = weights.reduce((a, b) => a + b, 0)
@@ -360,8 +519,7 @@ function buildReceivables(salesRows) {
     }
     return { name, buckets }
   })
-  let t = sumCents(accounts, (a) => a.buckets.total)
-  const fix = roundCents(targetTotal - t)
+  const fix = roundCents(targetTotal - sumCents(accounts, (a) => a.buckets.total))
   if (fix) {
     accounts[0].buckets.total = roundCents(accounts[0].buckets.total + fix)
     accounts[0].buckets.current = roundCents(accounts[0].buckets.current + fix)
@@ -377,8 +535,7 @@ function buildReceivables(salesRows) {
 
   accounts.forEach((a) => {
     const b = a.buckets
-    const parts = [b.current, b.d1_30, b.d31_60, b.d61_90, b.d90p]
-    const s = roundCents(parts.reduce((x, y) => x + y, 0))
+    const s = roundCents(b.current + b.d1_30 + b.d31_60 + b.d61_90 + b.d90p)
     const diff = roundCents(b.total - s)
     if (diff) b.current = roundCents(b.current + diff)
   })
@@ -418,7 +575,7 @@ function buildReceivables(salesRows) {
     }
   })
 
-  return { accounts, invoices, payments, targetTotal: sumCents(accounts, (a) => a.buckets.total) }
+  return { accounts, invoices, payments, targetTotal: sumCents(accounts, (a) => a.buckets.total), priorTotal: roundCents(sumCents(accounts, (a) => a.buckets.total) * 0.968) }
 }
 
 function buildChannelDetails(salesRows) {
@@ -448,7 +605,8 @@ function buildChannelDetails(salesRows) {
     }))
     const extra = {}
     if (ch === 'Amazon') {
-      const fees = roundCents(curRev * 0.1532)
+      const sepPnl = buildCombinedPnl(salesRows, sep)
+      const fees = sepPnl.operating_expenses_entries.find((e) => e.l === 'Amazon fees').n
       extra.amazon = { grossSales: curRev, fees, netPayout: roundCents(curRev - fees) }
     }
     if (ch === 'Own site') {
@@ -513,7 +671,7 @@ function buildModel() {
   BRANDS.forEach((b) => addPnlView(b, (id) => pnlByBrandMonth[`${id}:${b}`]))
 
   const stock = buildStock(salesRows)
-  const receivables = buildReceivables(salesRows)
+  const receivables = buildReceivables()
   const channels = buildChannelDetails(salesRows)
 
   const sep = '2026-09'
@@ -545,6 +703,9 @@ function buildModel() {
     }
   })
 
+  const stockValueSep = sumCents(stock, (r) => r.valueAtCost)
+  const stockValueAug = roundCents(stockValueSep * 0.972)
+
   return {
     meta: { as_of: AS_OF, built_by: BUILT_BY, name: BIZ_NAME },
     salesRows,
@@ -557,17 +718,18 @@ function buildModel() {
       sepSales: combinedSep.revenue_total,
       augSales: combinedAug.revenue_total,
       grossMarginPct: combinedSep.revenue_total > 0 ? (combinedSep.gross_profit / combinedSep.revenue_total) * 100 : 0,
+      priorGrossMarginPct: combinedAug.revenue_total > 0 ? (combinedAug.gross_profit / combinedAug.revenue_total) * 100 : 0,
       netProfitSep: combinedSep.net_profit,
-      stockValue: sumCents(stock, (r) => r.valueAtCost),
+      priorNetProfit: combinedAug.net_profit,
+      stockValue: stockValueSep,
+      priorStockValue: stockValueAug,
       stockWeeks: (() => {
         const w = stock.reduce((s, r) => s + r.weeksSupply, 0) / stock.length
         return Math.round(w * 10) / 10
       })(),
       owedTotal: receivables.targetTotal,
-      owedOver60: sumCents(
-        receivables.accounts,
-        (a) => a.buckets.d61_90 + a.buckets.d90p
-      ),
+      priorOwedTotal: receivables.priorTotal,
+      owedOver60: sumCents(receivables.accounts, (a) => a.buckets.d61_90 + a.buckets.d90p),
       channelSalesSep: CHANNELS.map((ch) => ({
         channel: ch,
         revenue: sumSales(salesRows, { month: sep, channel: ch }),
@@ -585,4 +747,4 @@ function buildModel() {
 const DATA = buildModel()
 
 export default DATA
-export { buildModel, PRODUCT_META }
+export { buildModel, PRODUCT_META, BRAND_MONTH, MONTH_TOTAL }

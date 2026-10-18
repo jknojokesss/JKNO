@@ -7,20 +7,17 @@ import {
   MUTED,
   BORDER,
   GREEN,
+  RED,
   MONO,
-  money,
   money0,
   pct1,
   pctChange,
   changeColor,
+  CHANNEL_ROW_CSS,
 } from './aufschnittUtils'
 
-export default function AufschnittOverview({ card, lbl, big, KPI, brand, onOpen }) {
+export default function AufschnittOverview({ card, lbl, KPI, brand, onOpen }) {
   const ov = DATA.overview
-  const brandRows =
-    brand === 'All brands'
-      ? DATA.brandSummary
-      : DATA.brandSummary.filter((b) => b.brand === brand)
 
   const salesCur =
     brand === 'All brands'
@@ -33,13 +30,18 @@ export default function AufschnittOverview({ card, lbl, big, KPI, brand, onOpen 
   const salesDelta = pctChange(salesCur, salesPrior)
 
   const sepPnl = DATA.pnlViews[brand].find((m) => m.month === '2026-09')
-  const grossPct = sepPnl.revenue_total > 0 ? (sepPnl.gross_profit / sepPnl.revenue_total) * 100 : 0
   const priorPnl = DATA.pnlViews[brand].find((m) => m.month === '2026-08')
-  const priorGrossPct = priorPnl.revenue_total > 0 ? (priorPnl.gross_profit / priorPnl.revenue_total) * 100 : 0
+  const grossPct = sepPnl.revenue_total > 0 ? (sepPnl.gross_profit / sepPnl.revenue_total) * 100 : 0
+  const priorGrossPct =
+    brand === 'All brands' ? ov.priorGrossMarginPct : priorPnl.revenue_total > 0 ? (priorPnl.gross_profit / priorPnl.revenue_total) * 100 : 0
+  const marginPts = grossPct - priorGrossPct
+  const netDelta = pctChange(sepPnl.net_profit, priorPnl.net_profit)
 
-  const stockRows =
-    brand === 'All brands' ? DATA.stock : DATA.stock.filter((r) => r.brand === brand)
+  const stockRows = brand === 'All brands' ? DATA.stock : DATA.stock.filter((r) => r.brand === brand)
   const stockValue = stockRows.reduce((s, r) => s + r.valueAtCost, 0)
+  const stockPrior =
+    brand === 'All brands' ? ov.priorStockValue : round(ov.priorStockValue * (stockValue / ov.stockValue))
+  const stockDelta = pctChange(stockValue, stockPrior)
   const stockWeeks =
     stockRows.length > 0 ? Math.round((stockRows.reduce((s, r) => s + r.weeksSupply, 0) / stockRows.length) * 10) / 10 : 0
 
@@ -54,13 +56,13 @@ export default function AufschnittOverview({ card, lbl, big, KPI, brand, onOpen 
             prior: DATA.pnlViews[brand].find((m) => m.month === '2026-08').revenue[c.channel],
           })) || []
 
-  const chartData =
-    brand === 'All brands'
-      ? ov.chartMonths
-      : MONTH_CHART(brand)
+  const chartData = brand === 'All brands' ? ov.chartMonths : MONTH_CHART(brand)
+
+  const owedDelta = pctChange(ov.owedTotal, ov.priorOwedTotal)
 
   return (
     <>
+      <style>{CHANNEL_ROW_CSS}</style>
       <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap', marginBottom: '16px' }}>
         <KPI
           k="Sales September"
@@ -73,28 +75,32 @@ export default function AufschnittOverview({ card, lbl, big, KPI, brand, onOpen 
         <KPI
           k="Gross margin"
           v={pct1(grossPct)}
-          sub={`${pct1(grossPct - priorGrossPct)} vs August`}
-          subColor={changeColor(grossPct - priorGrossPct)}
+          sub={`${marginPts >= 0 ? '+' : ''}${marginPts.toFixed(1)} pts vs August`}
+          subColor={changeColor(marginPts)}
           onClick={() => onOpen({ type: 'margin', brand, grossPct, priorGrossPct, sepPnl })}
         />
         <KPI
           k="Net profit September"
-          v={money(sepPnl.net_profit)}
-          accent={sepPnl.net_profit >= 0 ? GREEN : '#C03A22'}
+          v={money0(sepPnl.net_profit)}
+          sub={`${netDelta >= 0 ? '+' : ''}${pct1(netDelta)} vs August`}
+          subColor={changeColor(netDelta)}
+          accent={sepPnl.net_profit >= 0 ? GREEN : RED}
           onClick={() => onOpen({ type: 'net', brand, sepPnl, priorPnl })}
         />
         <KPI
           k="Stock at cost"
           v={money0(stockValue)}
-          sub={`${stockWeeks} wks supply avg`}
+          sub={`${stockDelta >= 0 ? '+' : ''}${pct1(stockDelta)} vs August`}
+          subColor={changeColor(stockDelta)}
           onClick={() => onOpen({ type: 'stock-summary', brand, stockRows, stockValue, stockWeeks })}
         />
         {brand === 'All brands' && (
           <KPI
             k="Owed by stores"
             v={money0(ov.owedTotal)}
-            sub={`${money0(ov.owedOver60)} over 60 days`}
-            onClick={() => onOpen({ type: 'goto-ar' })}
+            sub={`${owedDelta >= 0 ? '+' : ''}${pct1(owedDelta)} vs August`}
+            subColor={changeColor(owedDelta)}
+            onClick={() => onOpen({ type: 'owed-summary', total: ov.owedTotal, prior: ov.priorOwedTotal, over60: ov.owedOver60 })}
           />
         )}
       </div>
@@ -141,7 +147,16 @@ export default function AufschnittOverview({ card, lbl, big, KPI, brand, onOpen 
                       {ch >= 0 ? '+' : ''}
                       {pct1(ch)}
                     </td>
-                    <td style={{ padding: '10px 4px', textAlign: 'right', fontFamily: MONO }}>{money(b.netProfit)}</td>
+                    <td
+                      style={{
+                        padding: '10px 4px',
+                        textAlign: 'right',
+                        fontFamily: MONO,
+                        color: b.netProfit < 0 ? RED : INK,
+                      }}
+                    >
+                      {money0(b.netProfit)}
+                    </td>
                   </tr>
                 )
               })}
@@ -158,26 +173,16 @@ export default function AufschnittOverview({ card, lbl, big, KPI, brand, onOpen 
             <button
               key={c.channel}
               type="button"
-              className="au-click"
+              className="au-ch-row au-click"
               onClick={() => onOpen({ type: 'channel', channel: c.channel })}
-              style={{
-                display: 'flex',
-                justifyContent: 'space-between',
-                width: '100%',
-                border: 'none',
-                background: 'transparent',
-                padding: '10px 6px',
-                borderTop: `1px solid ${CREAM}`,
-                cursor: 'pointer',
-                textAlign: 'left',
-                alignItems: 'center',
-                gap: 8,
-              }}
             >
               <span style={{ fontWeight: 600, fontSize: 14, color: INK }}>{c.channel}</span>
-              <span style={{ fontFamily: MONO, color: changeColor(ch), fontSize: 12 }}>{ch >= 0 ? '+' : ''}{pct1(ch)}</span>
-              <span style={{ ...big, fontSize: 15, fontFamily: MONO }}>{money0(c.revenue)}</span>
-              <span style={{ color: '#C6B79A', fontSize: 15 }}>›</span>
+              <span className="au-ch-pct" style={{ color: changeColor(ch) }}>
+                {ch >= 0 ? '+' : ''}
+                {pct1(ch)}
+              </span>
+              <span className="au-ch-amt">{money0(c.revenue)}</span>
+              <span style={{ color: '#C6B79A', fontSize: 15, textAlign: 'right' }}>›</span>
             </button>
           )
         })}
@@ -197,4 +202,8 @@ function MONTH_CHART(brand) {
     revenue: m.revenue_total,
     net: m.net_profit,
   }))
+}
+
+function round(n) {
+  return Math.round(n * 100) / 100
 }

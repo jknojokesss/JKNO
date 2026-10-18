@@ -82,9 +82,34 @@ DATA.channels.forEach((ch) => {
   }
 })
 
-console.log('\nSeptember combined P&L:')
 const sep = DATA.pnlViews['All brands'].find((p) => p.month === '2026-09')
 const aug = DATA.pnlViews['All brands'].find((p) => p.month === '2026-08')
+BRANDS.forEach((b) => {
+  const s = DATA.pnlViews[b].find((x) => x.month === '2026-09')
+  const share = s.revenue_total / sep.revenue_total
+  ok(`Brand share ${b}`, share > 0.12 && share < 0.58)
+})
+ok('Essiccata Sep net loss', DATA.pnlViews.Essiccata.find((x) => x.month === '2026-09').net_profit === -612.4)
+
+DATA.stock.forEach((r) => {
+  const monthUnits = DATA.salesRows.filter((x) => x.productId === r.productId && x.month === '2026-09').reduce((s, x) => s + x.units, 0)
+  const avgWeeklyUnits = r.weeklyUnits.reduce((a, b) => a + b, 0) / 8
+  const impliedMonth = avgWeeklyUnits * 4.33
+  ok(`Stock weekly ${r.productId}`, Math.abs(impliedMonth - monthUnits) / Math.max(monthUnits, 1) < 0.12)
+})
+
+console.log('\nSeptember brand revenue / net:')
+BRANDS.forEach((b) => {
+  const s = DATA.pnlViews[b].find((x) => x.month === '2026-09')
+  const p = DATA.pnlViews[b].find((x) => x.month === '2026-08')
+  console.log(`  ${b}: rev ${s.revenue_total.toFixed(2)} (aug ${p.revenue_total.toFixed(2)}) net ${s.net_profit.toFixed(2)}`)
+})
+console.log('\nChannel totals Sep / Aug:')
+CHANNELS.forEach((ch) => {
+  console.log(`  ${ch}: ${sep.revenue[ch].toFixed(2)} / ${aug.revenue[ch].toFixed(2)}`)
+})
+
+console.log('\nSeptember combined P&L:')
 const line = (label, cur, prior) => {
   const d = roundCents(cur - prior)
   console.log(`${label}: ${cur.toFixed(2)} | prior ${prior.toFixed(2)} | chg ${d.toFixed(2)}`)

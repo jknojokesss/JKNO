@@ -1,9 +1,8 @@
-import { useMemo, useState } from 'react'
+import { useMemo } from 'react'
 import DATA from './aufschnittData'
 import { INK, MUTED, BORDER, CREAM, RED, MONO, money, money0 } from './aufschnittUtils'
 
-export default function AufschnittStockTab({ card, lbl, brand, onOpen }) {
-  const [sort, setSort] = useState({ key: 'weeksSupply', dir: 'asc' })
+export default function AufschnittStockTab({ card, lbl, brand, onOpen, sort, setSort }) {
   const rows = useMemo(() => {
     const base = brand === 'All brands' ? DATA.stock : DATA.stock.filter((r) => r.brand === brand)
     const dir = sort.dir === 'asc' ? 1 : -1
