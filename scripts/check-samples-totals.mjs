@@ -118,6 +118,7 @@ function checkStoreAgingRules(prefix, rows) {
   const pp = DATA.profitPerOrder
   const chProfit = round2(pp.channelSummary.reduce((s, r) => s + r.profit, 0))
   ok('AU profit ties contribution', chProfit === pp.contributionAfterFulfillment)
+  ok('AU net profit Sep', round2(sep.net_profit) === 16720)
   ok('AU overview profit avg', round2(DATA.overview.profitPerOrderAvg) === round2(pp.blendedAvgProfitPerOrder))
   ok('AU channel rev sum', round2(pp.channelSummary.reduce((s, r) => s + r.revenue, 0)) === round2(sep.revenue_total))
   console.log('aufschnitt', { profitContribution: chProfit, avgPerOrder: pp.blendedAvgProfitPerOrder })

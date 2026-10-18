@@ -13,7 +13,7 @@ import {
   STOCK_LOCATIONS,
 } from './aufschnittCatalog.js'
 import { allocateByWeight, roundCents, sumCents } from './aufschnittUtils.js'
-import { buildProfitPerOrder } from './aufschnittProfitOrders.js'
+import { buildProfitPerOrder, SEP_FULFILLMENT, SEP_NET_PROFIT_TARGET } from './aufschnittProfitOrders.js'
 
 const MONTH_TOTAL = {
   '2026-04': 198_432.17,
@@ -81,6 +81,51 @@ const OPEX_RATE = {
 }
 
 const ESSICCATA_SEP_NET = -612.4
+
+function reduceBrandOpex(entries, amount) {
+  let rem = roundCents(amount)
+  for (const label of ['Other', 'Software', 'Insurance', 'Warehouse rent']) {
+    const e = entries.find((x) => x.l === label)
+    if (!e || rem <= 0) continue
+    const cut = Math.min(rem, e.n)
+    e.n = roundCents(e.n - cut)
+    rem = roundCents(rem - cut)
+  }
+  return rem
+}
+
+function applySeptemberFulfillment(salesRows, monthId, brand, rev, operating_expenses_entries) {
+  if (monthId !== '2026-09') return operating_expenses_entries
+  const totalStoresRev = sumSales(salesRows, { month: monthId, channel: 'Stores' })
+  const totalOwnRev = sumSales(salesRows, { month: monthId, channel: 'Own site' })
+  const totalOwnOrders = Math.max(180, Math.round(totalOwnRev / 100))
+
+  const ownShip = roundCents(rev['Own site'] * OPEX_RATE.shipping[monthId])
+  const storesShip = totalStoresRev > 0
+    ? roundCents(SEP_FULFILLMENT.storesShipping * rev.Stores / totalStoresRev)
+    : 0
+  const newShip = roundCents(ownShip + storesShip)
+
+  const brandOwnOrders = totalOwnRev > 0
+    ? Math.max(1, Math.round(totalOwnOrders * rev['Own site'] / totalOwnRev))
+    : 0
+  const ownCard = roundCents(rev['Own site'] * SEP_FULFILLMENT.ownCardRate + brandOwnOrders * SEP_FULFILLMENT.ownCardPerOrder)
+  const storesCard =
+    totalStoresRev > 0 ? roundCents(SEP_FULFILLMENT.storesCard * rev.Stores / totalStoresRev) : 0
+  const newCard = roundCents(ownCard + storesCard)
+
+  const oldShip = operating_expenses_entries.find((e) => e.l === 'Shipping to customers').n
+  const oldCard = operating_expenses_entries.find((e) => e.l === 'Card processing').n
+  const delta = roundCents(newShip - oldShip + newCard - oldCard)
+
+  const next = operating_expenses_entries.map((e) => {
+    if (e.l === 'Shipping to customers') return { ...e, n: newShip }
+    if (e.l === 'Card processing') return { ...e, n: newCard }
+    return { ...e }
+  })
+  reduceBrandOpex(next, delta)
+  return next
+}
 
 const PRODUCT_CFG = {
   'auf-01': { unitPrice: 4.49, unitsPerCase: 12, costPerCase: 54.6, saleWeight: 24, weeks: 5.2, fbaShare: 0.26, ownSiteCaseShare: 0.34 },
@@ -497,6 +542,13 @@ function buildBrandPnl(salesRows, monthId, brand) {
     { l: 'Card processing', n: cardProc },
     ...SHARED_OPEX.map((l) => ({ l, n: allocatedShared[l] })),
   ]
+  operating_expenses_entries = applySeptemberFulfillment(
+    salesRows,
+    monthId,
+    brand,
+    rev,
+    operating_expenses_entries
+  )
   let operating_expenses_total = sumCents(operating_expenses_entries, (e) => e.n)
   let gross_profit = roundCents(revenueTotal - cogsTotal)
   let net_profit = roundCents(gross_profit - operating_expenses_total)
@@ -539,8 +591,7 @@ function buildBrandPnl(salesRows, monthId, brand) {
   }
 }
 
-function buildCombinedPnl(salesRows, monthId) {
-  const byBrand = BRANDS.map((b) => buildBrandPnl(salesRows, monthId, b))
+function assembleCombinedPnl(salesRows, monthId, byBrand) {
   const revenue = {}
   CHANNELS.forEach((ch) => {
     revenue[ch] = sumSales(salesRows, { month: monthId, channel: ch })
@@ -554,12 +605,17 @@ function buildCombinedPnl(salesRows, monthId) {
   const cogs = sumCents(cogs_entries, (e) => e.n)
 
   const operating_expenses_entries = OPEX_LINES.map((l) => {
-    if (SHARED_OPEX.includes(l)) return { l, n: SHARED_OPEX_MONTHLY[monthId][l] }
+    if (SHARED_OPEX.includes(l)) {
+      if (monthId === '2026-09') {
+        return { l, n: sumCents(byBrand, (b) => b.operating_expenses_entries.find((e) => e.l === l).n) }
+      }
+      return { l, n: SHARED_OPEX_MONTHLY[monthId][l] }
+    }
     return { l, n: sumCents(byBrand, (b) => b.operating_expenses_entries.find((e) => e.l === l).n) }
   })
-  const operating_expenses_total = sumCents(operating_expenses_entries, (e) => e.n)
+  let operating_expenses_total = sumCents(operating_expenses_entries, (e) => e.n)
   const gross_profit = roundCents(revenue_total - cogs)
-  const net_profit = roundCents(gross_profit - operating_expenses_total)
+  let net_profit = roundCents(gross_profit - operating_expenses_total)
 
   return {
     month: monthId,
@@ -574,6 +630,11 @@ function buildCombinedPnl(salesRows, monthId) {
     net_profit,
     byBrand,
   }
+}
+
+function buildCombinedPnl(salesRows, monthId) {
+  const byBrand = BRANDS.map((b) => buildBrandPnl(salesRows, monthId, b))
+  return assembleCombinedPnl(salesRows, monthId, byBrand)
 }
 
 function buildPnlDrills(salesRows, pnl, brandKey) {
@@ -866,14 +927,49 @@ function buildChannelDetails(salesRows) {
 
 function buildModel() {
   const salesRows = buildSalesRows()
+  const sep = '2026-09'
+  const aug = '2026-08'
   const pnlByMonth = {}
   const pnlByBrandMonth = {}
   MONTHS.forEach((m) => {
-    pnlByMonth[m.id] = buildCombinedPnl(salesRows, m.id)
     BRANDS.forEach((b) => {
       pnlByBrandMonth[`${m.id}:${b}`] = buildBrandPnl(salesRows, m.id, b)
     })
+    pnlByMonth[m.id] = assembleCombinedPnl(
+      salesRows,
+      m.id,
+      BRANDS.map((b) => pnlByBrandMonth[`${m.id}:${b}`])
+    )
   })
+
+  const pinBrandNet = (brandKey) => {
+    const brand = pnlByBrandMonth[`${sep}:${brandKey}`]
+    const netFix = roundCents(SEP_NET_PROFIT_TARGET - pnlByMonth[sep].net_profit)
+    if (Math.abs(netFix) < 0.005) return
+    if (netFix > 0) {
+      let rem = netFix
+      for (const label of ['Other', 'Software', 'Insurance', 'Warehouse rent']) {
+        const e = brand.operating_expenses_entries.find((x) => x.l === label)
+        if (!e || rem <= 0) continue
+        const cut = Math.min(rem, e.n)
+        e.n = roundCents(e.n - cut)
+        rem = roundCents(rem - cut)
+      }
+    } else {
+      const other = brand.operating_expenses_entries.find((e) => e.l === 'Other')
+      if (other) other.n = roundCents(other.n + Math.abs(netFix))
+    }
+    brand.operating_expenses_total = sumCents(brand.operating_expenses_entries, (e) => e.n)
+    brand.net_profit = roundCents(brand.gross_profit - brand.operating_expenses_total)
+    pnlByMonth[sep] = assembleCombinedPnl(
+      salesRows,
+      sep,
+      BRANDS.map((b) => pnlByBrandMonth[`${sep}:${b}`])
+    )
+  }
+  for (let pass = 0; pass < 4 && Math.abs(pnlByMonth[sep].net_profit - SEP_NET_PROFIT_TARGET) >= 0.005; pass++) {
+    pinBrandNet('Aufschnitt')
+  }
 
   const pnlViews = {}
   const addPnlView = (key, getter) => {
@@ -890,9 +986,6 @@ function buildModel() {
   }
   addPnlView('All brands', (id) => pnlByMonth[id])
   BRANDS.forEach((b) => addPnlView(b, (id) => pnlByBrandMonth[`${id}:${b}`]))
-
-  const sep = '2026-09'
-  const aug = '2026-08'
 
   const stock = buildStock(salesRows)
   const channels = buildChannelDetails(salesRows)

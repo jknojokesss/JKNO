@@ -1,12 +1,19 @@
 /**
- * September profit-per-order — channel summary ties to P&L; recent orders are a
- * realistic sample only (they do not sum to the month).
+ * September profit-per-order — channel summary ties to P&L; recent orders are a sample.
  */
 import { CHANNELS, STORE_ACCOUNTS } from './aufschnittCatalog.js'
 import { roundCents, sumCents } from './aufschnittUtils.js'
 
 const SEP = '2026-09'
-const COGS_RATE = 0.603
+
+export const SEP_NET_PROFIT_TARGET = 16_720
+
+export const SEP_FULFILLMENT = {
+  storesShipping: 4_940,
+  storesCard: 764.4,
+  ownCardRate: 0.029,
+  ownCardPerOrder: 0.3,
+}
 
 const OWN_SITE_CUSTOMERS = [
   'Rachel M.',
@@ -37,38 +44,30 @@ const AMAZON_CUSTOMERS = [
   'Hannah K.',
 ]
 
-/** Retail SKUs on this sample — no fish / salmon. */
 const WEB_SKUS = [
-  { name: 'Beef jerky Original', unit: 4.49 },
-  { name: 'Beef jerky Teriyaki', unit: 4.59 },
-  { name: 'Beef jerky Hot', unit: 4.59 },
-  { name: 'Beef jerky Sweet & Spicy', unit: 4.69 },
-  { name: 'Turkey jerky Original', unit: 4.39 },
-  { name: 'Beef sticks Original', unit: 5.29 },
-  { name: 'Beef sticks Spicy', unit: 5.39 },
-  { name: 'Salami chips Original', unit: 3.89 },
-  { name: 'Biltong Original', unit: 5.79 },
-  { name: 'Dry sausage sticks Original', unit: 4.99 },
-  { name: 'Salumi snack pack', unit: 6.49 },
+  { name: 'Beef jerky Original 3 oz', unit: 8.99 },
+  { name: 'Beef jerky Teriyaki 3 oz', unit: 8.99 },
+  { name: 'Beef jerky Hot 3 oz', unit: 8.99 },
+  { name: 'Beef jerky Sweet & Spicy 3 oz', unit: 9.49 },
+  { name: 'Turkey jerky Original 3 oz', unit: 8.49 },
+  { name: 'Beef sticks Original 5 pack', unit: 11.99 },
+  { name: 'Beef sticks Spicy 5 pack', unit: 11.99 },
+  { name: 'Salami chips Original', unit: 6.99 },
+  { name: 'Biltong Original 4 oz', unit: 12.99 },
+  { name: 'Dry sausage sticks Original', unit: 13.99 },
+  { name: 'Salumi 6 oz', unit: 14.99 },
 ]
 
-const AMAZON_SKUS = [
-  { name: 'Beef jerky Original', unit: 8.99 },
-  { name: 'Beef jerky Teriyaki', unit: 9.49 },
-  { name: 'Beef sticks Original', unit: 11.99 },
-  { name: 'Salami chips Original', unit: 7.49 },
-  { name: 'Biltong Original', unit: 10.99 },
-  { name: 'Dry sausage sticks Chili', unit: 9.99 },
-]
+const AMAZON_SKUS = WEB_SKUS
 
 const STORE_CASE_LINES = [
-  { name: 'Beef jerky Original — case', unit: 52 },
-  { name: 'Beef jerky Teriyaki — case', unit: 54 },
-  { name: 'Beef sticks Original — case', unit: 48 },
-  { name: 'Salami chips — case', unit: 62 },
-  { name: 'Biltong Original — case', unit: 58 },
-  { name: 'Dry sausage — case', unit: 45 },
-  { name: 'Salumi — case', unit: 72 },
+  { name: 'Beef jerky Original — case of 12', unit: 72 },
+  { name: 'Beef jerky Teriyaki — case of 12', unit: 72 },
+  { name: 'Beef sticks Original — case', unit: 96 },
+  { name: 'Salami chips — case', unit: 84 },
+  { name: 'Biltong Original — case', unit: 108 },
+  { name: 'Dry sausage — case', unit: 90 },
+  { name: 'Salumi — case', unit: 120 },
 ]
 
 function opexAmt(pnl, label) {
@@ -77,13 +76,6 @@ function opexAmt(pnl, label) {
 
 function allocCogs(channelRev, revenueTotal, cogsTotal) {
   return roundCents((cogsTotal * channelRev) / revenueTotal)
-}
-
-function splitCardFees(storesRev, ownRev, cardTotal) {
-  const w = storesRev + ownRev
-  if (w <= 0) return { Stores: 0, 'Own site': 0 }
-  const stores = roundCents((cardTotal * storesRev) / w)
-  return { Stores: stores, 'Own site': roundCents(cardTotal - stores) }
 }
 
 function channelOrderCount(channel, revenue) {
@@ -99,12 +91,11 @@ function buildChannelSummary(pnl) {
   const storePromos = opexAmt(pnl, 'Store promos and credits')
   const shippingTotal = opexAmt(pnl, 'Shipping to customers')
   const cardTotal = opexAmt(pnl, 'Card processing')
-  const storesRev = pnl.revenue.Stores
-  const ownRev = pnl.revenue['Own site']
-  const cardSplit = splitCardFees(storesRev, ownRev, cardTotal)
 
-  const storesShipping = roundCents(shippingTotal * 0.131)
+  const storesShipping = SEP_FULFILLMENT.storesShipping
   const ownShipping = roundCents(shippingTotal - storesShipping)
+  const storesFees = SEP_FULFILLMENT.storesCard
+  const ownFees = roundCents(cardTotal - storesFees)
 
   const rows = CHANNELS.map((channel) => {
     const revenue = pnl.revenue[channel]
@@ -113,11 +104,7 @@ function buildChannelSummary(pnl) {
     const shipping =
       channel === 'Stores' ? storesShipping : channel === 'Own site' ? ownShipping : 0
     const fees =
-      channel === 'Amazon'
-        ? amazonFees
-        : channel === 'Stores'
-          ? cardSplit.Stores
-          : cardSplit['Own site']
+      channel === 'Amazon' ? amazonFees : channel === 'Stores' ? storesFees : ownFees
     const profit = roundCents(revenue - productCost - shipping - discounts - fees)
     const orders = channelOrderCount(channel, revenue)
     const marginPct = revenue > 0 ? (profit / revenue) * 100 : 0
@@ -152,117 +139,81 @@ function buildChannelSummary(pnl) {
   return rows
 }
 
-function buildLines(orderTotal, skus, lineSpec, costRate = COGS_RATE) {
-  const lines = []
-  let running = 0
-  lineSpec.forEach(([skuIdx, qty], i) => {
+function buildLinesFromSpec(skus, lineSpec, costRate) {
+  return lineSpec.map(([skuIdx, qty]) => {
     const sku = skus[skuIdx % skus.length]
-    const isLast = i === lineSpec.length - 1
-    let unitPrice = sku.unit
-    let q = qty
-    let revenue
-    if (isLast) {
-      revenue = roundCents(orderTotal - running)
-      if (q === 1) {
-        unitPrice = revenue
-      } else {
-        unitPrice = roundCents(revenue / q)
-        revenue = roundCents(unitPrice * q)
-        const target = roundCents(orderTotal - running)
-        if (revenue !== target) {
-          q = 1
-          unitPrice = target
-          revenue = target
-        }
-      }
-    } else {
-      revenue = roundCents(unitPrice * q)
-      running = roundCents(running + revenue)
-    }
-    lines.push({
+    const revenue = roundCents(sku.unit * qty)
+    return {
       description: sku.name,
-      qty: q,
-      unitPrice,
+      qty,
+      unitPrice: sku.unit,
       revenue,
       cost: roundCents(revenue * costRate),
-    })
+    }
   })
-  return lines
 }
 
 function itemsSummary(lines) {
   return lines.map((l) => `${l.description} x${l.qty}`).join(', ')
 }
 
-function mkOrder({
-  id,
-  orderNo,
-  date,
-  customer,
-  orderTotal,
-  productCost,
-  shipping,
-  discount,
-  fees,
-  lostOnShipping,
-  lines,
-}) {
-  const profit = roundCents(orderTotal - productCost - shipping - discount - fees)
-  return {
-    id,
-    orderNo,
-    date,
-    customer,
-    items: itemsSummary(lines),
-    orderTotal,
-    productCost,
-    shipping,
-    discount,
-    fees,
-    profit,
-    lostOnShipping: !!lostOnShipping,
-    lines,
-  }
+function syncLineCost(lines, productCost) {
+  const lineCost = sumCents(lines, (l) => l.cost)
+  const costAdj = roundCents(productCost - lineCost)
+  if (costAdj && lines.length) lines[0].cost = roundCents(lines[0].cost + costAdj)
+}
+
+function ownSiteCardFee(orderTotal) {
+  return roundCents(orderTotal * SEP_FULFILLMENT.ownCardRate + SEP_FULFILLMENT.ownCardPerOrder)
+}
+
+function storeCardFee(orderTotal, cardOrder) {
+  return cardOrder ? roundCents(orderTotal * SEP_FULFILLMENT.ownCardRate) : 0
+}
+
+function mkOrder(fields) {
+  const profit = roundCents(
+    fields.orderTotal - fields.productCost - fields.shipping - fields.discount - fields.fees
+  )
+  return { ...fields, profit, lostOnShipping: !!fields.lostOnShipping }
 }
 
 function buildOwnSiteRecentOrders() {
   const specs = [
-    { day: 4, cust: 0, no: 5124, total: 58.87, ship: 9.5, disc: 0, lines: [[0, 3], [7, 2]] },
-    { day: 7, cust: 1, no: 5131, total: 94.24, ship: 11, disc: 5, lines: [[1, 4], [5, 6]] },
-    { day: 9, cust: 2, no: 5138, total: 42.5, ship: 14.25, disc: 0, lost: true, lines: [[3, 2], [8, 1]] },
-    { day: 11, cust: 3, no: 5142, total: 127.6, ship: 12, disc: 10, lines: [[0, 6], [4, 4], [9, 2]] },
-    { day: 14, cust: 4, no: 5150, total: 76.33, ship: 8.75, disc: 0, lines: [[2, 5], [7, 3]] },
-    { day: 16, cust: 5, no: 5156, total: 148.9, ship: 15, disc: 12, lines: [[1, 8], [5, 8], [10, 2]] },
-    { day: 19, cust: 6, no: 5163, total: 39.95, ship: 13.5, disc: 0, lost: true, lines: [[6, 3], [8, 2]] },
-    { day: 21, cust: 7, no: 5171, total: 112.44, ship: 10.5, disc: 8, lines: [[4, 6], [9, 4]] },
-    { day: 23, cust: 8, no: 5178, total: 67.18, ship: 7.25, disc: 0, lines: [[0, 4], [3, 3], [7, 2]] },
-    { day: 26, cust: 9, no: 5184, total: 155.2, ship: 18, disc: 15, lines: [[1, 10], [5, 10]] },
-    { day: 28, cust: 10, no: 5190, total: 88.06, ship: 9, disc: 0, lines: [[2, 4], [6, 6], [10, 1]] },
+    { day: 4, cust: 0, no: 5124, lines: [[0, 3], [5, 2]], ship: 8.5, disc: 0 },
+    { day: 7, cust: 1, no: 5131, lines: [[1, 4], [7, 2]], ship: 10, disc: 0 },
+    { day: 9, cust: 2, no: 5138, lines: [[2, 2], [7, 1]], ship: 16, disc: 0, lost: true, profit: -6.5 },
+    { day: 11, cust: 3, no: 5142, lines: [[0, 5], [10, 2], [5, 1]], ship: 12, disc: 8 },
+    { day: 14, cust: 4, no: 5150, lines: [[0, 4], [8, 1]], ship: 9.5, disc: 0 },
+    { day: 16, cust: 5, no: 5156, lines: [[1, 6], [5, 3], [9, 1]], ship: 14, disc: 10 },
+    { day: 19, cust: 6, no: 5163, lines: [[6, 2], [7, 1]], ship: 15, disc: 0, lost: true, profit: -9.25 },
+    { day: 21, cust: 7, no: 5171, lines: [[4, 5], [9, 2]], ship: 11, disc: 5 },
+    { day: 23, cust: 8, no: 5178, lines: [[0, 3], [5, 2]], ship: 7.5, disc: 0 },
+    { day: 26, cust: 9, no: 5184, lines: [[1, 8], [10, 3]], ship: 17, disc: 15 },
+    { day: 28, cust: 10, no: 5190, lines: [[2, 3], [6, 2], [8, 1]], ship: 9, disc: 0 },
   ]
   return specs.map((s, i) => {
-    const orderTotal = s.total
-    const productCost = roundCents(orderTotal * COGS_RATE)
-    const fees = roundCents(orderTotal * 0.03)
+    const lines = buildLinesFromSpec(WEB_SKUS, s.lines, 0.59)
+    const orderTotal = sumCents(lines, (l) => l.revenue)
+    const productCost = roundCents(orderTotal * 0.59)
+    syncLineCost(lines, productCost)
+    const fees = ownSiteCardFee(orderTotal)
     let shipping = s.ship
-    let profit = roundCents(orderTotal - productCost - shipping - s.disc - fees)
+    let discount = s.disc
     if (s.lost) {
-      profit = roundCents(-(4 + (i % 9)))
-      shipping = roundCents(orderTotal - productCost - s.disc - fees - profit)
+      const profit = s.profit
+      shipping = roundCents(orderTotal - productCost - discount - fees - profit)
     }
-    const lines = buildLines(orderTotal, WEB_SKUS, s.lines)
-    const lineCost = sumCents(lines, (l) => l.cost)
-    const costAdj = roundCents(productCost - lineCost)
-    if (costAdj && lines.length) lines[0].cost = roundCents(lines[0].cost + costAdj)
-
     return mkOrder({
       id: `Own site-${i}`,
       orderNo: `WEB-${s.no}`,
       date: `2026-09-${String(s.day).padStart(2, '0')}`,
       customer: OWN_SITE_CUSTOMERS[s.cust],
+      items: itemsSummary(lines),
       orderTotal,
       productCost,
       shipping,
-      discount: s.disc,
+      discount,
       fees,
       lostOnShipping: s.lost,
       lines,
@@ -272,38 +223,34 @@ function buildOwnSiteRecentOrders() {
 
 function buildAmazonRecentOrders() {
   const specs = [
-    { day: 3, cust: 0, no: 882104, total: 34.97, fulfill: 5.2, lines: [[0, 2], [2, 1]] },
-    { day: 5, cust: 1, no: 882211, total: 52.45, fulfill: 5.5, lines: [[1, 3], [4, 2]] },
-    { day: 8, cust: 2, no: 882318, total: 28.5, fulfill: 4.75, lines: [[3, 2], [5, 1]] },
-    { day: 10, cust: 3, no: 882402, total: 67.88, fulfill: 6, lines: [[0, 4], [2, 3]] },
-    { day: 12, cust: 4, no: 882519, total: 41.2, fulfill: 5.1, lines: [[4, 2], [1, 2]] },
-    { day: 15, cust: 5, no: 882604, total: 89.95, fulfill: 6.25, lines: [[2, 5], [3, 4]] },
-    { day: 17, cust: 6, no: 882711, total: 36.75, fulfill: 4.9, lines: [[5, 2], [0, 1]] },
-    { day: 18, cust: 7, no: 882823, total: 58.4, fulfill: 5.4, lines: [[1, 4], [4, 1]] },
-    { day: 20, cust: 8, no: 882901, total: 45.6, fulfill: 5, lines: [[3, 3], [5, 2]] },
-    { day: 22, cust: 9, no: 883012, total: 72.3, fulfill: 5.8, lines: [[2, 4], [4, 2]] },
-    { day: 25, cust: 10, no: 883118, total: 31.99, fulfill: 4.6, lines: [[0, 2], [5, 1]] },
-    { day: 27, cust: 11, no: 883205, total: 54.15, fulfill: 5.35, lines: [[1, 3], [3, 2]] },
+    { day: 3, cust: 0, no: 882104, lines: [[0, 3], [7, 1]], fulfill: 5.25 },
+    { day: 5, cust: 1, no: 882211, lines: [[1, 3], [5, 1]], fulfill: 5.5 },
+    { day: 8, cust: 2, no: 882318, lines: [[2, 3]], fulfill: 4.75 },
+    { day: 10, cust: 3, no: 882402, lines: [[0, 4], [6, 1]], fulfill: 6 },
+    { day: 12, cust: 4, no: 882519, lines: [[4, 2], [7, 2]], fulfill: 5.1 },
+    { day: 15, cust: 5, no: 882604, lines: [[5, 3], [8, 1]], fulfill: 6.25 },
+    { day: 17, cust: 6, no: 882711, lines: [[3, 2], [9, 1]], fulfill: 4.9 },
+    { day: 18, cust: 7, no: 882823, lines: [[1, 4]], fulfill: 5.4 },
+    { day: 20, cust: 8, no: 882901, lines: [[0, 2], [10, 1]], fulfill: 5 },
+    { day: 22, cust: 9, no: 883012, lines: [[2, 3], [6, 1]], fulfill: 5.8 },
+    { day: 25, cust: 10, no: 883118, lines: [[7, 3], [0, 1]], fulfill: 4.6 },
+    { day: 27, cust: 11, no: 883205, lines: [[1, 2], [5, 2]], fulfill: 5.35 },
   ]
   return specs.map((s, i) => {
-    const orderTotal = s.total
-    const productCost = roundCents(orderTotal * COGS_RATE)
-    const referral = roundCents(orderTotal * 0.15)
-    const fees = roundCents(referral + s.fulfill)
-    const shipping = 0
-    const lines = buildLines(orderTotal, AMAZON_SKUS, s.lines)
-    const lineCost = sumCents(lines, (l) => l.cost)
-    const costAdj = roundCents(productCost - lineCost)
-    if (costAdj && lines.length) lines[0].cost = roundCents(lines[0].cost + costAdj)
-
+    const lines = buildLinesFromSpec(AMAZON_SKUS, s.lines, 0.58)
+    const orderTotal = sumCents(lines, (l) => l.revenue)
+    const productCost = roundCents(orderTotal * 0.58)
+    syncLineCost(lines, productCost)
+    const fees = roundCents(orderTotal * 0.15 + s.fulfill)
     return mkOrder({
       id: `Amazon-${i}`,
       orderNo: `AMZ-${s.no}`,
       date: `2026-09-${String(s.day).padStart(2, '0')}`,
       customer: AMAZON_CUSTOMERS[s.cust],
+      items: itemsSummary(lines),
       orderTotal,
       productCost,
-      shipping,
+      shipping: 0,
       discount: 0,
       fees,
       lines,
@@ -313,39 +260,35 @@ function buildAmazonRecentOrders() {
 
 function buildStoresRecentOrders() {
   const specs = [
-    { day: 2, store: 6, no: 10431, total: 864, ship: 42, disc: 28, cases: [[0, 8], [2, 6]] },
-    { day: 5, store: 7, no: 10438, total: 1124, ship: 48, disc: 0, cases: [[1, 12], [4, 8]] },
-    { day: 8, store: 0, no: 10445, total: 468, ship: 38, disc: 15, cases: [[3, 6], [5, 4]] },
-    { day: 10, store: 12, no: 10452, total: 692, ship: 35, disc: 22, cases: [[0, 6], [6, 6]] },
-    { day: 13, store: 14, no: 10459, total: 318, ship: 52, disc: 0, lost: true, cases: [[5, 4], [2, 2]] },
-    { day: 15, store: 8, no: 10466, total: 956, ship: 44, disc: 35, cases: [[1, 10], [3, 8]] },
-    { day: 17, store: 10, no: 10473, total: 540, ship: 28, disc: 12, cases: [[4, 6], [5, 6]] },
-    { day: 19, store: 4, no: 10480, total: 1188, ship: 55, disc: 0, cases: [[0, 14], [6, 10]] },
-    { day: 22, store: 11, no: 10487, total: 624, ship: 32, disc: 18, cases: [[2, 8], [4, 4]] },
-    { day: 24, store: 16, no: 10494, total: 792, ship: 40, disc: 25, cases: [[1, 8], [6, 8]] },
-    { day: 27, store: 2, no: 10501, total: 408, ship: 24, disc: 10, cases: [[3, 4], [5, 4]] },
+    { day: 2, store: 6, no: 10431, lines: [[0, 8], [2, 4]], ship: 28, disc: 28, card: true },
+    { day: 5, store: 7, no: 10438, lines: [[1, 8], [4, 5]], ship: 26, disc: 0, card: false },
+    { day: 8, store: 0, no: 10445, lines: [[3, 4], [5, 4]], ship: 24, disc: 15, card: true },
+    { day: 10, store: 12, no: 10452, lines: [[0, 6], [6, 5]], ship: 27, disc: 22, card: false },
+    { day: 13, store: 14, no: 10459, lines: [[5, 2], [2, 2]], ship: 38, disc: 0, lost: true, profit: -11.5, card: true },
+    { day: 15, store: 8, no: 10466, lines: [[1, 8], [3, 6]], ship: 30, disc: 35, card: true },
+    { day: 17, store: 10, no: 10473, lines: [[4, 5], [5, 3]], ship: 22, disc: 12, card: false },
+    { day: 19, store: 4, no: 10480, lines: [[0, 10], [6, 4]], ship: 29, disc: 0, card: false },
+    { day: 22, store: 11, no: 10487, lines: [[2, 6], [4, 3]], ship: 25, disc: 18, card: true },
+    { day: 24, store: 16, no: 10494, lines: [[1, 6], [6, 4]], ship: 28, disc: 25, card: false },
+    { day: 27, store: 2, no: 10501, lines: [[3, 3], [5, 2]], ship: 23, disc: 10, card: true },
   ]
   return specs.map((s, i) => {
-    const orderTotal = s.total
-    const productCost = roundCents(orderTotal * 0.58)
-    const fees = roundCents(orderTotal * 0.0045)
+    const lines = buildLinesFromSpec(STORE_CASE_LINES, s.lines, 0.57)
+    const orderTotal = sumCents(lines, (l) => l.revenue)
+    const productCost = roundCents(orderTotal * 0.57)
+    syncLineCost(lines, productCost)
+    const fees = storeCardFee(orderTotal, s.card)
     let shipping = s.ship
-    let discount = s.disc
-    let profit = roundCents(orderTotal - productCost - shipping - discount - fees)
+    const discount = s.disc
     if (s.lost) {
-      profit = roundCents(-11.5)
-      shipping = roundCents(orderTotal - productCost - discount - fees - profit)
+      shipping = roundCents(orderTotal - productCost - discount - fees - s.profit)
     }
-    const lines = buildLines(orderTotal, STORE_CASE_LINES, s.cases, 0.58)
-    const lineCost = sumCents(lines, (l) => l.cost)
-    const costAdj = roundCents(productCost - lineCost)
-    if (costAdj && lines.length) lines[0].cost = roundCents(lines[0].cost + costAdj)
-
     return mkOrder({
       id: `Stores-${i}`,
       orderNo: `WS-${s.no}`,
       date: `2026-09-${String(s.day).padStart(2, '0')}`,
       customer: STORE_ACCOUNTS[s.store],
+      items: itemsSummary(lines),
       orderTotal,
       productCost,
       shipping,
