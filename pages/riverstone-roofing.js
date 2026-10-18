@@ -207,9 +207,6 @@ export default function RoofingPortal({ demoEmbed = false }) {
           ))}
           <div style={{ margin: '16px 24px 6px', borderTop: '1px solid rgba(201,196,184,.15)', paddingTop: '16px', fontSize: '9px', color: '#6d747d', letterSpacing: '.12em' }}>FOR THE SALE</div>
           <button className={'nbtn' + (tab === 'buyer' ? ' on' : '')} onClick={() => setTab('buyer')} style={{ fontFamily: serif, fontSize: '14px' }}>Buyer Package</button>
-          <div style={{ marginTop: 'auto', padding: '16px 24px 0', fontSize: '10px', lineHeight: 1.65, color: '#6d747d' }}>
-            QuickBooks stays the book of record. AccuLynx stays the job subledger. This is the management layer that reads across both — nothing posts from here.
-          </div>
         </aside>
 
         <main className="main">

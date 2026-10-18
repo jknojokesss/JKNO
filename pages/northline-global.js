@@ -101,7 +101,9 @@ export default function NorthlineGlobal({ demoEmbed = false }) {
         @media(max-width:700px){
           .side{display:none}
           .main{padding:16px 14px 48px}
-          .mobilenav{display:flex;overflow-x:auto;gap:2px;padding:8px 10px;background:${SIDEBAR};position:sticky;top:0;z-index:9;-webkit-overflow-scrolling:touch}
+          .mobilenav{display:flex;overflow-x:auto;gap:2px;padding:8px 10px;background:${SIDEBAR};position:sticky;top:var(--demo-lobby-h, 56px);z-index:9;-webkit-overflow-scrolling:touch;scrollbar-width:none}
+          .mobilenav::-webkit-scrollbar{display:none}
+          .mobilenav::after{content:'';flex:0 0 8px}
           .mobilenav button{flex-shrink:0;border:none;background:transparent;color:#9a9590;font-family:${DEMO_UI};font-size:12px;font-weight:500;padding:8px 12px;border-radius:6px;cursor:pointer;white-space:nowrap}
           .mobilenav button.on{background:rgba(255,255,255,.1);color:#fff;box-shadow:inset 0 -2px 0 ${ACCENT}}
         }
@@ -109,7 +111,7 @@ export default function NorthlineGlobal({ demoEmbed = false }) {
 
       {!demoEmbed && <DemoLobby />}
 
-      <div className="mobilenav">
+      <div className="mobilenav" style={demoEmbed ? undefined : { ['--demo-lobby-h']: '56px' }}>
         {NAV.map((n) => (
           <button key={n.id} type="button" className={tab === n.id ? 'on' : ''} onClick={() => setTab(n.id)}>{n.label}</button>
         ))}

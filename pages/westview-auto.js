@@ -372,31 +372,32 @@ export default function WestviewAutoPortal({ demoEmbed = false }) {
           .bl-nav:hover{background:${PAPER};color:${INK}}
           .bl-nav.on{background:#F5F0E6;color:${INK};font-weight:600;box-shadow:inset 3px 0 0 ${SIGNAL}}
           .bl-main{flex:1;min-width:0;padding:32px 32px 56px;max-width:1100px;width:100%}
-          .bl-mtabs{display:none;position:sticky;top:${embedded ? 0 : 72}px;z-index:20;background:${WHITE};border-bottom:1px solid ${RULE};padding:8px 12px;gap:8px;overflow-x:auto;-webkit-overflow-scrolling:touch;width:100%;max-width:100%}
+          .bl-page-meta-mobile{display:none}
+          .bl-mtabs{display:none;position:sticky;z-index:18;background:${WHITE};border-bottom:1px solid ${RULE};padding:8px 12px;gap:8px;overflow-x:auto;-webkit-overflow-scrolling:touch;width:100%;max-width:100%;scrollbar-width:none}
+          .bl-mtabs::-webkit-scrollbar{display:none}
+          .bl-mtabs::after{content:'';flex:0 0 8px}
           .bl-mtab{flex-shrink:0;border:1px solid ${RULE};border-radius:999px;padding:8px 16px;font-size:13px;font-weight:500;font-family:${sans};cursor:pointer;background:${WHITE};color:${MUTED};white-space:nowrap}
           .bl-mtab.on{background:#F5F0E6;border-color:${SIGNAL};color:${INK};font-weight:600}
           .bl-chev{transition:transform .15s;display:inline-block;color:${FAINT}}
           .bl-chev.open{transform:rotate(90deg)}
           @media(max-width:820px){
             .bl-side{display:none}
-            .bl-mtabs{display:flex}
-            .bl-main{padding:20px 16px 48px}
+            .bl-page-meta-mobile{display:block;padding:4px 0 12px}
+            .bl-page-meta-desktop{display:none!important}
+            .bl-mtabs{display:flex;top:${embedded ? 0 : 'var(--demo-lobby-h, 56px)'}}
+            .bl-main{padding:16px 16px 48px}
             .bl-kpi-row .bl-kpi-card{flex:1 1 calc(50% - 6px);min-width:0}
+            .bl-mtab{padding:8px 12px;font-size:12px}
           }
         `}</style>
       </Head>
 
       {!embedded && <DemoLobby />}
 
-      <div className={`bl-shell ${DEMO_PORTAL_ROOT_CLASS}`}>
-        <div className="bl-mtabs" role="tablist">
-          {NAV.map((n) => (
-            <button key={n.id} type="button" role="tab" className={`bl-mtab${tab === n.id ? ' on' : ''}`} onClick={() => setTab(n.id)}>
-              {n.label}
-            </button>
-          ))}
-        </div>
-
+      <div
+        className={`bl-shell ${DEMO_PORTAL_ROOT_CLASS}`}
+        style={embedded ? undefined : { ['--demo-lobby-h']: '56px' }}
+      >
         <div className="bl-body">
         <aside className="bl-side">
           <div style={{ paddingBottom: '20px' }}>
@@ -413,9 +414,22 @@ export default function WestviewAutoPortal({ demoEmbed = false }) {
         </aside>
 
         <main className="bl-main">
+          <div className="bl-page-meta-mobile">
+            <p style={{ fontSize: '12px', color: FAINT, marginBottom: '8px' }}>Sample — fictitious numbers · as of {fmtD(AS_OF)}</p>
+            <p style={{ fontSize: '13px', color: MUTED, lineHeight: 1.5, margin: 0 }}>Deals come from the store&apos;s systems. QuickBooks syncs nightly.</p>
+          </div>
+          <div className="bl-mtabs" role="tablist">
+            {NAV.map((n) => (
+              <button key={n.id} type="button" role="tab" className={`bl-mtab${tab === n.id ? ' on' : ''}`} onClick={() => setTab(n.id)}>
+                {n.label}
+              </button>
+            ))}
+          </div>
           <header style={{ marginBottom: '24px' }}>
-            <p style={{ fontSize: '12px', color: FAINT, marginBottom: '10px' }}>Sample — fictitious numbers · as of {fmtD(AS_OF)}</p>
-            <p style={{ fontSize: '13px', color: MUTED, marginBottom: '14px', lineHeight: 1.5 }}>Deals come from the store&apos;s systems. QuickBooks syncs nightly.</p>
+            <div className="bl-page-meta-desktop">
+              <p style={{ fontSize: '12px', color: FAINT, marginBottom: '10px' }}>Sample — fictitious numbers · as of {fmtD(AS_OF)}</p>
+              <p style={{ fontSize: '13px', color: MUTED, marginBottom: '14px', lineHeight: 1.5 }}>Deals come from the store&apos;s systems. QuickBooks syncs nightly.</p>
+            </div>
             <h1 style={{ fontSize: '26px', fontWeight: 700, color: INK, letterSpacing: '-0.02em', lineHeight: 1.2 }}>
               {tab === 'funding' && 'When do you get paid?'}
               {tab === 'desk' && 'Where each deal stands'}
