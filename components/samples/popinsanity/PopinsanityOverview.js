@@ -43,7 +43,7 @@ export default function PopinsanityOverview({ styles, goTab, setCalendarMonth, o
         />
         <KPI card={card} lbl={lbl} big={big} k="Deposits received" v={money0(hol.deposits)} onClick={() => goTab('orders')} />
         <KPI card={card} lbl={lbl} big={big} k="Balance due" v={money0(hol.balance)} onClick={() => goTab('orders')} />
-        <KPI card={card} lbl={lbl} big={big} k="Owed by stores" v={money0(ws.owed)} onClick={() => goTab('stores')} />
+        <KPI card={card} lbl={lbl} big={big} k="Owed by stores" v={money(ws.owed)} onClick={() => goTab('stores')} />
         <KPI
           card={card}
           lbl={lbl}

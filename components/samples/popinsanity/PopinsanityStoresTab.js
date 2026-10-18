@@ -32,7 +32,7 @@ export default function PopinsanityStoresTab({ styles, openStore }) {
       <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap', marginBottom: '16px' }}>
         <KPI card={card} lbl={lbl} big={big} k="Stores carrying" v={fmtInt(ws.count)} />
         <KPI card={card} lbl={lbl} big={big} k="Wholesale sales · Oct" v={money0(ws.salesThis)} accent="#C8102E" />
-        <KPI card={card} lbl={lbl} big={big} k="Owed by stores" v={money0(ws.owed)} />
+        <KPI card={card} lbl={lbl} big={big} k="Owed by stores" v={money(ws.owed)} />
         <KPI card={card} lbl={lbl} big={big} k="Past 30 days" v={money0(ws.past30)} />
       </div>
 
