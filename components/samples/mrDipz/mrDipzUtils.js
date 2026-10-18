@@ -8,6 +8,8 @@ import {
   WEEKS,
   SOLD,
   EXPIRED,
+  PRIOR_SOLD,
+  PRIOR_EXPIRED,
   PRIOR_MONTH,
   INVOICES,
   PNL_LINES,
@@ -72,16 +74,79 @@ const sumAmount = (rows, month) => round2(rows.filter((r) => r.month === month).
 
 const creditPct = (credits, gross) => (gross > 0 ? Math.round((credits / gross) * 1000) / 10 : 0)
 
-export function buildMrDipzModel() {
-  const areaById = Object.fromEntries(AREAS.map((a) => [a.id, a]))
-  const storeById = Object.fromEntries(STORES.map((s) => [s.id, s]))
-  const productById = Object.fromEntries(PRODUCTS.map((p) => [p.id, p]))
-  const weekById = Object.fromEntries(WEEKS.map((w) => [w.id, w]))
+const normArea = (a) => ({ ...a, label: a.label ?? a.name })
+const normStore = (s) => ({
+  ...s,
+  label: s.label ?? s.name,
+  areaId: s.areaId ?? s.area,
+  terms: s.terms || 'Net 30',
+})
+const normProduct = (p) => ({ ...p, label: p.label ?? p.name })
 
-  const sepGross = sumAmount(SOLD, '2026-09')
-  const sepCredits = sumAmount(EXPIRED, '2026-09')
-  const augGross = sumAmount(SOLD, '2026-08')
-  const augCredits = sumAmount(EXPIRED, '2026-08')
+/** Nested store → product → [w1..w4] unit grids → flat money rows. */
+function flattenSeptemberGrid(nested, month, weekIds, priceById) {
+  const rows = []
+  for (const [storeId, byProduct] of Object.entries(nested || {})) {
+    for (const [productId, weekUnits] of Object.entries(byProduct)) {
+      const price = priceById[productId] || 0
+      if (!Array.isArray(weekUnits)) continue
+      weekUnits.forEach((units, i) => {
+        if (!units) return
+        rows.push({
+          storeId,
+          productId,
+          weekId: weekIds[i],
+          month,
+          amount: round2(units * price),
+        })
+      })
+    }
+  }
+  return rows
+}
+
+function flattenPriorMonth(nested, month, priceById) {
+  const rows = []
+  for (const [storeId, byProduct] of Object.entries(nested || {})) {
+    for (const [productId, units] of Object.entries(byProduct)) {
+      const price = priceById[productId] || 0
+      if (!units) continue
+      rows.push({
+        storeId,
+        productId,
+        weekId: null,
+        month,
+        amount: round2(units * price),
+      })
+    }
+  }
+  return rows
+}
+
+export function buildMrDipzModel() {
+  const areasNorm = AREAS.map(normArea)
+  const storesNorm = STORES.map(normStore)
+  const productsNorm = PRODUCTS.map(normProduct)
+  const areaById = Object.fromEntries(areasNorm.map((a) => [a.id, a]))
+  const storeById = Object.fromEntries(storesNorm.map((s) => [s.id, s]))
+  const productById = Object.fromEntries(productsNorm.map((p) => [p.id, p]))
+  const weekById = Object.fromEntries(WEEKS.map((w) => [w.id, { ...w, month: w.month || '2026-09' }]))
+  const weekIds = WEEKS.map((w) => w.id)
+  const priceById = Object.fromEntries(productsNorm.map((p) => [p.id, p.price ?? p.casePrice ?? 0]))
+
+  const soldRows = [
+    ...flattenSeptemberGrid(SOLD, '2026-09', weekIds, priceById),
+    ...flattenPriorMonth(PRIOR_SOLD, '2026-08', priceById),
+  ]
+  const expiredRows = [
+    ...flattenSeptemberGrid(EXPIRED, '2026-09', weekIds, priceById),
+    ...flattenPriorMonth(PRIOR_EXPIRED, '2026-08', priceById),
+  ]
+
+  const sepGross = sumAmount(soldRows, '2026-09')
+  const sepCredits = sumAmount(expiredRows, '2026-09')
+  const augGross = sumAmount(soldRows, '2026-08')
+  const augCredits = sumAmount(expiredRows, '2026-08')
 
   const september = {
     grossSales: sepGross,
@@ -120,26 +185,28 @@ export function buildMrDipzModel() {
     netSales: pnlAmount('net_sales', '2026-08'),
   }
 
-  const storeRows = STORES.map((st) => {
-    const sepSales = round2(SOLD.filter((r) => r.storeId === st.id && r.month === '2026-09').reduce((a, r) => a + r.amount, 0))
-    const sepCred = round2(EXPIRED.filter((r) => r.storeId === st.id && r.month === '2026-09').reduce((a, r) => a + r.amount, 0))
-    const augSales = round2(SOLD.filter((r) => r.storeId === st.id && r.month === '2026-08').reduce((a, r) => a + r.amount, 0))
-    const augCred = round2(EXPIRED.filter((r) => r.storeId === st.id && r.month === '2026-08').reduce((a, r) => a + r.amount, 0))
-    const owed = round2(INVOICES.filter((inv) => inv.storeId === st.id && inv.status === 'Open').reduce((a, inv) => a + inv.amount, 0))
-    return {
-      ...st,
-      area: areaById[st.areaId],
-      sepSales,
-      sepCredits: sepCred,
-      sepNet: round2(sepSales - sepCred),
-      creditPctSep: creditPct(sepCred, sepSales),
-      augSales,
-      augCredits: augCred,
-      balanceOwed: owed,
-    }
-  }).sort((a, b) => b.sepSales - a.sepSales)
+  const storeRows = storesNorm
+    .map((st) => {
+      const sepSales = round2(soldRows.filter((r) => r.storeId === st.id && r.month === '2026-09').reduce((a, r) => a + r.amount, 0))
+      const sepCred = round2(expiredRows.filter((r) => r.storeId === st.id && r.month === '2026-09').reduce((a, r) => a + r.amount, 0))
+      const augSales = round2(soldRows.filter((r) => r.storeId === st.id && r.month === '2026-08').reduce((a, r) => a + r.amount, 0))
+      const augCred = round2(expiredRows.filter((r) => r.storeId === st.id && r.month === '2026-08').reduce((a, r) => a + r.amount, 0))
+      const owed = round2(INVOICES.filter((inv) => inv.storeId === st.id && inv.status === 'Open').reduce((a, inv) => a + inv.amount, 0))
+      return {
+        ...st,
+        area: areaById[st.areaId],
+        sepSales,
+        sepCredits: sepCred,
+        sepNet: round2(sepSales - sepCred),
+        creditPctSep: creditPct(sepCred, sepSales),
+        augSales,
+        augCredits: augCred,
+        balanceOwed: owed,
+      }
+    })
+    .sort((a, b) => b.sepSales - a.sepSales)
 
-  const areaRows = AREAS.map((area) => {
+  const areaRows = areasNorm.map((area) => {
     const inArea = storeRows.filter((s) => s.areaId === area.id)
     const sepSales = round2(inArea.reduce((a, s) => a + s.sepSales, 0))
     const sepCredits = round2(inArea.reduce((a, s) => a + s.sepCredits, 0))
@@ -147,25 +214,29 @@ export function buildMrDipzModel() {
     return { ...area, storeCount: inArea.length, sepSales, sepCredits, sepNet: round2(sepSales - sepCredits), balanceOwed: owed }
   })
 
-  const productRows = PRODUCTS.map((p) => {
-    const sepSold = round2(SOLD.filter((r) => r.productId === p.id && r.month === '2026-09').reduce((a, r) => a + r.amount, 0))
-    const sepCred = round2(EXPIRED.filter((r) => r.productId === p.id && r.month === '2026-09').reduce((a, r) => a + r.amount, 0))
-    return { ...p, sepSales: sepSold, sepCredits: sepCred, sepNet: round2(sepSold - sepCred) }
-  }).sort((a, b) => b.sepSales - a.sepSales)
+  const productRows = productsNorm
+    .map((p) => {
+      const sepSold = round2(soldRows.filter((r) => r.productId === p.id && r.month === '2026-09').reduce((a, r) => a + r.amount, 0))
+      const sepCred = round2(expiredRows.filter((r) => r.productId === p.id && r.month === '2026-09').reduce((a, r) => a + r.amount, 0))
+      return { ...p, sepSales: sepSold, sepCredits: sepCred, sepNet: round2(sepSold - sepCred) }
+    })
+    .sort((a, b) => b.sepSales - a.sepSales)
 
-  const weekRows = WEEKS.filter((w) => w.month === '2026-09').map((w) => {
-    const sales = round2(SOLD.filter((r) => r.weekId === w.id && r.month === '2026-09').reduce((a, r) => a + r.amount, 0))
-    const credits = round2(EXPIRED.filter((r) => r.weekId === w.id && r.month === '2026-09').reduce((a, r) => a + r.amount, 0))
-    return { ...w, sepSales: sales, sepCredits: credits, sepNet: round2(sales - credits) }
+  const weekRows = WEEKS.map((w) => {
+    const sales = round2(soldRows.filter((r) => r.weekId === w.id && r.month === '2026-09').reduce((a, r) => a + r.amount, 0))
+    const credits = round2(expiredRows.filter((r) => r.weekId === w.id && r.month === '2026-09').reduce((a, r) => a + r.amount, 0))
+    return { ...w, month: w.month || '2026-09', sepSales: sales, sepCredits: credits, sepNet: round2(sales - credits) }
   })
 
-  const creditRows = EXPIRED.filter((r) => r.month === '2026-09')
+  const creditRows = expiredRows
+    .filter((r) => r.month === '2026-09')
     .map((r, idx) => ({
       ...r,
       id: `cr-${idx}`,
       store: storeById[r.storeId],
       product: productById[r.productId],
       week: weekById[r.weekId],
+      reason: r.reason || 'Spoilage or short-dated pull',
     }))
     .sort((a, b) => b.amount - a.amount)
 

@@ -1,4 +1,4 @@
-import { SPICE, INK, MUTED, BORDER, GREEN, RED, MONO, money0, pct1 } from './mrDipzUtils'
+import { SPICE, INK, MUTED, BORDER, GREEN, RED, MONO, money, pct1 } from './mrDipzUtils'
 
 export default function MrDipzOverview({ model, card, lbl, KPI, goTab, onAreaClick, onWeekClick }) {
   const { totals, areas, weeks, pnlSep, pnlAug } = model
@@ -9,11 +9,11 @@ export default function MrDipzOverview({ model, card, lbl, KPI, goTab, onAreaCli
   return (
     <>
       <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap', marginBottom: 16 }}>
-        <KPI k="Gross sales (Sep)" v={money0(sep.grossSales)} sub={`${salesDelta >= 0 ? '+' : ''}${pct1(salesDelta)} vs Aug`} accent={SPICE} onClick={() => goTab('stores')} />
-        <KPI k="Credits (Sep)" v={money0(sep.credits)} sub={pct1(sep.creditPct) + ' of sales'} onClick={() => goTab('credits')} />
-        <KPI k="Net sales (Sep)" v={money0(sep.netSales)} onClick={() => goTab('financials')} />
-        <KPI k="Owed by stores" v={money0(totals.totalOwed)} onClick={() => goTab('owed')} />
-        <KPI k="Net profit (Sep)" v={money0(pnlSep.netProfit)} sub={`Aug ${money0(pnlAug.netProfit)}`} accent={pnlSep.netProfit >= 0 ? GREEN : RED} onClick={() => goTab('financials')} />
+        <KPI k="Gross sales (Sep)" v={money(sep.grossSales)} sub={`${salesDelta >= 0 ? '+' : ''}${pct1(salesDelta)} vs Aug`} accent={SPICE} onClick={() => goTab('stores')} />
+        <KPI k="Credits (Sep)" v={money(sep.credits)} sub={pct1(sep.creditPct) + ' of sales'} onClick={() => goTab('credits')} />
+        <KPI k="Net sales (Sep)" v={money(sep.netSales)} onClick={() => goTab('financials')} />
+        <KPI k="Owed by stores" v={money(totals.totalOwed)} onClick={() => goTab('owed')} />
+        <KPI k="Net profit (Sep)" v={money(pnlSep.netProfit)} sub={`Aug ${money(pnlAug.netProfit)}`} accent={pnlSep.netProfit >= 0 ? GREEN : RED} onClick={() => goTab('financials')} />
       </div>
 
       <div style={{ display: 'flex', gap: 16, flexWrap: 'wrap' }}>
@@ -37,7 +37,7 @@ export default function MrDipzOverview({ model, card, lbl, KPI, goTab, onAreaCli
               }}
             >
               <span style={{ fontWeight: 600, color: INK }}>{a.label}</span>
-              <span style={{ fontFamily: MONO, fontSize: 13 }}>{money0(a.sepSales)}</span>
+              <span style={{ fontFamily: MONO, fontSize: 13 }}>{money(a.sepSales)}</span>
             </button>
           ))}
         </div>
@@ -61,7 +61,7 @@ export default function MrDipzOverview({ model, card, lbl, KPI, goTab, onAreaCli
               }}
             >
               <span style={{ color: INK }}>{w.label}</span>
-              <span style={{ fontFamily: MONO, fontSize: 13 }}>{money0(w.sepSales)}</span>
+              <span style={{ fontFamily: MONO, fontSize: 13 }}>{money(w.sepSales)}</span>
             </button>
           ))}
         </div>
