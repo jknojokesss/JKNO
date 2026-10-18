@@ -1289,6 +1289,12 @@ function DashboardTab({ period, setPeriod, onOpenOrders, onOpenFinancials, onOpe
             Top Tire Sizes · Aug 2026
           </PanelTitle>
           <table className="rt-dash-sizes-table" style={{ width: '100%', borderCollapse: 'collapse', minWidth: 0 }}>
+            <colgroup>
+              <col className="rt-dash-col-rank rt-col-rank" />
+              <col className="rt-dash-col-size" />
+              <col className="rt-dash-col-units" />
+              <col className="rt-dash-col-rev" />
+            </colgroup>
             <thead>
               <tr>
                 <th className="rt-col-rank" style={hcell()}>#</th>
@@ -1314,9 +1320,19 @@ function DashboardTab({ period, setPeriod, onOpenOrders, onOpenFinancials, onOpe
                 </tr>
               ))}
             </tbody>
-            <tfoot>
+            <tfoot className="rt-dash-foot-desk">
               <tr>
                 <td colSpan={2} style={cell('left', { fontWeight: 600, borderBottom: 'none' })}>
+                  Top six
+                  <TieMark ok={topSixTie} />
+                </td>
+                <td style={cell('right', { fontFamily: mono, fontWeight: 600, borderBottom: 'none' })}>{topSixUnits}</td>
+                <td style={cell('right', { fontFamily: mono, fontWeight: 600, borderBottom: 'none' })}>{fmt0(topSixRev)}</td>
+              </tr>
+            </tfoot>
+            <tfoot className="rt-dash-foot-phone">
+              <tr>
+                <td style={cell('left', { fontWeight: 600, borderBottom: 'none' })}>
                   Top six
                   <TieMark ok={topSixTie} />
                 </td>
@@ -1434,6 +1450,20 @@ function SalesItemsTab({ seed }) {
           </div>
           <div className={`rt-table-wrap rt-items-wrap${compareOn ? ' rt-items-wrap--compare' : ''}`} style={{ background: C.card, border: `1px solid ${C.hair}` }}>
             <table className={`rt-items-table${compareOn ? ' rt-items-table--compare' : ''}`} style={{ width: '100%', borderCollapse: 'collapse', minWidth: compareOn ? 720 : 0 }}>
+              <colgroup>
+                <col className="rt-items-col-rank rt-col-rank" />
+                <col className="rt-items-col-item" />
+                <col className="rt-items-col-units" />
+                <col className="rt-items-col-rev" />
+                <col className="rt-items-col-avg rt-col-avg" />
+                {compareOn ? (
+                  <>
+                    <col className="rt-items-col-units-b rt-col-compare-b" />
+                    <col className="rt-items-col-rev-b rt-col-compare-b" />
+                    <col className="rt-items-col-delta rt-col-compare-d" />
+                  </>
+                ) : null}
+              </colgroup>
               <thead>
                 <tr>
                   <th className="rt-col-rank" style={hcell()}>#</th>
@@ -1823,7 +1853,7 @@ function StockTab() {
         <Kpi label="Stock value" value={fmt0(value)} tie={invTie} />
         <Kpi label="Sizes" value={String(stockRowsFor(asOf).length)} />
       </div>
-      <div className="rt-filter-stack">
+      <div className="rt-filter-stack rt-stock-filter-stack">
         <input
           value={q}
           onChange={(e) => setQ(e.target.value)}
@@ -1832,7 +1862,7 @@ function StockTab() {
           className="rt-filter-search"
           style={{ ...selectStyle, flex: '1 1 140px', minWidth: 0 }}
         />
-        <div className="rt-filters-scroll rt-scroll-fade">
+        <div className="rt-filters-scroll rt-stock-asof-row">
           <label className="rt-filters-asof" style={{ display: 'flex', alignItems: 'center', gap: 8, fontFamily: ui, fontSize: 11, color: C.muted, letterSpacing: '0.1em', textTransform: 'uppercase', flexShrink: 0 }}>
             As of
             <select value={asOf} onChange={(e) => setAsOf(e.target.value)} style={selectStyle} aria-label="Stock as of">
@@ -1862,6 +1892,12 @@ function StockTab() {
       </div>
       <div className="rt-table-wrap rt-stock-wrap" style={{ background: C.card, border: `1px solid ${C.hair}` }}>
         <table className="rt-stock-table" style={{ width: '100%', borderCollapse: 'collapse', minWidth: 0 }}>
+          <colgroup>
+            <col className="rt-stock-col-size" />
+            <col className="rt-stock-col-qty" />
+            <col className="rt-stock-col-cost" />
+            <col className="rt-stock-col-value" />
+          </colgroup>
           <thead>
             <tr>
               <th style={hcell()}>Size / Item</th>
@@ -2131,6 +2167,7 @@ const PORTAL_CSS = `
   .rt-stock-wrap,.rt-items-wrap,.rt-monthly-wrap,.rt-dash-sizes-wrap,.rt-acct-wrap{overflow:auto;-webkit-overflow-scrolling:touch}
   .rt-drill-wrap{overflow:auto;-webkit-overflow-scrolling:touch;width:100%}
   .rt-drill-foot-phone{display:none}
+  .rt-dash-foot-phone{display:none}
   .rt-stock-table{min-width:420px}
   .rt-items-table{min-width:460px}
   .rt-items-table--compare{min-width:720px}
@@ -2218,8 +2255,31 @@ const PORTAL_CSS = `
     .rt-items-table th,.rt-items-table td{padding:7px 5px!important;font-size:10px!important}
     .rt-items-table thead th{font-size:8px!important;letter-spacing:.06em;padding:5px 4px!important}
     .rt-items-table td:nth-child(2){word-break:break-word;overflow-wrap:anywhere;line-height:1.25}
+    .rt-dash-foot-desk{display:none}
+    .rt-dash-foot-phone{display:table-footer-group}
+    .rt-dash-sizes-wrap{width:100%}
+    .rt-dash-sizes-table col.rt-dash-col-rank{width:0!important}
+    .rt-dash-sizes-table col.rt-dash-col-size{width:42%}
+    .rt-dash-sizes-table col.rt-dash-col-units{width:20%}
+    .rt-dash-sizes-table col.rt-dash-col-rev{width:38%}
     .rt-dash-sizes-table th,.rt-dash-sizes-table td{padding:7px 5px!important;font-size:10px!important}
     .rt-dash-sizes-table thead th{font-size:8px!important}
+    .rt-items-table col.rt-items-col-rank,.rt-items-table col.rt-items-col-avg,.rt-items-table col.rt-items-col-units-b,.rt-items-table col.rt-items-col-rev-b,.rt-items-table col.rt-items-col-delta{width:0!important}
+    .rt-items-table:not(.rt-items-table--compare) col.rt-items-col-item{width:46%}
+    .rt-items-table:not(.rt-items-table--compare) col.rt-items-col-units{width:18%}
+    .rt-items-table:not(.rt-items-table--compare) col.rt-items-col-rev{width:36%}
+    .rt-items-table--compare col.rt-items-col-item{width:40%}
+    .rt-items-table--compare col.rt-items-col-units{width:16%}
+    .rt-items-table--compare col.rt-items-col-rev{width:44%}
+    .rt-stock-table col.rt-stock-col-size{width:36%}
+    .rt-stock-table col.rt-stock-col-qty{width:18%}
+    .rt-stock-table col.rt-stock-col-cost{width:22%}
+    .rt-stock-table col.rt-stock-col-value{width:24%}
+    .rt-stock-filter-stack .rt-stock-asof-row{flex-direction:column;align-items:stretch;overflow:visible;flex-wrap:wrap;gap:8px;max-width:100%}
+    .rt-stock-filter-stack .rt-stock-asof-row::after{display:none}
+    .rt-stock-filter-stack .rt-filters-asof{width:100%;min-width:0;flex-shrink:1}
+    .rt-stock-filter-stack .rt-filters-asof select{flex:1;min-width:0;max-width:100%}
+    .rt-stock-filter-stack .rt-filters-chips{width:100%;flex-wrap:wrap!important;overflow:visible!important;gap:6px}
     .rt-acct-bal-table td:first-child{word-break:break-word;padding-right:6px!important}
     .rt-acct-bal-table td:last-child{width:84px!important;max-width:84px;padding-left:4px!important;font-size:10px!important;white-space:nowrap}
     .rt-modal__box .rt-drill-table col.rt-drill-col-date{width:24%}
