@@ -455,9 +455,9 @@ function Intro({ M, onClose }) {
   const liabTotal = M.retainageTotal + M.apTotal + M.depositTotal + M.suppTotal
   const flagged = M.open.filter((j) => j.flagged)
   const QS = [
-    { id: 'jobs', q: 'Which jobs are losing money?', hook: `${flagged.length} open jobs are pacing below estimate right now — caught mid-job, not at closeout.` },
+    { id: 'jobs', q: 'Which jobs are losing money?', hook: `${flagged.length} open jobs are pacing below estimate right now.` },
     { id: 'wip', q: "What have we earned that we haven't billed?", hook: `${money0(M.wipTotals.under)} of finished work has never been invoiced.` },
-    { id: 'cash', q: 'When does the money actually land?', hook: `${moneyK(M.arTotal)} is owed to you. A 13-week view of when it arrives — claims treated like claims.` },
+    { id: 'cash', q: 'When does the money actually land?', hook: `${moneyK(M.arTotal)} is owed to you. A 13-week view of when it arrives.` },
     { id: 'liab', q: "What's held, committed, or owed off the books?", hook: `${moneyK(liabTotal)} sits in retainage, committed AP, deposits, and approved-but-unbilled supplements.` },
   ]
   return (
@@ -533,7 +533,7 @@ function DraftInvoice({ d, onClose }) {
           </tbody>
         </table>
         <div style={{ fontSize: '11px', color: MUTED, lineHeight: 1.6, margin: '12px 0 16px' }}>
-          Demo — nothing posts from this screen. In production this draft lands in AccuLynx as the invoice record and syncs to QuickBooks, which stays the book of record.
+          Demo only. In production this draft lands in AccuLynx and syncs to QuickBooks.
         </div>
         <div style={{ display: 'flex', gap: '10px', justifyContent: 'flex-end' }}>
           <button className="ghost" onClick={onClose}>CANCEL</button>
@@ -574,7 +574,7 @@ function JobMargin({ M, groupBy, setGroupBy, jobFilter, setJobFilter, expanded, 
     <div>
       <Header q="Which jobs are losing money?"
         lead={`${openFlagged.length} of your ${M.open.length} open jobs are pacing below estimate: ${moneyK(marginAtRisk)} of margin at risk.`}
-        sub="Estimated vs. actual cost, projected to completion at the current run rate — flagged while the job is still open, not three months after closeout." />
+        sub="Estimated vs. actual cost, projected to completion at the current run rate." />
       <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap', marginBottom: '18px' }}>
         <Kpi k="OPEN JOBS" v={M.open.length} sub={money0(M.open.reduce((s, j) => s + j.cwc, 0)) + ' under contract'} onClick={() => setJobFilter('open')} />
         <Kpi k="FLAGGED OPEN JOBS" v={openFlagged.length} sub="pacing >5 pts under estimate" onClick={() => setJobFilter('flagged')} />
@@ -819,7 +819,7 @@ function Cash({ M }) {
   return (
     <div>
       <Header q="When does the money actually land?"
-        lead={`${moneyK(M.arTotal)} is owed to you — and ${moneyK(M.claimsInReview)} of it is a claim sitting with an adjuster, not a customer ignoring you.`}
+        lead={`${moneyK(M.arTotal)} is owed to you${M.claimsInReview ? ` — ${moneyK(M.claimsInReview)} in adjuster review` : ''}.`}
         sub="Commercial progress billing plus insurance claims means the P&L and the bank account tell different stories. This is the bank-account story, thirteen weeks out." />
       <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap', marginBottom: '18px' }}>
         <Kpi k="OPEN RECEIVABLES" v={moneyK(M.arTotal)} sub={`${M.openInvoices.length} open invoices`} />
@@ -855,7 +855,7 @@ function Cash({ M }) {
             <text x={20} y={170} fontSize="9.5" fill={MUTED} fontFamily={sans}>cash balance →</text>
           </svg>
           <div style={{ fontSize: '11px', color: MUTED, marginTop: '4px' }}>
-            Dark bars: expected collections (AR aging + claim timing). Stone bars: committed AP + payroll. Net printed under each week; line is the running balance. <b style={{ color: SLATE }}>Click a week to see what lands in it.</b> Insurance claims in adjuster review are modeled at due + 45 days — they do not behave like trade AR.{M.excludedAR > 0 && <> {moneyK(M.excludedAR)} of deep past-due balances is excluded — that&rsquo;s a workout, not a forecast.</>}
+            Dark bars: expected collections (AR aging + claim timing). Stone bars: committed AP + payroll. Net printed under each week; line is the running balance. <b style={{ color: SLATE }}>Click a week to see what lands in it.</b> Insurance claims in adjuster review are modeled at due + 45 days.{M.excludedAR > 0 && <> {moneyK(M.excludedAR)} of deep past-due balances is excluded from the forecast.</>}
           </div>
           {wk != null && (() => {
             const w = M.weeks[wk]
@@ -1048,7 +1048,7 @@ function Liabilities({ M }) {
               </tr>
             ))}</tbody>
           </table>
-          <div style={{ padding: '10px 16px 14px', fontSize: '11px', color: MUTED }}>The carrier already said yes to every line on this list. It&rsquo;s not a collections problem — it&rsquo;s an invoicing problem, and it&rsquo;s free money. Click a line to draft the invoice.</div>
+          <div style={{ padding: '10px 16px 14px', fontSize: '11px', color: MUTED }}>The carrier already approved every line. Click a line to draft the invoice.</div>
         </div>
       </div>
       {draft && <DraftInvoice d={draft} onClose={() => setDraft(null)} />}

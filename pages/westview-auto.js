@@ -624,7 +624,7 @@ export default function WestviewAutoPortal({ demoEmbed = false }) {
                 })}
               </div>
               <p style={{ marginTop: '16px', fontSize: '13px', color: MUTED, maxWidth: '40rem', lineHeight: 1.55 }}>
-                One list for the whole store — same customer from first quote through bank payment and what accounting shows.
+                Every deal from first quote to bank paid.
               </p>
             </>
           )}
@@ -654,7 +654,7 @@ export default function WestviewAutoPortal({ demoEmbed = false }) {
               <div style={card}>
                 <div style={{ fontSize: '16px', fontWeight: 700, marginBottom: '4px' }}>October deals</div>
                 <p style={{ fontSize: '13px', color: MUTED, marginBottom: '12px', lineHeight: 1.45 }}>
-                  Desk profit = store margin on the car. Finance products = warranties, gap, etc. Your commission follows both — but only after the bank pays.
+                  Commission is paid on desk profit and finance products, after the bank pays.
                 </p>
                 <div style={{ overflowX: 'auto' }}>
                   <table style={{ width: '100%', borderCollapse: 'collapse', minWidth: '620px' }}>
@@ -712,7 +712,7 @@ export default function WestviewAutoPortal({ demoEmbed = false }) {
                 green={GREEN}
                 border={RULE}
                 title="Sales desk vs QuickBooks"
-                intro="QuickBooks syncs nightly. Nothing posts from this screen — it is a read-only check that the cars you sold match what accounting shows."
+                intro="Cars sold vs what accounting shows."
                 rows={[
                   { label: 'Still waiting on bank', portal: money0(M.openCit.reduce((s, d) => s + d.front + d.back, 0)), qbo: money0(186400) },
                   { label: 'Commission owed to sales', portal: money0(M.commissionMtd + M.pendingCommission), qbo: money0(GL_SNAPSHOT.commissionAccrued) },

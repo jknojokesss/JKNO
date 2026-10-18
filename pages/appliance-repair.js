@@ -345,7 +345,7 @@ export default function ApplianceRepair() {
               <div style={card}>
                 <div style={{ ...lbl, marginBottom: '8px' }}>QUICKBOOKS STATEMENT (SAMPLE)</div>
                 <div style={{ fontSize: '12px', color: MUTED, lineHeight: 1.55, marginBottom: '12px' }}>
-                  Job board = operating margin during the week. QuickBooks stays the book of record — this column is the synced statement you reconcile to at close.
+                  Synced nightly from QuickBooks.
                 </div>
                 {[
                   ['Revenue', billed, billed],

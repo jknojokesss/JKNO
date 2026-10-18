@@ -183,7 +183,7 @@ export default function HarborfieldProperties() {
           {tab === 'owners' && (
             <>
               <p style={{ fontSize: '14px', color: MUTED, lineHeight: 1.6, marginBottom: '16px', maxWidth: '560px' }}>
-                Owner statements ready on the 1st — collected rent, repairs, and your management fee on one page.
+                Owner statements: rent, repairs and fees.
               </p>
               {OWNERS.map((o) => {
                 const fee = Math.round(o.collected * o.feePct / 100)
@@ -229,22 +229,14 @@ export default function HarborfieldProperties() {
                 green={GREEN}
                 border={BORDER}
                 title="September — portfolio vs QuickBooks"
-                intro={
-                  <>
-                    Rent roll and owner packets on the other tabs are how you <strong style={{ color: INK }}>run</strong> the month. QuickBooks stays the book of record — nightly sync mirrors the GL; owner distributions and management fees tie out here before statements go out on the 1st.
-                  </>
-                }
+                intro="Synced nightly from QuickBooks."
                 rows={[
                   { label: 'Rental income (collected)', portal: money(89200), qbo: money(89200) },
                   { label: 'Management & leasing revenue', portal: money(96400), qbo: money(96400) },
                   { label: 'Operating expenses', portal: money(71900), qbo: money(71900) },
                   { label: 'Net income', portal: money(24500), qbo: money(24500) },
                 ]}
-                bullets={[
-                  'Delinquency and repair holds reviewed against trust / operating accounts',
-                  'Owner statement PDFs use the same GL balances your CPA closes',
-                  'Unsigned bank rec does not hide a closed month',
-                ]}
+                footnote=""
               />
             </>
           )}

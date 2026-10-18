@@ -282,7 +282,7 @@ export default function NorthlineGlobal({ demoEmbed = false }) {
             <div style={{ background: '#fff', border: `1px solid ${BORDER}`, borderRadius: '8px', padding: '20px 22px', maxWidth: '640px' }}>
               <div style={{ fontFamily: DEMO_HEAD, fontSize: '20px', fontWeight: 600, color: INK, marginBottom: '8px' }}>QuickBooks at month-end</div>
               <p style={{ fontSize: '13px', color: MUTED, lineHeight: 1.6, margin: '0 0 16px' }}>
-                Landed cost on each PO hits <strong style={{ color: INK }}>Inventory Asset</strong> in QBO. Sales on the Orders tab relieve COGS using those unit costs — not a flat COGS %. The portal shows margin during the month; close ties inventory and P&L to the official statement.
+                Landed cost goes to inventory. Sales use those unit costs for COGS.
               </p>
               <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '13px' }}>
                 <thead>
@@ -307,7 +307,7 @@ export default function NorthlineGlobal({ demoEmbed = false }) {
                 </tbody>
               </table>
               <p style={{ fontSize: '11px', color: MUTED, marginTop: '14px', lineHeight: 1.5 }}>
-                Nightly sync on P&L, balance sheet, and GL — month-end inventory JE posts when you approve.
+                Synced nightly from QuickBooks.
               </p>
             </div>
           )}

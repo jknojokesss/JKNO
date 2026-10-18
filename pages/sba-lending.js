@@ -207,7 +207,7 @@ export default function SbaLending() {
             </div>
             <div style={card}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px', flexWrap: 'wrap', gap: '8px' }}>
-                <div><div style={{ ...serif, fontSize: '20px', fontWeight: 600, color: INK }}>Disbursed loans</div><div style={{ fontFamily: DEMO_MONO, fontSize: '10px', color: MUTED }}>Amount, rate, maturity, and who to reach</div></div>
+                <div><div style={{ ...serif, fontSize: '20px', fontWeight: 600, color: INK }}>Disbursed loans</div><div style={{ fontFamily: DEMO_MONO, fontSize: '10px', color: MUTED }}>Funded deals</div></div>
                 <button onClick={() => setAddingDeal((a) => !a)} style={addBtn(addingDeal)}>{addingDeal ? '✕ CANCEL' : '+ NEW DEAL'}</button>
               </div>
               {addingDeal && (
@@ -245,12 +245,6 @@ export default function SbaLending() {
         {/* FEES */}
         {tab === 'financials' && (
           <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-            <div style={{ ...card, background: '#F7FAFC', borderStyle: 'dashed' }}>
-              <div style={{ ...serif, fontSize: '17px', fontWeight: 600, color: INK, marginBottom: '6px' }}>Pipeline screen — not loan servicing</div>
-              <p style={{ margin: 0, fontSize: '13px', color: MUTED, lineHeight: 1.6 }}>
-                Leads and disbursed deals are how you <strong style={{ color: INK }}>run</strong> the book of business. QuickBooks stays where fees are recognized. This portal does not service loans, collect payments, or replace your LOS — it keeps pipeline and fee income next to the GL.
-              </p>
-            </div>
             <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
               <Kpi k="FEES (YTD)" v={usd0(feesYtd)} sub="Total brought in" color={GREEN} />
               <Kpi k="DEALS CLOSED" v={fees.length} sub="Fee-earning" />
@@ -298,18 +292,13 @@ export default function SbaLending() {
               green={GREEN}
               border="#DCE3EB"
               title="Fee income vs QuickBooks"
-              intro="Every fee you log here should already exist (or will exist) as brokerage / referral revenue in QuickBooks — nightly sync flags drift before your CPA closes the year."
+              intro="Fees sync to QuickBooks nightly."
               rows={[
                 { label: 'Fees logged (portal)', portal: usd0(feesYtd), qbo: usd0(feesYtd) },
                 { label: 'YTD brokerage income (P&L)', portal: usd0(feesYtd), qbo: usd0(feesYtd) },
                 { label: 'Open pipeline (not in GL)', portal: usd0(0), qbo: '—' },
               ]}
-              footnote="Pipeline dollars are operational only until a deal funds and the fee posts in QBO."
-              bullets={[
-                'Disbursed deals tracked for relationship follow-up — not amortization schedules',
-                'Fee rows export to the same accounts your bookkeeper already uses',
-                'Scoped login — one broker company, no shared SaaS tenant',
-              ]}
+              footnote=""
             />
           </div>
         )}
