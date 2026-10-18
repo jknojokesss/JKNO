@@ -6051,5 +6051,432 @@
    "total_dollars": 3489.75
   }
  ],
- "alerts": []
+ "alerts": [],
+ "deposits": {
+  "period_label": "October 1–17, 2026",
+  "qb_note": "Goes into QuickBooks as one deposit per payout, fees to merchant fees",
+  "payouts": [
+   {
+    "id": "dep-01",
+    "date": "2026-10-02",
+    "source": "Shopify",
+    "matched": true,
+    "orders": [
+     {
+      "order": "#1043",
+      "date": "2026-09-28",
+      "amount": 52.4,
+      "payment_method": "Shop Pay",
+      "delivery_guarantee": 2.25
+     },
+     {
+      "order": "#1044",
+      "date": "2026-09-29",
+      "amount": 38.75,
+      "payment_method": "Card",
+      "delivery_guarantee": 0
+     },
+     {
+      "order": "#1046",
+      "date": "2026-09-30",
+      "amount": 67.2,
+      "payment_method": "Google Pay",
+      "delivery_guarantee": 2.75
+     },
+     {
+      "order": "#1048",
+      "date": "2026-10-01",
+      "amount": 41.5,
+      "payment_method": "Card",
+      "delivery_guarantee": 1.85
+     }
+    ],
+    "refunds": 0,
+    "adjustments": [],
+    "gross_sales": 199.85,
+    "delivery_guarantee": 6.85,
+    "fees": 6.99,
+    "deposit": 199.71,
+    "order_count": 4,
+    "mismatch_amount": 0
+   },
+   {
+    "id": "dep-02",
+    "date": "2026-10-04",
+    "source": "PayPal",
+    "matched": true,
+    "orders": [
+     {
+      "order": "#1051",
+      "date": "2026-10-01",
+      "amount": 58.9,
+      "payment_method": "PayPal",
+      "delivery_guarantee": 2.1
+     },
+     {
+      "order": "#1052",
+      "date": "2026-10-02",
+      "amount": 33.25,
+      "payment_method": "PayPal",
+      "delivery_guarantee": 0
+     },
+     {
+      "order": "#1054",
+      "date": "2026-10-03",
+      "amount": 72.15,
+      "payment_method": "PayPal",
+      "delivery_guarantee": 2.85
+     }
+    ],
+    "refunds": 0,
+    "adjustments": [],
+    "gross_sales": 164.3,
+    "delivery_guarantee": 4.95,
+    "fees": 7.21,
+    "deposit": 162.04,
+    "order_count": 3,
+    "mismatch_amount": 0
+   },
+   {
+    "id": "dep-03",
+    "date": "2026-10-05",
+    "source": "Shopify",
+    "matched": false,
+    "orders": [
+     {
+      "order": "#1056",
+      "date": "2026-10-03",
+      "amount": 48.6,
+      "payment_method": "Card",
+      "delivery_guarantee": 1.95
+     },
+     {
+      "order": "#1058",
+      "date": "2026-10-04",
+      "amount": 55.3,
+      "payment_method": "Shop Pay",
+      "delivery_guarantee": 2.4
+     },
+     {
+      "order": "#1060",
+      "date": "2026-10-04",
+      "amount": 29.99,
+      "payment_method": "Google Pay",
+      "delivery_guarantee": 0
+     }
+    ],
+    "refunds": 0,
+    "adjustments": [
+     {
+      "type": "earlier_refund",
+      "order": "#1021",
+      "label": "Refund from earlier order #1021",
+      "amount": 38.4
+     }
+    ],
+    "gross_sales": 133.89,
+    "delivery_guarantee": 4.35,
+    "fees": 4.78,
+    "deposit": 95.06,
+    "order_count": 3,
+    "mismatch_amount": 38.4
+   },
+   {
+    "id": "dep-04",
+    "date": "2026-10-07",
+    "source": "Amazon Pay",
+    "matched": true,
+    "orders": [
+     {
+      "order": "#1062",
+      "date": "2026-10-05",
+      "amount": 44.8,
+      "payment_method": "Amazon Pay",
+      "delivery_guarantee": 1.75
+     },
+     {
+      "order": "#1064",
+      "date": "2026-10-06",
+      "amount": 61.25,
+      "payment_method": "Amazon Pay",
+      "delivery_guarantee": 2.55
+     },
+     {
+      "order": "#1065",
+      "date": "2026-10-06",
+      "amount": 36.5,
+      "payment_method": "Amazon Pay",
+      "delivery_guarantee": 0
+     },
+     {
+      "order": "#1067",
+      "date": "2026-10-06",
+      "amount": 78.4,
+      "payment_method": "Amazon Pay",
+      "delivery_guarantee": 2.9
+     }
+    ],
+    "refunds": 0,
+    "adjustments": [],
+    "gross_sales": 220.95,
+    "delivery_guarantee": 7.2,
+    "fees": 7.61,
+    "deposit": 220.54,
+    "order_count": 4,
+    "mismatch_amount": 0
+   },
+   {
+    "id": "dep-05",
+    "date": "2026-10-09",
+    "source": "Shopify",
+    "matched": true,
+    "orders": [
+     {
+      "order": "#1069",
+      "date": "2026-10-07",
+      "amount": 42.15,
+      "payment_method": "Card",
+      "delivery_guarantee": 0
+     },
+     {
+      "order": "#1071",
+      "date": "2026-10-08",
+      "amount": 53.85,
+      "payment_method": "Shop Pay",
+      "delivery_guarantee": 2.2
+     },
+     {
+      "order": "#1073",
+      "date": "2026-10-08",
+      "amount": 65.7,
+      "payment_method": "Card",
+      "delivery_guarantee": 2.65
+     }
+    ],
+    "refunds": 12.5,
+    "adjustments": [],
+    "gross_sales": 161.7,
+    "delivery_guarantee": 4.85,
+    "fees": 5.59,
+    "deposit": 148.46,
+    "order_count": 3,
+    "mismatch_amount": 0
+   },
+   {
+    "id": "dep-06",
+    "date": "2026-10-10",
+    "source": "PayPal",
+    "matched": true,
+    "orders": [
+     {
+      "order": "#1075",
+      "date": "2026-10-08",
+      "amount": 47.35,
+      "payment_method": "PayPal",
+      "delivery_guarantee": 1.9
+     },
+     {
+      "order": "#1077",
+      "date": "2026-10-09",
+      "amount": 31.8,
+      "payment_method": "PayPal",
+      "delivery_guarantee": 0
+     },
+     {
+      "order": "#1079",
+      "date": "2026-10-09",
+      "amount": 59.45,
+      "payment_method": "PayPal",
+      "delivery_guarantee": 2.35
+     },
+     {
+      "order": "#1081",
+      "date": "2026-10-09",
+      "amount": 26.5,
+      "payment_method": "PayPal",
+      "delivery_guarantee": 0
+     }
+    ],
+    "refunds": 0,
+    "adjustments": [],
+    "gross_sales": 165.1,
+    "delivery_guarantee": 4.25,
+    "fees": 7.71,
+    "deposit": 161.64,
+    "order_count": 4,
+    "mismatch_amount": 0
+   },
+   {
+    "id": "dep-07",
+    "date": "2026-10-12",
+    "source": "Shopify",
+    "matched": false,
+    "orders": [
+     {
+      "order": "#1083",
+      "date": "2026-10-10",
+      "amount": 49.25,
+      "payment_method": "Google Pay",
+      "delivery_guarantee": 2.05
+     },
+     {
+      "order": "#1085",
+      "date": "2026-10-11",
+      "amount": 71.6,
+      "payment_method": "Card",
+      "delivery_guarantee": 2.8
+     },
+     {
+      "order": "#1087",
+      "date": "2026-10-11",
+      "amount": 38.9,
+      "payment_method": "Shop Pay",
+      "delivery_guarantee": 0
+     }
+    ],
+    "refunds": 0,
+    "adjustments": [
+     {
+      "type": "chargeback",
+      "order": "#1037",
+      "label": "Chargeback #1037",
+      "amount": 52.18
+     }
+    ],
+    "gross_sales": 159.75,
+    "delivery_guarantee": 4.85,
+    "fees": 5.54,
+    "deposit": 106.88,
+    "order_count": 3,
+    "mismatch_amount": 52.18
+   },
+   {
+    "id": "dep-08",
+    "date": "2026-10-14",
+    "source": "Amazon Pay",
+    "matched": true,
+    "orders": [
+     {
+      "order": "#1089",
+      "date": "2026-10-12",
+      "amount": 54.2,
+      "payment_method": "Amazon Pay",
+      "delivery_guarantee": 2.15
+     },
+     {
+      "order": "#1091",
+      "date": "2026-10-13",
+      "amount": 43.65,
+      "payment_method": "Amazon Pay",
+      "delivery_guarantee": 0
+     }
+    ],
+    "refunds": 0,
+    "adjustments": [],
+    "gross_sales": 97.85,
+    "delivery_guarantee": 2.15,
+    "fees": 3.44,
+    "deposit": 96.56,
+    "order_count": 2,
+    "mismatch_amount": 0
+   },
+   {
+    "id": "dep-09",
+    "date": "2026-10-15",
+    "source": "Shopify",
+    "matched": true,
+    "orders": [
+     {
+      "order": "#1093",
+      "date": "2026-10-13",
+      "amount": 62.35,
+      "payment_method": "Card",
+      "delivery_guarantee": 2.5
+     },
+     {
+      "order": "#1095",
+      "date": "2026-10-14",
+      "amount": 35.4,
+      "payment_method": "Shop Pay",
+      "delivery_guarantee": 0
+     },
+     {
+      "order": "#1097",
+      "date": "2026-10-14",
+      "amount": 48.05,
+      "payment_method": "Google Pay",
+      "delivery_guarantee": 1.8
+     },
+     {
+      "order": "#1099",
+      "date": "2026-10-14",
+      "amount": 57.75,
+      "payment_method": "Card",
+      "delivery_guarantee": 2.45
+     },
+     {
+      "order": "#1101",
+      "date": "2026-10-15",
+      "amount": 28.6,
+      "payment_method": "Card",
+      "delivery_guarantee": 0
+     }
+    ],
+    "refunds": 0,
+    "adjustments": [],
+    "gross_sales": 232.15,
+    "delivery_guarantee": 6.75,
+    "fees": 8.23,
+    "deposit": 230.67,
+    "order_count": 5,
+    "mismatch_amount": 0
+   },
+   {
+    "id": "dep-10",
+    "date": "2026-10-17",
+    "source": "PayPal",
+    "matched": true,
+    "orders": [
+     {
+      "order": "#1103",
+      "date": "2026-10-15",
+      "amount": 46.7,
+      "payment_method": "PayPal",
+      "delivery_guarantee": 2
+     },
+     {
+      "order": "#1105",
+      "date": "2026-10-16",
+      "amount": 39.95,
+      "payment_method": "PayPal",
+      "delivery_guarantee": 0
+     },
+     {
+      "order": "#1107",
+      "date": "2026-10-16",
+      "amount": 68.25,
+      "payment_method": "PayPal",
+      "delivery_guarantee": 2.7
+     }
+    ],
+    "refunds": 0,
+    "adjustments": [],
+    "gross_sales": 154.9,
+    "delivery_guarantee": 4.7,
+    "fees": 6.87,
+    "deposit": 152.73,
+    "order_count": 3,
+    "mismatch_amount": 0
+   }
+  ],
+  "summary": {
+   "deposited_this_month": 1574.29,
+   "fees": 63.97,
+   "orders_matched": 28,
+   "not_matched": {
+    "order_count": 6,
+    "dollars": 90.58
+   }
+  }
+ }
 }

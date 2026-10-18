@@ -38,6 +38,8 @@ import {
   MarginByChannelChart,
   InventoryDaysChart,
 } from './PrimalKrispCharts'
+import PrimalKrispDepositsTab from './primal-krisp/PrimalKrispDepositsTab'
+import PrimalKrispDepositsDetail from './primal-krisp/PrimalKrispDepositsDetail'
 
 const CHANNELS = DATA.channels
 const AS_OF = DATA.meta.as_of
@@ -309,6 +311,7 @@ export default function PrimalKrispPortal() {
     ['stores', 'Stores'],
     ['products', 'Products'],
     ['subscriptions', 'Online & subscriptions'],
+    ['deposits', 'Deposits'],
     ['advertising', 'Advertising / promos'],
   ]
   const EXTRA = [['close', 'Monthly close']]
@@ -434,6 +437,13 @@ export default function PrimalKrispPortal() {
               onClose={() => setOverviewDetail(null)}
               storeList={storeList}
               openStoreBalance={liveStoreOwed}
+            />
+          ) : null}
+          {tab === 'deposits' && overviewDetail ? (
+            <PrimalKrispDepositsDetail
+              detail={overviewDetail}
+              onBack={() => setOverviewDetail(null)}
+              onClose={() => setOverviewDetail(null)}
             />
           ) : null}
           {tab === 'overview' && !overviewDetail && (
@@ -608,6 +618,10 @@ export default function PrimalKrispPortal() {
                 />
               </div>
             </>
+          )}
+
+          {tab === 'deposits' && !overviewDetail && (
+            <PrimalKrispDepositsTab card={card} lbl={lbl} KPI={KPI} onOpenDetail={openDetail} />
           )}
 
           {tab === 'advertising' && (
