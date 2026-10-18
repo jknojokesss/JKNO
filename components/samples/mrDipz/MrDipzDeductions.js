@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react'
 import { money, pct1, pctOf, fmtD, fmtInt } from './mrDipzUtils'
-import { Card, KPI, MdTable } from './MrDipzKit'
+import { Card, KPI, MdTable, DeductionRemittanceList } from './MrDipzKit'
 
 const STATUS_FILTER = {
   all: () => true,
@@ -25,6 +25,18 @@ export default function MrDipzDeductions({ model, open, initialFilter }) {
 
   const filteredTotal = useMemo(() => rows.reduce((t, r) => t + r.amount, 0), [rows])
 
+  const listRows = useMemo(
+    () =>
+      rows.map((r) => ({
+        key: r.id,
+        id: r.id,
+        ref: r.ref,
+        amount: money(r.amount),
+        meta: `#${r.invoiceNo} · ${r.code} · ${fmtInt(r.daysLeft)} days · ${r.statusLabel}`,
+      })),
+    [rows],
+  )
+
   return (
     <>
       <div className="md-kpis" style={{ marginBottom: 12 }}>
@@ -35,24 +47,11 @@ export default function MrDipzDeductions({ model, open, initialFilter }) {
       </div>
 
       <Card title="Remittances · last 90 days">
-        <MdTable
-          columns={['Deduction', 'Remit', 'Invoice', 'Code', 'Amount', 'Days', 'Status']}
-          rows={[
-            ...rows.map((r) => ({
-              key: r.id,
-              name: r.ref,
-              sub: `#${r.invoiceNo} · ${fmtD(r.invoiceDate)} · ${money(r.invoiceAmount)}`,
-              cells: [fmtD(r.remittanceDate), `#${r.invoiceNo}`, r.code, money(r.amount), fmtInt(r.daysLeft), r.statusLabel],
-              onClick: () => open({ type: 'deduction', id: r.id }),
-            })),
-            {
-              key: 'total',
-              kind: 'total',
-              name: filter === 'all' ? 'Total' : 'Filtered total',
-              cells: ['', '', '', money(filter === 'all' ? d.summary.total : filteredTotal), '', ''],
-            },
-          ]}
-          stackAt={5}
+        <DeductionRemittanceList
+          rows={listRows}
+          totalLabel={filter === 'all' ? 'Total' : 'Filtered total'}
+          totalAmount={money(filter === 'all' ? d.summary.total : filteredTotal)}
+          onRowClick={(r) => open({ type: 'deduction', id: r.id })}
         />
       </Card>
 

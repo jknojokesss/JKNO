@@ -28,6 +28,14 @@ ok('open review', d.openReview === d.summary.needsBackup + d.summary.dispute)
 for (const r of d.rows) {
   ok(`${r.ref} invoice − paid`, r.invoiceAmount - r.paidAmount === r.amount)
   ok(`${r.ref} days left`, r.daysLeft >= 0 && r.daysLeft <= 90, String(r.daysLeft))
+  const refMatch = r.ref.match(/^RD-(\d{6})-\d{2}$/)
+  if (refMatch) {
+    const yymmdd = refMatch[1]
+    const iso = `20${yymmdd.slice(0, 2)}-${yymmdd.slice(2, 4)}-${yymmdd.slice(4, 6)}`
+    ok(`${r.ref} remit date`, iso === r.remittanceDate, iso)
+  } else {
+    ok(`${r.ref} format`, false)
+  }
 }
 
 const rawRows = DISTRIBUTOR_DEDUCTIONS.length

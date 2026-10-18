@@ -1,5 +1,5 @@
 import { money, moneySigned, pct1, pctOf, fmtInt, fmtD, deltaColor, BUCKETS, GREEN, MUTED } from './mrDipzUtils'
-import { Card, Stat, MdTable, Tag } from './MrDipzKit'
+import { Card, Stat, MdTable, Tag, PreviewFields } from './MrDipzKit'
 
 const sumBy = (arr, f) => arr.reduce((t, x) => t + f(x), 0)
 
@@ -732,30 +732,29 @@ function DeductionDetail({ model, id, open }) {
 function DeductionCreditMemoPreview({ model, id, close }) {
   const r = model.deductions.byId[id]
   const lineDesc = r.memoProductName || r.memoDesc
-  const qty = r.memoProductId ? fmtInt(Math.max(1, Math.round(r.amount / (model.productAgg[r.memoProductId]?.priceC || r.amount)))) : '1'
+  const priceC = r.memoProductId ? model.productAgg[r.memoProductId]?.priceC : 0
+  const qty = r.memoProductId && priceC ? fmtInt(Math.round(r.amount / priceC)) : '1'
+  const line = `${lineDesc} · qty ${qty} · ${money(r.amount)}`
   return {
     title: 'Credit memo preview',
     sub: 'Not sent',
     body: (
-      <>
+      <div className="md-preview-panel">
         <Card title="Credit memo">
-          <MdTable
-            columns={['', '']}
+          <PreviewFields
             rows={[
-              { key: 'cust', name: 'Customer', cells: ['Distributor'] },
-              { key: 'date', name: 'Date', cells: [fmtD(r.remittanceDate)] },
-              {
-                key: 'line',
-                name: 'Line',
-                cells: [`${lineDesc} · qty ${qty} · ${money(r.amount)}`],
-              },
-              { key: 'total', kind: 'total', name: 'Total', cells: [money(r.amount)] },
+              { key: 'cust', label: 'Customer', value: 'Distributor' },
+              { key: 'date', label: 'Date', value: fmtD(r.remittanceDate) },
+              { key: 'line', label: 'Line', value: line },
+              { key: 'total', label: 'Total', value: money(r.amount), total: true },
             ]}
           />
         </Card>
-        <div style={{ fontSize: 13, color: MUTED, marginTop: 4 }}>Goes into QuickBooks as a credit memo</div>
+        <div style={{ fontSize: 13, color: MUTED, marginTop: 4, overflowWrap: 'anywhere' }}>
+          Goes into QuickBooks as a credit memo
+        </div>
         <ActionBtn onClick={close}>Close</ActionBtn>
-      </>
+      </div>
     ),
   }
 }
@@ -772,21 +771,20 @@ function DeductionDisputePreview({ model, id, close }) {
     title: 'Dispute note preview',
     sub: 'Not sent',
     body: (
-      <>
+      <div className="md-preview-panel">
         <Card title="Note">
-          <MdTable
-            columns={['', '']}
+          <PreviewFields
             rows={[
-              { key: 'ref', name: 'Ref', cells: [r.ref] },
-              { key: 'inv', name: 'Invoice', cells: [`#${r.invoiceNo} · ${fmtD(r.invoiceDate)}`] },
-              { key: 'amt', name: 'Amount', cells: [money(r.amount)] },
-              { key: 'reason', name: 'Reason', cells: [reason] },
-              { key: 'backup', name: 'Backup', cells: [r.backup || '—'] },
+              { key: 'ref', label: 'Ref', value: r.ref },
+              { key: 'inv', label: 'Invoice', value: `#${r.invoiceNo} · ${fmtD(r.invoiceDate)}` },
+              { key: 'amt', label: 'Amount', value: money(r.amount) },
+              { key: 'reason', label: 'Reason', value: reason },
+              { key: 'backup', label: 'Backup', value: r.backup || '—' },
             ]}
           />
         </Card>
         <ActionBtn onClick={close}>Close</ActionBtn>
-      </>
+      </div>
     ),
   }
 }
@@ -815,7 +813,7 @@ export default function MrDipzDetail({ model, detail, depth, open, back, close }
   const { title, sub, body } = view({ model, open, close, back, ...detail })
   return (
     <Frame title={title} sub={sub} depth={depth} back={back} close={close}>
-      {body}
+      <div className="md-detail-body">{body}</div>
     </Frame>
   )
 }

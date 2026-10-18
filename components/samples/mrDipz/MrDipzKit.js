@@ -44,6 +44,24 @@ html.md-sample-page .m-sample-lobby,html.md-sample-page .m-header,html.md-sample
 .md-t-row--total{border-top:1px solid ${BORDER}}
 .md-t-row--total .md-t-name,.md-t-row--total .md-num{font-weight:700}
 .md-tag{display:inline-block;font-family:${UI};font-size:10px;font-weight:600;letter-spacing:.5px;text-transform:uppercase;padding:2px 7px;border-radius:10px;margin-left:6px;vertical-align:1px}
+.md-detail-body{max-width:100%;box-sizing:border-box;overflow-x:hidden}
+.md-ded-list{display:flex;flex-direction:column;max-width:100%}
+.md-ded-row{display:block;width:100%;max-width:100%;box-sizing:border-box;padding:11px 2px;border-top:1px solid ${CREAM};text-align:left;background:transparent;border-left:none;border-right:none;border-bottom:none;font-family:${UI};color:${INK}}
+.md-ded-row.md-click{border-radius:2px}
+.md-ded-row:first-of-type{border-top:none}
+.md-ded-row--total{border-top:1px solid ${BORDER};padding-top:12px;margin-top:4px}
+.md-ded-line1{display:flex;justify-content:space-between;align-items:baseline;gap:10px;min-width:0;max-width:100%}
+.md-ded-ref{font-size:14px;line-height:1.3;min-width:0;overflow-wrap:anywhere;word-break:break-word}
+.md-ded-amt{font-size:14px;font-weight:400;font-variant-numeric:tabular-nums;flex-shrink:0;text-align:right}
+.md-ded-line2{font-size:11px;color:${MUTED};margin-top:4px;line-height:1.4;overflow-wrap:anywhere;word-break:break-word;max-width:100%}
+.md-ded-row--total .md-ded-ref,.md-ded-row--total .md-ded-amt{font-weight:700}
+.md-preview-panel{max-width:100%;box-sizing:border-box;overflow-x:hidden}
+.md-preview-fields{max-width:100%;box-sizing:border-box}
+.md-preview-row{padding:10px 0;border-top:1px solid ${CREAM};max-width:100%;box-sizing:border-box}
+.md-preview-row:first-child{border-top:none;padding-top:0}
+.md-preview-k{font-family:${UI};font-size:10px;font-weight:600;letter-spacing:.6px;text-transform:uppercase;color:${MUTED};margin-bottom:3px}
+.md-preview-v{font-family:${UI};font-size:14px;line-height:1.4;overflow-wrap:anywhere;word-break:break-word;max-width:100%;font-variant-numeric:tabular-nums}
+.md-preview-row--total .md-preview-v{font-weight:700}
 @media(min-width:861px){.md-t-row{column-gap:1.5rem}}
 @media(max-width:860px){.md-shell{flex-direction:column}.md-side{width:auto;height:auto;position:static;padding:14px 12px 10px}.md-nav--main{flex-direction:row;overflow-x:auto;gap:6px;padding:4px 4px 10px;-webkit-overflow-scrolling:touch;scrollbar-width:none}.md-nav::-webkit-scrollbar{display:none}.md-navbtn{width:auto;padding:8px 14px;border-radius:2px;background:rgba(255,255,255,.07);flex-shrink:0;font-size:13px;min-height:40px}.md-main{padding:18px 16px 52px;max-width:100%}}
 @media(max-width:600px){button{min-height:40px}.md-card{padding:14px}.md-kpi{padding:13px 14px}.md-kpi-v{font-size:21px}.md-stat-v{font-size:17px}
@@ -204,6 +222,46 @@ export function MdTable({ columns, rows, stackAt = 4 }) {
           </div>
         )
       })}
+    </div>
+  )
+}
+
+export function DeductionRemittanceList({ rows, totalLabel, totalAmount, onRowClick }) {
+  return (
+    <div className="md-ded-list">
+      {rows.map((r) => (
+        <button
+          key={r.key}
+          type="button"
+          className="md-ded-row md-click"
+          onClick={() => onRowClick(r)}
+        >
+          <div className="md-ded-line1">
+            <span className="md-ded-ref">{r.ref}</span>
+            <span className="md-ded-amt">{r.amount}</span>
+          </div>
+          <div className="md-ded-line2">{r.meta}</div>
+        </button>
+      ))}
+      <div className="md-ded-row md-ded-row--total">
+        <div className="md-ded-line1">
+          <span className="md-ded-ref">{totalLabel}</span>
+          <span className="md-ded-amt">{totalAmount}</span>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+export function PreviewFields({ rows }) {
+  return (
+    <div className="md-preview-fields">
+      {rows.map((r) => (
+        <div key={r.key} className={`md-preview-row${r.total ? ' md-preview-row--total' : ''}`}>
+          <div className="md-preview-k">{r.label}</div>
+          <div className="md-preview-v">{r.value}</div>
+        </div>
+      ))}
     </div>
   )
 }

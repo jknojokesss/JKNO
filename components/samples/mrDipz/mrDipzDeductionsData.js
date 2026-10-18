@@ -5,7 +5,7 @@ export const DEDUCTION_AS_OF = '2026-10-15'
 export const DISTRIBUTOR_DEDUCTIONS = [
   {
     id: 'ded-01',
-    ref: 'RD-240718-03',
+    ref: 'RD-260722-03',
     remittanceDate: '2026-07-22',
     invoiceNo: '4821',
     invoiceDate: '2026-07-05',
@@ -19,7 +19,7 @@ export const DISTRIBUTOR_DEDUCTIONS = [
   },
   {
     id: 'ded-02',
-    ref: 'RD-240801-11',
+    ref: 'RD-260805-11',
     remittanceDate: '2026-08-05',
     invoiceNo: '4910',
     invoiceDate: '2026-07-22',
@@ -33,7 +33,7 @@ export const DISTRIBUTOR_DEDUCTIONS = [
   },
   {
     id: 'ded-03',
-    ref: 'RD-240815-07',
+    ref: 'RD-260819-07',
     remittanceDate: '2026-08-19',
     invoiceNo: '4962',
     invoiceDate: '2026-08-04',
@@ -47,7 +47,7 @@ export const DISTRIBUTOR_DEDUCTIONS = [
   },
   {
     id: 'ded-04',
-    ref: 'RD-240822-02',
+    ref: 'RD-260826-02',
     remittanceDate: '2026-08-26',
     invoiceNo: '4988',
     invoiceDate: '2026-08-11',
@@ -61,7 +61,7 @@ export const DISTRIBUTOR_DEDUCTIONS = [
   },
   {
     id: 'ded-05',
-    ref: 'RD-240905-14',
+    ref: 'RD-260909-14',
     remittanceDate: '2026-09-09',
     invoiceNo: '5044',
     invoiceDate: '2026-09-07',
@@ -75,7 +75,7 @@ export const DISTRIBUTOR_DEDUCTIONS = [
   },
   {
     id: 'ded-06',
-    ref: 'RD-240912-08',
+    ref: 'RD-260916-08',
     remittanceDate: '2026-09-16',
     invoiceNo: '5061',
     invoiceDate: '2026-09-07',
@@ -89,7 +89,7 @@ export const DISTRIBUTOR_DEDUCTIONS = [
   },
   {
     id: 'ded-07',
-    ref: 'RD-240912-09',
+    ref: 'RD-260916-09',
     remittanceDate: '2026-09-16',
     invoiceNo: '5062',
     invoiceDate: '2026-09-14',
@@ -103,7 +103,7 @@ export const DISTRIBUTOR_DEDUCTIONS = [
   },
   {
     id: 'ded-08',
-    ref: 'RD-240919-04',
+    ref: 'RD-260923-04',
     remittanceDate: '2026-09-23',
     invoiceNo: '5088',
     invoiceDate: '2026-09-14',
@@ -117,7 +117,7 @@ export const DISTRIBUTOR_DEDUCTIONS = [
   },
   {
     id: 'ded-09',
-    ref: 'RD-240919-05',
+    ref: 'RD-260923-05',
     remittanceDate: '2026-09-23',
     invoiceNo: '5089',
     invoiceDate: '2026-09-14',
@@ -131,7 +131,7 @@ export const DISTRIBUTOR_DEDUCTIONS = [
   },
   {
     id: 'ded-10',
-    ref: 'RD-240926-12',
+    ref: 'RD-260930-12',
     remittanceDate: '2026-09-30',
     invoiceNo: '5112',
     invoiceDate: '2026-09-21',
@@ -145,7 +145,7 @@ export const DISTRIBUTOR_DEDUCTIONS = [
   },
   {
     id: 'ded-11',
-    ref: 'RD-240926-13',
+    ref: 'RD-260930-13',
     remittanceDate: '2026-09-30',
     invoiceNo: '5113',
     invoiceDate: '2026-09-21',
@@ -159,7 +159,7 @@ export const DISTRIBUTOR_DEDUCTIONS = [
   },
   {
     id: 'ded-12',
-    ref: 'RD-240926-14',
+    ref: 'RD-260930-14',
     remittanceDate: '2026-09-30',
     invoiceNo: '5114',
     invoiceDate: '2026-09-28',
@@ -173,7 +173,7 @@ export const DISTRIBUTOR_DEDUCTIONS = [
   },
   {
     id: 'ded-13',
-    ref: 'RD-240926-15',
+    ref: 'RD-260930-15',
     remittanceDate: '2026-09-30',
     invoiceNo: '5115',
     invoiceDate: '2026-09-28',
@@ -187,7 +187,7 @@ export const DISTRIBUTOR_DEDUCTIONS = [
   },
   {
     id: 'ded-14',
-    ref: 'RD-241003-06',
+    ref: 'RD-261007-06',
     remittanceDate: '2026-10-07',
     invoiceNo: '5140',
     invoiceDate: '2026-09-30',
@@ -201,7 +201,7 @@ export const DISTRIBUTOR_DEDUCTIONS = [
   },
   {
     id: 'ded-15',
-    ref: 'RD-241010-01',
+    ref: 'RD-261014-01',
     remittanceDate: '2026-10-14',
     invoiceNo: '5162',
     invoiceDate: '2026-10-05',
@@ -215,7 +215,7 @@ export const DISTRIBUTOR_DEDUCTIONS = [
   },
   {
     id: 'ded-16',
-    ref: 'RD-241010-02',
+    ref: 'RD-261014-02',
     remittanceDate: '2026-10-14',
     invoiceNo: '5168',
     invoiceDate: '2026-10-08',
