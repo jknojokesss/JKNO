@@ -12,6 +12,7 @@ import {
   PNL_LINES,
   PNL_ENTRIES,
 } from './mrDipzData.js'
+import { DISTRIBUTOR_DEDUCTIONS, DEDUCTION_AS_OF } from './mrDipzDeductionsData.js'
 
 /** Mr. Dipz sample tokens, copied from the Primal Krisp sample so neither file depends on the other. */
 export const CHAR = '#2B2018'
@@ -66,6 +67,53 @@ const PRIOR_WEEK_IDS = new Set(PRIOR_WEEKS.map((w) => w.id))
 const priorWeekLabel = Object.fromEntries(PRIOR_WEEKS.map((w) => [w.id, w.label]))
 
 const round2 = (n) => Math.round(n * 100) / 100
+
+const DEDUCTION_STATUS_LABEL = {
+  matched: 'Matched',
+  'needs-backup': 'Needs backup',
+  dispute: 'Dispute',
+}
+
+function buildDeductions(productById) {
+  const rows = DISTRIBUTOR_DEDUCTIONS.map((d) => {
+    const invoiceAmount = cents(d.invoiceAmount)
+    const paidAmount = cents(d.paidAmount)
+    const amount = invoiceAmount - paidAmount
+    const daysLeft = Math.max(0, 90 - daysBetween(d.remittanceDate, DEDUCTION_AS_OF))
+    const product = d.memoProductId ? productById[d.memoProductId] : null
+    return {
+      id: d.id,
+      ref: d.ref,
+      remittanceDate: d.remittanceDate,
+      invoiceNo: d.invoiceNo,
+      invoiceDate: d.invoiceDate,
+      invoiceAmount,
+      paidAmount,
+      amount,
+      code: d.code,
+      status: d.status,
+      statusLabel: DEDUCTION_STATUS_LABEL[d.status],
+      daysLeft,
+      backup: d.backup,
+      memoProductId: d.memoProductId,
+      memoDesc: d.memoDesc,
+      memoProductName: product?.name || null,
+    }
+  })
+  const summary = {
+    total: sum(rows, (r) => r.amount),
+    matched: sum(rows.filter((r) => r.status === 'matched'), (r) => r.amount),
+    needsBackup: sum(rows.filter((r) => r.status === 'needs-backup'), (r) => r.amount),
+    dispute: sum(rows.filter((r) => r.status === 'dispute'), (r) => r.amount),
+  }
+  const sepExpired = sum(
+    rows.filter((r) => r.code === 'Expired' && r.invoiceDate.startsWith('2026-09')),
+    (r) => r.amount,
+  )
+  const openReview = summary.needsBackup + summary.dispute
+  const byId = Object.fromEntries(rows.map((r) => [r.id, r]))
+  return { rows, byId, summary, sepExpired, openReview, asOf: DEDUCTION_AS_OF }
+}
 
 /** Split August store totals into four delivery weeks (fictitious; used for open August invoices). */
 function priorWeekNets(priorSales, priorCredits) {
@@ -392,6 +440,19 @@ export function buildMrDipzModel() {
 
   const pnl = buildPnl({ sep: { sales, credits }, aug: { sales: priorSales, credits: priorCredits } })
 
+  const deductions = buildDeductions(productById)
+  const expiredByFlavor = products
+    .filter((p) => p.units > 0)
+    .map((p) => ({
+      productId: p.id,
+      name: p.name,
+      sold: p.units,
+      expired: p.expUnits,
+      expiredPct: pctOf(p.expUnits, p.units),
+      credits: p.credits,
+    }))
+    .sort((a, b) => b.expired - a.expired || b.credits - a.credits)
+
   return {
     stores,
     storeById,
@@ -404,6 +465,8 @@ export function buildMrDipzModel() {
     openInvoices,
     totals,
     pnl,
+    deductions,
+    expiredByFlavor,
   }
 }
 

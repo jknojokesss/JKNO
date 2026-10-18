@@ -7,6 +7,7 @@ import { SHELL_CSS } from './MrDipzKit'
 import MrDipzOverview from './MrDipzOverview'
 import MrDipzStores from './MrDipzStores'
 import MrDipzCredits from './MrDipzCredits'
+import MrDipzDeductions from './MrDipzDeductions'
 import MrDipzProducts from './MrDipzProducts'
 import MrDipzOwed from './MrDipzOwed'
 import MrDipzFinancials from './MrDipzFinancials'
@@ -18,6 +19,7 @@ const TABS = [
   ['overview', 'Overview'],
   ['stores', 'Stores'],
   ['credits', 'Credits'],
+  ['deductions', 'Distributor deductions'],
   ['products', 'Products'],
   ['owed', 'Owed by stores'],
   ['financials', 'Financials'],
@@ -27,6 +29,7 @@ const TAB_BODY = {
   overview: MrDipzOverview,
   stores: MrDipzStores,
   credits: MrDipzCredits,
+  deductions: MrDipzDeductions,
   products: MrDipzProducts,
   owed: MrDipzOwed,
   financials: MrDipzFinancials,
@@ -34,6 +37,7 @@ const TAB_BODY = {
 
 export default function MrDipzSample() {
   const [tab, setTab] = useState('overview')
+  const [deductionFilter, setDeductionFilter] = useState(null)
   const [stack, setStack] = useState([])
   const model = useMemo(() => buildMrDipzModel(), [])
 
@@ -52,9 +56,10 @@ export default function MrDipzSample() {
     setStack([])
     scrollTop()
   }
-  const goTab = (id) => {
+  const goTab = (id, opts) => {
     setTab(id)
     setStack([])
+    setDeductionFilter(opts?.deductionFilter ?? null)
     scrollTop()
   }
 
@@ -121,7 +126,12 @@ export default function MrDipzSample() {
           {detail ? (
             <MrDipzDetail model={model} detail={detail} depth={stack.length} open={open} back={back} close={close} />
           ) : (
-            <Body model={model} open={open} goTab={goTab} />
+            <Body
+              model={model}
+              open={open}
+              goTab={goTab}
+              initialFilter={tab === 'deductions' ? deductionFilter : undefined}
+            />
           )}
         </main>
       </div>

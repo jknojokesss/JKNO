@@ -25,6 +25,10 @@ export default function MrDipzCredits({ model, open }) {
         />
       </div>
 
+      <div style={{ fontSize: 13, color: MUTED, marginBottom: 14 }}>
+        Credits come back as Distributor deductions
+      </div>
+
       <Card title="By store">
         <MdTable
           columns={['Store', 'Credits', 'Credit %', 'Last month %']}

@@ -22,6 +22,12 @@ export default function MrDipzOverview({ model, open, goTab }) {
           subColor={deltaColor(pctDelta, { cost: true })}
           onClick={() => goTab('credits')}
         />
+        <KPI
+          k="DISTRIBUTOR DEDUCTIONS"
+          v={money(model.deductions.openReview)}
+          sub="Open to review"
+          onClick={() => goTab('deductions', { deductionFilter: 'open' })}
+        />
         <KPI k="NET AFTER CREDITS" v={money(t.net)} onClick={() => goTab('stores')} />
         <KPI k="OWED BY STORES" v={money(t.owed)} onClick={() => goTab('owed')} />
         <KPI

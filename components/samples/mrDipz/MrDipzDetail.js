@@ -695,6 +695,102 @@ function PnlDetail({ model, id, open }) {
   }
 }
 
+function ActionBtn({ children, onClick }) {
+  return (
+    <button type="button" className="md-backbtn" onClick={onClick} style={{ marginTop: 12, marginRight: 8 }}>
+      {children}
+    </button>
+  )
+}
+
+function DeductionDetail({ model, id, open }) {
+  const r = model.deductions.byId[id]
+  const showMemo = r.status === 'matched' || r.code === 'Expired'
+  const showDispute = r.status === 'dispute' || r.code === 'Unknown'
+  return {
+    title: r.ref,
+    sub: `Distributor · remit ${fmtD(r.remittanceDate)}`,
+    body: (
+      <>
+        <div className="md-stats">
+          <Stat k="Invoice" v={`#${r.invoiceNo}`} />
+          <Stat k="Invoice date" v={fmtD(r.invoiceDate)} />
+          <Stat k="Invoice amount" v={money(r.invoiceAmount)} />
+          <Stat k="Paid amount" v={money(r.paidAmount)} />
+          <Stat k="Deduction" v={money(r.amount)} />
+          <Stat k="Code" v={r.code} />
+          <Stat k="Days left to dispute" v={fmtInt(r.daysLeft)} />
+          <Stat k="Status" v={r.statusLabel} />
+        </div>
+        {showMemo ? <ActionBtn onClick={() => open({ type: 'deductionCreditMemo', id })}>Create credit memo</ActionBtn> : null}
+        {showDispute ? <ActionBtn onClick={() => open({ type: 'deductionDispute', id })}>Dispute</ActionBtn> : null}
+      </>
+    ),
+  }
+}
+
+function DeductionCreditMemoPreview({ model, id, close }) {
+  const r = model.deductions.byId[id]
+  const lineDesc = r.memoProductName || r.memoDesc
+  const qty = r.memoProductId ? fmtInt(Math.max(1, Math.round(r.amount / (model.productAgg[r.memoProductId]?.priceC || r.amount)))) : '1'
+  return {
+    title: 'Credit memo preview',
+    sub: 'Not sent',
+    body: (
+      <>
+        <Card title="Credit memo">
+          <MdTable
+            columns={['', '']}
+            rows={[
+              { key: 'cust', name: 'Customer', cells: ['Distributor'] },
+              { key: 'date', name: 'Date', cells: [fmtD(r.remittanceDate)] },
+              {
+                key: 'line',
+                name: 'Line',
+                cells: [`${lineDesc} · qty ${qty} · ${money(r.amount)}`],
+              },
+              { key: 'total', kind: 'total', name: 'Total', cells: [money(r.amount)] },
+            ]}
+          />
+        </Card>
+        <div style={{ fontSize: 13, color: MUTED, marginTop: 4 }}>Goes into QuickBooks as a credit memo</div>
+        <ActionBtn onClick={close}>Close</ActionBtn>
+      </>
+    ),
+  }
+}
+
+function DeductionDisputePreview({ model, id, close }) {
+  const r = model.deductions.byId[id]
+  const reason =
+    r.code === 'Unknown'
+      ? `Dispute unlabeled deduction on invoice #${r.invoiceNo}.`
+      : r.code === 'Shortage'
+        ? `Dispute ${r.code.toLowerCase()} on invoice #${r.invoiceNo}.`
+        : `Dispute ${r.code.toLowerCase()} deduction on invoice #${r.invoiceNo}.`
+  return {
+    title: 'Dispute note preview',
+    sub: 'Not sent',
+    body: (
+      <>
+        <Card title="Note">
+          <MdTable
+            columns={['', '']}
+            rows={[
+              { key: 'ref', name: 'Ref', cells: [r.ref] },
+              { key: 'inv', name: 'Invoice', cells: [`#${r.invoiceNo} · ${fmtD(r.invoiceDate)}`] },
+              { key: 'amt', name: 'Amount', cells: [money(r.amount)] },
+              { key: 'reason', name: 'Reason', cells: [reason] },
+              { key: 'backup', name: 'Backup', cells: [r.backup || '—'] },
+            ]}
+          />
+        </Card>
+        <ActionBtn onClick={close}>Close</ActionBtn>
+      </>
+    ),
+  }
+}
+
 const VIEWS = {
   area: AreaDetail,
   store: StoreDetail,
@@ -708,12 +804,15 @@ const VIEWS = {
   invoice: InvoiceDetail,
   bucket: BucketDetail,
   pnl: PnlDetail,
+  deduction: DeductionDetail,
+  deductionCreditMemo: DeductionCreditMemoPreview,
+  deductionDispute: DeductionDisputePreview,
 }
 
 export default function MrDipzDetail({ model, detail, depth, open, back, close }) {
   const view = VIEWS[detail.type]
   if (!view) return null
-  const { title, sub, body } = view({ model, open, ...detail })
+  const { title, sub, body } = view({ model, open, close, back, ...detail })
   return (
     <Frame title={title} sub={sub} depth={depth} back={back} close={close}>
       {body}
