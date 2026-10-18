@@ -1,4 +1,4 @@
-import { useState, useMemo, Fragment } from 'react'
+import { useState, useMemo, useEffect, useRef, Fragment } from 'react'
 import {
   AS_OF,
   isConsignmentStore,
@@ -10,9 +10,30 @@ import {
   totalOwed,
   subtotalOwed,
   addDays,
+  daysBetween,
 } from './primalKrispStoreBilling'
 import { SPICE, CHAR, KRAFT, CREAM, CARDBG, INK, MUTED, BORDER, AMBER, RED, GREEN, UI, MONO, money, fmtAsOfLong, fmtInt, TieMark } from './primalKrispUtils'
 import { ArAgingBars } from './PrimalKrispCharts'
+
+const AGING_FILTERS = {
+  aging_0_30: { bucket: '0-30', label: '0-30 days open' },
+  aging_31_60: { bucket: '31-60', label: '31-60 days open' },
+  aging_61_90: { bucket: '61-90', label: '61-90 days open' },
+}
+
+function bucketAmountForInvoice(inv, bucket, asOf = AS_OF) {
+  if (inv.status !== 'Open') return 0
+  const days = daysBetween(inv.issued, asOf)
+  if (bucket === '0-30') return days <= 30 ? inv.amount : 0
+  if (bucket === '31-60') return days > 30 && days <= 60 ? inv.amount : 0
+  return days > 60 ? inv.amount : 0
+}
+
+function storeBucketOpenTotal(store, filterKey) {
+  const bucket = AGING_FILTERS[filterKey]?.bucket
+  if (!bucket) return 0
+  return (store.sample.invoices || []).reduce((s, inv) => s + bucketAmountForInvoice(inv, bucket), 0)
+}
 
 const PRINT_CSS = `@media print{
 body{background:#fff!important}
@@ -141,6 +162,7 @@ export default function PrimalKrispStoresTab({
   const [preview, setPreview] = useState(null)
   const [countDraft, setCountDraft] = useState({})
   const [forms, setForms] = useState({})
+  const listAnchorRef = useRef(null)
 
   const stores = billingState.stores
   const owedTotal = totalOwed(stores)
@@ -151,16 +173,29 @@ export default function PrimalKrispStoresTab({
   const consignmentOwed = subtotalOwed(stores, true)
   const invoiceOwed = subtotalOwed(stores, false)
 
+  const agingFilterActive = listFilter && AGING_FILTERS[listFilter]
+
+  useEffect(() => {
+    if (!agingFilterActive) return
+    const id = requestAnimationFrame(() => {
+      listAnchorRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+    })
+    return () => cancelAnimationFrame(id)
+  }, [listFilter, agingFilterActive])
+
+  const chipLabel = agingFilterActive ? AGING_FILTERS[listFilter].label : listFilterLabel
+
   const filtered = useMemo(() => {
     const q = storeSearch.trim().toLowerCase()
     let rows = stores.filter((s) => {
-      if (isConsignmentStore(s) !== (side === 'consignment')) return false
+      if (!agingFilterActive && isConsignmentStore(s) !== (side === 'consignment')) return false
       if (regionFilter !== 'All' && s.region !== regionFilter) return false
       if (listFilter === 'open_balance' && !(openInvoiceTotal(s) > 0)) return false
       if (listFilter === 'past60') {
         const has = (s.sample.invoices || []).some((inv) => invoiceStatus(inv) === 'Overdue' || (inv.status === 'Open' && inv.days_outstanding > 60))
         if (!has) return false
       }
+      if (agingFilterActive && storeBucketOpenTotal(s, listFilter) <= 0) return false
       if (listFilter === 'unaccounted' && !(s.sample.bags_unaccounted > 0)) return false
       if (q && !(`${s.name} ${s.city}`.toLowerCase().includes(q))) return false
       return true
@@ -178,7 +213,7 @@ export default function PrimalKrispStoresTab({
       return (openInvoiceTotal(a) - openInvoiceTotal(b)) * dir
     })
     return rows
-  }, [stores, side, regionFilter, listFilter, storeSearch, storeSort, period])
+  }, [stores, side, regionFilter, listFilter, storeSearch, storeSort, period, agingFilterActive])
 
   const grouped = useMemo(() => {
     const map = {}
@@ -262,7 +297,7 @@ export default function PrimalKrispStoresTab({
         />
       </div>
 
-      <FilterChip label={listFilterLabel} onClear={() => setListFilter(null)} />
+      <FilterChip label={chipLabel} onClear={() => setListFilter(null)} />
 
       <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap', marginBottom: '16px' }}>
         <KPI k="Owed by stores" v={money(owedTotal)} accent={AMBER} onClick={() => setListFilter('open_balance')} />
@@ -279,11 +314,11 @@ export default function PrimalKrispStoresTab({
 
       <div style={{ ...card, marginBottom: '16px' }}>
         <div style={{ ...lbl, marginBottom: '10px' }}>AR aging — open store balances</div>
-        <ArAgingBars aging={aging} />
+        <ArAgingBars aging={aging} onBarClick={setListFilter} />
         <Row l="Total" v={money(owedTotal)} bold top tieExpected={owedTotal} tieActual={agingSum} />
       </div>
 
-      <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap', marginBottom: '12px', alignItems: 'center' }}>
+      <div ref={listAnchorRef} style={{ display: 'flex', gap: '10px', flexWrap: 'wrap', marginBottom: '12px', alignItems: 'center', scrollMarginTop: 72 }}>
         <input
           type="search"
           placeholder="Search store or city"

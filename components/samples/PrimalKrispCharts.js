@@ -453,22 +453,68 @@ export function InventoryDaysChart({ rows, accent = BRICK, refDays = 21 }) {
   )
 }
 
-export function ArAgingBars({ aging, accent = BRICK }) {
+const AGING_BAR_FILTER = { '0-30': 'aging_0_30', '31-60': 'aging_31_60', '61-90': 'aging_61_90' }
+
+export function ArAgingBars({ aging, accent = BRICK, onBarClick }) {
   const { show, hide, node } = useChartTip()
   const keys = ['0-30', '31-60', '61-90']
   const vals = keys.map((k) => aging[k] || 0)
   const max = Math.max(...vals, 1)
+  const TOP = 20
+  const BASE = 96
+  const BAR_MAX = 70
+  const vbH = 112
+  const activate = (k) => {
+    const id = AGING_BAR_FILTER[k]
+    if (id && onBarClick) onBarClick(id)
+  }
+  const onBarKey = (k) => (e) => {
+    if (e.key === 'Enter' || e.key === ' ') {
+      e.preventDefault()
+      activate(k)
+    }
+  }
   return (
     <ChartFrame tip={node} hide={hide}>
-      <svg viewBox="0 0 360 100" style={{ width: '100%', maxWidth: '420px', display: 'block' }}>
+      <svg viewBox={`0 0 360 ${vbH}`} style={{ width: '100%', maxWidth: '420px', display: 'block' }}>
         {keys.map((k, i) => {
           const x = 20 + i * 110
-          const h = (vals[i] / max) * 70
+          const h = (vals[i] / max) * BAR_MAX
+          const barY = BASE - h
+          const labelY = Math.max(TOP + 6, barY - 4)
+          const clickable = !!onBarClick
           return (
             <g key={k}>
-              <TipRect show={show} hide={hide} x={x} y={78 - h} width={80} height={h} fill={i === 2 ? accent : CHARCOAL} opacity={i === 0 ? 0.75 : 1} label={`${k} days`} value={vals[i]} />
-              <text x={x + 40} y={90} textAnchor="middle" fontSize="10" fill={MUTED} fontFamily={sans}>{k} days</text>
-              <text x={x + 40} y={78 - h - 4} textAnchor="middle" fontSize="10" fontWeight="600" fill={INK} fontFamily={sans}>
+              {clickable ? (
+                <>
+                  <rect x={x} y={barY} width={80} height={h} fill={i === 2 ? accent : CHARCOAL} opacity={i === 0 ? 0.75 : 1} pointerEvents="none" />
+                  <rect
+                    x={x}
+                    y={TOP}
+                    width={80}
+                    height={BASE - TOP}
+                    fill="transparent"
+                    role="button"
+                    tabIndex={0}
+                    aria-label={`${k} days open, ${moneyK(vals[i])}`}
+                    onClick={() => activate(k)}
+                    onKeyDown={onBarKey(k)}
+                    onMouseEnter={(e) => show(e, `${k} days`, vals[i])}
+                    onMouseMove={(e) => show(e, `${k} days`, vals[i])}
+                    onMouseLeave={hide}
+                    onTouchStart={(e) => {
+                      e.preventDefault()
+                      show(e, `${k} days`, vals[i])
+                    }}
+                    onTouchEnd={hide}
+                    style={{ cursor: 'pointer' }}
+                  />
+                </>
+              ) : (
+                <TipRect show={show} hide={hide} x={x} y={barY} width={80} height={h} fill={i === 2 ? accent : CHARCOAL} opacity={i === 0 ? 0.75 : 1} label={`${k} days`} value={vals[i]} />
+              )}
+              <text x={x + 40} y={BASE + 12} textAnchor="middle" fontSize="10" fill={MUTED} fontFamily={sans} pointerEvents="none">{k} days</text>
+              <text x={x + 40} y={labelY} textAnchor="middle" fontSize="10" fontWeight="600" fill={INK} fontFamily={sans} pointerEvents="none">
                 {moneyK(vals[i])}
               </text>
             </g>
