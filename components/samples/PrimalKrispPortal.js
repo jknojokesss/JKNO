@@ -3,6 +3,7 @@ import Image from 'next/image'
 import SampleJkLogoLink from './SampleJkLogoLink'
 import DATA from '../../data/primal-krisp.json'
 import PrimalKrispOverview from './PrimalKrispOverview'
+import PrimalKrispOverviewDetail from './PrimalKrispOverviewDetail'
 import PrimalKrispFinancials from './PrimalKrispFinancials'
 import PrimalKrispStoresTab from './PrimalKrispStoresTab'
 import { initBillingFromData, billingReducer, totalOwed } from './primalKrispStoreBilling'
@@ -55,6 +56,7 @@ export default function PrimalKrispPortal() {
   const [promoSort, setPromoSort] = useState({ key: 'revenue', dir: 'desc' })
   const [invSort, setInvSort] = useState({ key: 'date', dir: 'desc' })
   const [reorderFocus, setReorderFocus] = useState(false)
+  const [overviewDetail, setOverviewDetail] = useState(null)
 
   const ov = DATA.overview
   const periodSlice = period === 'week' ? DATA.period_slices?.overview : null
@@ -356,6 +358,7 @@ export default function PrimalKrispPortal() {
                     setTab(id)
                     setDrawerProduct(null)
                     setReorderFocus(false)
+                    setOverviewDetail(null)
                   }}
                   style={
                     active
@@ -403,7 +406,15 @@ export default function PrimalKrispPortal() {
             <PrimalKrispFinancials card={card} lbl={lbl} big={big} btn={btn} inp={inp} KPI={KPI} />
           )}
 
-          {tab === 'overview' && (
+          {tab === 'overview' && overviewDetail ? (
+            <PrimalKrispOverviewDetail
+              detail={overviewDetail}
+              onBack={() => setOverviewDetail(null)}
+              storeList={storeList}
+              openStoreBalance={liveStoreOwed}
+            />
+          ) : null}
+          {tab === 'overview' && !overviewDetail && (
             <PrimalKrispOverview
               card={card}
               lbl={lbl}
@@ -416,9 +427,7 @@ export default function PrimalKrispPortal() {
               salesDelta={salesDelta}
               bagsPeriod={bagsPeriod}
               channelRowsPeriod={channelRowsPeriod}
-              goTab={goTab}
-              goStoresFilter={goStoresFilter}
-              goStoresDueReorder={goStoresDueReorder}
+              onOpenDetail={setOverviewDetail}
               openStoreBalance={liveStoreOwed}
             />
           )}

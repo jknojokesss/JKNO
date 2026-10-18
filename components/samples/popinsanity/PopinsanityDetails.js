@@ -5,6 +5,10 @@ import {
   tierStats,
   channelTotal,
   channelPrior,
+  allChannelSales,
+  pnlComputed,
+  cashByMonthKey,
+  monthLabel,
   storeByName,
   wholesaleChannel,
   wholesaleStats,
@@ -21,6 +25,7 @@ import { DetailShell, RowLine, ClickRow } from './PopinsanityShared'
 import { CompareSheet } from './PopinsanityCompareSheet'
 import {
   money,
+  money0,
   fmtD,
   fmtInt,
   pct1,
@@ -725,6 +730,61 @@ export function PnlLineDetail({ line, section, onBack, onChannel, card, big }) {
           Open {channelLabel} sales detail
         </button>
       ) : null}
+    </DetailShell>
+  )
+}
+
+export function SalesMonthOverviewDetail({ onBack, card, big }) {
+  const sales = allChannelSales()
+  const total = sales.thisMonth
+  return (
+    <DetailShell title={`Sales · ${DATA.meta.this_short}`} onBack={onBack} card={card} big={big}>
+      {sales.rows.map((r) => (
+        <RowLine key={r.id} l={r.name} v={money0(r.this)} />
+      ))}
+      <RowLine l="Total" v={money0(total)} bold />
+    </DetailShell>
+  )
+}
+
+export function NetProfitOverviewDetail({ onBack, card, big }) {
+  const p = pnlComputed()
+  const rows = [
+    ...DATA.pnl.revenue.map((l) => ({ label: l.label, value: l.this })),
+    ...DATA.pnl.cogs.map((l) => ({ label: l.label, value: -l.this })),
+    ...DATA.pnl.opex.map((l) => ({ label: l.label, value: -l.this })),
+  ]
+  return (
+    <DetailShell title={`Net profit · ${DATA.meta.this_short}`} onBack={onBack} card={card} big={big}>
+      {rows.map((r) => (
+        <RowLine key={r.label} l={r.label} v={money(r.value)} />
+      ))}
+      <RowLine l="Net profit" v={money0(p.net)} bold />
+    </DetailShell>
+  )
+}
+
+export function CashMonthOverviewDetail({ monthKey, onBack, onOrder, card, big }) {
+  const { map } = cashByMonthKey()
+  const items = map[monthKey] || []
+  const total = sumBy(items, 'amount')
+  return (
+    <DetailShell title={monthLabel(monthKey)} onBack={onBack} card={card} big={big}>
+      {items.map((it) => (
+        <div
+          key={`${it.orderId}-${it.date}-${it.type}`}
+          role="button"
+          tabIndex={0}
+          className="pop-click"
+          onClick={() => onOrder(it.orderId)}
+          onKeyDown={(e) => e.key === 'Enter' && onOrder(it.orderId)}
+          style={{ display: 'flex', justifyContent: 'space-between', gap: 10, padding: '8px 0', borderTop: `1px solid ${BORDER}`, fontSize: 13, cursor: 'pointer' }}
+        >
+          <span>{it.client}</span>
+          <span style={{ fontFamily: MONO }}>{money(it.amount)}</span>
+        </div>
+      ))}
+      <RowLine l="Total" v={money0(total)} bold />
     </DetailShell>
   )
 }

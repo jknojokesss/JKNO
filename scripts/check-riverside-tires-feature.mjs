@@ -10,6 +10,7 @@ import {
   buildDailyCloseJournal,
   assertDailyCloseTies,
 } from '../components/samples/riverside/riversideDailyClose.js'
+import { buildPeriodStats, salesItemsForPeriod, octoberOrdersSlice } from '../components/samples/riverside/riversideSalesItems.js'
 
 const root = path.dirname(fileURLToPath(import.meta.url))
 const dataPath = path.join(root, '../data/riverside-tires.json')
@@ -115,6 +116,33 @@ ok('Sep sales items month present', Array.isArray(data.sales_items_by_month?.['2
 const sepItemsRev = round2(data.sales_items_by_month['2026-09'].reduce((s, i) => s + i.revenue, 0))
 ok('Sep items revenue = Sep month', sepItemsRev === data.monthly.find((m) => m.month === '2026-09').revenue)
 
+const closedMonths = data.monthly
+const closedRev = round2(closedMonths.reduce((s, m) => s + m.revenue, 0))
+const octOrders = octoberOrdersSlice(data.orders, AS_OF)
+const octRev = round2(octOrders.reduce((s, o) => s + o.sale, 0))
+const allStats = buildPeriodStats({
+  periodStats: data.period_stats,
+  salesItemsByMonth: data.sales_items_by_month,
+  monthly: closedMonths,
+  orders: data.orders,
+  asOf: AS_OF,
+  periodKey: 'all',
+  lastClosedMonth: closedMonths[closedMonths.length - 1].month,
+})
+const allItems = salesItemsForPeriod({
+  salesItemsByMonth: data.sales_items_by_month,
+  orders: data.orders,
+  asOf: AS_OF,
+  periodKey: 'all',
+  fallbackAug: data.sales_items_aug,
+})
+const allUnits = allItems.reduce((s, i) => s + i.units, 0)
+const allItemRev = round2(allItems.reduce((s, i) => s + i.revenue, 0))
+ok('All time revenue = closed months + October', allStats.revenue === round2(closedRev + octRev))
+ok('All time units = item rollup', allStats.unitsSold === allUnits)
+ok('All time item revenue ties stats revenue', Math.abs(allItemRev - allStats.revenue) < 0.02)
+ok('portal label Overview not Dashboard', !/label:\s*'Dashboard'/.test(portalSrc))
+
 if (failures.length) {
   console.error('FAILED:', failures)
   process.exit(1)
@@ -125,4 +153,8 @@ console.log('riverside-tires feature checks passed.', {
   tickets: model.totalTickets,
   plJanSepNet,
   profitByMonthTotal,
+  allTimeRevenue: allStats.revenue,
+  allTimeUnits: allStats.unitsSold,
+  closedRev,
+  octRev,
 })

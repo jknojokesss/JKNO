@@ -1,7 +1,7 @@
 import { money, pct1, fmtInt, GREEN, RED, deltaColor } from './mrDipzUtils'
 import { Card, KPI, MdTable } from './MrDipzKit'
 
-export default function MrDipzOverview({ model, open, goTab }) {
+export default function MrDipzOverview({ model, open }) {
   const t = model.totals
   const pctDelta = Math.round(t.pct * 10) - Math.round(t.priorPct * 10)
 
@@ -13,28 +13,28 @@ export default function MrDipzOverview({ model, open, goTab }) {
           v={money(t.sales)}
           sub={`${t.salesChangePct >= 0 ? '+' : ''}${pct1(t.salesChangePct)} vs last month`}
           subColor={deltaColor(t.salesChangePct)}
-          onClick={() => goTab('stores')}
+          onClick={() => open({ type: 'pnl', id: 'gross' })}
         />
         <KPI
           k="CREDITS FOR EXPIRED"
           v={money(t.credits)}
           sub={`${pct1(t.pct)} of sales · ${pct1(t.priorPct)} last month`}
           subColor={deltaColor(pctDelta, { cost: true })}
-          onClick={() => goTab('credits')}
+          onClick={() => open({ type: 'pnl', id: 'credits' })}
         />
         <KPI
           k="DISTRIBUTOR DEDUCTIONS"
           v={money(model.deductions.openReview)}
           sub="Open to review"
-          onClick={() => goTab('deductions', { deductionFilter: 'open' })}
+          onClick={() => open({ type: 'deductionsOpen' })}
         />
-        <KPI k="NET AFTER CREDITS" v={money(t.net)} onClick={() => goTab('stores')} />
-        <KPI k="OWED BY STORES" v={money(t.owed)} onClick={() => goTab('owed')} />
+        <KPI k="NET AFTER CREDITS" v={money(t.net)} onClick={() => open({ type: 'pnl', id: 'netSales' })} />
+        <KPI k="OWED BY STORES" v={money(t.owed)} onClick={() => open({ type: 'bucket', id: 'all' })} />
         <KPI
           k="NET PROFIT · SEPTEMBER"
           v={money(model.pnl.sep.netProfit)}
           accent={model.pnl.sep.netProfit >= 0 ? GREEN : RED}
-          onClick={() => goTab('financials')}
+          onClick={() => open({ type: 'pnl', id: 'netProfit' })}
         />
       </div>
 
@@ -53,7 +53,7 @@ export default function MrDipzOverview({ model, open, goTab }) {
               kind: 'total',
               name: 'Total',
               cells: [money(t.sales), money(t.credits), pct1(t.pct), money(t.net)],
-              onClick: () => goTab('stores'),
+              onClick: () => open({ type: 'pnl', id: 'gross' }),
             },
           ]}
         />
@@ -74,7 +74,7 @@ export default function MrDipzOverview({ model, open, goTab }) {
               kind: 'total',
               name: 'Total',
               cells: [fmtInt(t.expUnits), money(t.credits)],
-              onClick: () => goTab('credits'),
+              onClick: () => open({ type: 'pnl', id: 'credits' }),
             },
           ]}
         />

@@ -38,9 +38,7 @@ export default function PrimalKrispOverview({
   salesDelta,
   bagsPeriod,
   channelRowsPeriod,
-  goTab,
-  goStoresFilter,
-  goStoresDueReorder,
+  onOpenDetail,
   openStoreBalance,
 }) {
   const [chartsReady, setChartsReady] = useState(false)
@@ -103,27 +101,45 @@ export default function PrimalKrispOverview({
   return (
     <>
       <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap', marginBottom: '16px' }}>
-        <KPI k="Cash on hand" v={money0(DATA.overview.cash_on_hand)} onClick={() => goTab('financials')} />
+        <KPI k="Cash on hand" v={money0(DATA.overview.cash_on_hand)} onClick={() => onOpenDetail({ kind: 'cash' })} />
         <KPI
           k={period === 'week' ? 'Sales this week' : 'Sales this month'}
           v={money0(salesPeriod)}
           sub={`${salesDelta >= 0 ? '+' : ''}${pct1(salesDelta)} vs ${period === 'week' ? 'prior week' : 'last month'}`}
           accent={salesDelta >= 0 ? GREEN : RED}
           subColor={deltaColor(salesDelta)}
-          onClick={() => goTab('financials')}
+          onClick={() =>
+            onOpenDetail({
+              kind: 'sales',
+              total: salesPeriod,
+              periodLabel: period === 'week' ? 'Sales this week' : 'Sales this month',
+              rows: channelRowsPeriod,
+            })
+          }
         />
-        <KPI k="Bags sold" v={fmtInt(bagsPeriod)} onClick={() => goTab('products')} />
-        <KPI k="Active subscriptions" v={DATA.overview.active_subscriptions} accent={GREEN} onClick={() => goTab('subscriptions')} />
+        <KPI
+          k="Bags sold"
+          v={fmtInt(bagsPeriod)}
+          onClick={() =>
+            onOpenDetail({
+              kind: 'bags',
+              total: bagsPeriod,
+              periodLabel: period === 'week' ? 'Bags sold this week' : 'Bags sold this month',
+              products: products.map((p) => ({ name: p.name, bags: p[period] })),
+            })
+          }
+        />
+        <KPI k="Active subscriptions" v={DATA.overview.active_subscriptions} accent={GREEN} onClick={() => onOpenDetail({ kind: 'subs' })} />
         <KPI
           k="Owed by stores"
           v={money0(openStoreBalance ?? DATA.overview.open_store_balance)}
           accent={AMBER}
-          onClick={() => goStoresFilter('open_balance')}
+          onClick={() => onOpenDetail({ kind: 'owed' })}
         />
         <KPI
           k="Due to reorder"
           v={`${dueToReorderCount()} stores`}
-          onClick={() => goStoresDueReorder?.()}
+          onClick={() => onOpenDetail({ kind: 'reorder' })}
         />
       </div>
 
@@ -192,8 +208,8 @@ export default function PrimalKrispOverview({
               className="pk-click"
               role="button"
               tabIndex={0}
-              onClick={() => goTab('stores')}
-              onKeyDown={(e) => e.key === 'Enter' && goTab('stores')}
+              onClick={() => onOpenDetail({ kind: 'store', name: s.name })}
+              onKeyDown={(e) => e.key === 'Enter' && onOpenDetail({ kind: 'store', name: s.name })}
               style={{ padding: '9px 8px', borderTop: i ? `1px solid ${CREAM}` : 'none', cursor: 'pointer', borderRadius: 2 }}
             >
               <div style={{ display: 'flex', justifyContent: 'space-between', gap: 8, marginBottom: 6 }}>
@@ -211,8 +227,8 @@ export default function PrimalKrispOverview({
               className="pk-click"
               role="button"
               tabIndex={0}
-              onClick={() => goTab('products')}
-              onKeyDown={(e) => e.key === 'Enter' && goTab('products')}
+              onClick={() => onOpenDetail({ kind: 'flavor', name: f.name })}
+              onKeyDown={(e) => e.key === 'Enter' && onOpenDetail({ kind: 'flavor', name: f.name })}
               style={{ padding: '9px 8px', borderTop: i ? `1px solid ${CREAM}` : 'none', cursor: 'pointer', borderRadius: 2 }}
             >
               <div style={{ display: 'flex', justifyContent: 'space-between', gap: 8 }}>

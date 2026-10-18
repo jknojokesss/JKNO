@@ -596,6 +596,63 @@ export default function CloseoutExplosionPortal() {
     )
   }
 
+  const OverviewLinesDetail = ({ title, sub, rows, total, format = money }) => (
+    <div className="ce-detail">
+      <DetailBack />
+      <div style={{ ...lbl }}>{sub}</div>
+      <h2 style={{ ...big, fontSize: 22, margin: '8px 0 16px' }}>{format(total)}</h2>
+      <div style={{ ...card }}>
+        {rows.map((r, i) => (
+          <div key={r.key || r.label} style={{ display: 'flex', justifyContent: 'space-between', gap: 12, padding: '8px 0', borderTop: i ? `1px solid ${BORDER}` : 'none' }}>
+            <span style={{ fontSize: 13, color: MUTED }}>{r.label}</span>
+            <span style={{ fontFamily: MONO, fontSize: 13 }}>{format(r.value)}</span>
+          </div>
+        ))}
+        <div style={{ display: 'flex', justifyContent: 'space-between', gap: 12, padding: '10px 0', borderTop: `1px solid ${BORDER}`, fontWeight: 700 }}>
+          <span style={{ fontSize: 13 }}>Total</span>
+          <span style={{ fontFamily: MONO, fontSize: 13 }}>{format(total)}</span>
+        </div>
+      </div>
+    </div>
+  )
+
+  const OverviewNetDetail = () => {
+    const { thisP } = dash
+    const rows = [
+      { label: 'Sales', value: thisP.sales },
+      { label: 'Cost of goods sold', value: -thisP.cogs },
+      ...thisP.expenseLines.map((e) => ({ label: e.name, value: -e.amount, key: e.name })),
+    ]
+    return (
+      <OverviewLinesDetail
+        title={`Net profit ${dash.pnlLabels.this}`}
+        sub="Profit & loss"
+        rows={rows}
+        total={thisP.netProfit}
+      />
+    )
+  }
+
+  const OverviewCashDetail = () => {
+    const rows = cashSorted.map((row) => ({ label: `${row.lot.id} · ${row.lot.desc}`, value: row.cashTied, key: row.lot.id }))
+    return <OverviewLinesDetail title="Cash tied up in stock" sub="Open lots" rows={rows} total={dash.cashTiedTotal} />
+  }
+
+  const OverviewCasesDetail = () => {
+    const rows = cashSorted.map((row) => ({ label: `${row.lot.id} · ${row.lot.desc}`, value: row.casesLeft, key: row.lot.id }))
+    return <OverviewLinesDetail title="Cases in warehouse" sub="Open lots" rows={rows} total={dash.casesInWarehouse} format={(v) => fmtInt(v)} />
+  }
+
+  const OverviewOpenLotsDetail = () => {
+    const rows = dash.openLots.map((row) => ({ label: `${row.lot.id} · ${row.lot.desc}`, value: 1, key: row.lot.id }))
+    return <OverviewLinesDetail title="Open lots" sub="Inventory" rows={rows} total={dash.openLots.length} format={(v) => fmtInt(v)} />
+  }
+
+  const OverviewBuyersDetail = () => {
+    const rows = dash.buyerRows.map((b) => ({ label: b.name, value: b.total, key: b.name }))
+    return <OverviewLinesDetail title="Buyers owe" sub="Open invoices" rows={rows} total={dash.buyersOwe} />
+  }
+
   const ExpenseDrill = ({ name }) => {
     const line = DATA.pnl.expenses.find((e) => e.name === name)
     if (!line) return null
@@ -755,6 +812,11 @@ export default function CloseoutExplosionPortal() {
     if (topFrame?.type === 'buyer') return <BuyerDetail name={topFrame.name} />
     if (topFrame?.type === 'pnlSales') return <PnlSalesDrill which={topFrame.which} mode={topFrame.mode} />
     if (topFrame?.type === 'expense') return <ExpenseDrill name={topFrame.name} />
+    if (topFrame?.type === 'overviewNet') return <OverviewNetDetail />
+    if (topFrame?.type === 'overviewCash') return <OverviewCashDetail />
+    if (topFrame?.type === 'overviewCases') return <OverviewCasesDetail />
+    if (topFrame?.type === 'overviewOpenLots') return <OverviewOpenLotsDetail />
+    if (topFrame?.type === 'overviewBuyers') return <OverviewBuyersDetail />
 
     if (tab === 'overview') {
       const openList = [...dash.openLots].sort((a, b) => b.cashTied - a.cashTied).slice(0, 6)
@@ -766,18 +828,18 @@ export default function CloseoutExplosionPortal() {
               v={money0(dash.thisP.sales)}
               sub={salesSub}
               valueColor={salesDeltaColor}
-              onClick={() => goTab('pnl')}
+              onClick={() => push({ type: 'pnlSales', which: 'this', mode: 'sales' })}
             />
             <KPI
               k={`Net profit ${dash.pnlLabels.this}`}
               v={money0(dash.thisP.netProfit)}
               valueColor={dash.thisP.netProfit >= 0 ? GREEN : RED}
-              onClick={() => goTab('pnl')}
+              onClick={() => push({ type: 'overviewNet' })}
             />
-            <KPI k="Cash tied up in stock" v={money0(dash.cashTiedTotal)} onClick={() => goTab('cash')} />
-            <KPI k="Buyers owe" v={money0(dash.buyersOwe)} onClick={() => goTab('buyers')} />
-            <KPI k="Open lots" v={fmtInt(dash.openLots.length)} onClick={() => goTab('lots')} />
-            <KPI k="Cases in warehouse" v={fmtInt(dash.casesInWarehouse)} onClick={() => goTab('cash')} />
+            <KPI k="Cash tied up in stock" v={money0(dash.cashTiedTotal)} onClick={() => push({ type: 'overviewCash' })} />
+            <KPI k="Buyers owe" v={money0(dash.buyersOwe)} onClick={() => push({ type: 'overviewBuyers' })} />
+            <KPI k="Open lots" v={fmtInt(dash.openLots.length)} onClick={() => push({ type: 'overviewOpenLots' })} />
+            <KPI k="Cases in warehouse" v={fmtInt(dash.casesInWarehouse)} onClick={() => push({ type: 'overviewCases' })} />
           </div>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: 16 }}>
             <div style={card}>
@@ -819,10 +881,7 @@ export default function CloseoutExplosionPortal() {
                   key={b.name}
                   type="button"
                   className="ce-click"
-                  onClick={() => {
-                    setTab('buyers')
-                    setStack([{ type: 'buyer', name: b.name }])
-                  }}
+                  onClick={() => openBuyer(b.name)}
                   style={{
                     display: 'flex',
                     justifyContent: 'space-between',

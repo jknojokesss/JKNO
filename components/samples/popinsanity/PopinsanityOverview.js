@@ -3,7 +3,16 @@ import { pnlComputed } from './popinsanityComputed'
 import { KPI, RankedBars } from './PopinsanityShared'
 import { money0, money, pct1, changePct, changeColor, kpiValueColor, RED, GREEN } from './popinsanityUtils'
 
-export default function PopinsanityOverview({ styles, goTab, setCalendarMonth, openChannel, openTier, openHolidayOverview }) {
+export default function PopinsanityOverview({
+  styles,
+  openChannel,
+  openTier,
+  openHolidayOverview,
+  openStoresList,
+  openSalesMonth,
+  openNetProfit,
+  openCashMonth,
+}) {
   const { card, lbl, big } = styles
   const hol = holidayTotals()
   const ws = wholesaleStats()
@@ -56,7 +65,7 @@ export default function PopinsanityOverview({ styles, goTab, setCalendarMonth, o
           v={money0(hol.balance)}
           onClick={() => (openHolidayOverview ? openHolidayOverview('balance') : goTab('orders'))}
         />
-        <KPI card={card} lbl={lbl} big={big} k="Owed by stores" v={money(ws.owed)} onClick={() => goTab('stores')} />
+        <KPI card={card} lbl={lbl} big={big} k="Owed by stores" v={money(ws.owed)} onClick={() => openStoresList?.()} />
         <KPI
           card={card}
           lbl={lbl}
@@ -66,7 +75,7 @@ export default function PopinsanityOverview({ styles, goTab, setCalendarMonth, o
           sub={`${salesDelta >= 0 ? '+' : ''}${pct1(salesDelta)} vs ${DATA.meta.prior_short}`}
           accent={kpiValueColor(salesDelta)}
           subColor={changeColor(salesDelta)}
-          onClick={() => goTab('sales')}
+          onClick={() => openSalesMonth?.()}
         />
         <KPI
           card={card}
@@ -75,7 +84,7 @@ export default function PopinsanityOverview({ styles, goTab, setCalendarMonth, o
           k={`Net profit · ${DATA.meta.this_short}`}
           v={money0(pnl.net)}
           accent={pnl.net < 0 ? RED : GREEN}
-          onClick={() => goTab('financials')}
+          onClick={() => openNetProfit?.()}
         />
       </div>
       <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
@@ -94,10 +103,7 @@ export default function PopinsanityOverview({ styles, goTab, setCalendarMonth, o
           title="Cash due by month"
           rows={cashBars}
           preserveOrder
-          onRow={(r) => {
-            setCalendarMonth(r.monthKey)
-            goTab('calendar')
-          }}
+          onRow={(r) => openCashMonth?.(r.monthKey)}
         />
         <RankedBars
           card={card}

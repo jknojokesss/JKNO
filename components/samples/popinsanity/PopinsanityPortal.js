@@ -29,6 +29,9 @@ import {
   StoreInvoiceListDetail,
   InvoicePreviewDetail,
   HolidayOverviewDetail,
+  SalesMonthOverviewDetail,
+  NetProfitOverviewDetail,
+  CashMonthOverviewDetail,
 } from './PopinsanityDetails'
 
 const TABS = [
@@ -119,6 +122,20 @@ export default function PopinsanityPortal() {
             lbl={styles.lbl}
           />,
         )
+      case 'salesMonth':
+        return wrap(<SalesMonthOverviewDetail onBack={back} card={styles.card} big={styles.big} />)
+      case 'netProfit':
+        return wrap(<NetProfitOverviewDetail onBack={back} card={styles.card} big={styles.big} />)
+      case 'cashMonth':
+        return wrap(
+          <CashMonthOverviewDetail
+            monthKey={top.monthKey}
+            onBack={back}
+            onOrder={openOrder}
+            card={styles.card}
+            big={styles.big}
+          />,
+        )
       case 'tier':
         return wrap(
           <TierDetail
@@ -193,6 +210,10 @@ export default function PopinsanityPortal() {
             openChannel={openChannel}
             openTier={openTier}
             openHolidayOverview={openHolidayOverview}
+            openStoresList={openStoresList}
+            openSalesMonth={() => push({ kind: 'salesMonth' })}
+            openNetProfit={() => push({ kind: 'netProfit' })}
+            openCashMonth={(monthKey) => push({ kind: 'cashMonth', monthKey })}
           />
         )
       case 'orders':

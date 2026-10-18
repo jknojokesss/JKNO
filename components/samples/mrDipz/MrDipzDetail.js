@@ -703,6 +703,32 @@ function ActionBtn({ children, onClick }) {
   )
 }
 
+function DeductionsOpenDetail({ model, open }) {
+  const rows = model.deductions.rows.filter((r) => r.status === 'needsBackup' || r.status === 'dispute')
+  const total = sumBy(rows, (r) => r.amount)
+  return {
+    title: 'Open to review',
+    sub: 'Distributor deductions',
+    body: (
+      <Card title="Deductions">
+        <MdTable
+          columns={['Ref', 'Code', 'Amount']}
+          rows={[
+            ...rows.map((r) => ({
+              key: r.id,
+              name: r.ref,
+              sub: r.code,
+              cells: [r.ref, r.code, money(r.amount)],
+              onClick: () => open({ type: 'deduction', id: r.id }),
+            })),
+            { key: 'total', kind: 'total', name: 'Total', cells: ['', '', money(total)] },
+          ]}
+        />
+      </Card>
+    ),
+  }
+}
+
 function DeductionDetail({ model, id, open }) {
   const r = model.deductions.byId[id]
   const showMemo = r.status === 'matched' || r.code === 'Expired'
@@ -802,6 +828,7 @@ const VIEWS = {
   invoice: InvoiceDetail,
   bucket: BucketDetail,
   pnl: PnlDetail,
+  deductionsOpen: DeductionsOpenDetail,
   deduction: DeductionDetail,
   deductionCreditMemo: DeductionCreditMemoPreview,
   deductionDispute: DeductionDisputePreview,

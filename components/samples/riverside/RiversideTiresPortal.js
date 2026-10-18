@@ -26,6 +26,7 @@ import {
   NAV,
 } from './riversideUtils'
 import { buildDailyCloseModel } from './riversideDailyClose.js'
+import { buildPeriodStats, salesItemsForPeriod } from './riversideSalesItems.js'
 import {
   DailyCloseSection,
   DailyCloseDayDetail,
@@ -1135,7 +1136,7 @@ function FinancialsTab({ fin, setFin, plPeriod, setPlPeriod }) {
 
 /* ---------- Dashboard ---------- */
 
-function DashboardTab({ period, setPeriod, onOpenOrders, onOpenFinancials, onOpenSalesItems, onOpenSalesItemsSize }) {
+function DashboardTab({ period, setPeriod }) {
   const [dailyDay, setDailyDay] = useState(null)
   const [jeDay, setJeDay] = useState(null)
   const [metricDetail, setMetricDetail] = useState(null)
@@ -1176,7 +1177,65 @@ function DashboardTab({ period, setPeriod, onOpenOrders, onOpenFinancials, onOpe
   const profitRows = MONTHS.map((x) => ({ ...x, margin: (x.profit / x.revenue) * 100 }))
   const profitTotal = sumBy(profitRows, 'profit')
 
-  const openSalesMix = () => onOpenSalesItems({ periodKey: STOCK_AUG_ID, q: '' })
+  const openOpenPeriodDetail = () => {
+    const ticketLines = rows
+      .slice()
+      .sort((a, b) => a.date.localeCompare(b.date) || a.id - b.id)
+      .map((o) => ({ label: `${o.date} · ${o.item}`, value: fmt0(o.sale) }))
+    setMetricDetail({
+      title: 'Open period',
+      subtitle: `${monthName} · in progress`,
+      rows: [
+        { label: 'Sales', value: fmt0(reg.sale) },
+        { label: 'Est. cost', value: fmt0(reg.cost) },
+        { label: 'Est. gross', value: fmt0(reg.profit), valueStyle: { color: C.green } },
+        { label: 'Est. margin', value: pct(reg.margin) },
+        { label: 'Tickets', value: String(reg.tickets) },
+        ...ticketLines,
+      ],
+    })
+  }
+
+  const openSalesMixDetail = () => {
+    setMetricDetail({
+      title: `Sales mix · ${monthYear(m)}`,
+      subtitle: monthYear(m),
+      rows: closedMix.map((s) => ({ label: s.name, value: `${fmt0(s.revenue)} · ${pct(s.pct)}` })),
+    })
+  }
+
+  const openTopSizesDetail = () => {
+    setMetricDetail({
+      title: `Top tire sizes · ${monthYear(m)}`,
+      subtitle: monthYear(m),
+      rows: [
+        ...closedSizes.map((t) => ({ label: t.size, value: `${t.units} units · ${fmt0(t.revenue)}` })),
+        { label: 'Top six', value: `${topSixUnits} units · ${fmt0(topSixRev)}`, valueStyle: { fontWeight: 600 } },
+      ],
+    })
+  }
+
+  const openMonthProfitDetail = (x) => {
+    setMetricDetail({
+      title: `Net profit · ${monthYear(x)}`,
+      subtitle: monthYear(x),
+      rows: [
+        { label: 'Revenue', value: fmt0(x.revenue) },
+        { label: 'Net profit', value: fmt0(x.profit), valueStyle: { fontWeight: 600, color: C.green } },
+        { label: 'Net margin', value: pct((x.profit / x.revenue) * 100) },
+      ],
+    })
+  }
+
+  const openYtdChartDetail = () => {
+    const lines = MONTHS.flatMap((x) => [
+      { label: `${monthShort(x.label)} revenue`, value: fmt0(x.revenue) },
+      { label: `${monthShort(x.label)} net profit`, value: fmt0(x.profit) },
+    ])
+    lines.push({ label: 'YTD revenue', value: fmt0(DATA.ytd_revenue), valueStyle: { fontWeight: 600 } })
+    lines.push({ label: 'YTD net profit', value: fmt0(profitTotal), valueStyle: { fontWeight: 600 } })
+    setMetricDetail({ title: 'Revenue, expenses and profit', subtitle: ytdSpanLabel(), rows: lines })
+  }
 
   const openAugPl = (focus) => {
     const lines = []
@@ -1225,8 +1284,8 @@ function DashboardTab({ period, setPeriod, onOpenOrders, onOpenFinancials, onOpe
         tabIndex={0}
         className="rt-open-period-card"
         style={{ ...panel, marginBottom: 28 }}
-        onClick={onOpenOrders}
-        onKeyDown={(e) => (e.key === 'Enter' || e.key === ' ') && (e.preventDefault(), onOpenOrders())}
+        onClick={openOpenPeriodDetail}
+        onKeyDown={(e) => (e.key === 'Enter' || e.key === ' ') && (e.preventDefault(), openOpenPeriodDetail())}
       >
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 10, flexWrap: 'wrap', marginBottom: 12 }}>
           <div style={{ fontFamily: head, fontSize: 13, fontWeight: 700, color: C.ink, letterSpacing: '0.06em', textTransform: 'uppercase' }}>
@@ -1256,18 +1315,6 @@ function DashboardTab({ period, setPeriod, onOpenOrders, onOpenFinancials, onOpe
               </div>
             </div>
           ))}
-        </div>
-        <div style={{ marginTop: 12 }}>
-          <button
-            type="button"
-            className="rt-linkbtn"
-            onClick={(e) => {
-              e.stopPropagation()
-              onOpenOrders()
-            }}
-          >
-            View these {reg.tickets} tickets in Orders
-          </button>
         </div>
       </div>
 
@@ -1307,7 +1354,7 @@ function DashboardTab({ period, setPeriod, onOpenOrders, onOpenFinancials, onOpe
       <div className="rt-dash-main">
         <div className="rt-section-card" style={{ ...panel, marginBottom: 0 }}>
           <PanelTitle>Revenue, Expenses &amp; Profit</PanelTitle>
-          <ComboRevExpProfitChart months={MONTHS} onFullPl={() => onOpenFinancials('all')} />
+          <ComboRevExpProfitChart months={MONTHS} onFullPl={openYtdChartDetail} />
         </div>
         <div className="rt-section-card" style={{ ...panel, marginBottom: 0 }}>
           <PanelTitle>Profit by Month</PanelTitle>
@@ -1317,7 +1364,7 @@ function DashboardTab({ period, setPeriod, onOpenOrders, onOpenFinancials, onOpe
                 key={x.month}
                 type="button"
                 className="rt-profit-row"
-                onClick={() => onOpenFinancials(x.month)}
+                onClick={() => openMonthProfitDetail(x)}
               >
                 <span>{monthShort(x.label)}</span>
                 <span style={{ fontFamily: mono }}>{fmt0(x.profit)}</span>
@@ -1342,17 +1389,17 @@ function DashboardTab({ period, setPeriod, onOpenOrders, onOpenFinancials, onOpe
             right={
               <span style={{ display: 'inline-flex', alignItems: 'baseline', gap: 8 }}>
                 {mixTie ? <TieMark ok /> : null}
-                <button type="button" className="rt-linkbtn" onClick={openSalesMix}>
-                  Items
+                <button type="button" className="rt-linkbtn" onClick={openSalesMixDetail}>
+                  Detail
                 </button>
               </span>
             }
           >
             Sales Mix · {monthYear(m)}
           </PanelTitle>
-          <StackedMixBar segments={closedMix} onClick={openSalesMix} />
+          <StackedMixBar segments={closedMix} onClick={openSalesMixDetail} />
           {closedMix.map((s, i) => (
-            <button key={s.name} type="button" className="rt-mix-row" onClick={openSalesMix}>
+            <button key={s.name} type="button" className="rt-mix-row" onClick={openSalesMixDetail}>
               <div style={{ display: 'flex', justifyContent: 'space-between', fontFamily: ui, fontSize: 12, marginBottom: 4, width: '100%' }}>
                 <span style={{ color: C.ink }}>{s.name}</span>
                 <span style={{ fontFamily: mono, color: C.sub }}>
@@ -1368,8 +1415,8 @@ function DashboardTab({ period, setPeriod, onOpenOrders, onOpenFinancials, onOpe
         <div className="rt-section-card rt-table-wrap rt-dash-sizes-wrap" style={{ ...panel, marginBottom: 0 }}>
           <PanelTitle
             right={
-              <button type="button" className="rt-linkbtn" onClick={() => onOpenSalesItems({ periodKey: STOCK_AUG_ID, q: '' })}>
-                All
+              <button type="button" className="rt-linkbtn" onClick={openTopSizesDetail}>
+                Detail
               </button>
             }
           >
@@ -1397,8 +1444,8 @@ function DashboardTab({ period, setPeriod, onOpenOrders, onOpenFinancials, onOpe
                   className="rt-clickrow"
                   role="button"
                   tabIndex={0}
-                  onClick={() => onOpenSalesItemsSize(t.size)}
-                  onKeyDown={(e) => (e.key === 'Enter' || e.key === ' ') && (e.preventDefault(), onOpenSalesItemsSize(t.size))}
+                  onClick={openTopSizesDetail}
+                  onKeyDown={(e) => (e.key === 'Enter' || e.key === ' ') && (e.preventDefault(), openTopSizesDetail())}
                 >
                   <td className="rt-col-rank" style={cell('left', { fontFamily: mono, color: C.muted })}>{t.rank}</td>
                   <td style={cell('left', { fontFamily: mono })}>{t.size}</td>
@@ -1458,8 +1505,22 @@ function SalesItemsTab({ seed }) {
     if (seed.q !== undefined) setQ(seed.q)
   }, [seed?.seq])
 
-  const stats = DATA.period_stats?.[periodKey] || DATA.period_stats?.[LAST_CLOSED.month]
-  const items = (DATA.sales_items_by_month?.[periodKey] || DATA.sales_items_aug).filter((it) => !q.trim() || it.item.toLowerCase().includes(q.trim().toLowerCase()))
+  const stats = buildPeriodStats({
+    periodStats: DATA.period_stats,
+    salesItemsByMonth: DATA.sales_items_by_month,
+    monthly: MONTHS,
+    orders: DATA.orders,
+    asOf: AS_OF,
+    periodKey,
+    lastClosedMonth: LAST_CLOSED.month,
+  })
+  const items = salesItemsForPeriod({
+    salesItemsByMonth: DATA.sales_items_by_month,
+    orders: DATA.orders,
+    asOf: AS_OF,
+    periodKey,
+    fallbackAug: DATA.sales_items_aug,
+  }).filter((it) => !q.trim() || it.item.toLowerCase().includes(q.trim().toLowerCase()))
   const sortKey = sort === 'avg' ? 'avgSale' : sort
   const withAvg = items.map((it) => ({ ...it, avgSale: it.units ? it.revenue / it.units : 0 }))
   const ranked = [...withAvg].sort((a, b) => (a[sortKey] - b[sortKey]) * sortDir)
@@ -2575,14 +2636,7 @@ export default function RiversideTiresPortal() {
 
       <Shell embed={embed} tab={tab} setTab={setTab}>
         {tab === 'dashboard' && (
-          <DashboardTab
-            period={openPeriod}
-            setPeriod={setOpenPeriod}
-            onOpenOrders={openOrders}
-            onOpenFinancials={openFinancials}
-            onOpenSalesItems={openSalesItems}
-            onOpenSalesItemsSize={(size) => openSalesItems({ periodKey: STOCK_AUG_ID, q: size })}
-          />
+          <DashboardTab period={openPeriod} setPeriod={setOpenPeriod} />
         )}
         {tab === 'financials' && <FinancialsTab fin={finTab} setFin={setFinTab} plPeriod={plPeriod} setPlPeriod={setPlPeriod} />}
         {tab === 'inventory' && <SalesItemsTab seed={inventorySeed} />}

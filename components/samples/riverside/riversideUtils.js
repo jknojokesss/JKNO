@@ -69,7 +69,7 @@ export const cell = (align = 'left', extra = {}) => ({
 export const panel = { background: C.card, border: `1px solid ${C.hair}`, padding: '18px 20px', marginBottom: 20, borderRadius: 0 }
 
 export const NAV = [
-  { id: 'dashboard', label: 'Dashboard', title: 'Dashboard' },
+  { id: 'dashboard', label: 'Overview', title: 'Overview' },
   { id: 'financials', label: 'Financials', title: 'Financials' },
   { id: 'inventory', label: 'Sales & Items', title: 'Sales & Items' },
   { id: 'orders', label: 'Orders', title: 'Orders' },
