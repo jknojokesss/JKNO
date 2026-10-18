@@ -194,15 +194,15 @@ export default function PrimalKrispPortal() {
               border: 'none',
               background: 'rgba(255,255,255,.2)',
               color: CREAM,
-              borderRadius: '50%',
-              width: '22px',
-              height: '22px',
+              borderRadius: '2px',
+              padding: '2px 6px',
               cursor: 'pointer',
-              fontSize: '14px',
-              lineHeight: 1,
+              fontSize: '11px',
+              fontWeight: 600,
+              lineHeight: 1.2,
             }}
           >
-            ×
+            Clear
           </button>
         </span>
       </div>
@@ -796,21 +796,21 @@ export default function PrimalKrispPortal() {
               </div>
               <button
                 type="button"
-                aria-label="Close"
                 onClick={() => setDrawerProduct(null)}
                 style={{
-                  border: 'none',
-                  background: CREAM,
-                  borderRadius: '8px',
-                  width: '40px',
-                  height: '40px',
+                  border: `1px solid ${BORDER}`,
+                  background: CARDBG,
+                  borderRadius: '2px',
+                  padding: '8px 12px',
+                  minHeight: 40,
                   cursor: 'pointer',
-                  fontSize: '22px',
-                  lineHeight: 1,
+                  fontSize: '13px',
+                  fontWeight: 600,
+                  lineHeight: 1.2,
                   color: INK,
                 }}
               >
-                ×
+                Close
               </button>
             </div>
             <div style={{ flex: 1, overflowY: 'auto', padding: '12px 18px 24px' }}>

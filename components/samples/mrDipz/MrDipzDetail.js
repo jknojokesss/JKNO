@@ -8,7 +8,7 @@ function Frame({ title, sub, depth, back, close, children }) {
     <>
       <div className="md-back">
         <button type="button" className="md-backbtn" onClick={back}>
-          ‹ Back
+          Back
         </button>
         {depth > 1 ? (
           <button type="button" className="md-backbtn" onClick={close}>

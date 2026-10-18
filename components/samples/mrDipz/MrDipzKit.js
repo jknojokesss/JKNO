@@ -20,7 +20,6 @@ html.md-sample-page .m-sample-lobby,html.md-sample-page .m-header,html.md-sample
 .md-kpi{flex:1;min-width:150px;padding:15px 17px;text-align:left;position:relative;background:${CARDBG};border:1px solid ${BORDER};border-radius:2px;font-family:${UI};color:${INK}}
 .md-kpi-v{font-family:${UI};font-weight:700;letter-spacing:-.4px;font-size:29px;line-height:1.15;margin-top:4px;white-space:nowrap;font-variant-numeric:tabular-nums}
 .md-kpi-sub{font-size:12px;color:#A2937A;margin-top:3px}
-.md-chev{position:absolute;top:11px;right:13px;color:#C6B79A;font-size:15px}
 .md-stats{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px;margin-bottom:16px}
 .md-stat{background:${CARDBG};border:1px solid ${BORDER};border-radius:2px;padding:12px 14px;text-align:left;font-family:${UI};color:${INK};position:relative}
 .md-stat-v{font-weight:700;font-size:20px;margin-top:3px;white-space:nowrap;font-variant-numeric:tabular-nums}
@@ -35,8 +34,6 @@ html.md-sample-page .m-sample-lobby,html.md-sample-page .m-header,html.md-sample
 .md-t-head .md-t-name{font-family:${UI};font-size:10px;font-weight:600;letter-spacing:.6px;text-transform:uppercase;color:${MUTED}}
 .md-t-name{font-family:${UI};font-size:14px;color:${INK};min-width:0;line-height:1.3;padding-right:8px;overflow-wrap:break-word;word-break:normal}
 .md-t-sub{display:block;font-size:11px;color:${MUTED};margin-top:1px}
-.md-label-tail{white-space:nowrap}
-.md-label-tail .md-t-cv{color:#C9BBA0;font-size:12px}
 .md-num{text-align:right;white-space:nowrap;font-variant-numeric:tabular-nums}
 .md-t-row--indent .md-t-name{padding-left:14px}
 .md-t-row--group{background:${CREAM};border-top:1px solid ${BORDER}}

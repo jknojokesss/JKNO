@@ -26,7 +26,8 @@ const scanRoots = [
   'components/samples/SampleJkLogoLink.js',
 ]
 
-const glyphRe = /[›»→←↑↓▲▼✓✔]/
+const glyphRe = /[›»‹«→←↑↓▲▼▾▸⇄↗✓✔]/
+const closeIconRe = />\s*×\s*</
 const banned = ['Owings Mills', 'Abraham', 'Essiccata']
 
 function walk(entry, out) {
@@ -35,22 +36,33 @@ function walk(entry, out) {
   const st = fs.statSync(abs)
   if (st.isDirectory()) {
     for (const name of fs.readdirSync(abs)) {
-      if (name.endsWith('.js') || name.endsWith('.jsx')) walk(path.join(entry, name), out)
+      if (name.endsWith('.js') || name.endsWith('.jsx') || name.endsWith('.mjs')) walk(path.join(entry, name), out)
     }
     return
   }
   out.push(abs)
 }
 
+const isUiSource = (rel) => rel.endsWith('.js') || rel.endsWith('.jsx')
+
 const files = []
 for (const r of scanRoots) walk(r, files)
 
 const failures = []
 for (const file of files) {
+  const rel = path.relative(root, file)
   const text = fs.readFileSync(file, 'utf8')
-  if (glyphRe.test(text)) failures.push(`${path.relative(root, file)}: banned glyph`)
-  for (const b of banned) {
-    if (text.includes(b)) failures.push(`${path.relative(root, file)}: contains "${b}"`)
+  if (glyphRe.test(text)) failures.push(`${rel}: banned glyph`)
+  if (closeIconRe.test(text)) failures.push(`${rel}: close icon × in markup`)
+  for (const m of text.matchAll(/content\s*:\s*(['"])(.*?)\1/g)) {
+    const body = m[2]
+    if (!body || body === '') continue
+    if (glyphRe.test(body)) failures.push(`${rel}: banned glyph in CSS content "${body}"`)
+  }
+  if (isUiSource(rel)) {
+    for (const b of banned) {
+      if (text.includes(b)) failures.push(`${rel}: contains "${b}"`)
+    }
   }
 }
 

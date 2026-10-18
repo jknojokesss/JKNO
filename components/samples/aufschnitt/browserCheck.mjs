@@ -53,7 +53,7 @@ for (const w of WIDTHS) {
       await page.waitForTimeout(250)
       const d = await metrics(page)
       results.push({ w, tab: long, view: 'detail', ...d, overflow: d.scrollW > d.clientW })
-      await page.getByRole('button', { name: '← Back' }).click()
+      await page.getByRole('button', { name: 'Back' }).click()
       await page.waitForTimeout(200)
     }
   }
@@ -72,13 +72,13 @@ await page.locator('.au-nav--main button[data-tab="stock"]').click()
 await page.locator('th button', { hasText: 'Wks' }).click()
 const sortBefore = await page.locator('th button', { hasText: 'Wks' }).textContent()
 await page.locator('main tr.au-click').first().click()
-await page.getByRole('button', { name: '← Back' }).click()
+await page.getByRole('button', { name: 'Back' }).click()
 const sortAfter = await page.locator('th button', { hasText: 'Wks' }).textContent()
 results.push({ test: 'stock-back-sort', ok: sortBefore === sortAfter, sortBefore, sortAfter })
 
 await page.locator('.au-nav--main button[data-tab="channels"]').click()
 await page.locator('main button.au-click').first().click()
-await page.getByRole('button', { name: '← Back' }).click()
+await page.getByRole('button', { name: 'Back' }).click()
 const channelsActive = await page
   .locator('.au-nav--main')
   .locator('button[data-tab="channels"]')

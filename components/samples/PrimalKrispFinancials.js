@@ -222,8 +222,22 @@ export default function PrimalKrispFinancials({ card, lbl, big, btn, inp, KPI })
           >
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', gap: 10 }}>
               <div style={{ ...big, fontSize: 17 }}>{pnlDrill.title}</div>
-              <button type="button" aria-label="Close" onClick={() => setPnlDrill(null)} style={{ background: 'none', border: 'none', fontSize: 22, color: MUTED, cursor: 'pointer', minHeight: 40, minWidth: 40 }}>
-                ×
+              <button
+                type="button"
+                onClick={() => setPnlDrill(null)}
+                style={{
+                  background: 'none',
+                  border: `1px solid ${BORDER}`,
+                  borderRadius: 2,
+                  fontSize: 13,
+                  fontWeight: 600,
+                  color: MUTED,
+                  cursor: 'pointer',
+                  minHeight: 40,
+                  padding: '8px 12px',
+                }}
+              >
+                Close
               </button>
             </div>
             <div style={{ fontSize: 12, color: MUTED, margin: '6px 0 12px', display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
