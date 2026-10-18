@@ -13,8 +13,8 @@ export const C = {
 }
 
 export const head = "'Barlow Semi Condensed', sans-serif"
-export const ui = "'Inter', sans-serif"
-export const mono = "'IBM Plex Mono', monospace"
+export const ui = "'DM Sans', system-ui, sans-serif"
+export const mono = ui
 
 export const fmtC = (n) =>
   new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(n)

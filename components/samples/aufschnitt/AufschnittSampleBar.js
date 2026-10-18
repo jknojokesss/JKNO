@@ -1,10 +1,6 @@
-/** Muted credit link to JK site — no lobby bar, no home link to "/". */
+import SampleJkLogoLink from '../SampleJkLogoLink'
+
+/** JK wordmark above the Aufschnitt sample — no lobby bar, no home link. */
 export default function AufschnittSampleBar() {
-  return (
-    <p className="au-prospect-credit">
-      <a href="https://jknojokes.com" className="au-prospect-credit__link">
-        JK No Jokes Financials
-      </a>
-    </p>
-  )
+  return <SampleJkLogoLink />
 }

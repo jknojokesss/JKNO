@@ -52,6 +52,7 @@ const ok = (label, cond) => {
   ok('PK card vs stores', round2(data.overview.open_store_balance) === owed)
   ok('PK aging vs owed', agingSum === owed)
   ok('PK 61-90 zero', aging['61-90'] === 0)
+  ok('PK 0-30 majority', owed > 0 && aging['0-30'] / owed >= 0.8)
   console.log('primal-krisp', { owed, aging, card: data.overview.open_store_balance })
 }
 
@@ -77,6 +78,7 @@ const ok = (label, cond) => {
   }
   owed = round2(owed)
   ok('POP bucket61 zero', round2(buckets.b61) === 0)
+  ok('POP 31-60 under 12%', owed > 0 && buckets.b31 / owed < 0.12)
   console.log('popinsanity', { owed, buckets: Object.fromEntries(Object.entries(buckets).map(([k, v]) => [k, round2(v)])) })
 }
 
@@ -101,6 +103,10 @@ const ok = (label, cond) => {
   })
   ok('AU overview owed', round2(DATA.overview.owedTotal) === totals.total)
   ok('AU 61-90+0', totals.d61_90 === 0 && totals.d90p === 0)
+  const arTotals = ar.accounts.map((a) => a.buckets.total).sort((a, b) => a - b)
+  const med = arTotals[Math.floor(arTotals.length / 2)]
+  ok('AU max ~1.8x median', Math.max(...arTotals) <= med * 1.8 + 0.02)
+  ok('AU owed ~94828', totals.total === 94827.63)
   console.log('aufschnitt', { owed: totals.total, buckets: totals })
 }
 
@@ -121,6 +127,15 @@ const ok = (label, cond) => {
   const credits = round2(m.totals.credits / 100)
   const sales = round2(m.totals.sales / 100)
   ok('MD net', round2(m.totals.net / 100) === round2(sales - credits))
+  ok('MD owed total', owed === 53735.75 || owed === 53735.76)
+  const storePcts = m.stores.map((s) => s.pct)
+  ok('MD credits 7-11%', Math.min(...storePcts) >= 7 && Math.max(...storePcts) <= 11)
+  const ateres = m.stores.find((s) => s.id === 'brooklyn-4')
+  ok('MD Ateres credit mid', ateres.pct >= 8 && ateres.pct <= 9.1)
+  let b1 = 0
+  for (const s of m.stores) b1 += s.aging.b1
+  ok('MD 31-60 under 8%', b1 / m.totals.owed < 0.08)
+  ok('MD max store share', Math.max(...m.stores.map((s) => s.owed)) / m.totals.owed <= 0.11)
   console.log('mr-dipz', { owed, sales, credits, pct: m.totals.pct })
 }
 

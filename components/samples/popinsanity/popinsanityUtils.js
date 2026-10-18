@@ -11,8 +11,8 @@ export const GREEN = '#3E7C4F'
 export const RED = '#C03A22'
 export const STONE = '#C9C4B8'
 
-export const UI = "'Inter', sans-serif"
-export const MONO = "'IBM Plex Mono', monospace"
+export const UI = "'DM Sans', system-ui, sans-serif"
+export const MONO = UI
 
 export const PK_LOCALE = 'en-US'
 export const PK_TZ = 'America/New_York'
@@ -90,6 +90,7 @@ export const tierShort = (tierId) => {
 export const SHELL_CSS = (theme) => `*{box-sizing:border-box;margin:0;padding:0}
 html{-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale;text-rendering:optimizeLegibility}
 body{background:${theme.CREAM};font-family:${UI};color:${theme.INK}}
+.pop-shell td,.pop-shell th,.pop-kpi-val{font-variant-numeric:tabular-nums}
 .pop-shell{display:flex;min-height:100vh;align-items:stretch}
 .pop-side{width:236px;flex-shrink:0;background:${theme.CHAR};color:${theme.CREAM};display:flex;flex-direction:column;padding:22px 14px;position:sticky;top:0;height:100vh}
 .pop-wordmark{font-family:${UI};font-weight:800;font-size:17px;letter-spacing:0.12em;color:${theme.CREAM};line-height:1.2;padding:4px 8px 0}

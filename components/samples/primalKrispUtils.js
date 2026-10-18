@@ -21,8 +21,8 @@ export const SAGE = GREEN
 export const BROWN = KRAFT
 export const STONE = '#C9C4B8'
 
-export const UI = "'Inter', sans-serif"
-export const MONO = "'IBM Plex Mono', monospace"
+export const UI = "'DM Sans', system-ui, sans-serif"
+export const MONO = UI
 
 /** Fixed locale so SSR (Node) and browser hydrate the same text. */
 export const PK_LOCALE = 'en-US'
@@ -120,6 +120,7 @@ export function BagIcon({ color = SPICE }) {
 export const SHELL_CSS = (theme) => `*{box-sizing:border-box;margin:0;padding:0}
 html{-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale;text-rendering:optimizeLegibility}
 body{background:${theme.CREAM};font-family:${UI};color:${theme.INK}}
+.pk-shell td,.pk-shell th,.pk-shell .pk-kpi-val{font-variant-numeric:tabular-nums}
 .pk-shell{display:flex;min-height:100vh;align-items:stretch}
 .pk-side{width:236px;flex-shrink:0;background:${theme.CHAR};color:${theme.CREAM};display:flex;flex-direction:column;padding:22px 14px;position:sticky;top:0;height:100vh}
 .pk-nav{display:flex;flex-direction:column;gap:3px}.pk-nav--main{flex:1}

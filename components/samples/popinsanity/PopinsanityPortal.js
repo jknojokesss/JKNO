@@ -1,4 +1,5 @@
 import { useState, useCallback } from 'react'
+import SampleJkLogoLink from '../SampleJkLogoLink'
 import { DATA } from './popinsanityComputed'
 import {
   SPICE,
@@ -198,6 +199,7 @@ export default function PopinsanityPortal() {
   return (
     <>
       <style dangerouslySetInnerHTML={{ __html: portalStyles }} />
+      <SampleJkLogoLink />
       <div className="pop-shell">
         <aside className="pop-side">
           <div style={{ padding: '2px 8px 16px' }}>
@@ -252,9 +254,6 @@ export default function PopinsanityPortal() {
 
         <main className="pop-main">
           <div style={{ marginBottom: '22px' }}>
-            <a href="https://jknojokes.com" className="pop-credit-link" style={{ display: 'inline-block', marginBottom: '6px' }}>
-              JK No Jokes Financials
-            </a>
             <h1 style={{ ...styles.big, fontSize: '28px', color: INK, letterSpacing: '0.3px', lineHeight: 1.1, marginTop: '4px' }}>
               {top
                 ? top.kind === 'order'

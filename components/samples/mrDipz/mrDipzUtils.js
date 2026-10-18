@@ -23,8 +23,8 @@ export const MUTED = '#8A7A66'
 export const BORDER = '#E6DBC8'
 export const GREEN = '#3E7C4F'
 export const RED = '#C03A22'
-export const UI = "'Inter', sans-serif"
-export const MONO = "'IBM Plex Mono', monospace"
+export const UI = "'DM Sans', system-ui, sans-serif"
+export const MONO = UI
 
 const LOCALE = 'en-US'
 const intFormatter = new Intl.NumberFormat(LOCALE, { maximumFractionDigits: 0 })

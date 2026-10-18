@@ -425,9 +425,6 @@ export default function PrimalKrispStoresTab({
                     </div>
                     <div style={{ textAlign: 'right' }}>
                       {!consignment && openCount > 0 && <div style={{ fontSize: 12, color: MUTED, marginBottom: 4 }}>{openCount} open</div>}
-                      {hasOverdue && (
-                        <span style={{ fontSize: 11, fontWeight: 600, color: RED, marginRight: 8 }}>Overdue</span>
-                      )}
                       <span style={{ ...big, fontSize: 16, fontFamily: MONO }}>{money(displayOpen)}</span>
                     </div>
                   </div>

@@ -120,7 +120,7 @@
   "holiday_orders": [
     {
       "id": "PO-2611",
-      "client": "Rockland Pediatrics",
+      "client": "Brookview Pediatric Associates",
       "tier": "t3",
       "units": 250,
       "price": 85,
@@ -143,7 +143,7 @@
     },
     {
       "id": "PO-2612",
-      "client": "Maple Ave Realty",
+      "client": "Birchwood Realty Partners",
       "tier": "t2",
       "units": 400,
       "price": 54,
@@ -189,7 +189,7 @@
     },
     {
       "id": "PO-2614",
-      "client": "Hudson Valley Dental Group",
+      "client": "Stonecrest Dental Group",
       "tier": "t1",
       "units": 600,
       "price": 32,
@@ -212,7 +212,7 @@
     },
     {
       "id": "PO-2615",
-      "client": "Pinnacle Home Care",
+      "client": "Willowmere Home Care",
       "tier": "t3",
       "units": 150,
       "price": 85,
@@ -309,7 +309,7 @@
     },
     {
       "id": "PO-2619",
-      "client": "Northgate Property Management",
+      "client": "Oakpoint Property Management",
       "tier": "t2",
       "units": 180,
       "price": 54,
@@ -337,7 +337,7 @@
     },
     {
       "id": "PO-2620",
-      "client": "Palisades Physical Therapy",
+      "client": "Glenmoor Physical Therapy",
       "tier": "t3",
       "units": 120,
       "price": 85,
@@ -388,7 +388,7 @@
     },
     {
       "id": "PO-2622",
-      "client": "Highview Senior Living",
+      "client": "Fernhill Senior Residence",
       "tier": "t3",
       "units": 90,
       "price": 85,
@@ -475,7 +475,7 @@
       "as_of_for_age": "2026-10-31",
       "stores": [
         {
-          "name": "Rockland Kosher Supermarket",
+          "name": "Brocha Supermarket - Monsey",
           "area": "Monsey",
           "sales_this": 1240.8,
           "sales_prior": 1486.4,
@@ -496,16 +496,16 @@
           "owed": 1240.8
         },
         {
-          "name": "Evergreen - Monsey",
+          "name": "Shefa Market - Monsey",
           "area": "Monsey",
           "sales_this": 1086.6,
           "sales_prior": 1302.2,
           "open_invoices": [
             {
               "invoice": "INV-4803",
-              "date": "2026-09-22",
+              "date": "2026-10-10",
               "amount": 548.2,
-              "age_days": 39
+              "age_days": 21
             },
             {
               "invoice": "INV-4804",
@@ -517,7 +517,7 @@
           "owed": 1086.6
         },
         {
-          "name": "Wesley Kosher - Monsey",
+          "name": "Ohr Kosher - Monsey",
           "area": "Monsey",
           "sales_this": 642.4,
           "sales_prior": 798.6,
@@ -532,16 +532,16 @@
           "owed": 642.4
         },
         {
-          "name": "Pomegranate - Flatbush",
+          "name": "Kesher Foods - Flatbush",
           "area": "Brooklyn",
           "sales_this": 968.2,
           "sales_prior": 1154.8,
           "open_invoices": [
             {
               "invoice": "INV-4806",
-              "date": "2026-09-08",
+              "date": "2026-10-12",
               "amount": 386.4,
-              "age_days": 53
+              "age_days": 19
             },
             {
               "invoice": "INV-4807",
@@ -553,7 +553,7 @@
           "owed": 854.6
         },
         {
-          "name": "Breadberry - Boro Park",
+          "name": "Shalva Fresh - Boro Park",
           "area": "Brooklyn",
           "sales_this": 712.5,
           "sales_prior": 904.3,
@@ -568,7 +568,7 @@
           "owed": 712.5
         },
         {
-          "name": "KRM - Boro Park",
+          "name": "Ruchama Market - Boro Park",
           "area": "Brooklyn",
           "sales_this": 498.6,
           "sales_prior": 612.4,
@@ -581,15 +581,15 @@
             },
             {
               "invoice": "INV-4810",
-              "date": "2026-09-24",
+              "date": "2026-09-30",
               "amount": 298.6,
-              "age_days": 37
+              "age_days": 31
             }
           ],
           "owed": 604.8
         },
         {
-          "name": "Gourmet Glatt - Lakewood",
+          "name": "Bais Hamakolet - Lakewood",
           "area": "Lakewood",
           "sales_this": 824.3,
           "sales_prior": 1046.7,
@@ -604,7 +604,7 @@
           "owed": 824.3
         },
         {
-          "name": "Seasons - Lakewood",
+          "name": "Nitzan Market - Lakewood",
           "area": "Lakewood",
           "sales_this": 586.4,
           "sales_prior": 688.2,
@@ -625,22 +625,22 @@
           "owed": 586.4
         },
         {
-          "name": "Aron's Kissena Farms - Queens",
+          "name": "Lev Fresh - Queens",
           "area": "Queens",
           "sales_this": 348.2,
           "sales_prior": 402.6,
           "open_invoices": [
             {
               "invoice": "INV-4814",
-              "date": "2026-09-29",
+              "date": "2026-10-10",
               "amount": 348.2,
-              "age_days": 32
+              "age_days": 21
             }
           ],
           "owed": 348.2
         },
         {
-          "name": "Seasons - Lawrence",
+          "name": "Golden Basket Kosher - Lawrence",
           "area": "Five Towns",
           "sales_this": 272.5,
           "sales_prior": 225.9,
@@ -654,7 +654,7 @@
       "name": "Corporate",
       "shipped_this": [
         {
-          "client": "Clarkstown Orthodontics",
+          "client": "Elmridge Orthodontics",
           "tier": "t2",
           "units": 120,
           "price": 54,
@@ -662,7 +662,7 @@
           "shipped": "2026-10-01"
         },
         {
-          "client": "Bergen Medical Supply",
+          "client": "Halbrook Medical Supply",
           "tier": "t1",
           "units": 150,
           "price": 32,
@@ -672,7 +672,7 @@
       ],
       "shipped_prior": [
         {
-          "client": "Rockland Pediatrics",
+          "client": "Brookview Pediatric Associates",
           "tier": "t2",
           "units": 180,
           "price": 54,
@@ -680,7 +680,7 @@
           "shipped": "2026-09-04"
         },
         {
-          "client": "Hudson Valley Dental Group",
+          "client": "Stonecrest Dental Group",
           "tier": "t1",
           "units": 250,
           "price": 32,
@@ -688,7 +688,7 @@
           "shipped": "2026-09-03"
         },
         {
-          "client": "Riverdale Staffing",
+          "client": "Kestrel Staffing Group",
           "tier": "t3",
           "units": 80,
           "price": 85,
@@ -696,7 +696,7 @@
           "shipped": "2026-09-08"
         },
         {
-          "client": "Maple Ave Realty",
+          "client": "Birchwood Realty Partners",
           "tier": "t1",
           "units": 100,
           "price": 32,

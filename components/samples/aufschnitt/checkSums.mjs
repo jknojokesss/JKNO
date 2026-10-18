@@ -102,18 +102,19 @@ ok('AR buckets=total', bucketSum === ar.targetTotal)
 ar.accounts.forEach((a) => {
   const invSum = sum(ar.invoices.filter((i) => i.account === a.name), (i) => i.amount)
   ok(`Invoices ${a.name}`, invSum === a.buckets.total)
-  ok(`AR size ${a.name}`, a.buckets.total >= 900 && a.buckets.total <= 14_200)
+  ok(`AR size ${a.name}`, a.buckets.total >= 900 && a.buckets.total <= 9_500)
 })
+const totalsSorted = ar.accounts.map((a) => a.buckets.total).sort((a, b) => a - b)
+const medianAr = totalsSorted[Math.floor(totalsSorted.length / 2)]
+ok('AR max ~1.8x median', Math.max(...totalsSorted) <= medianAr * 1.8 + 0.02)
 const fullyCurrent = ar.accounts.filter(
   (a) => a.buckets.d1_30 === 0 && a.buckets.d31_60 === 0 && a.buckets.d61_90 === 0 && a.buckets.d90p === 0
 )
 ok('AR 5 fully current', fullyCurrent.length === 5)
-ok('AR 31-60 count', ar.accounts.filter((a) => a.buckets.d31_60 > 0).length === 4)
+ok('AR 31-60 count', ar.accounts.filter((a) => a.buckets.d31_60 > 0).length >= 4)
 ok('AR 61-90 count', ar.accounts.filter((a) => a.buckets.d61_90 > 0).length === 0)
 ok('AR 90+ count', ar.accounts.filter((a) => a.buckets.d90p > 0).length === 0)
-ok('AR Bingo large', ar.accounts.find((a) => a.name === 'Bingo Wholesale').buckets.total > 12_000)
-ok('AR Gourmet Glatt Lakewood large', ar.accounts.find((a) => a.name === 'Gourmet Glatt - Lakewood').buckets.total > 11_000)
-ok('AR Arons small', ar.accounts.find((a) => a.name === "Aron's Kissena Farms - Queens").buckets.total < 1_200)
+ok('AR Lev Fresh modest', ar.accounts.find((a) => a.name === 'Lev Fresh - Queens').buckets.total < 5_200)
 
 const stockVal = sum(DATA.stock, (r) => r.valueAtCost)
 ok('Stock value', stockVal === DATA.overview.stockValue)

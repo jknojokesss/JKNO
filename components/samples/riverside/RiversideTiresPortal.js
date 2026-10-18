@@ -6,7 +6,7 @@ import { isDemoEmbedQuery } from '../../../lib/demoEmbed'
 import { PHONE_DEMO_MSG, isPhoneDemoUrl } from '../../../lib/phoneDemoPostMessage'
 import { DEMO_PORTAL_ROOT_CLASS, DEMO_RENDER_HINTS } from '../../../lib/demoFonts'
 import DemoFontLinks from '../../DemoFontLinks'
-import DemoLobby from '../../DemoLobby'
+import SampleJkLogoLink from '../SampleJkLogoLink'
 import {
   THEME,
   C,
@@ -2080,11 +2080,7 @@ function Shell({ tab, setTab, embed, children }) {
             </button>
           ))}
         </nav>
-        <div className="rt-foot">
-          <a href="https://jknojokes.com" style={{ fontFamily: mono, fontSize: 10, color: '#948D81', textDecoration: 'underline' }}>
-            JK No Jokes Financials
-          </a>
-        </div>
+        <div className="rt-foot" />
       </aside>
       <main className="rt-main">
         <div className="rt-status">
@@ -2100,7 +2096,8 @@ const PORTAL_CSS = `
   *{box-sizing:border-box;margin:0;padding:0}
   ${DEMO_RENDER_HINTS}
   html.rt-phone-embed,body.rt-phone-embed{height:100%;overflow:hidden}
-  body{background:${C.paper};color:${C.ink}}
+  body{background:${C.paper};color:${C.ink};font-family:${ui}}
+  .rt-shell td,.rt-shell th,.rt-drill-td-amt{font-variant-numeric:tabular-nums}
   button:disabled{cursor:default}
   .rt-shell{display:flex;min-height:100vh;align-items:stretch;background:${C.paper}}
   .rt-side{width:214px;flex-shrink:0;background:${THEME.side};box-shadow:inset -3px 0 0 ${THEME.accent};display:flex;flex-direction:column;padding:20px 12px;position:sticky;top:0;height:100vh}
@@ -2476,7 +2473,7 @@ export default function RiversideTiresPortal() {
       </Head>
       <style dangerouslySetInnerHTML={{ __html: PORTAL_CSS }} />
 
-      <DemoLobby minimal />
+      <SampleJkLogoLink />
 
       <Shell embed={embed} tab={tab} setTab={setTab}>
         {tab === 'dashboard' && (

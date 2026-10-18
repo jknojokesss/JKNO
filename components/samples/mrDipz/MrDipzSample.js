@@ -1,8 +1,8 @@
 import { useMemo, useState, useEffect } from 'react'
 import { buildMrDipzModel, CREAM, SPICE, INK, MUTED, UI } from './mrDipzUtils'
+import SampleJkLogoLink from '../SampleJkLogoLink'
 
 export const MD_SAMPLE_HEADER = 'Sample — fictitious numbers · as of Oct 2026'
-export const MD_CREDIT_LINE = 'JK No Jokes Financials'
 import { SHELL_CSS } from './MrDipzKit'
 import MrDipzOverview from './MrDipzOverview'
 import MrDipzStores from './MrDipzStores'
@@ -80,10 +80,11 @@ export default function MrDipzSample() {
     <>
       <style dangerouslySetInnerHTML={{ __html: SHELL_CSS }} />
 
+      <SampleJkLogoLink />
+
       <div className="md-shell">
         <aside className="md-side">
           <div style={{ padding: '2px 8px 16px' }}>
-            <a className="md-credit" href="https://jknojokes.com">{MD_CREDIT_LINE}</a>
             <div style={{ fontFamily: UI, fontWeight: 800, fontSize: 26, letterSpacing: '1px', color: CREAM, lineHeight: 1.1, marginTop: 10 }}>
               MR. DIPZ
             </div>

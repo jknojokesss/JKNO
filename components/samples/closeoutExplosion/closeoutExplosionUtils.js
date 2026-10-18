@@ -10,8 +10,8 @@ export const BORDER = '#E6DBC8'
 export const GREEN = '#3E7C4F'
 export const RED = '#C03A22'
 
-export const UI = "'Inter', sans-serif"
-export const MONO = "'IBM Plex Mono', monospace"
+export const UI = "'DM Sans', system-ui, sans-serif"
+export const MONO = UI
 
 export const CE_LOCALE = 'en-US'
 export const CE_TZ = 'America/New_York'

@@ -1,6 +1,6 @@
 import { useState, useMemo, useEffect, useReducer, Fragment } from 'react'
 import Image from 'next/image'
-import DemoLobby from '../DemoLobby'
+import SampleJkLogoLink from './SampleJkLogoLink'
 import DATA from '../../data/primal-krisp.json'
 import PrimalKrispOverview from './PrimalKrispOverview'
 import PrimalKrispFinancials from './PrimalKrispFinancials'
@@ -325,7 +325,7 @@ export default function PrimalKrispPortal() {
     <>
       <style dangerouslySetInnerHTML={{ __html: portalStyles }} />
 
-      <DemoLobby minimal />
+      <SampleJkLogoLink />
 
       <div className="pk-shell">
         <aside className="pk-side">

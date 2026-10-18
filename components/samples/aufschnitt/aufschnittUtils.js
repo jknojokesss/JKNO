@@ -10,8 +10,8 @@ export const BORDER = '#E6DBC8'
 export const GREEN = '#3E7C4F'
 export const RED = '#C03A22'
 
-export const UI = "'Inter', sans-serif"
-export const MONO = "'IBM Plex Mono', monospace"
+export const UI = "'DM Sans', system-ui, sans-serif"
+export const MONO = UI
 
 export const AU_LOCALE = 'en-US'
 export const AU_TZ = 'America/New_York'
@@ -103,6 +103,7 @@ export const pctChange = (cur, prior) => (prior > 0 ? ((cur - prior) / prior) * 
 export const SHELL_CSS = (theme) => `*{box-sizing:border-box;margin:0;padding:0}
 html{-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale;text-rendering:optimizeLegibility}
 body{background:${theme.CREAM};font-family:${UI};color:${theme.INK};overflow-x:hidden}
+.au-shell td,.au-shell th,.au-kpi-val{font-variant-numeric:tabular-nums}
 .au-shell{max-width:100%;overflow-x:hidden}
 .au-prospect-credit{margin:0;padding:10px 16px 0;max-width:1180px;font-family:${UI};font-size:11px;font-weight:500;color:${MUTED};line-height:1.35;background:${theme.CREAM}}
 .au-prospect-credit__link{color:inherit;text-decoration:none;font-weight:inherit}
