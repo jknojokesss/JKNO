@@ -1,19 +1,8 @@
-import { fmtDueDisplay, fmtShortDate, payableMeta, payableTooltip, formatMoney, dueTheme, NOT_IN_QB } from './utils'
+import { fmtDueDisplay, payableMeta, payableTooltip, formatMoney, dueTheme } from './utils'
 
 export function PayableMeta({ row }) {
   const meta = payableMeta(row)
-  const notInQb = !row.inQb
-  if (!notInQb) {
-    return <p className="mt-0.5 text-[10px] leading-snug text-[#5c7280]">{meta}</p>
-  }
-  const base = meta.replace(' · NOT IN QB', '')
-  return (
-    <p className="mt-0.5 text-[10px] leading-snug text-[#5c7280]">
-      {base}
-      {base ? ' · ' : ''}
-      <span className="font-semibold tracking-wide" style={{ color: NOT_IN_QB }}>NOT IN QB</span>
-    </p>
-  )
+  return <p className="mt-0.5 text-[10px] leading-snug text-[#5c7280]">{meta}</p>
 }
 
 export function VendorCell({ row }) {
@@ -26,13 +15,9 @@ export function VendorCell({ row }) {
 }
 
 export function DueCell({ row }) {
-  const same = !row.bankDate || row.bankDate === row.due
   return (
     <td className="ops-td align-top tabular-nums">
       <div className="text-xs font-medium text-[#2f4049]">{fmtDueDisplay(row.due)}</div>
-      {!same && row.bankDate ? (
-        <div className="text-[10px] text-[#5c7280]">Bank {fmtShortDate(row.bankDate)}</div>
-      ) : null}
     </td>
   )
 }
@@ -53,10 +38,8 @@ export function PayableRow({ row, showDue = true, index }) {
       style={{ background: theme.rowBg, borderLeft: `4px solid ${theme.stripe}` }}
     >
       <VendorCell row={row} />
-      <MoneyCell value={row.bill} />
-      <MoneyCell value={row.fees} />
       {showDue ? <DueCell row={row} /> : null}
-      <MoneyCell value={row.total} strong />
+      <MoneyCell value={row.amount} strong />
     </tr>
   )
 }
@@ -73,7 +56,7 @@ export function CompactPayableRow({ row, index }) {
         <div className="ops-heading text-xs font-semibold text-[#2f4049]">{row.vendor}</div>
         <PayableMeta row={row} />
       </div>
-      <div className="shrink-0 text-xs font-medium tabular-nums">{formatMoney(row.total)}</div>
+      <div className="shrink-0 text-xs font-medium tabular-nums">{formatMoney(row.amount)}</div>
     </div>
   )
 }

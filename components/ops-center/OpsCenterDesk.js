@@ -130,8 +130,7 @@ export default function OpsCenterDesk() {
       <main className="mx-auto w-full max-w-5xl flex-1 px-4 py-6 sm:px-6 sm:py-10">
         <header className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
           <div>
-            <p className="text-sm font-medium text-[#5c7280]">One screen · money in, liabilities out</p>
-            <h1 className="ops-heading mt-1 text-2xl tracking-tight sm:text-3xl">Operations Center</h1>
+            <h1 className="ops-heading text-2xl tracking-tight sm:text-3xl">Operations Center</h1>
             <p className="mt-2 max-w-2xl text-sm leading-relaxed text-[#5c7280]">
               Sample — fictitious numbers · as of {OPS_SAMPLE.asOf}
             </p>

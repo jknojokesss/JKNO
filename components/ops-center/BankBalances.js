@@ -1,40 +1,13 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo } from 'react'
 import { OPS_SAMPLE } from '../../data/ops-center-sample.js'
-import {
-  formatMoney,
-  formatBalanceField,
-  parseBalanceInput,
-  NAVY_GRADIENT,
-  GOLD_ON_NAVY,
-  useRefreshSpin,
-} from './utils'
-import { IconRefresh } from './icons'
+import { formatMoney, NAVY_GRADIENT, GOLD_ON_NAVY } from './utils'
 
 export default function BankBalances({ onTotalChange }) {
-  const [balances, setBalances] = useState(() => OPS_SAMPLE.banks.map((b) => b.balance))
-  const [focusedIndex, setFocusedIndex] = useState(null)
-  const [editDraft, setEditDraft] = useState('')
-  const [spinning, setSpinning] = useState(false)
-  const [saving, setSaving] = useState(false)
-  const refresh = useRefreshSpin(setSpinning)
-
-  const total = useMemo(() => balances.reduce((s, v) => s + (Number(v) || 0), 0), [balances])
+  const total = useMemo(() => OPS_SAMPLE.banks.reduce((s, b) => s + b.balance, 0), [])
 
   useEffect(() => {
     if (onTotalChange) onTotalChange(total)
   }, [total, onTotalChange])
-
-  const handleReload = () => {
-    refresh()
-    setFocusedIndex(null)
-    setBalances(OPS_SAMPLE.banks.map((b) => b.balance))
-  }
-
-  const handleSave = (e) => {
-    e.preventDefault()
-    setSaving(true)
-    window.setTimeout(() => setSaving(false), 400)
-  }
 
   return (
     <section className="ops-card mt-6 overflow-hidden">
@@ -42,13 +15,7 @@ export default function BankBalances({ onTotalChange }) {
         <div className="flex flex-wrap items-end justify-between gap-4 px-4 py-4 sm:px-5">
           <div>
             <p className="ops-eyebrow-navy">CASH ON HAND</p>
-            <div className="mt-1 flex flex-wrap items-baseline gap-3">
-              <h2 className="ops-heading text-2xl text-white sm:text-3xl">Bank balances</h2>
-              <button type="button" className="ops-text-btn text-white/80" onClick={handleReload}>
-                <IconRefresh spinning={spinning} />
-                Reload
-              </button>
-            </div>
+            <h2 className="ops-heading mt-1 text-2xl text-white sm:text-3xl">Bank balances</h2>
           </div>
           <div className="text-right">
             <p className="ops-eyebrow-navy">TOTAL CASH</p>
@@ -58,35 +25,21 @@ export default function BankBalances({ onTotalChange }) {
           </div>
         </div>
       </div>
-      <form className="border-t border-[#c5d0d6]/40 bg-[#e8eef1]/20 px-4 py-4 sm:px-5" onSubmit={handleSave}>
-        <div className="grid grid-cols-1 gap-2 sm:grid-cols-3">
-          {OPS_SAMPLE.banks.map((bank, i) => (
-            <label key={bank.name} className="block">
-              <span className="mb-1 block text-xs font-semibold text-[#5c7280]">{bank.name}</span>
-              <input
-                type="text"
-                inputMode="decimal"
-                className="ops-input w-full tabular-nums"
-                value={focusedIndex === i ? editDraft : formatBalanceField(balances[i])}
-                onFocus={() => {
-                  setFocusedIndex(i)
-                  setEditDraft(String(balances[i]))
-                }}
-                onChange={(e) => setEditDraft(e.target.value)}
-                onBlur={() => {
-                  const next = [...balances]
-                  next[i] = parseBalanceInput(editDraft)
-                  setBalances(next)
-                  setFocusedIndex(null)
-                }}
-              />
-            </label>
+      <div className="border-t border-[#c5d0d6]/40 bg-[#e8eef1]/20 px-4 py-4 sm:px-5">
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
+          {OPS_SAMPLE.banks.map((bank) => (
+            <div
+              key={bank.name}
+              className="rounded-lg border border-[#c5d0d6]/50 bg-white px-4 py-3"
+            >
+              <p className="text-xs font-semibold text-[#5c7280]">{bank.name}</p>
+              <p className="ops-heading mt-1 text-lg font-semibold tabular-nums text-[#2f4049]">
+                {formatMoney(bank.balance)}
+              </p>
+            </div>
           ))}
         </div>
-        <button type="submit" className="ops-btn-primary mt-4" disabled={saving}>
-          {saving ? 'Saving…' : 'Save balances'}
-        </button>
-      </form>
+      </div>
     </section>
   )
 }

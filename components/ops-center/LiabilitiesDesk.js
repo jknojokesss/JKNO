@@ -7,29 +7,26 @@ import {
   formatMoneyCompact,
   sumPayables,
   monthBuckets,
-  cardCounts,
+  methodCounts,
   stlTotal,
   stlMonthlyTotal,
   stlEarliestPayoffLabel,
   poTotal,
-  ccScheduleTotal,
+  payablesScheduleTotal,
   sortPayables,
   SORT_DEFAULTS,
   dueTheme,
   SCHEDULE_MONTH_KEYS,
   fmtDueGroupTitle,
-  useRefreshSpin,
   dueMonthKey,
 } from './utils'
 import {
-  IconRefresh,
   IconLayoutGrid,
   IconRows3,
   IconCalendarDays,
   IconCardSquare,
   IconArrowUpDown,
   IconArrowDownAZ,
-  IconUpload,
   IconFilter,
   IconOutflow,
 } from './icons'
@@ -51,10 +48,11 @@ const SORT_OPTIONS = [
 ]
 
 function TableHead({ showDue }) {
+  const cols = showDue ? ['VENDOR', 'DUE', 'AMOUNT'] : ['VENDOR', 'AMOUNT']
   return (
     <thead className="sticky top-0 z-[1]">
       <tr style={{ background: NAVY_GRADIENT }}>
-        {['VENDOR / CARD', 'BILL', 'FEES', ...(showDue ? ['DUE'] : []), 'TOTAL'].map((h, i) => (
+        {cols.map((h, i) => (
           <th
             key={h}
             className={`ops-th ${i > 0 ? 'text-right' : 'text-left'}`}
@@ -69,31 +67,18 @@ function TableHead({ showDue }) {
 }
 
 function TotalsBar({ rows, filtered }) {
-  const { bill, fees, total } = sumPayables(rows)
+  const { total } = sumPayables(rows)
   return (
     <div
       className="flex flex-wrap items-center justify-between gap-4 px-4 py-3 text-white"
       style={{ background: NAVY_GRADIENT }}
     >
       <span className="text-[10px] font-semibold uppercase tracking-widest text-white/85">
-        {filtered ? 'Filtered total' : 'Totals'}
+        {filtered ? 'Filtered total' : 'Total'}
       </span>
-      <dl className="flex flex-wrap gap-6 text-right text-xs sm:gap-10">
-        <div>
-          <dt className="text-[10px] uppercase text-white/55">Bill</dt>
-          <dd className="tabular-nums font-medium">{formatMoney(bill)}</dd>
-        </div>
-        <div>
-          <dt className="text-[10px] uppercase text-white/55">CC fees</dt>
-          <dd className="tabular-nums font-medium">{formatMoney(fees)}</dd>
-        </div>
-        <div>
-          <dt className="text-[10px] uppercase text-white/55">Bill + fees</dt>
-          <dd className="ops-heading tabular-nums text-lg font-semibold" style={{ color: GOLD_ON_NAVY }}>
-            {formatMoney(total)}
-          </dd>
-        </div>
-      </dl>
+      <span className="ops-heading tabular-nums text-lg font-semibold" style={{ color: GOLD_ON_NAVY }}>
+        {formatMoney(total)}
+      </span>
     </div>
   )
 }
@@ -184,11 +169,11 @@ function CalendarDayDetail({ day, payables }) {
       </div>
     )
   }
-  const byCard = new Map()
+  const byMethod = new Map()
   rows.forEach((r) => {
-    const k = r.card || 'Unknown'
-    if (!byCard.has(k)) byCard.set(k, [])
-    byCard.get(k).push(r)
+    const k = r.method || 'Unknown'
+    if (!byMethod.has(k)) byMethod.set(k, [])
+    byMethod.get(k).push(r)
   })
   const theme = dueTheme(day)
   return (
@@ -196,17 +181,17 @@ function CalendarDayDetail({ day, payables }) {
       <h4 className="ops-heading text-sm font-semibold text-[#2f4049]">Due {fmtDueGroupTitle(day)}</h4>
       <p className="mb-3 text-xs tabular-nums text-[#5c7280]">{formatMoney(sumPayables(rows).total)} · {rows.length} due</p>
       <div className="space-y-3">
-        {[...byCard.entries()].map(([card, cardRows]) => {
-          const sub = sumPayables(cardRows)
+        {[...byMethod.entries()].map(([method, methodRows]) => {
+          const sub = sumPayables(methodRows)
           return (
-            <div key={card} className="rounded-lg border border-amber-200/60 bg-white/70 p-3">
+            <div key={method} className="rounded-lg border border-amber-200/60 bg-white/70 p-3">
               <div className="flex items-baseline justify-between gap-2">
-                <span className="ops-heading text-xs font-semibold text-[#2f4049]">{card}</span>
+                <span className="ops-heading text-xs font-semibold text-[#2f4049]">{method}</span>
                 <span className="text-xs font-semibold tabular-nums">{formatMoney(sub.total)}</span>
               </div>
-              <p className="text-[10px] text-[#5c7280]">{cardRows.length} due</p>
+              <p className="text-[10px] text-[#5c7280]">{methodRows.length} due</p>
               <div className="mt-2 border-l-2 border-amber-400/50 pl-2">
-                {cardRows.map((r, i) => <CompactPayableRow key={i} row={r} index={i} />)}
+                {methodRows.map((r, i) => <CompactPayableRow key={i} row={r} index={i} />)}
               </div>
             </div>
           )
@@ -225,8 +210,7 @@ function LoanRunway({ cashTotal }) {
     amount: sumPayables(buckets[k] || []).total,
   }))
   const po = poTotal()
-  const loansPayables = stl
-  const totalOut = loansPayables + monthOut.reduce((s, m) => s + m.amount, 0) + po
+  const totalOut = stl + monthOut.reduce((s, m) => s + m.amount, 0) + po
   const shortage = totalOut - cashTotal
   const monthlyLoans = stlMonthlyTotal()
   const earliestPayoff = stlEarliestPayoffLabel()
@@ -258,8 +242,8 @@ function LoanRunway({ cashTotal }) {
               </thead>
               <tbody>
                 <tr className="border-t border-[#c5d0d6]/30">
-                  <td className="px-3 py-2 text-sm font-medium text-[#2f4049]">Loans & payables</td>
-                  <td className="px-3 py-2 text-right text-sm tabular-nums">{formatMoney(loansPayables)}</td>
+                  <td className="px-3 py-2 text-sm font-medium text-[#2f4049]">Short-term loans</td>
+                  <td className="px-3 py-2 text-right text-sm tabular-nums">{formatMoney(stl)}</td>
                 </tr>
                 {monthOut.map((m) => (
                   <tr key={m.key} className="border-t border-[#c5d0d6]/30">
@@ -318,13 +302,11 @@ export default function LiabilitiesDesk({ cashTotal }) {
   const [sortField, setSortField] = useState('dueDate')
   const [sortAsc, setSortAsc] = useState(true)
   const [monthFilters, setMonthFilters] = useState([])
-  const [cardFilter, setCardFilter] = useState('')
-  const [spinning, setSpinning] = useState(false)
+  const [methodFilter, setMethodFilter] = useState('')
   const [calDay, setCalDay] = useState('')
-  const refresh = useRefreshSpin(setSpinning)
 
   const allPayables = OPS_SAMPLE.payables
-  const ccTotal = ccScheduleTotal(allPayables)
+  const payablesDueTotal = payablesScheduleTotal(allPayables)
   const stl = stlTotal()
 
   const monthStats = useMemo(() => {
@@ -337,17 +319,17 @@ export default function LiabilitiesDesk({ cashTotal }) {
     })
   }, [allPayables])
 
-  const cards = useMemo(() => cardCounts(allPayables), [allPayables])
+  const methods = useMemo(() => methodCounts(allPayables), [allPayables])
 
   const filtered = useMemo(() => {
     let rows = [...allPayables]
     if (monthFilters.length) rows = rows.filter((r) => monthFilters.includes(dueMonthKey(r.due)))
-    if (cardFilter) rows = rows.filter((r) => r.card === cardFilter)
+    if (methodFilter) rows = rows.filter((r) => r.method === methodFilter)
     const fieldMap = { dueDate: 'dueDate', amount: 'amount', vendor: 'vendor', entered: 'entered', entity: 'entity' }
     return sortPayables(rows, fieldMap[sortField] || 'dueDate', sortAsc)
-  }, [allPayables, monthFilters, cardFilter, sortField, sortAsc])
+  }, [allPayables, monthFilters, methodFilter, sortField, sortAsc])
 
-  const filtersActive = monthFilters.length > 0 || Boolean(cardFilter)
+  const filtersActive = monthFilters.length > 0 || Boolean(methodFilter)
 
   const toggleMonth = (key) => {
     setMonthFilters((prev) => (prev.includes(key) ? prev.filter((k) => k !== key) : [...prev, key]))
@@ -355,7 +337,7 @@ export default function LiabilitiesDesk({ cashTotal }) {
 
   const clearFilters = () => {
     setMonthFilters([])
-    setCardFilter('')
+    setMethodFilter('')
   }
 
   const onSortChange = (e) => {
@@ -385,18 +367,14 @@ export default function LiabilitiesDesk({ cashTotal }) {
             <span className="flex size-9 items-center justify-center rounded-lg bg-white/12 ring-1 ring-white/20 text-white">
               <IconCardSquare />
             </span>
-            <h2 className="ops-heading flex-1 text-2xl text-white sm:text-3xl">CC payables</h2>
-            <button type="button" className="ops-text-btn text-white/80" onClick={refresh}>
-              <IconRefresh spinning={spinning} />
-              Refresh
-            </button>
+            <h2 className="ops-heading flex-1 text-2xl text-white sm:text-3xl">Payables</h2>
           </div>
         </div>
         <div className="grid grid-cols-2 border-t border-white/10">
           <div className="min-w-0 border-r border-white/15 px-4 py-4 sm:px-5">
-            <p className="ops-eyebrow-navy">CC SCHEDULE</p>
+            <p className="ops-eyebrow-navy">PAYABLES DUE</p>
             <p className="ops-heading mt-1 text-3xl tabular-nums sm:text-4xl" style={{ color: GOLD_ON_NAVY }}>
-              {formatMoney(ccTotal)}
+              {formatMoney(payablesDueTotal)}
             </p>
           </div>
           <div className="min-w-0 overflow-hidden px-4 py-4 text-right sm:px-5">
@@ -425,9 +403,9 @@ export default function LiabilitiesDesk({ cashTotal }) {
         </div>
       </div>
 
-      <div className="border-b border-[#c5d0d6]/40 bg-[#e8eef1]/25 px-3 py-2.5 sm:flex sm:flex-row sm:items-center sm:justify-between sm:px-4">
-        {view !== 'calendar' ? (
-          <div className="mb-2 flex flex-wrap items-center gap-2 sm:mb-0">
+      {view !== 'calendar' ? (
+        <div className="border-b border-[#c5d0d6]/40 bg-[#e8eef1]/25 px-3 py-2.5 sm:flex sm:flex-row sm:items-center sm:justify-between sm:px-4">
+          <div className="flex flex-wrap items-center gap-2">
             <span className="ops-heading flex items-center gap-1 text-xs font-semibold uppercase tracking-wide text-[#2f4049]/70">
               <IconArrowUpDown size={14} />
               Sort
@@ -446,20 +424,8 @@ export default function LiabilitiesDesk({ cashTotal }) {
               {sortAsc ? 'Asc' : 'Desc'}
             </button>
           </div>
-        ) : (
-          <div />
-        )}
-        <details className="text-xs text-[#5c7280]">
-          <summary className="flex cursor-pointer list-none items-center gap-1 hover:text-[#2f4049] [&::-webkit-details-marker]:hidden">
-            <IconUpload />
-            Update from Excel
-          </summary>
-          <div className="mt-2 flex flex-wrap items-end gap-2">
-            <input type="file" accept=".xlsx" className="text-xs" />
-            <button type="button" className="ops-btn-primary opacity-50" disabled>Upload and update</button>
-          </div>
-        </details>
-      </div>
+        </div>
+      ) : null}
 
       <div className="border-b border-[#c5d0d6]/30 bg-gradient-to-b from-[#e8eef1]/40 to-[#e8eef1]/15 px-3 py-3 shadow-sm">
         <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:items-center">
@@ -487,13 +453,13 @@ export default function LiabilitiesDesk({ cashTotal }) {
           </div>
           <select
             className="ops-select max-w-full text-xs sm:ml-auto"
-            value={cardFilter}
-            onChange={(e) => setCardFilter(e.target.value)}
-            aria-label="Card filter"
+            value={methodFilter}
+            onChange={(e) => setMethodFilter(e.target.value)}
+            aria-label="Payment method filter"
           >
-            <option value="">All cards</option>
-            {cards.map(([card, count]) => (
-              <option key={card} value={card}>{card} ({count})</option>
+            <option value="">All methods</option>
+            {methods.map(([method, count]) => (
+              <option key={method} value={method}>{method} ({count})</option>
             ))}
           </select>
           {filtersActive ? (
@@ -523,7 +489,7 @@ export default function LiabilitiesDesk({ cashTotal }) {
           ))}
         </div>
         <div className="mb-4 flex flex-wrap items-center justify-between gap-2 text-sm text-[#2f4049]">
-          <span className="text-[#5c7280]">CC schedule by due month</span>
+          <span className="text-[#5c7280]">Payables by due month</span>
           <span className="flex items-center gap-2 font-semibold tabular-nums">
             {formatMoney(grandSchedule.total)}
             <span className="text-[#5c7280] font-normal" aria-hidden>✓</span>
@@ -533,7 +499,7 @@ export default function LiabilitiesDesk({ cashTotal }) {
         {view === 'sheet' ? (
           <div className="overflow-hidden rounded-xl ring-1 ring-[#2f4049]/10">
             <div className="max-h-[min(70vh,520px)] overflow-auto">
-              <table className="ops-table w-full min-w-[560px] border-collapse">
+              <table className="ops-table w-full min-w-[400px] border-collapse">
                 <TableHead showDue />
                 <tbody>
                   {filtered.map((row, i) => (
@@ -566,7 +532,7 @@ export default function LiabilitiesDesk({ cashTotal }) {
                     </span>
                   </div>
                   <div className="max-h-80 overflow-auto">
-                    <table className="ops-table w-full min-w-[480px] border-collapse">
+                    <table className="ops-table w-full min-w-[360px] border-collapse">
                       <TableHead showDue={false} />
                       <tbody>
                         {rows.map((row, i) => (

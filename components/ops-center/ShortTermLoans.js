@@ -120,14 +120,14 @@ export default function ShortTermLoansSection({ heroTotal }) {
                 </thead>
                 <tbody>
                   {group.loans.map((loan) => (
-                    <LoanRowDesktop key={`${group.entity}-${loan.lender}`} loan={loan} />
+                    <LoanRowDesktop key={`${group.entity}-${loan.type}-${loan.lender}`} loan={loan} />
                   ))}
                 </tbody>
               </table>
             </div>
 
             {group.loans.map((loan) => (
-              <LoanRowMobile key={`m-${group.entity}-${loan.lender}`} loan={loan} />
+              <LoanRowMobile key={`m-${group.entity}-${loan.type}-${loan.lender}`} loan={loan} />
             ))}
           </div>
         ))}

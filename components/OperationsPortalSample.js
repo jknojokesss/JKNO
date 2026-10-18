@@ -152,7 +152,7 @@ function HubLogo() {
 const PORTAL_DESKS = [
   {
     id: 'operations',
-    kicker: 'All entities · banks & cards',
+    kicker: 'All entities · banks & payables',
     title: 'Operations Center',
     live: true,
     art: 'ops',

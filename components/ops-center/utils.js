@@ -3,7 +3,6 @@ import { OPS_SAMPLE } from '../../data/ops-center-sample.js'
 export const NAVY_GRADIENT = 'linear-gradient(135deg, #172f4d 0%, #1e3a5f 42%, #2a4d73 100%)'
 export const DESK_NAVY = '#1e3a5f'
 export const GOLD_ON_NAVY = '#e8c97a'
-export const NOT_IN_QB = '#c0392b'
 
 const KNOWN_MONTHS = {
   '2026-10': {
@@ -75,22 +74,6 @@ export function formatMoney(n) {
   return `$${abs}`
 }
 
-/** Bank balance input display (no currency symbol). */
-export function formatBalanceField(n) {
-  const v = Number(n) || 0
-  return v.toLocaleString('en-US', {
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 2,
-  })
-}
-
-export function parseBalanceInput(raw) {
-  const cleaned = String(raw).replace(/,/g, '').trim()
-  if (!cleaned) return 0
-  const n = parseFloat(cleaned)
-  return Number.isFinite(n) ? n : 0
-}
-
 export function formatMoneyCompact(n) {
   const v = Number(n) || 0
   const abs = Math.abs(v)
@@ -132,33 +115,27 @@ export function fmtDueGroupTitle(iso) {
 export function payableMeta(row) {
   const parts = []
   if (row.entered) parts.push(`Entered ${fmtShortDate(row.entered)}`)
-  if (row.inQb) parts.push('In QB')
   if (row.entity) parts.push(row.entity)
-  if (row.card && row.card !== 'No card on file') parts.push(row.card)
   if (row.method) parts.push(row.method)
-  let line = parts.join(' · ')
-  if (!row.inQb) line += (line ? ' · ' : '') + 'NOT IN QB'
-  return line
+  return parts.join(' · ')
 }
 
 export function payableTooltip(row) {
   const bits = []
-  if (row.entered) bits.push(`Payable ${fmtShortDate(row.entered)}`)
-  if (row.method) bits.push(`Processor: ${row.method}`)
-  bits.push(`QB: ${row.inQb ? 'yes' : 'no'}`)
+  if (row.entered) bits.push(`Entered ${fmtShortDate(row.entered)}`)
+  if (row.method) bits.push(`Method: ${row.method}`)
+  if (row.entity) bits.push(row.entity)
   return bits.join(' · ')
 }
 
 export function sumPayables(rows) {
   return rows.reduce(
     (acc, r) => {
-      acc.bill += r.bill
-      acc.fees += r.fees
-      acc.total += r.total
+      acc.total += r.amount
       acc.count += 1
       return acc
     },
-    { bill: 0, fees: 0, total: 0, count: 0 },
+    { total: 0, count: 0 },
   )
 }
 
@@ -172,16 +149,18 @@ export function monthBuckets(payables) {
   return map
 }
 
-export function cardCounts(payables) {
+const METHOD_ORDER = ['ACH', 'Card', 'Check', 'Wire']
+
+export function methodCounts(payables) {
   const map = new Map()
   payables.forEach((r) => {
-    const c = r.card || 'Unknown'
-    map.set(c, (map.get(c) || 0) + 1)
+    const m = r.method || 'Unknown'
+    map.set(m, (map.get(m) || 0) + 1)
   })
-  return [...map.entries()].sort((a, b) => a[0].localeCompare(b[0]))
+  return METHOD_ORDER.filter((m) => map.has(m)).map((m) => [m, map.get(m)])
 }
 
-export const STL_ENTITY_ORDER = ['Northgate', 'Bayline', 'Pinecrest', 'Harborview']
+export const STL_ENTITY_ORDER = ['Retail Co.', 'Wholesale Co.', 'Property Co.', 'Distribution Co.']
 
 export function stlTotal() {
   return OPS_SAMPLE.shortTermLoans.reduce((s, r) => s + r.balance, 0)
@@ -241,7 +220,7 @@ export function poTotal() {
   return OPS_SAMPLE.purchaseOrders.reduce((s, r) => s + r.amount, 0)
 }
 
-export function ccScheduleTotal(payables = OPS_SAMPLE.payables) {
+export function payablesScheduleTotal(payables = OPS_SAMPLE.payables) {
   return sumPayables(payables).total
 }
 
@@ -258,18 +237,11 @@ export function sortPayables(rows, field, asc) {
   sorted.sort((a, b) => {
     let cmp = 0
     if (field === 'vendor') cmp = (a.vendor || '').localeCompare(b.vendor || '')
-    else if (field === 'amount') cmp = a.total - b.total
+    else if (field === 'amount') cmp = a.amount - b.amount
     else if (field === 'entered') cmp = (a.entered || '').localeCompare(b.entered || '')
     else if (field === 'entity') cmp = (a.entity || '').localeCompare(b.entity || '')
     else cmp = (a.due || '').localeCompare(b.due || '')
     return asc ? cmp : -cmp
   })
   return sorted
-}
-
-export function useRefreshSpin(setSpinning) {
-  return () => {
-    setSpinning(true)
-    window.setTimeout(() => setSpinning(false), 600)
-  }
 }
