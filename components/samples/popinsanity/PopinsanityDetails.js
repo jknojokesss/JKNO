@@ -4,7 +4,9 @@ import {
   tierStats,
   channelTotal,
   channelPrior,
-  pnlComputed,
+  storeByName,
+  wholesaleChannel,
+  PNL_CHANNEL_MAP,
 } from './popinsanityComputed'
 import { DetailShell, RowLine, ClickRow } from './PopinsanityShared'
 import { CompareSheet } from './PopinsanityCompareSheet'
@@ -18,6 +20,7 @@ import {
   changePct,
   changeColor,
   SPICE,
+  RED,
   MUTED,
   INK,
   BORDER,
@@ -122,11 +125,119 @@ export function ProductLineDetail({ line, onBack, card, big }) {
   )
 }
 
-export function ChannelDetail({ channelId, onBack, onOrder, onProductLine, card, big, lbl }) {
+export function StoreDetail({ storeName, onBack, card, big, lbl }) {
+  const store = storeByName(storeName)
+  const ch = wholesaleChannel()
+  if (!store || !ch) return null
+  const delta = store.sales_prior != null ? store.sales_this - store.sales_prior : null
+  const color = changeColor(delta, { cost: false })
+  const owed = sumBy(store.open_invoices, 'amount')
+  return (
+    <DetailShell title={store.name} onBack={onBack} card={card} big={big}>
+      <RowLine l="Area" v={store.area} />
+      <RowLine l="Terms" v={ch.terms} />
+      <RowLine l={`${DATA.meta.this_short} sales`} v={money(store.sales_this)} />
+      <RowLine l={`${DATA.meta.prior_short} sales`} v={money(store.sales_prior)} />
+      <RowLine l="Change" v={<span style={{ color }}>{money(delta)} ({store.sales_prior ? pct1(changePct(store.sales_this, store.sales_prior)) : '—'})</span>} />
+      <div style={{ ...lbl, margin: '16px 0 8px' }}>Open invoices</div>
+      {store.open_invoices.length === 0 ? (
+        <div style={{ fontSize: 13, color: MUTED, padding: '8px 0' }}>No open invoices</div>
+      ) : (
+        <table className="pop-table">
+          <thead>
+            <tr>
+              <th className="pop-th">Invoice</th>
+              <th className="pop-th">Date</th>
+              <th className="pop-th pop-th--r">Amount</th>
+              <th className="pop-th pop-th--r">Age</th>
+            </tr>
+          </thead>
+          <tbody>
+            {store.open_invoices.map((inv) => (
+              <tr key={inv.invoice}>
+                <td className="pop-td">{inv.invoice}</td>
+                <td className="pop-td">{fmtD(inv.date)}</td>
+                <td className="pop-td pop-td--r">{money(inv.amount)}</td>
+                <td className="pop-td pop-td--r" style={{ color: inv.age_days > 60 ? RED : INK }}>{inv.age_days} days</td>
+              </tr>
+            ))}
+          </tbody>
+          <tfoot>
+            <tr className="pop-tfoot">
+              <td className="pop-td" colSpan={2}>Owed</td>
+              <td className="pop-td pop-td--r">{money(owed)}</td>
+              <td />
+            </tr>
+          </tfoot>
+        </table>
+      )}
+    </DetailShell>
+  )
+}
+
+export function ChannelDetail({ channelId, onBack, onOrder, onProductLine, onStore, card, big, lbl }) {
   const ch = DATA.channels.find((c) => c.id === channelId)
   if (!ch) return null
   const th = { className: 'pop-th' }
   const thr = { className: 'pop-th pop-th--r' }
+  if (ch.id === 'wholesale') {
+    const thisT = channelTotal(ch)
+    const priorT = channelPrior(ch)
+    const sheetRows = ch.stores.map((s) => ({
+      key: s.name,
+      label: s.name,
+      this: s.sales_this,
+      prior: s.sales_prior,
+      meta: s,
+    }))
+    return (
+      <DetailShell title={ch.name} onBack={onBack} card={card} big={big}>
+        <div className="pop-compare-mobile pop-wholesale-mobile">
+          <CompareSheet
+            thisCol={DATA.meta.this_short}
+            priorCol={DATA.meta.prior_short}
+            changeCol="Change"
+            rows={sheetRows}
+            footer={{ label: 'Total', this: thisT, prior: priorT }}
+            onRow={(r) => onStore?.(r.meta.name)}
+          />
+        </div>
+        <div className="pop-channel-table-wrap pop-wholesale-desktop">
+          <table className="pop-table">
+            <thead>
+              <tr>
+                <th className="pop-th">Store</th>
+                <th className="pop-th pop-th--r">{DATA.meta.this_short}</th>
+                <th className="pop-th pop-th--r">{DATA.meta.prior_short}</th>
+                <th className="pop-th pop-th--r">Change</th>
+              </tr>
+            </thead>
+            <tbody>
+              {ch.stores.map((s) => {
+                const d = s.sales_this - s.sales_prior
+                return (
+                  <ClickRow key={s.name} onClick={() => onStore?.(s.name)}>
+                    <td className="pop-td"><span className="pop-client-name" style={{ fontWeight: 600, fontSize: 13, marginBottom: 0 }}>{s.name}</span></td>
+                    <td className="pop-td pop-td--r">{money(s.sales_this)}</td>
+                    <td className="pop-td pop-td--r">{money(s.sales_prior)}</td>
+                    <td className="pop-td pop-td--r" style={{ color: changeColor(d) }}>{money(d)}</td>
+                  </ClickRow>
+                )
+              })}
+            </tbody>
+            <tfoot>
+              <tr className="pop-tfoot">
+                <td className="pop-td">Total</td>
+                <td className="pop-td pop-td--r">{money(thisT)}</td>
+                <td className="pop-td pop-td--r">{money(priorT)}</td>
+                <td className="pop-td pop-td--r" style={{ color: changeColor(thisT - priorT) }}>{money(thisT - priorT)}</td>
+              </tr>
+            </tfoot>
+          </table>
+        </div>
+      </DetailShell>
+    )
+  }
   if (ch.id === 'corporate') {
     const renderBlock = (title, rows) => (
       <div style={{ marginBottom: 20 }}>
@@ -175,6 +286,7 @@ export function ChannelDetail({ channelId, onBack, onOrder, onProductLine, card,
   }
   const thisT = channelTotal(ch)
   const priorT = channelPrior(ch)
+  if (!ch.lines) return null
   const sheetRows = ch.lines.map((ln) => ({
     key: ln.label,
     label: ln.label,
@@ -279,10 +391,9 @@ export function PnlLineDetail({ line, section, onBack, onChannel, card, big }) {
   const isRev = section === 'revenue'
   const delta = line.prior != null ? line.this - line.prior : null
   const color = changeColor(delta, { cost: !isRev })
-  const channelMap = { Online: 'online', Store: 'store', 'Corporate gifts': 'corporate' }
-  const channelId = channelMap[line.label]
+  const channelId = PNL_CHANNEL_MAP[line.label]
   const channelLabel =
-    line.label === 'Corporate gifts' ? 'Corporate' : line.label
+    line.label === 'Corporate gifts' ? 'Corporate' : line.label === 'Wholesale to stores' ? 'Wholesale' : line.label
   return (
     <DetailShell title={line.label} onBack={onBack} card={card} big={big}>
       <RowLine l={DATA.meta.this_month} v={money(line.this)} />

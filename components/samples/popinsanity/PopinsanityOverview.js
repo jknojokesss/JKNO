@@ -1,4 +1,4 @@
-import { DATA, allChannelSales, holidayTotals, allTierRows, cashByMonthKey, monthLabel } from './popinsanityComputed'
+import { DATA, allChannelSales, holidayTotals, allTierRows, cashByMonthKey, monthLabel, wholesaleStats } from './popinsanityComputed'
 import { pnlComputed } from './popinsanityComputed'
 import { KPI, RankedBars } from './PopinsanityShared'
 import { money0, money, pct1, changePct, RED, GREEN, SPICE } from './popinsanityUtils'
@@ -6,6 +6,7 @@ import { money0, money, pct1, changePct, RED, GREEN, SPICE } from './popinsanity
 export default function PopinsanityOverview({ styles, goTab, setCalendarMonth, openChannel, openTier }) {
   const { card, lbl, big } = styles
   const hol = holidayTotals()
+  const ws = wholesaleStats()
   const sales = allChannelSales()
   const pnl = pnlComputed()
   const salesDelta = changePct(sales.thisMonth, sales.prior)
@@ -42,6 +43,7 @@ export default function PopinsanityOverview({ styles, goTab, setCalendarMonth, o
         />
         <KPI card={card} lbl={lbl} big={big} k="Deposits received" v={money0(hol.deposits)} onClick={() => goTab('orders')} />
         <KPI card={card} lbl={lbl} big={big} k="Balance due" v={money0(hol.balance)} onClick={() => goTab('orders')} />
+        <KPI card={card} lbl={lbl} big={big} k="Owed by stores" v={money0(ws.owed)} onClick={() => goTab('stores')} />
         <KPI
           card={card}
           lbl={lbl}

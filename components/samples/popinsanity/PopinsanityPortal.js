@@ -11,6 +11,7 @@ import {
 import { useStyles } from './PopinsanityShared'
 import PopinsanityOverview from './PopinsanityOverview'
 import PopinsanityOrdersTab from './PopinsanityOrdersTab'
+import PopinsanityStoresTab from './PopinsanityStoresTab'
 import PopinsanityTiersTab from './PopinsanityTiersTab'
 import PopinsanitySalesTab from './PopinsanitySalesTab'
 import PopinsanityCalendarTab from './PopinsanityCalendarTab'
@@ -19,6 +20,7 @@ import {
   OrderDetail,
   TierDetail,
   ChannelDetail,
+  StoreDetail,
   DayDetail,
   PnlLineDetail,
   ProductLineDetail,
@@ -27,6 +29,7 @@ import {
 const TABS = [
   ['overview', 'Overview'],
   ['orders', 'Corporate orders'],
+  ['stores', 'Stores'],
   ['tiers', 'Gift tiers'],
   ['sales', 'Sales by channel'],
   ['calendar', 'Cash-in calendar'],
@@ -59,6 +62,7 @@ export default function PopinsanityPortal() {
   const openOrder = useCallback((orderId) => push({ kind: 'order', orderId }), [push])
   const openTier = useCallback((tierId) => push({ kind: 'tier', tierId }), [push])
   const openChannel = useCallback((channelId) => push({ kind: 'channel', channelId }), [push])
+  const openStore = useCallback((storeName) => push({ kind: 'store', storeName }), [push])
   const openDay = useCallback((date, items) => push({ kind: 'day', date, items }), [push])
   const openPnlLine = useCallback((line) => push({ kind: 'pnl', line }), [push])
 
@@ -100,10 +104,15 @@ export default function PopinsanityPortal() {
             onBack={back}
             onOrder={openOrder}
             onProductLine={(line) => push({ kind: 'productLine', line })}
+            onStore={openStore}
             card={styles.card}
             big={styles.big}
             lbl={styles.lbl}
           />,
+        )
+      case 'store':
+        return wrap(
+          <StoreDetail storeName={top.storeName} onBack={back} card={styles.card} big={styles.big} lbl={styles.lbl} />,
         )
       case 'productLine':
         return wrap(<ProductLineDetail line={top.line} onBack={back} card={styles.card} big={styles.big} />)
@@ -139,6 +148,8 @@ export default function PopinsanityPortal() {
         )
       case 'orders':
         return <PopinsanityOrdersTab styles={styles} openOrder={openOrder} />
+      case 'stores':
+        return <PopinsanityStoresTab styles={styles} openStore={openStore} />
       case 'tiers':
         return <PopinsanityTiersTab styles={styles} openTier={openTier} />
       case 'sales':
@@ -211,7 +222,9 @@ export default function PopinsanityPortal() {
                 ? 'Overview'
                 : id === 'orders'
                   ? 'Orders'
-                  : id === 'tiers'
+                  : id === 'stores'
+                    ? 'Stores'
+                    : id === 'tiers'
                     ? 'Tiers'
                     : id === 'sales'
                       ? 'Sales'
@@ -233,7 +246,19 @@ export default function PopinsanityPortal() {
             </a>
             <div style={{ ...styles.lbl, color: SPICE }}>{BIZ}</div>
             <h1 style={{ ...styles.big, fontSize: '28px', color: INK, letterSpacing: '0.3px', lineHeight: 1.1, marginTop: '4px' }}>
-              {top ? (top.kind === 'order' ? 'Order detail' : top.kind === 'tier' ? 'Tier detail' : top.kind === 'channel' ? 'Channel detail' : top.kind === 'day' ? 'Cash due' : 'Line detail') : currentLabel}
+              {top
+                ? top.kind === 'order'
+                  ? 'Order detail'
+                  : top.kind === 'store'
+                    ? 'Store detail'
+                    : top.kind === 'tier'
+                      ? 'Tier detail'
+                      : top.kind === 'channel'
+                        ? 'Channel detail'
+                        : top.kind === 'day'
+                          ? 'Cash due'
+                          : 'Line detail'
+                : currentLabel}
             </h1>
           </div>
           {financialsPnlDrill ? <PopinsanityFinancials styles={styles} openPnlLine={openPnlLine} /> : null}

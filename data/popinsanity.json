@@ -443,28 +443,209 @@
       ]
     },
     {
-      "id": "store",
-      "name": "Store",
+      "id": "shop",
+      "name": "Shop (Monsey)",
       "lines": [
         {
           "label": "Popcorn bags",
-          "this": 6120.45,
-          "prior": 7034.2
+          "this": 2640.15,
+          "prior": 3010.6
         },
         {
           "label": "Gift tins",
-          "this": 2310.8,
-          "prior": 3180.55
+          "this": 1105.4,
+          "prior": 1280.35
         },
         {
           "label": "Party and bulk packs",
-          "this": 1745.3,
-          "prior": 1926.1
+          "this": 512.3,
+          "prior": 604.2
         },
         {
           "label": "Chocolate and sweets",
-          "this": 2463.7,
-          "prior": 2769.4
+          "this": 1201.9,
+          "prior": 1393
+        }
+      ]
+    },
+    {
+      "id": "wholesale",
+      "name": "Wholesale to stores",
+      "terms": "Net 30",
+      "as_of_for_age": "2026-10-31",
+      "stores": [
+        {
+          "name": "Rockland Kosher Supermarket",
+          "area": "Monsey",
+          "sales_this": 1240.8,
+          "sales_prior": 1486.4,
+          "open_invoices": [
+            {
+              "invoice": "INV-4801",
+              "date": "2026-10-06",
+              "amount": 612.4,
+              "age_days": 25
+            },
+            {
+              "invoice": "INV-4802",
+              "date": "2026-10-20",
+              "amount": 628.4,
+              "age_days": 11
+            }
+          ],
+          "owed": 1240.8
+        },
+        {
+          "name": "Evergreen - Monsey",
+          "area": "Monsey",
+          "sales_this": 1086.6,
+          "sales_prior": 1302.2,
+          "open_invoices": [
+            {
+              "invoice": "INV-4803",
+              "date": "2026-09-22",
+              "amount": 548.2,
+              "age_days": 39
+            },
+            {
+              "invoice": "INV-4804",
+              "date": "2026-10-13",
+              "amount": 538.4,
+              "age_days": 18
+            }
+          ],
+          "owed": 1086.6
+        },
+        {
+          "name": "Wesley Kosher - Monsey",
+          "area": "Monsey",
+          "sales_this": 642.4,
+          "sales_prior": 798.6,
+          "open_invoices": [
+            {
+              "invoice": "INV-4805",
+              "date": "2026-10-15",
+              "amount": 642.4,
+              "age_days": 16
+            }
+          ],
+          "owed": 642.4
+        },
+        {
+          "name": "Pomegranate - Flatbush",
+          "area": "Brooklyn",
+          "sales_this": 968.2,
+          "sales_prior": 1154.8,
+          "open_invoices": [
+            {
+              "invoice": "INV-4806",
+              "date": "2026-09-08",
+              "amount": 386.4,
+              "age_days": 53
+            },
+            {
+              "invoice": "INV-4807",
+              "date": "2026-10-07",
+              "amount": 468.2,
+              "age_days": 24
+            }
+          ],
+          "owed": 854.6
+        },
+        {
+          "name": "Breadberry - Boro Park",
+          "area": "Brooklyn",
+          "sales_this": 712.5,
+          "sales_prior": 904.3,
+          "open_invoices": [
+            {
+              "invoice": "INV-4808",
+              "date": "2026-10-21",
+              "amount": 712.5,
+              "age_days": 10
+            }
+          ],
+          "owed": 712.5
+        },
+        {
+          "name": "KRM - Boro Park",
+          "area": "Brooklyn",
+          "sales_this": 498.6,
+          "sales_prior": 612.4,
+          "open_invoices": [
+            {
+              "invoice": "INV-4809",
+              "date": "2026-08-25",
+              "amount": 306.2,
+              "age_days": 67
+            },
+            {
+              "invoice": "INV-4810",
+              "date": "2026-09-24",
+              "amount": 298.6,
+              "age_days": 37
+            }
+          ],
+          "owed": 604.8
+        },
+        {
+          "name": "Gourmet Glatt - Lakewood",
+          "area": "Lakewood",
+          "sales_this": 824.3,
+          "sales_prior": 1046.7,
+          "open_invoices": [
+            {
+              "invoice": "INV-4811",
+              "date": "2026-10-09",
+              "amount": 824.3,
+              "age_days": 22
+            }
+          ],
+          "owed": 824.3
+        },
+        {
+          "name": "Seasons - Lakewood",
+          "area": "Lakewood",
+          "sales_this": 586.4,
+          "sales_prior": 688.2,
+          "open_invoices": [
+            {
+              "invoice": "INV-4812",
+              "date": "2026-10-12",
+              "amount": 286.4,
+              "age_days": 19
+            },
+            {
+              "invoice": "INV-4813",
+              "date": "2026-10-26",
+              "amount": 300,
+              "age_days": 5
+            }
+          ],
+          "owed": 586.4
+        },
+        {
+          "name": "Aron's Kissena Farms - Queens",
+          "area": "Queens",
+          "sales_this": 348.2,
+          "sales_prior": 402.6,
+          "open_invoices": [
+            {
+              "invoice": "INV-4814",
+              "date": "2026-09-29",
+              "amount": 348.2,
+              "age_days": 32
+            }
+          ],
+          "owed": 348.2
+        },
+        {
+          "name": "Seasons - Lawrence",
+          "area": "Five Towns",
+          "sales_this": 272.5,
+          "sales_prior": 225.9,
+          "open_invoices": [],
+          "owed": 0
         }
       ]
     },
@@ -541,9 +722,14 @@
         "prior": 15380.25
       },
       {
-        "label": "Store",
-        "this": 12640.25,
-        "prior": 14910.25
+        "label": "Shop (Monsey)",
+        "this": 5459.75,
+        "prior": 6288.15
+      },
+      {
+        "label": "Wholesale to stores",
+        "this": 7180.5,
+        "prior": 8622.1
       },
       {
         "label": "Corporate gifts",

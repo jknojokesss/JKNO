@@ -7,21 +7,64 @@ export const tierById = Object.fromEntries(DATA.tiers.map((t) => [t.id, t]))
 
 export function channelTotal(ch) {
   if (ch.id === 'corporate') return sumBy(ch.shipped_this, 'amount')
+  if (ch.id === 'wholesale') return sumBy(ch.stores, 'sales_this')
   return sumBy(ch.lines, 'this')
 }
 
 export function channelPrior(ch) {
   if (ch.id === 'corporate') return sumBy(ch.shipped_prior, 'amount')
+  if (ch.id === 'wholesale') return sumBy(ch.stores, 'sales_prior')
   return sumBy(ch.lines, 'prior')
 }
 
 export function allChannelSales() {
-  const online = DATA.channels.find((c) => c.id === 'online')
-  const store = DATA.channels.find((c) => c.id === 'store')
-  const corp = DATA.channels.find((c) => c.id === 'corporate')
-  const thisMonth = channelTotal(online) + channelTotal(store) + channelTotal(corp)
-  const prior = channelPrior(online) + channelPrior(store) + channelPrior(corp)
-  return { thisMonth, prior, rows: DATA.channels.map((c) => ({ id: c.id, name: c.name, this: channelTotal(c), prior: channelPrior(c) })) }
+  const thisMonth = DATA.channels.reduce((s, c) => s + channelTotal(c), 0)
+  const prior = DATA.channels.reduce((s, c) => s + channelPrior(c), 0)
+  return {
+    thisMonth,
+    prior,
+    rows: DATA.channels.map((c) => ({ id: c.id, name: c.name, this: channelTotal(c), prior: channelPrior(c) })),
+  }
+}
+
+export function wholesaleChannel() {
+  return DATA.channels.find((c) => c.id === 'wholesale')
+}
+
+export function storeByName(name) {
+  return wholesaleChannel()?.stores.find((s) => s.name === name) || null
+}
+
+export function wholesaleStats() {
+  const ch = wholesaleChannel()
+  const stores = ch?.stores || []
+  let past30 = 0
+  let bucket0 = 0
+  let bucket31 = 0
+  let bucket61 = 0
+  stores.forEach((s) => {
+    s.open_invoices.forEach((inv) => {
+      if (inv.age_days > 30) past30 += inv.amount
+      if (inv.age_days <= 30) bucket0 += inv.amount
+      else if (inv.age_days <= 60) bucket31 += inv.amount
+      else bucket61 += inv.amount
+    })
+  })
+  return {
+    stores,
+    terms: ch?.terms || '',
+    count: stores.length,
+    salesThis: sumBy(stores, 'sales_this'),
+    salesPrior: sumBy(stores, 'sales_prior'),
+    owed: sumBy(stores, 'owed'),
+    past30,
+    aging: { bucket0, bucket31, bucket61 },
+  }
+}
+
+export function storeOldestDays(store) {
+  if (!store.open_invoices?.length) return null
+  return Math.max(...store.open_invoices.map((i) => i.age_days))
 }
 
 export function holidayTotals() {
@@ -120,4 +163,11 @@ export function monthLabel(key) {
   if (key === '2026-11') return 'Nov 2026'
   if (key === '2026-12') return 'Dec 2026'
   return key
+}
+
+export const PNL_CHANNEL_MAP = {
+  Online: 'online',
+  'Shop (Monsey)': 'shop',
+  'Wholesale to stores': 'wholesale',
+  'Corporate gifts': 'corporate',
 }
