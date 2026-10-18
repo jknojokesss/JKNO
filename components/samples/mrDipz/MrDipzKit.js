@@ -26,14 +26,14 @@ html.md-sample-page .m-sample-lobby,html.md-sample-page .m-header,html.md-sample
 .md-stat-v{font-weight:700;font-size:20px;margin-top:3px;white-space:nowrap;font-variant-numeric:tabular-nums}
 .md-back{display:flex;gap:8px;align-items:center;margin-bottom:14px;flex-wrap:wrap}
 .md-backbtn{font-family:${UI};font-weight:600;font-size:13px;padding:8px 14px;min-height:40px;border:1px solid ${BORDER};background:${CARDBG};color:${INK};border-radius:2px;cursor:pointer}
-.md-dtitle{font-family:${UI};font-weight:700;font-size:22px;letter-spacing:-.2px;color:${INK};line-height:1.2}
+.md-dtitle{font-family:${UI};font-weight:700;font-size:22px;letter-spacing:-.2px;color:${INK};line-height:1.2;overflow-wrap:break-word;word-break:normal}
 .md-dsub{font-size:12px;color:${MUTED};margin:4px 0 14px}
 .md-t{font-family:${MONO};font-size:13px}
 .md-t-row{display:grid;grid-template-columns:var(--md-cols);align-items:center;padding:9px 6px;border-top:1px solid ${CREAM};border-radius:2px}
 .md-t-head{border-top:none;padding-top:0;padding-bottom:8px;align-items:end}
 .md-t-h{font-family:${UI};font-size:10px;font-weight:600;letter-spacing:.6px;text-transform:uppercase;color:${MUTED};text-align:right;line-height:1.25;white-space:nowrap}
 .md-t-head .md-t-name{font-family:${UI};font-size:10px;font-weight:600;letter-spacing:.6px;text-transform:uppercase;color:${MUTED}}
-.md-t-name{font-family:${UI};font-size:14px;color:${INK};min-width:0;line-height:1.3;padding-right:8px}
+.md-t-name{font-family:${UI};font-size:14px;color:${INK};min-width:0;line-height:1.3;padding-right:8px;overflow-wrap:break-word;word-break:normal}
 .md-t-sub{display:block;font-size:11px;color:${MUTED};margin-top:1px}
 .md-label-tail{white-space:nowrap}
 .md-label-tail .md-t-cv{color:#C9BBA0;font-size:12px}
@@ -53,6 +53,7 @@ html.md-sample-page .m-sample-lobby,html.md-sample-page .m-header,html.md-sample
 .md-t-row--indent .md-t-name{padding-left:8px}
 .md-t--stack .md-t-row{justify-content:space-between;column-gap:var(--md-col-gap-m,4px);row-gap:3px}
 .md-t--stack .md-t-name{grid-column:1/-1;padding-right:0}
+.md-t--stack .md-t-row{align-items:start}
 .md-t--stack .md-t-head .md-t-name{display:none}
 .md-t-h{font-size:9px;letter-spacing:.2px}}
 @media(max-width:480px){
