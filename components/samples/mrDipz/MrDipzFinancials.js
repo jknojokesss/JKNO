@@ -1,78 +1,52 @@
 import { useState } from 'react'
-import {
-  SPICE,
-  INK,
-  MUTED,
-  BORDER,
-  GREEN,
-  RED,
-  UI,
-  money,
-  PNL_SHEET_CSS,
-  CHAR,
-  CREAM,
-  CARDBG,
-} from './mrDipzUtils'
+import { SPICE, INK, MUTED, BORDER, GREEN, RED, UI, money, PNL_SHEET_CSS } from './mrDipzUtils'
 
-export default function MrDipzFinancials({ model, card, lbl }) {
-  const { pnlSep, pnlAug } = model
-  const cur = pnlSep
-  const prev = pnlAug
-  const [expand, setExpand] = useState({ opex: true })
+const CUR = '2026-09'
+const PREV = '2026-08'
 
-  if (!cur) return null
+export default function MrDipzFinancials({ model, card, lbl, onPnlLineClick }) {
+  const [opexOpen, setOpexOpen] = useState(true)
+  const cur = model.pnlByMonth.find((m) => m.month === CUR)?.entries || {}
+  const prev = model.pnlByMonth.find((m) => m.month === PREV)?.entries || {}
 
-  const portalStyles = PNL_SHEET_CSS({ CHAR, CREAM, INK, SPICE, CARDBG })
+  const opexLines = model.pnlLines.filter((l) => l.parent === 'opex')
 
-  const PnlLine = ({ label, amount, priorAmount, indent, bold, subtotal, cost }) => {
-    const prior = priorAmount
-    const delta = prior != null ? amount - prior : null
+  const PnlLine = ({ lineId, indent, bold, cost }) => {
+    const line = model.pnlLines.find((l) => l.id === lineId)
+    if (!line) return null
+    const amount = cur[lineId] ?? 0
+    const priorAmount = prev[lineId]
+    const delta = priorAmount != null ? amount - priorAmount : null
     const show = cost ? -amount : amount
-    const showPrior = prior != null ? (cost ? -prior : prior) : null
+    const showPrior = priorAmount != null ? (cost ? -priorAmount : priorAmount) : null
     const changeColor =
-      delta == null
-        ? MUTED
-        : delta > 0
-          ? cost
-            ? RED
-            : GREEN
-          : delta < 0
-            ? cost
-              ? GREEN
-              : RED
-            : MUTED
-    const lineClass = [
-      'md-pnl-line',
-      indent ? 'md-pnl-line--indent' : '',
-      subtotal || bold ? 'md-pnl-line--sub' : '',
-      !prev ? 'md-pnl-line--solo' : '',
-    ]
-      .filter(Boolean)
-      .join(' ')
+      delta == null ? MUTED : delta > 0 ? (cost ? RED : GREEN) : delta < 0 ? (cost ? GREEN : RED) : MUTED
+
     return (
-      <div className={lineClass}>
-        <span className="md-pnl-label" style={{ fontWeight: bold ? 700 : 400, color: indent ? MUTED : INK }}>{label}</span>
-        <span className="md-pnl-num md-pnl-num--cur" style={{ fontWeight: bold ? 700 : 400, color: cost ? RED : INK }}>
-          {money(show)}
+      <div
+        role="button"
+        tabIndex={0}
+        className={`md-pnl-line md-click${indent ? ' md-pnl-line--indent' : ''}${bold ? ' md-pnl-line--sub' : ''}`}
+        onClick={() => onPnlLineClick(line, CUR, amount, prev[lineId])}
+        onKeyDown={(e) => e.key === 'Enter' && onPnlLineClick(line, CUR, amount, prev[lineId])}
+        style={{ cursor: 'pointer' }}
+      >
+        <span className="md-pnl-label" style={{ fontWeight: bold ? 700 : 400, color: indent ? MUTED : INK }}>
+          {line.label}
+          <span style={{ color: '#C9BBA0', fontSize: 11 }}> ›</span>
         </span>
-        {prev ? <span className="md-pnl-num" style={{ color: MUTED }}>{money(showPrior)}</span> : null}
-        {prev ? (
-          <span className="md-pnl-num" style={{ color: changeColor }}>
-            {delta != null ? money(delta) : '—'}
-          </span>
-        ) : null}
+        <span className="md-pnl-num md-pnl-num--cur" style={{ fontWeight: bold ? 700 : 400, color: cost ? RED : INK }}>{money(show)}</span>
+        <span className="md-pnl-num" style={{ color: MUTED }}>{priorAmount != null ? money(showPrior) : '—'}</span>
+        <span className="md-pnl-num" style={{ color: changeColor }}>{delta != null ? money(delta) : '—'}</span>
       </div>
     )
   }
 
-  const opexEntries = Object.entries(cur.operatingExpenses || {})
-
   return (
     <>
-      <style dangerouslySetInnerHTML={{ __html: portalStyles }} />
+      <style dangerouslySetInnerHTML={{ __html: PNL_SHEET_CSS() }} />
       <div style={card}>
-        <div style={{ ...lbl, marginBottom: 8 }}>P&amp;L — {cur.period}</div>
-        <p style={{ fontSize: 12, color: MUTED, marginBottom: 16 }}>Accrual sample · compares September to August</p>
+        <div style={{ ...lbl, marginBottom: 12 }}>P&amp;L</div>
         <div className="md-pnl-wrap">
           <div className="md-pnl-head">
             <span className="md-pnl-label" />
@@ -80,14 +54,14 @@ export default function MrDipzFinancials({ model, card, lbl }) {
             <span className="md-pnl-num">Prior mo.</span>
             <span className="md-pnl-num">Change</span>
           </div>
-          <PnlLine label="Gross sales" amount={cur.grossSales} priorAmount={prev?.grossSales} bold />
-          <PnlLine label="Credits & returns" amount={cur.credits} priorAmount={prev?.credits} indent cost />
-          <PnlLine label="Net sales" amount={cur.netSales} priorAmount={prev?.netSales} subtotal bold />
-          <PnlLine label="Cost of goods sold" amount={cur.cogs} priorAmount={prev?.cogs} cost />
-          <PnlLine label="Gross profit" amount={cur.grossProfit} priorAmount={prev?.grossProfit} subtotal bold />
+          <PnlLine lineId="gross" bold />
+          <PnlLine lineId="credits" indent cost />
+          <PnlLine lineId="net_sales" bold />
+          <PnlLine lineId="cogs" cost />
+          <PnlLine lineId="gross_profit" bold />
           <button
             type="button"
-            onClick={() => setExpand((e) => ({ ...e, opex: !e.opex }))}
+            onClick={() => setOpexOpen((o) => !o)}
             style={{
               display: 'flex',
               alignItems: 'center',
@@ -103,25 +77,12 @@ export default function MrDipzFinancials({ model, card, lbl }) {
               color: INK,
             }}
           >
-            <span style={{ color: SPICE, fontSize: 10 }}>{expand.opex ? '▼' : '▶'}</span>
+            <span style={{ color: SPICE, fontSize: 10 }}>{opexOpen ? '▼' : '▶'}</span>
             Operating expenses
           </button>
-          {expand.opex
-            ? opexEntries.map(([label, amt]) => {
-                const prevAmt = prev?.operatingExpenses?.[label]
-                return (
-                  <PnlLine key={label} label={label} amount={amt} priorAmount={prevAmt} indent cost />
-                )
-              })
-            : null}
-          <PnlLine
-            label="Total operating expenses"
-            amount={cur.operatingExpensesTotal}
-            priorAmount={prev?.operatingExpensesTotal}
-            cost
-            subtotal
-          />
-          <PnlLine label="Net profit" amount={cur.netProfit} priorAmount={prev?.netProfit} bold subtotal />
+          {opexOpen ? opexLines.map((l) => <PnlLine key={l.id} lineId={l.id} indent cost />) : null}
+          <PnlLine lineId="opex" cost bold />
+          <PnlLine lineId="net_profit" bold />
         </div>
       </div>
     </>

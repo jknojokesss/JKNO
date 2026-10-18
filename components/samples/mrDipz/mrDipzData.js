@@ -1,142 +1,1413 @@
-// BEGIN mrDipzData
-/** Fictitious Mr. Dipz wholesale sample — refrigerated kosher dips, store-direct. */
-export const MR_DIPZ_RAW = {
-  meta: {
-    portal: 'Mr. Dipz — owner portal (sample)',
-    sample_label: 'Sample — fictitious numbers',
-    period: 'September 2026',
-    as_of: '2026-09-30',
-    built_by: 'JK No Jokes Financials',
-    brand: 'Mr. Dipz',
-    tagline: 'Dips worth the fridge space.',
+// -----BEGIN mrDipzData.js-----
+export const AS_OF_LABEL = 'Sep 30, 2026'
+export const AS_OF_DATE = '2026-09-30'
+export const AREAS = [
+  {
+    'id': 'north',
+    'label': 'North'
   },
-  products: [
-    { sku: 'MD-RG-7', name: 'Roasted Garlic Dip', size: '7 oz', cases_per_pallet: 360, case_price: 28.5, unit_cost: 3.42, category: 'Garlic' },
-    { sku: 'MD-HE-7', name: 'Heavenly Eggplant', size: '7 oz', cases_per_pallet: 360, case_price: 27.75, unit_cost: 3.28, category: 'Eggplant' },
-    { sku: 'MD-SO-7', name: 'Sweet Onion Dip', size: '7 oz', cases_per_pallet: 360, case_price: 27.75, unit_cost: 3.25, category: 'Onion' },
-    { sku: 'MD-PS-7', name: 'Pickles & Sweet Onion', size: '7 oz', cases_per_pallet: 360, case_price: 28.25, unit_cost: 3.35, category: 'Onion' },
-    { sku: 'MD-BB-7', name: 'Babaganoush', size: '7 oz', cases_per_pallet: 360, case_price: 27.5, unit_cost: 3.22, category: 'Eggplant' },
-    { sku: 'MD-SS-7', name: "Sweet N' Spicy Onion", size: '7 oz', cases_per_pallet: 360, case_price: 28.5, unit_cost: 3.38, category: 'Onion' },
-    { sku: 'MD-ORG-7', name: 'Onion & Roasted Garlic', size: '7 oz', cases_per_pallet: 360, case_price: 28.75, unit_cost: 3.44, category: 'Garlic' },
-    { sku: 'MD-MO-7', name: "Mustard N' Sweet Onion", size: '7 oz', cases_per_pallet: 360, case_price: 28.25, unit_cost: 3.31, category: 'Onion' },
-  ],
-  stores: [
-    { id: 'st-rockland', name: 'Rockland Kosher Supermarket', city: 'Monsey, NY', region: 'NY / NJ', terms: 'Net 30', rep: 'D. Weiss',
-      sales: { sep: 12408.2, aug: 10847.21 }, credits: { sep: 44.73, aug: 1189.24 }, balanceOwed: 6154.23,
-      casesSep: { 'MD-RG-7': 142, 'MD-HE-7': 98, 'MD-SO-7': 76, 'MD-PS-7': 54, 'MD-BB-7': 41 },
-      lastDelivery: '2026-09-26', daysSinceOrder: 4 },
-    { id: 'st-pomegranate', name: 'Pomegranate', city: 'Brooklyn, NY', region: 'NY / NJ', terms: 'Net 30', rep: 'D. Weiss',
-      sales: { sep: 485.34, aug: 3814.31 }, credits: { sep: 335.17, aug: 886.86 }, balanceOwed: 3532.03,
-      casesSep: { 'MD-SO-7': 12, 'MD-HE-7': 6 }, lastDelivery: '2026-09-08', daysSinceOrder: 22 },
-    { id: 'st-bingo', name: 'Bingo Wholesale', city: 'Brooklyn, NY', region: 'NY / NJ', terms: 'Net 45', rep: 'M. Klein',
-      sales: { sep: 5337.0, aug: 1051.0 }, credits: { sep: 1095.48, aug: 1235.56 }, balanceOwed: 3583.82,
-      casesSep: { 'MD-RG-7': 48, 'MD-PS-7': 62, 'MD-SS-7': 44, 'MD-BB-7': 38 }, lastDelivery: '2026-09-19', daysSinceOrder: 11 },
-    { id: 'st-seasons', name: 'Seasons Kosher', city: 'Scranton, PA', region: 'Tri-State', terms: 'Net 30', rep: 'A. Horowitz',
-      sales: { sep: 4331.45, aug: 1096.0 }, credits: { sep: 918.58, aug: 827.84 }, balanceOwed: 2028.29,
-      casesSep: { 'MD-HE-7': 52, 'MD-SO-7': 38, 'MD-ORG-7': 28 }, lastDelivery: '2026-09-22', daysSinceOrder: 8 },
-    { id: 'st-evergreen', name: 'Evergreen Kosher', city: 'Monsey, NY', region: 'NY / NJ', terms: 'Net 30', rep: 'D. Weiss',
-      sales: { sep: 14291.37, aug: 9603.87 }, credits: { sep: 371.59, aug: 1010.25 }, balanceOwed: 2584.68,
-      casesSep: { 'MD-RG-7': 186, 'MD-HE-7': 124, 'MD-SO-7': 88, 'MD-PS-7': 72, 'MD-SS-7': 46, 'MD-MO-7': 34 },
-      lastDelivery: '2026-09-28', daysSinceOrder: 2 },
-    { id: 'st-gourmet', name: 'Gourmet Glatt', city: 'Cedarhurst, NY', region: 'NY / NJ', terms: 'Net 30', rep: 'M. Klein',
-      sales: { sep: 13131.49, aug: 6841.47 }, credits: { sep: 993.3, aug: 65.71 }, balanceOwed: 9068.0,
-      casesSep: { 'MD-RG-7': 156, 'MD-HE-7': 102, 'MD-ORG-7': 64, 'MD-BB-7': 58 }, lastDelivery: '2026-09-24', daysSinceOrder: 6 },
-    { id: 'st-shalom', name: 'Shalom Kosher Market', city: 'Lakewood, NJ', region: 'NY / NJ', terms: 'Net 30', rep: 'M. Klein',
-      sales: { sep: 17312.92, aug: 9146.44 }, credits: { sep: 1364.42, aug: 326.77 }, balanceOwed: 6273.8,
-      casesSep: { 'MD-RG-7': 198, 'MD-HE-7': 142, 'MD-SO-7': 96, 'MD-PS-7': 84, 'MD-SS-7': 52, 'MD-MO-7': 40, 'MD-ORG-7': 36 },
-      lastDelivery: '2026-09-29', daysSinceOrder: 1 },
-    { id: 'st-oak', name: 'Oak & Thyme', city: 'Brooklyn, NY', region: 'NY / NJ', terms: 'Net 21', rep: 'D. Weiss',
-      sales: { sep: 1687.07, aug: 8269.37 }, credits: { sep: 10.95, aug: 414.94 }, balanceOwed: 5897.15,
-      casesSep: { 'MD-SO-7': 28, 'MD-HE-7': 18, 'MD-BB-7': 14 }, lastDelivery: '2026-09-12', daysSinceOrder: 18 },
-    { id: 'st-cedar', name: 'Cedar Market', city: 'Teaneck, NJ', region: 'NY / NJ', terms: 'Net 30', rep: 'A. Horowitz',
-      sales: { sep: 8187.48, aug: 6076.58 }, credits: { sep: 1358.33, aug: 114.41 }, balanceOwed: 1656.84,
-      casesSep: { 'MD-RG-7': 88, 'MD-PS-7': 56, 'MD-HE-7': 44, 'MD-SS-7': 32 }, lastDelivery: '2026-09-20', daysSinceOrder: 10 },
-    { id: 'st-stop', name: 'Kosher Stop Edison', city: 'Edison, NJ', region: 'Tri-State', terms: 'Net 30', rep: 'A. Horowitz',
-      sales: { sep: 578.22, aug: 11027.42 }, credits: { sep: 1176.82, aug: 333.79 }, balanceOwed: 7058.87,
-      casesSep: { 'MD-HE-7': 8, 'MD-SO-7': 6 }, lastDelivery: '2026-09-05', daysSinceOrder: 25 },
-    { id: 'st-munchies', name: 'Munchies Kosher', city: 'Miami, FL', region: 'South', terms: 'Net 45', rep: 'R. Santos',
-      sales: { sep: 4242.71, aug: 4289.58 }, credits: { sep: 573.54, aug: 144.82 }, balanceOwed: 1581.94,
-      casesSep: { 'MD-RG-7': 42, 'MD-HE-7': 36, 'MD-SO-7': 28, 'MD-BB-7': 22 }, lastDelivery: '2026-09-17', daysSinceOrder: 13 },
-    { id: 'st-kosherworld', name: 'Kosher World LA', city: 'Los Angeles, CA', region: 'West', terms: 'Net 45', rep: 'R. Santos',
-      sales: { sep: 9806.5, aug: 6255.75 }, credits: { sep: 262.09, aug: 398.56 }, balanceOwed: 3673.6,
-      casesSep: { 'MD-RG-7': 96, 'MD-HE-7': 68, 'MD-ORG-7': 48, 'MD-PS-7': 40, 'MD-SS-7': 28 }, lastDelivery: '2026-09-23', daysSinceOrder: 7 },
-  ],
-  creditMemos: [
-    { id: 'cm-901', storeId: 'st-bingo', date: '2026-09-14', amount: 612.0, reason: 'Spoilage — warm case', sku: 'MD-HE-7', cases: 22 },
-    { id: 'cm-902', storeId: 'st-bingo', date: '2026-09-21', amount: 483.48, reason: 'Short dated pull', sku: 'MD-PS-7', cases: 17 },
-    { id: 'cm-903', storeId: 'st-seasons', date: '2026-09-09', amount: 518.25, reason: 'Damaged in transit', sku: 'MD-HE-7', cases: 19 },
-    { id: 'cm-904', storeId: 'st-seasons', date: '2026-09-27', amount: 400.33, reason: 'Store count variance', sku: 'MD-SO-7', cases: 14 },
-    { id: 'cm-905', storeId: 'st-evergreen', date: '2026-09-18', amount: 371.59, reason: 'Promo slotting credit', sku: 'MD-RG-7', cases: 13 },
-    { id: 'cm-906', storeId: 'st-gourmet', date: '2026-09-11', amount: 993.3, reason: 'Spoilage — fridge outage', sku: 'MD-ORG-7', cases: 35 },
-    { id: 'cm-907', storeId: 'st-shalom', date: '2026-09-16', amount: 864.42, reason: 'Spoilage', sku: 'MD-RG-7', cases: 30 },
-    { id: 'cm-908', storeId: 'st-shalom', date: '2026-09-25', amount: 500.0, reason: 'Short dated pull', sku: 'MD-HE-7', cases: 18 },
-    { id: 'cm-909', storeId: 'st-cedar', date: '2026-09-08', amount: 728.33, reason: 'Damaged cases', sku: 'MD-PS-7', cases: 26 },
-    { id: 'cm-910', storeId: 'st-cedar', date: '2026-09-24', amount: 630.0, reason: 'Spoilage', sku: 'MD-RG-7', cases: 22 },
-    { id: 'cm-911', storeId: 'st-stop', date: '2026-09-03', amount: 1176.82, reason: 'Full case returns', sku: 'MD-HE-7', cases: 42 },
-    { id: 'cm-912', storeId: 'st-munchies', date: '2026-09-19', amount: 573.54, reason: 'Heat damage (freight)', sku: 'MD-RG-7', cases: 20 },
-    { id: 'cm-913', storeId: 'st-pomegranate', date: '2026-09-07', amount: 335.17, reason: 'Short dated pull', sku: 'MD-SO-7', cases: 12 },
-    { id: 'cm-914', storeId: 'st-kosherworld', date: '2026-09-15', amount: 262.09, reason: 'Count adjustment', sku: 'MD-HE-7', cases: 9 },
-    { id: 'cm-915', storeId: 'st-rockland', date: '2026-09-29', amount: 44.73, reason: 'Single case credit', sku: 'MD-BB-7', cases: 2 },
-  ],
-  pnlByMonth: [
-    {
-      month: '2026-08',
-      label: 'Aug 26',
-      period: 'August 2026',
-      grossSales: 78319.0,
-      credits: 6948.75,
-      netSales: 71370.25,
-      cogs: 38542.5,
-      grossProfit: 32827.75,
-      operatingExpenses: {
-        'Freight & cold chain': 8420.0,
-        'Sales commissions': 3568.5,
-        'Payroll': 12400.0,
-        'Co-packer & kitchen': 4820.0,
-        'Samples & demos': 980.0,
-        'Rent & storage (cold)': 2100.0,
-        'Insurance & kosher': 1450.0,
-        'Software & phones': 251.53,
-      },
-      operatingExpensesTotal: 32990.03,
-      netProfit: -162.28,
-    },
-    {
-      month: '2026-09',
-      label: 'Sep 26',
-      period: 'September 2026',
-      grossSales: 91799.75,
-      credits: 8505.0,
-      netSales: 83294.75,
-      cogs: 45231.52,
-      grossProfit: 38063.23,
-      operatingExpenses: {
-        'Freight & cold chain': 9180.0,
-        'Sales commissions': 4176.0,
-        'Payroll': 12400.0,
-        'Co-packer & kitchen': 5280.0,
-        'Samples & demos': 1120.0,
-        'Rent & storage (cold)': 2100.0,
-        'Insurance & kosher': 1450.0,
-        'Software & phones': 263.0,
-      },
-      operatingExpensesTotal: 32694.0,
-      netProfit: 5369.23,
-    },
-  ],
-  overview: {
-    cashOnHand: 42850.0,
-    casesShippedSep: 2846,
-    activeStores: 12,
-    needsAttention: [
-      { severity: 'high', title: 'Bingo credits spiked in September', detail: '$1,095 in spoilage and short-dated pulls — ask about case temps on delivery.', tab: 'credits' },
-      { severity: 'high', title: 'Gourmet Glatt balance past terms', detail: '$9,068 open — largest single-store balance on the books.', tab: 'owed' },
-      { severity: 'medium', title: 'Kosher Stop Edison quiet in September', detail: 'Sales $578 after an $11K August — follow up on shelf reset.', tab: 'stores' },
-      { severity: 'medium', title: 'Sweet Onion cases down 8% vs August', detail: 'Still the #2 SKU; Heavenly Eggplant picked up share.', tab: 'products' },
-      { severity: 'low', title: 'West region freight up $420', detail: 'Kosher World LA took an extra pallet — one-time.', tab: 'financials' },
-    ],
+  {
+    'id': 'central',
+    'label': 'Central'
   },
-}
-// END mrDipzData
-
-export default MR_DIPZ_RAW
+  {
+    'id': 'south',
+    'label': 'South'
+  }
+]
+export const STORES = [
+  {
+    'id': 'st_01',
+    'areaId': 'north',
+    'label': 'Maple Court Foods',
+    'terms': 'Net 30'
+  },
+  {
+    'id': 'st_02',
+    'areaId': 'north',
+    'label': 'Harbor Lane Market',
+    'terms': 'Net 30'
+  },
+  {
+    'id': 'st_03',
+    'areaId': 'north',
+    'label': 'Pine Ridge Grocery',
+    'terms': 'Net 30'
+  },
+  {
+    'id': 'st_04',
+    'areaId': 'central',
+    'label': 'Route 9 Foods',
+    'terms': 'Net 30'
+  },
+  {
+    'id': 'st_05',
+    'areaId': 'central',
+    'label': 'Cedar Plaza Market',
+    'terms': 'Net 30'
+  },
+  {
+    'id': 'st_06',
+    'areaId': 'central',
+    'label': 'Valley View Kosher',
+    'terms': 'Net 30'
+  },
+  {
+    'id': 'st_07',
+    'areaId': 'central',
+    'label': 'Lakeside Provisions',
+    'terms': 'Net 30'
+  },
+  {
+    'id': 'st_08',
+    'areaId': 'south',
+    'label': 'Bayfront Market',
+    'terms': 'Net 30'
+  },
+  {
+    'id': 'st_09',
+    'areaId': 'south',
+    'label': 'Orchard Row Foods',
+    'terms': 'Net 30'
+  },
+  {
+    'id': 'st_10',
+    'areaId': 'south',
+    'label': 'Sunset Park Grocery',
+    'terms': 'Net 30'
+  },
+  {
+    'id': 'st_11',
+    'areaId': 'south',
+    'label': 'Palm Drive Market',
+    'terms': 'Net 30'
+  },
+  {
+    'id': 'st_12',
+    'areaId': 'central',
+    'label': 'Hillcrest Foods',
+    'terms': 'Net 30'
+  }
+]
+export const PRODUCTS = [
+  {
+    'id': 'rg',
+    'label': 'Roasted Garlic',
+    'casePrice': 28.5
+  },
+  {
+    'id': 'he',
+    'label': 'Heavenly Eggplant',
+    'casePrice': 27.75
+  },
+  {
+    'id': 'so',
+    'label': 'Sweet Onion',
+    'casePrice': 27.75
+  },
+  {
+    'id': 'ps',
+    'label': 'Pickles & Sweet Onion',
+    'casePrice': 28.25
+  },
+  {
+    'id': 'bb',
+    'label': 'Babaganoush',
+    'casePrice': 27.5
+  },
+  {
+    'id': 'ss',
+    'label': 'Sweet N Spicy Onion',
+    'casePrice': 28.5
+  },
+  {
+    'id': 'org',
+    'label': 'Onion & Roasted Garlic',
+    'casePrice': 28.75
+  },
+  {
+    'id': 'mo',
+    'label': 'Mustard N Sweet Onion',
+    'casePrice': 28.25
+  }
+]
+export const WEEKS = [
+  {
+    'id': 'w35',
+    'label': 'Aug 25\u201331',
+    'month': '2026-08'
+  },
+  {
+    'id': 'w36',
+    'label': 'Sep 1\u20137',
+    'month': '2026-09'
+  },
+  {
+    'id': 'w37',
+    'label': 'Sep 8\u201314',
+    'month': '2026-09'
+  },
+  {
+    'id': 'w38',
+    'label': 'Sep 15\u201321',
+    'month': '2026-09'
+  },
+  {
+    'id': 'w39',
+    'label': 'Sep 22\u201330',
+    'month': '2026-09'
+  }
+]
+export const SOLD = [
+  {
+    'storeId': 'st_01',
+    'productId': 'rg',
+    'weekId': 'w36',
+    'month': '2026-09',
+    'amount': 2729.8
+  },
+  {
+    'storeId': 'st_01',
+    'productId': 'he',
+    'weekId': 'w37',
+    'month': '2026-09',
+    'amount': 2977.97
+  },
+  {
+    'storeId': 'st_01',
+    'productId': 'so',
+    'weekId': 'w38',
+    'month': '2026-09',
+    'amount': 3226.13
+  },
+  {
+    'storeId': 'st_01',
+    'productId': 'ps',
+    'weekId': 'w39',
+    'month': '2026-09',
+    'amount': 3474.3
+  },
+  {
+    'storeId': 'st_01',
+    'productId': 'rg',
+    'weekId': 'w35',
+    'month': '2026-08',
+    'amount': 10847.21
+  },
+  {
+    'storeId': 'st_02',
+    'productId': 'rg',
+    'weekId': 'w36',
+    'month': '2026-09',
+    'amount': 106.77
+  },
+  {
+    'storeId': 'st_02',
+    'productId': 'he',
+    'weekId': 'w37',
+    'month': '2026-09',
+    'amount': 116.48
+  },
+  {
+    'storeId': 'st_02',
+    'productId': 'so',
+    'weekId': 'w38',
+    'month': '2026-09',
+    'amount': 126.19
+  },
+  {
+    'storeId': 'st_02',
+    'productId': 'ps',
+    'weekId': 'w39',
+    'month': '2026-09',
+    'amount': 135.9
+  },
+  {
+    'storeId': 'st_02',
+    'productId': 'he',
+    'weekId': 'w35',
+    'month': '2026-08',
+    'amount': 3814.31
+  },
+  {
+    'storeId': 'st_03',
+    'productId': 'rg',
+    'weekId': 'w36',
+    'month': '2026-09',
+    'amount': 1174.14
+  },
+  {
+    'storeId': 'st_03',
+    'productId': 'he',
+    'weekId': 'w37',
+    'month': '2026-09',
+    'amount': 1280.88
+  },
+  {
+    'storeId': 'st_03',
+    'productId': 'so',
+    'weekId': 'w38',
+    'month': '2026-09',
+    'amount': 1387.62
+  },
+  {
+    'storeId': 'st_03',
+    'productId': 'ps',
+    'weekId': 'w39',
+    'month': '2026-09',
+    'amount': 1494.36
+  },
+  {
+    'storeId': 'st_03',
+    'productId': 'so',
+    'weekId': 'w35',
+    'month': '2026-08',
+    'amount': 1051.0
+  },
+  {
+    'storeId': 'st_04',
+    'productId': 'rg',
+    'weekId': 'w36',
+    'month': '2026-09',
+    'amount': 952.92
+  },
+  {
+    'storeId': 'st_04',
+    'productId': 'he',
+    'weekId': 'w37',
+    'month': '2026-09',
+    'amount': 1039.55
+  },
+  {
+    'storeId': 'st_04',
+    'productId': 'so',
+    'weekId': 'w38',
+    'month': '2026-09',
+    'amount': 1126.18
+  },
+  {
+    'storeId': 'st_04',
+    'productId': 'ps',
+    'weekId': 'w39',
+    'month': '2026-09',
+    'amount': 1212.8
+  },
+  {
+    'storeId': 'st_04',
+    'productId': 'ps',
+    'weekId': 'w35',
+    'month': '2026-08',
+    'amount': 1096.0
+  },
+  {
+    'storeId': 'st_05',
+    'productId': 'rg',
+    'weekId': 'w36',
+    'month': '2026-09',
+    'amount': 3144.1
+  },
+  {
+    'storeId': 'st_05',
+    'productId': 'he',
+    'weekId': 'w37',
+    'month': '2026-09',
+    'amount': 3429.93
+  },
+  {
+    'storeId': 'st_05',
+    'productId': 'so',
+    'weekId': 'w38',
+    'month': '2026-09',
+    'amount': 3715.76
+  },
+  {
+    'storeId': 'st_05',
+    'productId': 'ps',
+    'weekId': 'w39',
+    'month': '2026-09',
+    'amount': 4001.58
+  },
+  {
+    'storeId': 'st_05',
+    'productId': 'bb',
+    'weekId': 'w35',
+    'month': '2026-08',
+    'amount': 9603.87
+  },
+  {
+    'storeId': 'st_06',
+    'productId': 'rg',
+    'weekId': 'w36',
+    'month': '2026-09',
+    'amount': 2888.93
+  },
+  {
+    'storeId': 'st_06',
+    'productId': 'he',
+    'weekId': 'w37',
+    'month': '2026-09',
+    'amount': 3151.56
+  },
+  {
+    'storeId': 'st_06',
+    'productId': 'so',
+    'weekId': 'w38',
+    'month': '2026-09',
+    'amount': 3414.19
+  },
+  {
+    'storeId': 'st_06',
+    'productId': 'ps',
+    'weekId': 'w39',
+    'month': '2026-09',
+    'amount': 3676.81
+  },
+  {
+    'storeId': 'st_06',
+    'productId': 'ss',
+    'weekId': 'w35',
+    'month': '2026-08',
+    'amount': 6841.47
+  },
+  {
+    'storeId': 'st_07',
+    'productId': 'rg',
+    'weekId': 'w36',
+    'month': '2026-09',
+    'amount': 3808.84
+  },
+  {
+    'storeId': 'st_07',
+    'productId': 'he',
+    'weekId': 'w37',
+    'month': '2026-09',
+    'amount': 4155.1
+  },
+  {
+    'storeId': 'st_07',
+    'productId': 'so',
+    'weekId': 'w38',
+    'month': '2026-09',
+    'amount': 4501.36
+  },
+  {
+    'storeId': 'st_07',
+    'productId': 'ps',
+    'weekId': 'w39',
+    'month': '2026-09',
+    'amount': 4847.62
+  },
+  {
+    'storeId': 'st_07',
+    'productId': 'org',
+    'weekId': 'w35',
+    'month': '2026-08',
+    'amount': 9146.44
+  },
+  {
+    'storeId': 'st_08',
+    'productId': 'rg',
+    'weekId': 'w36',
+    'month': '2026-09',
+    'amount': 371.16
+  },
+  {
+    'storeId': 'st_08',
+    'productId': 'he',
+    'weekId': 'w37',
+    'month': '2026-09',
+    'amount': 404.9
+  },
+  {
+    'storeId': 'st_08',
+    'productId': 'so',
+    'weekId': 'w38',
+    'month': '2026-09',
+    'amount': 438.64
+  },
+  {
+    'storeId': 'st_08',
+    'productId': 'ps',
+    'weekId': 'w39',
+    'month': '2026-09',
+    'amount': 472.37
+  },
+  {
+    'storeId': 'st_08',
+    'productId': 'mo',
+    'weekId': 'w35',
+    'month': '2026-08',
+    'amount': 8269.37
+  },
+  {
+    'storeId': 'st_09',
+    'productId': 'rg',
+    'weekId': 'w36',
+    'month': '2026-09',
+    'amount': 1801.25
+  },
+  {
+    'storeId': 'st_09',
+    'productId': 'he',
+    'weekId': 'w37',
+    'month': '2026-09',
+    'amount': 1965.0
+  },
+  {
+    'storeId': 'st_09',
+    'productId': 'so',
+    'weekId': 'w38',
+    'month': '2026-09',
+    'amount': 2128.74
+  },
+  {
+    'storeId': 'st_09',
+    'productId': 'ps',
+    'weekId': 'w39',
+    'month': '2026-09',
+    'amount': 2292.49
+  },
+  {
+    'storeId': 'st_09',
+    'productId': 'rg',
+    'weekId': 'w35',
+    'month': '2026-08',
+    'amount': 6076.58
+  },
+  {
+    'storeId': 'st_10',
+    'productId': 'rg',
+    'weekId': 'w36',
+    'month': '2026-09',
+    'amount': 127.21
+  },
+  {
+    'storeId': 'st_10',
+    'productId': 'he',
+    'weekId': 'w37',
+    'month': '2026-09',
+    'amount': 138.77
+  },
+  {
+    'storeId': 'st_10',
+    'productId': 'so',
+    'weekId': 'w38',
+    'month': '2026-09',
+    'amount': 150.34
+  },
+  {
+    'storeId': 'st_10',
+    'productId': 'ps',
+    'weekId': 'w39',
+    'month': '2026-09',
+    'amount': 161.9
+  },
+  {
+    'storeId': 'st_10',
+    'productId': 'he',
+    'weekId': 'w35',
+    'month': '2026-08',
+    'amount': 11027.42
+  },
+  {
+    'storeId': 'st_11',
+    'productId': 'rg',
+    'weekId': 'w36',
+    'month': '2026-09',
+    'amount': 933.4
+  },
+  {
+    'storeId': 'st_11',
+    'productId': 'he',
+    'weekId': 'w37',
+    'month': '2026-09',
+    'amount': 1018.25
+  },
+  {
+    'storeId': 'st_11',
+    'productId': 'so',
+    'weekId': 'w38',
+    'month': '2026-09',
+    'amount': 1103.1
+  },
+  {
+    'storeId': 'st_11',
+    'productId': 'ps',
+    'weekId': 'w39',
+    'month': '2026-09',
+    'amount': 1187.96
+  },
+  {
+    'storeId': 'st_11',
+    'productId': 'so',
+    'weekId': 'w35',
+    'month': '2026-08',
+    'amount': 4289.58
+  },
+  {
+    'storeId': 'st_12',
+    'productId': 'rg',
+    'weekId': 'w36',
+    'month': '2026-09',
+    'amount': 2157.43
+  },
+  {
+    'storeId': 'st_12',
+    'productId': 'he',
+    'weekId': 'w37',
+    'month': '2026-09',
+    'amount': 2353.56
+  },
+  {
+    'storeId': 'st_12',
+    'productId': 'so',
+    'weekId': 'w38',
+    'month': '2026-09',
+    'amount': 2549.69
+  },
+  {
+    'storeId': 'st_12',
+    'productId': 'ps',
+    'weekId': 'w39',
+    'month': '2026-09',
+    'amount': 2745.82
+  },
+  {
+    'storeId': 'st_12',
+    'productId': 'ps',
+    'weekId': 'w35',
+    'month': '2026-08',
+    'amount': 6255.75
+  }
+]
+export const EXPIRED = [
+  {
+    'storeId': 'st_01',
+    'productId': 'he',
+    'weekId': 'w36',
+    'month': '2026-09',
+    'amount': 8.95,
+    'reason': 'Spoilage or short-dated pull'
+  },
+  {
+    'storeId': 'st_01',
+    'productId': 'so',
+    'weekId': 'w37',
+    'month': '2026-09',
+    'amount': 11.18,
+    'reason': 'Spoilage or short-dated pull'
+  },
+  {
+    'storeId': 'st_01',
+    'productId': 'ps',
+    'weekId': 'w38',
+    'month': '2026-09',
+    'amount': 11.18,
+    'reason': 'Spoilage or short-dated pull'
+  },
+  {
+    'storeId': 'st_01',
+    'productId': 'bb',
+    'weekId': 'w39',
+    'month': '2026-09',
+    'amount': 13.42,
+    'reason': 'Spoilage or short-dated pull'
+  },
+  {
+    'storeId': 'st_01',
+    'productId': 'he',
+    'weekId': 'w35',
+    'month': '2026-08',
+    'amount': 1189.24,
+    'reason': 'Prior month credit'
+  },
+  {
+    'storeId': 'st_02',
+    'productId': 'he',
+    'weekId': 'w36',
+    'month': '2026-09',
+    'amount': 67.03,
+    'reason': 'Spoilage or short-dated pull'
+  },
+  {
+    'storeId': 'st_02',
+    'productId': 'so',
+    'weekId': 'w37',
+    'month': '2026-09',
+    'amount': 83.79,
+    'reason': 'Spoilage or short-dated pull'
+  },
+  {
+    'storeId': 'st_02',
+    'productId': 'ps',
+    'weekId': 'w38',
+    'month': '2026-09',
+    'amount': 83.79,
+    'reason': 'Spoilage or short-dated pull'
+  },
+  {
+    'storeId': 'st_02',
+    'productId': 'bb',
+    'weekId': 'w39',
+    'month': '2026-09',
+    'amount': 100.56,
+    'reason': 'Spoilage or short-dated pull'
+  },
+  {
+    'storeId': 'st_02',
+    'productId': 'so',
+    'weekId': 'w35',
+    'month': '2026-08',
+    'amount': 886.86,
+    'reason': 'Prior month credit'
+  },
+  {
+    'storeId': 'st_03',
+    'productId': 'he',
+    'weekId': 'w36',
+    'month': '2026-09',
+    'amount': 219.1,
+    'reason': 'Spoilage or short-dated pull'
+  },
+  {
+    'storeId': 'st_03',
+    'productId': 'so',
+    'weekId': 'w37',
+    'month': '2026-09',
+    'amount': 273.87,
+    'reason': 'Spoilage or short-dated pull'
+  },
+  {
+    'storeId': 'st_03',
+    'productId': 'ps',
+    'weekId': 'w38',
+    'month': '2026-09',
+    'amount': 273.87,
+    'reason': 'Spoilage or short-dated pull'
+  },
+  {
+    'storeId': 'st_03',
+    'productId': 'bb',
+    'weekId': 'w39',
+    'month': '2026-09',
+    'amount': 328.64,
+    'reason': 'Spoilage or short-dated pull'
+  },
+  {
+    'storeId': 'st_03',
+    'productId': 'ps',
+    'weekId': 'w35',
+    'month': '2026-08',
+    'amount': 1235.56,
+    'reason': 'Prior month credit'
+  },
+  {
+    'storeId': 'st_04',
+    'productId': 'he',
+    'weekId': 'w36',
+    'month': '2026-09',
+    'amount': 183.72,
+    'reason': 'Spoilage or short-dated pull'
+  },
+  {
+    'storeId': 'st_04',
+    'productId': 'so',
+    'weekId': 'w37',
+    'month': '2026-09',
+    'amount': 229.65,
+    'reason': 'Spoilage or short-dated pull'
+  },
+  {
+    'storeId': 'st_04',
+    'productId': 'ps',
+    'weekId': 'w38',
+    'month': '2026-09',
+    'amount': 229.65,
+    'reason': 'Spoilage or short-dated pull'
+  },
+  {
+    'storeId': 'st_04',
+    'productId': 'bb',
+    'weekId': 'w39',
+    'month': '2026-09',
+    'amount': 275.56,
+    'reason': 'Spoilage or short-dated pull'
+  },
+  {
+    'storeId': 'st_04',
+    'productId': 'bb',
+    'weekId': 'w35',
+    'month': '2026-08',
+    'amount': 827.84,
+    'reason': 'Prior month credit'
+  },
+  {
+    'storeId': 'st_05',
+    'productId': 'he',
+    'weekId': 'w36',
+    'month': '2026-09',
+    'amount': 74.32,
+    'reason': 'Spoilage or short-dated pull'
+  },
+  {
+    'storeId': 'st_05',
+    'productId': 'so',
+    'weekId': 'w37',
+    'month': '2026-09',
+    'amount': 92.9,
+    'reason': 'Spoilage or short-dated pull'
+  },
+  {
+    'storeId': 'st_05',
+    'productId': 'ps',
+    'weekId': 'w38',
+    'month': '2026-09',
+    'amount': 92.9,
+    'reason': 'Spoilage or short-dated pull'
+  },
+  {
+    'storeId': 'st_05',
+    'productId': 'bb',
+    'weekId': 'w39',
+    'month': '2026-09',
+    'amount': 111.47,
+    'reason': 'Spoilage or short-dated pull'
+  },
+  {
+    'storeId': 'st_05',
+    'productId': 'ss',
+    'weekId': 'w35',
+    'month': '2026-08',
+    'amount': 1010.25,
+    'reason': 'Prior month credit'
+  },
+  {
+    'storeId': 'st_06',
+    'productId': 'he',
+    'weekId': 'w36',
+    'month': '2026-09',
+    'amount': 198.66,
+    'reason': 'Spoilage or short-dated pull'
+  },
+  {
+    'storeId': 'st_06',
+    'productId': 'so',
+    'weekId': 'w37',
+    'month': '2026-09',
+    'amount': 248.32,
+    'reason': 'Spoilage or short-dated pull'
+  },
+  {
+    'storeId': 'st_06',
+    'productId': 'ps',
+    'weekId': 'w38',
+    'month': '2026-09',
+    'amount': 248.32,
+    'reason': 'Spoilage or short-dated pull'
+  },
+  {
+    'storeId': 'st_06',
+    'productId': 'bb',
+    'weekId': 'w39',
+    'month': '2026-09',
+    'amount': 298.0,
+    'reason': 'Spoilage or short-dated pull'
+  },
+  {
+    'storeId': 'st_06',
+    'productId': 'org',
+    'weekId': 'w35',
+    'month': '2026-08',
+    'amount': 65.71,
+    'reason': 'Prior month credit'
+  },
+  {
+    'storeId': 'st_07',
+    'productId': 'he',
+    'weekId': 'w36',
+    'month': '2026-09',
+    'amount': 272.88,
+    'reason': 'Spoilage or short-dated pull'
+  },
+  {
+    'storeId': 'st_07',
+    'productId': 'so',
+    'weekId': 'w37',
+    'month': '2026-09',
+    'amount': 341.11,
+    'reason': 'Spoilage or short-dated pull'
+  },
+  {
+    'storeId': 'st_07',
+    'productId': 'ps',
+    'weekId': 'w38',
+    'month': '2026-09',
+    'amount': 341.11,
+    'reason': 'Spoilage or short-dated pull'
+  },
+  {
+    'storeId': 'st_07',
+    'productId': 'bb',
+    'weekId': 'w39',
+    'month': '2026-09',
+    'amount': 409.32,
+    'reason': 'Spoilage or short-dated pull'
+  },
+  {
+    'storeId': 'st_07',
+    'productId': 'mo',
+    'weekId': 'w35',
+    'month': '2026-08',
+    'amount': 326.77,
+    'reason': 'Prior month credit'
+  },
+  {
+    'storeId': 'st_08',
+    'productId': 'he',
+    'weekId': 'w36',
+    'month': '2026-09',
+    'amount': 2.19,
+    'reason': 'Spoilage or short-dated pull'
+  },
+  {
+    'storeId': 'st_08',
+    'productId': 'so',
+    'weekId': 'w37',
+    'month': '2026-09',
+    'amount': 2.74,
+    'reason': 'Spoilage or short-dated pull'
+  },
+  {
+    'storeId': 'st_08',
+    'productId': 'ps',
+    'weekId': 'w38',
+    'month': '2026-09',
+    'amount': 2.74,
+    'reason': 'Spoilage or short-dated pull'
+  },
+  {
+    'storeId': 'st_08',
+    'productId': 'bb',
+    'weekId': 'w39',
+    'month': '2026-09',
+    'amount': 3.28,
+    'reason': 'Spoilage or short-dated pull'
+  },
+  {
+    'storeId': 'st_08',
+    'productId': 'rg',
+    'weekId': 'w35',
+    'month': '2026-08',
+    'amount': 414.94,
+    'reason': 'Prior month credit'
+  },
+  {
+    'storeId': 'st_09',
+    'productId': 'he',
+    'weekId': 'w36',
+    'month': '2026-09',
+    'amount': 271.67,
+    'reason': 'Spoilage or short-dated pull'
+  },
+  {
+    'storeId': 'st_09',
+    'productId': 'so',
+    'weekId': 'w37',
+    'month': '2026-09',
+    'amount': 339.58,
+    'reason': 'Spoilage or short-dated pull'
+  },
+  {
+    'storeId': 'st_09',
+    'productId': 'ps',
+    'weekId': 'w38',
+    'month': '2026-09',
+    'amount': 339.58,
+    'reason': 'Spoilage or short-dated pull'
+  },
+  {
+    'storeId': 'st_09',
+    'productId': 'bb',
+    'weekId': 'w39',
+    'month': '2026-09',
+    'amount': 407.5,
+    'reason': 'Spoilage or short-dated pull'
+  },
+  {
+    'storeId': 'st_09',
+    'productId': 'he',
+    'weekId': 'w35',
+    'month': '2026-08',
+    'amount': 114.41,
+    'reason': 'Prior month credit'
+  },
+  {
+    'storeId': 'st_10',
+    'productId': 'he',
+    'weekId': 'w36',
+    'month': '2026-09',
+    'amount': 235.36,
+    'reason': 'Spoilage or short-dated pull'
+  },
+  {
+    'storeId': 'st_10',
+    'productId': 'so',
+    'weekId': 'w37',
+    'month': '2026-09',
+    'amount': 294.2,
+    'reason': 'Spoilage or short-dated pull'
+  },
+  {
+    'storeId': 'st_10',
+    'productId': 'ps',
+    'weekId': 'w38',
+    'month': '2026-09',
+    'amount': 294.2,
+    'reason': 'Spoilage or short-dated pull'
+  },
+  {
+    'storeId': 'st_10',
+    'productId': 'bb',
+    'weekId': 'w39',
+    'month': '2026-09',
+    'amount': 353.06,
+    'reason': 'Spoilage or short-dated pull'
+  },
+  {
+    'storeId': 'st_10',
+    'productId': 'so',
+    'weekId': 'w35',
+    'month': '2026-08',
+    'amount': 333.79,
+    'reason': 'Prior month credit'
+  },
+  {
+    'storeId': 'st_11',
+    'productId': 'he',
+    'weekId': 'w36',
+    'month': '2026-09',
+    'amount': 114.71,
+    'reason': 'Spoilage or short-dated pull'
+  },
+  {
+    'storeId': 'st_11',
+    'productId': 'so',
+    'weekId': 'w37',
+    'month': '2026-09',
+    'amount': 143.38,
+    'reason': 'Spoilage or short-dated pull'
+  },
+  {
+    'storeId': 'st_11',
+    'productId': 'ps',
+    'weekId': 'w38',
+    'month': '2026-09',
+    'amount': 143.38,
+    'reason': 'Spoilage or short-dated pull'
+  },
+  {
+    'storeId': 'st_11',
+    'productId': 'bb',
+    'weekId': 'w39',
+    'month': '2026-09',
+    'amount': 172.07,
+    'reason': 'Spoilage or short-dated pull'
+  },
+  {
+    'storeId': 'st_11',
+    'productId': 'ps',
+    'weekId': 'w35',
+    'month': '2026-08',
+    'amount': 144.82,
+    'reason': 'Prior month credit'
+  },
+  {
+    'storeId': 'st_12',
+    'productId': 'he',
+    'weekId': 'w36',
+    'month': '2026-09',
+    'amount': 52.42,
+    'reason': 'Spoilage or short-dated pull'
+  },
+  {
+    'storeId': 'st_12',
+    'productId': 'so',
+    'weekId': 'w37',
+    'month': '2026-09',
+    'amount': 65.52,
+    'reason': 'Spoilage or short-dated pull'
+  },
+  {
+    'storeId': 'st_12',
+    'productId': 'ps',
+    'weekId': 'w38',
+    'month': '2026-09',
+    'amount': 65.52,
+    'reason': 'Spoilage or short-dated pull'
+  },
+  {
+    'storeId': 'st_12',
+    'productId': 'bb',
+    'weekId': 'w39',
+    'month': '2026-09',
+    'amount': 78.63,
+    'reason': 'Spoilage or short-dated pull'
+  },
+  {
+    'storeId': 'st_12',
+    'productId': 'bb',
+    'weekId': 'w35',
+    'month': '2026-08',
+    'amount': 398.56,
+    'reason': 'Prior month credit'
+  }
+]
+export const PRIOR_MONTH = { month: '2026-08', label: 'August 2026' }
+export const INVOICES = [
+  {
+    'id': 'inv-1001',
+    'storeId': 'st_01',
+    'issued': '2026-09-05',
+    'due': '2026-10-05',
+    'amount': 6154.23,
+    'daysOutstanding': 25,
+    'status': 'Open'
+  },
+  {
+    'id': 'inv-1002',
+    'storeId': 'st_02',
+    'issued': '2026-09-05',
+    'due': '2026-10-05',
+    'amount': 3532.03,
+    'daysOutstanding': 25,
+    'status': 'Open'
+  },
+  {
+    'id': 'inv-1003',
+    'storeId': 'st_03',
+    'issued': '2026-09-05',
+    'due': '2026-10-05',
+    'amount': 3583.82,
+    'daysOutstanding': 25,
+    'status': 'Open'
+  },
+  {
+    'id': 'inv-1004',
+    'storeId': 'st_04',
+    'issued': '2026-09-05',
+    'due': '2026-10-05',
+    'amount': 2028.29,
+    'daysOutstanding': 25,
+    'status': 'Open'
+  },
+  {
+    'id': 'inv-1005',
+    'storeId': 'st_05',
+    'issued': '2026-09-05',
+    'due': '2026-10-05',
+    'amount': 2584.68,
+    'daysOutstanding': 25,
+    'status': 'Open'
+  },
+  {
+    'id': 'inv-1006',
+    'storeId': 'st_06',
+    'issued': '2026-09-05',
+    'due': '2026-10-05',
+    'amount': 9068.0,
+    'daysOutstanding': 25,
+    'status': 'Open'
+  },
+  {
+    'id': 'inv-1007',
+    'storeId': 'st_07',
+    'issued': '2026-09-05',
+    'due': '2026-10-05',
+    'amount': 6273.8,
+    'daysOutstanding': 25,
+    'status': 'Open'
+  },
+  {
+    'id': 'inv-1008',
+    'storeId': 'st_08',
+    'issued': '2026-09-05',
+    'due': '2026-10-05',
+    'amount': 5897.15,
+    'daysOutstanding': 25,
+    'status': 'Open'
+  },
+  {
+    'id': 'inv-1009',
+    'storeId': 'st_09',
+    'issued': '2026-09-05',
+    'due': '2026-10-05',
+    'amount': 1656.84,
+    'daysOutstanding': 25,
+    'status': 'Open'
+  },
+  {
+    'id': 'inv-1010',
+    'storeId': 'st_10',
+    'issued': '2026-09-05',
+    'due': '2026-10-05',
+    'amount': 7058.87,
+    'daysOutstanding': 25,
+    'status': 'Open'
+  },
+  {
+    'id': 'inv-1011',
+    'storeId': 'st_11',
+    'issued': '2026-09-05',
+    'due': '2026-10-05',
+    'amount': 1581.94,
+    'daysOutstanding': 25,
+    'status': 'Open'
+  },
+  {
+    'id': 'inv-1012',
+    'storeId': 'st_12',
+    'issued': '2026-09-05',
+    'due': '2026-10-05',
+    'amount': 3673.6,
+    'daysOutstanding': 25,
+    'status': 'Open'
+  }
+]
+export const PNL_LINES = [
+  {
+    'id': 'gross',
+    'label': 'Gross sales',
+    'kind': 'revenue'
+  },
+  {
+    'id': 'credits',
+    'label': 'Credits & returns',
+    'kind': 'contra'
+  },
+  {
+    'id': 'net_sales',
+    'label': 'Net sales',
+    'kind': 'subtotal'
+  },
+  {
+    'id': 'cogs',
+    'label': 'Cost of goods sold',
+    'kind': 'cost'
+  },
+  {
+    'id': 'gross_profit',
+    'label': 'Gross profit',
+    'kind': 'subtotal'
+  },
+  {
+    'id': 'freight',
+    'label': 'Freight & cold chain',
+    'kind': 'cost',
+    'parent': 'opex'
+  },
+  {
+    'id': 'commission',
+    'label': 'Sales commissions',
+    'kind': 'cost',
+    'parent': 'opex'
+  },
+  {
+    'id': 'payroll',
+    'label': 'Payroll',
+    'kind': 'cost',
+    'parent': 'opex'
+  },
+  {
+    'id': 'copack',
+    'label': 'Co-packer & kitchen',
+    'kind': 'cost',
+    'parent': 'opex'
+  },
+  {
+    'id': 'samples',
+    'label': 'Samples & demos',
+    'kind': 'cost',
+    'parent': 'opex'
+  },
+  {
+    'id': 'rent',
+    'label': 'Rent & storage (cold)',
+    'kind': 'cost',
+    'parent': 'opex'
+  },
+  {
+    'id': 'insurance',
+    'label': 'Insurance & kosher',
+    'kind': 'cost',
+    'parent': 'opex'
+  },
+  {
+    'id': 'software',
+    'label': 'Software & phones',
+    'kind': 'cost',
+    'parent': 'opex'
+  },
+  {
+    'id': 'opex',
+    'label': 'Operating expenses',
+    'kind': 'rollup'
+  },
+  {
+    'id': 'net_profit',
+    'label': 'Net profit',
+    'kind': 'total'
+  }
+]
+export const PNL_ENTRIES = [
+  {
+    'month': '2026-09',
+    'lineId': 'gross',
+    'amount': 91799.75
+  },
+  {
+    'month': '2026-08',
+    'lineId': 'gross',
+    'amount': 78319.0
+  },
+  {
+    'month': '2026-09',
+    'lineId': 'credits',
+    'amount': 8505.0
+  },
+  {
+    'month': '2026-08',
+    'lineId': 'credits',
+    'amount': 6948.75
+  },
+  {
+    'month': '2026-09',
+    'lineId': 'net_sales',
+    'amount': 83294.75
+  },
+  {
+    'month': '2026-08',
+    'lineId': 'net_sales',
+    'amount': 71370.25
+  },
+  {
+    'month': '2026-09',
+    'lineId': 'cogs',
+    'amount': 45231.52
+  },
+  {
+    'month': '2026-08',
+    'lineId': 'cogs',
+    'amount': 38542.5
+  },
+  {
+    'month': '2026-09',
+    'lineId': 'gross_profit',
+    'amount': 38063.23
+  },
+  {
+    'month': '2026-08',
+    'lineId': 'gross_profit',
+    'amount': 32827.75
+  },
+  {
+    'month': '2026-09',
+    'lineId': 'freight',
+    'amount': 9180
+  },
+  {
+    'month': '2026-09',
+    'lineId': 'commission',
+    'amount': 4176
+  },
+  {
+    'month': '2026-09',
+    'lineId': 'payroll',
+    'amount': 12400
+  },
+  {
+    'month': '2026-09',
+    'lineId': 'copack',
+    'amount': 5280
+  },
+  {
+    'month': '2026-09',
+    'lineId': 'samples',
+    'amount': 1120
+  },
+  {
+    'month': '2026-09',
+    'lineId': 'rent',
+    'amount': 2100
+  },
+  {
+    'month': '2026-09',
+    'lineId': 'insurance',
+    'amount': 1450
+  },
+  {
+    'month': '2026-09',
+    'lineId': 'software',
+    'amount': 263
+  },
+  {
+    'month': '2026-08',
+    'lineId': 'freight',
+    'amount': 8420
+  },
+  {
+    'month': '2026-08',
+    'lineId': 'commission',
+    'amount': 3568.5
+  },
+  {
+    'month': '2026-08',
+    'lineId': 'payroll',
+    'amount': 12400
+  },
+  {
+    'month': '2026-08',
+    'lineId': 'copack',
+    'amount': 4820
+  },
+  {
+    'month': '2026-08',
+    'lineId': 'samples',
+    'amount': 980
+  },
+  {
+    'month': '2026-08',
+    'lineId': 'rent',
+    'amount': 2100
+  },
+  {
+    'month': '2026-08',
+    'lineId': 'insurance',
+    'amount': 1450
+  },
+  {
+    'month': '2026-08',
+    'lineId': 'software',
+    'amount': 251.53
+  },
+  {
+    'month': '2026-09',
+    'lineId': 'opex',
+    'amount': 32694.0
+  },
+  {
+    'month': '2026-08',
+    'lineId': 'opex',
+    'amount': 32990.03
+  },
+  {
+    'month': '2026-09',
+    'lineId': 'net_profit',
+    'amount': 5369.23
+  },
+  {
+    'month': '2026-08',
+    'lineId': 'net_profit',
+    'amount': -162.28
+  }
+]
+// -----END mrDipzData.js-----
