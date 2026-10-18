@@ -1,5 +1,5 @@
 import { useState, useCallback, useEffect } from 'react'
-import DemoLobby from '../../DemoLobby'
+import AufschnittSampleBar from './AufschnittSampleBar'
 import DATA from './aufschnittData'
 import { BRAND_ALL, BRANDS } from './aufschnittCatalog'
 import AufschnittOverview from './AufschnittOverview'
@@ -22,11 +22,10 @@ import {
   SHELL_CSS,
   money,
   money0,
-  fmtAsOfLong,
 } from './aufschnittUtils'
 
 const BIZ = DATA.meta.name
-const AS_OF = DATA.meta.as_of
+const SAMPLE_HEADER = 'Sample — fictitious numbers · as of Oct 2026'
 
 const TABS = [
   ['overview', 'Overview', 'Overview'],
@@ -139,7 +138,6 @@ export default function AufschnittPortal() {
   }
 
   const currentLabel = TABS.find((t) => t[0] === tab)?.[1] || ''
-  const sampleHeader = `Sample — fictitious numbers · as of ${fmtAsOfLong(AS_OF)}`
 
   const brandPills = tab !== 'receivables' && (
     <div className="au-brand-pills">
@@ -161,7 +159,7 @@ export default function AufschnittPortal() {
   return (
     <>
       <style dangerouslySetInnerHTML={{ __html: portalStyles }} />
-      <DemoLobby />
+      <AufschnittSampleBar />
 
       <div className="au-shell">
         <aside className="au-side">
@@ -194,12 +192,6 @@ export default function AufschnittPortal() {
               )
             })}
           </nav>
-          <div style={{ padding: '12px 10px 0', borderTop: '1px solid rgba(255,255,255,.1)', marginTop: '8px' }}>
-            <div style={{ fontFamily: MONO, fontSize: '9px', color: '#8A7A66', lineHeight: 1.7 }}>
-              SAMPLE DASHBOARD<br />
-              <span style={{ color: SPICE, fontWeight: 600 }}>{DATA.meta.built_by}</span>
-            </div>
-          </div>
         </aside>
 
         <main className="au-main">
@@ -208,7 +200,7 @@ export default function AufschnittPortal() {
             <h1 style={{ ...big, fontSize: '28px', color: INK, letterSpacing: '0.3px', lineHeight: 1.1, marginTop: '4px' }}>
               {detail ? 'Detail' : currentLabel}
             </h1>
-            <div style={{ fontSize: '12px', color: MUTED, marginTop: '6px' }}>{sampleHeader}</div>
+            <div style={{ fontSize: '12px', color: MUTED, marginTop: '6px' }}>{SAMPLE_HEADER}</div>
           </div>
 
           {!detail && brandPills}
