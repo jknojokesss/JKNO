@@ -5,6 +5,11 @@
 import fs from 'fs'
 import path from 'path'
 import { fileURLToPath } from 'url'
+import {
+  costOfSalesForLot,
+  lotCostBasis,
+  saleCostsForLot,
+} from '../components/samples/closeoutExplosion/closeoutExplosionCosts.js'
 
 const root = path.dirname(path.dirname(fileURLToPath(import.meta.url)))
 const lotsDir = path.join(root, 'components/samples/closeoutExplosion/lots')
@@ -30,12 +35,6 @@ function loadLots() {
     .map((f) => JSON.parse(fs.readFileSync(path.join(lotsDir, f), 'utf8')))
 }
 
-function lotCostBasis(lot) {
-  const brokerCommission = lot.broker ?? 0
-  const totalCost = lot.buy + lot.freight + brokerCommission
-  return { brokerCommission, totalCost }
-}
-
 function isOpenInvoice(sale) {
   return Boolean(sale.invoice) && sale.paid == null
 }
@@ -45,7 +44,7 @@ function lotStats(lot) {
   const casesSold = lot.sales.reduce((s, x) => s + x.cases, 0)
   const casesLeft = lot.cases - casesSold
   const revenue = lot.sales.reduce((s, x) => s + x.amount, 0)
-  const costSold = lot.sales.reduce((s, x) => s + x.cost, 0)
+  const costSold = costOfSalesForLot(lot)
   const costInStock = totalCost - costSold
   const profit = revenue - costSold
   const margin = revenue > 0 ? profit / revenue : null
@@ -92,14 +91,14 @@ const EXPECT_BUYERS_OWE = 58118.75
 const EXPECT_CASH_TIED = 42391
 const EXPECT_CASES = 4545
 const EXPECT_OCT_SALES = 36524.25
-const EXPECT_OCT_NET = 2924.45
+const EXPECT_OCT_NET = 2588.15
 
 const OPEN_CASH = {
-  'L-2041': 3063.37,
-  'L-2047': 6743.33,
-  'L-2052': 8440.25,
-  'L-2056': 5701.14,
-  'L-2061': 12444.44,
+  'L-2041': 3063.36,
+  'L-2047': 6743.34,
+  'L-2052': 8440.24,
+  'L-2056': 5701.15,
+  'L-2061': 12444.45,
   'L-2063': 5998.5,
 }
 
@@ -127,17 +126,21 @@ for (const row of rows) {
   if (lot.status === 'Open') {
     ok(`${lot.id} cost in stock`, round2(row.costInStock) === round2(row.cashTied))
   }
+  if (row.casesLeft === 0) {
+    ok(`${lot.id} sold out cost of sales`, round2(row.costSold) === round2(row.totalCost))
+  }
 }
 
 let octSales = 0
 let octCogs = 0
 for (const lot of lots) {
-  for (const sale of lot.sales) {
+  const lineCosts = saleCostsForLot(lot)
+  lot.sales.forEach((sale, i) => {
     if (sale.date >= PNL.thisFrom && sale.date <= PNL.thisTo) {
       octSales += sale.amount
-      octCogs += sale.cost
+      octCogs += lineCosts[i]
     }
-  }
+  })
 }
 octSales = round2(octSales)
 octCogs = round2(octCogs)

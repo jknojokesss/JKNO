@@ -1,4 +1,5 @@
 import DATA from './closeoutExplosionData.js'
+import { costOfSalesForLot, lotCostBasis, saleLandedCost } from './closeoutExplosionCosts.js'
 import {
   isOpenInvoice,
   lotStatusLabel,
@@ -8,16 +9,7 @@ import {
 const AS_OF = DATA.asOf
 const { pnl } = DATA
 
-export function lotCostBasis(lot) {
-  const brokerCommission = lot.broker ?? 0
-  const totalCost = lot.buy + lot.freight + brokerCommission
-  return {
-    purchaseCost: lot.buy,
-    freightIn: lot.freight,
-    brokerCommission,
-    totalCost,
-  }
-}
+export { lotCostBasis } from './closeoutExplosionCosts.js'
 
 export function lotBuyerPayStatus(lot) {
   const open = lot.sales.filter((s) => isOpenInvoice(s))
@@ -41,8 +33,10 @@ export function inSaleRange(date, from, to) {
 export function enrichSale(sale, lot) {
   const ageDays = daysBetween(sale.date, AS_OF)
   const pastDue = sale.due != null && AS_OF > sale.due && sale.paid == null
+  const cost = saleLandedCost(lot, sale)
   return {
     ...sale,
+    cost,
     lotId: lot.id,
     lotDesc: lot.desc,
     open: sale.paid == null,
@@ -65,7 +59,7 @@ export function lotStats(lot) {
   const casesSold = lot.sales.reduce((s, x) => s + x.cases, 0)
   const casesLeft = lot.cases - casesSold
   const revenue = lot.sales.reduce((s, x) => s + x.amount, 0)
-  const costSold = lot.sales.reduce((s, x) => s + x.cost, 0)
+  const costSold = costOfSalesForLot(lot)
   const costInStock = totalCost - costSold
   const fullySold = casesLeft === 0
   const profit = revenue - costSold

@@ -1,3 +1,5 @@
+import { fmtD } from './closeoutExplosionUtils.js'
+
 /** Sale line helpers — invoiced vs shipped-only rows share one array per lot. */
 
 export function saleLineKey(sale) {
@@ -34,7 +36,7 @@ export function nextInvoiceNumber(lots) {
 
 export function saleStatusLabel(sale) {
   if (isShippedOnly(sale)) return 'Shipped, not invoiced'
-  if (sale.paid) return `Paid ${sale.paid}`
+  if (sale.paid) return `Paid ${fmtD(sale.paid)}`
   return 'Unpaid'
 }
 
