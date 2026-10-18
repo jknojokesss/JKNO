@@ -123,7 +123,13 @@ export default function PopinsanityFinancials({ styles, openPnlLine }) {
             onClick={() => openPnlLine({ ...ln, section: 'revenue' })}
           />
         ))}
-      <PnlLine label="Total revenue" thisVal={p.revTotal} priorVal={p.revPrior} bold />
+      <PnlLine
+        label="Total revenue"
+        thisVal={p.revTotal}
+        priorVal={p.revPrior}
+        bold
+        onClick={() => openPnlLine({ label: 'Total revenue', this: p.revTotal, prior: p.revPrior, section: 'revenue' })}
+      />
 
       <CatHeader id="cogs" label="Cost of goods sold" />
       {exp.cogs &&
@@ -138,7 +144,14 @@ export default function PopinsanityFinancials({ styles, openPnlLine }) {
             onClick={() => openPnlLine({ ...ln, section: 'cogs' })}
           />
         ))}
-      <PnlLine label="Total COGS" thisVal={p.cogsTotal} priorVal={p.cogsPrior} cost bold />
+      <PnlLine
+        label="Total COGS"
+        thisVal={p.cogsTotal}
+        priorVal={p.cogsPrior}
+        cost
+        bold
+        onClick={() => openPnlLine({ label: 'Total COGS', this: p.cogsTotal, prior: p.cogsPrior, section: 'cogs' })}
+      />
 
       <PnlLine
         label={`Gross profit (${pct1(p.grossMarginPct)} margin)`}
@@ -161,7 +174,14 @@ export default function PopinsanityFinancials({ styles, openPnlLine }) {
             onClick={() => openPnlLine({ ...ln, section: 'opex' })}
           />
         ))}
-      <PnlLine label="Total operating expenses" thisVal={p.opexTotal} priorVal={p.opexPrior} cost bold />
+      <PnlLine
+        label="Total operating expenses"
+        thisVal={p.opexTotal}
+        priorVal={p.opexPrior}
+        cost
+        bold
+        onClick={() => openPnlLine({ label: 'Total operating expenses', this: p.opexTotal, prior: p.opexPrior, section: 'opex' })}
+      />
 
       <PnlLine
         label="Net profit"
