@@ -21,6 +21,7 @@ import {
   ChannelDetail,
   DayDetail,
   PnlLineDetail,
+  ProductLineDetail,
 } from './PopinsanityDetails'
 
 const TABS = [
@@ -93,8 +94,18 @@ export default function PopinsanityPortal() {
         )
       case 'channel':
         return wrap(
-          <ChannelDetail channelId={top.channelId} onBack={back} onOrder={openOrder} card={styles.card} big={styles.big} lbl={styles.lbl} />,
+          <ChannelDetail
+            channelId={top.channelId}
+            onBack={back}
+            onOrder={openOrder}
+            onProductLine={(line) => push({ kind: 'productLine', line })}
+            card={styles.card}
+            big={styles.big}
+            lbl={styles.lbl}
+          />,
         )
+      case 'productLine':
+        return wrap(<ProductLineDetail line={top.line} onBack={back} card={styles.card} big={styles.big} />)
       case 'day':
         return wrap(<DayDetail date={top.date} items={top.items} onBack={back} onOrder={openOrder} card={styles.card} big={styles.big} />)
       case 'pnl':

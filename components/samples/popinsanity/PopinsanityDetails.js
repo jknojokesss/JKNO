@@ -108,7 +108,19 @@ export function TierDetail({ tierId, onBack, onOrder, card, big, lbl }) {
   )
 }
 
-export function ChannelDetail({ channelId, onBack, onOrder, card, big, lbl }) {
+export function ProductLineDetail({ line, onBack, card, big }) {
+  const delta = line.prior != null ? line.this - line.prior : null
+  const color = changeColor(delta, { cost: false })
+  return (
+    <DetailShell title={line.label} onBack={onBack} card={card} big={big}>
+      <RowLine l={`${line.channel} · ${DATA.meta.this_short}`} v={money(line.this)} />
+      <RowLine l={`${line.channel} · ${DATA.meta.prior_short}`} v={money(line.prior)} />
+      <RowLine l="Change" v={<span style={{ color }}>{money(delta)}</span>} />
+    </DetailShell>
+  )
+}
+
+export function ChannelDetail({ channelId, onBack, onOrder, onProductLine, card, big, lbl }) {
   const ch = DATA.channels.find((c) => c.id === channelId)
   if (!ch) return null
   const th = { className: 'pop-th' }
@@ -174,7 +186,17 @@ export function ChannelDetail({ channelId, onBack, onOrder, card, big, lbl }) {
             const d = ln.this - ln.prior
             const color = changeColor(d, { cost: false })
             return (
-              <ClickRow key={ln.label} onClick={() => {}}>
+              <ClickRow
+                key={ln.label}
+                onClick={() =>
+                  onProductLine?.({
+                    channel: ch.name,
+                    label: ln.label,
+                    this: ln.this,
+                    prior: ln.prior,
+                  })
+                }
+              >
                 <td className="pop-td">{ln.label}</td>
                 <td className="pop-td pop-td--r">{money(ln.this)}</td>
                 <td className="pop-td pop-td--r">{money(ln.prior)}</td>

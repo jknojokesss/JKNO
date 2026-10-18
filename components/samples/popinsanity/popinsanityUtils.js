@@ -103,6 +103,8 @@ body{background:${theme.CREAM};font-family:${UI};color:${theme.INK}}
 .pop-td--r{text-align:right;font-family:${MONO};font-variant-numeric:tabular-nums}
 .pop-tfoot td{font-weight:700;border-top:1px solid ${BORDER}}
 @media(max-width:390px){
+  .pop-table .pop-th{white-space:normal;line-height:1.25;font-size:9px;padding:6px 3px}
+  .pop-table .pop-td{font-size:12px;padding:8px 3px}
   .pop-orders-grid{display:block}
   .pop-orders-grid thead{display:none}
   .pop-orders-grid tbody tr{display:block;border:1px solid ${BORDER};border-radius:2px;margin-bottom:10px;padding:10px 12px;background:${CARDBG}}
