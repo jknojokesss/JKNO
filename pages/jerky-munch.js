@@ -90,6 +90,9 @@ export default function JerkyMunch() {
   const [invBusy, setInvBusy] = useState({})          // partnerId -> submitting
   const [invResult, setInvResult] = useState({})      // partnerId -> { ok, msg } | { error }
   const [qbCustomers, setQbCustomers] = useState(null) // QB customer list for manual mapping
+  const [qbAllCustomers, setQbAllCustomers] = useState({ loading: false, loaded: false, error: null, customers: null })
+  const [invSearch, setInvSearch] = useState('')
+  const [qbOnlyLimit, setQbOnlyLimit] = useState(50)
   const [linkPick, setLinkPick] = useState({})        // partnerId -> typed customer name in the mapping box
   const [syncing, setSyncing] = useState(false)
   const [syncMsg, setSyncMsg] = useState('')
@@ -156,7 +159,7 @@ export default function JerkyMunch() {
         id: p.id, store: p.store, price: p.price, sent: p.sent, returned: p.returned, paid: p.paid,
         counted: p.counted, countedDate: p.counted_date || '', diagnosis: p.diagnosis || '',
         cycle: p.cycle, lastContact: p.last_contact, restock: p.restock, notes: p.notes,
-        type: p.type || 'consignment', region: p.region || '',
+        type: p.type || 'consignment', region: p.region || '', qbCustomerId: p.qb_customer_id || null,
         log: (byPartner[p.id] || []).map(l => ({ at: fmtD(l.at), t: l.note })),
       })))
     } catch (e) { console.error('loadConsign failed', e) }
@@ -198,12 +201,13 @@ export default function JerkyMunch() {
     })
   }
   // fetch the store's QB customer + last-invoice prices when its panel opens
-  const ensurePricing = async (partnerId, storeName, force = false) => {
+  const ensurePricing = async (partnerId, storeName, force = false, qbCustomerId = null) => {
     if (!force && pricing[partnerId] && (pricing[partnerId].loading || pricing[partnerId].loaded)) return
     setPricing(p => ({ ...p, [partnerId]: { loading: true } }))
     const blank = [{ itemId: '', item: '', unitPrice: '', qty: '', description: '' }]
+    const pricingQ = qbCustomerId ? `customer=${encodeURIComponent(qbCustomerId)}` : `partner=${encodeURIComponent(partnerId)}`
     try {
-      const res = await jerkyApi(`/api/jerky/store-pricing?partner=${partnerId}`)
+      const res = await jerkyApi(`/api/jerky/store-pricing?${pricingQ}`)
       const j = await res.json().catch(() => ({}))
       if (!res.ok) {
         setPricing(p => ({ ...p, [partnerId]: { loaded: true, error: j.error || 'Could not load pricing.' } }))
@@ -240,14 +244,17 @@ export default function JerkyMunch() {
     }
     setInvBusy(b => ({ ...b, [c.id]: true })); setInvResult(r => ({ ...r, [c.id]: null }))
     try {
+      const virtualQb = String(c.id).startsWith('qb_')
       const res = await jerkyApi('/api/jerky/create-invoice', { method: 'POST', body: {
-        partnerId: c.id, storeName: c.store, customerId: (pr.customer && pr.customer.id) || null,
+        partnerId: virtualQb ? null : c.id, storeName: c.store, customerId: (pr.customer && pr.customer.id) || null,
         txnDate: form.txnDate || todayISO(), dueDate: form.dueDate || null, memo: form.memo || null,
         send: !!form.send, email: form.email || null, lines,
       } })
       const j = await res.json().catch(() => ({}))
       if (!res.ok) { setInvResult(r => ({ ...r, [c.id]: { error: j.error || 'Could not create the invoice.' } })); return }
       setInvResult(r => ({ ...r, [c.id]: { ok: true, msg: `Invoice ${j.docNumber ? '#' + j.docNumber : ''} created in QuickBooks${j.sent ? ' & emailed to the store' : ''}.${j.sendError ? ' (but the email failed: ' + j.sendError + ')' : ''}` } }))
+      if (j.partnerId && String(c.id).startsWith('qb_')) setExpanded(j.partnerId)
+      await loadConsign()
       await loadInvoices()
     } catch (e) { setInvResult(r => ({ ...r, [c.id]: { error: String(e.message || e) } })) }
     finally { setInvBusy(b => ({ ...b, [c.id]: false })) }
@@ -295,6 +302,21 @@ export default function JerkyMunch() {
       const j = await res.json().catch(() => ({}))
       if (res.ok) setQbCustomers(j.customers || [])
     } catch (e) { /* leave null; the box shows a retry */ }
+  }
+  const loadQbAllCustomers = async () => {
+    if (qbAllCustomers.loading || qbAllCustomers.loaded) return
+    setQbAllCustomers(s => ({ ...s, loading: true, error: null }))
+    try {
+      const res = await jerkyApi('/api/jerky/customers?active=1')
+      const j = await res.json().catch(() => ({}))
+      if (!res.ok) {
+        setQbAllCustomers({ loading: false, loaded: true, error: j.error || 'Could not load QuickBooks customers.', customers: null })
+        return
+      }
+      setQbAllCustomers({ loading: false, loaded: true, error: null, customers: j.customers || [] })
+    } catch (e) {
+      setQbAllCustomers({ loading: false, loaded: true, error: 'Could not load QuickBooks customers.', customers: null })
+    }
   }
   const linkCustomer = async (partnerId, storeName) => {
     const typed = (linkPick[partnerId] || '').trim()
@@ -402,6 +424,10 @@ export default function JerkyMunch() {
       invSyncedRef.current = true
       syncInvoices(true)
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [tab, session, role])
+  useEffect(() => {
+    if (tab === 'invoices' && session && role === 'owner') loadQbAllCustomers()
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [tab, session, role])
 
@@ -1243,11 +1269,81 @@ export default function JerkyMunch() {
                 <button disabled={syncing} onClick={() => syncInvoices(false)} style={{ background: 'none', color: CHAR, border: `1px solid ${BORDER}`, borderRadius: '2px', padding: '9px 15px', ...btn, fontSize: '13px', cursor: syncing ? 'default' : 'pointer' }}>{syncing ? 'Syncing…' : '↻ Sync with QuickBooks'}</button>
                 {syncMsg && <span style={{ fontSize: '12px', color: MUTED }}>{syncMsg}</span>}
               </div>
+              <input value={invSearch} onChange={e => { setInvSearch(e.target.value); setQbOnlyLimit(50) }} placeholder="Search customers" style={{ ...inp, width: '100%', marginBottom: '14px', boxSizing: 'border-box' }} />
 
               {(() => {
                 const inv = consign.filter(c => c.type === 'invoice').slice().sort((a, b) => (a.region || '').localeCompare(b.region || '') || (a.store || '').localeCompare(b.store || ''))
-                if (!inv.length) return <div style={{ ...card, color: MUTED, fontSize: '13px' }}>No invoice accounts yet.</div>
-                return inv.map((c, idx) => {
+                const searchQ = invSearch.trim().toLowerCase()
+                const representedQbIds = new Set(consign.filter(c => c.qbCustomerId).map(c => c.qbCustomerId))
+                const representedNames = new Set(consign.map(c => String(c.store || '').trim().toLowerCase()))
+                const qbPool = (qbAllCustomers.customers || []).filter(qc => {
+                  if (representedQbIds.has(qc.id)) return false
+                  if (representedNames.has(String(qc.name || '').trim().toLowerCase())) return false
+                  return true
+                }).sort((a, b) => a.name.localeCompare(b.name))
+                const qbFiltered = searchQ
+                  ? qbPool.filter(qc => qc.name.toLowerCase().includes(searchQ) || (qc.email && qc.email.toLowerCase().includes(searchQ)))
+                  : qbPool
+                const qbVisible = searchQ ? qbFiltered : qbFiltered.slice(0, qbOnlyLimit)
+
+                const renderNewInvoiceForm = (c, { qbOnly = false } = {}) => {
+                  const pr = pricing[c.id] || {}
+                  const form = invForm[c.id]
+                  if (pr.loading || !form) return <div style={{ fontSize: '13px', color: MUTED }}>Loading this store's last invoice…</div>
+                  const items = pr.items || []
+                  const lineTotal = form.lines.reduce((s, l) => s + (Number(l.qty) || 0) * (Number(l.unitPrice) || 0), 0)
+                  return (
+                    <>
+                      {pr.customer
+                        ? <div style={{ fontSize: '12px', color: MUTED, marginBottom: '10px', lineHeight: 1.5 }}>QuickBooks customer: <b style={{ color: INK }}>{pr.customer.name}</b>{pr.last ? <> · prices prefilled from invoice{pr.last.docNumber ? ` #${pr.last.docNumber}` : ''} — just set the qty</> : ' · no prior invoice, pick a product'}</div>
+                        : !qbOnly && <div style={{ marginBottom: '12px' }}>
+                            <div style={{ fontSize: '12px', color: AMBER, marginBottom: '8px', lineHeight: 1.5 }}>{pr.error || pr.matchError || 'Not matched to a QuickBooks customer'} — link this store to its QuickBooks customer once:</div>
+                            <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+                              <input list={`qbc_${c.id}`} value={linkPick[c.id] || ''} onChange={e => setLinkPick(v => ({ ...v, [c.id]: e.target.value }))} onFocus={loadQbCustomers} placeholder={qbCustomers ? 'Type a QuickBooks customer…' : 'Loading customers…'} style={{ ...inp, flex: '2 1 180px' }} />
+                              <datalist id={`qbc_${c.id}`}>{(qbCustomers || []).map(qc => <option key={qc.id} value={qc.name} />)}</datalist>
+                              <button onClick={() => linkCustomer(c.id, c.store)} style={{ background: CHAR, color: CREAM, border: 'none', borderRadius: '2px', padding: '10px 16px', ...btn }}>Link</button>
+                            </div>
+                          </div>}
+                      {(() => {
+                        const l = form.lines[0] || { itemId: '', item: '', unitPrice: '', qty: '' }
+                        const showLabel = l.item && (l.itemId || !items.length)
+                        return (
+                          <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', alignItems: 'center', marginBottom: '10px' }}>
+                            {showLabel
+                              ? <div style={{ flex: '2 1 150px', fontWeight: 600, color: INK, fontSize: '14px' }}>{l.item}</div>
+                              : <select value={l.itemId} onChange={e => { const it = items.find(x => x.id === e.target.value); setLine(c.id, 0, { itemId: e.target.value, item: it ? it.name : '', unitPrice: (l.unitPrice !== '' && l.unitPrice != null) ? l.unitPrice : (it && it.unitPrice != null ? it.unitPrice : '') }) }} style={{ ...inp, flex: '2 1 150px' }}>
+                                  <option value="">Choose product…</option>
+                                  {items.map(it => <option key={it.id} value={it.id}>{it.name}</option>)}
+                                </select>}
+                            <input value={l.unitPrice} onChange={e => setLine(c.id, 0, { unitPrice: e.target.value })} type="number" inputMode="decimal" placeholder="$ / bag" style={{ ...inp, flex: '1 1 90px', minWidth: '80px' }} />
+                            <input value={l.qty} onChange={e => setLine(c.id, 0, { qty: e.target.value })} type="number" inputMode="numeric" placeholder="Qty" style={{ ...inp, flex: '1 1 80px', minWidth: '70px', fontWeight: 600, fontSize: '16px' }} autoFocus />
+                          </div>
+                        )
+                      })()}
+                      <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+                        <label style={{ flex: '1 1 130px' }}><span style={{ fontSize: '11px', color: MUTED }}>Invoice date</span><input value={form.txnDate} onChange={e => setFormField(c.id, { txnDate: e.target.value })} type="date" style={{ ...inp, width: '100%', marginTop: '2px' }} /></label>
+                        <label style={{ flex: '1 1 130px' }}><span style={{ fontSize: '11px', color: MUTED }}>Due date (optional)</span><input value={form.dueDate} onChange={e => setFormField(c.id, { dueDate: e.target.value })} type="date" style={{ ...inp, width: '100%', marginTop: '2px' }} /></label>
+                      </div>
+                      <label style={{ display: 'flex', alignItems: 'center', gap: '8px', marginTop: '12px', fontSize: '13px', color: INK, cursor: 'pointer' }}>
+                        <input type="checkbox" checked={form.send} onChange={e => setFormField(c.id, { send: e.target.checked })} style={{ width: '16px', height: '16px' }} />
+                        Email it from accounting@jerkymunch.com{!form.email && pr.customer && pr.customer.email ? ` (to ${pr.customer.email})` : ''}
+                      </label>
+                      {form.send && (
+                        <input value={form.email || ''} onChange={e => setFormField(c.id, { email: e.target.value })} type="email" inputMode="email" placeholder="Send to (blank = the store's email) — put your address here to test" style={{ ...inp, width: '100%', marginTop: '8px' }} />
+                      )}
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap', marginTop: '14px' }}>
+                        <span style={{ fontSize: '14px', color: INK }}>Total <b>{m0(lineTotal)}</b></span>
+                        <button disabled={invBusy[c.id]} onClick={() => submitInvoice(c)} style={{ marginLeft: 'auto', background: invBusy[c.id] ? MUTED : SPICE, color: '#fff', border: 'none', borderRadius: '2px', padding: '13px 20px', ...btn, cursor: invBusy[c.id] ? 'default' : 'pointer' }}>{invBusy[c.id] ? 'Creating…' : (form.send ? 'Create in QuickBooks & email' : 'Create in QuickBooks')}</button>
+                      </div>
+                      {invResult[c.id] && (invResult[c.id].error
+                        ? <div style={{ fontSize: '12.5px', color: RED, marginTop: '10px', lineHeight: 1.5 }}>{invResult[c.id].error}</div>
+                        : <div style={{ fontSize: '12.5px', color: GREEN, marginTop: '10px', lineHeight: 1.5 }}>✓ {invResult[c.id].msg}</div>)}
+                      {!qbOnly && <p style={{ fontSize: '11px', color: '#A2937A', marginTop: '10px', lineHeight: 1.5 }}>Creates a real invoice in Efraim's QuickBooks and lists it here. “Mark paid” updates this view only — record the actual payment in QuickBooks.</p>}
+                    </>
+                  )
+                }
+
+                const storeBlocks = inv.map((c, idx) => {
                   const open = expanded === c.id
                   const showHeader = idx === 0 || inv[idx - 1].region !== c.region
                   const mine = storeInvoices.filter(i => i.partnerId === c.id).slice().sort((a, b) => (b.date || '').localeCompare(a.date || ''))
@@ -1299,62 +1395,7 @@ export default function JerkyMunch() {
 
                             <div style={{ ...lbl, margin: '18px 0 8px' }}>New invoice</div>
                             <div style={{ background: CREAM, borderRadius: '2px', padding: '14px 16px' }}>
-                              {(() => {
-                                const pr = pricing[c.id] || {}
-                                const form = invForm[c.id]
-                                if (pr.loading || !form) return <div style={{ fontSize: '13px', color: MUTED }}>Loading this store's last invoice…</div>
-                                const items = pr.items || []
-                                const lineTotal = form.lines.reduce((s, l) => s + (Number(l.qty) || 0) * (Number(l.unitPrice) || 0), 0)
-                                return (
-                                  <>
-                                    {pr.customer
-                                      ? <div style={{ fontSize: '12px', color: MUTED, marginBottom: '10px', lineHeight: 1.5 }}>QuickBooks customer: <b style={{ color: INK }}>{pr.customer.name}</b>{pr.last ? <> · prices prefilled from invoice{pr.last.docNumber ? ` #${pr.last.docNumber}` : ''} — just set the qty</> : ' · no prior invoice, pick a product'}</div>
-                                      : <div style={{ marginBottom: '12px' }}>
-                                          <div style={{ fontSize: '12px', color: AMBER, marginBottom: '8px', lineHeight: 1.5 }}>{pr.error || pr.matchError || 'Not matched to a QuickBooks customer'} — link this store to its QuickBooks customer once:</div>
-                                          <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
-                                            <input list={`qbc_${c.id}`} value={linkPick[c.id] || ''} onChange={e => setLinkPick(v => ({ ...v, [c.id]: e.target.value }))} onFocus={loadQbCustomers} placeholder={qbCustomers ? 'Type a QuickBooks customer…' : 'Loading customers…'} style={{ ...inp, flex: '2 1 180px' }} />
-                                            <datalist id={`qbc_${c.id}`}>{(qbCustomers || []).map(qc => <option key={qc.id} value={qc.name} />)}</datalist>
-                                            <button onClick={() => linkCustomer(c.id, c.store)} style={{ background: CHAR, color: CREAM, border: 'none', borderRadius: '2px', padding: '10px 16px', ...btn }}>Link</button>
-                                          </div>
-                                        </div>}
-                                    {(() => {
-                                      const l = form.lines[0] || { itemId: '', item: '', unitPrice: '', qty: '' }
-                                      const showLabel = l.item && (l.itemId || !items.length)
-                                      return (
-                                        <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', alignItems: 'center', marginBottom: '10px' }}>
-                                          {showLabel
-                                            ? <div style={{ flex: '2 1 150px', fontWeight: 600, color: INK, fontSize: '14px' }}>{l.item}</div>
-                                            : <select value={l.itemId} onChange={e => { const it = items.find(x => x.id === e.target.value); setLine(c.id, 0, { itemId: e.target.value, item: it ? it.name : '', unitPrice: (l.unitPrice !== '' && l.unitPrice != null) ? l.unitPrice : (it && it.unitPrice != null ? it.unitPrice : '') }) }} style={{ ...inp, flex: '2 1 150px' }}>
-                                                <option value="">Choose product…</option>
-                                                {items.map(it => <option key={it.id} value={it.id}>{it.name}</option>)}
-                                              </select>}
-                                          <input value={l.unitPrice} onChange={e => setLine(c.id, 0, { unitPrice: e.target.value })} type="number" inputMode="decimal" placeholder="$ / bag" style={{ ...inp, flex: '1 1 90px', minWidth: '80px' }} />
-                                          <input value={l.qty} onChange={e => setLine(c.id, 0, { qty: e.target.value })} type="number" inputMode="numeric" placeholder="Qty" style={{ ...inp, flex: '1 1 80px', minWidth: '70px', fontWeight: 600, fontSize: '16px' }} autoFocus />
-                                        </div>
-                                      )
-                                    })()}
-                                    <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
-                                      <label style={{ flex: '1 1 130px' }}><span style={{ fontSize: '11px', color: MUTED }}>Invoice date</span><input value={form.txnDate} onChange={e => setFormField(c.id, { txnDate: e.target.value })} type="date" style={{ ...inp, width: '100%', marginTop: '2px' }} /></label>
-                                      <label style={{ flex: '1 1 130px' }}><span style={{ fontSize: '11px', color: MUTED }}>Due date (optional)</span><input value={form.dueDate} onChange={e => setFormField(c.id, { dueDate: e.target.value })} type="date" style={{ ...inp, width: '100%', marginTop: '2px' }} /></label>
-                                    </div>
-                                    <label style={{ display: 'flex', alignItems: 'center', gap: '8px', marginTop: '12px', fontSize: '13px', color: INK, cursor: 'pointer' }}>
-                                      <input type="checkbox" checked={form.send} onChange={e => setFormField(c.id, { send: e.target.checked })} style={{ width: '16px', height: '16px' }} />
-                                      Email it from accounting@jerkymunch.com{!form.email && pr.customer && pr.customer.email ? ` (to ${pr.customer.email})` : ''}
-                                    </label>
-                                    {form.send && (
-                                      <input value={form.email || ''} onChange={e => setFormField(c.id, { email: e.target.value })} type="email" inputMode="email" placeholder="Send to (blank = the store's email) — put your address here to test" style={{ ...inp, width: '100%', marginTop: '8px' }} />
-                                    )}
-                                    <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap', marginTop: '14px' }}>
-                                      <span style={{ fontSize: '14px', color: INK }}>Total <b>{m0(lineTotal)}</b></span>
-                                      <button disabled={invBusy[c.id]} onClick={() => submitInvoice(c)} style={{ marginLeft: 'auto', background: invBusy[c.id] ? MUTED : SPICE, color: '#fff', border: 'none', borderRadius: '2px', padding: '13px 20px', ...btn, cursor: invBusy[c.id] ? 'default' : 'pointer' }}>{invBusy[c.id] ? 'Creating…' : (form.send ? 'Create in QuickBooks & email' : 'Create in QuickBooks')}</button>
-                                    </div>
-                                    {invResult[c.id] && (invResult[c.id].error
-                                      ? <div style={{ fontSize: '12.5px', color: RED, marginTop: '10px', lineHeight: 1.5 }}>{invResult[c.id].error}</div>
-                                      : <div style={{ fontSize: '12.5px', color: GREEN, marginTop: '10px', lineHeight: 1.5 }}>✓ {invResult[c.id].msg}</div>)}
-                                    <p style={{ fontSize: '11px', color: '#A2937A', marginTop: '10px', lineHeight: 1.5 }}>Creates a real invoice in Efraim's QuickBooks and lists it here. “Mark paid” updates this view only — record the actual payment in QuickBooks.</p>
-                                  </>
-                                )
-                              })()}
+                              {renderNewInvoiceForm(c)}
                             </div>
                           </div>
                         )}
@@ -1362,6 +1403,51 @@ export default function JerkyMunch() {
                     </Fragment>
                   )
                 })
+
+                const qbBlocks = qbVisible.map(qc => {
+                  const rowId = `qb_${qc.id}`
+                  const c = { id: rowId, store: qc.name }
+                  const open = expanded === rowId
+                  const bal = Number(qc.balance) || 0
+                  return (
+                    <div key={rowId} style={{ ...card, padding: 0, marginBottom: '8px', overflow: 'hidden', borderColor: open ? CHAR : BORDER }}>
+                      <div onClick={() => { const willOpen = !open; setExpanded(willOpen ? rowId : null); if (willOpen) ensurePricing(rowId, qc.name, false, qc.id) }} style={{ padding: '12px 16px', cursor: 'pointer', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '10px', flexWrap: 'wrap' }}>
+                        <div style={{ minWidth: 0, flex: '1 1 200px' }}>
+                          <div style={{ fontWeight: 600, color: INK, fontSize: '15px', wordBreak: 'break-word' }}>{qc.name}</div>
+                          {qc.email && <div style={{ fontSize: '12px', color: MUTED, marginTop: '2px', wordBreak: 'break-word' }}>{qc.email}</div>}
+                        </div>
+                        {bal > 0 && <div style={{ fontFamily: MONO, fontSize: '13px', color: KRAFT, whiteSpace: 'nowrap' }}>{m0(bal)} open in QuickBooks</div>}
+                      </div>
+                      {open && (
+                        <div style={{ padding: '0 16px 16px', borderTop: `1px solid ${CREAM}` }}>
+                          <div style={{ ...lbl, margin: '14px 0 8px' }}>New invoice</div>
+                          <div style={{ background: CREAM, borderRadius: '2px', padding: '14px 16px' }}>
+                            {renderNewInvoiceForm(c, { qbOnly: true })}
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  )
+                })
+
+                return (
+                  <>
+                    {inv.length === 0 && <div style={{ ...card, color: MUTED, fontSize: '13px', marginBottom: '12px' }}>No invoice stores saved yet. Pick a QuickBooks customer below to invoice them.</div>}
+                    {storeBlocks}
+                    {qbAllCustomers.loading && <div style={{ fontSize: '13px', color: MUTED, margin: '16px 0 8px' }}>Loading QuickBooks customers</div>}
+                    {qbAllCustomers.error && <div style={{ fontSize: '13px', color: RED, margin: '8px 0 12px', lineHeight: 1.5 }}>{qbAllCustomers.error}</div>}
+                    {!qbAllCustomers.loading && qbPool.length > 0 && (
+                      <>
+                        <div style={{ ...lbl, color: MUTED, fontSize: '12px', margin: inv.length ? '24px 0 10px' : '8px 0 10px' }}>QuickBooks customers</div>
+                        {qbBlocks}
+                        {!searchQ && qbFiltered.length > qbOnlyLimit && (
+                          <button type="button" onClick={() => setQbOnlyLimit(n => n + 50)} style={{ background: 'none', color: CHAR, border: `1px solid ${BORDER}`, borderRadius: '2px', padding: '10px 16px', ...btn, fontSize: '13px', width: '100%', marginTop: '4px', cursor: 'pointer' }}>Show more</button>
+                        )}
+                        {searchQ && qbFiltered.length === 0 && <div style={{ fontSize: '13px', color: MUTED, padding: '8px 0' }}>No matching QuickBooks customers.</div>}
+                      </>
+                    )}
+                  </>
+                )
               })()}
             </>
           )}

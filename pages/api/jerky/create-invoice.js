@@ -7,6 +7,7 @@ import { getLiveToken } from '../../../lib/qboAuth'
 import { fetchCustomerRefs, resolveCustomer, buildInvoice, postInvoice, fetchInvoicePdf, fetchInvoiceEmailPrefs, nextInvoiceNumber } from '../../../lib/qboWrite'
 import { requireJerkyUser } from '../../../lib/requireJerkyUser'
 import { sendInvoiceEmail, jerkyMailerConfigured } from '../../../lib/jerkyMailer'
+import { ensureInvoicePartner } from '../../../lib/ensureInvoicePartner'
 
 const round2 = (n) => Math.round(Number(n) * 100) / 100
 
@@ -24,9 +25,19 @@ export default async function handler(req, res) {
     const { env, token, realmId } = await getLiveToken('jerky')
     const customers = await fetchCustomerRefs(env, token, realmId)
 
-    let customer = b.customerId ? customers.find((c) => c.id === b.customerId) : null
-    if (!customer && b.storeName) { const r = resolveCustomer(customers, b.storeName); if (r.customer) customer = r.customer }
-    if (!customer) return res.status(400).json({ error: `No QuickBooks customer for "${b.storeName || b.customerId}". Set one up in QuickBooks first.` })
+    let partnerId = b.partnerId || null
+    let customer = null
+    if (!partnerId) {
+      const cid = b.customerId ? String(b.customerId).trim() : ''
+      if (!cid) return res.status(400).json({ error: 'QuickBooks customer id is required when no invoice store is selected.' })
+      customer = customers.find((c) => c.id === cid)
+      if (!customer) return res.status(400).json({ error: 'That QuickBooks customer was not found.' })
+      partnerId = await ensureInvoicePartner(gate.db, { qbCustomerId: customer.id, displayName: customer.name })
+    } else {
+      customer = b.customerId ? customers.find((c) => c.id === b.customerId) : null
+      if (!customer && b.storeName) { const r = resolveCustomer(customers, b.storeName); if (r.customer) customer = r.customer }
+      if (!customer) return res.status(400).json({ error: `No QuickBooks customer for "${b.storeName || b.customerId}". Set one up in QuickBooks first.` })
+    }
 
     // If QB has "Custom transaction numbers" on, it will NOT auto-number an
     // API invoice — supply the next sequential number ourselves. (Off = omit,
@@ -45,7 +56,7 @@ export default async function handler(req, res) {
     if (built.errors.length) return res.status(400).json({ error: built.errors.join(' ') })
 
     // requestid makes an accidental double-submit idempotent on Intuit's side
-    const requestId = `jm-${(b.partnerId || 'x').slice(0, 8)}-${Date.now()}`
+    const requestId = `jm-${(partnerId || 'x').slice(0, 8)}-${Date.now()}`
     const posted = await postInvoice(env, token, realmId, built.payload, requestId)
     const inv = posted.Invoice || {}
 
@@ -64,7 +75,7 @@ export default async function handler(req, res) {
     const totalQty = round2(lines.reduce((s, l) => s + Number(l.qty || 0), 0))
     const single = lines.length === 1 ? lines[0] : null
     const row = {
-      partner_id: b.partnerId || null,
+      partner_id: partnerId || null,
       inv_date: txnDate,
       units: single ? Math.round(Number(single.qty)) : Math.round(totalQty),
       unit_price: single ? round2(single.unitPrice) : null,
@@ -88,6 +99,7 @@ export default async function handler(req, res) {
       total: built.total,
       customer: customer.name,
       sent, sendError,
+      partnerId: partnerId || null,
       invoiceId: saved ? saved.id : null,
       saveError: saveErr ? saveErr.message : null,
     })

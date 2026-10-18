@@ -1,7 +1,8 @@
-// GET /api/jerky/customers — the QuickBooks customer list, for mapping a store
-// that didn't auto-match. Returns [{ id, name, email }].
+// GET /api/jerky/customers — QuickBooks customers (read-only).
+// Default: all customers [{ id, name, email }] for store Link / datalist.
+// ?active=1: active only [{ id, name, email, balance }] for Invoice Stores list (~5 min cache).
 import { getLiveToken } from '../../../lib/qboAuth'
-import { fetchCustomerRefs } from '../../../lib/qboWrite'
+import { fetchCustomerRefs, fetchActiveCustomerRefs } from '../../../lib/qboWrite'
 import { requireJerkyUser } from '../../../lib/requireJerkyUser'
 
 export default async function handler(req, res) {
@@ -9,7 +10,10 @@ export default async function handler(req, res) {
   if (!gate.ok) return res.status(401).json({ error: gate.reason })
   try {
     const { env, token, realmId } = await getLiveToken('jerky')
-    const customers = (await fetchCustomerRefs(env, token, realmId))
+    const activeOnly = req.query.active === '1' || req.query.active === 'true'
+    const customers = (activeOnly
+      ? await fetchActiveCustomerRefs(env, token, realmId)
+      : await fetchCustomerRefs(env, token, realmId))
       .sort((a, b) => a.name.localeCompare(b.name))
     return res.status(200).json({ customers })
   } catch (e) {

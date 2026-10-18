@@ -12,13 +12,13 @@ export default async function handler(req, res) {
 
   try {
     let storeName = req.query.store ? String(req.query.store) : null
-    let savedCustomerId = null
+    let savedCustomerId = req.query.customer ? String(req.query.customer) : null
     if (req.query.partner) {
       const { data: p } = await gate.db.from('consignment_partners')
         .select('store, qb_customer_id').eq('id', String(req.query.partner)).maybeSingle()
-      if (p) { storeName = p.store; savedCustomerId = p.qb_customer_id || null }
+      if (p) { storeName = p.store; savedCustomerId = p.qb_customer_id || savedCustomerId }
     }
-    if (!storeName && !savedCustomerId) return res.status(400).json({ error: 'Pass ?partner= or ?store=.' })
+    if (!storeName && !savedCustomerId) return res.status(400).json({ error: 'Pass ?partner=, ?customer=, or ?store=.' })
 
     const { env, token, realmId } = await getLiveToken('jerky')
     const customers = await fetchCustomerRefs(env, token, realmId)
