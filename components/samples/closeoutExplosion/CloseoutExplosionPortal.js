@@ -1159,7 +1159,7 @@ export default function CloseoutExplosionPortal() {
                   <StackKV k="0–15" v={money(b.bucket015)} />
                   <StackKV k="16–30" v={money(b.bucket1630)} />
                   <StackKV k="Over 30" v={money(b.bucketOver30)} />
-                  <StackKV k="Invoices" v={String(b.count)} />
+                  <StackKV k="Invoices" v={fmtInt(b.count)} />
                 </div>
               </button>
             ))}
@@ -1172,7 +1172,7 @@ export default function CloseoutExplosionPortal() {
                 <StackKV k="0–15" v={money(dash.bucketTotals.bucket015)} />
                 <StackKV k="16–30" v={money(dash.bucketTotals.bucket1630)} />
                 <StackKV k="Over 30" v={money(dash.bucketTotals.bucketOver30)} />
-                <StackKV k="Invoices" v={String(dash.bucketTotals.count)} />
+                <StackKV k="Invoices" v={fmtInt(dash.bucketTotals.count)} />
               </div>
             </div>
           </div>
@@ -1194,7 +1194,7 @@ export default function CloseoutExplosionPortal() {
                   <td className="ce-td-left">
                     <BuyerLabel name={b.name} />
                   </td>
-                  <td>{b.count}</td>
+                  <td>{fmtInt(b.count)}</td>
                   <td>{money(b.bucket015)}</td>
                   <td>{money(b.bucket1630)}</td>
                   <td>{money(b.bucketOver30)}</td>
@@ -1203,7 +1203,7 @@ export default function CloseoutExplosionPortal() {
               ))}
               <tr className="ce-total">
                 <td className="ce-td-left">Total</td>
-                <td>{dash.bucketTotals.count}</td>
+                <td>{fmtInt(dash.bucketTotals.count)}</td>
                 <td>{money(dash.bucketTotals.bucket015)}</td>
                 <td>{money(dash.bucketTotals.bucket1630)}</td>
                 <td>{money(dash.bucketTotals.bucketOver30)}</td>

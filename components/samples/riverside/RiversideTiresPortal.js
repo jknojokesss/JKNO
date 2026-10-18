@@ -14,6 +14,7 @@ import {
   mono,
   fmtC,
   fmt0,
+  fmtInt,
   pct,
   deltaColor,
   fmtDate,
@@ -254,7 +255,7 @@ function buildAskAnswers() {
   const leadAvg = lead?.units ? lead.revenue / lead.units : 0
   const sizeLine = (t) => {
     const avgSale = t.units ? t.revenue / t.units : 0
-    return `${t.size} (${t.units} units, ${fmt0(t.revenue)}, ~${fmtC(avgSale)} per tire)`
+    return `${t.size} (${fmtInt(t.units)} units, ${fmt0(t.revenue)}, ~${fmtC(avgSale)} per tire)`
   }
   const sizesTail = topSizes.slice(1, 3).map(sizeLine).join('; ')
   const sepOrders = ORDERS.filter((o) => o.date.slice(0, 7) === AS_OF.slice(0, 7) && o.date <= AS_OF)
@@ -263,9 +264,9 @@ function buildAskAnswers() {
   return {
     best_month: `${monthYear(best)} was the strongest closed month at ${fmt0(best.profit)} net profit on ${fmt0(best.revenue)} revenue (${pct(bestMargin)} margin).`,
     cash: `Business checking was ${fmt0(checking)} at ${monthShort(LAST_CLOSED.label)} 30. ${monthYear(LAST_CLOSED)} net change in cash was ${fmt0(cfClosed.netChange)} (net cash from operations ${fmt0(opNet)}).`,
-    mix: `In ${monthYear(LAST_CLOSED)}, new tire sales were ${fmt0(newMix?.revenue || 0)} (${tireSales.new_tire_units} units). Used tires added ${fmt0(usedMix?.revenue || 0)} (${tireSales.used_tire_units} units). Service and repair was ${fmt0(svcMix?.revenue || 0)}.`,
-    sizes: `Top size in ${monthYear(LAST_CLOSED)} was ${lead.size} — ${lead.units} units and ${fmt0(lead.revenue)} revenue at about ${fmtC(leadAvg)} per tire.${sizesTail ? ` Next: ${sizesTail}.` : ''}`,
-    month: `${monthName} register shows ${fmt0(sepSale)} in sales on ${sepOrders.length} tickets (estimates).`,
+    mix: `In ${monthYear(LAST_CLOSED)}, new tire sales were ${fmt0(newMix?.revenue || 0)} (${fmtInt(tireSales.new_tire_units)} units). Used tires added ${fmt0(usedMix?.revenue || 0)} (${fmtInt(tireSales.used_tire_units)} units). Service and repair was ${fmt0(svcMix?.revenue || 0)}.`,
+    sizes: `Top size in ${monthYear(LAST_CLOSED)} was ${lead.size} — ${fmtInt(lead.units)} units and ${fmt0(lead.revenue)} revenue at about ${fmtC(leadAvg)} per tire.${sizesTail ? ` Next: ${sizesTail}.` : ''}`,
+    month: `${monthName} register shows ${fmt0(sepSale)} in sales on ${fmtInt(sepOrders.length)} tickets (estimates).`,
   }
 }
 
@@ -1188,7 +1189,7 @@ function DashboardTab({ period, setPeriod, setMetricDetail }) {
     ['Gross profit', fmt0(grossClosed)],
     ['Net margin', pct((m.profit / m.revenue) * 100)],
     ['YTD revenue', fmt0(DATA.ytd_revenue)],
-    ['Tires sold', String(m.tiresSold)],
+    ['Tires sold', fmtInt(m.tiresSold)],
   ]
 
   const profitRows = MONTHS.map((x) => ({ ...x, margin: (x.profit / x.revenue) * 100 }))
@@ -1207,7 +1208,7 @@ function DashboardTab({ period, setPeriod, setMetricDetail }) {
         { label: 'Est. cost', value: fmt0(reg.cost) },
         { label: 'Est. gross', value: fmt0(reg.profit), valueStyle: { color: C.green } },
         { label: 'Est. margin', value: pct(reg.margin) },
-        { label: 'Tickets', value: String(reg.tickets) },
+        { label: 'Tickets', value: fmtInt(reg.tickets) },
         ...ticketLines,
       ],
     })
@@ -1226,8 +1227,8 @@ function DashboardTab({ period, setPeriod, setMetricDetail }) {
       title: `Top tire sizes · ${monthYear(m)}`,
       subtitle: monthYear(m),
       rows: [
-        ...closedSizes.map((t, i) => ({ label: t.size, value: `${t.units} units · ${fmt0(sizeRevWhole[i])}` })),
-        { label: 'Top six', value: `${topSixUnits} units · ${fmt0(topSixRev)}`, valueStyle: { fontWeight: 600 } },
+        ...closedSizes.map((t, i) => ({ label: t.size, value: `${fmtInt(t.units)} units · ${fmt0(sizeRevWhole[i])}` })),
+        { label: 'Top six', value: `${fmtInt(topSixUnits)} units · ${fmt0(topSixRev)}`, valueStyle: { fontWeight: 600 } },
       ],
     })
   }
@@ -1278,10 +1279,10 @@ function DashboardTab({ period, setPeriod, setMetricDetail }) {
     }
     if (focus === 'tires') {
       const t = closedTireSales()
-      lines.push({ label: 'New tire units', value: String(t.new_tire_units) })
-      lines.push({ label: 'Used tire units', value: String(t.used_tire_units) })
+      lines.push({ label: 'New tire units', value: fmtInt(t.new_tire_units) })
+      lines.push({ label: 'Used tire units', value: fmtInt(t.used_tire_units) })
       lines.push({ label: 'Tire revenue', value: fmt0(t.tire_revenue_total) })
-      lines.push({ label: `Tires sold (${monthShort(m.label)})`, value: String(t.tires_sold_units), valueStyle: { fontWeight: 600 } })
+      lines.push({ label: `Tires sold (${monthShort(m.label)})`, value: fmtInt(t.tires_sold_units), valueStyle: { fontWeight: 600 } })
     }
     const titles = {
       revenue: 'Revenue',
@@ -1322,7 +1323,7 @@ function DashboardTab({ period, setPeriod, setMetricDetail }) {
             ['Est. cost', fmt0(reg.cost), C.ink],
             ['Est. gross', fmt0(reg.profit), C.green],
             ['Est. margin', pct(reg.margin), C.ink],
-            ['Tickets', String(reg.tickets), C.ink],
+            ['Tickets', fmtInt(reg.tickets), C.ink],
           ].map(([l, v, color], i) => (
             <div key={l} className="rt-reg-kpi">
               <div style={{ fontFamily: ui, fontSize: 10.5, color: C.muted }}>{l}</div>
@@ -1466,7 +1467,7 @@ function DashboardTab({ period, setPeriod, setMetricDetail }) {
                 >
                   <td className="rt-col-rank" style={cell('left', { fontFamily: mono, color: C.muted })}>{t.rank}</td>
                   <td style={cell('left', { fontFamily: mono })}>{t.size}</td>
-                  <td style={cell('right', { fontFamily: mono })}>{t.units}</td>
+                  <td style={cell('right', { fontFamily: mono })}>{fmtInt(t.units)}</td>
                   <td style={cell('right', { fontFamily: mono })}>{fmt0(sizeRevWhole[i])}</td>
                 </tr>
               ))}
@@ -1477,7 +1478,7 @@ function DashboardTab({ period, setPeriod, setMetricDetail }) {
                   Top six
                   <TieMark ok={topSixTie} />
                 </td>
-                <td style={cell('right', { fontFamily: mono, fontWeight: 600, borderBottom: 'none' })}>{topSixUnits}</td>
+                <td style={cell('right', { fontFamily: mono, fontWeight: 600, borderBottom: 'none' })}>{fmtInt(topSixUnits)}</td>
                 <td style={cell('right', { fontFamily: mono, fontWeight: 600, borderBottom: 'none' })}>{fmt0(topSixRev)}</td>
               </tr>
             </tfoot>
@@ -1487,7 +1488,7 @@ function DashboardTab({ period, setPeriod, setMetricDetail }) {
                   Top six
                   <TieMark ok={topSixTie} />
                 </td>
-                <td style={cell('right', { fontFamily: mono, fontWeight: 600, borderBottom: 'none' })}>{topSixUnits}</td>
+                <td style={cell('right', { fontFamily: mono, fontWeight: 600, borderBottom: 'none' })}>{fmtInt(topSixUnits)}</td>
                 <td style={cell('right', { fontFamily: mono, fontWeight: 600, borderBottom: 'none' })}>{fmt0(topSixRev)}</td>
               </tr>
             </tfoot>
@@ -1557,17 +1558,17 @@ function SalesItemsTab({ seed, setMetricDetail }) {
 
   const openItemDetail = (t) => {
     const rows = [
-      { label: 'Units', value: String(t.units) },
+      { label: 'Units', value: fmtInt(t.units) },
       { label: 'Revenue', value: fmt0(t.revenue) },
       { label: 'Avg sale', value: t.units ? fmtC(t.avgSale) : '—' },
     ]
     if (periodKey === 'all') {
       MONTHS.forEach((m) => {
         const hit = (DATA.sales_items_by_month[m.month] || []).find((i) => i.item === t.item)
-        if (hit) rows.push({ label: monthYear(m), value: `${hit.units} units · ${fmt0(hit.revenue)}` })
+        if (hit) rows.push({ label: monthYear(m), value: `${fmtInt(hit.units)} units · ${fmt0(hit.revenue)}` })
       })
       const oct = itemsFromOctoberOrders(DATA.orders, AS_OF).find((i) => i.item === t.item)
-      if (oct) rows.push({ label: 'October (open)', value: `${oct.units} units · ${fmt0(oct.revenue)}` })
+      if (oct) rows.push({ label: 'October (open)', value: `${fmtInt(oct.units)} units · ${fmt0(oct.revenue)}` })
     }
     setMetricDetail({ title: t.item, subtitle: `Sales & Items · ${periodLabel}`, rows })
   }
@@ -1583,17 +1584,17 @@ function SalesItemsTab({ seed, setMetricDetail }) {
     }
     if (kind === 'units') {
       setMetricDetail({
-        title: String(stats?.unitsSold || 0),
+        title: fmtInt(stats?.unitsSold || 0),
         subtitle: `Units sold · ${periodLabel}`,
-        rows: ranked.map((t) => ({ label: t.item, value: `${t.units} units` })),
+        rows: ranked.map((t) => ({ label: t.item, value: `${fmtInt(t.units)} units` })),
       })
       return
     }
     if (kind === 'unique') {
       setMetricDetail({
-        title: String(stats?.uniqueItems || items.length),
+        title: fmtInt(stats?.uniqueItems || items.length),
         subtitle: `Unique items · ${periodLabel}`,
-        rows: ranked.map((t) => ({ label: t.item, value: `${t.units} units` })),
+        rows: ranked.map((t) => ({ label: t.item, value: `${fmtInt(t.units)} units` })),
       })
       return
     }
@@ -1603,7 +1604,7 @@ function SalesItemsTab({ seed, setMetricDetail }) {
       subtitle: `Avg ticket · ${periodLabel}`,
       rows: [
         { label: 'Revenue', value: fmt0(stats?.revenue || 0) },
-        { label: 'Tickets', value: String(stats?.ticketCount || 0) },
+        { label: 'Tickets', value: fmtInt(stats?.ticketCount || 0) },
         { label: 'Avg ticket', value: fmtC(avg), valueStyle: { fontWeight: 600 } },
       ],
     })
@@ -1614,8 +1615,8 @@ function SalesItemsTab({ seed, setMetricDetail }) {
       <PageHead title={NAV.find((n) => n.id === 'inventory').title} />
       <div className="rt-kpi-row">
         <Kpi label="Revenue" value={fmt0(stats?.revenue || 0)} onClick={() => openKpiDetail('revenue')} />
-        <Kpi label="Units sold" value={String(stats?.unitsSold || 0)} onClick={() => openKpiDetail('units')} />
-        <Kpi label="Unique items" value={String(stats?.uniqueItems || items.length)} onClick={() => openKpiDetail('unique')} />
+        <Kpi label="Units sold" value={fmtInt(stats?.unitsSold || 0)} onClick={() => openKpiDetail('units')} />
+        <Kpi label="Unique items" value={fmtInt(stats?.uniqueItems || items.length)} onClick={() => openKpiDetail('unique')} />
         <Kpi label="Avg ticket" value={fmtC(stats?.ticketCount ? stats.revenue / stats.ticketCount : 0)} onClick={() => openKpiDetail('avg')} />
       </div>
       <SubTabs
@@ -1728,22 +1729,22 @@ function SalesItemsTab({ seed, setMetricDetail }) {
                     >
                       <td className="rt-col-rank" style={cell('left', { fontFamily: mono, color: C.muted })}>{i + 1}</td>
                       <td style={cell('left', { fontFamily: mono })}>{t.item}</td>
-                      <td style={cell('right', { fontFamily: mono })}>{t.units}</td>
+                      <td style={cell('right', { fontFamily: mono })}>{fmtInt(t.units)}</td>
                       <td className="rt-td-revenue" style={cell('right', { fontFamily: mono, fontWeight: 600 })}>
                         <div>{fmt0(t.revenue)}</div>
                         {t.units ? <div className="rt-phone-only rt-line-sub">{fmtC(t.avgSale)} avg</div> : null}
                         {compareOn && b ? (
                           <div className="rt-phone-only rt-line-sub">
-                            was {fmt0(b.revenue)} · Δ {b.units - t.units} units
+                            was {fmt0(b.revenue)} · Δ {fmtInt(b.units - t.units)} units
                           </div>
                         ) : null}
                       </td>
                       <td className="rt-col-avg" style={cell('right', { fontFamily: mono, color: C.sub })}>{t.units ? fmtC(t.avgSale) : '—'}</td>
                       {compareOn ? (
                         <>
-                          <td className="rt-col-compare-b" style={cell('right', { fontFamily: mono })}>{b?.units ?? '—'}</td>
+                          <td className="rt-col-compare-b" style={cell('right', { fontFamily: mono })}>{b != null ? fmtInt(b.units) : '—'}</td>
                           <td className="rt-col-compare-b" style={cell('right', { fontFamily: mono })}>{b ? fmt0(b.revenue) : '—'}</td>
-                          <td className="rt-col-compare-d" style={cell('right', { fontFamily: mono })}>{b ? b.units - t.units : '—'}</td>
+                          <td className="rt-col-compare-d" style={cell('right', { fontFamily: mono })}>{b ? fmtInt(b.units - t.units) : '—'}</td>
                         </>
                       ) : null}
                     </tr>
@@ -1765,7 +1766,7 @@ function SalesItemsTab({ seed, setMetricDetail }) {
                   <div style={{ width: `${(x.revenue / maxMonthRev) * 100}%`, height: '100%', background: '#B0281C' }} />
                 </div>
                 <span style={{ fontFamily: mono, fontSize: 11, whiteSpace: 'nowrap' }}>
-                  {fmt0(x.revenue)} · {x.tiresSold} sold
+                  {fmt0(x.revenue)} · {fmtInt(x.tiresSold)} sold
                 </span>
               </div>
             ))}
@@ -1910,7 +1911,7 @@ function OrdersTab({ initialPeriod }) {
     <>
       <PageHead title={NAV.find((n) => n.id === 'orders').title} />
       <div className="rt-kpi-row">
-        <Kpi label="Total orders" value={String(t.tickets)} />
+        <Kpi label="Total orders" value={fmtInt(t.tickets)} />
         <Kpi label="Profit / new tire" value={fmtC(newProfit)} />
         <Kpi label="Profit / used tire" value={usedRows.length ? fmtC(usedProfit) : '—'} />
         <Kpi
@@ -1995,7 +1996,7 @@ function OrdersTab({ initialPeriod }) {
         <>
           <OrderCards rows={rows} />
           <div className="rt-order-cards-total" style={{ fontFamily: mono, fontSize: 11, color: C.sub, padding: '4px 2px' }}>
-            {t.tickets} tickets · {fmt0(t.sale)} sales · {fmt0(t.profit)} est. gross
+            {fmtInt(t.tickets)} tickets · {fmt0(t.sale)} sales · {fmt0(t.profit)} est. gross
           </div>
           <div className="rt-order-table" style={{ background: C.card, border: `1px solid ${C.hair}`, overflow: 'auto' }}>
             <table style={{ width: '100%', borderCollapse: 'collapse', minWidth: 720 }}>
@@ -2019,7 +2020,7 @@ function OrdersTab({ initialPeriod }) {
                     <td style={cell('left')}>
                       <SourcePill source={r.source} />
                     </td>
-                    <td style={cell('right', { fontFamily: mono })}>{r.qty}</td>
+                    <td style={cell('right', { fontFamily: mono })}>{fmtInt(r.qty)}</td>
                     <td style={cell('right', { fontFamily: mono, fontWeight: 500 })}>{fmtC(r.sale)}</td>
                     <td style={cell('right', { fontFamily: mono, color: C.sub })}>
                       {fmtC(r.cost)}
@@ -2035,9 +2036,9 @@ function OrdersTab({ initialPeriod }) {
               <tfoot>
                 <tr style={{ background: '#ECE7DD' }}>
                   <td colSpan={8} style={cell('left', { fontWeight: 500, borderBottom: 'none', fontSize: 10, lineHeight: 1.5 })}>
-                    {bySource.map((x) => `${x.source}: ${x.count}`).join(' · ')}
-                    {flaggedCount ? ` · Flagged: ${flaggedCount}` : ''}
-                    {estCount ? ` · * estimated cost (${estCount})` : ''}
+                    {bySource.map((x) => `${x.source}: ${fmtInt(x.count)}`).join(' · ')}
+                    {flaggedCount ? ` · Flagged: ${fmtInt(flaggedCount)}` : ''}
+                    {estCount ? ` · * estimated cost (${fmtInt(estCount)})` : ''}
                     {' · '}
                     <strong>Total est. profit {fmtC(t.profit)}</strong>
                   </td>
@@ -2095,10 +2096,10 @@ function StockTab({ setMetricDetail }) {
       title: s.size,
       subtitle: `Stock · ${snapLabel}`,
       rows: [
-        { label: 'On hand', value: String(s.onHand) },
+        { label: 'On hand', value: fmtInt(s.onHand) },
         { label: 'Unit cost', value: fmtC(s.unitCost) },
         { label: 'Stock value', value: fmt0(s.value) },
-        { label: `Units sold · ${monthShort(LAST_CLOSED.label)}`, value: String(sold) },
+        { label: `Units sold · ${monthShort(LAST_CLOSED.label)}`, value: fmtInt(sold) },
         { label: 'Description', value: s.desc },
       ],
     })
@@ -2107,9 +2108,9 @@ function StockTab({ setMetricDetail }) {
   const openStockKpi = (kind) => {
     if (kind === 'onHand') {
       setMetricDetail({
-        title: String(units),
+        title: fmtInt(units),
         subtitle: `On hand · ${snapLabel}`,
-        rows: allStockRows.map((s) => ({ label: s.size, value: `${s.onHand} units` })),
+        rows: allStockRows.map((s) => ({ label: s.size, value: `${fmtInt(s.onHand)} units` })),
       })
       return
     }
@@ -2122,9 +2123,9 @@ function StockTab({ setMetricDetail }) {
       return
     }
     setMetricDetail({
-      title: String(allStockRows.length),
+      title: fmtInt(allStockRows.length),
       subtitle: `Sizes · ${snapLabel}`,
-      rows: allStockRows.map((s) => ({ label: s.size, value: `${s.onHand} on hand` })),
+      rows: allStockRows.map((s) => ({ label: s.size, value: `${fmtInt(s.onHand)} on hand` })),
     })
   }
 
@@ -2132,9 +2133,9 @@ function StockTab({ setMetricDetail }) {
     <>
       <PageHead title={NAV.find((n) => n.id === 'stock').title} />
       <div className="rt-kpi-row">
-        <Kpi label="On hand" value={String(units)} onClick={() => openStockKpi('onHand')} />
+        <Kpi label="On hand" value={fmtInt(units)} onClick={() => openStockKpi('onHand')} />
         <Kpi label="Stock value" value={fmt0(value)} tie={invTie} onClick={() => openStockKpi('value')} />
-        <Kpi label="Sizes" value={String(allStockRows.length)} onClick={() => openStockKpi('sizes')} />
+        <Kpi label="Sizes" value={fmtInt(allStockRows.length)} onClick={() => openStockKpi('sizes')} />
       </div>
       <div className="rt-filter-stack rt-stock-filter-stack">
         <input
@@ -2213,7 +2214,7 @@ function StockTab({ setMetricDetail }) {
                   <div style={{ fontFamily: mono }}>{s.size}</div>
                   <div style={{ fontSize: 10, color: C.sub }}>{s.desc}</div>
                 </td>
-                <td style={cell('right', { fontFamily: mono, fontWeight: 600 })}>{s.onHand}</td>
+                <td style={cell('right', { fontFamily: mono, fontWeight: 600 })}>{fmtInt(s.onHand)}</td>
                 <td style={cell('right', { fontFamily: mono, color: C.sub })}>{fmtC(s.unitCost)}</td>
                 <td style={cell('right', { fontFamily: mono })}>{fmtC(s.value)}</td>
               </tr>
@@ -2228,8 +2229,8 @@ function StockTab({ setMetricDetail }) {
               onKeyDown={(e) => (e.key === 'Enter' || e.key === ' ') && (e.preventDefault(), openStockKpi('onHand'))}
               style={{ background: '#ECE7DD', cursor: 'pointer' }}
             >
-              <td style={cell('left', { fontWeight: 600, borderBottom: 'none' })}>{allStockRows.length} sizes</td>
-              <td style={cell('right', { fontFamily: mono, fontWeight: 700, borderBottom: 'none' })}>{units}</td>
+              <td style={cell('left', { fontWeight: 600, borderBottom: 'none' })}>{fmtInt(allStockRows.length)} sizes</td>
+              <td style={cell('right', { fontFamily: mono, fontWeight: 700, borderBottom: 'none' })}>{fmtInt(units)}</td>
               <td style={cell('right', { borderBottom: 'none' })} />
               <td style={cell('right', { fontFamily: mono, fontWeight: 700, borderBottom: 'none' })}>{fmtC(value)}</td>
             </tr>

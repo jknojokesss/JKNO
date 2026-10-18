@@ -20,6 +20,8 @@ export const mono = ui
 export const fmtC = (n) =>
   new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(n)
 export const fmt0 = (n) => new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }).format(n)
+const intFormatter = new Intl.NumberFormat('en-US', { maximumFractionDigits: 0 })
+export const fmtInt = (n) => intFormatter.format(Math.round(n))
 export const pct = (n) => `${Number(n).toFixed(1)}%`
 
 /** Revenue / profit up = green; expense up = red. */

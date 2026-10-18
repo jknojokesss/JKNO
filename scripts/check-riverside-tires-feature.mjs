@@ -108,6 +108,32 @@ const utilsSrc = fs.readFileSync(path.join(root, '../components/samples/riversid
 const portalNoTemplates = portalSrc.replace(/\$\{[^}]+\}/g, '')
 ok('Riverside no accounting paren ($', !/\(\$/.test(portalNoTemplates))
 ok('Riverside paren helper uses minus', /-\$\{fmt0\(-n\)\}/.test(utilsSrc))
+ok('Riverside fmtInt exported', /export const fmtInt/.test(utilsSrc))
+ok('Riverside portal imports fmtInt', /fmtInt/.test(portalSrc) && /riversideUtils/.test(portalSrc))
+const fmtInt = (n) => new Intl.NumberFormat('en-US', { maximumFractionDigits: 0 }).format(Math.round(n))
+ok('Riverside fmtInt thousands', fmtInt(4765) === '4,765' && fmtInt(1616) === '1,616')
+const riversideBareCountPatterns = [
+  [/\{t\.units\}/, 't.units in JSX'],
+  [/\{s\.onHand\}/, 's.onHand in JSX'],
+  [/\{topSixUnits\}/, 'topSixUnits in JSX'],
+  [/\{x\.tiresSold\}/, 'tiresSold in JSX'],
+  [/\{r\.qty\}/, 'order qty in JSX'],
+  [/value=\{String\(stats/, 'String(stats…) KPI'],
+  [/value=\{String\(units\)/, 'String(units) KPI'],
+  [/value=\{String\(t\.tickets\)/, 'String(t.tickets) KPI'],
+  [/value=\{String\(reg\.tickets\)/, 'String(reg.tickets) detail'],
+  [/value=\{String\(m\.tiresSold\)/, 'String(m.tiresSold) strip'],
+  [/value=\{String\(allStockRows/, 'String(allStockRows…) detail'],
+  [/title: String\(stats\?\.unitsSold/, 'unitsSold detail title'],
+  [/\$\{t\.units\} units/, 'template t.units units'],
+  [/\$\{hit\.units\} units/, 'template hit.units units'],
+  [/\$\{topSixUnits\} units/, 'template topSixUnits units'],
+  [/\$\{s\.onHand\} /, 'template s.onHand'],
+  [/\{t\.tickets\} tickets/, 't.tickets tickets line'],
+]
+for (const [re, label] of riversideBareCountPatterns) {
+  ok(`Riverside UI no bare count (${label})`, !re.test(portalSrc))
+}
 
 const augTop = data.top_tire_sizes_aug.map((t) => t.units).join(',')
 const sepTop = data.top_tire_sizes_sep.map((t) => t.units).join(',')
@@ -141,6 +167,7 @@ const allUnits = allItems.reduce((s, i) => s + i.units, 0)
 const allItemRev = round2(allItems.reduce((s, i) => s + i.revenue, 0))
 ok('All time revenue = closed months + October', allStats.revenue === round2(closedRev + octRev))
 ok('All time units = item rollup', allStats.unitsSold === allUnits)
+ok('All time units need thousands sep', allStats.unitsSold >= 1000 && fmtInt(allStats.unitsSold).includes(','))
 ok('All time item revenue ties stats revenue', Math.abs(allItemRev - allStats.revenue) < 0.02)
 ok('portal label Overview not Dashboard', !/label:\s*'Dashboard'/.test(portalSrc))
 

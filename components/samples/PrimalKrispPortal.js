@@ -701,7 +701,7 @@ export default function PrimalKrispPortal() {
                         >
                           <td style={{ padding: '10px 6px', fontWeight: 600, color: INK }}>{p.code}</td>
                           <td style={{ padding: '10px 6px', textAlign: 'right', fontFamily: MONO }}>{money(p.spend)}</td>
-                          <td style={{ padding: '10px 6px', textAlign: 'right', fontFamily: MONO }}>{p.orders}</td>
+                          <td style={{ padding: '10px 6px', textAlign: 'right', fontFamily: MONO }}>{fmtInt(p.orders)}</td>
                           <td style={{ padding: '10px 6px', textAlign: 'right', fontFamily: MONO }}>{money(p.revenue)}</td>
                           <td style={{ padding: '10px 6px', textAlign: 'right', fontFamily: MONO }}>{p.return_per_dollar.toFixed(1)}</td>
                           <td style={{ padding: '10px 6px', textAlign: 'right' }}>
