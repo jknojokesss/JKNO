@@ -18,14 +18,14 @@ export default function PopinsanityOverview({ styles, goTab, setCalendarMonth, o
     value: map[k].reduce((s, i) => s + i.amount, 0),
     monthKey: k,
   }))
-  const tierBars = allTierRows().map((t) => ({
-    key: t.id,
-    label: t.name.replace(/^Tier \d+: /, 'Tier ').split(':')[0] || t.name,
-    value: t.marginPct,
-    suffix: '%',
-    id: t.id,
-    fullName: t.name,
-  }))
+  const tierBars = allTierRows()
+    .sort((a, b) => a.id.localeCompare(b.id))
+    .map((t) => ({
+      key: t.id,
+      label: t.name.split(':')[0],
+      value: t.marginPct,
+      id: t.id,
+    }))
 
   return (
     <>
@@ -77,6 +77,7 @@ export default function PopinsanityOverview({ styles, goTab, setCalendarMonth, o
           big={big}
           title="Cash due by month"
           rows={cashBars}
+          preserveOrder
           onRow={(r) => {
             setCalendarMonth(r.monthKey)
             goTab('calendar')
@@ -87,8 +88,9 @@ export default function PopinsanityOverview({ styles, goTab, setCalendarMonth, o
           lbl={lbl}
           big={big}
           title="Margin by tier"
-          rows={tierBars.map((t) => ({ ...t, label: t.fullName.split(':')[0] }))}
-          formatValue={(v) => v.toFixed(1) + '%'}
+          rows={tierBars}
+          preserveOrder
+          formatValue={(v) => pct1(v)}
           onRow={(r) => openTier(r.id)}
         />
       </div>

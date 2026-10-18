@@ -9,6 +9,7 @@ export const MUTED = '#8A7A66'
 export const BORDER = '#E6DBC8'
 export const GREEN = '#3E7C4F'
 export const RED = '#C03A22'
+export const STONE = '#C9C4B8'
 
 export const UI = "'Inter', sans-serif"
 export const MONO = "'IBM Plex Mono', monospace"
@@ -89,7 +90,7 @@ body{background:${theme.CREAM};font-family:${UI};color:${theme.INK}}
 .pop-nav{display:flex;flex-direction:column;gap:3px}.pop-nav--main{flex:1}
 .pop-navbtn{display:block;width:100%;text-align:left;padding:11px 14px;border-radius:2px;border:none;background:transparent;color:#B6A78C;font-family:${UI};font-size:14px;font-weight:500;cursor:pointer;white-space:nowrap}
 .pop-navbtn:hover{background:rgba(255,255,255,.08);color:${theme.CREAM}}
-.pop-main{flex:1;min-width:0;max-width:1180px;padding:24px 30px 60px}
+.pop-main{flex:1;min-width:0;max-width:1180px;padding:24px 30px 60px;overflow-x:hidden}
 .pop-click{transition:box-shadow .12s;cursor:pointer}.pop-click:hover{box-shadow:inset 0 0 0 1.5px ${theme.SPICE}}
 .pop-back{display:inline-flex;align-items:center;gap:6px;border:none;background:transparent;color:${theme.SPICE};font-family:${UI};font-size:14px;font-weight:600;cursor:pointer;padding:8px 0;margin-bottom:12px;min-height:40px}
 .pop-mobtab{display:none}
@@ -102,17 +103,28 @@ body{background:${theme.CREAM};font-family:${UI};color:${theme.INK}}
 .pop-td{padding:10px 6px;border-bottom:1px solid ${CREAM};vertical-align:top}
 .pop-td--r{text-align:right;font-family:${MONO};font-variant-numeric:tabular-nums}
 .pop-tfoot td{font-weight:700;border-top:1px solid ${BORDER}}
+.pop-order-sub{display:none}
+.pop-tier-cards,.pop-order-cards{display:none}
+@media(max-width:480px){
+  .pop-tier-table-wrap,.pop-order-table-wrap{display:none!important}
+  .pop-tier-cards,.pop-order-cards{display:block}
+  .pop-order-sub{display:block;font-size:11px;color:${MUTED};margin-top:2px}
+  .pop-corp-detail-table thead{display:none}
+  .pop-corp-detail-table tbody tr{display:block;border-bottom:1px solid ${CREAM};padding:10px 0}
+  .pop-corp-detail-table tbody td{display:flex;justify-content:space-between;gap:10px;padding:3px 0;border:none}
+  .pop-corp-detail-table .pop-corp-client{display:block;width:100%;text-align:left}
+  .pop-corp-detail-table .pop-corp-client::before{display:none}
+  .pop-corp-detail-table .pop-corp-hide-phone{display:none}
+  .pop-corp-detail-table tfoot tr{display:flex;flex-wrap:wrap;justify-content:space-between;padding-top:10px;border-top:1px solid ${BORDER}}
+  .pop-corp-detail-table tfoot td{border:none;padding:4px 0}
+}
+.pop-tier-card,.pop-order-card{border:1px solid ${BORDER};border-radius:2px;padding:14px;margin-bottom:10px;background:${CARDBG};cursor:pointer;text-align:left;width:100%;font:inherit;color:inherit}
+.pop-tier-card:hover,.pop-order-card:hover{box-shadow:inset 0 0 0 1.5px ${theme.SPICE}}
+.pop-card-title{font-weight:700;font-size:14px;color:${INK};margin-bottom:10px}
+.pop-card-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px 14px}
+.pop-card-k{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.5px;color:${MUTED}}
+.pop-card-v{font-family:${MONO};font-size:13px;color:${INK};text-align:right;margin-top:2px}
 @media(max-width:390px){
-  .pop-table .pop-th{white-space:normal;line-height:1.25;font-size:9px;padding:6px 3px}
-  .pop-table .pop-td{font-size:12px;padding:8px 3px}
-  .pop-orders-grid{display:block}
-  .pop-orders-grid thead{display:none}
-  .pop-orders-grid tbody tr{display:block;border:1px solid ${BORDER};border-radius:2px;margin-bottom:10px;padding:10px 12px;background:${CARDBG}}
-  .pop-orders-grid tbody td{display:flex;justify-content:space-between;gap:10px;padding:4px 0;border:none;text-align:right}
-  .pop-orders-grid tbody td::before{content:attr(data-label);font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.5px;color:${MUTED};text-align:left;flex-shrink:0}
-  .pop-orders-grid .pop-order-client{display:block;width:100%;text-align:left;padding-bottom:6px;border-bottom:1px solid ${CREAM};margin-bottom:4px}
-  .pop-orders-grid .pop-order-client::before{display:none}
-  .pop-orders-grid .pop-hide-phone{display:none}
   .pop-cal-grid{font-size:10px}
   .pop-cal-cell{min-height:36px;padding:2px 1px}
 }

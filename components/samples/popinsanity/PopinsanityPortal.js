@@ -1,5 +1,5 @@
 import { useState, useCallback } from 'react'
-import DemoLobby from '../../DemoLobby'
+import PopinsanityLobby from './PopinsanityLobby'
 import { DATA } from './popinsanityComputed'
 import {
   SPICE,
@@ -63,6 +63,7 @@ export default function PopinsanityPortal() {
   const openPnlLine = useCallback((line) => push({ kind: 'pnl', line }), [push])
 
   const top = stack[stack.length - 1]
+  const financialsPnlDrill = tab === 'financials' && stack.length > 0 && stack[0].kind === 'pnl'
 
   const portalStyles = SHELL_CSS({ CHAR, CREAM, INK, SPICE })
 
@@ -153,7 +154,7 @@ export default function PopinsanityPortal() {
           />
         )
       case 'financials':
-        return <PopinsanityFinancials styles={styles} openPnlLine={openPnlLine} />
+        return financialsPnlDrill ? null : <PopinsanityFinancials styles={styles} openPnlLine={openPnlLine} />
       default:
         return null
     }
@@ -162,7 +163,7 @@ export default function PopinsanityPortal() {
   return (
     <>
       <style dangerouslySetInnerHTML={{ __html: portalStyles }} />
-      <DemoLobby />
+      <PopinsanityLobby />
       <div className="pop-shell">
         <aside className="pop-side">
           <div style={{ padding: '2px 8px 16px' }}>
@@ -233,7 +234,8 @@ export default function PopinsanityPortal() {
               {top ? (top.kind === 'order' ? 'Order detail' : top.kind === 'tier' ? 'Tier detail' : top.kind === 'channel' ? 'Channel detail' : top.kind === 'day' ? 'Cash due' : 'Line detail') : currentLabel}
             </h1>
           </div>
-          {top ? renderDetail() : renderTab()}
+          {financialsPnlDrill ? <PopinsanityFinancials styles={styles} openPnlLine={openPnlLine} /> : null}
+          {top ? <div style={financialsPnlDrill ? { marginTop: 16 } : undefined}>{renderDetail()}</div> : financialsPnlDrill ? null : renderTab()}
         </main>
       </div>
     </>

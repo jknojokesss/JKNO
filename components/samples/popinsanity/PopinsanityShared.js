@@ -56,8 +56,8 @@ export function BackButton({ onBack }) {
   )
 }
 
-export function RankedBars({ title, rows, onRow, card, lbl, big, formatValue }) {
-  const sorted = [...rows].sort((a, b) => b.value - a.value)
+export function RankedBars({ title, rows, onRow, card, lbl, big, formatValue, preserveOrder = false }) {
+  const sorted = preserveOrder ? rows : [...rows].sort((a, b) => b.value - a.value)
   const max = sorted[0]?.value || 1
   const fmt = formatValue || ((v) => money(v))
   return (

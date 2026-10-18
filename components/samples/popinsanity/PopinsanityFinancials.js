@@ -19,11 +19,15 @@ const PNL_SHEET_CSS = `
 }
 @media(max-width:480px){
   .pop-pnl-wrap{
-    --pop-pnl-c1:4.5rem;--pop-pnl-c2:4.5rem;--pop-pnl-c3:4rem;--pop-pnl-gap:8px;
+    --pop-pnl-c1:4.25rem;--pop-pnl-c2:4.25rem;--pop-pnl-c3:4.75rem;--pop-pnl-gap:6px;
     --pop-pnl-fs:10px;--pop-pnl-fs-cur:10px;--pop-pnl-fs-head:9px;
+    padding:12px 8px!important;
   }
   .pop-pnl-label{font-size:12px}
+  .pop-pnl-head,.pop-pnl-line{padding-right:0}
+  .pop-pnl-line .pop-pnl-num:last-child{font-size:9px}
 }
+.pop-pnl-wrap{max-width:100%;box-sizing:border-box}
 .pop-pnl-head,.pop-pnl-line{
   display:grid;grid-template-columns:minmax(0,1fr) var(--pop-pnl-c1) var(--pop-pnl-c2) var(--pop-pnl-c3);
   column-gap:var(--pop-pnl-gap);align-items:center;padding-right:6px;box-sizing:border-box;

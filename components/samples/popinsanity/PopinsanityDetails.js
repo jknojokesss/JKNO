@@ -21,6 +21,7 @@ import {
   INK,
   BORDER,
   CREAM,
+  CARDBG,
   MONO,
 } from './popinsanityUtils'
 
@@ -129,7 +130,7 @@ export function ChannelDetail({ channelId, onBack, onOrder, onProductLine, card,
     const renderBlock = (title, rows) => (
       <div style={{ marginBottom: 20 }}>
         <div style={{ ...lbl, marginBottom: 8 }}>{title}</div>
-        <table className="pop-table">
+        <table className="pop-table pop-corp-detail-table">
           <thead>
             <tr>
               <th {...th}>Client</th>
@@ -142,11 +143,14 @@ export function ChannelDetail({ channelId, onBack, onOrder, onProductLine, card,
           <tbody>
             {rows.map((r, i) => (
               <tr key={i}>
-                <td className="pop-td">{r.client}</td>
-                <td className="pop-td">{tierShort(r.tier)}</td>
-                <td className="pop-td pop-td--r">{fmtInt(r.units)}</td>
-                <td className="pop-td pop-td--r">{money(r.amount)}</td>
-                <td className="pop-td pop-td--r">{fmtD(r.shipped)}</td>
+                <td className="pop-td pop-corp-client">
+                  <div style={{ fontWeight: 600 }}>{r.client}</div>
+                  <div className="pop-order-sub">{tierShort(r.tier)} · Shipped {fmtD(r.shipped)}</div>
+                </td>
+                <td className="pop-td pop-corp-hide-phone">{tierShort(r.tier)}</td>
+                <td className="pop-td pop-td--r" data-label="Units">{fmtInt(r.units)}</td>
+                <td className="pop-td pop-td--r" data-label="Amount">{money(r.amount)}</td>
+                <td className="pop-td pop-td--r pop-corp-hide-phone">{fmtD(r.shipped)}</td>
               </tr>
             ))}
           </tbody>
@@ -249,19 +253,22 @@ export function PnlLineDetail({ line, section, onBack, onChannel, card, big }) {
   const delta = line.prior != null ? line.this - line.prior : null
   const color = changeColor(delta, { cost: !isRev })
   const channelMap = { Online: 'online', Store: 'store', 'Corporate gifts': 'corporate' }
+  const channelId = channelMap[line.label]
+  const channelLabel =
+    line.label === 'Corporate gifts' ? 'Corporate' : line.label
   return (
     <DetailShell title={line.label} onBack={onBack} card={card} big={big}>
       <RowLine l={DATA.meta.this_month} v={money(line.this)} />
       <RowLine l={DATA.meta.prior_month} v={money(line.prior)} />
       <RowLine l="Change" v={<span style={{ color }}>{money(delta)} ({delta != null && line.prior ? pct1(changePct(line.this, line.prior)) : '—'})</span>} />
-      {isRev && channelMap[line.label] ? (
+      {isRev && channelId ? (
         <button
           type="button"
           className="pop-click"
-          onClick={() => onChannel(channelMap[line.label])}
-          style={{ marginTop: 16, border: 'none', background: 'none', color: SPICE, fontWeight: 600, cursor: 'pointer', fontSize: 13, padding: 0 }}
+          onClick={() => onChannel(channelId)}
+          style={{ marginTop: 16, border: `1px solid ${BORDER}`, background: CARDBG, color: SPICE, fontWeight: 600, cursor: 'pointer', fontSize: 13, padding: '10px 14px', borderRadius: 2, width: '100%', textAlign: 'left' }}
         >
-          Open {line.label} sales detail ›
+          Open {channelLabel} sales detail ›
         </button>
       ) : null}
     </DetailShell>

@@ -1,35 +1,38 @@
-import { DATA, allChannelSales } from './popinsanityComputed'
+import { allChannelSales } from './popinsanityComputed'
 import { ClickRow, ChangeCell } from './PopinsanityShared'
-import { money, SPICE, KRAFT, MUTED, BORDER } from './popinsanityUtils'
+import { money, money0, SPICE, STONE, MUTED, CREAM, MONO, UI } from './popinsanityUtils'
 
-function ChannelBars({ rows }) {
-  const max = Math.max(...rows.map((r) => Math.max(r.this, r.prior)), 1)
-  const h = 120
-  const w = 280
-  const gap = 24
-  const barW = 14
+function HorizontalChannelChart({ rows }) {
+  const max = Math.max(...rows.flatMap((r) => [r.this, r.prior]), 1)
   return (
-    <svg viewBox={`0 0 ${rows.length * gap + 40} ${h + 36}`} style={{ width: '100%', maxWidth: 360, display: 'block', marginBottom: 16 }} aria-hidden>
-      {rows.map((r, i) => {
-        const x = 20 + i * gap
-        const th = (r.this / max) * h
-        const ph = (r.prior / max) * h
-        return (
-          <g key={r.id}>
-            <rect x={x} y={h - ph} width={barW} height={ph} fill={KRAFT} />
-            <rect x={x + barW + 4} y={h - th} width={barW} height={th} fill={SPICE} />
-            <text x={x + barW} y={h + 14} textAnchor="middle" fontSize="9" fill={MUTED}>{r.name.slice(0, 3)}</text>
-            <text x={x + barW + 2} y={h - th - 4} textAnchor="middle" fontSize="8" fill={SPICE}>{Math.round(r.this / 1000)}k</text>
-            <text x={x + barW + 2} y={h - ph - 4} textAnchor="middle" fontSize="8" fill={KRAFT}>{Math.round(r.prior / 1000)}k</text>
-          </g>
-        )
-      })}
-    </svg>
+    <div style={{ maxWidth: 640, width: '100%' }}>
+      <div style={{ display: 'flex', gap: 16, fontSize: 11, color: MUTED, marginBottom: 12, fontFamily: UI }}>
+        <span><span style={{ color: SPICE, marginRight: 4 }}>■</span>Oct</span>
+        <span><span style={{ color: STONE, marginRight: 4 }}>■</span>Sep</span>
+      </div>
+      {rows.map((r) => (
+        <div key={r.id} style={{ marginBottom: 14 }}>
+          <div style={{ fontWeight: 600, fontSize: 13, marginBottom: 6, color: '#2B2B2B' }}>{r.name}</div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 5 }}>
+            <div style={{ flex: 1, minWidth: 0, height: 12, background: CREAM, borderRadius: 2, overflow: 'hidden' }}>
+              <div style={{ width: `${(r.this / max) * 100}%`, height: '100%', background: SPICE, minWidth: r.this > 0 ? 2 : 0 }} />
+            </div>
+            <span style={{ fontFamily: MONO, fontSize: 12, flexShrink: 0 }}>{money0(r.this)}</span>
+          </div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+            <div style={{ flex: 1, minWidth: 0, height: 12, background: CREAM, borderRadius: 2, overflow: 'hidden' }}>
+              <div style={{ width: `${(r.prior / max) * 100}%`, height: '100%', background: STONE, minWidth: r.prior > 0 ? 2 : 0 }} />
+            </div>
+            <span style={{ fontFamily: MONO, fontSize: 12, flexShrink: 0 }}>{money0(r.prior)}</span>
+          </div>
+        </div>
+      ))}
+    </div>
   )
 }
 
 export default function PopinsanitySalesTab({ styles, openChannel }) {
-  const { card, lbl } = styles
+  const { card } = styles
   const sales = allChannelSales()
   const totalThis = sales.thisMonth
   const totalPrior = sales.prior
@@ -37,7 +40,7 @@ export default function PopinsanitySalesTab({ styles, openChannel }) {
   return (
     <>
       <div style={{ ...card, marginBottom: 16 }}>
-        <ChannelBars rows={sales.rows} />
+        <HorizontalChannelChart rows={sales.rows} />
       </div>
       <div style={{ ...card, overflowX: 'auto' }}>
         <table className="pop-table">
