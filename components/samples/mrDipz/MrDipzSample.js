@@ -1,8 +1,8 @@
 import { useMemo, useState, useEffect } from 'react'
-import MrDipzLobby from './MrDipzLobby'
+import { buildMrDipzModel, CREAM, SPICE, INK, MUTED, UI } from './mrDipzUtils'
 
 export const MD_SAMPLE_HEADER = 'Sample — fictitious numbers · as of Oct 2026'
-import { buildMrDipzModel, CREAM, SPICE, INK, MUTED, UI } from './mrDipzUtils'
+export const MD_CREDIT_LINE = 'JK No Jokes Financials'
 import { SHELL_CSS } from './MrDipzKit'
 import MrDipzOverview from './MrDipzOverview'
 import MrDipzStores from './MrDipzStores'
@@ -59,6 +59,11 @@ export default function MrDipzSample() {
   }
 
   useEffect(() => {
+    document.documentElement.classList.add('md-sample-page')
+    return () => document.documentElement.classList.remove('md-sample-page')
+  }, [])
+
+  useEffect(() => {
     if (!stack.length) return undefined
     const onKey = (e) => {
       if (e.key === 'Escape') setStack((s) => s.slice(0, -1))
@@ -75,12 +80,11 @@ export default function MrDipzSample() {
     <>
       <style dangerouslySetInnerHTML={{ __html: SHELL_CSS }} />
 
-      <MrDipzLobby />
-
       <div className="md-shell">
         <aside className="md-side">
           <div style={{ padding: '2px 8px 16px' }}>
-            <div style={{ fontFamily: UI, fontWeight: 800, fontSize: 26, letterSpacing: '1px', color: CREAM, lineHeight: 1.1 }}>
+            <div className="md-credit">{MD_CREDIT_LINE}</div>
+            <div style={{ fontFamily: UI, fontWeight: 800, fontSize: 26, letterSpacing: '1px', color: CREAM, lineHeight: 1.1, marginTop: 10 }}>
               MR. DIPZ
             </div>
             <div className="md-lbl" style={{ color: '#B6A78C', marginTop: 12 }}>
