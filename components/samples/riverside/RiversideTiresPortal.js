@@ -53,6 +53,51 @@ const WEEK_START = DATA.meta.week_start
 const CF_PERIOD_KEYS = ['all', ...MONTHS.map((m) => m.month)]
 const ITEM_PERIOD_KEYS = CF_PERIOD_KEYS
 const STOCK_MONTH_IDS = ['2026-04', '2026-05', '2026-06', '2026-07', '2026-08']
+const STOCK_AUG_ID = '2026-08'
+const STOCK_LIVE_ID = 'live'
+
+const normTireSize = (s) => String(s || '').replace(/R/gi, '/').replace(/-/g, '/').toUpperCase()
+
+const scrollPortalTop = () => {
+  requestAnimationFrame(() => {
+    const el = document.querySelector('.rt-main')
+    if (el) el.scrollTop = 0
+    window.scrollTo(0, 0)
+  })
+}
+
+const monthEndIso = (monthKey) => {
+  const [y, mo] = monthKey.split('-').map(Number)
+  return new Date(Date.UTC(y, mo, 0)).toISOString().slice(0, 10)
+}
+
+const isNetIncomeRow = (label) => label === 'Net income (current year)'
+
+function synthDrillRows(label, total, asOfIso) {
+  const t = Math.round(total * 100) / 100
+  if (Math.abs(t) < 0.01) {
+    return [{ date: asOfIso, description: `${label} · no balance`, type: 'Balance', amount: 0 }]
+  }
+  const sign = t < 0 ? -1 : 1
+  const abs = Math.abs(t)
+  const open = Math.round(abs * 0.62 * 100) / 100
+  const activity = Math.round((abs - open) * 100) / 100
+  const openAmt = open * sign
+  const actAmt = activity * sign
+  if (Math.abs(openAmt + actAmt - t) > 0.02) {
+    return [{ date: asOfIso, description: `${label} · balance`, type: 'Journal', amount: t }]
+  }
+  return [
+    { date: asOfIso, description: 'Opening balance', type: 'Balance', amount: openAmt },
+    { date: asOfIso, description: `${label} · activity`, type: 'Journal', amount: actAmt },
+  ]
+}
+
+function drillRowsForAccount(line, asOfIso) {
+  if (isNetIncomeRow(line.label)) return null
+  if (line.drill?.length) return line.drill
+  return synthDrillRows(line.label, line.amount, asOfIso)
+}
 
 const cfPeriodLabel = (key) => (key === 'all' ? 'Jan–Aug 2026' : monthYear(MONTHS.find((m) => m.month === key) || LAST_MONTH))
 const cfPillLabel = (key) => (key === 'all' ? 'All time' : MONTHS.find((m) => m.month === key)?.label || key)
@@ -79,6 +124,32 @@ const withProfit = (o) => {
 
 const ORDERS = DATA.orders.map(withProfit)
 
+function buildLiveStockSnap() {
+  const aug = DATA.stock_by_month[STOCK_AUG_ID]
+  const bySize = new Map(aug.rows.map((r) => [normTireSize(r.size), { ...r, onHand: r.onHand, value: r.value }]))
+  const sepStart = `${AS_OF.slice(0, 7)}-01`
+  ORDERS.filter((o) => o.source === 'Inventory' && o.date >= sepStart && o.date <= AS_OF).forEach((o) => {
+    const row = bySize.get(normTireSize(o.size))
+    if (!row) return
+    const sold = Math.min(o.qty, row.onHand)
+    row.onHand -= sold
+    row.value = Math.round(row.onHand * row.unitCost * 100) / 100
+  })
+  const rows = [...bySize.values()].map((r) => ({
+    size: r.size,
+    desc: r.desc,
+    unitCost: r.unitCost,
+    onHand: r.onHand,
+    value: Math.round(r.onHand * r.unitCost * 100) / 100,
+  }))
+  return {
+    label: 'Live · current on-hand after Aug 31, 2026',
+    rows,
+    inventory_value: sumBy(rows, 'value'),
+    units_on_hand: sumBy(rows, 'onHand'),
+  }
+}
+
 const isNewTireOrder = (o) => o.size && !['Service', 'Parts'].includes(o.size) && !/used/i.test(o.item)
 const isUsedTireOrder = (o) => o.source === 'Used' || /used/i.test(o.item)
 
@@ -94,7 +165,10 @@ const SIZES = [...new Set(ORDERS.map((o) => o.size))].sort()
 
 /* ---------- Stock helpers ---------- */
 
-const stockSnapFor = (id) => DATA.stock_by_month[id] || DATA.stock_by_month[STOCK_MONTH_IDS[STOCK_MONTH_IDS.length - 1]]
+const stockSnapFor = (id) => {
+  if (id === STOCK_LIVE_ID) return buildLiveStockSnap()
+  return DATA.stock_by_month[id] || DATA.stock_by_month[STOCK_AUG_ID]
+}
 
 const stockRowsFor = (id) => {
   const snap = stockSnapFor(id)
@@ -135,6 +209,32 @@ function buildPL(keys) {
   out.net = out.gross - out.exp
   out.reportedNet = keys.reduce((s, k) => s + (MONTHS.find((m) => m.month === k)?.profit || 0), 0)
   return out
+}
+
+function buildAskAnswers() {
+  const best = MONTHS.reduce((b, m) => (m.profit > b.profit ? m : b), MONTHS[0])
+  const bestMargin = (best.profit / best.revenue) * 100
+  const bsAug = DATA.balance_sheet[STOCK_AUG_ID]
+  const checking = bsAug.assets.find((a) => a.label === 'Business checking')?.amount
+  const cfAug = DATA.cash_flow[STOCK_AUG_ID]
+  const opNet = sumBy(cfAug.operating)
+  const mix = DATA.sales_mix_aug
+  const newMix = mix.find((s) => s.name === 'New Tires')
+  const usedMix = mix.find((s) => s.name === 'Used Tires')
+  const svcMix = mix.find((s) => s.name === 'Service & Repair')
+  const topItems = DATA.sales_items_by_month?.[STOCK_AUG_ID] || DATA.sales_items_aug
+  const topItem = [...topItems].sort((a, b) => b.revenue - a.revenue)[0]
+  const avg = topItem?.units ? topItem.revenue / topItem.units : 0
+  const sepOrders = ORDERS.filter((o) => o.date.slice(0, 7) === AS_OF.slice(0, 7) && o.date <= AS_OF)
+  const sepSale = sumBy(sepOrders, 'sale')
+  const monthName = MONTH_NAMES[Number(AS_OF.slice(5, 7)) - 1]
+  return {
+    best_month: `${monthYear(best)} was the strongest closed month at ${fmt0(best.profit)} net profit on ${fmt0(best.revenue)} revenue (${pct(bestMargin)} margin).`,
+    cash: `Business checking was ${fmt0(checking)} at Aug 31. August net change in cash was ${fmt0(cfAug.netChange)} (net cash from operations ${fmt0(opNet)}).`,
+    mix: `In August, new tire sales were ${fmt0(newMix?.revenue || 0)} (${DATA.aug_tire_sales.new_tire_units} units). Used tires added ${fmt0(usedMix?.revenue || 0)} (${DATA.aug_tire_sales.used_tire_units} units). Service and repair was ${fmt0(svcMix?.revenue || 0)}.`,
+    sizes: `Top size in August was ${topItem.item} — ${topItem.units} units and ${fmt0(topItem.revenue)} revenue at about ${fmtC(avg)} per tire.`,
+    month: `${monthName} register through ${fmtDate(AS_OF).replace(/, \d{4}$/, '')} shows ${fmt0(sepSale)} in sales on ${sepOrders.length} tickets (estimates).`,
+  }
 }
 
 const downloadCsv = (filename, rows) => {
@@ -325,13 +425,25 @@ function ComboRevExpProfitChart({ months, onFullPl }) {
   )
 }
 
-function StackedMixBar({ segments }) {
-  return (
-    <div style={{ display: 'flex', height: 10, width: '100%', marginBottom: 14, overflow: 'hidden' }}>
+function StackedMixBar({ segments, onClick }) {
+  const inner = (
+    <>
       {segments.map((s, i) => (
         <div key={s.name} style={{ width: `${s.pct}%`, background: MIX_COLORS[i] || C.line, minWidth: s.pct > 0 ? 2 : 0 }} title={`${s.name} ${s.pct}%`} />
       ))}
-    </div>
+    </>
+  )
+  if (!onClick) {
+    return (
+      <div style={{ display: 'flex', height: 10, width: '100%', marginBottom: 14, overflow: 'hidden' }}>
+        {inner}
+      </div>
+    )
+  }
+  return (
+    <button type="button" className="rt-mix-bar" onClick={onClick} aria-label="Open sales items">
+      {inner}
+    </button>
   )
 }
 
@@ -413,8 +525,8 @@ function DrillModal({ drill, onClose }) {
             Close
           </button>
         </div>
-        <div style={{ overflow: 'auto', border: `1px solid ${C.hair}`, maxHeight: '58vh' }}>
-          <table style={{ width: '100%', borderCollapse: 'collapse', minWidth: 420 }}>
+        <div style={{ overflow: 'auto', border: `1px solid ${C.hair}`, maxHeight: '58vh', WebkitOverflowScrolling: 'touch' }}>
+          <table style={{ width: '100%', borderCollapse: 'collapse', minWidth: 0 }}>
             <thead>
               <tr>
                 <th style={hcell()}>Date</th>
@@ -524,60 +636,78 @@ function StmtPanel({ title, period, children }) {
   )
 }
 
-function PeriodBar({ children, compare, onCompare, compareDisabled }) {
+function FinPeriodBar({ children, compare, onCompareToggle, compareKey, onCompareKey, showCompareToggle = true }) {
   return (
-    <div className="rt-fin-pills">
-      <span>PERIOD</span>
-      {children}
-      <label
-        style={{
-          marginLeft: 'auto',
-          display: 'flex',
-          alignItems: 'center',
-          gap: 6,
-          fontFamily: ui,
-          fontSize: 11,
-          color: compareDisabled ? C.muted : C.sub,
-          cursor: compareDisabled ? 'default' : 'pointer',
-        }}
-      >
-        <input type="checkbox" checked={compare && !compareDisabled} disabled={compareDisabled} onChange={(e) => onCompare(e.target.checked)} />
-        Compare to prior period
-      </label>
-    </div>
+    <>
+      <div className="rt-fin-pills">
+        <span>PERIOD</span>
+        {children}
+        {showCompareToggle ? (
+          <button type="button" className={`rt-pill rt-compare-toggle${compare ? ' on' : ''}`} style={{ marginLeft: 8 }} onClick={onCompareToggle} aria-pressed={compare}>
+            ⇄ Compare
+          </button>
+        ) : null}
+      </div>
+      {compare ? (
+        <div className="rt-fin-pills rt-compare-row">
+          <span>COMPARE TO</span>
+          {MONTHS.map((m) => (
+            <Pill key={m.month} on={compareKey === m.month} onClick={() => onCompareKey(m.month)}>
+              {m.label}
+            </Pill>
+          ))}
+        </div>
+      ) : null}
+    </>
   )
+}
+
+function useCompareToggle(periodKey, setPeriodKey) {
+  const [compare, setCompare] = useState(false)
+  const [compareKey, setCompareKey] = useState(MONTHS[MONTHS.length - 2]?.month || MONTHS[0].month)
+  const toggleCompare = () => {
+    setCompare((on) => {
+      if (!on && periodKey === 'all') {
+        setPeriodKey(LAST_MONTH.month)
+        setCompareKey(MONTHS[MONTHS.length - 2].month)
+      }
+      return !on
+    })
+  }
+  return { compare, compareKey, setCompareKey, toggleCompare, setCompare }
 }
 
 /* ---------- Financials ---------- */
 
 function PlView({ onDrill, periodId, setPeriodId }) {
-  const [compare, setCompare] = useState(false)
+  const { compare, compareKey, setCompareKey, toggleCompare } = useCompareToggle(periodId, setPeriodId)
   const period = PL_PERIODS.find((p) => p.id === periodId) || PL_PERIODS[PL_PERIODS.length - 3]
   const pl = useMemo(() => buildPL(period.keys), [period])
-  const priorPl = useMemo(() => (period.prior ? buildPL(period.prior) : null), [period])
-  const showCompare = compare && !!priorPl
-  const priorLine = (sec, label) => priorPl?.[sec]?.find((l) => l.label === label)?.amount
+  const comparePl = useMemo(() => buildPL([compareKey]), [compareKey])
+  const compareLabel = MONTHS.find((m) => m.month === compareKey)?.label || compareKey
+  const showCompare = compare
+  const priorLine = (sec, label) => comparePl?.[sec]?.find((l) => l.label === label)?.amount
   const drillFor = (l) =>
     l.drill?.length ? () => onDrill({ title: l.label, period: period.full, rows: l.drill, total: l.amount }) : undefined
 
   const net = pl.net
   return (
     <>
-      <PeriodBar compare={compare} onCompare={setCompare} compareDisabled={!priorPl}>
+      <FinPeriodBar compare={compare} onCompareToggle={toggleCompare} compareKey={compareKey} onCompareKey={setCompareKey}>
         {PL_PERIODS.map((p) => (
           <Pill key={p.id} on={p.id === period.id} onClick={() => setPeriodId(p.id)}>
             {p.label}
           </Pill>
         ))}
-      </PeriodBar>
+      </FinPeriodBar>
       <StmtPanel title="Profit & Loss" period={period.full}>
         <Stmt compare={showCompare}>
-          <StmtHead compare={showCompare} current={period.label} prior="Prior" />
+          <StmtHead compare={showCompare} current={period.label} prior={compareLabel} />
           <StmtSection>Income</StmtSection>
           {pl.income.map((l) => (
             <StmtLine key={l.label} label={l.label} amount={l.amount} prior={priorLine('income', l.label)} compare={showCompare} indent onDrill={drillFor(l)} />
           ))}
-          <StmtLine label="Total income" amount={pl.inc} prior={priorPl?.inc} compare={showCompare} total />
+          <StmtLine label="Total income" amount={pl.inc} prior={comparePl?.inc} compare={showCompare} total />
           <StmtSection>Cost of goods sold</StmtSection>
           {pl.cogs.map((l) => (
             <StmtLine
@@ -590,7 +720,7 @@ function PlView({ onDrill, periodId, setPeriodId }) {
               onDrill={drillFor(l)}
             />
           ))}
-          <StmtLine label="Gross profit" amount={pl.gross} prior={priorPl?.gross} compare={showCompare} total />
+          <StmtLine label="Gross profit" amount={pl.gross} prior={comparePl?.gross} compare={showCompare} total />
           <StmtSection>Operating expenses</StmtSection>
           {pl.expense.map((l) => (
             <StmtLine
@@ -603,8 +733,8 @@ function PlView({ onDrill, periodId, setPeriodId }) {
               onDrill={drillFor(l)}
             />
           ))}
-          <StmtLine label="Total operating expenses" amount={-pl.exp} prior={priorPl ? -priorPl.exp : undefined} compare={showCompare} total />
-          <StmtLine label="Net income" amount={net} prior={priorPl?.net} compare={showCompare} total strong tie={Math.abs(net - pl.reportedNet) < 1} />
+          <StmtLine label="Total operating expenses" amount={-pl.exp} prior={comparePl ? -comparePl.exp : undefined} compare={showCompare} total />
+          <StmtLine label="Net income" amount={net} prior={comparePl?.net} compare={showCompare} total strong tie={Math.abs(net - pl.reportedNet) < 1} />
         </Stmt>
         {pl.inc > 0 ? (
           <div style={{ textAlign: 'right', fontFamily: ui, fontSize: 11, color: C.muted, padding: '8px 8px 0' }}>
@@ -616,9 +746,16 @@ function PlView({ onDrill, periodId, setPeriodId }) {
   )
 }
 
+function cfPriorAmount(cfCompare, section, label) {
+  const list = cfCompare?.[section] || []
+  return list.find((l) => l.label === label)?.amount
+}
+
 function CashFlowView() {
   const [key, setKey] = useState('all')
-  const cf = DATA.cash_flow[key]
+  const { compare, compareKey, setCompareKey, toggleCompare } = useCompareToggle(key, setKey)
+  const cf = DATA.cash_flow[key] || DATA.cash_flow[STOCK_AUG_ID]
+  const cfCompare = compare ? DATA.cash_flow[compareKey] : null
   const bs = bsForCfKey(key)
   const checking = bs?.assets.find((a) => a.label === 'Business checking')?.amount
   const opTotal = sumBy(cf.operating)
@@ -627,44 +764,60 @@ function CashFlowView() {
   const plNet = plNetForCfKey(key)
   const period = cfPeriodLabel(key)
   const headLabel = key === 'all' ? 'YTD' : monthShort(MONTHS.find((m) => m.month === key)?.label || '')
+  const compareLabel = MONTHS.find((m) => m.month === compareKey)?.label || compareKey
+  const opCompare = cfCompare ? sumBy(cfCompare.operating) : null
+  const invCompare = cfCompare ? sumBy(cfCompare.investing) : null
+  const finCompare = cfCompare ? sumBy(cfCompare.financing) : null
   return (
     <>
-      <PeriodBar compare={false} onCompare={() => {}} compareDisabled>
+      <FinPeriodBar compare={compare} onCompareToggle={toggleCompare} compareKey={compareKey} onCompareKey={setCompareKey}>
         {CF_PERIOD_KEYS.map((k) => (
           <Pill key={k} on={k === key} onClick={() => setKey(k)}>
             {cfPillLabel(k)}
           </Pill>
         ))}
-      </PeriodBar>
+      </FinPeriodBar>
       <StmtPanel title="Cash Flow" period={period}>
-        <Stmt>
-          <StmtHead current={headLabel} />
+        <Stmt compare={compare}>
+          <StmtHead compare={compare} current={headLabel} prior={compareLabel} />
           <StmtSection>Operating activities</StmtSection>
           {cf.operating.map((l) => (
             <StmtLine
               key={l.label}
               label={l.label}
               amount={l.amount}
+              prior={cfPriorAmount(cfCompare, 'operating', l.label)}
+              compare={compare}
               indent
               tie={l.label === 'Net income' ? Math.abs(l.amount - plNet) < 1 : undefined}
             />
           ))}
-          <StmtLine label="Net cash from operating activities" amount={opTotal} total />
+          <StmtLine label="Net cash from operating activities" amount={opTotal} prior={opCompare} compare={compare} total />
           <StmtSection>Investing activities</StmtSection>
           {cf.investing.map((l) => (
-            <StmtLine key={l.label} label={l.label} amount={l.amount} indent />
+            <StmtLine key={l.label} label={l.label} amount={l.amount} prior={cfPriorAmount(cfCompare, 'investing', l.label)} compare={compare} indent />
           ))}
-          <StmtLine label="Net cash from investing activities" amount={invTotal} total />
+          <StmtLine label="Net cash from investing activities" amount={invTotal} prior={invCompare} compare={compare} total />
           <StmtSection>Financing activities</StmtSection>
           {cf.financing.map((l) => (
-            <StmtLine key={l.label} label={l.label} amount={l.amount} indent />
+            <StmtLine key={l.label} label={l.label} amount={l.amount} prior={cfPriorAmount(cfCompare, 'financing', l.label)} compare={compare} indent />
           ))}
-          <StmtLine label="Net cash from financing activities" amount={finTotal} total />
-          <StmtLine label="Net change in cash" amount={cf.netChange} total strong tie={Math.abs(opTotal + invTotal + finTotal - cf.netChange) < 1} />
-          <StmtLine label="Cash at beginning of period" amount={cf.cashStart} indent />
+          <StmtLine label="Net cash from financing activities" amount={finTotal} prior={finCompare} compare={compare} total />
+          <StmtLine
+            label="Net change in cash"
+            amount={cf.netChange}
+            prior={cfCompare?.netChange}
+            compare={compare}
+            total
+            strong
+            tie={Math.abs(opTotal + invTotal + finTotal - cf.netChange) < 1}
+          />
+          <StmtLine label="Cash at beginning of period" amount={cf.cashStart} prior={cfCompare?.cashStart} compare={compare} indent />
           <StmtLine
             label="Cash at end of period"
             amount={cf.cashEnd}
+            prior={cfCompare?.cashEnd}
+            compare={compare}
             total
             strong
             tie={checking != null && Math.abs(checking - cf.cashEnd) < 1 && Math.abs(cf.cashStart + cf.netChange - cf.cashEnd) < 1}
@@ -675,43 +828,75 @@ function CashFlowView() {
   )
 }
 
+function AcctSectionHead({ title, open, onToggle, count, total }) {
+  return (
+    <button type="button" className="rt-acct-head" onClick={onToggle} aria-expanded={open}>
+      <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}>
+        <span>{open ? '▾' : '▸'}</span>
+        {title}
+      </span>
+      <span style={{ marginLeft: 'auto', fontFamily: mono, fontSize: 11, fontWeight: 500, color: C.sub }}>
+        {count} · {paren(total)}
+      </span>
+    </button>
+  )
+}
+
 function BalanceSheetView({ onDrill }) {
   const keys = Object.keys(DATA.balance_sheet)
   const [key, setKey] = useState(keys[keys.length - 1])
   const bs = DATA.balance_sheet[key]
+  const asOfIso = monthEndIso(key)
+  const [open, setOpen] = useState({ ASSETS: true, LIABILITIES: true, EQUITY: true })
   const assets = sumBy(bs.assets)
   const liab = sumBy(bs.liabilities)
   const eq = sumBy(bs.equity)
-  const drillFor = (l) => (l.drill?.length ? () => onDrill({ title: l.label, period: `As of ${bs.label}`, rows: l.drill, total: l.amount }) : undefined)
+  const drillFor = (l) => {
+    const rows = drillRowsForAccount(l, asOfIso)
+    if (!rows) return undefined
+    return () => onDrill({ title: l.label, period: `As of ${bs.label}`, rows, total: l.amount })
+  }
+  const sections = [
+    { id: 'ASSETS', title: 'ASSETS', rows: bs.assets, total: assets, totalLabel: 'Total assets' },
+    { id: 'LIABILITIES', title: 'LIABILITIES', rows: bs.liabilities, total: liab, totalLabel: 'Total liabilities' },
+    { id: 'EQUITY', title: 'EQUITY', rows: bs.equity, total: eq, totalLabel: 'Total equity' },
+  ]
   return (
     <>
-      <PeriodBar compare={false} onCompare={() => {}} compareDisabled>
+      <FinPeriodBar showCompareToggle={false} compare={false} onCompareToggle={() => {}} compareKey={MONTHS[0].month} onCompareKey={() => {}}>
         {keys.map((k) => (
           <Pill key={k} on={k === key} onClick={() => setKey(k)}>
             {MONTHS.find((m) => m.month === k)?.label || k}
           </Pill>
         ))}
-      </PeriodBar>
+      </FinPeriodBar>
       <StmtPanel title="Balance Sheet" period={`As of ${bs.label}`}>
-        <Stmt>
-          <StmtHead current={bs.label.split(',')[0]} />
-          <StmtSection>Assets</StmtSection>
-          {bs.assets.map((l) => (
-            <StmtLine key={l.label} label={l.label} amount={l.amount} indent onDrill={drillFor(l)} />
+        <div style={{ background: C.card, border: `1px solid ${C.hair}`, overflow: 'hidden' }}>
+          {sections.map((sec) => (
+            <div key={sec.id} style={{ borderBottom: `1px solid ${C.hair}` }}>
+              <AcctSectionHead
+                title={sec.title}
+                open={open[sec.id]}
+                onToggle={() => setOpen((o) => ({ ...o, [sec.id]: !o[sec.id] }))}
+                count={sec.rows.length}
+                total={sec.total}
+              />
+              {open[sec.id] ? (
+                <Stmt>
+                  {sec.rows.map((l) => (
+                    <StmtLine key={l.label} label={l.label} amount={l.amount} indent onDrill={drillFor(l)} />
+                  ))}
+                  <StmtLine label={sec.totalLabel} amount={sec.total} total strong={sec.id === 'ASSETS'} />
+                </Stmt>
+              ) : null}
+            </div>
           ))}
-          <StmtLine label="Total assets" amount={assets} total strong />
-          <StmtSection>Liabilities</StmtSection>
-          {bs.liabilities.map((l) => (
-            <StmtLine key={l.label} label={l.label} amount={l.amount} indent onDrill={drillFor(l)} />
-          ))}
-          <StmtLine label="Total liabilities" amount={liab} total />
-          <StmtSection>Equity</StmtSection>
-          {bs.equity.map((l) => (
-            <StmtLine key={l.label} label={l.label} amount={l.amount} indent onDrill={drillFor(l)} />
-          ))}
-          <StmtLine label="Total equity" amount={eq} total />
-          <StmtLine label="Total liabilities & equity" amount={liab + eq} total strong tie={Math.abs(assets - liab - eq) < 1} />
-        </Stmt>
+          <div style={{ padding: '8px 8px 12px' }}>
+            <Stmt>
+              <StmtLine label="Total liabilities & equity" amount={liab + eq} total strong tie={Math.abs(assets - liab - eq) < 1} />
+            </Stmt>
+          </div>
+        </div>
       </StmtPanel>
     </>
   )
@@ -798,8 +983,9 @@ function MonthlyTableView({ onPickMonth }) {
 }
 
 function AccountBalancesView({ onDrill }) {
-  const key = '2026-08'
+  const key = STOCK_AUG_ID
   const bs = DATA.balance_sheet[key]
+  const asOfIso = monthEndIso(key)
   const [open, setOpen] = useState({ ASSETS: true, LIABILITIES: true, EQUITY: true, INCOME: false, EXPENSES: false })
   const assets = sumBy(bs.assets)
   const liab = sumBy(bs.liabilities)
@@ -816,26 +1002,42 @@ function AccountBalancesView({ onDrill }) {
 
   const toggle = (id) => setOpen((o) => ({ ...o, [id]: !o[id] }))
 
+  const ytdEnd = monthEndIso(STOCK_AUG_ID)
+
+  const openDrill = (l, secId) => {
+    const period =
+      secId === 'ASSETS' || secId === 'LIABILITIES' || secId === 'EQUITY' ? `As of ${bs.label}` : 'Jan–Aug 2026 YTD'
+    const asOf = secId === 'ASSETS' || secId === 'LIABILITIES' || secId === 'EQUITY' ? asOfIso : ytdEnd
+    const rows = drillRowsForAccount(l, asOf)
+    if (!rows) return
+    onDrill({ title: l.label, period, rows, total: l.amount })
+  }
+
   return (
     <div style={{ background: C.card, border: `1px solid ${C.hair}`, overflow: 'auto', maxWidth: 760 }}>
       {sections.map((sec) => (
         <div key={sec.id} style={{ borderBottom: `1px solid ${C.hair}` }}>
-          <button type="button" className="rt-acct-head" onClick={() => toggle(sec.id)} aria-expanded={open[sec.id]}>
-            <span>{open[sec.id] ? '▾' : '▸'}</span> {sec.title}
-          </button>
+          <AcctSectionHead
+            title={sec.title}
+            open={open[sec.id]}
+            onToggle={() => toggle(sec.id)}
+            count={sec.rows.length}
+            total={sumBy(sec.rows, 'amount')}
+          />
           {open[sec.id] ? (
-            <table style={{ width: '100%', borderCollapse: 'collapse', minWidth: 420 }}>
+            <table style={{ width: '100%', borderCollapse: 'collapse', minWidth: 0 }}>
               <tbody>
                 {sec.rows.map((l) => {
-                  const canDrill = !!l.drill?.length
-                  const period = sec.id === 'ASSETS' || sec.id === 'LIABILITIES' || sec.id === 'EQUITY' ? `As of ${bs.label}` : 'Jan–Aug 2026 YTD'
+                  const rowAsOf = sec.id === 'INCOME' || sec.id === 'EXPENSES' ? ytdEnd : asOfIso
+                  const canDrill = !!drillRowsForAccount(l, rowAsOf)
                   return (
                     <tr
                       key={`${sec.id}-${l.label}`}
                       className={canDrill ? 'rt-clickrow' : undefined}
                       tabIndex={canDrill ? 0 : undefined}
-                      onClick={canDrill ? () => onDrill({ title: l.label, period, rows: l.drill, total: l.amount }) : undefined}
-                      onKeyDown={canDrill ? (e) => e.key === 'Enter' && onDrill({ title: l.label, period, rows: l.drill, total: l.amount }) : undefined}
+                      role={canDrill ? 'button' : undefined}
+                      onClick={canDrill ? () => openDrill(l, sec.id) : undefined}
+                      onKeyDown={canDrill ? (e) => (e.key === 'Enter' || e.key === ' ') && (e.preventDefault(), openDrill(l, sec.id)) : undefined}
                     >
                       <td style={cell()}>{l.label}</td>
                       <td style={cell('right', { fontFamily: mono, width: 120 })}>{paren(l.amount)}</td>
@@ -887,7 +1089,7 @@ function FinancialsTab({ fin, setFin, plPeriod, setPlPeriod }) {
 
 /* ---------- Dashboard ---------- */
 
-function DashboardTab({ period, setPeriod, onOpenOrders, onOpenFinancials, onOpenSalesItems }) {
+function DashboardTab({ period, setPeriod, onOpenOrders, onOpenFinancials, onOpenSalesItems, onOpenSalesItemsSize }) {
   const rows = ORDERS.filter((o) => inPeriod(o, period))
   const reg = totalsOf(rows)
   const ordersView = totalsOf(ORDERS.filter((o) => inPeriod(o, period)))
@@ -920,14 +1122,23 @@ function DashboardTab({ period, setPeriod, onOpenOrders, onOpenFinancials, onOpe
   const profitRows = MONTHS.map((x) => ({ ...x, margin: (x.profit / x.revenue) * 100 }))
   const profitTotal = sumBy(profitRows, 'profit')
 
+  const openSalesMix = () => onOpenSalesItems({ periodKey: STOCK_AUG_ID, q: '' })
+
   return (
     <>
-      <div style={{ ...panel, marginBottom: 28 }}>
+      <div
+        role="button"
+        tabIndex={0}
+        className="rt-open-period-card"
+        style={{ ...panel, marginBottom: 28 }}
+        onClick={onOpenOrders}
+        onKeyDown={(e) => (e.key === 'Enter' || e.key === ' ') && (e.preventDefault(), onOpenOrders())}
+      >
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 10, flexWrap: 'wrap', marginBottom: 12 }}>
           <div style={{ fontFamily: head, fontSize: 13, fontWeight: 700, color: C.ink, letterSpacing: '0.08em', textTransform: 'uppercase' }}>
             Open period · {monthName} · through {fmtDate(AS_OF).replace(/, \d{4}$/, '')}
           </div>
-          <div style={{ display: 'flex', gap: 6 }}>
+          <div style={{ display: 'flex', gap: 6 }} onClick={(e) => e.stopPropagation()} onKeyDown={(e) => e.stopPropagation()}>
             {ORDER_PERIODS.filter((p) => p.id !== 'all').map((p) => (
               <Pill key={p.id} on={period === p.id} onClick={() => setPeriod(p.id)}>
                 {p.label}
@@ -953,7 +1164,14 @@ function DashboardTab({ period, setPeriod, onOpenOrders, onOpenFinancials, onOpe
           ))}
         </div>
         <div style={{ marginTop: 12 }}>
-          <button type="button" className="rt-linkbtn" onClick={onOpenOrders}>
+          <button
+            type="button"
+            className="rt-linkbtn"
+            onClick={(e) => {
+              e.stopPropagation()
+              onOpenOrders()
+            }}
+          >
             View these {reg.tickets} tickets in Orders →
           </button>
         </div>
@@ -1013,26 +1231,37 @@ function DashboardTab({ period, setPeriod, onOpenOrders, onOpenFinancials, onOpe
 
       <div className="rt-chartrow" style={{ marginTop: 16 }}>
         <div style={{ ...panel, marginBottom: 0 }}>
-          <PanelTitle right={mixTie ? <TieMark ok /> : null}>Sales Mix · Aug 2026</PanelTitle>
-          <StackedMixBar segments={DATA.sales_mix_aug} />
+          <PanelTitle
+            right={
+              <span style={{ display: 'inline-flex', alignItems: 'baseline', gap: 8 }}>
+                {mixTie ? <TieMark ok /> : null}
+                <button type="button" className="rt-linkbtn" onClick={openSalesMix}>
+                  Items →
+                </button>
+              </span>
+            }
+          >
+            Sales Mix · Aug 2026
+          </PanelTitle>
+          <StackedMixBar segments={DATA.sales_mix_aug} onClick={openSalesMix} />
           {DATA.sales_mix_aug.map((s, i) => (
-            <div key={s.name} style={{ marginBottom: 10 }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', fontFamily: ui, fontSize: 12, marginBottom: 4 }}>
+            <button key={s.name} type="button" className="rt-mix-row" onClick={openSalesMix}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', fontFamily: ui, fontSize: 12, marginBottom: 4, width: '100%' }}>
                 <span style={{ color: C.ink }}>{s.name}</span>
                 <span style={{ fontFamily: mono, color: C.sub }}>
                   {fmt0(s.revenue)} · {pct(s.pct)}
                 </span>
               </div>
-              <div style={{ height: 5, background: C.line }}>
+              <div style={{ height: 5, background: C.line, width: '100%' }}>
                 <div style={{ width: `${s.pct}%`, height: '100%', background: MIX_COLORS[i] }} />
               </div>
-            </div>
+            </button>
           ))}
         </div>
         <div style={{ ...panel, marginBottom: 0, overflow: 'auto' }}>
           <PanelTitle
             right={
-              <button type="button" className="rt-linkbtn" onClick={onOpenSalesItems}>
+              <button type="button" className="rt-linkbtn" onClick={() => onOpenSalesItems({ periodKey: STOCK_AUG_ID, q: '' })}>
                 All
               </button>
             }
@@ -1050,7 +1279,14 @@ function DashboardTab({ period, setPeriod, onOpenOrders, onOpenFinancials, onOpe
             </thead>
             <tbody>
               {DATA.top_tire_sizes_aug.map((t) => (
-                <tr key={t.size}>
+                <tr
+                  key={t.size}
+                  className="rt-clickrow"
+                  role="button"
+                  tabIndex={0}
+                  onClick={() => onOpenSalesItemsSize(t.size)}
+                  onKeyDown={(e) => (e.key === 'Enter' || e.key === ' ') && (e.preventDefault(), onOpenSalesItemsSize(t.size))}
+                >
                   <td style={cell('left', { fontFamily: mono, color: C.muted })}>{t.rank}</td>
                   <td style={cell('left', { fontFamily: mono })}>{t.size}</td>
                   <td style={cell('right', { fontFamily: mono })}>{t.units}</td>
@@ -1077,7 +1313,7 @@ function DashboardTab({ period, setPeriod, onOpenOrders, onOpenFinancials, onOpe
 
 /* ---------- Sales & Items ---------- */
 
-function SalesItemsTab() {
+function SalesItemsTab({ seed }) {
   const [view, setView] = useState('ranked')
   const [periodKey, setPeriodKey] = useState('2026-08')
   const [compareOn, setCompareOn] = useState(false)
@@ -1085,6 +1321,13 @@ function SalesItemsTab() {
   const [sort, setSort] = useState('revenue')
   const [sortDir, setSortDir] = useState(-1)
   const [q, setQ] = useState('')
+
+  useEffect(() => {
+    if (!seed) return
+    setView(seed.view || 'ranked')
+    if (seed.periodKey) setPeriodKey(seed.periodKey)
+    if (seed.q !== undefined) setQ(seed.q)
+  }, [seed?.seq])
 
   const stats = DATA.period_stats?.[periodKey] || DATA.period_stats?.['2026-08']
   const items = (DATA.sales_items_by_month?.[periodKey] || DATA.sales_items_aug).filter((it) => !q.trim() || it.item.toLowerCase().includes(q.trim().toLowerCase()))
@@ -1512,7 +1755,7 @@ function StockTab() {
   })
   const units = sumBy(stockRowsFor(asOf), 'onHand')
   const value = snap.inventory_value
-  const bsInv = inventoryOnBs(asOf)
+  const bsInv = asOf === STOCK_LIVE_ID ? null : inventoryOnBs(asOf)
   const invTie = bsInv != null && value === bsInv
 
   const exportCsv = () => {
@@ -1547,6 +1790,7 @@ function StockTab() {
                 {stockSnapFor(id).label}
               </option>
             ))}
+            <option value={STOCK_LIVE_ID}>{stockSnapFor(STOCK_LIVE_ID).label}</option>
           </select>
         </label>
         <input value={q} onChange={(e) => setQ(e.target.value)} placeholder="Search stock" aria-label="Search stock" style={{ ...selectStyle, flex: '1 1 140px', minWidth: 0 }} />
@@ -1629,7 +1873,8 @@ function AskTab() {
     const t = text.trim()
     if (!t) return
     const k = key || pickAnswerKey(t)
-    const answer = k ? DATA.ask.answers[k] : ASK_FALLBACK
+    const answers = buildAskAnswers()
+    const answer = k ? answers[k] : ASK_FALLBACK
     setMessages((m) => [...m, { role: 'user', text: t }, { role: 'ai', text: answer }])
     setInput('')
   }
@@ -1794,7 +2039,17 @@ const PORTAL_CSS = `
   .rt-profit-row{display:grid;grid-template-columns:72px 1fr auto;gap:10px;width:100%;text-align:left;padding:10px 12px;border:none;border-bottom:1px solid ${C.line};background:${C.card};font-family:${ui};font-size:12px;cursor:pointer;color:${C.ink}}
   .rt-profit-row.total{cursor:default;background:#FAF8F4;font-weight:600}
   .rt-profit-row:hover:not(.total){background:#FAF8F4}
-  .rt-acct-head{width:100%;text-align:left;padding:12px 14px;border:none;background:#ECE7DD;font-family:${head};font-size:11px;font-weight:700;letter-spacing:.12em;color:${C.ink};cursor:pointer}
+  .rt-acct-head{width:100%;display:flex;align-items:center;gap:8px;text-align:left;padding:12px 14px;border:none;background:#ECE7DD;font-family:${head};font-size:11px;font-weight:700;letter-spacing:.12em;color:${C.ink};cursor:pointer}
+  .rt-compare-row{overflow-x:auto;-webkit-overflow-scrolling:touch;flex-wrap:nowrap;padding-bottom:2px}
+  .rt-compare-row .rt-pill{flex-shrink:0}
+  .rt-open-period-card{cursor:pointer;transition:background .15s}
+  .rt-open-period-card:hover{background:#FAF8F4}
+  .rt-open-period-card:focus-visible{outline:2px solid ${THEME.accent};outline-offset:2px}
+  .rt-mix-bar{display:flex;height:10px;width:100%;margin-bottom:14px;overflow:hidden;border:none;padding:0;background:transparent;cursor:pointer}
+  .rt-mix-bar:hover{opacity:.92}
+  .rt-mix-row{display:block;width:100%;text-align:left;border:none;border-bottom:1px solid ${C.line};background:${C.card};padding:10px 0;cursor:pointer;color:inherit}
+  .rt-mix-row:hover{background:#FAF8F4}
+  .rt-mix-row:focus-visible{outline:2px solid ${THEME.accent};outline-offset:-2px}
   .rt-stmt{--cols:1fr 120px}
   .rt-stmt.cmp{--cols:1fr 104px 104px 92px}
   .rt-stmt__row{display:grid;grid-template-columns:var(--cols);gap:8px;padding:6px 8px;font-family:${ui};font-size:12px;align-items:baseline}
@@ -1865,6 +2120,7 @@ export default function RiversideTiresPortal() {
   const [openPeriod, setOpenPeriod] = useState('7d')
   const [finTab, setFinTab] = useState('pl')
   const [plPeriod, setPlPeriod] = useState('all')
+  const [inventorySeed, setInventorySeed] = useState({ seq: 0, view: 'ranked', periodKey: STOCK_AUG_ID, q: '' })
   const [phoneTourActive, setPhoneTourActive] = useState(false)
   const phoneTabTimerRef = useRef(null)
   const phoneScrollTimerRef = useRef(null)
@@ -1952,6 +2208,24 @@ export default function RiversideTiresPortal() {
 
   const navItem = NAV.find((n) => n.id === tab) || NAV[0]
 
+  const openSalesItems = ({ periodKey = STOCK_AUG_ID, q = '' } = {}) => {
+    scrollPortalTop()
+    setInventorySeed((s) => ({ seq: s.seq + 1, view: 'ranked', periodKey, q }))
+    setTab('inventory')
+  }
+
+  const openOrders = () => {
+    scrollPortalTop()
+    setTab('orders')
+  }
+
+  const openFinancials = (p) => {
+    scrollPortalTop()
+    setTab('financials')
+    setFinTab('pl')
+    setPlPeriod(p || 'all')
+  }
+
   return (
     <>
       <Head>
@@ -1968,17 +2242,14 @@ export default function RiversideTiresPortal() {
           <DashboardTab
             period={openPeriod}
             setPeriod={setOpenPeriod}
-            onOpenOrders={() => setTab('orders')}
-            onOpenFinancials={(p) => {
-              setTab('financials')
-              setFinTab('pl')
-              setPlPeriod(p || 'all')
-            }}
-            onOpenSalesItems={() => setTab('inventory')}
+            onOpenOrders={openOrders}
+            onOpenFinancials={openFinancials}
+            onOpenSalesItems={openSalesItems}
+            onOpenSalesItemsSize={(size) => openSalesItems({ periodKey: STOCK_AUG_ID, q: size })}
           />
         )}
         {tab === 'financials' && <FinancialsTab fin={finTab} setFin={setFinTab} plPeriod={plPeriod} setPlPeriod={setPlPeriod} />}
-        {tab === 'inventory' && <SalesItemsTab />}
+        {tab === 'inventory' && <SalesItemsTab seed={inventorySeed} />}
         {tab === 'orders' && <OrdersTab initialPeriod={openPeriod} />}
         {tab === 'stock' && <StockTab />}
         {tab === 'ai' && <AskTab />}
