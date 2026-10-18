@@ -27,6 +27,13 @@ import { buildDashboard, getLotById, salesInPeriod } from './closeoutExplosionCo
 import DATA from './closeoutExplosionData'
 
 const BIZ = 'CLOSEOUT EXPLOSION'
+const StackKV = ({ k, v, vColor = INK }) => (
+  <div className="ce-stack-kv">
+    <span className="k">{k}</span>
+    <span className="v" style={{ color: vColor }}>{v}</span>
+  </div>
+)
+
 const TABS = [
   ['overview', 'Overview'],
   ['lots', 'Lots'],
@@ -67,11 +74,11 @@ export default function CloseoutExplosionPortal() {
   }
   const big = { fontFamily: UI, fontWeight: 700, letterSpacing: '-0.4px' }
 
-  const KPI = ({ k, v, sub, accent, onClick }) => {
+  const KPI = ({ k, v, sub, valueColor, onClick }) => {
     const inner = (
       <>
-        <div style={lbl}>{k}</div>
-        <div style={{ ...big, fontSize: '26px', color: accent || INK, lineHeight: 1.15, marginTop: '4px' }}>{v}</div>
+        <div style={{ ...lbl, ...(onClick ? { paddingRight: 22, lineHeight: 1.3 } : {}) }}>{k}</div>
+        <div style={{ ...big, fontSize: '26px', color: valueColor || INK, lineHeight: 1.15, marginTop: '4px' }}>{v}</div>
         {sub ? (
           <div style={{ fontFamily: UI, fontSize: '12px', color: sub.color || '#A2937A', marginTop: '3px' }}>{sub.text}</div>
         ) : null}
@@ -97,7 +104,7 @@ export default function CloseoutExplosionPortal() {
         }}
       >
         {inner}
-        <span style={{ position: 'absolute', top: 11, right: 13, color: '#C6B79A', fontSize: 15 }}>›</span>
+        <span style={{ position: 'absolute', top: 11, right: 13, color: '#C6B79A', fontSize: 15, pointerEvents: 'none' }}>›</span>
       </button>
     )
   }
@@ -166,7 +173,29 @@ export default function CloseoutExplosionPortal() {
           ))}
         </div>
         <div style={{ ...lbl, marginBottom: 8 }}>Sales</div>
-        <div style={{ overflowX: 'auto' }}>
+        <div className="ce-stack-only">
+          {lot.sales.map((s) => (
+            <button
+              key={s.invoice}
+              type="button"
+              className="ce-stack-row ce-click"
+              onClick={() => openBuyer(s.buyer)}
+            >
+              <div className="ce-stack-title">{fmtD(s.date)}</div>
+              <div className="ce-stack-sub">{s.invoice}</div>
+              <div style={{ fontSize: 12, marginTop: 4 }}>{s.buyer}</div>
+              <div className="ce-stack-grid ce-stack-grid-3">
+                <StackKV k="Cases" v={fmtInt(s.cases)} />
+                <StackKV k="Price" v={money(s.price)} />
+                <StackKV k="Amount" v={money(s.amount)} />
+              </div>
+              <div style={{ fontSize: 12, color: s.paid ? MUTED : INK, marginTop: 8 }}>
+                {s.paid ? `Paid ${fmtD(s.paid)}` : 'Open'}
+              </div>
+            </button>
+          ))}
+        </div>
+        <div className="ce-table-wrap">
           <table className="ce-table ce-compact">
             <thead>
               <tr>
@@ -206,9 +235,13 @@ export default function CloseoutExplosionPortal() {
 
   const BuyerDetail = ({ name }) => {
     const terms = dash.buyerTerms[name] || 30
-    const openInv = dash.openSales.filter((s) => s.buyer === name)
+    const openInv = dash.openSales
+      .filter((s) => s.buyer === name)
+      .sort((a, b) => a.date.localeCompare(b.date) || a.invoice.localeCompare(b.invoice))
     const balance = openInv.reduce((sum, s) => sum + s.amount, 0)
-    const paidFall = dash.paidFallByBuyer(name)
+    const paidFall = [...dash.paidFallByBuyer(name)].sort(
+      (a, b) => a.date.localeCompare(b.date) || a.invoice.localeCompare(b.invoice),
+    )
     return (
       <div className="ce-detail">
         <DetailBack />
@@ -220,7 +253,24 @@ export default function CloseoutExplosionPortal() {
           <div style={{ ...big, fontSize: 28, marginTop: 4 }}>{money(balance)}</div>
         </div>
         <div style={{ ...lbl, marginBottom: 8 }}>Open invoices</div>
-        <div style={{ overflowX: 'auto', marginBottom: 24 }}>
+        <div className="ce-stack-only" style={{ marginBottom: 24 }}>
+          {openInv.map((s) => (
+            <button key={s.invoice} type="button" className="ce-stack-row ce-click" onClick={() => openLot(s.lotId)}>
+              <div className="ce-stack-title">{fmtD(s.date)}</div>
+              <div className="ce-stack-sub">{s.invoice} · {s.lotId}</div>
+              <div className="ce-stack-grid ce-stack-grid-3">
+                <StackKV k="Cases" v={fmtInt(s.cases)} />
+                <StackKV k="Amount" v={money(s.amount)} />
+                <StackKV k="Age" v={`${s.ageDays}d`} />
+              </div>
+              <div style={{ fontSize: 12, marginTop: 8 }}>
+                Due {fmtD(s.due)}
+                {s.pastDue ? <span style={{ color: RED, marginLeft: 6 }}>Past due</span> : null}
+              </div>
+            </button>
+          ))}
+        </div>
+        <div className="ce-table-wrap" style={{ marginBottom: 24 }}>
           <table className="ce-table ce-compact">
             <thead>
               <tr>
@@ -252,7 +302,19 @@ export default function CloseoutExplosionPortal() {
           </table>
         </div>
         <div style={{ ...lbl, marginBottom: 8 }}>Paid invoices this fall</div>
-        <div style={{ overflowX: 'auto' }}>
+        <div className="ce-stack-only">
+          {paidFall.map((s) => (
+            <button key={s.invoice} type="button" className="ce-stack-row ce-click" onClick={() => openLot(s.lotId)}>
+              <div className="ce-stack-title">{fmtD(s.date)}</div>
+              <div className="ce-stack-sub">{s.invoice} · {s.lotId}</div>
+              <div className="ce-stack-grid ce-stack-grid-2">
+                <StackKV k="Amount" v={money(s.amount)} />
+                <StackKV k="Paid" v={fmtD(s.paid)} />
+              </div>
+            </button>
+          ))}
+        </div>
+        <div className="ce-table-wrap">
           <table className="ce-table ce-compact">
             <thead>
               <tr>
@@ -291,13 +353,29 @@ export default function CloseoutExplosionPortal() {
         <DetailBack />
         <div style={{ ...lbl }}>{mode === 'sales' ? 'Sales' : 'Cost of goods sold'} · {label}</div>
         <div style={{ ...big, fontSize: 22, margin: '8px 0 16px' }}>{money(total)}</div>
-        <div style={{ overflowX: 'auto' }}>
+        <div className="ce-stack-only">
+          {rows.map((s) => (
+            <button key={s.invoice} type="button" className="ce-stack-row ce-click" onClick={() => openLot(s.lotId)}>
+              <div className="ce-stack-title">{fmtD(s.date)}</div>
+              <div className="ce-stack-sub">{s.invoice} · {s.lotId}</div>
+              <div style={{ fontSize: 12, marginTop: 4 }}>{s.buyer}</div>
+              <div style={{ fontFamily: MONO, fontSize: 12, marginTop: 8 }}>
+                {mode === 'sales' ? money(s.amount) : money(s.cost)}
+              </div>
+            </button>
+          ))}
+          <div className="ce-stack-row ce-stack-row-total" style={{ cursor: 'default' }}>
+            <div className="ce-stack-title">Total</div>
+            <div style={{ fontFamily: MONO, fontSize: 13, marginTop: 6 }}>{money(total)}</div>
+          </div>
+        </div>
+        <div className="ce-table-wrap">
           <table className="ce-table ce-compact">
             <thead>
               <tr>
                 <th className="ce-th-left">Date</th>
-                <th className="ce-th-left ce-hide-sm">Invoice</th>
-                <th className="ce-th-left ce-hide-sm">Lot</th>
+                <th className="ce-th-left">Invoice</th>
+                <th className="ce-th-left">Lot</th>
                 <th className="ce-th-left">Buyer</th>
                 <th>{mode === 'sales' ? 'Amount' : 'Cost'}</th>
               </tr>
@@ -306,8 +384,8 @@ export default function CloseoutExplosionPortal() {
               {rows.map((s) => (
                 <tr key={s.invoice} className="ce-rowbtn" onClick={() => openLot(s.lotId)}>
                   <td className="ce-td-left">{fmtD(s.date)}</td>
-                  <td className="ce-td-left ce-hide-sm">{s.invoice}</td>
-                  <td className="ce-td-left ce-hide-sm">{s.lotId}</td>
+                  <td className="ce-td-left">{s.invoice}</td>
+                  <td className="ce-td-left">{s.lotId}</td>
                   <td className="ce-td-left">{s.buyer}</td>
                   <td>{money(mode === 'sales' ? s.amount : s.cost)}</td>
                 </tr>
@@ -374,9 +452,54 @@ export default function CloseoutExplosionPortal() {
       { key: 'net', label: 'Net profit', this: thisP.netProfit, prior: priorP.netProfit, cost: false, bold: true },
     ]
 
+    const pnlThisColor = (r) => (r.key === 'net' && r.this < 0 ? RED : INK)
+
     return (
-      <div style={{ ...card, overflowX: 'auto' }}>
-        <table className="ce-table" style={{ minWidth: 320 }}>
+      <>
+        <div className="ce-stack-only" style={card}>
+          {rows.map((r) => {
+            const delta = r.this - r.prior
+            const fmt = (v) => (r.pct ? pct1(v) : money(v))
+            const onDrill = () => {
+              if (r.drill) push(r.drill)
+              else if (r.expense) push({ type: 'expense', name: r.expense })
+            }
+            const clickable = r.drill || r.expense
+            return (
+              <div
+                key={r.key}
+                className={`ce-pnl-stack-row${clickable ? ' ce-click' : ''}`}
+                role={clickable ? 'button' : undefined}
+                tabIndex={clickable ? 0 : undefined}
+                onClick={clickable ? onDrill : undefined}
+                onKeyDown={clickable ? (e) => e.key === 'Enter' && onDrill() : undefined}
+              >
+                <div className="ce-pnl-stack-label">
+                  {r.label}
+                  {clickable ? <span style={{ color: '#C9BBA0', fontSize: 11 }}> ›</span> : null}
+                </div>
+                <div className="ce-pnl-stack-cols">
+                  <div>
+                    <div className="k">{pnlLabels.this}</div>
+                    <div className="v" style={{ color: pnlThisColor(r) }}>{fmt(r.this)}</div>
+                  </div>
+                  <div>
+                    <div className="k">{pnlLabels.prior}</div>
+                    <div className="v" style={{ color: MUTED }}>{fmt(r.prior)}</div>
+                  </div>
+                  <div>
+                    <div className="k">Change</div>
+                    <div className="v" style={{ color: deltaColor(delta, r.cost && !r.pct) }}>
+                      {r.pct ? `${delta >= 0 ? '+' : ''}${pct1(delta)}` : money(delta)}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )
+          })}
+        </div>
+        <div className="ce-table-wrap" style={card}>
+        <table className="ce-table">
           <thead>
             <tr>
               <th className="ce-th-left" />
@@ -405,15 +528,16 @@ export default function CloseoutExplosionPortal() {
                     {r.label}
                     {clickable ? <span style={{ color: '#C9BBA0', fontSize: 11 }}> ›</span> : null}
                   </td>
-                  <td style={{ color: r.cost ? RED : moneyColor(r.this) }}>{fmt(r.this)}</td>
+                  <td style={{ color: pnlThisColor(r) }}>{fmt(r.this)}</td>
                   <td style={{ color: MUTED }}>{fmt(r.prior)}</td>
-                  <td style={{ color: deltaColor(delta, r.cost) }}>{r.pct ? `${delta >= 0 ? '+' : ''}${pct1(delta)}` : money(delta)}</td>
+                  <td style={{ color: deltaColor(delta, r.cost && !r.pct) }}>{r.pct ? `${delta >= 0 ? '+' : ''}${pct1(delta)}` : money(delta)}</td>
                 </tr>
               )
             })}
           </tbody>
         </table>
-      </div>
+        </div>
+      </>
     )
   }
 
@@ -432,10 +556,14 @@ export default function CloseoutExplosionPortal() {
               k={`Sales ${dash.pnlLabels.this}`}
               v={money0(dash.thisP.sales)}
               sub={salesSub}
-              accent={SPICE}
               onClick={() => goTab('pnl')}
             />
-            <KPI k={`Net profit ${dash.pnlLabels.this}`} v={money0(dash.thisP.netProfit)} accent={dash.thisP.netProfit >= 0 ? GREEN : RED} onClick={() => goTab('pnl')} />
+            <KPI
+              k={`Net profit ${dash.pnlLabels.this}`}
+              v={money0(dash.thisP.netProfit)}
+              valueColor={dash.thisP.netProfit < 0 ? RED : INK}
+              onClick={() => goTab('pnl')}
+            />
             <KPI k="Cash tied up in stock" v={money0(dash.cashTiedTotal)} onClick={() => goTab('cash')} />
             <KPI k="Buyers owe" v={money0(dash.buyersOwe)} onClick={() => goTab('buyers')} />
             <KPI k="Open lots" v={fmtInt(dash.openLots.length)} onClick={() => goTab('lots')} />
@@ -533,7 +661,42 @@ export default function CloseoutExplosionPortal() {
               </button>
             ))}
           </div>
-          <div style={{ overflowX: 'auto' }}>
+          <div className="ce-stack-only">
+            {filteredLots.map((row) => (
+              <button
+                key={row.lot.id}
+                type="button"
+                className="ce-stack-row ce-click"
+                onClick={() => openLot(row.lot.id)}
+              >
+                <div className="ce-stack-title">
+                  <strong>{row.lot.id}</strong> {row.lot.desc}
+                </div>
+                <div className="ce-stack-grid ce-stack-grid-3">
+                  <StackKV k="Landed" v={money(row.landed)} />
+                  <StackKV k="Sold" v={fmtInt(row.casesSold)} />
+                  <StackKV k="Left" v={fmtInt(row.casesLeft)} />
+                </div>
+                <div className="ce-stack-grid ce-stack-grid-2">
+                  <StackKV k="Revenue" v={money(row.revenue)} />
+                  <StackKV k="Profit" v={money(row.profit)} vColor={moneyColor(row.profit)} />
+                </div>
+              </button>
+            ))}
+            <div className="ce-stack-row ce-stack-row-total" style={{ cursor: 'default' }}>
+              <div className="ce-stack-title">Total</div>
+              <div className="ce-stack-grid ce-stack-grid-3">
+                <StackKV k="Landed" v={money(lotGroupTotals.landed)} />
+                <StackKV k="Sold" v={fmtInt(lotGroupTotals.casesSold)} />
+                <StackKV k="Left" v={fmtInt(lotGroupTotals.casesLeft)} />
+              </div>
+              <div className="ce-stack-grid ce-stack-grid-2">
+                <StackKV k="Revenue" v={money(lotGroupTotals.revenue)} />
+                <StackKV k="Profit" v={money(lotGroupTotals.profit)} vColor={moneyColor(lotGroupTotals.profit)} />
+              </div>
+            </div>
+          </div>
+          <div className="ce-table-wrap">
             <table className="ce-table ce-compact">
               <thead>
                 <tr>
@@ -576,7 +739,35 @@ export default function CloseoutExplosionPortal() {
 
     if (tab === 'cash') {
       return (
-        <div style={{ overflowX: 'auto' }}>
+        <>
+          <div className="ce-stack-only">
+            {cashSorted.map((row) => (
+              <button
+                key={row.lot.id}
+                type="button"
+                className="ce-stack-row ce-click"
+                onClick={() => openLot(row.lot.id)}
+              >
+                <div className="ce-stack-title">
+                  <strong>{row.lot.id}</strong> {row.lot.desc}
+                </div>
+                <div className="ce-stack-grid ce-stack-grid-2">
+                  <StackKV k="Left" v={fmtInt(row.casesLeft)} />
+                  <StackKV k="Cost / case" v={money(row.landedPerCase)} />
+                  <StackKV k="Cash tied up" v={money(row.cashTied)} />
+                  <StackKV k="Days" v={String(row.daysSinceBought)} />
+                </div>
+              </button>
+            ))}
+            <div className="ce-stack-row ce-stack-row-total" style={{ cursor: 'default' }}>
+              <div className="ce-stack-title">Total</div>
+              <div className="ce-stack-grid ce-stack-grid-2">
+                <StackKV k="Left" v={fmtInt(dash.casesInWarehouse)} />
+                <StackKV k="Cash tied up" v={money(dash.cashTiedTotal)} />
+              </div>
+            </div>
+          </div>
+          <div className="ce-table-wrap">
           <table className="ce-table ce-compact">
             <thead>
               <tr>
@@ -609,13 +800,48 @@ export default function CloseoutExplosionPortal() {
               </tr>
             </tbody>
           </table>
-        </div>
+          </div>
+        </>
       )
     }
 
     if (tab === 'buyers') {
       return (
-        <div style={{ overflowX: 'auto' }}>
+        <>
+          <div className="ce-stack-only">
+            {dash.buyerRows.map((b) => (
+              <button
+                key={b.name}
+                type="button"
+                className="ce-stack-row ce-click"
+                onClick={() => openBuyer(b.name)}
+              >
+                <div className="ce-stack-head">
+                  <span className="ce-stack-title">{b.name}</span>
+                  <span style={{ fontFamily: MONO, fontSize: 12, flexShrink: 0 }}>{money(b.total)}</span>
+                </div>
+                <div className="ce-stack-grid ce-stack-grid-4">
+                  <StackKV k="0–15" v={money(b.bucket015)} />
+                  <StackKV k="16–30" v={money(b.bucket1630)} />
+                  <StackKV k="Over 30" v={money(b.bucketOver30)} />
+                  <StackKV k="Invoices" v={String(b.count)} />
+                </div>
+              </button>
+            ))}
+            <div className="ce-stack-row ce-stack-row-total" style={{ cursor: 'default' }}>
+              <div className="ce-stack-head">
+                <span className="ce-stack-title">Total</span>
+                <span style={{ fontFamily: MONO, fontSize: 12 }}>{money(dash.bucketTotals.total)}</span>
+              </div>
+              <div className="ce-stack-grid ce-stack-grid-4">
+                <StackKV k="0–15" v={money(dash.bucketTotals.bucket015)} />
+                <StackKV k="16–30" v={money(dash.bucketTotals.bucket1630)} />
+                <StackKV k="Over 30" v={money(dash.bucketTotals.bucketOver30)} />
+                <StackKV k="Invoices" v={String(dash.bucketTotals.count)} />
+              </div>
+            </div>
+          </div>
+          <div className="ce-table-wrap">
           <table className="ce-table ce-compact">
             <thead>
               <tr>
@@ -648,7 +874,8 @@ export default function CloseoutExplosionPortal() {
               </tr>
             </tbody>
           </table>
-        </div>
+          </div>
+        </>
       )
     }
 
@@ -695,11 +922,8 @@ export default function CloseoutExplosionPortal() {
         </aside>
         <main className="ce-main">
           <div style={{ marginBottom: 22 }}>
-            <div style={{ ...lbl, color: KRAFT }}>SAMPLE DASHBOARD / JK No Jokes Financials</div>
-            <h1 style={{ ...big, fontSize: 28, color: INK, letterSpacing: '0.3px', lineHeight: 1.1, marginTop: 4 }}>{BIZ}</h1>
-            {!stack.length ? (
-              <h2 style={{ ...big, fontSize: 22, color: INK, marginTop: 8, fontWeight: 600 }}>{currentLabel}</h2>
-            ) : null}
+            <div style={{ ...lbl, color: SPICE }}>{BIZ}</div>
+            <h1 style={{ ...big, fontSize: 28, color: INK, letterSpacing: '0.3px', lineHeight: 1.1, marginTop: 4 }}>{currentLabel}</h1>
             <div style={{ fontSize: 12, color: MUTED, marginTop: 6 }}>{sampleHeader}</div>
           </div>
           {renderSection()}

@@ -73,24 +73,48 @@ export function moneyColor(amount) {
 export const SHELL_CSS = (theme) => `*{box-sizing:border-box;margin:0;padding:0}
 html{-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale;text-rendering:optimizeLegibility;overflow-x:hidden}
 body{background:${theme.CREAM};font-family:${UI};color:${theme.INK};overflow-x:hidden}
-.ce-shell{display:flex;min-height:100vh;align-items:stretch;max-width:100vw}
+.ce-shell{display:flex;min-height:100vh;align-items:stretch;max-width:100vw;overflow-x:hidden}
 .ce-side{width:236px;flex-shrink:0;background:${theme.CHAR};color:${theme.CREAM};display:flex;flex-direction:column;padding:22px 14px;position:sticky;top:0;height:100vh}
 .ce-nav{display:flex;flex-direction:column;gap:3px}.ce-nav--main{flex:1}
 .ce-navbtn{display:block;width:100%;text-align:left;padding:11px 14px;border-radius:2px;border:none;background:transparent;color:#B6A78C;font-family:${UI};font-size:14px;font-weight:500;cursor:pointer;white-space:nowrap}
 .ce-navbtn:hover{background:rgba(255,255,255,.08);color:${theme.CREAM}}
-.ce-main{flex:1;min-width:0;max-width:1180px;padding:24px 30px 60px}
+.ce-main{flex:1;min-width:0;max-width:1180px;padding:24px 30px 60px;overflow-x:hidden}
 .ce-click{transition:box-shadow .12s}.ce-click:hover{box-shadow:inset 0 0 0 1.5px ${theme.SPICE}}
-.ce-table{width:100%;border-collapse:collapse;font-size:13px}
+.ce-table{width:100%;border-collapse:collapse;font-size:13px;table-layout:fixed}
 .ce-table th{font-family:${MONO};font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.5px;color:${MUTED};text-align:right;padding:8px 6px;border-bottom:1px solid ${BORDER}}
 .ce-table th.ce-th-left{text-align:left}
-.ce-table td{font-family:${MONO};font-size:12px;padding:10px 6px;border-top:1px solid ${BORDER};text-align:right;vertical-align:top}
+.ce-table td{font-family:${MONO};font-size:12px;padding:10px 6px;border-top:1px solid ${BORDER};text-align:right;vertical-align:top;word-break:break-word}
 .ce-table td.ce-td-left{text-align:left;font-family:${UI};font-size:13px}
 .ce-table tr.ce-rowbtn{cursor:pointer}
 .ce-table tr.ce-rowbtn:hover td{background:rgba(200,70,44,.04)}
 .ce-total td{font-weight:700;border-top:2px solid ${BORDER}}
-.ce-detail{max-width:640px}
+.ce-detail{max-width:640px;width:100%}
 .ce-back{display:inline-flex;align-items:center;gap:6px;border:none;background:transparent;color:${MUTED};font-family:${UI};font-size:13px;font-weight:600;cursor:pointer;padding:0 0 14px;min-height:40px}
 .ce-back:hover{color:${INK}}
-@media(max-width:860px){.ce-shell{flex-direction:column}.ce-side{width:auto;height:auto;position:static;padding:14px 12px 10px}.ce-nav--main{flex-direction:row;overflow-x:auto;gap:6px;padding:4px 4px 10px;-webkit-overflow-scrolling:touch;scrollbar-width:none}.ce-nav::-webkit-scrollbar{display:none}.ce-navbtn{width:auto;padding:8px 14px;border-radius:2px;background:rgba(255,255,255,.07);flex-shrink:0;font-size:13px;min-height:40px}.ce-main{padding:18px 12px 52px;max-width:100%}}
-@media(max-width:480px){.ce-table.ce-compact th,.ce-table.ce-compact td{padding:8px 4px;font-size:11px}.ce-table.ce-compact td.ce-td-left{font-size:12px}.ce-hide-sm{display:none}}
+.ce-table-wrap{width:100%;max-width:100%}
+.ce-stack-only{display:none;width:100%;max-width:100%}
+.ce-stack-row{display:block;width:100%;text-align:left;border:none;border-top:1px solid ${BORDER};background:transparent;padding:12px 0;cursor:pointer;font:inherit;color:inherit}
+.ce-stack-row:first-child{border-top:none}
+.ce-stack-row.ce-click:hover{box-shadow:inset 0 0 0 1.5px ${theme.SPICE}}
+.ce-stack-title{font-size:13px;line-height:1.35;color:${INK}}
+.ce-stack-title strong{font-weight:700}
+.ce-stack-sub{font-size:11px;color:${MUTED};margin-top:3px;font-family:${MONO}}
+.ce-stack-grid{display:grid;gap:8px 10px;margin-top:10px}
+.ce-stack-grid-3{grid-template-columns:repeat(3,minmax(0,1fr))}
+.ce-stack-grid-2{grid-template-columns:repeat(2,minmax(0,1fr))}
+.ce-stack-grid-4{grid-template-columns:repeat(4,minmax(0,1fr))}
+.ce-stack-kv{min-width:0}
+.ce-stack-kv .k{display:block;font-size:9px;font-weight:600;text-transform:uppercase;letter-spacing:.4px;color:${MUTED};margin-bottom:2px}
+.ce-stack-kv .v{display:block;font-family:${MONO};font-size:11px;color:${INK};line-height:1.2}
+.ce-stack-row-total{font-weight:700}
+.ce-stack-head{display:flex;justify-content:space-between;align-items:flex-start;gap:10px}
+.ce-pnl-stack-row{border-top:1px solid ${BORDER};padding:12px 0}
+.ce-pnl-stack-row:first-child{border-top:none}
+.ce-pnl-stack-label{font-size:13px;font-weight:600;color:${INK};margin-bottom:8px}
+.ce-pnl-stack-cols{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px}
+.ce-pnl-stack-cols .k{font-size:9px;text-transform:uppercase;color:${MUTED};margin-bottom:2px}
+.ce-pnl-stack-cols .v{font-family:${MONO};font-size:11px}
+.ce-kpi-lbl{padding-right:22px;line-height:1.3}
+@media(max-width:860px){.ce-shell{flex-direction:column}.ce-side{width:auto;height:auto;position:static;padding:14px 12px 10px}.ce-nav--main{flex-direction:row;flex-wrap:wrap;overflow-x:visible;gap:5px;padding:4px 2px 10px;-webkit-overflow-scrolling:auto}.ce-navbtn{width:auto;flex:1 1 calc(33.333% - 5px);min-width:0;padding:7px 6px;border-radius:2px;background:rgba(255,255,255,.07);font-size:11px;min-height:36px;white-space:normal;text-align:center;line-height:1.2}.ce-main{padding:18px 12px 52px;max-width:100%}}
+@media(max-width:480px){.ce-table-wrap{display:none!important}.ce-stack-only{display:block!important}.ce-navbtn{flex:1 1 calc(50% - 5px);font-size:10px;padding:6px 4px}}
 @media(max-width:600px){input,select,textarea{font-size:16px!important}button{min-height:40px}}`
