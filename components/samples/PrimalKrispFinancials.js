@@ -1,5 +1,6 @@
-import { useState } from 'react'
+import { useState, useMemo, useEffect } from 'react'
 import DATA from '../../data/primal-krisp.json'
+import PrimalKrispListControls from './primal-krisp/PrimalKrispListControls'
 import {
   SPICE,
   CHAR,
@@ -54,6 +55,13 @@ export default function PrimalKrispFinancials({ card, lbl, big, btn, inp, KPI })
   const [pnlMonthIdx, setPnlMonthIdx] = useState(months.length - 1)
   const [pnlExpand, setPnlExpand] = useState({ revenue: true, cogs: true, opex: true })
   const [pnlDrill, setPnlDrill] = useState(null)
+  const [drillSort, setDrillSort] = useState({ key: 'date', dir: 'desc' })
+  const [drillSearch, setDrillSearch] = useState('')
+
+  useEffect(() => {
+    setDrillSort({ key: 'date', dir: 'desc' })
+    setDrillSearch('')
+  }, [pnlDrill])
 
   const cur = months[pnlMonthIdx]
   const prev = pnlMonthIdx > 0 ? months[pnlMonthIdx - 1] : null
@@ -144,6 +152,21 @@ export default function PrimalKrispFinancials({ card, lbl, big, btn, inp, KPI })
     </button>
   )
 
+  const drillRows = useMemo(() => {
+    if (!pnlDrill?.rows) return []
+    let rows = [...pnlDrill.rows]
+    const q = drillSearch.trim().toLowerCase()
+    if (q) {
+      rows = rows.filter((r) => `${r.description} ${r.date} ${r.amount}`.toLowerCase().includes(q))
+    }
+    const dir = drillSort.dir === 'asc' ? 1 : -1
+    rows.sort((a, b) => {
+      if (drillSort.key === 'date') return String(a.date).localeCompare(String(b.date)) * dir
+      return (a.amount - b.amount) * dir
+    })
+    return rows
+  }, [pnlDrill, drillSort, drillSearch])
+
   if (!cur) return null
 
   return (
@@ -166,7 +189,7 @@ export default function PrimalKrispFinancials({ card, lbl, big, btn, inp, KPI })
       <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap', marginBottom: 16 }}>
         <KPI k="Revenue" v={money(cur.revenue_total)} accent={GREEN} />
         <KPI k="Gross profit" v={money(cur.gross_profit)} />
-        <KPI k="Net profit" v={money(cur.net_profit)} accent={SPICE} />
+        <KPI k="Net profit" v={money(cur.net_profit)} accent={cur.net_profit >= 0 ? GREEN : RED} />
       </div>
 
       <div className="pk-pnl-wrap" style={{ ...card }}>
@@ -246,8 +269,19 @@ export default function PrimalKrispFinancials({ card, lbl, big, btn, inp, KPI })
               <span style={{ fontFamily: MONO, color: INK }}>{money0(pnlDrill.total)}</span>
               <TieMark expected={pnlDrill.total} actual={pnlDrill.rows.reduce((s, r) => s + r.amount, 0)} />
             </div>
+            <PrimalKrispListControls
+              sortOptions={[
+                { key: 'date', labels: { desc: 'Date (newest)', asc: 'Date (oldest)' } },
+                { key: 'amount', labels: { desc: 'Amount (largest)', asc: 'Amount (smallest)' } },
+              ]}
+              sort={drillSort}
+              onSortChange={setDrillSort}
+              search={drillSearch}
+              onSearchChange={setDrillSearch}
+              rowCount={pnlDrill.rows.length}
+            />
             <div style={{ maxHeight: '62vh', overflowY: 'auto' }}>
-              {pnlDrill.rows.map((r, i) => (
+              {drillRows.map((r, i) => (
                 <div key={i} style={{ display: 'flex', justifyContent: 'space-between', gap: 12, padding: '8px 0', borderTop: i ? `1px solid ${BORDER}` : 'none' }}>
                   <div style={{ minWidth: 0 }}>
                     <div style={{ fontSize: 13, color: INK }}>{r.description}</div>

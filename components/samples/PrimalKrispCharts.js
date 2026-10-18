@@ -434,34 +434,40 @@ export function MarginByChannelChart({ products, channels, accent = BRICK }) {
 export function InventoryDaysChart({ rows, accent = BRICK, refDays = 21 }) {
   const { show, hide, node } = useChartTip()
   const maxD = Math.max(...rows.map((r) => r.days_of_stock), refDays + 5)
-  const rowH = 28
-  const vbH = 40 + rows.length * rowH
-  const refX = 180 + (refDays / maxD) * 200
+  const rowH = 26
+  const labelCol = 118
+  const barX = labelCol + 8
+  const barMaxW = 168
+  const valueX = barX + barMaxW + 10
+  const vbW = valueX + 52
+  const vbH = 36 + rows.length * rowH
+  const refX = barX + (refDays / maxD) * barMaxW
   return (
     <ChartFrame tip={node} hide={hide}>
-      <svg viewBox={`0 0 400 ${vbH}`} style={{ width: '100%', maxWidth: '100%', display: 'block' }}>
-        <line x1={refX} y1={20} x2={refX} y2={vbH - 20} stroke={AMBER} strokeWidth="1" strokeDasharray="4 3" />
-        <text x={refX + 4} y={16} fontSize="9" fill={AMBER} fontFamily={sans}>{refDays}d</text>
+      <svg viewBox={`0 0 ${vbW} ${vbH}`} preserveAspectRatio="xMinYMin meet" style={{ width: '100%', maxWidth: '100%', display: 'block' }}>
+        <line x1={refX} y1={18} x2={refX} y2={vbH - 16} stroke={AMBER} strokeWidth="1" strokeDasharray="4 3" />
+        <text x={refX + 4} y={14} fontSize="9" fill={AMBER} fontFamily={sans}>{refDays}d</text>
         {rows.map((r, i) => {
-          const y = 28 + i * rowH
-          const w = (r.days_of_stock / maxD) * 200
+          const y = 22 + i * rowH
+          const w = (r.days_of_stock / maxD) * barMaxW
           const short = r.days_of_stock < 14
+          const label = r.days_of_stock.toFixed(1) + ' d'
           return (
             <g key={r.product}>
-              <text x={0} y={y + 14} fontSize="11" fill={INK} fontFamily={sans}>{r.product}</text>
+              <text x={0} y={y + 12} fontSize="9.5" fill={INK} fontFamily={sans}>{r.product}</text>
               <TipRect
                 show={show}
                 hide={hide}
-                x={180}
-                y={y + 2}
+                x={barX}
+                y={y + 1}
                 width={Math.max(w, 4)}
-                height={14}
+                height={12}
                 fill={short ? accent : SAGE}
                 rx={2}
                 label={r.product}
                 value={`${r.days_of_stock.toFixed(1)} days`}
               />
-              <text x={180 + w + 6} y={y + 14} fontSize="10" fill={INK} fontFamily={MONO}>{r.days_of_stock.toFixed(1)}d</text>
+              <text x={valueX} y={y + 12} fontSize="9" fill={INK} fontFamily={sans} textAnchor="start">{label}</text>
             </g>
           )
         })}

@@ -293,6 +293,34 @@ export default function PrimalKrispOverviewDetail({ detail, onBack, onClose, sto
     )
   }
 
+  if (detail.kind === 'productChannel') {
+    const breakdown = DATA.product_store_breakdown?.find((p) => p.product === detail.name)
+    if (!breakdown) return null
+    const rows = breakdown.stores.map((r) => ({ label: r.store, value: r.dollars, key: r.store }))
+    return (
+      <Shell title={detail.name} sub="Store channel" {...shell}>
+        <Lines rows={rows} totalLabel="Total" totalValue={breakdown.total_dollars} />
+        <div style={{ marginTop: 12, fontSize: 13, color: MUTED }}>
+          Units sold in stores: <span style={{ fontFamily: MONO, color: INK }}>{fmtInt(breakdown.total_units)}</span>
+        </div>
+      </Shell>
+    )
+  }
+
+  if (detail.kind === 'productCost') {
+    const product = DATA.products.find((p) => p.name === detail.name)
+    const cost = product?.fictitious?.cost_per_bag
+    if (!cost) return null
+    const costRows = Object.entries(cost)
+      .filter(([k]) => k !== 'total')
+      .map(([k, v]) => ({ label: k.replace(/_/g, ' '), value: v, key: k }))
+    return (
+      <Shell title={detail.name} sub="Cost per bag" {...shell}>
+        <Lines rows={costRows} totalLabel="Cost per bag" totalValue={cost.total} format={money} />
+      </Shell>
+    )
+  }
+
   if (detail.kind === 'prodRun') {
     const r = DATA.production_runs.find((x) => x.run === detail.run)
     if (!r) return null

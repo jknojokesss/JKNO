@@ -1,4 +1,4 @@
-import { useState, useMemo, useEffect, useReducer, Fragment } from 'react'
+import { useState, useMemo, useEffect, useReducer } from 'react'
 import Image from 'next/image'
 import SampleJkLogoLink from './SampleJkLogoLink'
 import DATA from '../../data/primal-krisp.json'
@@ -40,6 +40,7 @@ import {
 import PrimalKrispDepositsTab from './primal-krisp/PrimalKrispDepositsTab'
 import PrimalKrispDepositsDetail from './primal-krisp/PrimalKrispDepositsDetail'
 import PrimalKrispMonthEndTab from './primal-krisp/PrimalKrispMonthEndTab'
+import PrimalKrispListControls from './primal-krisp/PrimalKrispListControls'
 import { allocateWholeDollars } from './sampleWholeDollarDisplay.js'
 
 const CHANNELS = DATA.channels
@@ -50,14 +51,12 @@ export default function PrimalKrispPortal() {
   const [tab, setTab] = useState('overview')
   const [period, setPeriod] = useState('month')
   const [billingState, dispatchBilling] = useReducer(billingReducer, undefined, () => initBillingFromData(DATA))
-  const [drawerProduct, setDrawerProduct] = useState(null)
   const [regionFilter, setRegionFilter] = useState('All')
   const [listFilter, setListFilter] = useState(null)
   const [storeSearch, setStoreSearch] = useState('')
   const [storeSort, setStoreSort] = useState({ key: 'balance', dir: 'desc' })
-  const [costOpen, setCostOpen] = useState(null)
-  const [promoSort, setPromoSort] = useState({ key: 'revenue', dir: 'desc' })
-  const [invSort, setInvSort] = useState({ key: 'date', dir: 'desc' })
+  const [promoSort, setPromoSort] = useState({ key: 'spend', dir: 'desc' })
+  const [runSort, setRunSort] = useState({ key: 'date', dir: 'desc' })
   const [reorderFocus, setReorderFocus] = useState(false)
   const [overviewDetail, setOverviewDetail] = useState(null)
   const [narrowNav, setNarrowNav] = useState(false)
@@ -93,28 +92,19 @@ export default function PrimalKrispPortal() {
   const regions = useMemo(() => ['All', ...Object.keys(stores.by_region)], [stores.by_region])
 
   const sortedRuns = useMemo(() => {
-    const dir = invSort.dir === 'asc' ? 1 : -1
-    return [...DATA.production_runs].sort((a, b) => {
-      let va = a[invSort.key]
-      let vb = b[invSort.key]
-      if (invSort.key === 'date') {
-        va = a.date || ''
-        vb = b.date || ''
-        return va.localeCompare(vb) * dir
-      }
-      if (typeof va === 'string') return va.localeCompare(vb) * dir
-      return ((va || 0) - (vb || 0)) * dir
-    })
-  }, [invSort])
+    const dir = runSort.dir === 'asc' ? 1 : -1
+    return [...DATA.production_runs].sort((a, b) => String(a.date).localeCompare(String(b.date)) * dir)
+  }, [runSort])
 
-  useEffect(() => {
-    if (!drawerProduct) return
-    const onKey = (e) => {
-      if (e.key === 'Escape') setDrawerProduct(null)
-    }
-    window.addEventListener('keydown', onKey)
-    return () => window.removeEventListener('keydown', onKey)
-  }, [drawerProduct])
+  const sortedPromos = useMemo(() => {
+    const dir = promoSort.dir === 'asc' ? 1 : -1
+    return [...DATA.promo_codes].sort((a, b) => {
+      const va = a[promoSort.key]
+      const vb = b[promoSort.key]
+      if (typeof va === 'string') return va.localeCompare(vb) * dir
+      return (va - vb) * dir
+    })
+  }, [promoSort])
 
   useEffect(() => {
     const mq = window.matchMedia('(max-width: 860px)')
@@ -372,7 +362,13 @@ export default function PrimalKrispPortal() {
 
   const goTab = (id) => {
     setTab(id)
-    setDrawerProduct(null)
+    setOverviewDetail(null)
+  }
+
+  const goOverviewHome = () => {
+    setTab('overview')
+    setOverviewDetail(null)
+    setReorderFocus(false)
   }
   const goStoresFilter = (filter) => {
     setTab('stores')
@@ -387,10 +383,6 @@ export default function PrimalKrispPortal() {
 
   const sampleHeader = 'Sample — fictitious numbers · as of Oct 2026'
 
-  const productBreakdown = drawerProduct
-    ? DATA.product_store_breakdown?.find((p) => p.product === drawerProduct)
-    : null
-
   const portalStyles = `${SHELL_CSS({ CHAR, CREAM, INK, SPICE })}
 .pk-drawer-backdrop{position:fixed;inset:0;background:rgba(43,32,24,.45);z-index:8000}
 .pk-drawer{position:fixed;top:0;right:0;height:100%;width:min(420px,100%);background:${CARDBG};border-left:1px solid ${BORDER};z-index:8001;display:flex;flex-direction:column;box-shadow:-8px 0 32px rgba(0,0,0,.12)}
@@ -404,9 +396,8 @@ export default function PrimalKrispPortal() {
 .pk-promo-table th.pk-promo-spend,.pk-promo-table td.pk-promo-spend{width:19%}
 .pk-promo-table th.pk-promo-orders,.pk-promo-table td.pk-promo-orders{width:13%}
 .pk-promo-table th.pk-promo-rev,.pk-promo-table td.pk-promo-rev{width:23%}
-.pk-promo-table th.pk-promo-roas,.pk-promo-table td.pk-promo-roas{width:22%}
-.pk-promo-table .pk-promo-sort{min-height:32px;white-space:normal;line-height:1.2;letter-spacing:.04em;padding:2px 0}
-.pk-promo-table .pk-promo-roas-label{display:inline-block;max-width:2.8em;text-align:right;white-space:normal}
+.pk-promo-table th.pk-promo-return,.pk-promo-table td.pk-promo-return{width:22%}
+.pk-promo-return-head{display:inline-flex;flex-direction:column;align-items:flex-end;line-height:1.2;text-align:right}
 }`
 
   return (
@@ -418,13 +409,20 @@ export default function PrimalKrispPortal() {
       <div className="pk-shell">
         <aside className="pk-side">
           <div style={{ padding: '2px 8px 16px' }}>
-            <Image
-              src="/samples/primal-krisp/primal_krisp_logo_white.png"
-              alt={BIZ}
-              width={200}
-              height={56}
-              style={{ height: '56px', width: 'auto', maxWidth: '100%' }}
-            />
+            <button
+              type="button"
+              onClick={goOverviewHome}
+              aria-label="Primal Krisp home"
+              style={{ border: 'none', background: 'transparent', padding: 0, cursor: 'pointer', display: 'block' }}
+            >
+              <Image
+                src="/samples/primal-krisp/primal_krisp_logo_white.png"
+                alt={BIZ}
+                width={200}
+                height={56}
+                style={{ height: '56px', width: 'auto', maxWidth: '100%', display: 'block' }}
+              />
+            </button>
           </div>
           {narrowNav ? (
             <nav className="pk-nav pk-nav--main pk-nav--phone-grid" aria-label="Sections">
@@ -437,7 +435,6 @@ export default function PrimalKrispPortal() {
                     className="pk-navbtn"
                     onClick={() => {
                       setTab(id)
-                      setDrawerProduct(null)
                       setReorderFocus(false)
                       setOverviewDetail(null)
                     }}
@@ -463,7 +460,6 @@ export default function PrimalKrispPortal() {
                       className="pk-navbtn"
                       onClick={() => {
                         setTab(id)
-                        setDrawerProduct(null)
                         setReorderFocus(false)
                         setOverviewDetail(null)
                       }}
@@ -599,7 +595,6 @@ export default function PrimalKrispPortal() {
                       ? channelRowsPeriod.find((c) => c.channel === 'Subscriptions')?.sales || 0
                       : ov.sales_by_channel.find((c) => c.channel === 'Subscriptions')?.sales || 0,
                   )}
-                  accent={SPICE}
                   onClick={() => openDetail({ kind: 'subChannel', channel: 'Subscriptions' })}
                 />
                 <KPI k="Active subs" v={DATA.subscriptions.active} onClick={() => openDetail({ kind: 'subs' })} />
@@ -753,60 +748,33 @@ export default function PrimalKrispPortal() {
           {tab === 'advertising' && !overviewDetail && (
             <>
               <div className="pk-promo-card" style={{ ...card, marginBottom: '16px', overflowX: 'auto' }}>
+                <PrimalKrispListControls
+                  sortOptions={[
+                    { key: 'spend', labels: { desc: 'Spend (largest)', asc: 'Spend (smallest)' } },
+                    { key: 'revenue', labels: { desc: 'Revenue (largest)', asc: 'Revenue (smallest)' } },
+                    { key: 'return_per_dollar', labels: { desc: 'Return (largest)', asc: 'Return (smallest)' } },
+                  ]}
+                  sort={promoSort}
+                  onSortChange={setPromoSort}
+                  rowCount={DATA.promo_codes.length}
+                />
                 <table className="pk-promo-table">
                   <thead>
                     <tr style={{ borderBottom: `1px solid ${BORDER}` }}>
-                      {[
-                        ['Code', 'code', 'left', 'pk-promo-code'],
-                        ['Spend', 'spend', 'right', 'pk-promo-spend'],
-                        ['Orders', 'orders', 'right', 'pk-promo-orders'],
-                        ['Revenue', 'revenue', 'right', 'pk-promo-rev'],
-                        ['Return / $1', 'return_per_dollar', 'right', 'pk-promo-roas'],
-                      ].map(([h, key, align, colClass]) => (
-                        <th key={h || 'act'} className={colClass} style={{ ...lbl, textAlign: align, padding: '8px 6px' }}>
-                          {key ? (
-                            <button
-                              type="button"
-                              className="pk-promo-sort"
-                              onClick={() =>
-                                setPromoSort((s) => ({
-                                  key,
-                                  dir: s.key === key && s.dir === 'desc' ? 'asc' : 'desc',
-                                }))
-                              }
-                              style={{
-                                border: 'none',
-                                background: 'none',
-                                cursor: 'pointer',
-                                ...lbl,
-                                textAlign: align,
-                                minHeight: '40px',
-                                width: '100%',
-                                color: promoSort.key === key ? INK : '#96866C',
-                                fontWeight: promoSort.key === key ? 700 : 600,
-                                textDecoration: promoSort.key === key ? 'underline' : 'none',
-                                textUnderlineOffset: 3,
-                              }}
-                            >
-                              {key === 'return_per_dollar' ? <span className="pk-promo-roas-label">{h}</span> : h}
-                            </button>
-                          ) : (
-                            h
-                          )}
-                        </th>
-                      ))}
+                      <th className="pk-promo-code" style={{ ...lbl, textAlign: 'left', padding: '8px 6px' }}>Code</th>
+                      <th className="pk-promo-spend" style={{ ...lbl, textAlign: 'right', padding: '8px 6px' }}>Spend</th>
+                      <th className="pk-promo-orders" style={{ ...lbl, textAlign: 'right', padding: '8px 6px' }}>Orders</th>
+                      <th className="pk-promo-rev" style={{ ...lbl, textAlign: 'right', padding: '8px 6px' }}>Revenue</th>
+                      <th className="pk-promo-return" style={{ ...lbl, textAlign: 'right', padding: '8px 6px' }}>
+                        <span className="pk-promo-return-head">
+                          <span>Return</span>
+                          <span>per $1</span>
+                        </span>
+                      </th>
                     </tr>
                   </thead>
                   <tbody>
-                    {[...DATA.promo_codes]
-                      .sort((a, b) => {
-                        const dir = promoSort.dir === 'asc' ? 1 : -1
-                        const va = a[promoSort.key]
-                        const vb = b[promoSort.key]
-                        if (typeof va === 'string') return va.localeCompare(vb) * dir
-                        return (va - vb) * dir
-                      })
-                      .map((p) => (
+                    {sortedPromos.map((p) => (
                         <tr
                           key={p.code}
                           className="pk-click"
@@ -820,11 +788,12 @@ export default function PrimalKrispPortal() {
                           <td className="pk-promo-spend" style={{ padding: '10px 6px', textAlign: 'right', fontFamily: MONO }}>{money(p.spend)}</td>
                           <td className="pk-promo-orders" style={{ padding: '10px 6px', textAlign: 'right', fontFamily: MONO }}>{fmtInt(p.orders)}</td>
                           <td className="pk-promo-rev" style={{ padding: '10px 6px', textAlign: 'right', fontFamily: MONO }}>{money(p.revenue)}</td>
-                          <td className="pk-promo-roas" style={{ padding: '10px 6px', textAlign: 'right', fontFamily: MONO }}>{p.return_per_dollar.toFixed(1)}</td>
+                          <td className="pk-promo-return" style={{ padding: '10px 6px', textAlign: 'right', fontFamily: MONO }}>{p.return_per_dollar.toFixed(1)}</td>
                         </tr>
                       ))}
                   </tbody>
                 </table>
+                <div style={{ fontFamily: UI, fontSize: 12, color: MUTED, marginTop: 10 }}>Return = sales per $1 spent</div>
               </div>
 
               <div style={{ ...card, overflowX: 'auto' }}>
@@ -837,10 +806,10 @@ export default function PrimalKrispPortal() {
           {tab === 'products' && !overviewDetail && (
             <>
               <div style={{ ...card, marginBottom: '16px', overflowX: 'auto' }}>
-                <table style={{ width: '100%', minWidth: '640px', borderCollapse: 'collapse', fontSize: '13px' }}>
+                <table style={{ width: '100%', minWidth: '520px', borderCollapse: 'collapse', fontSize: '13px' }}>
                   <thead>
                     <tr style={{ borderBottom: `1px solid ${BORDER}` }}>
-                      {['Product', 'Retail', 'Cost / bag', period === 'week' ? 'Bags sold (week)' : 'Bags sold (Sept)', ''].map((h) => (
+                      {['Product', 'Retail', 'Cost / bag', period === 'week' ? 'Bags sold (week)' : 'Bags sold (Sept)'].map((h) => (
                         <th key={h} style={{ ...lbl, textAlign: 'left', padding: '8px 6px' }}>{h}</th>
                       ))}
                     </tr>
@@ -848,9 +817,6 @@ export default function PrimalKrispPortal() {
                   <tbody>
                     {DATA.products.map((p) => {
                       const cost = p.fictitious.cost_per_bag
-                      const open = costOpen === p.name
-                      const parts = Object.entries(cost).filter(([k]) => k !== 'total')
-                      const partSum = parts.reduce((s, [, v]) => s + v, 0)
                       const marginRow = DATA.product_margins_by_channel.find((m) => m.product === p.name)
                       const bagsMonth = marginRow?.bags_sold_sept_all_channels || 0
                       const bags =
@@ -858,56 +824,42 @@ export default function PrimalKrispPortal() {
                           ? Math.round(bagsMonth * (bagsPeriod / ov.bags_sold_this_month))
                           : bagsMonth
                       const retail = p.real.price_per_bag_in_packs || p.real.price_per_bag_build_your_own
+                      const openChannel = () => openDetail({ kind: 'productChannel', name: p.name })
+                      const openCost = (e) => {
+                        e.stopPropagation()
+                        openDetail({ kind: 'productCost', name: p.name })
+                      }
                       return (
-                        <Fragment key={p.name}>
-                          <tr
-                            style={{ borderBottom: `1px solid ${CREAM}`, cursor: 'pointer' }}
-                            onClick={() => setDrawerProduct(p.name)}
+                        <tr
+                          key={p.name}
+                          className="pk-click"
+                          style={{ borderBottom: `1px solid ${CREAM}`, cursor: 'pointer' }}
+                          onClick={openChannel}
+                          onKeyDown={(e) => e.key === 'Enter' && openChannel()}
+                          tabIndex={0}
+                          role="button"
+                        >
+                          <td style={{ padding: '10px 6px', fontWeight: 600 }}>{p.name}</td>
+                          <td
+                            style={{ padding: '10px 6px', fontFamily: MONO }}
+                            onClick={(e) => {
+                              e.stopPropagation()
+                              openChannel()
+                            }}
                           >
-                            <td style={{ padding: '10px 6px', fontWeight: 600 }}>{p.name}</td>
-                            <td style={{ padding: '10px 6px', fontFamily: MONO }}>{retail ? money(retail) : '—'}</td>
-                            <td style={{ padding: '10px 6px', fontFamily: MONO }}>{money(cost.total)}</td>
-                            <td style={{ padding: '10px 6px', fontFamily: MONO }}>{fmtInt(bags)}</td>
-                            <td style={{ padding: '10px 6px' }}>
-                              <button
-                                type="button"
-                                onClick={(e) => {
-                                  e.stopPropagation()
-                                  setCostOpen(open ? null : p.name)
-                                }}
-                                style={{
-                                  background: 'none',
-                                  border: 'none',
-                                  color: SPICE,
-                                  cursor: 'pointer',
-                                  fontWeight: 600,
-                                  fontSize: '12px',
-                                  minHeight: '40px',
-                                  padding: '8px',
-                                }}
-                              >
-                                Cost
-                              </button>
-                            </td>
-                          </tr>
-                          {open && (
-                            <tr>
-                              <td colSpan={5} style={{ padding: '8px 12px 14px', background: CREAM }}>
-                                {parts.map(([k, v]) => (
-                                  <Row key={k} l={k.replace(/_/g, ' ')} v={money(v)} />
-                                ))}
-                                <Row
-                                  l="Cost per bag"
-                                  v={money(cost.total)}
-                                  bold
-                                  top
-                                  tieExpected={cost.total}
-                                  tieActual={partSum}
-                                />
-                              </td>
-                            </tr>
-                          )}
-                        </Fragment>
+                            {retail ? money(retail) : '—'}
+                          </td>
+                          <td style={{ padding: '10px 6px', fontFamily: MONO }} onClick={openCost}>{money(cost.total)}</td>
+                          <td
+                            style={{ padding: '10px 6px', fontFamily: MONO }}
+                            onClick={(e) => {
+                              e.stopPropagation()
+                              openChannel()
+                            }}
+                          >
+                            {fmtInt(bags)}
+                          </td>
+                        </tr>
                       )
                     })}
                   </tbody>
@@ -925,41 +877,17 @@ export default function PrimalKrispPortal() {
               </div>
 
               <div style={{ ...card, overflowX: 'auto' }}>
+                <PrimalKrispListControls
+                  sortOptions={[{ key: 'date', labels: { desc: 'Date (newest)', asc: 'Date (oldest)' } }]}
+                  sort={runSort}
+                  onSortChange={setRunSort}
+                  rowCount={DATA.production_runs.length}
+                />
                 <table style={{ width: '100%', minWidth: '720px', borderCollapse: 'collapse', fontSize: '12px' }}>
                   <thead>
                     <tr style={{ borderBottom: `1px solid ${BORDER}` }}>
-                      {[
-                        ['Run', 'run'],
-                        ['Date', 'date'],
-                        ['Product', 'product'],
-                        ['Raw lbs', 'raw_meat_lbs'],
-                        ['Planned', 'bags_planned'],
-                        ['Packed', 'bags_packed'],
-                        ['Yield', 'yield_vs_plan_pct'],
-                        ['Cost / bag', 'cost_per_bag'],
-                        ['Status', 'status'],
-                      ].map(([h, key]) => (
-                        <th key={h} style={{ ...lbl, padding: '8px 4px', textAlign: 'left', color: KRAFT }}>
-                          <button
-                            type="button"
-                            onClick={() =>
-                              setInvSort((s) => ({ key, dir: s.key === key && s.dir === 'desc' ? 'asc' : 'desc' }))
-                            }
-                            style={{
-                              border: 'none',
-                              background: 'none',
-                              cursor: 'pointer',
-                              ...lbl,
-                              color: invSort.key === key ? INK : KRAFT,
-                              minHeight: 40,
-                              fontWeight: invSort.key === key ? 700 : 600,
-                              textDecoration: invSort.key === key ? 'underline' : 'none',
-                              textUnderlineOffset: 3,
-                            }}
-                          >
-                            {h}
-                          </button>
-                        </th>
+                      {['Run', 'Date', 'Product', 'Raw lbs', 'Planned', 'Packed', 'Yield', 'Cost / bag', 'Status'].map((h) => (
+                        <th key={h} style={{ ...lbl, padding: '8px 4px', textAlign: 'left', color: KRAFT }}>{h}</th>
                       ))}
                     </tr>
                   </thead>
@@ -995,101 +923,6 @@ export default function PrimalKrispPortal() {
             <PrimalKrispMonthEndTab card={card} lbl={lbl} onOpenDetail={openDetail} storeOwed={liveStoreOwed} />
           )}
         </main>
-
-        {drawerProduct && (
-          <div
-            className="pk-drawer-backdrop"
-            role="presentation"
-            onClick={() => setDrawerProduct(null)}
-          />
-        )}
-
-        {drawerProduct && productBreakdown && (
-          <aside className="pk-drawer" aria-label="Product detail">
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', padding: '18px 18px 12px', borderBottom: `1px solid ${BORDER}` }}>
-              <div>
-                <div style={{ ...big, fontSize: '20px', color: INK }}>{drawerProduct}</div>
-                <div style={{ fontSize: '13px', color: MUTED, marginTop: '4px' }}>Store channel</div>
-              </div>
-              <button
-                type="button"
-                onClick={() => setDrawerProduct(null)}
-                style={{
-                  border: `1px solid ${BORDER}`,
-                  background: CARDBG,
-                  borderRadius: '2px',
-                  padding: '8px 12px',
-                  minHeight: 40,
-                  cursor: 'pointer',
-                  fontSize: '13px',
-                  fontWeight: 600,
-                  lineHeight: 1.2,
-                  color: INK,
-                }}
-              >
-                Close
-              </button>
-            </div>
-            <div style={{ flex: 1, overflowY: 'auto', padding: '12px 18px 24px' }}>
-              <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '13px' }}>
-                <thead>
-                  <tr style={{ borderBottom: `1px solid ${BORDER}` }}>
-                    {['Store', 'Units', 'Dollars'].map((h) => (
-                      <th key={h} style={{ ...lbl, textAlign: h === 'Store' ? 'left' : 'right', padding: '8px 4px', fontSize: '10px' }}>
-                        {h}
-                      </th>
-                    ))}
-                  </tr>
-                </thead>
-                <tbody>
-                  {productBreakdown.stores.map((r) => (
-                    <tr key={r.store} style={{ borderBottom: `1px solid ${CREAM}` }}>
-                      <td style={{ padding: '10px 4px' }}>
-                        <div style={{ fontWeight: 600 }}>{r.store}</div>
-                        <div style={{ fontSize: '11px', color: MUTED }}>{r.city}</div>
-                      </td>
-                      <td style={{ padding: '10px 4px', textAlign: 'right', fontFamily: MONO }}>{fmtInt(r.units)}</td>
-                      <td style={{ padding: '10px 4px', textAlign: 'right', fontFamily: MONO }}>{money(r.dollars)}</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-              <button
-                type="button"
-                className="pk-click"
-                onClick={() =>
-                  openDetail({
-                    kind: 'tableTotal',
-                    tableName: `${drawerProduct} · store channel`,
-                    rows: productBreakdown.stores.map((r) => ({
-                      label: r.store,
-                      value: r.dollars,
-                      key: r.store,
-                    })),
-                    total: productBreakdown.total_dollars,
-                    format: money,
-                  })
-                }
-                style={{ display: 'block', width: '100%', border: 'none', background: 'transparent', padding: 0, cursor: 'pointer', textAlign: 'left' }}
-              >
-                <Row
-                  l="Total"
-                  v={money(productBreakdown.total_dollars)}
-                  bold
-                  top
-                  tieExpected={productBreakdown.store_channel_dollars}
-                  tieActual={productBreakdown.total_dollars}
-                />
-              </button>
-              <Row
-                l="Units"
-                v={fmtInt(productBreakdown.total_units)}
-                tieExpected={productBreakdown.store_channel_units}
-                tieActual={productBreakdown.total_units}
-              />
-            </div>
-          </aside>
-        )}
       </div>
     </>
   )

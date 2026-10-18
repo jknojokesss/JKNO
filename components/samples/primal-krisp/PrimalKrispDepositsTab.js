@@ -1,6 +1,8 @@
+import { useMemo, useState } from 'react'
 import DATA from '../../../data/primal-krisp.json'
 import { enrichPayouts, payoutTotals, aggregatePayoutTable } from './primalKrispDepositsData'
 import { BORDER, CREAM, INK, MUTED, RED, UI, MONO, money, fmtD, fmtInt } from '../primalKrispUtils'
+import PrimalKrispListControls from './PrimalKrispListControls'
 
 const DEPOSITS_CSS = `
 .pk-dep-table{width:100%;border-collapse:collapse;font-size:13px}
@@ -36,6 +38,26 @@ export default function PrimalKrispDepositsTab({ KPI, card, lbl, onOpenDetail })
   const { payouts, summary } = enrichPayouts(DATA.deposits)
   const nm = summary.not_matched
   const totals = aggregatePayoutTable(payouts)
+  const [payoutSort, setPayoutSort] = useState({ key: 'date', dir: 'desc' })
+  const [payoutSearch, setPayoutSearch] = useState('')
+
+  const sortedPayouts = useMemo(() => {
+    let rows = [...payouts]
+    const q = payoutSearch.trim().toLowerCase()
+    if (q) {
+      rows = rows.filter((p) => {
+        const t = payoutTotals(p)
+        const blob = [p.date, p.source, t.deposit, t.order_count, matchLabel(p)].join(' ').toLowerCase()
+        return blob.includes(q)
+      })
+    }
+    const dir = payoutSort.dir === 'asc' ? 1 : -1
+    rows.sort((a, b) => {
+      if (payoutSort.key === 'date') return String(a.date).localeCompare(String(b.date)) * dir
+      return (payoutTotals(a).deposit - payoutTotals(b).deposit) * dir
+    })
+    return rows
+  }, [payouts, payoutSort, payoutSearch])
   const openDeposited = () => onOpenDetail({ kind: 'depDeposited' })
   const openPayoutsTotal = () =>
     onOpenDetail({
@@ -69,6 +91,17 @@ export default function PrimalKrispDepositsTab({ KPI, card, lbl, onOpenDetail })
 
       <div style={{ ...card, padding: '12px 16px' }}>
         <div style={{ ...lbl, marginBottom: 10 }}>Payouts</div>
+        <PrimalKrispListControls
+          sortOptions={[
+            { key: 'date', labels: { desc: 'Date (newest)', asc: 'Date (oldest)' } },
+            { key: 'deposit', labels: { desc: 'Deposit amount (largest)', asc: 'Deposit amount (smallest)' } },
+          ]}
+          sort={payoutSort}
+          onSortChange={setPayoutSort}
+          search={payoutSearch}
+          onSearchChange={setPayoutSearch}
+          rowCount={payouts.length}
+        />
         <table className="pk-dep-table">
           <thead>
             <tr>
@@ -85,7 +118,7 @@ export default function PrimalKrispDepositsTab({ KPI, card, lbl, onOpenDetail })
             </tr>
           </thead>
           <tbody>
-            {payouts.map((p) => {
+            {sortedPayouts.map((p) => {
               const t = payoutTotals(p)
               const status = matchLabel(p)
               const nmAmt = rowNotMatched(t)
