@@ -1274,16 +1274,16 @@ export default function JerkyMunch() {
               {(() => {
                 const inv = consign.filter(c => c.type === 'invoice').slice().sort((a, b) => (a.region || '').localeCompare(b.region || '') || (a.store || '').localeCompare(b.store || ''))
                 const searchQ = invSearch.trim().toLowerCase()
-                const representedQbIds = new Set(consign.filter(c => c.qbCustomerId).map(c => c.qbCustomerId))
+                const representedQbIds = new Set(consign.filter(c => c.qbCustomerId).map(c => String(c.qbCustomerId)))
                 const representedNames = new Set(consign.map(c => String(c.store || '').trim().toLowerCase()))
                 const qbPool = (qbAllCustomers.customers || []).filter(qc => {
-                  if (representedQbIds.has(qc.id)) return false
+                  if (representedQbIds.has(String(qc.id))) return false
                   if (representedNames.has(String(qc.name || '').trim().toLowerCase())) return false
                   return true
                 }).sort((a, b) => a.name.localeCompare(b.name))
                 const qbFiltered = searchQ
                   ? qbPool.filter(qc => qc.name.toLowerCase().includes(searchQ) || (qc.email && qc.email.toLowerCase().includes(searchQ)))
-                  : qbPool
+                  : qbPool.filter(qc => qc.hasInvoice)
                 const qbVisible = searchQ ? qbFiltered : qbFiltered.slice(0, qbOnlyLimit)
 
                 const renderNewInvoiceForm = (c, { qbOnly = false } = {}) => {
@@ -1436,14 +1436,19 @@ export default function JerkyMunch() {
                     {storeBlocks}
                     {qbAllCustomers.loading && <div style={{ fontSize: '13px', color: MUTED, margin: '16px 0 8px' }}>Loading QuickBooks customers</div>}
                     {qbAllCustomers.error && <div style={{ fontSize: '13px', color: RED, margin: '8px 0 12px', lineHeight: 1.5 }}>{qbAllCustomers.error}</div>}
-                    {!qbAllCustomers.loading && qbPool.length > 0 && (
+                    {!qbAllCustomers.loading && !qbAllCustomers.error && searchQ && (
                       <>
-                        <div style={{ ...lbl, color: MUTED, fontSize: '12px', margin: inv.length ? '24px 0 10px' : '8px 0 10px' }}>QuickBooks customers</div>
                         {qbBlocks}
-                        {!searchQ && qbFiltered.length > qbOnlyLimit && (
+                        {qbFiltered.length === 0 && <div style={{ fontSize: '13px', color: MUTED, padding: '8px 0' }}>No matching QuickBooks customers.</div>}
+                      </>
+                    )}
+                    {!qbAllCustomers.loading && !qbAllCustomers.error && !searchQ && qbFiltered.length > 0 && (
+                      <>
+                        <div style={{ ...lbl, color: MUTED, fontSize: '12px', margin: inv.length ? '24px 0 10px' : '8px 0 10px' }}>QuickBooks stores</div>
+                        {qbBlocks}
+                        {qbFiltered.length > qbOnlyLimit && (
                           <button type="button" onClick={() => setQbOnlyLimit(n => n + 50)} style={{ background: 'none', color: CHAR, border: `1px solid ${BORDER}`, borderRadius: '2px', padding: '10px 16px', ...btn, fontSize: '13px', width: '100%', marginTop: '4px', cursor: 'pointer' }}>Show more</button>
                         )}
-                        {searchQ && qbFiltered.length === 0 && <div style={{ fontSize: '13px', color: MUTED, padding: '8px 0' }}>No matching QuickBooks customers.</div>}
                       </>
                     )}
                   </>
