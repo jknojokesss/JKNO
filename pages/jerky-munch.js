@@ -71,6 +71,10 @@ const Bag = ({ color }) => (
 )
 
 const MONO = "'IBM Plex Mono', monospace"
+const GL_SELECT = 'account,amount,txn_date,date,txn_type,name,description,split_account'
+const GL_PAGE = 1000
+const GL_PARALLEL = 5
+const COA_SELECT = 'account,leaf,account_type'
 
 export default function JerkyMunch() {
   const [tab, setTab] = useState('overview')
@@ -126,7 +130,10 @@ export default function JerkyMunch() {
   const [glTx, setGlTx] = useState([])          // real QuickBooks GL rows from Supabase
   const [coaTx, setCoaTx] = useState([])        // real Chart of Accounts rows from Supabase
   const [qbo, setQbo] = useState(null)          // QuickBooks' own P&L + balance sheet
+  const [booksLoading, setBooksLoading] = useState(false)
+  const [booksReady, setBooksReady] = useState(false)
   const fileRef = useRef(null)
+  const booksLoadRef = useRef(false)
 
   // ── auth gate ──────────────────────────────────────────────────────
   const [session, setSession] = useState(null)
@@ -287,11 +294,13 @@ export default function JerkyMunch() {
     if (syncing) return
     setSyncing(true); if (!silent) setSyncMsg('Syncing with QuickBooks…')
     try {
-      const res = await jerkyApi('/api/jerky/sync-invoices', { method: 'POST', body: {} })
+      const res = await jerkyApi('/api/jerky/sync-invoices', { method: 'POST', body: silent ? {} : { force: true } })
       const j = await res.json().catch(() => ({}))
       if (!res.ok) { setSyncMsg(j.error || 'Sync failed.'); return }
-      await loadInvoices()
-      setSyncMsg(`Up to date with QuickBooks${j.removed ? ` · ${j.removed} removed` : ''}${j.unmatched && j.unmatched.length ? ` · not matched: ${j.unmatched.join(', ')}` : ''}`)
+      if (!j.skipped) await loadInvoices()
+      if (!silent) {
+        setSyncMsg(j.skipped ? 'Up to date with QuickBooks' : `Up to date with QuickBooks${j.removed ? ` · ${j.removed} removed` : ''}${j.unmatched && j.unmatched.length ? ` · not matched: ${j.unmatched.join(', ')}` : ''}`)
+      }
     } catch (e) { setSyncMsg('Sync failed.') }
     finally { setSyncing(false) }
   }
@@ -356,22 +365,36 @@ export default function JerkyMunch() {
   }
   const loadGL = async () => {
     try {
-      // Supabase caps a select at 1000 rows — page through until exhausted.
-      const all = []
-      const size = 1000
-      for (let from = 0; ; from += size) {
+      const { count, error: countErr } = await jerkySupabase
+        .from('gl_transactions').select('id', { count: 'exact', head: true })
+      if (countErr) throw countErr
+      const total = count || 0
+      if (total === 0) { setGlTx([]); return }
+      const pages = Math.ceil(total / GL_PAGE)
+      const fetchPage = async (pageIdx) => {
+        const from = pageIdx * GL_PAGE
         const { data, error } = await jerkySupabase
-          .from('gl_transactions').select('*').order('txn_date').range(from, from + size - 1)
+          .from('gl_transactions')
+          .select(GL_SELECT)
+          .order('txn_date')
+          .order('id')
+          .range(from, from + GL_PAGE - 1)
         if (error) throw error
-        all.push(...(data || []))
-        if (!data || data.length < size) break
+        return data || []
       }
-      setGlTx(all)
+      const chunks = []
+      for (let p = 0; p < pages; p += GL_PARALLEL) {
+        const batch = []
+        for (let i = p; i < Math.min(p + GL_PARALLEL, pages); i++) batch.push(fetchPage(i))
+        const parts = await Promise.all(batch)
+        for (const part of parts) chunks.push(...part)
+      }
+      setGlTx(chunks)
     } catch (e) { console.error('loadGL failed', e); setGlTx([]) }
   }
   const loadCoA = async () => {
     try {
-      const { data } = await jerkySupabase.from('coa_accounts').select('*')
+      const { data } = await jerkySupabase.from('coa_accounts').select(COA_SELECT)
       setCoaTx(data || [])
     } catch (e) { console.error('loadCoA failed', e); setCoaTx([]) }
   }
@@ -387,10 +410,25 @@ export default function JerkyMunch() {
   const loadRole = async () => {
     try {
       const email = (await jerkySupabase.auth.getUser()).data.user?.email
-      if (!email) { setRole('owner'); return }
+      if (!email) { setRole('owner'); return 'owner' }
       const { data } = await jerkySupabase.from('user_roles').select('role').ilike('email', email).maybeSingle()
-      setRole(data?.role === 'counter' ? 'counter' : 'owner')
-    } catch (e) { console.error('loadRole failed', e); setRole('owner') }
+      const r = data?.role === 'counter' ? 'counter' : 'owner'
+      setRole(r)
+      return r
+    } catch (e) { console.error('loadRole failed', e); setRole('owner'); return 'owner' }
+  }
+  const loadBooks = async () => {
+    if (booksLoadRef.current) return
+    booksLoadRef.current = true
+    setBooksLoading(true)
+    try {
+      await Promise.all([loadGL(), loadCoA(), loadQbo()])
+    } catch (e) { console.error('loadBooks failed', e) }
+    finally {
+      booksLoadRef.current = false
+      setBooksLoading(false)
+      setBooksReady(true)
+    }
   }
   const saveShelfCount = async (partnerId, count) => {
     try {
@@ -398,9 +436,16 @@ export default function JerkyMunch() {
       await loadConsign()
     } catch (e) { console.error('saveShelfCount failed', e) }
   }
-  const loadAll = async () => {
-    await Promise.all([loadRole(), loadConsign(), loadDirect(), loadAds(), loadExpenses(), loadInvoices(), loadProducts(), loadMonthSeries(), loadSettings(), loadGL(), loadCoA(), loadQbo()])
+  const loadCore = async () => {
+    const r = await loadRole()
+    if (r === 'counter') {
+      await loadConsign()
+      setDataLoaded(true)
+      return
+    }
+    await Promise.all([loadConsign(), loadDirect(), loadAds(), loadExpenses(), loadInvoices(), loadProducts(), loadMonthSeries(), loadSettings()])
     setDataLoaded(true)
+    loadBooks()
   }
 
   useEffect(() => {
@@ -414,8 +459,17 @@ export default function JerkyMunch() {
     }
   }, [])
   useEffect(() => {
-    if (session) loadAll()
-    else setDataLoaded(false)
+    if (session) {
+      loadCore()
+    } else {
+      setDataLoaded(false)
+      setBooksReady(false)
+      setBooksLoading(false)
+      booksLoadRef.current = false
+      setGlTx([])
+      setCoaTx([])
+      setQbo(null)
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [session])
   useEffect(() => {
@@ -964,12 +1018,18 @@ export default function JerkyMunch() {
               <div style={{ ...lbl, color: SPICE }}>Jerky Munch</div>
               <h1 style={{ ...big, fontSize: '28px', color: INK, letterSpacing: '0.3px', lineHeight: 1.1 }}>{currentLabel}</h1>
             </div>
+            {booksLoading && <span style={{ fontSize: '11.5px', color: MUTED }}>Updating...</span>}
           </div>
 
           {/* ===== OVERVIEW ===== */}
           {tab === 'overview' && (
             <>
-              {glPnl ? (
+              {booksLoading ? (
+                <div style={{ ...card, marginBottom: '16px', fontSize: '13px', color: MUTED, lineHeight: 1.5 }}>
+                  <span style={{ fontSize: '11.5px', color: MUTED }}>Updating...</span>
+                  <div style={{ marginTop: '6px' }}>Loading your books from QuickBooks…</div>
+                </div>
+              ) : glPnl ? (
                 <>
                   <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', alignItems: 'center', marginBottom: '14px' }}>
                     <span style={{ ...lbl }}>Showing</span>
@@ -1288,6 +1348,7 @@ export default function JerkyMunch() {
               </div>
               <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap', marginBottom: '16px' }}>
                 <button disabled={syncing} onClick={() => syncInvoices(false)} style={{ background: 'none', color: CHAR, border: `1px solid ${BORDER}`, borderRadius: '2px', padding: '9px 15px', ...btn, fontSize: '13px', cursor: syncing ? 'default' : 'pointer' }}>{syncing ? 'Syncing…' : '↻ Sync with QuickBooks'}</button>
+                {(syncing || qbAllCustomers.loading) && <span style={{ fontSize: '11.5px', color: MUTED }}>Updating...</span>}
                 {syncMsg && <span style={{ fontSize: '12px', color: MUTED }}>{syncMsg}</span>}
               </div>
               <input value={invSearch} onChange={e => { setInvSearch(e.target.value); setQbOnlyLimit(50) }} placeholder="Search customers" style={{ ...inp, width: '100%', marginBottom: '14px', boxSizing: 'border-box' }} />
@@ -1557,7 +1618,13 @@ export default function JerkyMunch() {
           {/* ===== ADVERTISING ===== */}
           {tab === 'ads' && (
             <>
-              {glAds && glAds.months && glAds.months.length > 1 && (
+              {booksLoading && (
+                <div style={{ ...card, marginBottom: '16px', fontSize: '13px', color: MUTED }}>
+                  <span style={{ fontSize: '11.5px', color: MUTED }}>Updating...</span>
+                  <div style={{ marginTop: '6px' }}>Loading advertiser spend from your ledger…</div>
+                </div>
+              )}
+              {!booksLoading && glAds && glAds.months && glAds.months.length > 1 && (
                 <div style={{ ...card, marginBottom: '16px' }}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: '10px', flexWrap: 'wrap', gap: '6px' }}>
                     <div style={{ ...big, fontSize: '16px', color: INK }}>What you paid each advertiser, by month</div>
@@ -1697,14 +1764,23 @@ export default function JerkyMunch() {
                 <div>
                   <div style={{ fontWeight: 600, color: INK, fontSize: '16px' }}>QuickBooks Online</div>
                   <div style={{ fontSize: '12.5px', color: MUTED, marginTop: '2px' }}>Connected — reads your ledger and chart of accounts every night</div>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '7px', fontSize: '12.5px', color: GREEN, marginTop: '9px' }}>
-                    <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: GREEN, flexShrink: 0 }} />
-                    {glTx.length.toLocaleString()} transactions · {coaTx.length} accounts
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '7px', fontSize: '12.5px', color: booksLoading ? MUTED : GREEN, marginTop: '9px' }}>
+                    <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: booksLoading ? MUTED : GREEN, flexShrink: 0 }} />
+                    {booksLoading ? (
+                      <span><span style={{ fontSize: '11.5px' }}>Updating...</span> · loading ledger</span>
+                    ) : (
+                      <span>{glTx.length.toLocaleString()} transactions · {coaTx.length} accounts</span>
+                    )}
                   </div>
                 </div>
               </div>
 
-              {glPnl ? (
+              {booksLoading ? (
+                <div style={{ ...card, fontSize: '13px', color: MUTED, lineHeight: 1.5 }}>
+                  <span style={{ fontSize: '11.5px', color: MUTED }}>Updating...</span>
+                  <div style={{ marginTop: '6px' }}>Pulling your General Ledger and Chart of Accounts…</div>
+                </div>
+              ) : glPnl ? (
                 <>
                   <div style={{ ...card, background: '#FBF3E7', borderColor: '#EAD9BD', fontSize: '12.5px', color: INK, lineHeight: 1.5, marginBottom: '14px' }}>
                     Ledger synced nightly from QuickBooks · current through <b>{glAsOf}</b> · {glPnl.rowCount.toLocaleString()} transactions · {coaTx.length} accounts. The current month is still filling in{glPnl.usedCoA ? '' : ' — and no Chart of Accounts is loaded yet, so categorization is best-guess'}.
@@ -1727,7 +1803,12 @@ export default function JerkyMunch() {
           {/* ===== FINANCIALS (real statements from the GL) ===== */}
           {tab === 'financials' && (
             <>
-              {!glPnl ? (
+              {booksLoading ? (
+                <div style={{ ...card, fontSize: '13px', color: MUTED, lineHeight: 1.5 }}>
+                  <span style={{ fontSize: '11.5px', color: MUTED }}>Updating...</span>
+                  <div style={{ marginTop: '6px' }}>Loading P&amp;L, Balance Sheet, and Cash Flow…</div>
+                </div>
+              ) : !glPnl ? (
                 <div style={{ ...card, background: '#EAF3EC', borderColor: '#CFE4D6', fontSize: '13.5px', color: INK, lineHeight: 1.55 }}>
                   No books loaded yet. Import your Chart of Accounts and General Ledger on the <b style={{ cursor: 'pointer', color: SPICE }} onClick={() => setTab('quickbooks')}>QuickBooks</b> tab, then your statements appear here.
                 </div>
