@@ -426,54 +426,82 @@ export default function PrimalKrispPortal() {
               style={{ height: '56px', width: 'auto', maxWidth: '100%' }}
             />
           </div>
-          <nav className="pk-nav pk-nav--main" aria-label="Sections">
-            {TABS.map(([id, longLabel, shortLabel]) => {
-              const active = tab === id
-              const navLabel = narrowNav ? shortLabel : longLabel
-              return (
-                <button
-                  key={id}
-                  className="pk-navbtn"
-                  onClick={() => {
-                    setTab(id)
-                    setDrawerProduct(null)
-                    setReorderFocus(false)
-                    setOverviewDetail(null)
-                  }}
-                  style={
-                    active
-                      ? { background: 'rgba(255,255,255,.12)', color: CREAM, boxShadow: `inset 3px 0 0 ${SPICE}` }
-                      : undefined
-                  }
-                >
-                  {navLabel}
-                </button>
-              )
-            })}
-          </nav>
-          <div className="pk-tools-label" style={{ ...lbl, color: '#7A6A52', fontSize: '10px', margin: '16px 14px 6px' }}>
-            Tools
-          </div>
-          <nav className="pk-nav pk-nav--tools" aria-label="Tools">
-            {EXTRA.map(([id, longLabel, shortLabel]) => {
-              const active = tab === id
-              const navLabel = narrowNav ? shortLabel : longLabel
-              return (
-                <button
-                  key={id}
-                  className="pk-navbtn"
-                  onClick={() => setTab(id)}
-                  style={
-                    active
-                      ? { background: 'rgba(255,255,255,.12)', color: CREAM, boxShadow: `inset 3px 0 0 ${SPICE}` }
-                      : undefined
-                  }
-                >
-                  {navLabel}
-                </button>
-              )
-            })}
-          </nav>
+          {narrowNav ? (
+            <nav className="pk-nav pk-nav--main pk-nav--phone-grid" aria-label="Sections">
+              {[...TABS, ...EXTRA].map(([id, longLabel, shortLabel]) => {
+                const active = tab === id
+                const navLabel = shortLabel
+                return (
+                  <button
+                    key={id}
+                    className="pk-navbtn"
+                    onClick={() => {
+                      setTab(id)
+                      setDrawerProduct(null)
+                      setReorderFocus(false)
+                      setOverviewDetail(null)
+                    }}
+                    style={
+                      active
+                        ? { background: 'rgba(255,255,255,.12)', color: CREAM, boxShadow: `inset 3px 0 0 ${SPICE}` }
+                        : undefined
+                    }
+                  >
+                    {navLabel}
+                  </button>
+                )
+              })}
+            </nav>
+          ) : (
+            <>
+              <nav className="pk-nav pk-nav--main" aria-label="Sections">
+                {TABS.map(([id, longLabel, shortLabel]) => {
+                  const active = tab === id
+                  return (
+                    <button
+                      key={id}
+                      className="pk-navbtn"
+                      onClick={() => {
+                        setTab(id)
+                        setDrawerProduct(null)
+                        setReorderFocus(false)
+                        setOverviewDetail(null)
+                      }}
+                      style={
+                        active
+                          ? { background: 'rgba(255,255,255,.12)', color: CREAM, boxShadow: `inset 3px 0 0 ${SPICE}` }
+                          : undefined
+                      }
+                    >
+                      {longLabel}
+                    </button>
+                  )
+                })}
+              </nav>
+              <div className="pk-tools-label" style={{ ...lbl, color: '#7A6A52', fontSize: '10px', margin: '16px 14px 6px' }}>
+                Tools
+              </div>
+              <nav className="pk-nav pk-nav--tools" aria-label="Tools">
+                {EXTRA.map(([id, longLabel]) => {
+                  const active = tab === id
+                  return (
+                    <button
+                      key={id}
+                      className="pk-navbtn"
+                      onClick={() => setTab(id)}
+                      style={
+                        active
+                          ? { background: 'rgba(255,255,255,.12)', color: CREAM, boxShadow: `inset 3px 0 0 ${SPICE}` }
+                          : undefined
+                      }
+                    >
+                      {longLabel}
+                    </button>
+                  )
+                })}
+              </nav>
+            </>
+          )}
         </aside>
 
         <main className="pk-main">
