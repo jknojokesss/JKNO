@@ -126,15 +126,21 @@ export default function RoofingPortal({ demoEmbed = false }) {
       </Head>
       <style>{`
         *{box-sizing:border-box;margin:0;padding:0}
-        html,body{background:${PAPER}}
+        html,body{background:${PAPER};overflow-x:hidden;max-width:100%}
         ${DEMO_RENDER_HINTS}
         body{color:${SLATE};font-size:13px}
+        .shell{min-width:0;max-width:100%;overflow-x:hidden}
         table{border-collapse:collapse;width:100%;font-variant-numeric:tabular-nums}
         h1,h2,h3{font-family:${serif};color:${INK};font-weight:600}
         button{font-family:${sans}}
         .shell{display:flex;min-height:calc(100vh - ${embedded ? 34 : 72}px)}
         .side{width:212px;flex-shrink:0;background:${INK};padding:26px 0 20px;position:sticky;top:${embedded ? 34 : 72}px;height:calc(100vh - ${embedded ? 34 : 72}px);display:flex;flex-direction:column}
-        .main{flex:1;min-width:0;padding:30px 36px 20px;max-width:1280px}
+        .main{flex:1;min-width:0;padding:30px 36px 20px;max-width:1280px;overflow-x:hidden}
+        .roof-hscroll{overflow-x:auto;-webkit-overflow-scrolling:touch;max-width:100%}
+        .roof-cash-row{display:flex;gap:18px;flex-wrap:wrap;margin-bottom:18px}
+        .roof-cash-chart{flex:1.4 1 420px;min-width:0;max-width:100%}
+        .roof-cash-aging{flex:1 1 340px;min-width:0;max-width:100%}
+        .liab-card{flex:1 1 420px;min-width:360px}
         .nbtn{display:block;width:100%;text-align:left;padding:10px 24px;border:none;background:transparent;color:#9aa0a8;font-size:12.5px;font-weight:500;letter-spacing:.02em;cursor:pointer;border-left:3px solid transparent}
         .nbtn:hover{color:${STONE}}
         .nbtn.on{color:${WHITE};border-left-color:${SIGNAL};background:rgba(255,255,255,.04)}
@@ -173,6 +179,15 @@ export default function RoofingPortal({ demoEmbed = false }) {
           .job-margin-table .th:nth-child(9),.job-margin-table .td:nth-child(9){display:table-cell}
           .job-margin-table .th:nth-child(1),.job-margin-table .td:nth-child(1){position:sticky;left:0;background:${WHITE};z-index:1;box-shadow:4px 0 8px -4px rgba(0,0,0,.08)}
           .job-margin-table .th:nth-child(9),.job-margin-table .td:nth-child(9){position:sticky;right:0;background:${WHITE};z-index:1;box-shadow:-4px 0 8px -4px rgba(0,0,0,.08);min-width:108px}
+          .liab-card{flex:1 1 100%;min-width:0;max-width:100%;overflow-x:auto}
+          .liab-card table,.roof-cash-aging table{min-width:480px}
+          .roof-cash-chart .roof-hscroll svg,.roof-hscroll--13wk svg{width:640px;min-width:640px;max-width:none}
+          .roof-hscroll--t12 svg{width:520px;min-width:520px;max-width:none}
+        }
+        @media(min-width:821px){
+          .roof-hscroll--13wk svg{width:100%;min-width:640px;max-width:none}
+          .roof-hscroll--t12 svg{width:100%;min-width:520px;max-width:none}
+          .liab-card table,.roof-cash-aging table{min-width:0}
         }
         @media print{
           .no-print{display:none!important}
@@ -548,7 +563,7 @@ function DraftInvoice({ d, onClose }) {
 
 function SectionTitle({ t, right }) {
   return (
-    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', padding: '13px 16px 11px' }}>
+    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', flexWrap: 'wrap', gap: '8px 12px', padding: '13px 16px 11px' }}>
       <h2 style={{ fontSize: '16.5px' }}>{t}</h2>
       {right}
     </div>
@@ -828,10 +843,11 @@ function Cash({ M }) {
         <Kpi k="CASH POSITION, WK 13" v={moneyK(M.weeks[12].cum)} sub={`from ${moneyK(M.STARTING_CASH)} today, if collections pace`} />
       </div>
 
-      <div className="card" style={{ marginBottom: '18px', overflowX: 'auto' }}>
+      <div className="card" style={{ marginBottom: '18px', maxWidth: '100%' }}>
         <SectionTitle t="Rolling 13-week forecast" right={<span style={{ fontSize: '11px', color: MUTED }}>expected collections vs. committed AP + payroll</span>} />
         <div style={{ padding: '4px 16px 14px' }}>
-          <svg viewBox="0 0 780 190" style={{ width: '100%', minWidth: '640px', display: 'block' }}>
+          <div className="roof-hscroll roof-hscroll--13wk">
+          <svg viewBox="0 0 780 190" style={{ display: 'block' }}>
             {M.weeks.map((w, i) => {
               const x = 20 + i * 58
               const collH = (w.coll / wMax) * 92
@@ -854,6 +870,7 @@ function Cash({ M }) {
             ))}
             <text x={20} y={170} fontSize="9.5" fill={MUTED} fontFamily={sans}>cash balance →</text>
           </svg>
+          </div>
           <div style={{ fontSize: '11px', color: MUTED, marginTop: '4px' }}>
             Dark bars: expected collections (AR aging + claim timing). Stone bars: committed AP + payroll. Net printed under each week; line is the running balance. <b style={{ color: SLATE }}>Click a week to see what lands in it.</b> Insurance claims in adjuster review are modeled at due + 45 days.{M.excludedAR > 0 && <> {moneyK(M.excludedAR)} of deep past-due balances is excluded from the forecast.</>}
           </div>
@@ -896,11 +913,12 @@ function Cash({ M }) {
         </div>
       </div>
 
-      <div style={{ display: 'flex', gap: '18px', flexWrap: 'wrap', marginBottom: '18px' }}>
-        <div className="card" style={{ flex: '1.4 1 420px', overflowX: 'auto' }}>
+      <div className="roof-cash-row">
+        <div className="card roof-cash-chart">
           <SectionTitle t="Contracted vs. invoiced vs. collected — trailing 12" />
           <div style={{ padding: '4px 16px 14px' }}>
-            <svg viewBox="0 0 720 170" style={{ width: '100%', minWidth: '520px', display: 'block' }}>
+            <div className="roof-hscroll roof-hscroll--t12">
+            <svg viewBox="0 0 720 170" style={{ display: 'block' }}>
               {M.t12.map((r, i) => {
                 const x = 16 + i * 58
                 return (
@@ -918,12 +936,14 @@ function Cash({ M }) {
                 <rect x={250} y={158} width={10} height={10} fill={SLATE} /><text x={265} y={166.5}>collected</text>
               </g>
             </svg>
+            </div>
             <div style={{ fontSize: '11px', color: MUTED, marginTop: '4px' }}>The gap between the middle and right bars is your float. When signings spike (the April hail event), collections lag by a quarter — that&rsquo;s the working-capital squeeze that growth causes.</div>
           </div>
         </div>
 
-        <div className="card" style={{ flex: '1 1 340px' }}>
+        <div className="card roof-cash-aging">
           <SectionTitle t="AR aging — claims aged separately" />
+          <div className="roof-hscroll">
           <table>
             <thead><tr><th className="th"></th>{buckets.map((b) => <th key={b} className="th r">{b}</th>)}<th className="th r">Total</th></tr></thead>
             <tbody>
@@ -945,6 +965,7 @@ function Cash({ M }) {
               </tr>
             </tbody>
           </table>
+          </div>
           <div style={{ padding: '10px 16px 14px', fontSize: '11px', color: MUTED, lineHeight: 1.6 }}>
             A claim in adjuster review isn&rsquo;t &ldquo;past due&rdquo; the way an unpaid GC invoice is — chasing it like one wastes calls, and aging it like one overstates your problem. {moneyK(M.claimsInReview)} of the claim balance is in review right now.
           </div>
@@ -969,7 +990,6 @@ function Cash({ M }) {
 // ── screen: liabilities ──────────────────────────────────────────────────
 
 function Liabilities({ M }) {
-  const block = { flex: '1 1 420px', minWidth: '360px' }
   const [draft, setDraft] = useState(null)
   return (
     <div>
@@ -984,7 +1004,7 @@ function Liabilities({ M }) {
       </div>
 
       <div style={{ display: 'flex', gap: '18px', flexWrap: 'wrap' }}>
-        <div className="card" style={block}>
+        <div className="card liab-card">
           <SectionTitle t="Retainage held, by customer" right={<b style={{ fontVariantNumeric: 'tabular-nums' }}>{money0(M.retainageTotal)}</b>} />
           <table>
             <thead><tr><th className="th">Customer / job</th><th className="th r">%</th><th className="th r">Held</th><th className="th">Expected release</th></tr></thead>
@@ -1000,7 +1020,7 @@ function Liabilities({ M }) {
           {M.retainage.length > 9 && <div style={{ padding: '8px 16px', fontSize: '11px', color: MUTED }}>+ {M.retainage.length - 9} more jobs holding {money0(M.retainage.slice(9).reduce((s, r) => s + r.held, 0))}</div>}
         </div>
 
-        <div className="card" style={block}>
+        <div className="card liab-card">
           <SectionTitle t="AP committed against open jobs" right={<b style={{ fontVariantNumeric: 'tabular-nums' }}>{money0(M.apTotal)}</b>} />
           <table>
             <thead><tr><th className="th">Vendor</th><th className="th">Job</th><th className="th">Kind</th><th className="th r">Amount</th><th className="th r">Due</th></tr></thead>
@@ -1017,7 +1037,7 @@ function Liabilities({ M }) {
           {M.openAp.length > 12 && <div style={{ padding: '8px 16px', fontSize: '11px', color: MUTED }}>+ {M.openAp.length - 12} more bills</div>}
         </div>
 
-        <div className="card" style={block}>
+        <div className="card liab-card">
           <SectionTitle t="Deposits taken on jobs not yet started" right={<b style={{ fontVariantNumeric: 'tabular-nums' }}>{money0(M.depositTotal)}</b>} />
           <table>
             <thead><tr><th className="th">Customer / job</th><th className="th r">Deposit held</th><th className="th r">Taken</th><th className="th r">Starts</th></tr></thead>
@@ -1033,7 +1053,7 @@ function Liabilities({ M }) {
           <div style={{ padding: '10px 16px 14px', fontSize: '11px', color: MUTED }}>This is revenue you can&rsquo;t recognize and cash you&rsquo;ve already got — the classic way a roofer&rsquo;s bank balance flatters him.</div>
         </div>
 
-        <div className="card" style={block}>
+        <div className="card liab-card">
           <SectionTitle t="Approved supplements never billed" right={<b style={{ fontVariantNumeric: 'tabular-nums' }}>{money0(M.suppTotal)}</b>} />
           <table>
             <thead><tr><th className="th">Job / description</th><th className="th r">Amount</th><th className="th r">Approved</th></tr></thead>
