@@ -575,9 +575,9 @@
           "open_invoices": [
             {
               "invoice": "INV-4809",
-              "date": "2026-08-25",
+              "date": "2026-10-05",
               "amount": 306.2,
-              "age_days": 67
+              "age_days": 26
             },
             {
               "invoice": "INV-4810",

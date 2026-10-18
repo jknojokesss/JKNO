@@ -165,9 +165,8 @@ export default function AufschnittPortal() {
         <aside className="au-side">
           <div style={{ padding: '2px 8px 16px' }}>
             <div style={{ fontSize: 12, color: '#B6A78C' }}>Owings Mills, MD</div>
-            <div style={{ ...lbl, color: '#B6A78C', marginTop: '12px' }}>Dashboard</div>
           </div>
-          <nav className="au-nav au-nav--main" aria-label="Dashboard sections">
+          <nav className="au-nav au-nav--main" aria-label="Sections">
             {TABS.map(([id, longLabel, shortLabel]) => {
               const active = tab === id
               const navLabel = narrowNav ? shortLabel : longLabel

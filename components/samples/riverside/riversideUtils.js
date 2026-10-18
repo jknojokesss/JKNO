@@ -21,6 +21,13 @@ export const fmtC = (n) =>
 export const fmt0 = (n) => new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }).format(n)
 export const pct = (n) => `${Number(n).toFixed(1)}%`
 
+/** Revenue / profit up = green; expense up = red. */
+export function deltaColor(delta, { cost = false } = {}) {
+  if (delta == null || Math.abs(delta) < 0.005) return C.muted
+  if (cost) return delta > 0 ? C.neg : C.green
+  return delta > 0 ? C.green : C.neg
+}
+
 export const fmtDate = (iso) => {
   if (!iso) return '—'
   return new Intl.DateTimeFormat('en-US', { timeZone: 'America/New_York', month: 'short', day: 'numeric', year: 'numeric' }).format(

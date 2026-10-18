@@ -108,9 +108,9 @@ const fullyCurrent = ar.accounts.filter(
   (a) => a.buckets.d1_30 === 0 && a.buckets.d31_60 === 0 && a.buckets.d61_90 === 0 && a.buckets.d90p === 0
 )
 ok('AR 5 fully current', fullyCurrent.length === 5)
-ok('AR 31-60 count', ar.accounts.filter((a) => a.buckets.d31_60 > 0).length === 6)
-ok('AR 61-90 count', ar.accounts.filter((a) => a.buckets.d61_90 > 0).length === 2)
-ok('AR 90+ only Salt Market', ar.accounts.filter((a) => a.buckets.d90p > 0).length === 1 && ar.accounts.find((a) => a.name === 'Salt Market - Deal').buckets.d90p > 0)
+ok('AR 31-60 count', ar.accounts.filter((a) => a.buckets.d31_60 > 0).length === 4)
+ok('AR 61-90 count', ar.accounts.filter((a) => a.buckets.d61_90 > 0).length === 0)
+ok('AR 90+ count', ar.accounts.filter((a) => a.buckets.d90p > 0).length === 0)
 ok('AR Bingo large', ar.accounts.find((a) => a.name === 'Bingo Wholesale').buckets.total > 12_000)
 ok('AR Gourmet Glatt Lakewood large', ar.accounts.find((a) => a.name === 'Gourmet Glatt - Lakewood').buckets.total > 11_000)
 ok('AR Arons small', ar.accounts.find((a) => a.name === "Aron's Kissena Farms - Queens").buckets.total < 1_200)

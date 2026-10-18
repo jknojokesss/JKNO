@@ -1023,13 +1023,21 @@
        "invoice": "PK-1041",
        "issued": "2026-09-22",
        "amount": 639.36,
-       "days_outstanding": 8
+       "days_outstanding": 8,
+       "status": "Open",
+       "due": "2026-10-22",
+       "terms": "Net 30",
+       "bags": 72
       },
       {
        "invoice": "PK-1042",
        "issued": "2026-09-04",
        "amount": 213.12,
-       "days_outstanding": 26
+       "days_outstanding": 26,
+       "status": "Open",
+       "due": "2026-10-04",
+       "terms": "Net 30",
+       "bags": 24
       }
      ],
      "open_balance": 852.48,
@@ -1099,15 +1107,23 @@
      "open_invoices": [
       {
        "invoice": "PK-1045",
-       "issued": "2026-08-13",
+       "issued": "2026-08-31",
        "amount": 426.24,
-       "days_outstanding": 48
+       "days_outstanding": 30,
+       "status": "Open",
+       "due": "2026-09-12",
+       "terms": "Net 30",
+       "bags": 48
       },
       {
        "invoice": "PK-1046",
-       "issued": "2026-07-29",
+       "issued": "2026-08-30",
        "amount": 639.36,
-       "days_outstanding": 63
+       "days_outstanding": 31,
+       "status": "Open",
+       "due": "2026-08-28",
+       "terms": "Net 30",
+       "bags": 72
       }
      ],
      "open_balance": 1065.6,
@@ -1128,9 +1144,9 @@
       },
       {
        "invoice": "PK-1045",
-       "issued": "2026-08-13",
+       "issued": "2026-08-31",
        "amount": 426.24,
-       "days_outstanding": 48,
+       "days_outstanding": 30,
        "status": "Open",
        "due": "2026-09-12",
        "terms": "Net 30",
@@ -1138,9 +1154,9 @@
       },
       {
        "invoice": "PK-1046",
-       "issued": "2026-07-29",
+       "issued": "2026-08-30",
        "amount": 639.36,
-       "days_outstanding": 63,
+       "days_outstanding": 31,
        "status": "Open",
        "due": "2026-08-28",
        "terms": "Net 30",
@@ -1222,7 +1238,11 @@
        "invoice": "PK-1049",
        "issued": "2026-09-22",
        "amount": 319.68,
-       "days_outstanding": 8
+       "days_outstanding": 8,
+       "status": "Open",
+       "due": "2026-10-22",
+       "terms": "Net 30",
+       "bags": 36
       }
      ],
      "open_balance": 319.68,
@@ -1328,7 +1348,11 @@
        "invoice": "PK-1058",
        "issued": "2026-08-20",
        "amount": 426.24,
-       "days_outstanding": 41
+       "days_outstanding": 41,
+       "status": "Open",
+       "due": "2026-09-19",
+       "terms": "Net 30",
+       "bags": 48
       }
      ],
      "open_balance": 426.24,
@@ -1389,7 +1413,11 @@
        "invoice": "PK-1060",
        "issued": "2026-09-18",
        "amount": 328.32,
-       "days_outstanding": 12
+       "days_outstanding": 12,
+       "status": "Open",
+       "due": "2026-10-18",
+       "terms": "Net 30",
+       "bags": 36
       }
      ],
      "open_balance": 328.32,
@@ -1449,9 +1477,13 @@
      "open_invoices": [
       {
        "invoice": "PK-1063",
-       "issued": "2026-07-20",
+       "issued": "2026-08-27",
        "amount": 639.36,
-       "days_outstanding": 72
+       "days_outstanding": 34,
+       "status": "Open",
+       "due": "2026-08-19",
+       "terms": "Net 30",
+       "bags": 72
       }
      ],
      "open_balance": 639.36,
@@ -1472,9 +1504,9 @@
       },
       {
        "invoice": "PK-1063",
-       "issued": "2026-07-20",
+       "issued": "2026-08-27",
        "amount": 639.36,
-       "days_outstanding": 72,
+       "days_outstanding": 34,
        "status": "Open",
        "due": "2026-08-19",
        "terms": "Net 30",
@@ -1510,9 +1542,13 @@
      "open_invoices": [
       {
        "invoice": "PK-1067",
-       "issued": "2026-07-20",
+       "issued": "2026-08-23",
        "amount": 639.36,
-       "days_outstanding": 72
+       "days_outstanding": 38,
+       "status": "Open",
+       "due": "2026-08-19",
+       "terms": "Net 30",
+       "bags": 72
       }
      ],
      "open_balance": 639.36,
@@ -1534,9 +1570,9 @@
       },
       {
        "invoice": "PK-1067",
-       "issued": "2026-07-20",
+       "issued": "2026-08-23",
        "amount": 639.36,
-       "days_outstanding": 72,
+       "days_outstanding": 38,
        "status": "Open",
        "due": "2026-08-19",
        "terms": "Net 30",
@@ -1574,7 +1610,11 @@
        "invoice": "PK-1069",
        "issued": "2026-08-28",
        "amount": 639.36,
-       "days_outstanding": 33
+       "days_outstanding": 33,
+       "status": "Open",
+       "due": "2026-09-27",
+       "terms": "Net 30",
+       "bags": 72
       }
      ],
      "open_balance": 639.36,
@@ -1635,7 +1675,11 @@
        "invoice": "PK-1088",
        "issued": "2026-09-12",
        "amount": 525.6,
-       "days_outstanding": 18
+       "days_outstanding": 18,
+       "status": "Open",
+       "due": "2026-10-12",
+       "terms": "Net 30",
+       "bags": 60
       }
      ],
      "open_balance": 525.6,
@@ -1697,13 +1741,21 @@
        "invoice": "PK-1091",
        "issued": "2026-09-20",
        "amount": 426.24,
-       "days_outstanding": 10
+       "days_outstanding": 10,
+       "status": "Open",
+       "due": "2026-10-20",
+       "terms": "Net 30",
+       "bags": 48
       },
       {
        "invoice": "PK-1092",
        "issued": "2026-09-05",
        "amount": 213.12,
-       "days_outstanding": 25
+       "days_outstanding": 25,
+       "status": "Open",
+       "due": "2026-10-05",
+       "terms": "Net 30",
+       "bags": 24
       }
      ],
      "open_balance": 639.36,
@@ -1775,7 +1827,11 @@
        "invoice": "PK-1095",
        "issued": "2026-08-28",
        "amount": 894.72,
-       "days_outstanding": 33
+       "days_outstanding": 33,
+       "status": "Open",
+       "due": "2026-09-27",
+       "terms": "Net 30",
+       "bags": 105
       }
      ],
      "open_balance": 894.72,
@@ -1834,16 +1890,24 @@
      "days_of_stock_on_shelf": 19.3,
      "open_invoices": [
       {
-       "invoice": "PK-1098",
-       "issued": "2026-07-29",
-       "amount": 639.36,
-       "days_outstanding": 63
-      },
-      {
        "invoice": "PK-1099",
        "issued": "2026-09-18",
        "amount": 426.24,
-       "days_outstanding": 12
+       "days_outstanding": 12,
+       "status": "Open",
+       "due": "2026-10-18",
+       "terms": "Net 30",
+       "bags": 48
+      },
+      {
+       "invoice": "PK-1098",
+       "issued": "2026-09-10",
+       "amount": 639.36,
+       "days_outstanding": 20,
+       "status": "Open",
+       "due": "2026-08-28",
+       "terms": "Net 30",
+       "bags": 72
       }
      ],
      "open_balance": 1065.6,
@@ -1875,9 +1939,9 @@
       },
       {
        "invoice": "PK-1098",
-       "issued": "2026-07-29",
+       "issued": "2026-09-10",
        "amount": 639.36,
-       "days_outstanding": 63,
+       "days_outstanding": 20,
        "status": "Open",
        "due": "2026-08-28",
        "terms": "Net 30",
@@ -1915,7 +1979,11 @@
        "invoice": "PK-1102",
        "issued": "2026-09-22",
        "amount": 271.56,
-       "days_outstanding": 8
+       "days_outstanding": 8,
+       "status": "Open",
+       "due": "2026-10-22",
+       "terms": "Net 30",
+       "bags": 31
       }
      ],
      "open_balance": 271.56,
@@ -5487,5 +5555,6 @@
    "total_units": 423,
    "total_dollars": 3489.75
   }
- ]
+ ],
+ "alerts": []
 }

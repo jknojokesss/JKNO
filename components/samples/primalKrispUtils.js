@@ -56,6 +56,13 @@ export const moneyK = (n) => {
 
 export const pct1 = (n) => (Math.round(n * 10) / 10).toFixed(1) + '%'
 
+/** Revenue up = green; cost up = red. */
+export const deltaColor = (delta, { cost = false } = {}) => {
+  if (delta == null || Math.abs(delta) < 0.005) return MUTED
+  if (cost) return delta > 0 ? RED : GREEN
+  return delta > 0 ? GREEN : RED
+}
+
 const asOfDateFormatter = new Intl.DateTimeFormat(PK_LOCALE, {
   timeZone: PK_TZ,
   month: 'short',

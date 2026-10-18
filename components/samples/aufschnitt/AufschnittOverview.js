@@ -69,7 +69,7 @@ export default function AufschnittOverview({ card, lbl, KPI, brand, onOpen }) {
           v={money0(salesCur)}
           sub={`${salesDelta >= 0 ? '+' : ''}${pct1(salesDelta)} vs August`}
           subColor={changeColor(salesDelta)}
-          accent={SPICE}
+          accent={salesDelta >= 0 ? GREEN : RED}
           onClick={() => onOpen({ type: 'sales-sep', brand, salesCur, salesPrior })}
         />
         <KPI

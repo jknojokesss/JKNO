@@ -202,21 +202,8 @@ export default function PopinsanityPortal() {
         <aside className="pop-side">
           <div style={{ padding: '2px 8px 16px' }}>
             <div className="pop-wordmark">POPINSANITY</div>
-            <div
-              style={{
-                fontFamily: styles.lbl.fontFamily,
-                fontSize: '11px',
-                fontWeight: 600,
-                letterSpacing: '0.7px',
-                textTransform: 'uppercase',
-                color: '#B6A78C',
-                marginTop: '12px',
-              }}
-            >
-              Dashboard
-            </div>
           </div>
-          <nav className="pop-nav pop-nav--main" aria-label="Dashboard sections">
+          <nav className="pop-nav pop-nav--main" aria-label="Sections">
             {TABS.map(([id, label]) => {
               const active = tab === id && !top
               return (

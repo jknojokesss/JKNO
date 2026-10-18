@@ -555,12 +555,13 @@ export default function CloseoutExplosionPortal() {
               k={`Sales ${dash.pnlLabels.this}`}
               v={money0(dash.thisP.sales)}
               sub={salesSub}
+              valueColor={salesDeltaColor}
               onClick={() => goTab('pnl')}
             />
             <KPI
               k={`Net profit ${dash.pnlLabels.this}`}
               v={money0(dash.thisP.netProfit)}
-              valueColor={dash.thisP.netProfit < 0 ? RED : INK}
+              valueColor={dash.thisP.netProfit >= 0 ? GREEN : RED}
               onClick={() => goTab('pnl')}
             />
             <KPI k="Cash tied up in stock" v={money0(dash.cashTiedTotal)} onClick={() => goTab('cash')} />

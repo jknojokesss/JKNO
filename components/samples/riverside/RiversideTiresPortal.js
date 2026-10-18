@@ -16,6 +16,7 @@ import {
   fmtC,
   fmt0,
   pct,
+  deltaColor,
   fmtDate,
   paren,
   parenC,
@@ -610,7 +611,7 @@ function StmtSection({ children }) {
   )
 }
 
-function StmtLine({ label, amount, prior, compare, indent, total, strong, onDrill, tie }) {
+function StmtLine({ label, amount, prior, compare, indent, total, strong, onDrill, tie, cost = false }) {
   const delta = compare && prior != null ? amount - prior : null
   const clickable = !!onDrill
   return (
@@ -636,7 +637,7 @@ function StmtLine({ label, amount, prior, compare, indent, total, strong, onDril
         </span>
       ) : null}
       {compare ? (
-        <span className="num" style={{ color: delta == null ? C.muted : delta > 0 ? C.green : delta < 0 ? C.neg : C.muted }}>
+        <span className="num" style={{ color: deltaColor(delta, { cost }) }}>
           {delta == null ? '—' : paren(delta)}
         </span>
       ) : null}
@@ -737,6 +738,7 @@ function PlView({ onDrill, periodId, setPeriodId }) {
               prior={priorLine('cogs', l.label) != null ? -priorLine('cogs', l.label) : undefined}
               compare={showCompare}
               indent
+              cost
               onDrill={drillFor(l)}
             />
           ))}
@@ -750,6 +752,7 @@ function PlView({ onDrill, periodId, setPeriodId }) {
               prior={priorLine('expense', l.label) != null ? -priorLine('expense', l.label) : undefined}
               compare={showCompare}
               indent
+              cost
               onDrill={drillFor(l)}
             />
           ))}

@@ -131,12 +131,16 @@ export default function PrimalKrispPortal() {
     fontFamily: 'inherit',
   }
 
-  const KPI = ({ k, v, sub, accent, onClick }) => {
+  const KPI = ({ k, v, sub, subColor, accent, onClick }) => {
     const inner = (
       <>
         <div style={lbl}>{k}</div>
         <div style={{ ...big, fontSize: '29px', color: accent || INK, lineHeight: 1.15, marginTop: '4px' }}>{v}</div>
-        {sub ? <div style={{ fontFamily: UI, fontSize: '12px', color: '#A2937A', marginTop: '3px' }}>{sub}</div> : null}
+        {sub ? (
+          <div style={{ fontFamily: UI, fontSize: '12px', color: subColor || '#A2937A', marginTop: '3px', fontWeight: subColor ? 600 : 400 }}>
+            {sub}
+          </div>
+        ) : null}
       </>
     )
     if (!onClick) {
@@ -333,9 +337,8 @@ export default function PrimalKrispPortal() {
               height={56}
               style={{ height: '56px', width: 'auto', maxWidth: '100%' }}
             />
-            <div style={{ ...lbl, color: '#B6A78C', marginTop: '12px' }}>Dashboard</div>
           </div>
-          <nav className="pk-nav pk-nav--main" aria-label="Dashboard sections">
+          <nav className="pk-nav pk-nav--main" aria-label="Sections">
             {TABS.map(([id, label]) => {
               const active = tab === id
               return (

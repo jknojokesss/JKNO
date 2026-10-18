@@ -30,12 +30,24 @@ export function useStyles() {
   return { card, lbl, big, btn }
 }
 
-export function KPI({ k, v, sub, accent, onClick, card, lbl, big }) {
+export function KPI({ k, v, sub, subColor, accent, onClick, card, lbl, big }) {
   const inner = (
     <>
       <div style={lbl}>{k}</div>
       <div style={{ ...big, fontSize: '29px', color: accent || INK, lineHeight: 1.15, marginTop: '4px' }}>{v}</div>
-      {sub ? <div style={{ fontFamily: UI, fontSize: '12px', color: '#A2937A', marginTop: '3px' }}>{sub}</div> : null}
+      {sub ? (
+        <div
+          style={{
+            fontFamily: UI,
+            fontSize: '12px',
+            color: subColor || '#A2937A',
+            marginTop: '3px',
+            fontWeight: subColor ? 600 : 400,
+          }}
+        >
+          {sub}
+        </div>
+      ) : null}
     </>
   )
   const base = { ...card, flex: 1, minWidth: '150px', padding: '15px 17px' }

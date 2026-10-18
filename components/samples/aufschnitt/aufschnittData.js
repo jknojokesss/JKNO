@@ -741,26 +741,26 @@ function daysBetween(a, b) {
   return Math.round((db - da) / 86400000)
 }
 
-/** Bucket amounts per store — sums to ~94.8k; uneven sizes and aging mix. */
+/** Bucket amounts per store — sums to ~94.8k; mostly current aging. */
 const AR_BUCKET_SPEC = {
   'Pomegranate - Flatbush': { current: 2142.33, d1_30: 1827.44, d31_60: 0, d61_90: 0, d90p: 0 },
-  "Moisha's - Brooklyn": { current: 712.18, d1_30: 991.27, d31_60: 1638.92, d61_90: 0, d90p: 0 },
+  'Moisha\'s - Brooklyn': { current: 712.18, d1_30: 2229.11, d31_60: 401.08, d61_90: 0, d90p: 0 },
   'Breadberry - Brooklyn': { current: 1628.67, d1_30: 1384.22, d31_60: 0, d61_90: 0, d90p: 0 },
-  'KRM - Brooklyn': { current: 484.11, d1_30: 612.44, d31_60: 2387.63, d61_90: 0, d90p: 0 },
-  'Rockland Kosher Supermarket': { current: 824.56, d1_30: 1188.34, d31_60: 1742.87, d61_90: 0, d90p: 0 },
-  'Shoprite Wesley Hills': { current: 598.22, d1_30: 976.41, d31_60: 2024.18, d61_90: 0, d90p: 0 },
-  'Gourmet Glatt - Lakewood': { current: 3347.63, d1_30: 3784.22, d31_60: 0, d61_90: 2984.17, d90p: 0 },
+  'KRM - Brooklyn': { current: 484.11, d1_30: 2581.97, d31_60: 418.1, d61_90: 0, d90p: 0 },
+  'Rockland Kosher Supermarket': { current: 824.56, d1_30: 2931.21, d31_60: 0, d61_90: 0, d90p: 0 },
+  'Shoprite Wesley Hills': { current: 598.22, d1_30: 2568.73, d31_60: 431.86, d61_90: 0, d90p: 0 },
+  'Gourmet Glatt - Lakewood': { current: 3347.63, d1_30: 6768.39, d31_60: 0, d61_90: 0, d90p: 0 },
   'Evergreen - Lakewood': { current: 3218.34, d1_30: 3876.18, d31_60: 0, d61_90: 0, d90p: 0 },
   'Gourmet Glatt - Cedarhurst': { current: 1187.44, d1_30: 1042.18, d31_60: 0, d61_90: 0, d90p: 0 },
-  "Brach's - Lawrence": { current: 797.49, d1_30: 0, d31_60: 0, d61_90: 0, d90p: 0 },
+  'Brach\'s - Lawrence': { current: 797.49, d1_30: 0, d31_60: 0, d61_90: 0, d90p: 0 },
   'Cedar Market - Teaneck': { current: 3511.1, d1_30: 0, d31_60: 0, d61_90: 0, d90p: 0 },
-  'Salt Market - Deal': { current: 518.44, d1_30: 612.87, d31_60: 0, d61_90: 0, d90p: 1384.56 },
-  'Supersol - Lawrence': { current: 642.18, d1_30: 787.44, d31_60: 1484.22, d61_90: 0, d90p: 0 },
-  'Evergreen - Monsey': { current: 3313.0, d1_30: 0, d31_60: 0, d61_90: 0, d90p: 0 },
+  'Salt Market - Deal': { current: 518.44, d1_30: 1997.43, d31_60: 0, d61_90: 0, d90p: 0 },
+  'Supersol - Lawrence': { current: 642.18, d1_30: 2271.66, d31_60: 0, d61_90: 0, d90p: 0 },
+  'Evergreen - Monsey': { current: 3313, d1_30: 0, d31_60: 0, d61_90: 0, d90p: 0 },
   'Seven Mile Market - Baltimore': { current: 4129.62, d1_30: 0, d31_60: 0, d61_90: 0, d90p: 0 },
-  'Market Maven - Baltimore': { current: 528.67, d1_30: 712.33, d31_60: 1687.92, d61_90: 0, d90p: 0 },
-  "Aron's Kissena Farms - Queens": { current: 900.07, d1_30: 0, d31_60: 0, d61_90: 0, d90p: 0 },
-  'Bingo Wholesale': { current: 3284.22, d1_30: 3988.67, d31_60: 0, d61_90: 2947.44, d90p: 0 },
+  'Market Maven - Baltimore': { current: 528.67, d1_30: 2048.78, d31_60: 351.47, d61_90: 0, d90p: 0 },
+  'Aron\'s Kissena Farms - Queens': { current: 900.07, d1_30: 0, d31_60: 0, d61_90: 0, d90p: 0 },
+  'Bingo Wholesale': { current: 3284.22, d1_30: 6936.11, d31_60: 0, d61_90: 0, d90p: 0 },
 }
 
 function bucketDueDate(bucket) {

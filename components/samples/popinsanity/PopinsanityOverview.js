@@ -1,7 +1,7 @@
 import { DATA, allChannelSales, holidayTotals, allTierRows, cashByMonthKey, monthLabel, wholesaleStats } from './popinsanityComputed'
 import { pnlComputed } from './popinsanityComputed'
 import { KPI, RankedBars } from './PopinsanityShared'
-import { money0, money, pct1, changePct, RED, GREEN, SPICE } from './popinsanityUtils'
+import { money0, money, pct1, changePct, changeColor, kpiValueColor, RED, GREEN } from './popinsanityUtils'
 
 export default function PopinsanityOverview({ styles, goTab, setCalendarMonth, openChannel, openTier }) {
   const { card, lbl, big } = styles
@@ -51,7 +51,8 @@ export default function PopinsanityOverview({ styles, goTab, setCalendarMonth, o
           k="Sales this month"
           v={money0(sales.thisMonth)}
           sub={`${salesDelta >= 0 ? '+' : ''}${pct1(salesDelta)} vs ${DATA.meta.prior_short}`}
-          accent={SPICE}
+          accent={kpiValueColor(salesDelta)}
+          subColor={changeColor(salesDelta)}
           onClick={() => goTab('sales')}
         />
         <KPI

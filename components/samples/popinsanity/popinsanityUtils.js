@@ -76,6 +76,12 @@ export function changeDisplay(thisVal, priorVal, { cost = false, revenue = true 
   return { delta, color, pct }
 }
 
+/** Main KPI figure for revenue / profit lines (not brand accent). */
+export function kpiValueColor(delta, { cost = false } = {}) {
+  if (delta == null || Math.abs(delta) < 0.005) return INK
+  return changeColor(delta, { cost })
+}
+
 export const tierShort = (tierId) => {
   const n = tierId?.replace(/^t/, '')
   return n ? `Tier ${n}` : tierId

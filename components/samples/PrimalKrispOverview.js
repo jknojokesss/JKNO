@@ -17,6 +17,7 @@ import {
   money0,
   fmtInt,
   pct1,
+  deltaColor,
   BagIcon,
   CHANNEL_COLORS,
 } from './primalKrispUtils'
@@ -105,7 +106,8 @@ export default function PrimalKrispOverview({
           k={period === 'week' ? 'Sales this week' : 'Sales this month'}
           v={money0(salesPeriod)}
           sub={`${salesDelta >= 0 ? '+' : ''}${pct1(salesDelta)} vs ${period === 'week' ? 'prior week' : 'last month'}`}
-          accent={SPICE}
+          accent={salesDelta >= 0 ? GREEN : RED}
+          subColor={deltaColor(salesDelta)}
           onClick={() => goTab('financials')}
         />
         <KPI k="Bags sold" v={fmtInt(bagsPeriod)} onClick={() => goTab('products')} />

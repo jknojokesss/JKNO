@@ -87,11 +87,8 @@ export default function MrDipzSample() {
             <div style={{ fontFamily: UI, fontWeight: 800, fontSize: 26, letterSpacing: '1px', color: CREAM, lineHeight: 1.1, marginTop: 10 }}>
               MR. DIPZ
             </div>
-            <div className="md-lbl" style={{ color: '#B6A78C', marginTop: 12 }}>
-              Dashboard
-            </div>
           </div>
-          <nav className="md-nav md-nav--main" aria-label="Dashboard sections">
+          <nav className="md-nav md-nav--main" aria-label="Sections">
             {TABS.map(([id, label]) => {
               const active = tab === id
               return (
