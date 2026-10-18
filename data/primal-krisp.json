@@ -6838,15 +6838,15 @@
       "type": "earlier_refund",
       "order": "#1021",
       "label": "Refund from earlier order #1021",
-      "amount": 413.81
+      "amount": 38.4
      }
     ],
     "gross_sales": 2003.39,
     "delivery_guarantee": 29.27,
     "fees": 68.61,
-    "deposit": 1550.24,
+    "deposit": 1925.65,
     "order_count": 35,
-    "mismatch_amount": 413.81
+    "mismatch_amount": 38.4
    },
    {
     "id": "dep-04",
@@ -7826,15 +7826,21 @@
       "type": "chargeback",
       "order": "#1037",
       "label": "Chargeback #1037",
-      "amount": 562.29
+      "amount": 52.18
+     },
+     {
+      "type": "chargeback_fee",
+      "order": "#1037",
+      "label": "Chargeback fee",
+      "amount": 15
      }
     ],
     "gross_sales": 2003.39,
     "delivery_guarantee": 34.32,
     "fees": 68.32,
-    "deposit": 1407.1,
+    "deposit": 1902.21,
     "order_count": 34,
-    "mismatch_amount": 562.29
+    "mismatch_amount": 67.18
    },
    {
     "id": "dep-08",
@@ -8495,12 +8501,12 @@
    }
   ],
   "summary": {
-   "deposited_this_month": 16769.06,
+   "deposited_this_month": 17639.58,
    "fees": 667.3,
-   "orders_matched": 254,
+   "orders_matched": 322,
    "not_matched": {
-    "order_count": 69,
-    "dollars": 976.1
+    "order_count": 2,
+    "dollars": 105.58
    }
   }
  }

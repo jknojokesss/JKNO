@@ -43,26 +43,40 @@ export function payoutTotals(payout) {
   }
 }
 
+export function notMatchedItems(payouts) {
+  const items = []
+  for (const p of payouts) {
+    if (p.matched) continue
+    for (const a of payoutAdjustmentRows(p)) {
+      items.push({ payout: p, adjustment: a })
+    }
+  }
+  return items
+}
+
 export function buildDepositsSummary(payouts) {
   let deposited = 0
   let fees = 0
-  let ordersMatched = 0
-  let notMatchedCount = 0
+  let totalOrders = 0
+  let chargebackOrderHits = 0
   let notMatchedDollars = 0
   for (const p of payouts) {
     const t = payoutTotals(p)
     deposited = round2(deposited + t.deposit)
     fees = round2(fees + t.fees)
-    if (p.matched) ordersMatched += t.order_count
-    else {
-      notMatchedCount += t.order_count
-      notMatchedDollars = round2(notMatchedDollars + t.mismatch_amount)
+    totalOrders += t.order_count
+    if (!p.matched) notMatchedDollars = round2(notMatchedDollars + t.mismatch_amount)
+    for (const a of payoutAdjustmentRows(p)) {
+      if (a.type === 'chargeback') chargebackOrderHits += 1
     }
   }
+  const nmItems = notMatchedItems(payouts)
+  const notMatchedCount = nmItems.filter((x) => x.adjustment.type === 'earlier_refund' || x.adjustment.type === 'chargeback').length
+  const orders_matched = totalOrders - chargebackOrderHits
   return {
     deposited_this_month: deposited,
     fees,
-    orders_matched: ordersMatched,
+    orders_matched,
     not_matched: { order_count: notMatchedCount, dollars: notMatchedDollars },
   }
 }

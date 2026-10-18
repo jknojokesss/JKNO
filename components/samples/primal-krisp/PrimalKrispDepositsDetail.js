@@ -1,5 +1,5 @@
 import DATA from '../../../data/primal-krisp.json'
-import { payoutTotals, enrichPayouts, payoutAdjustmentRows } from './primalKrispDepositsData'
+import { payoutTotals, enrichPayouts, payoutAdjustmentRows, notMatchedItems } from './primalKrispDepositsData'
 import { BORDER, INK, MUTED, RED, UI, MONO, money, fmtD, fmtInt } from '../primalKrispUtils'
 
 function Shell({ title, sub, onBack, onClose, children }) {
@@ -93,11 +93,14 @@ export default function PrimalKrispDepositsDetail({ detail, onBack, onClose }) {
   }
 
   if (detail.kind === 'depNotMatched') {
-    const unmatched = payouts.filter((p) => !p.matched)
-    const rows = unmatched.map((p) => {
-      const t = payoutTotals(p)
-      return { label: `${fmtD(p.date)} · ${p.source}`, value: t.mismatch_amount, key: p.id }
-    })
+    const items = notMatchedItems(payouts).filter(
+      (x) => x.adjustment.type === 'earlier_refund' || x.adjustment.type === 'chargeback',
+    )
+    const rows = items.map((x) => ({
+      label: x.adjustment.label,
+      value: x.adjustment.amount,
+      key: `${x.payout.id}-${x.adjustment.order}`,
+    }))
     const nm = summary.not_matched
     return (
       <Shell title={`${fmtInt(nm.order_count)} · ${money(-nm.dollars)}`} sub="Not matched" {...shell}>
