@@ -530,30 +530,45 @@ function DrillModal({ drill, onClose }) {
             Close
           </button>
         </div>
-        <div className="rt-table-wrap rt-drill-wrap" style={{ border: `1px solid ${C.hair}`, maxHeight: '58vh' }}>
+        <div className="rt-drill-wrap" style={{ border: `1px solid ${C.hair}`, maxHeight: '58vh' }}>
           <table className="rt-drill-table" style={{ width: '100%', borderCollapse: 'collapse', minWidth: 0 }}>
+            <colgroup>
+              <col className="rt-drill-col-date" />
+              <col className="rt-drill-col-desc" />
+              <col className="rt-drill-col-type rt-col-type" />
+              <col className="rt-drill-col-amt" />
+            </colgroup>
             <thead>
               <tr>
-                <th style={hcell()}>Date</th>
-                <th style={hcell()}>Description</th>
-                <th className="rt-col-type" style={hcell()}>Type</th>
-                <th style={hcell('right')}>Amount</th>
+                <th className="rt-drill-th-date" style={hcell()}>Date</th>
+                <th className="rt-drill-th-desc" style={hcell()}>Description</th>
+                <th className="rt-col-type rt-drill-th-type" style={hcell()}>Type</th>
+                <th className="rt-drill-th-amt" style={hcell('right')}>Amount</th>
               </tr>
             </thead>
             <tbody>
               {drill.rows.map((r, i) => (
                 <tr key={`${r.date}-${i}`}>
-                  <td style={cell('left', { fontFamily: mono, fontSize: 10, color: C.muted, whiteSpace: 'nowrap' })}>{fmtDate(r.date)}</td>
-                  <td style={cell()}>{r.description}</td>
-                  <td className="rt-col-type" style={cell('left', { color: C.sub })}>{r.type}</td>
-                  <td style={cell('right', { fontFamily: mono, whiteSpace: 'nowrap' })}>{paren(r.amount)}</td>
+                  <td className="rt-drill-td-date" style={cell('left', { fontFamily: mono, fontSize: 10, color: C.muted, whiteSpace: 'nowrap' })}>{fmtDate(r.date)}</td>
+                  <td className="rt-drill-td-desc" style={cell()}>{r.description}</td>
+                  <td className="rt-col-type rt-drill-td-type" style={cell('left', { color: C.sub })}>{r.type}</td>
+                  <td className="rt-drill-td-amt" style={cell('right', { fontFamily: mono, whiteSpace: 'nowrap' })}>{paren(r.amount)}</td>
                 </tr>
               ))}
             </tbody>
-            <tfoot>
+            <tfoot className="rt-drill-foot-desk">
               <tr>
                 <td colSpan={3} style={cell('left', { fontWeight: 600, borderBottom: 'none' })}>Total</td>
-                <td style={cell('right', { fontFamily: mono, fontWeight: 700, borderBottom: 'none' })}>
+                <td className="rt-drill-td-amt" style={cell('right', { fontFamily: mono, fontWeight: 700, borderBottom: 'none' })}>
+                  {paren(rowsTotal)}
+                  <TieMark ok={Math.abs(rowsTotal - Math.abs(drill.total)) < 1} />
+                </td>
+              </tr>
+            </tfoot>
+            <tfoot className="rt-drill-foot-phone">
+              <tr>
+                <td colSpan={2} style={cell('left', { fontWeight: 600, borderBottom: 'none' })}>Total</td>
+                <td className="rt-drill-td-amt" style={cell('right', { fontFamily: mono, fontWeight: 700, borderBottom: 'none' })}>
                   {paren(rowsTotal)}
                   <TieMark ok={Math.abs(rowsTotal - Math.abs(drill.total)) < 1} />
                 </td>
@@ -2113,7 +2128,9 @@ const PORTAL_CSS = `
   .rt-th-phone{display:none}
   .rt-phone-only{display:none}
   .rt-line-sub{font-size:9px;color:${C.sub};font-weight:400;margin-top:2px;line-height:1.25}
-  .rt-stock-wrap,.rt-items-wrap,.rt-drill-wrap,.rt-monthly-wrap,.rt-dash-sizes-wrap,.rt-acct-wrap{overflow:auto;-webkit-overflow-scrolling:touch}
+  .rt-stock-wrap,.rt-items-wrap,.rt-monthly-wrap,.rt-dash-sizes-wrap,.rt-acct-wrap{overflow:auto;-webkit-overflow-scrolling:touch}
+  .rt-drill-wrap{overflow:auto;-webkit-overflow-scrolling:touch;width:100%}
+  .rt-drill-foot-phone{display:none}
   .rt-stock-table{min-width:420px}
   .rt-items-table{min-width:460px}
   .rt-items-table--compare{min-width:720px}
@@ -2171,7 +2188,10 @@ const PORTAL_CSS = `
     .rt-dash-main{grid-template-columns:1fr;gap:18px;margin-bottom:18px}
     .rt-modal{padding:10px;align-items:flex-end}
     .rt-modal__box{max-width:min(100%,calc(100vw - 16px));padding:14px 12px;max-height:92vh}
-    .rt-modal__box .rt-drill-table{min-width:0!important}
+    .rt-modal__box .rt-drill-wrap{width:100%;max-width:100%;overflow-x:hidden;overflow-y:auto;-webkit-overflow-scrolling:touch}
+    .rt-modal__box .rt-drill-table{width:100%!important;min-width:0!important;table-layout:fixed}
+    .rt-drill-foot-desk{display:none}
+    .rt-drill-foot-phone{display:table-footer-group}
     .rt-stmt{--cols:minmax(0,1fr) 76px}
     .rt-stmt.cmp{--cols:minmax(0,1fr) 58px 58px 52px}
     .rt-stmt__row{font-size:11px;padding:6px 6px;gap:4px}
@@ -2185,7 +2205,7 @@ const PORTAL_CSS = `
     .rt-scroll-fade{position:relative}
     .rt-scroll-fade::after{content:'';position:absolute;top:0;right:0;bottom:2px;width:22px;pointer-events:none;background:linear-gradient(90deg,rgba(242,240,234,0),${C.paper} 72%);opacity:.98}
     .rt-section-card.rt-scroll-fade::after,.rt-section-card .rt-scroll-fade::after{background:linear-gradient(90deg,rgba(255,255,255,0),${C.card} 72%)}
-    .rt-stock-wrap,.rt-items-wrap,.rt-dash-sizes-wrap,.rt-drill-wrap,.rt-acct-wrap{overflow-x:hidden!important;overflow-y:visible}
+    .rt-stock-wrap,.rt-items-wrap,.rt-dash-sizes-wrap,.rt-acct-wrap{overflow-x:hidden!important;overflow-y:visible}
     .rt-stock-table,.rt-items-table,.rt-items-table--compare,.rt-dash-sizes-table{min-width:0!important;width:100%;table-layout:fixed}
     .rt-stock-table th,.rt-stock-table td{padding:6px 4px!important;font-size:10px!important}
     .rt-stock-table thead th{font-size:7.5px!important;letter-spacing:.06em;padding:5px 3px!important}
@@ -2202,11 +2222,14 @@ const PORTAL_CSS = `
     .rt-dash-sizes-table thead th{font-size:8px!important}
     .rt-acct-bal-table td:first-child{word-break:break-word;padding-right:6px!important}
     .rt-acct-bal-table td:last-child{width:84px!important;max-width:84px;padding-left:4px!important;font-size:10px!important;white-space:nowrap}
-    .rt-drill-table{table-layout:fixed}
-    .rt-drill-table th,.rt-drill-table td{padding:6px 4px!important;font-size:10px!important}
-    .rt-drill-table td:nth-child(2){word-break:break-word;line-height:1.3}
-    .rt-drill-table td:last-child{width:72px!important;font-size:9.5px!important}
-    .rt-drill-table td:first-child{width:68px!important;font-size:9px!important}
+    .rt-modal__box .rt-drill-table col.rt-drill-col-date{width:24%}
+    .rt-modal__box .rt-drill-table col.rt-drill-col-desc{width:auto}
+    .rt-modal__box .rt-drill-table col.rt-drill-col-type{width:0!important}
+    .rt-modal__box .rt-drill-table col.rt-drill-col-amt{width:26%}
+    .rt-modal__box .rt-drill-table th,.rt-modal__box .rt-drill-table td{padding:6px 5px!important;font-size:10px!important}
+    .rt-modal__box .rt-drill-td-date,.rt-modal__box .rt-drill-th-date{font-size:9px!important;padding-right:4px!important}
+    .rt-modal__box .rt-drill-td-desc,.rt-modal__box .rt-drill-th-desc{word-break:break-word;overflow-wrap:break-word;line-height:1.35;min-width:0}
+    .rt-modal__box .rt-drill-td-amt,.rt-modal__box .rt-drill-th-amt{width:26%!important;max-width:none!important;font-size:9.5px!important;padding-left:4px!important}
     .rt-monthly-wrap{overflow-x:auto!important;-webkit-overflow-scrolling:touch}
     .rt-monthly-table th,.rt-monthly-table td{padding:7px 6px!important;font-size:10px!important;white-space:nowrap}
     .rt-monthly-sticky{position:sticky;left:0;z-index:2;background:inherit;box-shadow:2px 0 0 ${C.line}}
