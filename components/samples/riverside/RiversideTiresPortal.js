@@ -80,7 +80,7 @@ const withProfit = (o) => {
 const ORDERS = DATA.orders.map(withProfit)
 
 const isNewTireOrder = (o) => o.size && !['Service', 'Parts'].includes(o.size) && !/used/i.test(o.item)
-const isUsedTireOrder = (o) => /used/i.test(o.item)
+const isUsedTireOrder = (o) => o.source === 'Used' || /used/i.test(o.item)
 
 const totalsOf = (rows) => {
   const sale = sumBy(rows, 'sale')
@@ -1314,7 +1314,18 @@ function OrdersTab({ initialPeriod }) {
   const usedRows = rows.filter(isUsedTireOrder)
   const newProfit = newRows.length ? sumBy(newRows, 'profit') / newRows.length : 0
   const usedProfit = usedRows.length ? sumBy(usedRows, 'profit') / usedRows.length : 0
-  const bestMargin = rows.reduce((best, r) => (r.margin > (best?.margin || -1) ? r : best), null)
+  const bestMarginSize = (() => {
+    const bySize = new Map()
+    newRows.forEach((r) => {
+      const cur = bySize.get(r.size) || { size: r.size, count: 0, marginSum: 0 }
+      cur.count += 1
+      cur.marginSum += r.margin
+      bySize.set(r.size, cur)
+    })
+    const ranked = [...bySize.values()].map((x) => ({ size: x.size, margin: x.marginSum / x.count, count: x.count }))
+    ranked.sort((a, b) => b.margin - a.margin)
+    return ranked[0] || null
+  })()
   const flaggedCount = rows.filter((r) => r.flagged).length
   const estCount = rows.filter((r) => r.est).length
   const bySource = SOURCES.map((s) => ({ source: s, count: rows.filter((r) => r.source === s).length })).filter((x) => x.count)
@@ -1351,7 +1362,11 @@ function OrdersTab({ initialPeriod }) {
         <Kpi label="Total orders" value={String(t.tickets)} />
         <Kpi label="Profit / new tire" value={fmtC(newProfit)} />
         <Kpi label="Profit / used tire" value={usedRows.length ? fmtC(usedProfit) : '—'} />
-        <Kpi label="Best margin size" value={bestMargin ? bestMargin.size : '—'} sub={bestMargin ? pct(bestMargin.margin) : undefined} />
+        <Kpi
+          label="Best margin size"
+          value={bestMarginSize ? bestMarginSize.size : '—'}
+          sub={bestMarginSize ? `${pct(bestMarginSize.margin)} · ${bestMarginSize.count} line${bestMarginSize.count === 1 ? '' : 's'}` : undefined}
+        />
         <Kpi label="Est. profit" value={fmt0(t.profit)} color={C.green} />
       </div>
 

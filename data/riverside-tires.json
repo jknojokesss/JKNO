@@ -3205,6 +3205,18 @@
     },
     {
       "date": "2026-09-24",
+      "ticket": "C-89208",
+      "item": "Used 225/60R17 ×2",
+      "qty": 2,
+      "sale": 110,
+      "cost": 44,
+      "source": "Used",
+      "est": false,
+      "flagged": false,
+      "size": "225/60R17"
+    },
+    {
+      "date": "2026-09-24",
       "ticket": "C-89202",
       "item": "205/55R16 grand touring ×2",
       "qty": 2,
@@ -3322,6 +3334,30 @@
       "est": true,
       "flagged": false,
       "size": "Parts"
+    },
+    {
+      "date": "2026-09-21",
+      "ticket": "C-89066",
+      "item": "Used 205/55R16 ×2",
+      "qty": 2,
+      "sale": 100,
+      "cost": 48,
+      "source": "Used",
+      "est": false,
+      "flagged": false,
+      "size": "205/55R16"
+    },
+    {
+      "date": "2026-09-20",
+      "ticket": "C-89033",
+      "item": "Used 235/65R17 ×2",
+      "qty": 2,
+      "sale": 120,
+      "cost": 50,
+      "source": "Used",
+      "est": false,
+      "flagged": false,
+      "size": "235/65R17"
     },
     {
       "date": "2026-09-21",
@@ -3458,7 +3494,7 @@
       "cash": "Business checking was $45,200 at Aug 31. August net cash from operations was about $350 after draws.",
       "mix": "In August, new tire sales were $23,150 (184 units). Used tires added $3,900 (78 units). Service and repair was $8,200.",
       "sizes": "Top size in August was 235/65R17 — 44 units and $5,720 revenue at about $130 per tire.",
-      "month": "September register through Sep 25 shows about $7,750 in sales on 22 tickets (estimates)."
+      "month": "September register through Sep 25 shows $8,087 in sales on 25 tickets (estimates)."
     }
   },
   "aug_tire_sales": {
