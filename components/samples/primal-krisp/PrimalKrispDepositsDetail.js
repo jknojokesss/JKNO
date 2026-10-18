@@ -1,5 +1,5 @@
 import DATA from '../../../data/primal-krisp.json'
-import { payoutTotals, enrichPayouts } from './primalKrispDepositsData'
+import { payoutTotals, enrichPayouts, payoutAdjustmentRows } from './primalKrispDepositsData'
 import { BORDER, INK, MUTED, RED, UI, MONO, money, fmtD, fmtInt } from '../primalKrispUtils'
 
 function Shell({ title, sub, onBack, onClose, children }) {
@@ -115,7 +115,7 @@ export default function PrimalKrispDepositsDetail({ detail, onBack, onClose }) {
       { label: 'Delivery guarantee', value: t.delivery_guarantee },
       { label: 'Fees', value: -t.fees },
       ...(t.refunds ? [{ label: 'Refunds', value: -t.refunds }] : []),
-      ...(p.adjustments || []).map((a) => ({ label: a.label, value: -a.amount, key: a.order })),
+      ...payoutAdjustmentRows(p).map((a) => ({ label: a.label, value: -a.amount, key: a.order })),
       { label: 'Deposit', value: t.deposit },
     ]
     return (

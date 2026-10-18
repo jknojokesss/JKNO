@@ -36,16 +36,17 @@ let notMatchedDollars = 0
 for (const p of payouts) {
   const t = payoutTotals(p)
   ok(`gross sum ${p.id}`, round2(p.orders.reduce((s, o) => s + o.amount, 0)) === t.gross_sales)
-  ok(`deposit formula ${p.id}`, t.deposit === round2(t.gross_sales + t.delivery_guarantee - t.fees - t.refunds - t.adjustments))
+  ok(`adjustments is array ${p.id}`, Array.isArray(p.adjustments))
+  ok(`deposit formula ${p.id}`, t.deposit === round2(t.gross_sales + t.delivery_guarantee - t.fees - t.refunds - t.adjustmentsTotal))
   if (p.deposit != null) ok(`stored deposit ${p.id}`, round2(p.deposit) === t.deposit)
   if (!p.matched) {
     unmatched += 1
-    ok(`unmatched has adjustment ${p.id}`, (p.adjustments || []).length === 1 && t.mismatch_amount > 0)
+    ok(`unmatched has adjustment ${p.id}`, Array.isArray(p.adjustments) && p.adjustments.length === 1 && t.mismatch_amount > 0)
     notMatchedOrders += t.order_count
     notMatchedDollars = round2(notMatchedDollars + t.mismatch_amount)
   } else {
     ordersMatched += t.order_count
-    ok(`matched no adjustment ${p.id}`, t.adjustments === 0)
+    ok(`matched no adjustment ${p.id}`, t.adjustmentsTotal === 0)
   }
   sumDeposit = round2(sumDeposit + t.deposit)
   sumFees = round2(sumFees + t.fees)

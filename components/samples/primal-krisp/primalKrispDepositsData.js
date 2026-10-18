@@ -14,22 +14,28 @@ export function feeForOrder(source, amount) {
   return round2(amount * r.pct + r.fixed)
 }
 
+/** Payout JSON stores adjustment rows on `adjustments`; never confuse with dollar total. */
+export function payoutAdjustmentRows(payout) {
+  const raw = payout?.adjustments
+  return Array.isArray(raw) ? raw : []
+}
+
 export function payoutTotals(payout) {
-  const gross_sales = round2(payout.orders.reduce((s, o) => s + o.amount, 0))
-  const delivery_guarantee = round2(payout.orders.reduce((s, o) => s + (o.delivery_guarantee || 0), 0))
-  const fees = round2(payout.orders.reduce((s, o) => s + feeForOrder(payout.source, o.amount), 0))
+  const gross_sales = round2((payout.orders || []).reduce((s, o) => s + o.amount, 0))
+  const delivery_guarantee = round2((payout.orders || []).reduce((s, o) => s + (o.delivery_guarantee || 0), 0))
+  const fees = round2((payout.orders || []).reduce((s, o) => s + feeForOrder(payout.source, o.amount), 0))
   const refunds = round2(payout.refunds || 0)
-  const adjustments = round2((payout.adjustments || []).reduce((s, a) => s + a.amount, 0))
-  const deposit = round2(gross_sales + delivery_guarantee - fees - refunds - adjustments)
-  const order_count = payout.orders.length
+  const adjustmentsTotal = round2(payoutAdjustmentRows(payout).reduce((s, a) => s + a.amount, 0))
+  const deposit = round2(gross_sales + delivery_guarantee - fees - refunds - adjustmentsTotal)
+  const order_count = (payout.orders || []).length
   const expectedWithoutAdjustments = round2(gross_sales + delivery_guarantee - fees - refunds)
-  const mismatch_amount = payout.matched ? 0 : round2(adjustments)
+  const mismatch_amount = payout.matched ? 0 : round2(adjustmentsTotal)
   return {
     gross_sales,
     delivery_guarantee,
     fees,
     refunds,
-    adjustments,
+    adjustmentsTotal,
     deposit,
     order_count,
     mismatch_amount,
@@ -64,7 +70,12 @@ export function buildDepositsSummary(payouts) {
 export function enrichPayouts(deposits) {
   const payouts = (deposits?.payouts || []).map((p) => {
     const t = payoutTotals(p)
-    return { ...p, ...t }
+    const adjustmentRows = payoutAdjustmentRows(p)
+    return {
+      ...p,
+      adjustments: adjustmentRows,
+      ...t,
+    }
   })
   const summary = buildDepositsSummary(payouts)
   return { payouts, summary }
