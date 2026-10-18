@@ -46,7 +46,7 @@ function LoanRowMobile({ loan }) {
           <p className="text-xs text-[#5c7280]">{loan.type}</p>
         </div>
       </div>
-      <div className="mt-2">
+      <div className="mt-2 flex justify-end">
         <BalanceCell loan={loan} />
       </div>
       <dl className="mt-3 grid grid-cols-2 gap-x-3 gap-y-2 text-xs">
@@ -132,9 +132,9 @@ export default function ShortTermLoansSection({ heroTotal }) {
           </div>
         ))}
 
-        <div className="flex flex-wrap items-center justify-between gap-3 border-t-2 border-[#c5d0d6]/50 bg-[#e8eef1]/35 px-3 py-3 sm:px-4">
+        <div className="flex flex-col gap-3 border-t-2 border-[#c5d0d6]/50 bg-[#e8eef1]/35 px-3 py-3 sm:flex-row sm:flex-wrap sm:items-center sm:justify-between sm:px-4">
           <span className="text-xs font-semibold uppercase tracking-wide text-[#5c7280]">Section totals</span>
-          <dl className="flex flex-wrap gap-4 text-right text-sm sm:gap-8">
+          <dl className="grid grid-cols-3 gap-2 text-right text-xs sm:flex sm:flex-wrap sm:gap-8 sm:text-sm">
             <div>
               <dt className="text-[10px] uppercase text-[#5c7280]">Original</dt>
               <dd className="font-semibold tabular-nums">{formatMoney(originalTotal)}</dd>

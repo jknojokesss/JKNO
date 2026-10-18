@@ -55,7 +55,7 @@ function TableHead({ showDue }) {
         {cols.map((h, i) => (
           <th
             key={h}
-            className={`ops-th ${i > 0 ? 'text-right' : 'text-left'}`}
+            className={`ops-th ${h === 'VENDOR' ? 'ops-vendor-col' : ''} ${h === 'DUE' ? 'ops-due-col hidden sm:table-cell' : ''} ${h === 'AMOUNT' ? 'ops-amount-col' : ''} ${i > 0 ? 'text-right' : 'text-left'}`}
             style={{ textAlign: i > 0 ? 'right' : 'left' }}
           >
             {h}
@@ -76,7 +76,7 @@ function TotalsBar({ rows, filtered }) {
       <span className="text-[10px] font-semibold uppercase tracking-widest text-white/85">
         {filtered ? 'Filtered total' : 'Total'}
       </span>
-      <span className="ops-heading tabular-nums text-lg font-semibold" style={{ color: GOLD_ON_NAVY }}>
+      <span className="ops-heading max-w-full shrink-0 tabular-nums text-base font-semibold sm:text-lg" style={{ color: GOLD_ON_NAVY }}>
         {formatMoney(total)}
       </span>
     </div>
@@ -233,7 +233,7 @@ function LoanRunway({ cashTotal }) {
             <h3 className="ops-heading text-base font-semibold">Amount going out</h3>
           </div>
           <div className="max-w-full overflow-x-auto">
-            <table className="ops-table w-full min-w-[240px]">
+            <table className="ops-table ops-runway-table w-full min-w-0 sm:min-w-[240px]">
               <thead>
                 <tr className="bg-[#e8eef1]/80 text-[10px] font-semibold uppercase tracking-wide text-[#5c7280]">
                   <th className="px-3 py-2 text-left">Item</th>
@@ -498,8 +498,8 @@ export default function LiabilitiesDesk({ cashTotal }) {
 
         {view === 'sheet' ? (
           <div className="overflow-hidden rounded-xl ring-1 ring-[#2f4049]/10">
-            <div className="max-h-[min(70vh,520px)] overflow-auto">
-              <table className="ops-table w-full min-w-[400px] border-collapse">
+            <div className="max-h-[min(70vh,520px)] overflow-y-auto overflow-x-hidden sm:overflow-x-auto">
+              <table className="ops-table ops-payables-table w-full border-collapse sm:min-w-[400px]">
                 <TableHead showDue />
                 <tbody>
                   {filtered.map((row, i) => (
@@ -527,12 +527,12 @@ export default function LiabilitiesDesk({ cashTotal }) {
                       <span className="ops-heading font-semibold">Due {fmtDueGroupTitle(due === 'none' ? null : due)}</span>
                       <span className="ml-2 text-sm text-white/70">{rows.length} payables</span>
                     </div>
-                    <span className="ops-heading text-xl tabular-nums" style={{ color: GOLD_ON_NAVY }}>
+                    <span className="ops-heading shrink-0 text-base tabular-nums sm:text-xl" style={{ color: GOLD_ON_NAVY }}>
                       {formatMoney(sub.total)}
                     </span>
                   </div>
-                  <div className="max-h-80 overflow-auto">
-                    <table className="ops-table w-full min-w-[360px] border-collapse">
+                  <div className="max-h-80 overflow-y-auto overflow-x-hidden sm:overflow-x-auto">
+                    <table className="ops-table ops-payables-table w-full border-collapse sm:min-w-[360px]">
                       <TableHead showDue={false} />
                       <tbody>
                         {rows.map((row, i) => (

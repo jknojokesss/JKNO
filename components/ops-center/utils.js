@@ -112,6 +112,15 @@ export function fmtDueGroupTitle(iso) {
   })
 }
 
+/** Compact due for narrow phone columns (e.g. "Oct 2"). */
+export function fmtDueCompact(iso) {
+  if (!iso) return '—'
+  return new Date(`${iso}T12:00:00`).toLocaleDateString('en-US', {
+    month: 'short',
+    day: 'numeric',
+  })
+}
+
 export function payableMeta(row) {
   const parts = []
   if (row.entered) parts.push(`Entered ${fmtShortDate(row.entered)}`)

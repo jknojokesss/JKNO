@@ -123,6 +123,58 @@ export default function OpsCenterDesk() {
           border-bottom: 1px solid rgba(47,64,73,0.07);
           color: var(--ops-ink);
         }
+        @media (max-width: 639px) {
+          .ops-center-root .ops-payables-table {
+            table-layout: fixed;
+            width: 100%;
+          }
+          .ops-center-root .ops-payables-table .ops-vendor-col {
+            width: auto;
+            min-width: 0;
+            padding-right: 0.35rem;
+          }
+          .ops-center-root .ops-payables-table .ops-amount-col {
+            width: 6.75rem;
+            max-width: 6.75rem;
+            padding-left: 0.25rem;
+            padding-right: 0.5rem;
+            font-size: 10px;
+          }
+          .ops-center-root .ops-payables-table .ops-th.ops-amount-col {
+            font-size: 9px;
+          }
+          .ops-center-root .ops-th,
+          .ops-center-root .ops-payables-table .ops-td {
+            padding-top: 0.4rem;
+            padding-bottom: 0.4rem;
+          }
+          .ops-center-root .ops-obligations-table {
+            table-layout: fixed;
+            width: 100%;
+            min-width: 0 !important;
+          }
+          .ops-center-root .ops-obligations-table th,
+          .ops-center-root .ops-obligations-table td {
+            padding: 0.35rem 0.4rem;
+            font-size: 10px;
+            word-break: break-word;
+          }
+          .ops-center-root .ops-obligations-table .ops-num-cell {
+            white-space: nowrap;
+            font-size: 9px;
+          }
+          .ops-center-root .ops-runway-table {
+            min-width: 0 !important;
+            width: 100%;
+            table-layout: fixed;
+          }
+          .ops-center-root .ops-runway-table td:last-child,
+          .ops-center-root .ops-runway-table th:last-child {
+            width: 6.5rem;
+            white-space: nowrap;
+            font-size: 10px;
+          }
+        }
         @keyframes ops-spin-keyframes { to { transform: rotate(360deg); } }
         .ops-center-root .ops-spin { animation: ops-spin-keyframes 0.6s linear; }
       `}</style>

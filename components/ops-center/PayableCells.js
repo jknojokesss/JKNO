@@ -1,22 +1,38 @@
-import { fmtDueDisplay, payableMeta, payableTooltip, formatMoney, dueTheme } from './utils'
+import {
+  fmtDueDisplay,
+  fmtDueCompact,
+  payableMeta,
+  payableTooltip,
+  formatMoney,
+  dueTheme,
+} from './utils'
 
-export function PayableMeta({ row }) {
+export function PayableMeta({ row, showDueInline }) {
   const meta = payableMeta(row)
-  return <p className="mt-0.5 text-[10px] leading-snug text-[#5c7280]">{meta}</p>
+  return (
+    <p className="mt-0.5 text-[10px] leading-snug text-[#5c7280]">
+      {showDueInline && row.due ? (
+        <span className="font-medium text-[#2f4049]/80 sm:hidden">Due {fmtDueCompact(row.due)} · </span>
+      ) : null}
+      {meta}
+    </p>
+  )
 }
 
-export function VendorCell({ row }) {
+export function VendorCell({ row, showDueInline }) {
   return (
-    <td className="ops-td align-top" title={payableTooltip(row)}>
-      <div className="ops-heading text-xs font-semibold leading-snug text-[#2f4049] sm:text-sm">{row.vendor || '—'}</div>
-      <PayableMeta row={row} />
+    <td className="ops-td ops-vendor-col align-top" title={payableTooltip(row)}>
+      <div className="ops-heading break-words text-xs font-semibold leading-snug text-[#2f4049] sm:text-sm">
+        {row.vendor || '—'}
+      </div>
+      <PayableMeta row={row} showDueInline={showDueInline} />
     </td>
   )
 }
 
 export function DueCell({ row }) {
   return (
-    <td className="ops-td align-top tabular-nums">
+    <td className="ops-td ops-due-col hidden align-top tabular-nums sm:table-cell">
       <div className="text-xs font-medium text-[#2f4049]">{fmtDueDisplay(row.due)}</div>
     </td>
   )
@@ -24,7 +40,9 @@ export function DueCell({ row }) {
 
 export function MoneyCell({ value, strong }) {
   return (
-    <td className={`ops-td text-right tabular-nums ${strong ? 'ops-heading font-semibold' : ''}`}>
+    <td
+      className={`ops-td ops-amount-col text-right tabular-nums whitespace-nowrap ${strong ? 'ops-heading font-semibold' : ''}`}
+    >
       {formatMoney(value)}
     </td>
   )
@@ -37,7 +55,7 @@ export function PayableRow({ row, showDue = true, index }) {
       key={`${row.vendor}-${row.due}-${index}`}
       style={{ background: theme.rowBg, borderLeft: `4px solid ${theme.stripe}` }}
     >
-      <VendorCell row={row} />
+      <VendorCell row={row} showDueInline={showDue} />
       {showDue ? <DueCell row={row} /> : null}
       <MoneyCell value={row.amount} strong />
     </tr>
@@ -53,10 +71,10 @@ export function CompactPayableRow({ row, index }) {
       style={{ borderLeft: `3px solid ${theme.stripe}`, paddingLeft: 8 }}
     >
       <div className="min-w-0 flex-1">
-        <div className="ops-heading text-xs font-semibold text-[#2f4049]">{row.vendor}</div>
-        <PayableMeta row={row} />
+        <div className="ops-heading break-words text-xs font-semibold text-[#2f4049]">{row.vendor}</div>
+        <PayableMeta row={row} showDueInline={false} />
       </div>
-      <div className="shrink-0 text-xs font-medium tabular-nums">{formatMoney(row.amount)}</div>
+      <div className="shrink-0 text-xs font-medium tabular-nums whitespace-nowrap">{formatMoney(row.amount)}</div>
     </div>
   )
 }
