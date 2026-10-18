@@ -12,39 +12,78 @@
       "id": "t1",
       "name": "Tier 1: Classic tin",
       "contents": "1 gallon tin, 2 flavors",
-      "price": 32.0,
+      "price": 32,
       "cost_lines": [
-        { "label": "Popcorn and toppings", "amount": 6.4 },
-        { "label": "Tin, box or crate", "amount": 4.8 },
-        { "label": "Packaging and label", "amount": 1.6 },
-        { "label": "Packing labor", "amount": 3.2 }
+        {
+          "label": "Popcorn and toppings",
+          "amount": 6.4
+        },
+        {
+          "label": "Tin, box or crate",
+          "amount": 4.8
+        },
+        {
+          "label": "Packaging and label",
+          "amount": 1.6
+        },
+        {
+          "label": "Packing labor",
+          "amount": 3.2
+        }
       ],
-      "cost_per_unit": 16.0
+      "cost_per_unit": 16
     },
     {
       "id": "t2",
       "name": "Tier 2: Three-flavor tin",
       "contents": "2 gallon tin, 3 flavors",
-      "price": 54.0,
+      "price": 54,
       "cost_lines": [
-        { "label": "Popcorn and toppings", "amount": 11.2 },
-        { "label": "Tin, box or crate", "amount": 7.4 },
-        { "label": "Packaging and label", "amount": 2.1 },
-        { "label": "Packing labor", "amount": 5.3 }
+        {
+          "label": "Popcorn and toppings",
+          "amount": 11.2
+        },
+        {
+          "label": "Tin, box or crate",
+          "amount": 7.4
+        },
+        {
+          "label": "Packaging and label",
+          "amount": 2.1
+        },
+        {
+          "label": "Packing labor",
+          "amount": 5.3
+        }
       ],
-      "cost_per_unit": 26.0
+      "cost_per_unit": 26
     },
     {
       "id": "t3",
       "name": "Tier 3: Gift box",
       "contents": "Popcorn, chocolate bark and nuts",
-      "price": 85.0,
+      "price": 85,
       "cost_lines": [
-        { "label": "Popcorn and toppings", "amount": 14.5 },
-        { "label": "Chocolate and nuts", "amount": 12.4 },
-        { "label": "Tin, box or crate", "amount": 9.6 },
-        { "label": "Packaging and label", "amount": 3.2 },
-        { "label": "Packing labor", "amount": 7.8 }
+        {
+          "label": "Popcorn and toppings",
+          "amount": 14.5
+        },
+        {
+          "label": "Chocolate and nuts",
+          "amount": 12.4
+        },
+        {
+          "label": "Tin, box or crate",
+          "amount": 9.6
+        },
+        {
+          "label": "Packaging and label",
+          "amount": 3.2
+        },
+        {
+          "label": "Packing labor",
+          "amount": 7.8
+        }
       ],
       "cost_per_unit": 47.5
     },
@@ -52,232 +91,327 @@
       "id": "t4",
       "name": "Tier 4: Deluxe crate",
       "contents": "Wood crate, 4 popcorns, chocolates, nuts",
-      "price": 140.0,
+      "price": 140,
       "cost_lines": [
-        { "label": "Popcorn and toppings", "amount": 21.0 },
-        { "label": "Chocolate and nuts", "amount": 26.5 },
-        { "label": "Tin, box or crate", "amount": 18.0 },
-        { "label": "Packaging and label", "amount": 5.2 },
-        { "label": "Packing labor", "amount": 12.3 }
+        {
+          "label": "Popcorn and toppings",
+          "amount": 21
+        },
+        {
+          "label": "Chocolate and nuts",
+          "amount": 26.5
+        },
+        {
+          "label": "Tin, box or crate",
+          "amount": 18
+        },
+        {
+          "label": "Packaging and label",
+          "amount": 5.2
+        },
+        {
+          "label": "Packing labor",
+          "amount": 12.3
+        }
       ],
-      "cost_per_unit": 83.0
+      "cost_per_unit": 83
     }
   ],
   "holiday_orders": [
     {
       "id": "PO-2611",
-      "client": "Client company A",
+      "client": "Rockland Pediatrics",
       "tier": "t3",
       "units": 250,
-      "price": 85.0,
-      "order_total": 21250.0,
+      "price": 85,
+      "order_total": 21250,
       "booked": "2026-09-22",
       "ship_date": "2026-11-30",
       "deposit_pct": 50,
-      "deposit_amount": 10625.0,
-      "deposit_received": 10625.0,
+      "deposit_amount": 10625,
+      "deposit_received": 10625,
       "deposit_date": "2026-09-29",
-      "balance_due": 10625.0,
+      "balance_due": 10625,
       "status": "Deposit received",
-      "cash_due": [{ "date": "2026-11-20", "type": "Final balance", "amount": 10625.0 }]
+      "cash_due": [
+        {
+          "date": "2026-11-20",
+          "type": "Final balance",
+          "amount": 10625
+        }
+      ]
     },
     {
       "id": "PO-2612",
-      "client": "Client company B",
+      "client": "Maple Ave Realty",
       "tier": "t2",
       "units": 400,
-      "price": 54.0,
-      "order_total": 21600.0,
+      "price": 54,
+      "order_total": 21600,
       "booked": "2026-09-25",
       "ship_date": "2026-12-01",
       "deposit_pct": 50,
-      "deposit_amount": 10800.0,
-      "deposit_received": 10800.0,
+      "deposit_amount": 10800,
+      "deposit_received": 10800,
       "deposit_date": "2026-10-02",
-      "balance_due": 10800.0,
+      "balance_due": 10800,
       "status": "Deposit received",
-      "cash_due": [{ "date": "2026-12-01", "type": "Final balance", "amount": 10800.0 }]
+      "cash_due": [
+        {
+          "date": "2026-12-01",
+          "type": "Final balance",
+          "amount": 10800
+        }
+      ]
     },
     {
       "id": "PO-2613",
-      "client": "Client company C",
+      "client": "Tri-State Title Agency",
       "tier": "t4",
       "units": 80,
-      "price": 140.0,
-      "order_total": 11200.0,
+      "price": 140,
+      "order_total": 11200,
       "booked": "2026-09-30",
       "ship_date": "2026-12-02",
       "deposit_pct": 50,
-      "deposit_amount": 5600.0,
-      "deposit_received": 5600.0,
+      "deposit_amount": 5600,
+      "deposit_received": 5600,
       "deposit_date": "2026-10-06",
-      "balance_due": 5600.0,
+      "balance_due": 5600,
       "status": "Deposit received",
-      "cash_due": [{ "date": "2026-12-04", "type": "Final balance", "amount": 5600.0 }]
+      "cash_due": [
+        {
+          "date": "2026-12-04",
+          "type": "Final balance",
+          "amount": 5600
+        }
+      ]
     },
     {
       "id": "PO-2614",
-      "client": "Client company D",
+      "client": "Hudson Valley Dental Group",
       "tier": "t1",
       "units": 600,
-      "price": 32.0,
-      "order_total": 19200.0,
+      "price": 32,
+      "order_total": 19200,
       "booked": "2026-10-01",
       "ship_date": "2026-11-23",
       "deposit_pct": 30,
-      "deposit_amount": 5760.0,
-      "deposit_received": 5760.0,
+      "deposit_amount": 5760,
+      "deposit_received": 5760,
       "deposit_date": "2026-10-08",
-      "balance_due": 13440.0,
+      "balance_due": 13440,
       "status": "Deposit received",
-      "cash_due": [{ "date": "2026-11-25", "type": "Final balance", "amount": 13440.0 }]
+      "cash_due": [
+        {
+          "date": "2026-11-25",
+          "type": "Final balance",
+          "amount": 13440
+        }
+      ]
     },
     {
       "id": "PO-2615",
-      "client": "Client company E",
+      "client": "Pinnacle Home Care",
       "tier": "t3",
       "units": 150,
-      "price": 85.0,
-      "order_total": 12750.0,
+      "price": 85,
+      "order_total": 12750,
       "booked": "2026-10-05",
       "ship_date": "2026-12-08",
       "deposit_pct": 50,
-      "deposit_amount": 6375.0,
-      "deposit_received": 6375.0,
+      "deposit_amount": 6375,
+      "deposit_received": 6375,
       "deposit_date": "2026-10-09",
-      "balance_due": 6375.0,
+      "balance_due": 6375,
       "status": "Deposit received",
-      "cash_due": [{ "date": "2026-12-10", "type": "Final balance", "amount": 6375.0 }]
+      "cash_due": [
+        {
+          "date": "2026-12-10",
+          "type": "Final balance",
+          "amount": 6375
+        }
+      ]
     },
     {
       "id": "PO-2616",
-      "client": "Client company F",
+      "client": "Lakewood Insurance Brokers",
       "tier": "t2",
       "units": 220,
-      "price": 54.0,
-      "order_total": 11880.0,
+      "price": 54,
+      "order_total": 11880,
       "booked": "2026-10-07",
       "ship_date": "2026-11-18",
       "deposit_pct": 50,
-      "deposit_amount": 5940.0,
-      "deposit_received": 5940.0,
+      "deposit_amount": 5940,
+      "deposit_received": 5940,
       "deposit_date": "2026-10-13",
-      "balance_due": 5940.0,
+      "balance_due": 5940,
       "status": "Deposit received",
-      "cash_due": [{ "date": "2026-11-16", "type": "Final balance", "amount": 5940.0 }]
+      "cash_due": [
+        {
+          "date": "2026-11-16",
+          "type": "Final balance",
+          "amount": 5940
+        }
+      ]
     },
     {
       "id": "PO-2617",
-      "client": "Client company G",
+      "client": "Route 59 Auto Group",
       "tier": "t1",
       "units": 350,
-      "price": 32.0,
-      "order_total": 11200.0,
+      "price": 32,
+      "order_total": 11200,
       "booked": "2026-10-09",
       "ship_date": "2026-12-04",
       "deposit_pct": 50,
-      "deposit_amount": 5600.0,
-      "deposit_received": 0.0,
+      "deposit_amount": 5600,
+      "deposit_received": 0,
       "deposit_date": null,
-      "balance_due": 11200.0,
+      "balance_due": 11200,
       "status": "Awaiting deposit",
       "cash_due": [
-        { "date": "2026-10-23", "type": "Deposit", "amount": 5600.0 },
-        { "date": "2026-12-07", "type": "Final balance", "amount": 5600.0 }
+        {
+          "date": "2026-10-23",
+          "type": "Deposit",
+          "amount": 5600
+        },
+        {
+          "date": "2026-12-07",
+          "type": "Final balance",
+          "amount": 5600
+        }
       ]
     },
     {
       "id": "PO-2618",
-      "client": "Client company H",
+      "client": "Spring Valley Law Offices",
       "tier": "t4",
       "units": 60,
-      "price": 140.0,
-      "order_total": 8400.0,
+      "price": 140,
+      "order_total": 8400,
       "booked": "2026-10-12",
       "ship_date": "2026-12-11",
       "deposit_pct": 50,
-      "deposit_amount": 4200.0,
-      "deposit_received": 4200.0,
+      "deposit_amount": 4200,
+      "deposit_received": 4200,
       "deposit_date": "2026-10-14",
-      "balance_due": 4200.0,
+      "balance_due": 4200,
       "status": "Deposit received",
-      "cash_due": [{ "date": "2026-12-15", "type": "Final balance", "amount": 4200.0 }]
+      "cash_due": [
+        {
+          "date": "2026-12-15",
+          "type": "Final balance",
+          "amount": 4200
+        }
+      ]
     },
     {
       "id": "PO-2619",
-      "client": "Client company I",
+      "client": "Northgate Property Management",
       "tier": "t2",
       "units": 180,
-      "price": 54.0,
-      "order_total": 9720.0,
+      "price": 54,
+      "order_total": 9720,
       "booked": "2026-10-13",
       "ship_date": "2026-12-14",
       "deposit_pct": 30,
-      "deposit_amount": 2916.0,
-      "deposit_received": 0.0,
+      "deposit_amount": 2916,
+      "deposit_received": 0,
       "deposit_date": null,
-      "balance_due": 9720.0,
+      "balance_due": 9720,
       "status": "Awaiting deposit",
       "cash_due": [
-        { "date": "2026-10-30", "type": "Deposit", "amount": 2916.0 },
-        { "date": "2026-12-18", "type": "Final balance", "amount": 6804.0 }
+        {
+          "date": "2026-10-30",
+          "type": "Deposit",
+          "amount": 2916
+        },
+        {
+          "date": "2026-12-18",
+          "type": "Final balance",
+          "amount": 6804
+        }
       ]
     },
     {
       "id": "PO-2620",
-      "client": "Client company J",
+      "client": "Palisades Physical Therapy",
       "tier": "t3",
       "units": 120,
-      "price": 85.0,
-      "order_total": 10200.0,
+      "price": 85,
+      "order_total": 10200,
       "booked": "2026-10-14",
       "ship_date": "2026-11-25",
       "deposit_pct": 50,
-      "deposit_amount": 5100.0,
-      "deposit_received": 5100.0,
+      "deposit_amount": 5100,
+      "deposit_received": 5100,
       "deposit_date": "2026-10-15",
-      "balance_due": 5100.0,
+      "balance_due": 5100,
       "status": "Deposit received",
-      "cash_due": [{ "date": "2026-11-30", "type": "Final balance", "amount": 5100.0 }]
+      "cash_due": [
+        {
+          "date": "2026-11-30",
+          "type": "Final balance",
+          "amount": 5100
+        }
+      ]
     },
     {
       "id": "PO-2621",
-      "client": "Client company K",
+      "client": "Ramapo Building Supply",
       "tier": "t1",
       "units": 500,
-      "price": 32.0,
-      "order_total": 16000.0,
+      "price": 32,
+      "order_total": 16000,
       "booked": "2026-10-15",
       "ship_date": "2026-12-09",
       "deposit_pct": 50,
-      "deposit_amount": 8000.0,
-      "deposit_received": 0.0,
+      "deposit_amount": 8000,
+      "deposit_received": 0,
       "deposit_date": null,
-      "balance_due": 16000.0,
+      "balance_due": 16000,
       "status": "Awaiting deposit",
       "cash_due": [
-        { "date": "2026-11-06", "type": "Deposit", "amount": 8000.0 },
-        { "date": "2026-12-11", "type": "Final balance", "amount": 8000.0 }
+        {
+          "date": "2026-11-06",
+          "type": "Deposit",
+          "amount": 8000
+        },
+        {
+          "date": "2026-12-11",
+          "type": "Final balance",
+          "amount": 8000
+        }
       ]
     },
     {
       "id": "PO-2622",
-      "client": "Client company L",
+      "client": "Highview Senior Living",
       "tier": "t3",
       "units": 90,
-      "price": 85.0,
-      "order_total": 7650.0,
+      "price": 85,
+      "order_total": 7650,
       "booked": "2026-10-16",
       "ship_date": "2026-12-16",
       "deposit_pct": 50,
-      "deposit_amount": 3825.0,
-      "deposit_received": 0.0,
+      "deposit_amount": 3825,
+      "deposit_received": 0,
       "deposit_date": null,
-      "balance_due": 7650.0,
+      "balance_due": 7650,
       "status": "Awaiting deposit",
       "cash_due": [
-        { "date": "2026-11-13", "type": "Deposit", "amount": 3825.0 },
-        { "date": "2026-12-21", "type": "Final balance", "amount": 3825.0 }
+        {
+          "date": "2026-11-13",
+          "type": "Deposit",
+          "amount": 3825
+        },
+        {
+          "date": "2026-12-21",
+          "type": "Final balance",
+          "amount": 3825
+        }
       ]
     }
   ],
@@ -286,20 +420,52 @@
       "id": "online",
       "name": "Online",
       "lines": [
-        { "label": "Popcorn bags", "this": 7840.35, "prior": 6215.4 },
-        { "label": "Gift tins", "this": 5920.6, "prior": 5630.85 },
-        { "label": "Party and bulk packs", "this": 1480.25, "prior": 1310.1 },
-        { "label": "Chocolate and sweets", "this": 2179.15, "prior": 2223.9 }
+        {
+          "label": "Popcorn bags",
+          "this": 7840.35,
+          "prior": 6215.4
+        },
+        {
+          "label": "Gift tins",
+          "this": 5920.6,
+          "prior": 5630.85
+        },
+        {
+          "label": "Party and bulk packs",
+          "this": 1480.25,
+          "prior": 1310.1
+        },
+        {
+          "label": "Chocolate and sweets",
+          "this": 2179.15,
+          "prior": 2223.9
+        }
       ]
     },
     {
       "id": "store",
       "name": "Store",
       "lines": [
-        { "label": "Popcorn bags", "this": 6120.45, "prior": 7034.2 },
-        { "label": "Gift tins", "this": 2310.8, "prior": 3180.55 },
-        { "label": "Party and bulk packs", "this": 1745.3, "prior": 1926.1 },
-        { "label": "Chocolate and sweets", "this": 2463.7, "prior": 2769.4 }
+        {
+          "label": "Popcorn bags",
+          "this": 6120.45,
+          "prior": 7034.2
+        },
+        {
+          "label": "Gift tins",
+          "this": 2310.8,
+          "prior": 3180.55
+        },
+        {
+          "label": "Party and bulk packs",
+          "this": 1745.3,
+          "prior": 1926.1
+        },
+        {
+          "label": "Chocolate and sweets",
+          "this": 2463.7,
+          "prior": 2769.4
+        }
       ]
     },
     {
@@ -307,61 +473,61 @@
       "name": "Corporate",
       "shipped_this": [
         {
-          "client": "Client company M",
+          "client": "Clarkstown Orthodontics",
           "tier": "t2",
           "units": 120,
-          "price": 54.0,
-          "amount": 6480.0,
+          "price": 54,
+          "amount": 6480,
           "shipped": "2026-10-01"
         },
         {
-          "client": "Client company N",
+          "client": "Bergen Medical Supply",
           "tier": "t1",
           "units": 150,
-          "price": 32.0,
-          "amount": 4800.0,
+          "price": 32,
+          "amount": 4800,
           "shipped": "2026-10-02"
         }
       ],
       "shipped_prior": [
         {
-          "client": "Client company A",
+          "client": "Rockland Pediatrics",
           "tier": "t2",
           "units": 180,
-          "price": 54.0,
-          "amount": 9720.0,
+          "price": 54,
+          "amount": 9720,
           "shipped": "2026-09-04"
         },
         {
-          "client": "Client company D",
+          "client": "Hudson Valley Dental Group",
           "tier": "t1",
           "units": 250,
-          "price": 32.0,
-          "amount": 8000.0,
+          "price": 32,
+          "amount": 8000,
           "shipped": "2026-09-03"
         },
         {
-          "client": "Client company P",
+          "client": "Riverdale Staffing",
           "tier": "t3",
           "units": 80,
-          "price": 85.0,
-          "amount": 6800.0,
+          "price": 85,
+          "amount": 6800,
           "shipped": "2026-09-08"
         },
         {
-          "client": "Client company B",
+          "client": "Maple Ave Realty",
           "tier": "t1",
           "units": 100,
-          "price": 32.0,
-          "amount": 3200.0,
+          "price": 32,
+          "amount": 3200,
           "shipped": "2026-09-07"
         },
         {
-          "client": "Client company Q",
+          "client": "Kingsbridge Contracting",
           "tier": "t4",
           "units": 20,
-          "price": 140.0,
-          "amount": 2800.0,
+          "price": 140,
+          "amount": 2800,
           "shipped": "2026-09-09"
         }
       ]
@@ -369,25 +535,85 @@
   ],
   "pnl": {
     "revenue": [
-      { "label": "Online", "this": 17420.35, "prior": 15380.25 },
-      { "label": "Store", "this": 12640.25, "prior": 14910.25 },
-      { "label": "Corporate gifts", "this": 11280.0, "prior": 30520.0 }
+      {
+        "label": "Online",
+        "this": 17420.35,
+        "prior": 15380.25
+      },
+      {
+        "label": "Store",
+        "this": 12640.25,
+        "prior": 14910.25
+      },
+      {
+        "label": "Corporate gifts",
+        "this": 11280,
+        "prior": 30520
+      }
     ],
     "cogs": [
-      { "label": "Popcorn and ingredients", "this": 7985.4, "prior": 11240.65 },
-      { "label": "Tins, boxes and packaging", "this": 5946.2, "prior": 8910.3 },
-      { "label": "Production labor", "this": 5212.75, "prior": 6870.4 },
-      { "label": "Shipping and delivery", "this": 2461.9, "prior": 2874.15 }
+      {
+        "label": "Popcorn and ingredients",
+        "this": 7985.4,
+        "prior": 11240.65
+      },
+      {
+        "label": "Tins, boxes and packaging",
+        "this": 5946.2,
+        "prior": 8910.3
+      },
+      {
+        "label": "Production labor",
+        "this": 5212.75,
+        "prior": 6870.4
+      },
+      {
+        "label": "Shipping and delivery",
+        "this": 2461.9,
+        "prior": 2874.15
+      }
     ],
     "opex": [
-      { "label": "Rent (store and kitchen)", "this": 6500.0, "prior": 6500.0 },
-      { "label": "Store and office payroll", "this": 9952.3, "prior": 9805.6 },
-      { "label": "Card and platform fees", "this": 1268.45, "prior": 1824.7 },
-      { "label": "Marketing", "this": 2650.0, "prior": 2100.0 },
-      { "label": "Kosher supervision", "this": 650.0, "prior": 650.0 },
-      { "label": "Utilities", "this": 1043.85, "prior": 1187.2 },
-      { "label": "Insurance", "this": 540.0, "prior": 540.0 },
-      { "label": "Other", "this": 485.6, "prior": 612.35 }
+      {
+        "label": "Rent (store and kitchen)",
+        "this": 6500,
+        "prior": 6500
+      },
+      {
+        "label": "Store and office payroll",
+        "this": 9952.3,
+        "prior": 9805.6
+      },
+      {
+        "label": "Card and platform fees",
+        "this": 1268.45,
+        "prior": 1824.7
+      },
+      {
+        "label": "Marketing",
+        "this": 2650,
+        "prior": 2100
+      },
+      {
+        "label": "Kosher supervision",
+        "this": 650,
+        "prior": 650
+      },
+      {
+        "label": "Utilities",
+        "this": 1043.85,
+        "prior": 1187.2
+      },
+      {
+        "label": "Insurance",
+        "this": 540,
+        "prior": 540
+      },
+      {
+        "label": "Other",
+        "this": 485.6,
+        "prior": 612.35
+      }
     ]
   }
 }

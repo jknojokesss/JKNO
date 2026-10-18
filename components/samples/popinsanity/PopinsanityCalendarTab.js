@@ -102,7 +102,7 @@ export default function PopinsanityCalendarTab({ styles, monthKey, setMonthKey, 
             {[...items].sort((a, b) => a.date.localeCompare(b.date)).map((it, i) => (
               <ClickRow key={i} onClick={() => openOrder(it.orderId)}>
                 <td className="pop-td">{fmtD(it.date)}</td>
-                <td className="pop-td">{it.client}</td>
+                <td className="pop-td"><span className="pop-client-name" style={{ fontWeight: 600, fontSize: 13, marginBottom: 0 }}>{it.client}</span></td>
                 <td className="pop-td">{it.type}</td>
                 <td className="pop-td pop-td--r">{money(it.amount)}</td>
               </ClickRow>

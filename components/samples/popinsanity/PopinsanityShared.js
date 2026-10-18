@@ -119,7 +119,7 @@ export function DetailShell({ title, onBack, children, card, big }) {
     <div>
       <BackButton onBack={onBack} />
       <div style={{ ...card }}>
-        {title ? <div style={{ ...big, fontSize: '20px', color: INK, marginBottom: '14px' }}>{title}</div> : null}
+        {title ? <div className="pop-client-name" style={{ ...big, fontSize: '20px', color: INK, marginBottom: '14px' }}>{title}</div> : null}
         {children}
       </div>
     </div>

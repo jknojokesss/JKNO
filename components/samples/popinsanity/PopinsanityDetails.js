@@ -92,7 +92,7 @@ export function TierDetail({ tierId, onBack, onOrder, card, big, lbl }) {
         <tbody>
           {orders.map((o) => (
             <ClickRow key={o.id} onClick={() => onOrder(o.id)}>
-              <td className="pop-td">{o.client}</td>
+              <td className="pop-td"><span className="pop-client-name">{o.client}</span></td>
               <td className="pop-td pop-td--r">{fmtInt(o.units)}</td>
               <td className="pop-td pop-td--r">{money(o.order_total)}</td>
             </ClickRow>
@@ -145,7 +145,7 @@ export function ChannelDetail({ channelId, onBack, onOrder, onProductLine, card,
             {rows.map((r, i) => (
               <tr key={i}>
                 <td className="pop-td pop-corp-client">
-                  <div style={{ fontWeight: 600 }}>{r.client}</div>
+                  <div className="pop-client-name">{r.client}</div>
                   <div className="pop-order-sub">{tierShort(r.tier)} · Shipped {fmtD(r.shipped)}</div>
                 </td>
                 <td className="pop-td pop-corp-hide-phone">{tierShort(r.tier)}</td>
@@ -264,7 +264,7 @@ export function DayDetail({ date, items, onBack, onOrder, card, big }) {
           style={{ display: 'flex', justifyContent: 'space-between', gap: 12, padding: '10px 0', borderTop: i ? `1px solid ${CREAM}` : 'none', cursor: 'pointer' }}
         >
           <div>
-            <div style={{ fontWeight: 600, fontSize: 14, color: INK }}>{it.client}</div>
+            <div className="pop-client-name" style={{ fontSize: 14 }}>{it.client}</div>
             <div style={{ fontSize: 12, color: MUTED }}>{it.type}</div>
           </div>
           <div style={{ fontFamily: MONO, fontSize: 13 }}>{money(it.amount)}</div>

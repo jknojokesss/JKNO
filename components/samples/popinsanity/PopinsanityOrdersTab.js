@@ -40,7 +40,7 @@ export default function PopinsanityOrdersTab({ styles, openOrder }) {
             {orders.map((o) => (
               <ClickRow key={o.id} onClick={() => openOrder(o.id)}>
                 <td className="pop-td">
-                  <div style={{ fontWeight: 600 }}>{o.client}</div>
+                  <div className="pop-client-name">{o.client}</div>
                 </td>
                 <td className="pop-td">{tierShort(o.tier)}</td>
                 <td className="pop-td pop-td--r">{fmtInt(o.units)}</td>
@@ -67,7 +67,7 @@ export default function PopinsanityOrdersTab({ styles, openOrder }) {
       <div className="pop-order-cards">
         {orders.map((o) => (
           <button key={o.id} type="button" className="pop-order-card" onClick={() => openOrder(o.id)}>
-            <div className="pop-card-title">{o.client}</div>
+            <div className="pop-card-title pop-client-name">{o.client}</div>
             <div className="pop-order-sub">{tierShort(o.tier)} · {o.status}</div>
             <div className="pop-card-grid" style={{ marginTop: 10 }}>
               <CardField k="Units" v={fmtInt(o.units)} />

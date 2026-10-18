@@ -228,9 +228,9 @@ export default function PopinsanityPortal() {
 
         <main className="pop-main">
           <div style={{ marginBottom: '22px' }}>
-            <div style={{ fontFamily: styles.lbl.fontFamily, fontSize: '12px', color: MUTED, marginBottom: '6px', fontWeight: 500 }}>
+            <a href="https://jknojokes.com" className="pop-credit-link" style={{ display: 'inline-block', marginBottom: '6px' }}>
               JK No Jokes Financials
-            </div>
+            </a>
             <div style={{ ...styles.lbl, color: SPICE }}>{BIZ}</div>
             <h1 style={{ ...styles.big, fontSize: '28px', color: INK, letterSpacing: '0.3px', lineHeight: 1.1, marginTop: '4px' }}>
               {top ? (top.kind === 'order' ? 'Order detail' : top.kind === 'tier' ? 'Tier detail' : top.kind === 'channel' ? 'Channel detail' : top.kind === 'day' ? 'Cash due' : 'Line detail') : currentLabel}
