@@ -1,0 +1,2796 @@
+{
+  "meta": {
+    "as_of": "2026-09-25",
+    "sample_header": "Sample — fictitious numbers · as of Sep 25, 2026"
+  },
+  "monthly": [
+    {
+      "month": "2026-01",
+      "label": "JAN",
+      "revenue": 33800,
+      "cogs": 13050,
+      "opex": 8650,
+      "profit": 12100,
+      "tiresSold": 412
+    },
+    {
+      "month": "2026-02",
+      "label": "FEB",
+      "revenue": 34600,
+      "cogs": 13380,
+      "opex": 8720,
+      "profit": 12500,
+      "tiresSold": 428
+    },
+    {
+      "month": "2026-03",
+      "label": "MAR",
+      "revenue": 35200,
+      "cogs": 13620,
+      "opex": 8780,
+      "profit": 12800,
+      "tiresSold": 435
+    },
+    {
+      "month": "2026-04",
+      "label": "APR",
+      "revenue": 35600,
+      "cogs": 13800,
+      "opex": 9000,
+      "profit": 12800,
+      "tiresSold": 440
+    },
+    {
+      "month": "2026-05",
+      "label": "MAY",
+      "revenue": 38100,
+      "cogs": 14750,
+      "opex": 9150,
+      "profit": 14200,
+      "tiresSold": 468
+    },
+    {
+      "month": "2026-06",
+      "label": "JUN",
+      "revenue": 34800,
+      "cogs": 13500,
+      "opex": 8300,
+      "profit": 13000,
+      "tiresSold": 430
+    },
+    {
+      "month": "2026-07",
+      "label": "JUL",
+      "revenue": 36200,
+      "cogs": 14000,
+      "opex": 9000,
+      "profit": 13200,
+      "tiresSold": 448
+    },
+    {
+      "month": "2026-08",
+      "label": "AUG",
+      "revenue": 37100,
+      "cogs": 14400,
+      "opex": 9100,
+      "profit": 13600,
+      "tiresSold": 462
+    }
+  ],
+  "pl_by_month": {
+    "2026-01": {
+      "income": [
+        {
+          "label": "Tire sales",
+          "amount": 27716,
+          "drill": [
+            {
+              "date": "2026-01-08",
+              "description": "Tire sales · week 1",
+              "type": "Journal",
+              "amount": 6098
+            },
+            {
+              "date": "2026-01-15",
+              "description": "Tire sales · week 2",
+              "type": "Journal",
+              "amount": 7206
+            },
+            {
+              "date": "2026-01-22",
+              "description": "Tire sales · week 3",
+              "type": "Journal",
+              "amount": 7760
+            },
+            {
+              "date": "2026-01-28",
+              "description": "Tire sales · week 4",
+              "type": "Journal",
+              "amount": 6652
+            }
+          ]
+        },
+        {
+          "label": "Service & labor",
+          "amount": 4732,
+          "drill": [
+            {
+              "date": "2026-01-08",
+              "description": "Service & labor · week 1",
+              "type": "Journal",
+              "amount": 1041
+            },
+            {
+              "date": "2026-01-15",
+              "description": "Service & labor · week 2",
+              "type": "Journal",
+              "amount": 1230
+            },
+            {
+              "date": "2026-01-22",
+              "description": "Service & labor · week 3",
+              "type": "Journal",
+              "amount": 1325
+            },
+            {
+              "date": "2026-01-28",
+              "description": "Service & labor · week 4",
+              "type": "Journal",
+              "amount": 1136
+            }
+          ]
+        },
+        {
+          "label": "Parts & accessories",
+          "amount": 1352,
+          "drill": [
+            {
+              "date": "2026-01-08",
+              "description": "Parts & accessories · week 1",
+              "type": "Journal",
+              "amount": 297
+            },
+            {
+              "date": "2026-01-15",
+              "description": "Parts & accessories · week 2",
+              "type": "Journal",
+              "amount": 352
+            },
+            {
+              "date": "2026-01-22",
+              "description": "Parts & accessories · week 3",
+              "type": "Journal",
+              "amount": 379
+            },
+            {
+              "date": "2026-01-28",
+              "description": "Parts & accessories · week 4",
+              "type": "Journal",
+              "amount": 324
+            }
+          ]
+        }
+      ],
+      "cogs": [
+        {
+          "label": "Tire cost of sales",
+          "amount": 9918,
+          "drill": [
+            {
+              "date": "2026-01-08",
+              "description": "COGS · Tire COGS · week 1",
+              "type": "Journal",
+              "amount": 2182
+            },
+            {
+              "date": "2026-01-15",
+              "description": "COGS · Tire COGS · week 2",
+              "type": "Journal",
+              "amount": 2579
+            },
+            {
+              "date": "2026-01-22",
+              "description": "COGS · Tire COGS · week 3",
+              "type": "Journal",
+              "amount": 2777
+            },
+            {
+              "date": "2026-01-28",
+              "description": "COGS · Tire COGS · week 4",
+              "type": "Journal",
+              "amount": 2380
+            }
+          ]
+        },
+        {
+          "label": "Parts & fluids",
+          "amount": 2088,
+          "drill": [
+            {
+              "date": "2026-01-08",
+              "description": "COGS · Parts COGS · week 1",
+              "type": "Journal",
+              "amount": 459
+            },
+            {
+              "date": "2026-01-15",
+              "description": "COGS · Parts COGS · week 2",
+              "type": "Journal",
+              "amount": 543
+            },
+            {
+              "date": "2026-01-22",
+              "description": "COGS · Parts COGS · week 3",
+              "type": "Journal",
+              "amount": 585
+            },
+            {
+              "date": "2026-01-28",
+              "description": "COGS · Parts COGS · week 4",
+              "type": "Journal",
+              "amount": 501
+            }
+          ]
+        },
+        {
+          "label": "Shop supplies (COGS)",
+          "amount": 1044,
+          "drill": [
+            {
+              "date": "2026-01-08",
+              "description": "COGS · Supplies COGS · week 1",
+              "type": "Journal",
+              "amount": 230
+            },
+            {
+              "date": "2026-01-15",
+              "description": "COGS · Supplies COGS · week 2",
+              "type": "Journal",
+              "amount": 271
+            },
+            {
+              "date": "2026-01-22",
+              "description": "COGS · Supplies COGS · week 3",
+              "type": "Journal",
+              "amount": 292
+            },
+            {
+              "date": "2026-01-28",
+              "description": "COGS · Supplies COGS · week 4",
+              "type": "Journal",
+              "amount": 251
+            }
+          ]
+        }
+      ],
+      "expense": [
+        {
+          "label": "Rent",
+          "amount": 4325,
+          "drill": [
+            {
+              "date": "2026-01-08",
+              "description": "Rent · week 1",
+              "type": "Journal",
+              "amount": 952
+            },
+            {
+              "date": "2026-01-15",
+              "description": "Rent · week 2",
+              "type": "Journal",
+              "amount": 1125
+            },
+            {
+              "date": "2026-01-22",
+              "description": "Rent · week 3",
+              "type": "Journal",
+              "amount": 1211
+            },
+            {
+              "date": "2026-01-28",
+              "description": "Rent · week 4",
+              "type": "Journal",
+              "amount": 1037
+            }
+          ]
+        },
+        {
+          "label": "Payroll — shop",
+          "amount": 2941,
+          "drill": [
+            {
+              "date": "2026-01-08",
+              "description": "Payroll · week 1",
+              "type": "Journal",
+              "amount": 647
+            },
+            {
+              "date": "2026-01-15",
+              "description": "Payroll · week 2",
+              "type": "Journal",
+              "amount": 765
+            },
+            {
+              "date": "2026-01-22",
+              "description": "Payroll · week 3",
+              "type": "Journal",
+              "amount": 823
+            },
+            {
+              "date": "2026-01-28",
+              "description": "Payroll · week 4",
+              "type": "Journal",
+              "amount": 706
+            }
+          ]
+        },
+        {
+          "label": "Other operating",
+          "amount": 1384,
+          "drill": [
+            {
+              "date": "2026-01-08",
+              "description": "Other operating · week 1",
+              "type": "Journal",
+              "amount": 304
+            },
+            {
+              "date": "2026-01-15",
+              "description": "Other operating · week 2",
+              "type": "Journal",
+              "amount": 360
+            },
+            {
+              "date": "2026-01-22",
+              "description": "Other operating · week 3",
+              "type": "Journal",
+              "amount": 388
+            },
+            {
+              "date": "2026-01-28",
+              "description": "Other operating · week 4",
+              "type": "Journal",
+              "amount": 332
+            }
+          ]
+        }
+      ]
+    },
+    "2026-02": {
+      "income": [
+        {
+          "label": "Tire sales",
+          "amount": 28372,
+          "drill": [
+            {
+              "date": "2026-02-08",
+              "description": "Tire sales · week 1",
+              "type": "Journal",
+              "amount": 6242
+            },
+            {
+              "date": "2026-02-15",
+              "description": "Tire sales · week 2",
+              "type": "Journal",
+              "amount": 7377
+            },
+            {
+              "date": "2026-02-22",
+              "description": "Tire sales · week 3",
+              "type": "Journal",
+              "amount": 7944
+            },
+            {
+              "date": "2026-02-28",
+              "description": "Tire sales · week 4",
+              "type": "Journal",
+              "amount": 6809
+            }
+          ]
+        },
+        {
+          "label": "Service & labor",
+          "amount": 4844,
+          "drill": [
+            {
+              "date": "2026-02-08",
+              "description": "Service & labor · week 1",
+              "type": "Journal",
+              "amount": 1066
+            },
+            {
+              "date": "2026-02-15",
+              "description": "Service & labor · week 2",
+              "type": "Journal",
+              "amount": 1259
+            },
+            {
+              "date": "2026-02-22",
+              "description": "Service & labor · week 3",
+              "type": "Journal",
+              "amount": 1356
+            },
+            {
+              "date": "2026-02-28",
+              "description": "Service & labor · week 4",
+              "type": "Journal",
+              "amount": 1163
+            }
+          ]
+        },
+        {
+          "label": "Parts & accessories",
+          "amount": 1384,
+          "drill": [
+            {
+              "date": "2026-02-08",
+              "description": "Parts & accessories · week 1",
+              "type": "Journal",
+              "amount": 304
+            },
+            {
+              "date": "2026-02-15",
+              "description": "Parts & accessories · week 2",
+              "type": "Journal",
+              "amount": 360
+            },
+            {
+              "date": "2026-02-22",
+              "description": "Parts & accessories · week 3",
+              "type": "Journal",
+              "amount": 388
+            },
+            {
+              "date": "2026-02-28",
+              "description": "Parts & accessories · week 4",
+              "type": "Journal",
+              "amount": 332
+            }
+          ]
+        }
+      ],
+      "cogs": [
+        {
+          "label": "Tire cost of sales",
+          "amount": 10169,
+          "drill": [
+            {
+              "date": "2026-02-08",
+              "description": "COGS · Tire COGS · week 1",
+              "type": "Journal",
+              "amount": 2237
+            },
+            {
+              "date": "2026-02-15",
+              "description": "COGS · Tire COGS · week 2",
+              "type": "Journal",
+              "amount": 2644
+            },
+            {
+              "date": "2026-02-22",
+              "description": "COGS · Tire COGS · week 3",
+              "type": "Journal",
+              "amount": 2847
+            },
+            {
+              "date": "2026-02-28",
+              "description": "COGS · Tire COGS · week 4",
+              "type": "Journal",
+              "amount": 2441
+            }
+          ]
+        },
+        {
+          "label": "Parts & fluids",
+          "amount": 2141,
+          "drill": [
+            {
+              "date": "2026-02-08",
+              "description": "COGS · Parts COGS · week 1",
+              "type": "Journal",
+              "amount": 471
+            },
+            {
+              "date": "2026-02-15",
+              "description": "COGS · Parts COGS · week 2",
+              "type": "Journal",
+              "amount": 557
+            },
+            {
+              "date": "2026-02-22",
+              "description": "COGS · Parts COGS · week 3",
+              "type": "Journal",
+              "amount": 599
+            },
+            {
+              "date": "2026-02-28",
+              "description": "COGS · Parts COGS · week 4",
+              "type": "Journal",
+              "amount": 514
+            }
+          ]
+        },
+        {
+          "label": "Shop supplies (COGS)",
+          "amount": 1070,
+          "drill": [
+            {
+              "date": "2026-02-08",
+              "description": "COGS · Supplies COGS · week 1",
+              "type": "Journal",
+              "amount": 235
+            },
+            {
+              "date": "2026-02-15",
+              "description": "COGS · Supplies COGS · week 2",
+              "type": "Journal",
+              "amount": 278
+            },
+            {
+              "date": "2026-02-22",
+              "description": "COGS · Supplies COGS · week 3",
+              "type": "Journal",
+              "amount": 300
+            },
+            {
+              "date": "2026-02-28",
+              "description": "COGS · Supplies COGS · week 4",
+              "type": "Journal",
+              "amount": 257
+            }
+          ]
+        }
+      ],
+      "expense": [
+        {
+          "label": "Rent",
+          "amount": 4360,
+          "drill": [
+            {
+              "date": "2026-02-08",
+              "description": "Rent · week 1",
+              "type": "Journal",
+              "amount": 959
+            },
+            {
+              "date": "2026-02-15",
+              "description": "Rent · week 2",
+              "type": "Journal",
+              "amount": 1134
+            },
+            {
+              "date": "2026-02-22",
+              "description": "Rent · week 3",
+              "type": "Journal",
+              "amount": 1221
+            },
+            {
+              "date": "2026-02-28",
+              "description": "Rent · week 4",
+              "type": "Journal",
+              "amount": 1046
+            }
+          ]
+        },
+        {
+          "label": "Payroll — shop",
+          "amount": 2965,
+          "drill": [
+            {
+              "date": "2026-02-08",
+              "description": "Payroll · week 1",
+              "type": "Journal",
+              "amount": 652
+            },
+            {
+              "date": "2026-02-15",
+              "description": "Payroll · week 2",
+              "type": "Journal",
+              "amount": 771
+            },
+            {
+              "date": "2026-02-22",
+              "description": "Payroll · week 3",
+              "type": "Journal",
+              "amount": 830
+            },
+            {
+              "date": "2026-02-28",
+              "description": "Payroll · week 4",
+              "type": "Journal",
+              "amount": 712
+            }
+          ]
+        },
+        {
+          "label": "Other operating",
+          "amount": 1395,
+          "drill": [
+            {
+              "date": "2026-02-08",
+              "description": "Other operating · week 1",
+              "type": "Journal",
+              "amount": 307
+            },
+            {
+              "date": "2026-02-15",
+              "description": "Other operating · week 2",
+              "type": "Journal",
+              "amount": 363
+            },
+            {
+              "date": "2026-02-22",
+              "description": "Other operating · week 3",
+              "type": "Journal",
+              "amount": 391
+            },
+            {
+              "date": "2026-02-28",
+              "description": "Other operating · week 4",
+              "type": "Journal",
+              "amount": 334
+            }
+          ]
+        }
+      ]
+    },
+    "2026-03": {
+      "income": [
+        {
+          "label": "Tire sales",
+          "amount": 28864,
+          "drill": [
+            {
+              "date": "2026-03-08",
+              "description": "Tire sales · week 1",
+              "type": "Journal",
+              "amount": 6350
+            },
+            {
+              "date": "2026-03-15",
+              "description": "Tire sales · week 2",
+              "type": "Journal",
+              "amount": 7505
+            },
+            {
+              "date": "2026-03-22",
+              "description": "Tire sales · week 3",
+              "type": "Journal",
+              "amount": 8082
+            },
+            {
+              "date": "2026-03-28",
+              "description": "Tire sales · week 4",
+              "type": "Journal",
+              "amount": 6927
+            }
+          ]
+        },
+        {
+          "label": "Service & labor",
+          "amount": 4928,
+          "drill": [
+            {
+              "date": "2026-03-08",
+              "description": "Service & labor · week 1",
+              "type": "Journal",
+              "amount": 1084
+            },
+            {
+              "date": "2026-03-15",
+              "description": "Service & labor · week 2",
+              "type": "Journal",
+              "amount": 1281
+            },
+            {
+              "date": "2026-03-22",
+              "description": "Service & labor · week 3",
+              "type": "Journal",
+              "amount": 1380
+            },
+            {
+              "date": "2026-03-28",
+              "description": "Service & labor · week 4",
+              "type": "Journal",
+              "amount": 1183
+            }
+          ]
+        },
+        {
+          "label": "Parts & accessories",
+          "amount": 1408,
+          "drill": [
+            {
+              "date": "2026-03-08",
+              "description": "Parts & accessories · week 1",
+              "type": "Journal",
+              "amount": 310
+            },
+            {
+              "date": "2026-03-15",
+              "description": "Parts & accessories · week 2",
+              "type": "Journal",
+              "amount": 366
+            },
+            {
+              "date": "2026-03-22",
+              "description": "Parts & accessories · week 3",
+              "type": "Journal",
+              "amount": 394
+            },
+            {
+              "date": "2026-03-28",
+              "description": "Parts & accessories · week 4",
+              "type": "Journal",
+              "amount": 338
+            }
+          ]
+        }
+      ],
+      "cogs": [
+        {
+          "label": "Tire cost of sales",
+          "amount": 10351,
+          "drill": [
+            {
+              "date": "2026-03-08",
+              "description": "COGS · Tire COGS · week 1",
+              "type": "Journal",
+              "amount": 2277
+            },
+            {
+              "date": "2026-03-15",
+              "description": "COGS · Tire COGS · week 2",
+              "type": "Journal",
+              "amount": 2691
+            },
+            {
+              "date": "2026-03-22",
+              "description": "COGS · Tire COGS · week 3",
+              "type": "Journal",
+              "amount": 2898
+            },
+            {
+              "date": "2026-03-28",
+              "description": "COGS · Tire COGS · week 4",
+              "type": "Journal",
+              "amount": 2485
+            }
+          ]
+        },
+        {
+          "label": "Parts & fluids",
+          "amount": 2179,
+          "drill": [
+            {
+              "date": "2026-03-08",
+              "description": "COGS · Parts COGS · week 1",
+              "type": "Journal",
+              "amount": 479
+            },
+            {
+              "date": "2026-03-15",
+              "description": "COGS · Parts COGS · week 2",
+              "type": "Journal",
+              "amount": 567
+            },
+            {
+              "date": "2026-03-22",
+              "description": "COGS · Parts COGS · week 3",
+              "type": "Journal",
+              "amount": 610
+            },
+            {
+              "date": "2026-03-28",
+              "description": "COGS · Parts COGS · week 4",
+              "type": "Journal",
+              "amount": 523
+            }
+          ]
+        },
+        {
+          "label": "Shop supplies (COGS)",
+          "amount": 1090,
+          "drill": [
+            {
+              "date": "2026-03-08",
+              "description": "COGS · Supplies COGS · week 1",
+              "type": "Journal",
+              "amount": 240
+            },
+            {
+              "date": "2026-03-15",
+              "description": "COGS · Supplies COGS · week 2",
+              "type": "Journal",
+              "amount": 283
+            },
+            {
+              "date": "2026-03-22",
+              "description": "COGS · Supplies COGS · week 3",
+              "type": "Journal",
+              "amount": 305
+            },
+            {
+              "date": "2026-03-28",
+              "description": "COGS · Supplies COGS · week 4",
+              "type": "Journal",
+              "amount": 262
+            }
+          ]
+        }
+      ],
+      "expense": [
+        {
+          "label": "Rent",
+          "amount": 4390,
+          "drill": [
+            {
+              "date": "2026-03-08",
+              "description": "Rent · week 1",
+              "type": "Journal",
+              "amount": 966
+            },
+            {
+              "date": "2026-03-15",
+              "description": "Rent · week 2",
+              "type": "Journal",
+              "amount": 1141
+            },
+            {
+              "date": "2026-03-22",
+              "description": "Rent · week 3",
+              "type": "Journal",
+              "amount": 1229
+            },
+            {
+              "date": "2026-03-28",
+              "description": "Rent · week 4",
+              "type": "Journal",
+              "amount": 1054
+            }
+          ]
+        },
+        {
+          "label": "Payroll — shop",
+          "amount": 2985,
+          "drill": [
+            {
+              "date": "2026-03-08",
+              "description": "Payroll · week 1",
+              "type": "Journal",
+              "amount": 657
+            },
+            {
+              "date": "2026-03-15",
+              "description": "Payroll · week 2",
+              "type": "Journal",
+              "amount": 776
+            },
+            {
+              "date": "2026-03-22",
+              "description": "Payroll · week 3",
+              "type": "Journal",
+              "amount": 836
+            },
+            {
+              "date": "2026-03-28",
+              "description": "Payroll · week 4",
+              "type": "Journal",
+              "amount": 716
+            }
+          ]
+        },
+        {
+          "label": "Other operating",
+          "amount": 1405,
+          "drill": [
+            {
+              "date": "2026-03-08",
+              "description": "Other operating · week 1",
+              "type": "Journal",
+              "amount": 309
+            },
+            {
+              "date": "2026-03-15",
+              "description": "Other operating · week 2",
+              "type": "Journal",
+              "amount": 365
+            },
+            {
+              "date": "2026-03-22",
+              "description": "Other operating · week 3",
+              "type": "Journal",
+              "amount": 393
+            },
+            {
+              "date": "2026-03-28",
+              "description": "Other operating · week 4",
+              "type": "Journal",
+              "amount": 338
+            }
+          ]
+        }
+      ]
+    },
+    "2026-04": {
+      "income": [
+        {
+          "label": "Tire sales",
+          "amount": 29192,
+          "drill": [
+            {
+              "date": "2026-04-08",
+              "description": "Tire sales · week 1",
+              "type": "Journal",
+              "amount": 6422
+            },
+            {
+              "date": "2026-04-15",
+              "description": "Tire sales · week 2",
+              "type": "Journal",
+              "amount": 7590
+            },
+            {
+              "date": "2026-04-22",
+              "description": "Tire sales · week 3",
+              "type": "Journal",
+              "amount": 8174
+            },
+            {
+              "date": "2026-04-28",
+              "description": "Tire sales · week 4",
+              "type": "Journal",
+              "amount": 7006
+            }
+          ]
+        },
+        {
+          "label": "Service & labor",
+          "amount": 4984,
+          "drill": [
+            {
+              "date": "2026-04-08",
+              "description": "Service & labor · week 1",
+              "type": "Journal",
+              "amount": 1096
+            },
+            {
+              "date": "2026-04-15",
+              "description": "Service & labor · week 2",
+              "type": "Journal",
+              "amount": 1296
+            },
+            {
+              "date": "2026-04-22",
+              "description": "Service & labor · week 3",
+              "type": "Journal",
+              "amount": 1396
+            },
+            {
+              "date": "2026-04-28",
+              "description": "Service & labor · week 4",
+              "type": "Journal",
+              "amount": 1196
+            }
+          ]
+        },
+        {
+          "label": "Parts & accessories",
+          "amount": 1424,
+          "drill": [
+            {
+              "date": "2026-04-08",
+              "description": "Parts & accessories · week 1",
+              "type": "Journal",
+              "amount": 313
+            },
+            {
+              "date": "2026-04-15",
+              "description": "Parts & accessories · week 2",
+              "type": "Journal",
+              "amount": 370
+            },
+            {
+              "date": "2026-04-22",
+              "description": "Parts & accessories · week 3",
+              "type": "Journal",
+              "amount": 399
+            },
+            {
+              "date": "2026-04-28",
+              "description": "Parts & accessories · week 4",
+              "type": "Journal",
+              "amount": 342
+            }
+          ]
+        }
+      ],
+      "cogs": [
+        {
+          "label": "Tire cost of sales",
+          "amount": 10488,
+          "drill": [
+            {
+              "date": "2026-04-08",
+              "description": "COGS · Tire COGS · week 1",
+              "type": "Journal",
+              "amount": 2307
+            },
+            {
+              "date": "2026-04-15",
+              "description": "COGS · Tire COGS · week 2",
+              "type": "Journal",
+              "amount": 2727
+            },
+            {
+              "date": "2026-04-22",
+              "description": "COGS · Tire COGS · week 3",
+              "type": "Journal",
+              "amount": 2937
+            },
+            {
+              "date": "2026-04-28",
+              "description": "COGS · Tire COGS · week 4",
+              "type": "Journal",
+              "amount": 2517
+            }
+          ]
+        },
+        {
+          "label": "Parts & fluids",
+          "amount": 2208,
+          "drill": [
+            {
+              "date": "2026-04-08",
+              "description": "COGS · Parts COGS · week 1",
+              "type": "Journal",
+              "amount": 486
+            },
+            {
+              "date": "2026-04-15",
+              "description": "COGS · Parts COGS · week 2",
+              "type": "Journal",
+              "amount": 574
+            },
+            {
+              "date": "2026-04-22",
+              "description": "COGS · Parts COGS · week 3",
+              "type": "Journal",
+              "amount": 618
+            },
+            {
+              "date": "2026-04-28",
+              "description": "COGS · Parts COGS · week 4",
+              "type": "Journal",
+              "amount": 530
+            }
+          ]
+        },
+        {
+          "label": "Shop supplies (COGS)",
+          "amount": 1104,
+          "drill": [
+            {
+              "date": "2026-04-08",
+              "description": "COGS · Supplies COGS · week 1",
+              "type": "Journal",
+              "amount": 243
+            },
+            {
+              "date": "2026-04-15",
+              "description": "COGS · Supplies COGS · week 2",
+              "type": "Journal",
+              "amount": 287
+            },
+            {
+              "date": "2026-04-22",
+              "description": "COGS · Supplies COGS · week 3",
+              "type": "Journal",
+              "amount": 309
+            },
+            {
+              "date": "2026-04-28",
+              "description": "COGS · Supplies COGS · week 4",
+              "type": "Journal",
+              "amount": 265
+            }
+          ]
+        }
+      ],
+      "expense": [
+        {
+          "label": "Rent",
+          "amount": 4500,
+          "drill": [
+            {
+              "date": "2026-04-08",
+              "description": "Rent · week 1",
+              "type": "Journal",
+              "amount": 990
+            },
+            {
+              "date": "2026-04-15",
+              "description": "Rent · week 2",
+              "type": "Journal",
+              "amount": 1170
+            },
+            {
+              "date": "2026-04-22",
+              "description": "Rent · week 3",
+              "type": "Journal",
+              "amount": 1260
+            },
+            {
+              "date": "2026-04-28",
+              "description": "Rent · week 4",
+              "type": "Journal",
+              "amount": 1080
+            }
+          ]
+        },
+        {
+          "label": "Payroll — shop",
+          "amount": 3060,
+          "drill": [
+            {
+              "date": "2026-04-08",
+              "description": "Payroll · week 1",
+              "type": "Journal",
+              "amount": 673
+            },
+            {
+              "date": "2026-04-15",
+              "description": "Payroll · week 2",
+              "type": "Journal",
+              "amount": 796
+            },
+            {
+              "date": "2026-04-22",
+              "description": "Payroll · week 3",
+              "type": "Journal",
+              "amount": 857
+            },
+            {
+              "date": "2026-04-28",
+              "description": "Payroll · week 4",
+              "type": "Journal",
+              "amount": 734
+            }
+          ]
+        },
+        {
+          "label": "Other operating",
+          "amount": 1440,
+          "drill": [
+            {
+              "date": "2026-04-08",
+              "description": "Other operating · week 1",
+              "type": "Journal",
+              "amount": 317
+            },
+            {
+              "date": "2026-04-15",
+              "description": "Other operating · week 2",
+              "type": "Journal",
+              "amount": 374
+            },
+            {
+              "date": "2026-04-22",
+              "description": "Other operating · week 3",
+              "type": "Journal",
+              "amount": 403
+            },
+            {
+              "date": "2026-04-28",
+              "description": "Other operating · week 4",
+              "type": "Journal",
+              "amount": 346
+            }
+          ]
+        }
+      ]
+    },
+    "2026-05": {
+      "income": [
+        {
+          "label": "Tire sales",
+          "amount": 31242,
+          "drill": [
+            {
+              "date": "2026-05-08",
+              "description": "Tire sales · week 1",
+              "type": "Journal",
+              "amount": 6873
+            },
+            {
+              "date": "2026-05-15",
+              "description": "Tire sales · week 2",
+              "type": "Journal",
+              "amount": 8123
+            },
+            {
+              "date": "2026-05-22",
+              "description": "Tire sales · week 3",
+              "type": "Journal",
+              "amount": 8748
+            },
+            {
+              "date": "2026-05-28",
+              "description": "Tire sales · week 4",
+              "type": "Journal",
+              "amount": 7498
+            }
+          ]
+        },
+        {
+          "label": "Service & labor",
+          "amount": 5334,
+          "drill": [
+            {
+              "date": "2026-05-08",
+              "description": "Service & labor · week 1",
+              "type": "Journal",
+              "amount": 1173
+            },
+            {
+              "date": "2026-05-15",
+              "description": "Service & labor · week 2",
+              "type": "Journal",
+              "amount": 1387
+            },
+            {
+              "date": "2026-05-22",
+              "description": "Service & labor · week 3",
+              "type": "Journal",
+              "amount": 1494
+            },
+            {
+              "date": "2026-05-28",
+              "description": "Service & labor · week 4",
+              "type": "Journal",
+              "amount": 1280
+            }
+          ]
+        },
+        {
+          "label": "Parts & accessories",
+          "amount": 1524,
+          "drill": [
+            {
+              "date": "2026-05-08",
+              "description": "Parts & accessories · week 1",
+              "type": "Journal",
+              "amount": 335
+            },
+            {
+              "date": "2026-05-15",
+              "description": "Parts & accessories · week 2",
+              "type": "Journal",
+              "amount": 396
+            },
+            {
+              "date": "2026-05-22",
+              "description": "Parts & accessories · week 3",
+              "type": "Journal",
+              "amount": 427
+            },
+            {
+              "date": "2026-05-28",
+              "description": "Parts & accessories · week 4",
+              "type": "Journal",
+              "amount": 366
+            }
+          ]
+        }
+      ],
+      "cogs": [
+        {
+          "label": "Tire cost of sales",
+          "amount": 11210,
+          "drill": [
+            {
+              "date": "2026-05-08",
+              "description": "COGS · Tire COGS · week 1",
+              "type": "Journal",
+              "amount": 2466
+            },
+            {
+              "date": "2026-05-15",
+              "description": "COGS · Tire COGS · week 2",
+              "type": "Journal",
+              "amount": 2915
+            },
+            {
+              "date": "2026-05-22",
+              "description": "COGS · Tire COGS · week 3",
+              "type": "Journal",
+              "amount": 3139
+            },
+            {
+              "date": "2026-05-28",
+              "description": "COGS · Tire COGS · week 4",
+              "type": "Journal",
+              "amount": 2690
+            }
+          ]
+        },
+        {
+          "label": "Parts & fluids",
+          "amount": 2360,
+          "drill": [
+            {
+              "date": "2026-05-08",
+              "description": "COGS · Parts COGS · week 1",
+              "type": "Journal",
+              "amount": 519
+            },
+            {
+              "date": "2026-05-15",
+              "description": "COGS · Parts COGS · week 2",
+              "type": "Journal",
+              "amount": 614
+            },
+            {
+              "date": "2026-05-22",
+              "description": "COGS · Parts COGS · week 3",
+              "type": "Journal",
+              "amount": 661
+            },
+            {
+              "date": "2026-05-28",
+              "description": "COGS · Parts COGS · week 4",
+              "type": "Journal",
+              "amount": 566
+            }
+          ]
+        },
+        {
+          "label": "Shop supplies (COGS)",
+          "amount": 1180,
+          "drill": [
+            {
+              "date": "2026-05-08",
+              "description": "COGS · Supplies COGS · week 1",
+              "type": "Journal",
+              "amount": 260
+            },
+            {
+              "date": "2026-05-15",
+              "description": "COGS · Supplies COGS · week 2",
+              "type": "Journal",
+              "amount": 307
+            },
+            {
+              "date": "2026-05-22",
+              "description": "COGS · Supplies COGS · week 3",
+              "type": "Journal",
+              "amount": 330
+            },
+            {
+              "date": "2026-05-28",
+              "description": "COGS · Supplies COGS · week 4",
+              "type": "Journal",
+              "amount": 283
+            }
+          ]
+        }
+      ],
+      "expense": [
+        {
+          "label": "Rent",
+          "amount": 4575,
+          "drill": [
+            {
+              "date": "2026-05-08",
+              "description": "Rent · week 1",
+              "type": "Journal",
+              "amount": 1007
+            },
+            {
+              "date": "2026-05-15",
+              "description": "Rent · week 2",
+              "type": "Journal",
+              "amount": 1190
+            },
+            {
+              "date": "2026-05-22",
+              "description": "Rent · week 3",
+              "type": "Journal",
+              "amount": 1281
+            },
+            {
+              "date": "2026-05-28",
+              "description": "Rent · week 4",
+              "type": "Journal",
+              "amount": 1097
+            }
+          ]
+        },
+        {
+          "label": "Payroll — shop",
+          "amount": 3111,
+          "drill": [
+            {
+              "date": "2026-05-08",
+              "description": "Payroll · week 1",
+              "type": "Journal",
+              "amount": 684
+            },
+            {
+              "date": "2026-05-15",
+              "description": "Payroll · week 2",
+              "type": "Journal",
+              "amount": 809
+            },
+            {
+              "date": "2026-05-22",
+              "description": "Payroll · week 3",
+              "type": "Journal",
+              "amount": 871
+            },
+            {
+              "date": "2026-05-28",
+              "description": "Payroll · week 4",
+              "type": "Journal",
+              "amount": 747
+            }
+          ]
+        },
+        {
+          "label": "Other operating",
+          "amount": 1464,
+          "drill": [
+            {
+              "date": "2026-05-08",
+              "description": "Other operating · week 1",
+              "type": "Journal",
+              "amount": 322
+            },
+            {
+              "date": "2026-05-15",
+              "description": "Other operating · week 2",
+              "type": "Journal",
+              "amount": 381
+            },
+            {
+              "date": "2026-05-22",
+              "description": "Other operating · week 3",
+              "type": "Journal",
+              "amount": 410
+            },
+            {
+              "date": "2026-05-28",
+              "description": "Other operating · week 4",
+              "type": "Journal",
+              "amount": 351
+            }
+          ]
+        }
+      ]
+    },
+    "2026-06": {
+      "income": [
+        {
+          "label": "Tire sales",
+          "amount": 28536,
+          "drill": [
+            {
+              "date": "2026-06-08",
+              "description": "Tire sales · week 1",
+              "type": "Journal",
+              "amount": 6278
+            },
+            {
+              "date": "2026-06-15",
+              "description": "Tire sales · week 2",
+              "type": "Journal",
+              "amount": 7419
+            },
+            {
+              "date": "2026-06-22",
+              "description": "Tire sales · week 3",
+              "type": "Journal",
+              "amount": 7990
+            },
+            {
+              "date": "2026-06-28",
+              "description": "Tire sales · week 4",
+              "type": "Journal",
+              "amount": 6849
+            }
+          ]
+        },
+        {
+          "label": "Service & labor",
+          "amount": 4872,
+          "drill": [
+            {
+              "date": "2026-06-08",
+              "description": "Service & labor · week 1",
+              "type": "Journal",
+              "amount": 1072
+            },
+            {
+              "date": "2026-06-15",
+              "description": "Service & labor · week 2",
+              "type": "Journal",
+              "amount": 1267
+            },
+            {
+              "date": "2026-06-22",
+              "description": "Service & labor · week 3",
+              "type": "Journal",
+              "amount": 1364
+            },
+            {
+              "date": "2026-06-28",
+              "description": "Service & labor · week 4",
+              "type": "Journal",
+              "amount": 1169
+            }
+          ]
+        },
+        {
+          "label": "Parts & accessories",
+          "amount": 1392,
+          "drill": [
+            {
+              "date": "2026-06-08",
+              "description": "Parts & accessories · week 1",
+              "type": "Journal",
+              "amount": 306
+            },
+            {
+              "date": "2026-06-15",
+              "description": "Parts & accessories · week 2",
+              "type": "Journal",
+              "amount": 362
+            },
+            {
+              "date": "2026-06-22",
+              "description": "Parts & accessories · week 3",
+              "type": "Journal",
+              "amount": 390
+            },
+            {
+              "date": "2026-06-28",
+              "description": "Parts & accessories · week 4",
+              "type": "Journal",
+              "amount": 334
+            }
+          ]
+        }
+      ],
+      "cogs": [
+        {
+          "label": "Tire cost of sales",
+          "amount": 10260,
+          "drill": [
+            {
+              "date": "2026-06-08",
+              "description": "COGS · Tire COGS · week 1",
+              "type": "Journal",
+              "amount": 2257
+            },
+            {
+              "date": "2026-06-15",
+              "description": "COGS · Tire COGS · week 2",
+              "type": "Journal",
+              "amount": 2668
+            },
+            {
+              "date": "2026-06-22",
+              "description": "COGS · Tire COGS · week 3",
+              "type": "Journal",
+              "amount": 2873
+            },
+            {
+              "date": "2026-06-28",
+              "description": "COGS · Tire COGS · week 4",
+              "type": "Journal",
+              "amount": 2462
+            }
+          ]
+        },
+        {
+          "label": "Parts & fluids",
+          "amount": 2160,
+          "drill": [
+            {
+              "date": "2026-06-08",
+              "description": "COGS · Parts COGS · week 1",
+              "type": "Journal",
+              "amount": 475
+            },
+            {
+              "date": "2026-06-15",
+              "description": "COGS · Parts COGS · week 2",
+              "type": "Journal",
+              "amount": 562
+            },
+            {
+              "date": "2026-06-22",
+              "description": "COGS · Parts COGS · week 3",
+              "type": "Journal",
+              "amount": 605
+            },
+            {
+              "date": "2026-06-28",
+              "description": "COGS · Parts COGS · week 4",
+              "type": "Journal",
+              "amount": 518
+            }
+          ]
+        },
+        {
+          "label": "Shop supplies (COGS)",
+          "amount": 1080,
+          "drill": [
+            {
+              "date": "2026-06-08",
+              "description": "COGS · Supplies COGS · week 1",
+              "type": "Journal",
+              "amount": 238
+            },
+            {
+              "date": "2026-06-15",
+              "description": "COGS · Supplies COGS · week 2",
+              "type": "Journal",
+              "amount": 281
+            },
+            {
+              "date": "2026-06-22",
+              "description": "COGS · Supplies COGS · week 3",
+              "type": "Journal",
+              "amount": 302
+            },
+            {
+              "date": "2026-06-28",
+              "description": "COGS · Supplies COGS · week 4",
+              "type": "Journal",
+              "amount": 259
+            }
+          ]
+        }
+      ],
+      "expense": [
+        {
+          "label": "Rent",
+          "amount": 4150,
+          "drill": [
+            {
+              "date": "2026-06-08",
+              "description": "Rent · week 1",
+              "type": "Journal",
+              "amount": 913
+            },
+            {
+              "date": "2026-06-15",
+              "description": "Rent · week 2",
+              "type": "Journal",
+              "amount": 1079
+            },
+            {
+              "date": "2026-06-22",
+              "description": "Rent · week 3",
+              "type": "Journal",
+              "amount": 1162
+            },
+            {
+              "date": "2026-06-28",
+              "description": "Rent · week 4",
+              "type": "Journal",
+              "amount": 996
+            }
+          ]
+        },
+        {
+          "label": "Payroll — shop",
+          "amount": 2822,
+          "drill": [
+            {
+              "date": "2026-06-08",
+              "description": "Payroll · week 1",
+              "type": "Journal",
+              "amount": 621
+            },
+            {
+              "date": "2026-06-15",
+              "description": "Payroll · week 2",
+              "type": "Journal",
+              "amount": 734
+            },
+            {
+              "date": "2026-06-22",
+              "description": "Payroll · week 3",
+              "type": "Journal",
+              "amount": 790
+            },
+            {
+              "date": "2026-06-28",
+              "description": "Payroll · week 4",
+              "type": "Journal",
+              "amount": 677
+            }
+          ]
+        },
+        {
+          "label": "Other operating",
+          "amount": 1328,
+          "drill": [
+            {
+              "date": "2026-06-08",
+              "description": "Other operating · week 1",
+              "type": "Journal",
+              "amount": 292
+            },
+            {
+              "date": "2026-06-15",
+              "description": "Other operating · week 2",
+              "type": "Journal",
+              "amount": 345
+            },
+            {
+              "date": "2026-06-22",
+              "description": "Other operating · week 3",
+              "type": "Journal",
+              "amount": 372
+            },
+            {
+              "date": "2026-06-28",
+              "description": "Other operating · week 4",
+              "type": "Journal",
+              "amount": 319
+            }
+          ]
+        }
+      ]
+    },
+    "2026-07": {
+      "income": [
+        {
+          "label": "Tire sales",
+          "amount": 29684,
+          "drill": [
+            {
+              "date": "2026-07-08",
+              "description": "Tire sales · week 1",
+              "type": "Journal",
+              "amount": 6530
+            },
+            {
+              "date": "2026-07-15",
+              "description": "Tire sales · week 2",
+              "type": "Journal",
+              "amount": 7718
+            },
+            {
+              "date": "2026-07-22",
+              "description": "Tire sales · week 3",
+              "type": "Journal",
+              "amount": 8312
+            },
+            {
+              "date": "2026-07-28",
+              "description": "Tire sales · week 4",
+              "type": "Journal",
+              "amount": 7124
+            }
+          ]
+        },
+        {
+          "label": "Service & labor",
+          "amount": 5068,
+          "drill": [
+            {
+              "date": "2026-07-08",
+              "description": "Service & labor · week 1",
+              "type": "Journal",
+              "amount": 1115
+            },
+            {
+              "date": "2026-07-15",
+              "description": "Service & labor · week 2",
+              "type": "Journal",
+              "amount": 1318
+            },
+            {
+              "date": "2026-07-22",
+              "description": "Service & labor · week 3",
+              "type": "Journal",
+              "amount": 1419
+            },
+            {
+              "date": "2026-07-28",
+              "description": "Service & labor · week 4",
+              "type": "Journal",
+              "amount": 1216
+            }
+          ]
+        },
+        {
+          "label": "Parts & accessories",
+          "amount": 1448,
+          "drill": [
+            {
+              "date": "2026-07-08",
+              "description": "Parts & accessories · week 1",
+              "type": "Journal",
+              "amount": 319
+            },
+            {
+              "date": "2026-07-15",
+              "description": "Parts & accessories · week 2",
+              "type": "Journal",
+              "amount": 376
+            },
+            {
+              "date": "2026-07-22",
+              "description": "Parts & accessories · week 3",
+              "type": "Journal",
+              "amount": 405
+            },
+            {
+              "date": "2026-07-28",
+              "description": "Parts & accessories · week 4",
+              "type": "Journal",
+              "amount": 348
+            }
+          ]
+        }
+      ],
+      "cogs": [
+        {
+          "label": "Tire cost of sales",
+          "amount": 10640,
+          "drill": [
+            {
+              "date": "2026-07-08",
+              "description": "COGS · Tire COGS · week 1",
+              "type": "Journal",
+              "amount": 2341
+            },
+            {
+              "date": "2026-07-15",
+              "description": "COGS · Tire COGS · week 2",
+              "type": "Journal",
+              "amount": 2766
+            },
+            {
+              "date": "2026-07-22",
+              "description": "COGS · Tire COGS · week 3",
+              "type": "Journal",
+              "amount": 2979
+            },
+            {
+              "date": "2026-07-28",
+              "description": "COGS · Tire COGS · week 4",
+              "type": "Journal",
+              "amount": 2554
+            }
+          ]
+        },
+        {
+          "label": "Parts & fluids",
+          "amount": 2240,
+          "drill": [
+            {
+              "date": "2026-07-08",
+              "description": "COGS · Parts COGS · week 1",
+              "type": "Journal",
+              "amount": 493
+            },
+            {
+              "date": "2026-07-15",
+              "description": "COGS · Parts COGS · week 2",
+              "type": "Journal",
+              "amount": 582
+            },
+            {
+              "date": "2026-07-22",
+              "description": "COGS · Parts COGS · week 3",
+              "type": "Journal",
+              "amount": 627
+            },
+            {
+              "date": "2026-07-28",
+              "description": "COGS · Parts COGS · week 4",
+              "type": "Journal",
+              "amount": 538
+            }
+          ]
+        },
+        {
+          "label": "Shop supplies (COGS)",
+          "amount": 1120,
+          "drill": [
+            {
+              "date": "2026-07-08",
+              "description": "COGS · Supplies COGS · week 1",
+              "type": "Journal",
+              "amount": 246
+            },
+            {
+              "date": "2026-07-15",
+              "description": "COGS · Supplies COGS · week 2",
+              "type": "Journal",
+              "amount": 291
+            },
+            {
+              "date": "2026-07-22",
+              "description": "COGS · Supplies COGS · week 3",
+              "type": "Journal",
+              "amount": 314
+            },
+            {
+              "date": "2026-07-28",
+              "description": "COGS · Supplies COGS · week 4",
+              "type": "Journal",
+              "amount": 269
+            }
+          ]
+        }
+      ],
+      "expense": [
+        {
+          "label": "Rent",
+          "amount": 4500,
+          "drill": [
+            {
+              "date": "2026-07-08",
+              "description": "Rent · week 1",
+              "type": "Journal",
+              "amount": 990
+            },
+            {
+              "date": "2026-07-15",
+              "description": "Rent · week 2",
+              "type": "Journal",
+              "amount": 1170
+            },
+            {
+              "date": "2026-07-22",
+              "description": "Rent · week 3",
+              "type": "Journal",
+              "amount": 1260
+            },
+            {
+              "date": "2026-07-28",
+              "description": "Rent · week 4",
+              "type": "Journal",
+              "amount": 1080
+            }
+          ]
+        },
+        {
+          "label": "Payroll — shop",
+          "amount": 3060,
+          "drill": [
+            {
+              "date": "2026-07-08",
+              "description": "Payroll · week 1",
+              "type": "Journal",
+              "amount": 673
+            },
+            {
+              "date": "2026-07-15",
+              "description": "Payroll · week 2",
+              "type": "Journal",
+              "amount": 796
+            },
+            {
+              "date": "2026-07-22",
+              "description": "Payroll · week 3",
+              "type": "Journal",
+              "amount": 857
+            },
+            {
+              "date": "2026-07-28",
+              "description": "Payroll · week 4",
+              "type": "Journal",
+              "amount": 734
+            }
+          ]
+        },
+        {
+          "label": "Other operating",
+          "amount": 1440,
+          "drill": [
+            {
+              "date": "2026-07-08",
+              "description": "Other operating · week 1",
+              "type": "Journal",
+              "amount": 317
+            },
+            {
+              "date": "2026-07-15",
+              "description": "Other operating · week 2",
+              "type": "Journal",
+              "amount": 374
+            },
+            {
+              "date": "2026-07-22",
+              "description": "Other operating · week 3",
+              "type": "Journal",
+              "amount": 403
+            },
+            {
+              "date": "2026-07-28",
+              "description": "Other operating · week 4",
+              "type": "Journal",
+              "amount": 346
+            }
+          ]
+        }
+      ]
+    },
+    "2026-08": {
+      "income": [
+        {
+          "label": "Tire sales",
+          "amount": 30422,
+          "drill": [
+            {
+              "date": "2026-08-08",
+              "description": "Tire sales · week 1",
+              "type": "Journal",
+              "amount": 6693
+            },
+            {
+              "date": "2026-08-15",
+              "description": "Tire sales · week 2",
+              "type": "Journal",
+              "amount": 7910
+            },
+            {
+              "date": "2026-08-22",
+              "description": "Tire sales · week 3",
+              "type": "Journal",
+              "amount": 8518
+            },
+            {
+              "date": "2026-08-28",
+              "description": "Tire sales · week 4",
+              "type": "Journal",
+              "amount": 7301
+            }
+          ]
+        },
+        {
+          "label": "Service & labor",
+          "amount": 5194,
+          "drill": [
+            {
+              "date": "2026-08-08",
+              "description": "Service & labor · week 1",
+              "type": "Journal",
+              "amount": 1143
+            },
+            {
+              "date": "2026-08-15",
+              "description": "Service & labor · week 2",
+              "type": "Journal",
+              "amount": 1350
+            },
+            {
+              "date": "2026-08-22",
+              "description": "Service & labor · week 3",
+              "type": "Journal",
+              "amount": 1454
+            },
+            {
+              "date": "2026-08-28",
+              "description": "Service & labor · week 4",
+              "type": "Journal",
+              "amount": 1247
+            }
+          ]
+        },
+        {
+          "label": "Parts & accessories",
+          "amount": 1484,
+          "drill": [
+            {
+              "date": "2026-08-08",
+              "description": "Parts & accessories · week 1",
+              "type": "Journal",
+              "amount": 326
+            },
+            {
+              "date": "2026-08-15",
+              "description": "Parts & accessories · week 2",
+              "type": "Journal",
+              "amount": 386
+            },
+            {
+              "date": "2026-08-22",
+              "description": "Parts & accessories · week 3",
+              "type": "Journal",
+              "amount": 416
+            },
+            {
+              "date": "2026-08-28",
+              "description": "Parts & accessories · week 4",
+              "type": "Journal",
+              "amount": 356
+            }
+          ]
+        }
+      ],
+      "cogs": [
+        {
+          "label": "Tire cost of sales",
+          "amount": 10944,
+          "drill": [
+            {
+              "date": "2026-08-08",
+              "description": "COGS · Tire COGS · week 1",
+              "type": "Journal",
+              "amount": 2408
+            },
+            {
+              "date": "2026-08-15",
+              "description": "COGS · Tire COGS · week 2",
+              "type": "Journal",
+              "amount": 2845
+            },
+            {
+              "date": "2026-08-22",
+              "description": "COGS · Tire COGS · week 3",
+              "type": "Journal",
+              "amount": 3064
+            },
+            {
+              "date": "2026-08-28",
+              "description": "COGS · Tire COGS · week 4",
+              "type": "Journal",
+              "amount": 2627
+            }
+          ]
+        },
+        {
+          "label": "Parts & fluids",
+          "amount": 2304,
+          "drill": [
+            {
+              "date": "2026-08-08",
+              "description": "COGS · Parts COGS · week 1",
+              "type": "Journal",
+              "amount": 507
+            },
+            {
+              "date": "2026-08-15",
+              "description": "COGS · Parts COGS · week 2",
+              "type": "Journal",
+              "amount": 599
+            },
+            {
+              "date": "2026-08-22",
+              "description": "COGS · Parts COGS · week 3",
+              "type": "Journal",
+              "amount": 645
+            },
+            {
+              "date": "2026-08-28",
+              "description": "COGS · Parts COGS · week 4",
+              "type": "Journal",
+              "amount": 553
+            }
+          ]
+        },
+        {
+          "label": "Shop supplies (COGS)",
+          "amount": 1152,
+          "drill": [
+            {
+              "date": "2026-08-08",
+              "description": "COGS · Supplies COGS · week 1",
+              "type": "Journal",
+              "amount": 253
+            },
+            {
+              "date": "2026-08-15",
+              "description": "COGS · Supplies COGS · week 2",
+              "type": "Journal",
+              "amount": 300
+            },
+            {
+              "date": "2026-08-22",
+              "description": "COGS · Supplies COGS · week 3",
+              "type": "Journal",
+              "amount": 323
+            },
+            {
+              "date": "2026-08-28",
+              "description": "COGS · Supplies COGS · week 4",
+              "type": "Journal",
+              "amount": 276
+            }
+          ]
+        }
+      ],
+      "expense": [
+        {
+          "label": "Rent",
+          "amount": 4550,
+          "drill": [
+            {
+              "date": "2026-08-08",
+              "description": "Rent · week 1",
+              "type": "Journal",
+              "amount": 1001
+            },
+            {
+              "date": "2026-08-15",
+              "description": "Rent · week 2",
+              "type": "Journal",
+              "amount": 1183
+            },
+            {
+              "date": "2026-08-22",
+              "description": "Rent · week 3",
+              "type": "Journal",
+              "amount": 1274
+            },
+            {
+              "date": "2026-08-28",
+              "description": "Rent · week 4",
+              "type": "Journal",
+              "amount": 1092
+            }
+          ]
+        },
+        {
+          "label": "Payroll — shop",
+          "amount": 3094,
+          "drill": [
+            {
+              "date": "2026-08-08",
+              "description": "Payroll · week 1",
+              "type": "Journal",
+              "amount": 681
+            },
+            {
+              "date": "2026-08-15",
+              "description": "Payroll · week 2",
+              "type": "Journal",
+              "amount": 804
+            },
+            {
+              "date": "2026-08-22",
+              "description": "Payroll · week 3",
+              "type": "Journal",
+              "amount": 866
+            },
+            {
+              "date": "2026-08-28",
+              "description": "Payroll · week 4",
+              "type": "Journal",
+              "amount": 743
+            }
+          ]
+        },
+        {
+          "label": "Other operating",
+          "amount": 1456,
+          "drill": [
+            {
+              "date": "2026-08-08",
+              "description": "Other operating · week 1",
+              "type": "Journal",
+              "amount": 320
+            },
+            {
+              "date": "2026-08-15",
+              "description": "Other operating · week 2",
+              "type": "Journal",
+              "amount": 379
+            },
+            {
+              "date": "2026-08-22",
+              "description": "Other operating · week 3",
+              "type": "Journal",
+              "amount": 408
+            },
+            {
+              "date": "2026-08-28",
+              "description": "Other operating · week 4",
+              "type": "Journal",
+              "amount": 349
+            }
+          ]
+        }
+      ]
+    }
+  },
+  "balance_sheet": {
+    "2026-08": {
+      "month": "2026-08",
+      "label": "Aug 31, 2026",
+      "assets": [
+        {
+          "label": "Business checking",
+          "amount": 45200,
+          "drill": [
+            {
+              "date": "2026-08-31",
+              "description": "Bank balance per statement",
+              "type": "Balance",
+              "amount": 45200
+            }
+          ]
+        },
+        {
+          "label": "Inventory",
+          "amount": 19200,
+          "drill": [
+            {
+              "date": "2026-08-31",
+              "description": "Finished tires on hand",
+              "type": "Balance",
+              "amount": 19200
+            }
+          ]
+        },
+        {
+          "label": "Accounts receivable",
+          "amount": 3800,
+          "drill": [
+            {
+              "date": "2026-08-31",
+              "description": "Open customer invoices",
+              "type": "Balance",
+              "amount": 3800
+            }
+          ]
+        }
+      ],
+      "liabilities": [
+        {
+          "label": "Accounts payable",
+          "amount": 10800
+        },
+        {
+          "label": "Credit cards",
+          "amount": 6400
+        },
+        {
+          "label": "Sales tax payable",
+          "amount": 2200
+        }
+      ],
+      "equity": [
+        {
+          "label": "Owner's equity",
+          "amount": 48800
+        }
+      ]
+    }
+  },
+  "cash_flow": {
+    "2026-08": {
+      "month": "2026-08",
+      "operating": [
+        {
+          "label": "Net income",
+          "amount": 13600
+        },
+        {
+          "label": "Inventory change",
+          "amount": -800
+        },
+        {
+          "label": "Accounts receivable change",
+          "amount": -400
+        },
+        {
+          "label": "Accounts payable change",
+          "amount": 600
+        }
+      ],
+      "investing": [
+        {
+          "label": "Shop equipment",
+          "amount": -1200
+        }
+      ],
+      "financing": [
+        {
+          "label": "Owner draw",
+          "amount": -2500
+        }
+      ],
+      "cashStart": 42100,
+      "cashEnd": 45200,
+      "netChange": 3100
+    }
+  },
+  "sales_mix_aug": [
+    {
+      "name": "New Tires",
+      "pct": 62.4,
+      "revenue": 23150
+    },
+    {
+      "name": "Service & Repair",
+      "pct": 22.1,
+      "revenue": 8200
+    },
+    {
+      "name": "Used Tires",
+      "pct": 10.5,
+      "revenue": 3900
+    },
+    {
+      "name": "Other",
+      "pct": 5,
+      "revenue": 1850
+    }
+  ],
+  "top_tire_sizes_aug": [
+    {
+      "rank": 1,
+      "size": "235/65R17",
+      "units": 86,
+      "revenue": 11200
+    },
+    {
+      "rank": 2,
+      "size": "225/60R17",
+      "units": 72,
+      "revenue": 9800
+    },
+    {
+      "rank": 3,
+      "size": "245/70R17",
+      "units": 58,
+      "revenue": 8900
+    },
+    {
+      "rank": 4,
+      "size": "205/55R16",
+      "units": 54,
+      "revenue": 6200
+    },
+    {
+      "rank": 5,
+      "size": "265/70R17",
+      "units": 41,
+      "revenue": 7100
+    },
+    {
+      "rank": 6,
+      "size": "275/55R20",
+      "units": 36,
+      "revenue": 6800
+    }
+  ],
+  "stock": [
+    {
+      "size": "235/65/17",
+      "desc": "All-season touring",
+      "onHand": 8,
+      "unitCost": 454.26250000000005
+    },
+    {
+      "size": "205/55/16",
+      "desc": "Grand touring",
+      "onHand": 6,
+      "unitCost": 393.69
+    },
+    {
+      "size": "225/60/17",
+      "desc": "All-season",
+      "onHand": 10,
+      "unitCost": 423.97
+    },
+    {
+      "size": "245/70/17",
+      "desc": "All-terrain",
+      "onHand": 6,
+      "unitCost": 514.83
+    },
+    {
+      "size": "265/70/17",
+      "desc": "Highway terrain",
+      "onHand": 2,
+      "unitCost": 514.83
+    },
+    {
+      "size": "255/50/20",
+      "desc": "Performance SUV",
+      "onHand": 4,
+      "unitCost": 696.53
+    },
+    {
+      "size": "215/55/17",
+      "desc": "Standard touring",
+      "onHand": 5,
+      "unitCost": 411.86
+    }
+  ],
+  "inventory_value_aug": 19200,
+  "orders": [
+    {
+      "date": "2026-09-25",
+      "ticket": "C-89221",
+      "item": "235/65R17 touring ×4",
+      "qty": 4,
+      "sale": 520,
+      "cost": 300,
+      "source": "Distributor · matched",
+      "est": false,
+      "flagged": false,
+      "size": "235/65R17"
+    },
+    {
+      "date": "2026-09-25",
+      "ticket": "C-89219",
+      "item": "Oil change + rotation",
+      "qty": 1,
+      "sale": 115,
+      "cost": 42,
+      "source": "Parts est.",
+      "est": true,
+      "flagged": false,
+      "size": "Service"
+    },
+    {
+      "date": "2026-09-24",
+      "ticket": "C-89202",
+      "item": "205/55R16 grand touring ×2",
+      "qty": 2,
+      "sale": 248,
+      "cost": 130,
+      "source": "Distributor · matched",
+      "est": false,
+      "flagged": false,
+      "size": "205/55R16"
+    },
+    {
+      "date": "2026-09-24",
+      "ticket": "C-89198",
+      "item": "Tire plug repair",
+      "qty": 1,
+      "sale": 25,
+      "cost": 4,
+      "source": "Service",
+      "est": false,
+      "flagged": false,
+      "size": "Service"
+    },
+    {
+      "date": "2026-09-24",
+      "ticket": "C-89191",
+      "item": "245/70R17 A/T ×4 + alignment",
+      "qty": 4,
+      "sale": 620,
+      "cost": 340,
+      "source": "Distributor · matched",
+      "est": false,
+      "flagged": true,
+      "size": "245/70R17"
+    },
+    {
+      "date": "2026-09-23",
+      "ticket": "C-89170",
+      "item": "225/60R17 all-season ×4",
+      "qty": 4,
+      "sale": 440,
+      "cost": 280,
+      "source": "Inventory",
+      "est": false,
+      "flagged": false,
+      "size": "225/60R17"
+    },
+    {
+      "date": "2026-09-23",
+      "ticket": "C-89165",
+      "item": "TPMS sensor ×2",
+      "qty": 2,
+      "sale": 210,
+      "cost": 72,
+      "source": "Parts est.",
+      "est": true,
+      "flagged": false,
+      "size": "Parts"
+    },
+    {
+      "date": "2026-09-22",
+      "ticket": "C-89140",
+      "item": "255/50R20 SUV ×4",
+      "qty": 4,
+      "sale": 880,
+      "cost": 460,
+      "source": "Distributor · same-day",
+      "est": false,
+      "flagged": false,
+      "size": "255/50R20"
+    },
+    {
+      "date": "2026-09-22",
+      "ticket": "C-89132",
+      "item": "Wheel balance (set)",
+      "qty": 1,
+      "sale": 48,
+      "cost": 8,
+      "source": "Service",
+      "est": false,
+      "flagged": false,
+      "size": "Service"
+    },
+    {
+      "date": "2026-09-22",
+      "ticket": "C-89110",
+      "item": "265/70R17 highway ×2",
+      "qty": 2,
+      "sale": 280,
+      "cost": 170,
+      "source": "Distributor · matched",
+      "est": false,
+      "flagged": false,
+      "size": "265/70R17"
+    },
+    {
+      "date": "2026-09-21",
+      "ticket": "C-89088",
+      "item": "275/55R20 crossover ×4",
+      "qty": 4,
+      "sale": 720,
+      "cost": 400,
+      "source": "Distributor · matched",
+      "est": false,
+      "flagged": false,
+      "size": "275/55R20"
+    },
+    {
+      "date": "2026-09-21",
+      "ticket": "C-89072",
+      "item": "Battery install",
+      "qty": 1,
+      "sale": 189,
+      "cost": 95,
+      "source": "Parts est.",
+      "est": true,
+      "flagged": false,
+      "size": "Parts"
+    },
+    {
+      "date": "2026-09-21",
+      "ticket": "C-89061",
+      "item": "195/65R15 touring ×4",
+      "qty": 4,
+      "sale": 360,
+      "cost": 220,
+      "source": "Inventory",
+      "est": false,
+      "flagged": false,
+      "size": "195/65R15"
+    },
+    {
+      "date": "2026-09-20",
+      "ticket": "C-89040",
+      "item": "Alignment · 4-wheel",
+      "qty": 1,
+      "sale": 120,
+      "cost": 18,
+      "source": "Service",
+      "est": false,
+      "flagged": false,
+      "size": "Service"
+    },
+    {
+      "date": "2026-09-20",
+      "ticket": "C-89028",
+      "item": "285/45R22 performance ×2",
+      "qty": 2,
+      "sale": 540,
+      "cost": 310,
+      "source": "Distributor · same-day",
+      "est": false,
+      "flagged": false,
+      "size": "285/45R22"
+    },
+    {
+      "date": "2026-09-20",
+      "ticket": "C-89015",
+      "item": "Brake pads front",
+      "qty": 1,
+      "sale": 285,
+      "cost": 110,
+      "source": "Parts est.",
+      "est": true,
+      "flagged": false,
+      "size": "Parts"
+    },
+    {
+      "date": "2026-09-19",
+      "ticket": "C-88990",
+      "item": "215/55R17 touring ×4",
+      "qty": 4,
+      "sale": 392,
+      "cost": 248,
+      "source": "Distributor · matched",
+      "est": false,
+      "flagged": false,
+      "size": "215/55R17"
+    },
+    {
+      "date": "2026-09-19",
+      "ticket": "C-88977",
+      "item": "Flat repair + mount",
+      "qty": 1,
+      "sale": 35,
+      "cost": 6,
+      "source": "Service",
+      "est": false,
+      "flagged": false,
+      "size": "Service"
+    },
+    {
+      "date": "2026-09-19",
+      "ticket": "C-88962",
+      "item": "245/60R18 touring ×4",
+      "qty": 4,
+      "sale": 680,
+      "cost": 420,
+      "source": "Inventory",
+      "est": false,
+      "flagged": false,
+      "size": "245/60R18"
+    },
+    {
+      "date": "2026-09-15",
+      "ticket": "C-88810",
+      "item": "225/60R17 all-season ×4",
+      "qty": 4,
+      "sale": 452,
+      "cost": 288,
+      "source": "Inventory",
+      "est": false,
+      "flagged": false,
+      "size": "225/60R17"
+    },
+    {
+      "date": "2026-09-12",
+      "ticket": "C-88702",
+      "item": "Used tire pair 215/60R16",
+      "qty": 2,
+      "sale": 90,
+      "cost": 36,
+      "source": "Used",
+      "est": false,
+      "flagged": false,
+      "size": "215/60R16"
+    },
+    {
+      "date": "2026-09-08",
+      "ticket": "C-88540",
+      "item": "235/65R17 touring ×4",
+      "qty": 4,
+      "sale": 508,
+      "cost": 300,
+      "source": "Distributor · matched",
+      "est": false,
+      "flagged": false,
+      "size": "235/65R17"
+    }
+  ],
+  "ytd_revenue": 285400,
+  "ask": {
+    "chips": [
+      "What was my best month this year?",
+      "How is my cash looking?",
+      "What is driving the business, tires or service?",
+      "Which tire sizes sell best?",
+      "How is this month going?"
+    ],
+    "answers": {
+      "best_month": "May 2026 was the strongest closed month at $14,200 net profit on $38,100 revenue (37.3% margin).",
+      "cash": "Business checking was $45,200 at Aug 31. August net cash from operations was about $3,100.",
+      "mix": "In August, new tire sales were $23,150 (62.4% of revenue). Service and repair added $8,200.",
+      "sizes": "Top size in August was 235/65R17 — 86 units and $11,200 revenue.",
+      "month": "September register through Sep 25 shows $7,757 in sales on 22 tickets (estimates)."
+    }
+  }
+}
