@@ -1,5 +1,5 @@
 import { useMemo, useState, useCallback } from 'react'
-import DemoLobby from '../../DemoLobby'
+import CloseoutExplosionLobby from './CloseoutExplosionLobby'
 import {
   CHAR,
   SPICE,
@@ -17,7 +17,6 @@ import {
   money,
   money0,
   pct1,
-  fmtAsOfLong,
   fmtD,
   fmtInt,
   deltaColor,
@@ -48,7 +47,7 @@ export default function CloseoutExplosionPortal() {
   const [lotFilter, setLotFilter] = useState('Open')
   const [stack, setStack] = useState([])
 
-  const sampleHeader = `Sample — fictitious numbers · as of ${fmtAsOfLong(dash.asOf)}`
+  const sampleHeader = 'Sample — fictitious numbers · as of Oct 2026'
   const currentLabel = TABS.find((t) => t[0] === tab)?.[1] || ''
 
   const push = useCallback((frame) => setStack((s) => [...s, frame]), [])
@@ -886,7 +885,7 @@ export default function CloseoutExplosionPortal() {
   return (
     <>
       <style dangerouslySetInnerHTML={{ __html: portalStyles }} />
-      <DemoLobby />
+      <CloseoutExplosionLobby />
       <div className="ce-shell">
         <aside className="ce-side">
           <div style={{ padding: '2px 8px 16px' }}>
@@ -913,12 +912,6 @@ export default function CloseoutExplosionPortal() {
               )
             })}
           </nav>
-          <div style={{ padding: '12px 10px 0', borderTop: '1px solid rgba(255,255,255,.1)', marginTop: 8 }}>
-            <div style={{ fontFamily: MONO, fontSize: 9, color: '#8A7A66', lineHeight: 1.7 }}>
-              SAMPLE DASHBOARD<br />
-              <span style={{ color: SPICE, fontWeight: 600 }}>JK No Jokes Financials</span>
-            </div>
-          </div>
         </aside>
         <main className="ce-main">
           <div style={{ marginBottom: 22 }}>
