@@ -27,6 +27,14 @@ import { allocateWholeDollars } from './sampleWholeDollarDisplay.js'
 const CHANNELS = DATA.channels
 const BAG_COLORS = [SPICE, KRAFT, GREEN, '#8A5A2B', '#6B5B4F']
 
+/** Right-axis net profit ticks (e.g. 1500 → $1.5k, not rounded $2k). */
+function formatNetAxisK(v) {
+  const k = v / 1000
+  const tenths = Math.round(k * 10) / 10
+  if (Math.abs(tenths - Math.round(tenths)) < 1e-9) return `$${Math.round(tenths)}k`
+  return `$${tenths.toFixed(1)}k`
+}
+
 export default function PrimalKrispOverview({
   card,
   lbl,
@@ -177,7 +185,7 @@ export default function PrimalKrispOverview({
                 <YAxis
                   yAxisId="net"
                   orientation="right"
-                  tickFormatter={(v) => '$' + Math.round(v / 1000) + 'k'}
+                  tickFormatter={formatNetAxisK}
                   tick={{ fontSize: 11, fill: GREEN }}
                   axisLine={false}
                   tickLine={false}
