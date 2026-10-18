@@ -3,7 +3,7 @@
  * orders; journal previews are computed here so the check script and UI share one path.
  */
 
-const TAX_RATE = 0.06625
+const TAX_RATE = 0.07
 const PROCESSOR_RATE = 0.025
 const DRAWER_FLOAT = 150
 
@@ -17,26 +17,19 @@ export function classifySaleLine(order) {
 
 function splitRegisterSales(orders) {
   const registerSales = round2(orders.reduce((s, o) => s + o.sale, 0))
-  const tax = round2(registerSales - registerSales / (1 + TAX_RATE))
-  const pretax = round2(registerSales - tax)
   let tires = 0
   let service = 0
   let other = 0
-  const pretaxByLine = orders.map((o) => round2(o.sale / (1 + TAX_RATE)))
-  const pretaxSum = round2(pretaxByLine.reduce((s, n) => s + n, 0))
-  const scale = pretaxSum > 0 ? pretax / pretaxSum : 1
-  orders.forEach((o, i) => {
+  orders.forEach((o) => {
     const bucket = classifySaleLine(o)
-    const slice = round2(pretaxByLine[i] * scale)
-    if (bucket === 'service') service += slice
-    else if (bucket === 'other') other += slice
-    else tires += slice
+    const pretaxLine = Math.round(o.sale / (1 + TAX_RATE))
+    if (bucket === 'service') service += pretaxLine
+    else if (bucket === 'other') other += pretaxLine
+    else tires += pretaxLine
   })
-  tires = round2(tires)
-  service = round2(service)
-  other = round2(other)
-  const drift = round2(pretax - tires - service - other)
-  if (Math.abs(drift) >= 0.01) tires = round2(tires + drift)
+  let tax = round2((tires + service + other) * TAX_RATE)
+  const drift = round2(registerSales - tires - service - other - tax)
+  if (Math.abs(drift) >= 0.005) tax = round2(tax + drift)
   return { registerSales, tires, service, other, tax }
 }
 
@@ -130,10 +123,8 @@ export function buildDailyCloseJournal(day) {
   if (salesSplit.service > 0) lines.push({ account: 'Sales — service', debit: 0, credit: salesSplit.service })
   if (salesSplit.other > 0) lines.push({ account: 'Sales — other', debit: 0, credit: salesSplit.other })
   if (salesSplit.tax > 0) lines.push({ account: 'Sales tax payable', debit: 0, credit: salesSplit.tax })
-  if (Math.abs(overShort) >= 0.005) {
-    if (overShort > 0) lines.push({ account: 'Cash over / short', debit: 0, credit: overShort })
-    else lines.push({ account: 'Cash over / short', debit: -overShort, credit: 0 })
-  }
+  if (overShort > 0.005) lines.push({ account: 'Cash over / short', debit: 0, credit: round2(overShort) })
+  else if (overShort < -0.005) lines.push({ account: 'Cash over / short', debit: round2(-overShort), credit: 0 })
   const debitTotal = round2(lines.reduce((s, l) => s + l.debit, 0))
   const creditTotal = round2(lines.reduce((s, l) => s + l.credit, 0))
   const salesCredits = round2(salesSplit.tires + salesSplit.service + salesSplit.other + salesSplit.tax)

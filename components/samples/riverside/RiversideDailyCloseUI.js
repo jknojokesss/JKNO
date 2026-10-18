@@ -62,7 +62,7 @@ export function DailyCloseSection({ model, onSelectDay }) {
               <th style={hcell()}>Date</th>
               <th style={hcell('right')}>Register</th>
               <th style={hcell('right')}>Cash counted</th>
-              <th style={hcell('right')}>Card deposit</th>
+              <th style={hcell('right')}>Card sales</th>
               <th style={hcell('right')}>Over / short</th>
               <th style={hcell()}>Status</th>
             </tr>
@@ -80,7 +80,7 @@ export function DailyCloseSection({ model, onSelectDay }) {
                 <td style={cell('left')}>{fmtDate(day.date).replace(/, \d{4}$/, '')}</td>
                 <td style={cell('right')}>{fmtC(day.registerSales)}</td>
                 <td style={cell('right')}>{fmtC(day.cashDrawer.cashToDeposit)}</td>
-                <td style={cell('right')}>{fmtC(day.cardBatch.netDeposit)}</td>
+                <td style={cell('right')}>{fmtC(day.cardBatch.batchTotal)}</td>
                 <td style={cell('right')}>{fmtC(day.overShort)}</td>
                 <td style={cell('left', statusColor(day.status))}>{day.status}</td>
               </tr>
@@ -99,8 +99,8 @@ export function DailyCloseSection({ model, onSelectDay }) {
                 <span>{fmtC(day.registerSales)}</span>
                 <span>Cash counted</span>
                 <span>{fmtC(day.cashDrawer.cashToDeposit)}</span>
-                <span>Card deposit</span>
-                <span>{fmtC(day.cardBatch.netDeposit)}</span>
+                <span>Card sales</span>
+                <span>{fmtC(day.cardBatch.batchTotal)}</span>
                 <span>Over / short</span>
                 <span>{fmtC(day.overShort)}</span>
               </div>

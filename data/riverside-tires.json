@@ -1,8 +1,8 @@
 {
   "meta": {
-    "as_of": "2026-10-25",
+    "as_of": "2026-10-17",
     "sample_header": "Sample — fictitious numbers · as of Oct 2026",
-    "week_start": "2026-10-19"
+    "week_start": "2026-10-11"
   },
   "monthly": [
     {
@@ -3180,7 +3180,7 @@
   "inventory_value_aug": 17767,
   "orders": [
     {
-      "date": "2026-10-24",
+      "date": "2026-10-17",
       "ticket": "C-89221",
       "item": "235/65R17 touring ×4",
       "qty": 4,
@@ -3193,7 +3193,7 @@
       "payment": "card"
     },
     {
-      "date": "2026-10-24",
+      "date": "2026-10-17",
       "ticket": "C-89219",
       "item": "Oil change + rotation",
       "qty": 1,
@@ -3206,7 +3206,7 @@
       "payment": "cash"
     },
     {
-      "date": "2026-10-24",
+      "date": "2026-10-17",
       "ticket": "C-89208",
       "item": "Used 225/60R17 ×2",
       "qty": 2,
@@ -3219,7 +3219,7 @@
       "payment": "card"
     },
     {
-      "date": "2026-10-24",
+      "date": "2026-10-17",
       "ticket": "C-89202",
       "item": "205/55R16 grand touring ×2",
       "qty": 2,
@@ -3232,7 +3232,7 @@
       "payment": "card"
     },
     {
-      "date": "2026-10-24",
+      "date": "2026-10-17",
       "ticket": "C-89198",
       "item": "Tire plug repair",
       "qty": 1,
@@ -3245,7 +3245,7 @@
       "payment": "cash"
     },
     {
-      "date": "2026-10-24",
+      "date": "2026-10-17",
       "ticket": "C-89191",
       "item": "245/70R17 A/T ×4 + alignment",
       "qty": 4,
@@ -3258,7 +3258,7 @@
       "payment": "card"
     },
     {
-      "date": "2026-10-23",
+      "date": "2026-10-16",
       "ticket": "C-89170",
       "item": "225/60R17 all-season ×4",
       "qty": 4,
@@ -3271,7 +3271,7 @@
       "payment": "cash"
     },
     {
-      "date": "2026-10-23",
+      "date": "2026-10-16",
       "ticket": "C-89165",
       "item": "TPMS sensor ×2",
       "qty": 2,
@@ -3284,7 +3284,7 @@
       "payment": "card"
     },
     {
-      "date": "2026-10-22",
+      "date": "2026-10-15",
       "ticket": "C-89140",
       "item": "255/50R20 SUV ×4",
       "qty": 4,
@@ -3297,7 +3297,7 @@
       "payment": "cash"
     },
     {
-      "date": "2026-10-22",
+      "date": "2026-10-15",
       "ticket": "C-89132",
       "item": "Wheel balance (set)",
       "qty": 1,
@@ -3310,7 +3310,7 @@
       "payment": "card"
     },
     {
-      "date": "2026-10-22",
+      "date": "2026-10-15",
       "ticket": "C-89110",
       "item": "265/70R17 highway ×2",
       "qty": 2,
@@ -3323,7 +3323,7 @@
       "payment": "card"
     },
     {
-      "date": "2026-10-21",
+      "date": "2026-10-14",
       "ticket": "C-89088",
       "item": "275/55R20 crossover ×4",
       "qty": 4,
@@ -3336,7 +3336,7 @@
       "payment": "cash"
     },
     {
-      "date": "2026-10-21",
+      "date": "2026-10-14",
       "ticket": "C-89072",
       "item": "Battery install",
       "qty": 1,
@@ -3349,7 +3349,7 @@
       "payment": "card"
     },
     {
-      "date": "2026-10-21",
+      "date": "2026-10-14",
       "ticket": "C-89066",
       "item": "Used 205/55R16 ×2",
       "qty": 2,
@@ -3362,7 +3362,7 @@
       "payment": "cash"
     },
     {
-      "date": "2026-10-20",
+      "date": "2026-10-13",
       "ticket": "C-89033",
       "item": "Used 235/65R17 ×2",
       "qty": 2,
@@ -3375,7 +3375,7 @@
       "payment": "card"
     },
     {
-      "date": "2026-10-21",
+      "date": "2026-10-14",
       "ticket": "C-89061",
       "item": "195/65R15 touring ×4",
       "qty": 4,
@@ -3388,7 +3388,7 @@
       "payment": "card"
     },
     {
-      "date": "2026-10-20",
+      "date": "2026-10-13",
       "ticket": "C-89040",
       "item": "Alignment · 4-wheel",
       "qty": 1,
@@ -3401,7 +3401,7 @@
       "payment": "cash"
     },
     {
-      "date": "2026-10-20",
+      "date": "2026-10-13",
       "ticket": "C-89028",
       "item": "285/45R22 performance ×2",
       "qty": 2,
@@ -3414,7 +3414,7 @@
       "payment": "card"
     },
     {
-      "date": "2026-10-20",
+      "date": "2026-10-13",
       "ticket": "C-89015",
       "item": "Brake pads front",
       "qty": 1,
@@ -3427,7 +3427,7 @@
       "payment": "cash"
     },
     {
-      "date": "2026-10-19",
+      "date": "2026-10-12",
       "ticket": "C-88990",
       "item": "215/55R17 touring ×4",
       "qty": 4,
@@ -3440,7 +3440,7 @@
       "payment": "card"
     },
     {
-      "date": "2026-10-19",
+      "date": "2026-10-12",
       "ticket": "C-88977",
       "item": "Flat repair + mount",
       "qty": 1,
@@ -3453,7 +3453,7 @@
       "payment": "cash"
     },
     {
-      "date": "2026-10-19",
+      "date": "2026-10-12",
       "ticket": "C-88962",
       "item": "245/60R18 touring ×4",
       "qty": 4,
@@ -3480,7 +3480,7 @@
       "cash": "Business checking was $45,200 at Aug 31. August net cash from operations was about $350 after draws.",
       "mix": "In August, new tire sales were $23,150 (184 units). Used tires added $3,900 (78 units). Service and repair was $8,200.",
       "sizes": "Top size in August was 235/65R17 — 44 units and $5,720 revenue at about $130 per tire.",
-      "month": "October register through Oct 25 shows $7,037 in sales on 22 tickets (estimates)."
+      "month": "October register through Oct 17 shows $7,037 in sales on 22 tickets (estimates)."
     }
   },
   "aug_tire_sales": {
@@ -6768,10 +6768,10 @@
   "daily_close": {
     "starting_drawer": 150,
     "adjustments": {
-      "2026-10-22": {
+      "2026-10-15": {
         "cash_counted": 1017.6
       },
-      "2026-10-24": {
+      "2026-10-17": {
         "cash_counted": 298.15
       }
     }
