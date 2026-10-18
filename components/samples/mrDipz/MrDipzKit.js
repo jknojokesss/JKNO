@@ -2,7 +2,8 @@ import { CHAR, SPICE, KRAFT, CREAM, CARDBG, INK, MUTED, BORDER, UI, MONO } from 
 
 export const SHELL_CSS = `*{box-sizing:border-box;margin:0;padding:0}
 html{-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale;text-rendering:optimizeLegibility}
-body{background:${CREAM};font-family:${UI};color:${INK}}
+body{background:${CREAM};font-family:${UI};color:${INK};font-variant-numeric:tabular-nums}
+.md-shell{font-variant-numeric:tabular-nums}
 html.md-sample-page .m-sample-lobby,html.md-sample-page .m-header,html.md-sample-page .md-lobby{display:none!important}
 .md-credit{font-size:11px;font-weight:500;color:${MUTED};line-height:1.35;letter-spacing:.02em;text-decoration:none}
 .md-credit:hover{text-decoration:underline}

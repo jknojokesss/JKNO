@@ -40,10 +40,10 @@ export default function MrDipzDeductions({ model, open, initialFilter }) {
   return (
     <>
       <div className="md-kpis" style={{ marginBottom: 12 }}>
-        <KPI k="TOTAL DEDUCTED" v={money(d.summary.total)} onClick={() => setFilter('all')} />
-        <KPI k="MATCHED" v={money(d.summary.matched)} onClick={() => setFilter('matched')} />
-        <KPI k="NEEDS BACKUP" v={money(d.summary.needsBackup)} onClick={() => setFilter('needs-backup')} />
-        <KPI k="DISPUTE" v={money(d.summary.dispute)} onClick={() => setFilter('dispute')} />
+        <KPI k="TOTAL DEDUCTED" v={money(d.summary.total)} onClick={() => open({ type: 'deductionsBucket', id: 'all' })} />
+        <KPI k="MATCHED" v={money(d.summary.matched)} onClick={() => open({ type: 'deductionsBucket', id: 'matched' })} />
+        <KPI k="NEEDS BACKUP" v={money(d.summary.needsBackup)} onClick={() => open({ type: 'deductionsBucket', id: 'needs-backup' })} />
+        <KPI k="DISPUTE" v={money(d.summary.dispute)} onClick={() => open({ type: 'deductionsBucket', id: 'dispute' })} />
       </div>
 
       <Card title="Remittances · last 90 days">

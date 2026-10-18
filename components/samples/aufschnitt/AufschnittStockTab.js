@@ -1,6 +1,6 @@
 import { useMemo } from 'react'
 import DATA from './aufschnittData'
-import { INK, MUTED, BORDER, CREAM, RED, MONO, money, money0, fmtCases, fmtAsOfLong, fmtWeekEnding } from './aufschnittUtils'
+import { INK, MUTED, BORDER, CREAM, RED, MONO, money, money0, fmtCases, fmtInt, fmtAsOfLong, fmtWeekEnding } from './aufschnittUtils'
 
 export default function AufschnittStockTab({ card, lbl, brand, onOpen, sort, setSort }) {
   const rows = useMemo(() => {
@@ -58,7 +58,7 @@ export default function AufschnittStockTab({ card, lbl, brand, onOpen, sort, set
                 <div style={{ fontWeight: 600, lineHeight: 1.3 }}>{r.name}</div>
                 <div style={{ fontSize: 10, color: MUTED }}>{r.brand}</div>
               </td>
-              <td style={{ padding: '8px 4px', textAlign: 'right', fontFamily: MONO }}>{r.onHandCases}</td>
+              <td style={{ padding: '8px 4px', textAlign: 'right', fontFamily: MONO }}>{fmtInt(r.onHandCases)}</td>
               <td style={{ padding: '8px 4px', textAlign: 'right', fontFamily: MONO }}>{fmtCases(r.avgWeeklyCases)}</td>
               <td style={{ padding: '8px 4px', textAlign: 'right', fontFamily: MONO, color: r.weeksSupply < 3 ? RED : INK }}>
                 {r.weeksSupply.toFixed(1)}
@@ -68,7 +68,7 @@ export default function AufschnittStockTab({ card, lbl, brand, onOpen, sort, set
           ))}
           <tr style={{ borderTop: `2px solid ${BORDER}`, fontWeight: 700 }}>
             <td style={{ padding: '10px 4px' }}>Total</td>
-            <td style={{ padding: '10px 4px', textAlign: 'right', fontFamily: MONO }}>{totals.cases}</td>
+            <td style={{ padding: '10px 4px', textAlign: 'right', fontFamily: MONO }}>{fmtInt(totals.cases)}</td>
             <td />
             <td />
             <td style={{ padding: '10px 4px', textAlign: 'right', fontFamily: MONO }}>{money0(totals.value)}</td>
@@ -92,12 +92,12 @@ export function StockDetail({ detail, card, lbl, big, onBack }) {
         {r.locations.map((loc) => (
           <div key={loc.location} style={{ display: 'flex', justifyContent: 'space-between', padding: '6px 0', borderTop: `1px solid ${CREAM}` }}>
             <span style={{ fontSize: 13 }}>{loc.location}</span>
-            <span style={{ fontFamily: MONO }}>{loc.cases} cases</span>
+            <span style={{ fontFamily: MONO }}>{fmtInt(loc.cases)} cases</span>
           </div>
         ))}
         <div style={{ display: 'flex', justifyContent: 'space-between', padding: '8px 0', fontWeight: 700, borderTop: `1px solid ${BORDER}` }}>
           <span>Total</span>
-          <span style={{ fontFamily: MONO }}>{r.onHandCases} cases</span>
+          <span style={{ fontFamily: MONO }}>{fmtInt(r.onHandCases)} cases</span>
         </div>
       </div>
 

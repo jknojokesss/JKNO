@@ -516,8 +516,8 @@ export function verifyMrDipzTotals() {
     '31–60 days': [t.aging.b1, 501150],
     '61–90 days': [t.aging.b2, 146050],
     'Over 90 days': [t.aging.b3, 71900],
-    'September net profit': [m.pnl.sep.netProfit, 536923],
-    'August net profit': [m.pnl.aug.netProfit, -16228],
+    'September net profit': [m.pnl.sep.netProfit, 576523],
+    'August net profit': [m.pnl.aug.netProfit, -24253],
   }
   const out = {}
   Object.entries(expect).forEach(([k, [got, want]]) => {

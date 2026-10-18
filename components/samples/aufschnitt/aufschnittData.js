@@ -189,35 +189,19 @@ const STOCK_WEEK_ENDINGS = [
   '2026-09-26',
 ]
 
-/** Relative store size for Stores channel splits (largest distributors / Lakewood). */
-const STORE_SALES_WEIGHT = {
-  'Tamar Market - Flatbush': 0.92,
-  "Zissel's - Brooklyn": 0.88,
-  'Nachas Foods - Brooklyn': 0.9,
-  'Ner Market - Brooklyn': 0.86,
-  'Gan Eden Market - Monsey': 0.94,
-  'Tova Supermarket - Wesley Hills': 0.91,
-  'Meged Glatt - Lakewood': 1.28,
-  'Nitzan Market - Lakewood': 1.22,
-  'Achdus Foods - Cedarhurst': 0.84,
-  "Gitty's Market - Lawrence": 0.68,
-  'Shoresh Market - Teaneck': 1.02,
-  'Dvir Market - Deal': 0.82,
-  'Golden Basket Kosher - Lawrence': 0.87,
-  'Shefa Market - Monsey': 1.06,
-  'Ahava Market - Baltimore': 1.08,
-  'Simcha Foods - Baltimore': 0.85,
-  "Lev Fresh - Queens": 0.66,
-  'Keren Wholesale - Lakewood': 1.32,
-}
+/** Relative store size for Stores channel splits (largest distributors). */
+const STORE_WEIGHTS_BY_INDEX = [
+  0.92, 0.88, 0.9, 0.86, 0.94, 0.91, 1.28, 1.22, 0.84, 0.68, 1.02, 0.82, 0.87, 1.06, 1.08, 0.85, 0.66, 1.32,
+]
+const STORE_SALES_WEIGHT = Object.fromEntries(STORE_ACCOUNTS.map((name, i) => [name, STORE_WEIGHTS_BY_INDEX[i]]))
 
 /** Share of Stores revenue for the three largest accounts (each under 12% at Sep scale). */
 const TOP_STORE_SHARE = {
-  'Meged Glatt - Lakewood': 0.11608,
-  'Nitzan Market - Lakewood': 0.09997,
-  'Keren Wholesale - Lakewood': 0.11971,
+  'Meged Glatt': 0.11608,
+  'Nitzan Market': 0.09997,
+  'Keren Wholesale': 0.11971,
 }
-const TOP_STORE_NAMES = ['Meged Glatt - Lakewood', 'Nitzan Market - Lakewood', 'Keren Wholesale - Lakewood']
+const TOP_STORE_NAMES = ['Meged Glatt', 'Nitzan Market', 'Keren Wholesale']
 
 function roundCases(n) {
   const t = Math.round(n * 10) / 10

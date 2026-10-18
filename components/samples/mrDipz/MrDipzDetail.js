@@ -10,11 +10,9 @@ function Frame({ title, sub, depth, back, close, children }) {
         <button type="button" className="md-backbtn" onClick={back}>
           Back
         </button>
-        {depth > 1 ? (
-          <button type="button" className="md-backbtn" onClick={close}>
-            Close
-          </button>
-        ) : null}
+        <button type="button" className="md-backbtn" onClick={close}>
+          Close
+        </button>
       </div>
       <div className="md-dtitle">{title}</div>
       <div className="md-dsub">{sub}</div>
@@ -671,6 +669,37 @@ function PnlDetail({ model, id, open }) {
     }
   }
 
+  if (id === 'netProfit') {
+    const rows = [
+      {
+        key: 'gp',
+        name: 'Gross profit',
+        cur: sep.grossProfit,
+        prior: aug.grossProfit,
+        onClick: () => open({ type: 'pnl', id: 'grossProfit' }),
+      },
+      {
+        key: 'opex',
+        name: 'Less total operating expenses',
+        cur: -sep.opex,
+        prior: -aug.opex,
+        onClick: () => open({ type: 'pnl', id: 'opex' }),
+      },
+    ]
+    return {
+      title: 'Net profit',
+      sub: 'September vs August',
+      body: (
+        <Card title="Gross profit − operating expenses">
+          <MdTable
+            columns={cols}
+            rows={compareRows(rows, { key: 'total', name: 'Net profit', cur: sep.netProfit, prior: aug.netProfit })}
+          />
+        </Card>
+      ),
+    }
+  }
+
   const gp = id === 'grossProfit'
   const rows = gp
     ? [
@@ -703,8 +732,49 @@ function ActionBtn({ children, onClick }) {
   )
 }
 
+function DeductionsBucketDetail({ model, id, open }) {
+  const d = model.deductions
+  const filterFn = {
+    all: () => true,
+    matched: (r) => r.status === 'matched',
+    'needs-backup': (r) => r.status === 'needs-backup',
+    dispute: (r) => r.status === 'dispute',
+  }[id] || (() => true)
+  const title = {
+    all: 'Total deducted',
+    matched: 'Matched',
+    'needs-backup': 'Needs backup',
+    dispute: 'Dispute',
+  }[id] || 'Deductions'
+  const rows = [...d.rows]
+    .filter(filterFn)
+    .sort((a, b) => b.remittanceDate.localeCompare(a.remittanceDate) || a.ref.localeCompare(b.ref))
+  const total = sumBy(rows, (r) => r.amount)
+  return {
+    title,
+    sub: 'Distributor deductions',
+    body: (
+      <Card title="Deductions">
+        <MdTable
+          columns={['Ref', 'Code', 'Amount']}
+          rows={[
+            ...rows.map((r) => ({
+              key: r.id,
+              name: r.ref,
+              sub: r.code,
+              cells: [r.ref, r.code, money(r.amount)],
+              onClick: () => open({ type: 'deduction', id: r.id }),
+            })),
+            { key: 'total', kind: 'total', name: 'Total', cells: ['', '', money(total)] },
+          ]}
+        />
+      </Card>
+    ),
+  }
+}
+
 function DeductionsOpenDetail({ model, open }) {
-  const rows = model.deductions.rows.filter((r) => r.status === 'needsBackup' || r.status === 'dispute')
+  const rows = model.deductions.rows.filter((r) => r.status === 'needs-backup' || r.status === 'dispute')
   const total = sumBy(rows, (r) => r.amount)
   return {
     title: 'Open to review',
@@ -829,6 +899,7 @@ const VIEWS = {
   bucket: BucketDetail,
   pnl: PnlDetail,
   deductionsOpen: DeductionsOpenDetail,
+  deductionsBucket: DeductionsBucketDetail,
   deduction: DeductionDetail,
   deductionCreditMemo: DeductionCreditMemoPreview,
   deductionDispute: DeductionDisputePreview,

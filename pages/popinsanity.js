@@ -8,7 +8,7 @@ const HIDE_SITE_CHROME = `
 
 export default function PopinsanityPage() {
   return (
-    <div className="popinsanity-page">
+    <div className="popinsanity-page" style={{ fontVariantNumeric: 'tabular-nums' }}>
       <Head>
         <title>Popinsanity — owner portal (sample)</title>
         <meta name="description" content="Sample owner portal for Popinsanity: holiday corporate gifts, channel sales, cash timing, and month-end P&amp;L." />

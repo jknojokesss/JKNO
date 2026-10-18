@@ -238,7 +238,7 @@ export function monthLabel(key) {
 
 export const PNL_CHANNEL_MAP = {
   Online: 'online',
-  'Shop (Monsey)': 'shop',
+  'Shop': 'shop',
   'Wholesale to stores': 'wholesale',
   'Corporate gifts': 'corporate',
 }

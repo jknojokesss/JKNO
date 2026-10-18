@@ -260,15 +260,28 @@ export default function PrimalKrispPortal() {
     </div>
   )
 
-  const RankedBars = ({ title, rows, valueKey, labelKey, formatValue }) => {
+  const RankedBars = ({ title, rows, valueKey, labelKey, formatValue, onRowClick, onCardClick }) => {
     const sorted = [...rows].sort((a, b) => b[valueKey] - a[valueKey])
     const max = sorted[0]?.[valueKey] || 1
     const fmt = formatValue || ((v) => money(v))
+    const total = sorted.reduce((s, r) => s + (r[valueKey] || 0), 0)
     return (
-      <div style={{ ...card, flex: 1, minWidth: '290px' }}>
+      <button
+        type="button"
+        className="pk-click"
+        onClick={onCardClick}
+        style={{ ...card, flex: 1, minWidth: '290px', textAlign: 'left', cursor: onCardClick || onRowClick ? 'pointer' : 'default' }}
+      >
         <div style={{ ...lbl, marginBottom: '14px' }}>{title}</div>
         {sorted.map((r, i) => (
-          <div key={r[labelKey]} style={{ padding: '9px 0', borderTop: i ? `1px solid ${CREAM}` : 'none' }}>
+          <div
+            key={r[labelKey]}
+            role={onRowClick ? 'button' : undefined}
+            tabIndex={onRowClick ? 0 : undefined}
+            onClick={onRowClick ? (e) => { e.stopPropagation(); onRowClick(r) } : undefined}
+            onKeyDown={onRowClick ? (e) => e.key === 'Enter' && onRowClick(r) : undefined}
+            style={{ padding: '9px 0', borderTop: i ? `1px solid ${CREAM}` : 'none' }}
+          >
             <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '6px', gap: '8px' }}>
               <span style={{ fontWeight: 600, fontSize: '14px', color: INK }}>{r[labelKey]}</span>
               <span style={{ ...big, fontSize: '15px', color: INK, fontFamily: MONO }}>{fmt(r[valueKey])}</span>
@@ -278,9 +291,17 @@ export default function PrimalKrispPortal() {
             </div>
           </div>
         ))}
-      </div>
+        {onCardClick ? (
+          <div style={{ display: 'flex', justifyContent: 'space-between', paddingTop: 10, marginTop: 6, borderTop: `1px solid ${BORDER}`, fontWeight: 700, fontSize: 13 }}>
+            <span>Total</span>
+            <span style={{ fontFamily: MONO }}>{fmt(total)}</span>
+          </div>
+        ) : null}
+      </button>
     )
   }
+
+  const openDetail = (d) => setOverviewDetail(d)
 
   const TABS = [
     ['overview', 'Overview'],
@@ -406,10 +427,11 @@ export default function PrimalKrispPortal() {
             <PrimalKrispFinancials card={card} lbl={lbl} big={big} btn={btn} inp={inp} KPI={KPI} />
           )}
 
-          {tab === 'overview' && overviewDetail ? (
+          {(tab === 'overview' || tab === 'subscriptions' || tab === 'close') && overviewDetail ? (
             <PrimalKrispOverviewDetail
               detail={overviewDetail}
               onBack={() => setOverviewDetail(null)}
+              onClose={() => setOverviewDetail(null)}
               storeList={storeList}
               openStoreBalance={liveStoreOwed}
             />
@@ -461,7 +483,7 @@ export default function PrimalKrispPortal() {
             />
           )}
 
-          {tab === 'subscriptions' && (
+          {tab === 'subscriptions' && !overviewDetail && (
             <>
               <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap', marginBottom: '16px' }}>
                 <KPI
@@ -471,6 +493,7 @@ export default function PrimalKrispPortal() {
                       ? channelRowsPeriod.find((c) => c.channel === 'Website')?.sales || 0
                       : ov.sales_by_channel.find((c) => c.channel === 'Website')?.sales || 0,
                   )}
+                  onClick={() => openDetail({ kind: 'subChannel', channel: 'Website' })}
                 />
                 <KPI
                   k="Subscription sales"
@@ -480,24 +503,40 @@ export default function PrimalKrispPortal() {
                       : ov.sales_by_channel.find((c) => c.channel === 'Subscriptions')?.sales || 0,
                   )}
                   accent={SPICE}
+                  onClick={() => openDetail({ kind: 'subChannel', channel: 'Subscriptions' })}
                 />
-                <KPI k="Active subs" v={DATA.subscriptions.active} />
-                <KPI k="September churn" v={pct1(DATA.subscriptions.churn_sept_pct)} />
-                <KPI k="Failed payments" v={DATA.subscriptions.failed_payments_open.count} accent={RED} />
+                <KPI k="Active subs" v={DATA.subscriptions.active} onClick={() => openDetail({ kind: 'subs' })} />
+                <KPI k="September churn" v={pct1(DATA.subscriptions.churn_sept_pct)} onClick={() => openDetail({ kind: 'subChurn' })} />
+                <KPI
+                  k="Failed payments"
+                  v={DATA.subscriptions.failed_payments_open.count}
+                  accent={RED}
+                  onClick={() => openDetail({ kind: 'subFailed' })}
+                />
               </div>
               <div style={{ ...lbl, marginBottom: '12px', color: MUTED, textTransform: 'none', letterSpacing: 0, fontSize: '12px' }}>
-                {DATA.subscription_terms_real}
+                Subscribe & save: 6% off, free shipping
               </div>
 
-              <div style={{ ...card, marginBottom: '16px', overflowX: 'auto' }}>
+              <button
+                type="button"
+                className="pk-click"
+                onClick={() => openDetail({ kind: 'subMonthly' })}
+                style={{ ...card, marginBottom: '16px', overflowX: 'auto', width: '100%', textAlign: 'left', cursor: 'pointer' }}
+              >
                 <div style={{ ...lbl, marginBottom: '8px' }}>Active subscribers — 12 months</div>
                 <SubscriberLineChart monthly={DATA.subscriptions.monthly} />
-              </div>
+              </button>
 
-              <div style={{ ...card, marginBottom: '16px', overflowX: 'auto' }}>
+              <button
+                type="button"
+                className="pk-click"
+                onClick={() => openDetail({ kind: 'subRenewals' })}
+                style={{ ...card, marginBottom: '16px', overflowX: 'auto', width: '100%', textAlign: 'left', cursor: 'pointer' }}
+              >
                 <div style={{ ...lbl, marginBottom: '8px' }}>Renewals — next 14 days</div>
                 <RenewalBars14 days={DATA.subscriptions.renewals_next_14_days} />
-              </div>
+              </button>
 
               <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
                 <RankedBars
@@ -506,6 +545,24 @@ export default function PrimalKrispPortal() {
                   valueKey="n"
                   labelKey="label"
                   formatValue={(v) => fmtInt(v)}
+                  onCardClick={() =>
+                    openDetail({
+                      kind: 'subBar',
+                      sub: 'By interval',
+                      total: DATA.subscriptions.active,
+                      formatTitle: (v) => fmtInt(v),
+                      rows: DATA.subscriptions.by_interval.map((r) => ({ label: r.interval, value: r.active })),
+                    })
+                  }
+                  onRowClick={(r) =>
+                    openDetail({
+                      kind: 'subBar',
+                      sub: r.label,
+                      total: r.n,
+                      formatTitle: (v) => fmtInt(v),
+                      rows: [{ label: r.label, value: r.n }],
+                    })
+                  }
                 />
                 <RankedBars
                   title="By what they get"
@@ -513,6 +570,24 @@ export default function PrimalKrispPortal() {
                   valueKey="n"
                   labelKey="label"
                   formatValue={(v) => fmtInt(v)}
+                  onCardClick={() =>
+                    openDetail({
+                      kind: 'subBar',
+                      sub: 'By what they get',
+                      total: DATA.subscriptions.by_what_they_get.reduce((s, r) => s + r.active, 0),
+                      formatTitle: (v) => fmtInt(v),
+                      rows: DATA.subscriptions.by_what_they_get.map((r) => ({ label: r.item, value: r.active })),
+                    })
+                  }
+                  onRowClick={(r) =>
+                    openDetail({
+                      kind: 'subBar',
+                      sub: r.label,
+                      total: r.n,
+                      formatTitle: (v) => fmtInt(v),
+                      rows: [{ label: r.label, value: r.n }],
+                    })
+                  }
                 />
                 <RankedBars
                   title="Cancel reasons (September)"
@@ -520,6 +595,16 @@ export default function PrimalKrispPortal() {
                   valueKey="n"
                   labelKey="label"
                   formatValue={(v) => fmtInt(v)}
+                  onCardClick={() => openDetail({ kind: 'subChurn' })}
+                  onRowClick={(r) =>
+                    openDetail({
+                      kind: 'subBar',
+                      sub: r.label,
+                      total: r.n,
+                      formatTitle: (v) => fmtInt(v),
+                      rows: [{ label: r.label, value: r.n }],
+                    })
+                  }
                 />
               </div>
             </>
@@ -758,30 +843,69 @@ export default function PrimalKrispPortal() {
             </>
           )}
 
-          {tab === 'close' && (
+          {tab === 'close' && !overviewDetail && (
             <>
               <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap', marginBottom: '16px' }}>
-                <KPI k="Income to post" v={money(DATA.monthly_close.income_to_post_total)} accent={GREEN} />
-                <KPI k="COGS to post" v={money(DATA.monthly_close.cogs_to_post.amount)} />
-                <KPI k="AR at month end" v={money(liveStoreOwed)} accent={AMBER} />
+                <KPI k="Income to post" v={money(DATA.monthly_close.income_to_post_total)} accent={GREEN} onClick={() => openDetail({ kind: 'closeIncome' })} />
+                <KPI k="COGS to post" v={money(DATA.monthly_close.cogs_to_post.amount)} onClick={() => openDetail({ kind: 'closeCogs' })} />
+                <KPI k="AR at month end" v={money(liveStoreOwed)} accent={AMBER} onClick={() => openDetail({ kind: 'closeAR' })} />
               </div>
               <div style={{ ...card }}>
                 <div style={{ ...lbl, color: KRAFT, marginBottom: '6px' }}>Income to post</div>
                 {Object.entries(DATA.monthly_close.income_to_post).map(([k, v]) => (
-                  <Row key={k} l={k} v={money(v)} />
+                  <button
+                    key={k}
+                    type="button"
+                    className="pk-click"
+                    onClick={() => openDetail({ kind: 'closeIncomeLine', key: k })}
+                    style={{ display: 'block', width: '100%', border: 'none', background: 'transparent', padding: 0, cursor: 'pointer', textAlign: 'left' }}
+                  >
+                    <Row l={k} v={money(v)} />
+                  </button>
                 ))}
-                <Row l="Total" v={money(DATA.monthly_close.income_to_post_total)} bold top />
+                <button
+                  type="button"
+                  className="pk-click"
+                  onClick={() => openDetail({ kind: 'closeIncome' })}
+                  style={{ display: 'block', width: '100%', border: 'none', background: 'transparent', padding: 0, cursor: 'pointer', textAlign: 'left' }}
+                >
+                  <Row l="Total" v={money(DATA.monthly_close.income_to_post_total)} bold top />
+                </button>
                 <div style={{ marginTop: '16px', padding: '12px 14px', background: CREAM, borderRadius: '2px', border: `1px dashed ${BORDER}` }}>
                   <div style={{ ...lbl, marginBottom: '6px' }}>Booked elsewhere</div>
                   {Object.entries(DATA.monthly_close.booked_through_shopify_do_not_reenter).map(([k, v]) => (
-                    <Row key={k} l={k} v={money(v)} />
+                    <button
+                      key={k}
+                      type="button"
+                      className="pk-click"
+                      onClick={() => openDetail({ kind: 'closeBookedLine', key: k })}
+                      style={{ display: 'block', width: '100%', border: 'none', background: 'transparent', padding: 0, cursor: 'pointer', textAlign: 'left' }}
+                    >
+                      <Row l={k} v={money(v)} />
+                    </button>
                   ))}
+                  <button
+                    type="button"
+                    className="pk-click"
+                    onClick={() => openDetail({ kind: 'closeBooked' })}
+                    style={{ display: 'block', width: '100%', border: 'none', background: 'transparent', padding: 0, cursor: 'pointer', textAlign: 'left' }}
+                  >
+                    <Row l="Total booked" v={money0(Object.values(DATA.monthly_close.booked_through_shopify_do_not_reenter).reduce((s, n) => s + n, 0))} bold top />
+                  </button>
                 </div>
                 <div style={{ ...lbl, color: KRAFT, margin: '16px 0 6px' }}>Journal entry preview</div>
                 {DATA.monthly_close.journal_entries_preview.map((je, i) => (
-                  <div key={i} style={{ fontSize: '12px', color: MUTED, padding: '6px 0', borderTop: i ? `1px solid ${CREAM}` : 'none' }}>
-                    <span style={{ color: INK, fontWeight: 600 }}>{je.memo}</span> · Dr {je.debit} / Cr {je.credit} · {money(je.amount)}
-                  </div>
+                  <button
+                    key={i}
+                    type="button"
+                    className="pk-click"
+                    onClick={() => openDetail({ kind: 'closeJournal', index: i })}
+                    style={{ display: 'block', width: '100%', border: 'none', background: 'transparent', padding: '6px 0', cursor: 'pointer', textAlign: 'left', borderTop: i ? `1px solid ${CREAM}` : 'none' }}
+                  >
+                    <span style={{ fontSize: '12px', color: MUTED }}>
+                      <span style={{ color: INK, fontWeight: 600 }}>{je.memo}</span> · Dr {je.debit} / Cr {je.credit} · {money(je.amount)}
+                    </span>
+                  </button>
                 ))}
               </div>
             </>
