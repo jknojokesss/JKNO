@@ -24,8 +24,8 @@ const PNL_SHEET_CSS = `
 }
 @media(max-width:480px){
   .pk-pnl-wrap{
-    --pk-pnl-c1:4.375rem;--pk-pnl-c2:4.375rem;--pk-pnl-c3:3.5rem;--pk-pnl-gap:4px;
-    --pk-pnl-fs:10px;--pk-pnl-fs-cur:11px;--pk-pnl-fs-head:9px;
+    --pk-pnl-c1:4.75rem;--pk-pnl-c2:4.75rem;--pk-pnl-c3:3.375rem;--pk-pnl-gap:4px;
+    --pk-pnl-fs:10px;--pk-pnl-fs-cur:10px;--pk-pnl-fs-head:9px;
   }
 }
 .pk-pnl-head,.pk-pnl-line{
