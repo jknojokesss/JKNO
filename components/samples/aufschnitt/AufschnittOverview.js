@@ -91,7 +91,7 @@ export default function AufschnittOverview({ card, lbl, KPI, brand, onOpen }) {
           k="Stock at cost"
           v={money0(stockValue)}
           sub={`${stockDelta >= 0 ? '+' : ''}${pct1(stockDelta)} vs August`}
-          subColor={changeColor(stockDelta)}
+          subColor={MUTED}
           onClick={() =>
             onOpen({ type: 'stock-summary', brand, stockRows, stockValue, stockPrior, stockWeeks, stockDelta })
           }
@@ -101,7 +101,7 @@ export default function AufschnittOverview({ card, lbl, KPI, brand, onOpen }) {
             k="Owed by stores"
             v={money0(ov.owedTotal)}
             sub={`${owedDelta >= 0 ? '+' : ''}${pct1(owedDelta)} vs August`}
-            subColor={changeColor(owedDelta)}
+            subColor={MUTED}
             onClick={() => onOpen({ type: 'owed-summary', total: ov.owedTotal, prior: ov.priorOwedTotal, over60: ov.owedOver60 })}
           />
         )}

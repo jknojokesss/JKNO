@@ -405,9 +405,9 @@ function GenericOverviewDetail({ detail, card, lbl }) {
           {detail.stockPrior != null ? <Row l="August" v={money0(detail.stockPrior)} /> : null}
           {detail.stockDelta != null ? (
             <Row
-              l="Change"
+              l="Change vs August"
               v={`${detail.stockDelta >= 0 ? '+' : ''}${detail.stockDelta.toFixed(1)}%`}
-              bold
+              accent={MUTED}
             />
           ) : null}
           <Row l="Avg weeks of supply" v={String(detail.stockWeeks)} />
@@ -417,6 +417,8 @@ function GenericOverviewDetail({ detail, card, lbl }) {
     )
   }
   if (detail.type === 'owed-summary') {
+    const owedDelta =
+      detail.prior > 0 ? ((detail.total - detail.prior) / detail.prior) * 100 : 0
     return (
       <>
         <h2 style={{ fontSize: 20, fontWeight: 700, marginBottom: 12 }}>Owed by stores</h2>
@@ -424,6 +426,11 @@ function GenericOverviewDetail({ detail, card, lbl }) {
           <Row l="Total open" v={money0(detail.total)} bold />
           <Row l="Over 60 days" v={money0(detail.over60)} />
           <Row l="August total" v={money0(detail.prior)} />
+          <Row
+            l="Change vs August"
+            v={`${owedDelta >= 0 ? '+' : ''}${owedDelta.toFixed(1)}%`}
+            accent={MUTED}
+          />
         </div>
       </>
     )

@@ -1064,7 +1064,6 @@ function buildModel() {
   BRANDS.forEach((b) => addPnlView(b, (id) => pnlByBrandMonth[`${id}:${b}`]))
 
   const stock = buildStock(salesRows)
-  const stockAug = buildStock(salesRows, { velocityMonth: '2026-08', weeksScale: 0.96, skipValueScale: true })
   const receivables = buildReceivables()
   const channels = buildChannelDetails(salesRows, receivables.accounts)
 
@@ -1098,7 +1097,8 @@ function buildModel() {
   })
 
   const stockValueSep = sumCents(stock, (r) => r.valueAtCost)
-  const stockValueAug = sumCents(stockAug, (r) => r.valueAtCost)
+  /** August inventory snapshot ~4% above September (MoM card, not a second live build). */
+  const stockValueAug = roundCents(stockValueSep * 1.0416)
 
   return {
     meta: { as_of: AS_OF, built_by: BUILT_BY, name: BIZ_NAME },
