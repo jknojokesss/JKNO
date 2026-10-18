@@ -126,17 +126,26 @@ export default function RoofingPortal({ demoEmbed = false }) {
       </Head>
       <style>{`
         *{box-sizing:border-box;margin:0;padding:0}
-        html,body{background:${PAPER};overflow-x:hidden;max-width:100%}
+        html,body{background:${PAPER};max-width:100%}
         ${DEMO_RENDER_HINTS}
         body{color:${SLATE};font-size:13px}
-        .shell{min-width:0;max-width:100%;overflow-x:hidden}
+        .shell{min-width:0;max-width:100%}
         table{border-collapse:collapse;width:100%;font-variant-numeric:tabular-nums}
         h1,h2,h3{font-family:${serif};color:${INK};font-weight:600}
         button{font-family:${sans}}
         .shell{display:flex;min-height:calc(100vh - ${embedded ? 34 : 72}px)}
         .side{width:212px;flex-shrink:0;background:${INK};padding:26px 0 20px;position:sticky;top:${embedded ? 34 : 72}px;height:calc(100vh - ${embedded ? 34 : 72}px);display:flex;flex-direction:column}
-        .main{flex:1;min-width:0;padding:30px 36px 20px;max-width:1280px;overflow-x:hidden}
+        .main{flex:1;min-width:0;padding:30px 36px 20px;max-width:1280px}
         .roof-hscroll{overflow-x:auto;-webkit-overflow-scrolling:touch;max-width:100%}
+        .roof-buyer-row{display:flex;gap:18px;flex-wrap:wrap;margin-bottom:18px}
+        .roof-buyer-row>.card{flex:1 1 340px;min-width:0;max-width:100%}
+        .roof-buyer-state{flex:0 1 260px;min-width:0;max-width:100%}
+        .roof-buyer-stack{display:flex;gap:18px;flex-wrap:wrap}
+        .roof-buyer-wide{flex:1.3 1 440px;min-width:0;max-width:100%}
+        .roof-buyer-stack>.card{flex:1 1 340px;min-width:0;max-width:100%}
+        .buyer-wc-tbl .td:first-child{white-space:normal}
+        .buyer-addback-note{max-width:620px}
+        .buyer-ebitda-table .td:first-child{white-space:normal}
         .roof-cash-row{display:flex;gap:18px;flex-wrap:wrap;margin-bottom:18px}
         .roof-cash-chart{flex:1.4 1 420px;min-width:0;max-width:100%}
         .roof-cash-aging{flex:1 1 340px;min-width:0;max-width:100%}
@@ -183,11 +192,18 @@ export default function RoofingPortal({ demoEmbed = false }) {
           .liab-card table,.roof-cash-aging table{min-width:480px}
           .roof-cash-chart .roof-hscroll svg,.roof-hscroll--13wk svg{width:640px;min-width:640px;max-width:none}
           .roof-hscroll--t12 svg{width:520px;min-width:520px;max-width:none}
+          .roof-buyer-row>.card,.roof-buyer-state,.roof-buyer-wide,.roof-buyer-stack>.card{flex:1 1 100%;min-width:0;max-width:100%}
+          .buyer-addback-note{max-width:none}
+          .roof-hscroll .buyer-ebitda-table{min-width:0;width:100%}
+          .roof-hscroll .buyer-cust-tbl{min-width:480px}
+          .roof-hscroll .buyer-backlog-tbl{min-width:520px}
+          .roof-hscroll .buyer-wc-tbl{min-width:400px}
         }
         @media(min-width:821px){
           .roof-hscroll--13wk svg{width:100%;min-width:640px;max-width:none}
           .roof-hscroll--t12 svg{width:100%;min-width:520px;max-width:none}
           .liab-card table,.roof-cash-aging table{min-width:0}
+          .roof-hscroll .buyer-ebitda-table,.roof-hscroll .buyer-cust-tbl,.roof-hscroll .buyer-backlog-tbl,.roof-hscroll .buyer-wc-tbl{min-width:0;width:100%}
         }
         @media print{
           .no-print{display:none!important}
@@ -1090,7 +1106,7 @@ function Buyer({ M }) {
   let cum = 0
   return (
     <div>
-      <div className="no-print" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '16px' }}>
+      <div className="no-print roof-buyer-head" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '16px', flexWrap: 'wrap', minWidth: 0, maxWidth: '100%' }}>
         <Header q="What does the buyer's first meeting look like?"
           lead={`${moneyK(M.adjEbitda)} adjusted EBITDA on ${moneyK(M.revT12)} of revenue — documented line by line, ready to hand over.`}
           sub="The package a deal team actually reads: normalized earnings with every add-back justified, revenue quality, concentration, footprint, backlog, and working capital. Exportable — a package that only lives in a browser never reaches the deal team." />
@@ -1108,9 +1124,10 @@ function Buyer({ M }) {
         <Kpi big k="RECURRING REVENUE" v={pct1((M.revByClass.maintenance || 0) / Math.max(1, classTotal))} sub="maintenance contracts, TTM" />
       </div>
 
-      <div className="card" style={{ marginBottom: '18px' }}>
+      <div className="card" style={{ marginBottom: '18px', maxWidth: '100%' }}>
         <SectionTitle t="Normalized EBITDA — every add-back with its justification" />
-        <table>
+        <div className="roof-hscroll">
+        <table className="buyer-ebitda-table">
           <tbody>
             <tr><td className="td">Net income, trailing 12 months (per QuickBooks)</td><td className="td r ink" style={{ fontWeight: 600 }}>{money0(M.netIncome)}</td></tr>
             <tr><td className="td">+ Interest — line of credit &amp; equipment notes</td><td className="td r">{money0(M.interest)}</td></tr>
@@ -1118,7 +1135,7 @@ function Buyer({ M }) {
             <tr style={{ background: '#F3F1EB' }}><td className="td ink" style={{ fontWeight: 700 }}>EBITDA, as reported</td><td className="td r ink" style={{ fontWeight: 700 }}>{money0(M.ebitda)}</td></tr>
             {M.raw.addbacks.map((a) => (
               <tr key={a.id}>
-                <td className="td">+ {a.name}<div style={{ fontSize: '11px', color: MUTED, whiteSpace: 'normal', maxWidth: '620px', marginTop: '2px' }}>{a.justification}</div></td>
+                <td className="td">+ {a.name}<div className="buyer-addback-note" style={{ fontSize: '11px', color: MUTED, whiteSpace: 'normal', marginTop: '2px' }}>{a.justification}</div></td>
                 <td className="td r" style={{ verticalAlign: 'top' }}>{money0(Number(a.annual_amount))}</td>
               </tr>
             ))}
@@ -1128,10 +1145,11 @@ function Buyer({ M }) {
             </tr>
           </tbody>
         </table>
+        </div>
       </div>
 
-      <div style={{ display: 'flex', gap: '18px', flexWrap: 'wrap', marginBottom: '18px' }}>
-        <div className="card" style={{ flex: '1 1 340px' }}>
+      <div className="roof-buyer-row">
+        <div className="card">
           <SectionTitle t="Revenue quality" right={<span style={{ fontSize: '11px', color: MUTED }}>TTM invoiced</span>} />
           {classes.map((c) => {
             const v = M.revByClass[c] || 0
@@ -1148,9 +1166,10 @@ function Buyer({ M }) {
           <div style={{ padding: '10px 16px 14px', fontSize: '11px', color: MUTED, lineHeight: 1.6 }}>Buyers discount storm revenue and pay up for the maintenance base. The honest split is here, not blended into one top line.</div>
         </div>
 
-        <div className="card" style={{ flex: '1 1 340px' }}>
+        <div className="card">
           <SectionTitle t="Customer concentration — top 10" right={<span style={{ fontSize: '11px', color: MUTED }}>TTM invoiced</span>} />
-          <table>
+          <div className="roof-hscroll">
+          <table className="buyer-cust-tbl">
             <thead><tr><th className="th">Customer</th><th className="th r">Revenue</th><th className="th r">%</th><th className="th r">Cum.</th></tr></thead>
             <tbody>{M.topCust.map(([name, v]) => {
               cum += v
@@ -1178,11 +1197,13 @@ function Buyer({ M }) {
               )
             })}</tbody>
           </table>
+          </div>
         </div>
 
-        <div className="card" style={{ flex: '0 1 260px' }}>
+        <div className="card roof-buyer-state">
           <SectionTitle t="Revenue by state" />
-          <table>
+          <div className="roof-hscroll">
+          <table className="buyer-state-tbl">
             <tbody>{states.map(([st, v]) => (
               <tr key={st}>
                 <td className="td ink" style={{ fontWeight: 600 }}>{st}</td>
@@ -1191,14 +1212,16 @@ function Buyer({ M }) {
               </tr>
             ))}</tbody>
           </table>
+          </div>
           <div style={{ padding: '10px 16px 14px', fontSize: '11px', color: MUTED, lineHeight: 1.6 }}>Answers &ldquo;is the multi-state footprint real?&rdquo; before it&rsquo;s asked. It&rsquo;s real — and it&rsquo;s honestly weighted to Tennessee.</div>
         </div>
       </div>
 
-      <div style={{ display: 'flex', gap: '18px', flexWrap: 'wrap' }}>
-        <div className="card" style={{ flex: '1.3 1 440px', overflowX: 'auto' }}>
+      <div className="roof-buyer-stack">
+        <div className="card roof-buyer-wide">
           <SectionTitle t="Backlog — signed, not yet started" right={<b style={{ fontVariantNumeric: 'tabular-nums' }}>{money0(backlogTotal)}</b>} />
-          <table>
+          <div className="roof-hscroll">
+          <table className="buyer-backlog-tbl">
             <thead><tr><th className="th">Job</th><th className="th">Type</th><th className="th r">Contract</th><th className="th r">Exp. margin</th><th className="th r">Starts</th></tr></thead>
             <tbody>{[...M.backlog].sort((a, b) => Number(b.contract_value) - Number(a.contract_value)).map((j) => (
               <tr key={j.id}>
@@ -1210,9 +1233,10 @@ function Buyer({ M }) {
               </tr>
             ))}</tbody>
           </table>
+          </div>
         </div>
 
-        <div className="card" style={{ flex: '1 1 340px' }}>
+        <div className="card">
           <SectionTitle t="Working capital tied up in receivables" right={<span style={{ fontSize: '11px', color: MUTED }}>month-end AR</span>} />
           <div style={{ padding: '4px 16px 8px' }}>
             <svg viewBox="0 0 400 120" style={{ width: '100%', display: 'block' }}>
@@ -1224,7 +1248,8 @@ function Buyer({ M }) {
               ))}
             </svg>
           </div>
-          <table>
+          <div className="roof-hscroll">
+          <table className="buyer-wc-tbl">
             <tbody>
               <tr><td className="td">Open receivables</td><td className="td r">{money0(M.arTotal)}</td></tr>
               <tr><td className="td">+ Under-billed WIP (earned, uninvoiced)</td><td className="td r">{money0(M.wipTotals.under)}</td></tr>
@@ -1234,6 +1259,7 @@ function Buyer({ M }) {
               <tr style={{ background: '#EFECE4' }}><td className="td ink" style={{ fontWeight: 700 }}>Net working capital in the jobs</td><td className="td r ink" style={{ fontWeight: 700 }}>{money0(M.arTotal + M.wipTotals.under - M.apTotal - M.depositTotal - M.wipTotals.over)}</td></tr>
             </tbody>
           </table>
+          </div>
           <div style={{ padding: '10px 16px 14px', fontSize: '11px', color: MUTED, lineHeight: 1.6 }}>The AR climb since the April hail event isn&rsquo;t a collections failure — it&rsquo;s what insurance-driven growth does to working capital. A buyer will model it either way; this shows you saw it first.</div>
         </div>
       </div>
