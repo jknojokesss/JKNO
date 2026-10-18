@@ -229,7 +229,11 @@ export default function Demo({ demoEmbed = false }) {
   const [pnlView, setPnlView] = useState('single')
   const [rangeStart, setRangeStart] = useState(0)
   const [rangeEnd, setRangeEnd] = useState(99)
-  const [pnlOpen, setPnlOpen] = useState(null)
+  const [drill, setDrill] = useState(null)
+  const [overviewBack, setOverviewBack] = useState(false)
+  const [scrollConsignId, setScrollConsignId] = useState(null)
+  const [highlightDirectId, setHighlightDirectId] = useState(null)
+  const [pnlSections, setPnlSections] = useState({ revenue: true, cogs: true, opex: true })
   const [period, setPeriod] = useState('month')
   const [costPerBag, setCostPerBag] = useState(4.5)
   const [logoOk, setLogoOk] = useState(true)
@@ -241,6 +245,41 @@ export default function Demo({ demoEmbed = false }) {
     window.scrollTo(0, 0)
     return () => document.documentElement.classList.remove('demo-embed')
   }, [demoEmbed])
+
+  useEffect(() => {
+    if (!drill) return
+    const onKey = (e) => { if (e.key === 'Escape') setDrill(null) }
+    window.addEventListener('keydown', onKey)
+    return () => window.removeEventListener('keydown', onKey)
+  }, [drill])
+
+  useEffect(() => {
+    if (!scrollConsignId || tab !== 'consign') return
+    const run = () => {
+      const el = document.getElementById(`consign-store-${scrollConsignId}`)
+      if (el) {
+        const top = el.getBoundingClientRect().top + window.scrollY - 72
+        window.scrollTo({ top: Math.max(0, top), behavior: 'smooth' })
+      }
+      setScrollConsignId(null)
+    }
+    const id = requestAnimationFrame(() => requestAnimationFrame(run))
+    return () => cancelAnimationFrame(id)
+  }, [scrollConsignId, tab, expanded])
+
+  useEffect(() => {
+    if (!highlightDirectId || tab !== 'direct') return
+    const run = () => {
+      const el = document.getElementById(`direct-sale-${highlightDirectId}`)
+      if (el) {
+        const top = el.getBoundingClientRect().top + window.scrollY - 72
+        window.scrollTo({ top: Math.max(0, top), behavior: 'smooth' })
+      }
+    }
+    const id = requestAnimationFrame(() => requestAnimationFrame(run))
+    const tm = setTimeout(() => setHighlightDirectId(null), 2800)
+    return () => { cancelAnimationFrame(id); clearTimeout(tm) }
+  }, [highlightDirectId, tab])
 
   const dv = (k) => draft[k] || ''
   const setDv = (k, v) => setDraft({ ...draft, [k]: v })
@@ -336,6 +375,53 @@ export default function Demo({ demoEmbed = false }) {
   const rngLabel = monthsAll.length ? `${monthsAll[rngA].m}–${monthsAll[rngB].m}` : ''
   const rngPct = (n) => rngAgg.rev ? Math.round(n / rngAgg.rev * 100) : 0
   const rngMonthCount = rngB - rngA + 1
+  const demoMonthLabel = new Date(`${DEMO_AS_OF}T00:00:00`).toLocaleDateString('en-US', { month: 'short', year: 'numeric' })
+
+  const navFromOverview = (nextTab, extra) => {
+    setOverviewBack(true)
+    setTab(nextTab)
+    setExpanded(null)
+    extra?.()
+  }
+  const goOverviewPnl = () => navFromOverview('pnl', () => setPnlView('single'))
+  const openConsignStore = (storeName) => {
+    const c = consign.find(x => x.store === storeName)
+    if (!c) { navFromOverview('consign'); return }
+    navFromOverview('consign', () => { setExpanded(c.id); setScrollConsignId(c.id) })
+  }
+  const openDirectPerf = (perf) => {
+    const d = direct.find(x => x.who === perf.who || x.source === perf.source)
+    navFromOverview('direct', () => { if (d) setHighlightDirectId(d.id) })
+  }
+  const openDrill = (payload) => setDrill(payload)
+  const drillDirectRows = () => direct.map(d => ({ l: d.who, sub: d.source, n: d.rev, v: m0(d.rev) }))
+  const drillConsignRows = () => R.filter(c => c.paid > 0).map(c => ({ l: c.store, sub: `${c.paidUnits} sold`, n: c.paid, v: m0(c.paid) }))
+  const drillCogsRows = () => [
+    { l: 'Direct sales units', sub: `${directUnits} × ${money(costPerBag)}`, n: directUnits * costPerBag, v: `−${m0(directUnits * costPerBag)}` },
+    { l: 'Consignment units sold', sub: `${consignUnits} × ${money(costPerBag)}`, n: consignUnits * costPerBag, v: `−${m0(consignUnits * costPerBag)}` },
+  ]
+  const drillAdRows = () => ads.map(a => ({ l: a.channel, sub: a.spend ? `${(a.rev / a.spend).toFixed(1)}× ROAS` : '', n: a.spend, v: `−${m0(a.spend)}` }))
+  const drillExpCatRows = (cat) => {
+    const list = expenses.filter(e => e.cat === cat)
+    const n = list.reduce((s, e) => s + e.amt, 0)
+    return { total: n, rows: list.map(e => ({ l: e.vendor, sub: PAYM[e.pay] ? PAYM[e.pay].label : '', n: e.amt, v: `−${m0(e.amt)}` })) }
+  }
+  const drillRangeMonths = (key) => rngLines.map(l => {
+    const raw = l[key] || 0
+    const n = Math.abs(raw)
+    const cost = PNL_ROWS.find(r => r.key === key)?.cost
+    return { l: l.m, sub: '', n, v: cost ? `−${m0(n)}` : m0(n) }
+  })
+  const drillCloseIncomeRows = () => [
+    { l: 'Consignment collected', sub: '', n: cashCollected, v: m0(cashCollected) },
+    { l: 'Direct sales — non-Shopify', sub: '', n: offlineDirectRev, v: m0(offlineDirectRev) },
+  ]
+  const drillCloseCogsRows = () => [
+    { l: 'Consignment units sold', sub: `${consignUnits} × ${money(costPerBag)}`, n: consignUnits * costPerBag, v: `−${m0(consignUnits * costPerBag)}` },
+    { l: 'Offline direct units', sub: `${offlineDirectUnits} × ${money(costPerBag)}`, n: offlineDirectUnits * costPerBag, v: `−${m0(offlineDirectUnits * costPerBag)}` },
+  ]
+  const drillShopifyRows = () => direct.filter(d => d.source === 'Shopify / online').map(d => ({ l: d.who, sub: d.source, n: d.rev, v: m0(d.rev) }))
+  const drillARRows = () => R.filter(c => c.variance > 0 && c.diagnosis === 'Sold but not reported (store owes me)').map(c => ({ l: c.store, sub: `${c.variance} items`, n: c.varVal, v: money(c.varVal) }))
 
   const card = { background: CARDBG, border: `1px solid ${BORDER}`, borderRadius: '14px', padding: '20px' }
   const lbl = { fontFamily: "'Inter', sans-serif", fontSize: '11px', fontWeight: 600, letterSpacing: '0.7px', textTransform: 'uppercase', color: '#96866C' }
@@ -343,11 +429,15 @@ export default function Demo({ demoEmbed = false }) {
   const big = { fontFamily: "'Inter', sans-serif", fontWeight: 700, letterSpacing: '-0.4px' }
   const btn = { fontFamily: "'Inter', sans-serif", fontWeight: 600, fontSize: '13px', letterSpacing: '0.1px', cursor: 'pointer' }
 
-  const KPI = ({ k, v, sub, accent }) => (
-    <div style={{ ...card, flex: 1, minWidth: '150px', padding: '15px 17px' }}>
+  const tapKey = (fn) => (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); fn(e) } }
+  const KPI = ({ k, v, sub, accent, onClick }) => (
+    <div onClick={onClick} onKeyDown={onClick ? tapKey(onClick) : undefined} role={onClick ? 'button' : undefined} tabIndex={onClick ? 0 : undefined}
+      className={onClick ? 'sm-click' : undefined}
+      style={{ ...card, flex: 1, minWidth: '150px', padding: '15px 17px', position: 'relative', ...(onClick ? { cursor: 'pointer' } : {}) }}>
       <div style={lbl}>{k}</div>
       <div style={{ ...big, fontSize: '29px', color: accent || INK, lineHeight: 1.15, marginTop: '4px' }}>{v}</div>
       <div style={{ fontFamily: "'Inter', sans-serif", fontSize: '12px', fontWeight: 400, color: '#A2937A', marginTop: '3px' }}>{sub}</div>
+      {onClick ? <span style={{ position: 'absolute', top: '11px', right: '13px', color: '#C6B79A', fontSize: '15px', lineHeight: 1 }} aria-hidden="true">›</span> : null}
     </div>
   )
   const MiniToggle = ({ value, onChange }) => (
@@ -366,35 +456,61 @@ export default function Demo({ demoEmbed = false }) {
       </span>
     </div>
   )
-  // Clickable P&L line — expands to show the transactions behind the number.
-  const DrillRow = ({ k, l, v, items, hint }) => {
-    const open = pnlOpen === k
-    const has = items && items.length > 0
+  const DrillLine = ({ l, v, onDrill, muted = true }) => (
+    <div onClick={onDrill} onKeyDown={tapKey(onDrill)} role="button" tabIndex={0} className="sm-click sm-tap-row"
+      style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '10px', padding: '10px 4px', minHeight: '40px', cursor: 'pointer', borderRadius: '8px' }}>
+      <span style={{ fontSize: '13px', color: muted ? MUTED : INK, fontWeight: muted ? 400 : 600 }}>{l}</span>
+      <span style={{ fontFamily: MONO, fontSize: '13px', color: muted ? MUTED : INK, display: 'inline-flex', alignItems: 'center', gap: '8px', whiteSpace: 'nowrap' }}>
+        {v}<span style={{ color: '#C6B79A', fontSize: '14px' }} aria-hidden="true">›</span>
+      </span>
+    </div>
+  )
+  const PnlSectionHead = ({ sectionKey, title }) => (
+    <div onClick={() => setPnlSections(s => ({ ...s, [sectionKey]: !s[sectionKey] }))} onKeyDown={tapKey(() => setPnlSections(s => ({ ...s, [sectionKey]: !s[sectionKey] })))}
+      role="button" tabIndex={0} className="sm-click sm-tap-row"
+      style={{ ...lbl, color: KRAFT, margin: sectionKey === 'revenue' ? '4px 0' : '16px 0 6px', display: 'flex', alignItems: 'center', gap: '7px', cursor: 'pointer', padding: '6px 4px', minHeight: '40px', borderRadius: '8px' }}>
+      <span style={{ fontSize: '9px', color: SPICE }} aria-hidden="true">{pnlSections[sectionKey] ? '▼' : '▶'}</span>
+      {title}
+    </div>
+  )
+  const DrillOverlay = () => {
+    if (!drill) return null
+    const sum = drill.rows.reduce((s, r) => s + (r.n || 0), 0)
+    const tied = Math.round(sum * 100) === Math.round((drill.totalN || 0) * 100)
+    const totalDisp = drill.totalV || m0(drill.totalN)
     return (
-      <>
-        <div onClick={() => has && setPnlOpen(open ? null : k)}
-          style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '6px 0', cursor: has ? 'pointer' : 'default' }}>
-          <span style={{ fontSize: '13px', color: MUTED, display: 'inline-flex', alignItems: 'center', gap: '7px' }}>
-            {has && <span style={{ color: SPICE, fontSize: '9px', display: 'inline-block', transform: open ? 'rotate(90deg)' : 'none', transition: 'transform .15s' }}>▶</span>}
-            {l}
-          </span>
-          <span style={{ fontFamily: MONO, fontSize: '13px', color: MUTED, display: 'inline-flex', alignItems: 'center', gap: '9px' }}>
-            {v}
-            {has && <span style={{ fontFamily: "'Inter', sans-serif", fontSize: '10px', fontWeight: 600, color: SPICE }}>{open ? 'hide' : 'view'}</span>}
-          </span>
-        </div>
-        {open && has && (
-          <div style={{ margin: '0 0 12px 17px', padding: '4px 12px', background: CREAM, border: `1px solid ${BORDER}`, borderRadius: '9px' }}>
-            {hint && <div style={{ fontSize: '11px', color: '#A2937A', padding: '6px 0 2px' }}>{hint}</div>}
-            {items.map((it, i) => (
-              <div key={i} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', gap: '10px', padding: '6px 0', borderTop: i ? `1px solid ${BORDER}` : 'none' }}>
-                <span style={{ fontSize: '12px', color: INK }}>{it.l}{it.sub ? <span style={{ color: MUTED }}> · {it.sub}</span> : null}</span>
-                <span style={{ fontFamily: MONO, fontSize: '12px', color: INK, whiteSpace: 'nowrap' }}>{it.v}</span>
+      <div onClick={() => setDrill(null)} role="presentation"
+        style={{ position: 'fixed', inset: 0, background: 'rgba(30,42,58,.45)', display: 'flex', alignItems: 'flex-start', justifyContent: 'center', padding: 'max(24px, env(safe-area-inset-top)) 16px 24px', zIndex: 80, overflowY: 'auto', overflowX: 'hidden' }}>
+        <div onClick={e => e.stopPropagation()} role="dialog" aria-modal="true" aria-labelledby="drill-title"
+          style={{ background: CARDBG, borderRadius: '14px', border: `1px solid ${BORDER}`, maxWidth: '640px', width: '100%', padding: '18px 18px 16px', boxShadow: '0 12px 44px rgba(0,0,0,.22)', maxHeight: '80vh', display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '10px', flexShrink: 0 }}>
+            <div id="drill-title" style={{ ...big, fontSize: '17px', color: INK, lineHeight: 1.25, paddingRight: '8px' }}>{drill.title}</div>
+            <button type="button" onClick={() => setDrill(null)} aria-label="Close"
+              style={{ background: 'none', border: 'none', fontSize: '24px', color: MUTED, cursor: 'pointer', lineHeight: 1, padding: '0 4px', minHeight: '40px' }}>×</button>
+          </div>
+          <div style={{ fontSize: '12px', color: MUTED, margin: '6px 0 12px', flexShrink: 0, display: 'flex', flexWrap: 'wrap', gap: '6px', alignItems: 'center' }}>
+            <span>{drill.period}</span>
+            <span>·</span>
+            <span>{drill.rows.length} {drill.rows.length === 1 ? 'entry' : 'entries'}</span>
+            <span>·</span>
+            <span style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
+              total <b style={{ color: INK, fontFamily: MONO }}>{totalDisp}</b>
+              {tied ? <TieMark /> : null}
+            </span>
+          </div>
+          <div style={{ overflowY: 'auto', flex: 1, minHeight: 0, WebkitOverflowScrolling: 'touch' }}>
+            {drill.rows.map((r, i) => (
+              <div key={i} style={{ display: 'flex', justifyContent: 'space-between', gap: '12px', padding: '10px 0', borderTop: i ? `1px solid ${BORDER}` : 'none', minHeight: '40px', alignItems: 'center' }}>
+                <div style={{ minWidth: 0 }}>
+                  <div style={{ fontSize: '13px', color: INK }}>{r.l}</div>
+                  {r.sub ? <div style={{ fontSize: '11px', color: MUTED, marginTop: '2px' }}>{r.sub}</div> : null}
+                </div>
+                <div style={{ fontFamily: MONO, fontSize: '13px', whiteSpace: 'nowrap', color: INK, flexShrink: 0 }}>{r.v}</div>
               </div>
             ))}
           </div>
-        )}
-      </>
+        </div>
+      </div>
     )
   }
   const Pill = ({ value, opts, map, onChange }) => (
@@ -441,7 +557,9 @@ export default function Demo({ demoEmbed = false }) {
 .jm-navbtn:hover{background:rgba(255,255,255,.08);color:${CREAM}}
 .jm-main{flex:1;min-width:0;max-width:1180px;padding:24px 30px 60px;overflow-x:hidden}
 .jm-pnl-scroll{max-width:100%;overflow-x:auto;-webkit-overflow-scrolling:touch}
-@media(max-width:860px){.jm-shell{flex-direction:column}.jm-side{width:auto;height:auto;position:static;flex-direction:column;padding:14px 12px 10px}.jm-nav--tabs{flex-direction:row;overflow-x:auto;gap:6px;padding:4px 4px 10px;-webkit-overflow-scrolling:touch;scrollbar-width:none;scroll-padding-inline-end:20px}.jm-nav--tabs::after{content:'';flex:0 0 16px}.jm-nav::-webkit-scrollbar{display:none}.jm-navbtn{width:auto;padding:8px 14px;border-radius:18px;background:rgba(255,255,255,.07);flex-shrink:0;font-size:13px}.jm-store-chips{display:flex!important;flex-direction:row!important;flex-wrap:wrap;align-items:center;justify-content:flex-end;gap:6px!important}.jm-main{padding:18px 16px 52px;max-width:100%}}`}</style>
+.sm-click{transition:box-shadow .12s}.sm-click:hover,.sm-click:active{box-shadow:inset 0 0 0 1.5px ${SPICE}}
+@media(max-width:860px){.jm-shell{flex-direction:column}.jm-side{width:auto;height:auto;position:static;flex-direction:column;padding:14px 12px 10px}.jm-nav--tabs{flex-direction:row;overflow-x:auto;gap:6px;padding:4px 4px 10px;-webkit-overflow-scrolling:touch;scrollbar-width:none;scroll-padding-inline-end:20px}.jm-nav--tabs::after{content:'';flex:0 0 16px}.jm-nav::-webkit-scrollbar{display:none}.jm-navbtn{width:auto;padding:8px 14px;border-radius:18px;background:rgba(255,255,255,.07);flex-shrink:0;font-size:13px}.jm-store-chips{display:flex!important;flex-direction:row!important;flex-wrap:wrap;align-items:center;justify-content:flex-end;gap:6px!important}.jm-main{padding:18px 16px 52px;max-width:100%}}
+@media(max-width:600px){button,.sm-tap-row{min-height:40px}}`}</style>
       </Head>
 
       {!demoEmbed && <DemoLobby />}
@@ -459,7 +577,7 @@ export default function Demo({ demoEmbed = false }) {
             {TABS.map(([id, label]) => {
               const active = tab === id
               return (
-                <button key={id} className="jm-navbtn" onClick={() => { setTab(id); setExpanded(null) }}
+                <button key={id} className="jm-navbtn" onClick={() => { setTab(id); setExpanded(null); setOverviewBack(false) }}
                   style={active ? { background: 'rgba(255,255,255,.12)', color: CREAM, boxShadow: `inset 3px 0 0 ${SPICE}` } : undefined}>
                   {label}
                 </button>
@@ -480,6 +598,13 @@ export default function Demo({ demoEmbed = false }) {
             <div style={{ fontSize: '12px', color: MUTED, marginTop: '6px' }}>{SAMPLE_HEADER}</div>
           </div>
 
+          {overviewBack && tab !== 'overview' && (
+            <button type="button" onClick={() => { setTab('overview'); setOverviewBack(false) }}
+              style={{ background: 'none', border: 'none', padding: '0 0 14px', margin: '-6px 0 4px', fontFamily: "'Inter', sans-serif", fontSize: '13px', color: MUTED, cursor: 'pointer', textAlign: 'left', minHeight: '40px' }}>
+              ‹ Overview
+            </button>
+          )}
+
           {/* ===== OVERVIEW ===== */}
           {tab === 'overview' && (
             <>
@@ -490,17 +615,18 @@ export default function Demo({ demoEmbed = false }) {
               </div>
 
               <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap', marginBottom: '16px' }}>
-                <KPI k={`Items sold this ${period}`} v={bagsPeriod} sub="across all products" accent={INK} />
-                <KPI k="Revenue / mo" v={m0(revenue)} sub={`${bagsPeriod} items this ${period}`} accent={SPICE} />
-                <KPI k="Out on consignment" v={m0(onShelfVal)} sub={`${bagsOut} items sitting in stores`} accent={KRAFT} />
-                <KPI k="Missing pieces" v={`${missUnits}`} sub={`${m0(missVal)} to investigate`} accent={missUnits ? RED : GREEN} />
+                <KPI k={`Items sold this ${period}`} v={bagsPeriod} sub="across all products" accent={INK} onClick={goOverviewPnl} />
+                <KPI k="Revenue / mo" v={m0(revenue)} sub={`${bagsPeriod} items this ${period}`} accent={SPICE} onClick={goOverviewPnl} />
+                <KPI k="Out on consignment" v={m0(onShelfVal)} sub={`${bagsOut} items sitting in stores`} accent={KRAFT} onClick={() => navFromOverview('consign')} />
+                <KPI k="Missing pieces" v={`${missUnits}`} sub={`${m0(missVal)} to investigate`} accent={missUnits ? RED : GREEN} onClick={() => navFromOverview('consign')} />
               </div>
 
               <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap', marginBottom: '16px' }}>
                 <div style={{ ...card, flex: 1, minWidth: '290px' }}>
                   <div style={{ ...lbl, marginBottom: '14px' }}>Top consignment stores · this {period}</div>
                   {(() => { const pv = s => period === 'week' ? s.weekRev : s.monthRev; const pb = s => period === 'week' ? s.week : s.month; const sorted = STORE_PERF.slice().sort((a, b) => pv(b) - pv(a)); const max = pv(sorted[0]) || 1; return sorted.slice(0, 6).map((c, i) => (
-                    <div key={c.store} style={{ padding: '9px 0', borderTop: i ? `1px solid ${CREAM}` : 'none' }}>
+                    <div key={c.store} className="sm-click sm-tap-row" role="button" tabIndex={0} onClick={() => openConsignStore(c.store)} onKeyDown={tapKey(() => openConsignStore(c.store))}
+                      style={{ padding: '10px 8px', borderTop: i ? `1px solid ${CREAM}` : 'none', cursor: 'pointer', borderRadius: '8px', minHeight: '40px' }}>
                       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', gap: '8px', marginBottom: '6px' }}>
                         <span style={{ fontWeight: 600, color: INK, fontSize: '14px' }}>{c.store}</span>
                         <span style={{ ...big, fontSize: '15px', color: INK }}>{m0(pv(c))}</span>
@@ -517,7 +643,8 @@ export default function Demo({ demoEmbed = false }) {
                 <div style={{ ...card, flex: 1, minWidth: '290px' }}>
                   <div style={{ ...lbl, marginBottom: '14px' }}>Top direct sales · this {period}</div>
                   {(() => { const pv = s => period === 'week' ? s.weekRev : s.monthRev; const pb = s => period === 'week' ? s.week : s.month; const sorted = DIRECT_PERF.slice().sort((a, b) => pv(b) - pv(a)); const max = pv(sorted[0]) || 1; return sorted.map((d, i) => (
-                    <div key={d.who} style={{ padding: '9px 0', borderTop: i ? `1px solid ${CREAM}` : 'none' }}>
+                    <div key={d.who} className="sm-click sm-tap-row" role="button" tabIndex={0} onClick={() => openDirectPerf(d)} onKeyDown={tapKey(() => openDirectPerf(d))}
+                      style={{ padding: '10px 8px', borderTop: i ? `1px solid ${CREAM}` : 'none', cursor: 'pointer', borderRadius: '8px', minHeight: '40px' }}>
                       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', gap: '8px', marginBottom: '6px' }}>
                         <span style={{ fontWeight: 600, color: INK, fontSize: '14px' }}>{d.who}</span>
                         <span style={{ ...big, fontSize: '15px', color: GREEN }}>{m0(pv(d))}</span>
@@ -571,29 +698,31 @@ export default function Demo({ demoEmbed = false }) {
 
               <div style={{ ...card }}>
                 <div style={{ ...lbl, marginBottom: '14px' }}>Profit &amp; loss — this month (cash basis)</div>
-                <div style={{ ...lbl, color: KRAFT, margin: '4px 0' }}>Revenue</div>
-                <DrillRow k="direct" l="Direct sales" v={m0(directRev)}
-                  items={direct.map(d => ({ l: d.who, sub: d.source, v: m0(d.rev) }))} />
-                <DrillRow k="consign" l="Consignment (collected)" v={m0(cashCollected)}
-                  items={R.filter(c => c.paid > 0).map(c => ({ l: c.store, sub: `${c.paidUnits} sold`, v: m0(c.paid) }))} />
+                <PnlSectionHead sectionKey="revenue" title="Revenue" />
+                {pnlSections.revenue && <>
+                  <DrillLine l="Direct sales" v={m0(directRev)} onDrill={() => openDrill({ title: 'Direct sales', period: demoMonthLabel, rows: drillDirectRows(), totalN: directRev, totalV: m0(directRev) })} />
+                  <DrillLine l="Consignment (collected)" v={m0(cashCollected)} onDrill={() => openDrill({ title: 'Consignment collected', period: demoMonthLabel, rows: drillConsignRows(), totalN: cashCollected, totalV: m0(cashCollected) })} />
+                </>}
                 <Row l="Total revenue" v={m0(revenue)} bold top tie />
-                <div style={{ ...lbl, color: KRAFT, margin: '16px 0 6px' }}>Cost of goods sold</div>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '2px 0 8px', flexWrap: 'wrap' }}>
-                  <span style={{ fontSize: '13px', color: MUTED }}>Cost to make one item:</span>
-                  <span style={{ display: 'inline-flex', alignItems: 'center', gap: '3px', color: MUTED }}>$<input value={costPerBag} onChange={e => setCostPerBag(Number(e.target.value) || 0)} type="number" step="0.25" style={{ ...inp, width: '74px', padding: '6px 9px' }} /></span>
-                  <span style={{ fontSize: '12px', color: '#A2937A' }}>← estimate, set the real number</span>
-                </div>
-                <DrillRow k="cogs" l={`Cost of goods sold (${soldBags} items × ${money(costPerBag)})`} v={`−${m0(cogs)}`}
-                  hint="Units sold × your cost to make one item."
-                  items={[
-                    { l: 'Direct sales units', sub: `${directUnits} × ${money(costPerBag)}`, v: `−${m0(directUnits * costPerBag)}` },
-                    { l: 'Consignment units sold', sub: `${R.reduce((s, c) => s + c.paidUnits, 0)} × ${money(costPerBag)}`, v: `−${m0(R.reduce((s, c) => s + c.paidUnits, 0) * costPerBag)}` },
-                  ]} />
+                <PnlSectionHead sectionKey="cogs" title="Cost of goods sold" />
+                {pnlSections.cogs && <>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '2px 0 8px', flexWrap: 'wrap' }}>
+                    <span style={{ fontSize: '13px', color: MUTED }}>Cost to make one item:</span>
+                    <span style={{ display: 'inline-flex', alignItems: 'center', gap: '3px', color: MUTED }}>$<input value={costPerBag} onChange={e => setCostPerBag(Number(e.target.value) || 0)} type="number" step="0.25" style={{ ...inp, width: '74px', padding: '6px 9px' }} /></span>
+                    <span style={{ fontSize: '12px', color: '#A2937A' }}>← estimate, set the real number</span>
+                  </div>
+                  <DrillLine l={`Cost of goods sold (${soldBags} items × ${money(costPerBag)})`} v={`−${m0(cogs)}`}
+                    onDrill={() => openDrill({ title: 'Cost of goods sold', period: demoMonthLabel, rows: drillCogsRows(), totalN: cogs, totalV: `−${m0(cogs)}` })} />
+                </>}
                 <Row l={`Gross profit  ·  ${pct(grossProfit)}% margin`} v={m0(grossProfit)} bold top />
-                <div style={{ ...lbl, color: KRAFT, margin: '16px 0 4px' }}>Operating expenses</div>
-                <DrillRow k="ads" l="Advertising" v={`−${m0(adSpend)}`}
-                  items={ads.map(a => ({ l: a.channel, sub: a.spend ? `${(a.rev / a.spend).toFixed(1)}× ROAS` : '', v: `−${m0(a.spend)}` }))} />
-                {[...new Set(expenses.filter(e => !COGS_CATS.includes(e.cat)).map(e => e.cat))].map(cat => { const list = expenses.filter(e => e.cat === cat); const v = list.reduce((s, e) => s + e.amt, 0); return <DrillRow key={cat} k={`exp-${cat}`} l={cat} v={`−${m0(v)}`} items={list.map(e => ({ l: e.vendor, sub: PAYM[e.pay] ? PAYM[e.pay].label : '', v: `−${m0(e.amt)}` }))} /> })}
+                <PnlSectionHead sectionKey="opex" title="Operating expenses" />
+                {pnlSections.opex && <>
+                  <DrillLine l="Advertising" v={`−${m0(adSpend)}`} onDrill={() => openDrill({ title: 'Advertising', period: demoMonthLabel, rows: drillAdRows(), totalN: adSpend, totalV: `−${m0(adSpend)}` })} />
+                  {[...new Set(expenses.filter(e => !COGS_CATS.includes(e.cat)).map(e => e.cat))].map(cat => {
+                    const { total, rows } = drillExpCatRows(cat)
+                    return <DrillLine key={cat} l={cat} v={`−${m0(total)}`} onDrill={() => openDrill({ title: cat, period: demoMonthLabel, rows, totalN: total, totalV: `−${m0(total)}` })} />
+                  })}
+                </>}
                 <Row l="Total operating expenses" v={`−${m0(totalOpex)}`} bold top tie />
                 <div style={{ marginTop: '12px', padding: '12px 14px', background: netProfit >= 0 ? '#EAF3EC' : '#FBEDE9', borderRadius: '10px' }}>
                   <Row l={`${netProfit >= 0 ? 'Net profit' : 'Net loss'}  ·  ${pct(netProfit)}% margin`} v={m0(netProfit)} bold neg={netProfit < 0} />
@@ -684,6 +813,15 @@ export default function Demo({ demoEmbed = false }) {
                 {PNL_ROWS.map(row => {
                   const strong = row.kind === 'subtotal' || row.kind === 'total', isNet = row.kind === 'total'
                   const v = row.cost ? -rngAgg[row.key] : rngAgg[row.key]
+                  const tapKeys = ['directRev', 'consignRev', 'cogs', 'ad', 'otherOpex']
+                  if (!strong && tapKeys.includes(row.key)) {
+                    const totalN = rngAgg[row.key]
+                    const rows = drillRangeMonths(row.key)
+                    return (
+                      <DrillLine key={row.key} l={row.label} v={sgn(v)}
+                        onDrill={() => openDrill({ title: row.label, period: rngLabel, rows, totalN, totalV: row.cost ? `−${m0(totalN)}` : m0(totalN) })} />
+                    )
+                  }
                   return <Row key={row.key} l={row.label} v={sgn(v)} bold={strong} top={strong} neg={isNet ? rngAgg.net < 0 : false} />
                 })}
                 <p style={{ fontSize: '12px', color: MUTED, marginTop: '12px' }}>Every month from {rngLabel} added together. Costs shown negative.</p>
@@ -710,7 +848,7 @@ export default function Demo({ demoEmbed = false }) {
                     Across {R.filter(c => c.variance > 0).length} stores · tap a row to open that account
                   </p>
                   {R.filter(c => c.variance > 0).sort((a, b) => b.varVal - a.varVal).map((c, i) => (
-                    <div key={c.id} onClick={() => setExpanded(c.id)} role="button" tabIndex={0} onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setExpanded(c.id) } }} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '10px 0', borderTop: i ? `1px solid ${CREAM}` : 'none', cursor: 'pointer', gap: '8px', flexWrap: 'wrap' }}>
+                    <div key={c.id} onClick={() => { setExpanded(c.id); setScrollConsignId(c.id) }} role="button" tabIndex={0} onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setExpanded(c.id); setScrollConsignId(c.id) } }} className="sm-click sm-tap-row" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '10px 4px', borderTop: i ? `1px solid ${CREAM}` : 'none', cursor: 'pointer', gap: '8px', flexWrap: 'wrap', minHeight: '40px', borderRadius: '8px' }}>
                       <div>
                         <span style={{ fontWeight: 600, color: INK, fontSize: '14px' }}>{c.store}</span>
                         <span style={{ fontSize: '12px', color: MUTED }}> · {c.variance} {c.variance === 1 ? 'item' : 'items'}{c.diagnosis ? ` · ${c.diagnosis}` : ''}</span>
@@ -752,7 +890,7 @@ export default function Demo({ demoEmbed = false }) {
                         : { c: MUTED, t: 'Not counted' }
                 const onShelf = shelfUnits(c)
                 return (
-                  <div key={c.id} style={{ ...card, padding: 0, marginBottom: '12px', overflow: 'hidden', borderColor: open ? CHAR : (c.status === 'short' ? '#E7C3B8' : BORDER) }}>
+                  <div key={c.id} id={`consign-store-${c.id}`} style={{ ...card, padding: 0, marginBottom: '12px', overflow: 'hidden', borderColor: open ? CHAR : (c.status === 'short' ? '#E7C3B8' : BORDER) }}>
                     <div onClick={() => setExpanded(open ? null : c.id)} style={{ padding: '15px 18px', cursor: 'pointer' }}>
                       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '12px', flexWrap: 'wrap' }}>
                         <div>
@@ -895,7 +1033,7 @@ export default function Demo({ demoEmbed = false }) {
                 </div>
               )}
               {direct.map(d => (
-                <div key={d.id} style={{ ...card, marginBottom: '10px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '8px' }}>
+                <div key={d.id} id={`direct-sale-${d.id}`} style={{ ...card, marginBottom: '10px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '8px', ...(highlightDirectId === d.id ? { boxShadow: `inset 0 0 0 2px ${SPICE}`, background: '#F5FAFF' } : {}) }}>
                   <div>
                     <div style={{ ...big, fontSize: '18px', color: INK }}>{d.who}</div>
                     <div style={{ fontSize: '12px', color: MUTED, marginTop: '2px' }}>
@@ -986,29 +1124,37 @@ export default function Demo({ demoEmbed = false }) {
           {tab === 'close' && (
             <>
               <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap', marginBottom: '16px' }}>
-                <KPI k="Income to post" v={m0(closeIncome)} sub="consignment + offline direct" accent={GREEN} />
-                <KPI k="COGS to post" v={m0(closeCogs)} sub={`${closeUnits} items × ${money(costPerBag)}`} accent={KRAFT} />
-                <KPI k="AR to invoice" v={m0(closeAR)} sub="stores that owe you" accent={closeAR ? RED : MUTED} />
+                <KPI k="Income to post" v={m0(closeIncome)} sub="consignment + offline direct" accent={GREEN}
+                  onClick={() => openDrill({ title: 'Income to post', period: demoMonthLabel, rows: drillCloseIncomeRows(), totalN: closeIncome, totalV: m0(closeIncome) })} />
+                <KPI k="COGS to post" v={m0(closeCogs)} sub={`${closeUnits} items × ${money(costPerBag)}`} accent={KRAFT}
+                  onClick={() => openDrill({ title: 'COGS to post', period: demoMonthLabel, rows: drillCloseCogsRows(), totalN: closeCogs, totalV: m0(closeCogs) })} />
+                <KPI k="AR to invoice" v={m0(closeAR)} sub="stores that owe you" accent={closeAR ? RED : MUTED}
+                  onClick={closeAR > 0 ? () => openDrill({ title: 'AR to invoice', period: demoMonthLabel, rows: drillARRows(), totalN: closeAR, totalV: m0(closeAR) }) : undefined} />
               </div>
 
               <div style={{ ...card }}>
                 <div style={{ ...lbl, color: KRAFT, margin: '2px 0 4px' }}>Income to post</div>
-                <Row l="Consignment collected" v={m0(cashCollected)} />
-                <Row l="Direct sales — non-Shopify (market, pop-up, cash, wholesale)" v={m0(offlineDirectRev)} />
+                <DrillLine l="Consignment collected" v={m0(cashCollected)} onDrill={() => openDrill({ title: 'Consignment collected', period: demoMonthLabel, rows: drillConsignRows(), totalN: cashCollected, totalV: m0(cashCollected) })} />
+                <DrillLine l="Direct sales — non-Shopify (market, pop-up, cash, wholesale)" v={m0(offlineDirectRev)}
+                  onDrill={() => openDrill({ title: 'Direct sales — non-Shopify', period: demoMonthLabel, rows: direct.filter(x => x.source !== 'Shopify / online').map(d => ({ l: d.who, sub: d.source, n: d.rev, v: m0(d.rev) })), totalN: offlineDirectRev, totalV: m0(offlineDirectRev) })} />
                 <Row l="Total income to post" v={m0(closeIncome)} bold top tie />
 
                 <div style={{ ...lbl, color: KRAFT, margin: '16px 0 4px' }}>Cost of goods sold</div>
-                <Row l={`${closeUnits} items sold × ${money(costPerBag)}/item`} v={`−${m0(closeCogs)}`} bold top />
+                <DrillLine l={`${closeUnits} items sold × ${money(costPerBag)}/item`} v={`−${m0(closeCogs)}`} muted={false}
+                  onDrill={() => openDrill({ title: 'Cost of goods sold', period: demoMonthLabel, rows: drillCloseCogsRows(), totalN: closeCogs, totalV: `−${m0(closeCogs)}` })} />
 
                 <div style={{ ...lbl, color: KRAFT, margin: '16px 0 4px' }}>Accounts receivable</div>
-                <Row l="Invoice stores for sold-not-reported items" v={m0(closeAR)} bold top />
+                {closeAR > 0 ? (
+                  <DrillLine l="Invoice stores for sold-not-reported items" v={m0(closeAR)} muted={false}
+                    onDrill={() => openDrill({ title: 'AR to invoice', period: demoMonthLabel, rows: drillARRows(), totalN: closeAR, totalV: m0(closeAR) })} />
+                ) : (
+                  <Row l="Invoice stores for sold-not-reported items" v={m0(closeAR)} bold top />
+                )}
 
                 <div style={{ marginTop: '16px', padding: '12px 14px', background: CREAM, borderRadius: '10px', border: `1px dashed ${BORDER}` }}>
                   <div style={{ ...lbl, marginBottom: '4px' }}>Booked elsewhere — do NOT re-enter</div>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '13px', color: MUTED }}>
-                    <span>Shopify online sales <span style={{ color: '#A2937A' }}>(via Shopify → QuickBooks)</span></span>
-                    <span style={{ fontFamily: MONO }}>{m0(shopifyRev)}</span>
-                  </div>
+                  <DrillLine l="Shopify online sales" v={m0(shopifyRev)}
+                    onDrill={() => openDrill({ title: 'Shopify online sales', period: demoMonthLabel, rows: drillShopifyRows(), totalN: shopifyRev, totalV: m0(shopifyRev) })} />
                 </div>
 
                 <div style={{ ...lbl, color: KRAFT, margin: '16px 0 6px' }}>Journal entry preview</div>
@@ -1029,9 +1175,9 @@ export default function Demo({ demoEmbed = false }) {
           {tab === 'askai' && (
             <>
               {[
-                { q: 'Which store owes me the most right now?', a: <>Your counts show <b>Cedar Market</b> has the biggest gap: <b>7 items missing</b> (~$56), most likely sold-but-unreported. Across all stores you&rsquo;re owed about <b>{m0(missVal)}</b> — invoice the worst offenders.</> },
-                { q: 'Where am I wasting ad money?', a: <>Three channels are underwater — <b>Facebook, the 5K, and flyers</b>. Together they cost <b>{m0(wastedSpend)}/mo</b> and return only <b>{m0(wastedReturn)}</b>. Move that budget to Instagram and your influencer (both ~4x).</> },
-                { q: 'Did I actually make money this month?', a: <>Net profit is already <b>{m0(netProfit)}</b> after revenue of <b>{m0(revenue)}</b>. Fixing ad waste and collecting the <b>{m0(missVal)}</b> still owed on consignment would add about <b>{m0(wastedSpend - wastedReturn)}</b> plus <b>{m0(missVal)}</b> on top of that.</> },
+                { q: 'Which store owes me the most right now?', a: <>Your counts show <b>Cedar Market</b> has the biggest gap: <b>7 items missing</b> (~$56), most likely sold-but-unreported. Across all stores you&rsquo;re owed about <b>{m0(missVal)}</b> — invoice the worst offenders.</>, go: () => openConsignStore('Cedar Market') },
+                { q: 'Where am I wasting ad money?', a: <>Three channels are underwater — <b>Facebook, the 5K, and flyers</b>. Together they cost <b>{m0(wastedSpend)}/mo</b> and return only <b>{m0(wastedReturn)}</b>. Move that budget to Instagram and your influencer (both ~4x).</>, go: () => { setOverviewBack(false); setTab('ads'); setExpanded(null) } },
+                { q: 'Did I actually make money this month?', a: <>Net profit is already <b>{m0(netProfit)}</b> after revenue of <b>{m0(revenue)}</b>. Fixing ad waste and collecting the <b>{m0(missVal)}</b> still owed on consignment would add about <b>{m0(wastedSpend - wastedReturn)}</b> plus <b>{m0(missVal)}</b> on top of that.</>, go: () => { setOverviewBack(false); setTab('pnl'); setPnlView('single'); setExpanded(null) } },
               ].map((m, i) => (
                 <div key={i} style={{ marginBottom: '16px' }}>
                   <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: '8px' }}>
@@ -1039,7 +1185,11 @@ export default function Demo({ demoEmbed = false }) {
                   </div>
                   <div style={{ display: 'flex', gap: '10px', alignItems: 'flex-start' }}>
                     <div style={{ width: '30px', height: '30px', borderRadius: '8px', background: SPICE, color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, ...big, fontSize: '12px' }}>JK</div>
-                    <div style={{ ...card, padding: '13px 15px', fontSize: '14px', lineHeight: 1.55, maxWidth: '85%' }}>{m.a}</div>
+                    <div onClick={m.go} onKeyDown={tapKey(m.go)} role="button" tabIndex={0} className="sm-click"
+                      style={{ ...card, padding: '13px 15px', fontSize: '14px', lineHeight: 1.55, maxWidth: '85%', position: 'relative', cursor: 'pointer', flex: 1 }}>
+                      {m.a}
+                      <span style={{ position: 'absolute', top: '11px', right: '12px', color: '#C6B79A', fontSize: '15px', lineHeight: 1 }} aria-hidden="true">›</span>
+                    </div>
                   </div>
                 </div>
               ))}
@@ -1048,6 +1198,7 @@ export default function Demo({ demoEmbed = false }) {
 
         </main>
       </div>
+      <DrillOverlay />
     </>
   )
 }
