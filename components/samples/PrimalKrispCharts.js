@@ -460,9 +460,9 @@ export function ArAgingBars({ aging, accent = BRICK, onBarClick }) {
   const keys = ['0-30', '31-60', '61-90']
   const vals = keys.map((k) => aging[k] || 0)
   const max = Math.max(...vals, 1)
-  const TOP = 20
+  const TOP = 26
   const BASE = 96
-  const BAR_MAX = 70
+  const BAR_MAX = 62
   const vbH = 112
   const activate = (k) => {
     const id = AGING_BAR_FILTER[k]
@@ -481,7 +481,7 @@ export function ArAgingBars({ aging, accent = BRICK, onBarClick }) {
           const x = 20 + i * 110
           const h = (vals[i] / max) * BAR_MAX
           const barY = BASE - h
-          const labelY = Math.max(TOP + 6, barY - 4)
+          const labelY = barY - 6
           const clickable = !!onBarClick
           return (
             <g key={k}>

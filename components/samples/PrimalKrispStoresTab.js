@@ -29,10 +29,12 @@ function bucketAmountForInvoice(inv, bucket, asOf = AS_OF) {
   return days > 60 ? inv.amount : 0
 }
 
+const round2 = (n) => Math.round(n * 100) / 100
+
 function storeBucketOpenTotal(store, filterKey) {
   const bucket = AGING_FILTERS[filterKey]?.bucket
   if (!bucket) return 0
-  return (store.sample.invoices || []).reduce((s, inv) => s + bucketAmountForInvoice(inv, bucket), 0)
+  return round2((store.sample.invoices || []).reduce((s, inv) => s + bucketAmountForInvoice(inv, bucket), 0))
 }
 
 const PRINT_CSS = `@media print{
@@ -183,8 +185,6 @@ export default function PrimalKrispStoresTab({
     return () => cancelAnimationFrame(id)
   }, [listFilter, agingFilterActive])
 
-  const chipLabel = agingFilterActive ? AGING_FILTERS[listFilter].label : listFilterLabel
-
   const filtered = useMemo(() => {
     const q = storeSearch.trim().toLowerCase()
     let rows = stores.filter((s) => {
@@ -214,6 +214,19 @@ export default function PrimalKrispStoresTab({
     })
     return rows
   }, [stores, side, regionFilter, listFilter, storeSearch, storeSort, period, agingFilterActive])
+
+  const filterChipLabel = useMemo(() => {
+    if (!agingFilterActive) return listFilterLabel
+    const bucket = AGING_FILTERS[listFilter].bucket
+    const expected = aging[bucket] || 0
+    const actual = round2(filtered.reduce((s, st) => s + storeBucketOpenTotal(st, listFilter), 0))
+    return (
+      <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}>
+        <span>{AGING_FILTERS[listFilter].label} · {money(actual)}</span>
+        <TieMark expected={expected} actual={actual} />
+      </span>
+    )
+  }, [agingFilterActive, listFilter, listFilterLabel, aging, filtered])
 
   const grouped = useMemo(() => {
     const map = {}
@@ -297,7 +310,7 @@ export default function PrimalKrispStoresTab({
         />
       </div>
 
-      <FilterChip label={chipLabel} onClear={() => setListFilter(null)} />
+      <FilterChip label={filterChipLabel} onClear={() => setListFilter(null)} />
 
       <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap', marginBottom: '16px' }}>
         <KPI k="Owed by stores" v={money(owedTotal)} accent={AMBER} onClick={() => setListFilter('open_balance')} />
@@ -360,6 +373,7 @@ export default function PrimalKrispStoresTab({
           {list.map((st) => {
             const s = st.sample
             const open = openInvoiceTotal(st)
+            const displayOpen = agingFilterActive ? storeBucketOpenTotal(st, listFilter) : open
             const isOpen = expanded === st.name
             const consignment = isConsignmentStore(st)
             const sold = shelfSold(s)
@@ -414,7 +428,7 @@ export default function PrimalKrispStoresTab({
                       {hasOverdue && (
                         <span style={{ fontSize: 11, fontWeight: 600, color: RED, marginRight: 8 }}>Overdue</span>
                       )}
-                      <span style={{ ...big, fontSize: 16, fontFamily: MONO }}>{money(open)}</span>
+                      <span style={{ ...big, fontSize: 16, fontFamily: MONO }}>{money(displayOpen)}</span>
                     </div>
                   </div>
                 </button>
