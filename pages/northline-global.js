@@ -86,9 +86,11 @@ export default function NorthlineGlobal({ demoEmbed = false }) {
         *{box-sizing:border-box;margin:0;padding:0}
         ${DEMO_RENDER_HINTS}
         body{background:${BG};color:${INK}}
-        .shell{display:flex;min-height:100vh}
+        .shell{display:flex;min-height:100vh;width:100%;max-width:100%;min-width:0}
         .side{width:210px;flex-shrink:0;background:${SIDEBAR};display:flex;flex-direction:column;padding:22px 12px;position:sticky;top:0;height:100vh;overflow-y:auto}
-        .main{flex:1;min-width:0;padding:28px 32px 60px;overflow-y:auto}
+        .main{flex:1;min-width:0;max-width:100%;padding:28px 32px 60px;overflow-y:auto;overflow-x:visible}
+        .table-card{background:#fff;border:1px solid ${BORDER};border-radius:8px;max-width:100%;min-width:0}
+        .table-scroll{width:100%;max-width:100%;min-width:0;overflow-x:auto;-webkit-overflow-scrolling:touch}
         .nbtn{display:block;width:100%;text-align:left;padding:9px 13px;border-radius:7px;border:none;background:transparent;color:#9a9590;font-family:${DEMO_UI};font-size:13.5px;font-weight:500;cursor:pointer;margin-bottom:2px}
         .nbtn:hover{background:rgba(255,255,255,.06);color:#ddd}
         .nbtn.on{background:rgba(255,255,255,.08);color:#fff;box-shadow:inset 3px 0 0 ${ACCENT}}
@@ -180,8 +182,9 @@ export default function NorthlineGlobal({ demoEmbed = false }) {
                 <Kpi k="PO value (open)" v={money(120600)} sub="ex-factory" />
                 <Kpi k="Landed (est.)" v={money(133320)} sub="+10.5% freight & duty" color={ACCENT} />
               </div>
-              <div style={{ background: '#fff', border: `1px solid ${BORDER}`, borderRadius: '8px', overflow: 'hidden' }}>
-                <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+              <div className="table-card">
+                <div className="table-scroll">
+                <table style={{ width: '100%', borderCollapse: 'collapse', minWidth: '520px' }}>
                   <thead><tr>
                     <th style={hcell}>PO</th>
                     <th style={hcell}>Vendor</th>
@@ -201,6 +204,7 @@ export default function NorthlineGlobal({ demoEmbed = false }) {
                     ))}
                   </tbody>
                 </table>
+                </div>
               </div>
             </>
           )}
@@ -219,8 +223,9 @@ export default function NorthlineGlobal({ demoEmbed = false }) {
                 value={binSearch}
                 onChange={(e) => setBinSearch(e.target.value)}
               />
-              <div style={{ background: '#fff', border: `1px solid ${BORDER}`, borderRadius: '8px', overflow: 'hidden' }}>
-                <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+              <div className="table-card">
+                <div className="table-scroll">
+                <table style={{ width: '100%', borderCollapse: 'collapse', minWidth: '480px' }}>
                   <thead><tr>
                     <th style={hcell}>SKU</th>
                     <th style={hcell}>Product</th>
@@ -240,6 +245,7 @@ export default function NorthlineGlobal({ demoEmbed = false }) {
                     ))}
                   </tbody>
                 </table>
+                </div>
               </div>
             </>
           )}
@@ -251,8 +257,9 @@ export default function NorthlineGlobal({ demoEmbed = false }) {
                 <Kpi k="Shipped MTD" v={money(42840)} sub="12 orders" color={GREEN} />
                 <Kpi k="Avg margin" v="28.4%" sub="after landed cost" color={ACCENT} />
               </div>
-              <div style={{ background: '#fff', border: `1px solid ${BORDER}`, borderRadius: '8px', overflow: 'hidden' }}>
-                <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+              <div className="table-card">
+                <div className="table-scroll">
+                <table style={{ width: '100%', borderCollapse: 'collapse', minWidth: '560px' }}>
                   <thead><tr>
                     <th style={hcell}>Order</th>
                     <th style={hcell}>Customer</th>
@@ -274,6 +281,7 @@ export default function NorthlineGlobal({ demoEmbed = false }) {
                     ))}
                   </tbody>
                 </table>
+                </div>
               </div>
             </>
           )}

@@ -364,9 +364,8 @@ export default function WestviewAutoPortal({ demoEmbed = false }) {
           *{box-sizing:border-box;margin:0;padding:0}
           ${DEMO_RENDER_HINTS.replace(/font-family:[^;]+;/, `font-family:${sans};`)}
           body{background:${PAPER};font-family:${sans};color:${INK}}
-          html{overflow-x:hidden}
-          .bl-shell{display:flex;flex-direction:column;min-height:calc(100vh - ${embedded ? 0 : 72}px);font-family:${sans};max-width:100%;overflow-x:hidden}
-          .bl-body{display:flex;flex:1;min-width:0;width:100%}
+          .bl-shell{display:flex;flex-direction:column;min-height:calc(100vh - ${embedded ? 0 : 72}px);font-family:${sans};width:100%;max-width:100%;min-width:0}
+          .bl-body{display:flex;flex:1;min-width:0;width:100%;max-width:100%}
           .bl-side{width:232px;flex-shrink:0;background:${SIDEBAR};border-right:1px solid ${RULE};display:flex;flex-direction:column;padding:24px 16px 20px;position:sticky;top:${embedded ? 0 : 72}px;height:calc(100vh - ${embedded ? 0 : 72}px)}
           .bl-nav{width:100%;text-align:left;padding:10px 12px;border-radius:8px;border:none;background:transparent;color:${MUTED};font-size:14px;font-weight:500;cursor:pointer;margin-bottom:4px;font-family:${sans}}
           .bl-nav:hover{background:${PAPER};color:${INK}}
@@ -380,6 +379,9 @@ export default function WestviewAutoPortal({ demoEmbed = false }) {
           .bl-mtab.on{background:#F5F0E6;border-color:${SIGNAL};color:${INK};font-weight:600}
           .bl-chev{transition:transform .15s;display:inline-block;color:${FAINT}}
           .bl-chev.open{transform:rotate(90deg)}
+          .bl-card-panel{min-width:0;max-width:100%;width:100%}
+          .bl-table-scroll{width:100%;max-width:100%;min-width:0;overflow-x:auto;-webkit-overflow-scrolling:touch}
+          .bl-stage-grid{display:grid;gap:14px;min-width:0;width:100%;max-width:100%}
           @media(max-width:820px){
             .bl-side{display:none}
             .bl-page-meta-mobile{display:block;padding:4px 0 12px}
@@ -498,7 +500,7 @@ export default function WestviewAutoPortal({ demoEmbed = false }) {
                 })}
               </div>
 
-              <div style={card}>
+              <div className="bl-card-panel" style={card}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px', flexWrap: 'wrap', gap: '8px' }}>
                   <div style={{ fontSize: '17px', fontWeight: 700, color: INK }}>{fundingTableTitle}</div>
                   {fundingFilter !== 'attention' && (
@@ -511,7 +513,7 @@ export default function WestviewAutoPortal({ demoEmbed = false }) {
                     </button>
                   )}
                 </div>
-                <div style={{ overflowX: 'auto' }}>
+                <div className="bl-table-scroll">
                   <table style={{ width: '100%', borderCollapse: 'collapse', minWidth: '640px' }}>
                     <thead>
                       <tr>
@@ -584,7 +586,7 @@ export default function WestviewAutoPortal({ demoEmbed = false }) {
           {tab === 'desk' && (
             <>
               <p style={{ margin: '0 0 8px', fontSize: '15px', color: MUTED }}>{M.unitsMtd} cars sold this month — from first quote to bank paid.</p>
-              <div style={{ display: 'grid', gap: '14px' }}>
+              <div className="bl-stage-grid">
                 {['quote', 'fi', 'cit', 'funded'].map((stage) => {
                   const label = { quote: 'Working the deal', fi: 'In finance office', cit: 'Sold — waiting on bank', funded: 'Bank paid this month' }[stage]
                   const rows = DEALS.filter((d) => d.stage === stage && (stage === 'funded' ? dt(d.sold) >= dt('2026-10-01') : true))
@@ -593,9 +595,9 @@ export default function WestviewAutoPortal({ demoEmbed = false }) {
                     if (!rows.length && !extra.length) return null
                   } else if (!rows.length) return null
                   return (
-                    <div key={stage} style={card}>
+                    <div key={stage} className="bl-card-panel" style={card}>
                       <div style={{ fontSize: '16px', fontWeight: 700, color: INK, marginBottom: '10px' }}>{label}</div>
-                      <div style={{ overflowX: 'auto' }}>
+                      <div className="bl-table-scroll">
                         <table style={{ width: '100%', borderCollapse: 'collapse', minWidth: '520px' }}>
                           <thead>
                             <tr>
@@ -651,12 +653,12 @@ export default function WestviewAutoPortal({ demoEmbed = false }) {
                   <div style={{ fontSize: '13px', color: MUTED, marginTop: '4px' }}>On pace for unit goal</div>
                 </div>
               </div>
-              <div style={card}>
+              <div className="bl-card-panel" style={card}>
                 <div style={{ fontSize: '16px', fontWeight: 700, marginBottom: '4px' }}>October deals</div>
                 <p style={{ fontSize: '13px', color: MUTED, marginBottom: '12px', lineHeight: 1.45 }}>
                   Commission is paid on desk profit and finance products, after the bank pays.
                 </p>
-                <div style={{ overflowX: 'auto' }}>
+                <div className="bl-table-scroll">
                   <table style={{ width: '100%', borderCollapse: 'collapse', minWidth: '620px' }}>
                     <thead>
                       <tr>

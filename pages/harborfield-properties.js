@@ -73,9 +73,11 @@ export default function HarborfieldProperties() {
         *{box-sizing:border-box;margin:0;padding:0}
         ${DEMO_RENDER_HINTS}
         body{background:${BG};color:${INK}}
-        .shell{display:flex;min-height:100vh}
+        .shell{display:flex;min-height:100vh;width:100%;max-width:100%;min-width:0}
         .side{width:210px;flex-shrink:0;background:${SIDEBAR};display:flex;flex-direction:column;padding:22px 12px;position:sticky;top:0;height:100vh;overflow-y:auto}
-        .main{flex:1;min-width:0;padding:28px 32px 60px;overflow-y:auto}
+        .main{flex:1;min-width:0;max-width:100%;padding:28px 32px 60px;overflow-y:auto;overflow-x:visible}
+        .table-card{background:#fff;border:1px solid ${BORDER};border-radius:8px;max-width:100%;min-width:0}
+        .table-scroll{width:100%;max-width:100%;min-width:0;overflow-x:auto;-webkit-overflow-scrolling:touch}
         .nbtn{display:block;width:100%;text-align:left;padding:9px 13px;border-radius:7px;border:none;background:transparent;color:#8a9aa8;font-family:${DEMO_UI};font-size:13px;font-weight:500;cursor:pointer;margin-bottom:2px}
         .nbtn:hover{background:rgba(255,255,255,.06);color:#ddd}
         .nbtn.on{background:rgba(255,255,255,.09);color:#fff;box-shadow:inset 3px 0 0 ${ACCENT}}
@@ -133,8 +135,9 @@ export default function HarborfieldProperties() {
                 <Kpi k="Delinquent" v={money(totalDelinquent)} sub="11 tenants" color={RED} />
                 <Kpi k="Vacancy" v={fmtPct((totalVacant / totalDoors) * 100)} sub={`${totalVacant} of ${totalDoors} doors`} />
               </div>
-              <div style={{ background: '#fff', border: `1px solid ${BORDER}`, borderRadius: '8px', overflow: 'hidden' }}>
-                <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+              <div className="table-card">
+                <div className="table-scroll">
+                <table style={{ width: '100%', borderCollapse: 'collapse', minWidth: '520px' }}>
                   <thead><tr>
                     <th style={hcell}>Property</th>
                     <th style={{ ...hcell, textAlign: 'right' }}>Units</th>
@@ -154,6 +157,7 @@ export default function HarborfieldProperties() {
                     ))}
                   </tbody>
                 </table>
+                </div>
               </div>
             </>
           )}
