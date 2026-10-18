@@ -83,7 +83,7 @@ export default function MrDipzSample() {
       <div className="md-shell">
         <aside className="md-side">
           <div style={{ padding: '2px 8px 16px' }}>
-            <div className="md-credit">{MD_CREDIT_LINE}</div>
+            <a className="md-credit" href="https://jknojokes.com">{MD_CREDIT_LINE}</a>
             <div style={{ fontFamily: UI, fontWeight: 800, fontSize: 26, letterSpacing: '1px', color: CREAM, lineHeight: 1.1, marginTop: 10 }}>
               MR. DIPZ
             </div>

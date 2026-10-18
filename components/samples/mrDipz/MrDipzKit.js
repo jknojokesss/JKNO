@@ -4,7 +4,8 @@ export const SHELL_CSS = `*{box-sizing:border-box;margin:0;padding:0}
 html{-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale;text-rendering:optimizeLegibility}
 body{background:${CREAM};font-family:${UI};color:${INK}}
 html.md-sample-page .m-sample-lobby,html.md-sample-page .m-header,html.md-sample-page .md-lobby{display:none!important}
-.md-credit{font-size:11px;font-weight:500;color:${MUTED};line-height:1.35;letter-spacing:.02em}
+.md-credit{font-size:11px;font-weight:500;color:${MUTED};line-height:1.35;letter-spacing:.02em;text-decoration:none}
+.md-credit:hover{text-decoration:underline}
 @media(max-width:860px){.md-credit{color:#9A8B78}}
 .md-shell{display:flex;min-height:100vh;align-items:stretch}
 .md-side{width:236px;flex-shrink:0;background:${CHAR};color:${CREAM};display:flex;flex-direction:column;padding:22px 14px;position:sticky;top:0;height:100vh}
