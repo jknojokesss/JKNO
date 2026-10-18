@@ -1,6 +1,16 @@
 import Head from 'next/head'
 import AufschnittPortal from '../components/samples/aufschnitt/AufschnittPortal'
 
+/** Hide marketing site chrome if a shared layout adds it — scoped to this route only. */
+const PROSPECT_ROUTE_CSS = `
+body:has([data-aufschnitt-prospect]) > header.m-header,
+body:has([data-aufschnitt-prospect]) > .m-header,
+body:has([data-aufschnitt-prospect]) .marketing-site > .m-header,
+body:has([data-aufschnitt-prospect]) nav.m-sample-lobby {
+  display: none !important;
+}
+`
+
 export default function AufschnittPage() {
   return (
     <>
@@ -18,7 +28,10 @@ export default function AufschnittPage() {
           rel="stylesheet"
         />
       </Head>
-      <AufschnittPortal />
+      <style dangerouslySetInnerHTML={{ __html: PROSPECT_ROUTE_CSS }} />
+      <div data-aufschnitt-prospect>
+        <AufschnittPortal />
+      </div>
     </>
   )
 }
