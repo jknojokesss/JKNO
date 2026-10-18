@@ -1,5 +1,11 @@
 import DATA from '../../../data/primal-krisp.json'
-import { payoutTotals, enrichPayouts, payoutAdjustmentRows, notMatchedItems } from './primalKrispDepositsData'
+import {
+  payoutTotals,
+  enrichPayouts,
+  payoutAdjustmentRows,
+  notMatchedItems,
+  buildDepositedMonthBridge,
+} from './primalKrispDepositsData'
 import { BORDER, INK, MUTED, RED, UI, MONO, money, fmtD, fmtInt } from '../primalKrispUtils'
 
 function Shell({ title, sub, onBack, onClose, children }) {
@@ -60,10 +66,20 @@ export default function PrimalKrispDepositsDetail({ detail, onBack, onClose }) {
   const shell = { onBack, onClose }
 
   if (detail.kind === 'depDeposited') {
-    const rows = payouts.map((p) => ({ label: `${fmtD(p.date)} · ${p.source}`, value: p.deposit, key: p.id }))
+    const bridge = buildDepositedMonthBridge(payouts)
+    const bridgeRows = [
+      { label: 'Gross sales', value: bridge.gross_sales, key: 'gross' },
+      { label: 'Delivery guarantee', value: bridge.delivery_guarantee, key: 'dg' },
+      { label: 'Fees', value: -bridge.fees, key: 'fees' },
+      { label: 'Refunds', value: -bridge.refunds, key: 'refunds' },
+      { label: 'Earlier refund and chargeback', value: -bridge.not_matched, key: 'nm' },
+    ]
+    const payoutRows = payouts.map((p) => ({ label: `${fmtD(p.date)} · ${p.source}`, value: payoutTotals(p).deposit, key: p.id }))
     return (
       <Shell title={money(summary.deposited_this_month)} sub="Deposited this month" {...shell}>
-        <Lines rows={rows} totalLabel="Total" totalValue={summary.deposited_this_month} />
+        <Lines rows={bridgeRows} totalLabel="Deposited" totalValue={bridge.deposited} />
+        <div style={{ marginTop: 20, fontSize: 12, color: MUTED, fontWeight: 600, letterSpacing: '0.5px', textTransform: 'uppercase', marginBottom: 8 }}>By payout</div>
+        <Lines rows={payoutRows} />
       </Shell>
     )
   }
@@ -119,7 +135,6 @@ export default function PrimalKrispDepositsDetail({ detail, onBack, onClose }) {
       { label: 'Fees', value: -t.fees },
       ...(t.refunds ? [{ label: 'Refunds', value: -t.refunds }] : []),
       ...payoutAdjustmentRows(p).map((a) => ({ label: a.label, value: -a.amount, key: a.order })),
-      { label: 'Deposit', value: t.deposit },
     ]
     return (
       <Shell title={money(t.deposit)} sub={`${fmtD(p.date)} · ${p.source}`} {...shell}>
@@ -127,7 +142,7 @@ export default function PrimalKrispDepositsDetail({ detail, onBack, onClose }) {
         <div style={{ border: `1px solid ${BORDER}`, borderRadius: 2, padding: '0 14px', marginBottom: 16 }}>
           {p.orders.map((o) => <OrderBlock key={o.order} o={o} />)}
         </div>
-        <Lines rows={lineRows.slice(0, -1)} totalLabel="Deposit" totalValue={t.deposit} />
+        <Lines rows={lineRows} totalLabel="Deposit" totalValue={t.deposit} />
       </Shell>
     )
   }

@@ -6065,294 +6065,294 @@
     "matched": true,
     "orders": [
      {
-      "order": "#1235",
+      "order": "#1106",
       "date": "2026-10-02",
       "amount": 65.8,
       "payment_method": "Google Pay",
       "delivery_guarantee": 2.88
      },
      {
-      "order": "#1236",
+      "order": "#1107",
       "date": "2026-10-02",
       "amount": 66.2,
       "payment_method": "Shop Pay",
       "delivery_guarantee": 0
      },
      {
-      "order": "#1237",
+      "order": "#1108",
       "date": "2026-10-02",
       "amount": 48.64,
       "payment_method": "Card",
       "delivery_guarantee": 2.45
      },
      {
-      "order": "#1238",
+      "order": "#1109",
       "date": "2026-10-02",
       "amount": 29.48,
       "payment_method": "Google Pay",
       "delivery_guarantee": 0
      },
      {
-      "order": "#1239",
+      "order": "#1102",
       "date": "2026-10-01",
       "amount": 42.94,
       "payment_method": "Shop Pay",
       "delivery_guarantee": 2.6
      },
      {
-      "order": "#1240",
+      "order": "#1110",
       "date": "2026-10-02",
       "amount": 53.71,
       "payment_method": "Card",
       "delivery_guarantee": 1.6
      },
      {
-      "order": "#1241",
+      "order": "#1111",
       "date": "2026-10-02",
       "amount": 50.98,
       "payment_method": "Shop Pay",
       "delivery_guarantee": 2.05
      },
      {
-      "order": "#1242",
+      "order": "#1112",
       "date": "2026-10-02",
       "amount": 43.2,
       "payment_method": "Google Pay",
       "delivery_guarantee": 0
      },
      {
-      "order": "#1243",
+      "order": "#1113",
       "date": "2026-10-02",
       "amount": 67.52,
       "payment_method": "Card",
       "delivery_guarantee": 2.47
      },
      {
-      "order": "#1244",
+      "order": "#1114",
       "date": "2026-10-02",
       "amount": 55.93,
       "payment_method": "Google Pay",
       "delivery_guarantee": 0
      },
      {
-      "order": "#1245",
+      "order": "#1103",
       "date": "2026-10-01",
       "amount": 35.43,
       "payment_method": "Google Pay",
       "delivery_guarantee": 0
      },
      {
-      "order": "#1246",
+      "order": "#1115",
       "date": "2026-10-02",
       "amount": 84.61,
       "payment_method": "Shop Pay",
       "delivery_guarantee": 0
      },
      {
-      "order": "#1247",
+      "order": "#1116",
       "date": "2026-10-02",
       "amount": 44.83,
       "payment_method": "Google Pay",
       "delivery_guarantee": 0
      },
      {
-      "order": "#1248",
+      "order": "#1117",
       "date": "2026-10-02",
       "amount": 52.05,
       "payment_method": "Google Pay",
       "delivery_guarantee": 2.79
      },
      {
-      "order": "#1249",
+      "order": "#1118",
       "date": "2026-10-02",
       "amount": 79.55,
       "payment_method": "Card",
       "delivery_guarantee": 0
      },
      {
-      "order": "#1250",
+      "order": "#1119",
       "date": "2026-10-02",
       "amount": 47.74,
       "payment_method": "Card",
       "delivery_guarantee": 1.66
      },
      {
-      "order": "#1251",
+      "order": "#1120",
       "date": "2026-10-02",
       "amount": 57.61,
       "payment_method": "Shop Pay",
       "delivery_guarantee": 0
      },
      {
-      "order": "#1252",
+      "order": "#1121",
       "date": "2026-10-02",
       "amount": 86.01,
       "payment_method": "Shop Pay",
       "delivery_guarantee": 1.76
      },
      {
-      "order": "#1253",
+      "order": "#1122",
       "date": "2026-10-02",
       "amount": 67.27,
       "payment_method": "Card",
       "delivery_guarantee": 0
      },
      {
-      "order": "#1254",
+      "order": "#1123",
       "date": "2026-10-02",
       "amount": 29.36,
       "payment_method": "Shop Pay",
       "delivery_guarantee": 2.16
      },
      {
-      "order": "#1255",
+      "order": "#1124",
       "date": "2026-10-02",
       "amount": 61.62,
       "payment_method": "Shop Pay",
       "delivery_guarantee": 0
      },
      {
-      "order": "#1256",
+      "order": "#1125",
       "date": "2026-10-02",
       "amount": 54.98,
       "payment_method": "Card",
       "delivery_guarantee": 0
      },
      {
-      "order": "#1257",
+      "order": "#1126",
       "date": "2026-10-02",
       "amount": 77.51,
       "payment_method": "Shop Pay",
       "delivery_guarantee": 2.34
      },
      {
-      "order": "#1258",
+      "order": "#1127",
       "date": "2026-10-02",
       "amount": 56.56,
       "payment_method": "Google Pay",
       "delivery_guarantee": 0
      },
      {
-      "order": "#1259",
+      "order": "#1128",
       "date": "2026-10-02",
       "amount": 87.12,
       "payment_method": "Card",
       "delivery_guarantee": 0
      },
      {
-      "order": "#1260",
+      "order": "#1104",
       "date": "2026-10-01",
       "amount": 44.33,
       "payment_method": "Shop Pay",
       "delivery_guarantee": 0
      },
      {
-      "order": "#1261",
+      "order": "#1129",
       "date": "2026-10-02",
       "amount": 30.36,
       "payment_method": "Card",
       "delivery_guarantee": 0
      },
      {
-      "order": "#1262",
+      "order": "#1130",
       "date": "2026-10-02",
       "amount": 53.41,
       "payment_method": "Shop Pay",
       "delivery_guarantee": 0
      },
      {
-      "order": "#1263",
+      "order": "#1105",
       "date": "2026-10-01",
       "amount": 39.99,
       "payment_method": "Google Pay",
       "delivery_guarantee": 2.99
      },
      {
-      "order": "#1264",
+      "order": "#1131",
       "date": "2026-10-02",
       "amount": 27.97,
       "payment_method": "Shop Pay",
       "delivery_guarantee": 2.63
      },
      {
-      "order": "#1265",
+      "order": "#1132",
       "date": "2026-10-02",
       "amount": 67.85,
       "payment_method": "Card",
       "delivery_guarantee": 0
      },
      {
-      "order": "#1266",
+      "order": "#1133",
       "date": "2026-10-02",
       "amount": 71.04,
       "payment_method": "Card",
       "delivery_guarantee": 1.67
      },
      {
-      "order": "#1267",
+      "order": "#1134",
       "date": "2026-10-02",
       "amount": 63.57,
       "payment_method": "Google Pay",
       "delivery_guarantee": 0
      },
      {
-      "order": "#1268",
+      "order": "#1135",
       "date": "2026-10-02",
       "amount": 36.78,
       "payment_method": "Card",
       "delivery_guarantee": 0
      },
      {
-      "order": "#1269",
+      "order": "#1136",
       "date": "2026-10-02",
       "amount": 38.92,
       "payment_method": "Shop Pay",
       "delivery_guarantee": 0
      },
      {
-      "order": "#1270",
+      "order": "#1137",
       "date": "2026-10-02",
       "amount": 88.53,
       "payment_method": "Card",
       "delivery_guarantee": 2.3
      },
      {
-      "order": "#1271",
+      "order": "#1138",
       "date": "2026-10-02",
       "amount": 70.44,
       "payment_method": "Google Pay",
       "delivery_guarantee": 1.69
      },
      {
-      "order": "#1272",
+      "order": "#1139",
       "date": "2026-10-02",
       "amount": 89.81,
       "payment_method": "Card",
       "delivery_guarantee": 0
      },
      {
-      "order": "#1273",
+      "order": "#1140",
       "date": "2026-10-02",
       "amount": 84.59,
       "payment_method": "Google Pay",
       "delivery_guarantee": 0
      },
      {
-      "order": "#1274",
+      "order": "#1141",
       "date": "2026-10-02",
       "amount": 66.7,
       "payment_method": "Card",
       "delivery_guarantee": 2.05
      },
      {
-      "order": "#1275",
+      "order": "#1142",
       "date": "2026-10-02",
       "amount": 30.09,
       "payment_method": "Google Pay",
       "delivery_guarantee": 1.73
      },
      {
-      "order": "#1276",
+      "order": "#1143",
       "date": "2026-10-02",
       "amount": 16.62,
       "payment_method": "Card",
@@ -6375,197 +6375,197 @@
     "matched": true,
     "orders": [
      {
-      "order": "#1103",
+      "order": "#1159",
       "date": "2026-10-04",
-      "amount": 43.08,
+      "amount": 43.35,
       "payment_method": "PayPal",
       "delivery_guarantee": 0
      },
      {
-      "order": "#1104",
-      "date": "2026-10-01",
+      "order": "#1144",
+      "date": "2026-10-02",
       "amount": 89.69,
       "payment_method": "PayPal",
       "delivery_guarantee": 1.73
      },
      {
-      "order": "#1105",
-      "date": "2026-10-01",
+      "order": "#1145",
+      "date": "2026-10-02",
       "amount": 43.02,
       "payment_method": "PayPal",
       "delivery_guarantee": 0
      },
      {
-      "order": "#1106",
+      "order": "#1160",
       "date": "2026-10-04",
       "amount": 68.42,
       "payment_method": "PayPal",
       "delivery_guarantee": 0
      },
      {
-      "order": "#1107",
+      "order": "#1161",
       "date": "2026-10-04",
       "amount": 50.21,
       "payment_method": "PayPal",
       "delivery_guarantee": 2.38
      },
      {
-      "order": "#1108",
+      "order": "#1152",
       "date": "2026-10-03",
       "amount": 89.26,
       "payment_method": "PayPal",
       "delivery_guarantee": 0
      },
      {
-      "order": "#1109",
+      "order": "#1162",
       "date": "2026-10-04",
       "amount": 69.32,
       "payment_method": "PayPal",
       "delivery_guarantee": 1.93
      },
      {
-      "order": "#1110",
+      "order": "#1163",
       "date": "2026-10-04",
       "amount": 39.55,
       "payment_method": "PayPal",
       "delivery_guarantee": 0
      },
      {
-      "order": "#1111",
-      "date": "2026-10-01",
+      "order": "#1146",
+      "date": "2026-10-02",
       "amount": 61.06,
       "payment_method": "PayPal",
       "delivery_guarantee": 1.89
      },
      {
-      "order": "#1112",
+      "order": "#1164",
       "date": "2026-10-04",
       "amount": 37.37,
       "payment_method": "PayPal",
       "delivery_guarantee": 3
      },
      {
-      "order": "#1113",
+      "order": "#1165",
       "date": "2026-10-04",
       "amount": 73.45,
       "payment_method": "PayPal",
       "delivery_guarantee": 0
      },
      {
-      "order": "#1114",
-      "date": "2026-10-01",
+      "order": "#1147",
+      "date": "2026-10-02",
       "amount": 80.43,
       "payment_method": "PayPal",
       "delivery_guarantee": 1.97
      },
      {
-      "order": "#1115",
+      "order": "#1166",
       "date": "2026-10-04",
       "amount": 60.09,
       "payment_method": "PayPal",
       "delivery_guarantee": 2.54
      },
      {
-      "order": "#1116",
+      "order": "#1167",
       "date": "2026-10-04",
       "amount": 30.43,
       "payment_method": "PayPal",
       "delivery_guarantee": 0
      },
      {
-      "order": "#1117",
-      "date": "2026-10-01",
+      "order": "#1148",
+      "date": "2026-10-02",
       "amount": 49.82,
       "payment_method": "PayPal",
       "delivery_guarantee": 2.76
      },
      {
-      "order": "#1118",
+      "order": "#1168",
       "date": "2026-10-04",
       "amount": 50.21,
       "payment_method": "PayPal",
       "delivery_guarantee": 1.6
      },
      {
-      "order": "#1119",
+      "order": "#1169",
       "date": "2026-10-04",
       "amount": 81.12,
       "payment_method": "PayPal",
       "delivery_guarantee": 1.78
      },
      {
-      "order": "#1120",
+      "order": "#1149",
       "date": "2026-10-02",
       "amount": 29.26,
       "payment_method": "PayPal",
       "delivery_guarantee": 2.97
      },
      {
-      "order": "#1121",
+      "order": "#1170",
       "date": "2026-10-04",
       "amount": 76.64,
       "payment_method": "PayPal",
       "delivery_guarantee": 2.43
      },
      {
-      "order": "#1122",
+      "order": "#1171",
       "date": "2026-10-04",
       "amount": 59.16,
       "payment_method": "PayPal",
       "delivery_guarantee": 2.73
      },
      {
-      "order": "#1123",
+      "order": "#1172",
       "date": "2026-10-04",
       "amount": 56.38,
       "payment_method": "PayPal",
       "delivery_guarantee": 2.41
      },
      {
-      "order": "#1124",
+      "order": "#1173",
       "date": "2026-10-04",
       "amount": 87.08,
       "payment_method": "PayPal",
       "delivery_guarantee": 1.78
      },
      {
-      "order": "#1125",
-      "date": "2026-10-01",
+      "order": "#1150",
+      "date": "2026-10-02",
       "amount": 53.1,
       "payment_method": "PayPal",
       "delivery_guarantee": 2.48
      },
      {
-      "order": "#1126",
+      "order": "#1174",
       "date": "2026-10-04",
       "amount": 81.62,
       "payment_method": "PayPal",
       "delivery_guarantee": 1.57
      },
      {
-      "order": "#1127",
+      "order": "#1175",
       "date": "2026-10-04",
       "amount": 32.45,
       "payment_method": "PayPal",
       "delivery_guarantee": 0
      },
      {
-      "order": "#1128",
+      "order": "#1176",
       "date": "2026-10-04",
       "amount": 25.76,
       "payment_method": "PayPal",
       "delivery_guarantee": 0
      },
      {
-      "order": "#1129",
+      "order": "#1177",
       "date": "2026-10-04",
       "amount": 81.67,
       "payment_method": "PayPal",
       "delivery_guarantee": 2.07
      },
      {
-      "order": "#1130",
-      "date": "2026-10-01",
+      "order": "#1151",
+      "date": "2026-10-02",
       "amount": 39.49,
       "payment_method": "PayPal",
       "delivery_guarantee": 0
@@ -6573,10 +6573,10 @@
     ],
     "refunds": 0,
     "adjustments": [],
-    "gross_sales": 1639.14,
+    "gross_sales": 1639.41,
     "delivery_guarantee": 40.02,
-    "fees": 70.91,
-    "deposit": 1608.25,
+    "fees": 70.92,
+    "deposit": 1608.51,
     "order_count": 28,
     "mismatch_amount": 0
    },
@@ -6587,44 +6587,16 @@
     "matched": false,
     "orders": [
      {
-      "order": "#1176",
-      "date": "2026-10-05",
-      "amount": 54.74,
-      "payment_method": "Google Pay",
-      "delivery_guarantee": 0
-     },
-     {
-      "order": "#1177",
-      "date": "2026-10-05",
-      "amount": 74.41,
-      "payment_method": "Google Pay",
-      "delivery_guarantee": 0
-     },
-     {
-      "order": "#1178",
-      "date": "2026-10-05",
-      "amount": 74.94,
-      "payment_method": "Google Pay",
-      "delivery_guarantee": 0
-     },
-     {
-      "order": "#1179",
-      "date": "2026-10-02",
-      "amount": 47.18,
-      "payment_method": "Shop Pay",
-      "delivery_guarantee": 2.67
-     },
-     {
       "order": "#1180",
       "date": "2026-10-05",
-      "amount": 25.43,
-      "payment_method": "Card",
+      "amount": 55.37,
+      "payment_method": "Google Pay",
       "delivery_guarantee": 0
      },
      {
       "order": "#1181",
       "date": "2026-10-05",
-      "amount": 28.54,
+      "amount": 74.41,
       "payment_method": "Google Pay",
       "delivery_guarantee": 0
      },
@@ -6632,88 +6604,116 @@
       "order": "#1182",
       "date": "2026-10-05",
       "amount": 74.94,
-      "payment_method": "Shop Pay",
+      "payment_method": "Google Pay",
       "delivery_guarantee": 0
+     },
+     {
+      "order": "#1153",
+      "date": "2026-10-03",
+      "amount": 47.18,
+      "payment_method": "Shop Pay",
+      "delivery_guarantee": 2.67
      },
      {
       "order": "#1183",
       "date": "2026-10-05",
-      "amount": 43.2,
+      "amount": 25.43,
       "payment_method": "Card",
       "delivery_guarantee": 0
      },
      {
       "order": "#1184",
-      "date": "2026-10-01",
-      "amount": 51.62,
-      "payment_method": "Shop Pay",
+      "date": "2026-10-05",
+      "amount": 28.54,
+      "payment_method": "Google Pay",
       "delivery_guarantee": 0
      },
      {
       "order": "#1185",
       "date": "2026-10-05",
-      "amount": 86.97,
+      "amount": 74.94,
       "payment_method": "Shop Pay",
       "delivery_guarantee": 0
      },
      {
       "order": "#1186",
       "date": "2026-10-05",
+      "amount": 43.2,
+      "payment_method": "Card",
+      "delivery_guarantee": 0
+     },
+     {
+      "order": "#1154",
+      "date": "2026-10-03",
+      "amount": 51.62,
+      "payment_method": "Shop Pay",
+      "delivery_guarantee": 0
+     },
+     {
+      "order": "#1187",
+      "date": "2026-10-05",
+      "amount": 86.97,
+      "payment_method": "Shop Pay",
+      "delivery_guarantee": 0
+     },
+     {
+      "order": "#1188",
+      "date": "2026-10-05",
       "amount": 57.71,
       "payment_method": "Shop Pay",
       "delivery_guarantee": 2.87
      },
      {
-      "order": "#1187",
+      "order": "#1189",
       "date": "2026-10-05",
       "amount": 89.25,
       "payment_method": "Card",
       "delivery_guarantee": 2.75
      },
      {
-      "order": "#1188",
+      "order": "#1178",
       "date": "2026-10-04",
       "amount": 43.08,
       "payment_method": "Card",
       "delivery_guarantee": 2.06
      },
      {
-      "order": "#1189",
+      "order": "#1190",
       "date": "2026-10-05",
       "amount": 43.61,
       "payment_method": "Card",
       "delivery_guarantee": 0
      },
      {
-      "order": "#1190",
+      "order": "#1191",
       "date": "2026-10-05",
       "amount": 83.43,
       "payment_method": "Card",
       "delivery_guarantee": 0
      },
      {
-      "order": "#1191",
+      "order": "#1192",
       "date": "2026-10-05",
       "amount": 48.65,
       "payment_method": "Google Pay",
       "delivery_guarantee": 0
      },
      {
-      "order": "#1192",
+      "order": "#1193",
       "date": "2026-10-05",
       "amount": 78.13,
       "payment_method": "Shop Pay",
       "delivery_guarantee": 2.07
      },
      {
-      "order": "#1193",
+      "order": "#1194",
       "date": "2026-10-05",
       "amount": 47.91,
       "payment_method": "Google Pay",
       "delivery_guarantee": 0
      },
      {
-      "order": "#1194",
+      "order": "#1155",
       "date": "2026-10-03",
       "amount": 28.32,
       "payment_method": "Card",
@@ -6755,78 +6755,78 @@
       "delivery_guarantee": 2.67
      },
      {
-      "order": "#1200",
-      "date": "2026-10-02",
+      "order": "#1156",
+      "date": "2026-10-03",
       "amount": 84.68,
       "payment_method": "Google Pay",
       "delivery_guarantee": 0
      },
      {
-      "order": "#1201",
+      "order": "#1200",
       "date": "2026-10-05",
       "amount": 49.15,
       "payment_method": "Card",
       "delivery_guarantee": 0
      },
      {
-      "order": "#1202",
+      "order": "#1201",
       "date": "2026-10-05",
       "amount": 46.88,
       "payment_method": "Google Pay",
       "delivery_guarantee": 2.82
      },
      {
-      "order": "#1203",
-      "date": "2026-10-02",
+      "order": "#1157",
+      "date": "2026-10-03",
       "amount": 83.44,
       "payment_method": "Card",
       "delivery_guarantee": 0
      },
      {
-      "order": "#1204",
+      "order": "#1179",
       "date": "2026-10-04",
       "amount": 47.79,
       "payment_method": "Card",
       "delivery_guarantee": 0
      },
      {
-      "order": "#1205",
+      "order": "#1202",
       "date": "2026-10-05",
       "amount": 75.61,
       "payment_method": "Shop Pay",
       "delivery_guarantee": 0
      },
      {
-      "order": "#1206",
+      "order": "#1203",
       "date": "2026-10-05",
       "amount": 38.71,
       "payment_method": "Shop Pay",
       "delivery_guarantee": 0
      },
      {
-      "order": "#1207",
+      "order": "#1204",
       "date": "2026-10-05",
       "amount": 73.38,
       "payment_method": "Google Pay",
       "delivery_guarantee": 1.74
      },
      {
-      "order": "#1208",
+      "order": "#1205",
       "date": "2026-10-05",
       "amount": 29.02,
       "payment_method": "Google Pay",
       "delivery_guarantee": 2.43
      },
      {
-      "order": "#1209",
+      "order": "#1206",
       "date": "2026-10-05",
       "amount": 55.16,
       "payment_method": "Card",
       "delivery_guarantee": 0
      },
      {
-      "order": "#1210",
-      "date": "2026-10-01",
+      "order": "#1158",
+      "date": "2026-10-03",
       "amount": 43.99,
       "payment_method": "Shop Pay",
       "delivery_guarantee": 0
@@ -6841,10 +6841,10 @@
       "amount": 38.4
      }
     ],
-    "gross_sales": 2003.39,
+    "gross_sales": 2004.02,
     "delivery_guarantee": 29.27,
-    "fees": 68.61,
-    "deposit": 1925.65,
+    "fees": 68.63,
+    "deposit": 1926.26,
     "order_count": 35,
     "mismatch_amount": 38.4
    },
@@ -6855,203 +6855,203 @@
     "matched": true,
     "orders": [
      {
-      "order": "#1124",
-      "date": "2026-10-02",
+      "order": "#1207",
+      "date": "2026-10-05",
       "amount": 82.23,
       "payment_method": "Amazon Pay",
       "delivery_guarantee": 0
      },
      {
-      "order": "#1125",
-      "date": "2026-10-03",
+      "order": "#1208",
+      "date": "2026-10-05",
       "amount": 66.54,
       "payment_method": "Amazon Pay",
       "delivery_guarantee": 2.32
      },
      {
-      "order": "#1126",
+      "order": "#1209",
       "date": "2026-10-05",
       "amount": 55.49,
       "payment_method": "Amazon Pay",
       "delivery_guarantee": 0
      },
      {
-      "order": "#1127",
-      "date": "2026-10-01",
+      "order": "#1210",
+      "date": "2026-10-05",
       "amount": 44.06,
       "payment_method": "Amazon Pay",
       "delivery_guarantee": 1.83
      },
      {
-      "order": "#1128",
+      "order": "#1219",
       "date": "2026-10-07",
       "amount": 50.5,
       "payment_method": "Amazon Pay",
       "delivery_guarantee": 2.99
      },
      {
-      "order": "#1129",
+      "order": "#1220",
       "date": "2026-10-07",
       "amount": 32.54,
       "payment_method": "Amazon Pay",
       "delivery_guarantee": 1.65
      },
      {
-      "order": "#1130",
-      "date": "2026-10-03",
+      "order": "#1211",
+      "date": "2026-10-05",
       "amount": 63.94,
       "payment_method": "Amazon Pay",
       "delivery_guarantee": 0
      },
      {
-      "order": "#1131",
+      "order": "#1221",
       "date": "2026-10-07",
       "amount": 77.12,
       "payment_method": "Amazon Pay",
       "delivery_guarantee": 0
      },
      {
-      "order": "#1132",
-      "date": "2026-10-03",
+      "order": "#1212",
+      "date": "2026-10-05",
       "amount": 44,
       "payment_method": "Amazon Pay",
       "delivery_guarantee": 2.36
      },
      {
-      "order": "#1133",
+      "order": "#1222",
       "date": "2026-10-07",
       "amount": 70.7,
       "payment_method": "Amazon Pay",
       "delivery_guarantee": 2.07
      },
      {
-      "order": "#1134",
+      "order": "#1223",
       "date": "2026-10-07",
       "amount": 72.18,
       "payment_method": "Amazon Pay",
       "delivery_guarantee": 1.88
      },
      {
-      "order": "#1135",
+      "order": "#1224",
       "date": "2026-10-07",
       "amount": 66.08,
       "payment_method": "Amazon Pay",
       "delivery_guarantee": 1.57
      },
      {
-      "order": "#1136",
+      "order": "#1225",
       "date": "2026-10-07",
       "amount": 29.41,
       "payment_method": "Amazon Pay",
       "delivery_guarantee": 0
      },
      {
-      "order": "#1137",
+      "order": "#1226",
       "date": "2026-10-07",
       "amount": 27.12,
       "payment_method": "Amazon Pay",
       "delivery_guarantee": 2.5
      },
      {
-      "order": "#1138",
+      "order": "#1227",
       "date": "2026-10-07",
       "amount": 42.55,
       "payment_method": "Amazon Pay",
       "delivery_guarantee": 2.62
      },
      {
-      "order": "#1139",
-      "date": "2026-10-01",
+      "order": "#1213",
+      "date": "2026-10-05",
       "amount": 62.43,
       "payment_method": "Amazon Pay",
       "delivery_guarantee": 2.05
      },
      {
-      "order": "#1140",
-      "date": "2026-10-02",
+      "order": "#1214",
+      "date": "2026-10-05",
       "amount": 51.23,
       "payment_method": "Amazon Pay",
       "delivery_guarantee": 2.16
      },
      {
-      "order": "#1141",
-      "date": "2026-10-02",
+      "order": "#1215",
+      "date": "2026-10-05",
       "amount": 43.42,
       "payment_method": "Amazon Pay",
       "delivery_guarantee": 0
      },
      {
-      "order": "#1142",
+      "order": "#1228",
       "date": "2026-10-07",
       "amount": 28.53,
       "payment_method": "Amazon Pay",
       "delivery_guarantee": 2.59
      },
      {
-      "order": "#1143",
+      "order": "#1229",
       "date": "2026-10-07",
       "amount": 28.92,
       "payment_method": "Amazon Pay",
       "delivery_guarantee": 0
      },
      {
-      "order": "#1144",
+      "order": "#1230",
       "date": "2026-10-07",
       "amount": 27.79,
       "payment_method": "Amazon Pay",
       "delivery_guarantee": 0
      },
      {
-      "order": "#1145",
+      "order": "#1217",
       "date": "2026-10-06",
       "amount": 68.34,
       "payment_method": "Amazon Pay",
       "delivery_guarantee": 2.11
      },
      {
-      "order": "#1146",
+      "order": "#1231",
       "date": "2026-10-07",
       "amount": 47.2,
       "payment_method": "Amazon Pay",
       "delivery_guarantee": 1.58
      },
      {
-      "order": "#1147",
+      "order": "#1232",
       "date": "2026-10-07",
       "amount": 76.93,
       "payment_method": "Amazon Pay",
       "delivery_guarantee": 2.05
      },
      {
-      "order": "#1148",
+      "order": "#1233",
       "date": "2026-10-07",
       "amount": 41.28,
       "payment_method": "Amazon Pay",
       "delivery_guarantee": 0
      },
      {
-      "order": "#1149",
+      "order": "#1234",
       "date": "2026-10-07",
       "amount": 50.24,
       "payment_method": "Amazon Pay",
       "delivery_guarantee": 0
      },
      {
-      "order": "#1150",
+      "order": "#1218",
       "date": "2026-10-06",
       "amount": 61.43,
       "payment_method": "Amazon Pay",
       "delivery_guarantee": 2.67
      },
      {
-      "order": "#1151",
+      "order": "#1216",
       "date": "2026-10-05",
       "amount": 39.09,
       "payment_method": "Amazon Pay",
       "delivery_guarantee": 0
      },
      {
-      "order": "#1152",
+      "order": "#1235",
       "date": "2026-10-07",
       "amount": 5.72,
       "payment_method": "Amazon Pay",
@@ -7074,260 +7074,260 @@
     "matched": true,
     "orders": [
      {
-      "order": "#1132",
-      "date": "2026-10-05",
+      "order": "#1236",
+      "date": "2026-10-07",
       "amount": 46.01,
       "payment_method": "Google Pay",
       "delivery_guarantee": 2.8
      },
      {
-      "order": "#1133",
+      "order": "#1269",
       "date": "2026-10-09",
       "amount": 76.21,
       "payment_method": "Card",
       "delivery_guarantee": 0
      },
      {
-      "order": "#1134",
+      "order": "#1270",
       "date": "2026-10-09",
       "amount": 25.56,
       "payment_method": "Google Pay",
       "delivery_guarantee": 0
      },
      {
-      "order": "#1135",
+      "order": "#1271",
       "date": "2026-10-09",
       "amount": 73.27,
       "payment_method": "Card",
       "delivery_guarantee": 1.63
      },
      {
-      "order": "#1136",
-      "date": "2026-10-06",
+      "order": "#1237",
+      "date": "2026-10-07",
       "amount": 83.66,
       "payment_method": "Google Pay",
       "delivery_guarantee": 0
      },
      {
-      "order": "#1137",
+      "order": "#1253",
       "date": "2026-10-08",
       "amount": 59.78,
       "payment_method": "Shop Pay",
       "delivery_guarantee": 0
      },
      {
-      "order": "#1138",
+      "order": "#1238",
       "date": "2026-10-07",
       "amount": 38.14,
       "payment_method": "Card",
       "delivery_guarantee": 1.74
      },
      {
-      "order": "#1139",
-      "date": "2026-10-03",
+      "order": "#1239",
+      "date": "2026-10-07",
       "amount": 77.98,
       "payment_method": "Google Pay",
       "delivery_guarantee": 0
      },
      {
-      "order": "#1140",
-      "date": "2026-10-06",
+      "order": "#1240",
+      "date": "2026-10-07",
       "amount": 57.83,
       "payment_method": "Shop Pay",
       "delivery_guarantee": 2.85
      },
      {
-      "order": "#1141",
-      "date": "2026-10-01",
+      "order": "#1241",
+      "date": "2026-10-07",
       "amount": 73.94,
       "payment_method": "Card",
       "delivery_guarantee": 0
      },
      {
-      "order": "#1142",
+      "order": "#1272",
       "date": "2026-10-09",
       "amount": 77.7,
       "payment_method": "Google Pay",
       "delivery_guarantee": 1.61
      },
      {
-      "order": "#1143",
+      "order": "#1273",
       "date": "2026-10-09",
       "amount": 66.72,
       "payment_method": "Google Pay",
       "delivery_guarantee": 0
      },
      {
-      "order": "#1144",
-      "date": "2026-10-01",
+      "order": "#1242",
+      "date": "2026-10-07",
       "amount": 34.85,
       "payment_method": "Google Pay",
       "delivery_guarantee": 0
      },
      {
-      "order": "#1145",
+      "order": "#1274",
       "date": "2026-10-09",
       "amount": 43.04,
       "payment_method": "Google Pay",
       "delivery_guarantee": 0
      },
      {
-      "order": "#1146",
+      "order": "#1275",
       "date": "2026-10-09",
       "amount": 86.12,
       "payment_method": "Shop Pay",
       "delivery_guarantee": 0
      },
      {
-      "order": "#1147",
+      "order": "#1276",
       "date": "2026-10-09",
       "amount": 52.44,
       "payment_method": "Google Pay",
       "delivery_guarantee": 1.82
      },
      {
-      "order": "#1148",
+      "order": "#1277",
       "date": "2026-10-09",
       "amount": 48.18,
       "payment_method": "Shop Pay",
       "delivery_guarantee": 2.98
      },
      {
-      "order": "#1149",
+      "order": "#1278",
       "date": "2026-10-09",
       "amount": 88.95,
       "payment_method": "Shop Pay",
       "delivery_guarantee": 2.91
      },
      {
-      "order": "#1150",
-      "date": "2026-10-03",
+      "order": "#1243",
+      "date": "2026-10-07",
       "amount": 62.2,
       "payment_method": "Card",
       "delivery_guarantee": 0
      },
      {
-      "order": "#1151",
+      "order": "#1279",
       "date": "2026-10-09",
       "amount": 58.95,
       "payment_method": "Card",
       "delivery_guarantee": 0
      },
      {
-      "order": "#1152",
-      "date": "2026-10-05",
+      "order": "#1244",
+      "date": "2026-10-07",
       "amount": 59.02,
       "payment_method": "Shop Pay",
       "delivery_guarantee": 0
      },
      {
-      "order": "#1153",
+      "order": "#1280",
       "date": "2026-10-09",
       "amount": 74.93,
       "payment_method": "Card",
       "delivery_guarantee": 0
      },
      {
-      "order": "#1154",
+      "order": "#1281",
       "date": "2026-10-09",
       "amount": 86.33,
       "payment_method": "Shop Pay",
       "delivery_guarantee": 2.17
      },
      {
-      "order": "#1155",
+      "order": "#1282",
       "date": "2026-10-09",
       "amount": 29.24,
       "payment_method": "Google Pay",
       "delivery_guarantee": 0
      },
      {
-      "order": "#1156",
+      "order": "#1283",
       "date": "2026-10-09",
       "amount": 72.49,
       "payment_method": "Shop Pay",
       "delivery_guarantee": 2.36
      },
      {
-      "order": "#1157",
+      "order": "#1245",
       "date": "2026-10-07",
       "amount": 49.69,
       "payment_method": "Shop Pay",
       "delivery_guarantee": 1.71
      },
      {
-      "order": "#1158",
-      "date": "2026-10-04",
+      "order": "#1246",
+      "date": "2026-10-07",
       "amount": 30.2,
       "payment_method": "Google Pay",
       "delivery_guarantee": 0
      },
      {
-      "order": "#1159",
-      "date": "2026-10-01",
+      "order": "#1247",
+      "date": "2026-10-07",
       "amount": 56.86,
       "payment_method": "Shop Pay",
       "delivery_guarantee": 0
      },
      {
-      "order": "#1160",
-      "date": "2026-10-01",
+      "order": "#1248",
+      "date": "2026-10-07",
       "amount": 50.22,
       "payment_method": "Card",
       "delivery_guarantee": 0
      },
      {
-      "order": "#1161",
-      "date": "2026-10-05",
+      "order": "#1249",
+      "date": "2026-10-07",
       "amount": 42.02,
       "payment_method": "Card",
       "delivery_guarantee": 2.32
      },
      {
-      "order": "#1162",
-      "date": "2026-10-04",
+      "order": "#1250",
+      "date": "2026-10-07",
       "amount": 59.67,
       "payment_method": "Shop Pay",
       "delivery_guarantee": 2.3
      },
      {
-      "order": "#1163",
+      "order": "#1284",
       "date": "2026-10-09",
       "amount": 83.09,
       "payment_method": "Google Pay",
       "delivery_guarantee": 0
      },
      {
-      "order": "#1164",
-      "date": "2026-10-03",
+      "order": "#1251",
+      "date": "2026-10-07",
       "amount": 37.23,
       "payment_method": "Google Pay",
       "delivery_guarantee": 1.59
      },
      {
-      "order": "#1165",
+      "order": "#1285",
       "date": "2026-10-09",
       "amount": 74.63,
       "payment_method": "Card",
       "delivery_guarantee": 2.57
      },
      {
-      "order": "#1166",
+      "order": "#1286",
       "date": "2026-10-09",
       "amount": 30.56,
       "payment_method": "Shop Pay",
       "delivery_guarantee": 2.78
      },
      {
-      "order": "#1167",
+      "order": "#1287",
       "date": "2026-10-09",
       "amount": 88.81,
       "payment_method": "Google Pay",
       "delivery_guarantee": 0
      },
      {
-      "order": "#1168",
-      "date": "2026-10-02",
+      "order": "#1252",
+      "date": "2026-10-07",
       "amount": 29,
       "payment_method": "Shop Pay",
       "delivery_guarantee": 1.53
@@ -7349,218 +7349,218 @@
     "matched": true,
     "orders": [
      {
-      "order": "#1143",
-      "date": "2026-10-06",
-      "amount": 30.81,
+      "order": "#1254",
+      "date": "2026-10-08",
+      "amount": 30.62,
       "payment_method": "PayPal",
       "delivery_guarantee": 0
      },
      {
-      "order": "#1144",
+      "order": "#1291",
       "date": "2026-10-10",
       "amount": 84.27,
       "payment_method": "PayPal",
       "delivery_guarantee": 0
      },
      {
-      "order": "#1145",
+      "order": "#1288",
       "date": "2026-10-09",
       "amount": 86.41,
       "payment_method": "PayPal",
       "delivery_guarantee": 0
      },
      {
-      "order": "#1146",
+      "order": "#1292",
       "date": "2026-10-10",
       "amount": 59.06,
       "payment_method": "PayPal",
       "delivery_guarantee": 0
      },
      {
-      "order": "#1147",
+      "order": "#1293",
       "date": "2026-10-10",
       "amount": 81.15,
       "payment_method": "PayPal",
       "delivery_guarantee": 0
      },
      {
-      "order": "#1148",
+      "order": "#1255",
       "date": "2026-10-08",
       "amount": 67.06,
       "payment_method": "PayPal",
       "delivery_guarantee": 0
      },
      {
-      "order": "#1149",
-      "date": "2026-10-06",
+      "order": "#1256",
+      "date": "2026-10-08",
       "amount": 55.45,
       "payment_method": "PayPal",
       "delivery_guarantee": 0
      },
      {
-      "order": "#1150",
+      "order": "#1294",
       "date": "2026-10-10",
       "amount": 82.61,
       "payment_method": "PayPal",
       "delivery_guarantee": 0
      },
      {
-      "order": "#1151",
-      "date": "2026-10-04",
+      "order": "#1257",
+      "date": "2026-10-08",
       "amount": 27.07,
       "payment_method": "PayPal",
       "delivery_guarantee": 2.69
      },
      {
-      "order": "#1152",
-      "date": "2026-10-04",
+      "order": "#1258",
+      "date": "2026-10-08",
       "amount": 83,
       "payment_method": "PayPal",
       "delivery_guarantee": 0
      },
      {
-      "order": "#1153",
-      "date": "2026-10-06",
+      "order": "#1259",
+      "date": "2026-10-08",
       "amount": 63.89,
       "payment_method": "PayPal",
       "delivery_guarantee": 0
      },
      {
-      "order": "#1154",
-      "date": "2026-10-07",
+      "order": "#1260",
+      "date": "2026-10-08",
       "amount": 33.81,
       "payment_method": "PayPal",
       "delivery_guarantee": 0
      },
      {
-      "order": "#1155",
+      "order": "#1289",
       "date": "2026-10-09",
       "amount": 40.18,
       "payment_method": "PayPal",
       "delivery_guarantee": 2.18
      },
      {
-      "order": "#1156",
+      "order": "#1295",
       "date": "2026-10-10",
       "amount": 37.3,
       "payment_method": "PayPal",
       "delivery_guarantee": 1.99
      },
      {
-      "order": "#1157",
+      "order": "#1296",
       "date": "2026-10-10",
       "amount": 49.35,
       "payment_method": "PayPal",
       "delivery_guarantee": 1.64
      },
      {
-      "order": "#1158",
+      "order": "#1297",
       "date": "2026-10-10",
       "amount": 69.24,
       "payment_method": "PayPal",
       "delivery_guarantee": 2.37
      },
      {
-      "order": "#1159",
+      "order": "#1290",
       "date": "2026-10-09",
       "amount": 38.53,
       "payment_method": "PayPal",
       "delivery_guarantee": 2.44
      },
      {
-      "order": "#1160",
+      "order": "#1298",
       "date": "2026-10-10",
       "amount": 52.68,
       "payment_method": "PayPal",
       "delivery_guarantee": 0
      },
      {
-      "order": "#1161",
+      "order": "#1299",
       "date": "2026-10-10",
       "amount": 25.96,
       "payment_method": "PayPal",
       "delivery_guarantee": 0
      },
      {
-      "order": "#1162",
+      "order": "#1261",
       "date": "2026-10-08",
       "amount": 81.04,
       "payment_method": "PayPal",
       "delivery_guarantee": 0
      },
      {
-      "order": "#1163",
+      "order": "#1300",
       "date": "2026-10-10",
       "amount": 63.54,
       "payment_method": "PayPal",
       "delivery_guarantee": 0
      },
      {
-      "order": "#1164",
+      "order": "#1262",
       "date": "2026-10-08",
       "amount": 28.59,
       "payment_method": "PayPal",
       "delivery_guarantee": 2.45
      },
      {
-      "order": "#1165",
+      "order": "#1301",
       "date": "2026-10-10",
       "amount": 31.37,
       "payment_method": "PayPal",
       "delivery_guarantee": 0
      },
      {
-      "order": "#1166",
-      "date": "2026-10-05",
+      "order": "#1263",
+      "date": "2026-10-08",
       "amount": 41.09,
       "payment_method": "PayPal",
       "delivery_guarantee": 0
      },
      {
-      "order": "#1167",
+      "order": "#1302",
       "date": "2026-10-10",
       "amount": 43.26,
       "payment_method": "PayPal",
       "delivery_guarantee": 0
      },
      {
-      "order": "#1168",
+      "order": "#1303",
       "date": "2026-10-10",
       "amount": 53.41,
       "payment_method": "PayPal",
       "delivery_guarantee": 2.59
      },
      {
-      "order": "#1169",
-      "date": "2026-10-02",
+      "order": "#1264",
+      "date": "2026-10-08",
       "amount": 62.51,
       "payment_method": "PayPal",
       "delivery_guarantee": 0
      },
      {
-      "order": "#1170",
-      "date": "2026-10-05",
+      "order": "#1265",
+      "date": "2026-10-08",
       "amount": 38.92,
       "payment_method": "PayPal",
       "delivery_guarantee": 0
      },
      {
-      "order": "#1171",
-      "date": "2026-10-02",
+      "order": "#1266",
+      "date": "2026-10-08",
       "amount": 51.84,
       "payment_method": "PayPal",
       "delivery_guarantee": 2.15
      },
      {
-      "order": "#1172",
-      "date": "2026-10-03",
+      "order": "#1267",
+      "date": "2026-10-08",
       "amount": 42.26,
       "payment_method": "PayPal",
       "delivery_guarantee": 1.98
      },
      {
-      "order": "#1173",
-      "date": "2026-10-04",
+      "order": "#1268",
+      "date": "2026-10-08",
       "amount": 33.48,
       "payment_method": "PayPal",
       "delivery_guarantee": 0
@@ -7568,10 +7568,10 @@
     ],
     "refunds": 0,
     "adjustments": [],
-    "gross_sales": 1639.14,
+    "gross_sales": 1638.95,
     "delivery_guarantee": 22.48,
-    "fees": 72.39,
-    "deposit": 1589.23,
+    "fees": 72.38,
+    "deposit": 1589.05,
     "order_count": 31,
     "mismatch_amount": 0
    },
@@ -7582,238 +7582,238 @@
     "matched": false,
     "orders": [
      {
-      "order": "#1068",
+      "order": "#1328",
       "date": "2026-10-12",
-      "amount": 38.64,
+      "amount": 37.8,
       "payment_method": "Shop Pay",
       "delivery_guarantee": 0
      },
      {
-      "order": "#1069",
+      "order": "#1329",
       "date": "2026-10-12",
       "amount": 87.16,
       "payment_method": "Shop Pay",
       "delivery_guarantee": 0
      },
      {
-      "order": "#1070",
-      "date": "2026-10-05",
+      "order": "#1304",
+      "date": "2026-10-10",
       "amount": 83.82,
       "payment_method": "Shop Pay",
       "delivery_guarantee": 0
      },
      {
-      "order": "#1071",
-      "date": "2026-10-07",
+      "order": "#1305",
+      "date": "2026-10-10",
       "amount": 60.08,
       "payment_method": "Shop Pay",
       "delivery_guarantee": 0
      },
      {
-      "order": "#1072",
+      "order": "#1330",
       "date": "2026-10-12",
       "amount": 55.04,
       "payment_method": "Shop Pay",
       "delivery_guarantee": 2.01
      },
      {
-      "order": "#1073",
+      "order": "#1323",
       "date": "2026-10-11",
       "amount": 31.07,
       "payment_method": "Shop Pay",
       "delivery_guarantee": 2.55
      },
      {
-      "order": "#1074",
-      "date": "2026-10-07",
+      "order": "#1306",
+      "date": "2026-10-10",
       "amount": 49.01,
       "payment_method": "Google Pay",
       "delivery_guarantee": 2.46
      },
      {
-      "order": "#1075",
-      "date": "2026-10-06",
+      "order": "#1307",
+      "date": "2026-10-10",
       "amount": 62.37,
       "payment_method": "Shop Pay",
       "delivery_guarantee": 0
      },
      {
-      "order": "#1076",
-      "date": "2026-10-07",
+      "order": "#1308",
+      "date": "2026-10-10",
       "amount": 46.14,
       "payment_method": "Shop Pay",
       "delivery_guarantee": 0
      },
      {
-      "order": "#1077",
-      "date": "2026-10-02",
+      "order": "#1309",
+      "date": "2026-10-10",
       "amount": 57.98,
       "payment_method": "Shop Pay",
       "delivery_guarantee": 0
      },
      {
-      "order": "#1078",
+      "order": "#1310",
       "date": "2026-10-10",
       "amount": 71.07,
       "payment_method": "Google Pay",
       "delivery_guarantee": 0
      },
      {
-      "order": "#1079",
-      "date": "2026-10-03",
+      "order": "#1311",
+      "date": "2026-10-10",
       "amount": 69.67,
       "payment_method": "Shop Pay",
       "delivery_guarantee": 0
      },
      {
-      "order": "#1080",
+      "order": "#1324",
       "date": "2026-10-11",
       "amount": 74.68,
       "payment_method": "Google Pay",
       "delivery_guarantee": 2.61
      },
      {
-      "order": "#1081",
-      "date": "2026-10-03",
+      "order": "#1312",
+      "date": "2026-10-10",
       "amount": 64.7,
       "payment_method": "Google Pay",
       "delivery_guarantee": 2.7
      },
      {
-      "order": "#1082",
-      "date": "2026-10-09",
+      "order": "#1313",
+      "date": "2026-10-10",
       "amount": 50.52,
       "payment_method": "Google Pay",
       "delivery_guarantee": 0
      },
      {
-      "order": "#1083",
+      "order": "#1314",
       "date": "2026-10-10",
       "amount": 55.85,
       "payment_method": "Shop Pay",
       "delivery_guarantee": 1.53
      },
      {
-      "order": "#1084",
+      "order": "#1315",
       "date": "2026-10-10",
       "amount": 35.24,
       "payment_method": "Shop Pay",
       "delivery_guarantee": 0
      },
      {
-      "order": "#1085",
+      "order": "#1325",
       "date": "2026-10-11",
       "amount": 26.96,
       "payment_method": "Card",
       "delivery_guarantee": 0
      },
      {
-      "order": "#1086",
+      "order": "#1326",
       "date": "2026-10-11",
       "amount": 68.5,
       "payment_method": "Google Pay",
       "delivery_guarantee": 0
      },
      {
-      "order": "#1087",
-      "date": "2026-10-03",
+      "order": "#1316",
+      "date": "2026-10-10",
       "amount": 59.85,
       "payment_method": "Card",
       "delivery_guarantee": 2.38
      },
      {
-      "order": "#1088",
-      "date": "2026-10-03",
+      "order": "#1317",
+      "date": "2026-10-10",
       "amount": 44.89,
       "payment_method": "Shop Pay",
       "delivery_guarantee": 2.18
      },
      {
-      "order": "#1089",
-      "date": "2026-10-02",
+      "order": "#1318",
+      "date": "2026-10-10",
       "amount": 37.92,
       "payment_method": "Card",
       "delivery_guarantee": 1.84
      },
      {
-      "order": "#1090",
+      "order": "#1331",
       "date": "2026-10-12",
       "amount": 86.02,
       "payment_method": "Card",
       "delivery_guarantee": 2.99
      },
      {
-      "order": "#1091",
-      "date": "2026-10-07",
+      "order": "#1319",
+      "date": "2026-10-10",
       "amount": 83.23,
       "payment_method": "Card",
       "delivery_guarantee": 0
      },
      {
-      "order": "#1092",
+      "order": "#1332",
       "date": "2026-10-12",
       "amount": 81.13,
       "payment_method": "Google Pay",
       "delivery_guarantee": 0
      },
      {
-      "order": "#1093",
+      "order": "#1333",
       "date": "2026-10-12",
       "amount": 60,
       "payment_method": "Shop Pay",
       "delivery_guarantee": 0
      },
      {
-      "order": "#1094",
+      "order": "#1334",
       "date": "2026-10-12",
       "amount": 28.79,
       "payment_method": "Card",
       "delivery_guarantee": 1.6
      },
      {
-      "order": "#1095",
+      "order": "#1335",
       "date": "2026-10-12",
       "amount": 45.08,
       "payment_method": "Google Pay",
       "delivery_guarantee": 0
      },
      {
-      "order": "#1096",
+      "order": "#1336",
       "date": "2026-10-12",
       "amount": 80.88,
       "payment_method": "Card",
       "delivery_guarantee": 1.87
      },
      {
-      "order": "#1097",
-      "date": "2026-10-05",
+      "order": "#1320",
+      "date": "2026-10-10",
       "amount": 81.25,
       "payment_method": "Card",
       "delivery_guarantee": 2.93
      },
      {
-      "order": "#1098",
-      "date": "2026-10-04",
+      "order": "#1321",
+      "date": "2026-10-10",
       "amount": 54.51,
       "payment_method": "Card",
       "delivery_guarantee": 2.81
      },
      {
-      "order": "#1099",
+      "order": "#1327",
       "date": "2026-10-11",
       "amount": 45.7,
       "payment_method": "Card",
       "delivery_guarantee": 0
      },
      {
-      "order": "#1100",
-      "date": "2026-10-05",
+      "order": "#1322",
+      "date": "2026-10-10",
       "amount": 89.55,
       "payment_method": "Shop Pay",
       "delivery_guarantee": 1.86
      },
      {
-      "order": "#1101",
+      "order": "#1337",
       "date": "2026-10-12",
       "amount": 36.09,
       "payment_method": "Card",
@@ -7835,10 +7835,10 @@
       "amount": 15
      }
     ],
-    "gross_sales": 2003.39,
+    "gross_sales": 2002.55,
     "delivery_guarantee": 34.32,
-    "fees": 68.32,
-    "deposit": 1902.21,
+    "fees": 68.3,
+    "deposit": 1901.39,
     "order_count": 34,
     "mismatch_amount": 67.18
    },
@@ -7849,148 +7849,148 @@
     "matched": true,
     "orders": [
      {
-      "order": "#1197",
-      "date": "2026-10-01",
+      "order": "#1338",
+      "date": "2026-10-12",
       "amount": 38.28,
       "payment_method": "Amazon Pay",
       "delivery_guarantee": 0
      },
      {
-      "order": "#1198",
-      "date": "2026-10-07",
+      "order": "#1339",
+      "date": "2026-10-12",
       "amount": 89.24,
       "payment_method": "Amazon Pay",
       "delivery_guarantee": 1.82
      },
      {
-      "order": "#1199",
-      "date": "2026-10-06",
+      "order": "#1340",
+      "date": "2026-10-12",
       "amount": 35.58,
       "payment_method": "Amazon Pay",
       "delivery_guarantee": 1.77
      },
      {
-      "order": "#1200",
+      "order": "#1390",
       "date": "2026-10-14",
       "amount": 57.16,
       "payment_method": "Amazon Pay",
       "delivery_guarantee": 0
      },
      {
-      "order": "#1201",
+      "order": "#1391",
       "date": "2026-10-14",
       "amount": 69.24,
       "payment_method": "Amazon Pay",
       "delivery_guarantee": 1.61
      },
      {
-      "order": "#1202",
-      "date": "2026-10-09",
+      "order": "#1341",
+      "date": "2026-10-12",
       "amount": 29.5,
       "payment_method": "Amazon Pay",
       "delivery_guarantee": 0
      },
      {
-      "order": "#1203",
-      "date": "2026-10-03",
+      "order": "#1342",
+      "date": "2026-10-12",
       "amount": 28.88,
       "payment_method": "Amazon Pay",
       "delivery_guarantee": 0
      },
      {
-      "order": "#1204",
+      "order": "#1392",
       "date": "2026-10-14",
       "amount": 83.41,
       "payment_method": "Amazon Pay",
       "delivery_guarantee": 2.63
      },
      {
-      "order": "#1205",
-      "date": "2026-10-08",
+      "order": "#1343",
+      "date": "2026-10-12",
       "amount": 83.56,
       "payment_method": "Amazon Pay",
       "delivery_guarantee": 2.48
      },
      {
-      "order": "#1206",
+      "order": "#1393",
       "date": "2026-10-14",
       "amount": 26.85,
       "payment_method": "Amazon Pay",
       "delivery_guarantee": 0
      },
      {
-      "order": "#1207",
-      "date": "2026-10-11",
+      "order": "#1344",
+      "date": "2026-10-12",
       "amount": 86.41,
       "payment_method": "Amazon Pay",
       "delivery_guarantee": 0
      },
      {
-      "order": "#1208",
+      "order": "#1394",
       "date": "2026-10-14",
       "amount": 67.09,
       "payment_method": "Amazon Pay",
       "delivery_guarantee": 2.22
      },
      {
-      "order": "#1209",
+      "order": "#1395",
       "date": "2026-10-14",
       "amount": 61.74,
       "payment_method": "Amazon Pay",
       "delivery_guarantee": 0
      },
      {
-      "order": "#1210",
-      "date": "2026-10-06",
+      "order": "#1345",
+      "date": "2026-10-12",
       "amount": 69.29,
       "payment_method": "Amazon Pay",
       "delivery_guarantee": 2.63
      },
      {
-      "order": "#1211",
-      "date": "2026-10-01",
+      "order": "#1346",
+      "date": "2026-10-12",
       "amount": 28.16,
       "payment_method": "Amazon Pay",
       "delivery_guarantee": 2.03
      },
      {
-      "order": "#1212",
+      "order": "#1396",
       "date": "2026-10-14",
       "amount": 30.45,
       "payment_method": "Amazon Pay",
       "delivery_guarantee": 0
      },
      {
-      "order": "#1213",
+      "order": "#1397",
       "date": "2026-10-14",
       "amount": 52.78,
       "payment_method": "Amazon Pay",
       "delivery_guarantee": 0
      },
      {
-      "order": "#1214",
-      "date": "2026-10-11",
+      "order": "#1347",
+      "date": "2026-10-12",
       "amount": 47.09,
       "payment_method": "Amazon Pay",
       "delivery_guarantee": 0
      },
      {
-      "order": "#1215",
+      "order": "#1398",
       "date": "2026-10-14",
       "amount": 50.71,
       "payment_method": "Amazon Pay",
       "delivery_guarantee": 0
      },
      {
-      "order": "#1216",
-      "date": "2026-10-04",
+      "order": "#1348",
+      "date": "2026-10-12",
       "amount": 45.15,
       "payment_method": "Amazon Pay",
       "delivery_guarantee": 1.78
      },
      {
-      "order": "#1217",
-      "date": "2026-10-08",
+      "order": "#1349",
+      "date": "2026-10-12",
       "amount": 12.19,
       "payment_method": "Amazon Pay",
       "delivery_guarantee": 0
@@ -8012,309 +8012,309 @@
     "matched": true,
     "orders": [
      {
-      "order": "#1231",
-      "date": "2026-10-07",
+      "order": "#1350",
+      "date": "2026-10-13",
       "amount": 52.56,
       "payment_method": "Card",
       "delivery_guarantee": 2.45
      },
      {
-      "order": "#1232",
-      "date": "2026-10-08",
+      "order": "#1351",
+      "date": "2026-10-13",
       "amount": 67.36,
       "payment_method": "Card",
       "delivery_guarantee": 0
      },
      {
-      "order": "#1233",
-      "date": "2026-10-05",
+      "order": "#1352",
+      "date": "2026-10-13",
       "amount": 59.38,
       "payment_method": "Shop Pay",
       "delivery_guarantee": 0
      },
      {
-      "order": "#1234",
-      "date": "2026-10-06",
+      "order": "#1353",
+      "date": "2026-10-13",
       "amount": 64.74,
       "payment_method": "Shop Pay",
       "delivery_guarantee": 2.4
      },
      {
-      "order": "#1235",
-      "date": "2026-10-04",
+      "order": "#1354",
+      "date": "2026-10-13",
       "amount": 66.43,
       "payment_method": "Card",
       "delivery_guarantee": 0
      },
      {
-      "order": "#1236",
+      "order": "#1399",
       "date": "2026-10-14",
       "amount": 29.04,
       "payment_method": "Google Pay",
       "delivery_guarantee": 2.46
      },
      {
-      "order": "#1237",
-      "date": "2026-10-05",
+      "order": "#1355",
+      "date": "2026-10-13",
       "amount": 56.21,
       "payment_method": "Card",
       "delivery_guarantee": 0
      },
      {
-      "order": "#1238",
+      "order": "#1400",
       "date": "2026-10-15",
       "amount": 39.21,
       "payment_method": "Card",
       "delivery_guarantee": 0
      },
      {
-      "order": "#1239",
-      "date": "2026-10-10",
+      "order": "#1356",
+      "date": "2026-10-13",
       "amount": 83.55,
       "payment_method": "Google Pay",
       "delivery_guarantee": 2.13
      },
      {
-      "order": "#1240",
-      "date": "2026-10-09",
+      "order": "#1357",
+      "date": "2026-10-13",
       "amount": 77.88,
       "payment_method": "Google Pay",
       "delivery_guarantee": 1.79
      },
      {
-      "order": "#1241",
-      "date": "2026-10-10",
+      "order": "#1358",
+      "date": "2026-10-13",
       "amount": 79.12,
       "payment_method": "Google Pay",
       "delivery_guarantee": 0
      },
      {
-      "order": "#1242",
-      "date": "2026-10-11",
+      "order": "#1359",
+      "date": "2026-10-13",
       "amount": 48.35,
       "payment_method": "Google Pay",
       "delivery_guarantee": 0
      },
      {
-      "order": "#1243",
-      "date": "2026-10-10",
+      "order": "#1360",
+      "date": "2026-10-13",
       "amount": 65.89,
       "payment_method": "Card",
       "delivery_guarantee": 2.76
      },
      {
-      "order": "#1244",
-      "date": "2026-10-11",
+      "order": "#1361",
+      "date": "2026-10-13",
       "amount": 85.76,
       "payment_method": "Card",
       "delivery_guarantee": 0
      },
      {
-      "order": "#1245",
-      "date": "2026-10-10",
+      "order": "#1362",
+      "date": "2026-10-13",
       "amount": 32.92,
       "payment_method": "Card",
       "delivery_guarantee": 0
      },
      {
-      "order": "#1246",
-      "date": "2026-10-11",
+      "order": "#1363",
+      "date": "2026-10-13",
       "amount": 28.75,
       "payment_method": "Google Pay",
       "delivery_guarantee": 1.6
      },
      {
-      "order": "#1247",
-      "date": "2026-10-11",
+      "order": "#1364",
+      "date": "2026-10-13",
       "amount": 56.17,
       "payment_method": "Shop Pay",
       "delivery_guarantee": 0
      },
      {
-      "order": "#1248",
-      "date": "2026-10-02",
+      "order": "#1365",
+      "date": "2026-10-13",
       "amount": 44.38,
       "payment_method": "Shop Pay",
       "delivery_guarantee": 2.92
      },
      {
-      "order": "#1249",
-      "date": "2026-10-11",
+      "order": "#1366",
+      "date": "2026-10-13",
       "amount": 31,
       "payment_method": "Card",
       "delivery_guarantee": 0
      },
      {
-      "order": "#1250",
-      "date": "2026-10-08",
+      "order": "#1367",
+      "date": "2026-10-13",
       "amount": 84.6,
       "payment_method": "Shop Pay",
       "delivery_guarantee": 2.53
      },
      {
-      "order": "#1251",
-      "date": "2026-10-01",
+      "order": "#1368",
+      "date": "2026-10-13",
       "amount": 60.07,
       "payment_method": "Google Pay",
       "delivery_guarantee": 1.62
      },
      {
-      "order": "#1252",
-      "date": "2026-10-03",
+      "order": "#1369",
+      "date": "2026-10-13",
       "amount": 58.36,
       "payment_method": "Google Pay",
       "delivery_guarantee": 0
      },
      {
-      "order": "#1253",
-      "date": "2026-10-05",
+      "order": "#1370",
+      "date": "2026-10-13",
       "amount": 58.14,
       "payment_method": "Shop Pay",
       "delivery_guarantee": 0
      },
      {
-      "order": "#1254",
-      "date": "2026-10-09",
+      "order": "#1371",
+      "date": "2026-10-13",
       "amount": 53.28,
       "payment_method": "Google Pay",
       "delivery_guarantee": 2.2
      },
      {
-      "order": "#1255",
-      "date": "2026-10-05",
+      "order": "#1372",
+      "date": "2026-10-13",
       "amount": 69.61,
       "payment_method": "Card",
       "delivery_guarantee": 0
      },
      {
-      "order": "#1256",
-      "date": "2026-10-09",
+      "order": "#1373",
+      "date": "2026-10-13",
       "amount": 51.51,
       "payment_method": "Google Pay",
       "delivery_guarantee": 2.46
      },
      {
-      "order": "#1257",
-      "date": "2026-10-07",
+      "order": "#1374",
+      "date": "2026-10-13",
       "amount": 47.03,
       "payment_method": "Shop Pay",
       "delivery_guarantee": 2.46
      },
      {
-      "order": "#1258",
-      "date": "2026-10-02",
+      "order": "#1375",
+      "date": "2026-10-13",
       "amount": 38.74,
       "payment_method": "Google Pay",
       "delivery_guarantee": 2.45
      },
      {
-      "order": "#1259",
-      "date": "2026-10-12",
+      "order": "#1376",
+      "date": "2026-10-13",
       "amount": 55.98,
       "payment_method": "Card",
       "delivery_guarantee": 1.79
      },
      {
-      "order": "#1260",
-      "date": "2026-10-10",
+      "order": "#1377",
+      "date": "2026-10-13",
       "amount": 89.86,
       "payment_method": "Google Pay",
       "delivery_guarantee": 2.12
      },
      {
-      "order": "#1261",
-      "date": "2026-10-02",
+      "order": "#1378",
+      "date": "2026-10-13",
       "amount": 84.88,
       "payment_method": "Card",
       "delivery_guarantee": 0
      },
      {
-      "order": "#1262",
+      "order": "#1379",
       "date": "2026-10-13",
       "amount": 75.98,
       "payment_method": "Card",
       "delivery_guarantee": 1.58
      },
      {
-      "order": "#1263",
-      "date": "2026-10-12",
+      "order": "#1380",
+      "date": "2026-10-13",
       "amount": 83.76,
       "payment_method": "Google Pay",
       "delivery_guarantee": 1.92
      },
      {
-      "order": "#1264",
-      "date": "2026-10-09",
+      "order": "#1381",
+      "date": "2026-10-13",
       "amount": 45.02,
       "payment_method": "Card",
       "delivery_guarantee": 0
      },
      {
-      "order": "#1265",
+      "order": "#1401",
       "date": "2026-10-15",
       "amount": 82.14,
       "payment_method": "Google Pay",
       "delivery_guarantee": 0
      },
      {
-      "order": "#1266",
-      "date": "2026-10-07",
+      "order": "#1382",
+      "date": "2026-10-13",
       "amount": 65.26,
       "payment_method": "Card",
       "delivery_guarantee": 3
      },
      {
-      "order": "#1267",
-      "date": "2026-10-11",
+      "order": "#1383",
+      "date": "2026-10-13",
       "amount": 32.4,
       "payment_method": "Google Pay",
       "delivery_guarantee": 1.66
      },
      {
-      "order": "#1268",
-      "date": "2026-10-03",
+      "order": "#1384",
+      "date": "2026-10-13",
       "amount": 45.47,
       "payment_method": "Shop Pay",
       "delivery_guarantee": 0
      },
      {
-      "order": "#1269",
-      "date": "2026-10-08",
+      "order": "#1385",
+      "date": "2026-10-13",
       "amount": 64.05,
       "payment_method": "Card",
       "delivery_guarantee": 1.67
      },
      {
-      "order": "#1270",
-      "date": "2026-10-07",
+      "order": "#1386",
+      "date": "2026-10-13",
       "amount": 51.58,
       "payment_method": "Card",
       "delivery_guarantee": 0
      },
      {
-      "order": "#1271",
+      "order": "#1402",
       "date": "2026-10-15",
       "amount": 70.16,
       "payment_method": "Google Pay",
       "delivery_guarantee": 2.82
      },
      {
-      "order": "#1272",
-      "date": "2026-10-11",
+      "order": "#1387",
+      "date": "2026-10-13",
       "amount": 36.42,
       "payment_method": "Card",
       "delivery_guarantee": 0
      },
      {
-      "order": "#1273",
-      "date": "2026-10-10",
+      "order": "#1388",
+      "date": "2026-10-13",
       "amount": 29.96,
       "payment_method": "Card",
       "delivery_guarantee": 2.82
      },
      {
-      "order": "#1274",
-      "date": "2026-10-09",
+      "order": "#1389",
+      "date": "2026-10-13",
       "amount": 46.81,
       "payment_method": "Shop Pay",
       "delivery_guarantee": 2.01
@@ -8336,155 +8336,155 @@
     "matched": true,
     "orders": [
      {
-      "order": "#1164",
+      "order": "#1421",
       "date": "2026-10-16",
       "amount": 38.98,
       "payment_method": "PayPal",
       "delivery_guarantee": 2.57
      },
      {
-      "order": "#1165",
-      "date": "2026-10-05",
+      "order": "#1403",
+      "date": "2026-10-15",
       "amount": 49.65,
       "payment_method": "PayPal",
       "delivery_guarantee": 1.87
      },
      {
-      "order": "#1166",
-      "date": "2026-10-08",
+      "order": "#1404",
+      "date": "2026-10-15",
       "amount": 77.92,
       "payment_method": "PayPal",
       "delivery_guarantee": 0
      },
      {
-      "order": "#1167",
+      "order": "#1422",
       "date": "2026-10-17",
       "amount": 57.01,
       "payment_method": "PayPal",
       "delivery_guarantee": 0
      },
      {
-      "order": "#1168",
-      "date": "2026-10-09",
+      "order": "#1405",
+      "date": "2026-10-15",
       "amount": 68.45,
       "payment_method": "PayPal",
       "delivery_guarantee": 0
      },
      {
-      "order": "#1169",
+      "order": "#1423",
       "date": "2026-10-17",
       "amount": 77.02,
       "payment_method": "PayPal",
       "delivery_guarantee": 0
      },
      {
-      "order": "#1170",
+      "order": "#1406",
       "date": "2026-10-15",
       "amount": 83.86,
       "payment_method": "PayPal",
       "delivery_guarantee": 2.39
      },
      {
-      "order": "#1171",
+      "order": "#1424",
       "date": "2026-10-17",
       "amount": 66.45,
       "payment_method": "PayPal",
       "delivery_guarantee": 0
      },
      {
-      "order": "#1172",
-      "date": "2026-10-06",
+      "order": "#1407",
+      "date": "2026-10-15",
       "amount": 83.12,
       "payment_method": "PayPal",
       "delivery_guarantee": 0
      },
      {
-      "order": "#1173",
-      "date": "2026-10-02",
+      "order": "#1408",
+      "date": "2026-10-15",
       "amount": 61.94,
       "payment_method": "PayPal",
       "delivery_guarantee": 2.9
      },
      {
-      "order": "#1174",
-      "date": "2026-10-10",
+      "order": "#1409",
+      "date": "2026-10-15",
       "amount": 25.64,
       "payment_method": "PayPal",
       "delivery_guarantee": 0
      },
      {
-      "order": "#1175",
-      "date": "2026-10-12",
+      "order": "#1410",
+      "date": "2026-10-15",
       "amount": 48.53,
       "payment_method": "PayPal",
       "delivery_guarantee": 0
      },
      {
-      "order": "#1176",
-      "date": "2026-10-06",
+      "order": "#1411",
+      "date": "2026-10-15",
       "amount": 70.6,
       "payment_method": "PayPal",
       "delivery_guarantee": 0
      },
      {
-      "order": "#1177",
-      "date": "2026-10-03",
+      "order": "#1412",
+      "date": "2026-10-15",
       "amount": 45.67,
       "payment_method": "PayPal",
       "delivery_guarantee": 2.09
      },
      {
-      "order": "#1178",
-      "date": "2026-10-12",
+      "order": "#1413",
+      "date": "2026-10-15",
       "amount": 35.02,
       "payment_method": "PayPal",
       "delivery_guarantee": 1.8
      },
      {
-      "order": "#1179",
-      "date": "2026-10-09",
+      "order": "#1414",
+      "date": "2026-10-15",
       "amount": 32.58,
       "payment_method": "PayPal",
       "delivery_guarantee": 0
      },
      {
-      "order": "#1180",
-      "date": "2026-10-09",
+      "order": "#1415",
+      "date": "2026-10-15",
       "amount": 40.15,
       "payment_method": "PayPal",
       "delivery_guarantee": 1.56
      },
      {
-      "order": "#1181",
-      "date": "2026-10-09",
+      "order": "#1416",
+      "date": "2026-10-15",
       "amount": 62.58,
       "payment_method": "PayPal",
       "delivery_guarantee": 0
      },
      {
-      "order": "#1182",
-      "date": "2026-10-12",
+      "order": "#1417",
+      "date": "2026-10-15",
       "amount": 83.02,
       "payment_method": "PayPal",
       "delivery_guarantee": 2.19
      },
      {
-      "order": "#1183",
-      "date": "2026-10-11",
+      "order": "#1418",
+      "date": "2026-10-15",
       "amount": 88.96,
       "payment_method": "PayPal",
       "delivery_guarantee": 0
      },
      {
-      "order": "#1184",
-      "date": "2026-10-05",
+      "order": "#1419",
+      "date": "2026-10-15",
       "amount": 70.8,
       "payment_method": "PayPal",
       "delivery_guarantee": 1.82
      },
      {
-      "order": "#1185",
-      "date": "2026-10-10",
+      "order": "#1420",
+      "date": "2026-10-15",
       "amount": 6.94,
       "payment_method": "PayPal",
       "delivery_guarantee": 0
@@ -8501,7 +8501,7 @@
    }
   ],
   "summary": {
-   "deposited_this_month": 17639.58,
+   "deposited_this_month": 17639.45,
    "fees": 667.3,
    "orders_matched": 322,
    "not_matched": {

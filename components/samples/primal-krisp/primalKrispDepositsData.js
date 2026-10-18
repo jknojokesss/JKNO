@@ -54,6 +54,46 @@ export function notMatchedItems(payouts) {
   return items
 }
 
+/** Month-level bridge: gross + delivery − fees − refunds − not-matched adjustments = deposited */
+export function buildDepositedMonthBridge(payouts) {
+  let gross_sales = 0
+  let delivery_guarantee = 0
+  let fees = 0
+  let refunds = 0
+  let not_matched = 0
+  for (const p of payouts) {
+    const t = payoutTotals(p)
+    gross_sales = round2(gross_sales + t.gross_sales)
+    delivery_guarantee = round2(delivery_guarantee + t.delivery_guarantee)
+    fees = round2(fees + t.fees)
+    refunds = round2(refunds + t.refunds)
+    if (!p.matched) not_matched = round2(not_matched + t.mismatch_amount)
+  }
+  const deposited = round2(gross_sales + delivery_guarantee - fees - refunds - not_matched)
+  return { gross_sales, delivery_guarantee, fees, refunds, not_matched, deposited }
+}
+
+export function aggregatePayoutTable(payouts) {
+  let deposit = 0
+  let order_count = 0
+  let gross_sales = 0
+  let delivery_guarantee = 0
+  let fees = 0
+  let refunds = 0
+  let not_matched = 0
+  for (const p of payouts) {
+    const t = payoutTotals(p)
+    deposit = round2(deposit + t.deposit)
+    order_count += t.order_count
+    gross_sales = round2(gross_sales + t.gross_sales)
+    delivery_guarantee = round2(delivery_guarantee + t.delivery_guarantee)
+    fees = round2(fees + t.fees)
+    refunds = round2(refunds + t.refunds)
+    not_matched = round2(not_matched + t.mismatch_amount)
+  }
+  return { deposit, order_count, gross_sales, delivery_guarantee, fees, refunds, not_matched }
+}
+
 export function buildDepositsSummary(payouts) {
   let deposited = 0
   let fees = 0

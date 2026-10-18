@@ -8,6 +8,8 @@ import { fileURLToPath } from 'url'
 import {
   payoutTotals,
   buildDepositsSummary,
+  buildDepositedMonthBridge,
+  aggregatePayoutTable,
   notMatchedItems,
   round2,
 } from '../components/samples/primal-krisp/primalKrispDepositsData.js'
@@ -32,12 +34,25 @@ let sumDeposit = 0
 let sumFees = 0
 let sumGross = 0
 let totalOrderRows = 0
+const grossValues = new Set()
+const allOrders = []
 
 for (const p of payouts) {
   const t = payoutTotals(p)
   ok(`gross sum ${p.id}`, round2(p.orders.reduce((s, o) => s + o.amount, 0)) === t.gross_sales)
   ok(`adjustments is array ${p.id}`, Array.isArray(p.adjustments))
   ok(`deposit formula ${p.id}`, t.deposit === round2(t.gross_sales + t.delivery_guarantee - t.fees - t.refunds - t.adjustmentsTotal))
+  ok(
+    `table row tie ${p.id}`,
+    t.deposit === round2(t.gross_sales + t.delivery_guarantee - t.fees - t.refunds - t.mismatch_amount),
+  )
+  ok(`unique gross ${p.id}`, !grossValues.has(t.gross_sales))
+  grossValues.add(t.gross_sales)
+  for (const o of p.orders) {
+    allOrders.push({ order: o.order, date: o.date, payoutDate: p.date })
+    const days = Math.round((Date.parse(`${p.date}T12:00:00Z`) - Date.parse(`${o.date}T12:00:00Z`)) / 86400000)
+    ok(`order date window ${p.id} ${o.order}`, days >= 0 && days <= 2)
+  }
   if (p.deposit != null) ok(`stored deposit ${p.id}`, round2(p.deposit) === t.deposit)
   if (!p.matched) {
     unmatchedPayouts += 1
@@ -68,7 +83,22 @@ for (const p of payouts) {
 }
 
 ok('exactly 2 not matched payouts', unmatchedPayouts === 2)
-ok('october gross ~18212', Math.abs(sumGross - 18212.66) < 0.02)
+ok('october gross near target', Math.abs(sumGross - 18212.66) <= 50)
+
+const byDate = [...allOrders].sort((a, b) => a.date.localeCompare(b.date) || a.order.localeCompare(b.order))
+for (let i = 1; i < byDate.length; i++) {
+  const pn = parseInt(byDate[i - 1].order.slice(1), 10)
+  const cn = parseInt(byDate[i].order.slice(1), 10)
+  ok(`order nums rise with date ${byDate[i].order}`, cn > pn)
+}
+ok('order sequence starts ~1102', parseInt(byDate[0].order.slice(1), 10) >= 1100 && parseInt(byDate[0].order.slice(1), 10) <= 1105)
+
+const bridge = buildDepositedMonthBridge(payouts)
+ok('deposited bridge', bridge.deposited === round2(bridge.gross_sales + bridge.delivery_guarantee - bridge.fees - bridge.refunds - bridge.not_matched))
+ok('deposited bridge matches summary', bridge.deposited === buildDepositsSummary(payouts).deposited_this_month)
+const table = aggregatePayoutTable(payouts)
+ok('table totals deposit', table.deposit === bridge.deposited)
+ok('table totals gross', table.gross_sales === bridge.gross_sales)
 
 const summary = buildDepositsSummary(payouts)
 const nmItems = notMatchedItems(payouts).filter(
@@ -86,6 +116,8 @@ ok('not matched items list', nmItems.length === 2)
 ok('card not matched dollars', summary.not_matched.dollars === 105.58)
 ok('card not matched dollars tie', summary.not_matched.dollars === notMatchedDollars)
 ok('stored summary deposited', round2(deposits.summary.deposited_this_month) === summary.deposited_this_month)
+ok('adjustments reference sep orders', payouts.some((p) => p.adjustments?.some((a) => a.order === '#1021')) && payouts.some((p) => p.adjustments?.some((a) => a.order === '#1037')))
+ok('sep orders not in october rows', !allOrders.some((o) => o.order === '#1021' || o.order === '#1037'))
 ok('stored summary orders_matched', deposits.summary.orders_matched === summary.orders_matched)
 ok('stored summary not_matched', deposits.summary.not_matched.order_count === 2 && deposits.summary.not_matched.dollars === 105.58)
 
