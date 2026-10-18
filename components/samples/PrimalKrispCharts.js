@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react'
+import { useState, useCallback, useEffect, useRef } from 'react'
 import {
   BRICK,
   CHARCOAL,
@@ -18,6 +18,27 @@ import {
 } from './primalKrispUtils'
 
 const sans = UI
+const TXT = 11
+const TXT_SM = 10
+const TXT_LG = 12
+
+function useMeasuredWidth(minWidth = 260) {
+  const ref = useRef(null)
+  const [width, setWidth] = useState(0)
+  useEffect(() => {
+    const el = ref.current
+    if (!el) return
+    const measure = () => {
+      const w = Math.round(el.getBoundingClientRect().width)
+      if (w > 0) setWidth(Math.max(minWidth, w))
+    }
+    measure()
+    const ro = new ResizeObserver(measure)
+    ro.observe(el)
+    return () => ro.disconnect()
+  }, [minWidth])
+  return { ref, width }
+}
 
 function useChartTip() {
   const [tip, setTip] = useState(null)
@@ -242,59 +263,64 @@ export function CashForecast13({ forecast, accent = BRICK }) {
 
 export function SubscriberLineChart({ monthly, accent = BRICK }) {
   const { show, hide, node } = useChartTip()
+  const { ref, width: W } = useMeasuredWidth(280)
   const pts = monthly || []
   if (!pts.length) return null
   const maxA = Math.max(...pts.map((p) => p.active_end), 1)
-  const padL = 36
-  const padR = 20
-  const padT = 20
-  const labelH = 44
-  const plotH = 100
+  const padL = 28
+  const padR = 12
+  const padT = 14
+  const labelH = 34
+  const plotH = 86
   const n = pts.length
-  const step = n > 1 ? Math.min(52, Math.max(36, 480 / (n - 1))) : 0
-  const innerW = n > 1 ? step * (n - 1) : 0
-  const vbW = padL + innerW + padR
   const plotBottom = padT + plotH
-  const vbH = plotBottom + labelH
+  const H = plotBottom + labelH
+  const innerW = W > 0 ? W - padL - padR : 0
+  const step = n > 1 ? innerW / (n - 1) : 0
   const xAt = (i) => padL + (n <= 1 ? innerW / 2 : i * step)
-  const yAt = (v) => plotBottom - (v / maxA) * (plotH - 4)
+  const yAt = (v) => plotBottom - (v / maxA) * (plotH - 6)
   return (
     <ChartFrame tip={node} hide={hide} style={{ width: '100%', maxWidth: '100%' }}>
-      <svg
-        viewBox={`0 0 ${vbW} ${vbH}`}
-        preserveAspectRatio="xMidYMid meet"
-        style={{ width: '100%', maxWidth: '100%', height: 'auto', display: 'block' }}
-        role="img"
-        aria-label="Active subscribers over 12 months"
-      >
-        <line x1={padL} y1={plotBottom} x2={vbW - padR} y2={plotBottom} stroke={STONE} strokeWidth="1" />
-        <polyline
-          fill="none"
-          stroke={accent}
-          strokeWidth="2"
-          points={pts.map((p, i) => `${xAt(i)},${yAt(p.active_end)}`).join(' ')}
-        />
-        {pts.map((p, i) => (
-          <g key={p.label}>
-            <circle
-              cx={xAt(i)}
-              cy={yAt(p.active_end)}
-              r="4.5"
-              fill={accent}
-              onMouseEnter={(e) => show(e, `${p.label} active`, fmtInt(p.active_end))}
-              onMouseMove={(e) => show(e, `${p.label} active`, fmtInt(p.active_end))}
-              onTouchStart={(e) => show(e, `${p.label} active`, fmtInt(p.active_end))}
-              style={{ cursor: 'pointer' }}
+      <div ref={ref} style={{ width: '100%' }}>
+        {W > 0 ? (
+          <svg
+            width={W}
+            height={H}
+            viewBox={`0 0 ${W} ${H}`}
+            style={{ display: 'block', maxWidth: '100%' }}
+            role="img"
+            aria-label="Active subscribers over 12 months"
+          >
+            <line x1={padL} y1={plotBottom} x2={W - padR} y2={plotBottom} stroke={STONE} strokeWidth="1" />
+            <polyline
+              fill="none"
+              stroke={accent}
+              strokeWidth="2"
+              points={pts.map((p, i) => `${xAt(i)},${yAt(p.active_end)}`).join(' ')}
             />
-            <text x={xAt(i)} y={plotBottom + 16} textAnchor="middle" fontSize="9" fill={MUTED} fontFamily={sans}>
-              {p.label}
-            </text>
-            <text x={xAt(i)} y={plotBottom + 30} textAnchor="middle" fontSize="10" fontWeight="600" fill={INK} fontFamily={sans}>
-              {fmtInt(p.active_end)}
-            </text>
-          </g>
-        ))}
-      </svg>
+            {pts.map((p, i) => (
+              <g key={p.label}>
+                <circle
+                  cx={xAt(i)}
+                  cy={yAt(p.active_end)}
+                  r="4"
+                  fill={accent}
+                  onMouseEnter={(e) => show(e, `${p.label} active`, fmtInt(p.active_end))}
+                  onMouseMove={(e) => show(e, `${p.label} active`, fmtInt(p.active_end))}
+                  onTouchStart={(e) => show(e, `${p.label} active`, fmtInt(p.active_end))}
+                  style={{ cursor: 'pointer' }}
+                />
+                <text x={xAt(i)} y={plotBottom + 14} textAnchor="middle" fontSize={TXT_SM} fill={MUTED} fontFamily={sans}>
+                  {p.label}
+                </text>
+                <text x={xAt(i)} y={plotBottom + 28} textAnchor="middle" fontSize={TXT_LG} fontWeight="600" fill={INK} fontFamily={sans}>
+                  {fmtInt(p.active_end)}
+                </text>
+              </g>
+            ))}
+          </svg>
+        ) : null}
+      </div>
     </ChartFrame>
   )
 }
@@ -385,93 +411,130 @@ export function TastingLiftChart({ tastings, accent = BRICK }) {
 
 export function MarginByChannelChart({ products, channels, accent = BRICK }) {
   const { show, hide, node } = useChartTip()
+  const { ref, width: W } = useMeasuredWidth(320)
   const maxM = Math.max(
     ...products.flatMap((p) => channels.map((ch) => p.channels[ch]?.margin_per_bag || 0)),
     1,
   )
   const groups = products.length
-  const gw = 72
-  const vbW = 40 + groups * gw
-  const chW = 8
+  const H = 224
+  const plotTop = 20
+  const plotBottom = 162
+  const plotH = plotBottom - plotTop
+  const chW = 7
+  const gap = 2
+  const clusterW = channels.length * chW + (channels.length - 1) * gap
   const seriesColors = [accent, CHARCOAL, SAGE, BROWN, STONE]
+  const slotW = W > 0 ? (W - 24) / Math.max(groups, 1) : 0
   return (
     <ChartFrame tip={node} hide={hide}>
-      <svg viewBox={`0 0 ${vbW} 260`} preserveAspectRatio="xMidYMid meet" style={{ width: '100%', maxWidth: '100%', height: 'auto', display: 'block' }}>
-        {products.map((p, gi) => {
-          const gx = 36 + gi * gw
-          return (
-            <g key={p.product}>
-              {channels.map((ch, ci) => {
-                const m = p.channels[ch]?.margin_per_bag || 0
-                const h = (m / maxM) * 130
+      <div ref={ref} style={{ width: '100%' }}>
+        {W > 0 ? (
+          <svg width={W} height={H} viewBox={`0 0 ${W} ${H}`} style={{ display: 'block', maxWidth: '100%' }}>
+            {products.map((p, gi) => {
+              const gx = 12 + gi * slotW + (slotW - clusterW) / 2
+              return (
+                <g key={p.product}>
+                  {channels.map((ch, ci) => {
+                    const m = p.channels[ch]?.margin_per_bag || 0
+                    const h = (m / maxM) * plotH
+                    return (
+                      <TipRect
+                        key={ch}
+                        show={show}
+                        hide={hide}
+                        x={gx + ci * (chW + gap)}
+                        y={plotBottom - h}
+                        width={chW}
+                        height={h}
+                        fill={seriesColors[ci % seriesColors.length]}
+                        label={`${p.product} · ${ch}`}
+                        value={m}
+                      />
+                    )
+                  })}
+                  <text
+                    x={12 + gi * slotW + slotW / 2}
+                    y={plotBottom + 16}
+                    textAnchor="middle"
+                    fontSize={TXT_SM}
+                    fill={MUTED}
+                    fontFamily={sans}
+                  >
+                    {p.product.split(' ')[0]}
+                  </text>
+                </g>
+              )
+            })}
+            <g fontFamily={sans} fontSize={TXT_SM} fill={CHARCOAL}>
+              {channels.map((ch, i) => {
+                const col = i % 3
+                const row = Math.floor(i / 3)
+                const colW = (W - 24) / 3
+                const x = 12 + col * colW
+                const y = 186 + row * 16
                 return (
-                  <TipRect
-                    key={ch}
-                    show={show}
-                    hide={hide}
-                    x={gx + ci * (chW + 2)}
-                    y={150 - h}
-                    width={chW}
-                    height={h}
-                    fill={seriesColors[ci % seriesColors.length]}
-                    label={`${p.product} · ${ch}`}
-                    value={m}
-                  />
+                  <g key={ch} transform={`translate(${x}, ${y})`}>
+                    <rect width={9} height={9} fill={seriesColors[i % seriesColors.length]} />
+                    <text x={13} y={9} fill={CHARCOAL}>{ch}</text>
+                  </g>
                 )
               })}
-              <text x={gx + (channels.length * (chW + 2)) / 2} y={168} textAnchor="middle" fontSize="8" fill={MUTED} fontFamily={sans}>
-                {p.product.split(' ')[0]}
-              </text>
             </g>
-          )
-        })}
-        <ChartLegend items={channels.map((ch, i) => ({ label: ch, color: seriesColors[i % seriesColors.length] }))} yBase={208} vbW={vbW} />
-      </svg>
+          </svg>
+        ) : null}
+      </div>
     </ChartFrame>
   )
 }
 
 export function InventoryDaysChart({ rows, accent = BRICK, refDays = 21 }) {
   const { show, hide, node } = useChartTip()
+  const { ref, width: W } = useMeasuredWidth(280)
   const maxD = Math.max(...rows.map((r) => r.days_of_stock), refDays + 5)
-  const rowH = 26
-  const labelCol = 118
-  const barX = labelCol + 8
-  const barMaxW = 168
-  const valueX = barX + barMaxW + 10
-  const vbW = valueX + 52
-  const vbH = 36 + rows.length * rowH
+  const rowH = 22
+  const valueCol = 44
+  const topPad = 14
+  const labelCol = W > 0 ? Math.min(108, Math.floor(W * 0.28)) : 108
+  const barX = labelCol + 6
+  const barMaxW = W > 0 ? Math.max(36, W - barX - valueCol - 4) : 36
+  const H = topPad + rows.length * rowH + 6
   const refX = barX + (refDays / maxD) * barMaxW
+  const valueX = W - valueCol
   return (
     <ChartFrame tip={node} hide={hide}>
-      <svg viewBox={`0 0 ${vbW} ${vbH}`} preserveAspectRatio="xMinYMin meet" style={{ width: '100%', maxWidth: '100%', display: 'block' }}>
-        <line x1={refX} y1={18} x2={refX} y2={vbH - 16} stroke={AMBER} strokeWidth="1" strokeDasharray="4 3" />
-        <text x={refX + 4} y={14} fontSize="9" fill={AMBER} fontFamily={sans}>{refDays}d</text>
-        {rows.map((r, i) => {
-          const y = 22 + i * rowH
-          const w = (r.days_of_stock / maxD) * barMaxW
-          const short = r.days_of_stock < 14
-          const label = r.days_of_stock.toFixed(1) + ' d'
-          return (
-            <g key={r.product}>
-              <text x={0} y={y + 12} fontSize="9.5" fill={INK} fontFamily={sans}>{r.product}</text>
-              <TipRect
-                show={show}
-                hide={hide}
-                x={barX}
-                y={y + 1}
-                width={Math.max(w, 4)}
-                height={12}
-                fill={short ? accent : SAGE}
-                rx={2}
-                label={r.product}
-                value={`${r.days_of_stock.toFixed(1)} days`}
-              />
-              <text x={valueX} y={y + 12} fontSize="9" fill={INK} fontFamily={sans} textAnchor="start">{label}</text>
-            </g>
-          )
-        })}
-      </svg>
+      <div ref={ref} style={{ width: '100%' }}>
+        {W > 0 ? (
+          <svg width={W} height={H} viewBox={`0 0 ${W} ${H}`} style={{ display: 'block', maxWidth: '100%' }}>
+            <line x1={refX} y1={topPad - 2} x2={refX} y2={H - 4} stroke={AMBER} strokeWidth="1" strokeDasharray="4 3" />
+            <text x={refX + 4} y={topPad - 4} fontSize={TXT_SM} fill={AMBER} fontFamily={sans}>{refDays}d</text>
+            {rows.map((r, i) => {
+              const y = topPad + i * rowH
+              const w = (r.days_of_stock / maxD) * barMaxW
+              const short = r.days_of_stock < 14
+              const label = `${r.days_of_stock.toFixed(1)} d`
+              return (
+                <g key={r.product}>
+                  <text x={0} y={y + 14} fontSize={TXT} fill={INK} fontFamily={sans}>{r.product}</text>
+                  <TipRect
+                    show={show}
+                    hide={hide}
+                    x={barX}
+                    y={y + 3}
+                    width={Math.max(w, 3)}
+                    height={11}
+                    fill={short ? accent : SAGE}
+                    rx={2}
+                    label={r.product}
+                    value={`${r.days_of_stock.toFixed(1)} days`}
+                  />
+                  <text x={valueX} y={y + 14} fontSize={TXT} fill={INK} fontFamily={sans} textAnchor="start">{label}</text>
+                </g>
+              )
+            })}
+          </svg>
+        ) : null}
+      </div>
     </ChartFrame>
   )
 }

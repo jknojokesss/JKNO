@@ -114,12 +114,13 @@ body{background:${theme.CREAM};font-family:${UI};color:${theme.INK}}
 .pk-shell td,.pk-shell th,.pk-shell .pk-kpi-val{font-variant-numeric:tabular-nums;font-feature-settings:"tnum"}
 .pk-shell{display:flex;min-height:100vh;align-items:stretch;font-variant-numeric:tabular-nums}
 .pk-shell button{font-variant-numeric:tabular-nums;font-feature-settings:"tnum"}
-.pk-side{width:236px;flex-shrink:0;align-self:stretch;background:${theme.CHAR};color:${theme.CREAM};display:flex;flex-direction:column;padding:22px 14px;position:sticky;top:0;min-height:100vh;height:auto;overflow-y:auto;overflow-x:hidden}
+.pk-side{width:236px;flex-shrink:0;background:${theme.CHAR};color:${theme.CREAM};display:flex;flex-direction:column;padding:22px 14px}
 .pk-nav{display:flex;flex-direction:column;gap:3px}.pk-nav--main{flex:1}
 .pk-navbtn{display:block;width:100%;text-align:left;padding:11px 14px;border-radius:2px;border:none;background:transparent;color:#B6A78C;font-family:${UI};font-size:14px;font-weight:500;cursor:pointer;white-space:nowrap}
 .pk-navbtn:hover{background:rgba(255,255,255,.08);color:${theme.CREAM}}
 .pk-main{flex:1;min-width:0;max-width:1180px;padding:24px 30px 60px}
 .pk-click{transition:box-shadow .12s}.pk-click:hover{box-shadow:inset 0 0 0 1.5px ${theme.SPICE}}
-@media(max-width:860px){.pk-shell{flex-direction:column}.pk-side{width:auto;height:auto;position:static;padding:14px 12px 10px;max-width:100%;overflow-x:hidden}.pk-nav--phone-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;padding:4px 2px 10px;width:100%;max-width:100%;overflow-x:hidden}.pk-nav--phone-grid .pk-navbtn{width:100%;min-width:0;padding:8px 4px;border-radius:4px;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.14);font-size:12px;line-height:1.25;min-height:40px;text-align:center;white-space:normal;word-break:break-word}.pk-main{padding:18px 16px 52px;max-width:100%}}
-@media(max-width:390px){.pk-nav--phone-grid .pk-navbtn{font-size:12px;padding:8px 3px}}
-@media(max-width:600px){input,select,textarea{font-size:16px!important}button{min-height:40px}}`
+@media(min-width:861px){.pk-side{align-self:stretch;position:sticky;top:0;min-height:100vh;height:auto;overflow-y:auto;overflow-x:hidden}}
+@media(max-width:860px){.pk-shell{flex-direction:column}.pk-side{width:auto;height:auto;min-height:0;max-height:none;align-self:auto;position:static;padding:14px 12px 10px;max-width:100%;overflow-x:hidden;overflow-y:visible}.pk-nav--main{flex:0 0 auto}.pk-nav--phone-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;padding:4px 2px 10px;width:100%;max-width:100%;overflow-x:hidden}.pk-nav--phone-grid .pk-navbtn{width:100%;min-width:0;padding:6px 4px;border-radius:4px;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.14);font-size:12px;line-height:1.25;min-height:36px;text-align:center;white-space:normal;word-break:break-word}.pk-main{padding:18px 16px 52px;max-width:100%}}
+@media(max-width:390px){.pk-nav--phone-grid .pk-navbtn{font-size:12px;padding:6px 3px;min-height:36px}}
+@media(max-width:600px){input,select,textarea{font-size:16px!important}.pk-shell button:not(.pk-navbtn){min-height:40px}}`
