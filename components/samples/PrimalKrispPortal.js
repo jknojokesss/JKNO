@@ -356,7 +356,20 @@ export default function PrimalKrispPortal() {
   const portalStyles = `${SHELL_CSS({ CHAR, CREAM, INK, SPICE })}
 .pk-drawer-backdrop{position:fixed;inset:0;background:rgba(43,32,24,.45);z-index:8000}
 .pk-drawer{position:fixed;top:0;right:0;height:100%;width:min(420px,100%);background:${CARDBG};border-left:1px solid ${BORDER};z-index:8001;display:flex;flex-direction:column;box-shadow:-8px 0 32px rgba(0,0,0,.12)}
-@media(max-width:860px){.pk-drawer{top:0;left:0;right:0;width:100%;border-left:none}}`
+@media(max-width:860px){.pk-drawer{top:0;left:0;right:0;width:100%;border-left:none}}
+.pk-promo-table{width:100%;border-collapse:collapse;font-size:13px}
+@media(max-width:390px){
+.pk-promo-card{overflow-x:visible!important;padding:12px 8px!important}
+.pk-promo-table{font-size:12px;table-layout:fixed}
+.pk-promo-table th,.pk-promo-table td{padding:6px 2px!important}
+.pk-promo-table th.pk-promo-code,.pk-promo-table td.pk-promo-code{width:23%;word-break:break-word;white-space:normal;line-height:1.25}
+.pk-promo-table th.pk-promo-spend,.pk-promo-table td.pk-promo-spend{width:19%}
+.pk-promo-table th.pk-promo-orders,.pk-promo-table td.pk-promo-orders{width:13%}
+.pk-promo-table th.pk-promo-rev,.pk-promo-table td.pk-promo-rev{width:23%}
+.pk-promo-table th.pk-promo-roas,.pk-promo-table td.pk-promo-roas{width:22%}
+.pk-promo-table .pk-promo-sort{min-height:32px;white-space:normal;line-height:1.2;letter-spacing:.04em;padding:2px 0}
+.pk-promo-table .pk-promo-roas-label{display:inline-block;max-width:2.8em;text-align:right;white-space:normal}
+}`
 
   return (
     <>
@@ -632,21 +645,22 @@ export default function PrimalKrispPortal() {
 
           {tab === 'advertising' && !overviewDetail && (
             <>
-              <div style={{ ...card, marginBottom: '16px', overflowX: 'auto' }}>
-                <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '13px' }}>
+              <div className="pk-promo-card" style={{ ...card, marginBottom: '16px', overflowX: 'auto' }}>
+                <table className="pk-promo-table">
                   <thead>
                     <tr style={{ borderBottom: `1px solid ${BORDER}` }}>
                       {[
-                        ['Code', 'code', 'left'],
-                        ['Spend', 'spend', 'right'],
-                        ['Orders', 'orders', 'right'],
-                        ['Revenue', 'revenue', 'right'],
-                        ['Return / $1', 'return_per_dollar', 'right'],
-                      ].map(([h, key, align]) => (
-                        <th key={h || 'act'} style={{ ...lbl, textAlign: align, padding: '8px 6px' }}>
+                        ['Code', 'code', 'left', 'pk-promo-code'],
+                        ['Spend', 'spend', 'right', 'pk-promo-spend'],
+                        ['Orders', 'orders', 'right', 'pk-promo-orders'],
+                        ['Revenue', 'revenue', 'right', 'pk-promo-rev'],
+                        ['Return / $1', 'return_per_dollar', 'right', 'pk-promo-roas'],
+                      ].map(([h, key, align, colClass]) => (
+                        <th key={h || 'act'} className={colClass} style={{ ...lbl, textAlign: align, padding: '8px 6px' }}>
                           {key ? (
                             <button
                               type="button"
+                              className="pk-promo-sort"
                               onClick={() =>
                                 setPromoSort((s) => ({
                                   key,
@@ -667,7 +681,7 @@ export default function PrimalKrispPortal() {
                                 textUnderlineOffset: 3,
                               }}
                             >
-                              {h}
+                              {key === 'return_per_dollar' ? <span className="pk-promo-roas-label">{h}</span> : h}
                             </button>
                           ) : (
                             h
@@ -695,11 +709,11 @@ export default function PrimalKrispPortal() {
                           tabIndex={0}
                           role="button"
                         >
-                          <td style={{ padding: '10px 6px', fontWeight: 600, color: INK }}>{p.code}</td>
-                          <td style={{ padding: '10px 6px', textAlign: 'right', fontFamily: MONO }}>{money(p.spend)}</td>
-                          <td style={{ padding: '10px 6px', textAlign: 'right', fontFamily: MONO }}>{fmtInt(p.orders)}</td>
-                          <td style={{ padding: '10px 6px', textAlign: 'right', fontFamily: MONO }}>{money(p.revenue)}</td>
-                          <td style={{ padding: '10px 6px', textAlign: 'right', fontFamily: MONO }}>{p.return_per_dollar.toFixed(1)}</td>
+                          <td className="pk-promo-code" style={{ padding: '10px 6px', fontWeight: 600, color: INK }}>{p.code}</td>
+                          <td className="pk-promo-spend" style={{ padding: '10px 6px', textAlign: 'right', fontFamily: MONO }}>{money(p.spend)}</td>
+                          <td className="pk-promo-orders" style={{ padding: '10px 6px', textAlign: 'right', fontFamily: MONO }}>{fmtInt(p.orders)}</td>
+                          <td className="pk-promo-rev" style={{ padding: '10px 6px', textAlign: 'right', fontFamily: MONO }}>{money(p.revenue)}</td>
+                          <td className="pk-promo-roas" style={{ padding: '10px 6px', textAlign: 'right', fontFamily: MONO }}>{p.return_per_dollar.toFixed(1)}</td>
                         </tr>
                       ))}
                   </tbody>

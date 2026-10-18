@@ -80,6 +80,8 @@ const utilsPath = path.join(root, 'components/samples/primalKrispUtils.js')
 const utilsSrc = fs.readFileSync(utilsPath, 'utf8')
 ok('no verdictPromo helper', !/verdictPromo/.test(utilsSrc))
 ok('advertising table no Keep Watch Cut', !/\bKeep\b|\bWatch\b|\bCut\b/.test(portalSrc))
+ok('promo ads narrow layout CSS', /@media\(max-width:390px\)/.test(portalSrc) && /\.pk-promo-table/.test(portalSrc) && /\.pk-promo-roas-label/.test(portalSrc))
+ok('promo ads card no narrow scroll', /\.pk-promo-card\{overflow-x:visible!important/.test(portalSrc))
 for (const p of DATA.promo_codes) {
   ok(`promo no call field ${p.code}`, p.call === undefined)
 }
