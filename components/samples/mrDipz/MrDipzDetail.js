@@ -476,7 +476,8 @@ function StoreInvoicesDetail({ model, id, open }) {
 function InvoiceDetail({ model, storeId, no, open }) {
   const s = model.storeById[storeId]
   const inv = s.invoices.find((i) => i.no === no)
-  const wi = inv.weekId ? model.weeks.findIndex((w) => w.id === inv.weekId) : -1
+  const isPriorWeek = inv.weekId && String(inv.weekId).startsWith('pw')
+  const wi = inv.weekId && !isPriorWeek ? model.weeks.findIndex((w) => w.id === inv.weekId) : -1
   const lines = wi >= 0 ? s.byProduct.filter((r) => r.delivered[wi] || r.expired[wi]) : []
   return {
     title: `Invoice #${inv.no}`,
@@ -484,8 +485,8 @@ function InvoiceDetail({ model, storeId, no, open }) {
     body: (
       <>
         <div className="md-stats">
-          {wi >= 0 ? <Stat k="Sales" v={money(inv.weekSales)} /> : null}
-          {wi >= 0 ? <Stat k="Credits" v={money(inv.weekCredits)} /> : null}
+          {inv.weekSales != null ? <Stat k="Sales" v={money(inv.weekSales)} /> : null}
+          {inv.weekCredits != null ? <Stat k="Credits" v={money(inv.weekCredits)} /> : null}
           <Stat k="Invoice" v={money(inv.amount)} />
           <Stat k="Status" v={inv.status === 'paid' ? 'Paid' : 'Open'} color={inv.status === 'paid' ? GREEN : undefined} />
           {inv.status === 'open' ? <Stat k="Days" v={fmtInt(inv.days)} /> : null}
@@ -511,6 +512,19 @@ function InvoiceDetail({ model, storeId, no, open }) {
                     fmtInt(sumBy(lines, (r) => r.expired[wi])),
                     money(inv.weekCredits),
                   ],
+                },
+              ]}
+            />
+          </Card>
+        ) : isPriorWeek && inv.weekLabel ? (
+          <Card title={`Week of ${inv.weekLabel}`}>
+            <MdTable
+              columns={['', 'Sales', 'Credits', 'Open on invoice']}
+              rows={[
+                {
+                  key: 'week',
+                  name: 'August delivery week',
+                  cells: [money(inv.weekSales), money(inv.weekCredits), money(inv.amount)],
                 },
               ]}
             />

@@ -4,6 +4,7 @@ import {
   STORES,
   PRODUCTS,
   WEEKS,
+  PRIOR_WEEKS,
   SOLD,
   EXPIRED,
   PRIOR_MONTH,
@@ -61,6 +62,29 @@ export const deltaColor = (delta, { cost = false } = {}) => {
 const cents = (dollars) => Math.round(dollars * 100)
 const sum = (arr, f = (x) => x) => arr.reduce((t, x) => t + f(x), 0)
 const DAY_MS = 86400000
+const PRIOR_WEEK_IDS = new Set(PRIOR_WEEKS.map((w) => w.id))
+const priorWeekLabel = Object.fromEntries(PRIOR_WEEKS.map((w) => [w.id, w.label]))
+
+const round2 = (n) => Math.round(n * 100) / 100
+
+/** Split August store totals into four delivery weeks (fictitious; used for open August invoices). */
+function priorWeekNets(priorSales, priorCredits) {
+  const weights = [0.24, 0.25, 0.24, 0.27]
+  const ids = PRIOR_WEEKS.map((w) => w.id)
+  const nets = {}
+  let salesRun = 0
+  let creditsRun = 0
+  ids.forEach((id, i) => {
+    const sales = round2(priorSales * weights[i])
+    const credits = round2(priorCredits * weights[i])
+    nets[id] = { sales, credits }
+    salesRun += sales
+    creditsRun += credits
+  })
+  nets.pw4.sales = round2(priorSales - salesRun + nets.pw4.sales)
+  nets.pw4.credits = round2(priorCredits - creditsRun + nets.pw4.credits)
+  return nets
+}
 
 export const BUCKETS = [
   { id: 'b0', label: '0–30 days', short: '0–30' },
@@ -135,13 +159,31 @@ export function buildMrDipzModel() {
       })
     })
 
+    const prior = PRIOR_MONTH[s.id] || { sales: 0, credits: 0 }
     const aging = zeroAging()
+    const augustWeeks = priorWeekNets(prior.sales, prior.credits)
     const invoices = (INVOICES[s.id] || []).map((inv) => {
       const days = daysBetween(inv.date, AS_OF_DATE)
       const bucket = bucketOf(days)
       const amount = cents(inv.amount)
       const status = String(inv.status).toLowerCase()
-      const wk = inv.week != null ? byWeek[weekIndex[inv.week]] : null
+      let weekId = inv.week
+      let weekLabel = null
+      let weekSales = null
+      let weekCredits = null
+      if (weekId && PRIOR_WEEK_IDS.has(weekId)) {
+        const pw = augustWeeks[weekId]
+        weekLabel = priorWeekLabel[weekId]
+        weekSales = cents(pw.sales)
+        weekCredits = cents(pw.credits)
+      } else if (weekId != null) {
+        const wk = byWeek[weekIndex[weekId]]
+        if (wk) {
+          weekLabel = wk.label
+          weekSales = wk.sales
+          weekCredits = wk.credits
+        }
+      }
       if (status === 'open') {
         aging[bucket] += amount
         aging.total += amount
@@ -155,14 +197,13 @@ export function buildMrDipzModel() {
         status,
         days,
         bucket,
-        weekId: inv.week,
-        weekLabel: wk ? wk.label : null,
-        weekSales: wk ? wk.sales : null,
-        weekCredits: wk ? wk.credits : null,
+        weekId,
+        weekLabel,
+        weekSales,
+        weekCredits,
       }
     })
 
-    const prior = PRIOR_MONTH[s.id] || { sales: 0, credits: 0 }
     const sales = sum(byProduct, (r) => r.sales)
     const credits = sum(byProduct, (r) => r.credits)
     const priorSales = cents(prior.sales)
@@ -424,7 +465,14 @@ export function verifyMrDipzTotals() {
   out['Sales vs last month'] = pct1(t.salesChangePct) === '17.2%' ? 'OK +17.2%' : `MISMATCH ${pct1(t.salesChangePct)}`
 
   const badInvoices = m.stores.flatMap((s) =>
-    s.invoices.filter((i) => i.weekId && i.weekSales - i.weekCredits !== i.amount).map((i) => i.no),
+    s.invoices
+      .filter(
+        (i) =>
+          i.weekId
+          && !PRIOR_WEEK_IDS.has(i.weekId)
+          && i.weekSales - i.weekCredits !== i.amount,
+      )
+      .map((i) => i.no),
   )
   out['September invoices = week sales − credits'] = badInvoices.length ? `MISMATCH ${badInvoices.join(', ')}` : 'OK'
   const areaSum = sum(m.areas, (a) => a.sales) === t.sales && sum(m.areas, (a) => a.credits) === t.credits
