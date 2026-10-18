@@ -103,7 +103,9 @@ export default function AufschnittOverview({ card, lbl, KPI, brand, onOpen }) {
             v={money(DATA.profitPerOrder.blendedAvgProfitPerOrder)}
             sub={`${ppoDelta >= 0 ? '+' : ''}${pct1(ppoDelta)} vs August`}
             subColor={changeColor(ppoDelta)}
-            onClick={() => onOpen({ type: 'goto-profit' })}
+            onClick={() =>
+              onOpen({ type: 'profit-summary', prior: ov.priorProfitPerOrderAvg })
+            }
           />
         )}
       </div>

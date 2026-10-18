@@ -4,7 +4,11 @@
  */
 import DATA from '../components/samples/aufschnitt/aufschnittData.js'
 import { CHANNELS } from '../components/samples/aufschnitt/aufschnittCatalog.js'
-import { SEP_FULFILLMENT, SEP_NET_PROFIT_TARGET } from '../components/samples/aufschnitt/aufschnittProfitOrders.js'
+import {
+  SEP_FULFILLMENT,
+  SEP_NET_PROFIT_TARGET,
+  blendedProfitPerOrderFromPnl,
+} from '../components/samples/aufschnitt/aufschnittProfitOrders.js'
 
 const round2 = (n) => Math.round(n * 100) / 100
 const sum = (arr, fn = (x) => x) => round2(arr.reduce((s, x) => s + fn(x), 0))
@@ -111,6 +115,9 @@ ok(
 const orderSum = sum(chRows, (r) => r.orders)
 ok('blended avg', round2(totalProfit / orderSum) === pp.blendedAvgProfitPerOrder)
 ok('overview avg', ov.profitPerOrderAvg === pp.blendedAvgProfitPerOrder)
+const augPnl = DATA.pnlViews['All products'].find((m) => m.month === '2026-08')
+ok('overview prior avg from Aug orders', ov.priorProfitPerOrderAvg === blendedProfitPerOrderFromPnl(augPnl))
+ok('channel avg order field', chRows.every((r) => r.avgOrderRevenue === round2(r.revenue / r.orders)))
 
 ok('Salami net', DATA.pnlViews.Salami.find((m) => m.month === '2026-09').net_profit === -612.4)
 const amazonRow = chRows.find((r) => r.channel === 'Amazon')

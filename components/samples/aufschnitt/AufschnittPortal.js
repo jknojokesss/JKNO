@@ -446,14 +446,15 @@ function GenericOverviewDetail({ detail, card, lbl }) {
   }
   if (detail.type === 'profit-summary') {
     const pp = DATA.profitPerOrder
+    const priorAvg = detail.prior ?? DATA.overview.priorProfitPerOrderAvg
     return (
       <>
         <h2 style={{ fontSize: 20, fontWeight: 700, marginBottom: 12 }}>Profit per order</h2>
         <div style={{ ...card }}>
-          <Row l="Blended avg September" v={money(pp.blendedAvgProfitPerOrder)} bold />
-          <Row l="Orders September" v={String(pp.totalOrders)} />
+          <Row l="September blended avg" v={money(pp.blendedAvgProfitPerOrder)} bold />
+          <Row l="September orders" v={String(pp.totalOrders)} />
+          <Row l="August blended avg" v={money(priorAvg)} />
           <Row l="Profit after fulfillment" v={money0(pp.contributionAfterFulfillment)} />
-          <Row l="Prior month avg" v={money(detail.prior)} />
         </div>
       </>
     )

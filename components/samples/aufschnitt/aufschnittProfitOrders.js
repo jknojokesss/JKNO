@@ -84,7 +84,7 @@ function channelOrderCount(channel, revenue) {
   return Math.max(180, Math.round(revenue / 100))
 }
 
-function buildChannelSummary(pnl) {
+export function buildChannelSummary(pnl) {
   const revenueTotal = pnl.revenue_total
   const cogsTotal = pnl.cogs
   const amazonFees = opexAmt(pnl, 'Amazon fees')
@@ -109,6 +109,7 @@ function buildChannelSummary(pnl) {
     const orders = channelOrderCount(channel, revenue)
     const marginPct = revenue > 0 ? (profit / revenue) * 100 : 0
     const avgProfitPerOrder = orders > 0 ? roundCents(profit / orders) : 0
+    const avgOrderRevenue = orders > 0 ? roundCents(revenue / orders) : 0
     return {
       channel,
       orders,
@@ -120,6 +121,7 @@ function buildChannelSummary(pnl) {
       profit,
       marginPct,
       avgProfitPerOrder,
+      avgOrderRevenue,
     }
   })
 
@@ -137,6 +139,13 @@ function buildChannelSummary(pnl) {
   }
 
   return rows
+}
+
+export function blendedProfitPerOrderFromPnl(pnl) {
+  const rows = buildChannelSummary(pnl)
+  const totalOrders = sumCents(rows, (r) => r.orders)
+  const totalProfit = sumCents(rows, (r) => r.profit)
+  return totalOrders > 0 ? roundCents(totalProfit / totalOrders) : 0
 }
 
 function buildLinesFromSpec(skus, lineSpec, costRate) {

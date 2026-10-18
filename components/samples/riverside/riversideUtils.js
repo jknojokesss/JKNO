@@ -36,8 +36,8 @@ export const fmtDate = (iso) => {
   )
 }
 
-export const paren = (n) => (n < 0 ? `(${fmt0(-n)})` : fmt0(n))
-export const parenC = (n) => (n < 0 ? `(${fmtC(-n)})` : fmtC(n))
+export const paren = (n) => (n < 0 ? `-${fmt0(-n)}` : fmt0(n))
+export const parenC = (n) => (n < 0 ? `-${fmtC(-n)}` : fmtC(n))
 
 export function TieMark() {
   return null

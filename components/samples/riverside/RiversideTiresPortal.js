@@ -688,7 +688,7 @@ function FinPeriodBar({ children, compare, onCompareToggle, compareKey, onCompar
         {children}
         {showCompareToggle ? (
           <button type="button" className={`rt-pill rt-compare-toggle${compare ? ' on' : ''}`} style={{ marginLeft: 8 }} onClick={onCompareToggle} aria-pressed={compare}>
-            ⇄ Compare
+            Compare
           </button>
         ) : null}
       </div>

@@ -80,6 +80,41 @@ model.days.forEach((day) => {
   if (day.status === 'Balanced') ok(`JE no os line ${day.date}`, !osLine)
 })
 
+const buildPlNet = (keys) => {
+  const sections = { income: [], cogs: [], expense: [] }
+  keys.forEach((k) => {
+    ;['income', 'cogs', 'expense'].forEach((sec) => {
+      ;(data.pl_by_month[k]?.[sec] || []).forEach((l) => {
+        const hit = sections[sec].find((x) => x.label === l.label)
+        if (hit) hit.amount += l.amount
+        else sections[sec].push({ label: l.label, amount: l.amount })
+      })
+    })
+  })
+  const inc = round2(sections.income.reduce((s, l) => s + l.amount, 0))
+  const cogs = round2(sections.cogs.reduce((s, l) => s + l.amount, 0))
+  const exp = round2(sections.expense.reduce((s, l) => s + l.amount, 0))
+  return round2(inc - cogs - exp)
+}
+
+const closedKeys = data.monthly.map((m) => m.month)
+const profitByMonthTotal = round2(data.monthly.reduce((s, m) => s + m.profit, 0))
+const plJanSepNet = buildPlNet(closedKeys)
+ok('P&L net Jan-Sep = profit-by-month total', plJanSepNet === profitByMonthTotal)
+
+const portalSrc = fs.readFileSync(path.join(root, '../components/samples/riverside/RiversideTiresPortal.js'), 'utf8')
+const utilsSrc = fs.readFileSync(path.join(root, '../components/samples/riverside/riversideUtils.js'), 'utf8')
+const portalNoTemplates = portalSrc.replace(/\$\{[^}]+\}/g, '')
+ok('Riverside no accounting paren ($', !/\(\$/.test(portalNoTemplates))
+ok('Riverside paren helper uses minus', /-\$\{fmt0\(-n\)\}/.test(utilsSrc))
+
+const augTop = data.top_tire_sizes_aug.map((t) => t.units).join(',')
+const sepTop = data.top_tire_sizes_sep.map((t) => t.units).join(',')
+ok('Sep top sizes differ from Aug', augTop !== sepTop)
+ok('Sep sales items month present', Array.isArray(data.sales_items_by_month?.['2026-09']))
+const sepItemsRev = round2(data.sales_items_by_month['2026-09'].reduce((s, i) => s + i.revenue, 0))
+ok('Sep items revenue = Sep month', sepItemsRev === data.monthly.find((m) => m.month === '2026-09').revenue)
+
 if (failures.length) {
   console.error('FAILED:', failures)
   process.exit(1)
@@ -88,4 +123,6 @@ console.log('riverside-tires feature checks passed.', {
   days: model.days.length,
   register: model.totalRegister,
   tickets: model.totalTickets,
+  plJanSepNet,
+  profitByMonthTotal,
 })

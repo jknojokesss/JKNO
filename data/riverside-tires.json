@@ -2435,7 +2435,7 @@
       "cogs": [
         {
           "label": "Tire cost of sales",
-          "amount": 11061.99,
+          "amount": 11058,
           "drill": [
             {
               "date": "2026-08-08",
@@ -2465,7 +2465,7 @@
         },
         {
           "label": "Parts & fluids",
-          "amount": 2328.84,
+          "amount": 2328,
           "drill": [
             {
               "date": "2026-08-08",
@@ -2495,7 +2495,7 @@
         },
         {
           "label": "Shop supplies (COGS)",
-          "amount": 1164.42,
+          "amount": 1164,
           "drill": [
             {
               "date": "2026-08-08",
@@ -2527,7 +2527,7 @@
       "expense": [
         {
           "label": "Rent",
-          "amount": 4599.06,
+          "amount": 4600,
           "drill": [
             {
               "date": "2026-08-08",
@@ -2557,7 +2557,7 @@
         },
         {
           "label": "Payroll — shop",
-          "amount": 3127.36,
+          "amount": 3128,
           "drill": [
             {
               "date": "2026-08-08",
@@ -2587,7 +2587,7 @@
         },
         {
           "label": "Other operating",
-          "amount": 1471.7,
+          "amount": 1472,
           "drill": [
             {
               "date": "2026-08-08",
@@ -5999,6 +5999,112 @@
         "unitCost": 8,
         "category": "Other"
       }
+    ],
+    "2026-09": [
+      {
+        "item": "235/65R17",
+        "units": 42,
+        "revenue": 5565.36,
+        "category": "New tire",
+        "unitPrice": 132.51,
+        "unitCost": 75
+      },
+      {
+        "item": "225/60R17",
+        "units": 30,
+        "revenue": 3215.3,
+        "category": "New tire",
+        "unitPrice": 107.18,
+        "unitCost": 70
+      },
+      {
+        "item": "245/70R17",
+        "units": 22,
+        "revenue": 3082.88,
+        "category": "New tire",
+        "unitPrice": 140.13,
+        "unitCost": 85
+      },
+      {
+        "item": "205/55R16",
+        "units": 19,
+        "revenue": 2237.87,
+        "category": "New tire",
+        "unitPrice": 117.78,
+        "unitCost": 65
+      },
+      {
+        "item": "265/70R17",
+        "units": 17,
+        "revenue": 2311.66,
+        "category": "New tire",
+        "unitPrice": 135.98,
+        "unitCost": 85
+      },
+      {
+        "item": "275/55R20",
+        "units": 18,
+        "revenue": 2296.5,
+        "category": "New tire",
+        "unitPrice": 127.58,
+        "unitCost": 95
+      },
+      {
+        "item": "255/50R20",
+        "units": 8,
+        "unitPrice": 204.3,
+        "unitCost": 115,
+        "category": "New tire",
+        "revenue": 1634.43
+      },
+      {
+        "item": "195/65R15",
+        "units": 8,
+        "unitPrice": 112.83,
+        "unitCost": 62,
+        "category": "New tire",
+        "revenue": 902.63
+      },
+      {
+        "item": "215/55R17",
+        "units": 8,
+        "unitPrice": 124.58,
+        "unitCost": 68,
+        "category": "New tire",
+        "revenue": 996.63
+      },
+      {
+        "item": "285/45R22",
+        "units": 6,
+        "unitPrice": 192.72,
+        "unitCost": 130,
+        "category": "New tire",
+        "revenue": 1156.33
+      },
+      {
+        "item": "Used tires (assorted)",
+        "units": 79,
+        "revenue": 3942.05,
+        "unitPrice": 49.9,
+        "unitCost": 32,
+        "category": "Used tire"
+      },
+      {
+        "item": "Service & labor",
+        "units": 188,
+        "revenue": 8288.41,
+        "unitPrice": 44.09,
+        "unitCost": 18,
+        "category": "Service"
+      },
+      {
+        "item": "Parts & other",
+        "units": 95,
+        "revenue": 1869.95,
+        "unitPrice": 19.68,
+        "unitCost": 8,
+        "category": "Other"
+      }
     ]
   },
   "accounts_ytd": {
@@ -7304,37 +7410,37 @@
     {
       "rank": 1,
       "size": "235/65R17",
-      "units": 44,
+      "units": 42,
       "revenue": 5565.36
     },
     {
       "rank": 2,
       "size": "225/60R17",
-      "units": 28,
+      "units": 30,
       "revenue": 3215.3
     },
     {
       "rank": 3,
       "size": "245/70R17",
-      "units": 24,
+      "units": 22,
       "revenue": 3082.88
     },
     {
       "rank": 4,
       "size": "205/55R16",
-      "units": 20,
+      "units": 19,
       "revenue": 2237.87
     },
     {
       "rank": 5,
       "size": "265/70R17",
-      "units": 18,
+      "units": 17,
       "revenue": 2311.66
     },
     {
       "rank": 6,
       "size": "275/55R20",
-      "units": 20,
+      "units": 18,
       "revenue": 2296.5
     }
   ],
@@ -7346,7 +7452,7 @@
     "tire_revenue_total": 27341.64,
     "tires_sold_units": 266,
     "top_six_revenue": 18709.57,
-    "top_six_units": 154
+    "top_six_units": 148
   },
   "equity_summary_sep": {
     "opening": 38200,

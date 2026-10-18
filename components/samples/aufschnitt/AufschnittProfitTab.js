@@ -28,7 +28,8 @@ export default function AufschnittProfitTab({ card, lbl, onOpen }) {
     { orders: 0, revenue: 0, productCost: 0, shipping: 0, discounts: 0, fees: 0, profit: 0 }
   )
   const totalMargin = totals.revenue > 0 ? (totals.profit / totals.revenue) * 100 : 0
-  const totalAvg = totals.orders > 0 ? totals.profit / totals.orders : 0
+  const totalAvgOrder = totals.orders > 0 ? totals.revenue / totals.orders : 0
+  const totalAvgProfit = totals.orders > 0 ? totals.profit / totals.orders : 0
 
   return (
     <div style={{ ...card }}>
@@ -58,7 +59,8 @@ export default function AufschnittProfitTab({ card, lbl, onOpen }) {
               <th>Fees</th>
               <th>Profit</th>
               <th>Margin</th>
-              <th>Avg / order</th>
+              <th>Avg order</th>
+              <th>Profit / order</th>
             </tr>
           </thead>
           <tbody>
@@ -80,6 +82,7 @@ export default function AufschnittProfitTab({ card, lbl, onOpen }) {
                 <td>{money0(row.fees)}</td>
                 <td style={{ color: row.profit >= 0 ? GREEN : RED }}>{money(row.profit)}</td>
                 <td>{pct1(row.marginPct)}</td>
+                <td>{money(row.avgOrderRevenue)}</td>
                 <td>{money(row.avgProfitPerOrder)}</td>
               </tr>
             ))}
@@ -93,7 +96,8 @@ export default function AufschnittProfitTab({ card, lbl, onOpen }) {
               <td>{money0(totals.fees)}</td>
               <td style={{ color: totals.profit >= 0 ? GREEN : RED }}>{money(totals.profit)}</td>
               <td>{pct1(totalMargin)}</td>
-              <td>{money(totalAvg)}</td>
+              <td>{money(totalAvgOrder)}</td>
+              <td>{money(totalAvgProfit)}</td>
             </tr>
           </tbody>
         </table>
@@ -109,16 +113,16 @@ export default function AufschnittProfitTab({ card, lbl, onOpen }) {
           >
             <div style={{ fontWeight: 600, marginBottom: 6 }}>{row.channel}</div>
             <div className="au-profit-card-row">
-              <span>Revenue</span>
-              <span>{money0(row.revenue)}</span>
+              <span>Orders</span>
+              <span>{row.orders.toLocaleString()}</span>
             </div>
             <div className="au-profit-card-row">
-              <span>Profit</span>
-              <span style={{ color: row.profit >= 0 ? GREEN : RED }}>{money(row.profit)}</span>
+              <span>Avg order</span>
+              <span>{money(row.avgOrderRevenue)}</span>
             </div>
             <div className="au-profit-card-row">
-              <span>Avg / order</span>
-              <span>{money(row.avgProfitPerOrder)}</span>
+              <span>Profit / order</span>
+              <span style={{ color: row.profit >= 0 ? GREEN : RED }}>{money(row.avgProfitPerOrder)}</span>
             </div>
           </button>
         ))}
@@ -136,6 +140,23 @@ export function ProfitChannelDetail({ detail, card, lbl, big, onOpen, onBack }) 
       <button type="button" className="au-detail-back" onClick={onBack}>Back</button>
       <h2 style={{ ...big, fontSize: 22, marginBottom: 4 }}>{detail.channel}</h2>
       <div style={{ fontSize: 12, color: MUTED, marginBottom: 14 }}>Recent orders · September 2026</div>
+
+      {row ? (
+        <div style={{ ...card, marginBottom: 12 }}>
+          <div className="au-profit-card-row" style={{ display: 'flex', justifyContent: 'space-between', padding: '4px 0', fontSize: 13 }}>
+            <span style={{ color: MUTED }}>Orders</span>
+            <span>{row.orders.toLocaleString()}</span>
+          </div>
+          <div className="au-profit-card-row" style={{ display: 'flex', justifyContent: 'space-between', padding: '4px 0', fontSize: 13 }}>
+            <span style={{ color: MUTED }}>Avg order</span>
+            <span>{money(row.avgOrderRevenue)}</span>
+          </div>
+          <div className="au-profit-card-row" style={{ display: 'flex', justifyContent: 'space-between', padding: '4px 0', fontSize: 13 }}>
+            <span style={{ color: MUTED }}>Profit / order</span>
+            <span style={{ color: row.profit >= 0 ? GREEN : RED }}>{money(row.avgProfitPerOrder)}</span>
+          </div>
+        </div>
+      ) : null}
 
       <div style={{ ...card }}>
         <div style={{ ...lbl, marginBottom: 10 }}>Recent orders</div>

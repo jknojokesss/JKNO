@@ -200,7 +200,25 @@ function checkStoreAgingRules(prefix, rows) {
   ok('RT Sep mix sums', round2(sum(mix, (x) => x.revenue)) === sep.revenue)
   const topSix = round2(sum(data.top_tire_sizes_sep, (x) => x.revenue))
   ok('RT Sep top six', topSix === data.sep_tire_sales.top_six_revenue)
-  console.log('riverside-tires', { ytd, profitTotal, sepRev: sep.revenue, sepProfit: sep.profit })
+  const buildPlNet = (keys) => {
+    let inc = 0
+    let cogs = 0
+    let exp = 0
+    keys.forEach((k) => {
+      ;(data.pl_by_month[k]?.income || []).forEach((l) => {
+        inc += l.amount
+      })
+      ;(data.pl_by_month[k]?.cogs || []).forEach((l) => {
+        cogs += l.amount
+      })
+      ;(data.pl_by_month[k]?.expense || []).forEach((l) => {
+        exp += l.amount
+      })
+    })
+    return round2(inc - cogs - exp)
+  }
+  ok('RT P&L net = profit by month', buildPlNet(months.map((m) => m.month)) === profitTotal)
+  console.log('riverside-tires', { ytd, profitTotal, plNet: buildPlNet(months.map((m) => m.month)), sepRev: sep.revenue, sepProfit: sep.profit })
 }
 
 if (failures.length) {

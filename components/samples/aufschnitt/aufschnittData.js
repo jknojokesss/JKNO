@@ -13,7 +13,12 @@ import {
   STOCK_LOCATIONS,
 } from './aufschnittCatalog.js'
 import { allocateByWeight, roundCents, sumCents } from './aufschnittUtils.js'
-import { buildProfitPerOrder, SEP_FULFILLMENT, SEP_NET_PROFIT_TARGET } from './aufschnittProfitOrders.js'
+import {
+  buildProfitPerOrder,
+  blendedProfitPerOrderFromPnl,
+  SEP_FULFILLMENT,
+  SEP_NET_PROFIT_TARGET,
+} from './aufschnittProfitOrders.js'
 
 const MONTH_TOTAL = {
   '2026-04': 198_432.17,
@@ -1047,7 +1052,7 @@ function buildModel() {
         return Math.round(w * 10) / 10
       })(),
       profitPerOrderAvg: profitPerOrder.blendedAvgProfitPerOrder,
-      priorProfitPerOrderAvg: roundCents(profitPerOrder.blendedAvgProfitPerOrder * 0.962),
+      priorProfitPerOrderAvg: blendedProfitPerOrderFromPnl(combinedAug),
       channelSalesSep: CHANNELS.map((ch) => ({
         channel: ch,
         revenue: sumSales(salesRows, { month: sep, channel: ch }),
