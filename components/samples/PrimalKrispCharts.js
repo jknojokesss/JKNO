@@ -267,17 +267,18 @@ export function SubscriberLineChart({ monthly, accent = BRICK }) {
   const pts = monthly || []
   if (!pts.length) return null
   const maxA = Math.max(...pts.map((p) => p.active_end), 1)
-  const padL = 28
-  const padR = 12
+  const labelPadL = 36
+  const labelPadR = 36
   const padT = 14
   const labelH = 34
   const plotH = 86
   const n = pts.length
   const plotBottom = padT + plotH
   const H = plotBottom + labelH
-  const innerW = W > 0 ? W - padL - padR : 0
+  const innerW = W > 0 ? W - labelPadL - labelPadR : 0
   const step = n > 1 ? innerW / (n - 1) : 0
-  const xAt = (i) => padL + (n <= 1 ? innerW / 2 : i * step)
+  const xAt = (i) => labelPadL + (n <= 1 ? innerW / 2 : i * step)
+  const labelAnchor = (i) => (i === 0 ? 'start' : i === n - 1 ? 'end' : 'middle')
   const yAt = (v) => plotBottom - (v / maxA) * (plotH - 6)
   return (
     <ChartFrame tip={node} hide={hide} style={{ width: '100%', maxWidth: '100%' }}>
@@ -291,7 +292,7 @@ export function SubscriberLineChart({ monthly, accent = BRICK }) {
             role="img"
             aria-label="Active subscribers over 12 months"
           >
-            <line x1={padL} y1={plotBottom} x2={W - padR} y2={plotBottom} stroke={STONE} strokeWidth="1" />
+            <line x1={labelPadL} y1={plotBottom} x2={W - labelPadR} y2={plotBottom} stroke={STONE} strokeWidth="1" />
             <polyline
               fill="none"
               stroke={accent}
@@ -310,10 +311,10 @@ export function SubscriberLineChart({ monthly, accent = BRICK }) {
                   onTouchStart={(e) => show(e, `${p.label} active`, fmtInt(p.active_end))}
                   style={{ cursor: 'pointer' }}
                 />
-                <text x={xAt(i)} y={plotBottom + 14} textAnchor="middle" fontSize={TXT_SM} fill={MUTED} fontFamily={sans}>
+                <text x={xAt(i)} y={plotBottom + 14} textAnchor={labelAnchor(i)} fontSize={TXT_SM} fill={MUTED} fontFamily={sans}>
                   {p.label}
                 </text>
-                <text x={xAt(i)} y={plotBottom + 28} textAnchor="middle" fontSize={TXT_LG} fontWeight="600" fill={INK} fontFamily={sans}>
+                <text x={xAt(i)} y={plotBottom + 28} textAnchor={labelAnchor(i)} fontSize={TXT_LG} fontWeight="600" fill={INK} fontFamily={sans}>
                   {fmtInt(p.active_end)}
                 </text>
               </g>

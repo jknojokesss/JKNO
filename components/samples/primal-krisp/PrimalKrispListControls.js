@@ -25,6 +25,7 @@ export default function PrimalKrispListControls({
             <button
               key={opt.key}
               type="button"
+              className="pk-sort-pill"
               onClick={() =>
                 onSortChange({
                   key: opt.key,
@@ -34,7 +35,9 @@ export default function PrimalKrispListControls({
               style={{
                 fontFamily: UI,
                 fontSize: 12,
-                lineHeight: 1.3,
+                lineHeight: 1,
+                minHeight: 0,
+                height: 28,
                 padding: '4px 8px',
                 borderRadius: 4,
                 border: `1px solid ${active ? INK : BORDER}`,
