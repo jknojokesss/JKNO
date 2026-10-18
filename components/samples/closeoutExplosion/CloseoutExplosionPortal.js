@@ -26,6 +26,18 @@ import { buildDashboard, getLotById, salesInPeriod } from './closeoutExplosionCo
 import DATA from './closeoutExplosionData'
 
 const BIZ = 'CLOSEOUT EXPLOSION'
+const buyerTypes = Object.fromEntries(DATA.buyers.map((b) => [b.name, b.type]))
+
+function BuyerLabel({ name }) {
+  const type = buyerTypes[name]
+  return (
+    <span className="ce-buyer-label">
+      <span className="ce-buyer-name">{name}</span>
+      {type ? <span className="ce-buyer-type">{type}</span> : null}
+    </span>
+  )
+}
+
 const StackKV = ({ k, v, vColor = INK }) => (
   <div className="ce-stack-kv">
     <span className="k">{k}</span>
@@ -182,7 +194,9 @@ export default function CloseoutExplosionPortal() {
             >
               <div className="ce-stack-title">{fmtD(s.date)}</div>
               <div className="ce-stack-sub">{s.invoice}</div>
-              <div style={{ fontSize: 12, marginTop: 4 }}>{s.buyer}</div>
+              <div style={{ marginTop: 4 }}>
+                <BuyerLabel name={s.buyer} />
+              </div>
               <div className="ce-stack-grid ce-stack-grid-3">
                 <StackKV k="Cases" v={fmtInt(s.cases)} />
                 <StackKV k="Price" v={money(s.price)} />
@@ -216,7 +230,9 @@ export default function CloseoutExplosionPortal() {
                 >
                   <td className="ce-td-left">{fmtD(s.date)}</td>
                   <td className="ce-td-left ce-hide-sm">{s.invoice}</td>
-                  <td className="ce-td-left">{s.buyer}</td>
+                  <td className="ce-td-left">
+                    <BuyerLabel name={s.buyer} />
+                  </td>
                   <td>{fmtInt(s.cases)}</td>
                   <td>{money(s.price)}</td>
                   <td>{money(s.amount)}</td>
@@ -234,6 +250,7 @@ export default function CloseoutExplosionPortal() {
 
   const BuyerDetail = ({ name }) => {
     const terms = dash.buyerTerms[name] || 30
+    const buyerType = buyerTypes[name]
     const openInv = dash.openSales
       .filter((s) => s.buyer === name)
       .sort((a, b) => a.date.localeCompare(b.date) || a.invoice.localeCompare(b.invoice))
@@ -245,7 +262,10 @@ export default function CloseoutExplosionPortal() {
       <div className="ce-detail">
         <DetailBack />
         <div style={{ ...lbl, color: SPICE }}>Buyer</div>
-        <h2 style={{ ...big, fontSize: '20px', marginTop: 4, marginBottom: 8 }}>{name}</h2>
+        <h2 style={{ ...big, fontSize: '20px', marginTop: 4, marginBottom: 4 }}>{name}</h2>
+        {buyerType ? (
+          <div style={{ fontSize: 12, fontWeight: 400, color: MUTED, marginBottom: 8 }}>{buyerType}</div>
+        ) : null}
         <div style={{ fontSize: 13, color: MUTED, marginBottom: 16 }}>Terms · Net {terms}</div>
         <div style={{ ...card, marginBottom: 20 }}>
           <div style={lbl}>Balance owed</div>
@@ -357,7 +377,9 @@ export default function CloseoutExplosionPortal() {
             <button key={s.invoice} type="button" className="ce-stack-row ce-click" onClick={() => openLot(s.lotId)}>
               <div className="ce-stack-title">{fmtD(s.date)}</div>
               <div className="ce-stack-sub">{s.invoice} · {s.lotId}</div>
-              <div style={{ fontSize: 12, marginTop: 4 }}>{s.buyer}</div>
+              <div style={{ marginTop: 4 }}>
+                <BuyerLabel name={s.buyer} />
+              </div>
               <div style={{ fontFamily: MONO, fontSize: 12, marginTop: 8 }}>
                 {mode === 'sales' ? money(s.amount) : money(s.cost)}
               </div>
@@ -385,7 +407,9 @@ export default function CloseoutExplosionPortal() {
                   <td className="ce-td-left">{fmtD(s.date)}</td>
                   <td className="ce-td-left">{s.invoice}</td>
                   <td className="ce-td-left">{s.lotId}</td>
-                  <td className="ce-td-left">{s.buyer}</td>
+                  <td className="ce-td-left">
+                    <BuyerLabel name={s.buyer} />
+                  </td>
                   <td>{money(mode === 'sales' ? s.amount : s.cost)}</td>
                 </tr>
               ))}
@@ -626,7 +650,9 @@ export default function CloseoutExplosionPortal() {
                     fontSize: 13,
                   }}
                 >
-                  <span style={{ paddingRight: 8 }}>{b.name}</span>
+                  <span style={{ paddingRight: 8, minWidth: 0, flex: 1 }}>
+                    <BuyerLabel name={b.name} />
+                  </span>
                   <span style={{ fontFamily: MONO, flexShrink: 0 }}>{money(b.total)}</span>
                 </button>
               ))}
@@ -817,7 +843,9 @@ export default function CloseoutExplosionPortal() {
                 onClick={() => openBuyer(b.name)}
               >
                 <div className="ce-stack-head">
-                  <span className="ce-stack-title">{b.name}</span>
+                  <span className="ce-stack-title" style={{ minWidth: 0, flex: 1 }}>
+                    <BuyerLabel name={b.name} />
+                  </span>
                   <span style={{ fontFamily: MONO, fontSize: 12, flexShrink: 0 }}>{money(b.total)}</span>
                 </div>
                 <div className="ce-stack-grid ce-stack-grid-4">
@@ -856,7 +884,9 @@ export default function CloseoutExplosionPortal() {
             <tbody>
               {dash.buyerRows.map((b) => (
                 <tr key={b.name} className="ce-rowbtn" onClick={() => openBuyer(b.name)}>
-                  <td className="ce-td-left">{b.name}</td>
+                  <td className="ce-td-left">
+                    <BuyerLabel name={b.name} />
+                  </td>
                   <td>{b.count}</td>
                   <td>{money(b.bucket015)}</td>
                   <td>{money(b.bucket1630)}</td>

@@ -117,4 +117,8 @@ body{background:${theme.CREAM};font-family:${UI};color:${theme.INK};overflow-x:h
 .ce-kpi-lbl{padding-right:22px;line-height:1.3}
 @media(max-width:860px){.ce-shell{flex-direction:column}.ce-side{width:100%;max-width:100%;height:auto;position:static;padding:14px 12px 10px;overflow:hidden}.ce-nav--main{flex-direction:row;flex-wrap:nowrap;overflow-x:auto;overflow-y:hidden;gap:4px;padding:4px 2px 10px;-webkit-overflow-scrolling:touch;scrollbar-width:none;max-width:100%}.ce-nav--main::-webkit-scrollbar{display:none}.ce-navbtn{width:auto;flex:0 0 auto;min-width:0;padding:7px 8px;border-radius:2px;background:rgba(255,255,255,.07);font-size:10.5px;min-height:36px;white-space:nowrap;text-align:center;line-height:1.2}.ce-main{padding:18px 12px 52px;max-width:100%}}
 @media(max-width:480px){.ce-table-wrap{display:none!important}.ce-stack-only{display:block!important}.ce-navbtn{font-size:10px;padding:6px 7px}}
-@media(max-width:600px){input,select,textarea{font-size:16px!important}button{min-height:40px}}`
+@media(max-width:600px){input,select,textarea{font-size:16px!important}button{min-height:40px}}
+.ce-buyer-label{display:block;min-width:0}
+.ce-buyer-name{display:block;font-weight:600;font-size:13px;line-height:1.3;overflow:hidden;text-overflow:ellipsis}
+.ce-buyer-type{display:block;font-size:12px;font-weight:400;color:${MUTED};margin-top:2px;line-height:1.25}
+.ce-table.ce-compact .ce-buyer-type{display:none}`

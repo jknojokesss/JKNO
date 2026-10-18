@@ -244,7 +244,7 @@ function buildAskAnswers() {
     cash: `Business checking was ${fmt0(checking)} at Aug 31. August net change in cash was ${fmt0(cfAug.netChange)} (net cash from operations ${fmt0(opNet)}).`,
     mix: `In August, new tire sales were ${fmt0(newMix?.revenue || 0)} (${DATA.aug_tire_sales.new_tire_units} units). Used tires added ${fmt0(usedMix?.revenue || 0)} (${DATA.aug_tire_sales.used_tire_units} units). Service and repair was ${fmt0(svcMix?.revenue || 0)}.`,
     sizes: `Top size in August was ${lead.size} — ${lead.units} units and ${fmt0(lead.revenue)} revenue at about ${fmtC(leadAvg)} per tire.${sizesTail ? ` Next: ${sizesTail}.` : ''}`,
-    month: `${monthName} register through ${fmtDate(AS_OF).replace(/, \d{4}$/, '')} shows ${fmt0(sepSale)} in sales on ${sepOrders.length} tickets (estimates).`,
+    month: `${monthName} register shows ${fmt0(sepSale)} in sales on ${sepOrders.length} tickets (estimates).`,
   }
 }
 
@@ -1164,7 +1164,7 @@ function DashboardTab({ period, setPeriod, onOpenOrders, onOpenFinancials, onOpe
       >
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 10, flexWrap: 'wrap', marginBottom: 12 }}>
           <div style={{ fontFamily: head, fontSize: 13, fontWeight: 700, color: C.ink, letterSpacing: '0.06em', textTransform: 'uppercase' }}>
-            Open period · {monthName} · through {fmtDate(AS_OF).replace(/, \d{4}$/, '')}
+            Open period · {monthName} · in progress
           </div>
           <div style={{ display: 'flex', gap: 6 }} onClick={(e) => e.stopPropagation()} onKeyDown={(e) => e.stopPropagation()}>
             {ORDER_PERIODS.filter((p) => p.id !== 'all').map((p) => (

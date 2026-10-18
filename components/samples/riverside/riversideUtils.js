@@ -39,9 +39,8 @@ export const fmtDate = (iso) => {
 export const paren = (n) => (n < 0 ? `(${fmt0(-n)})` : fmt0(n))
 export const parenC = (n) => (n < 0 ? `(${fmtC(-n)})` : fmtC(n))
 
-export function TieMark({ ok }) {
-  if (!ok) return null
-  return <span style={{ color: C.green, fontSize: 11, marginLeft: 6 }}>✓</span>
+export function TieMark() {
+  return null
 }
 
 export const hcell = (align = 'left') => ({

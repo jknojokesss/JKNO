@@ -125,6 +125,7 @@ export function buildDashboard() {
     const total = b0 + b1 + b2
     return {
       name: b.name,
+      type: b.type,
       termsDays: b.termsDays,
       count: invs.length,
       bucket015: b0,

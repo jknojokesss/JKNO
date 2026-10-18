@@ -1,7 +1,7 @@
 {
   "meta": {
     "as_of": "2026-09-25",
-    "sample_header": "Sample — fictitious numbers · as of Sep 25, 2026",
+    "sample_header": "Sample — fictitious numbers · as of Oct 2026",
     "week_start": "2026-09-19"
   },
   "monthly": [
@@ -3180,7 +3180,7 @@
   "inventory_value_aug": 17767,
   "orders": [
     {
-      "date": "2026-09-25",
+      "date": "2026-09-24",
       "ticket": "C-89221",
       "item": "235/65R17 touring ×4",
       "qty": 4,
@@ -3192,7 +3192,7 @@
       "size": "235/65R17"
     },
     {
-      "date": "2026-09-25",
+      "date": "2026-09-24",
       "ticket": "C-89219",
       "item": "Oil change + rotation",
       "qty": 1,
@@ -3494,7 +3494,7 @@
       "cash": "Business checking was $45,200 at Aug 31. August net cash from operations was about $350 after draws.",
       "mix": "In August, new tire sales were $23,150 (184 units). Used tires added $3,900 (78 units). Service and repair was $8,200.",
       "sizes": "Top size in August was 235/65R17 — 44 units and $5,720 revenue at about $130 per tire.",
-      "month": "September register through Sep 25 shows $8,087 in sales on 25 tickets (estimates)."
+      "month": "September register shows $8,087 in sales on 25 tickets (estimates)."
     }
   },
   "aug_tire_sales": {
