@@ -222,9 +222,14 @@ function buildAskAnswers() {
   const newMix = mix.find((s) => s.name === 'New Tires')
   const usedMix = mix.find((s) => s.name === 'Used Tires')
   const svcMix = mix.find((s) => s.name === 'Service & Repair')
-  const topItems = DATA.sales_items_by_month?.[STOCK_AUG_ID] || DATA.sales_items_aug
-  const topItem = [...topItems].sort((a, b) => b.revenue - a.revenue)[0]
-  const avg = topItem?.units ? topItem.revenue / topItem.units : 0
+  const topSizes = DATA.top_tire_sizes_aug
+  const lead = topSizes[0]
+  const leadAvg = lead?.units ? lead.revenue / lead.units : 0
+  const sizeLine = (t) => {
+    const avgSale = t.units ? t.revenue / t.units : 0
+    return `${t.size} (${t.units} units, ${fmt0(t.revenue)}, ~${fmtC(avgSale)} per tire)`
+  }
+  const sizesTail = topSizes.slice(1, 3).map(sizeLine).join('; ')
   const sepOrders = ORDERS.filter((o) => o.date.slice(0, 7) === AS_OF.slice(0, 7) && o.date <= AS_OF)
   const sepSale = sumBy(sepOrders, 'sale')
   const monthName = MONTH_NAMES[Number(AS_OF.slice(5, 7)) - 1]
@@ -232,7 +237,7 @@ function buildAskAnswers() {
     best_month: `${monthYear(best)} was the strongest closed month at ${fmt0(best.profit)} net profit on ${fmt0(best.revenue)} revenue (${pct(bestMargin)} margin).`,
     cash: `Business checking was ${fmt0(checking)} at Aug 31. August net change in cash was ${fmt0(cfAug.netChange)} (net cash from operations ${fmt0(opNet)}).`,
     mix: `In August, new tire sales were ${fmt0(newMix?.revenue || 0)} (${DATA.aug_tire_sales.new_tire_units} units). Used tires added ${fmt0(usedMix?.revenue || 0)} (${DATA.aug_tire_sales.used_tire_units} units). Service and repair was ${fmt0(svcMix?.revenue || 0)}.`,
-    sizes: `Top size in August was ${topItem.item} — ${topItem.units} units and ${fmt0(topItem.revenue)} revenue at about ${fmtC(avg)} per tire.`,
+    sizes: `Top size in August was ${lead.size} — ${lead.units} units and ${fmt0(lead.revenue)} revenue at about ${fmtC(leadAvg)} per tire.${sizesTail ? ` Next: ${sizesTail}.` : ''}`,
     month: `${monthName} register through ${fmtDate(AS_OF).replace(/, \d{4}$/, '')} shows ${fmt0(sepSale)} in sales on ${sepOrders.length} tickets (estimates).`,
   }
 }
@@ -1380,28 +1385,37 @@ function SalesItemsTab({ seed }) {
               </>
             ) : null}
           </div>
-          <div className="rt-filters">
-            <input value={q} onChange={(e) => setQ(e.target.value)} placeholder="Search items" aria-label="Search items" style={{ ...selectStyle, flex: '1 1 160px', minWidth: 0 }} />
-            <span style={{ fontSize: 9, color: C.muted, letterSpacing: '0.12em' }}>SORT</span>
-            {[
-              ['revenue', 'Revenue'],
-              ['units', 'Units'],
-              ['avg', 'Avg sale'],
-            ].map(([id, label]) => (
-              <Pill
-                key={id}
-                on={sort === id}
-                onClick={() => {
-                  if (sort === id) setSortDir((d) => -d)
-                  else {
-                    setSort(id)
-                    setSortDir(-1)
-                  }
-                }}
-              >
-                {label}
-              </Pill>
-            ))}
+          <div className="rt-filter-stack">
+            <input
+              value={q}
+              onChange={(e) => setQ(e.target.value)}
+              placeholder="Search items"
+              aria-label="Search items"
+              className="rt-filter-search"
+              style={{ ...selectStyle, flex: '1 1 160px', minWidth: 0 }}
+            />
+            <div className="rt-filters rt-filters-chips">
+              <span style={{ fontSize: 9, color: C.muted, letterSpacing: '0.12em' }}>SORT</span>
+              {[
+                ['revenue', 'Revenue'],
+                ['units', 'Units'],
+                ['avg', 'Avg sale'],
+              ].map(([id, label]) => (
+                <Pill
+                  key={id}
+                  on={sort === id}
+                  onClick={() => {
+                    if (sort === id) setSortDir((d) => -d)
+                    else {
+                      setSort(id)
+                      setSortDir(-1)
+                    }
+                  }}
+                >
+                  {label}
+                </Pill>
+              ))}
+            </div>
           </div>
           <div style={{ background: C.card, border: `1px solid ${C.hair}`, overflow: 'auto' }}>
             <table style={{ width: '100%', borderCollapse: 'collapse', minWidth: compareOn ? 720 : 460 }}>
@@ -1613,62 +1627,67 @@ function OrdersTab({ initialPeriod }) {
         <Kpi label="Est. profit" value={fmt0(t.profit)} color={C.green} />
       </div>
 
-      <div className="rt-filters">
-        <div style={{ display: 'flex', gap: 6 }}>
-          {ORDER_PERIODS.map((p) => (
-            <Pill key={p.id} on={period === p.id} onClick={() => setPeriod(p.id)}>
-              {p.label}
-            </Pill>
-          ))}
-        </div>
+      <div className="rt-filter-stack">
         <input
           value={q}
           onChange={(e) => setQ(e.target.value)}
           placeholder="Search ticket or item"
           aria-label="Search orders"
+          className="rt-filter-search"
           style={{ ...selectStyle, minWidth: 200, flex: '1 1 200px' }}
         />
-        <select value={source} onChange={(e) => setSource(e.target.value)} aria-label="Filter by source" style={selectStyle}>
-          <option value="all">All sources</option>
-          {SOURCES.map((s) => (
-            <option key={s} value={s}>
-              {s}
-            </option>
-          ))}
-        </select>
-        <select value={size} onChange={(e) => setSize(e.target.value)} aria-label="Filter by size" style={selectStyle}>
-          <option value="all">All sizes</option>
-          {SIZES.map((s) => (
-            <option key={s} value={s}>
-              {s}
-            </option>
-          ))}
-        </select>
-        <Pill on={flaggedOnly} onClick={() => setFlaggedOnly((v) => !v)}>
-          Flagged
-        </Pill>
-        <Pill on={hideEst} onClick={() => setHideEst((v) => !v)}>
-          Hide est.
-        </Pill>
-        <span style={{ fontSize: 9, color: C.muted, letterSpacing: '0.12em' }}>SORT</span>
-        {[
-          ['date', 'Date'],
-          ['profit', 'Profit'],
-          ['margin', 'Margin'],
-          ['sale', 'Sale'],
-        ].map(([id, label]) => (
-          <Pill key={id} on={sortKey === id} onClick={() => toggleSort(id)}>
-            {label}
+        <div className="rt-filters-scroll">
+          <div className="rt-filters-period" style={{ display: 'flex', gap: 6 }}>
+            {ORDER_PERIODS.map((p) => (
+              <Pill key={p.id} on={period === p.id} onClick={() => setPeriod(p.id)}>
+                {p.label}
+              </Pill>
+            ))}
+          </div>
+          <div className="rt-filters rt-filters-chips">
+          <select value={source} onChange={(e) => setSource(e.target.value)} aria-label="Filter by source" style={selectStyle}>
+            <option value="all">All sources</option>
+            {SOURCES.map((s) => (
+              <option key={s} value={s}>
+                {s}
+              </option>
+            ))}
+          </select>
+          <select value={size} onChange={(e) => setSize(e.target.value)} aria-label="Filter by size" style={selectStyle}>
+            <option value="all">All sizes</option>
+            {SIZES.map((s) => (
+              <option key={s} value={s}>
+                {s}
+              </option>
+            ))}
+          </select>
+          <Pill on={flaggedOnly} onClick={() => setFlaggedOnly((v) => !v)}>
+            Flagged
           </Pill>
-        ))}
-        {filtered ? (
-          <button type="button" className="rt-linkbtn" onClick={reset}>
-            Clear
+          <Pill on={hideEst} onClick={() => setHideEst((v) => !v)}>
+            Hide est.
+          </Pill>
+          <span style={{ fontSize: 9, color: C.muted, letterSpacing: '0.12em' }}>SORT</span>
+          {[
+            ['date', 'Date'],
+            ['profit', 'Profit'],
+            ['margin', 'Margin'],
+            ['sale', 'Sale'],
+          ].map(([id, label]) => (
+            <Pill key={id} on={sortKey === id} onClick={() => toggleSort(id)}>
+              {label}
+            </Pill>
+          ))}
+          {filtered ? (
+            <button type="button" className="rt-linkbtn" onClick={reset}>
+              Clear
+            </button>
+          ) : null}
+          <button type="button" className="rt-pill" onClick={exportCsv} disabled={!rows.length}>
+            Export CSV
           </button>
-        ) : null}
-        <button type="button" className="rt-pill" style={{ marginLeft: 'auto' }} onClick={exportCsv} disabled={!rows.length}>
-          Export CSV
-        </button>
+          </div>
+        </div>
       </div>
 
       {rows.length === 0 ? (
@@ -1781,31 +1800,42 @@ function StockTab() {
         <Kpi label="Stock value" value={fmt0(value)} tie={invTie} />
         <Kpi label="Sizes" value={String(stockRowsFor(asOf).length)} />
       </div>
-      <div className="rt-filters">
-        <label style={{ display: 'flex', alignItems: 'center', gap: 8, fontFamily: ui, fontSize: 11, color: C.muted, letterSpacing: '0.1em', textTransform: 'uppercase' }}>
-          As of
-          <select value={asOf} onChange={(e) => setAsOf(e.target.value)} style={selectStyle} aria-label="Stock as of">
-            {STOCK_MONTH_IDS.map((id) => (
-              <option key={id} value={id}>
-                {stockSnapFor(id).label}
-              </option>
+      <div className="rt-filter-stack">
+        <input
+          value={q}
+          onChange={(e) => setQ(e.target.value)}
+          placeholder="Search stock"
+          aria-label="Search stock"
+          className="rt-filter-search"
+          style={{ ...selectStyle, flex: '1 1 140px', minWidth: 0 }}
+        />
+        <div className="rt-filters-scroll">
+          <label className="rt-filters-asof" style={{ display: 'flex', alignItems: 'center', gap: 8, fontFamily: ui, fontSize: 11, color: C.muted, letterSpacing: '0.1em', textTransform: 'uppercase', flexShrink: 0 }}>
+            As of
+            <select value={asOf} onChange={(e) => setAsOf(e.target.value)} style={selectStyle} aria-label="Stock as of">
+              {STOCK_MONTH_IDS.map((id) => (
+                <option key={id} value={id}>
+                  {stockSnapFor(id).label}
+                </option>
+              ))}
+              <option value={STOCK_LIVE_ID}>{stockSnapFor(STOCK_LIVE_ID).label}</option>
+            </select>
+          </label>
+          <div className="rt-filters rt-filters-chips">
+            {[
+              ['value', 'Value'],
+              ['onHand', 'On hand'],
+              ['size', 'Size'],
+            ].map(([id, label]) => (
+              <Pill key={id} on={sort === id} onClick={() => toggleStockSort(id)}>
+                {label}
+              </Pill>
             ))}
-            <option value={STOCK_LIVE_ID}>{stockSnapFor(STOCK_LIVE_ID).label}</option>
-          </select>
-        </label>
-        <input value={q} onChange={(e) => setQ(e.target.value)} placeholder="Search stock" aria-label="Search stock" style={{ ...selectStyle, flex: '1 1 140px', minWidth: 0 }} />
-        {[
-          ['value', 'Value'],
-          ['onHand', 'On hand'],
-          ['size', 'Size'],
-        ].map(([id, label]) => (
-          <Pill key={id} on={sort === id} onClick={() => toggleStockSort(id)}>
-            {label}
-          </Pill>
-        ))}
-        <button type="button" className="rt-pill" style={{ marginLeft: 'auto' }} onClick={exportCsv}>
-          Export CSV
-        </button>
+            <button type="button" className="rt-pill" onClick={exportCsv}>
+              Export CSV
+            </button>
+          </div>
+        </div>
       </div>
       <div style={{ background: C.card, border: `1px solid ${C.hair}`, overflow: 'auto' }}>
         <table style={{ width: '100%', borderCollapse: 'collapse', minWidth: 420 }}>
@@ -2016,6 +2046,12 @@ const PORTAL_CSS = `
   .rt-dash-metrics{display:flex;gap:12px;flex-wrap:wrap;margin-bottom:20px}
   .rt-metric-tile{background:${C.card};border:1px solid ${C.hair};padding:18px 20px;flex:1 1 120px;margin-bottom:0}
   .rt-kpi-row{display:flex;gap:12px;flex-wrap:wrap;margin-bottom:20px}
+  .rt-filter-stack{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin-bottom:14px;width:100%}
+  .rt-filter-stack .rt-filters-chips{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-bottom:0}
+  .rt-filters-scroll{display:contents}
+  .rt-filters-period,.rt-filters-asof{order:1}
+  .rt-filter-search{order:2;flex:1 1 200px;min-width:200px;max-width:100%}
+  .rt-filters-scroll .rt-filters-chips,.rt-filter-stack>.rt-filters-chips{order:3}
   .rt-content{padding:26px 30px 56px;max-width:1160px}
   .rt-mobilenav{display:none}
   .rt-order-cards,.rt-order-cards-total{display:none}
@@ -2114,11 +2150,18 @@ const PORTAL_CSS = `
     .rt-stmt{--cols:1fr 72px}
     .rt-stmt.cmp{--cols:1fr 64px 64px 56px}
     .rt-status{padding:8px 10px;flex-wrap:nowrap}
-    .rt-sample-line{font-size:8.5px;letter-spacing:0;white-space:nowrap;line-height:1.25;display:block;width:100%;overflow:hidden;text-overflow:clip;transform-origin:left center}
+    .rt-sample-line{font-family:${mono};font-size:10.5px;letter-spacing:0;white-space:nowrap;line-height:1.25;display:block;width:100%;overflow:hidden}
     .rt-content input,.rt-content select{font-size:16px!important}
-    .rt-mobilenav,.rt-embed .rt-mobilenav{display:grid!important;grid-template-columns:repeat(6,minmax(0,1fr));overflow-x:hidden;gap:1px;padding:5px 3px;scrollbar-width:none;-ms-overflow-style:none}
-    .rt-mobilenav::-webkit-scrollbar,.rt-embed .rt-mobilenav::-webkit-scrollbar{display:none}
-    .rt-mobilenav button,.rt-embed .rt-mobilenav button{flex:none;width:100%;min-width:0;font-size:8px;padding:5px 1px;letter-spacing:0;line-height:1.15;white-space:normal;text-align:center;display:flex;align-items:center;justify-content:center;min-height:34px;hyphens:auto;overflow-wrap:anywhere}
+    .rt-mobilenav,.rt-embed .rt-mobilenav{display:grid!important;grid-template-columns:repeat(3,minmax(0,1fr));grid-auto-rows:auto;overflow-x:hidden;gap:2px;padding:6px 4px}
+    .rt-mobilenav button,.rt-embed .rt-mobilenav button{flex:none;width:100%;min-width:0;font-family:${head};font-size:11px;font-weight:500;padding:8px 4px;letter-spacing:.04em;line-height:1.2;white-space:nowrap;text-align:center;display:flex;align-items:center;justify-content:center;min-height:36px;text-transform:uppercase;overflow:hidden;text-overflow:ellipsis}
+    .rt-filter-stack{flex-direction:column;align-items:stretch;gap:8px;margin-bottom:14px}
+    .rt-filter-search{order:-1;width:100%!important;min-width:0!important;flex:none!important;box-sizing:border-box}
+    .rt-filters-scroll{display:flex;flex-wrap:nowrap;overflow-x:auto;overflow-y:hidden;-webkit-overflow-scrolling:touch;scrollbar-width:none;-ms-overflow-style:none;max-width:100%;gap:6px;align-items:center;padding-bottom:2px}
+    .rt-filters-scroll::-webkit-scrollbar{display:none}
+    .rt-filters-scroll .rt-filters-period,.rt-filters-scroll .rt-filters-asof,.rt-filters-scroll .rt-filters-chips{flex-shrink:0;display:flex;flex-wrap:nowrap;gap:6px;align-items:center}
+    .rt-filters-scroll .rt-filters-chips{margin-bottom:0}
+    .rt-filter-stack>.rt-filters-chips{flex-wrap:nowrap;overflow-x:auto;overflow-y:hidden;-webkit-overflow-scrolling:touch;scrollbar-width:none;-ms-overflow-style:none;max-width:100%;padding-bottom:2px}
+    .rt-filter-stack>.rt-filters-chips::-webkit-scrollbar{display:none}
     .rt-scroll-row{flex-wrap:nowrap!important;overflow-x:auto;overflow-y:hidden;-webkit-overflow-scrolling:touch;scrollbar-width:none;-ms-overflow-style:none;max-width:100%;padding-bottom:2px}
     .rt-scroll-row::-webkit-scrollbar{display:none}
     .rt-filters.rt-scroll-row{align-items:stretch;gap:6px;margin-left:0;margin-right:0}
@@ -2129,10 +2172,7 @@ const PORTAL_CSS = `
     .rt-fin-pills:not(.rt-scroll-row){flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none;-ms-overflow-style:none;max-width:100%}
     .rt-fin-pills:not(.rt-scroll-row)::-webkit-scrollbar{display:none}
     .rt-fin-pills:not(.rt-scroll-row) .rt-pill,.rt-fin-pills:not(.rt-scroll-row) .rt-compare-toggle{flex-shrink:0}
-    .rt-filters{flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none;-ms-overflow-style:none;max-width:100%}
-    .rt-filters::-webkit-scrollbar{display:none}
-    .rt-filters>*{flex-shrink:0}
-    .rt-filters .rt-pill[style*="marginLeft"]{margin-left:0!important}
+    .rt-fin-pills{flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none;-ms-overflow-style:none;max-width:100%}
     .rt-open-period-card{padding:12px 10px!important;margin-bottom:18px!important}
     .rt-section-card{padding:12px 10px!important;margin-bottom:0!important}
     .rt-reg-kpis{display:grid!important;grid-template-columns:1fr 1fr;gap:0;border-top:1px solid ${C.line}}
@@ -2154,6 +2194,9 @@ const PORTAL_CSS = `
     .rt-order-card{padding:12px 10px;border:none;border-bottom:1px solid ${C.hair};background:transparent}
     .rt-order-cards{gap:0;border:1px solid ${C.hair};background:${C.card}}
     .rt-chartrow .rt-section-card{border:none;background:${C.card}}
+  }
+  @media(max-width:369px){
+    .rt-sample-line{font-size:10px}
   }
 `
 
