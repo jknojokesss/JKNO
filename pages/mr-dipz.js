@@ -6,8 +6,8 @@ export default function MrDipzPage() {
     <>
       <Head>
         <title>Mr. Dipz — owner portal (sample)</title>
-        <meta name="robots" content="noindex, nofollow" />
-        <meta name="description" content="Sample owner portal for Mr. Dipz refrigerated kosher dips." />
+        <meta name="robots" content="noindex" />
+        <meta name="description" content="Sample owner portal for Mr. Dipz: sales, expired-product credits and balances by store." />
         <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
         <meta name="theme-color" content="#2B2018" />
         <link

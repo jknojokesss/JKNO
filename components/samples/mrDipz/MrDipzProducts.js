@@ -1,38 +1,63 @@
-import { BORDER, INK, MUTED, MONO, KRAFT, money } from './mrDipzUtils'
+import { money, pct1, pctOf, fmtInt } from './mrDipzUtils'
+import { Card, MdTable } from './MrDipzKit'
 
-export default function MrDipzProducts({ model, card, lbl, onProductClick }) {
-  const max = model.products[0]?.sepSales || 1
+const GROUPS = [
+  ['Dip', 'Dips'],
+  ['Dressing', 'Dressings'],
+]
+
+const cellsFor = (r) => [
+  fmtInt(r.units),
+  money(r.sales),
+  fmtInt(r.expUnits),
+  money(r.credits),
+  pct1(pctOf(r.credits, r.sales)),
+  money(r.sales - r.credits),
+]
+
+const add = (list) =>
+  list.reduce(
+    (a, p) => ({
+      units: a.units + p.units,
+      sales: a.sales + p.sales,
+      expUnits: a.expUnits + p.expUnits,
+      credits: a.credits + p.credits,
+    }),
+    { units: 0, sales: 0, expUnits: 0, credits: 0 },
+  )
+
+export default function MrDipzProducts({ model, open }) {
+  const rows = []
+  GROUPS.forEach(([type, label]) => {
+    const list = model.products.filter((p) => p.type === type)
+    rows.push({
+      key: `sub-${type}`,
+      kind: 'group',
+      name: label,
+      cells: cellsFor(add(list)),
+      onClick: () => open({ type: 'productGroup', id: type }),
+    })
+    list.forEach((p) => {
+      rows.push({
+        key: p.id,
+        indent: true,
+        name: p.name,
+        cells: cellsFor(p),
+        onClick: () => open({ type: 'product', id: p.id }),
+      })
+    })
+  })
+  rows.push({
+    key: 'total',
+    kind: 'total',
+    name: 'Total',
+    cells: cellsFor(model.totals),
+    onClick: () => open({ type: 'pnl', id: 'gross' }),
+  })
 
   return (
-    <div style={card}>
-      <div style={{ ...lbl, marginBottom: 14 }}>Products — September</div>
-      {model.products.map((p, i) => (
-        <button
-          key={p.id}
-          type="button"
-          className="md-click"
-          onClick={() => onProductClick(p)}
-          style={{
-            display: 'block',
-            width: '100%',
-            textAlign: 'left',
-            border: 'none',
-            background: 'transparent',
-            padding: '12px 0',
-            borderTop: i ? `1px solid ${BORDER}` : 'none',
-            cursor: 'pointer',
-          }}
-        >
-          <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 6 }}>
-            <span style={{ fontWeight: 600, color: INK }}>{p.label}</span>
-            <span style={{ fontFamily: MONO }}>{money(p.sepSales)}</span>
-          </div>
-          <div style={{ height: 6, background: '#F6F0E6', borderRadius: 2 }}>
-            <div style={{ width: `${Math.round((p.sepSales / max) * 100)}%`, height: '100%', background: KRAFT }} />
-          </div>
-          <div style={{ fontSize: 11, color: MUTED, marginTop: 4 }}>Credits {money(p.sepCredits)}</div>
-        </button>
-      ))}
-    </div>
+    <Card title="Products · September">
+      <MdTable columns={['Product', 'Units', 'Sales', 'Expired', 'Credits', 'Credit %', 'Net']} rows={rows} />
+    </Card>
   )
 }
