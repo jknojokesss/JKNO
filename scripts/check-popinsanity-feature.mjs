@@ -104,6 +104,29 @@ const octDepositsDue = sum(
 )
 ok('oct cash calendar has deposit lines', octDepositsDue > 0)
 
+const asOfSrc = fs.readFileSync(path.join(root, 'components/samples/popinsanity/popinsanityComputed.js'), 'utf8')
+ok('as-of Oct 15 2026', /AS_OF_ISO = '2026-10-15'/.test(asOfSrc))
+
+const DEPOSIT_INVOICE_STAGES = new Set(['quote', 'deposit_invoiced'])
+const BALANCE_INVOICE_STAGES = new Set(['deposit_paid', 'shipping', 'balance_invoiced'])
+function stackInvoiceView(payload) {
+  const { orderId, kind: invoiceKind } = payload
+  return { kind: 'invoicePreview', orderId, invoiceKind }
+}
+for (const o of orders) {
+  const depBtn = DEPOSIT_INVOICE_STAGES.has(o.stage)
+  const balBtn = BALANCE_INVOICE_STAGES.has(o.stage)
+  ok(`${o.id} invoice buttons`, depBtn || balBtn)
+  if (depBtn) {
+    const v = stackInvoiceView({ orderId: o.id, kind: 'deposit' })
+    ok(`${o.id} preview stack deposit`, v.kind === 'invoicePreview' && v.invoiceKind === 'deposit')
+  }
+  if (balBtn) {
+    const v = stackInvoiceView({ orderId: o.id, kind: 'balance' })
+    ok(`${o.id} preview stack balance`, v.kind === 'invoicePreview' && v.invoiceKind === 'balance')
+  }
+}
+
 if (failures.length) {
   console.error('FAIL', failures)
   process.exit(1)

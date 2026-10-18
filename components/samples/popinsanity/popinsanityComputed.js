@@ -108,7 +108,7 @@ export function recipientShippedCounts(order) {
   return { shipped, total: list.length }
 }
 
-export const AS_OF_ISO = '2026-10-18'
+export const AS_OF_ISO = '2026-10-15'
 
 export function daysToTarget(shipDateIso) {
   if (!shipDateIso) return null

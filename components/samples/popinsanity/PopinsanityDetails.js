@@ -15,6 +15,7 @@ import {
   recipientShippedCounts,
   daysToTarget,
   holidayTotals,
+  AS_OF_ISO,
 } from './popinsanityComputed'
 import { DetailShell, RowLine, ClickRow } from './PopinsanityShared'
 import { CompareSheet } from './PopinsanityCompareSheet'
@@ -184,9 +185,7 @@ export function InvoicePreviewDetail({ orderId, kind, onClose, card, big, lbl })
   const o = DATA.holiday_orders.find((x) => x.id === orderId)
   if (!o) return null
   const isDeposit = kind === 'deposit'
-  const lineAmount = isDeposit ? o.deposit_amount : o.balance_due
-  const lineLabel = isDeposit ? 'Deposit' : 'Balance'
-  const invoiceDate = '2026-10-18'
+  const invoiceTotal = isDeposit ? o.deposit_amount : o.balance_due
   return (
     <div>
       <button type="button" className="pop-back" onClick={onClose}>
@@ -197,12 +196,15 @@ export function InvoicePreviewDetail({ orderId, kind, onClose, card, big, lbl })
           {isDeposit ? 'Deposit invoice preview' : 'Balance invoice preview'}
         </div>
         <RowLine l="Bill to" v={o.client} mono={false} />
-        <RowLine l="Invoice date" v={fmtD(invoiceDate)} mono={false} />
+        <RowLine l="Invoice date" v={fmtD(AS_OF_ISO)} mono={false} />
         <RowLine l="Order" v={o.id} mono={false} />
         <div style={{ marginTop: 12, ...lbl, marginBottom: 8 }}>Line items</div>
-        <RowLine l={`${fmtInt(o.units)} tins @ ${money(o.price)}`} v={money(o.order_total)} mono={false} />
-        <RowLine l={lineLabel} v={money(lineAmount)} mono={false} />
-        <RowLine l="Invoice total" v={money(lineAmount)} bold mono={false} />
+        <RowLine l={`${fmtInt(o.units)} tins × ${money(o.price)}`} v={money(o.order_total)} mono={false} />
+        {!isDeposit && o.deposit_received > 0 ? (
+          <RowLine l="Less deposit paid" v={money(-o.deposit_received)} mono={false} />
+        ) : null}
+        <RowLine l={isDeposit ? 'Deposit' : 'Balance'} v={money(invoiceTotal)} mono={false} />
+        <RowLine l="Invoice total" v={money(invoiceTotal)} bold mono={false} />
         <div style={{ marginTop: 14, fontSize: 13, color: MUTED }}>Goes into QuickBooks as an invoice</div>
       </div>
     </div>

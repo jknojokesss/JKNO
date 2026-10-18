@@ -1,5 +1,5 @@
 import { useState, useCallback } from 'react'
-import SampleJkLogoLink from '../SampleJkLogoLink'
+import PopinsanityJkCredit from './PopinsanityJkCredit'
 import { DATA } from './popinsanityComputed'
 import {
   SPICE,
@@ -71,7 +71,10 @@ export default function PopinsanityPortal() {
   const openStoresList = useCallback(() => push({ kind: 'storesList' }), [push])
   const openInvoiceList = useCallback((filter, title) => push({ kind: 'storeInvoices', filter, title }), [push])
   const openHolidayOverview = useCallback((focus) => push({ kind: 'holidayOverview', focus }), [push])
-  const openInvoicePreview = useCallback((payload) => push({ kind: 'invoicePreview', ...payload }), [push])
+  const openInvoicePreview = useCallback(
+    ({ orderId, kind: invoiceKind }) => push({ kind: 'invoicePreview', orderId, invoiceKind }),
+    [push],
+  )
 
   const top = stack[stack.length - 1]
 
@@ -97,7 +100,7 @@ export default function PopinsanityPortal() {
         return wrap(
           <InvoicePreviewDetail
             orderId={top.orderId}
-            kind={top.kind}
+            kind={top.invoiceKind}
             onClose={back}
             card={styles.card}
             big={styles.big}
@@ -234,7 +237,7 @@ export default function PopinsanityPortal() {
   return (
     <>
       <style dangerouslySetInnerHTML={{ __html: portalStyles }} />
-      <SampleJkLogoLink />
+      <PopinsanityJkCredit />
       <div className="pop-shell">
         <aside className="pop-side">
           <div style={{ padding: '2px 8px 16px' }}>
