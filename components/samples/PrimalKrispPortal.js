@@ -369,6 +369,7 @@ export default function PrimalKrispPortal() {
     setTab('overview')
     setOverviewDetail(null)
     setReorderFocus(false)
+    if (typeof window !== 'undefined') window.scrollTo({ top: 0, behavior: 'smooth' })
   }
   const goStoresFilter = (filter) => {
     setTab('stores')
@@ -502,7 +503,25 @@ export default function PrimalKrispPortal() {
 
         <main className="pk-main">
           <div style={{ marginBottom: '22px' }}>
-            <div style={{ ...lbl, color: SPICE }}>{BIZ}</div>
+            <button
+              type="button"
+              aria-label="Go to Overview"
+              onClick={goOverviewHome}
+              style={{
+                ...lbl,
+                color: SPICE,
+                border: 'none',
+                background: 'transparent',
+                padding: 0,
+                margin: 0,
+                cursor: 'pointer',
+                textAlign: 'left',
+                display: 'block',
+                font: 'inherit',
+              }}
+            >
+              {BIZ}
+            </button>
             <h1 style={{ ...big, fontSize: '28px', color: INK, letterSpacing: '0.3px', lineHeight: 1.1, marginTop: '4px' }}>{currentLabel}</h1>
             <div style={{ fontSize: '12px', color: MUTED, marginTop: '6px' }}>{sampleHeader}</div>
           </div>

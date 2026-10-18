@@ -2,6 +2,11 @@ import { useState, useMemo, useEffect } from 'react'
 import DATA from '../../data/primal-krisp.json'
 import PrimalKrispListControls from './primal-krisp/PrimalKrispListControls'
 import {
+  buildDrillTransactions,
+  isExpandedDrillKey,
+  lineAmountForLedgerKey,
+} from './primal-krisp/primalKrispPnlDrill'
+import {
   SPICE,
   CHAR,
   CREAM,
@@ -57,10 +62,12 @@ export default function PrimalKrispFinancials({ card, lbl, big, btn, inp, KPI })
   const [pnlDrill, setPnlDrill] = useState(null)
   const [drillSort, setDrillSort] = useState({ key: 'date', dir: 'desc' })
   const [drillSearch, setDrillSearch] = useState('')
+  const [pnlTxnDetail, setPnlTxnDetail] = useState(null)
 
   useEffect(() => {
     setDrillSort({ key: 'date', dir: 'desc' })
     setDrillSearch('')
+    setPnlTxnDetail(null)
   }, [pnlDrill])
 
   const cur = months[pnlMonthIdx]
@@ -68,12 +75,20 @@ export default function PrimalKrispFinancials({ card, lbl, big, btn, inp, KPI })
   const pnlMonthShort = (period) => (period ? String(period).split(' ')[0] : '')
 
   const openDrill = (title, ledgerKey, total) => {
-    const rows = cur?.drill_ledgers?.[ledgerKey] || []
-    setPnlDrill({ title, rows, total, period: cur?.period })
+    const lineTotal = lineAmountForLedgerKey(cur, ledgerKey) ?? total
+    const rows = isExpandedDrillKey(ledgerKey)
+      ? buildDrillTransactions(cur.month, ledgerKey, lineTotal)
+      : cur?.drill_ledgers?.[ledgerKey] || []
+    setPnlDrill({ title, rows, total: lineTotal, period: cur?.period, ledgerKey })
+    setPnlTxnDetail(null)
   }
 
   const PnlLine = ({ label, amount, priorAmount, ledgerKey, indent, bold, subtotal, cost }) => {
-    const drillable = ledgerKey && cur?.drill_ledgers?.[ledgerKey]?.length
+    const drillable =
+      ledgerKey &&
+      (isExpandedDrillKey(ledgerKey)
+        ? (lineAmountForLedgerKey(cur, ledgerKey) ?? amount) > 0
+        : Boolean(cur?.drill_ledgers?.[ledgerKey]?.length))
     const prior = priorAmount
     const delta = prior != null ? amount - prior : null
     const show = cost ? -amount : amount
@@ -157,11 +172,17 @@ export default function PrimalKrispFinancials({ card, lbl, big, btn, inp, KPI })
     let rows = [...pnlDrill.rows]
     const q = drillSearch.trim().toLowerCase()
     if (q) {
-      rows = rows.filter((r) => `${r.description} ${r.date} ${r.amount}`.toLowerCase().includes(q))
+      rows = rows.filter((r) =>
+        `${r.description} ${r.date} ${r.sortDate || ''} ${r.amount}`.toLowerCase().includes(q),
+      )
     }
     const dir = drillSort.dir === 'asc' ? 1 : -1
     rows.sort((a, b) => {
-      if (drillSort.key === 'date') return String(a.date).localeCompare(String(b.date)) * dir
+      if (drillSort.key === 'date') {
+        const da = a.sortDate || a.date
+        const db = b.sortDate || b.date
+        return String(da).localeCompare(String(db)) * dir
+      }
       return (a.amount - b.amount) * dir
     })
     return rows
@@ -245,10 +266,13 @@ export default function PrimalKrispFinancials({ card, lbl, big, btn, inp, KPI })
             style={{ background: CARDBG, borderRadius: 2, maxWidth: 640, width: '100%', padding: 20, boxShadow: '0 12px 44px rgba(0,0,0,.28)' }}
           >
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', gap: 10 }}>
-              <div style={{ ...big, fontSize: 17 }}>{pnlDrill.title}</div>
+              <div style={{ ...big, fontSize: 17 }}>{pnlTxnDetail ? pnlTxnDetail.description : pnlDrill.title}</div>
               <button
                 type="button"
-                onClick={() => setPnlDrill(null)}
+                onClick={() => {
+                  setPnlDrill(null)
+                  setPnlTxnDetail(null)
+                }}
                 style={{
                   background: 'none',
                   border: `1px solid ${BORDER}`,
@@ -264,33 +288,91 @@ export default function PrimalKrispFinancials({ card, lbl, big, btn, inp, KPI })
                 Close
               </button>
             </div>
-            <div style={{ fontSize: 12, color: MUTED, margin: '6px 0 12px', display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
-              <span>{pnlDrill.period}</span>
-              <span style={{ fontFamily: MONO, color: INK }}>{money0(pnlDrill.total)}</span>
-              <TieMark expected={pnlDrill.total} actual={pnlDrill.rows.reduce((s, r) => s + r.amount, 0)} />
-            </div>
-            <PrimalKrispListControls
-              sortOptions={[
-                { key: 'date', labels: { desc: 'Date (newest)', asc: 'Date (oldest)' } },
-                { key: 'amount', labels: { desc: 'Amount (largest)', asc: 'Amount (smallest)' } },
-              ]}
-              sort={drillSort}
-              onSortChange={setDrillSort}
-              search={drillSearch}
-              onSearchChange={setDrillSearch}
-              rowCount={pnlDrill.rows.length}
-            />
-            <div style={{ maxHeight: '62vh', overflowY: 'auto' }}>
-              {drillRows.map((r, i) => (
-                <div key={i} style={{ display: 'flex', justifyContent: 'space-between', gap: 12, padding: '8px 0', borderTop: i ? `1px solid ${BORDER}` : 'none' }}>
-                  <div style={{ minWidth: 0 }}>
-                    <div style={{ fontSize: 13, color: INK }}>{r.description}</div>
-                    <div style={{ fontSize: 11, color: MUTED, marginTop: 1, fontFamily: MONO }}>{r.date}</div>
-                  </div>
-                  <div style={{ fontFamily: MONO, fontSize: 13, whiteSpace: 'nowrap' }}>{money(r.amount)}</div>
+            {pnlTxnDetail ? (
+              <>
+                <div style={{ display: 'flex', gap: 8, marginBottom: 14 }}>
+                  <button
+                    type="button"
+                    className="pk-click"
+                    onClick={() => setPnlTxnDetail(null)}
+                    style={{
+                      border: `1px solid ${BORDER}`,
+                      background: 'transparent',
+                      padding: '8px 12px',
+                      fontFamily: UI,
+                      fontWeight: 600,
+                      fontSize: 13,
+                      cursor: 'pointer',
+                    }}
+                  >
+                    Back
+                  </button>
                 </div>
-              ))}
-            </div>
+                <div style={{ border: `1px solid ${BORDER}`, borderRadius: 2, padding: '4px 14px' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', gap: 12, padding: '10px 0', fontSize: 13 }}>
+                    <span style={{ color: MUTED }}>Date</span>
+                    <span style={{ fontFamily: MONO, color: INK }}>{pnlTxnDetail.date}</span>
+                  </div>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', gap: 12, padding: '10px 0', borderTop: `1px solid ${BORDER}`, fontSize: 13 }}>
+                    <span style={{ color: MUTED }}>Amount</span>
+                    <span style={{ fontFamily: MONO, fontWeight: 700, color: INK }}>{money(pnlTxnDetail.amount)}</span>
+                  </div>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', gap: 12, padding: '10px 0', borderTop: `1px solid ${BORDER}`, fontSize: 13 }}>
+                    <span style={{ color: MUTED }}>Account</span>
+                    <span style={{ color: INK, textAlign: 'right' }}>{pnlDrill.title}</span>
+                  </div>
+                  <div style={{ padding: '10px 0', borderTop: `1px solid ${BORDER}`, fontSize: 12, color: MUTED }}>{pnlDrill.period}</div>
+                </div>
+              </>
+            ) : (
+              <>
+                <div style={{ fontSize: 12, color: MUTED, margin: '6px 0 12px', display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
+                  <span>{pnlDrill.period}</span>
+                  <span style={{ fontFamily: MONO, color: INK }}>{money0(pnlDrill.total)}</span>
+                  <TieMark expected={pnlDrill.total} actual={pnlDrill.rows.reduce((s, r) => s + r.amount, 0)} />
+                </div>
+                <PrimalKrispListControls
+                  sortOptions={[
+                    { key: 'date', labels: { desc: 'Date (newest)', asc: 'Date (oldest)' } },
+                    { key: 'amount', labels: { desc: 'Amount (largest)', asc: 'Amount (smallest)' } },
+                  ]}
+                  sort={drillSort}
+                  onSortChange={setDrillSort}
+                  search={drillSearch}
+                  onSearchChange={setDrillSearch}
+                  rowCount={pnlDrill.rows.length}
+                />
+                <div style={{ maxHeight: '62vh', overflowY: 'auto' }}>
+                  {drillRows.map((r, i) => (
+                    <button
+                      key={r.id || `${r.date}-${r.description}`}
+                      type="button"
+                      className="pk-click"
+                      onClick={() => setPnlTxnDetail(r)}
+                      style={{
+                        display: 'flex',
+                        justifyContent: 'space-between',
+                        gap: 12,
+                        width: '100%',
+                        padding: '8px 0',
+                        border: 'none',
+                        borderTop: i ? `1px solid ${BORDER}` : 'none',
+                        background: 'transparent',
+                        cursor: 'pointer',
+                        textAlign: 'left',
+                        font: 'inherit',
+                      }}
+                    >
+                      <div style={{ minWidth: 0 }}>
+                        <div style={{ fontSize: 13, color: INK }}>{r.description}</div>
+                        <div style={{ fontSize: 11, color: MUTED, marginTop: 1, fontFamily: MONO }}>{r.date}</div>
+                      </div>
+                      <div style={{ fontFamily: MONO, fontSize: 13, whiteSpace: 'nowrap', color: INK }}>{money(r.amount)}</div>
+                    </button>
+                  ))}
+                </div>
+              </>
+            )}
           </div>
         </div>
       )}

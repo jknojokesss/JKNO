@@ -8,6 +8,11 @@ import { fileURLToPath } from 'url'
 
 const GLYPH_RE = /[✓✔↓↑▲▼▶]/
 import {
+  buildDrillTransactions,
+  isExpandedDrillKey,
+  lineAmountForLedgerKey,
+} from '../components/samples/primal-krisp/primalKrispPnlDrill.js'
+import {
   getDueToReorderStores,
   daysBetween,
   lineItemsTotal,
@@ -93,6 +98,22 @@ ok('sidebar stretch desktop only', /@media\(min-width:861px\)[^}]*align-self:str
 ok('phone nav no viewport min-height', /@media\(max-width:860px\)[\s\S]*\.pk-side\{[^}]*min-height:0/.test(utilsSrc))
 ok('phone nav compact pills', /\.pk-nav--phone-grid \.pk-navbtn\{[^}]*min-height:36px/.test(utilsSrc))
 ok('logo goes overview', /goOverviewHome/.test(portalSrc) && /onClick=\{goOverviewHome\}/.test(portalSrc))
+ok('eyebrow goes overview', /aria-label="Go to Overview"/.test(portalSrc) && /onClick=\{goOverviewHome\}/.test(portalSrc.split('pk-main')[1] || portalSrc))
+
+for (const m of DATA.pnl_by_month || []) {
+  for (const key of Object.keys(m.drill_ledgers || {})) {
+    if (!isExpandedDrillKey(key)) continue
+    const total = lineAmountForLedgerKey(m, key)
+    const rows = buildDrillTransactions(m.month, key, total)
+    const sum = round2(rows.reduce((s, r) => s + r.amount, 0))
+    ok(`pnl drill sum ${m.month} ${key}`, sum === round2(total))
+    ok(`pnl drill rows ${m.month} ${key}`, rows.length >= 5 && rows.length <= 15)
+    ok(
+      `pnl drill dates plain ${m.month} ${key}`,
+      rows.every((r) => r.date && !/^\d{4}-\d{2}-\d{2}$/.test(r.date)),
+    )
+  }
+}
 const pageSrc = fs.readFileSync(path.join(root, 'pages/primal-krisp.js'), 'utf8')
 ok('og:image primal-krisp', /property="og:image"/.test(pageSrc) && /samples\/primal-krisp\/og-image\.png/.test(pageSrc))
 ok('og image file', fs.existsSync(path.join(root, 'public/samples/primal-krisp/og-image.png')))
