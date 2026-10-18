@@ -170,6 +170,9 @@ ok('All time units = item rollup', allStats.unitsSold === allUnits)
 ok('All time units need thousands sep', allStats.unitsSold >= 1000 && fmtInt(allStats.unitsSold).includes(','))
 ok('All time item revenue ties stats revenue', Math.abs(allItemRev - allStats.revenue) < 0.02)
 ok('portal label Overview not Dashboard', !/label:\s*'Dashboard'/.test(portalSrc))
+ok('no Ask tab in NAV', !/label:\s*'Ask'/.test(utilsSrc))
+ok('no Ask tab UI', !/AskTab|tab === 'ai'|buildAskAnswers/.test(portalSrc))
+ok('no ask data key', !data.ask)
 
 const samplePaths = [
   path.join(root, '../data/riverside-tires.json'),

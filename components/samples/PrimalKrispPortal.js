@@ -29,7 +29,6 @@ import {
   fmtD,
   fmtInt,
   TieMark,
-  verdictPromo,
 } from './primalKrispUtils'
 import {
   SubscriberLineChart,
@@ -643,7 +642,6 @@ export default function PrimalKrispPortal() {
                         ['Orders', 'orders', 'right'],
                         ['Revenue', 'revenue', 'right'],
                         ['Return / $1', 'return_per_dollar', 'right'],
-                        ['', null, 'right'],
                       ].map(([h, key, align]) => (
                         <th key={h || 'act'} style={{ ...lbl, textAlign: align, padding: '8px 6px' }}>
                           {key ? (
@@ -687,9 +685,7 @@ export default function PrimalKrispPortal() {
                         if (typeof va === 'string') return va.localeCompare(vb) * dir
                         return (va - vb) * dir
                       })
-                      .map((p) => {
-                      const vd = verdictPromo(p.return_per_dollar)
-                      return (
+                      .map((p) => (
                         <tr
                           key={p.code}
                           className="pk-click"
@@ -704,14 +700,8 @@ export default function PrimalKrispPortal() {
                           <td style={{ padding: '10px 6px', textAlign: 'right', fontFamily: MONO }}>{fmtInt(p.orders)}</td>
                           <td style={{ padding: '10px 6px', textAlign: 'right', fontFamily: MONO }}>{money(p.revenue)}</td>
                           <td style={{ padding: '10px 6px', textAlign: 'right', fontFamily: MONO }}>{p.return_per_dollar.toFixed(1)}</td>
-                          <td style={{ padding: '10px 6px', textAlign: 'right' }}>
-                            <span style={{ fontSize: '11px', fontWeight: 600, color: '#fff', background: vd.c, padding: '4px 10px', borderRadius: '16px' }}>
-                              {p.call || vd.t}
-                            </span>
-                          </td>
                         </tr>
-                      )
-                    })}
+                      ))}
                   </tbody>
                 </table>
               </div>

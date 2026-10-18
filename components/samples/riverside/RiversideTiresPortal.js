@@ -238,38 +238,6 @@ function buildPL(keys) {
   return out
 }
 
-function buildAskAnswers() {
-  const best = MONTHS.reduce((b, m) => (m.profit > b.profit ? m : b), MONTHS[0])
-  const bestMargin = (best.profit / best.revenue) * 100
-  const bsClosed = DATA.balance_sheet[STOCK_AUG_ID]
-  const checking = bsClosed.assets.find((a) => a.label === 'Business checking')?.amount
-  const cfClosed = DATA.cash_flow[STOCK_AUG_ID]
-  const opNet = sumBy(cfClosed.operating)
-  const mix = closedSalesMix()
-  const newMix = mix.find((s) => s.name === 'New Tires')
-  const usedMix = mix.find((s) => s.name === 'Used Tires')
-  const svcMix = mix.find((s) => s.name === 'Service & Repair')
-  const topSizes = closedTopSizes()
-  const tireSales = closedTireSales()
-  const lead = topSizes[0]
-  const leadAvg = lead?.units ? lead.revenue / lead.units : 0
-  const sizeLine = (t) => {
-    const avgSale = t.units ? t.revenue / t.units : 0
-    return `${t.size} (${fmtInt(t.units)} units, ${fmt0(t.revenue)}, ~${fmtC(avgSale)} per tire)`
-  }
-  const sizesTail = topSizes.slice(1, 3).map(sizeLine).join('; ')
-  const sepOrders = ORDERS.filter((o) => o.date.slice(0, 7) === AS_OF.slice(0, 7) && o.date <= AS_OF)
-  const sepSale = sumBy(sepOrders, 'sale')
-  const monthName = MONTH_NAMES[Number(AS_OF.slice(5, 7)) - 1]
-  return {
-    best_month: `${monthYear(best)} was the strongest closed month at ${fmt0(best.profit)} net profit on ${fmt0(best.revenue)} revenue (${pct(bestMargin)} margin).`,
-    cash: `Business checking was ${fmt0(checking)} at ${monthShort(LAST_CLOSED.label)} 30. ${monthYear(LAST_CLOSED)} net change in cash was ${fmt0(cfClosed.netChange)} (net cash from operations ${fmt0(opNet)}).`,
-    mix: `In ${monthYear(LAST_CLOSED)}, new tire sales were ${fmt0(newMix?.revenue || 0)} (${fmtInt(tireSales.new_tire_units)} units). Used tires added ${fmt0(usedMix?.revenue || 0)} (${fmtInt(tireSales.used_tire_units)} units). Service and repair was ${fmt0(svcMix?.revenue || 0)}.`,
-    sizes: `Top size in ${monthYear(LAST_CLOSED)} was ${lead.size} — ${fmtInt(lead.units)} units and ${fmt0(lead.revenue)} revenue at about ${fmtC(leadAvg)} per tire.${sizesTail ? ` Next: ${sizesTail}.` : ''}`,
-    month: `${monthName} register shows ${fmt0(sepSale)} in sales on ${fmtInt(sepOrders.length)} tickets (estimates).`,
-  }
-}
-
 const downloadCsv = (filename, rows) => {
   const esc = (v) => {
     const s = String(v ?? '')
@@ -2241,90 +2209,6 @@ function StockTab({ setMetricDetail }) {
   )
 }
 
-/* ---------- Ask ---------- */
-
-const ASK_KEYS = ['best_month', 'cash', 'mix', 'sizes', 'month']
-const ASK_FALLBACK =
-  'I can answer questions about your best month, cash, sales mix, top tire sizes, and how this month is going. Try one of the suggestions above.'
-
-function pickAnswerKey(text) {
-  const q = text.toLowerCase()
-  if (/this month|going|september|so far|register/.test(q)) return 'month'
-  if (/best|strongest|top month|record/.test(q)) return 'best_month'
-  if (/cash|bank|checking|balance/.test(q)) return 'cash'
-  if (/driving|mix|service|repair|used/.test(q)) return 'mix'
-  if (/size|sell|popular|units/.test(q)) return 'sizes'
-  return null
-}
-
-function AskTab() {
-  const [messages, setMessages] = useState([])
-  const [input, setInput] = useState('')
-  const endRef = useRef(null)
-
-  useEffect(() => {
-    if (messages.length) endRef.current?.scrollIntoView({ block: 'nearest', behavior: 'smooth' })
-  }, [messages])
-
-  const send = (text, key) => {
-    const t = text.trim()
-    if (!t) return
-    const k = key || pickAnswerKey(t)
-    const answers = buildAskAnswers()
-    const answer = k ? answers[k] : ASK_FALLBACK
-    setMessages((m) => [...m, { role: 'user', text: t }, { role: 'ai', text: answer }])
-    setInput('')
-  }
-
-  return (
-    <>
-      <PageHead title={NAV.find((n) => n.id === 'ai').title} />
-      <div style={{ maxWidth: 680 }}>
-        <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginBottom: 16 }}>
-          {DATA.ask.chips.map((chip, i) => (
-            <button key={chip} type="button" className="rt-chip" onClick={() => send(chip, ASK_KEYS[i])}>
-              {chip}
-            </button>
-          ))}
-        </div>
-        <div style={{ ...panel, padding: 0, marginBottom: 0 }}>
-          <div style={{ padding: '12px 14px', borderBottom: `1px solid ${C.hair}`, fontFamily: head, fontSize: 12, fontWeight: 700, letterSpacing: '0.06em', textTransform: 'uppercase' }}>Conversation</div>
-          <div className="rt-convo" aria-live="polite">
-            {messages.length === 0 ? (
-              <div style={{ color: C.muted, fontFamily: ui, fontSize: 13, textAlign: 'center', margin: 'auto' }}>Start with a question</div>
-            ) : (
-              messages.map((m, i) => (
-                <div key={i} className={`rt-msg ${m.role}`}>
-                  {m.text}
-                </div>
-              ))
-            )}
-            <div ref={endRef} />
-          </div>
-          <form
-            onSubmit={(e) => {
-              e.preventDefault()
-              send(input)
-            }}
-            style={{ display: 'flex', gap: 8, padding: 12, borderTop: `1px solid ${C.hair}` }}
-          >
-            <input
-              value={input}
-              onChange={(e) => setInput(e.target.value)}
-              placeholder="Ask about sales, cash, margins..."
-              aria-label="Ask a question"
-              style={{ flex: 1, padding: '10px 12px', border: `1px solid ${C.hair}`, fontFamily: ui, fontSize: 14, outline: 'none', background: C.card, minWidth: 0 }}
-            />
-            <button type="submit" disabled={!input.trim()} style={{ background: THEME.side, color: '#fff', border: 'none', padding: '10px 18px', fontFamily: mono, fontSize: 11, cursor: input.trim() ? 'pointer' : 'default', opacity: input.trim() ? 1 : 0.5 }}>
-              Ask
-            </button>
-          </form>
-        </div>
-      </div>
-    </>
-  )
-}
-
 /* ---------- Shell ---------- */
 
 function Shell({ tab, setTab, embed, children }) {
@@ -2445,8 +2329,6 @@ const PORTAL_CSS = `
   .rt-pill.on{border-color:${THEME.side};background:${THEME.side};color:#fff}
   .rt-pill:disabled{opacity:.5}
   .rt-linkbtn{background:none;border:none;padding:0;font-family:${ui};font-size:11px;font-weight:600;color:${C.ink};text-decoration:underline;text-underline-offset:2px;cursor:pointer;letter-spacing:inherit;text-transform:inherit}
-  .rt-chip{font-family:${ui};font-size:12px;padding:8px 12px;border:1px solid ${C.hair};background:${C.card};color:${C.ink};cursor:pointer;text-align:left}
-  .rt-chip:hover{border-color:${THEME.side}}
   .rt-chartrow{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:16px;margin-bottom:16px}
   .rt-dash-main{display:grid;grid-template-columns:minmax(0,1.3fr) minmax(0,1fr);gap:16px;margin-bottom:16px}
   .rt-profit-row{display:grid;grid-template-columns:72px 1fr auto;gap:10px;width:100%;text-align:left;padding:10px 12px;border:none;border-bottom:1px solid ${C.line};background:${C.card};font-family:${ui};font-size:12px;cursor:pointer;color:${C.ink}}
@@ -2486,10 +2368,6 @@ const PORTAL_CSS = `
   .rt-stmt__head span{text-align:right}
   .rt-modal{position:fixed;inset:0;background:rgba(27,24,21,.45);z-index:1000;display:flex;align-items:center;justify-content:center;padding:16px}
   .rt-modal__box{background:${C.card};border:1px solid ${C.hair};padding:18px 20px;width:100%;max-width:640px;max-height:90vh}
-  .rt-convo{display:flex;flex-direction:column;gap:10px;padding:16px;min-height:220px;max-height:420px;overflow-y:auto}
-  .rt-msg{max-width:86%;padding:10px 13px;font-family:${ui};font-size:14px;line-height:1.55}
-  .rt-msg.user{align-self:flex-end;background:${THEME.side};color:#fff}
-  .rt-msg.ai{align-self:flex-start;background:#FAF8F4;border:1px solid ${C.line};color:${C.ink}}
   @media(max-width:860px){
     .rt-shell{flex-direction:column}
     .rt-side{display:none}
@@ -2788,7 +2666,6 @@ export default function RiversideTiresPortal() {
         {tab === 'inventory' && <SalesItemsTab seed={inventorySeed} setMetricDetail={setMetricDetail} />}
         {tab === 'orders' && <OrdersTab initialPeriod={openPeriod} />}
         {tab === 'stock' && <StockTab setMetricDetail={setMetricDetail} />}
-        {tab === 'ai' && <AskTab />}
       </Shell>
       {metricDetail ? <DashboardMetricSheet detail={metricDetail} onClose={() => setMetricDetail(null)} /> : null}
     </>

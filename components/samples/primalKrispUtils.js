@@ -95,9 +95,6 @@ export const CHANNEL_COLORS = {
   'Tastings & events': STONE,
 }
 
-export const verdictPromo = (roas) =>
-  roas >= 2 ? { c: GREEN, t: 'Keep' } : roas >= 1 ? { c: AMBER, t: 'Watch' } : { c: RED, t: 'Cut' }
-
 export function BagIcon({ color = SPICE }) {
   return (
     <svg width="58" height="58" viewBox="0 0 64 64" style={{ display: 'block', margin: '0 auto' }} aria-hidden>

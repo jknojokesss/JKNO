@@ -74,6 +74,16 @@ for (const st of due) {
   }
 }
 
+const portalPath = path.join(root, 'components/samples/PrimalKrispPortal.js')
+const portalSrc = fs.readFileSync(portalPath, 'utf8')
+const utilsPath = path.join(root, 'components/samples/primalKrispUtils.js')
+const utilsSrc = fs.readFileSync(utilsPath, 'utf8')
+ok('no verdictPromo helper', !/verdictPromo/.test(utilsSrc))
+ok('advertising table no Keep Watch Cut', !/\bKeep\b|\bWatch\b|\bCut\b/.test(portalSrc))
+for (const p of DATA.promo_codes) {
+  ok(`promo no call field ${p.code}`, p.call === undefined)
+}
+
 const pkFiles = [
   path.join(root, 'pages/primal-krisp.js'),
   path.join(root, 'data/primal-krisp.json'),

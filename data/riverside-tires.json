@@ -3840,22 +3840,6 @@
     }
   ],
   "ytd_revenue": 322900,
-  "ask": {
-    "chips": [
-      "What was my best month this year?",
-      "How is my cash looking?",
-      "What is driving the business, tires or service?",
-      "Which tire sizes sell best?",
-      "How is this month going?"
-    ],
-    "answers": {
-      "best_month": "May 2026 was the strongest closed month at $14,200 net profit on $38,100 revenue (37.3% margin).",
-      "cash": "Business checking was $45,200 at Aug 31. August net cash from operations was about $350 after draws.",
-      "mix": "In August, new tire sales were $23,150 (184 units). Used tires added $3,900 (78 units). Service and repair was $8,200.",
-      "sizes": "Top size in August was 235/65R17 — 44 units and $5,720 revenue at about $130 per tire.",
-      "month": "October register through Oct 17 shows $7,037 in sales on 22 tickets (estimates)."
-    }
-  },
   "aug_tire_sales": {
     "new_tire_revenue": 23150,
     "used_tire_revenue": 3900,

@@ -76,5 +76,4 @@ export const NAV = [
   { id: 'inventory', label: 'Sales & Items', title: 'Sales & Items' },
   { id: 'orders', label: 'Orders', title: 'Orders' },
   { id: 'stock', label: 'Stock', title: 'Stock on Hand' },
-  { id: 'ai', label: 'Ask', title: 'Ask' },
 ]

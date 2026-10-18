@@ -2819,7 +2819,6 @@
    "discount_given": 1584,
    "note": "Offer is real on their site; code name, orders and dollars are fictitious",
    "return_per_dollar": 10,
-   "call": "Keep",
    "period": "September 2026"
   },
   {
@@ -2832,7 +2831,6 @@
    "discount_given": 3006.12,
    "note": "Offer is real on their site; numbers fictitious",
    "return_per_dollar": 10.9,
-   "call": "Keep",
    "period": "September 2026"
   },
   {
@@ -2845,7 +2843,6 @@
    "discount_given": 1240,
    "note": "Program is real; numbers fictitious",
    "return_per_dollar": 3.9,
-   "call": "Keep",
    "period": "September 2026"
   },
   {
@@ -2857,7 +2854,6 @@
    "revenue": 5180,
    "discount_given": 518,
    "return_per_dollar": 6.9,
-   "call": "Keep",
    "period": "September 2026"
   },
   {
@@ -2869,7 +2865,6 @@
    "revenue": 1290,
    "discount_given": 129,
    "return_per_dollar": 2.6,
-   "call": "Watch",
    "period": "September 2026"
   },
   {
@@ -2881,7 +2876,6 @@
    "revenue": 430,
    "discount_given": 43,
    "return_per_dollar": 1.1,
-   "call": "Cut",
    "period": "September 2026"
   },
   {
@@ -2893,7 +2887,6 @@
    "revenue": 1720,
    "discount_given": 258,
    "return_per_dollar": 6.6,
-   "call": "Keep",
    "period": "September 2026"
   },
   {
@@ -2906,7 +2899,6 @@
    "discount_given": 0,
    "note": "pixel attribution, est.",
    "return_per_dollar": 1.9,
-   "call": "Watch",
    "period": "September 2026"
   }
  ],
