@@ -24,6 +24,7 @@ import {
 } from './closeoutExplosionUtils'
 import { buildDashboard, getLotById, salesInPeriod } from './closeoutExplosionCompute'
 import DATA from './closeoutExplosionData'
+import CloseoutExplosionProfitTab from './CloseoutExplosionProfitTab'
 
 const BIZ = 'CLOSEOUT EXPLOSION'
 const buyerTypes = Object.fromEntries(DATA.buyers.map((b) => [b.name, b.type]))
@@ -48,10 +49,17 @@ const StackKV = ({ k, v, vColor = INK }) => (
 const TABS = [
   ['overview', 'Overview'],
   ['lots', 'Lots'],
+  ['profit', 'Profit per lot'],
   ['cash', 'Cash in stock'],
   ['buyers', 'Buyers owe'],
   ['pnl', 'P&L'],
 ]
+
+function profitColor(amount) {
+  if (amount < 0) return RED
+  if (amount > 0) return GREEN
+  return INK
+}
 
 export default function CloseoutExplosionPortal() {
   const dash = useMemo(() => buildDashboard(), [])
@@ -73,6 +81,13 @@ export default function CloseoutExplosionPortal() {
 
   const openLot = (id) => push({ type: 'lot', id })
   const openBuyer = (name) => push({ type: 'buyer', name })
+  const openSale = (lotId, invoice) => push({ type: 'sale', lotId, invoice })
+  const openInvoicePreview = (lotId, invoice) => push({ type: 'invoicePreview', lotId, invoice })
+
+  const findSale = (lotId, invoice) => {
+    const lot = DATA.lots.find((l) => l.id === lotId)
+    return lot?.sales.find((s) => s.invoice === invoice) ?? null
+  }
 
   const card = { background: CARDBG, border: `1px solid ${BORDER}`, borderRadius: '2px', padding: '20px' }
   const lbl = {
@@ -88,7 +103,7 @@ export default function CloseoutExplosionPortal() {
   const KPI = ({ k, v, sub, valueColor, onClick }) => {
     const inner = (
       <>
-        <div style={{ ...lbl, ...(onClick ? { paddingRight: 22, lineHeight: 1.3 } : {}) }}>{k}</div>
+        <div style={{ ...lbl, ...(onClick ? { lineHeight: 1.3 } : {}) }}>{k}</div>
         <div style={{ ...big, fontSize: '26px', color: valueColor || INK, lineHeight: 1.15, marginTop: '4px' }}>{v}</div>
         {sub ? (
           <div style={{ fontFamily: UI, fontSize: '12px', color: sub.color || '#A2937A', marginTop: '3px' }}>{sub.text}</div>
@@ -115,7 +130,6 @@ export default function CloseoutExplosionPortal() {
         }}
       >
         {inner}
-        <span style={{ position: 'absolute', top: 11, right: 13, color: '#C6B79A', fontSize: 15, pointerEvents: 'none' }}>›</span>
       </button>
     )
   }
@@ -142,13 +156,18 @@ export default function CloseoutExplosionPortal() {
 
   const cashSorted = [...dash.openLots].sort((a, b) => b.cashTied - a.cashTied)
 
+  const profitLotRows = useMemo(
+    () => [...dash.lots].sort((a, b) => a.lot.id.localeCompare(b.lot.id)),
+    [dash.lots],
+  )
+
   const topFrame = stack[stack.length - 1]
 
   const portalStyles = SHELL_CSS({ CHAR, CREAM, INK, SPICE })
 
   const DetailBack = ({ label }) => (
     <button type="button" className="ce-back" onClick={pop}>
-      ‹ Back{label ? ` · ${label}` : ''}
+      Back{label ? ` · ${label}` : ''}
     </button>
   )
 
@@ -156,30 +175,62 @@ export default function CloseoutExplosionPortal() {
     const row = getLotById(id)
     if (!row) return <p>Lot not found.</p>
     const { lot } = row
+    const costLines = [
+      ['Purchase cost', money(row.purchaseCost)],
+      ['Freight in', money(row.freightIn)],
+    ]
+    if (row.brokerCommission > 0) {
+      costLines.push(['Broker commission', money(row.brokerCommission)])
+    }
+    costLines.push(['Total cost', money(row.totalCost)])
+    if (row.lot.status === 'Open') {
+      costLines.push(['Cost still in stock', money(row.costInStock)])
+    }
+
     return (
       <div className="ce-detail">
         <DetailBack />
         <div style={{ ...lbl, color: SPICE }}>{lot.id}</div>
-        <h2 style={{ ...big, fontSize: '22px', marginTop: 4, marginBottom: 16 }}>{lot.desc}</h2>
+        <h2 style={{ ...big, fontSize: '22px', marginTop: 4, marginBottom: 12 }}>{lot.desc}</h2>
+        <div style={{ fontSize: 13, color: MUTED, marginBottom: 16, lineHeight: 1.5 }}>
+          <div>Supplier: {row.supplierStatus}</div>
+          <div>
+            Buyers:{' '}
+            {row.buyerUnpaidCount === 0
+              ? 'Paid'
+              : `${row.buyerUnpaidCount} unpaid (${money(row.buyerUnpaidAmount)})`}
+          </div>
+        </div>
+        <div style={{ ...lbl, marginBottom: 8 }}>Cost</div>
+        <div style={{ ...card, marginBottom: 16 }}>
+          {costLines.map(([l, v], i) => (
+            <div key={l} style={{ display: 'flex', justifyContent: 'space-between', padding: '6px 0', borderTop: i ? `1px solid ${BORDER}` : 'none' }}>
+              <span style={{ fontSize: 13, color: MUTED }}>{l}</span>
+              <span style={{ fontFamily: MONO, fontSize: 13, color: INK }}>{v}</span>
+            </div>
+          ))}
+        </div>
         <div style={{ ...card, marginBottom: 16 }}>
           {[
-            ['Bought', fmtD(lot.bought)],
-            ['Cases bought', fmtInt(lot.cases)],
-            ['Buy price', money(lot.buy)],
-            ['Freight', money(lot.freight)],
-            ['Landed cost', money(row.landed)],
-            ['Landed cost per case', money(row.landedPerCase)],
             ['Cases sold', fmtInt(row.casesSold)],
             ['Cases left', fmtInt(row.casesLeft)],
-            ['Revenue so far', money(row.revenue)],
+            ['Sold so far', money(row.revenue)],
             ['Cost of cases sold', money(row.costSold)],
-            ['Profit so far', money(row.profit)],
+            ['Profit', money(row.profit)],
             ['Margin', pct1(row.margin * 100)],
-            ['Cash tied up in stock', money(row.cashTied)],
+            ...(row.lot.status === 'Open' ? [['Cash tied up in stock', money(row.cashTied)]] : []),
           ].map(([l, v], i) => (
             <div key={l} style={{ display: 'flex', justifyContent: 'space-between', padding: '6px 0', borderTop: i ? `1px solid ${BORDER}` : 'none' }}>
               <span style={{ fontSize: 13, color: MUTED }}>{l}</span>
-              <span style={{ fontFamily: MONO, fontSize: 13, color: l.includes('Profit') ? moneyColor(row.profit) : INK }}>{v}</span>
+              <span
+                style={{
+                  fontFamily: MONO,
+                  fontSize: 13,
+                  color: l === 'Profit' ? profitColor(row.profit) : INK,
+                }}
+              >
+                {v}
+              </span>
             </div>
           ))}
         </div>
@@ -190,7 +241,7 @@ export default function CloseoutExplosionPortal() {
               key={s.invoice}
               type="button"
               className="ce-stack-row ce-click"
-              onClick={() => openBuyer(s.buyer)}
+              onClick={() => openSale(lot.id, s.invoice)}
             >
               <div className="ce-stack-title">{fmtD(s.date)}</div>
               <div className="ce-stack-sub">{s.invoice}</div>
@@ -203,7 +254,7 @@ export default function CloseoutExplosionPortal() {
                 <StackKV k="Amount" v={money(s.amount)} />
               </div>
               <div style={{ fontSize: 12, color: s.paid ? MUTED : INK, marginTop: 8 }}>
-                {s.paid ? `Paid ${fmtD(s.paid)}` : 'Open'}
+                {s.paid ? `Paid ${fmtD(s.paid)}` : 'Unpaid'}
               </div>
             </button>
           ))}
@@ -216,7 +267,6 @@ export default function CloseoutExplosionPortal() {
                 <th className="ce-th-left ce-hide-sm">Invoice</th>
                 <th className="ce-th-left">Buyer</th>
                 <th>Cases</th>
-                <th>Price</th>
                 <th>Amount</th>
                 <th className="ce-th-left">Status</th>
               </tr>
@@ -226,7 +276,7 @@ export default function CloseoutExplosionPortal() {
                 <tr
                   key={s.invoice}
                   className="ce-rowbtn"
-                  onClick={() => openBuyer(s.buyer)}
+                  onClick={() => openSale(lot.id, s.invoice)}
                 >
                   <td className="ce-td-left">{fmtD(s.date)}</td>
                   <td className="ce-td-left ce-hide-sm">{s.invoice}</td>
@@ -234,15 +284,87 @@ export default function CloseoutExplosionPortal() {
                     <BuyerLabel name={s.buyer} />
                   </td>
                   <td>{fmtInt(s.cases)}</td>
-                  <td>{money(s.price)}</td>
                   <td>{money(s.amount)}</td>
                   <td className="ce-td-left" style={{ fontSize: 12, color: s.paid ? MUTED : INK }}>
-                    {s.paid ? `Paid ${fmtD(s.paid)}` : 'Open'}
+                    {s.paid ? 'Paid' : 'Unpaid'}
                   </td>
                 </tr>
               ))}
             </tbody>
           </table>
+        </div>
+      </div>
+    )
+  }
+
+  const SaleDetail = ({ lotId, invoice }) => {
+    const row = getLotById(lotId)
+    const sale = findSale(lotId, invoice)
+    if (!row || !sale) return <p>Sale not found.</p>
+    const { lot } = row
+    return (
+      <div className="ce-detail">
+        <DetailBack label={lot.id} />
+        <div style={{ ...lbl, color: SPICE }}>{sale.invoice}</div>
+        <h2 style={{ ...big, fontSize: 20, marginTop: 4, marginBottom: 8 }}>
+          <BuyerLabel name={sale.buyer} />
+        </h2>
+        <div style={{ ...card, marginBottom: 16 }}>
+          {[
+            ['Date', fmtD(sale.date)],
+            ['Lot', `${lot.id} · ${lot.desc}`],
+            ['Cases', fmtInt(sale.cases)],
+            ['Price per case', money(sale.price)],
+            ['Amount', money(sale.amount)],
+            ['Status', sale.paid ? `Paid ${fmtD(sale.paid)}` : 'Unpaid'],
+          ].map(([l, v], i) => (
+            <div key={l} style={{ display: 'flex', justifyContent: 'space-between', gap: 12, padding: '6px 0', borderTop: i ? `1px solid ${BORDER}` : 'none' }}>
+              <span style={{ fontSize: 13, color: MUTED, flexShrink: 0 }}>{l}</span>
+              <span style={{ fontFamily: MONO, fontSize: 13, textAlign: 'right' }}>{v}</span>
+            </div>
+          ))}
+        </div>
+        {!sale.paid ? (
+          <button type="button" className="ce-btn-primary" onClick={() => openInvoicePreview(lotId, invoice)}>
+            Create invoice
+          </button>
+        ) : null}
+        <button type="button" className="ce-btn-secondary" onClick={() => openBuyer(sale.buyer)}>
+          View buyer balance
+        </button>
+      </div>
+    )
+  }
+
+  const InvoicePreview = ({ lotId, invoice }) => {
+    const row = getLotById(lotId)
+    const sale = findSale(lotId, invoice)
+    if (!row || !sale) return null
+    const { lot } = row
+    const terms = dash.buyerTerms[sale.buyer] || 30
+    return (
+      <div className="ce-invoice-overlay" role="presentation" onClick={pop}>
+        <div
+          className="ce-invoice-panel"
+          role="dialog"
+          aria-labelledby="ce-inv-title"
+          onClick={(e) => e.stopPropagation()}
+        >
+          <h3 id="ce-inv-title">Invoice preview</h3>
+          <div style={{ fontSize: 13, lineHeight: 1.55 }}>
+            <div><span style={{ color: MUTED }}>Buyer</span><br />{sale.buyer}</div>
+            <div style={{ marginTop: 10 }}><span style={{ color: MUTED }}>Invoice</span><br />{sale.invoice}</div>
+            <div style={{ marginTop: 10 }}><span style={{ color: MUTED }}>Date</span><br />{fmtD(sale.date)}</div>
+            <div style={{ marginTop: 10 }}><span style={{ color: MUTED }}>Lot</span><br />{lot.id} · {lot.desc}</div>
+            <div style={{ marginTop: 10 }}><span style={{ color: MUTED }}>Cases</span><br />{fmtInt(sale.cases)}</div>
+            <div style={{ marginTop: 10 }}><span style={{ color: MUTED }}>Price per case</span><br />{money(sale.price)}</div>
+            <div style={{ marginTop: 10 }}><span style={{ color: MUTED }}>Total</span><br />{money(sale.amount)}</div>
+            <div style={{ marginTop: 10 }}><span style={{ color: MUTED }}>Terms</span><br />Net {terms}</div>
+          </div>
+          <p className="ce-status-line">Goes into QuickBooks as an invoice</p>
+          <button type="button" className="ce-btn-secondary" onClick={pop}>
+            Close
+          </button>
         </div>
       </div>
     )
@@ -274,7 +396,7 @@ export default function CloseoutExplosionPortal() {
         <div style={{ ...lbl, marginBottom: 8 }}>Open invoices</div>
         <div className="ce-stack-only" style={{ marginBottom: 24 }}>
           {openInv.map((s) => (
-            <button key={s.invoice} type="button" className="ce-stack-row ce-click" onClick={() => openLot(s.lotId)}>
+            <button key={s.invoice} type="button" className="ce-stack-row ce-click" onClick={() => openSale(s.lotId, s.invoice)}>
               <div className="ce-stack-title">{fmtD(s.date)}</div>
               <div className="ce-stack-sub">{s.invoice} · {s.lotId}</div>
               <div className="ce-stack-grid ce-stack-grid-3">
@@ -304,7 +426,7 @@ export default function CloseoutExplosionPortal() {
             </thead>
             <tbody>
               {openInv.map((s) => (
-                <tr key={s.invoice} className="ce-rowbtn" onClick={() => openLot(s.lotId)}>
+                <tr key={s.invoice} className="ce-rowbtn" onClick={() => openSale(s.lotId, s.invoice)}>
                   <td className="ce-td-left">{fmtD(s.date)}</td>
                   <td className="ce-td-left ce-hide-sm">{s.invoice}</td>
                   <td className="ce-td-left ce-hide-sm">{s.lotId}</td>
@@ -323,7 +445,7 @@ export default function CloseoutExplosionPortal() {
         <div style={{ ...lbl, marginBottom: 8 }}>Paid invoices this fall</div>
         <div className="ce-stack-only">
           {paidFall.map((s) => (
-            <button key={s.invoice} type="button" className="ce-stack-row ce-click" onClick={() => openLot(s.lotId)}>
+            <button key={s.invoice} type="button" className="ce-stack-row ce-click" onClick={() => openSale(s.lotId, s.invoice)}>
               <div className="ce-stack-title">{fmtD(s.date)}</div>
               <div className="ce-stack-sub">{s.invoice} · {s.lotId}</div>
               <div className="ce-stack-grid ce-stack-grid-2">
@@ -374,7 +496,7 @@ export default function CloseoutExplosionPortal() {
         <div style={{ ...big, fontSize: 22, margin: '8px 0 16px' }}>{money(total)}</div>
         <div className="ce-stack-only">
           {rows.map((s) => (
-            <button key={s.invoice} type="button" className="ce-stack-row ce-click" onClick={() => openLot(s.lotId)}>
+            <button key={s.invoice} type="button" className="ce-stack-row ce-click" onClick={() => openSale(s.lotId, s.invoice)}>
               <div className="ce-stack-title">{fmtD(s.date)}</div>
               <div className="ce-stack-sub">{s.invoice} · {s.lotId}</div>
               <div style={{ marginTop: 4 }}>
@@ -499,7 +621,6 @@ export default function CloseoutExplosionPortal() {
               >
                 <div className="ce-pnl-stack-label">
                   {r.label}
-                  {clickable ? <span style={{ color: '#C9BBA0', fontSize: 11 }}> ›</span> : null}
                 </div>
                 <div className="ce-pnl-stack-cols">
                   <div>
@@ -549,7 +670,6 @@ export default function CloseoutExplosionPortal() {
                 >
                   <td className="ce-td-left" style={{ fontWeight: r.bold ? 700 : 400, color: INK }}>
                     {r.label}
-                    {clickable ? <span style={{ color: '#C9BBA0', fontSize: 11 }}> ›</span> : null}
                   </td>
                   <td style={{ color: pnlThisColor(r) }}>{fmt(r.this)}</td>
                   <td style={{ color: MUTED }}>{fmt(r.prior)}</td>
@@ -565,6 +685,18 @@ export default function CloseoutExplosionPortal() {
   }
 
   const renderSection = () => {
+    if (topFrame?.type === 'invoicePreview') {
+      const prev = stack[stack.length - 2]
+      return (
+        <>
+          {prev?.type === 'sale' ? (
+            <SaleDetail lotId={prev.lotId} invoice={prev.invoice} />
+          ) : null}
+          <InvoicePreview lotId={topFrame.lotId} invoice={topFrame.invoice} />
+        </>
+      )
+    }
+    if (topFrame?.type === 'sale') return <SaleDetail lotId={topFrame.lotId} invoice={topFrame.invoice} />
     if (topFrame?.type === 'lot') return <LotDetail id={topFrame.id} />
     if (topFrame?.type === 'buyer') return <BuyerDetail name={topFrame.name} />
     if (topFrame?.type === 'pnlSales') return <PnlSalesDrill which={topFrame.which} mode={topFrame.mode} />
@@ -760,6 +892,18 @@ export default function CloseoutExplosionPortal() {
             </table>
           </div>
         </>
+      )
+    }
+
+    if (tab === 'profit') {
+      return (
+        <CloseoutExplosionProfitTab
+          rows={profitLotRows}
+          card={card}
+          lbl={lbl}
+          onOpenLot={openLot}
+          StackKV={StackKV}
+        />
       )
     }
 

@@ -72,7 +72,7 @@ export function moneyColor(amount) {
 
 export const SHELL_CSS = (theme) => `*{box-sizing:border-box;margin:0;padding:0}
 html{-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale;text-rendering:optimizeLegibility;overflow-x:hidden}
-body{background:${theme.CREAM};font-family:${UI};color:${theme.INK};overflow-x:hidden}
+body{background:${theme.CREAM};font-family:${UI};font-variant-numeric:tabular-nums;color:${theme.INK};overflow-x:hidden}
 .ce-shell{display:flex;min-height:100vh;align-items:stretch;max-width:100vw;overflow-x:hidden}
 .ce-side{width:236px;flex-shrink:0;background:${theme.CHAR};color:${theme.CREAM};display:flex;flex-direction:column;padding:22px 14px;position:sticky;top:0;height:100vh}
 .ce-nav{display:flex;flex-direction:column;gap:3px}.ce-nav--main{flex:1}
@@ -89,8 +89,16 @@ body{background:${theme.CREAM};font-family:${UI};color:${theme.INK};overflow-x:h
 .ce-table tr.ce-rowbtn:hover td{background:rgba(200,70,44,.04)}
 .ce-total td{font-weight:700;border-top:2px solid ${BORDER}}
 .ce-detail{max-width:640px;width:100%}
-.ce-back{display:inline-flex;align-items:center;gap:6px;border:none;background:transparent;color:${MUTED};font-family:${UI};font-size:13px;font-weight:600;cursor:pointer;padding:0 0 14px;min-height:40px}
+.ce-back{display:inline-flex;align-items:center;gap:6px;border:none;background:transparent;color:${MUTED};font-family:${UI};font-size:13px;font-weight:600;cursor:pointer;padding:0 0 14px;min-height:40px;text-decoration:underline;text-underline-offset:3px}
 .ce-back:hover{color:${INK}}
+.ce-invoice-overlay{position:fixed;inset:0;background:rgba(43,32,24,.45);z-index:40;display:flex;align-items:flex-end;justify-content:center;padding:12px}
+@media(min-width:520px){.ce-invoice-overlay{align-items:center;padding:24px}}
+.ce-invoice-panel{background:${CARDBG};border:1px solid ${BORDER};border-radius:2px;width:100%;max-width:420px;max-height:90vh;overflow:auto;padding:20px;box-shadow:0 8px 32px rgba(43,32,24,.18)}
+.ce-invoice-panel h3{font-size:18px;font-weight:700;margin:0 0 12px}
+.ce-btn-secondary{margin-top:16px;width:100%;padding:10px 14px;border:1px solid ${BORDER};background:transparent;font-family:${UI};font-size:14px;font-weight:600;cursor:pointer;border-radius:2px;color:${INK}}
+.ce-btn-secondary:hover{box-shadow:inset 0 0 0 1.5px ${theme.SPICE}}
+.ce-btn-primary{margin-top:10px;padding:8px 12px;border:1px solid ${theme.SPICE};background:${theme.SPICE};color:#fff;font-family:${UI};font-size:13px;font-weight:600;cursor:pointer;border-radius:2px}
+.ce-status-line{font-size:13px;color:${MUTED};margin:8px 0 0}
 .ce-table-wrap{width:100%;max-width:100%}
 .ce-stack-only{display:none;width:100%;max-width:100%}
 .ce-stack-row{display:block;width:100%;text-align:left;border:none;border-top:1px solid ${BORDER};background:transparent;padding:12px 0;cursor:pointer;font:inherit;color:inherit}

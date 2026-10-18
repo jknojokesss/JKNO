@@ -1,7 +1,33 @@
-import DATA from './closeoutExplosionData'
+import DATA from './closeoutExplosionData.js'
 
 const AS_OF = DATA.asOf
 const { pnl } = DATA
+
+export function lotCostBasis(lot) {
+  const brokerCommission = lot.broker ?? 0
+  const totalCost = lot.buy + lot.freight + brokerCommission
+  return {
+    purchaseCost: lot.buy,
+    freightIn: lot.freight,
+    brokerCommission,
+    totalCost,
+  }
+}
+
+export function lotBuyerPayStatus(lot) {
+  const open = lot.sales.filter((s) => s.paid == null)
+  if (!open.length) return { label: 'Paid', unpaidCount: 0, unpaidAmount: 0 }
+  const unpaidAmount = open.reduce((s, x) => s + x.amount, 0)
+  return {
+    label: `${open.length} unpaid (${unpaidAmount})`,
+    unpaidCount: open.length,
+    unpaidAmount,
+  }
+}
+
+export function supplierPayLabel(lot) {
+  return lot.supplierPaid ? 'Paid' : 'Unpaid'
+}
 
 export function inSaleRange(date, from, to) {
   return date >= from && date <= to
@@ -27,28 +53,43 @@ export function daysBetween(fromIso, toIso) {
 }
 
 export function lotStats(lot) {
-  const landed = lot.buy + lot.freight
+  const cost = lotCostBasis(lot)
+  const { totalCost, purchaseCost, freightIn, brokerCommission } = cost
+  const landed = totalCost
   const landedPerCase = lot.cases > 0 ? landed / lot.cases : 0
   const casesSold = lot.sales.reduce((s, x) => s + x.cases, 0)
   const casesLeft = lot.cases - casesSold
   const revenue = lot.sales.reduce((s, x) => s + x.amount, 0)
   const costSold = lot.sales.reduce((s, x) => s + x.cost, 0)
-  const profit = revenue - costSold
+  const costInStock = totalCost - costSold
+  const fullySold = casesLeft === 0
+  const profit =
+    lot.status === 'Closed' && fullySold ? revenue - totalCost : revenue - costSold
   const margin = revenue > 0 ? profit / revenue : 0
-  const cashTied = lot.status === 'Open' ? landed - costSold : 0
+  const cashTied = lot.status === 'Open' ? costInStock : 0
   const daysSinceBought = daysBetween(lot.bought, AS_OF)
+  const buyerPay = lotBuyerPayStatus(lot)
   return {
     lot,
+    ...cost,
     landed,
     landedPerCase,
     casesSold,
     casesLeft,
     revenue,
     costSold,
+    costInStock,
     profit,
     margin,
     cashTied,
     daysSinceBought,
+    supplierStatus: supplierPayLabel(lot),
+    buyersStatus:
+      buyerPay.unpaidCount === 0
+        ? 'Paid'
+        : `${buyerPay.unpaidCount} unpaid (${buyerPay.unpaidAmount})`,
+    buyerUnpaidAmount: buyerPay.unpaidAmount,
+    buyerUnpaidCount: buyerPay.unpaidCount,
   }
 }
 
