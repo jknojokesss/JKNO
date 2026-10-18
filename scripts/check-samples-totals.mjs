@@ -171,6 +171,7 @@ function checkStoreAgingRules(prefix, rows) {
     const lot = JSON.parse(fs.readFileSync(path.join(lotsDir, name), 'utf8'))
     for (const sale of lot.sales) {
       if (sale.paid != null) continue
+      if (!sale.invoice) continue
       buyersOwe += sale.amount
       const age = daysBetween(sale.date, AS_OF)
       if (age > 60) over60 += 1

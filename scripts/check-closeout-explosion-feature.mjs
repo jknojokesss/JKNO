@@ -19,18 +19,8 @@ const AS_OF = '2026-10-17'
 const PNL = {
   thisFrom: '2026-10-01',
   thisTo: '2026-10-17',
+  expensesThis: 1400 + 2180 + 870 + 210 + 260 + 140,
 }
-
-const BUYERS = [
-  'Garden State Quick Mart',
-  'Hudson Valley Discount Grocers',
-  'Keystone Surplus Distributors',
-  'Tri-State Bargain Outlet',
-  'Elm Street Family Grocery',
-  'Brightway Dollar Stores',
-  'Wexley Regional Supply',
-  'Fairlane Convenience Group',
-]
 
 function loadLots() {
   return fs
@@ -46,6 +36,10 @@ function lotCostBasis(lot) {
   return { brokerCommission, totalCost }
 }
 
+function isOpenInvoice(sale) {
+  return Boolean(sale.invoice) && sale.paid == null
+}
+
 function lotStats(lot) {
   const { totalCost } = lotCostBasis(lot)
   const casesSold = lot.sales.reduce((s, x) => s + x.cases, 0)
@@ -53,12 +47,11 @@ function lotStats(lot) {
   const revenue = lot.sales.reduce((s, x) => s + x.amount, 0)
   const costSold = lot.sales.reduce((s, x) => s + x.cost, 0)
   const costInStock = totalCost - costSold
-  const profit =
-    lot.status === 'Closed' && casesLeft === 0 ? revenue - totalCost : revenue - costSold
-  const margin = revenue > 0 ? profit / revenue : 0
+  const profit = revenue - costSold
+  const margin = revenue > 0 ? profit / revenue : null
   const cashTied = lot.status === 'Open' ? costInStock : 0
   const buyerUnpaidAmount = lot.sales
-    .filter((s) => s.paid == null)
+    .filter((s) => isOpenInvoice(s))
     .reduce((s, x) => s + x.amount, 0)
   return {
     lot,
@@ -82,32 +75,39 @@ const cashTiedTotal = openLots.reduce((s, l) => s + l.cashTied, 0)
 const casesInWarehouse = openLots.reduce((s, l) => s + l.casesLeft, 0)
 
 let buyersOwe = 0
-const unpaidByBuyer = {}
+let shippedOnly = 0
 for (const lot of lots) {
   for (const sale of lot.sales) {
+    if (!sale.invoice) {
+      shippedOnly += 1
+      continue
+    }
     if (sale.paid != null) continue
     buyersOwe += sale.amount
-    unpaidByBuyer[sale.buyer] = round2((unpaidByBuyer[sale.buyer] || 0) + sale.amount)
   }
 }
 buyersOwe = round2(buyersOwe)
 
 const EXPECT_BUYERS_OWE = 58118.75
-const EXPECT_CASH_TIED = 43543
-const EXPECT_CASES = 4680
+const EXPECT_CASH_TIED = 42391
+const EXPECT_CASES = 4545
+const EXPECT_OCT_SALES = 36524.25
+const EXPECT_OCT_NET = 2924.45
+
 const OPEN_CASH = {
-  'L-2041': 3501,
+  'L-2041': 3063.37,
   'L-2047': 6743.33,
   'L-2052': 8440.25,
-  'L-2056': 5963.54,
+  'L-2056': 5701.14,
   'L-2061': 12444.44,
-  'L-2063': 6450,
+  'L-2063': 5998.5,
 }
 
 ok('lot count 8-12', lots.length >= 8 && lots.length <= 12)
 ok('buyers owe card', buyersOwe === EXPECT_BUYERS_OWE)
 ok('cash tied total', Math.round(cashTiedTotal) === EXPECT_CASH_TIED)
 ok('cases in warehouse', casesInWarehouse === EXPECT_CASES)
+ok('three shipped not invoiced', shippedOnly === 3)
 
 for (const row of openLots) {
   const id = row.lot.id
@@ -116,39 +116,54 @@ for (const row of openLots) {
   }
 }
 
-for (const name of BUYERS) {
-  const fromLots = unpaidByBuyer[name] || 0
-  if (fromLots > 0) ok(`buyer ${name} has balance`, fromLots > 0)
-}
-ok('unpaid sum', round2(Object.values(unpaidByBuyer).reduce((s, x) => s + x, 0)) === EXPECT_BUYERS_OWE)
-
 for (const row of rows) {
   const lot = row.lot
-  const cost = lotCostBasis(lot)
-  ok(`${lot.id} total cost`, round2(row.totalCost) === round2(cost.totalCost))
+  ok(`${lot.id} profit = sales - cost of sales`, round2(row.profit) === round2(row.revenue - row.costSold))
+  if (row.revenue > 0) {
+    ok(`${lot.id} margin`, round2(row.margin) === round2(row.profit / row.revenue))
+  } else {
+    ok(`${lot.id} no sales margin`, row.margin == null)
+  }
   if (lot.status === 'Open') {
     ok(`${lot.id} cost in stock`, round2(row.costInStock) === round2(row.cashTied))
-  }
-  if (lot.status === 'Closed' && row.casesLeft === 0) {
-    ok(`${lot.id} closed profit`, round2(row.profit) === round2(row.revenue - row.totalCost))
-  } else {
-    ok(`${lot.id} open profit`, round2(row.profit) === round2(row.revenue - row.costSold))
   }
 }
 
 let octSales = 0
+let octCogs = 0
 for (const lot of lots) {
   for (const sale of lot.sales) {
-    if (sale.date >= PNL.thisFrom && sale.date <= PNL.thisTo) octSales += sale.amount
+    if (sale.date >= PNL.thisFrom && sale.date <= PNL.thisTo) {
+      octSales += sale.amount
+      octCogs += sale.cost
+    }
   }
 }
 octSales = round2(octSales)
+octCogs = round2(octCogs)
+const octGross = round2(octSales - octCogs)
+const octNet = round2(octGross - PNL.expensesThis)
 
-const sep25Open = lots.flatMap((l) => l.sales).filter((s) => s.date === '2026-09-25' && s.paid == null)
+ok('oct sales period', octSales === EXPECT_OCT_SALES)
+ok('oct net profit', octNet === EXPECT_OCT_NET)
+
+const sep25Open = lots
+  .flatMap((l) => l.sales)
+  .filter((s) => s.date === '2026-09-25' && isOpenInvoice(s))
 ok('no unpaid Sep 25 invoice dates', sep25Open.length === 0)
 
 const inv1043 = lots.flatMap((l) => l.sales).find((s) => s.invoice === 'INV-1043')
 ok('INV-1043 in October', inv1043 && inv1043.date >= '2026-10-01' && inv1043.date <= '2026-10-17')
+
+let maxInv = 0
+for (const lot of lots) {
+  for (const sale of lot.sales) {
+    if (!sale.invoice) continue
+    const n = parseInt(sale.invoice.replace(/^INV-/, ''), 10)
+    if (n > maxInv) maxInv = n
+  }
+}
+ok('next invoice after max', maxInv === 1090)
 
 console.log('closeout-explosion profit per lot', {
   lots: lots.length,
@@ -156,6 +171,8 @@ console.log('closeout-explosion profit per lot', {
   cashTied: Math.round(cashTiedTotal),
   cases: casesInWarehouse,
   octSales,
+  octNet,
+  shippedOnly,
 })
 
 if (failures.length) {

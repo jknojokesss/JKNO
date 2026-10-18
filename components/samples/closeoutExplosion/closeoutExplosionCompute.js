@@ -1,4 +1,9 @@
 import DATA from './closeoutExplosionData.js'
+import {
+  isOpenInvoice,
+  lotStatusLabel,
+  saleLineKey,
+} from './closeoutExplosionSales.js'
 
 const AS_OF = DATA.asOf
 const { pnl } = DATA
@@ -15,7 +20,7 @@ export function lotCostBasis(lot) {
 }
 
 export function lotBuyerPayStatus(lot) {
-  const open = lot.sales.filter((s) => s.paid == null)
+  const open = lot.sales.filter((s) => isOpenInvoice(s))
   if (!open.length) return { label: 'Paid', unpaidCount: 0, unpaidAmount: 0 }
   const unpaidAmount = open.reduce((s, x) => s + x.amount, 0)
   return {
@@ -35,7 +40,7 @@ export function inSaleRange(date, from, to) {
 
 export function enrichSale(sale, lot) {
   const ageDays = daysBetween(sale.date, AS_OF)
-  const pastDue = AS_OF > sale.due && sale.paid == null
+  const pastDue = sale.due != null && AS_OF > sale.due && sale.paid == null
   return {
     ...sale,
     lotId: lot.id,
@@ -63,9 +68,9 @@ export function lotStats(lot) {
   const costSold = lot.sales.reduce((s, x) => s + x.cost, 0)
   const costInStock = totalCost - costSold
   const fullySold = casesLeft === 0
-  const profit =
-    lot.status === 'Closed' && fullySold ? revenue - totalCost : revenue - costSold
-  const margin = revenue > 0 ? profit / revenue : 0
+  const profit = revenue - costSold
+  const margin = revenue > 0 ? profit / revenue : null
+  const statusLabel = lotStatusLabel(lot, casesLeft)
   const cashTied = lot.status === 'Open' ? costInStock : 0
   const daysSinceBought = daysBetween(lot.bought, AS_OF)
   const buyerPay = lotBuyerPayStatus(lot)
@@ -81,6 +86,7 @@ export function lotStats(lot) {
     costInStock,
     profit,
     margin,
+    statusLabel,
     cashTied,
     daysSinceBought,
     supplierStatus: supplierPayLabel(lot),
@@ -106,7 +112,10 @@ export function salesInPeriod(from, to) {
       }
     }
   }
-  rows.sort((a, b) => a.date.localeCompare(b.date) || a.invoice.localeCompare(b.invoice))
+  rows.sort(
+    (a, b) =>
+      a.date.localeCompare(b.date) || saleLineKey(a).localeCompare(saleLineKey(b)),
+  )
   return rows
 }
 
@@ -147,7 +156,7 @@ export function buildDashboard() {
   const openSales = []
   for (const lot of DATA.lots) {
     for (const sale of lot.sales) {
-      if (sale.paid == null) openSales.push(enrichSale(sale, lot))
+      if (isOpenInvoice(sale)) openSales.push(enrichSale(sale, lot))
     }
   }
   const buyersOwe = openSales.reduce((s, r) => s + r.amount, 0)

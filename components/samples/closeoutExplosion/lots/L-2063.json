@@ -1,1 +1,1 @@
-{"id":"L-2063","desc":"Shampoo, 12 oz, 12-pack, 500 cases","cases":500,"buy":6000,"freight":450,"bought":"2026-10-13","status":"Open","sales":[],"supplierPaid":false}
+{"id":"L-2063","desc":"Shampoo, 12 oz, 12-pack, 500 cases","cases":500,"buy":6000,"freight":450,"bought":"2026-10-13","status":"Open","sales":[{"shipId":"SHP-1093","date":"2026-10-17","buyer":"Garden State Quick Mart","cases":35,"price":14.25,"amount":498.75,"cost":451.5}],"supplierPaid":false}
