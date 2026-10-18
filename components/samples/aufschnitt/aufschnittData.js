@@ -158,6 +158,14 @@ const STORE_SALES_WEIGHT = {
   'Distributor NJ 1': 1.32,
 }
 
+/** Share of Stores revenue for the three largest accounts (each under 12% at Sep scale). */
+const TOP_STORE_SHARE = {
+  'Lakewood store 1': 0.11608,
+  'Lakewood store 2': 0.09997,
+  'Distributor NJ 1': 0.11971,
+}
+const TOP_STORE_NAMES = ['Lakewood store 1', 'Lakewood store 2', 'Distributor NJ 1']
+
 function roundCases(n) {
   const t = Math.round(n * 10) / 10
   return Math.abs(t - Math.round(t)) < 0.05 ? Math.round(t) : t
@@ -616,17 +624,33 @@ function buildPnlDrills(salesRows, pnl, brandKey) {
   return drills
 }
 
-function weeklyCaseSeries(avgWeeklyCases) {
-  const raw = WEEKLY_CASE_PATTERN.map((m) => avgWeeklyCases * m)
-  const mean = raw.reduce((a, b) => a + b, 0) / raw.length
-  const scaled = raw.map((v) => (mean > 0 ? (v * avgWeeklyCases) / mean : avgWeeklyCases))
-  const weeklyCases = scaled.map((v, i) =>
-    i === scaled.length - 1 ? roundCases(v) : Math.max(0.5, roundCases(v))
-  )
-  const avg = roundCases(weeklyCases.reduce((a, b) => a + b, 0) / weeklyCases.length)
-  const drift = roundCases(avgWeeklyCases - avg)
-  weeklyCases[weeklyCases.length - 1] = roundCases(weeklyCases[weeklyCases.length - 1] + drift)
-  return weeklyCases
+function avgWeeklyFromIntegerWeeks(weeklyCases) {
+  return roundCases(weeklyCases.reduce((a, b) => a + b, 0) / weeklyCases.length)
+}
+
+/** Eight whole case counts; mean (one decimal) matches the table avg/wk. */
+function weeklyCaseSeries(targetAvg) {
+  let totalSum = Math.round(targetAvg * 8)
+  const wSum = WEEKLY_CASE_PATTERN.reduce((a, b) => a + b, 0)
+  const floats = WEEKLY_CASE_PATTERN.map((m) => (m / wSum) * totalSum)
+  const weeks = floats.map((f) => Math.max(1, Math.floor(f)))
+  let rem = totalSum - weeks.reduce((a, b) => a + b, 0)
+  const order = floats
+    .map((f, i) => ({ i, frac: f - Math.floor(f) }))
+    .sort((a, b) => b.frac - a.frac)
+  for (let j = 0; j < rem; j++) weeks[order[j % order.length].i]++
+  let avg = avgWeeklyFromIntegerWeeks(weeks)
+  let guard = 0
+  while (avg !== roundCases(targetAvg) && guard < 16) {
+    const diff = Math.round((roundCases(targetAvg) - avg) * 8)
+    if (diff === 0) break
+    const idx = diff > 0 ? order[guard % order.length].i : weeks.indexOf(Math.max(...weeks))
+    weeks[idx] = Math.max(1, weeks[idx] + (diff > 0 ? 1 : -1))
+    totalSum += diff > 0 ? 1 : -1
+    avg = avgWeeklyFromIntegerWeeks(weeks)
+    guard++
+  }
+  return weeks
 }
 
 function buildStock(salesRows, opts = {}) {
@@ -636,8 +660,9 @@ function buildStock(salesRows, opts = {}) {
     const meta = PRODUCT_META[p.id]
     const monthUnits = sumUnits(salesRows, { productId: p.id, month: velocityMonth })
     const monthCases = monthUnits / meta.unitsPerCase
-    const avgWeeklyCases = roundCases(monthCases / 4.33)
-    const weeklyCases = weeklyCaseSeries(avgWeeklyCases)
+    const velocityAvg = roundCases(monthCases / 4.33)
+    const weeklyCases = weeklyCaseSeries(velocityAvg)
+    const avgWeeklyCases = avgWeeklyFromIntegerWeeks(weeklyCases)
     const weeklyUnits = weeklyCases.map((c) => Math.max(1, Math.round(c * meta.unitsPerCase)))
     const weeksTarget = meta.weeksTarget * weeksScale
     let onHandCases = Math.max(1, Math.round(avgWeeklyCases * weeksTarget))
@@ -663,7 +688,7 @@ function buildStock(salesRows, opts = {}) {
       brand: p.brand,
       name: p.name,
       onHandCases,
-      avgWeeklyCases: roundCases(weeklyCases.reduce((a, b) => a + b, 0) / weeklyCases.length),
+      avgWeeklyCases,
       weeksSupply: Math.round(weeksSupply * 10) / 10,
       valueAtCost,
       costPerCase: meta.costPerCase,
@@ -758,6 +783,40 @@ function bucketFromDaysPastDue(dpd) {
   return 'd90p'
 }
 
+function reconcileStoreSplitTotal(split, total, cap) {
+  let fix = roundCents(total - sumCents(STORE_ACCOUNTS.map((n) => split[n] || 0)))
+  if (!fix) return
+  const donor = STORE_ACCOUNTS.find(
+    (n) => !TOP_STORE_NAMES.includes(n) && (split[n] || 0) > 2500 + Math.abs(fix)
+  )
+  if (donor) split[donor] = roundCents(split[donor] + fix)
+  else split[STORE_ACCOUNTS[0]] = roundCents((split[STORE_ACCOUNTS[0]] || 0) + fix)
+}
+
+function enforceUniqueStoreRevenues(split, total, cap) {
+  for (let pass = 0; pass < 120; pass++) {
+    reconcileStoreSplitTotal(split, total, cap)
+    const seen = new Map()
+    let dupName = null
+    STORE_ACCOUNTS.forEach((name) => {
+      const key = (split[name] || 0).toFixed(2)
+      if (seen.has(key)) dupName = name
+      else seen.set(key, name)
+    })
+    if (!dupName) break
+    const bump = roundCents(0.11 + (hash(`${dupName}-${pass}`) % 17) / 100)
+    split[dupName] = roundCents(split[dupName] + bump)
+    const peer = STORE_ACCOUNTS.find(
+      (n) => n !== dupName && !TOP_STORE_NAMES.includes(n) && (split[n] || 0) > bump + 800
+    )
+    if (peer) split[peer] = roundCents(split[peer] - bump)
+    TOP_STORE_NAMES.forEach((n) => {
+      if ((split[n] || 0) > cap) split[n] = cap
+    })
+  }
+  reconcileStoreSplitTotal(split, total, cap)
+}
+
 function buildStoreRevenueSplits(salesRows, arAccounts, monthId, brandKey) {
   const total =
     brandKey === 'All brands'
@@ -767,44 +826,28 @@ function buildStoreRevenueSplits(salesRows, arAccounts, monthId, brandKey) {
   arAccounts.forEach((a) => {
     arByName[a.name] = a.buckets.total
   })
-  const weights = {}
-  STORE_ACCOUNTS.forEach((name) => {
-    const ar = arByName[name] || 8000
-    const ratio = 0.42 + (hash(`${name}-${monthId}-${brandKey}`) % 89) / 100
-    const target = ar * Math.min(1.3, Math.max(0.4, ratio))
-    weights[name] = target * (STORE_SALES_WEIGHT[name] || 1)
+  const cap = roundCents(total * 0.12)
+  const split = {}
+  let pinned = 0
+  TOP_STORE_NAMES.forEach((name) => {
+    const jitter = ((hash(`${name}|${monthId}|${brandKey}`) % 97) - 48) / 100
+    let amt = roundCents(total * TOP_STORE_SHARE[name] + jitter)
+    amt = Math.min(cap, Math.max(roundCents(total * 0.022), amt))
+    split[name] = amt
+    pinned = roundCents(pinned + amt)
   })
-  let split = allocateByWeight(total, weights)
-  const maxShare = 0.12
-  const cap = roundCents(total * maxShare)
-  for (let pass = 0; pass < 8; pass++) {
-    let excess = 0
-    const under = []
-    STORE_ACCOUNTS.forEach((name) => {
-      const v = split[name] || 0
-      if (v > cap + 0.005) {
-        excess += v - cap
-        split[name] = cap
-      } else if (v < cap - 0.005) {
-        under.push(name)
-      }
-    })
-    if (excess < 0.01 || under.length === 0) break
-    const addW = {}
-    under.forEach((name) => {
-      addW[name] = weights[name] || 1
-    })
-    const portion = allocateByWeight(excess, addW)
-    under.forEach((name) => {
-      split[name] = roundCents((split[name] || 0) + (portion[name] || 0))
-    })
-  }
-  const got = sumCents(STORE_ACCOUNTS.map((name) => split[name] || 0))
-  const fix = roundCents(total - got)
-  if (fix) {
-    const tail = STORE_ACCOUNTS.find((name) => (split[name] || 0) < cap - 0.01) || STORE_ACCOUNTS[0]
-    split[tail] = roundCents((split[tail] || 0) + fix)
-  }
+  const remainder = roundCents(total - pinned)
+  const others = STORE_ACCOUNTS.filter((n) => !TOP_STORE_NAMES.includes(n))
+  const weights = {}
+  others.forEach((name) => {
+    const ar = arByName[name] || 5000
+    weights[name] = (STORE_SALES_WEIGHT[name] || 1) * ar
+  })
+  const otherAlloc = allocateByWeight(Math.max(0, remainder), weights)
+  others.forEach((name) => {
+    split[name] = otherAlloc[name] || 0
+  })
+  enforceUniqueStoreRevenues(split, total, cap)
   return STORE_ACCOUNTS.map((name) => ({
     store: name,
     revenue: split[name] || 0,

@@ -160,6 +160,16 @@ DATA.channels.forEach((ch) => {
         .reduce((s, r) => s + r.revenue, 0)
       ok(`Stores ${b} accounts sum`, sum(brandStores, (x) => x.revenue) === roundCents(brandStoresRev))
     })
+    const assertUnique = (rows, label) => {
+      const vals = rows.map((s) => s.revenue.toFixed(2))
+      ok(`Stores unique ${label}`, new Set(vals).size === vals.length)
+    }
+    assertUnique(sepStores, 'Sep all brands')
+    assertUnique(augStores, 'Aug all brands')
+    BRANDS.forEach((b) => {
+      assertUnique(ch.extra.storeSplits['2026-09'][b], `Sep ${b}`)
+      assertUnique(ch.extra.storeSplits['2026-08'][b], `Aug ${b}`)
+    })
   }
 })
 
@@ -189,10 +199,16 @@ ar.invoices.forEach((inv) => {
 
 DATA.stock.forEach((r) => {
   if (!r.weeklyCases?.length) return
+  ok(
+    `Weekly cases integers ${r.productId}`,
+    r.weeklyCases.every((c) => Number.isInteger(c) && c >= 1)
+  )
   const avg = roundCents(r.weeklyCases.reduce((a, b) => a + b, 0) / r.weeklyCases.length)
   const avgOne = Math.round(avg * 10) / 10
   const rowAvg = Math.round(r.avgWeeklyCases * 10) / 10
   ok(`Weekly cases avg ${r.productId}`, avgOne === rowAvg)
+  const wks = r.avgWeeklyCases > 0 ? r.onHandCases / r.avgWeeklyCases : 0
+  ok(`Weeks supply ${r.productId}`, Math.abs(wks - r.weeksSupply) < 0.15)
 })
 
 const sep = DATA.pnlViews['All brands'].find((p) => p.month === '2026-09')

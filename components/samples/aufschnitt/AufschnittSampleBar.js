@@ -1,8 +1,10 @@
-/** Plain credit line only — no lobby bar, no home link on prospect samples. */
+/** Muted credit link to JK site — no lobby bar, no home link to "/". */
 export default function AufschnittSampleBar() {
   return (
-    <p className="au-prospect-credit" role="presentation">
-      JK No Jokes Financials
+    <p className="au-prospect-credit">
+      <a href="https://jknojokes.com" className="au-prospect-credit__link">
+        JK No Jokes Financials
+      </a>
     </p>
   )
 }
