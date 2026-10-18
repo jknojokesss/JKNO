@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect, Fragment } from 'react'
+import { useState, useRef, useEffect, useMemo, Fragment } from 'react'
 import Head from 'next/head'
 import { jerkySupabase } from '../lib/supabaseJerky'
 import { buildPnl, buildBalanceSheet, buildCashFlow, periodPnl, buildAdSpend } from '../lib/jerkyGL'
@@ -134,6 +134,7 @@ export default function JerkyMunch() {
   const [dataLoaded, setDataLoaded] = useState(false)
   const [role, setRole] = useState(null)              // 'owner' | 'counter' (staff shelf-count-only)
   const [drill, setDrill] = useState(null)            // P&L drill-down: { title, rows, total }
+  const [drillSort, setDrillSort] = useState({ key: 'date', dir: 'desc' }) // date: desc=newest; amount: desc=largest |abs|
   // /login already asked for the email; carry it over so it is typed once.
   const [loginEmail, setLoginEmail] = useState(() => {
     if (typeof window === 'undefined') return ''
@@ -417,6 +418,26 @@ export default function JerkyMunch() {
     else setDataLoaded(false)
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [session])
+  useEffect(() => {
+    if (drill) setDrillSort({ key: 'date', dir: 'desc' })
+  }, [drill])
+  const drillRowsSorted = useMemo(() => {
+    if (!drill?.rows?.length) return []
+    const rows = [...drill.rows]
+    const { key, dir } = drillSort
+    const mul = dir === 'desc' ? -1 : 1
+    if (key === 'amount') {
+      rows.sort((a, b) => mul * (Math.abs(Number(a.amount) || 0) - Math.abs(Number(b.amount) || 0)))
+    } else {
+      rows.sort((a, b) => {
+        const da = a.txn_date || ''
+        const db = b.txn_date || ''
+        if (da === db) return 0
+        return mul * (da < db ? -1 : 1)
+      })
+    }
+    return rows
+  }, [drill, drillSort])
   // reconcile the invoice list with QuickBooks once, when the owner opens the tab
   const invSyncedRef = useRef(false)
   useEffect(() => {
@@ -1910,10 +1931,28 @@ export default function JerkyMunch() {
               <div style={{ ...big, fontSize: '17px', color: INK }}>{drill.title}</div>
               <button onClick={() => setDrill(null)} style={{ background: 'none', border: 'none', fontSize: '22px', color: MUTED, cursor: 'pointer', lineHeight: 1 }}>×</button>
             </div>
-            <div style={{ fontSize: '12px', color: MUTED, margin: '2px 0 12px' }}>{drill.rows.length} transaction{drill.rows.length === 1 ? '' : 's'} · {drill.period || finRangeLabel(aFrom, aTo)} · total <b style={{ color: INK, fontFamily: MONO }}>{m0(drill.total)}</b></div>
+            <div style={{ fontSize: '12px', color: MUTED, margin: '2px 0 10px' }}>{drill.rows.length} transaction{drill.rows.length === 1 ? '' : 's'} · {drill.period || finRangeLabel(aFrom, aTo)} · total <b style={{ color: INK, fontFamily: MONO }}>{m0(drill.total)}</b></div>
+            {drill.rows.length > 0 && (
+              <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px', marginBottom: '10px', maxWidth: '100%' }}>
+                {[
+                  { key: 'date', label: drillSort.key === 'date' ? (drillSort.dir === 'desc' ? 'Date: newest' : 'Date: oldest') : 'Date' },
+                  { key: 'amount', label: drillSort.key === 'amount' ? (drillSort.dir === 'desc' ? 'Amount: largest' : 'Amount: smallest') : 'Amount' },
+                ].map(({ key, label }) => {
+                  const active = drillSort.key === key
+                  return (
+                    <button
+                      key={key}
+                      type="button"
+                      onClick={() => setDrillSort(s => (s.key === key ? { key, dir: s.dir === 'desc' ? 'asc' : 'desc' } : { key, dir: 'desc' }))}
+                      style={{ background: active ? CHAR : CARDBG, color: active ? CREAM : INK, border: `1px solid ${active ? CHAR : BORDER}`, borderRadius: '2px', padding: '5px 10px', fontFamily: "'Inter', sans-serif", fontWeight: 600, fontSize: '12px', letterSpacing: '0.05px', cursor: 'pointer', flexShrink: 1, minWidth: 0 }}
+                    >{label}</button>
+                  )
+                })}
+              </div>
+            )}
             <div style={{ maxHeight: '62vh', overflowY: 'auto' }}>
               {drill.rows.length === 0 && <div style={{ fontSize: '13px', color: MUTED }}>No transactions in this period.</div>}
-              {drill.rows.map((r, i) => (
+              {drillRowsSorted.map((r, i) => (
                 <div key={i} style={{ display: 'flex', justifyContent: 'space-between', gap: '12px', padding: '8px 0', borderTop: i ? `1px solid ${BORDER}` : 'none' }}>
                   <div style={{ minWidth: 0 }}>
                     <div style={{ fontSize: '13px', color: INK }}>{r.name || r.txn_type || '—'}</div>
