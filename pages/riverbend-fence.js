@@ -1064,7 +1064,7 @@ export default function RiverbendFenceDemo() {
           <div style={{ padding: '14px 18px', borderBottom: `1px solid ${BORDER}`, display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: '#fff' }}>
             <div style={{ display: 'flex', alignItems: 'baseline', gap: 10 }}>
               <div style={{ fontFamily: head, fontSize: 20, fontWeight: 700, letterSpacing: '-.01em' }}>{BIZ}</div>
-              {!embedded && <button onClick={() => setIntro(true)} style={{ border: 'none', background: 'none', padding: 0, color: FAINT, fontSize: 12.5, cursor: 'pointer' }}>Why this exists</button>}
+              {!embedded && <span style={{ color: MUTED, fontSize: 12.5, maxWidth: 220, lineHeight: 1.45 }}>QuickBooks can do job costing. Nothing feeds it right. This does.</span>}
             </div>
             <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
               <span style={{ fontSize: 12, color: queued ? AMBER : MUTED, fontWeight: 600 }}>{queued ? `${queued} sending…` : 'All sent'}</span>
@@ -1109,7 +1109,7 @@ export default function RiverbendFenceDemo() {
               </span>
               <span style={{ width: 1, height: 20, background: 'rgba(255,255,255,.22)' }} />
               <span style={{ fontSize: 13.5 }}>Riverbend Fence Co.</span>
-              <span style={{ fontSize: 10.5, fontWeight: 700, letterSpacing: '.06em', textTransform: 'uppercase', border: '1px solid rgba(255,255,255,.35)', borderRadius: 4, padding: '2px 6px', opacity: .85 }}>Sandbox</span>
+              <span style={{ fontSize: 10.5, fontWeight: 700, letterSpacing: '.06em', textTransform: 'uppercase', border: '1px solid rgba(255,255,255,.35)', borderRadius: 4, padding: '2px 6px', opacity: .85 }}>Sample company</span>
             </div>
             <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
               <span style={{ fontSize: 15, opacity: .75 }}>⚙</span>
@@ -1170,7 +1170,6 @@ export default function RiverbendFenceDemo() {
         </div>
       </div>
 
-      {intro && !embedded && <Intro jobs={jobs} stock={stock} onClose={closeIntro} />}
 
       {toast && (
         <div style={{
@@ -2233,7 +2232,7 @@ function Billing({ job, stock, onInvoice, onPayment }) {
 
 /* ─── QuickBooks pane ─────────────────────────────────────────────────── */
 
-const COLS = '78px 96px 1fr 106px 96px 56px'
+const COLS = '78px 96px 1fr 106px 96px'
 const TYPE_LABEL = {
   Customer: 'Customer', Estimate: 'Estimate', Invoice: 'Invoice', Payment: 'Payment',
   Purchase: 'Expense', TimeActivity: 'Time', JournalEntry: 'Journal', Bill: 'Bill', Vendor: 'Vendor',
@@ -2265,7 +2264,6 @@ function QboList({ rows, type, open, setOpen }) {
         <span style={th}>{nameCol}</span>
         <span style={{ ...th, textAlign: 'right' }}>{type === 'TimeActivity' ? 'Hours' : 'Amount'}</span>
         <span style={{ ...th, textAlign: 'right' }}>Status</span>
-        <span style={{ ...th, textAlign: 'right' }}>Action</span>
       </div>
 
       {rows.map((r) => {
@@ -2291,21 +2289,7 @@ function QboList({ rows, type, open, setOpen }) {
                   ? <span style={{ fontSize: 11.5, fontWeight: 600, color: '#8A6D1F' }}>Saving…</span>
                   : <span style={{ fontSize: 11.5, fontWeight: 700, color: st.c }}>{st.t}</span>}
               </span>
-              <button onClick={() => setOpen(open === r.key ? null : r.key)} title="Show the API payload"
-                style={{ justifySelf: 'end', border: `1px solid ${QBLINE}`, background: open === r.key ? '#EDEEF1' : '#fff', borderRadius: 3, padding: '3px 7px', fontSize: 11, color: '#6B6C72', cursor: 'pointer', fontFamily: 'ui-monospace, monospace' }}>
-                {'{ }'}
-              </button>
             </div>
-            {open === r.key && (
-              <div style={{ borderTop: `1px solid ${QBLINE}` }}>
-                <div style={{ padding: '7px 16px', background: '#FAFAFB', fontSize: 11.5, color: '#6B6C72' }}>
-                  What the portal sent to the QuickBooks API
-                </div>
-                <pre style={{ margin: 0, padding: '12px 16px 16px', background: '#0F1720', color: '#CFE9C4', fontSize: 11.5, lineHeight: 1.55, overflowX: 'auto', fontFamily: 'ui-monospace, SFMono-Regular, Menlo, monospace' }}>
-                  {JSON.stringify(r.payload, null, 2)}
-                </pre>
-              </div>
-            )}
           </div>
         )
       })}

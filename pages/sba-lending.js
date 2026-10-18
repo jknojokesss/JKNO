@@ -54,6 +54,10 @@ export default function SbaLending() {
   const toCall = leads.filter((l) => l.stage === 'tocall')
   const followUp = leads.filter((l) => l.stage === 'followup')
   const disbursed = deals.reduce((s, d) => s + Number(d.amount || 0), 0)
+  const weightedAvgRate =
+    disbursed > 0
+      ? (deals.reduce((s, d) => s + Number(d.amount || 0) * Number(d.rate || 0), 0) / disbursed).toFixed(2) + '%'
+      : '—'
   const feesYtd = fees.reduce((s, f) => s + Number(f.amount || 0), 0)
 
   const markCalled = (id) => setLeads((p) => p.map((l) => (l.id === id ? { ...l, stage: 'followup', last: 'just now' } : l)))
@@ -111,7 +115,7 @@ export default function SbaLending() {
             <div style={{ fontFamily: DEMO_MONO, fontSize: '9px', color: '#304A60', lineHeight: 1.6 }}>
               SAMPLE DASHBOARD<br /><span style={{ color: GREEN }}>JK No Jokes Financials</span>
             </div>
-            <a href={BOOK} target="_blank" rel="noopener noreferrer" style={{ display: 'inline-block', marginTop: '10px', background: GREEN, color: '#fff', textDecoration: 'none', borderRadius: '5px', padding: '7px 12px', fontFamily: DEMO_MONO, fontSize: '10px', letterSpacing: '1px' }}>BUILT BY JK →</a>
+            <a href={BOOK} target="_blank" rel="noopener noreferrer" style={{ display: 'inline-block', marginTop: '10px', background: GREEN, color: '#fff', textDecoration: 'none', borderRadius: '5px', padding: '7px 12px', fontFamily: DEMO_MONO, fontSize: '10px', letterSpacing: '1px' }}>Book a call</a>
           </div>
         </aside>
 
@@ -151,8 +155,7 @@ export default function SbaLending() {
 
             {/* To call — first contact */}
             <div style={card}>
-              <div style={{ ...serif, fontSize: '19px', fontWeight: 600, color: INK }}>🆕 To call — first contact <span style={{ fontSize: '13px', color: MUTED }}>({toCall.length})</span></div>
-              <div style={{ fontFamily: DEMO_MONO, fontSize: '10px', color: MUTED, marginBottom: '10px' }}>New leads you haven't reached yet — hit "Called" to move them to follow-up</div>
+              <div style={{ ...serif, fontSize: '19px', fontWeight: 600, color: INK }}>To call <span style={{ fontSize: '13px', color: MUTED }}>({toCall.length})</span></div>
               <div style={{ overflowX: 'auto' }}>
                 <table style={{ width: '100%', borderCollapse: 'collapse', minWidth: '620px' }}>
                   <thead><tr>{['LEAD', 'CONTACT', 'NOTE', ''].map((h) => <th key={h} style={th}>{h}</th>)}</tr></thead>
@@ -173,8 +176,7 @@ export default function SbaLending() {
 
             {/* Follow up */}
             <div style={card}>
-              <div style={{ ...serif, fontSize: '19px', fontWeight: 600, color: INK }}>📞 Follow up — already called <span style={{ fontSize: '13px', color: MUTED }}>({followUp.length})</span></div>
-              <div style={{ fontFamily: DEMO_MONO, fontSize: '10px', color: MUTED, marginBottom: '10px' }}>People you've talked to — circle back and keep them warm</div>
+              <div style={{ ...serif, fontSize: '19px', fontWeight: 600, color: INK, marginBottom: '10px' }}>Follow up <span style={{ fontSize: '13px', color: MUTED }}>({followUp.length})</span></div>
               <div style={{ overflowX: 'auto' }}>
                 <table style={{ width: '100%', borderCollapse: 'collapse', minWidth: '620px' }}>
                   <thead><tr>{['LEAD', 'CONTACT', 'LAST SPOKE', 'NOTE'].map((h) => <th key={h} style={th}>{h}</th>)}</tr></thead>
@@ -201,7 +203,7 @@ export default function SbaLending() {
             <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
               <Kpi k="LOANS DISBURSED" v={deals.length} sub="Active" />
               <Kpi k="TOTAL DISBURSED" v={usd0(disbursed)} sub="Across all deals" color={GREEN} />
-              <Kpi k="AVG RATE" v={deals.length ? (deals.reduce((s, d) => s + Number(d.rate || 0), 0) / deals.length).toFixed(2) + '%' : '—'} sub="Weighted later" />
+              <Kpi k="AVG RATE" v={weightedAvgRate} />
             </div>
             <div style={card}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px', flexWrap: 'wrap', gap: '8px' }}>
@@ -256,7 +258,7 @@ export default function SbaLending() {
             </div>
             <div style={card}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px', flexWrap: 'wrap', gap: '8px' }}>
-                <div><div style={{ ...serif, fontSize: '20px', fontWeight: 600, color: INK }}>Fees brought in</div><div style={{ fontFamily: DEMO_MONO, fontSize: '10px', color: MUTED }}>Log every fee you earn — total tracks itself</div></div>
+                <div><div style={{ ...serif, fontSize: '20px', fontWeight: 600, color: INK }}>Fees brought in</div><div style={{ fontFamily: DEMO_MONO, fontSize: '10px', color: MUTED }}>Fees this year</div></div>
                 <button onClick={() => setAddingFee((a) => !a)} style={addBtn(addingFee)}>{addingFee ? '✕ CANCEL' : '+ ADD FEE'}</button>
               </div>
               {addingFee && (
@@ -312,15 +314,10 @@ export default function SbaLending() {
           </div>
         )}
 
-        {/* CTA — referral angle */}
-        <div style={{ marginTop: '28px', textAlign: 'center', background: CARD, border: '1px solid #DCE3EB', borderRadius: '10px', padding: '30px' }}>
-          <div style={{ ...serif, fontSize: '26px', fontWeight: 600, color: INK }}>Got a client who needs loan-ready books?</div>
-          <p style={{ color: MUTED, fontSize: '14px', margin: '8px auto 18px', maxWidth: '480px', lineHeight: 1.6 }}>
-            I built this for you. I also clean up small-business books and build dashboards like this — exactly what your borrowers need to qualify and stay on top of their numbers. Send them my way.
-          </p>
-          <a href={BOOK} target="_blank" rel="noopener noreferrer" style={{ background: GREEN, color: '#fff', textDecoration: 'none', padding: '14px 30px', borderRadius: '4px', fontFamily: DEMO_MONO, fontSize: '12px', letterSpacing: '2px' }}>LET'S TALK →</a>
-          <div style={{ marginTop: '14px', fontFamily: DEMO_MONO, fontSize: '11px', color: FAINT }}>Jonathan Katz · JK No Jokes Financials · jk@jknojokes.com</div>
-        </div>
+        <p style={{ marginTop: '28px', fontSize: '14px', color: MUTED, lineHeight: 1.6 }}>
+          Your borrowers need clean books to qualify. I build these portals and clean up the books.{' '}
+          <a href={BOOK} target="_blank" rel="noopener noreferrer" style={{ color: GREEN, fontWeight: 600 }}>Book a call</a>.
+        </p>
         </main>
       </div>
     </>

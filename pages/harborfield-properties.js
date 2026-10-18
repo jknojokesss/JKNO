@@ -159,7 +159,7 @@ export default function HarborfieldProperties() {
           {tab === 'delinquent' && (
             <>
               <p style={{ fontSize: '14px', color: MUTED, lineHeight: 1.6, marginBottom: '16px', maxWidth: '560px' }}>
-                Every late tenant has a next step — nobody falls through. Bayside Court is {money(8200)} of your {money(totalDelinquent)} delinquency.
+                Every late tenant has a next step. Bayside Court is {money(8200)} of your {money(totalDelinquent)} delinquency.
               </p>
               <div style={{ background: '#fff', border: `1px solid ${BORDER}`, borderRadius: '8px', overflow: 'hidden' }}>
                 {DELINQUENT.map((d) => (

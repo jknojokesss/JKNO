@@ -187,29 +187,6 @@ export default function RoofingPortal({ demoEmbed = false }) {
 
       {!embedded && <DemoLobby />}
 
-      {/* SIGNAL use 1 of 3: the top bar, matching the prospect's site */}
-      <div
-        className="no-print"
-        style={{
-          position: 'sticky',
-          top: embedded ? 0 : 38,
-          zIndex: 10,
-          background: SIGNAL,
-          color: WHITE,
-          height: '34px',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-          padding: '0 18px',
-          fontSize: '10.5px',
-          fontWeight: 600,
-          letterSpacing: '.12em',
-        }}
-      >
-        <span>{BIZ.toUpperCase()} — MANAGEMENT PORTAL</span>
-        <span className="topbar-sub" style={{ fontWeight: 500, letterSpacing: '.08em' }}>DEMO · SYNTHETIC DATA · AS OF AUG 11, 2026</span>
-      </div>
-
       <div className="mobilenav no-print">
         {!embedded && <button onClick={() => setIntro(true)} style={{ fontFamily: serif, fontStyle: 'italic' }}>The 4 questions</button>}
         {NAV.map((n) => (
@@ -222,7 +199,6 @@ export default function RoofingPortal({ demoEmbed = false }) {
         <aside className="side no-print">
           <div style={{ padding: '0 24px 18px', borderBottom: '1px solid rgba(201,196,184,.15)', marginBottom: '10px' }}>
             <div style={{ fontFamily: serif, fontSize: '18px', fontWeight: 700, color: WHITE, lineHeight: 1.3 }}>Riverstone<br />Roofing</div>
-            <div style={{ fontSize: '9.5px', color: STONE, letterSpacing: '.14em', marginTop: '7px' }}>REGIONAL · FOUR-STATE FOOTPRINT</div>
           </div>
           <button className="nbtn" onClick={() => setIntro(true)} style={{ fontFamily: serif, fontSize: '13.5px', fontStyle: 'italic' }}>The four questions ↺</button>
           <div style={{ margin: '8px 24px 10px', borderTop: '1px solid rgba(201,196,184,.15)' }} />
@@ -237,6 +213,7 @@ export default function RoofingPortal({ demoEmbed = false }) {
         </aside>
 
         <main className="main">
+          <p className="no-print" style={{ fontSize: '11px', color: MUTED, marginBottom: '16px' }}>Sample — fictitious numbers · as of Aug 11, 2026</p>
           {intro && !embedded && M && <Intro M={M} onClose={closeIntro} />}
           {err && <div className="card" style={{ padding: '28px', color: INK }}>Couldn&rsquo;t load demo data: {err}</div>}
           {!err && !M && <div style={{ padding: '60px 0', color: MUTED, fontSize: '13px' }}>Loading job data…</div>}
@@ -251,9 +228,6 @@ export default function RoofingPortal({ demoEmbed = false }) {
               <span style={{ fontFamily: serif, fontSize: '16px', fontWeight: 600, color: INK }}>{NEXT[tab].q} →</span>
             </div>
           )}
-          {M && <div className="no-print" style={{ marginTop: '20px', paddingTop: '14px', borderTop: `1px solid ${RULE}`, fontSize: '11px', color: MUTED, lineHeight: 1.7 }}>
-            Nothing is typed into this portal and nothing posts from it. It reads AccuLynx (the job records) and QuickBooks (the books) and answers questions across both. That boundary is the point.
-          </div>}
         </main>
       </div>
     </>
@@ -493,13 +467,8 @@ function Intro({ M, onClose }) {
     <div style={{ position: 'fixed', inset: 0, background: 'rgba(26,30,36,.55)', zIndex: 60, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '18px', overflowY: 'auto' }}>
       <div className="card" style={{ maxWidth: '680px', width: '100%', padding: '30px 34px 26px', boxShadow: '0 24px 64px rgba(26,30,36,.35)' }}>
         <div style={{ fontSize: '10px', letterSpacing: '.16em', color: MUTED, fontWeight: 700, marginBottom: '12px' }}>{BIZ.toUpperCase()} — A WORKING DEMO</div>
-        <h1 style={{ fontSize: '25px', lineHeight: 1.25, marginBottom: '10px' }}>Four questions your software can&rsquo;t answer.</h1>
-        <p style={{ fontSize: '13.5px', color: SLATE, lineHeight: 1.65, marginBottom: '18px', maxWidth: '560px' }}>
-          AccuLynx runs your jobs. QuickBooks keeps your books. Both are doing their job — and neither one can answer the four questions below, because the answers live across both.
-          This portal reads the two systems and answers them. <b style={{ color: INK }}>Nobody types anything in here.</b>
-        </p>
-        <p style={{ fontSize: '11.5px', color: MUTED, lineHeight: 1.6, marginBottom: '18px', maxWidth: '560px' }}>
-          Built as a demo for {BIZ} — every number on these screens is invented. The questions aren&rsquo;t.
+        <p style={{ fontSize: '15px', color: INK, lineHeight: 1.55, marginBottom: '18px', maxWidth: '560px', fontWeight: 600 }}>
+          AccuLynx runs the jobs. QuickBooks keeps the books. Neither one answers these four.
         </p>
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '10px', marginBottom: '18px' }}>
           {QS.map((x, i) => (
@@ -509,9 +478,8 @@ function Intro({ M, onClose }) {
             </div>
           ))}
         </div>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '12px', flexWrap: 'wrap' }}>
-          <div style={{ fontSize: '11.5px', color: MUTED }}>Then the fifth screen: the package you&rsquo;d hand a buyer. Click anything — it&rsquo;s all live.</div>
-          <button className="ghost" style={{ background: INK, color: WHITE, border: 'none', padding: '9px 18px', fontSize: '11px' }} onClick={() => onClose('jobs')}>START WITH QUESTION 1 →</button>
+        <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
+          <button className="ghost" style={{ background: INK, color: WHITE, border: 'none', padding: '9px 18px', fontSize: '11px' }} onClick={() => onClose('jobs')}>Question 1</button>
         </div>
       </div>
     </div>
@@ -608,7 +576,7 @@ function JobMargin({ M, groupBy, setGroupBy, jobFilter, setJobFilter, expanded, 
   return (
     <div>
       <Header q="Which jobs are losing money?"
-        lead={`${openFlagged.length} of your ${M.open.length} open jobs are pacing below estimate — ${moneyK(marginAtRisk)} of margin, still catchable.`}
+        lead={`${openFlagged.length} of your ${M.open.length} open jobs are pacing below estimate: ${moneyK(marginAtRisk)} of margin at risk.`}
         sub="Estimated vs. actual cost, projected to completion at the current run rate — flagged while the job is still open, not three months after closeout." />
       <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap', marginBottom: '18px' }}>
         <Kpi k="OPEN JOBS" v={M.open.length} sub={money0(M.open.reduce((s, j) => s + j.cwc, 0)) + ' under contract'} onClick={() => setJobFilter('open')} />

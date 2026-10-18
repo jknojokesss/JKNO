@@ -147,9 +147,6 @@ export default function NorthlineGlobal({ demoEmbed = false }) {
                 <Kpi k="Open POs" v="5" sub="2 awaiting receipt" />
                 <Kpi k="Customs hold" v="1" sub="PO-2830" color={RED} />
               </div>
-              <p style={{ fontSize: '14px', color: MUTED, lineHeight: 1.6, marginBottom: '16px', maxWidth: '580px' }}>
-                Every container tracked from factory to warehouse — freight, duty, and brokerage rolled into landed cost before goods hit the shelf.
-              </p>
               {PIPELINE.map((p) => (
                 <div key={p.id} style={{ background: '#fff', border: `1px solid ${BORDER}`, borderRadius: '8px', padding: '14px 16px', marginBottom: '10px' }}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '12px', flexWrap: 'wrap' }}>
@@ -283,7 +280,7 @@ export default function NorthlineGlobal({ demoEmbed = false }) {
             <div style={{ background: '#fff', border: `1px solid ${BORDER}`, borderRadius: '8px', padding: '20px 22px', maxWidth: '640px' }}>
               <div style={{ fontFamily: DEMO_HEAD, fontSize: '20px', fontWeight: 600, color: INK, marginBottom: '8px' }}>QuickBooks at month-end</div>
               <p style={{ fontSize: '13px', color: MUTED, lineHeight: 1.6, margin: '0 0 16px' }}>
-                Landed cost on each PO hits <strong style={{ color: INK }}>Inventory Asset</strong> in QBO. Sales on the Orders tab relieve COGS using those unit costs — not a flat COGS %. The portal shows margin during the month; close ties inventory and P&amp;L to the official statement.
+                Landed cost on each PO hits <strong style={{ color: INK }}>Inventory Asset</strong> in QBO. Sales on the Orders tab relieve COGS using those unit costs — not a flat COGS %. The portal shows margin during the month; close ties inventory and P&L to the official statement.
               </p>
               <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '13px' }}>
                 <thead>
@@ -308,7 +305,7 @@ export default function NorthlineGlobal({ demoEmbed = false }) {
                 </tbody>
               </table>
               <p style={{ fontSize: '11px', color: MUTED, marginTop: '14px', lineHeight: 1.5 }}>
-                Nightly sync on P&amp;L, balance sheet, and GL — month-end inventory JE posts when you approve.
+                Nightly sync on P&L, balance sheet, and GL — month-end inventory JE posts when you approve.
               </p>
             </div>
           )}

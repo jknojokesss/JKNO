@@ -846,7 +846,7 @@ export default function Demo({ demoEmbed = false }) {
                     <span style={{ color: RED }}>{m0(missVal)}</span> you haven&rsquo;t been paid for <TieMark />
                   </h3>
                   <p style={{ fontSize: '12px', color: MUTED, marginBottom: '12px', lineHeight: 1.5 }}>
-                    Across {R.filter(c => c.variance > 0).length} stores · tap a row to open that account
+                    Across {R.filter(c => c.variance > 0).length} stores · Open a row to see the account.
                   </p>
                   {R.filter(c => c.variance > 0).sort((a, b) => b.varVal - a.varVal).map((c, i) => (
                     <div key={c.id} onClick={() => { setExpanded(c.id); setScrollConsignId(c.id) }} role="button" tabIndex={0} onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setExpanded(c.id); setScrollConsignId(c.id) } }} className="sm-click sm-tap-row" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '10px 4px', borderTop: i ? `1px solid ${CREAM}` : 'none', cursor: 'pointer', gap: '8px', flexWrap: 'wrap', minHeight: '40px', borderRadius: '8px' }}>
@@ -859,6 +859,8 @@ export default function Demo({ demoEmbed = false }) {
                   ))}
                 </div>
               )}
+
+              <p style={{ fontSize: '13px', color: MUTED, marginBottom: '14px', lineHeight: 1.5 }}>Cycle 1. Close a store&apos;s cycle to start a new count.</p>
 
               {!adding ? (
                 <button onClick={() => setAdding(true)} style={{ width: '100%', background: CHAR, color: CREAM, border: 'none', borderRadius: '11px', padding: '13px', ...btn, marginBottom: '16px' }}>+ Add a consignment partner</button>
@@ -901,9 +903,6 @@ export default function Demo({ demoEmbed = false }) {
                           </div>
                           <div style={{ fontSize: '12px', color: INK, marginTop: '5px', fontWeight: 500 }}>
                             {onShelf} on shelf{c.variance > 0 ? ` · ${c.variance} unaccounted` : c.variance === 0 && c.counted != null ? ' · counts match' : ''}
-                          </div>
-                          <div style={{ fontSize: '11px', color: MUTED, marginTop: '4px' }}>
-                            Cycle {c.cycle || 1}
                           </div>
                         </div>
                         <div className="jm-store-chips" style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '6px' }}>

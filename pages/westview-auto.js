@@ -337,7 +337,7 @@ export default function WestviewAutoPortal({ demoEmbed = false }) {
   }, [M, fundingFilter])
 
   const fundingTableTitle = {
-    attention: 'Needs attention',
+    attention: 'Waiting on the bank',
     all: 'Waiting on bank',
     missing: 'Lender still needs paperwork',
     slow: 'Slow — commission reduced',
@@ -364,15 +364,16 @@ export default function WestviewAutoPortal({ demoEmbed = false }) {
           *{box-sizing:border-box;margin:0;padding:0}
           ${DEMO_RENDER_HINTS.replace(/font-family:[^;]+;/, `font-family:${sans};`)}
           body{background:${PAPER};font-family:${sans};color:${INK}}
-          html.demo-embed .bu-foot{display:none}
-          .bl-shell{display:flex;min-height:calc(100vh - ${embedded ? 0 : 72}px);font-family:${sans}}
+          html{overflow-x:hidden}
+          .bl-shell{display:flex;flex-direction:column;min-height:calc(100vh - ${embedded ? 0 : 72}px);font-family:${sans};max-width:100%;overflow-x:hidden}
+          .bl-body{display:flex;flex:1;min-width:0;width:100%}
           .bl-side{width:232px;flex-shrink:0;background:${SIDEBAR};border-right:1px solid ${RULE};display:flex;flex-direction:column;padding:24px 16px 20px;position:sticky;top:${embedded ? 0 : 72}px;height:calc(100vh - ${embedded ? 0 : 72}px)}
           .bl-nav{width:100%;text-align:left;padding:10px 12px;border-radius:8px;border:none;background:transparent;color:${MUTED};font-size:14px;font-weight:500;cursor:pointer;margin-bottom:4px;font-family:${sans}}
           .bl-nav:hover{background:${PAPER};color:${INK}}
           .bl-nav.on{background:#F5F0E6;color:${INK};font-weight:600;box-shadow:inset 3px 0 0 ${SIGNAL}}
-          .bl-main{flex:1;min-width:0;padding:32px 32px 56px;max-width:1100px}
-          .bl-mtabs{display:none;position:sticky;top:${embedded ? 0 : 72}px;z-index:20;background:${WHITE};border-bottom:1px solid ${RULE};padding:8px 12px;gap:8px;overflow-x:auto}
-          .bl-mtab{flex-shrink:0;border:1px solid ${RULE};border-radius:999px;padding:8px 16px;font-size:13px;font-weight:500;font-family:${sans};cursor:pointer;background:${WHITE};color:${MUTED}}
+          .bl-main{flex:1;min-width:0;padding:32px 32px 56px;max-width:1100px;width:100%}
+          .bl-mtabs{display:none;position:sticky;top:${embedded ? 0 : 72}px;z-index:20;background:${WHITE};border-bottom:1px solid ${RULE};padding:8px 12px;gap:8px;overflow-x:auto;-webkit-overflow-scrolling:touch;width:100%;max-width:100%}
+          .bl-mtab{flex-shrink:0;border:1px solid ${RULE};border-radius:999px;padding:8px 16px;font-size:13px;font-weight:500;font-family:${sans};cursor:pointer;background:${WHITE};color:${MUTED};white-space:nowrap}
           .bl-mtab.on{background:#F5F0E6;border-color:${SIGNAL};color:${INK};font-weight:600}
           .bl-chev{transition:transform .15s;display:inline-block;color:${FAINT}}
           .bl-chev.open{transform:rotate(90deg)}
@@ -380,6 +381,7 @@ export default function WestviewAutoPortal({ demoEmbed = false }) {
             .bl-side{display:none}
             .bl-mtabs{display:flex}
             .bl-main{padding:20px 16px 48px}
+            .bl-kpi-row .bl-kpi-card{flex:1 1 calc(50% - 6px);min-width:0}
           }
         `}</style>
       </Head>
@@ -395,6 +397,7 @@ export default function WestviewAutoPortal({ demoEmbed = false }) {
           ))}
         </div>
 
+        <div className="bl-body">
         <aside className="bl-side">
           <div style={{ paddingBottom: '20px' }}>
             <div style={{ fontSize: '21px', fontWeight: 700, letterSpacing: '-0.02em', color: INK }}>{BIZ}</div>
@@ -407,30 +410,12 @@ export default function WestviewAutoPortal({ demoEmbed = false }) {
               </button>
             ))}
           </nav>
-          <div
-            style={{
-              borderTop: `1px solid ${RULE}`,
-              paddingTop: '16px',
-              marginTop: '8px',
-              fontSize: '12px',
-              color: MUTED,
-              lineHeight: 1.55,
-            }}
-          >
-            <div style={{ fontWeight: 700, color: INK, fontSize: '13px', marginBottom: '8px' }}>Where does the data come from?</div>
-            <p style={{ margin: '0 0 10px' }}>
-              <strong style={{ color: SLATE }}>Live store:</strong> Deals and stages feed from your desking system and finance office — sales does not type them in here. Bank
-              timing and missing items come from lender / F&amp;I status. Book totals sync from QuickBooks. Read-only view.
-            </p>
-            <p style={{ margin: 0, color: FAINT }}>
-              <strong style={{ color: MUTED }}>This sample:</strong> Fake deals in the demo file. Nothing connected.
-            </p>
-            <div style={{ marginTop: '12px', color: FAINT }}>As of {fmtD(AS_OF)}</div>
-          </div>
         </aside>
 
         <main className="bl-main">
           <header style={{ marginBottom: '24px' }}>
+            <p style={{ fontSize: '12px', color: FAINT, marginBottom: '10px' }}>Sample — fictitious numbers · as of {fmtD(AS_OF)}</p>
+            <p style={{ fontSize: '13px', color: MUTED, marginBottom: '14px', lineHeight: 1.5 }}>Deals come from the store&apos;s systems. QuickBooks syncs nightly.</p>
             <h1 style={{ fontSize: '26px', fontWeight: 700, color: INK, letterSpacing: '-0.02em', lineHeight: 1.2 }}>
               {tab === 'funding' && 'When do you get paid?'}
               {tab === 'desk' && 'Where each deal stands'}
@@ -453,10 +438,7 @@ export default function WestviewAutoPortal({ demoEmbed = false }) {
 
           {tab === 'funding' && (
             <>
-              <p style={{ margin: '0 0 14px', fontSize: '13px', color: MUTED, maxWidth: '40rem' }}>
-                Tap a number to filter the list. On a real build these counts update when your store systems sync — not when someone edits this page.
-              </p>
-              <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap', marginBottom: '20px' }}>
+              <div className="bl-kpi-row" style={{ display: 'flex', gap: '12px', flexWrap: 'wrap', marginBottom: '20px' }}>
                 {[
                   { id: 'all', k: 'Waiting on bank', v: M.openCit.length, sub: money0(M.pendingCommission) + ' commission pending' },
                   { id: 'missing', k: 'Lender still needs', v: M.withStips.length, sub: 'Paperwork missing', color: RED },
@@ -482,10 +464,11 @@ export default function WestviewAutoPortal({ demoEmbed = false }) {
                         setFundingFilter(x.id)
                         setExpanded(null)
                       }}
+                      className="bl-kpi-card"
                       style={{
                         ...card,
                         flex: '1 1 140px',
-                        minWidth: '140px',
+                        minWidth: '0',
                         textAlign: 'left',
                         cursor: 'pointer',
                         border: active ? `2px solid ${SIGNAL}` : `1px solid ${RULE}`,
@@ -496,14 +479,6 @@ export default function WestviewAutoPortal({ demoEmbed = false }) {
                       <div style={lbl}>{x.k}</div>
                       <div style={{ fontSize: '28px', fontWeight: 700, color: x.color || INK, marginTop: '4px', ...tabNums }}>{x.v}</div>
                       <div style={{ fontSize: '13px', color: MUTED, marginTop: '4px' }}>{x.sub}</div>
-                      {x.id !== 'paid' && (
-                        <div style={{ fontSize: '11px', color: active ? SIGNAL : FAINT, marginTop: '8px', fontWeight: 600 }}>
-                          {active ? 'Showing below' : 'Click to filter'}
-                        </div>
-                      )}
-                      {x.id === 'paid' && (
-                        <div style={{ fontSize: '11px', color: FAINT, marginTop: '8px', fontWeight: 600 }}>Click → Pipeline</div>
-                      )}
                     </button>
                   )
                 })}
@@ -518,7 +493,7 @@ export default function WestviewAutoPortal({ demoEmbed = false }) {
                       onClick={() => setFundingFilter('attention')}
                       style={{ fontSize: '13px', fontWeight: 600, color: SIGNAL, background: 'none', border: 'none', cursor: 'pointer', textDecoration: 'underline' }}
                     >
-                      Back to needs attention
+                      Back to main list
                     </button>
                   )}
                 </div>
@@ -595,7 +570,6 @@ export default function WestviewAutoPortal({ demoEmbed = false }) {
           {tab === 'desk' && (
             <>
               <p style={{ margin: '0 0 8px', fontSize: '15px', color: MUTED }}>{M.unitsMtd} cars sold this month — from first quote to bank paid.</p>
-              <p style={{ margin: '0 0 16px', fontSize: '13px', color: FAINT }}>Stages update from your desking / DMS feed — not typed on this screen.</p>
               <div style={{ display: 'grid', gap: '14px' }}>
                 {['quote', 'fi', 'cit', 'funded'].map((stage) => {
                   const label = { quote: 'Working the deal', fi: 'In finance office', cit: 'Sold — waiting on bank', funded: 'Bank paid this month' }[stage]
@@ -646,7 +620,6 @@ export default function WestviewAutoPortal({ demoEmbed = false }) {
               <p style={{ margin: '0 0 8px', fontSize: '15px', color: MUTED }}>
                 Desk profit this month: <strong style={{ color: INK }}>{money0(M.frontMtd)}</strong> (mostly leases — lower dollars per car).
               </p>
-              <p style={{ margin: '0 0 16px', fontSize: '13px', color: FAINT }}>Rolled up from the same deal feed as Pipeline — not a separate spreadsheet.</p>
               <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap', marginBottom: '20px' }}>
                 <div style={{ ...card, flex: 1, minWidth: '200px' }}>
                   <div style={lbl}>Avg desk profit · lease</div>
@@ -707,7 +680,7 @@ export default function WestviewAutoPortal({ demoEmbed = false }) {
                 {[
                   { k: 'Sold · bank not paid', v: money0(GL_SNAPSHOT.citBalance), sub: `${money0(GL_SNAPSHOT.citOver10)} over 10 days` },
                   { k: 'Inventory loan balance', v: money0(GL_SNAPSHOT.floorPlan), sub: 'What you owe on cars on the lot' },
-                  { k: 'Sales profit (month)', v: money0(GL_SNAPSHOT.mtdVehicleGross), sub: 'From the P&amp;L' },
+                  { k: 'Sales profit (month)', v: money0(GL_SNAPSHOT.mtdVehicleGross), sub: 'From the P&L' },
                   { k: 'Finance product income', v: money0(GL_SNAPSHOT.mtdFiIncome), sub: 'Warranties, gap, etc.' },
                 ].map((x) => (
                   <div key={x.k} style={{ ...card, flex: '1 1 160px' }}>
@@ -741,10 +714,8 @@ export default function WestviewAutoPortal({ demoEmbed = false }) {
             </>
           )}
 
-          <p className="bu-foot" style={{ marginTop: '32px', fontSize: '12px', color: FAINT, maxWidth: '36rem', lineHeight: 1.5 }}>
-            Westview Auto Group is fictitious. Sample deals are hard-coded for the demo; a production portal reads your systems and QuickBooks — no double entry here.
-          </p>
         </main>
+        </div>
       </div>
     </>
   )

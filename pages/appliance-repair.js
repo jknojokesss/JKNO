@@ -137,7 +137,7 @@ export default function ApplianceRepair() {
             <div style={{ fontFamily: 'DM Mono, monospace', fontSize: '9px', color: '#445058', lineHeight: 1.6 }}>
               SAMPLE DASHBOARD<br /><span style={{ color: ORANGE }}>JK No Jokes Financials</span>
             </div>
-            <a href={BOOK} target="_blank" rel="noopener noreferrer" style={{ display: 'inline-block', marginTop: '10px', background: ORANGE, color: '#fff', textDecoration: 'none', borderRadius: '5px', padding: '7px 12px', fontFamily: 'DM Mono, monospace', fontSize: '10px', letterSpacing: '1px' }}>GET THIS BUILT →</a>
+            <a href={BOOK} target="_blank" rel="noopener noreferrer" style={{ display: 'inline-block', marginTop: '10px', background: ORANGE, color: '#fff', textDecoration: 'none', borderRadius: '5px', padding: '7px 12px', fontFamily: 'DM Mono, monospace', fontSize: '10px', letterSpacing: '1px' }}>Book a call</a>
           </div>
         </aside>
 
@@ -164,7 +164,7 @@ export default function ApplianceRepair() {
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '8px', marginBottom: '12px' }}>
                 <div>
                   <div style={{ ...serif, fontSize: '20px', fontWeight: 600, color: INK }}>Job board</div>
-                  <div style={{ fontFamily: 'DM Mono, monospace', fontSize: '10px', color: MUTED }}>Tap a job to log parts &amp; labor as you go — cost and profit update live</div>
+                  <div style={{ fontFamily: 'DM Mono, monospace', fontSize: '10px', color: MUTED }}>Tap a job to add parts and hours.</div>
                 </div>
                 <button onClick={() => setAdding((a) => !a)} style={{ background: adding ? '#E2E7ED' : ORANGE, color: adding ? MUTED : '#fff', border: 'none', borderRadius: '5px', padding: '9px 14px', fontFamily: 'DM Mono, monospace', fontSize: '11px', letterSpacing: '1px', cursor: 'pointer' }}>
                   {adding ? '✕ CANCEL' : '+ NEW JOB'}
@@ -255,9 +255,6 @@ export default function ApplianceRepair() {
                     })}
                   </tbody>
                 </table>
-              </div>
-              <div style={{ fontFamily: 'DM Mono, monospace', fontSize: '10px', color: FAINT, marginTop: '10px' }}>
-                Tap a job to expand it, then add the parts you bought and the hours you put in. Every dollar rolls into job profit — and your books.
               </div>
             </div>
           </div>
@@ -368,15 +365,10 @@ export default function ApplianceRepair() {
           )
         })()}
 
-        {/* CTA */}
-        <div style={{ marginTop: '28px', textAlign: 'center', background: CARD, border: '1px solid #DDE3EA', borderRadius: '10px', padding: '30px' }}>
-          <div style={{ ...serif, fontSize: '26px', fontWeight: 600, color: INK }}>Want this for your shop?</div>
-          <p style={{ color: MUTED, fontSize: '14px', margin: '8px auto 18px', maxWidth: '470px', lineHeight: 1.6 }}>
-            This is a sample. I'd build you the real thing — every job, tech, part, and dollar in one place, so you always know what each job actually made you.
-          </p>
-          <a href={BOOK} target="_blank" rel="noopener noreferrer" style={{ background: BLUE, color: '#fff', textDecoration: 'none', padding: '14px 30px', borderRadius: '4px', fontFamily: 'DM Mono, monospace', fontSize: '12px', letterSpacing: '2px' }}>BOOK A FREE CALL →</a>
-          <div style={{ marginTop: '14px', fontFamily: 'DM Mono, monospace', fontSize: '11px', color: FAINT }}>Jonathan Katz · JK No Jokes Financials · jk@jknojokes.com</div>
-        </div>
+        <p style={{ marginTop: '28px', fontSize: '14px', color: MUTED, lineHeight: 1.6 }}>
+          Want this for your shop?{' '}
+          <a href={BOOK} target="_blank" rel="noopener noreferrer" style={{ color: BLUE, fontWeight: 600 }}>Book a call</a>.
+        </p>
         </main>
       </div>
     </>
