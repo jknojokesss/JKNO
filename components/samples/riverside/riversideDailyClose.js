@@ -15,22 +15,44 @@ export function classifySaleLine(order) {
   return 'tires'
 }
 
+function solveTaxableForRegister(registerSales) {
+  let taxable = round2(registerSales / (1 + TAX_RATE))
+  for (let i = 0; i < 25; i++) {
+    const tax = round2(taxable * TAX_RATE)
+    const gap = round2(registerSales - taxable - tax)
+    if (Math.abs(gap) < 0.005) return { taxable, tax }
+    taxable = round2(taxable + gap)
+  }
+  const tax = round2(taxable * TAX_RATE)
+  return { taxable: round2(registerSales - tax), tax }
+}
+
 function splitRegisterSales(orders) {
   const registerSales = round2(orders.reduce((s, o) => s + o.sale, 0))
-  let tires = 0
-  let service = 0
-  let other = 0
+  const parts = { tires: 0, service: 0, other: 0 }
   orders.forEach((o) => {
     const bucket = classifySaleLine(o)
-    const pretaxLine = Math.round(o.sale / (1 + TAX_RATE))
-    if (bucket === 'service') service += pretaxLine
-    else if (bucket === 'other') other += pretaxLine
-    else tires += pretaxLine
+    const pretaxLine = round2(o.sale / (1 + TAX_RATE))
+    if (bucket === 'service') parts.service += pretaxLine
+    else if (bucket === 'other') parts.other += pretaxLine
+    else parts.tires += pretaxLine
   })
-  let tax = round2((tires + service + other) * TAX_RATE)
-  const drift = round2(registerSales - tires - service - other - tax)
-  if (Math.abs(drift) >= 0.005) tax = round2(tax + drift)
-  return { registerSales, tires, service, other, tax }
+  parts.tires = round2(parts.tires)
+  parts.service = round2(parts.service)
+  parts.other = round2(parts.other)
+  const rawTaxable = round2(parts.tires + parts.service + parts.other)
+  const { taxable: targetTaxable, tax } = solveTaxableForRegister(registerSales)
+  if (rawTaxable < 0.01) {
+    return { registerSales, tires: 0, service: 0, other: 0, tax }
+  }
+  let tires = round2((parts.tires / rawTaxable) * targetTaxable)
+  let service = round2((parts.service / rawTaxable) * targetTaxable)
+  let other = round2(targetTaxable - tires - service)
+  const taxable = round2(tires + service + other)
+  const fix = round2(targetTaxable - taxable)
+  if (Math.abs(fix) >= 0.005) tires = round2(tires + fix)
+  const taxExact = round2((round2(tires + service + other)) * TAX_RATE)
+  return { registerSales, tires, service, other, tax: taxExact }
 }
 
 function statusForOverShort(overShort) {

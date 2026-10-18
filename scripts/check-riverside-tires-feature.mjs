@@ -15,6 +15,8 @@ const root = path.dirname(fileURLToPath(import.meta.url))
 const dataPath = path.join(root, '../data/riverside-tires.json')
 const data = JSON.parse(fs.readFileSync(dataPath, 'utf8'))
 
+const round2 = (n) => Math.round(n * 100) / 100
+
 const failures = []
 const ok = (label, cond) => {
   if (!cond) failures.push(label)
@@ -67,9 +69,11 @@ model.days.forEach((day) => {
   ok(`JE sales ${day.date}`, Math.abs(je.salesCredits - je.registerSales) < 0.05)
   const visibleOs = Math.round((day.cashDrawer.cashToDeposit + day.cardBatch.batchTotal - day.registerSales) * 100) / 100
   ok(`visible over/short ${day.date}`, Math.abs(visibleOs - day.overShort) < 0.02)
+  ok(`list cash is deposit ${day.date}`, Math.abs(day.cashDrawer.cashToDeposit - (day.cashDrawer.cashCounted - day.cashDrawer.startingCash)) < 0.02)
   const { tires, service, other, tax } = day.salesSplit
-  ok(`split whole dollars ${day.date}`, [tires, service, other].every((n) => Math.abs(n - Math.round(n)) < 0.001))
-  ok(`split sums ${day.date}`, Math.abs(tires + service + other + tax - day.registerSales) < 0.02)
+  const taxable = round2(tires + service + other)
+  ok(`split sums ${day.date}`, Math.abs(taxable + tax - day.registerSales) < 0.02)
+  ok(`tax is 7% ${day.date}`, tax === round2(taxable * 0.07))
   const osLine = je.lines.find((l) => l.account === 'Cash over / short')
   if (day.status === 'Short') ok(`JE short line ${day.date}`, osLine && osLine.debit > 0)
   if (day.status === 'Over') ok(`JE over line ${day.date}`, osLine && osLine.credit > 0)

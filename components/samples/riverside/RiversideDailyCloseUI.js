@@ -61,7 +61,7 @@ export function DailyCloseSection({ model, onSelectDay }) {
             <tr>
               <th style={hcell()}>Date</th>
               <th style={hcell('right')}>Register</th>
-              <th style={hcell('right')}>Cash counted</th>
+              <th style={hcell('right')}>Cash</th>
               <th style={hcell('right')}>Card sales</th>
               <th style={hcell('right')}>Over / short</th>
               <th style={hcell()}>Status</th>
@@ -97,7 +97,7 @@ export function DailyCloseSection({ model, onSelectDay }) {
               <div className="rt-dclose-card-grid">
                 <span>Register</span>
                 <span>{fmtC(day.registerSales)}</span>
-                <span>Cash counted</span>
+                <span>Cash</span>
                 <span>{fmtC(day.cashDrawer.cashToDeposit)}</span>
                 <span>Card sales</span>
                 <span>{fmtC(day.cardBatch.batchTotal)}</span>
