@@ -58,6 +58,9 @@ export default function PrimalKrispFinancials({ card, lbl, big, btn, inp, KPI })
           {label}
           {drillable ? <span style={{ color: '#C9BBA0', fontSize: 11 }}> ›</span> : null}
         </span>
+        <span style={{ fontFamily: MONO, fontSize: 13, fontWeight: bold ? 700 : 400, color: cost ? RED : INK, width: 96, textAlign: 'right' }}>
+          {money(show)}
+        </span>
         {prev && (
           <span style={{ fontFamily: MONO, fontSize: 12, color: MUTED, width: 88, textAlign: 'right' }}>{money(showPrior)}</span>
         )}
@@ -66,9 +69,6 @@ export default function PrimalKrispFinancials({ card, lbl, big, btn, inp, KPI })
             {delta != null ? money(delta) : '—'}
           </span>
         )}
-        <span style={{ fontFamily: MONO, fontSize: 13, fontWeight: bold ? 700 : 400, color: cost ? RED : INK, width: 96, textAlign: 'right' }}>
-          {money(show)}
-        </span>
       </div>
     )
   }
@@ -128,9 +128,9 @@ export default function PrimalKrispFinancials({ card, lbl, big, btn, inp, KPI })
         {prev && (
           <div style={{ display: 'flex', padding: '0 6px 8px', gap: 8, fontSize: 10, color: MUTED, textTransform: 'uppercase', letterSpacing: '0.6px' }}>
             <span style={{ flex: 1 }} />
+            <span style={{ width: 96, textAlign: 'right' }}>This month</span>
             <span style={{ width: 88, textAlign: 'right' }}>Prior mo.</span>
             <span style={{ width: 72, textAlign: 'right' }}>Change</span>
-            <span style={{ width: 96, textAlign: 'right' }}>This month</span>
           </div>
         )}
 
