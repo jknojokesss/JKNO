@@ -27,11 +27,12 @@ body{background:${CREAM};font-family:${UI};color:${INK}}
 .md-t{font-family:${MONO};font-size:13px}
 .md-t-row{display:grid;grid-template-columns:var(--md-cols);align-items:center;padding:9px 6px;border-top:1px solid ${CREAM};border-radius:2px}
 .md-t-head{border-top:none;padding-top:0;padding-bottom:8px;align-items:end}
-.md-t-h{font-family:${UI};font-size:10px;font-weight:600;letter-spacing:.6px;text-transform:uppercase;color:${MUTED};text-align:right;line-height:1.25}
+.md-t-h{font-family:${UI};font-size:10px;font-weight:600;letter-spacing:.6px;text-transform:uppercase;color:${MUTED};text-align:right;line-height:1.25;white-space:nowrap}
 .md-t-head .md-t-name{font-family:${UI};font-size:10px;font-weight:600;letter-spacing:.6px;text-transform:uppercase;color:${MUTED}}
 .md-t-name{font-family:${UI};font-size:14px;color:${INK};min-width:0;line-height:1.3;padding-right:8px}
 .md-t-sub{display:block;font-size:11px;color:${MUTED};margin-top:1px}
-.md-t-cv{color:#C9BBA0;font-size:12px;margin-left:4px}
+.md-label-tail{white-space:nowrap}
+.md-label-tail .md-t-cv{color:#C9BBA0;font-size:12px}
 .md-num{text-align:right;white-space:nowrap;font-variant-numeric:tabular-nums}
 .md-t-row--indent .md-t-name{padding-left:14px}
 .md-t-row--group{background:${CREAM};border-top:1px solid ${BORDER}}
@@ -39,16 +40,52 @@ body{background:${CREAM};font-family:${UI};color:${INK}}
 .md-t-row--total{border-top:1px solid ${BORDER}}
 .md-t-row--total .md-t-name,.md-t-row--total .md-num{font-weight:700}
 .md-tag{display:inline-block;font-family:${UI};font-size:10px;font-weight:600;letter-spacing:.5px;text-transform:uppercase;padding:2px 7px;border-radius:10px;margin-left:6px;vertical-align:1px}
+@media(min-width:861px){.md-t-row{column-gap:1.5rem}}
 @media(max-width:860px){.md-shell{flex-direction:column}.md-side{width:auto;height:auto;position:static;padding:14px 12px 10px}.md-nav--main{flex-direction:row;overflow-x:auto;gap:6px;padding:4px 4px 10px;-webkit-overflow-scrolling:touch;scrollbar-width:none}.md-nav::-webkit-scrollbar{display:none}.md-navbtn{width:auto;padding:8px 14px;border-radius:2px;background:rgba(255,255,255,.07);flex-shrink:0;font-size:13px;min-height:40px}.md-main{padding:18px 16px 52px;max-width:100%}}
 @media(max-width:600px){button{min-height:40px}.md-card{padding:14px}.md-kpi{padding:13px 14px}.md-kpi-v{font-size:21px}.md-stat-v{font-size:17px}
 .md-t{font-size:var(--md-fs-m)}
-.md-t-row{grid-template-columns:var(--md-cols-m);column-gap:6px;padding:9px 2px}
+.md-t-row{grid-template-columns:var(--md-cols-m);column-gap:var(--md-col-gap-m,6px);padding:9px 2px}
 .md-t-name{font-size:13px}
 .md-t-row--indent .md-t-name{padding-left:8px}
-.md-t--stack .md-t-row{justify-content:space-between;column-gap:4px;row-gap:3px}
+.md-t--stack .md-t-row{justify-content:space-between;column-gap:var(--md-col-gap-m,4px);row-gap:3px}
 .md-t--stack .md-t-name{grid-column:1/-1;padding-right:0}
 .md-t--stack .md-t-head .md-t-name{display:none}
-.md-t-h{font-size:9px;letter-spacing:.3px}}`
+.md-t-h{font-size:9px;letter-spacing:.2px}}
+@media(max-width:480px){
+  .md-t-h{font-size:8px;letter-spacing:.15px}
+  .md-kpi{min-width:0;flex:1 1 calc(50% - 6px);max-width:calc(50% - 6px)}
+}`
+
+/** Keep chevron on the same line as the last word of a tappable label. */
+export function LabelWithChevron({ text, chevron = true }) {
+  const s = String(text ?? '').trim()
+  if (!chevron || !s) return s
+  const i = s.lastIndexOf(' ')
+  if (i === -1) {
+    return (
+      <span className="md-label-tail">
+        {s}
+        <span className="md-t-cv"> ›</span>
+      </span>
+    )
+  }
+  return (
+    <>
+      {s.slice(0, i + 1)}
+      <span className="md-label-tail">
+        {s.slice(i + 1)}
+        <span className="md-t-cv"> ›</span>
+      </span>
+    </>
+  )
+}
+
+function colWidthRem(header) {
+  const h = String(header).toLowerCase()
+  if (h.includes('%')) return '6rem'
+  if (h === 'expired' || h === 'units' || h === 'delivered' || h === 'count' || h === 'days') return '6rem'
+  return '8.5rem'
+}
 
 export function Card({ title, children }) {
   return (
@@ -108,18 +145,25 @@ export function Stat({ k, v, color, onClick }) {
  */
 export function MdTable({ columns, rows, stackAt = 4 }) {
   const numCols = columns.slice(1)
-  const ws = numCols.map((c, j) =>
-    Math.max(4, Math.ceil(String(c).length * 0.7), ...rows.map((r) => String(r.cells[j] ?? '').length)),
-  )
+  const remWidths = numCols.map(colWidthRem)
   const stack = numCols.length >= stackAt
-  const totalCh = ws.reduce((a, b) => a + b, 0) + numCols.length - 1
-  const phoneFs = stack ? (totalCh <= 44 ? 11 : 10) : 12
-  const desk = `minmax(0,1fr) ${ws.map((w) => `${w + 2}ch`).join(' ')}`
-  const phone = stack ? ws.map((w) => `${w}ch`).join(' ') : `minmax(0,1fr) ${ws.map((w) => `${w}ch`).join(' ')}`
+  const desk = `minmax(0,1fr) ${remWidths.join(' ')}`
+  const n = numCols.length
+  const maxCell = Math.max(0, ...rows.flatMap((r) => r.cells.map((c) => String(c ?? '').length)))
+  const phoneMoney = n >= 6 ? (maxCell > 10 ? '3.85rem' : '3.55rem') : n >= 5 ? '3.75rem' : '4.15rem'
+  const phonePct = n >= 6 ? '3.5rem' : n >= 5 ? '3.55rem' : '3.9rem'
+  const phoneRem = remWidths.map((w) => (w === '8.5rem' ? phoneMoney : phonePct))
+  const phone = stack ? phoneRem.join(' ') : `minmax(0,1fr) ${phoneRem.join(' ')}`
+  const phoneFs = stack ? (maxCell > 10 ? 8 : 10) : 12
   return (
     <div
       className={`md-t${stack ? ' md-t--stack' : ''}`}
-      style={{ '--md-cols': desk, '--md-cols-m': phone, '--md-fs-m': `${phoneFs}px` }}
+      style={{
+        '--md-cols': desk,
+        '--md-cols-m': phone,
+        '--md-fs-m': `${phoneFs}px`,
+        '--md-col-gap-m': stack ? '3px' : '6px',
+      }}
     >
       <div className="md-t-row md-t-head">
         <span className="md-t-name">{columns[0]}</span>
@@ -143,9 +187,8 @@ export function MdTable({ columns, rows, stackAt = 4 }) {
             onKeyDown={r.onClick ? (e) => e.key === 'Enter' && r.onClick() : undefined}
           >
             <span className="md-t-name">
-              {r.name}
+              <LabelWithChevron text={r.name} chevron={Boolean(r.onClick)} />
               {r.tag || null}
-              {r.onClick ? <span className="md-t-cv">›</span> : null}
               {r.sub ? <span className="md-t-sub">{r.sub}</span> : null}
             </span>
             {r.cells.map((c, j) => (

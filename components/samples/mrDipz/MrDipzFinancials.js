@@ -1,16 +1,18 @@
 import { money, moneySigned, deltaColor, INK, MUTED, BORDER, UI, MONO } from './mrDipzUtils'
+import { LabelWithChevron } from './MrDipzKit'
 
 const PNL_CSS = `
 .md-pnl-wrap{
-  --md-pnl-c1:6.5rem;--md-pnl-c2:6.5rem;--md-pnl-c3:6.5rem;--md-pnl-gap:6px;
+  --md-pnl-c1:8.5rem;--md-pnl-c2:8.5rem;--md-pnl-c3:8.5rem;--md-pnl-gap:1.5rem;
   --md-pnl-fs:12px;--md-pnl-fs-cur:13px;--md-pnl-fs-head:10px;
 }
 @media(max-width:480px){
   .md-pnl-wrap{
-    --md-pnl-c1:4.5rem;--md-pnl-c2:4.5rem;--md-pnl-c3:4.5rem;--md-pnl-gap:6px;
+    --md-pnl-c1:4.75rem;--md-pnl-c2:4.75rem;--md-pnl-c3:4.75rem;--md-pnl-gap:6px;
     --md-pnl-fs:10px;--md-pnl-fs-cur:10px;--md-pnl-fs-head:9px;
   }
   .md-pnl-label{font-size:12px}
+  .md-pnl-head .md-pnl-num{white-space:nowrap}
 }
 .md-pnl-head,.md-pnl-line{
   display:grid;grid-template-columns:minmax(0,1fr) var(--md-pnl-c1) var(--md-pnl-c2) var(--md-pnl-c3);
@@ -44,8 +46,7 @@ export default function MrDipzFinancials({ model, open }) {
     return (
       <div role="button" tabIndex={0} className={cls} onClick={go} onKeyDown={(e) => e.key === 'Enter' && go()}>
         <span className="md-pnl-label" style={{ fontWeight: bold ? 700 : 400, color: indent ? MUTED : INK }}>
-          {label}
-          <span style={{ color: '#C9BBA0', fontSize: 11 }}> ›</span>
+          <LabelWithChevron text={label} />
         </span>
         <span className="md-pnl-num md-pnl-num--cur md-num" style={{ fontWeight: bold ? 700 : 400, color: INK }}>
           {money(cur)}

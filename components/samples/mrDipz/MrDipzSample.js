@@ -1,6 +1,7 @@
 import { useMemo, useState, useEffect } from 'react'
-import DemoLobby from '../../DemoLobby'
-import { AS_OF_LABEL } from './mrDipzData'
+import MrDipzLobby from './MrDipzLobby'
+
+export const MD_SAMPLE_HEADER = 'Sample — fictitious numbers · as of Oct 2026'
 import { buildMrDipzModel, CREAM, SPICE, INK, MUTED, UI } from './mrDipzUtils'
 import { SHELL_CSS } from './MrDipzKit'
 import MrDipzOverview from './MrDipzOverview'
@@ -74,7 +75,7 @@ export default function MrDipzSample() {
     <>
       <style dangerouslySetInnerHTML={{ __html: SHELL_CSS }} />
 
-      <DemoLobby />
+      <MrDipzLobby />
 
       <div className="md-shell">
         <aside className="md-side">
@@ -102,13 +103,6 @@ export default function MrDipzSample() {
               )
             })}
           </nav>
-          <div style={{ padding: '12px 10px 0', borderTop: '1px solid rgba(255,255,255,.1)', marginTop: 8 }}>
-            <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 9, color: '#8A7A66', lineHeight: 1.7 }}>
-              SAMPLE DASHBOARD
-              <br />
-              <span style={{ color: SPICE, fontWeight: 600 }}>JK No Jokes Financials</span>
-            </div>
-          </div>
         </aside>
 
         <main className="md-main">
@@ -119,7 +113,7 @@ export default function MrDipzSample() {
             <h1 style={{ fontFamily: UI, fontWeight: 700, fontSize: 28, color: INK, letterSpacing: '0.3px', lineHeight: 1.1, marginTop: 4 }}>
               {currentLabel}
             </h1>
-            <div style={{ fontSize: 12, color: MUTED, marginTop: 6 }}>Sample — fictitious numbers · as of {AS_OF_LABEL}</div>
+            <div className="md-sample-header" style={{ fontSize: 12, color: MUTED, marginTop: 6 }}>{MD_SAMPLE_HEADER}</div>
           </div>
 
           {detail ? (
