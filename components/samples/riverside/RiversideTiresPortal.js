@@ -301,7 +301,7 @@ function Kpi({ label, value, sub, color = C.ink, tie }) {
 
 function SubTabs({ active, onChange, tabs }) {
   return (
-    <div className="rt-fintabs" role="tablist">
+    <div className="rt-fintabs rt-scroll-fade" role="tablist">
       {tabs.map((t) => (
         <button key={t.id} type="button" role="tab" aria-selected={active === t.id} className={active === t.id ? 'on' : ''} onClick={() => onChange(t.id)}>
           {t.label}
@@ -530,13 +530,13 @@ function DrillModal({ drill, onClose }) {
             Close
           </button>
         </div>
-        <div style={{ overflow: 'auto', border: `1px solid ${C.hair}`, maxHeight: '58vh', WebkitOverflowScrolling: 'touch' }}>
-          <table style={{ width: '100%', borderCollapse: 'collapse', minWidth: 0 }}>
+        <div className="rt-table-wrap rt-drill-wrap" style={{ border: `1px solid ${C.hair}`, maxHeight: '58vh' }}>
+          <table className="rt-drill-table" style={{ width: '100%', borderCollapse: 'collapse', minWidth: 0 }}>
             <thead>
               <tr>
                 <th style={hcell()}>Date</th>
                 <th style={hcell()}>Description</th>
-                <th style={hcell()}>Type</th>
+                <th className="rt-col-type" style={hcell()}>Type</th>
                 <th style={hcell('right')}>Amount</th>
               </tr>
             </thead>
@@ -545,8 +545,8 @@ function DrillModal({ drill, onClose }) {
                 <tr key={`${r.date}-${i}`}>
                   <td style={cell('left', { fontFamily: mono, fontSize: 10, color: C.muted, whiteSpace: 'nowrap' })}>{fmtDate(r.date)}</td>
                   <td style={cell()}>{r.description}</td>
-                  <td style={cell('left', { color: C.sub })}>{r.type}</td>
-                  <td style={cell('right', { fontFamily: mono })}>{paren(r.amount)}</td>
+                  <td className="rt-col-type" style={cell('left', { color: C.sub })}>{r.type}</td>
+                  <td style={cell('right', { fontFamily: mono, whiteSpace: 'nowrap' })}>{paren(r.amount)}</td>
                 </tr>
               ))}
             </tbody>
@@ -644,7 +644,7 @@ function StmtPanel({ title, period, children }) {
 function FinPeriodBar({ children, compare, onCompareToggle, compareKey, onCompareKey, showCompareToggle = true }) {
   return (
     <>
-      <div className="rt-fin-pills">
+      <div className="rt-fin-pills rt-scroll-fade">
         <span>PERIOD</span>
         {children}
         {showCompareToggle ? (
@@ -654,7 +654,7 @@ function FinPeriodBar({ children, compare, onCompareToggle, compareKey, onCompar
         ) : null}
       </div>
       {compare ? (
-        <div className="rt-fin-pills rt-compare-row">
+        <div className="rt-fin-pills rt-compare-row rt-scroll-fade">
           <span>COMPARE TO</span>
           {MONTHS.map((m) => (
             <Pill key={m.month} on={compareKey === m.month} onClick={() => onCompareKey(m.month)}>
@@ -935,11 +935,11 @@ function MonthlyTableView({ onPickMonth }) {
     inProgress: true,
   }
   return (
-    <div style={{ background: C.card, border: `1px solid ${C.hair}`, overflow: 'auto' }}>
-      <table style={{ width: '100%', borderCollapse: 'collapse', minWidth: 520 }}>
+    <div className="rt-table-wrap rt-monthly-wrap" style={{ background: C.card, border: `1px solid ${C.hair}` }}>
+      <table className="rt-monthly-table" style={{ width: '100%', borderCollapse: 'collapse', minWidth: 520 }}>
         <thead>
           <tr>
-            <th style={hcell()}>Month</th>
+            <th className="rt-monthly-sticky" style={hcell()}>Month</th>
             <th style={hcell('right')}>Revenue</th>
             <th style={hcell('right')}>COGS</th>
             <th style={hcell('right')}>Gross Profit</th>
@@ -950,7 +950,7 @@ function MonthlyTableView({ onPickMonth }) {
         <tbody>
           {rows.map((m, i) => (
             <tr key={m.month} style={{ background: i % 2 ? '#FAF8F4' : C.card }}>
-              <td style={cell('left')}>
+              <td className="rt-monthly-sticky" style={cell('left')}>
                 <button type="button" className="rt-linkbtn" onClick={() => onPickMonth(m.month)}>
                   {monthYear(m)}
                 </button>
@@ -963,7 +963,7 @@ function MonthlyTableView({ onPickMonth }) {
             </tr>
           ))}
           <tr style={{ opacity: 0.55 }}>
-            <td style={cell('left', { fontStyle: 'italic' })}>{sepRow.label} · In progress</td>
+            <td className="rt-monthly-sticky" style={cell('left', { fontStyle: 'italic' })}>{sepRow.label} · In progress</td>
             <td style={cell('right', { fontFamily: mono })}>—</td>
             <td style={cell('right', { fontFamily: mono })}>—</td>
             <td style={cell('right', { fontFamily: mono })}>—</td>
@@ -971,7 +971,7 @@ function MonthlyTableView({ onPickMonth }) {
             <td style={cell('right', { fontFamily: mono })}>—</td>
           </tr>
           <tr style={{ background: '#ECE7DD' }}>
-            <td style={cell('left', { fontWeight: 700, borderBottom: 'none' })}>{total.label}</td>
+            <td className="rt-monthly-sticky" style={cell('left', { fontWeight: 700, borderBottom: 'none' })}>{total.label}</td>
             <td style={cell('right', { fontFamily: mono, fontWeight: 700, borderBottom: 'none' })}>
               {fmt0(total.revenue)}
               <TieMark ok={total.revenue === DATA.ytd_revenue} />
@@ -1019,7 +1019,7 @@ function AccountBalancesView({ onDrill }) {
   }
 
   return (
-    <div style={{ background: C.card, border: `1px solid ${C.hair}`, overflow: 'auto', maxWidth: 760 }}>
+    <div className="rt-table-wrap rt-acct-wrap" style={{ background: C.card, border: `1px solid ${C.hair}`, maxWidth: 760 }}>
       {sections.map((sec) => (
         <div key={sec.id} style={{ borderBottom: `1px solid ${C.hair}` }}>
           <AcctSectionHead
@@ -1030,7 +1030,7 @@ function AccountBalancesView({ onDrill }) {
             total={sumBy(sec.rows, 'amount')}
           />
           {open[sec.id] ? (
-            <table style={{ width: '100%', borderCollapse: 'collapse', minWidth: 0 }}>
+            <table className="rt-acct-bal-table" style={{ width: '100%', borderCollapse: 'collapse', minWidth: 0 }}>
               <tbody>
                 {sec.rows.map((l) => {
                   const rowAsOf = sec.id === 'INCOME' || sec.id === 'EXPENSES' ? ytdEnd : asOfIso
@@ -1263,7 +1263,7 @@ function DashboardTab({ period, setPeriod, onOpenOrders, onOpenFinancials, onOpe
             </button>
           ))}
         </div>
-        <div className="rt-section-card" style={{ ...panel, marginBottom: 0, overflow: 'auto' }}>
+        <div className="rt-section-card rt-table-wrap rt-dash-sizes-wrap" style={{ ...panel, marginBottom: 0 }}>
           <PanelTitle
             right={
               <button type="button" className="rt-linkbtn" onClick={() => onOpenSalesItems({ periodKey: STOCK_AUG_ID, q: '' })}>
@@ -1273,10 +1273,10 @@ function DashboardTab({ period, setPeriod, onOpenOrders, onOpenFinancials, onOpe
           >
             Top Tire Sizes · Aug 2026
           </PanelTitle>
-          <table style={{ width: '100%', borderCollapse: 'collapse', minWidth: 280 }}>
+          <table className="rt-dash-sizes-table" style={{ width: '100%', borderCollapse: 'collapse', minWidth: 0 }}>
             <thead>
               <tr>
-                <th style={hcell()}>#</th>
+                <th className="rt-col-rank" style={hcell()}>#</th>
                 <th style={hcell()}>Size</th>
                 <th style={hcell('right')}>Units</th>
                 <th style={hcell('right')}>Revenue</th>
@@ -1292,7 +1292,7 @@ function DashboardTab({ period, setPeriod, onOpenOrders, onOpenFinancials, onOpe
                   onClick={() => onOpenSalesItemsSize(t.size)}
                   onKeyDown={(e) => (e.key === 'Enter' || e.key === ' ') && (e.preventDefault(), onOpenSalesItemsSize(t.size))}
                 >
-                  <td style={cell('left', { fontFamily: mono, color: C.muted })}>{t.rank}</td>
+                  <td className="rt-col-rank" style={cell('left', { fontFamily: mono, color: C.muted })}>{t.rank}</td>
                   <td style={cell('left', { fontFamily: mono })}>{t.size}</td>
                   <td style={cell('right', { fontFamily: mono })}>{t.units}</td>
                   <td style={cell('right', { fontFamily: mono })}>{fmt0(t.revenue)}</td>
@@ -1364,7 +1364,7 @@ function SalesItemsTab({ seed }) {
       />
       {view === 'ranked' && (
         <>
-          <div className="rt-fin-pills">
+          <div className="rt-fin-pills rt-scroll-fade">
             <span>PERIOD</span>
             {ITEM_PERIOD_KEYS.map((k) => (
               <Pill key={k} on={k === periodKey} onClick={() => setPeriodKey(k)}>
@@ -1417,20 +1417,20 @@ function SalesItemsTab({ seed }) {
               ))}
             </div>
           </div>
-          <div style={{ background: C.card, border: `1px solid ${C.hair}`, overflow: 'auto' }}>
-            <table style={{ width: '100%', borderCollapse: 'collapse', minWidth: compareOn ? 720 : 460 }}>
+          <div className={`rt-table-wrap rt-items-wrap${compareOn ? ' rt-items-wrap--compare' : ''}`} style={{ background: C.card, border: `1px solid ${C.hair}` }}>
+            <table className={`rt-items-table${compareOn ? ' rt-items-table--compare' : ''}`} style={{ width: '100%', borderCollapse: 'collapse', minWidth: compareOn ? 720 : 0 }}>
               <thead>
                 <tr>
-                  <th style={hcell()}>#</th>
+                  <th className="rt-col-rank" style={hcell()}>#</th>
                   <th style={hcell()}>Item</th>
                   <th style={hcell('right')}>Units</th>
                   <th style={hcell('right')}>Revenue</th>
-                  <th style={hcell('right')}>Avg sale</th>
+                  <th className="rt-col-avg" style={hcell('right')}>Avg sale</th>
                   {compareOn ? (
                     <>
-                      <th style={hcell('right')}>Units B</th>
-                      <th style={hcell('right')}>Rev B</th>
-                      <th style={hcell('right')}>Δ Units</th>
+                      <th className="rt-col-compare-b" style={hcell('right')}>Units B</th>
+                      <th className="rt-col-compare-b" style={hcell('right')}>Rev B</th>
+                      <th className="rt-col-compare-d" style={hcell('right')}>Δ Units</th>
                     </>
                   ) : null}
                 </tr>
@@ -1440,16 +1440,24 @@ function SalesItemsTab({ seed }) {
                   const b = compareMap.get(t.item)
                   return (
                     <tr key={t.item} style={{ background: i % 2 ? '#FAF8F4' : C.card }}>
-                      <td style={cell('left', { fontFamily: mono, color: C.muted })}>{i + 1}</td>
+                      <td className="rt-col-rank" style={cell('left', { fontFamily: mono, color: C.muted })}>{i + 1}</td>
                       <td style={cell('left', { fontFamily: mono })}>{t.item}</td>
                       <td style={cell('right', { fontFamily: mono })}>{t.units}</td>
-                      <td style={cell('right', { fontFamily: mono, fontWeight: 600 })}>{fmt0(t.revenue)}</td>
-                      <td style={cell('right', { fontFamily: mono, color: C.sub })}>{t.units ? fmtC(t.avgSale) : '—'}</td>
+                      <td className="rt-td-revenue" style={cell('right', { fontFamily: mono, fontWeight: 600 })}>
+                        <div>{fmt0(t.revenue)}</div>
+                        {t.units ? <div className="rt-phone-only rt-line-sub">{fmtC(t.avgSale)} avg</div> : null}
+                        {compareOn && b ? (
+                          <div className="rt-phone-only rt-line-sub">
+                            was {fmt0(b.revenue)} · Δ {b.units - t.units} units
+                          </div>
+                        ) : null}
+                      </td>
+                      <td className="rt-col-avg" style={cell('right', { fontFamily: mono, color: C.sub })}>{t.units ? fmtC(t.avgSale) : '—'}</td>
                       {compareOn ? (
                         <>
-                          <td style={cell('right', { fontFamily: mono })}>{b?.units ?? '—'}</td>
-                          <td style={cell('right', { fontFamily: mono })}>{b ? fmt0(b.revenue) : '—'}</td>
-                          <td style={cell('right', { fontFamily: mono })}>{b ? b.units - t.units : '—'}</td>
+                          <td className="rt-col-compare-b" style={cell('right', { fontFamily: mono })}>{b?.units ?? '—'}</td>
+                          <td className="rt-col-compare-b" style={cell('right', { fontFamily: mono })}>{b ? fmt0(b.revenue) : '—'}</td>
+                          <td className="rt-col-compare-d" style={cell('right', { fontFamily: mono })}>{b ? b.units - t.units : '—'}</td>
                         </>
                       ) : null}
                     </tr>
@@ -1636,7 +1644,7 @@ function OrdersTab({ initialPeriod }) {
           className="rt-filter-search"
           style={{ ...selectStyle, minWidth: 200, flex: '1 1 200px' }}
         />
-        <div className="rt-filters-scroll">
+        <div className="rt-filters-scroll rt-scroll-fade">
           <div className="rt-filters-period" style={{ display: 'flex', gap: 6 }}>
             {ORDER_PERIODS.map((p) => (
               <Pill key={p.id} on={period === p.id} onClick={() => setPeriod(p.id)}>
@@ -1809,7 +1817,7 @@ function StockTab() {
           className="rt-filter-search"
           style={{ ...selectStyle, flex: '1 1 140px', minWidth: 0 }}
         />
-        <div className="rt-filters-scroll">
+        <div className="rt-filters-scroll rt-scroll-fade">
           <label className="rt-filters-asof" style={{ display: 'flex', alignItems: 'center', gap: 8, fontFamily: ui, fontSize: 11, color: C.muted, letterSpacing: '0.1em', textTransform: 'uppercase', flexShrink: 0 }}>
             As of
             <select value={asOf} onChange={(e) => setAsOf(e.target.value)} style={selectStyle} aria-label="Stock as of">
@@ -1837,14 +1845,23 @@ function StockTab() {
           </div>
         </div>
       </div>
-      <div style={{ background: C.card, border: `1px solid ${C.hair}`, overflow: 'auto' }}>
-        <table style={{ width: '100%', borderCollapse: 'collapse', minWidth: 420 }}>
+      <div className="rt-table-wrap rt-stock-wrap" style={{ background: C.card, border: `1px solid ${C.hair}` }}>
+        <table className="rt-stock-table" style={{ width: '100%', borderCollapse: 'collapse', minWidth: 0 }}>
           <thead>
             <tr>
               <th style={hcell()}>Size / Item</th>
-              <th style={hcell('right')}>On hand</th>
-              <th style={hcell('right')}>Unit cost</th>
-              <th style={hcell('right')}>Stock value</th>
+              <th style={hcell('right')}>
+                <span className="rt-th-desk">On hand</span>
+                <span className="rt-th-phone">On hand</span>
+              </th>
+              <th style={hcell('right')}>
+                <span className="rt-th-desk">Unit cost</span>
+                <span className="rt-th-phone">Cost</span>
+              </th>
+              <th style={hcell('right')}>
+                <span className="rt-th-desk">Stock value</span>
+                <span className="rt-th-phone">Value</span>
+              </th>
             </tr>
           </thead>
           <tbody>
@@ -2093,6 +2110,14 @@ const PORTAL_CSS = `
   .rt-mix-row{display:block;width:100%;text-align:left;border:none;border-bottom:1px solid ${C.line};background:${C.card};padding:10px 0;cursor:pointer;color:inherit}
   .rt-mix-row:hover{background:#FAF8F4}
   .rt-mix-row:focus-visible{outline:2px solid ${THEME.accent};outline-offset:-2px}
+  .rt-th-phone{display:none}
+  .rt-phone-only{display:none}
+  .rt-line-sub{font-size:9px;color:${C.sub};font-weight:400;margin-top:2px;line-height:1.25}
+  .rt-stock-wrap,.rt-items-wrap,.rt-drill-wrap,.rt-monthly-wrap,.rt-dash-sizes-wrap,.rt-acct-wrap{overflow:auto;-webkit-overflow-scrolling:touch}
+  .rt-stock-table{min-width:420px}
+  .rt-items-table{min-width:460px}
+  .rt-items-table--compare{min-width:720px}
+  .rt-dash-sizes-table{min-width:280px}
   .rt-stmt{--cols:1fr 120px}
   .rt-stmt.cmp{--cols:1fr 104px 104px 92px}
   .rt-stmt__row{display:grid;grid-template-columns:var(--cols);gap:8px;padding:6px 8px;font-family:${ui};font-size:12px;align-items:baseline}
@@ -2146,9 +2171,49 @@ const PORTAL_CSS = `
     .rt-dash-main{grid-template-columns:1fr;gap:18px;margin-bottom:18px}
     .rt-modal{padding:10px;align-items:flex-end}
     .rt-modal__box{max-width:min(100%,calc(100vw - 16px));padding:14px 12px;max-height:92vh}
-    .rt-modal__box table{min-width:300px}
-    .rt-stmt{--cols:1fr 72px}
-    .rt-stmt.cmp{--cols:1fr 64px 64px 56px}
+    .rt-modal__box .rt-drill-table{min-width:0!important}
+    .rt-stmt{--cols:minmax(0,1fr) 76px}
+    .rt-stmt.cmp{--cols:minmax(0,1fr) 58px 58px 52px}
+    .rt-stmt__row{font-size:11px;padding:6px 6px;gap:4px}
+    .rt-stmt__row .num{font-size:10px;white-space:nowrap}
+    .rt-stmt__head{font-size:8px}
+    .rt-acct-head{flex-wrap:wrap;row-gap:4px;padding:10px 10px}
+    .rt-acct-head>span:first-child{min-width:0;flex:1 1 auto}
+    .rt-acct-head>span:last-child{font-size:10px;white-space:nowrap;flex-shrink:0}
+    .rt-profit-row{grid-template-columns:52px minmax(0,1fr) auto;gap:6px;padding:9px 8px;font-size:11px}
+    .rt-profit-row .num,.rt-profit-row span:nth-child(3){font-size:10px;white-space:nowrap}
+    .rt-scroll-fade{position:relative}
+    .rt-scroll-fade::after{content:'';position:absolute;top:0;right:0;bottom:2px;width:22px;pointer-events:none;background:linear-gradient(90deg,rgba(242,240,234,0),${C.paper} 72%);opacity:.98}
+    .rt-section-card.rt-scroll-fade::after,.rt-section-card .rt-scroll-fade::after{background:linear-gradient(90deg,rgba(255,255,255,0),${C.card} 72%)}
+    .rt-stock-wrap,.rt-items-wrap,.rt-dash-sizes-wrap,.rt-drill-wrap,.rt-acct-wrap{overflow-x:hidden!important;overflow-y:visible}
+    .rt-stock-table,.rt-items-table,.rt-items-table--compare,.rt-dash-sizes-table{min-width:0!important;width:100%;table-layout:fixed}
+    .rt-stock-table th,.rt-stock-table td{padding:6px 4px!important;font-size:10px!important}
+    .rt-stock-table thead th{font-size:7.5px!important;letter-spacing:.06em;padding:5px 3px!important}
+    .rt-stock-table td:first-child div:first-child{font-size:9.5px!important;line-height:1.2}
+    .rt-stock-table td:first-child div:last-child{font-size:8.5px!important;line-height:1.2}
+    .rt-th-desk{display:none}
+    .rt-th-phone{display:inline}
+    .rt-col-rank,.rt-col-avg,.rt-col-type,.rt-col-compare-b,.rt-col-compare-d{display:none!important}
+    .rt-phone-only{display:block}
+    .rt-items-table th,.rt-items-table td{padding:7px 5px!important;font-size:10px!important}
+    .rt-items-table thead th{font-size:8px!important;letter-spacing:.06em;padding:5px 4px!important}
+    .rt-items-table td:nth-child(2){word-break:break-word;overflow-wrap:anywhere;line-height:1.25}
+    .rt-dash-sizes-table th,.rt-dash-sizes-table td{padding:7px 5px!important;font-size:10px!important}
+    .rt-dash-sizes-table thead th{font-size:8px!important}
+    .rt-acct-bal-table td:first-child{word-break:break-word;padding-right:6px!important}
+    .rt-acct-bal-table td:last-child{width:84px!important;max-width:84px;padding-left:4px!important;font-size:10px!important;white-space:nowrap}
+    .rt-drill-table{table-layout:fixed}
+    .rt-drill-table th,.rt-drill-table td{padding:6px 4px!important;font-size:10px!important}
+    .rt-drill-table td:nth-child(2){word-break:break-word;line-height:1.3}
+    .rt-drill-table td:last-child{width:72px!important;font-size:9.5px!important}
+    .rt-drill-table td:first-child{width:68px!important;font-size:9px!important}
+    .rt-monthly-wrap{overflow-x:auto!important;-webkit-overflow-scrolling:touch}
+    .rt-monthly-table th,.rt-monthly-table td{padding:7px 6px!important;font-size:10px!important;white-space:nowrap}
+    .rt-monthly-sticky{position:sticky;left:0;z-index:2;background:inherit;box-shadow:2px 0 0 ${C.line}}
+    .rt-monthly-table thead .rt-monthly-sticky{background:#ECE7DD}
+    .rt-monthly-table tbody tr:nth-child(odd) .rt-monthly-sticky{background:${C.card}}
+    .rt-monthly-table tbody tr:nth-child(even) .rt-monthly-sticky{background:#FAF8F4}
+    .rt-monthly-table tr[style*="ECE7DD"] .rt-monthly-sticky,.rt-monthly-table tfoot .rt-monthly-sticky{background:#ECE7DD}
     .rt-status{padding:8px 10px;flex-wrap:nowrap}
     .rt-sample-line{font-family:${mono};font-size:10.5px;letter-spacing:0;white-space:nowrap;line-height:1.25;display:block;width:100%;overflow:hidden}
     .rt-content input,.rt-content select{font-size:16px!important}
