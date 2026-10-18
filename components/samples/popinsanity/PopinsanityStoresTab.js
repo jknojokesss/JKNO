@@ -12,7 +12,19 @@ function CardField({ k, v }) {
   )
 }
 
-export default function PopinsanityStoresTab({ styles, openStore }) {
+const AGING_BUCKETS = [
+  { label: '0–30 days', amtKey: 'bucket0', filter: 'bucket0', title: 'Invoices · 0–30 days' },
+  { label: '31–60 days', amtKey: 'bucket31', filter: 'bucket31', title: 'Invoices · 31–60 days' },
+  { label: '61–90 days', amtKey: 'bucket61', filter: 'bucket61', title: 'Invoices · 61–90 days' },
+]
+
+export default function PopinsanityStoresTab({
+  styles,
+  openStore,
+  openStoresList,
+  openWholesaleChannel,
+  openInvoiceList,
+}) {
   const { card, lbl, big } = styles
   const ws = wholesaleStats()
   const [area, setArea] = useState('All')
@@ -30,36 +42,46 @@ export default function PopinsanityStoresTab({ styles, openStore }) {
   return (
     <>
       <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap', marginBottom: '16px' }}>
-        <KPI card={card} lbl={lbl} big={big} k="Stores carrying" v={fmtInt(ws.count)} />
-        <KPI card={card} lbl={lbl} big={big} k="Wholesale sales · Oct" v={money0(ws.salesThis)} accent="#C8102E" />
-        <KPI card={card} lbl={lbl} big={big} k="Owed by stores" v={money(ws.owed)} />
-        <KPI card={card} lbl={lbl} big={big} k="Past 30 days" v={money0(ws.past30)} />
+        <KPI card={card} lbl={lbl} big={big} k="Stores carrying" v={fmtInt(ws.count)} onClick={() => openStoresList?.()} />
+        <KPI card={card} lbl={lbl} big={big} k="Wholesale sales · Oct" v={money0(ws.salesThis)} accent="#C8102E" onClick={() => openWholesaleChannel?.()} />
+        <KPI card={card} lbl={lbl} big={big} k="Owed by stores" v={money(ws.owed)} onClick={() => openInvoiceList?.('all', 'Owed by stores')} />
+        <KPI card={card} lbl={lbl} big={big} k="Past 30 days" v={money(ws.past30)} onClick={() => openInvoiceList?.('past30', 'Past 30 days')} />
       </div>
 
       <div style={{ ...card, marginBottom: '16px' }}>
         <div style={{ ...lbl, marginBottom: '10px' }}>Open invoices by age</div>
         <div style={{ display: 'flex', gap: '8px', alignItems: 'flex-end', height: 48, marginBottom: '8px' }}>
-          {[
-            ['0–30 days', ws.aging.bucket0],
-            ['31–60 days', ws.aging.bucket31],
-            ['61–90 days', ws.aging.bucket61],
-          ].map(([label, amt]) => (
-            <div key={label} style={{ flex: 1, minWidth: 0 }}>
-              <div style={{ height: `${Math.max(8, (amt / agingMax) * 40)}px`, background: '#C8102E', borderRadius: 2, opacity: amt ? 1 : 0.25 }} />
-            </div>
-          ))}
+          {AGING_BUCKETS.map((b) => {
+            const amt = ws.aging[b.amtKey]
+            return (
+              <button
+                key={b.label}
+                type="button"
+                className="pop-click"
+                onClick={() => openInvoiceList?.(b.filter, b.title)}
+                style={{ flex: 1, minWidth: 0, border: 'none', background: 'transparent', padding: 0, cursor: 'pointer' }}
+              >
+                <div style={{ height: `${Math.max(8, (amt / agingMax) * 40)}px`, background: '#C8102E', borderRadius: 2, opacity: amt ? 1 : 0.25 }} />
+              </button>
+            )
+          })}
         </div>
         <div style={{ display: 'flex', gap: '8px', fontSize: '11px', color: MUTED, fontFamily: MONO }}>
-          {[
-            ['0–30 days', ws.aging.bucket0],
-            ['31–60 days', ws.aging.bucket31],
-            ['61–90 days', ws.aging.bucket61],
-          ].map(([label, amt]) => (
-            <div key={label} style={{ flex: 1, minWidth: 0 }}>
-              <div style={{ fontFamily: UI, fontSize: 10, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '.4px' }}>{label}</div>
-              <div style={{ color: INK, marginTop: 2 }}>{money(amt)}</div>
-            </div>
-          ))}
+          {AGING_BUCKETS.map((b) => {
+            const amt = ws.aging[b.amtKey]
+            return (
+              <button
+                key={b.label}
+                type="button"
+                className="pop-click"
+                onClick={() => openInvoiceList?.(b.filter, b.title)}
+                style={{ flex: 1, minWidth: 0, border: 'none', background: 'transparent', padding: 0, cursor: 'pointer', textAlign: 'left', color: 'inherit', font: 'inherit' }}
+              >
+                <div style={{ fontFamily: UI, fontSize: 10, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '.4px' }}>{b.label}</div>
+                <div style={{ color: INK, marginTop: 2 }}>{money(amt)}</div>
+              </button>
+            )
+          })}
         </div>
       </div>
 

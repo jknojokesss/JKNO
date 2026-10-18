@@ -24,6 +24,8 @@ import {
   DayDetail,
   PnlLineDetail,
   ProductLineDetail,
+  StoresListDetail,
+  StoreInvoiceListDetail,
 } from './PopinsanityDetails'
 
 const TABS = [
@@ -35,8 +37,6 @@ const TABS = [
   ['calendar', 'Cash-in calendar'],
   ['financials', 'Financials'],
 ]
-
-const BIZ = DATA.meta.company
 
 export default function PopinsanityPortal() {
   const [tab, setTab] = useState('overview')
@@ -65,9 +65,10 @@ export default function PopinsanityPortal() {
   const openStore = useCallback((storeName) => push({ kind: 'store', storeName }), [push])
   const openDay = useCallback((date, items) => push({ kind: 'day', date, items }), [push])
   const openPnlLine = useCallback((line) => push({ kind: 'pnl', line }), [push])
+  const openStoresList = useCallback(() => push({ kind: 'storesList' }), [push])
+  const openInvoiceList = useCallback((filter, title) => push({ kind: 'storeInvoices', filter, title }), [push])
 
   const top = stack[stack.length - 1]
-  const financialsPnlDrill = tab === 'financials' && stack.length > 0 && stack[0].kind === 'pnl'
 
   const portalStyles = SHELL_CSS({ CHAR, CREAM, INK, SPICE })
 
@@ -129,6 +130,21 @@ export default function PopinsanityPortal() {
             big={styles.big}
           />,
         )
+      case 'storesList':
+        return wrap(
+          <StoresListDetail onBack={back} onStore={openStore} card={styles.card} big={styles.big} />,
+        )
+      case 'storeInvoices':
+        return wrap(
+          <StoreInvoiceListDetail
+            title={top.title}
+            filter={top.filter}
+            onBack={back}
+            onStore={openStore}
+            card={styles.card}
+            big={styles.big}
+          />,
+        )
       default:
         return null
     }
@@ -149,7 +165,15 @@ export default function PopinsanityPortal() {
       case 'orders':
         return <PopinsanityOrdersTab styles={styles} openOrder={openOrder} />
       case 'stores':
-        return <PopinsanityStoresTab styles={styles} openStore={openStore} />
+        return (
+          <PopinsanityStoresTab
+            styles={styles}
+            openStore={openStore}
+            openStoresList={openStoresList}
+            openWholesaleChannel={() => openChannel('wholesale')}
+            openInvoiceList={openInvoiceList}
+          />
+        )
       case 'tiers':
         return <PopinsanityTiersTab styles={styles} openTier={openTier} />
       case 'sales':
@@ -165,7 +189,7 @@ export default function PopinsanityPortal() {
           />
         )
       case 'financials':
-        return financialsPnlDrill ? null : <PopinsanityFinancials styles={styles} openPnlLine={openPnlLine} />
+        return <PopinsanityFinancials styles={styles} openPnlLine={openPnlLine} />
       default:
         return null
     }
@@ -244,7 +268,6 @@ export default function PopinsanityPortal() {
             <a href="https://jknojokes.com" className="pop-credit-link" style={{ display: 'inline-block', marginBottom: '6px' }}>
               JK No Jokes Financials
             </a>
-            <div style={{ ...styles.lbl, color: SPICE }}>{BIZ}</div>
             <h1 style={{ ...styles.big, fontSize: '28px', color: INK, letterSpacing: '0.3px', lineHeight: 1.1, marginTop: '4px' }}>
               {top
                 ? top.kind === 'order'
@@ -257,12 +280,17 @@ export default function PopinsanityPortal() {
                         ? 'Channel detail'
                         : top.kind === 'day'
                           ? 'Cash due'
-                          : 'Line detail'
+                          : top.kind === 'pnl'
+                            ? top.line.label
+                            : top.kind === 'storesList'
+                              ? 'Stores carrying'
+                              : top.kind === 'storeInvoices'
+                                ? top.title
+                                : 'Detail'
                 : currentLabel}
             </h1>
           </div>
-          {financialsPnlDrill ? <PopinsanityFinancials styles={styles} openPnlLine={openPnlLine} /> : null}
-          {top ? <div style={financialsPnlDrill ? { marginTop: 16 } : undefined}>{renderDetail()}</div> : financialsPnlDrill ? null : renderTab()}
+          {top ? renderDetail() : renderTab()}
         </main>
       </div>
     </>

@@ -10,16 +10,33 @@ export const COMPARE_SHEET_CSS = `
 @media(max-width:480px){
   .pop-pnl-wrap,.pop-compare-wrap{
     --pop-pnl-c1:5.1rem;--pop-pnl-c2:5.1rem;--pop-pnl-c3:5.1rem;--pop-pnl-gap:6px;
-    --pop-pnl-fs:11px;--pop-pnl-fs-cur:11px;--pop-pnl-fs-head:9px;
+    --pop-pnl-fs:11px;--pop-pnl-fs-cur:12px;--pop-pnl-fs-head:9px;
     padding:12px!important;
   }
-  .pop-pnl-label,.pop-compare-label{font-size:12px;line-height:1.35;word-break:break-word;overflow-wrap:anywhere;white-space:normal}
-  .pop-pnl-head,.pop-pnl-line,.pop-compare-head,.pop-compare-line{padding-right:0}
-  .pop-pnl-line,.pop-compare-line{align-items:start}
-  .pop-pnl-num,.pop-pnl-num--cur{font-size:11px}
+  .pop-pnl-head,.pop-compare-head{
+    grid-template-columns:var(--pop-pnl-c1) var(--pop-pnl-c2) var(--pop-pnl-c3);
+    column-gap:var(--pop-pnl-gap);padding-right:0;
+  }
+  .pop-pnl-head>span:first-child,.pop-compare-head>span:first-child{display:none}
+  .pop-pnl-line,.pop-compare-line{
+    grid-template-columns:var(--pop-pnl-c1) var(--pop-pnl-c2) var(--pop-pnl-c3);
+    grid-template-rows:auto auto;row-gap:6px;column-gap:var(--pop-pnl-gap);
+    padding-right:0;align-items:center;
+  }
+  .pop-pnl-label,.pop-compare-label{
+    grid-column:1/-1;grid-row:1;font-size:13px;line-height:1.35;
+    overflow-wrap:normal;word-break:normal;white-space:normal;
+  }
+  .pop-pnl-line>.pop-pnl-num--cur{grid-column:1;grid-row:2}
+  .pop-pnl-line>.pop-pnl-num:nth-child(3){grid-column:2;grid-row:2}
+  .pop-pnl-line>.pop-pnl-num:nth-child(4){grid-column:3;grid-row:2}
+  .pop-compare-line>.pop-compare-num:nth-child(2){grid-column:1;grid-row:2}
+  .pop-compare-line>.pop-compare-num:nth-child(3){grid-column:2;grid-row:2}
+  .pop-compare-line>.pop-compare-num:nth-child(4){grid-column:3;grid-row:2}
+  .pop-pnl-num,.pop-pnl-num--cur,.pop-compare-num{font-size:11px}
   .pop-compare-pct{display:block;font-size:10px;line-height:1.25;margin-top:1px}
   .pop-sales-table-wrap{display:none!important}
-  .pop-channel-table-wrap.pop-wholesale-desktop{display:none!important}
+  .pop-channel-table-wrap{display:none!important}
   .pop-wholesale-mobile{display:block!important}
   .pop-compare-mobile{display:block!important}
 }

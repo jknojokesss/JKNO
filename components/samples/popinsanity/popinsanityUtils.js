@@ -120,7 +120,7 @@ body{background:${theme.CREAM};font-family:${UI};color:${theme.INK}}
 }
 .pop-tier-card,.pop-order-card{border:1px solid ${BORDER};border-radius:2px;padding:14px;margin-bottom:10px;background:${CARDBG};cursor:pointer;text-align:left;width:100%;font:inherit;color:inherit}
 .pop-tier-card:hover,.pop-order-card:hover{box-shadow:inset 0 0 0 1.5px ${theme.SPICE}}
-.pop-card-title,.pop-client-name{font-weight:700;font-size:14px;color:${INK};margin-bottom:10px;white-space:normal;overflow-wrap:anywhere;word-break:break-word;max-width:100%;line-height:1.35}
+.pop-card-title,.pop-client-name{font-weight:700;font-size:14px;color:${INK};margin-bottom:10px;white-space:normal;overflow-wrap:normal;word-break:normal;max-width:100%;line-height:1.35}
 .pop-credit-link{color:${MUTED};font-size:12px;font-weight:500;text-decoration:none;font-family:${UI}}
 .pop-credit-link:hover{text-decoration:underline}
 .pop-order-card .pop-card-title{margin-bottom:4px}

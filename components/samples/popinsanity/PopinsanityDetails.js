@@ -6,6 +6,9 @@ import {
   channelPrior,
   storeByName,
   wholesaleChannel,
+  wholesaleStats,
+  wholesaleInvoicesFiltered,
+  storeOldestDays,
   PNL_CHANNEL_MAP,
 } from './popinsanityComputed'
 import { DetailShell, RowLine, ClickRow } from './PopinsanityShared'
@@ -387,6 +390,101 @@ export function DayDetail({ date, items, onBack, onOrder, card, big }) {
   )
 }
 
+export function StoresListDetail({ onBack, onStore, card, big }) {
+  const ws = wholesaleStats()
+  const footer = {
+    salesThis: sumBy(ws.stores, 'sales_this'),
+    salesPrior: sumBy(ws.stores, 'sales_prior'),
+    owed: sumBy(ws.stores, 'owed'),
+  }
+  return (
+    <DetailShell title="Stores carrying" onBack={onBack} card={card} big={big}>
+      <div style={{ overflowX: 'auto' }}>
+        <div className="pop-order-table-wrap">
+          <table className="pop-table">
+            <thead>
+              <tr>
+                <th className="pop-th">Store</th>
+                <th className="pop-th">Area</th>
+                <th className="pop-th pop-th--r">Oct sales</th>
+                <th className="pop-th pop-th--r">Sep sales</th>
+                <th className="pop-th pop-th--r">Owed</th>
+                <th className="pop-th pop-th--r">Oldest invoice</th>
+              </tr>
+            </thead>
+            <tbody>
+              {ws.stores.map((s) => {
+                const oldest = storeOldestDays(s)
+                return (
+                  <ClickRow key={s.name} onClick={() => onStore(s.name)}>
+                    <td className="pop-td"><span className="pop-client-name" style={{ fontWeight: 600, fontSize: 13, marginBottom: 0 }}>{s.name}</span></td>
+                    <td className="pop-td">{s.area}</td>
+                    <td className="pop-td pop-td--r">{money(s.sales_this)}</td>
+                    <td className="pop-td pop-td--r">{money(s.sales_prior)}</td>
+                    <td className="pop-td pop-td--r">{money(s.owed)}</td>
+                    <td className="pop-td pop-td--r" style={{ color: oldest != null && oldest > 60 ? RED : INK }}>{oldest != null ? `${oldest} days` : '—'}</td>
+                  </ClickRow>
+                )
+              })}
+            </tbody>
+            <tfoot>
+              <tr className="pop-tfoot">
+                <td className="pop-td" colSpan={2}>Total</td>
+                <td className="pop-td pop-td--r">{money(footer.salesThis)}</td>
+                <td className="pop-td pop-td--r">{money(footer.salesPrior)}</td>
+                <td className="pop-td pop-td--r">{money(footer.owed)}</td>
+                <td />
+              </tr>
+            </tfoot>
+          </table>
+        </div>
+      </div>
+    </DetailShell>
+  )
+}
+
+export function StoreInvoiceListDetail({ title, filter, onBack, onStore, card, big }) {
+  const rows = wholesaleInvoicesFiltered(filter)
+  const total = sumBy(rows, 'amount')
+  return (
+    <DetailShell title={title} onBack={onBack} card={card} big={big}>
+      {rows.length === 0 ? (
+        <div style={{ fontSize: 13, color: MUTED, padding: '8px 0' }}>No open invoices</div>
+      ) : (
+        <table className="pop-table">
+          <thead>
+            <tr>
+              <th className="pop-th">Store</th>
+              <th className="pop-th">Invoice</th>
+              <th className="pop-th">Date</th>
+              <th className="pop-th pop-th--r">Amount</th>
+              <th className="pop-th pop-th--r">Age</th>
+            </tr>
+          </thead>
+          <tbody>
+            {rows.map((inv) => (
+              <ClickRow key={`${inv.storeName}-${inv.invoice}`} onClick={() => onStore(inv.storeName)}>
+                <td className="pop-td"><span className="pop-client-name" style={{ fontWeight: 600, fontSize: 13, marginBottom: 0 }}>{inv.storeName}</span></td>
+                <td className="pop-td">{inv.invoice}</td>
+                <td className="pop-td">{fmtD(inv.date)}</td>
+                <td className="pop-td pop-td--r">{money(inv.amount)}</td>
+                <td className="pop-td pop-td--r" style={{ color: inv.age_days > 60 ? RED : INK }}>{inv.age_days} days</td>
+              </ClickRow>
+            ))}
+          </tbody>
+          <tfoot>
+            <tr className="pop-tfoot">
+              <td className="pop-td" colSpan={3}>Total</td>
+              <td className="pop-td pop-td--r">{money(total)}</td>
+              <td />
+            </tr>
+          </tfoot>
+        </table>
+      )}
+    </DetailShell>
+  )
+}
+
 export function PnlLineDetail({ line, section, onBack, onChannel, card, big }) {
   const isRev = section === 'revenue'
   const delta = line.prior != null ? line.this - line.prior : null
@@ -396,8 +494,8 @@ export function PnlLineDetail({ line, section, onBack, onChannel, card, big }) {
     line.label === 'Corporate gifts' ? 'Corporate' : line.label === 'Wholesale to stores' ? 'Wholesale' : line.label
   return (
     <DetailShell title={line.label} onBack={onBack} card={card} big={big}>
-      <RowLine l={DATA.meta.this_month} v={money(line.this)} />
-      <RowLine l={DATA.meta.prior_month} v={money(line.prior)} />
+      <RowLine l="This month" v={money(line.this)} />
+      <RowLine l="Prior month" v={money(line.prior)} />
       <RowLine l="Change" v={<span style={{ color }}>{money(delta)} ({delta != null && line.prior ? pct1(changePct(line.this, line.prior)) : '—'})</span>} />
       {isRev && channelId ? (
         <button

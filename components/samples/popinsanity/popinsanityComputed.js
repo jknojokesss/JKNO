@@ -67,6 +67,22 @@ export function storeOldestDays(store) {
   return Math.max(...store.open_invoices.map((i) => i.age_days))
 }
 
+/** Flat open wholesale invoices with store name; filter: all | past30 | bucket0 | bucket31 | bucket61 */
+export function wholesaleInvoicesFiltered(filter = 'all') {
+  const stores = wholesaleChannel()?.stores || []
+  const rows = []
+  stores.forEach((s) => {
+    s.open_invoices.forEach((inv) => {
+      rows.push({ ...inv, storeName: s.name })
+    })
+  })
+  if (filter === 'past30') return rows.filter((i) => i.age_days > 30)
+  if (filter === 'bucket0') return rows.filter((i) => i.age_days <= 30)
+  if (filter === 'bucket31') return rows.filter((i) => i.age_days > 30 && i.age_days <= 60)
+  if (filter === 'bucket61') return rows.filter((i) => i.age_days > 60)
+  return rows
+}
+
 export function holidayTotals() {
   const orders = DATA.holiday_orders
   return {
