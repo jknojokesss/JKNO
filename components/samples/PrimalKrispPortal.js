@@ -54,6 +54,7 @@ export default function PrimalKrispPortal() {
   const [costOpen, setCostOpen] = useState(null)
   const [promoSort, setPromoSort] = useState({ key: 'revenue', dir: 'desc' })
   const [invSort, setInvSort] = useState({ key: 'date', dir: 'desc' })
+  const [reorderFocus, setReorderFocus] = useState(false)
 
   const ov = DATA.overview
   const periodSlice = period === 'week' ? DATA.period_slices?.overview : null
@@ -308,6 +309,12 @@ export default function PrimalKrispPortal() {
   const goStoresFilter = (filter) => {
     setTab('stores')
     setListFilter(filter)
+    setReorderFocus(false)
+  }
+  const goStoresDueReorder = () => {
+    setTab('stores')
+    setListFilter(null)
+    setReorderFocus(true)
   }
 
   const sampleHeader = 'Sample — fictitious numbers · as of Oct 2026'
@@ -348,6 +355,7 @@ export default function PrimalKrispPortal() {
                   onClick={() => {
                     setTab(id)
                     setDrawerProduct(null)
+                    setReorderFocus(false)
                   }}
                   style={
                     active
@@ -410,6 +418,7 @@ export default function PrimalKrispPortal() {
               channelRowsPeriod={channelRowsPeriod}
               goTab={goTab}
               goStoresFilter={goStoresFilter}
+              goStoresDueReorder={goStoresDueReorder}
               openStoreBalance={liveStoreOwed}
             />
           )}
@@ -439,6 +448,7 @@ export default function PrimalKrispPortal() {
               storeSort={storeSort}
               setStoreSort={setStoreSort}
               SortBtn={SortBtn}
+              reorderFocus={reorderFocus}
             />
           )}
 

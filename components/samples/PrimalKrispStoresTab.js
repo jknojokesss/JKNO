@@ -14,6 +14,7 @@ import {
 } from './primalKrispStoreBilling'
 import { SPICE, CHAR, KRAFT, CREAM, CARDBG, INK, MUTED, BORDER, AMBER, RED, GREEN, UI, MONO, money, fmtAsOfLong, fmtInt, TieMark } from './primalKrispUtils'
 import { ArAgingBars } from './PrimalKrispCharts'
+import PrimalKrispDueToReorder from './primal-krisp/PrimalKrispDueToReorder'
 
 const AGING_FILTERS = {
   aging_0_30: { bucket: '0-30', label: '0-30 days open' },
@@ -158,8 +159,10 @@ export default function PrimalKrispStoresTab({
   storeSort,
   setStoreSort,
   SortBtn,
+  reorderFocus,
 }) {
   const [side, setSide] = useState('consignment')
+  const [reorderDetail, setReorderDetail] = useState(false)
   const [expanded, setExpanded] = useState(null)
   const [preview, setPreview] = useState(null)
   const [countDraft, setCountDraft] = useState({})
@@ -299,6 +302,15 @@ export default function PrimalKrispStoresTab({
   return (
     <div className="pk-stores-ui">
       <style>{PRINT_CSS}</style>
+      <PrimalKrispDueToReorder
+        card={card}
+        lbl={lbl}
+        btn={btn}
+        focusScroll={reorderFocus}
+        onDetailChange={setReorderDetail}
+      />
+      {!reorderDetail && (
+      <>
       <div style={{ marginBottom: 16 }}>
         <Seg
           value={side}
@@ -574,6 +586,8 @@ export default function PrimalKrispStoresTab({
           })}
         </Fragment>
       ))}
+      </>
+      )}
 
       {preview && (
         <div

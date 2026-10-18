@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { ResponsiveContainer, ComposedChart, Bar, Line, XAxis, YAxis, Tooltip, CartesianGrid, PieChart, Pie, Cell } from 'recharts'
 import DATA from '../../data/primal-krisp.json'
+import { dueToReorderCount } from './primal-krisp/PrimalKrispDueToReorder'
 import {
   SPICE,
   KRAFT,
@@ -39,6 +40,7 @@ export default function PrimalKrispOverview({
   channelRowsPeriod,
   goTab,
   goStoresFilter,
+  goStoresDueReorder,
   openStoreBalance,
 }) {
   const [chartsReady, setChartsReady] = useState(false)
@@ -117,6 +119,11 @@ export default function PrimalKrispOverview({
           v={money0(openStoreBalance ?? DATA.overview.open_store_balance)}
           accent={AMBER}
           onClick={() => goStoresFilter('open_balance')}
+        />
+        <KPI
+          k="Due to reorder"
+          v={`${dueToReorderCount()} stores`}
+          onClick={() => goStoresDueReorder?.()}
         />
       </div>
 

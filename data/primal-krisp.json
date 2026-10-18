@@ -74,6 +74,7 @@
   ],
   "store_count": 15,
   "open_store_balance": 8307.24,
+  "due_to_reorder_count": 7,
   "active_subscriptions": 412,
   "needs_attention": [
    {
@@ -1990,6 +1991,160 @@
      "shelf_returned": 0,
      "bags_billed": 17
     }
+   }
+  ]
+ },
+ "due_to_reorder": {
+  "as_of": "2026-10-15",
+  "bags_per_case": 12,
+  "stores": [
+   {
+    "store_name": "Shefa Market - Boro Park",
+    "region": "Brooklyn",
+    "usual_gap_days": 21,
+    "last_order_date": "2026-09-04",
+    "usual_order": { "cases": 4, "bags": 48, "amount": 426 },
+    "usual_order_lines": [
+     { "flavor": "1st Cut Brisket", "cases": 1, "bags": 12, "unit_price": 9.5, "line_total": 114 },
+     { "flavor": "2nd Cut Brisket", "cases": 1, "bags": 12, "unit_price": 9.5, "line_total": 114 },
+     { "flavor": "BBQ Chicken", "cases": 1, "bags": 12, "unit_price": 8.25, "line_total": 99 },
+     { "flavor": "Classic Chicken", "cases": 1, "bags": 12, "unit_price": 8.25, "line_total": 99 }
+    ],
+    "order_history": [
+     { "date": "2026-09-04", "cases": 4, "bags": 45, "amount": 399.6 },
+     { "date": "2026-08-14", "cases": 4, "bags": 48, "amount": 426 },
+     { "date": "2026-07-24", "cases": 4, "bags": 48, "amount": 426 },
+     { "date": "2026-07-03", "cases": 4, "bags": 48, "amount": 426 },
+     { "date": "2026-06-12", "cases": 4, "bags": 48, "amount": 426 },
+     { "date": "2026-05-22", "cases": 4, "bags": 48, "amount": 426 }
+    ],
+    "avg_gap_days": 21
+   },
+   {
+    "store_name": "Bais Hamakolet - Lakewood",
+    "region": "Ocean & Monmouth, NJ",
+    "usual_gap_days": 14,
+    "last_order_date": "2026-09-22",
+    "usual_order": { "cases": 6, "bags": 72, "amount": 654 },
+    "usual_order_lines": [
+     { "flavor": "1st Cut Brisket", "cases": 2, "bags": 24, "unit_price": 9.5, "line_total": 228 },
+     { "flavor": "Texas Heat", "cases": 2, "bags": 24, "unit_price": 9.5, "line_total": 228 },
+     { "flavor": "Shawarma Chicken", "cases": 2, "bags": 24, "unit_price": 8.25, "line_total": 198 }
+    ],
+    "order_history": [
+     { "date": "2026-09-22", "cases": 6, "bags": 72, "amount": 684 },
+     { "date": "2026-08-28", "cases": 6, "bags": 72, "amount": 654 },
+     { "date": "2026-08-25", "cases": 6, "bags": 72, "amount": 654 },
+     { "date": "2026-08-11", "cases": 6, "bags": 72, "amount": 654 },
+     { "date": "2026-07-28", "cases": 6, "bags": 72, "amount": 654 },
+     { "date": "2026-07-14", "cases": 6, "bags": 72, "amount": 654 }
+    ],
+    "avg_gap_days": 14
+   },
+   {
+    "store_name": "Kesher Foods - Flatbush",
+    "region": "Brooklyn",
+    "usual_gap_days": 18,
+    "last_order_date": "2026-09-20",
+    "usual_order": { "cases": 4, "bags": 48, "amount": 441.12 },
+    "usual_order_lines": [
+     { "flavor": "1st Cut Brisket", "cases": 1, "bags": 12, "unit_price": 9.5, "line_total": 114 },
+     { "flavor": "Texas Heat", "cases": 1, "bags": 12, "unit_price": 9.5, "line_total": 114 },
+     { "flavor": "BBQ Chicken", "cases": 2, "bags": 24, "unit_price": 8.88, "line_total": 213.12 }
+    ],
+    "order_history": [
+     { "date": "2026-09-20", "cases": 4, "bags": 47, "amount": 417.36 },
+     { "date": "2026-08-27", "cases": 4, "bags": 48, "amount": 441.12 },
+     { "date": "2026-08-15", "cases": 4, "bags": 48, "amount": 441.12 },
+     { "date": "2026-07-28", "cases": 4, "bags": 48, "amount": 441.12 },
+     { "date": "2026-07-10", "cases": 4, "bags": 48, "amount": 441.12 },
+     { "date": "2026-06-22", "cases": 4, "bags": 48, "amount": 441.12 }
+    ],
+    "avg_gap_days": 18
+   },
+   {
+    "store_name": "Pri Market - Riverdale",
+    "region": "Manhattan & Bronx",
+    "usual_gap_days": 12,
+    "last_order_date": "2026-09-25",
+    "usual_order": { "cases": 3, "bags": 36, "amount": 327 },
+    "usual_order_lines": [
+     { "flavor": "1st Cut Brisket", "cases": 1, "bags": 12, "unit_price": 9.5, "line_total": 114 },
+     { "flavor": "2nd Cut Brisket", "cases": 1, "bags": 12, "unit_price": 9.5, "line_total": 114 },
+     { "flavor": "Classic Chicken", "cases": 1, "bags": 12, "unit_price": 8.25, "line_total": 99 }
+    ],
+    "order_history": [
+     { "date": "2026-09-25", "cases": 3, "bags": 20, "amount": 177.6 },
+     { "date": "2026-09-13", "cases": 3, "bags": 36, "amount": 327 },
+     { "date": "2026-09-01", "cases": 3, "bags": 36, "amount": 327 },
+     { "date": "2026-08-20", "cases": 3, "bags": 36, "amount": 327 },
+     { "date": "2026-08-08", "cases": 3, "bags": 36, "amount": 327 },
+     { "date": "2026-07-27", "cases": 3, "bags": 36, "amount": 327 }
+    ],
+    "avg_gap_days": 12
+   },
+   {
+    "store_name": "Shalva Fresh - Brooklyn",
+    "region": "Brooklyn",
+    "usual_gap_days": 18,
+    "last_order_date": "2026-09-10",
+    "usual_order": { "cases": 4, "bags": 48, "amount": 426 },
+    "usual_order_lines": [
+     { "flavor": "1st Cut Brisket", "cases": 2, "bags": 24, "unit_price": 9.5, "line_total": 228 },
+     { "flavor": "BBQ Chicken", "cases": 1, "bags": 12, "unit_price": 8.25, "line_total": 99 },
+     { "flavor": "Shawarma Chicken", "cases": 1, "bags": 12, "unit_price": 8.25, "line_total": 99 }
+    ],
+    "order_history": [
+     { "date": "2026-09-10", "cases": 4, "bags": 42, "amount": 373.04 },
+     { "date": "2026-08-23", "cases": 4, "bags": 48, "amount": 426 },
+     { "date": "2026-08-05", "cases": 4, "bags": 48, "amount": 426 },
+     { "date": "2026-07-18", "cases": 4, "bags": 48, "amount": 426 },
+     { "date": "2026-06-30", "cases": 4, "bags": 48, "amount": 426 },
+     { "date": "2026-06-12", "cases": 4, "bags": 48, "amount": 426 }
+    ],
+    "avg_gap_days": 18
+   },
+   {
+    "store_name": "Neshama Kosher - Aventura",
+    "region": "Florida",
+    "usual_gap_days": 21,
+    "last_order_date": "2026-09-18",
+    "usual_order": { "cases": 3, "bags": 36, "amount": 312 },
+    "usual_order_lines": [
+     { "flavor": "Texas Heat", "cases": 1, "bags": 12, "unit_price": 9.5, "line_total": 114 },
+     { "flavor": "BBQ Chicken", "cases": 1, "bags": 12, "unit_price": 8.25, "line_total": 99 },
+     { "flavor": "Shawarma Chicken", "cases": 1, "bags": 12, "unit_price": 8.25, "line_total": 99 }
+    ],
+    "order_history": [
+     { "date": "2026-09-18", "cases": 3, "bags": 25, "amount": 222 },
+     { "date": "2026-08-28", "cases": 3, "bags": 36, "amount": 312 },
+     { "date": "2026-08-07", "cases": 3, "bags": 36, "amount": 312 },
+     { "date": "2026-07-17", "cases": 3, "bags": 36, "amount": 312 },
+     { "date": "2026-06-26", "cases": 3, "bags": 36, "amount": 312 },
+     { "date": "2026-06-05", "cases": 3, "bags": 36, "amount": 312 }
+    ],
+    "avg_gap_days": 21
+   },
+   {
+    "store_name": "Tzur Kosher - Brooklyn",
+    "region": "Brooklyn",
+    "usual_gap_days": 16,
+    "last_order_date": "2026-09-22",
+    "usual_order": { "cases": 5, "bags": 60, "amount": 552.24 },
+    "usual_order_lines": [
+     { "flavor": "Texas Heat", "cases": 2, "bags": 24, "unit_price": 9.5, "line_total": 228 },
+     { "flavor": "2nd Cut Brisket", "cases": 1, "bags": 12, "unit_price": 9.5, "line_total": 114 },
+     { "flavor": "BBQ Chicken", "cases": 2, "bags": 24, "unit_price": 8.76, "line_total": 210.24 }
+    ],
+    "order_history": [
+     { "date": "2026-09-22", "cases": 5, "bags": 38, "amount": 332.88 },
+     { "date": "2026-09-06", "cases": 5, "bags": 60, "amount": 552.24 },
+     { "date": "2026-08-21", "cases": 5, "bags": 60, "amount": 552.24 },
+     { "date": "2026-08-05", "cases": 5, "bags": 60, "amount": 552.24 },
+     { "date": "2026-07-20", "cases": 5, "bags": 60, "amount": 552.24 },
+     { "date": "2026-07-04", "cases": 5, "bags": 60, "amount": 552.24 }
+    ],
+    "avg_gap_days": 16
    }
   ]
  },
