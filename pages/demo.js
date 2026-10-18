@@ -1175,7 +1175,7 @@ export default function Demo({ demoEmbed = false }) {
           {tab === 'askai' && (
             <>
               {[
-                { q: 'Which store owes me the most right now?', a: <>Your counts show <b>Cedar Market</b> has the biggest gap: <b>7 items missing</b> (~$56), most likely sold-but-unreported. Across all stores you&rsquo;re owed about <b>{m0(missVal)}</b> — invoice the worst offenders.</>, go: () => openConsignStore('Cedar Market') },
+                { q: 'Which store owes me the most right now?', a: <>Your counts show <b>Cedar Market</b> has the biggest gap: <b>7 items missing</b> (~$56), most likely sold-but-unreported. Across all stores you&rsquo;re owed about <b>{m0(missVal)}</b> — invoice the worst offenders.</>, go: () => { const c = consign.find(x => x.store === 'Cedar Market'); setOverviewBack(false); setTab('consign'); setExpanded(c?.id || null); if (c) setScrollConsignId(c.id) } },
                 { q: 'Where am I wasting ad money?', a: <>Three channels are underwater — <b>Facebook, the 5K, and flyers</b>. Together they cost <b>{m0(wastedSpend)}/mo</b> and return only <b>{m0(wastedReturn)}</b>. Move that budget to Instagram and your influencer (both ~4x).</>, go: () => { setOverviewBack(false); setTab('ads'); setExpanded(null) } },
                 { q: 'Did I actually make money this month?', a: <>Net profit is already <b>{m0(netProfit)}</b> after revenue of <b>{m0(revenue)}</b>. Fixing ad waste and collecting the <b>{m0(missVal)}</b> still owed on consignment would add about <b>{m0(wastedSpend - wastedReturn)}</b> plus <b>{m0(missVal)}</b> on top of that.</>, go: () => { setOverviewBack(false); setTab('pnl'); setPnlView('single'); setExpanded(null) } },
               ].map((m, i) => (
