@@ -113,8 +113,8 @@ export function ChannelDetail({ detail, card, lbl, big, onBack }) {
         <div style={{ ...card, marginBottom: 12 }}>
           <div style={{ ...lbl, marginBottom: 8 }}>By store account</div>
           {storeRows.map((s) => (
-            <div key={s.store} style={{ display: 'flex', justifyContent: 'space-between', padding: '5px 0', fontSize: 13, borderTop: `1px solid ${CREAM}` }}>
-              <span>{s.store}</span>
+            <div key={s.store} style={{ display: 'flex', justifyContent: 'space-between', gap: 8, padding: '5px 0', fontSize: 13, borderTop: `1px solid ${CREAM}` }}>
+              <span style={{ minWidth: 0, flex: 1, lineHeight: 1.35 }}>{s.store}</span>
               <span style={{ fontFamily: MONO }}>{money0(s.revenue)}</span>
             </div>
           ))}

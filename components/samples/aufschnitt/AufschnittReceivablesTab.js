@@ -71,7 +71,7 @@ export default function AufschnittReceivablesTab({ card, lbl, onOpen }) {
               onClick={() => onOpen({ type: 'ar-account', account: a.name })}
               style={{ textAlign: 'left', cursor: 'pointer', width: '100%' }}
             >
-              <div style={{ fontWeight: 700, marginBottom: 8, fontSize: 14 }}>{a.name}</div>
+              <div className="au-aging-card-title">{a.name}</div>
               <div className="au-aging-card-row">
                 <span>Total</span>
                 <span style={{ fontFamily: MONO }}>{money0(a.buckets.total)}</span>

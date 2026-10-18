@@ -138,33 +138,33 @@ const STOCK_WEEK_ENDINGS = [
 
 /** Relative store size for Stores channel splits (largest distributors / Lakewood). */
 const STORE_SALES_WEIGHT = {
-  'Brooklyn store 1': 0.92,
-  'Brooklyn store 2': 0.88,
-  'Brooklyn store 3': 0.9,
-  'Brooklyn store 4': 0.86,
-  'Monsey store 1': 0.94,
-  'Monsey store 2': 0.91,
-  'Lakewood store 1': 1.28,
-  'Lakewood store 2': 1.22,
-  'Five Towns store 1': 0.84,
-  'Five Towns store 2': 0.68,
-  'Teaneck store 1': 1.02,
-  'Passaic store 1': 0.82,
-  'Queens store 1': 0.87,
-  'Queens store 2': 1.06,
-  'Baltimore store 1': 1.08,
-  'Baltimore store 2': 0.85,
-  'Staten Island store 1': 0.66,
-  'Distributor NJ 1': 1.32,
+  'Pomegranate - Flatbush': 0.92,
+  "Moisha's - Brooklyn": 0.88,
+  'Breadberry - Brooklyn': 0.9,
+  'KRM - Brooklyn': 0.86,
+  'Rockland Kosher Supermarket': 0.94,
+  'Shoprite Wesley Hills': 0.91,
+  'Gourmet Glatt - Lakewood': 1.28,
+  'Evergreen - Lakewood': 1.22,
+  'Gourmet Glatt - Cedarhurst': 0.84,
+  "Brach's - Lawrence": 0.68,
+  'Cedar Market - Teaneck': 1.02,
+  'Salt Market - Deal': 0.82,
+  'Supersol - Lawrence': 0.87,
+  'Evergreen - Monsey': 1.06,
+  'Seven Mile Market - Baltimore': 1.08,
+  'Market Maven - Baltimore': 0.85,
+  "Aron's Kissena Farms - Queens": 0.66,
+  'Bingo Wholesale': 1.32,
 }
 
 /** Share of Stores revenue for the three largest accounts (each under 12% at Sep scale). */
 const TOP_STORE_SHARE = {
-  'Lakewood store 1': 0.11608,
-  'Lakewood store 2': 0.09997,
-  'Distributor NJ 1': 0.11971,
+  'Gourmet Glatt - Lakewood': 0.11608,
+  'Evergreen - Lakewood': 0.09997,
+  'Bingo Wholesale': 0.11971,
 }
-const TOP_STORE_NAMES = ['Lakewood store 1', 'Lakewood store 2', 'Distributor NJ 1']
+const TOP_STORE_NAMES = ['Gourmet Glatt - Lakewood', 'Evergreen - Lakewood', 'Bingo Wholesale']
 
 function roundCases(n) {
   const t = Math.round(n * 10) / 10
@@ -743,24 +743,24 @@ function daysBetween(a, b) {
 
 /** Bucket amounts per store — sums to ~94.8k; uneven sizes and aging mix. */
 const AR_BUCKET_SPEC = {
-  'Brooklyn store 1': { current: 2142.33, d1_30: 1827.44, d31_60: 0, d61_90: 0, d90p: 0 },
-  'Brooklyn store 2': { current: 712.18, d1_30: 991.27, d31_60: 1638.92, d61_90: 0, d90p: 0 },
-  'Brooklyn store 3': { current: 1628.67, d1_30: 1384.22, d31_60: 0, d61_90: 0, d90p: 0 },
-  'Brooklyn store 4': { current: 484.11, d1_30: 612.44, d31_60: 2387.63, d61_90: 0, d90p: 0 },
-  'Monsey store 1': { current: 824.56, d1_30: 1188.34, d31_60: 1742.87, d61_90: 0, d90p: 0 },
-  'Monsey store 2': { current: 598.22, d1_30: 976.41, d31_60: 2024.18, d61_90: 0, d90p: 0 },
-  'Lakewood store 1': { current: 3347.63, d1_30: 3784.22, d31_60: 0, d61_90: 2984.17, d90p: 0 },
-  'Lakewood store 2': { current: 3218.34, d1_30: 3876.18, d31_60: 0, d61_90: 0, d90p: 0 },
-  'Five Towns store 1': { current: 1187.44, d1_30: 1042.18, d31_60: 0, d61_90: 0, d90p: 0 },
-  'Five Towns store 2': { current: 797.49, d1_30: 0, d31_60: 0, d61_90: 0, d90p: 0 },
-  'Teaneck store 1': { current: 3511.1, d1_30: 0, d31_60: 0, d61_90: 0, d90p: 0 },
-  'Passaic store 1': { current: 518.44, d1_30: 612.87, d31_60: 0, d61_90: 0, d90p: 1384.56 },
-  'Queens store 1': { current: 642.18, d1_30: 787.44, d31_60: 1484.22, d61_90: 0, d90p: 0 },
-  'Queens store 2': { current: 3313.0, d1_30: 0, d31_60: 0, d61_90: 0, d90p: 0 },
-  'Baltimore store 1': { current: 4129.62, d1_30: 0, d31_60: 0, d61_90: 0, d90p: 0 },
-  'Baltimore store 2': { current: 528.67, d1_30: 712.33, d31_60: 1687.92, d61_90: 0, d90p: 0 },
-  'Staten Island store 1': { current: 900.07, d1_30: 0, d31_60: 0, d61_90: 0, d90p: 0 },
-  'Distributor NJ 1': { current: 3284.22, d1_30: 3988.67, d31_60: 0, d61_90: 2947.44, d90p: 0 },
+  'Pomegranate - Flatbush': { current: 2142.33, d1_30: 1827.44, d31_60: 0, d61_90: 0, d90p: 0 },
+  "Moisha's - Brooklyn": { current: 712.18, d1_30: 991.27, d31_60: 1638.92, d61_90: 0, d90p: 0 },
+  'Breadberry - Brooklyn': { current: 1628.67, d1_30: 1384.22, d31_60: 0, d61_90: 0, d90p: 0 },
+  'KRM - Brooklyn': { current: 484.11, d1_30: 612.44, d31_60: 2387.63, d61_90: 0, d90p: 0 },
+  'Rockland Kosher Supermarket': { current: 824.56, d1_30: 1188.34, d31_60: 1742.87, d61_90: 0, d90p: 0 },
+  'Shoprite Wesley Hills': { current: 598.22, d1_30: 976.41, d31_60: 2024.18, d61_90: 0, d90p: 0 },
+  'Gourmet Glatt - Lakewood': { current: 3347.63, d1_30: 3784.22, d31_60: 0, d61_90: 2984.17, d90p: 0 },
+  'Evergreen - Lakewood': { current: 3218.34, d1_30: 3876.18, d31_60: 0, d61_90: 0, d90p: 0 },
+  'Gourmet Glatt - Cedarhurst': { current: 1187.44, d1_30: 1042.18, d31_60: 0, d61_90: 0, d90p: 0 },
+  "Brach's - Lawrence": { current: 797.49, d1_30: 0, d31_60: 0, d61_90: 0, d90p: 0 },
+  'Cedar Market - Teaneck': { current: 3511.1, d1_30: 0, d31_60: 0, d61_90: 0, d90p: 0 },
+  'Salt Market - Deal': { current: 518.44, d1_30: 612.87, d31_60: 0, d61_90: 0, d90p: 1384.56 },
+  'Supersol - Lawrence': { current: 642.18, d1_30: 787.44, d31_60: 1484.22, d61_90: 0, d90p: 0 },
+  'Evergreen - Monsey': { current: 3313.0, d1_30: 0, d31_60: 0, d61_90: 0, d90p: 0 },
+  'Seven Mile Market - Baltimore': { current: 4129.62, d1_30: 0, d31_60: 0, d61_90: 0, d90p: 0 },
+  'Market Maven - Baltimore': { current: 528.67, d1_30: 712.33, d31_60: 1687.92, d61_90: 0, d90p: 0 },
+  "Aron's Kissena Farms - Queens": { current: 900.07, d1_30: 0, d31_60: 0, d61_90: 0, d90p: 0 },
+  'Bingo Wholesale': { current: 3284.22, d1_30: 3988.67, d31_60: 0, d61_90: 2947.44, d90p: 0 },
 }
 
 function bucketDueDate(bucket) {
@@ -886,11 +886,11 @@ function buildReceivables() {
   })
   const fix = roundCents(targetGoal - sumCents(accounts, (a) => a.buckets.total))
   if (fix) {
-    accounts.find((a) => a.name === 'Distributor NJ 1').buckets.d1_30 = roundCents(
-      accounts.find((a) => a.name === 'Distributor NJ 1').buckets.d1_30 + fix
+    accounts.find((a) => a.name === 'Bingo Wholesale').buckets.d1_30 = roundCents(
+      accounts.find((a) => a.name === 'Bingo Wholesale').buckets.d1_30 + fix
     )
-    accounts.find((a) => a.name === 'Distributor NJ 1').buckets.total = roundCents(
-      accounts.find((a) => a.name === 'Distributor NJ 1').buckets.total + fix
+    accounts.find((a) => a.name === 'Bingo Wholesale').buckets.total = roundCents(
+      accounts.find((a) => a.name === 'Bingo Wholesale').buckets.total + fix
     )
   }
   const targetTotal = sumCents(accounts, (a) => a.buckets.total)

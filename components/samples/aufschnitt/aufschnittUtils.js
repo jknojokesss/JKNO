@@ -169,11 +169,13 @@ export const AGING_CSS = `
 .au-aging th:first-child,.au-aging td:first-child{text-align:left}
 .au-aging thead th{font-size:10px;text-transform:uppercase;letter-spacing:.5px;color:${MUTED};border-bottom:1px solid ${BORDER}}
 .au-aging tbody tr{border-bottom:1px solid ${CREAM}}
-.au-aging .au-aging-acct{font-weight:600;color:${INK}}
+.au-aging .au-aging-acct{font-weight:600;color:${INK};white-space:normal;line-height:1.35;max-width:10.5rem}
+.au-aging th:not(:first-child),.au-aging td:not(:first-child){white-space:nowrap}
 @media(max-width:480px){
   .au-aging--full{display:none}
   .au-aging-cards{display:flex;flex-direction:column;gap:10px}
   .au-aging-card{border:1px solid ${BORDER};border-radius:2px;padding:12px;background:${CARDBG}}
+  .au-aging-card-title{font-weight:700;margin-bottom:8px;font-size:14px;line-height:1.35;word-break:break-word}
   .au-aging-card-row{display:flex;justify-content:space-between;gap:8px;font-size:12px;padding:3px 0}
 }
 @media(min-width:481px){
