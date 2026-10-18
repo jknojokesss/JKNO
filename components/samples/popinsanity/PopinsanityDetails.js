@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import {
   DATA,
   tierById,
@@ -38,6 +39,71 @@ import {
 
 const stageLabel = (id) => ORDER_STAGES.find((s) => s.id === id)?.label || id
 
+const invoiceActionBtn = {
+  border: `1px solid ${BORDER}`,
+  background: CARDBG,
+  color: SPICE,
+  fontWeight: 600,
+  cursor: 'pointer',
+  fontSize: 13,
+  padding: '10px 14px',
+  borderRadius: 2,
+  width: '100%',
+  textAlign: 'left',
+}
+
+function OrderRecipients({ order, lbl }) {
+  const [showAll, setShowAll] = useState(false)
+  const list = order.recipients || []
+  const visible = showAll ? list : list.slice(0, 10)
+  const hidden = list.length - visible.length
+  return (
+    <>
+      <div style={{ marginTop: 12, ...lbl, marginBottom: 6 }}>Recipients</div>
+      <div style={{ border: `1px solid ${BORDER}`, borderRadius: 2, padding: '4px 10px' }}>
+        {visible.map((r, i) => (
+          <div
+            key={i}
+            style={{
+              display: 'flex',
+              justifyContent: 'space-between',
+              gap: 10,
+              padding: '7px 0',
+              borderTop: i ? `1px solid ${CREAM}` : 'none',
+              fontSize: 13,
+            }}
+          >
+            <span>{r.name}</span>
+            <span style={{ color: MUTED, flexShrink: 0 }}>{r.status}</span>
+          </div>
+        ))}
+        {!showAll && hidden > 0 ? (
+          <button
+            type="button"
+            className="pop-click"
+            onClick={() => setShowAll(true)}
+            style={{
+              marginTop: 6,
+              marginBottom: 4,
+              border: 'none',
+              background: 'transparent',
+              color: SPICE,
+              fontWeight: 600,
+              fontSize: 13,
+              cursor: 'pointer',
+              padding: '8px 0',
+              width: '100%',
+              textAlign: 'left',
+            }}
+          >
+            Show all {list.length}
+          </button>
+        ) : null}
+      </div>
+    </>
+  )
+}
+
 export function OrderDetail({ orderId, onBack, onTier, onInvoicePreview, card, big, lbl }) {
   const o = DATA.holiday_orders.find((x) => x.id === orderId)
   if (!o) return null
@@ -47,7 +113,8 @@ export function OrderDetail({ orderId, onBack, onTier, onInvoicePreview, card, b
   const days = daysToTarget(o.ship_date)
   const daysLabel = days == null ? '—' : days === 0 ? 'Today' : days > 0 ? `${days} days` : `${Math.abs(days)} days ago`
   const showDepositInvoice = o.stage === 'quote' || o.stage === 'deposit_invoiced'
-  const showBalanceInvoice = o.stage === 'shipping' || o.stage === 'balance_invoiced'
+  const showBalanceInvoice =
+    o.stage === 'deposit_paid' || o.stage === 'shipping' || o.stage === 'balance_invoiced'
 
   return (
     <DetailShell title={o.client} onBack={onBack} card={card} big={big}>
@@ -68,60 +135,27 @@ export function OrderDetail({ orderId, onBack, onTier, onInvoicePreview, card, b
       <RowLine l="Target delivery" v={fmtD(o.ship_date)} mono={false} />
       <RowLine l="Days to target" v={daysLabel} mono={false} />
       <RowLine l="Deposit" v={`${o.deposit_pct}% · ${money(o.deposit_amount)}`} mono={false} />
+      {o.stage === 'deposit_invoiced' ? (
+        <RowLine l="Deposit invoiced" v={money(o.deposit_amount)} mono={false} />
+      ) : null}
       <RowLine
-        l="Deposit received"
+        l="Deposit paid"
         v={
           o.deposit_received > 0
             ? `${money(o.deposit_received)} · ${fmtD(o.deposit_date)}`
             : depositDue
-              ? `Not received, due ${fmtD(depositDue.date)}`
-              : 'Not received'
+              ? `Not paid, due ${fmtD(depositDue.date)}`
+              : 'Not paid'
         }
         mono={false}
       />
       <RowLine l="Balance due" v={money(o.balance_due)} bold mono={false} />
-      <RowLine l="Recipients shipped" v={`${fmtInt(shipped)} of ${fmtInt(recipTotal)}`} mono={false} />
-      <div style={{ marginTop: 12, ...lbl, marginBottom: 6 }}>Recipients</div>
-      <div style={{ maxHeight: 280, overflowY: 'auto', border: `1px solid ${BORDER}`, borderRadius: 2, padding: '4px 10px' }}>
-        {o.recipients.map((r, i) => (
-          <div
-            key={i}
-            style={{
-              display: 'flex',
-              justifyContent: 'space-between',
-              gap: 10,
-              padding: '7px 0',
-              borderTop: i ? `1px solid ${CREAM}` : 'none',
-              fontSize: 13,
-            }}
-          >
-            <span>{r.name}</span>
-            <span style={{ color: MUTED, flexShrink: 0 }}>{r.status}</span>
-          </div>
-        ))}
-      </div>
-      <div style={{ marginTop: 12, ...lbl, marginBottom: 6 }}>Cash due</div>
-      {o.cash_due.map((c, i) => (
-        <RowLine key={i} l={`${fmtD(c.date)} · ${c.type}`} v={money(c.amount)} mono={false} />
-      ))}
       {showDepositInvoice ? (
         <button
           type="button"
           className="pop-click"
           onClick={() => onInvoicePreview?.({ orderId: o.id, kind: 'deposit' })}
-          style={{
-            marginTop: 16,
-            border: `1px solid ${BORDER}`,
-            background: CARDBG,
-            color: SPICE,
-            fontWeight: 600,
-            cursor: 'pointer',
-            fontSize: 13,
-            padding: '10px 14px',
-            borderRadius: 2,
-            width: '100%',
-            textAlign: 'left',
-          }}
+          style={{ ...invoiceActionBtn, marginTop: 14 }}
         >
           Create deposit invoice
         </button>
@@ -131,23 +165,17 @@ export function OrderDetail({ orderId, onBack, onTier, onInvoicePreview, card, b
           type="button"
           className="pop-click"
           onClick={() => onInvoicePreview?.({ orderId: o.id, kind: 'balance' })}
-          style={{
-            marginTop: showDepositInvoice ? 8 : 16,
-            border: `1px solid ${BORDER}`,
-            background: CARDBG,
-            color: SPICE,
-            fontWeight: 600,
-            cursor: 'pointer',
-            fontSize: 13,
-            padding: '10px 14px',
-            borderRadius: 2,
-            width: '100%',
-            textAlign: 'left',
-          }}
+          style={{ ...invoiceActionBtn, marginTop: showDepositInvoice ? 8 : 14 }}
         >
           Create balance invoice
         </button>
       ) : null}
+      <RowLine l="Recipients shipped" v={`${fmtInt(shipped)} of ${fmtInt(recipTotal)}`} mono={false} />
+      <OrderRecipients order={o} lbl={lbl} />
+      <div style={{ marginTop: 12, ...lbl, marginBottom: 6 }}>Cash due</div>
+      {o.cash_due.map((c, i) => (
+        <RowLine key={i} l={`${fmtD(c.date)} · ${c.type}`} v={money(c.amount)} mono={false} />
+      ))}
     </DetailShell>
   )
 }
@@ -211,9 +239,6 @@ export function HolidayOverviewDetail({ focus, onBack, onOrder, onGoOrders, card
     <DetailShell title={title} onBack={onBack} card={card} big={big}>
       {focus === 'booked' ? (
         <RowLine l="Orders" v={`${hol.count} · ${fmtInt(hol.units)} units`} mono={false} />
-      ) : null}
-      {focus === 'deposits' ? (
-        <RowLine l="Rule" v="Deposit paid stage or later" mono={false} />
       ) : null}
       <div style={{ marginTop: 8, ...lbl, marginBottom: 8 }}>By order</div>
       <table className="pop-table">

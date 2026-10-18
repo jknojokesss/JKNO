@@ -21,6 +21,18 @@ const ok = (label, cond) => {
   if (!cond) failures.push(label)
 }
 
+const BANNED_CLIENT_NAMES = [
+  'Tri-State Title Agency',
+  'Lakewood Insurance Brokers',
+  'Spring Valley Law Offices',
+  'Route 59 Auto Group',
+  'Ramapo Building Supply',
+]
+const popJson = fs.readFileSync(path.join(root, 'data/popinsanity.json'), 'utf8')
+for (const name of BANNED_CLIENT_NAMES) {
+  ok(`no banned name: ${name}`, !popJson.includes(name))
+}
+
 const orders = data.holiday_orders
 ok('12 holiday orders', orders.length === 12)
 

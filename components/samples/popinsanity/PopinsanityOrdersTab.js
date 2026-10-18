@@ -32,7 +32,7 @@ function OrderBoardCard({ order, onOpen }) {
           <div className="pop-card-v pop-board-num">{money(order.order_total)}</div>
         </div>
         <div>
-          <div className="pop-card-k">Deposit</div>
+          <div className="pop-card-k">Deposit paid</div>
           <div className="pop-card-v pop-board-num">{money(order.deposit_received)}</div>
         </div>
         <div>
