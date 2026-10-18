@@ -17,6 +17,37 @@ import {
   TieMark,
 } from './primalKrispUtils'
 
+const PNL_SHEET_CSS = `
+.pk-pnl-wrap{
+  --pk-pnl-c1:5.5rem;--pk-pnl-c2:5.5rem;--pk-pnl-c3:4.25rem;--pk-pnl-gap:6px;
+  --pk-pnl-fs:12px;--pk-pnl-fs-cur:13px;--pk-pnl-fs-head:10px;
+}
+@media(max-width:480px){
+  .pk-pnl-wrap{
+    --pk-pnl-c1:4.375rem;--pk-pnl-c2:4.375rem;--pk-pnl-c3:3.5rem;--pk-pnl-gap:4px;
+    --pk-pnl-fs:10px;--pk-pnl-fs-cur:11px;--pk-pnl-fs-head:9px;
+  }
+}
+.pk-pnl-head,.pk-pnl-line{
+  display:grid;grid-template-columns:minmax(0,1fr) var(--pk-pnl-c1) var(--pk-pnl-c2) var(--pk-pnl-c3);
+  column-gap:var(--pk-pnl-gap);align-items:center;padding-right:6px;box-sizing:border-box;
+}
+.pk-pnl-line--solo{grid-template-columns:minmax(0,1fr) var(--pk-pnl-c1)}
+.pk-pnl-head{padding:0 6px 8px;font-size:var(--pk-pnl-fs-head);color:${MUTED};text-transform:uppercase;letter-spacing:.6px}
+.pk-pnl-line{padding:8px 6px;border-radius:2px}
+.pk-pnl-line--indent{padding:4px 6px 4px 0}
+.pk-pnl-line--indent .pk-pnl-label{padding-left:20px}
+.pk-pnl-line--sub{border-top:1px solid ${BORDER}}
+.pk-pnl-label{min-width:0;font-size:13px;line-height:1.35}
+.pk-pnl-num{
+  font-family:${MONO};font-size:var(--pk-pnl-fs);text-align:right;justify-self:stretch;
+  width:100%;max-width:100%;box-sizing:border-box;white-space:nowrap;overflow:hidden;
+  font-variant-numeric:tabular-nums;
+}
+.pk-pnl-num--cur{font-size:var(--pk-pnl-fs-cur)}
+.pk-pnl-head .pk-pnl-num{font-size:var(--pk-pnl-fs-head);font-family:${UI};font-weight:600;overflow:visible}
+`
+
 export default function PrimalKrispFinancials({ card, lbl, big, btn, inp, KPI }) {
   const months = DATA.pnl_by_month || []
   const [pnlMonthIdx, setPnlMonthIdx] = useState(months.length - 1)
@@ -37,38 +68,39 @@ export default function PrimalKrispFinancials({ card, lbl, big, btn, inp, KPI })
     const delta = prior != null ? amount - prior : null
     const show = cost ? -amount : amount
     const showPrior = prior != null ? (cost ? -prior : prior) : null
+    const lineClass = [
+      'pk-pnl-line',
+      indent ? 'pk-pnl-line--indent' : '',
+      subtotal || bold ? 'pk-pnl-line--sub' : '',
+      !prev ? 'pk-pnl-line--solo' : '',
+      drillable ? 'pk-click' : '',
+    ]
+      .filter(Boolean)
+      .join(' ')
     return (
       <div
         role={drillable ? 'button' : undefined}
         tabIndex={drillable ? 0 : undefined}
-        className={drillable ? 'pk-click' : undefined}
+        className={lineClass}
         onClick={drillable ? () => openDrill(label, ledgerKey, amount) : undefined}
         onKeyDown={drillable ? (e) => e.key === 'Enter' && openDrill(label, ledgerKey, amount) : undefined}
-        style={{
-          display: 'flex',
-          alignItems: 'center',
-          gap: 8,
-          padding: indent ? '4px 6px 4px 20px' : '8px 6px',
-          borderTop: subtotal || bold ? `1px solid ${BORDER}` : 'none',
-          cursor: drillable ? 'pointer' : 'default',
-          borderRadius: 2,
-        }}
+        style={{ cursor: drillable ? 'pointer' : 'default' }}
       >
-        <span style={{ flex: 1, fontSize: 13, fontWeight: bold ? 700 : 400, color: indent ? MUTED : INK }}>
+        <span className="pk-pnl-label" style={{ fontWeight: bold ? 700 : 400, color: indent ? MUTED : INK }}>
           {label}
           {drillable ? <span style={{ color: '#C9BBA0', fontSize: 11 }}> ›</span> : null}
         </span>
-        <span style={{ fontFamily: MONO, fontSize: 13, fontWeight: bold ? 700 : 400, color: cost ? RED : INK, width: 96, textAlign: 'right' }}>
+        <span className="pk-pnl-num pk-pnl-num--cur" style={{ fontWeight: bold ? 700 : 400, color: cost ? RED : INK }}>
           {money(show)}
         </span>
-        {prev && (
-          <span style={{ fontFamily: MONO, fontSize: 12, color: MUTED, width: 88, textAlign: 'right' }}>{money(showPrior)}</span>
-        )}
-        {prev && (
-          <span style={{ fontFamily: MONO, fontSize: 12, color: delta > 0 ? GREEN : delta < 0 ? RED : MUTED, width: 72, textAlign: 'right' }}>
+        {prev ? (
+          <span className="pk-pnl-num" style={{ color: MUTED }}>{money(showPrior)}</span>
+        ) : null}
+        {prev ? (
+          <span className="pk-pnl-num" style={{ color: delta > 0 ? GREEN : delta < 0 ? RED : MUTED }}>
             {delta != null ? money(delta) : '—'}
           </span>
-        )}
+        ) : null}
       </div>
     )
   }
@@ -123,14 +155,15 @@ export default function PrimalKrispFinancials({ card, lbl, big, btn, inp, KPI })
         <KPI k="Net profit" v={money(cur.net_profit)} accent={SPICE} />
       </div>
 
-      <div style={{ ...card }}>
+      <div className="pk-pnl-wrap" style={{ ...card }}>
+        <style>{PNL_SHEET_CSS}</style>
         <div style={{ ...lbl, marginBottom: 8 }}>Profit &amp; loss · {cur.period}</div>
         {prev && (
-          <div style={{ display: 'flex', padding: '0 6px 8px', gap: 8, fontSize: 10, color: MUTED, textTransform: 'uppercase', letterSpacing: '0.6px' }}>
-            <span style={{ flex: 1 }} />
-            <span style={{ width: 96, textAlign: 'right' }}>This month</span>
-            <span style={{ width: 88, textAlign: 'right' }}>Prior mo.</span>
-            <span style={{ width: 72, textAlign: 'right' }}>Change</span>
+          <div className="pk-pnl-head">
+            <span />
+            <span className="pk-pnl-num">This month</span>
+            <span className="pk-pnl-num">Prior mo.</span>
+            <span className="pk-pnl-num">Change</span>
           </div>
         )}
 
