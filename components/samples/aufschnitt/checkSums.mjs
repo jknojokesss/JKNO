@@ -87,9 +87,9 @@ ar.accounts.forEach((a) => {
   ok(`AR size ${a.name}`, a.buckets.total >= 900 && a.buckets.total <= 14_200)
 })
 const fullyCurrent = ar.accounts.filter(
-  (a) => a.buckets.d31_60 === 0 && a.buckets.d61_90 === 0 && a.buckets.d90p === 0
+  (a) => a.buckets.d1_30 === 0 && a.buckets.d31_60 === 0 && a.buckets.d61_90 === 0 && a.buckets.d90p === 0
 )
-ok('AR ~1/3 fully current', fullyCurrent.length >= 6 && fullyCurrent.length <= 10)
+ok('AR 5 fully current', fullyCurrent.length === 5)
 ok('AR 31-60 count', ar.accounts.filter((a) => a.buckets.d31_60 > 0).length === 6)
 ok('AR 61-90 count', ar.accounts.filter((a) => a.buckets.d61_90 > 0).length === 2)
 ok('AR 90+ only Passaic', ar.accounts.filter((a) => a.buckets.d90p > 0).length === 1 && ar.accounts.find((a) => a.name === 'Passaic store 1').buckets.d90p > 0)

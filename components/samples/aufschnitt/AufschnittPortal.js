@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react'
+import { useState, useCallback, useEffect } from 'react'
 import DemoLobby from '../../DemoLobby'
 import DATA from './aufschnittData'
 import { BRAND_ALL, BRANDS } from './aufschnittCatalog'
@@ -43,6 +43,15 @@ export default function AufschnittPortal() {
   const [pnlMonthIdx, setPnlMonthIdx] = useState(5)
   const [pnlExpand, setPnlExpand] = useState({ revenue: true, cogs: true, opex: true })
   const [stockSort, setStockSort] = useState({ key: 'weeksSupply', dir: 'asc' })
+  const [narrowNav, setNarrowNav] = useState(false)
+
+  useEffect(() => {
+    const mq = window.matchMedia('(max-width: 860px)')
+    const sync = () => setNarrowNav(mq.matches)
+    sync()
+    mq.addEventListener('change', sync)
+    return () => mq.removeEventListener('change', sync)
+  }, [])
 
   const card = { background: CARDBG, border: `1px solid ${BORDER}`, borderRadius: '2px', padding: '20px' }
   const lbl = {
@@ -157,15 +166,13 @@ export default function AufschnittPortal() {
       <div className="au-shell">
         <aside className="au-side">
           <div style={{ padding: '2px 8px 16px' }}>
-            <div style={{ fontFamily: UI, fontWeight: 800, fontSize: 22, color: CREAM, letterSpacing: '-0.5px' }}>
-              Aufschnitt Meats
-            </div>
-            <div style={{ fontSize: 12, color: '#B6A78C', marginTop: 6 }}>Owings Mills, MD</div>
-            <div style={{ ...lbl, color: '#B6A78C', marginTop: '12px' }}>Owner portal</div>
+            <div style={{ fontSize: 12, color: '#B6A78C' }}>Owings Mills, MD</div>
+            <div style={{ ...lbl, color: '#B6A78C', marginTop: '12px' }}>Dashboard</div>
           </div>
           <nav className="au-nav au-nav--main" aria-label="Dashboard sections">
             {TABS.map(([id, longLabel, shortLabel]) => {
               const active = tab === id
+              const navLabel = narrowNav ? shortLabel : longLabel
               return (
                 <button
                   key={id}
@@ -182,8 +189,7 @@ export default function AufschnittPortal() {
                       : undefined
                   }
                 >
-                  <span className="au-nav-label-long">{longLabel}</span>
-                  <span className="au-nav-label-short">{shortLabel}</span>
+                  {navLabel}
                 </button>
               )
             })}
@@ -192,8 +198,6 @@ export default function AufschnittPortal() {
             <div style={{ fontFamily: MONO, fontSize: '9px', color: '#8A7A66', lineHeight: 1.7 }}>
               SAMPLE DASHBOARD<br />
               <span style={{ color: SPICE, fontWeight: 600 }}>{DATA.meta.built_by}</span>
-              <br />
-              {BIZ}
             </div>
           </div>
         </aside>
@@ -380,7 +384,15 @@ function GenericOverviewDetail({ detail, card, lbl }) {
       <>
         <h2 style={{ fontSize: 20, fontWeight: 700, marginBottom: 12 }}>Stock at cost</h2>
         <div style={{ ...card }}>
-          <Row l="Value at cost" v={money0(detail.stockValue)} bold />
+          <Row l="September" v={money0(detail.stockValue)} bold />
+          {detail.stockPrior != null ? <Row l="August" v={money0(detail.stockPrior)} /> : null}
+          {detail.stockDelta != null ? (
+            <Row
+              l="Change"
+              v={`${detail.stockDelta >= 0 ? '+' : ''}${detail.stockDelta.toFixed(1)}%`}
+              bold
+            />
+          ) : null}
           <Row l="Avg weeks of supply" v={String(detail.stockWeeks)} />
           <Row l="SKU count" v={String(detail.stockRows.length)} />
         </div>

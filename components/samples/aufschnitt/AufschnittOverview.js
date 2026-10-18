@@ -92,7 +92,9 @@ export default function AufschnittOverview({ card, lbl, KPI, brand, onOpen }) {
           v={money0(stockValue)}
           sub={`${stockDelta >= 0 ? '+' : ''}${pct1(stockDelta)} vs August`}
           subColor={changeColor(stockDelta)}
-          onClick={() => onOpen({ type: 'stock-summary', brand, stockRows, stockValue, stockWeeks })}
+          onClick={() =>
+            onOpen({ type: 'stock-summary', brand, stockRows, stockValue, stockPrior, stockWeeks, stockDelta })
+          }
         />
         {brand === 'All brands' && (
           <KPI

@@ -605,7 +605,7 @@ function buildStock(salesRows, opts = {}) {
 
   let totalVal = sumCents(rows, (r) => r.valueAtCost)
   const targetVal = 208_400
-  if (totalVal < 190_000 || totalVal > 230_000) {
+  if (!opts.skipValueScale && (totalVal < 190_000 || totalVal > 230_000)) {
     const factor = targetVal / totalVal
     rows = rows.map((r) => {
       const onHandCases = Math.max(1, Math.round(r.onHandCases * factor))
@@ -652,14 +652,14 @@ const AR_BUCKET_SPEC = {
   'Lakewood store 1': { current: 3347.63, d1_30: 3784.22, d31_60: 0, d61_90: 2984.17, d90p: 0 },
   'Lakewood store 2': { current: 3218.34, d1_30: 3876.18, d31_60: 0, d61_90: 0, d90p: 0 },
   'Five Towns store 1': { current: 1187.44, d1_30: 1042.18, d31_60: 0, d61_90: 0, d90p: 0 },
-  'Five Towns store 2': { current: 412.87, d1_30: 384.62, d31_60: 0, d61_90: 0, d90p: 0 },
-  'Teaneck store 1': { current: 1878.92, d1_30: 1632.18, d31_60: 0, d61_90: 0, d90p: 0 },
+  'Five Towns store 2': { current: 797.49, d1_30: 0, d31_60: 0, d61_90: 0, d90p: 0 },
+  'Teaneck store 1': { current: 3511.1, d1_30: 0, d31_60: 0, d61_90: 0, d90p: 0 },
   'Passaic store 1': { current: 518.44, d1_30: 612.87, d31_60: 0, d61_90: 0, d90p: 1384.56 },
   'Queens store 1': { current: 642.18, d1_30: 787.44, d31_60: 1484.22, d61_90: 0, d90p: 0 },
-  'Queens store 2': { current: 1784.33, d1_30: 1528.67, d31_60: 0, d61_90: 0, d90p: 0 },
-  'Baltimore store 1': { current: 2187.44, d1_30: 1942.18, d31_60: 0, d61_90: 0, d90p: 0 },
+  'Queens store 2': { current: 3313.0, d1_30: 0, d31_60: 0, d61_90: 0, d90p: 0 },
+  'Baltimore store 1': { current: 4129.62, d1_30: 0, d31_60: 0, d61_90: 0, d90p: 0 },
   'Baltimore store 2': { current: 528.67, d1_30: 712.33, d31_60: 1687.92, d61_90: 0, d90p: 0 },
-  'Staten Island store 1': { current: 487.63, d1_30: 412.44, d31_60: 0, d61_90: 0, d90p: 0 },
+  'Staten Island store 1': { current: 900.07, d1_30: 0, d31_60: 0, d61_90: 0, d90p: 0 },
   'Distributor NJ 1': { current: 3284.22, d1_30: 3988.67, d31_60: 0, d61_90: 2947.44, d90p: 0 },
 }
 
@@ -878,7 +878,7 @@ function buildModel() {
   BRANDS.forEach((b) => addPnlView(b, (id) => pnlByBrandMonth[`${id}:${b}`]))
 
   const stock = buildStock(salesRows)
-  const stockAug = buildStock(salesRows, { velocityMonth: '2026-08', weeksScale: 1.03 })
+  const stockAug = buildStock(salesRows, { velocityMonth: '2026-08', weeksScale: 0.96, skipValueScale: true })
   const receivables = buildReceivables()
   const channels = buildChannelDetails(salesRows)
 
