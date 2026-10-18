@@ -1274,16 +1274,26 @@ export default function JerkyMunch() {
               {(() => {
                 const inv = consign.filter(c => c.type === 'invoice').slice().sort((a, b) => (a.region || '').localeCompare(b.region || '') || (a.store || '').localeCompare(b.store || ''))
                 const searchQ = invSearch.trim().toLowerCase()
-                const representedQbIds = new Set(consign.filter(c => c.qbCustomerId).map(c => String(c.qbCustomerId)))
-                const representedNames = new Set(consign.map(c => String(c.store || '').trim().toLowerCase()))
-                const qbPool = (qbAllCustomers.customers || []).filter(qc => {
-                  if (representedQbIds.has(String(qc.id))) return false
-                  if (representedNames.has(String(qc.name || '').trim().toLowerCase())) return false
-                  return true
-                }).sort((a, b) => a.name.localeCompare(b.name))
+                const qbCatalog = (qbAllCustomers.customers || []).slice().sort((a, b) => a.name.localeCompare(b.name))
+                const partnerForQbCustomer = (qc) => {
+                  const qbId = String(qc.id)
+                  const qbName = String(qc.name || '').trim().toLowerCase()
+                  return consign.find(c =>
+                    (c.qbCustomerId && String(c.qbCustomerId) === qbId) ||
+                    String(c.store || '').trim().toLowerCase() === qbName
+                  ) || null
+                }
+                const linkedAppStore = (qc) => {
+                  const p = partnerForQbCustomer(qc)
+                  if (!p) return false
+                  if (p.type === 'invoice') return true
+                  if ((p.type || 'consignment') === 'consignment') return true
+                  if (p.log && p.log.length > 0) return true
+                  return false
+                }
                 const qbFiltered = searchQ
-                  ? qbPool.filter(qc => qc.name.toLowerCase().includes(searchQ) || (qc.email && qc.email.toLowerCase().includes(searchQ)))
-                  : qbPool.filter(qc => qc.hasInvoice)
+                  ? qbCatalog.filter(qc => qc.name.toLowerCase().includes(searchQ) || (qc.email && qc.email.toLowerCase().includes(searchQ)))
+                  : qbCatalog.filter(qc => qc.hasInvoice && !linkedAppStore(qc))
                 const qbVisible = searchQ ? qbFiltered : qbFiltered.slice(0, qbOnlyLimit)
 
                 const renderNewInvoiceForm = (c, { qbOnly = false } = {}) => {
@@ -1405,13 +1415,21 @@ export default function JerkyMunch() {
                 })
 
                 const qbBlocks = qbVisible.map(qc => {
-                  const rowId = `qb_${qc.id}`
-                  const c = { id: rowId, store: qc.name }
+                  const existing = partnerForQbCustomer(qc)
+                  const rowId = existing ? existing.id : `qb_${qc.id}`
+                  const c = { id: rowId, store: existing ? existing.store : qc.name }
                   const open = expanded === rowId
                   const bal = Number(qc.balance) || 0
                   return (
-                    <div key={rowId} style={{ ...card, padding: 0, marginBottom: '8px', overflow: 'hidden', borderColor: open ? CHAR : BORDER }}>
-                      <div onClick={() => { const willOpen = !open; setExpanded(willOpen ? rowId : null); if (willOpen) ensurePricing(rowId, qc.name, false, qc.id) }} style={{ padding: '12px 16px', cursor: 'pointer', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '10px', flexWrap: 'wrap' }}>
+                    <div key={`${rowId}_${qc.id}`} style={{ ...card, padding: 0, marginBottom: '8px', overflow: 'hidden', borderColor: open ? CHAR : BORDER }}>
+                      <div onClick={() => {
+                        const willOpen = !open
+                        setExpanded(willOpen ? rowId : null)
+                        if (willOpen) {
+                          if (existing) ensurePricing(existing.id, existing.store)
+                          else ensurePricing(rowId, qc.name, false, qc.id)
+                        }
+                      }} style={{ padding: '12px 16px', cursor: 'pointer', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '10px', flexWrap: 'wrap' }}>
                         <div style={{ minWidth: 0, flex: '1 1 200px' }}>
                           <div style={{ fontWeight: 600, color: INK, fontSize: '15px', wordBreak: 'break-word' }}>{qc.name}</div>
                           {qc.email && <div style={{ fontSize: '12px', color: MUTED, marginTop: '2px', wordBreak: 'break-word' }}>{qc.email}</div>}
@@ -1422,7 +1440,7 @@ export default function JerkyMunch() {
                         <div style={{ padding: '0 16px 16px', borderTop: `1px solid ${CREAM}` }}>
                           <div style={{ ...lbl, margin: '14px 0 8px' }}>New invoice</div>
                           <div style={{ background: CREAM, borderRadius: '2px', padding: '14px 16px' }}>
-                            {renderNewInvoiceForm(c, { qbOnly: true })}
+                            {renderNewInvoiceForm(c, { qbOnly: !existing })}
                           </div>
                         </div>
                       )}
