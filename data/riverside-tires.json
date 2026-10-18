@@ -100,6 +100,18 @@
       "newTireUnits": 184,
       "usedTireUnits": 78,
       "ticketCount": 105
+    },
+    {
+      "month": "2026-09",
+      "label": "SEP",
+      "revenue": 37500,
+      "cogs": 14550,
+      "opex": 9200,
+      "profit": 13750,
+      "tiresSold": 266,
+      "newTireUnits": 187,
+      "usedTireUnits": 79,
+      "ticketCount": 107
     }
   ],
   "pl_by_month": {
@@ -2326,6 +2338,286 @@
           ]
         }
       ]
+    },
+    "2026-09": {
+      "income": [
+        {
+          "label": "Tire sales",
+          "amount": 30750,
+          "drill": [
+            {
+              "date": "2026-08-08",
+              "description": "Tire sales · week 1",
+              "type": "Journal",
+              "amount": 6765.16
+            },
+            {
+              "date": "2026-08-15",
+              "description": "Tire sales · week 2",
+              "type": "Journal",
+              "amount": 7995.28
+            },
+            {
+              "date": "2026-08-22",
+              "description": "Tire sales · week 3",
+              "type": "Journal",
+              "amount": 8609.84
+            },
+            {
+              "date": "2026-08-28",
+              "description": "Tire sales · week 4",
+              "type": "Journal",
+              "amount": 7379.72
+            }
+          ]
+        },
+        {
+          "label": "Service & labor",
+          "amount": 5250,
+          "drill": [
+            {
+              "date": "2026-08-08",
+              "description": "Service & labor · week 1",
+              "type": "Journal",
+              "amount": 1155.32
+            },
+            {
+              "date": "2026-08-15",
+              "description": "Service & labor · week 2",
+              "type": "Journal",
+              "amount": 1364.56
+            },
+            {
+              "date": "2026-08-22",
+              "description": "Service & labor · week 3",
+              "type": "Journal",
+              "amount": 1469.68
+            },
+            {
+              "date": "2026-08-28",
+              "description": "Service & labor · week 4",
+              "type": "Journal",
+              "amount": 1260.44
+            }
+          ]
+        },
+        {
+          "label": "Parts & accessories",
+          "amount": 1500,
+          "drill": [
+            {
+              "date": "2026-08-08",
+              "description": "Parts & accessories · week 1",
+              "type": "Journal",
+              "amount": 329.51
+            },
+            {
+              "date": "2026-08-15",
+              "description": "Parts & accessories · week 2",
+              "type": "Journal",
+              "amount": 390.16
+            },
+            {
+              "date": "2026-08-22",
+              "description": "Parts & accessories · week 3",
+              "type": "Journal",
+              "amount": 420.49
+            },
+            {
+              "date": "2026-08-28",
+              "description": "Parts & accessories · week 4",
+              "type": "Journal",
+              "amount": 359.84
+            }
+          ]
+        }
+      ],
+      "cogs": [
+        {
+          "label": "Tire cost of sales",
+          "amount": 11061.99,
+          "drill": [
+            {
+              "date": "2026-08-08",
+              "description": "COGS · Tire COGS · week 1",
+              "type": "Journal",
+              "amount": 2433.96
+            },
+            {
+              "date": "2026-08-15",
+              "description": "COGS · Tire COGS · week 2",
+              "type": "Journal",
+              "amount": 2875.67
+            },
+            {
+              "date": "2026-08-22",
+              "description": "COGS · Tire COGS · week 3",
+              "type": "Journal",
+              "amount": 3097.04
+            },
+            {
+              "date": "2026-08-28",
+              "description": "COGS · Tire COGS · week 4",
+              "type": "Journal",
+              "amount": 2655.32
+            }
+          ]
+        },
+        {
+          "label": "Parts & fluids",
+          "amount": 2328.84,
+          "drill": [
+            {
+              "date": "2026-08-08",
+              "description": "COGS · Parts COGS · week 1",
+              "type": "Journal",
+              "amount": 512.47
+            },
+            {
+              "date": "2026-08-15",
+              "description": "COGS · Parts COGS · week 2",
+              "type": "Journal",
+              "amount": 605.46
+            },
+            {
+              "date": "2026-08-22",
+              "description": "COGS · Parts COGS · week 3",
+              "type": "Journal",
+              "amount": 651.95
+            },
+            {
+              "date": "2026-08-28",
+              "description": "COGS · Parts COGS · week 4",
+              "type": "Journal",
+              "amount": 558.96
+            }
+          ]
+        },
+        {
+          "label": "Shop supplies (COGS)",
+          "amount": 1164.42,
+          "drill": [
+            {
+              "date": "2026-08-08",
+              "description": "COGS · Supplies COGS · week 1",
+              "type": "Journal",
+              "amount": 255.73
+            },
+            {
+              "date": "2026-08-15",
+              "description": "COGS · Supplies COGS · week 2",
+              "type": "Journal",
+              "amount": 303.23
+            },
+            {
+              "date": "2026-08-22",
+              "description": "COGS · Supplies COGS · week 3",
+              "type": "Journal",
+              "amount": 326.48
+            },
+            {
+              "date": "2026-08-28",
+              "description": "COGS · Supplies COGS · week 4",
+              "type": "Journal",
+              "amount": 278.98
+            }
+          ]
+        }
+      ],
+      "expense": [
+        {
+          "label": "Rent",
+          "amount": 4599.06,
+          "drill": [
+            {
+              "date": "2026-08-08",
+              "description": "Rent · week 1",
+              "type": "Journal",
+              "amount": 1011.79
+            },
+            {
+              "date": "2026-08-15",
+              "description": "Rent · week 2",
+              "type": "Journal",
+              "amount": 1195.75
+            },
+            {
+              "date": "2026-08-22",
+              "description": "Rent · week 3",
+              "type": "Journal",
+              "amount": 1287.74
+            },
+            {
+              "date": "2026-08-28",
+              "description": "Rent · week 4",
+              "type": "Journal",
+              "amount": 1103.77
+            }
+          ]
+        },
+        {
+          "label": "Payroll — shop",
+          "amount": 3127.36,
+          "drill": [
+            {
+              "date": "2026-08-08",
+              "description": "Payroll · week 1",
+              "type": "Journal",
+              "amount": 688.34
+            },
+            {
+              "date": "2026-08-15",
+              "description": "Payroll · week 2",
+              "type": "Journal",
+              "amount": 812.67
+            },
+            {
+              "date": "2026-08-22",
+              "description": "Payroll · week 3",
+              "type": "Journal",
+              "amount": 875.34
+            },
+            {
+              "date": "2026-08-28",
+              "description": "Payroll · week 4",
+              "type": "Journal",
+              "amount": 751.01
+            }
+          ]
+        },
+        {
+          "label": "Other operating",
+          "amount": 1471.7,
+          "drill": [
+            {
+              "date": "2026-08-08",
+              "description": "Other operating · week 1",
+              "type": "Journal",
+              "amount": 323.45
+            },
+            {
+              "date": "2026-08-15",
+              "description": "Other operating · week 2",
+              "type": "Journal",
+              "amount": 383.09
+            },
+            {
+              "date": "2026-08-22",
+              "description": "Other operating · week 3",
+              "type": "Journal",
+              "amount": 412.4
+            },
+            {
+              "date": "2026-08-28",
+              "description": "Other operating · week 4",
+              "type": "Journal",
+              "amount": 352.76
+            }
+          ]
+        }
+      ],
+      "gross": 22944.75,
+      "net": 13750
     }
   },
   "balance_sheet": {
@@ -2696,6 +2988,52 @@
         }
       ],
       "totalEquity": 51130
+    },
+    "2026-09": {
+      "label": "Sep 30, 2026",
+      "assets": [
+        {
+          "label": "Business checking",
+          "amount": 45346.2
+        },
+        {
+          "label": "Inventory",
+          "amount": 17824.47
+        },
+        {
+          "label": "Accounts receivable",
+          "amount": 4053.07
+        }
+      ],
+      "liabilities": [
+        {
+          "label": "Accounts payable",
+          "amount": 8728.78
+        },
+        {
+          "label": "Credit cards",
+          "amount": 5392.6
+        },
+        {
+          "label": "Sales tax payable",
+          "amount": 1789.85
+        }
+      ],
+      "equity": [
+        {
+          "label": "Opening equity",
+          "amount": 38302.96
+        },
+        {
+          "label": "Net income (current year)",
+          "amount": 104480.86
+        },
+        {
+          "label": "Owner draws (year to date)",
+          "amount": -91516.01
+        }
+      ],
+      "totalEquity": 51130
     }
   },
   "cash_flow": {
@@ -3013,6 +3351,41 @@
       "cashStart": 42100,
       "cashEnd": 45200,
       "netChange": 3100
+    },
+    "2026-09": {
+      "operating": [
+        {
+          "label": "Net income",
+          "amount": 13750
+        },
+        {
+          "label": "Accounts receivable change",
+          "amount": 254.72
+        },
+        {
+          "label": "Inventory change",
+          "amount": -413.92
+        },
+        {
+          "label": "Accounts payable change",
+          "amount": -163.75
+        }
+      ],
+      "investing": [
+        {
+          "label": "Shop equipment",
+          "amount": -1100
+        }
+      ],
+      "financing": [
+        {
+          "label": "Owner draw",
+          "amount": -11795
+        }
+      ],
+      "cashStart": 44850,
+      "cashEnd": 45350,
+      "netChange": 500
     }
   },
   "sales_mix_aug": [
@@ -3466,7 +3839,7 @@
       "payment": "card"
     }
   ],
-  "ytd_revenue": 285400,
+  "ytd_revenue": 322900,
   "ask": {
     "chips": [
       "What was my best month this year?",
@@ -4329,6 +4702,125 @@
     },
     "2026-08": {
       "label": "Aug 31, 2026",
+      "rows": [
+        {
+          "size": "235/65/17",
+          "desc": "All-season touring",
+          "unitCost": 75,
+          "onHand": 18,
+          "value": 1350
+        },
+        {
+          "size": "205/55/16",
+          "desc": "Grand touring",
+          "unitCost": 65,
+          "onHand": 16,
+          "value": 1040
+        },
+        {
+          "size": "225/60/17",
+          "desc": "All-season",
+          "unitCost": 70,
+          "onHand": 20,
+          "value": 1400
+        },
+        {
+          "size": "245/70/17",
+          "desc": "All-terrain",
+          "unitCost": 85,
+          "onHand": 15,
+          "value": 1275
+        },
+        {
+          "size": "265/70/17",
+          "desc": "Highway terrain",
+          "unitCost": 85,
+          "onHand": 12,
+          "value": 1020
+        },
+        {
+          "size": "255/50/20",
+          "desc": "Performance SUV",
+          "unitCost": 115,
+          "onHand": 10,
+          "value": 1150
+        },
+        {
+          "size": "215/55/17",
+          "desc": "Standard touring",
+          "unitCost": 68,
+          "onHand": 14,
+          "value": 952
+        },
+        {
+          "size": "275/55/20",
+          "desc": "Crossover",
+          "unitCost": 115,
+          "onHand": 12,
+          "value": 1380
+        },
+        {
+          "size": "195/65/15",
+          "desc": "Compact touring",
+          "unitCost": 62,
+          "onHand": 13,
+          "value": 806
+        },
+        {
+          "size": "235/60/18",
+          "desc": "Touring",
+          "unitCost": 78,
+          "onHand": 16,
+          "value": 1248
+        },
+        {
+          "size": "245/45/18",
+          "desc": "Performance",
+          "unitCost": 92,
+          "onHand": 11,
+          "value": 1012
+        },
+        {
+          "size": "265/60/18",
+          "desc": "SUV highway",
+          "unitCost": 88,
+          "onHand": 12,
+          "value": 1056
+        },
+        {
+          "size": "275/65/18",
+          "desc": "LT highway",
+          "unitCost": 95,
+          "onHand": 10,
+          "value": 950
+        },
+        {
+          "size": "285/45/22",
+          "desc": "Performance plus",
+          "unitCost": 130,
+          "onHand": 8,
+          "value": 1040
+        },
+        {
+          "size": "225/65/17",
+          "desc": "Crossover touring",
+          "unitCost": 72,
+          "onHand": 14,
+          "value": 1008
+        },
+        {
+          "size": "245/75/16",
+          "desc": "Light truck",
+          "unitCost": 90,
+          "onHand": 12,
+          "value": 1080
+        }
+      ],
+      "inventory_value": 17767,
+      "units_on_hand": 213
+    },
+    "2026-09": {
+      "label": "Sep 30, 2026",
       "rows": [
         {
           "size": "235/65/17",
@@ -6759,10 +7251,16 @@
       "ticketCount": 105
     },
     "all": {
-      "revenue": 285400,
-      "unitsSold": 2018,
+      "revenue": 322900,
+      "unitsSold": 4720,
       "uniqueItems": 13,
-      "ticketCount": 803
+      "ticketCount": 910
+    },
+    "2026-09": {
+      "revenue": 37500,
+      "unitsSold": 548,
+      "uniqueItems": 13,
+      "ticketCount": 107
     }
   },
   "daily_close": {
@@ -6775,5 +7273,85 @@
         "cash_counted": 298.15
       }
     }
+  },
+  "sales_mix_sep": [
+    {
+      "name": "New Tires",
+      "revenue": 23399.59,
+      "color": "#B0281C",
+      "pct": 62.399
+    },
+    {
+      "name": "Service & Repair",
+      "revenue": 8288.41,
+      "color": "#8A8577",
+      "pct": 22.102
+    },
+    {
+      "name": "Used Tires",
+      "revenue": 3942.05,
+      "color": "#B9AE9A",
+      "pct": 10.512
+    },
+    {
+      "name": "Other",
+      "revenue": 1869.95,
+      "color": "#D3CBBA",
+      "pct": 4.987
+    }
+  ],
+  "top_tire_sizes_sep": [
+    {
+      "rank": 1,
+      "size": "235/65R17",
+      "units": 44,
+      "revenue": 5565.36
+    },
+    {
+      "rank": 2,
+      "size": "225/60R17",
+      "units": 28,
+      "revenue": 3215.3
+    },
+    {
+      "rank": 3,
+      "size": "245/70R17",
+      "units": 24,
+      "revenue": 3082.88
+    },
+    {
+      "rank": 4,
+      "size": "205/55R16",
+      "units": 20,
+      "revenue": 2237.87
+    },
+    {
+      "rank": 5,
+      "size": "265/70R17",
+      "units": 18,
+      "revenue": 2311.66
+    },
+    {
+      "rank": 6,
+      "size": "275/55R20",
+      "units": 20,
+      "revenue": 2296.5
+    }
+  ],
+  "sep_tire_sales": {
+    "new_tire_revenue": 23399.6,
+    "used_tire_revenue": 3942.05,
+    "new_tire_units": 187,
+    "used_tire_units": 79,
+    "tire_revenue_total": 27341.64,
+    "tires_sold_units": 266,
+    "top_six_revenue": 18709.57,
+    "top_six_units": 154
+  },
+  "equity_summary_sep": {
+    "opening": 38200,
+    "net_income_ytd": 117950,
+    "owner_draws_ytd": 91270,
+    "total": 51280
   }
 }

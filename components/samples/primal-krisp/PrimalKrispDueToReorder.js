@@ -41,7 +41,7 @@ function BackBar({ onBack, label }) {
         minHeight: 40,
       }}
     >
-      ← {label}
+      {label}
     </button>
   )
 }
@@ -206,7 +206,7 @@ export default function PrimalKrispDueToReorder({ card, lbl, btn, focusScroll, o
     if (invoiceOpen) {
       return (
         <>
-          <style>{REORDER_CSS}</style>
+          <style dangerouslySetInnerHTML={{ __html: REORDER_CSS }} />
           <BackBar
             onBack={() => setInvoiceOpen(false)}
             label={selected.store_name}
@@ -217,7 +217,7 @@ export default function PrimalKrispDueToReorder({ card, lbl, btn, focusScroll, o
     }
     return (
       <>
-        <style>{REORDER_CSS}</style>
+        <style dangerouslySetInnerHTML={{ __html: REORDER_CSS }} />
         <StoreDetail
           store={selected}
           card={card}
@@ -232,7 +232,7 @@ export default function PrimalKrispDueToReorder({ card, lbl, btn, focusScroll, o
 
   return (
     <div ref={anchorRef} style={{ marginBottom: 20, scrollMarginTop: 72 }}>
-      <style>{REORDER_CSS}</style>
+      <style dangerouslySetInnerHTML={{ __html: REORDER_CSS }} />
       <div style={{ ...lbl, marginBottom: 10 }}>Due to reorder</div>
       <div style={{ ...card, padding: '12px 16px 16px' }}>
         <table className="pk-reorder-table">

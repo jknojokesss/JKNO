@@ -164,7 +164,6 @@ export default function PrimalKrispPortal() {
         }}
       >
         {inner}
-        <span style={{ position: 'absolute', top: 11, right: 13, color: '#C6B79A', fontSize: 15 }}>›</span>
       </button>
     )
   }

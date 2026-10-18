@@ -27,7 +27,6 @@ function PnlLine({ label, thisVal, priorVal, cost, bold, indent, onClick }) {
     >
       <span className="pop-pnl-label" style={{ fontWeight: bold ? 700 : 400, color: indent ? MUTED : INK }}>
         {label}
-        {clickable ? <span style={{ color: '#C9BBA0', fontSize: 11 }}> ›</span> : null}
       </span>
       <span className="pop-pnl-num pop-pnl-num--cur" style={{ fontWeight: bold ? 700 : 400 }}>
         {money(thisVal)}
@@ -65,14 +64,13 @@ export default function PopinsanityFinancials({ styles, openPnlLine }) {
         textAlign: 'left',
       }}
     >
-      <span style={{ color: SPICE, fontSize: 10 }}>{exp[id] ? '▼' : '▶'}</span>
       {label}
     </button>
   )
 
   return (
     <div className="pop-pnl-wrap" style={{ ...card }}>
-      <style>{COMPARE_SHEET_CSS}</style>
+      <style dangerouslySetInnerHTML={{ __html: COMPARE_SHEET_CSS }} />
       <div style={{ ...lbl, marginBottom: 8 }}>Profit &amp; loss · {DATA.meta.this_month}</div>
       <div className="pop-pnl-head">
         <span />

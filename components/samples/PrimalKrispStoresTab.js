@@ -301,7 +301,7 @@ export default function PrimalKrispStoresTab({
 
   return (
     <div className="pk-stores-ui">
-      <style>{PRINT_CSS}</style>
+      <style dangerouslySetInnerHTML={{ __html: PRINT_CSS }} />
       <PrimalKrispDueToReorder
         card={card}
         lbl={lbl}

@@ -74,7 +74,6 @@ export default function AufschnittFinancials({
       >
         <span className="au-pnl-label" style={{ fontWeight: bold ? 700 : 400, color: indent ? MUTED : INK }}>
           {label}
-          {drillable ? <span style={{ color: '#C9BBA0', fontSize: 11 }}> ›</span> : null}
         </span>
         <span className="au-pnl-num au-pnl-num--cur" style={{ fontWeight: bold ? 700 : 400, color: cost ? '#C03A22' : INK }}>
           {money(show)}
@@ -109,7 +108,6 @@ export default function AufschnittFinancials({
         textAlign: 'left',
       }}
     >
-      <span style={{ color: SPICE, fontSize: 10 }}>{pnlExpand[id] ? '▼' : '▶'}</span>
       {label}
     </button>
   )
@@ -140,7 +138,7 @@ export default function AufschnittFinancials({
       </div>
 
       <div className="au-pnl-wrap" style={{ ...card }}>
-        <style>{PNL_SHEET_CSS}</style>
+        <style dangerouslySetInnerHTML={{ __html: PNL_SHEET_CSS }} />
         <div style={{ ...lbl, marginBottom: 8 }}>Profit &amp; loss · {cur.period}</div>
         {prev && (
           <div className="au-pnl-head">

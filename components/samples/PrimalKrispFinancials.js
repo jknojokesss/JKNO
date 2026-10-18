@@ -101,7 +101,6 @@ export default function PrimalKrispFinancials({ card, lbl, big, btn, inp, KPI })
       >
         <span className="pk-pnl-label" style={{ fontWeight: bold ? 700 : 400, color: indent ? MUTED : INK }}>
           {label}
-          {drillable ? <span style={{ color: '#C9BBA0', fontSize: 11 }}> ›</span> : null}
         </span>
         <span className="pk-pnl-num pk-pnl-num--cur" style={{ fontWeight: bold ? 700 : 400, color: cost ? RED : INK }}>
           {money(show)}
@@ -170,7 +169,7 @@ export default function PrimalKrispFinancials({ card, lbl, big, btn, inp, KPI })
       </div>
 
       <div className="pk-pnl-wrap" style={{ ...card }}>
-        <style>{PNL_SHEET_CSS}</style>
+        <style dangerouslySetInnerHTML={{ __html: PNL_SHEET_CSS }} />
         <div style={{ ...lbl, marginBottom: 8 }}>Profit &amp; loss · {cur.period}</div>
         {prev && (
           <div className="pk-pnl-head">

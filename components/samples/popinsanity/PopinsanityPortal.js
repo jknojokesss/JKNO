@@ -318,6 +318,7 @@ export default function PopinsanityPortal() {
                 : currentLabel}
             </h1>
           </div>
+          <div style={{ fontSize: '12px', color: '#8A7A66', marginBottom: '16px' }}>{DATA.meta.sample_label}</div>
           {top ? renderDetail() : renderTab()}
         </main>
       </div>

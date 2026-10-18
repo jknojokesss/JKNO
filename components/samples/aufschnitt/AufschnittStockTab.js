@@ -4,7 +4,7 @@ import { INK, MUTED, BORDER, CREAM, RED, MONO, money, money0, fmtCases, fmtAsOfL
 
 export default function AufschnittStockTab({ card, lbl, brand, onOpen, sort, setSort }) {
   const rows = useMemo(() => {
-    const base = brand === 'All brands' ? DATA.stock : DATA.stock.filter((r) => r.brand === brand)
+    const base = brand === 'All products' ? DATA.stock : DATA.stock.filter((r) => r.brand === brand)
     const dir = sort.dir === 'asc' ? 1 : -1
     return [...base].sort((a, b) => (a[sort.key] - b[sort.key]) * dir)
   }, [brand, sort])
@@ -25,7 +25,7 @@ export default function AufschnittStockTab({ card, lbl, brand, onOpen, sort, set
         style={{ border: 'none', background: 'none', cursor: 'pointer', fontSize: 10, textTransform: 'uppercase', color: MUTED, minHeight: 40 }}
       >
         {label}
-        {sort.key === keyName ? (sort.dir === 'asc' ? ' ↑' : ' ↓') : ''}
+        {sort.key === keyName ? (sort.dir === 'asc' ? ' asc' : ' desc') : ''}
       </button>
     </th>
   )
@@ -83,7 +83,7 @@ export function StockDetail({ detail, card, lbl, big, onBack }) {
   const r = detail.row
   return (
     <div>
-      <button type="button" className="au-detail-back" onClick={onBack}>← Back</button>
+      <button type="button" className="au-detail-back" onClick={onBack}>Back</button>
       <h2 style={{ ...big, fontSize: 20, marginBottom: 4 }}>{r.name}</h2>
       <div style={{ fontSize: 13, color: MUTED, marginBottom: 16 }}>{r.brand}</div>
 

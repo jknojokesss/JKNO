@@ -30,7 +30,6 @@ export default function PopinsanityOverview({ styles, goTab, setCalendarMonth, o
 
   return (
     <>
-      <div style={{ fontSize: '12px', color: '#8A7A66', marginBottom: '16px' }}>{DATA.meta.sample_label}</div>
       <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap', marginBottom: '16px' }}>
         <KPI
           card={card}

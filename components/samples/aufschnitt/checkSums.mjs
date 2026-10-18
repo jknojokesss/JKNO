@@ -33,7 +33,7 @@ const ok = (label, cond) => {
 }
 
 MONTHS.forEach((m) => {
-  const combined = DATA.pnlViews['All brands'].find((p) => p.month === m.id)
+  const combined = DATA.pnlViews['All products'].find((p) => p.month === m.id)
   const brandSum = sum(BRANDS.map((b) => DATA.pnlViews[b].find((p) => p.month === m.id).revenue_total))
   ok(`P&L revenue ${m.id} brands=combined`, brandSum === combined.revenue_total)
 
@@ -95,11 +95,14 @@ DATA.salesRows
   })
 
 const pp = DATA.profitPerOrder
-const sepPnl = DATA.pnlViews['All brands'].find((p) => p.month === '2026-09')
+const sepPnl = DATA.pnlViews['All products'].find((p) => p.month === '2026-09')
 ok('Profit channel revenue', sum(pp.channelSummary, (r) => r.revenue) === sepPnl.revenue_total)
 ok('Profit product cost', sum(pp.channelSummary, (r) => r.productCost) === sepPnl.cogs)
 ok('Profit contribution', sum(pp.channelSummary, (r) => r.profit) === pp.contributionAfterFulfillment)
 ok('Overview profit avg', DATA.overview.profitPerOrderAvg === pp.blendedAvgProfitPerOrder)
+const amazonRow = pp.channelSummary.find((r) => r.channel === 'Amazon')
+const amazonRevPerOrder = amazonRow.revenue / amazonRow.orders
+ok('Amazon avg revenue per order 25-35', amazonRevPerOrder >= 25 && amazonRevPerOrder <= 35)
 
 const stockVal = sum(DATA.stock, (r) => r.valueAtCost)
 ok('Stock value', stockVal === DATA.overview.stockValue)
@@ -130,8 +133,8 @@ DATA.channels.forEach((ch) => {
   const prod = sum(ch.byProduct, (p) => p.revenue)
   ok(`Channel ${ch.channel} products`, prod === ch.curRev)
   if (ch.channel === 'Stores' && ch.extra.storeSplits) {
-    const sepStores = ch.extra.storeSplits['2026-09']['All brands']
-    const augStores = ch.extra.storeSplits['2026-08']['All brands']
+    const sepStores = ch.extra.storeSplits['2026-09']['All products']
+    const augStores = ch.extra.storeSplits['2026-08']['All products']
     const augCh = DATA.salesRows.filter((r) => r.month === '2026-08' && r.channel === 'Stores').reduce((s, r) => s + r.revenue, 0)
     ok(`Stores accounts Sep sum`, sum(sepStores, (s) => s.revenue) === ch.curRev)
     ok(`Stores accounts Aug sum`, sum(augStores, (s) => s.revenue) === roundCents(augCh))
@@ -189,14 +192,14 @@ DATA.stock.forEach((r) => {
   ok(`Weeks supply ${r.productId}`, Math.abs(wks - r.weeksSupply) < 0.15)
 })
 
-const sep = DATA.pnlViews['All brands'].find((p) => p.month === '2026-09')
-const aug = DATA.pnlViews['All brands'].find((p) => p.month === '2026-08')
+const sep = DATA.pnlViews['All products'].find((p) => p.month === '2026-09')
+const aug = DATA.pnlViews['All products'].find((p) => p.month === '2026-08')
 BRANDS.forEach((b) => {
   const s = DATA.pnlViews[b].find((x) => x.month === '2026-09')
   const share = s.revenue_total / sep.revenue_total
   ok(`Brand share ${b}`, share > 0.12 && share < 0.58)
 })
-ok('Essiccata Sep net loss', DATA.pnlViews.Essiccata.find((x) => x.month === '2026-09').net_profit === -612.4)
+ok('Salami Sep net loss', DATA.pnlViews.Salami.find((x) => x.month === '2026-09').net_profit === -612.4)
 
 console.log('\nSeptember brand revenue / net:')
 BRANDS.forEach((b) => {
@@ -247,7 +250,7 @@ DATA.stock.forEach((r) => {
 const storesCh = DATA.channels.find((c) => c.channel === 'Stores')
 if (storesCh?.extra?.storeSplits) {
   console.log('\nSeptember Stores by account:')
-  storesCh.extra.storeSplits['2026-09']['All brands'].forEach((s) => {
+  storesCh.extra.storeSplits['2026-09']['All products'].forEach((s) => {
     console.log(`  ${s.store} | ${s.revenue.toFixed(2)}`)
   })
 }

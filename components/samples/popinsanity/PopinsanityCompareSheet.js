@@ -29,7 +29,7 @@ export function CompareSheet({
 }) {
   return (
     <>
-      <style>{COMPARE_SHEET_CSS}</style>
+      <style dangerouslySetInnerHTML={{ __html: COMPARE_SHEET_CSS }} />
       <div className="pop-compare-wrap">
         <div className="pop-compare-head">
           <span />

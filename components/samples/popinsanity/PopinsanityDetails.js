@@ -722,7 +722,7 @@ export function PnlLineDetail({ line, section, onBack, onChannel, card, big }) {
           onClick={() => onChannel(channelId)}
           style={{ marginTop: 16, border: `1px solid ${BORDER}`, background: CARDBG, color: SPICE, fontWeight: 600, cursor: 'pointer', fontSize: 13, padding: '10px 14px', borderRadius: 2, width: '100%', textAlign: 'left' }}
         >
-          Open {channelLabel} sales detail ›
+          Open {channelLabel} sales detail
         </button>
       ) : null}
     </DetailShell>

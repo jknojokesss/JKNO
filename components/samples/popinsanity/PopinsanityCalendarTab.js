@@ -45,7 +45,7 @@ export default function PopinsanityCalendarTab({ styles, monthKey, setMonthKey, 
           onClick={() => setMonthKey(keys[idx - 1])}
           style={{ ...btn, padding: '8px 14px', border: `1px solid ${BORDER}`, background: CARDBG, borderRadius: 2, opacity: idx <= 0 ? 0.4 : 1 }}
         >
-          ‹
+          Prev
         </button>
         <span style={{ fontFamily: UI, fontWeight: 700, fontSize: 16, minWidth: 100, textAlign: 'center' }}>{monthLabel(monthKey)}</span>
         <button
@@ -54,7 +54,7 @@ export default function PopinsanityCalendarTab({ styles, monthKey, setMonthKey, 
           onClick={() => setMonthKey(keys[idx + 1])}
           style={{ ...btn, padding: '8px 14px', border: `1px solid ${BORDER}`, background: CARDBG, borderRadius: 2, opacity: idx >= keys.length - 1 ? 0.4 : 1 }}
         >
-          ›
+          Next
         </button>
         <span style={{ marginLeft: 'auto', fontFamily: UI, fontWeight: 600 }}>{money(monthTotal)}</span>
       </div>

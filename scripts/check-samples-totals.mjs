@@ -114,14 +114,17 @@ function checkStoreAgingRules(prefix, rows) {
 // --- Aufschnitt (profit per order — no store receivables) ---
 {
   const { default: DATA } = await import('../components/samples/aufschnitt/aufschnittData.js')
-  const sep = DATA.pnlViews['All brands'].find((m) => m.month === '2026-09')
+  const sep = DATA.pnlViews['All products'].find((m) => m.month === '2026-09')
   const pp = DATA.profitPerOrder
   const chProfit = round2(pp.channelSummary.reduce((s, r) => s + r.profit, 0))
   ok('AU profit ties contribution', chProfit === pp.contributionAfterFulfillment)
   ok('AU net profit Sep', round2(sep.net_profit) === 16720)
   ok('AU overview profit avg', round2(DATA.overview.profitPerOrderAvg) === round2(pp.blendedAvgProfitPerOrder))
   ok('AU channel rev sum', round2(pp.channelSummary.reduce((s, r) => s + r.revenue, 0)) === round2(sep.revenue_total))
-  console.log('aufschnitt', { profitContribution: chProfit, avgPerOrder: pp.blendedAvgProfitPerOrder })
+  const amazon = pp.channelSummary.find((r) => r.channel === 'Amazon')
+  const amazonAvgRev = amazon.revenue / amazon.orders
+  ok('AU Amazon avg order 25-35', amazonAvgRev >= 25 && amazonAvgRev <= 35)
+  console.log('aufschnitt', { profitContribution: chProfit, avgPerOrder: pp.blendedAvgProfitPerOrder, amazonOrders: amazon.orders, amazonAvgRev: round2(amazonAvgRev) })
 }
 
 // --- Mr. Dipz ---
@@ -183,8 +186,22 @@ function checkStoreAgingRules(prefix, rows) {
   console.log('closeout-explosion', { buyersOwe, over60 })
 }
 
-// --- Riverside (no store AR; P&L only) ---
-console.log('riverside-tires: no store-level AR aging in sample (skipped)')
+// --- Riverside (no store AR; P&L / YTD ties) ---
+{
+  const data = JSON.parse(fs.readFileSync(path.join(root, 'data/riverside-tires.json'), 'utf8'))
+  const months = data.monthly
+  const ytd = round2(months.reduce((s, m) => s + m.revenue, 0))
+  const profitTotal = round2(months.reduce((s, m) => s + m.profit, 0))
+  ok('RT YTD revenue', ytd === round2(data.ytd_revenue))
+  ok('RT has September 2026', months.some((m) => m.month === '2026-09'))
+  const sep = months.find((m) => m.month === '2026-09')
+  ok('RT Sep profit 13-14k', sep && sep.profit >= 13000 && sep.profit <= 14000)
+  const mix = data.sales_mix_sep
+  ok('RT Sep mix sums', round2(sum(mix, (x) => x.revenue)) === sep.revenue)
+  const topSix = round2(sum(data.top_tire_sizes_sep, (x) => x.revenue))
+  ok('RT Sep top six', topSix === data.sep_tire_sales.top_six_revenue)
+  console.log('riverside-tires', { ytd, profitTotal, sepRev: sep.revenue, sepProfit: sep.profit })
+}
 
 if (failures.length) {
   console.error('FAILED:', failures)

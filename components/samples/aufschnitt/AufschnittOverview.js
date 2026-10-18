@@ -21,11 +21,11 @@ export default function AufschnittOverview({ card, lbl, KPI, brand, onOpen }) {
   const ov = DATA.overview
 
   const salesCur =
-    brand === 'All brands'
+    brand === 'All products'
       ? ov.sepSales
       : DATA.pnlViews[brand].find((m) => m.month === '2026-09').revenue_total
   const salesPrior =
-    brand === 'All brands'
+    brand === 'All products'
       ? ov.augSales
       : DATA.pnlViews[brand].find((m) => m.month === '2026-08').revenue_total
   const salesDelta = pctChange(salesCur, salesPrior)
@@ -34,20 +34,20 @@ export default function AufschnittOverview({ card, lbl, KPI, brand, onOpen }) {
   const priorPnl = DATA.pnlViews[brand].find((m) => m.month === '2026-08')
   const grossPct = sepPnl.revenue_total > 0 ? (sepPnl.gross_profit / sepPnl.revenue_total) * 100 : 0
   const priorGrossPct =
-    brand === 'All brands' ? ov.priorGrossMarginPct : priorPnl.revenue_total > 0 ? (priorPnl.gross_profit / priorPnl.revenue_total) * 100 : 0
+    brand === 'All products' ? ov.priorGrossMarginPct : priorPnl.revenue_total > 0 ? (priorPnl.gross_profit / priorPnl.revenue_total) * 100 : 0
   const marginPts = grossPct - priorGrossPct
   const netDelta = pctChange(sepPnl.net_profit, priorPnl.net_profit)
 
-  const stockRows = brand === 'All brands' ? DATA.stock : DATA.stock.filter((r) => r.brand === brand)
+  const stockRows = brand === 'All products' ? DATA.stock : DATA.stock.filter((r) => r.brand === brand)
   const stockValue = stockRows.reduce((s, r) => s + r.valueAtCost, 0)
   const stockPrior =
-    brand === 'All brands' ? ov.priorStockValue : round(ov.priorStockValue * (stockValue / ov.stockValue))
+    brand === 'All products' ? ov.priorStockValue : round(ov.priorStockValue * (stockValue / ov.stockValue))
   const stockDelta = pctChange(stockValue, stockPrior)
   const stockWeeks =
     stockRows.length > 0 ? Math.round((stockRows.reduce((s, r) => s + r.weeksSupply, 0) / stockRows.length) * 10) / 10 : 0
 
   const channels =
-    brand === 'All brands'
+    brand === 'All products'
       ? ov.channelSalesSep
       : DATA.brandSummary
           .find((b) => b.brand === brand)
@@ -57,13 +57,13 @@ export default function AufschnittOverview({ card, lbl, KPI, brand, onOpen }) {
             prior: DATA.pnlViews[brand].find((m) => m.month === '2026-08').revenue[c.channel],
           })) || []
 
-  const chartData = brand === 'All brands' ? ov.chartMonths : MONTH_CHART(brand)
+  const chartData = brand === 'All products' ? ov.chartMonths : MONTH_CHART(brand)
 
   const ppoDelta = pctChange(ov.profitPerOrderAvg, ov.priorProfitPerOrderAvg)
 
   return (
     <>
-      <style>{CHANNEL_ROW_CSS}</style>
+      <style dangerouslySetInnerHTML={{ __html: CHANNEL_ROW_CSS }} />
       <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap', marginBottom: '16px' }}>
         <KPI
           k="Sales September"
@@ -97,7 +97,7 @@ export default function AufschnittOverview({ card, lbl, KPI, brand, onOpen }) {
             onOpen({ type: 'stock-summary', brand, stockRows, stockValue, stockPrior, stockWeeks, stockDelta })
           }
         />
-        {brand === 'All brands' && (
+        {brand === 'All products' && (
           <KPI
             k="Profit per order"
             v={money(DATA.profitPerOrder.blendedAvgProfitPerOrder)}
@@ -108,13 +108,13 @@ export default function AufschnittOverview({ card, lbl, KPI, brand, onOpen }) {
         )}
       </div>
 
-      {brand === 'All brands' && (
+      {brand === 'All products' && (
         <div style={{ ...card, marginBottom: 16 }}>
-          <div style={{ ...lbl, marginBottom: 10 }}>By brand</div>
+          <div style={{ ...lbl, marginBottom: 10 }}>By product</div>
           <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 13 }}>
             <thead>
               <tr style={{ borderBottom: `1px solid ${BORDER}` }}>
-                {['Brand', 'Sales', 'Change', 'Net profit'].map((h, i) => (
+                {['Product line', 'Sales', 'Change', 'Net profit'].map((h, i) => (
                   <th
                     key={h}
                     style={{
@@ -185,7 +185,6 @@ export default function AufschnittOverview({ card, lbl, KPI, brand, onOpen }) {
                 {pct1(ch)}
               </span>
               <span className="au-ch-amt">{money0(c.revenue)}</span>
-              <span style={{ color: '#C6B79A', fontSize: 15, textAlign: 'right' }}>›</span>
             </button>
           )
         })}

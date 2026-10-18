@@ -79,28 +79,9 @@ html.md-sample-page .m-sample-lobby,html.md-sample-page .m-header,html.md-sample
   .md-kpi{min-width:0;flex:1 1 calc(50% - 6px);max-width:calc(50% - 6px)}
 }`
 
-/** Keep chevron on the same line as the last word of a tappable label. */
-export function LabelWithChevron({ text, chevron = true }) {
-  const s = String(text ?? '').trim()
-  if (!chevron || !s) return s
-  const i = s.lastIndexOf(' ')
-  if (i === -1) {
-    return (
-      <span className="md-label-tail">
-        {s}
-        <span className="md-t-cv"> ›</span>
-      </span>
-    )
-  }
-  return (
-    <>
-      {s.slice(0, i + 1)}
-      <span className="md-label-tail">
-        {s.slice(i + 1)}
-        <span className="md-t-cv"> ›</span>
-      </span>
-    </>
-  )
+/** Tappable label text (no trailing glyph). */
+export function LabelWithChevron({ text }) {
+  return String(text ?? '').trim()
 }
 
 function colWidthRem(header) {
@@ -135,7 +116,6 @@ export function KPI({ k, v, sub, subColor, accent, onClick }) {
           {sub}
         </div>
       ) : null}
-      <span className="md-chev">›</span>
     </button>
   )
 }
@@ -155,9 +135,6 @@ export function Stat({ k, v, color, onClick }) {
   return (
     <button type="button" className="md-stat md-click" onClick={onClick}>
       {inner}
-      <span className="md-chev" style={{ top: 9, right: 11 }}>
-        ›
-      </span>
     </button>
   )
 }

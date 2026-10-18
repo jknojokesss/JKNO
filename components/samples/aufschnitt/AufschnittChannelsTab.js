@@ -10,11 +10,11 @@ export default function AufschnittChannelsTab({ card, lbl, brand, onOpen }) {
       {channels.map((ch) => {
         const delta = pctChange(ch.curRev, ch.priorRev)
         const unitDelta = pctChange(ch.curUnits, ch.priorUnits)
-        const filteredBrand = brand === 'All brands' ? ch.byBrand : ch.byBrand.filter((b) => b.brand === brand)
+        const filteredBrand = brand === 'All products' ? ch.byBrand : ch.byBrand.filter((b) => b.brand === brand)
         const curRev =
-          brand === 'All brands' ? ch.curRev : filteredBrand.reduce((s, b) => s + b.revenue, 0)
+          brand === 'All products' ? ch.curRev : filteredBrand.reduce((s, b) => s + b.revenue, 0)
         const priorRev =
-          brand === 'All brands'
+          brand === 'All products'
             ? ch.priorRev
             : DATA.salesRows
                 .filter((r) => r.month === '2026-08' && r.channel === ch.channel && r.brand === brand)
@@ -45,7 +45,6 @@ export default function AufschnittChannelsTab({ card, lbl, brand, onOpen }) {
               {ch.curUnits.toLocaleString()} units · {unitDelta >= 0 ? '+' : ''}
               {pct1(unitDelta)} units vs August
             </div>
-            <span style={{ position: 'absolute', top: 14, right: 14, color: '#C6B79A', fontSize: 15 }}>›</span>
           </button>
         )
       })}
@@ -56,10 +55,10 @@ export default function AufschnittChannelsTab({ card, lbl, brand, onOpen }) {
 export function ChannelDetail({ detail, card, lbl, big, onBack }) {
   const ch = DATA.channels.find((c) => c.channel === detail.channel)
   if (!ch) return null
-  const brand = detail.brand || 'All brands'
+  const brand = detail.brand || 'All products'
   const products =
-    brand === 'All brands' ? ch.byProduct : ch.byProduct.filter((p) => p.brand === brand)
-  const brands = brand === 'All brands' ? ch.byBrand : ch.byBrand.filter((b) => b.brand === brand)
+    brand === 'All products' ? ch.byProduct : ch.byProduct.filter((p) => p.brand === brand)
+  const brands = brand === 'All products' ? ch.byBrand : ch.byBrand.filter((b) => b.brand === brand)
   const storeRows =
     ch.channel === 'Stores' && ch.extra.storeSplits
       ? ch.extra.storeSplits['2026-09'][brand]
@@ -67,11 +66,11 @@ export function ChannelDetail({ detail, card, lbl, big, onBack }) {
 
   return (
     <div>
-      <button type="button" className="au-detail-back" onClick={onBack}>← Back</button>
+      <button type="button" className="au-detail-back" onClick={onBack}>Back</button>
       <h2 style={{ ...big, fontSize: 22, marginBottom: 16 }}>{ch.channel}</h2>
 
       <div style={{ ...card, marginBottom: 12 }}>
-        <div style={{ ...lbl, marginBottom: 8 }}>By brand</div>
+        <div style={{ ...lbl, marginBottom: 8 }}>By product</div>
         {brands.map((b) => (
           <div key={b.brand} style={{ display: 'flex', justifyContent: 'space-between', padding: '6px 0', borderTop: `1px solid ${CREAM}` }}>
             <span>{b.brand}</span>

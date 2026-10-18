@@ -26,20 +26,22 @@ const MONTH_TOTAL = {
 
 /** September brand revenue (≈55 / 30 / 15 %) */
 const BRAND_SEP = {
-  Aufschnitt: 129_881.9,
-  "Abraham's": 70_844.67,
-  Essiccata: 35_422.34,
+  'Beef jerky': 129_881.9,
+  "Beef bars": 70_844.67,
+  Salami: 35_422.34,
 }
 
-const BRAND_AUG_GROWTH = { Aufschnitt: 1.098, "Abraham's": 1.041, Essiccata: 0.968 }
+const BRAND_AUG_GROWTH = {
+  'Beef jerky': 1.098, "Beef bars": 1.041,
+  Salami: 0.968 }
 
 const CHANNEL_SHARE = {
-  Aufschnitt: { Stores: 0.62, Amazon: 0.26, 'Own site': 0.12 },
-  "Abraham's": { Stores: 0.6, Amazon: 0.25, 'Own site': 0.15 },
-  Essiccata: { Stores: 0.4, Amazon: 0.45, 'Own site': 0.15 },
+  'Beef jerky': { Stores: 0.62, Amazon: 0.26, 'Own site': 0.12 },
+  "Beef bars": { Stores: 0.6, Amazon: 0.25, 'Own site': 0.15 },
+  Salami: { Stores: 0.4, Amazon: 0.45, 'Own site': 0.15 },
 }
 
-/** Combined channel mix shifts slightly month to month (Aug own site higher → Sep down) */
+/** Combined channel mix shifts slightly month to month (Aug own site higher, Sep down) */
 const COMBINED_CH_TILT = {
   '2026-04': { Stores: 0.57, Amazon: 0.285, 'Own site': 0.145 },
   '2026-05': { Stores: 0.575, Amazon: 0.288, 'Own site': 0.137 },
@@ -68,9 +70,9 @@ const COGS_LINE_TILT = {
 }
 
 const COGS_RATE = {
-  Aufschnitt: { '2026-04': 0.594, '2026-05': 0.601, '2026-06': 0.608, '2026-07': 0.596, '2026-08': 0.599, '2026-09': 0.603 },
-  "Abraham's": { '2026-04': 0.612, '2026-05': 0.618, '2026-06': 0.621, '2026-07': 0.609, '2026-08': 0.614, '2026-09': 0.617 },
-  Essiccata: { '2026-04': 0.578, '2026-05': 0.584, '2026-06': 0.592, '2026-07': 0.586, '2026-08': 0.588, '2026-09': 0.624 },
+  'Beef jerky': { '2026-04': 0.594, '2026-05': 0.601, '2026-06': 0.608, '2026-07': 0.596, '2026-08': 0.599, '2026-09': 0.603 },
+  "Beef bars": { '2026-04': 0.612, '2026-05': 0.618, '2026-06': 0.621, '2026-07': 0.609, '2026-08': 0.614, '2026-09': 0.617 },
+  Salami: { '2026-04': 0.578, '2026-05': 0.584, '2026-06': 0.592, '2026-07': 0.586, '2026-08': 0.588, '2026-09': 0.624 },
 }
 
 const OPEX_RATE = {
@@ -80,7 +82,7 @@ const OPEX_RATE = {
   cardProc: 0.03,
 }
 
-const ESSICCATA_SEP_NET = -612.4
+const SALAMI_SEP_NET = -612.4
 
 function reduceBrandOpex(entries, amount) {
   let rem = roundCents(amount)
@@ -235,7 +237,7 @@ function buildBrandMonthTargets() {
     brandAug[b] = roundCents(augRaw[b] * augScale)
   })
   let fix = roundCents(MONTH_TOTAL['2026-08'] - sumCents(Object.values(brandAug)))
-  if (fix) brandAug.Aufschnitt = roundCents(brandAug.Aufschnitt + fix)
+  if (fix) brandAug['Beef jerky'] = roundCents(brandAug['Beef jerky'] + fix)
 
   const out = {
     '2026-08': brandAug,
@@ -248,7 +250,9 @@ function buildBrandMonthTargets() {
   for (let i = 0; i < iAug; i++) {
     const id = monthIds[i]
     const t = MONTH_TOTAL[id]
-    const wobble = { Aufschnitt: 0.54 + (i % 3) * 0.02, "Abraham's": 0.3 - (i % 2) * 0.01, Essiccata: 0.16 }
+    const wobble = {
+  'Beef jerky': 0.54 + (i % 3) * 0.02, "Beef bars": 0.3 - (i % 2) * 0.01,
+  Salami: 0.16 }
     const alloc = allocateByWeight(t, wobble)
     out[id] = alloc
   }
@@ -257,11 +261,11 @@ function buildBrandMonthTargets() {
   }
   const iJun = monthIds.indexOf('2026-06')
   if (out[monthIds[iJun]]) {
-    out[monthIds[iJun]].Essiccata = roundCents(out[monthIds[iJun]].Essiccata * 0.94)
-    out[monthIds[iJun]].Aufschnitt = roundCents(out[monthIds[iJun]].Aufschnitt * 1.012)
+    out[monthIds[iJun]].Salami = roundCents(out[monthIds[iJun]].Salami * 0.94)
+    out[monthIds[iJun]]['Beef jerky'] = roundCents(out[monthIds[iJun]]['Beef jerky'] * 1.012)
     const t = MONTH_TOTAL['2026-06']
     const s = sumCents(Object.values(out[monthIds[iJun]]))
-    out[monthIds[iJun]].Aufschnitt = roundCents(out[monthIds[iJun]].Aufschnitt + (t - s))
+    out[monthIds[iJun]]['Beef jerky'] = roundCents(out[monthIds[iJun]]['Beef jerky'] + (t - s))
   }
   return out
 }
@@ -465,7 +469,7 @@ function dedupeChannelProductRevenues(rows) {
 }
 
 function brandFilter(brand, row) {
-  if (!brand || brand === 'All brands') return true
+  if (!brand || brand === 'All products') return true
   return row.brand === brand
 }
 
@@ -553,8 +557,8 @@ function buildBrandPnl(salesRows, monthId, brand) {
   let gross_profit = roundCents(revenueTotal - cogsTotal)
   let net_profit = roundCents(gross_profit - operating_expenses_total)
 
-  if (brand === 'Essiccata' && monthId === '2026-09') {
-    const adj = roundCents(net_profit - ESSICCATA_SEP_NET)
+  if (brand === 'Salami' && monthId === '2026-09') {
+    const adj = roundCents(net_profit - SALAMI_SEP_NET)
     if (adj !== 0) {
       cogs_entries = cogs_entries.map((e, i) =>
         i === 0 ? { ...e, n: roundCents(e.n + adj) } : e
@@ -619,7 +623,7 @@ function assembleCombinedPnl(salesRows, monthId, byBrand) {
 
   return {
     month: monthId,
-    brand: 'All brands',
+    brand: 'All products',
     revenue,
     revenue_total,
     cogs_entries,
@@ -654,11 +658,11 @@ function buildPnlDrills(salesRows, pnl, brandKey) {
   COGS_LINES.forEach((line) => {
     const key = `cogs_${line}`
     drills[key] = MONTHS.map((m) => {
-      const slice = brandKey === 'All brands' ? buildCombinedPnl(salesRows, m.id) : buildBrandPnl(salesRows, m.id, brandKey)
+      const slice = brandKey === 'All products' ? buildCombinedPnl(salesRows, m.id) : buildBrandPnl(salesRows, m.id, brandKey)
       const amt = slice.cogs_entries.find((e) => e.l === line).n
       return { description: m.period, date: m.id, amount: amt }
     })
-    if (brandKey === 'All brands') {
+    if (brandKey === 'All products') {
       drills[`${key}_brands`] = BRANDS.map((b) => ({
         description: b,
         date: pnl.month,
@@ -670,11 +674,11 @@ function buildPnlDrills(salesRows, pnl, brandKey) {
   OPEX_LINES.forEach((line) => {
     const key = `opex_${line}`
     drills[key] = MONTHS.map((m) => {
-      const slice = brandKey === 'All brands' ? buildCombinedPnl(salesRows, m.id) : buildBrandPnl(salesRows, m.id, brandKey)
+      const slice = brandKey === 'All products' ? buildCombinedPnl(salesRows, m.id) : buildBrandPnl(salesRows, m.id, brandKey)
       const amt = slice.operating_expenses_entries.find((e) => e.l === line).n
       return { description: m.period, date: m.id, amount: amt }
     })
-    if (brandKey === 'All brands' && SHARED_OPEX.includes(line)) {
+    if (brandKey === 'All products' && SHARED_OPEX.includes(line)) {
       drills[`${key}_brands`] = BRANDS.map((b) => ({
         description: b,
         date: pnl.month,
@@ -827,7 +831,7 @@ function enforceUniqueStoreRevenues(split, total, cap) {
 
 function buildStoreRevenueSplits(salesRows, monthId, brandKey) {
   const total =
-    brandKey === 'All brands'
+    brandKey === 'All products'
       ? sumSales(salesRows, { month: monthId, channel: 'Stores' })
       : sumSales(salesRows, { month: monthId, channel: 'Stores', brand: brandKey })
   const cap = roundCents(total * 0.12)
@@ -861,7 +865,7 @@ function buildChannelDetails(salesRows) {
   const storeSplits = {}
   ;['2026-09', '2026-08'].forEach((monthId) => {
     storeSplits[monthId] = {}
-    storeSplits[monthId]['All brands'] = buildStoreRevenueSplits(salesRows, monthId, 'All brands')
+    storeSplits[monthId]['All products'] = buildStoreRevenueSplits(salesRows, monthId, 'All products')
     BRANDS.forEach((b) => {
       storeSplits[monthId][b] = buildStoreRevenueSplits(salesRows, monthId, b)
     })
@@ -908,7 +912,7 @@ function buildChannelDetails(salesRows) {
       extra.ownSite = { singleBags: roundCents(bags), casePacks: roundCents(cases) }
     }
     if (ch === 'Stores') {
-      extra.stores = storeSplits[sep]['All brands']
+      extra.stores = storeSplits[sep]['All products']
       extra.storeSplits = storeSplits
     }
     return {
@@ -968,7 +972,7 @@ function buildModel() {
     )
   }
   for (let pass = 0; pass < 4 && Math.abs(pnlByMonth[sep].net_profit - SEP_NET_PROFIT_TARGET) >= 0.005; pass++) {
-    pinBrandNet('Aufschnitt')
+    pinBrandNet('Beef jerky')
   }
 
   const pnlViews = {}
@@ -980,11 +984,11 @@ function buildModel() {
         ...base,
         label: meta.label,
         period: meta.period,
-        drill_ledgers: buildPnlDrills(salesRows, base, key === 'All brands' ? 'All brands' : key),
+        drill_ledgers: buildPnlDrills(salesRows, base, key === 'All products' ? 'All products' : key),
       }
     })
   }
-  addPnlView('All brands', (id) => pnlByMonth[id])
+  addPnlView('All products', (id) => pnlByMonth[id])
   BRANDS.forEach((b) => addPnlView(b, (id) => pnlByBrandMonth[`${id}:${b}`]))
 
   const stock = buildStock(salesRows)

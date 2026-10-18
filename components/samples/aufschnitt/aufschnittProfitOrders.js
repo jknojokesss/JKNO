@@ -80,7 +80,7 @@ function allocCogs(channelRev, revenueTotal, cogsTotal) {
 
 function channelOrderCount(channel, revenue) {
   if (channel === 'Stores') return Math.max(120, Math.round(revenue / 720))
-  if (channel === 'Amazon') return Math.max(400, Math.round(revenue / 76))
+  if (channel === 'Amazon') return Math.max(400, Math.round(revenue / 30))
   return Math.max(180, Math.round(revenue / 100))
 }
 

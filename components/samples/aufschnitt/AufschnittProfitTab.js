@@ -32,7 +32,7 @@ export default function AufschnittProfitTab({ card, lbl, onOpen }) {
 
   return (
     <div style={{ ...card }}>
-      <style>{PROFIT_TABLE_CSS}</style>
+      <style dangerouslySetInnerHTML={{ __html: PROFIT_TABLE_CSS }} />
       <div style={{ fontSize: 13, color: MUTED, marginBottom: 14 }}>September 2026</div>
 
       {pp.shippingLossCount > 0 && (
@@ -133,13 +133,13 @@ export function ProfitChannelDetail({ detail, card, lbl, big, onOpen, onBack }) 
 
   return (
     <div>
-      <button type="button" className="au-detail-back" onClick={onBack}>← Back</button>
+      <button type="button" className="au-detail-back" onClick={onBack}>Back</button>
       <h2 style={{ ...big, fontSize: 22, marginBottom: 4 }}>{detail.channel}</h2>
       <div style={{ fontSize: 12, color: MUTED, marginBottom: 14 }}>Recent orders · September 2026</div>
 
       <div style={{ ...card }}>
         <div style={{ ...lbl, marginBottom: 10 }}>Recent orders</div>
-        <style>{PROFIT_TABLE_CSS}</style>
+        <style dangerouslySetInnerHTML={{ __html: PROFIT_TABLE_CSS }} />
         <div className="au-profit-orders-wrap">
           <table className="au-profit-orders">
             <thead>
@@ -215,7 +215,7 @@ export function ProfitOrderDetail({ detail, card, lbl, big, onBack }) {
 
   return (
     <div>
-      <button type="button" className="au-detail-back" onClick={onBack}>← Back</button>
+      <button type="button" className="au-detail-back" onClick={onBack}>Back</button>
       <h2 style={{ ...big, fontSize: 20, marginBottom: 4 }}>{order.orderNo}</h2>
       <div style={{ fontSize: 12, color: MUTED, marginBottom: 14 }}>
         {fmtMonthDay(order.date)} · {order.customer}
@@ -262,7 +262,7 @@ export function ProfitShippingLossDetail({ card, lbl, big, onOpen, onBack }) {
   const list = DATA.profitPerOrder.shippingLossOrders
   return (
     <div>
-      <button type="button" className="au-detail-back" onClick={onBack}>← Back</button>
+      <button type="button" className="au-detail-back" onClick={onBack}>Back</button>
       <h2 style={{ ...big, fontSize: 20, marginBottom: 14 }}>Lost money on shipping</h2>
       <div style={{ ...card }}>
         {list.map((o, i) => (

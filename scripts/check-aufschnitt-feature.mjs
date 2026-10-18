@@ -14,7 +14,7 @@ const ok = (label, cond) => {
   if (!cond) failures.push(label)
 }
 
-const sep = DATA.pnlViews['All brands'].find((m) => m.month === '2026-09')
+const sep = DATA.pnlViews['All products'].find((m) => m.month === '2026-09')
 const pp = DATA.profitPerOrder
 const ov = DATA.overview
 
@@ -112,7 +112,9 @@ const orderSum = sum(chRows, (r) => r.orders)
 ok('blended avg', round2(totalProfit / orderSum) === pp.blendedAvgProfitPerOrder)
 ok('overview avg', ov.profitPerOrderAvg === pp.blendedAvgProfitPerOrder)
 
-ok('Essiccata net', DATA.pnlViews.Essiccata.find((m) => m.month === '2026-09').net_profit === -612.4)
+ok('Salami net', DATA.pnlViews.Salami.find((m) => m.month === '2026-09').net_profit === -612.4)
+const amazonRow = chRows.find((r) => r.channel === 'Amazon')
+ok('Amazon avg order 25-35', amazonRow.revenue / amazonRow.orders >= 25 && amazonRow.revenue / amazonRow.orders <= 35)
 ok('no receivables export', DATA.receivables === undefined)
 
 if (failures.length) {

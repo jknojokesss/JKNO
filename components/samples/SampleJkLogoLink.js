@@ -3,8 +3,10 @@ import { useRouter } from 'next/router'
 import { MarketingLogo } from '../MarketingShell'
 import { isDemoEmbedQuery } from '../../lib/demoEmbed'
 
+const FONT_LINK =
+  'https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,600;1,9..40,400&family=Playfair+Display:wght@700&display=swap'
+
 const LOGO_CSS = `
-@import url('https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,600;1,9..40,400&family=Playfair+Display:wght@700&display=swap');
 .sample-jk-credit{padding:8px 16px 2px;font-family:'DM Sans',system-ui,sans-serif;line-height:1}
 .sample-jk-credit a{display:inline-flex;align-items:center;text-decoration:none}
 .sample-jk-credit .m-logo{gap:0}
@@ -25,7 +27,8 @@ export default function SampleJkLogoLink() {
 
   return (
     <>
-      <style>{LOGO_CSS}</style>
+      <link rel="stylesheet" href={FONT_LINK} />
+      <style dangerouslySetInnerHTML={{ __html: LOGO_CSS }} />
       <div className="sample-jk-credit">
         <Link href="https://jknojokes.com" aria-label="JK No Jokes home">
           <MarketingLogo size={22} tagline={false} />

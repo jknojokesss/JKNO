@@ -53,6 +53,11 @@ const PHONE_SCROLL_STEP = 48
 const AS_OF = DATA.meta.as_of
 const MONTHS = DATA.monthly
 const LAST_MONTH = MONTHS[MONTHS.length - 1]
+const LAST_CLOSED = LAST_MONTH
+const CLOSED_TAG = LAST_CLOSED.label.toLowerCase()
+const closedSalesMix = () => DATA[`sales_mix_${CLOSED_TAG}`]
+const closedTopSizes = () => DATA[`top_tire_sizes_${CLOSED_TAG}`]
+const closedTireSales = () => DATA[`${CLOSED_TAG}_tire_sales`]
 const MONTH_NAMES = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December']
 const monthShort = (label) => label.charAt(0) + label.slice(1).toLowerCase()
 const monthLong = (key) => `${MONTH_NAMES[Number(key.slice(5, 7)) - 1]} ${key.slice(0, 4)}`
@@ -66,8 +71,8 @@ const WEEK_START = DATA.meta.week_start
 
 const CF_PERIOD_KEYS = ['all', ...MONTHS.map((m) => m.month)]
 const ITEM_PERIOD_KEYS = CF_PERIOD_KEYS
-const STOCK_MONTH_IDS = ['2026-04', '2026-05', '2026-06', '2026-07', '2026-08']
-const STOCK_AUG_ID = '2026-08'
+const STOCK_MONTH_IDS = ['2026-04', '2026-05', '2026-06', '2026-07', '2026-08', '2026-09']
+const STOCK_AUG_ID = LAST_CLOSED.month
 const STOCK_LIVE_ID = 'live'
 
 const normTireSize = (s) => String(s || '').replace(/R/gi, '/').replace(/-/g, '/').toUpperCase()
@@ -113,10 +118,15 @@ function drillRowsForAccount(line, asOfIso) {
   return synthDrillRows(line.label, line.amount, asOfIso)
 }
 
-const cfPeriodLabel = (key) => (key === 'all' ? 'Jan–Aug 2026' : monthYear(MONTHS.find((m) => m.month === key) || LAST_MONTH))
+const ytdSpanLabel = () => {
+  const first = MONTHS[0]
+  const last = LAST_CLOSED
+  return `${monthShort(first.label)}–${monthShort(last.label)} ${first.month.slice(0, 4)}`
+}
+const cfPeriodLabel = (key) => (key === 'all' ? ytdSpanLabel() : monthYear(MONTHS.find((m) => m.month === key) || LAST_MONTH))
 const cfPillLabel = (key) => (key === 'all' ? 'All time' : MONTHS.find((m) => m.month === key)?.label || key)
 const plNetForCfKey = (key) => (key === 'all' ? sumBy(MONTHS, 'profit') : MONTHS.find((m) => m.month === key)?.profit || 0)
-const bsForCfKey = (key) => DATA.balance_sheet[key === 'all' ? '2026-08' : key]
+const bsForCfKey = (key) => DATA.balance_sheet[key === 'all' ? LAST_CLOSED.month : key]
 const inventoryOnBs = (key) => bsForCfKey(key)?.assets.find((a) => a.label === 'Inventory')?.amount
 
 const ORDER_PERIODS = [
@@ -192,7 +202,7 @@ const stockRowsFor = (id) => {
 /* ---------- Statement helpers ---------- */
 
 const PL_PERIODS = [
-  { id: 'all', label: 'All time', full: 'Jan–Aug 2026', keys: MONTHS.map((m) => m.month), prior: null },
+  { id: 'all', label: 'All time', full: ytdSpanLabel(), keys: MONTHS.map((m) => m.month), prior: null },
   ...MONTHS.map((m, i) => ({
     id: m.month,
     label: m.label,
@@ -228,15 +238,16 @@ function buildPL(keys) {
 function buildAskAnswers() {
   const best = MONTHS.reduce((b, m) => (m.profit > b.profit ? m : b), MONTHS[0])
   const bestMargin = (best.profit / best.revenue) * 100
-  const bsAug = DATA.balance_sheet[STOCK_AUG_ID]
-  const checking = bsAug.assets.find((a) => a.label === 'Business checking')?.amount
-  const cfAug = DATA.cash_flow[STOCK_AUG_ID]
-  const opNet = sumBy(cfAug.operating)
-  const mix = DATA.sales_mix_aug
+  const bsClosed = DATA.balance_sheet[STOCK_AUG_ID]
+  const checking = bsClosed.assets.find((a) => a.label === 'Business checking')?.amount
+  const cfClosed = DATA.cash_flow[STOCK_AUG_ID]
+  const opNet = sumBy(cfClosed.operating)
+  const mix = closedSalesMix()
   const newMix = mix.find((s) => s.name === 'New Tires')
   const usedMix = mix.find((s) => s.name === 'Used Tires')
   const svcMix = mix.find((s) => s.name === 'Service & Repair')
-  const topSizes = DATA.top_tire_sizes_aug
+  const topSizes = closedTopSizes()
+  const tireSales = closedTireSales()
   const lead = topSizes[0]
   const leadAvg = lead?.units ? lead.revenue / lead.units : 0
   const sizeLine = (t) => {
@@ -249,9 +260,9 @@ function buildAskAnswers() {
   const monthName = MONTH_NAMES[Number(AS_OF.slice(5, 7)) - 1]
   return {
     best_month: `${monthYear(best)} was the strongest closed month at ${fmt0(best.profit)} net profit on ${fmt0(best.revenue)} revenue (${pct(bestMargin)} margin).`,
-    cash: `Business checking was ${fmt0(checking)} at Aug 31. August net change in cash was ${fmt0(cfAug.netChange)} (net cash from operations ${fmt0(opNet)}).`,
-    mix: `In August, new tire sales were ${fmt0(newMix?.revenue || 0)} (${DATA.aug_tire_sales.new_tire_units} units). Used tires added ${fmt0(usedMix?.revenue || 0)} (${DATA.aug_tire_sales.used_tire_units} units). Service and repair was ${fmt0(svcMix?.revenue || 0)}.`,
-    sizes: `Top size in August was ${lead.size} — ${lead.units} units and ${fmt0(lead.revenue)} revenue at about ${fmtC(leadAvg)} per tire.${sizesTail ? ` Next: ${sizesTail}.` : ''}`,
+    cash: `Business checking was ${fmt0(checking)} at ${monthShort(LAST_CLOSED.label)} 30. ${monthYear(LAST_CLOSED)} net change in cash was ${fmt0(cfClosed.netChange)} (net cash from operations ${fmt0(opNet)}).`,
+    mix: `In ${monthYear(LAST_CLOSED)}, new tire sales were ${fmt0(newMix?.revenue || 0)} (${tireSales.new_tire_units} units). Used tires added ${fmt0(usedMix?.revenue || 0)} (${tireSales.used_tire_units} units). Service and repair was ${fmt0(svcMix?.revenue || 0)}.`,
+    sizes: `Top size in ${monthYear(LAST_CLOSED)} was ${lead.size} — ${lead.units} units and ${fmt0(lead.revenue)} revenue at about ${fmtC(leadAvg)} per tire.${sizesTail ? ` Next: ${sizesTail}.` : ''}`,
     month: `${monthName} register shows ${fmt0(sepSale)} in sales on ${sepOrders.length} tickets (estimates).`,
   }
 }
@@ -1041,7 +1052,7 @@ function AccountBalancesView({ onDrill }) {
 
   const openDrill = (l, secId) => {
     const period =
-      secId === 'ASSETS' || secId === 'LIABILITIES' || secId === 'EQUITY' ? `As of ${bs.label}` : 'Jan–Aug 2026 YTD'
+      secId === 'ASSETS' || secId === 'LIABILITIES' || secId === 'EQUITY' ? `As of ${bs.label}` : `${ytdSpanLabel()} YTD`
     const asOf = secId === 'ASSETS' || secId === 'LIABILITIES' || secId === 'EQUITY' ? asOfIso : ytdEnd
     const rows = drillRowsForAccount(l, asOf)
     if (!rows) return
@@ -1140,21 +1151,23 @@ function DashboardTab({ period, setPeriod, onOpenOrders, onOpenFinancials, onOpe
   const plAug = buildPL([m.month])
   const netTie = Math.abs(plAug.net - m.profit) < 1
   const monthName = MONTH_NAMES[Number(AS_OF.slice(5, 7)) - 1]
-  const augTires = DATA.aug_tire_sales
-  const mixTotal = sumBy(DATA.sales_mix_aug, 'revenue')
+  const closedTires = closedTireSales()
+  const closedMix = closedSalesMix()
+  const closedSizes = closedTopSizes()
+  const mixTotal = sumBy(closedMix, 'revenue')
   const mixTie = mixTotal === m.revenue
-  const topSixRev = sumBy(DATA.top_tire_sizes_aug, 'revenue')
-  const topSixUnits = sumBy(DATA.top_tire_sizes_aug, 'units')
+  const topSixRev = sumBy(closedSizes, 'revenue')
+  const topSixUnits = sumBy(closedSizes, 'units')
   const topSixTie =
-    topSixRev === augTires.top_six_revenue &&
-    topSixUnits === augTires.top_six_units &&
-    topSixRev < augTires.new_tire_revenue &&
-    topSixUnits < augTires.new_tire_units
+    topSixRev === closedTires.top_six_revenue &&
+    topSixUnits === closedTires.top_six_units &&
+    topSixRev < closedTires.new_tire_revenue &&
+    topSixUnits < closedTires.new_tire_units
 
-  const grossAug = m.revenue - m.cogs
+  const grossClosed = m.revenue - m.cogs
   const strip = [
     ['Revenue', fmt0(m.revenue)],
-    ['Gross profit', fmt0(grossAug)],
+    ['Gross profit', fmt0(grossClosed)],
     ['Net margin', pct((m.profit / m.revenue) * 100)],
     ['YTD revenue', fmt0(DATA.ytd_revenue)],
     ['Tires sold', String(m.tiresSold)],
@@ -1188,11 +1201,11 @@ function DashboardTab({ period, setPeriod, onOpenOrders, onOpenFinancials, onOpe
       lines.push({ label: 'YTD revenue', value: fmt0(DATA.ytd_revenue), valueStyle: { fontWeight: 600 } })
     }
     if (focus === 'tires') {
-      const t = DATA.aug_tire_sales
+      const t = closedTireSales()
       lines.push({ label: 'New tire units', value: String(t.new_tire_units) })
       lines.push({ label: 'Used tire units', value: String(t.used_tire_units) })
       lines.push({ label: 'Tire revenue', value: fmt0(t.tire_revenue_total) })
-      lines.push({ label: 'Tires sold (Aug)', value: String(t.tires_sold_units), valueStyle: { fontWeight: 600 } })
+      lines.push({ label: `Tires sold (${monthShort(m.label)})`, value: String(t.tires_sold_units), valueStyle: { fontWeight: 600 } })
     }
     const titles = {
       revenue: 'Revenue',
@@ -1284,7 +1297,7 @@ function DashboardTab({ period, setPeriod, onOpenOrders, onOpenFinancials, onOpe
               <div style={{ fontFamily: mono, fontSize: 18, marginTop: 6, fontWeight: 500 }}>
                 {v}
                 {l === 'YTD revenue' ? <TieMark ok={DATA.ytd_revenue === sumBy(MONTHS, 'revenue')} /> : null}
-                {l === 'Tires sold' ? <TieMark ok={m.tiresSold === augTires.tires_sold_units} /> : null}
+                {l === 'Tires sold' ? <TieMark ok={m.tiresSold === closedTires.tires_sold_units} /> : null}
               </div>
             </button>
           )
@@ -1335,10 +1348,10 @@ function DashboardTab({ period, setPeriod, onOpenOrders, onOpenFinancials, onOpe
               </span>
             }
           >
-            Sales Mix · Aug 2026
+            Sales Mix · {monthYear(m)}
           </PanelTitle>
-          <StackedMixBar segments={DATA.sales_mix_aug} onClick={openSalesMix} />
-          {DATA.sales_mix_aug.map((s, i) => (
+          <StackedMixBar segments={closedMix} onClick={openSalesMix} />
+          {closedMix.map((s, i) => (
             <button key={s.name} type="button" className="rt-mix-row" onClick={openSalesMix}>
               <div style={{ display: 'flex', justifyContent: 'space-between', fontFamily: ui, fontSize: 12, marginBottom: 4, width: '100%' }}>
                 <span style={{ color: C.ink }}>{s.name}</span>
@@ -1360,7 +1373,7 @@ function DashboardTab({ period, setPeriod, onOpenOrders, onOpenFinancials, onOpe
               </button>
             }
           >
-            Top Tire Sizes · Aug 2026
+            Top Tire Sizes · {monthYear(m)}
           </PanelTitle>
           <table className="rt-dash-sizes-table" style={{ width: '100%', borderCollapse: 'collapse', minWidth: 0 }}>
             <colgroup>
@@ -1378,7 +1391,7 @@ function DashboardTab({ period, setPeriod, onOpenOrders, onOpenFinancials, onOpe
               </tr>
             </thead>
             <tbody>
-              {DATA.top_tire_sizes_aug.map((t) => (
+              {closedSizes.map((t) => (
                 <tr
                   key={t.size}
                   className="rt-clickrow"
@@ -1431,7 +1444,7 @@ function DashboardTab({ period, setPeriod, onOpenOrders, onOpenFinancials, onOpe
 
 function SalesItemsTab({ seed }) {
   const [view, setView] = useState('ranked')
-  const [periodKey, setPeriodKey] = useState('2026-08')
+  const [periodKey, setPeriodKey] = useState(LAST_CLOSED.month)
   const [compareOn, setCompareOn] = useState(false)
   const [compareKey, setCompareKey] = useState('2026-07')
   const [sort, setSort] = useState('revenue')
@@ -1445,7 +1458,7 @@ function SalesItemsTab({ seed }) {
     if (seed.q !== undefined) setQ(seed.q)
   }, [seed?.seq])
 
-  const stats = DATA.period_stats?.[periodKey] || DATA.period_stats?.['2026-08']
+  const stats = DATA.period_stats?.[periodKey] || DATA.period_stats?.[LAST_CLOSED.month]
   const items = (DATA.sales_items_by_month?.[periodKey] || DATA.sales_items_aug).filter((it) => !q.trim() || it.item.toLowerCase().includes(q.trim().toLowerCase()))
   const sortKey = sort === 'avg' ? 'avgSale' : sort
   const withAvg = items.map((it) => ({ ...it, avgSale: it.units ? it.revenue / it.units : 0 }))

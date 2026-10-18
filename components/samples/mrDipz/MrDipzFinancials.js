@@ -63,7 +63,7 @@ export default function MrDipzFinancials({ model, open }) {
 
   return (
     <div className="md-pnl-wrap md-card">
-      <style>{PNL_CSS}</style>
+      <style dangerouslySetInnerHTML={{ __html: PNL_CSS }} />
       <div className="md-lbl" style={{ marginBottom: 8 }}>
         Profit &amp; loss · September 2026
       </div>

@@ -128,7 +128,6 @@ export default function AufschnittPortal() {
         }}
       >
         {inner}
-        <span style={{ position: 'absolute', top: 11, right: 13, color: '#C6B79A', fontSize: 15 }}>›</span>
       </button>
     )
   }
@@ -171,9 +170,6 @@ export default function AufschnittPortal() {
 
       <div className="au-shell">
         <aside className="au-side">
-          <div style={{ padding: '2px 8px 16px' }}>
-            <div style={{ fontSize: 12, color: '#B6A78C' }}>Owings Mills, MD</div>
-          </div>
           <nav className="au-nav au-nav--main" aria-label="Sections">
             {TABS.map(([id, longLabel, shortLabel]) => {
               const active = tab === id
@@ -299,7 +295,7 @@ function DetailView({ detail, card, lbl, big, onBack, onOpen }) {
     const pnl = DATA.pnlViews[b.brand].find((m) => m.month === '2026-09')
     return (
       <div>
-        <button type="button" className="au-detail-back" onClick={onBack}>← Back</button>
+        <button type="button" className="au-detail-back" onClick={onBack}>Back</button>
         <h2 style={{ ...big, fontSize: 22, marginBottom: 16 }}>{b.brand}</h2>
         <div style={{ ...card, marginBottom: 12 }}>
           <div style={{ ...lbl, marginBottom: 8 }}>P&amp;L summary · September</div>
@@ -325,7 +321,7 @@ function DetailView({ detail, card, lbl, big, onBack, onOpen }) {
 
   return (
     <div>
-      <button type="button" className="au-detail-back" onClick={onBack}>← Back</button>
+      <button type="button" className="au-detail-back" onClick={onBack}>Back</button>
       <GenericOverviewDetail detail={detail} card={card} lbl={lbl} big={big} />
     </div>
   )
@@ -339,7 +335,7 @@ function PnlDrillDetail({ detail, card, lbl, big, onBack }) {
 
   return (
     <div>
-      <button type="button" className="au-detail-back" onClick={onBack}>← Back</button>
+      <button type="button" className="au-detail-back" onClick={onBack}>Back</button>
       <h2 style={{ ...big, fontSize: 20, marginBottom: 4 }}>{detail.title}</h2>
       <div style={{ fontSize: 12, color: MUTED, marginBottom: 14 }}>{periodLabel} · {money0(detail.total)}</div>
       {detail.brandRows?.length ? (
