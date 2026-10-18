@@ -321,7 +321,7 @@ export default function PrimalKrispPortal() {
     <>
       <style dangerouslySetInnerHTML={{ __html: portalStyles }} />
 
-      <DemoLobby hideAllSamplesLink />
+      <DemoLobby minimal />
 
       <div className="pk-shell">
         <aside className="pk-side">

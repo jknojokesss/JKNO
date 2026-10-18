@@ -73,16 +73,6 @@ export function moneyColor(amount) {
 export const SHELL_CSS = (theme) => `*{box-sizing:border-box;margin:0;padding:0}
 html{-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale;text-rendering:optimizeLegibility;overflow-x:hidden}
 body{background:${theme.CREAM};font-family:${UI};color:${theme.INK};overflow-x:hidden}
-.ce-lobby{position:sticky;top:0;z-index:20;background:#f2f0ea;border-bottom:1px solid rgba(27,24,21,.08);font-family:${UI}}
-.ce-lobby__inner{max-width:1200px;margin:0 auto;padding:10px 20px;display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap}
-.ce-lobby__brand{display:inline-flex;align-items:baseline;gap:8px;text-decoration:none;color:#1b1815;min-width:0}
-.ce-lobby__jk{font-family:'Playfair Display',Georgia,serif;font-size:1.125rem;font-weight:700;letter-spacing:-.02em;line-height:1}
-.ce-lobby__dot{color:#c9a84c}
-.ce-lobby__co{font-family:${UI};font-size:.7rem;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:#6b6560;white-space:nowrap}
-.ce-lobby__nav{display:flex;align-items:center;gap:16px}
-.ce-lobby__home{font-family:${UI};font-size:.875rem;font-weight:500;color:#6b6560;text-decoration:none;-webkit-font-smoothing:antialiased}
-.ce-lobby__home:hover{text-decoration:underline}
-html.demo-embed .ce-lobby{display:none!important}
 .ce-shell{display:flex;min-height:100vh;align-items:stretch;max-width:100vw;overflow-x:hidden}
 .ce-side{width:236px;flex-shrink:0;background:${theme.CHAR};color:${theme.CREAM};display:flex;flex-direction:column;padding:22px 14px;position:sticky;top:0;height:100vh}
 .ce-nav{display:flex;flex-direction:column;gap:3px}.ce-nav--main{flex:1}

@@ -4,11 +4,30 @@ import { useRouter } from 'next/router'
 import { isDemoEmbedQuery } from '../lib/demoEmbed'
 import { DEMO_LOBBY_FONT_LINK } from '../lib/demoFonts'
 
+const CREDIT_CSS = `
+.m-sample-credit{padding:10px 30px 4px;font-family:'Inter',system-ui,sans-serif}
+.m-sample-credit a{font-size:12px;font-weight:400;color:#6b6560;text-decoration:none;-webkit-font-smoothing:antialiased}
+.m-sample-credit a:hover{text-decoration:underline}
+@media(max-width:860px){.m-sample-credit{padding:10px 12px 4px}}
+html.demo-embed .m-sample-credit{display:none!important}
+`
+
+function SampleSiteCredit() {
+  return (
+    <>
+      <style>{CREDIT_CSS}</style>
+      <div className="m-sample-credit">
+        <a href="https://jknojokes.com">JK No Jokes Financials</a>
+      </div>
+    </>
+  )
+}
+
 /**
  * Minimal escape hatch above a sample portal (gallery lives on /demos).
  * Hidden when ?embed=1 (homepage / marketing iframe — show the app only).
  */
-export default function DemoLobby({ suppress = false, hideAllSamplesLink = false }) {
+export default function DemoLobby({ suppress = false, hideAllSamplesLink = false, minimal = false }) {
   const router = useRouter()
   if (suppress) return null
   const embedded =
@@ -16,6 +35,8 @@ export default function DemoLobby({ suppress = false, hideAllSamplesLink = false
     || router.asPath.includes('embed=1')
     || (router.isReady && isDemoEmbedQuery(router.query))
   if (embedded) return null
+
+  if (minimal) return <SampleSiteCredit />
 
   return (
     <>
