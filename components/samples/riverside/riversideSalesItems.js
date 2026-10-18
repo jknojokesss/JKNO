@@ -58,22 +58,38 @@ export function salesItemsForPeriod({ salesItemsByMonth, orders, asOf, periodKey
   return mergeItemRows([closed, oct])
 }
 
-export function buildPeriodStats({ periodStats, salesItemsByMonth, monthly, orders, asOf, periodKey, lastClosedMonth }) {
+export function buildPeriodStats({
+  periodStats,
+  salesItemsByMonth,
+  monthly,
+  orders,
+  asOf,
+  periodKey,
+  lastClosedMonth,
+  fallbackAug,
+}) {
+  const items = salesItemsForPeriod({
+    salesItemsByMonth,
+    orders,
+    asOf,
+    periodKey,
+    fallbackAug,
+  })
+  const unitsFromItems = items.reduce((s, i) => s + i.units, 0)
+
   if (periodKey !== 'all') {
-    return periodStats?.[periodKey] || periodStats?.[lastClosedMonth] || {}
+    const base = periodStats?.[periodKey] || periodStats?.[lastClosedMonth] || {}
+    return {
+      ...base,
+      unitsSold: unitsFromItems,
+      uniqueItems: items.length,
+    }
   }
   const closedRev = round2(monthly.reduce((s, m) => s + m.revenue, 0))
   const closedTickets = monthly.reduce((s, m) => s + (m.ticketCount || 0), 0)
   const octOrders = octoberOrdersSlice(orders, asOf)
   const octRev = round2(octOrders.reduce((s, o) => s + o.sale, 0))
-  const items = salesItemsForPeriod({
-    salesItemsByMonth,
-    orders,
-    asOf,
-    periodKey: 'all',
-    fallbackAug: [],
-  })
-  const unitsSold = items.reduce((s, i) => s + i.units, 0)
+  const unitsSold = unitsFromItems
   return {
     revenue: round2(closedRev + octRev),
     unitsSold,

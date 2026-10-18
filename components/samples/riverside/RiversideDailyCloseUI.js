@@ -189,7 +189,7 @@ export function DashboardMetricSheet({ detail, onClose }) {
   if (!detail) return null
   const { title, subtitle, rows } = detail
   return (
-    <Sheet title={title} subtitle={subtitle} onClose={onClose}>
+    <Sheet title={title} subtitle={subtitle} onBack={onClose} onClose={onClose}>
       {rows.map((row) => (
         <DetailRow key={row.label} label={row.label} value={row.value} valueStyle={row.valueStyle} />
       ))}

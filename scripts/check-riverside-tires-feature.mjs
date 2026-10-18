@@ -128,6 +128,7 @@ const allStats = buildPeriodStats({
   asOf: AS_OF,
   periodKey: 'all',
   lastClosedMonth: closedMonths[closedMonths.length - 1].month,
+  fallbackAug: data.sales_items_aug,
 })
 const allItems = salesItemsForPeriod({
   salesItemsByMonth: data.sales_items_by_month,
@@ -142,6 +143,58 @@ ok('All time revenue = closed months + October', allStats.revenue === round2(clo
 ok('All time units = item rollup', allStats.unitsSold === allUnits)
 ok('All time item revenue ties stats revenue', Math.abs(allItemRev - allStats.revenue) < 0.02)
 ok('portal label Overview not Dashboard', !/label:\s*'Dashboard'/.test(portalSrc))
+
+const samplePaths = [
+  path.join(root, '../data/riverside-tires.json'),
+  path.join(root, '../components/samples/riverside'),
+  path.join(root, '../components/samples/mrDipz'),
+  path.join(root, '../components/samples/popinsanity'),
+  path.join(root, '../components/samples/closeoutExplosion'),
+  path.join(root, '../components/samples/aufschnitt'),
+  path.join(root, '../data/primal-krisp.json'),
+  path.join(root, '../components/samples/PrimalKrispPortal.js'),
+]
+const collect = (p) => {
+  if (!fs.existsSync(p)) return []
+  const st = fs.statSync(p)
+  if (st.isFile()) return [p]
+  const out = []
+  for (const ent of fs.readdirSync(p, { withFileTypes: true })) {
+    if (ent.name.startsWith('.')) continue
+    const child = path.join(p, ent.name)
+    if (ent.isDirectory()) out.push(...collect(child))
+    else if (/\.(js|json)$/.test(ent.name)) out.push(child)
+  }
+  return out
+}
+let mulFound = false
+for (const fp of samplePaths.flatMap(collect)) {
+  if (fs.readFileSync(fp, 'utf8').includes('×')) mulFound = true
+}
+ok('sample pages no multiplication sign', !mulFound)
+
+const periodKeys = ['all', ...closedMonths.map((m) => m.month)]
+for (const pk of periodKeys) {
+  const stats = buildPeriodStats({
+    periodStats: data.period_stats,
+    salesItemsByMonth: data.sales_items_by_month,
+    monthly: closedMonths,
+    orders: data.orders,
+    asOf: AS_OF,
+    periodKey: pk,
+    lastClosedMonth: closedMonths[closedMonths.length - 1].month,
+    fallbackAug: data.sales_items_aug,
+  })
+  const items = salesItemsForPeriod({
+    salesItemsByMonth: data.sales_items_by_month,
+    orders: data.orders,
+    asOf: AS_OF,
+    periodKey: pk,
+    fallbackAug: data.sales_items_aug,
+  })
+  const sumUnits = items.reduce((s, i) => s + i.units, 0)
+  ok(`sales items units card ${pk}`, stats.unitsSold === sumUnits, `${stats.unitsSold} vs ${sumUnits}`)
+}
 
 if (failures.length) {
   console.error('FAILED:', failures)

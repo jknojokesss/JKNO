@@ -260,7 +260,7 @@ export function ProfitOrderDetail({ detail, card, lbl, big, onBack }) {
             }}
           >
             <span style={{ minWidth: 0 }}>
-              {line.description} · {line.qty} × {money(line.unitPrice)}
+              {line.description} · {line.qty} x {money(line.unitPrice)}
             </span>
             <span style={{ fontVariantNumeric: 'tabular-nums' }}>{money(line.revenue)}</span>
           </div>

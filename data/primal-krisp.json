@@ -92,7 +92,7 @@
    {
     "severity": "medium",
     "title": "4 store invoices past 60 days ($2,557.44)",
-    "detail": "Kesher Market",
+    "detail": "Kesher Foods - Flatbush, Brocha Supermarket - Monsey, Yam Kosher Market - Deal, Lev Fresh - Silver Spring, and Ohr Wholesale - Lakewood.",
     "tab": "Stores"
    },
    {
@@ -982,15 +982,15 @@
  "stores": {
   "count": 15,
   "by_region": {
-   "North": 5,
-   "South": 1,
+   "Brooklyn": 5,
+   "Five Towns, NY": 1,
    "Florida": 1,
-   "Area 6": 1,
-   "East": 1,
-   "Central": 3,
+   "Manhattan & Bronx": 1,
+   "North NJ": 1,
+   "Ocean & Monmouth, NJ": 3,
    "Other states": 1,
-   "Area 7": 1,
-   "West": 1
+   "Queens": 1,
+   "Rockland, NY": 1
   },
   "terms_note": "Store terms are fictitious. Whether Primal Krisp sells to stores on invoice or consignment is not public; the sample shows both.",
   "ar_aging": {
@@ -1001,10 +1001,10 @@
   "open_balance_total": 8307.24,
   "list": [
    {
-    "name": "Shefa Market",
-    "city": "North",
+    "name": "Shefa Market - Boro Park",
+    "city": "Brooklyn",
     "state": "NY",
-    "region": "North",
+    "region": "Brooklyn",
     "real": false,
     "sample": {
      "terms": "Consignment (paid on count)",
@@ -1085,10 +1085,10 @@
     }
    },
    {
-    "name": "Kesher Market",
-    "city": "North",
+    "name": "Kesher Foods - Flatbush",
+    "city": "Brooklyn",
     "state": "NY",
-    "region": "North",
+    "region": "Brooklyn",
     "real": false,
     "sample": {
      "terms": "Net 30 invoice",
@@ -1168,10 +1168,10 @@
     }
    },
    {
-    "name": "Golden Kosher",
-    "city": "South",
+    "name": "Golden Basket Kosher - 5 Towns",
+    "city": "Lawrence",
     "state": "NY",
-    "region": "South",
+    "region": "Five Towns, NY",
     "real": false,
     "sample": {
      "terms": "COD",
@@ -1210,8 +1210,8 @@
     }
    },
    {
-    "name": "Neshama Kosher",
-    "city": "Florida",
+    "name": "Neshama Kosher - Aventura",
+    "city": "Miami",
     "state": "FL",
     "region": "Florida",
     "real": false,
@@ -1274,10 +1274,10 @@
     }
    },
    {
-    "name": "Pri Market",
-    "city": "Area 6",
+    "name": "Pri Market - Riverdale",
+    "city": "Bronx",
     "state": "NY",
-    "region": "Area 6",
+    "region": "Manhattan & Bronx",
     "real": false,
     "sample": {
      "terms": "COD",
@@ -1316,10 +1316,10 @@
     }
    },
    {
-    "name": "Simcha Market",
-    "city": "East",
+    "name": "Simcha Market - Teaneck",
+    "city": "Teaneck",
     "state": "NJ",
-    "region": "East",
+    "region": "North NJ",
     "real": false,
     "sample": {
      "terms": "Net 30 invoice",
@@ -1379,10 +1379,10 @@
     }
    },
    {
-    "name": "Bais Hamazon",
-    "city": "Central",
+    "name": "Bais Hamakolet - Lakewood",
+    "city": "Lakewood",
     "state": "NJ",
-    "region": "Central",
+    "region": "Ocean & Monmouth, NJ",
     "real": false,
     "sample": {
      "terms": "Consignment (paid on count)",
@@ -1443,10 +1443,10 @@
     }
    },
    {
-    "name": "Yam Kosher Market",
-    "city": "Central",
+    "name": "Yam Kosher Market - Deal",
+    "city": "Long Branch",
     "state": "NJ",
-    "region": "Central",
+    "region": "Ocean & Monmouth, NJ",
     "real": false,
     "sample": {
      "terms": "Net 30 invoice",
@@ -1506,8 +1506,8 @@
     }
    },
    {
-    "name": "Lev Fresh",
-    "city": "Other states",
+    "name": "Lev Fresh - Silver Spring",
+    "city": "Silver Spring",
     "state": "MD",
     "region": "Other states",
     "real": false,
@@ -1570,10 +1570,10 @@
     }
    },
    {
-    "name": "Tal Fresh",
-    "city": "Area 7",
+    "name": "Tal Fresh - Queens",
+    "city": "Flushing",
     "state": "NY",
-    "region": "Area 7",
+    "region": "Queens",
     "real": false,
     "sample": {
      "terms": "Net 30 invoice",
@@ -1633,10 +1633,10 @@
     }
    },
    {
-    "name": "Tzur Kosher",
-    "city": "North",
+    "name": "Tzur Kosher - Brooklyn",
+    "city": "Brooklyn",
     "state": "NY",
-    "region": "North",
+    "region": "Brooklyn",
     "real": false,
     "sample": {
      "terms": "Invoice (Net 30)",
@@ -1697,10 +1697,10 @@
     }
    },
    {
-    "name": "Shalva Fresh",
-    "city": "North",
+    "name": "Shalva Fresh - Brooklyn",
+    "city": "Brooklyn",
     "state": "NY",
-    "region": "North",
+    "region": "Brooklyn",
     "real": false,
     "sample": {
      "terms": "Consignment (paid on count)",
@@ -1781,10 +1781,10 @@
     }
    },
    {
-    "name": "Ohr Wholesale",
-    "city": "Central",
+    "name": "Ohr Wholesale - Lakewood",
+    "city": "Lakewood",
     "state": "NJ",
-    "region": "Central",
+    "region": "Ocean & Monmouth, NJ",
     "real": false,
     "sample": {
      "terms": "Invoice (Net 30)",
@@ -1845,10 +1845,10 @@
     }
    },
    {
-    "name": "Brocha Foods",
-    "city": "West",
+    "name": "Brocha Supermarket - Monsey",
+    "city": "Monsey",
     "state": "NY",
-    "region": "West",
+    "region": "Rockland, NY",
     "real": false,
     "sample": {
      "terms": "Invoice (Net 30)",
@@ -1929,10 +1929,10 @@
     }
    },
    {
-    "name": "Ashira Kosher",
-    "city": "North",
+    "name": "Ashira Kosher - Brooklyn",
+    "city": "Brooklyn",
     "state": "NY",
-    "region": "North",
+    "region": "Brooklyn",
     "real": false,
     "sample": {
      "terms": "Consignment (paid on count)",
@@ -1999,8 +1999,8 @@
   "bags_per_case": 12,
   "stores": [
    {
-    "store_name": "Shefa Market",
-    "region": "North",
+    "store_name": "Shefa Market - Boro Park",
+    "region": "Brooklyn",
     "usual_gap_days": 21,
     "last_order_date": "2026-09-04",
     "usual_order": {
@@ -2079,8 +2079,8 @@
     "avg_gap_days": 21
    },
    {
-    "store_name": "Bais Hamazon",
-    "region": "Central",
+    "store_name": "Bais Hamakolet - Lakewood",
+    "region": "Ocean & Monmouth, NJ",
     "usual_gap_days": 14,
     "last_order_date": "2026-09-22",
     "usual_order": {
@@ -2152,8 +2152,8 @@
     "avg_gap_days": 14
    },
    {
-    "store_name": "Kesher Market",
-    "region": "North",
+    "store_name": "Kesher Foods - Flatbush",
+    "region": "Brooklyn",
     "usual_gap_days": 18,
     "last_order_date": "2026-09-20",
     "usual_order": {
@@ -2225,8 +2225,8 @@
     "avg_gap_days": 18
    },
    {
-    "store_name": "Pri Market",
-    "region": "Area 6",
+    "store_name": "Pri Market - Riverdale",
+    "region": "Manhattan & Bronx",
     "usual_gap_days": 12,
     "last_order_date": "2026-09-25",
     "usual_order": {
@@ -2298,8 +2298,8 @@
     "avg_gap_days": 12
    },
    {
-    "store_name": "Shalva Fresh",
-    "region": "North",
+    "store_name": "Shalva Fresh - Brooklyn",
+    "region": "Brooklyn",
     "usual_gap_days": 18,
     "last_order_date": "2026-09-10",
     "usual_order": {
@@ -2371,7 +2371,7 @@
     "avg_gap_days": 18
    },
    {
-    "store_name": "Neshama Kosher",
+    "store_name": "Neshama Kosher - Aventura",
     "region": "Florida",
     "usual_gap_days": 21,
     "last_order_date": "2026-09-18",
@@ -2444,8 +2444,8 @@
     "avg_gap_days": 21
    },
    {
-    "store_name": "Tzur Kosher",
-    "region": "North",
+    "store_name": "Tzur Kosher - Brooklyn",
+    "region": "Brooklyn",
     "usual_gap_days": 16,
     "last_order_date": "2026-09-22",
     "usual_order": {
@@ -2768,7 +2768,7 @@
  "tastings": [
   {
    "date": "2026-07-23",
-   "store": "Bais Hamazon",
+   "store": "Bais Hamakolet - Lakewood",
    "real_store": true,
    "hours": "4–7 pm",
    "bags_opened_for_samples": 6,
@@ -2781,7 +2781,7 @@
   },
   {
    "date": "2026-09-10",
-   "store": "Simcha Market",
+   "store": "Simcha Market - Teaneck",
    "real_store": true,
    "hours": "4–7 pm",
    "bags_opened_for_samples": 10,
@@ -2794,7 +2794,7 @@
   },
   {
    "date": "2026-09-24",
-   "store": "Street tasting, East (sample location)",
+   "store": "Street tasting, Lakewood (sample location)",
    "real_store": false,
    "hours": "6–9 pm",
    "bags_opened_for_samples": 15,
@@ -3152,7 +3152,7 @@
   },
   "revenue_total": 55530.64,
   "cogs": 28905.73,
-  "cogs_note": "bags sold × cost per bag (meat, spices, bag & label, co-pack labor, kosher supervision)",
+  "cogs_note": "bags sold x cost per bag (meat, spices, bag & label, co-pack labor, kosher supervision)",
   "gross_profit": 26624.91,
   "gross_margin_pct": 47.9,
   "operating_expenses": {
@@ -3223,7 +3223,7 @@
  "answers": [
   {
    "q": "Which store owes me the most?",
-   "a": "Kesher Market"
+   "a": "Kesher Foods - Flatbush and Brocha Supermarket - Monsey each show about $1,065 open. Most balances are current. Stores owe $8,307.24 in total."
   },
   {
    "q": "Which channel makes me the most per bag?",
@@ -3231,7 +3231,7 @@
   },
   {
    "q": "Did the tastings pay off?",
-   "a": "Six of eight store tastings lifted that store's next 4 weeks. Bais Hamazon"
+   "a": "Six of eight store tastings lifted that store's next 4 weeks. Bais Hamakolet - Lakewood, Yam Kosher Market - Deal, and Simcha Market - Teaneck were up more than 50%. Pri Market - Riverdale was flat, so skip a repeat there."
   },
   {
    "q": "Did I make money in September?",
@@ -5462,91 +5462,91 @@
    "store_channel_dollars": 4588.5,
    "stores": [
     {
-     "store": "Bais Hamazon",
-     "city": "East",
+     "store": "Bais Hamakolet - Lakewood",
+     "city": "Lakewood",
      "units": 66,
      "dollars": 627
     },
     {
-     "store": "Yam Kosher Market",
+     "store": "Yam Kosher Market - Deal",
      "city": "Long Branch",
      "units": 53,
      "dollars": 503.5
     },
     {
-     "store": "Simcha Market",
-     "city": "East",
+     "store": "Simcha Market - Teaneck",
+     "city": "Teaneck",
      "units": 42,
      "dollars": 399
     },
     {
-     "store": "Brocha Foods",
-     "city": "West",
+     "store": "Brocha Supermarket - Monsey",
+     "city": "Monsey",
      "units": 42,
      "dollars": 399
     },
     {
-     "store": "Shefa Market",
-     "city": "North",
+     "store": "Shefa Market - Boro Park",
+     "city": "Brooklyn",
      "units": 40,
      "dollars": 380
     },
     {
-     "store": "Shalva Fresh",
-     "city": "North",
+     "store": "Shalva Fresh - Brooklyn",
+     "city": "Brooklyn",
      "units": 37,
      "dollars": 351.5
     },
     {
-     "store": "Ohr Wholesale - East",
-     "city": "East",
+     "store": "Ohr Wholesale - Lakewood",
+     "city": "Lakewood",
      "units": 36,
      "dollars": 342
     },
     {
-     "store": "Kesher Market",
-     "city": "North",
+     "store": "Kesher Foods - Flatbush",
+     "city": "Brooklyn",
      "units": 31,
      "dollars": 294.5
     },
     {
-     "store": "Golden Kosher",
-     "city": "South",
+     "store": "Golden Basket Kosher - 5 Towns",
+     "city": "Lawrence",
      "units": 27,
      "dollars": 256.5
     },
     {
-     "store": "Tzur Kosher",
-     "city": "North",
+     "store": "Tzur Kosher - Brooklyn",
+     "city": "Brooklyn",
      "units": 25,
      "dollars": 237.5
     },
     {
-     "store": "Ashira Kosher",
-     "city": "North",
+     "store": "Ashira Kosher - Brooklyn",
+     "city": "Brooklyn",
      "units": 20,
      "dollars": 190
     },
     {
-     "store": "Pri Market",
-     "city": "Area 6",
+     "store": "Pri Market - Riverdale",
+     "city": "Bronx",
      "units": 18,
      "dollars": 171
     },
     {
-     "store": "Neshama Kosher",
+     "store": "Neshama Kosher - Aventura",
      "city": "Miami",
      "units": 16,
      "dollars": 152
     },
     {
-     "store": "Lev Fresh",
-     "city": "Central",
+     "store": "Lev Fresh - Silver Spring",
+     "city": "Silver Spring",
      "units": 16,
      "dollars": 152
     },
     {
-     "store": "Tal Fresh",
+     "store": "Tal Fresh - Queens",
      "city": "Flushing",
      "units": 14,
      "dollars": 133
@@ -5561,92 +5561,92 @@
    "store_channel_dollars": 2299,
    "stores": [
     {
-     "store": "Yam Kosher Market",
+     "store": "Yam Kosher Market - Deal",
      "city": "Long Branch",
      "units": 30,
      "dollars": 285
     },
     {
-     "store": "Bais Hamazon",
-     "city": "East",
+     "store": "Bais Hamakolet - Lakewood",
+     "city": "Lakewood",
      "units": 28,
      "dollars": 266
     },
     {
-     "store": "Golden Kosher",
-     "city": "South",
+     "store": "Golden Basket Kosher - 5 Towns",
+     "city": "Lawrence",
      "units": 21,
      "dollars": 199.5
     },
     {
-     "store": "Ohr Wholesale - East",
-     "city": "East",
+     "store": "Ohr Wholesale - Lakewood",
+     "city": "Lakewood",
      "units": 21,
      "dollars": 199.5
     },
     {
-     "store": "Simcha Market",
-     "city": "East",
+     "store": "Simcha Market - Teaneck",
+     "city": "Teaneck",
      "units": 18,
      "dollars": 171
     },
     {
-     "store": "Brocha Foods",
-     "city": "West",
+     "store": "Brocha Supermarket - Monsey",
+     "city": "Monsey",
      "units": 18,
      "dollars": 171
     },
     {
-     "store": "Kesher Market",
-     "city": "North",
+     "store": "Kesher Foods - Flatbush",
+     "city": "Brooklyn",
      "units": 17,
      "dollars": 161.5
     },
     {
-     "store": "Shefa Market",
-     "city": "North",
+     "store": "Shefa Market - Boro Park",
+     "city": "Brooklyn",
      "units": 16,
      "dollars": 152
     },
     {
-     "store": "Shalva Fresh",
-     "city": "North",
+     "store": "Shalva Fresh - Brooklyn",
+     "city": "Brooklyn",
      "units": 15,
      "dollars": 142.5
     },
     {
-     "store": "Tzur Kosher",
-     "city": "North",
+     "store": "Tzur Kosher - Brooklyn",
+     "city": "Brooklyn",
      "units": 14,
      "dollars": 133
     },
     {
-     "store": "Ashira Kosher",
-     "city": "North",
+     "store": "Ashira Kosher - Brooklyn",
+     "city": "Brooklyn",
      "units": 11,
      "dollars": 104.5
     },
     {
-     "store": "Neshama Kosher",
+     "store": "Neshama Kosher - Aventura",
      "city": "Miami",
      "units": 9,
      "dollars": 85.5
     },
     {
-     "store": "Lev Fresh",
-     "city": "Central",
+     "store": "Lev Fresh - Silver Spring",
+     "city": "Silver Spring",
      "units": 9,
      "dollars": 85.5
     },
     {
-     "store": "Tal Fresh",
+     "store": "Tal Fresh - Queens",
      "city": "Flushing",
      "units": 8,
      "dollars": 76
     },
     {
-     "store": "Pri Market",
-     "city": "Area 6",
+     "store": "Pri Market - Riverdale",
+     "city": "Bronx",
      "units": 7,
      "dollars": 66.5
     }
@@ -5660,91 +5660,91 @@
    "store_channel_dollars": 3059,
    "stores": [
     {
-     "store": "Yam Kosher Market",
+     "store": "Yam Kosher Market - Deal",
      "city": "Long Branch",
      "units": 40,
      "dollars": 380
     },
     {
-     "store": "Bais Hamazon",
-     "city": "East",
+     "store": "Bais Hamakolet - Lakewood",
+     "city": "Lakewood",
      "units": 37,
      "dollars": 351.5
     },
     {
-     "store": "Ohr Wholesale - East",
-     "city": "East",
+     "store": "Ohr Wholesale - Lakewood",
+     "city": "Lakewood",
      "units": 28,
      "dollars": 266
     },
     {
-     "store": "Simcha Market",
-     "city": "East",
+     "store": "Simcha Market - Teaneck",
+     "city": "Teaneck",
      "units": 24,
      "dollars": 228
     },
     {
-     "store": "Brocha Foods",
-     "city": "West",
+     "store": "Brocha Supermarket - Monsey",
+     "city": "Monsey",
      "units": 24,
      "dollars": 228
     },
     {
-     "store": "Kesher Market",
-     "city": "North",
+     "store": "Kesher Foods - Flatbush",
+     "city": "Brooklyn",
      "units": 23,
      "dollars": 218.5
     },
     {
-     "store": "Shefa Market",
-     "city": "North",
+     "store": "Shefa Market - Boro Park",
+     "city": "Brooklyn",
      "units": 21,
      "dollars": 199.5
     },
     {
-     "store": "Golden Kosher",
-     "city": "South",
+     "store": "Golden Basket Kosher - 5 Towns",
+     "city": "Lawrence",
      "units": 21,
      "dollars": 199.5
     },
     {
-     "store": "Shalva Fresh",
-     "city": "North",
+     "store": "Shalva Fresh - Brooklyn",
+     "city": "Brooklyn",
      "units": 21,
      "dollars": 199.5
     },
     {
-     "store": "Tzur Kosher",
-     "city": "North",
+     "store": "Tzur Kosher - Brooklyn",
+     "city": "Brooklyn",
      "units": 19,
      "dollars": 180.5
     },
     {
-     "store": "Lev Fresh",
-     "city": "Central",
+     "store": "Lev Fresh - Silver Spring",
+     "city": "Silver Spring",
      "units": 17,
      "dollars": 161.5
     },
     {
-     "store": "Ashira Kosher",
-     "city": "North",
+     "store": "Ashira Kosher - Brooklyn",
+     "city": "Brooklyn",
      "units": 15,
      "dollars": 142.5
     },
     {
-     "store": "Neshama Kosher",
+     "store": "Neshama Kosher - Aventura",
      "city": "Miami",
      "units": 12,
      "dollars": 114
     },
     {
-     "store": "Pri Market",
-     "city": "Area 6",
+     "store": "Pri Market - Riverdale",
+     "city": "Bronx",
      "units": 10,
      "dollars": 95
     },
     {
-     "store": "Tal Fresh",
+     "store": "Tal Fresh - Queens",
      "city": "Flushing",
      "units": 10,
      "dollars": 95
@@ -5759,92 +5759,92 @@
    "store_channel_dollars": 1996.5,
    "stores": [
     {
-     "store": "Yam Kosher Market",
+     "store": "Yam Kosher Market - Deal",
      "city": "Long Branch",
      "units": 39,
      "dollars": 321.75
     },
     {
-     "store": "Bais Hamazon",
-     "city": "East",
+     "store": "Bais Hamakolet - Lakewood",
+     "city": "Lakewood",
      "units": 27,
      "dollars": 222.75
     },
     {
-     "store": "Ohr Wholesale - East",
-     "city": "East",
+     "store": "Ohr Wholesale - Lakewood",
+     "city": "Lakewood",
      "units": 20,
      "dollars": 165
     },
     {
-     "store": "Kesher Market",
-     "city": "North",
+     "store": "Kesher Foods - Flatbush",
+     "city": "Brooklyn",
      "units": 17,
      "dollars": 140.25
     },
     {
-     "store": "Simcha Market",
-     "city": "East",
+     "store": "Simcha Market - Teaneck",
+     "city": "Teaneck",
      "units": 17,
      "dollars": 140.25
     },
     {
-     "store": "Brocha Foods",
-     "city": "West",
+     "store": "Brocha Supermarket - Monsey",
+     "city": "Monsey",
      "units": 17,
      "dollars": 140.25
     },
     {
-     "store": "Shefa Market",
-     "city": "North",
+     "store": "Shefa Market - Boro Park",
+     "city": "Brooklyn",
      "units": 15,
      "dollars": 123.75
     },
     {
-     "store": "Golden Kosher",
-     "city": "South",
+     "store": "Golden Basket Kosher - 5 Towns",
+     "city": "Lawrence",
      "units": 15,
      "dollars": 123.75
     },
     {
-     "store": "Shalva Fresh",
-     "city": "North",
+     "store": "Shalva Fresh - Brooklyn",
+     "city": "Brooklyn",
      "units": 15,
      "dollars": 123.75
     },
     {
-     "store": "Tzur Kosher",
-     "city": "North",
+     "store": "Tzur Kosher - Brooklyn",
+     "city": "Brooklyn",
      "units": 14,
      "dollars": 115.5
     },
     {
-     "store": "Ashira Kosher",
-     "city": "North",
+     "store": "Ashira Kosher - Brooklyn",
+     "city": "Brooklyn",
      "units": 11,
      "dollars": 90.75
     },
     {
-     "store": "Tal Fresh",
+     "store": "Tal Fresh - Queens",
      "city": "Flushing",
      "units": 10,
      "dollars": 82.5
     },
     {
-     "store": "Neshama Kosher",
+     "store": "Neshama Kosher - Aventura",
      "city": "Miami",
      "units": 9,
      "dollars": 74.25
     },
     {
-     "store": "Lev Fresh",
-     "city": "Central",
+     "store": "Lev Fresh - Silver Spring",
+     "city": "Silver Spring",
      "units": 9,
      "dollars": 74.25
     },
     {
-     "store": "Pri Market",
-     "city": "Area 6",
+     "store": "Pri Market - Riverdale",
+     "city": "Bronx",
      "units": 7,
      "dollars": 57.75
     }
@@ -5858,91 +5858,91 @@
    "store_channel_dollars": 2491.5,
    "stores": [
     {
-     "store": "Yam Kosher Market",
+     "store": "Yam Kosher Market - Deal",
      "city": "Long Branch",
      "units": 37,
      "dollars": 305.25
     },
     {
-     "store": "Bais Hamazon",
-     "city": "East",
+     "store": "Bais Hamakolet - Lakewood",
+     "city": "Lakewood",
      "units": 34,
      "dollars": 280.5
     },
     {
-     "store": "Kesher Market",
-     "city": "North",
+     "store": "Kesher Foods - Flatbush",
+     "city": "Brooklyn",
      "units": 29,
      "dollars": 239.25
     },
     {
-     "store": "Ohr Wholesale - East",
-     "city": "East",
+     "store": "Ohr Wholesale - Lakewood",
+     "city": "Lakewood",
      "units": 25,
      "dollars": 206.25
     },
     {
-     "store": "Simcha Market",
-     "city": "East",
+     "store": "Simcha Market - Teaneck",
+     "city": "Teaneck",
      "units": 22,
      "dollars": 181.5
     },
     {
-     "store": "Brocha Foods",
-     "city": "West",
+     "store": "Brocha Supermarket - Monsey",
+     "city": "Monsey",
      "units": 22,
      "dollars": 181.5
     },
     {
-     "store": "Shefa Market",
-     "city": "North",
+     "store": "Shefa Market - Boro Park",
+     "city": "Brooklyn",
      "units": 20,
      "dollars": 165
     },
     {
-     "store": "Golden Kosher",
-     "city": "South",
+     "store": "Golden Basket Kosher - 5 Towns",
+     "city": "Lawrence",
      "units": 19,
      "dollars": 156.75
     },
     {
-     "store": "Shalva Fresh",
-     "city": "North",
+     "store": "Shalva Fresh - Brooklyn",
+     "city": "Brooklyn",
      "units": 19,
      "dollars": 156.75
     },
     {
-     "store": "Tzur Kosher",
-     "city": "North",
+     "store": "Tzur Kosher - Brooklyn",
+     "city": "Brooklyn",
      "units": 17,
      "dollars": 140.25
     },
     {
-     "store": "Neshama Kosher",
+     "store": "Neshama Kosher - Aventura",
      "city": "Miami",
      "units": 15,
      "dollars": 123.75
     },
     {
-     "store": "Ashira Kosher",
-     "city": "North",
+     "store": "Ashira Kosher - Brooklyn",
+     "city": "Brooklyn",
      "units": 14,
      "dollars": 115.5
     },
     {
-     "store": "Lev Fresh",
-     "city": "Central",
+     "store": "Lev Fresh - Silver Spring",
+     "city": "Silver Spring",
      "units": 11,
      "dollars": 90.75
     },
     {
-     "store": "Pri Market",
-     "city": "Area 6",
+     "store": "Pri Market - Riverdale",
+     "city": "Bronx",
      "units": 9,
      "dollars": 74.25
     },
     {
-     "store": "Tal Fresh",
+     "store": "Tal Fresh - Queens",
      "city": "Flushing",
      "units": 9,
      "dollars": 74.25
@@ -5957,91 +5957,91 @@
    "store_channel_dollars": 3489.75,
    "stores": [
     {
-     "store": "Yam Kosher Market",
+     "store": "Yam Kosher Market - Deal",
      "city": "Long Branch",
      "units": 52,
      "dollars": 429
     },
     {
-     "store": "Bais Hamazon",
-     "city": "East",
+     "store": "Bais Hamakolet - Lakewood",
+     "city": "Lakewood",
      "units": 48,
      "dollars": 396
     },
     {
-     "store": "Ohr Wholesale - East",
-     "city": "East",
+     "store": "Ohr Wholesale - Lakewood",
+     "city": "Lakewood",
      "units": 48,
      "dollars": 396
     },
     {
-     "store": "Simcha Market",
-     "city": "East",
+     "store": "Simcha Market - Teaneck",
+     "city": "Teaneck",
      "units": 31,
      "dollars": 255.75
     },
     {
-     "store": "Brocha Foods",
-     "city": "West",
+     "store": "Brocha Supermarket - Monsey",
+     "city": "Monsey",
      "units": 31,
      "dollars": 255.75
     },
     {
-     "store": "Kesher Market",
-     "city": "North",
+     "store": "Kesher Foods - Flatbush",
+     "city": "Brooklyn",
      "units": 30,
      "dollars": 247.5
     },
     {
-     "store": "Shefa Market",
-     "city": "North",
+     "store": "Shefa Market - Boro Park",
+     "city": "Brooklyn",
      "units": 27,
      "dollars": 222.75
     },
     {
-     "store": "Golden Kosher",
-     "city": "South",
+     "store": "Golden Basket Kosher - 5 Towns",
+     "city": "Lawrence",
      "units": 27,
      "dollars": 222.75
     },
     {
-     "store": "Shalva Fresh",
-     "city": "North",
+     "store": "Shalva Fresh - Brooklyn",
+     "city": "Brooklyn",
      "units": 27,
      "dollars": 222.75
     },
     {
-     "store": "Tzur Kosher",
-     "city": "North",
+     "store": "Tzur Kosher - Brooklyn",
+     "city": "Brooklyn",
      "units": 24,
      "dollars": 198
     },
     {
-     "store": "Ashira Kosher",
-     "city": "North",
+     "store": "Ashira Kosher - Brooklyn",
+     "city": "Brooklyn",
      "units": 20,
      "dollars": 165
     },
     {
-     "store": "Neshama Kosher",
+     "store": "Neshama Kosher - Aventura",
      "city": "Miami",
      "units": 16,
      "dollars": 132
     },
     {
-     "store": "Lev Fresh",
-     "city": "Central",
+     "store": "Lev Fresh - Silver Spring",
+     "city": "Silver Spring",
      "units": 16,
      "dollars": 132
     },
     {
-     "store": "Pri Market",
-     "city": "Area 6",
+     "store": "Pri Market - Riverdale",
+     "city": "Bronx",
      "units": 13,
      "dollars": 107.25
     },
     {
-     "store": "Tal Fresh",
+     "store": "Tal Fresh - Queens",
      "city": "Flushing",
      "units": 13,
      "dollars": 107.25

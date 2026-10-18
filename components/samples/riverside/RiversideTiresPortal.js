@@ -26,7 +26,7 @@ import {
   NAV,
 } from './riversideUtils'
 import { buildDailyCloseModel } from './riversideDailyClose.js'
-import { buildPeriodStats, salesItemsForPeriod } from './riversideSalesItems.js'
+import { buildPeriodStats, salesItemsForPeriod, itemsFromOctoberOrders } from './riversideSalesItems.js'
 import {
   DailyCloseSection,
   DailyCloseDayDetail,
@@ -312,16 +312,23 @@ function Pill({ on, onClick, children, disabled }) {
   )
 }
 
-function Kpi({ label, value, sub, color = C.ink, tie }) {
-  return (
-    <div className="rt-kpi-tile" style={{ flex: '1 1 150px', background: C.card, border: `1px solid ${C.hair}`, padding: '14px 16px' }}>
+function Kpi({ label, value, sub, color = C.ink, tie, onClick }) {
+  const inner = (
+    <>
       <div style={{ fontSize: 9, color: C.muted, letterSpacing: '0.06em', marginBottom: 6, fontFamily: ui, textTransform: 'uppercase' }}>{label}</div>
       <div style={{ fontSize: 18, color, fontWeight: 600, fontFamily: ui, lineHeight: 1.2, fontVariantNumeric: 'tabular-nums' }}>
         {value}
         {tie ? <TieMark ok /> : null}
       </div>
       {sub ? <div style={{ fontSize: 10, color: C.muted, marginTop: 4, fontFamily: ui }}>{sub}</div> : null}
-    </div>
+    </>
+  )
+  const box = { flex: '1 1 150px', background: C.card, border: `1px solid ${C.hair}`, padding: '14px 16px' }
+  if (!onClick) return <div className="rt-kpi-tile" style={box}>{inner}</div>
+  return (
+    <button type="button" className="rt-kpi-tile rt-clickrow" onClick={onClick} style={{ ...box, cursor: 'pointer', textAlign: 'left', font: 'inherit', width: 'auto' }}>
+      {inner}
+    </button>
   )
 }
 
@@ -1136,10 +1143,9 @@ function FinancialsTab({ fin, setFin, plPeriod, setPlPeriod }) {
 
 /* ---------- Dashboard ---------- */
 
-function DashboardTab({ period, setPeriod }) {
+function DashboardTab({ period, setPeriod, setMetricDetail }) {
   const [dailyDay, setDailyDay] = useState(null)
   const [jeDay, setJeDay] = useState(null)
-  const [metricDetail, setMetricDetail] = useState(null)
 
   const rows = ORDERS.filter((o) => inPeriod(o, period))
   const reg = totalsOf(rows)
@@ -1482,14 +1488,20 @@ function DashboardTab({ period, setPeriod }) {
         <DailyCloseDayDetail day={dailyDay} onBack={() => setDailyDay(null)} onPreviewJe={(day) => setJeDay(day)} />
       ) : null}
       {jeDay ? <DailyCloseJePreview day={jeDay} onClose={() => setJeDay(null)} /> : null}
-      {metricDetail ? <DashboardMetricSheet detail={metricDetail} onClose={() => setMetricDetail(null)} /> : null}
     </>
   )
 }
 
 /* ---------- Sales & Items ---------- */
 
-function SalesItemsTab({ seed }) {
+function salesUnitsInClosedMonth(size) {
+  const items = DATA.sales_items_by_month[LAST_CLOSED.month] || []
+  const n = normTireSize(size)
+  const hit = items.find((i) => normTireSize(i.item) === n)
+  return hit?.units ?? 0
+}
+
+function SalesItemsTab({ seed, setMetricDetail }) {
   const [view, setView] = useState('ranked')
   const [periodKey, setPeriodKey] = useState(LAST_CLOSED.month)
   const [compareOn, setCompareOn] = useState(false)
@@ -1513,6 +1525,7 @@ function SalesItemsTab({ seed }) {
     asOf: AS_OF,
     periodKey,
     lastClosedMonth: LAST_CLOSED.month,
+    fallbackAug: DATA.sales_items_aug,
   })
   const items = salesItemsForPeriod({
     salesItemsByMonth: DATA.sales_items_by_month,
@@ -1529,15 +1542,70 @@ function SalesItemsTab({ seed }) {
   const compareMap = new Map(compareItems.map((it) => [it.item, it]))
 
   const maxMonthRev = Math.max(...MONTHS.map((m) => m.revenue), 1)
+  const periodLabel = cfPillLabel(periodKey)
+
+  const openItemDetail = (t) => {
+    const rows = [
+      { label: 'Units', value: String(t.units) },
+      { label: 'Revenue', value: fmt0(t.revenue) },
+      { label: 'Avg sale', value: t.units ? fmtC(t.avgSale) : '—' },
+    ]
+    if (periodKey === 'all') {
+      MONTHS.forEach((m) => {
+        const hit = (DATA.sales_items_by_month[m.month] || []).find((i) => i.item === t.item)
+        if (hit) rows.push({ label: monthYear(m), value: `${hit.units} units · ${fmt0(hit.revenue)}` })
+      })
+      const oct = itemsFromOctoberOrders(DATA.orders, AS_OF).find((i) => i.item === t.item)
+      if (oct) rows.push({ label: 'October (open)', value: `${oct.units} units · ${fmt0(oct.revenue)}` })
+    }
+    setMetricDetail({ title: t.item, subtitle: `Sales & Items · ${periodLabel}`, rows })
+  }
+
+  const openKpiDetail = (kind) => {
+    if (kind === 'revenue') {
+      setMetricDetail({
+        title: fmt0(stats?.revenue || 0),
+        subtitle: `Revenue · ${periodLabel}`,
+        rows: ranked.map((t) => ({ label: t.item, value: fmt0(t.revenue) })),
+      })
+      return
+    }
+    if (kind === 'units') {
+      setMetricDetail({
+        title: String(stats?.unitsSold || 0),
+        subtitle: `Units sold · ${periodLabel}`,
+        rows: ranked.map((t) => ({ label: t.item, value: `${t.units} units` })),
+      })
+      return
+    }
+    if (kind === 'unique') {
+      setMetricDetail({
+        title: String(stats?.uniqueItems || items.length),
+        subtitle: `Unique items · ${periodLabel}`,
+        rows: ranked.map((t) => ({ label: t.item, value: `${t.units} units` })),
+      })
+      return
+    }
+    const avg = stats?.ticketCount ? stats.revenue / stats.ticketCount : 0
+    setMetricDetail({
+      title: fmtC(avg),
+      subtitle: `Avg ticket · ${periodLabel}`,
+      rows: [
+        { label: 'Revenue', value: fmt0(stats?.revenue || 0) },
+        { label: 'Tickets', value: String(stats?.ticketCount || 0) },
+        { label: 'Avg ticket', value: fmtC(avg), valueStyle: { fontWeight: 600 } },
+      ],
+    })
+  }
 
   return (
     <>
       <PageHead title={NAV.find((n) => n.id === 'inventory').title} />
       <div className="rt-kpi-row">
-        <Kpi label="Revenue" value={fmt0(stats?.revenue || 0)} />
-        <Kpi label="Units sold" value={String(stats?.unitsSold || 0)} />
-        <Kpi label="Unique items" value={String(stats?.uniqueItems || items.length)} />
-        <Kpi label="Avg ticket" value={fmtC(stats?.ticketCount ? stats.revenue / stats.ticketCount : 0)} />
+        <Kpi label="Revenue" value={fmt0(stats?.revenue || 0)} onClick={() => openKpiDetail('revenue')} />
+        <Kpi label="Units sold" value={String(stats?.unitsSold || 0)} onClick={() => openKpiDetail('units')} />
+        <Kpi label="Unique items" value={String(stats?.uniqueItems || items.length)} onClick={() => openKpiDetail('unique')} />
+        <Kpi label="Avg ticket" value={fmtC(stats?.ticketCount ? stats.revenue / stats.ticketCount : 0)} onClick={() => openKpiDetail('avg')} />
       </div>
       <SubTabs
         active={view}
@@ -1638,7 +1706,15 @@ function SalesItemsTab({ seed }) {
                 {ranked.map((t, i) => {
                   const b = compareMap.get(t.item)
                   return (
-                    <tr key={t.item} style={{ background: i % 2 ? '#FAF8F4' : C.card }}>
+                    <tr
+                      key={t.item}
+                      className="rt-clickrow"
+                      role="button"
+                      tabIndex={0}
+                      onClick={() => openItemDetail(t)}
+                      onKeyDown={(e) => (e.key === 'Enter' || e.key === ' ') && (e.preventDefault(), openItemDetail(t))}
+                      style={{ background: i % 2 ? '#FAF8F4' : C.card, cursor: 'pointer' }}
+                    >
                       <td className="rt-col-rank" style={cell('left', { fontFamily: mono, color: C.muted })}>{i + 1}</td>
                       <td style={cell('left', { fontFamily: mono })}>{t.item}</td>
                       <td style={cell('right', { fontFamily: mono })}>{t.units}</td>
@@ -1966,7 +2042,7 @@ function OrdersTab({ initialPeriod }) {
 
 /* ---------- Stock ---------- */
 
-function StockTab() {
+function StockTab({ setMetricDetail }) {
   const [asOf, setAsOf] = useState(STOCK_MONTH_IDS[STOCK_MONTH_IDS.length - 1])
   const [q, setQ] = useState('')
   const [sort, setSort] = useState('value')
@@ -1999,13 +2075,55 @@ function StockTab() {
     }
   }
 
+  const snapLabel = stockSnapFor(asOf).label
+  const allStockRows = stockRowsFor(asOf)
+
+  const openStockRow = (s) => {
+    const sold = salesUnitsInClosedMonth(s.size)
+    setMetricDetail({
+      title: s.size,
+      subtitle: `Stock · ${snapLabel}`,
+      rows: [
+        { label: 'On hand', value: String(s.onHand) },
+        { label: 'Unit cost', value: fmtC(s.unitCost) },
+        { label: 'Stock value', value: fmt0(s.value) },
+        { label: `Units sold · ${monthShort(LAST_CLOSED.label)}`, value: String(sold) },
+        { label: 'Description', value: s.desc },
+      ],
+    })
+  }
+
+  const openStockKpi = (kind) => {
+    if (kind === 'onHand') {
+      setMetricDetail({
+        title: String(units),
+        subtitle: `On hand · ${snapLabel}`,
+        rows: allStockRows.map((s) => ({ label: s.size, value: `${s.onHand} units` })),
+      })
+      return
+    }
+    if (kind === 'value') {
+      setMetricDetail({
+        title: fmt0(value),
+        subtitle: `Stock value · ${snapLabel}`,
+        rows: allStockRows.map((s) => ({ label: s.size, value: fmt0(s.value) })),
+      })
+      return
+    }
+    setMetricDetail({
+      title: String(allStockRows.length),
+      subtitle: `Sizes · ${snapLabel}`,
+      rows: allStockRows.map((s) => ({ label: s.size, value: `${s.onHand} on hand` })),
+    })
+  }
+
   return (
     <>
       <PageHead title={NAV.find((n) => n.id === 'stock').title} />
       <div className="rt-kpi-row">
-        <Kpi label="On hand" value={String(units)} />
-        <Kpi label="Stock value" value={fmt0(value)} tie={invTie} />
-        <Kpi label="Sizes" value={String(stockRowsFor(asOf).length)} />
+        <Kpi label="On hand" value={String(units)} onClick={() => openStockKpi('onHand')} />
+        <Kpi label="Stock value" value={fmt0(value)} tie={invTie} onClick={() => openStockKpi('value')} />
+        <Kpi label="Sizes" value={String(allStockRows.length)} onClick={() => openStockKpi('sizes')} />
       </div>
       <div className="rt-filter-stack rt-stock-filter-stack">
         <input
@@ -2071,7 +2189,15 @@ function StockTab() {
           </thead>
           <tbody>
             {rows.map((s, i) => (
-              <tr key={s.size} style={{ background: i % 2 ? '#FAF8F4' : C.card }}>
+              <tr
+                key={s.size}
+                className="rt-clickrow"
+                role="button"
+                tabIndex={0}
+                onClick={() => openStockRow(s)}
+                onKeyDown={(e) => (e.key === 'Enter' || e.key === ' ') && (e.preventDefault(), openStockRow(s))}
+                style={{ background: i % 2 ? '#FAF8F4' : C.card, cursor: 'pointer' }}
+              >
                 <td style={cell('left')}>
                   <div style={{ fontFamily: mono }}>{s.size}</div>
                   <div style={{ fontSize: 10, color: C.sub }}>{s.desc}</div>
@@ -2083,8 +2209,15 @@ function StockTab() {
             ))}
           </tbody>
           <tfoot>
-            <tr style={{ background: '#ECE7DD' }}>
-              <td style={cell('left', { fontWeight: 600, borderBottom: 'none' })}>{stockRowsFor(asOf).length} sizes</td>
+            <tr
+              className="rt-clickrow"
+              role="button"
+              tabIndex={0}
+              onClick={() => openStockKpi('onHand')}
+              onKeyDown={(e) => (e.key === 'Enter' || e.key === ' ') && (e.preventDefault(), openStockKpi('onHand'))}
+              style={{ background: '#ECE7DD', cursor: 'pointer' }}
+            >
+              <td style={cell('left', { fontWeight: 600, borderBottom: 'none' })}>{allStockRows.length} sizes</td>
               <td style={cell('right', { fontFamily: mono, fontWeight: 700, borderBottom: 'none' })}>{units}</td>
               <td style={cell('right', { borderBottom: 'none' })} />
               <td style={cell('right', { fontFamily: mono, fontWeight: 700, borderBottom: 'none' })}>{fmtC(value)}</td>
@@ -2516,6 +2649,7 @@ export default function RiversideTiresPortal() {
   const [finTab, setFinTab] = useState('pl')
   const [plPeriod, setPlPeriod] = useState('all')
   const [inventorySeed, setInventorySeed] = useState({ seq: 0, view: 'ranked', periodKey: STOCK_AUG_ID, q: '' })
+  const [metricDetail, setMetricDetail] = useState(null)
   const [phoneTourActive, setPhoneTourActive] = useState(false)
   const phoneTabTimerRef = useRef(null)
   const phoneScrollTimerRef = useRef(null)
@@ -2636,14 +2770,15 @@ export default function RiversideTiresPortal() {
 
       <Shell embed={embed} tab={tab} setTab={setTab}>
         {tab === 'dashboard' && (
-          <DashboardTab period={openPeriod} setPeriod={setOpenPeriod} />
+          <DashboardTab period={openPeriod} setPeriod={setOpenPeriod} setMetricDetail={setMetricDetail} />
         )}
         {tab === 'financials' && <FinancialsTab fin={finTab} setFin={setFinTab} plPeriod={plPeriod} setPlPeriod={setPlPeriod} />}
-        {tab === 'inventory' && <SalesItemsTab seed={inventorySeed} />}
+        {tab === 'inventory' && <SalesItemsTab seed={inventorySeed} setMetricDetail={setMetricDetail} />}
         {tab === 'orders' && <OrdersTab initialPeriod={openPeriod} />}
-        {tab === 'stock' && <StockTab />}
+        {tab === 'stock' && <StockTab setMetricDetail={setMetricDetail} />}
         {tab === 'ai' && <AskTab />}
       </Shell>
+      {metricDetail ? <DashboardMetricSheet detail={metricDetail} onClose={() => setMetricDetail(null)} /> : null}
     </>
   )
 }

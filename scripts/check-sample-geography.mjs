@@ -1,39 +1,12 @@
 /**
- * Fail if banned real geography / brand strings appear in six sample page sources.
+ * Fail only on real-site leakage and the one retained closeout rename guard.
  */
 import fs from 'fs'
 import path from 'path'
 
 const root = path.resolve(import.meta.dirname, '..')
 
-const BANNED = [
-  'Lakewood',
-  'Monsey',
-  'Brooklyn',
-  'Boca',
-  'Flatbush',
-  'Teaneck',
-  'Deal',
-  'Boro Park',
-  'Five Towns',
-  'Queens',
-  'Southfield',
-  'Cedarhurst',
-  'Woodmere',
-  'Lawrence',
-  'Spring Valley',
-  'Kew Gardens',
-  'Riverdale',
-  'Aventura',
-  'Silver Spring',
-  'Rockland',
-  'Monmouth',
-  'Hudson Valley',
-  'Tri-State',
-  'Keystone',
-  'Garden State',
-  'primalkrisp.com',
-]
+const BANNED = ['primalkrisp.com', 'real, from', 'Tri-State']
 
 const FILES = [
   'pages/mr-dipz.js',

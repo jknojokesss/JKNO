@@ -136,7 +136,7 @@ export function OrderDetail({ orderId, onBack, onTier, onInvoicePreview, card, b
         mono={false}
       />
       <div style={{ fontSize: '12px', color: MUTED, marginBottom: 8 }}>{tier.contents}</div>
-      <RowLine l="Tins × price" v={`${fmtInt(o.units)} × ${money(o.price)} = ${money(o.order_total)}`} mono={false} />
+      <RowLine l="Tins x price" v={`${fmtInt(o.units)} x ${money(o.price)} = ${money(o.order_total)}`} mono={false} />
       <RowLine l="Booked" v={fmtD(o.booked)} mono={false} />
       <RowLine l="Target delivery" v={fmtD(o.ship_date)} mono={false} />
       <RowLine l="Days to target" v={daysLabel} mono={false} />
@@ -204,7 +204,7 @@ export function InvoicePreviewDetail({ orderId, kind, onClose, card, big, lbl })
         <RowLine l="Invoice date" v={fmtD(AS_OF_ISO)} mono={false} />
         <RowLine l="Order" v={o.id} mono={false} />
         <div style={{ marginTop: 12, ...lbl, marginBottom: 8 }}>Line items</div>
-        <RowLine l={`${fmtInt(o.units)} tins × ${money(o.price)}`} v={money(o.order_total)} mono={false} />
+        <RowLine l={`${fmtInt(o.units)} tins x ${money(o.price)}`} v={money(o.order_total)} mono={false} />
         {!isDeposit && o.deposit_received > 0 ? (
           <RowLine l="Less deposit paid" v={money(-o.deposit_received)} mono={false} />
         ) : null}

@@ -17,9 +17,9 @@ const DATA = {
   asOf: '2026-10-17',
   lots: [L2041, L2044, L2047, L2049, L2050, L2052, L2053, L2056, L2061, L2063],
   buyers: [
-    { name: 'Corner Quick Mart', type: 'c-store chain', termsDays: 30 },
-    { name: 'Valley Discount Grocers', type: 'grocery chain', termsDays: 30 },
-    { name: 'Summit Surplus Distributors', type: 'distributor', termsDays: 15 },
+    { name: 'Garden State Quick Mart', type: 'c-store chain', termsDays: 30 },
+    { name: 'Hudson Valley Discount Grocers', type: 'grocery chain', termsDays: 30 },
+    { name: 'Keystone Surplus Distributors', type: 'distributor', termsDays: 15 },
     { name: 'Bargain Outlet Stores', type: 'discount store', termsDays: 30 },
     { name: 'Elm Street Family Grocery', type: 'independent grocery', termsDays: 15 },
     { name: 'Brightway Dollar Stores', type: 'dollar store chain', termsDays: 30 },
