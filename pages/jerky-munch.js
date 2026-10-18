@@ -132,6 +132,7 @@ export default function JerkyMunch() {
   const [session, setSession] = useState(null)
   const [authChecked, setAuthChecked] = useState(false)
   const [dataLoaded, setDataLoaded] = useState(false)
+  const [booksLoadError, setBooksLoadError] = useState(null) // GL fetch failed — don't show "import books" empty state
   const [role, setRole] = useState(null)              // 'owner' | 'counter' (staff shelf-count-only)
   const [drill, setDrill] = useState(null)            // P&L drill-down: { title, rows, total }
   const [drillSort, setDrillSort] = useState({ key: 'date', dir: 'desc' }) // date: desc=newest; amount: desc=largest |abs|
@@ -367,7 +368,12 @@ export default function JerkyMunch() {
         if (!data || data.length < size) break
       }
       setGlTx(all)
-    } catch (e) { console.error('loadGL failed', e); setGlTx([]) }
+      setBooksLoadError(null)
+    } catch (e) {
+      console.error('loadGL failed', e)
+      setGlTx([])
+      setBooksLoadError(String(e.message || e))
+    }
   }
   const loadCoA = async () => {
     try {
@@ -401,6 +407,11 @@ export default function JerkyMunch() {
   const loadAll = async () => {
     await Promise.all([loadRole(), loadConsign(), loadDirect(), loadAds(), loadExpenses(), loadInvoices(), loadProducts(), loadMonthSeries(), loadSettings(), loadGL(), loadCoA(), loadQbo()])
     setDataLoaded(true)
+  }
+  const retryLoadAll = async () => {
+    setDataLoaded(false)
+    setBooksLoadError(null)
+    await loadAll()
   }
 
   useEffect(() => {
@@ -1036,6 +1047,11 @@ export default function JerkyMunch() {
                     <div style={{ fontSize: '11.5px', color: MUTED, marginTop: '8px' }}>Figures from your QuickBooks books · synced nightly, current through {glAsOf} (the current month is still filling in).</div>
                   </div>
                 </>
+              ) : booksLoadError ? (
+                <div style={{ ...card, marginBottom: '16px', background: '#FDF3F0', borderColor: '#E8C4BC', fontSize: '13.5px', color: INK, lineHeight: 1.55 }}>
+                  Could not load your QuickBooks ledger — {booksLoadError}.{' '}
+                  <button type="button" onClick={retryLoadAll} style={{ background: 'none', border: 'none', padding: 0, color: SPICE, fontWeight: 600, cursor: 'pointer', font: 'inherit' }}>Try again</button>
+                </div>
               ) : (
                 <div style={{ ...card, marginBottom: '16px', background: '#EAF3EC', borderColor: '#CFE4D6', fontSize: '13.5px', color: INK, lineHeight: 1.55 }}>
                   Import your books on the <b style={{ cursor: 'pointer', color: SPICE }} onClick={() => setTab('quickbooks')}>QuickBooks</b> tab and your numbers show up here.
