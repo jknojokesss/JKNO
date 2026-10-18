@@ -1,6 +1,6 @@
 import { useMemo } from 'react'
 import DATA from './aufschnittData'
-import { INK, MUTED, BORDER, CREAM, RED, MONO, money, money0 } from './aufschnittUtils'
+import { INK, MUTED, BORDER, CREAM, RED, MONO, money, money0, fmtCases } from './aufschnittUtils'
 
 export default function AufschnittStockTab({ card, lbl, brand, onOpen, sort, setSort }) {
   const rows = useMemo(() => {
@@ -59,7 +59,7 @@ export default function AufschnittStockTab({ card, lbl, brand, onOpen, sort, set
                 <div style={{ fontSize: 10, color: MUTED }}>{r.brand}</div>
               </td>
               <td style={{ padding: '8px 4px', textAlign: 'right', fontFamily: MONO }}>{r.onHandCases}</td>
-              <td style={{ padding: '8px 4px', textAlign: 'right', fontFamily: MONO }}>{r.avgWeeklyCases}</td>
+              <td style={{ padding: '8px 4px', textAlign: 'right', fontFamily: MONO }}>{fmtCases(r.avgWeeklyCases)}</td>
               <td style={{ padding: '8px 4px', textAlign: 'right', fontFamily: MONO, color: r.weeksSupply < 3 ? RED : INK }}>
                 {r.weeksSupply.toFixed(1)}
               </td>

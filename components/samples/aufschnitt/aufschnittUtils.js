@@ -24,6 +24,13 @@ const moneyFormatter = new Intl.NumberFormat(AU_LOCALE, {
 
 export const fmtInt = (n) => intFormatter.format(Math.round(n))
 
+/** Case counts: whole numbers or one decimal — never fake two-decimal precision. */
+export const fmtCases = (n) => {
+  const t = Math.round(n * 10) / 10
+  if (Math.abs(t - Math.round(t)) < 0.05) return String(Math.round(t))
+  return t.toFixed(1)
+}
+
 export const money = (n) => {
   const v = Math.round(n * 100) / 100
   if (v < 0) return '-$' + moneyFormatter.format(Math.abs(v))

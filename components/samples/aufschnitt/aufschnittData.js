@@ -81,17 +81,53 @@ const OPEX_RATE = {
 
 const ESSICCATA_SEP_NET = -612.4
 
+const PRODUCT_CFG = {
+  'auf-01': { unitPrice: 4.49, unitsPerCase: 12, costPerCase: 54.6, saleWeight: 24, weeks: 5.2, fbaShare: 0.26, ownSiteCaseShare: 0.34 },
+  'auf-02': { unitPrice: 4.59, unitsPerCase: 12, costPerCase: 55.1, saleWeight: 21, weeks: 4.8, fbaShare: 0.24, ownSiteCaseShare: 0.32 },
+  'auf-03': { unitPrice: 4.59, unitsPerCase: 12, costPerCase: 55.4, saleWeight: 19, weeks: 2.2, fbaShare: 0.25, ownSiteCaseShare: 0.3 },
+  'auf-04': { unitPrice: 4.69, unitsPerCase: 12, costPerCase: 56.2, saleWeight: 17, weeks: 5.0, fbaShare: 0.27, ownSiteCaseShare: 0.28 },
+  'auf-05': { unitPrice: 9.89, unitsPerCase: 12, costPerCase: 88.4, saleWeight: 4, weeks: 11.4, fbaShare: 0.22, ownSiteCaseShare: 0.42 },
+  'auf-06': { unitPrice: 4.39, unitsPerCase: 12, costPerCase: 52.8, saleWeight: 11, weeks: 6.1, fbaShare: 0.23, ownSiteCaseShare: 0.36 },
+  'auf-07': { unitPrice: 4.49, unitsPerCase: 12, costPerCase: 53.5, saleWeight: 10, weeks: 5.8, fbaShare: 0.24, ownSiteCaseShare: 0.33 },
+  'auf-08': { unitPrice: 5.29, unitsPerCase: 10, costPerCase: 48.2, saleWeight: 9, weeks: 6.4, fbaShare: 0.29, ownSiteCaseShare: 0.38 },
+  'auf-09': { unitPrice: 5.39, unitsPerCase: 10, costPerCase: 49.1, saleWeight: 8, weeks: 6.0, fbaShare: 0.28, ownSiteCaseShare: 0.35 },
+  'auf-10': { unitPrice: 3.89, unitsPerCase: 24, costPerCase: 62.3, saleWeight: 22, weeks: 7.2, fbaShare: 0.3, ownSiteCaseShare: 0.26 },
+  'abr-01': { unitPrice: 5.79, unitsPerCase: 12, costPerCase: 58.4, saleWeight: 16, weeks: 5.5, fbaShare: 0.32, ownSiteCaseShare: 0.3 },
+  'abr-02': { unitPrice: 5.89, unitsPerCase: 12, costPerCase: 59.1, saleWeight: 12, weeks: 6.2, fbaShare: 0.31, ownSiteCaseShare: 0.28 },
+  'abr-03': { unitPrice: 5.89, unitsPerCase: 12, costPerCase: 59.6, saleWeight: 10, weeks: 6.8, fbaShare: 0.33, ownSiteCaseShare: 0.27 },
+  'abr-04': { unitPrice: 11.49, unitsPerCase: 12, costPerCase: 96.2, saleWeight: 5, weeks: 10.2, fbaShare: 0.35, ownSiteCaseShare: 0.44 },
+  'abr-05': { unitPrice: 4.99, unitsPerCase: 10, costPerCase: 44.8, saleWeight: 13, weeks: 5.9, fbaShare: 0.34, ownSiteCaseShare: 0.32 },
+  'abr-06': { unitPrice: 4.99, unitsPerCase: 10, costPerCase: 45.2, saleWeight: 13, weeks: 6.5, fbaShare: 0.33, ownSiteCaseShare: 0.31 },
+  'abr-07': { unitPrice: 5.19, unitsPerCase: 10, costPerCase: 47.6, saleWeight: 12, weeks: 7.0, fbaShare: 0.36, ownSiteCaseShare: 0.29 },
+  'abr-08': { unitPrice: 3.29, unitsPerCase: 24, costPerCase: 51.7, saleWeight: 14, weeks: 8.4, fbaShare: 0.37, ownSiteCaseShare: 0.22 },
+  'ess-01': { unitPrice: 6.49, unitsPerCase: 12, costPerCase: 72.8, saleWeight: 10, weeks: 4.2, fbaShare: 0.58, ownSiteCaseShare: 0.4 },
+  'ess-02': { unitPrice: 6.59, unitsPerCase: 12, costPerCase: 74.1, saleWeight: 10, weeks: 4.9, fbaShare: 0.56, ownSiteCaseShare: 0.38 },
+  'ess-03': { unitPrice: 6.59, unitsPerCase: 12, costPerCase: 73.5, saleWeight: 10, weeks: 5.3, fbaShare: 0.55, ownSiteCaseShare: 0.36 },
+  'ess-04': { unitPrice: 4.29, unitsPerCase: 24, costPerCase: 68.4, saleWeight: 10, weeks: 6.6, fbaShare: 0.62, ownSiteCaseShare: 0.34 },
+  'ess-05': { unitPrice: 4.29, unitsPerCase: 24, costPerCase: 67.9, saleWeight: 10, weeks: 7.4, fbaShare: 0.6, ownSiteCaseShare: 0.33 },
+  'ess-06': { unitPrice: 7.89, unitsPerCase: 12, costPerCase: 81.2, saleWeight: 10, weeks: 11.8, fbaShare: 0.52, ownSiteCaseShare: 0.45 },
+}
+
 const PRODUCT_META = {}
-PRODUCT_DEFS.forEach((p, i) => {
-  const base = 4.25 + (i % 7) * 0.37 + (p.brand === 'Essiccata' ? 1.1 : 0)
+PRODUCT_DEFS.forEach((p) => {
+  const c = PRODUCT_CFG[p.id]
   PRODUCT_META[p.id] = {
-    unitPrice: roundCents(base + (i % 3) * 0.19),
-    velocity: 0.72 + (i % 11) * 0.11 + (p.name.includes('8 oz') ? 0.35 : 0),
-    ownSiteCaseShare: 0.28 + (i % 5) * 0.08,
-    costPerCase: roundCents(18.4 + (i % 9) * 2.17 + (p.brand === 'Essiccata' ? 4.2 : 0)),
-    unitsPerCase: p.name.includes('10 ct') ? 1 : p.name.includes('8 oz') ? 12 : 24,
+    unitPrice: c.unitPrice,
+    velocity: c.saleWeight,
+    ownSiteCaseShare: c.ownSiteCaseShare,
+    costPerCase: c.costPerCase,
+    unitsPerCase: c.unitsPerCase,
+    weeksTarget: c.weeks,
+    fbaShare: c.fbaShare,
   }
 })
+
+const WEEKLY_CASE_PATTERN = [0.82, 1.12, 0.91, 1.08, 0.86, 1.15, 0.94, 1.02]
+
+function roundCases(n) {
+  const t = Math.round(n * 10) / 10
+  return Math.abs(t - Math.round(t)) < 0.05 ? Math.round(t) : t
+}
 
 function hash(s) {
   let h = 0
@@ -148,11 +184,11 @@ const BRAND_MONTH = buildBrandMonthTargets()
 function productMoM(productId, monthId) {
   if (monthId === '2026-09') {
     const h = hash(productId) % 10
-    if (h === 0) return 0.912
-    if (h === 1) return 0.945
-    if (h === 2) return 0.968
-    if (h >= 7) return 1.082
-    return 1.018 + (h % 4) * 0.011
+    if (h === 0) return 0.962
+    if (h === 1) return 0.978
+    if (h === 2) return 0.988
+    if (h >= 7) return 1.028
+    return 1.004 + (h % 4) * 0.005
   }
   if (monthId === '2026-08') return 1
   const mi = MONTHS.findIndex((m) => m.id === monthId)
@@ -172,6 +208,66 @@ function channelTargets(monthId, brand, brandRev) {
   })
   const alloc = allocateByWeight(brandRev, blended)
   return alloc
+}
+
+function enforceBrandProductCap(rows, maxShare = 0.18) {
+  MONTHS.forEach((m) => {
+    BRANDS.forEach((brand) => {
+      const products = PRODUCT_DEFS.filter((p) => p.brand === brand)
+      const brandRev = sumCents(
+        rows.filter((r) => r.month === m.id && r.brand === brand),
+        (r) => r.revenue
+      )
+      if (brandRev <= 0) return
+      const cap = roundCents(brandRev * maxShare)
+      for (let pass = 0; pass < 24; pass++) {
+        const totals = {}
+        products.forEach((p) => {
+          totals[p.id] = sumCents(
+            rows.filter((r) => r.month === m.id && r.brand === brand && r.productId === p.id),
+            (r) => r.revenue
+          )
+        })
+        const over = products.find((p) => totals[p.id] > cap + 0.004)
+        if (!over) break
+        const pid = over.id
+        const excess = roundCents(totals[pid] - cap)
+        const pidTotal = totals[pid]
+        CHANNELS.forEach((ch) => {
+          const chRows = rows.filter(
+            (r) => r.month === m.id && r.brand === brand && r.channel === ch && r.productId === pid
+          )
+          const chPidRev = sumCents(chRows, (r) => r.revenue)
+          if (chPidRev <= 0) return
+          const chExcess = roundCents((excess * chPidRev) / pidTotal)
+          chRows.forEach((r) => {
+            const cut = roundCents((chExcess * r.revenue) / chPidRev)
+            r.revenue = roundCents(r.revenue - cut)
+            r.units = Math.max(1, Math.round(r.revenue / PRODUCT_META[r.productId].unitPrice))
+          })
+          const recipients = products.filter((p) => p.id !== pid)
+          const weights = {}
+          recipients.forEach((p) => {
+            weights[p.id] = PRODUCT_META[p.id].velocity
+          })
+          const split = allocateByWeight(chExcess, weights)
+          recipients.forEach((p) => {
+            const add = split[p.id] || 0
+            if (add <= 0) return
+            let row = rows.find(
+              (r) => r.month === m.id && r.brand === brand && r.channel === ch && r.productId === p.id
+            )
+            if (!row) {
+              row = { month: m.id, productId: p.id, brand, channel: ch, units: 0, revenue: 0 }
+              rows.push(row)
+            }
+            row.revenue = roundCents(row.revenue + add)
+            row.units = Math.max(1, Math.round(row.revenue / PRODUCT_META[p.id].unitPrice))
+          })
+        })
+      }
+    })
+  })
 }
 
 function shiftChannelRevenue(rows, monthId, shifts) {
@@ -446,36 +542,54 @@ function buildPnlDrills(salesRows, pnl, brandKey) {
   return drills
 }
 
-function buildStock(salesRows) {
-  const endMonth = '2026-09'
-  const rows = PRODUCT_DEFS.map((p) => {
+function weeklyCaseSeries(avgWeeklyCases) {
+  const raw = WEEKLY_CASE_PATTERN.map((m) => avgWeeklyCases * m)
+  const mean = raw.reduce((a, b) => a + b, 0) / raw.length
+  const scaled = raw.map((v) => (mean > 0 ? (v * avgWeeklyCases) / mean : avgWeeklyCases))
+  const weeklyCases = scaled.map((v, i) =>
+    i === scaled.length - 1 ? roundCases(v) : Math.max(0.5, roundCases(v))
+  )
+  const avg = roundCases(weeklyCases.reduce((a, b) => a + b, 0) / weeklyCases.length)
+  const drift = roundCases(avgWeeklyCases - avg)
+  weeklyCases[weeklyCases.length - 1] = roundCases(weeklyCases[weeklyCases.length - 1] + drift)
+  return weeklyCases
+}
+
+function buildStock(salesRows, opts = {}) {
+  const velocityMonth = opts.velocityMonth || '2026-09'
+  const weeksScale = opts.weeksScale ?? 1
+  let rows = PRODUCT_DEFS.map((p) => {
     const meta = PRODUCT_META[p.id]
-    const monthUnits = sumUnits(salesRows, { productId: p.id, month: endMonth })
-    const avgWeeklyUnits = monthUnits / 4.33
-    const weeklyUnits = []
-    for (let w = 0; w < 8; w++) {
-      const u = Math.max(1, Math.round(avgWeeklyUnits * (0.92 + (hash(`${p.id}-w${w}`) % 17) / 100)))
-      weeklyUnits.push(u)
-    }
-    const avgFromWeeks = weeklyUnits.reduce((a, b) => a + b, 0) / 8
-    const avgWeeklyCases = roundCents(avgFromWeeks / meta.unitsPerCase)
-    const owingsCases = Math.max(2, Math.round(avgWeeklyCases * (2.1 + (hash(p.id) % 18) / 10)))
-    const fbaCases = Math.max(1, Math.round(avgWeeklyCases * (1.4 + (hash(p.id + 'fba') % 12) / 10)))
-    const onHandCases = owingsCases + fbaCases
-    const weeksSupply = avgWeeklyCases > 0 ? onHandCases / avgWeeklyCases : 99
+    const monthUnits = sumUnits(salesRows, { productId: p.id, month: velocityMonth })
+    const monthCases = monthUnits / meta.unitsPerCase
+    const avgWeeklyCases = roundCases(monthCases / 4.33)
+    const weeklyCases = weeklyCaseSeries(avgWeeklyCases)
+    const weeklyUnits = weeklyCases.map((c) => Math.max(1, Math.round(c * meta.unitsPerCase)))
+    const weeksTarget = meta.weeksTarget * weeksScale
+    let onHandCases = Math.max(1, Math.round(avgWeeklyCases * weeksTarget))
+    const fbaCases = Math.max(0, Math.round(onHandCases * meta.fbaShare))
+    const owingsCases = Math.max(1, onHandCases - fbaCases)
+    onHandCases = owingsCases + fbaCases
+    let weeksSupply = avgWeeklyCases > 0 ? onHandCases / avgWeeklyCases : weeksTarget
     const valueAtCost = roundCents(onHandCases * meta.costPerCase)
+    const incomingProducts = ['auf-03', 'auf-05', 'ess-01', 'abr-04', 'auf-08']
+    const incomingDates = {
+      'auf-03': '2026-10-11',
+      'auf-05': '2026-10-18',
+      'ess-01': '2026-10-09',
+      'abr-04': '2026-10-22',
+      'auf-08': '2026-10-14',
+    }
     const incoming =
-      weeksSupply < 4 && hash(p.id) % 3 !== 0
-        ? { cases: Math.round(avgWeeklyCases * 3.2), expected: '2026-10-14' }
-        : weeksSupply < 2.5
-          ? { cases: Math.round(avgWeeklyCases * 5), expected: '2026-10-08' }
-          : null
+      incomingProducts.includes(p.id) && weeksSupply < 8
+        ? { cases: Math.max(2, Math.round(avgWeeklyCases * (2.8 + (hash(p.id) % 4) * 0.4))), expected: incomingDates[p.id] || '2026-10-12' }
+        : null
     return {
       productId: p.id,
       brand: p.brand,
       name: p.name,
       onHandCases,
-      avgWeeklyCases,
+      avgWeeklyCases: roundCases(weeklyCases.reduce((a, b) => a + b, 0) / weeklyCases.length),
       weeksSupply: Math.round(weeksSupply * 10) / 10,
       valueAtCost,
       costPerCase: meta.costPerCase,
@@ -484,98 +598,191 @@ function buildStock(salesRows) {
         { location: STOCK_LOCATIONS[1], cases: fbaCases },
       ],
       weeklyUnits,
+      weeklyCases,
       incoming,
     }
   })
+
+  let totalVal = sumCents(rows, (r) => r.valueAtCost)
+  const targetVal = 208_400
+  if (totalVal < 190_000 || totalVal > 230_000) {
+    const factor = targetVal / totalVal
+    rows = rows.map((r) => {
+      const onHandCases = Math.max(1, Math.round(r.onHandCases * factor))
+      const meta = PRODUCT_META[r.productId]
+      const fbaCases = Math.max(0, Math.round(onHandCases * meta.fbaShare))
+      const owingsCases = Math.max(1, onHandCases - fbaCases)
+      const onHand = owingsCases + fbaCases
+      const weeksSupply = r.avgWeeklyCases > 0 ? onHand / r.avgWeeklyCases : r.weeksSupply
+      return {
+        ...r,
+        onHandCases: onHand,
+        weeksSupply: Math.round(weeksSupply * 10) / 10,
+        valueAtCost: roundCents(onHand * meta.costPerCase),
+        locations: [
+          { location: STOCK_LOCATIONS[0], cases: owingsCases },
+          { location: STOCK_LOCATIONS[1], cases: fbaCases },
+        ],
+      }
+    })
+  }
   return rows
 }
 
+function addDays(iso, days) {
+  const d = new Date(`${iso}T12:00:00.000Z`)
+  d.setUTCDate(d.getUTCDate() + days)
+  return d.toISOString().slice(0, 10)
+}
+
+function daysBetween(a, b) {
+  const da = new Date(`${a}T12:00:00.000Z`)
+  const db = new Date(`${b}T12:00:00.000Z`)
+  return Math.round((db - da) / 86400000)
+}
+
+/** Bucket amounts per store — sums to ~94.8k; uneven sizes and aging mix. */
+const AR_BUCKET_SPEC = {
+  'Brooklyn store 1': { current: 2142.33, d1_30: 1827.44, d31_60: 0, d61_90: 0, d90p: 0 },
+  'Brooklyn store 2': { current: 712.18, d1_30: 991.27, d31_60: 1638.92, d61_90: 0, d90p: 0 },
+  'Brooklyn store 3': { current: 1628.67, d1_30: 1384.22, d31_60: 0, d61_90: 0, d90p: 0 },
+  'Brooklyn store 4': { current: 484.11, d1_30: 612.44, d31_60: 2387.63, d61_90: 0, d90p: 0 },
+  'Monsey store 1': { current: 824.56, d1_30: 1188.34, d31_60: 1742.87, d61_90: 0, d90p: 0 },
+  'Monsey store 2': { current: 598.22, d1_30: 976.41, d31_60: 2024.18, d61_90: 0, d90p: 0 },
+  'Lakewood store 1': { current: 3347.63, d1_30: 3784.22, d31_60: 0, d61_90: 2984.17, d90p: 0 },
+  'Lakewood store 2': { current: 3218.34, d1_30: 3876.18, d31_60: 0, d61_90: 0, d90p: 0 },
+  'Five Towns store 1': { current: 1187.44, d1_30: 1042.18, d31_60: 0, d61_90: 0, d90p: 0 },
+  'Five Towns store 2': { current: 412.87, d1_30: 384.62, d31_60: 0, d61_90: 0, d90p: 0 },
+  'Teaneck store 1': { current: 1878.92, d1_30: 1632.18, d31_60: 0, d61_90: 0, d90p: 0 },
+  'Passaic store 1': { current: 518.44, d1_30: 612.87, d31_60: 0, d61_90: 0, d90p: 1384.56 },
+  'Queens store 1': { current: 642.18, d1_30: 787.44, d31_60: 1484.22, d61_90: 0, d90p: 0 },
+  'Queens store 2': { current: 1784.33, d1_30: 1528.67, d31_60: 0, d61_90: 0, d90p: 0 },
+  'Baltimore store 1': { current: 2187.44, d1_30: 1942.18, d31_60: 0, d61_90: 0, d90p: 0 },
+  'Baltimore store 2': { current: 528.67, d1_30: 712.33, d31_60: 1687.92, d61_90: 0, d90p: 0 },
+  'Staten Island store 1': { current: 487.63, d1_30: 412.44, d31_60: 0, d61_90: 0, d90p: 0 },
+  'Distributor NJ 1': { current: 3284.22, d1_30: 3988.67, d31_60: 0, d61_90: 2947.44, d90p: 0 },
+}
+
+function bucketDueDate(bucket) {
+  if (bucket === 'current') return '2026-10-12'
+  if (bucket === 'd1_30') return '2026-09-18'
+  if (bucket === 'd31_60') return '2026-08-22'
+  if (bucket === 'd61_90') return '2026-07-19'
+  return '2026-06-08'
+}
+
 function buildReceivables() {
-  const targetTotal = 96_118.54
-  const weights = STORE_ACCOUNTS.map((name, i) => 0.55 + (hash(name) % 45) / 100 + (i % 4) * 0.08)
-  const wSum = weights.reduce((a, b) => a + b, 0)
-  const accounts = STORE_ACCOUNTS.map((name, i) => {
-    const total = roundCents((targetTotal * weights[i]) / wSum)
-    let cur = Math.round(total * (0.42 + (hash(name + 'c') % 20) / 100) * 100)
-    let d1 = Math.round(total * (0.28 + (hash(name + '1') % 12) / 100) * 100)
-    let d31 = Math.round(total * (0.14 + (hash(name + '31') % 8) / 100) * 100)
-    let d61 = Math.round(total * (0.06 + (hash(name + '61') % 5) / 100) * 100)
-    let d90 = Math.round(total * 100) - cur - d1 - d31 - d61
-    if (d90 < 0) {
-      d61 += d90
-      d90 = 0
+  const raw = STORE_ACCOUNTS.map((name) => {
+    const b = AR_BUCKET_SPEC[name]
+    return {
+      name,
+      buckets: {
+        current: roundCents(b.current),
+        d1_30: roundCents(b.d1_30),
+        d31_60: roundCents(b.d31_60),
+        d61_90: roundCents(b.d61_90),
+        d90p: roundCents(b.d90p),
+        total: roundCents(b.current + b.d1_30 + b.d31_60 + b.d61_90 + b.d90p),
+      },
     }
-    if (d61 < 0) {
-      d31 += d61
-      d61 = 0
-    }
+  })
+  const rawTotal = sumCents(raw, (a) => a.buckets.total)
+  const targetGoal = 94_827.63
+  const scale = targetGoal / rawTotal
+  const accounts = raw.map((a) => {
     const buckets = {
-      current: cur / 100,
-      d1_30: d1 / 100,
-      d31_60: d31 / 100,
-      d61_90: d61 / 100,
-      d90p: d90 / 100,
-      total: roundCents((cur + d1 + d31 + d61 + d90) / 100),
+      current: roundCents(a.buckets.current * scale),
+      d1_30: roundCents(a.buckets.d1_30 * scale),
+      d31_60: roundCents(a.buckets.d31_60 * scale),
+      d61_90: roundCents(a.buckets.d61_90 * scale),
+      d90p: roundCents(a.buckets.d90p * scale),
+      total: 0,
     }
-    return { name, buckets }
+    buckets.total = roundCents(buckets.current + buckets.d1_30 + buckets.d31_60 + buckets.d61_90 + buckets.d90p)
+    return { name: a.name, buckets }
   })
-  const fix = roundCents(targetTotal - sumCents(accounts, (a) => a.buckets.total))
+  const fix = roundCents(targetGoal - sumCents(accounts, (a) => a.buckets.total))
   if (fix) {
-    accounts[0].buckets.total = roundCents(accounts[0].buckets.total + fix)
-    accounts[0].buckets.current = roundCents(accounts[0].buckets.current + fix)
+    accounts.find((a) => a.name === 'Distributor NJ 1').buckets.d1_30 = roundCents(
+      accounts.find((a) => a.name === 'Distributor NJ 1').buckets.d1_30 + fix
+    )
+    accounts.find((a) => a.name === 'Distributor NJ 1').buckets.total = roundCents(
+      accounts.find((a) => a.name === 'Distributor NJ 1').buckets.total + fix
+    )
   }
-
-  accounts[4].buckets.d61_90 = roundCents(accounts[4].buckets.d61_90 + 842.19)
-  accounts[4].buckets.total = roundCents(accounts[4].buckets.total + 842.19)
-  accounts[11].buckets.d90p = roundCents(accounts[11].buckets.d90p + 1_284.56)
-  accounts[11].buckets.total = roundCents(accounts[11].buckets.total + 1_284.56)
-  const moveFrom = Math.min(accounts[11].buckets.current, 1_284.56)
-  accounts[11].buckets.current = roundCents(accounts[11].buckets.current - moveFrom)
-  accounts[11].buckets.d1_30 = roundCents(accounts[11].buckets.d1_30 + (1_284.56 - moveFrom))
-
-  accounts.forEach((a) => {
-    const b = a.buckets
-    const s = roundCents(b.current + b.d1_30 + b.d31_60 + b.d61_90 + b.d90p)
-    const diff = roundCents(b.total - s)
-    if (diff) b.current = roundCents(b.current + diff)
-  })
+  const targetTotal = sumCents(accounts, (a) => a.buckets.total)
 
   const invoices = []
   const payments = []
+  let invSeq = 10482
   accounts.forEach((acct, ai) => {
-    let remaining = acct.buckets.total
-    const invCount = 2 + (hash(acct.name) % 3)
-    for (let i = 0; i < invCount; i++) {
-      const amt =
-        i === invCount - 1
-          ? roundCents(remaining)
-          : roundCents(remaining * (0.35 + (hash(acct.name + i) % 25) / 100))
-      remaining = roundCents(remaining - amt)
-      const daysPast = i === 0 && acct.buckets.d90p > 0 ? 94 : i === 0 && acct.buckets.d61_90 > 500 ? 67 : 12 + (hash(acct.name + 'd' + i) % 40)
-      const invNo = `INV-${10480 + ai * 3 + i}`
-      const brandsOn = BRANDS.filter((_, bi) => hash(acct.name + bi) % 2 === 0)
+    const parts = [
+      ['current', acct.buckets.current],
+      ['d1_30', acct.buckets.d1_30],
+      ['d31_60', acct.buckets.d31_60],
+      ['d61_90', acct.buckets.d61_90],
+      ['d90p', acct.buckets.d90p],
+    ].filter(([, amt]) => amt > 0)
+    parts.forEach(([bucket, amount], bi) => {
+      const dueDate = bucketDueDate(bucket)
+      const invDate = addDays(dueDate, -30)
+      const daysPastDue = Math.max(0, daysBetween(dueDate, AS_OF))
+      const brandsOn = BRANDS.filter((_, idx) => (hash(acct.name + bucket) + idx) % 3 !== 0)
       if (brandsOn.length === 0) brandsOn.push(BRANDS[ai % 3])
-      invoices.push({
-        account: acct.name,
-        invoiceNo: invNo,
-        date: '2026-09-' + String(28 - i * 4).padStart(2, '0'),
-        dueDate: '2026-10-' + String(15 - i).padStart(2, '0'),
-        daysPastDue: Math.max(0, daysPast - 30),
-        brands: brandsOn,
-        amount: amt,
+      const splitAmt =
+        amount > 2400 && bi === 0
+          ? [
+              roundCents(amount * 0.58),
+              roundCents(amount * 0.42),
+            ]
+          : [amount]
+      splitAmt.forEach((amt, si) => {
+        invoices.push({
+          account: acct.name,
+          invoiceNo: `INV-${invSeq++}`,
+          date: si ? addDays(invDate, -4) : invDate,
+          dueDate: si ? addDays(dueDate, 2) : dueDate,
+          daysPastDue: Math.max(0, daysBetween(si ? addDays(dueDate, 2) : dueDate, AS_OF)),
+          brands: brandsOn,
+          amount: amt,
+        })
       })
-    }
-    if (hash(acct.name) % 3 !== 1) {
+    })
+    const payAmt = roundCents(acct.buckets.total * (0.14 + (hash(acct.name) % 17) / 100))
+    if (payAmt > 80 && ai % 5 !== 2) {
       payments.push({
         account: acct.name,
-        date: '2026-08-' + String(10 + (ai % 18)).padStart(2, '0'),
-        amount: roundCents(acct.buckets.total * 0.22),
-        reference: `PMT-${2200 + ai}`,
+        date: `2026-08-${String(6 + (ai % 21)).padStart(2, '0')}`,
+        amount: payAmt,
+        reference: `PMT-${2184 + ai * 3}`,
+      })
+    }
+    if (ai % 7 === 1) {
+      payments.push({
+        account: acct.name,
+        date: `2026-09-${String(4 + (ai % 12)).padStart(2, '0')}`,
+        amount: roundCents(payAmt * 0.62),
+        reference: `PMT-${3400 + ai}`,
       })
     }
   })
 
-  return { accounts, invoices, payments, targetTotal: sumCents(accounts, (a) => a.buckets.total), priorTotal: roundCents(sumCents(accounts, (a) => a.buckets.total) * 0.968) }
+  accounts.forEach((acct) => {
+    const invSum = sumCents(invoices.filter((i) => i.account === acct.name), (i) => i.amount)
+    const diff = roundCents(acct.buckets.total - invSum)
+    if (diff && invoices.length) {
+      const last = invoices.filter((i) => i.account === acct.name).pop()
+      if (last) last.amount = roundCents(last.amount + diff)
+    }
+  })
+
+  return {
+    accounts,
+    invoices,
+    payments,
+    targetTotal,
+    priorTotal: roundCents(targetTotal * 0.971),
+  }
 }
 
 function buildChannelDetails(salesRows) {
@@ -671,6 +878,7 @@ function buildModel() {
   BRANDS.forEach((b) => addPnlView(b, (id) => pnlByBrandMonth[`${id}:${b}`]))
 
   const stock = buildStock(salesRows)
+  const stockAug = buildStock(salesRows, { velocityMonth: '2026-08', weeksScale: 1.03 })
   const receivables = buildReceivables()
   const channels = buildChannelDetails(salesRows)
 
@@ -704,7 +912,7 @@ function buildModel() {
   })
 
   const stockValueSep = sumCents(stock, (r) => r.valueAtCost)
-  const stockValueAug = roundCents(stockValueSep * 0.972)
+  const stockValueAug = sumCents(stockAug, (r) => r.valueAtCost)
 
   return {
     meta: { as_of: AS_OF, built_by: BUILT_BY, name: BIZ_NAME },
