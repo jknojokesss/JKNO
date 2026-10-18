@@ -128,6 +128,6 @@ body{background:${theme.CREAM};font-family:${UI};font-variant-numeric:tabular-nu
 @media(max-width:480px){.ce-table-wrap{display:none!important}.ce-stack-only{display:block!important}.ce-navbtn{font-size:10px;padding:6px 7px}}
 @media(max-width:600px){input,select,textarea{font-size:16px!important}button{min-height:40px}}
 .ce-buyer-label{display:block;min-width:0}
-.ce-buyer-name{display:block;font-weight:600;font-size:13px;line-height:1.3;overflow:hidden;text-overflow:ellipsis}
+.ce-buyer-name{display:block;font-weight:600;font-size:13px;line-height:1.35;white-space:normal;word-break:break-word}
 .ce-buyer-type{display:block;font-size:12px;font-weight:400;color:${MUTED};margin-top:2px;line-height:1.25}
 .ce-table.ce-compact .ce-buyer-type{display:none}`

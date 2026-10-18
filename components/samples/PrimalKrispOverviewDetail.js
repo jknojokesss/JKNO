@@ -2,6 +2,7 @@ import DATA from '../../data/primal-krisp.json'
 import { getDueToReorderStores } from './primal-krisp/primalKrispReorderData'
 import { openInvoiceTotal, daysBetween, AS_OF } from './primalKrispStoreBilling'
 import { BORDER, INK, MUTED, UI, MONO, money, money0, fmtInt, pct1, fmtD } from './primalKrispUtils'
+import { allocateWholeDollars } from './sampleWholeDollarDisplay.js'
 
 function Shell({ title, sub, onBack, onClose, children }) {
   const close = onClose || onBack
@@ -23,18 +24,24 @@ function Shell({ title, sub, onBack, onClose, children }) {
 }
 
 function Lines({ rows, totalLabel, totalValue, format = money0 }) {
+  const displays =
+    totalLabel != null && totalValue != null
+      ? allocateWholeDollars(rows.map((r) => r.value), totalValue)
+      : null
+  const fmt = (v, i) => (displays ? money0(displays[i]) : format(v))
+  const fmtTotal = totalValue != null ? money0(totalValue) : null
   return (
     <div style={{ border: `1px solid ${BORDER}`, borderRadius: 2, padding: '4px 14px' }}>
       {rows.map((r, i) => (
         <div key={r.key || r.label} style={{ display: 'flex', justifyContent: 'space-between', gap: 12, padding: '8px 0', borderTop: i ? `1px solid ${BORDER}` : 'none', fontSize: 13 }}>
           <span style={{ color: INK }}>{r.label}</span>
-          <span style={{ fontFamily: MONO }}>{format(r.value)}</span>
+          <span style={{ fontFamily: MONO }}>{fmt(r.value, i)}</span>
         </div>
       ))}
       {totalLabel != null ? (
         <div style={{ display: 'flex', justifyContent: 'space-between', gap: 12, padding: '10px 0', borderTop: `1px solid ${BORDER}`, fontWeight: 700, fontSize: 13 }}>
           <span>{totalLabel}</span>
-          <span style={{ fontFamily: MONO }}>{format(totalValue)}</span>
+          <span style={{ fontFamily: MONO }}>{fmtTotal ?? format(totalValue)}</span>
         </div>
       ) : null}
     </div>

@@ -22,6 +22,7 @@ import {
   BagIcon,
   CHANNEL_COLORS,
 } from './primalKrispUtils'
+import { allocateWholeDollars } from './sampleWholeDollarDisplay.js'
 
 const CHANNELS = DATA.channels
 const BAG_COLORS = [SPICE, KRAFT, GREEN, '#8A5A2B', '#6B5B4F']
@@ -53,6 +54,7 @@ export default function PrimalKrispOverview({
     Net: m.net_profit,
   }))
   const donut = channelRowsPeriod.map((c) => ({ name: c.channel, value: c.sales }))
+  const channelWhole = allocateWholeDollars(donut.map((d) => d.value), salesPeriod)
   const topStores = [...DATA.stores.list]
     .map((s) => ({ name: s.name, rev: s.sample.sales_sept || 0, bal: s.sample.open_balance || 0 }))
     .sort((a, b) => b.rev - a.rev)
@@ -186,13 +188,13 @@ export default function PrimalKrispOverview({
             ) : null}
           </div>
           <div style={{ flex: 1, minWidth: 220 }}>
-            {donut.map((d) => (
+            {donut.map((d, i) => (
               <div key={d.name} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '5px 0', fontSize: '13px' }}>
                 <span style={{ display: 'flex', alignItems: 'center', gap: 8, color: INK }}>
                   <span style={{ width: 10, height: 10, borderRadius: 2, background: CHANNEL_COLORS[d.name], flexShrink: 0 }} />
                   {d.name}
                 </span>
-                <span style={{ fontFamily: MONO }}>{money0(d.value)}</span>
+                <span style={{ fontFamily: MONO }}>{money0(channelWhole[i])}</span>
               </div>
             ))}
           </div>

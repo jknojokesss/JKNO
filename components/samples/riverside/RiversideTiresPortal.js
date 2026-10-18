@@ -27,6 +27,7 @@ import {
 } from './riversideUtils'
 import { buildDailyCloseModel } from './riversideDailyClose.js'
 import { buildPeriodStats, salesItemsForPeriod, itemsFromOctoberOrders } from './riversideSalesItems.js'
+import { allocateWholeDollars } from '../sampleWholeDollarDisplay.js'
 import {
   DailyCloseSection,
   DailyCloseDayDetail,
@@ -983,6 +984,10 @@ function MonthlyTableView({ onPickMonth }) {
     margin: null,
     inProgress: true,
   }
+  const revWhole = allocateWholeDollars(rows.map((m) => m.revenue), total.revenue)
+  const cogsWhole = allocateWholeDollars(rows.map((m) => m.cogs), total.cogs)
+  const grossWhole = allocateWholeDollars(rows.map((m) => m.gross), total.gross)
+  const profitWhole = allocateWholeDollars(rows.map((m) => m.profit), total.profit)
   return (
     <div className="rt-table-wrap rt-monthly-wrap" style={{ background: C.card, border: `1px solid ${C.hair}` }}>
       <table className="rt-monthly-table" style={{ width: '100%', borderCollapse: 'collapse', minWidth: 520 }}>
@@ -1004,10 +1009,10 @@ function MonthlyTableView({ onPickMonth }) {
                   {monthYear(m)}
                 </button>
               </td>
-              <td style={cell('right', { fontFamily: mono })}>{fmt0(m.revenue)}</td>
-              <td style={cell('right', { fontFamily: mono })}>{fmt0(m.cogs)}</td>
-              <td style={cell('right', { fontFamily: mono, fontWeight: 600 })}>{fmt0(m.gross)}</td>
-              <td style={cell('right', { fontFamily: mono, fontWeight: 600 })}>{fmt0(m.profit)}</td>
+              <td style={cell('right', { fontFamily: mono })}>{fmt0(revWhole[i])}</td>
+              <td style={cell('right', { fontFamily: mono })}>{fmt0(cogsWhole[i])}</td>
+              <td style={cell('right', { fontFamily: mono, fontWeight: 600 })}>{fmt0(grossWhole[i])}</td>
+              <td style={cell('right', { fontFamily: mono, fontWeight: 600 })}>{fmt0(profitWhole[i])}</td>
               <td style={cell('right', { fontFamily: mono, color: C.sub })}>{pct(m.margin)}</td>
             </tr>
           ))}
@@ -1165,6 +1170,7 @@ function DashboardTab({ period, setPeriod, setMetricDetail }) {
   const mixTie = mixTotal === m.revenue
   const topSixRev = sumBy(closedSizes, 'revenue')
   const topSixUnits = sumBy(closedSizes, 'units')
+  const sizeRevWhole = allocateWholeDollars(closedSizes.map((t) => t.revenue), topSixRev)
   const topSixTie =
     topSixRev === closedTires.top_six_revenue &&
     topSixUnits === closedTires.top_six_units &&
@@ -1215,7 +1221,7 @@ function DashboardTab({ period, setPeriod, setMetricDetail }) {
       title: `Top tire sizes · ${monthYear(m)}`,
       subtitle: monthYear(m),
       rows: [
-        ...closedSizes.map((t) => ({ label: t.size, value: `${t.units} units · ${fmt0(t.revenue)}` })),
+        ...closedSizes.map((t, i) => ({ label: t.size, value: `${t.units} units · ${fmt0(sizeRevWhole[i])}` })),
         { label: 'Top six', value: `${topSixUnits} units · ${fmt0(topSixRev)}`, valueStyle: { fontWeight: 600 } },
       ],
     })
@@ -1444,7 +1450,7 @@ function DashboardTab({ period, setPeriod, setMetricDetail }) {
               </tr>
             </thead>
             <tbody>
-              {closedSizes.map((t) => (
+              {closedSizes.map((t, i) => (
                 <tr
                   key={t.size}
                   className="rt-clickrow"
@@ -1456,7 +1462,7 @@ function DashboardTab({ period, setPeriod, setMetricDetail }) {
                   <td className="rt-col-rank" style={cell('left', { fontFamily: mono, color: C.muted })}>{t.rank}</td>
                   <td style={cell('left', { fontFamily: mono })}>{t.size}</td>
                   <td style={cell('right', { fontFamily: mono })}>{t.units}</td>
-                  <td style={cell('right', { fontFamily: mono })}>{fmt0(t.revenue)}</td>
+                  <td style={cell('right', { fontFamily: mono })}>{fmt0(sizeRevWhole[i])}</td>
                 </tr>
               ))}
             </tbody>
@@ -2299,7 +2305,7 @@ function AskTab() {
             <input
               value={input}
               onChange={(e) => setInput(e.target.value)}
-              placeholder="Ask about sales, cash, margins…"
+              placeholder="Ask about sales, cash, margins..."
               aria-label="Ask a question"
               style={{ flex: 1, padding: '10px 12px', border: `1px solid ${C.hair}`, fontFamily: ui, fontSize: 14, outline: 'none', background: C.card, minWidth: 0 }}
             />
@@ -2591,7 +2597,7 @@ const PORTAL_CSS = `
     .rt-sample-line{font-family:${ui};font-size:10.5px;letter-spacing:0;white-space:nowrap;line-height:1.25;display:block;width:100%;overflow:hidden}
     .rt-content input,.rt-content select{font-size:16px!important}
     .rt-mobilenav,.rt-embed .rt-mobilenav{display:grid!important;grid-template-columns:repeat(3,minmax(0,1fr));grid-auto-rows:auto;overflow-x:hidden;gap:2px;padding:6px 4px}
-    .rt-mobilenav button,.rt-embed .rt-mobilenav button{flex:none;width:100%;min-width:0;font-family:${head};font-size:11px;font-weight:500;padding:8px 4px;letter-spacing:.04em;line-height:1.2;white-space:nowrap;text-align:center;display:flex;align-items:center;justify-content:center;min-height:36px;text-transform:uppercase;overflow:hidden;text-overflow:ellipsis}
+    .rt-mobilenav button,.rt-embed .rt-mobilenav button{flex:none;width:100%;min-width:0;font-family:${head};font-size:10px;font-weight:500;padding:8px 4px;letter-spacing:.03em;line-height:1.2;white-space:normal;text-align:center;display:flex;align-items:center;justify-content:center;min-height:36px;text-transform:uppercase}
     .rt-filter-stack{flex-direction:column;align-items:stretch;gap:8px;margin-bottom:14px}
     .rt-filter-search{order:-1;width:100%!important;min-width:0!important;flex:none!important;box-sizing:border-box}
     .rt-filters-scroll{display:flex;flex-wrap:nowrap;overflow-x:auto;overflow-y:hidden;-webkit-overflow-scrolling:touch;scrollbar-width:none;-ms-overflow-style:none;max-width:100%;gap:6px;align-items:center;padding-bottom:2px}

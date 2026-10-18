@@ -14,6 +14,7 @@ import {
   changeColor,
   changePct,
 } from './popinsanityUtils'
+import { allocateWholeDollars } from '../sampleWholeDollarDisplay.js'
 
 export function useStyles() {
   const card = { background: CARDBG, border: `1px solid ${BORDER}`, borderRadius: '2px', padding: '20px' }
@@ -67,10 +68,12 @@ export function BackButton({ onBack }) {
   )
 }
 
-export function RankedBars({ title, rows, onRow, card, lbl, big, formatValue, preserveOrder = false }) {
+export function RankedBars({ title, rows, onRow, card, lbl, big, formatValue, preserveOrder = false, wholeDollarTotal = null }) {
   const sorted = preserveOrder ? rows : [...rows].sort((a, b) => b.value - a.value)
   const max = sorted[0]?.value || 1
-  const fmt = formatValue || ((v) => money(v))
+  const wholeParts =
+    wholeDollarTotal != null && !formatValue ? allocateWholeDollars(sorted.map((r) => r.value), wholeDollarTotal) : null
+  const fmt = formatValue || ((v, i) => (wholeParts ? money0(wholeParts[i]) : money(v)))
   return (
     <div style={{ ...card, flex: 1, minWidth: 'min(100%,290px)' }}>
       <div style={{ ...lbl, marginBottom: '14px' }}>{title}</div>
@@ -86,7 +89,7 @@ export function RankedBars({ title, rows, onRow, card, lbl, big, formatValue, pr
         >
           <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '6px', gap: '8px' }}>
             <span style={{ fontWeight: 600, fontSize: '14px', color: INK }}>{r.label}</span>
-            <span style={{ ...big, fontSize: '15px', color: INK, fontFamily: MONO }}>{fmt(r.value)}{r.suffix || ''}</span>
+            <span style={{ ...big, fontSize: '15px', color: INK, fontFamily: MONO }}>{fmt(r.value, i)}{r.suffix || ''}</span>
           </div>
           <div style={{ height: '6px', background: CREAM, borderRadius: '2px', overflow: 'hidden' }}>
             <div style={{ width: `${Math.round((r.value / max) * 100)}%`, height: '100%', background: SPICE }} />

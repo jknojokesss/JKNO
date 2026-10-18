@@ -16,6 +16,7 @@ import {
   changeColor,
   CHANNEL_ROW_CSS,
 } from './aufschnittUtils'
+import { allocateWholeDollars } from '../sampleWholeDollarDisplay.js'
 
 export default function AufschnittOverview({ card, lbl, KPI, brand, onOpen }) {
   const ov = DATA.overview
@@ -60,6 +61,7 @@ export default function AufschnittOverview({ card, lbl, KPI, brand, onOpen }) {
   const chartData = brand === 'All products' ? ov.chartMonths : MONTH_CHART(brand)
 
   const ppoDelta = pctChange(ov.profitPerOrderAvg, ov.priorProfitPerOrderAvg)
+  const channelWhole = allocateWholeDollars(channels.map((c) => c.revenue), salesCur)
 
   return (
     <>
@@ -172,7 +174,7 @@ export default function AufschnittOverview({ card, lbl, KPI, brand, onOpen }) {
 
       <div style={{ ...card, marginBottom: 16 }}>
         <div style={{ ...lbl, marginBottom: 10 }}>Sales by channel</div>
-        {channels.map((c) => {
+        {channels.map((c, i) => {
           const ch = pctChange(c.revenue, c.prior)
           return (
             <button
@@ -186,7 +188,7 @@ export default function AufschnittOverview({ card, lbl, KPI, brand, onOpen }) {
                 {ch >= 0 ? '+' : ''}
                 {pct1(ch)}
               </span>
-              <span className="au-ch-amt">{money0(c.revenue)}</span>
+              <span className="au-ch-amt">{money0(channelWhole[i])}</span>
             </button>
           )
         })}

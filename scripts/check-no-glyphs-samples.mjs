@@ -26,7 +26,8 @@ const scanRoots = [
   'components/samples/SampleJkLogoLink.js',
 ]
 
-const glyphRe = /[›»‹«→←↑↓▲▼▾▸⇄↗✓✔]/
+const glyphRe = /[›»‹«→←↑↓▲▼▾▸⇄↗✓✔…]/
+const ellipsisCssRe = /text-overflow\s*:\s*ellipsis/
 const closeIconRe = />\s*×\s*</
 const banned = ['Owings Mills', 'Abraham', 'Essiccata']
 
@@ -53,6 +54,7 @@ for (const file of files) {
   const rel = path.relative(root, file)
   const text = fs.readFileSync(file, 'utf8')
   if (glyphRe.test(text)) failures.push(`${rel}: banned glyph`)
+  if (isUiSource(rel) && ellipsisCssRe.test(text)) failures.push(`${rel}: text-overflow ellipsis`)
   if (closeIconRe.test(text)) failures.push(`${rel}: close icon × in markup`)
   for (const m of text.matchAll(/content\s*:\s*(['"])(.*?)\1/g)) {
     const body = m[2]

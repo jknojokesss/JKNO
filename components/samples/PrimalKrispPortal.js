@@ -40,6 +40,7 @@ import {
 } from './PrimalKrispCharts'
 import PrimalKrispDepositsTab from './primal-krisp/PrimalKrispDepositsTab'
 import PrimalKrispDepositsDetail from './primal-krisp/PrimalKrispDepositsDetail'
+import { allocateWholeDollars } from './sampleWholeDollarDisplay.js'
 
 const CHANNELS = DATA.channels
 const AS_OF = DATA.meta.as_of
@@ -262,11 +263,15 @@ export default function PrimalKrispPortal() {
     </div>
   )
 
-  const RankedBars = ({ title, rows, valueKey, labelKey, formatValue, onRowClick, onCardClick }) => {
+  const RankedBars = ({ title, rows, valueKey, labelKey, formatValue, onRowClick, onCardClick, wholeDollarTotal = null }) => {
     const sorted = [...rows].sort((a, b) => b[valueKey] - a[valueKey])
     const max = sorted[0]?.[valueKey] || 1
-    const fmt = formatValue || ((v) => money(v))
     const total = sorted.reduce((s, r) => s + (r[valueKey] || 0), 0)
+    const wholeParts =
+      wholeDollarTotal != null && !formatValue
+        ? allocateWholeDollars(sorted.map((r) => r[valueKey]), wholeDollarTotal)
+        : null
+    const fmt = formatValue || ((v, i) => (wholeParts ? money0(wholeParts[i]) : money(v)))
     return (
       <button
         type="button"
@@ -286,7 +291,7 @@ export default function PrimalKrispPortal() {
           >
             <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '6px', gap: '8px' }}>
               <span style={{ fontWeight: 600, fontSize: '14px', color: INK }}>{r[labelKey]}</span>
-              <span style={{ ...big, fontSize: '15px', color: INK, fontFamily: MONO }}>{fmt(r[valueKey])}</span>
+              <span style={{ ...big, fontSize: '15px', color: INK, fontFamily: MONO }}>{fmt(r[valueKey], i)}</span>
             </div>
             <div style={{ flex: 1, height: '6px', background: CREAM, borderRadius: '2px', overflow: 'hidden' }}>
               <div style={{ width: `${Math.round((r[valueKey] / max) * 100)}%`, height: '100%', background: KRAFT }} />
@@ -296,7 +301,7 @@ export default function PrimalKrispPortal() {
         {onCardClick ? (
           <div style={{ display: 'flex', justifyContent: 'space-between', paddingTop: 10, marginTop: 6, borderTop: `1px solid ${BORDER}`, fontWeight: 700, fontSize: 13 }}>
             <span>Total</span>
-            <span style={{ fontFamily: MONO }}>{fmt(total)}</span>
+            <span style={{ fontFamily: MONO }}>{wholeDollarTotal != null && !formatValue ? money0(wholeDollarTotal) : fmt(total)}</span>
           </div>
         ) : null}
       </button>

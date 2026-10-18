@@ -94,6 +94,7 @@ export default function PopinsanityOverview({
           big={big}
           title={`Sales by channel · ${DATA.meta.this_short}`}
           rows={channelBars}
+          wholeDollarTotal={sales.thisMonth}
           onRow={(r) => openChannel(r.id)}
         />
         <RankedBars

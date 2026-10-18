@@ -34,6 +34,7 @@ import {
   saleLineKey,
   saleStatusLabel,
 } from './closeoutExplosionSales'
+import { allocateWholeDollars } from '../sampleWholeDollarDisplay.js'
 
 const BIZ = 'CLOSEOUT EXPLOSION'
 const buyerTypes = Object.fromEntries(DATA.buyers.map((b) => [b.name, b.type]))
@@ -165,6 +166,13 @@ export default function CloseoutExplosionPortal() {
   )
 
   const cashSorted = [...dash.openLots].sort((a, b) => b.cashTied - a.cashTied)
+  const openCashWhole = allocateWholeDollars(
+    cashSorted.map((r) => r.cashTied),
+    dash.cashTiedTotal,
+  )
+  const buyerTopSix = dash.buyerRows.slice(0, 6)
+  const buyerOtherRows = dash.buyerRows.slice(6)
+  const buyerOtherTotal = buyerOtherRows.reduce((s, b) => s + b.total, 0)
 
   const profitLotRows = useMemo(
     () => [...dash.lots].sort((a, b) => a.lot.id.localeCompare(b.lot.id)),
@@ -596,25 +604,30 @@ export default function CloseoutExplosionPortal() {
     )
   }
 
-  const OverviewLinesDetail = ({ title, sub, rows, total, format = money }) => (
-    <div className="ce-detail">
-      <DetailBack />
-      <div style={{ ...lbl }}>{sub}</div>
-      <h2 style={{ ...big, fontSize: 22, margin: '8px 0 16px' }}>{format(total)}</h2>
-      <div style={{ ...card }}>
-        {rows.map((r, i) => (
-          <div key={r.key || r.label} style={{ display: 'flex', justifyContent: 'space-between', gap: 12, padding: '8px 0', borderTop: i ? `1px solid ${BORDER}` : 'none' }}>
-            <span style={{ fontSize: 13, color: MUTED }}>{r.label}</span>
-            <span style={{ fontFamily: MONO, fontSize: 13 }}>{format(r.value)}</span>
+  const OverviewLinesDetail = ({ title, sub, rows, total, format = money, wholeDollarTie = false }) => {
+    const displays = wholeDollarTie ? allocateWholeDollars(rows.map((r) => r.value), total) : null
+    const fmt = (v, i) => (displays ? money0(displays[i]) : format(v))
+    const fmtTotal = wholeDollarTie ? money0(total) : format(total)
+    return (
+      <div className="ce-detail">
+        <DetailBack />
+        <div style={{ ...lbl }}>{sub}</div>
+        <h2 style={{ ...big, fontSize: 22, margin: '8px 0 16px' }}>{fmtTotal}</h2>
+        <div style={{ ...card }}>
+          {rows.map((r, i) => (
+            <div key={r.key || r.label} style={{ display: 'flex', justifyContent: 'space-between', gap: 12, padding: '8px 0', borderTop: i ? `1px solid ${BORDER}` : 'none' }}>
+              <span style={{ fontSize: 13, color: MUTED }}>{r.label}</span>
+              <span style={{ fontFamily: MONO, fontSize: 13 }}>{fmt(r.value, i)}</span>
+            </div>
+          ))}
+          <div style={{ display: 'flex', justifyContent: 'space-between', gap: 12, padding: '10px 0', borderTop: `1px solid ${BORDER}`, fontWeight: 700 }}>
+            <span style={{ fontSize: 13 }}>Total</span>
+            <span style={{ fontFamily: MONO, fontSize: 13 }}>{fmtTotal}</span>
           </div>
-        ))}
-        <div style={{ display: 'flex', justifyContent: 'space-between', gap: 12, padding: '10px 0', borderTop: `1px solid ${BORDER}`, fontWeight: 700 }}>
-          <span style={{ fontSize: 13 }}>Total</span>
-          <span style={{ fontFamily: MONO, fontSize: 13 }}>{format(total)}</span>
         </div>
       </div>
-    </div>
-  )
+    )
+  }
 
   const OverviewNetDetail = () => {
     const { thisP } = dash
@@ -635,7 +648,7 @@ export default function CloseoutExplosionPortal() {
 
   const OverviewCashDetail = () => {
     const rows = cashSorted.map((row) => ({ label: `${row.lot.id} · ${row.lot.desc}`, value: row.cashTied, key: row.lot.id }))
-    return <OverviewLinesDetail title="Cash tied up in stock" sub="Open lots" rows={rows} total={dash.cashTiedTotal} />
+    return <OverviewLinesDetail title="Cash tied up in stock" sub="Open lots" rows={rows} total={dash.cashTiedTotal} wholeDollarTie />
   }
 
   const OverviewCasesDetail = () => {
@@ -817,9 +830,13 @@ export default function CloseoutExplosionPortal() {
     if (topFrame?.type === 'overviewCases') return <OverviewCasesDetail />
     if (topFrame?.type === 'overviewOpenLots') return <OverviewOpenLotsDetail />
     if (topFrame?.type === 'overviewBuyers') return <OverviewBuyersDetail />
+    if (topFrame?.type === 'overviewBuyersOther') {
+      const rows = buyerOtherRows.map((b) => ({ label: b.name, value: b.total, key: b.name }))
+      return <OverviewLinesDetail title="Other buyers" sub="Buyers owe" rows={rows} total={buyerOtherTotal} />
+    }
 
     if (tab === 'overview') {
-      const openList = [...dash.openLots].sort((a, b) => b.cashTied - a.cashTied).slice(0, 6)
+      const openList = cashSorted.slice(0, 6)
       return (
         <>
           <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap', marginBottom: 16 }}>
@@ -844,7 +861,10 @@ export default function CloseoutExplosionPortal() {
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: 16 }}>
             <div style={card}>
               <div style={{ ...lbl, marginBottom: 12 }}>Open lots</div>
-              {openList.map((row, i) => (
+              {openList.map((row, i) => {
+                const cashIdx = cashSorted.findIndex((r) => r.lot.id === row.lot.id)
+                const cashWhole = openCashWhole[cashIdx >= 0 ? cashIdx : i]
+                return (
                 <button
                   key={row.lot.id}
                   type="button"
@@ -869,14 +889,14 @@ export default function CloseoutExplosionPortal() {
                   </div>
                   <div style={{ textAlign: 'right', flexShrink: 0 }}>
                     <div style={{ fontFamily: MONO, fontSize: 12 }}>{fmtInt(row.casesLeft)} left</div>
-                    <div style={{ fontFamily: MONO, fontSize: 12, color: MUTED }}>{money0(row.cashTied)}</div>
+                    <div style={{ fontFamily: MONO, fontSize: 12, color: MUTED }}>{money0(cashWhole)}</div>
                   </div>
                 </button>
-              ))}
+              )})}
             </div>
             <div style={card}>
               <div style={{ ...lbl, marginBottom: 12 }}>Buyers owe</div>
-              {dash.buyerRows.slice(0, 6).map((b, i) => (
+              {buyerTopSix.map((b, i) => (
                 <button
                   key={b.name}
                   type="button"
@@ -901,6 +921,28 @@ export default function CloseoutExplosionPortal() {
                   <span className="ce-num" style={{ flexShrink: 0 }}>{money(b.total)}</span>
                 </button>
               ))}
+              {buyerOtherTotal > 0 ? (
+                <button
+                  type="button"
+                  className="ce-click"
+                  onClick={() => push({ type: 'overviewBuyersOther' })}
+                  style={{
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    width: '100%',
+                    border: 'none',
+                    borderTop: `1px solid ${BORDER}`,
+                    background: 'transparent',
+                    padding: '10px 0',
+                    cursor: 'pointer',
+                    textAlign: 'left',
+                    fontSize: 13,
+                  }}
+                >
+                  <span style={{ paddingRight: 8, fontWeight: 600 }}>Other buyers</span>
+                  <span className="ce-num" style={{ flexShrink: 0 }}>{money(buyerOtherTotal)}</span>
+                </button>
+              ) : null}
             </div>
           </div>
         </>

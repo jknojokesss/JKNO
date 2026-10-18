@@ -334,7 +334,7 @@ export function TastingLiftChart({ tastings, accent = BRICK }) {
   const { show, hide, node } = useChartTip()
   const rows = (tastings || []).filter((t) => t.store_bags_4wk_before != null)
   const maxB = Math.max(...rows.flatMap((t) => [t.store_bags_4wk_before, t.store_bags_4wk_after]), 1)
-  const rowH = 36
+  const rowH = 44
   const vbH = 44 + rows.length * rowH
   const vbW = 420
   return (
@@ -345,9 +345,20 @@ export function TastingLiftChart({ tastings, accent = BRICK }) {
           const bw = (v) => (v / maxB) * 120
           return (
             <g key={t.date + t.store}>
-              <text x={0} y={y + 12} fontSize="10" fill={INK} fontFamily={sans}>
-                {t.store.length > 22 ? t.store.slice(0, 20) + '…' : t.store}
-              </text>
+              <foreignObject x={0} y={y - 2} width={132} height={34}>
+                <div
+                  xmlns="http://www.w3.org/1999/xhtml"
+                  style={{
+                    fontSize: 10,
+                    lineHeight: 1.25,
+                    color: INK,
+                    fontFamily: sans,
+                    wordBreak: 'break-word',
+                  }}
+                >
+                  {t.store}
+                </div>
+              </foreignObject>
               <TipRect show={show} hide={hide} x={140} y={y} width={bw(t.store_bags_4wk_before)} height={12} fill={STONE} label={`${t.store} · 4 wk before`} value={`${fmtInt(t.store_bags_4wk_before)} bags`} />
               <TipRect show={show} hide={hide} x={140} y={y + 14} width={bw(t.store_bags_4wk_after)} height={12} fill={accent} label={`${t.store} · 4 wk after`} value={`${fmtInt(t.store_bags_4wk_after)} bags`} />
               <text x={270} y={y + 12} fontSize="10" fontWeight="600" fill={t.lift_pct >= 0 ? CHARCOAL : RED} fontFamily={sans}>

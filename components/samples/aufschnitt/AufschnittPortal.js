@@ -2,6 +2,7 @@ import { useState, useCallback, useEffect } from 'react'
 import AufschnittSampleBar from './AufschnittSampleBar'
 import DATA from './aufschnittData'
 import { BRAND_ALL, BRANDS } from './aufschnittCatalog'
+import { allocateWholeDollars } from '../sampleWholeDollarDisplay.js'
 import AufschnittOverview from './AufschnittOverview'
 import AufschnittFinancials from './AufschnittFinancials'
 import AufschnittChannelsTab, { ChannelDetail } from './AufschnittChannelsTab'
@@ -305,15 +306,18 @@ function DetailView({ detail, card, lbl, big, onBack, onOpen }) {
         </div>
         <div style={{ ...card, marginBottom: 12 }}>
           <div style={{ ...lbl, marginBottom: 8 }}>Channels</div>
-          {b.channels.map((c) => (
-            <Row key={c.channel} l={c.channel} v={money0(c.revenue)} />
-          ))}
+          {(() => {
+            const chWhole = allocateWholeDollars(b.channels.map((c) => c.revenue), b.sales)
+            return b.channels.map((c, i) => <Row key={c.channel} l={c.channel} v={money0(chWhole[i])} />)
+          })()}
         </div>
         <div style={{ ...card }}>
           <div style={{ ...lbl, marginBottom: 8 }}>Top products</div>
-          {b.topProducts.map((p) => (
-            <Row key={p.name} l={p.name} v={money0(p.revenue)} />
-          ))}
+          {(() => {
+            const prodTotal = b.topProducts.reduce((s, p) => s + p.revenue, 0)
+            const pWhole = allocateWholeDollars(b.topProducts.map((p) => p.revenue), prodTotal)
+            return b.topProducts.map((p, i) => <Row key={p.name} l={p.name} v={money0(pWhole[i])} />)
+          })()}
         </div>
       </div>
     )
