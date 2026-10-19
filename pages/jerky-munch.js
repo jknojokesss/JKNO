@@ -1770,7 +1770,17 @@ export default function JerkyMunch() {
                       <span style={{ display: 'flex', gap: '14px', fontFamily: MONO, fontSize: strong ? '14px' : '13px' }}>
                         <span style={{ width: '104px', textAlign: 'right', color: colv(a, kind), fontWeight: strong ? 700 : 400 }}>{fmtv(a, kind)}</span>
                         {cmp && <span style={{ width: '104px', textAlign: 'right', color: colv(b, kind), fontWeight: strong ? 700 : 400 }}>{fmtv(b, kind)}</span>}
-                        {cmp && (() => { const chg = b - a; const good = kind === 'cost' ? chg <= 0 : chg >= 0; return <span style={{ width: '92px', textAlign: 'right', color: good ? GREEN : RED, fontWeight: 700 }}>{chg >= 0 ? '+' : '-'}{m0(Math.abs(chg))}</span> })()}
+                        {cmp && (() => {
+                          const chg = a - b
+                          let tone = 'neutral'
+                          if (chg !== 0) {
+                            if (kind === 'cost') tone = Math.abs(a) > Math.abs(b) ? 'bad' : 'good'
+                            else tone = chg > 0 ? 'good' : 'bad'
+                          }
+                          const toneColor = tone === 'good' ? GREEN : tone === 'bad' ? RED : MUTED
+                          const chgText = chg === 0 ? m0(0) : `${chg >= 0 ? '+' : '-'}${m0(Math.abs(chg))}`
+                          return <span data-change-tone={tone} style={{ width: '92px', textAlign: 'right', color: toneColor, fontWeight: 700 }}>{chgText}</span>
+                        })()}
                       </span>
                     )
                     const [dFK, dTK] = finKeys(aFrom, aTo)
