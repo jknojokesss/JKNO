@@ -1,11 +1,14 @@
 import crypto from 'crypto'
 import nodemailer from 'nodemailer'
 import { requireAdmin } from '../../../lib/requireAdmin'
-import { buildInvoiceEmail } from '../../../lib/invoiceEmail'
 import { isPortalClient, portalClientRefusal } from '../../../lib/portalAuth'
 import { getLiveToken, QboAuthError } from '../../../lib/qboAuth'
 import { fetchOpenInvoices, fetchInvoice, fetchInvoicePdf, fetchArRefs, buildInvoice, postInvoice, nextDocNumber, setInvoiceDocNumber, statementFor } from '../../../lib/qboAr'
 import { stampPayLink } from '../../../lib/pdfPayLink'
+import { fetchMailLogsForInvoices, insertMailLog, summarizeMailLog } from '../../../lib/qboArMailLog'
+import {
+  deliverInvoiceEmail, parseRecipientList, validateEmails, smtpConfig,
+} from '../../../lib/qboArEmail'
 
 // ── Live AR for one client: list, view, and email real invoices ──────────
 //
@@ -22,10 +25,6 @@ import { stampPayLink } from '../../../lib/pdfPayLink'
 
 const clean = (s) => String(s || '').toLowerCase().replace(/[^a-z0-9-]/g, '')
 const money = (n) => '$' + Number(n || 0).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
-// Real sold line items only — QBO's own Line array on a fetched invoice also
-// carries a trailing SubTotalLineDetail entry that isn't a row on the PDF.
-const countLines = (inv) => (inv && inv.Line ? inv.Line.filter((l) => l.DetailType === 'SalesItemLineDetail').length : 0)
-
 // How this company takes money, in the words the customer reads. Scoped to
 // the company that owns the accounts, so a client whose books pass through
 // here never points their customers at us.
@@ -71,17 +70,14 @@ export default async function handler(req, res) {
         const id = String(req.query.id || '').replace(/[^0-9]/g, '')
         if (!id) return res.status(400).json({ error: 'Missing ?id= invoice id.' })
         const pdf = await fetchInvoicePdf(env, token, realmId, id)
-
-        // Same pay-link stamp as the emailed PDF (see the POST handler below)
-        // — the "PDF" button in the admin table should show the same
-        // Stripe/Zelle info as what actually gets sent, not QBO's bare file.
+        const inv = await fetchInvoice(env, token, realmId, id)
+        const countLines = (i) => (i && i.Line ? i.Line.filter((l) => l.DetailType === 'SalesItemLineDetail').length : 0)
         const owner = process.env.STRIPE_PAY_CLIENT || 'jkno'
         const canPay = client === owner
         const stripeConfigured = !!(process.env.STRIPE_SECRET_KEY || process.env.STRIPE_PAYMENT_LINK || process.env.STRIPE_LINKS)
         const zelle = canPay ? (process.env.PAY_ZELLE || null) : null
         let finalPdf = pdf
         if ((canPay && stripeConfigured) || zelle) {
-          const inv = await fetchInvoice(env, token, realmId, id)
           const url = (canPay && stripeConfigured)
             ? `${process.env.PORTAL_BASE_URL || 'https://jknojokes.com'}/pay?inv=${encodeURIComponent((inv && inv.DocNumber) || id)}`
             : null
@@ -107,10 +103,18 @@ export default async function handler(req, res) {
       }
 
       const invoices = await fetchOpenInvoices(env, token, realmId)
+      const ids = invoices.map((i) => String(i.id))
+      const logMap = await fetchMailLogsForInvoices(client, ids)
+      const mailByInvoice = {}
+      for (const inv of invoices) {
+        const groups = logMap.get(String(inv.id))
+        mailByInvoice[inv.id] = summarizeMailLog(groups)
+      }
       return res.status(200).json({
         company: connection.company_name,
         environment: connection.environment,
         invoices,
+        mailByInvoice,
       })
     }
 
@@ -202,75 +206,83 @@ export default async function handler(req, res) {
       return res.status(200).json({ ok: true, doc: updated.DocNumber || doc })
     }
 
+    if (req.method === 'POST' && req.body && req.body.action === 'send-reminder') {
+      const client = clean(req.body.client)
+      const id = String(req.body.invoiceId || '').replace(/[^0-9]/g, '')
+      const toList = parseRecipientList(req.body.to)
+      const ccList = parseRecipientList(req.body.cc)
+      const subject = String(req.body.subject || '').trim()
+      const intro = String(req.body.body || req.body.intro || '').trim()
+      if (!client || !id) return res.status(400).json({ error: 'Missing client / invoiceId.' })
+      if (!toList.length) return res.status(400).json({ error: 'A "to" email address is required.' })
+      const vTo = validateEmails(toList)
+      if (!vTo.ok) return res.status(400).json({ error: vTo.error })
+      const vCc = validateEmails(ccList)
+      if (!vCc.ok) return res.status(400).json({ error: vCc.error })
+      if (!subject) return res.status(400).json({ error: 'Subject is required.' })
+      if (!intro) return res.status(400).json({ error: 'Message body is required.' })
+      if (!smtpConfig().ok) return res.status(503).json({ error: smtpConfig().error })
+
+      const { env, token, realmId, connection } = await getLiveToken(client)
+      const out = await deliverInvoiceEmail(env, token, realmId, connection, client, id, {
+        to: toList.join(', '),
+        cc: ccList,
+        subject,
+        intro,
+        reminder: true,
+      })
+      if (!out.ok) return res.status(503).json({ error: out.error })
+
+      const inv = await fetchInvoice(env, token, realmId, id)
+      const doc = (inv && inv.DocNumber) || id
+      const logResult = await insertMailLog({
+        clientSlug: client,
+        invoiceId: id,
+        docNumber: doc,
+        kind: 'reminder',
+        to: toList.join(', '),
+        cc: ccList.join(', ') || null,
+        subject,
+      })
+
+      return res.status(200).json({
+        ok: true,
+        sent: out.sent,
+        mailLog: logResult,
+      })
+    }
+
     if (req.method === 'POST') {
       const { client: rawClient, invoiceId, to } = req.body || {}
       const client = clean(rawClient)
       const id = String(invoiceId || '').replace(/[^0-9]/g, '')
       if (!client || !id) return res.status(400).json({ error: 'Missing client / invoiceId.' })
-      if (!to || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(String(to))) {
-        return res.status(400).json({ error: 'A valid "to" email address is required.' })
-      }
-
-      // Any SMTP mailbox works — Zoho, Google Workspace, Outlook. Generic
-      // SMTP_* vars win; the GMAIL_* pair (used by send-receipt) is the
-      // fallback so a Gmail-configured site needs nothing new.
-      const SMTP_USER = process.env.SMTP_USER || process.env.GMAIL_USER
-      const SMTP_PASS = process.env.SMTP_PASS || process.env.GMAIL_APP_PASSWORD
-      const SMTP_HOST = process.env.SMTP_HOST || 'smtp.gmail.com'
-      const SMTP_PORT = Number(process.env.SMTP_PORT || 465)
-      if (!SMTP_USER || !SMTP_PASS) {
-        return res.status(503).json({ error: 'Email is not set up — set SMTP_USER / SMTP_PASS (and SMTP_HOST, e.g. smtp.zoho.com) in the environment.' })
-      }
+      const toList = parseRecipientList(to)
+      if (!toList.length) return res.status(400).json({ error: 'A valid "to" email address is required.' })
+      const vTo = validateEmails(toList)
+      if (!vTo.ok) return res.status(400).json({ error: vTo.error })
+      if (!smtpConfig().ok) return res.status(503).json({ error: smtpConfig().error })
 
       const { env, token, realmId, connection } = await getLiveToken(client)
+      const out = await deliverInvoiceEmail(env, token, realmId, connection, client, id, {
+        to: toList.join(', '),
+        reminder: false,
+      })
+      if (!out.ok) return res.status(503).json({ error: out.error })
+
       const inv = await fetchInvoice(env, token, realmId, id)
       const doc = (inv && inv.DocNumber) || id
-      const balance = inv && inv.Balance != null ? Number(inv.Balance) : null
-      const dueDate = (inv && inv.DueDate) || null
-      const customer = (inv && inv.CustomerRef && inv.CustomerRef.name) || 'customer'
-      const pdf = await fetchInvoicePdf(env, token, realmId, id)
-
-      const transporter = nodemailer.createTransport({
-        host: SMTP_HOST,
-        port: SMTP_PORT,
-        secure: SMTP_PORT === 465,
-        auth: { user: SMTP_USER, pass: SMTP_PASS },
+      const logResult = await insertMailLog({
+        clientSlug: client,
+        invoiceId: id,
+        docNumber: doc,
+        kind: 'send',
+        to: toList.join(', '),
+        cc: null,
+        subject: out.sent.subject,
       })
 
-      const subject = `Invoice ${doc} from JK No Jokes`
-      // A designed email with a real Pay button, not a wall of text with a
-      // URL in it. payLines() still decides WHETHER we can offer payment; this
-      // decides how it looks.
-      const owner = process.env.STRIPE_PAY_CLIENT || 'jkno'
-      const canPay = client === owner
-      const payUrl = (canPay && (process.env.STRIPE_SECRET_KEY || process.env.STRIPE_PAYMENT_LINK || process.env.STRIPE_LINKS))
-        ? `${process.env.PORTAL_BASE_URL || 'https://jknojokes.com'}/pay?inv=${encodeURIComponent(doc)}`
-        : null
-      const zelle = canPay ? (process.env.PAY_ZELLE || null) : null
-      const mail = buildInvoiceEmail({
-        companyName: connection.company_name || 'JK No Jokes',
-        doc, balance, dueDate,
-        payUrl,
-        zelle,
-        replyTo: SMTP_USER,
-      })
-      // QuickBooks' own PDF has no idea our Stripe link (or Zelle) exists —
-      // Intuit can't template it in. Stamp it onto the invoice's own last
-      // page so the attachment itself can pay the invoice, not just the
-      // email body (which strips on forward, print, or a client that blocks
-      // HTML).
-      const attachedPdf = await stampPayLink(pdf, { url: payUrl, zelle, lineCount: countLines(inv) })
-      const info = await transporter.sendMail({
-        from: process.env.SMTP_FROM || `JK No Jokes <${SMTP_USER}>`,
-        replyTo: SMTP_USER,
-        to: String(to),
-        subject,
-        text: mail.text,
-        html: mail.html,
-        attachments: [{ filename: `Invoice-${doc}.pdf`, content: attachedPdf, contentType: 'application/pdf' }],
-      })
-
-      return res.status(200).json({ ok: true, sent: { to, subject, doc, customer, messageId: info.messageId } })
+      return res.status(200).json({ ok: true, sent: out.sent, mailLog: logResult })
     }
 
     return res.status(405).json({ error: 'Method not allowed' })

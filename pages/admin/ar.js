@@ -16,6 +16,8 @@ const withTimeout = (p, ms) => Promise.race([
   new Promise((_, rej) => setTimeout(() => rej(new Error('timeout')), ms)),
 ])
 
+const AR_E2E = process.env.NODE_ENV !== 'production' && process.env.NEXT_PUBLIC_AR_E2E === '1'
+
 export default function ArAdmin() {
   const router = useRouter()
   const [client, setClient] = useState('jkno')
@@ -25,6 +27,8 @@ export default function ArAdmin() {
   const [needsReconnect, setNeedsReconnect] = useState(false)
   const [toByInv, setToByInv] = useState({})
   const [sentByInv, setSentByInv] = useState({})
+  const [mailByInv, setMailByInv] = useState({})
+  const [reminderInv, setReminderInv] = useState(null)
   const [showNew, setShowNew] = useState(false)
   const [refs, setRefs] = useState(null)
   const [stmtTo, setStmtTo] = useState({})
@@ -38,6 +42,39 @@ export default function ArAdmin() {
   const [limit, setLimit] = useState(50)
 
   useEffect(() => {
+    if (AR_E2E) {
+      setData({
+        company: 'JK No Jokes Financials',
+        environment: 'e2e',
+        invoices: [{
+          id: '999',
+          doc: '1042',
+          date: '2026-10-01',
+          due: '2026-10-31',
+          balance: 500,
+          customer: 'MNE Trading',
+          email: 'sales@eminenttrading.com',
+          emailStatus: 'NotSet',
+        }],
+      })
+      setMailByInv({
+        999: {
+          sendCount: 1,
+          reminderCount: 0,
+          firstSendAt: '2026-10-01T15:00:00Z',
+          firstSendTo: 'sales@eminenttrading.com',
+        },
+      })
+      setToByInv({ 999: 'sales@eminenttrading.com' })
+      setReminderInv({
+        id: '999',
+        doc: '1042',
+        due: '2026-10-31',
+        customer: 'MNE Trading',
+        email: 'sales@eminenttrading.com',
+      })
+      return
+    }
     supabase.auth.getSession().then(async ({ data: { session } }) => {
       if (!session) { router.push('/admin'); return }
       const { data: adminData } = await supabase.from('admins').select('email').eq('email', session.user.email).single()
@@ -89,6 +126,7 @@ export default function ArAdmin() {
     try {
       const json = await call(`/api/qbo/ar?client=${encodeURIComponent(client)}`)
       setData(json)
+      setMailByInv(json.mailByInvoice || {})
       const prefill = {}
       for (const i of json.invoices) prefill[i.id] = i.email || ''
       setToByInv(prefill)
@@ -119,6 +157,15 @@ export default function ArAdmin() {
     try {
       const json = await call('/api/qbo/ar', { method: 'POST', body: JSON.stringify({ client, invoiceId: inv.id, to }) })
       setSentByInv((s) => ({ ...s, [inv.id]: json.sent }))
+      setMailByInv((m) => ({
+        ...m,
+        [inv.id]: {
+          ...(m[inv.id] || {}),
+          sendCount: ((m[inv.id] && m[inv.id].sendCount) || 0) + 1,
+          firstSendAt: (m[inv.id] && m[inv.id].firstSendAt) || new Date().toISOString(),
+          firstSendTo: json.sent && json.sent.to,
+        },
+      }))
     } catch (e) { setError(String(e.message || e)) } finally { setBusy('') }
   }
 
@@ -202,6 +249,32 @@ export default function ArAdmin() {
           </div>
         )}
 
+        {reminderInv && data && (
+          <ReminderModal
+            inv={reminderInv}
+            companyName={data.company}
+            mail={mailByInv[reminderInv.id]}
+            defaultTo={(toByInv[reminderInv.id] || reminderInv.email || '').trim()}
+            onClose={() => setReminderInv(null)}
+            onSent={(meta) => {
+              setMailByInv((m) => ({
+                ...m,
+                [reminderInv.id]: {
+                  ...(m[reminderInv.id] || {}),
+                  reminderCount: ((m[reminderInv.id] && m[reminderInv.id].reminderCount) || 0) + 1,
+                  lastReminderAt: meta.sentAt,
+                  lastReminderTo: meta.to,
+                  firstSendAt: (m[reminderInv.id] && m[reminderInv.id].firstSendAt) || null,
+                  sendCount: (m[reminderInv.id] && m[reminderInv.id].sendCount) || 0,
+                },
+              }))
+              setReminderInv(null)
+            }}
+            call={call}
+            client={client}
+          />
+        )}
+
         {showNew && (
           <NewInvoice
             client={client}
@@ -250,6 +323,10 @@ export default function ArAdmin() {
               <tbody>
                 {shown.slice(0, limit).map((inv) => {
                   const sent = sentByInv[inv.id]
+                  const mail = mailByInv[inv.id] || {}
+                  const reminderLabel = mail.lastReminderAt
+                    ? `Reminder sent ${formatShortDate(mail.lastReminderAt)}${mail.reminderCount > 1 ? ` (${mail.reminderCount})` : ''}`
+                    : null
                   return (
                     <tr key={inv.id}>
                       <td style={td()}>
@@ -273,10 +350,18 @@ export default function ArAdmin() {
                           placeholder="email address" style={{ fontFamily: mono, fontSize: '12px', padding: '5px 7px', border: `1px solid ${BORDER}`, borderRadius: '4px', width: '210px' }} />
                       </td>
                       <td style={{ ...td(), whiteSpace: 'nowrap' }}>
-                        <button onClick={() => openPdf(inv)} disabled={busy === 'pdf' + inv.id} style={btn(false)}>{busy === 'pdf' + inv.id ? '…' : 'PDF'}</button>{' '}
-                        {sent
-                          ? <span style={{ color: GREEN, fontWeight: 600 }}>sent ✓</span>
-                          : <button onClick={() => send(inv)} disabled={busy === 'send' + inv.id} style={btn(true)}>{busy === 'send' + inv.id ? 'Sending…' : 'Send'}</button>}
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '6px', alignItems: 'flex-start' }}>
+                          <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px', alignItems: 'center' }}>
+                            <button onClick={() => openPdf(inv)} disabled={busy === 'pdf' + inv.id} style={btn(false)}>{busy === 'pdf' + inv.id ? '…' : 'PDF'}</button>
+                            {sent
+                              ? <span style={{ color: GREEN, fontWeight: 600 }}>sent ✓</span>
+                              : <button onClick={() => send(inv)} disabled={busy === 'send' + inv.id} style={btn(true)}>{busy === 'send' + inv.id ? 'Sending…' : 'Send'}</button>}
+                            {inv.doc && (
+                              <button type="button" onClick={() => setReminderInv(inv)} style={btn(false)}>Send reminder</button>
+                            )}
+                          </div>
+                          {reminderLabel && <span style={{ fontSize: '11.5px', color: MUTED, lineHeight: 1.4 }}>{reminderLabel}</span>}
+                        </div>
                       </td>
                     </tr>
                   )
@@ -542,6 +627,108 @@ function NewInvoice({ client, refs, call, onClose, onCreated }) {
           {err && <div style={{ fontSize: '12.5px', color: RED, marginTop: '8px', lineHeight: 1.5 }}>{err}</div>}
         </>
       )}
+    </div>
+  )
+}
+
+function formatShortDate(isoOrTs) {
+  if (!isoOrTs) return ''
+  const s = String(isoOrTs)
+  const datePart = s.includes('T') ? s.slice(0, 10) : s
+  if (!/^\d{4}-\d{2}-\d{2}/.test(datePart)) return s
+  return new Date(datePart + 'T12:00:00Z').toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric', timeZone: 'UTC' })
+}
+
+function formatLongDate(iso) {
+  if (!iso) return null
+  return new Date(iso + 'T12:00:00Z').toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric', timeZone: 'UTC' })
+}
+
+function reminderDefaults(inv, companyName, mail) {
+  const doc = inv.doc || inv.id
+  const co = companyName || 'JK No Jokes Financials'
+  const due = formatLongDate(inv.due)
+  const subject = due
+    ? `Reminder: Invoice #${doc} from ${co}, due ${due}`
+    : `Reminder: Invoice #${doc} from ${co}`
+  const sentOn = mail && mail.firstSendAt ? formatLongDate(String(mail.firstSendAt).slice(0, 10)) : null
+  const body = sentOn
+    ? `Just a friendly reminder that the invoice below, sent on ${sentOn}, is still open. Let me know if you didn't receive it or have any questions.`
+    : `Just a friendly reminder that the invoice below is still open. Let me know if you didn't receive it or have any questions.`
+  return { subject, body }
+}
+
+function ReminderModal({ inv, companyName, mail, defaultTo, onClose, onSent, call, client }) {
+  const defaults = reminderDefaults(inv, companyName, mail)
+  const [to, setTo] = useState(defaultTo)
+  const [cc, setCc] = useState('')
+  const [subject, setSubject] = useState(defaults.subject)
+  const [body, setBody] = useState(defaults.body)
+  const [busy, setBusy] = useState(false)
+  const [err, setErr] = useState(null)
+  const [ok, setOk] = useState(null)
+
+  const field = { width: '100%', fontSize: '15px', padding: '10px 11px', border: `1px solid ${BORDER}`, borderRadius: '4px', fontFamily: 'inherit' }
+  const label = { display: 'block', fontSize: '12px', color: MUTED, marginBottom: '5px' }
+
+  const submit = async () => {
+    setBusy(true); setErr(null); setOk(null)
+    try {
+      const json = await call('/api/qbo/ar', {
+        method: 'POST',
+        body: JSON.stringify({
+          action: 'send-reminder',
+          client,
+          invoiceId: inv.id,
+          to,
+          cc,
+          subject,
+          body,
+        }),
+      })
+      const note = json.mailLog && json.mailLog.skipped
+        ? ` Reminder sent, but the log was not saved (${json.mailLog.reason}).`
+        : ''
+      setOk(`Reminder queued for ${json.sent.to}.${note}`)
+      onSent({ sentAt: new Date().toISOString(), to: json.sent.to })
+    } catch (e) {
+      setErr(String(e.message || e))
+    } finally { setBusy(false) }
+  }
+
+  return (
+    <div role="dialog" aria-modal="true" aria-labelledby="reminder-title"
+      style={{ position: 'fixed', inset: 0, zIndex: 50, background: 'rgba(0,0,0,.45)', display: 'flex', alignItems: 'flex-end', justifyContent: 'center', padding: '12px' }}
+      onClick={(e) => { if (e.target === e.currentTarget && !busy) onClose() }}>
+      <div style={{ background: '#fff', width: '100%', maxWidth: '520px', maxHeight: '92vh', overflow: 'auto', borderRadius: '8px', padding: '18px 16px 20px', boxShadow: '0 16px 48px rgba(0,0,0,.2)' }}
+        onClick={(e) => e.stopPropagation()}>
+        <div style={{ fontSize: '11px', fontWeight: 700, letterSpacing: '.12em', textTransform: 'uppercase', color: '#8B1E16', marginBottom: '6px' }}>Reminder</div>
+        <h2 id="reminder-title" style={{ fontSize: '18px', marginBottom: '4px' }}>Send reminder — invoice #{inv.doc || inv.id}</h2>
+        <p style={{ fontSize: '13px', color: MUTED, lineHeight: 1.55, marginBottom: '14px' }}>
+          Same PDF and pay link as the original send. Nothing goes out until you click Send reminder below.
+        </p>
+
+        <label style={label}>To
+          <input value={to} onChange={(e) => setTo(e.target.value)} type="email" autoComplete="email" style={field} />
+        </label>
+        <label style={{ ...label, marginTop: '12px' }}>CC (optional)
+          <input value={cc} onChange={(e) => setCc(e.target.value)} placeholder="one or more, comma-separated" style={field} />
+        </label>
+        <label style={{ ...label, marginTop: '12px' }}>Subject
+          <input value={subject} onChange={(e) => setSubject(e.target.value)} style={field} />
+        </label>
+        <label style={{ ...label, marginTop: '12px' }}>Message
+          <textarea value={body} onChange={(e) => setBody(e.target.value)} rows={5} style={{ ...field, resize: 'vertical', lineHeight: 1.5 }} />
+        </label>
+
+        {err && <div style={{ fontSize: '13px', color: RED, marginTop: '12px', lineHeight: 1.5 }}>{err}</div>}
+        {ok && <div style={{ fontSize: '13px', color: GREEN, marginTop: '12px', lineHeight: 1.5 }}>{ok}</div>}
+
+        <div style={{ display: 'flex', flexDirection: 'column-reverse', gap: '10px', marginTop: '18px' }}>
+          <button type="button" onClick={onClose} disabled={busy} style={{ ...btn(false), padding: '12px 14px', fontSize: '14px' }}>Cancel</button>
+          <button type="button" onClick={submit} disabled={busy} style={{ ...btn(true), padding: '12px 14px', fontSize: '14px' }}>{busy ? 'Sending…' : 'Send reminder'}</button>
+        </div>
+      </div>
     </div>
   )
 }
