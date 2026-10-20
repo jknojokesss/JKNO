@@ -689,7 +689,7 @@ function ReminderModal({ inv, companyName, mail, defaultTo, onClose, onSent, cal
       const note = json.mailLog && json.mailLog.skipped
         ? ` Reminder sent, but the log was not saved (${json.mailLog.reason}).`
         : ''
-      setOk(`Reminder queued for ${json.sent.to}.${note}`)
+      setOk(`Reminder sent to ${json.sent.to}.${note}`)
       onSent({ sentAt: new Date().toISOString(), to: json.sent.to })
     } catch (e) {
       setErr(String(e.message || e))
