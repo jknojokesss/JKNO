@@ -2,6 +2,7 @@ import React, { useState, useEffect, useMemo } from 'react'
 import Head from 'next/head'
 import { useRouter } from 'next/router'
 import { supabase } from '../../lib/supabase'
+import { defaultReminderBody, defaultReminderSubject } from '../../lib/qboArReminderText'
 
 // Live AR desk: pulls a client's real open invoices straight from QuickBooks
 // and emails the actual QBO invoice PDF from our own address (GMAIL_USER).
@@ -57,14 +58,7 @@ export default function ArAdmin() {
           emailStatus: 'NotSet',
         }],
       })
-      setMailByInv({
-        999: {
-          sendCount: 1,
-          reminderCount: 0,
-          firstSendAt: '2026-10-01T15:00:00Z',
-          firstSendTo: 'sales@eminenttrading.com',
-        },
-      })
+      setMailByInv({ 999: { sendCount: 0, reminderCount: 0 } })
       setToByInv({ 999: 'sales@eminenttrading.com' })
       setReminderInv({
         id: '999',
@@ -639,23 +633,12 @@ function formatShortDate(isoOrTs) {
   return new Date(datePart + 'T12:00:00Z').toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric', timeZone: 'UTC' })
 }
 
-function formatLongDate(iso) {
-  if (!iso) return null
-  return new Date(iso + 'T12:00:00Z').toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric', timeZone: 'UTC' })
-}
-
 function reminderDefaults(inv, companyName, mail) {
   const doc = inv.doc || inv.id
-  const co = companyName || 'JK No Jokes Financials'
-  const due = formatLongDate(inv.due)
-  const subject = due
-    ? `Reminder: Invoice #${doc} from ${co}, due ${due}`
-    : `Reminder: Invoice #${doc} from ${co}`
-  const sentOn = mail && mail.firstSendAt ? formatLongDate(String(mail.firstSendAt).slice(0, 10)) : null
-  const body = sentOn
-    ? `Just a friendly reminder that the invoice below, sent on ${sentOn}, is still open. Let me know if you didn't receive it or have any questions.`
-    : `Just a friendly reminder that the invoice below is still open. Let me know if you didn't receive it or have any questions.`
-  return { subject, body }
+  return {
+    subject: defaultReminderSubject({ doc, dueDate: inv.due, companyName }),
+    body: defaultReminderBody({ mailSummary: mail, invoice: inv }),
+  }
 }
 
 function ReminderModal({ inv, companyName, mail, defaultTo, onClose, onSent, call, client }) {
