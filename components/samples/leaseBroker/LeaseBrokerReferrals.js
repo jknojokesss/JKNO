@@ -25,50 +25,83 @@ export default function LeaseBrokerReferrals({ deals, referrers, openDeal }) {
       <input className="lb-inp lb-search" placeholder="Search referrer" value={q} onChange={(e) => setQ(e.target.value)} />
 
       <div className="lb-card lb-card--flush">
-        <div className="lb-scroll">
-        <table className="lb-table lb-table--wide">
-          <thead>
-            <tr>
-              <th>Referrer</th>
-              <th>Phone</th>
-              <th className="lb-num">Deals</th>
-              <th>Recent clients</th>
-            </tr>
-          </thead>
-          <tbody>
-            {rows.map((r) => {
-              const linked = (clientsByReferrer.get(r.id) || []).slice(-3).reverse()
-              return (
-                <tr key={r.id}>
-                  <td style={{ fontWeight: 600 }}>{r.name}</td>
-                  <td>{fmtPhone(r.phone)}</td>
-                  <td className="lb-num" style={{ fontWeight: 700 }}>{r.count}</td>
-                  <td>
-                    {linked.length === 0 ? (
-                      '—'
-                    ) : (
-                      <span style={{ fontSize: 13 }}>
-                        {linked.map((d, i) => (
-                          <span key={d.id}>
-                            {i > 0 ? ', ' : ''}
-                            <button
-                              type="button"
-                              className="lb-btn lb-btn--ghost"
-                              style={{ padding: 0, minHeight: 0, border: 'none', color: INK, fontWeight: 500 }}
-                              onClick={() => openDeal(d.id)}
-                            >
-                              {d.client.name}
-                            </button>
-                          </span>
-                        ))}
+        <div className="lb-show-desktop lb-scroll">
+          <table className="lb-table lb-table--wide">
+            <thead>
+              <tr>
+                <th>Referrer</th>
+                <th>Phone</th>
+                <th className="lb-num">Deals</th>
+                <th>Recent clients</th>
+              </tr>
+            </thead>
+            <tbody>
+              {rows.map((r) => {
+                const linked = (clientsByReferrer.get(r.id) || []).slice(-3).reverse()
+                return (
+                  <tr key={r.id}>
+                    <td style={{ fontWeight: 600 }}>{r.name}</td>
+                    <td>{fmtPhone(r.phone)}</td>
+                    <td className="lb-num" style={{ fontWeight: 700 }}>{r.count}</td>
+                    <td>
+                      {linked.length === 0 ? (
+                        '—'
+                      ) : (
+                        <span style={{ fontSize: 13 }}>
+                          {linked.map((d, i) => (
+                            <span key={d.id}>
+                              {i > 0 ? ', ' : ''}
+                              <button
+                                type="button"
+                                className="lb-btn lb-btn--ghost"
+                                style={{ padding: 0, minHeight: 0, border: 'none', color: INK, fontWeight: 500 }}
+                                onClick={() => openDeal(d.id)}
+                              >
+                                {d.client.name}
+                              </button>
+                            </span>
+                          ))}
+                        </span>
+                      )}
+                    </td>
+                  </tr>
+                )
+              })}
+            </tbody>
+          </table>
+        </div>
+        <div className="lb-show-mobile lb-stack">
+          {rows.map((r) => {
+            const linked = (clientsByReferrer.get(r.id) || []).slice(-3).reverse()
+            return (
+              <div key={r.id} className="lb-stack-row">
+                <div className="lb-stack-line1">
+                  <span>{r.name}</span>
+                  <span className="lb-num">{r.count}</span>
+                </div>
+                <div className="lb-stack-line2">{fmtPhone(r.phone)}</div>
+                <div className="lb-stack-line3" style={{ justifyContent: 'flex-start' }}>
+                  {linked.length === 0 ? (
+                    '—'
+                  ) : (
+                    linked.map((d, i) => (
+                      <span key={d.id}>
+                        {i > 0 ? ', ' : ''}
+                        <button
+                          type="button"
+                          className="lb-btn lb-btn--ghost"
+                          style={{ padding: 0, minHeight: 0, border: 'none', color: INK, fontWeight: 500 }}
+                          onClick={() => openDeal(d.id)}
+                        >
+                          {d.client.name}
+                        </button>
                       </span>
-                    )}
-                  </td>
-                </tr>
-              )
-            })}
-          </tbody>
-        </table>
+                    ))
+                  )}
+                </div>
+              </div>
+            )
+          })}
         </div>
       </div>
     </div>

@@ -65,8 +65,9 @@ export function feesOwedCollectible(deals) {
   return deals.filter((d) => d.stage === 'delivered' && !d.fee.paid && d.fee.amount > 0)
 }
 
+/** Total broker fees due now (delivered, unpaid). Matches Home "Fees owed". */
 export function feesOwedTotal(deals) {
-  return feesOwed(deals).reduce((s, d) => s + d.fee.amount, 0)
+  return feesOwedCollectibleTotal(deals)
 }
 
 export function feesOwedCollectibleTotal(deals) {

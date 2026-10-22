@@ -40,37 +40,53 @@ export default function LeaseBrokerDealers({ dealers, onAddDealer }) {
       </div>
 
       <div className="lb-card lb-card--flush">
-        <div className="lb-scroll">
-        <table className="lb-table lb-table--wide">
-          <thead>
-            <tr>
-              <th>
-                <button type="button" className="lb-btn lb-btn--ghost" style={{ border: 'none', padding: 0, minHeight: 0, fontSize: 10 }} onClick={() => toggleSort('name')}>Dealer</button>
-              </th>
-              <th>Salesperson</th>
-              <th>Brands</th>
-              <th>Phone</th>
-              <th className="lb-num">
-                <button type="button" className="lb-btn lb-btn--ghost" style={{ border: 'none', padding: 0, minHeight: 0, fontSize: 10 }} onClick={() => toggleSort('last_quote_date')}>Last quote</button>
-              </th>
-              <th className="lb-num">
-                <button type="button" className="lb-btn lb-btn--ghost" style={{ border: 'none', padding: 0, minHeight: 0, fontSize: 10 }} onClick={() => toggleSort('deals_closed')}>Closed</button>
-              </th>
-            </tr>
-          </thead>
-          <tbody>
-            {rows.map((d) => (
-              <tr key={d.id}>
-                <td style={{ fontWeight: 600 }}>{d.name}</td>
-                <td>{d.salesperson || '—'}</td>
-                <td>{d.brands.join(', ')}</td>
-                <td>{fmtPhone(d.phone)}</td>
-                <td className="lb-num">{d.last_quote_date ? fmtD(d.last_quote_date) : '—'}</td>
-                <td className="lb-num">{d.deals_closed}</td>
+        <div className="lb-show-desktop lb-scroll">
+          <table className="lb-table lb-table--wide">
+            <thead>
+              <tr>
+                <th>
+                  <button type="button" className="lb-btn lb-btn--ghost" style={{ border: 'none', padding: 0, minHeight: 0, fontSize: 10 }} onClick={() => toggleSort('name')}>Dealer</button>
+                </th>
+                <th>Salesperson</th>
+                <th>Brands</th>
+                <th>Phone</th>
+                <th className="lb-num">
+                  <button type="button" className="lb-btn lb-btn--ghost" style={{ border: 'none', padding: 0, minHeight: 0, fontSize: 10 }} onClick={() => toggleSort('last_quote_date')}>Last quote</button>
+                </th>
+                <th className="lb-num">
+                  <button type="button" className="lb-btn lb-btn--ghost" style={{ border: 'none', padding: 0, minHeight: 0, fontSize: 10 }} onClick={() => toggleSort('deals_closed')}>Closed</button>
+                </th>
               </tr>
-            ))}
-          </tbody>
-        </table>
+            </thead>
+            <tbody>
+              {rows.map((d) => (
+                <tr key={d.id}>
+                  <td style={{ fontWeight: 600 }}>{d.name}</td>
+                  <td>{d.salesperson || '—'}</td>
+                  <td>{d.brands.join(', ')}</td>
+                  <td>{fmtPhone(d.phone)}</td>
+                  <td className="lb-num">{d.last_quote_date ? fmtD(d.last_quote_date) : '—'}</td>
+                  <td className="lb-num">{d.deals_closed}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+        <div className="lb-show-mobile lb-stack">
+          {rows.map((d) => (
+            <div key={d.id} className="lb-stack-row">
+              <div className="lb-stack-line1">{d.name}</div>
+              <div className="lb-stack-line2">
+                {d.salesperson || '—'} · {d.brands.join(', ')}
+              </div>
+              <div className="lb-stack-line3">
+                <span>{fmtPhone(d.phone)}</span>
+                <span style={{ fontSize: 12 }}>
+                  {d.last_quote_date ? fmtD(d.last_quote_date) : '—'} · {d.deals_closed} closed
+                </span>
+              </div>
+            </div>
+          ))}
         </div>
       </div>
     </div>

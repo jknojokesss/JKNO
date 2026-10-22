@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { ACCENT, INK, STAGES, vehicleLabel } from './leaseBrokerUtils'
+import { ACCENT, INK, MUTED, STAGES, vehicleLabel } from './leaseBrokerUtils'
 
 export default function LeaseBrokerBoard({ deals, onMove, openDeal }) {
   const [dragId, setDragId] = useState(null)

@@ -30,38 +30,59 @@ export default function LeaseBrokerHome({ state, meta, ready, openDeal, startNew
         {ending.length === 0 ? (
           <p style={{ fontSize: 14, color: MUTED }}>—</p>
         ) : (
-          <div className="lb-scroll">
-            <table className="lb-table lb-table--wide">
-              <thead>
-                <tr>
-                  <th>Client</th>
-                  <th>Vehicle</th>
-                  <th>Ends</th>
-                  <th>Phone</th>
-                  <th />
-                </tr>
-              </thead>
-              <tbody>
-                {ending.map((d) => (
-                  <tr key={d.id}>
-                    <td>
-                      <button type="button" className="lb-btn lb-btn--ghost" style={{ padding: 0, minHeight: 0, border: 'none', fontWeight: 600, color: INK }} onClick={() => openDeal(d.id)}>
-                        {d.client.name}
-                      </button>
-                    </td>
-                    <td style={{ fontSize: 13 }}>{vehicleLabel(d.vehicle)}</td>
-                    <td className="lb-num" style={{ fontWeight: 600 }}>{fmtDShort(d.lease_end)}</td>
-                    <td>{fmtPhone(d.client.phone)}</td>
-                    <td className="lb-num">
-                      <button type="button" className="lb-btn lb-btn--primary" style={{ fontSize: 12, padding: '6px 10px', minHeight: 36 }} onClick={() => startNewDealFromLease(d)}>
-                        Start new deal
-                      </button>
-                    </td>
+          <>
+            <div className="lb-show-desktop lb-scroll">
+              <table className="lb-table lb-table--wide">
+                <thead>
+                  <tr>
+                    <th>Client</th>
+                    <th>Vehicle</th>
+                    <th>Ends</th>
+                    <th>Phone</th>
+                    <th />
                   </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+                </thead>
+                <tbody>
+                  {ending.map((d) => (
+                    <tr key={d.id}>
+                      <td>
+                        <button type="button" className="lb-btn lb-btn--ghost" style={{ padding: 0, minHeight: 0, border: 'none', fontWeight: 600, color: INK }} onClick={() => openDeal(d.id)}>
+                          {d.client.name}
+                        </button>
+                      </td>
+                      <td style={{ fontSize: 13 }}>{vehicleLabel(d.vehicle)}</td>
+                      <td className="lb-num" style={{ fontWeight: 600 }}>{fmtDShort(d.lease_end)}</td>
+                      <td>{fmtPhone(d.client.phone)}</td>
+                      <td className="lb-num">
+                        <button type="button" className="lb-btn lb-btn--primary" style={{ fontSize: 12, padding: '6px 10px', minHeight: 36 }} onClick={() => startNewDealFromLease(d)}>
+                          Start new deal
+                        </button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+            <div className="lb-show-mobile lb-stack">
+              {ending.map((d) => (
+                <div key={d.id} className="lb-stack-row">
+                  <div className="lb-stack-line1">
+                    <button type="button" className="lb-btn lb-btn--ghost" style={{ padding: 0, minHeight: 0, border: 'none', fontWeight: 600, color: INK, textAlign: 'left' }} onClick={() => openDeal(d.id)}>
+                      {d.client.name}
+                    </button>
+                    <span className="lb-num">{fmtDShort(d.lease_end)}</span>
+                  </div>
+                  <div className="lb-stack-line2">{vehicleLabel(d.vehicle)}</div>
+                  <div className="lb-stack-line3">
+                    <span>{fmtPhone(d.client.phone)}</span>
+                    <button type="button" className="lb-btn lb-btn--primary" style={{ fontSize: 12, padding: '6px 10px', minHeight: 36 }} onClick={() => startNewDealFromLease(d)}>
+                      Start new deal
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </>
         )}
       </section>
 
