@@ -24,7 +24,7 @@
       "phone": "732-555-2200",
       "brands": ["BMW", "MINI"],
       "last_quote_date": "2026-10-18",
-      "deals_closed": 6
+      "deals_closed": 2
     },
     {
       "id": "dlr-cjhonda",
@@ -32,17 +32,53 @@
       "salesperson": "Ana Reyes",
       "phone": "908-555-4411",
       "brands": ["Honda", "Acura"],
-      "last_quote_date": "2026-10-20",
-      "deals_closed": 4
+      "last_quote_date": "2026-09-20",
+      "deals_closed": 2
     },
     {
       "id": "dlr-oaklex",
       "name": "Oak Street Lexus",
       "salesperson": "James Park",
       "phone": "973-555-1190",
-      "brands": ["Lexus", "Toyota"],
-      "last_quote_date": "2026-09-28",
-      "deals_closed": 3
+      "brands": ["Lexus"],
+      "last_quote_date": "2026-10-14",
+      "deals_closed": 1
+    },
+    {
+      "id": "dlr-route9toy",
+      "name": "Route 9 Toyota",
+      "salesperson": "Kevin Shaw",
+      "phone": "732-555-8810",
+      "brands": ["Toyota"],
+      "last_quote_date": "2026-10-20",
+      "deals_closed": 1
+    },
+    {
+      "id": "dlr-freeholdtoy",
+      "name": "Freehold Toyota",
+      "salesperson": "Linda Wu",
+      "phone": "732-555-3322",
+      "brands": ["Toyota"],
+      "last_quote_date": "2026-10-19",
+      "deals_closed": 0
+    },
+    {
+      "id": "dlr-prinbmw",
+      "name": "Princeton BMW",
+      "salesperson": "Chris Abel",
+      "phone": "609-555-4402",
+      "brands": ["BMW", "MINI"],
+      "last_quote_date": "2026-09-26",
+      "deals_closed": 0
+    },
+    {
+      "id": "dlr-redlex",
+      "name": "Red Bank Lexus",
+      "salesperson": "Nina Patel",
+      "phone": "732-555-5580",
+      "brands": ["Lexus"],
+      "last_quote_date": "2026-10-09",
+      "deals_closed": 0
     },
     {
       "id": "dlr-shorevw",
@@ -50,8 +86,8 @@
       "salesperson": "Carla Nunez",
       "phone": "732-555-7702",
       "brands": ["Volkswagen", "Audi"],
-      "last_quote_date": "2026-10-12",
-      "deals_closed": 2
+      "last_quote_date": "2026-07-22",
+      "deals_closed": 1
     },
     {
       "id": "dlr-unionmaz",
@@ -59,8 +95,8 @@
       "salesperson": "Ben Hart",
       "phone": "201-555-6620",
       "brands": ["Mazda"],
-      "last_quote_date": "2026-10-08",
-      "deals_closed": 5
+      "last_quote_date": "2026-09-30",
+      "deals_closed": 2
     }
   ],
   "deals": [
@@ -94,7 +130,7 @@
         },
         {
           "id": "q-401b",
-          "dealer_id": "dlr-oaklex",
+          "dealer_id": "dlr-prinbmw",
           "monthly": 612,
           "due_at_signing": 2900,
           "money_factor": 0.00192,
@@ -155,7 +191,7 @@
         },
         {
           "id": "q-403b",
-          "dealer_id": "dlr-gsbmw",
+          "dealer_id": "dlr-redlex",
           "monthly": 702,
           "due_at_signing": 3100,
           "money_factor": 0.00195,
@@ -279,7 +315,7 @@
       "quotes": [
         {
           "id": "q-407a",
-          "dealer_id": "dlr-oaklex",
+          "dealer_id": "dlr-route9toy",
           "monthly": 498,
           "due_at_signing": 2200,
           "money_factor": 0.00168,
@@ -290,18 +326,18 @@
         },
         {
           "id": "q-407b",
-          "dealer_id": "dlr-cjhonda",
+          "dealer_id": "dlr-freeholdtoy",
           "monthly": 521,
           "due_at_signing": 2100,
           "money_factor": 0.00174,
           "residual_pct": 60,
           "rebates": 500,
           "quote_date": "2026-10-19",
-          "winner": true
+          "winner": false
         },
         {
           "id": "q-407c",
-          "dealer_id": "dlr-unionmaz",
+          "dealer_id": "dlr-route9toy",
           "monthly": 505,
           "due_at_signing": 2300,
           "money_factor": 0.0017,
@@ -456,7 +492,7 @@
       "quotes": [
         {
           "id": "q-304a",
-          "dealer_id": "dlr-oaklex",
+          "dealer_id": "dlr-route9toy",
           "monthly": 388,
           "due_at_signing": 2000,
           "money_factor": 0.00162,

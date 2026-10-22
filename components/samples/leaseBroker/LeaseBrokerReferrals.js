@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react'
+import { Fragment, useMemo, useState } from 'react'
 import { INK, fmtPhone } from './leaseBrokerUtils'
 import { referralCounts } from './leaseBrokerModel'
 
@@ -49,8 +49,8 @@ export default function LeaseBrokerReferrals({ deals, referrers, openDeal }) {
                       ) : (
                         <span style={{ fontSize: 13 }}>
                           {linked.map((d, i) => (
-                            <span key={d.id}>
-                              {i > 0 ? ', ' : ''}
+                            <Fragment key={d.id}>
+                              {i > 0 ? ', ' : null}
                               <button
                                 type="button"
                                 className="lb-btn lb-btn--ghost"
@@ -59,7 +59,7 @@ export default function LeaseBrokerReferrals({ deals, referrers, openDeal }) {
                               >
                                 {d.client.name}
                               </button>
-                            </span>
+                            </Fragment>
                           ))}
                         </span>
                       )}
@@ -85,8 +85,8 @@ export default function LeaseBrokerReferrals({ deals, referrers, openDeal }) {
                     '—'
                   ) : (
                     linked.map((d, i) => (
-                      <span key={d.id}>
-                        {i > 0 ? ', ' : ''}
+                      <Fragment key={d.id}>
+                        {i > 0 ? ', ' : null}
                         <button
                           type="button"
                           className="lb-btn lb-btn--ghost"
@@ -95,7 +95,7 @@ export default function LeaseBrokerReferrals({ deals, referrers, openDeal }) {
                         >
                           {d.client.name}
                         </button>
-                      </span>
+                      </Fragment>
                     ))
                   )}
                 </div>

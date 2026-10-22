@@ -17,7 +17,7 @@ import {
 import { dealerById, isQuoteStale, referrerById } from './leaseBrokerModel'
 import { canMarkFeePaid, feeStatusLabel } from './leaseBrokerFeeStatus'
 
-function QuoteRow({ q, dlr, stale, winner, onPick }) {
+function QuoteRow({ q, dlr, stale, winner, showWinner, onPick }) {
   return (
     <tr style={stale ? { background: STALE_BG } : undefined}>
       <td>
@@ -26,7 +26,7 @@ function QuoteRow({ q, dlr, stale, winner, onPick }) {
           {stale ? (
             <span className="lb-tag" style={{ background: STALE_BORDER, color: AMBER, textTransform: 'none' }}>Stale</span>
           ) : null}
-          {winner ? (
+          {showWinner && winner ? (
             <span className="lb-tag" style={{ background: '#EAF3EC', color: GREEN, textTransform: 'none' }}>Winner</span>
           ) : null}
         </div>
@@ -48,14 +48,14 @@ function QuoteRow({ q, dlr, stale, winner, onPick }) {
   )
 }
 
-function QuoteCard({ q, dlr, stale, winner, onPick }) {
+function QuoteCard({ q, dlr, stale, winner, showWinner, onPick }) {
   return (
     <div className={`lb-quote-card${stale ? ' lb-quote-card--stale' : ''}`}>
       <div style={{ display: 'flex', justifyContent: 'space-between', gap: 8, alignItems: 'flex-start' }}>
         <div style={{ fontWeight: 600 }}>{dlr?.name || '—'}</div>
         <div style={{ display: 'flex', gap: 6, flexShrink: 0 }}>
           {stale ? <span className="lb-tag" style={{ background: STALE_BORDER, color: AMBER, textTransform: 'none' }}>Stale</span> : null}
-          {winner ? <span className="lb-tag" style={{ background: '#EAF3EC', color: GREEN, textTransform: 'none' }}>Winner</span> : null}
+          {showWinner && winner ? <span className="lb-tag" style={{ background: '#EAF3EC', color: GREEN, textTransform: 'none' }}>Winner</span> : null}
         </div>
       </div>
       <dl className="lb-quote-grid">
@@ -103,6 +103,7 @@ export default function LeaseBrokerDeal({
   const ref = referrerById(referrers, deal.referrer_id)
   const quotes = [...deal.quotes].sort((a, b) => a.monthly - b.monthly)
   const feeLabel = feeStatusLabel(deal)
+  const showWinner = deal.stage !== 'lead' && deal.stage !== 'quoted'
 
   return (
     <div>
@@ -165,6 +166,7 @@ export default function LeaseBrokerDeal({
                         dlr={dlr}
                         stale={stale}
                         winner={q.winner}
+                        showWinner={showWinner}
                         onPick={() => onPickWinner(deal.id, q.id)}
                       />
                     )
@@ -183,6 +185,7 @@ export default function LeaseBrokerDeal({
                     dlr={dlr}
                     stale={stale}
                     winner={q.winner}
+                    showWinner={showWinner}
                     onPick={() => onPickWinner(deal.id, q.id)}
                   />
                 )
