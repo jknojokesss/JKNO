@@ -5,7 +5,6 @@ import {
   GREEN,
   INK,
   MUTED,
-  RED,
   STALE_BG,
   STALE_BORDER,
   fmtD,
@@ -72,9 +71,9 @@ export default function LeaseBrokerDeal({
           <button type="button" className="lb-btn lb-btn--primary" onClick={onAddQuote}>Add quote</button>
         </div>
         {quotes.length === 0 ? (
-          <p style={{ fontSize: 14, color: MUTED }}>No quotes yet — text your dealers and log them here.</p>
+          <p style={{ fontSize: 14, color: MUTED }}>None</p>
         ) : (
-          <div style={{ overflowX: 'auto' }}>
+          <div className="lb-scroll">
             <table className="lb-table">
               <thead>
                 <tr>
@@ -125,9 +124,6 @@ export default function LeaseBrokerDeal({
             </table>
           </div>
         )}
-        <p style={{ fontSize: 11, color: MUTED, marginTop: 10 }}>
-          Quotes before {programMonth} use last month&apos;s lender program and are flagged stale.
-        </p>
       </div>
 
       <div className="lb-card">

@@ -2,7 +2,7 @@ import { useEffect, useReducer, useState } from 'react'
 import SampleJkLogoLink from '../SampleJkLogoLink'
 import DATA from '../../../data/lease-broker-crm.json'
 import { initLeaseBrokerState, leaseBrokerReducer } from './leaseBrokerReducer'
-import { ACCENT, INK, MUTED, SHELL_CSS, UI, fmtD } from './leaseBrokerUtils'
+import { ACCENT, INK, MUTED, SHELL_CSS, UI } from './leaseBrokerUtils'
 import LeaseBrokerHome from './LeaseBrokerHome'
 import LeaseBrokerBoard from './LeaseBrokerBoard'
 import LeaseBrokerDeal from './LeaseBrokerDeal'
@@ -13,7 +13,7 @@ import { AddDealModal, AddQuoteModal, AddDealerModal, MarkFeePaidModal } from '.
 
 const BIZ = DATA.brand.name
 const META = DATA.meta
-const SAMPLE_HEADER = `Sample — fictitious clients and dealers · as of ${fmtD(META.as_of)}`
+const SAMPLE_HEADER = 'Sample — fictitious numbers'
 
 const TABS = [
   ['home', 'Home', 'Home'],
@@ -100,7 +100,7 @@ export default function LeaseBrokerPortal() {
               <div style={{ fontSize: 11, fontWeight: 600, letterSpacing: '1.2px', color: '#9CA3AF', marginTop: 4 }}>LEASE BROKERS</div>
             </button>
           </div>
-          <nav className="lb-nav" aria-label="Sections">
+          <nav className={`lb-nav${narrowNav ? ' lb-nav--phone-grid' : ''}`} aria-label="Sections">
             {TABS.map(([id, longLabel, shortLabel]) => {
               const active = tab === id || (tab === 'deal' && id === 'board')
               const label = narrowNav ? shortLabel : longLabel

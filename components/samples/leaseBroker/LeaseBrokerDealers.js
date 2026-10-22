@@ -39,8 +39,9 @@ export default function LeaseBrokerDealers({ dealers, onAddDealer }) {
         <button type="button" className="lb-btn lb-btn--primary" onClick={onAddDealer}>Add dealer</button>
       </div>
 
-      <div className="lb-card" style={{ padding: 0, overflow: 'hidden' }}>
-        <table className="lb-table">
+      <div className="lb-card lb-card--flush">
+        <div className="lb-scroll">
+        <table className="lb-table lb-table--wide">
           <thead>
             <tr>
               <th>
@@ -70,6 +71,7 @@ export default function LeaseBrokerDealers({ dealers, onAddDealer }) {
             ))}
           </tbody>
         </table>
+        </div>
       </div>
     </div>
   )

@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { ACCENT, INK, MUTED, STAGES, vehicleLabel } from './leaseBrokerUtils'
+import { ACCENT, INK, STAGES, vehicleLabel } from './leaseBrokerUtils'
 
 export default function LeaseBrokerBoard({ deals, onMove, openDeal }) {
   const [dragId, setDragId] = useState(null)
@@ -26,7 +26,6 @@ export default function LeaseBrokerBoard({ deals, onMove, openDeal }) {
 
   return (
     <div>
-      <p style={{ fontSize: 13, color: MUTED, marginBottom: 14 }}>Drag a card to update stage. Tap a card to open the deal.</p>
       <div className="lb-board">
         {STAGES.map((col) => (
           <div

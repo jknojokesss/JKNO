@@ -1,8 +1,6 @@
 import {
-  ACCENT,
   INK,
   MUTED,
-  RED,
   fmtDShort,
   fmtPhone,
   moneyOrDash,
@@ -13,7 +11,7 @@ import { leasesEndingSoon, dealsInProgress, feesOwedCollectible, feesOwedCollect
 
 export default function LeaseBrokerHome({ state, meta, ready, openDeal, startNewDealFromLease, goFees }) {
   const ending = leasesEndingSoon(state.deals, meta.as_of, 90)
-  const progress = dealsInProgress(state.deals).filter((d) => d.stage !== 'lead' || d.quotes.length > 0 || true)
+  const progress = dealsInProgress(state.deals)
   const owed = feesOwedCollectible(state.deals)
   const owedTotal = feesOwedCollectibleTotal(state.deals)
 
@@ -27,13 +25,13 @@ export default function LeaseBrokerHome({ state, meta, ready, openDeal, startNew
 
   return (
     <div>
-      <section className="lb-card" style={{ borderLeft: `4px solid ${ACCENT}` }}>
-        <div className="lb-lbl" style={{ marginBottom: 10, color: ACCENT }}>Leases ending in the next 90 days</div>
+      <section className="lb-card">
+        <div className="lb-lbl" style={{ marginBottom: 10 }}>Leases ending in the next 90 days</div>
         {ending.length === 0 ? (
-          <p style={{ fontSize: 14, color: MUTED }}>No lease-end dates in this window.</p>
+          <p style={{ fontSize: 14, color: MUTED }}>—</p>
         ) : (
-          <div style={{ overflowX: 'auto' }}>
-            <table className="lb-table">
+          <div className="lb-scroll">
+            <table className="lb-table lb-table--wide">
               <thead>
                 <tr>
                   <th>Client</th>
@@ -97,22 +95,20 @@ export default function LeaseBrokerHome({ state, meta, ready, openDeal, startNew
           <div style={{ fontSize: 28, fontWeight: 700, marginBottom: 12 }} className="lb-num">
             {moneyOrDash(owedTotal, ready)}
           </div>
-          {owed.length === 0 ? (
-            <p style={{ fontSize: 13, color: MUTED }}>All broker fees collected.</p>
-          ) : (
+          {owed.length > 0 ? (
             <ul style={{ listStyle: 'none', fontSize: 14 }}>
               {owed.map((d) => (
                 <li key={d.id} style={{ display: 'flex', justifyContent: 'space-between', gap: 8, padding: '6px 0', borderTop: '1px solid #E2E5EB' }}>
                   <button type="button" className="lb-btn lb-btn--ghost" style={{ padding: 0, minHeight: 0, border: 'none', fontWeight: 500 }} onClick={() => openDeal(d.id)}>
                     {d.client.name}
                   </button>
-                  <span className="lb-num" style={{ fontWeight: 600, color: RED }}>{moneyOrDash(d.fee.amount, ready)}</span>
+                  <span className="lb-num" style={{ fontWeight: 600 }}>{moneyOrDash(d.fee.amount, ready)}</span>
                 </li>
               ))}
             </ul>
-          )}
-          <button type="button" className="lb-btn" style={{ marginTop: 12, width: '100%' }} onClick={goFees}>
-            Open fee tracker
+          ) : null}
+          <button type="button" className="lb-btn" style={{ marginTop: owed.length ? 12 : 0, width: '100%' }} onClick={goFees}>
+            Fee tracker
           </button>
         </section>
       </div>

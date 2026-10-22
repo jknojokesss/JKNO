@@ -24,8 +24,9 @@ export default function LeaseBrokerReferrals({ deals, referrers, openDeal }) {
     <div>
       <input className="lb-inp lb-search" placeholder="Search referrer" value={q} onChange={(e) => setQ(e.target.value)} />
 
-      <div className="lb-card" style={{ padding: 0, overflow: 'hidden' }}>
-        <table className="lb-table">
+      <div className="lb-card lb-card--flush">
+        <div className="lb-scroll">
+        <table className="lb-table lb-table--wide">
           <thead>
             <tr>
               <th>Referrer</th>
@@ -68,6 +69,7 @@ export default function LeaseBrokerReferrals({ deals, referrers, openDeal }) {
             })}
           </tbody>
         </table>
+        </div>
       </div>
     </div>
   )

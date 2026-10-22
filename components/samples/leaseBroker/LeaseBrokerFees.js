@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react'
-import { GREEN, INK, MUTED, RED, fmtD, moneyOrDash } from './leaseBrokerUtils'
-import { feesCollectedThisMonth, feesOwed, feesOwedTotal } from './leaseBrokerModel'
+import { GREEN, INK, RED, fmtD, moneyOrDash } from './leaseBrokerUtils'
+import { feesCollectedThisMonth, feesOwedTotal } from './leaseBrokerModel'
 
 export default function LeaseBrokerFees({ deals, meta, ready, openDeal, onMarkFeePaid }) {
   const [sort, setSort] = useState({ key: 'owed', dir: 'desc' })
@@ -39,20 +39,16 @@ export default function LeaseBrokerFees({ deals, meta, ready, openDeal, onMarkFe
     setSort((s) => (s.key === key ? { key, dir: s.dir === 'asc' ? 'desc' : 'asc' } : { key, dir: 'desc' }))
   }
 
-  const owed = feesOwed(deals)
-
   return (
     <div>
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(160px,1fr))', gap: 12, marginBottom: 16 }}>
         <div className="lb-card" style={{ marginBottom: 0 }}>
           <div className="lb-lbl">Owed now</div>
-          <div style={{ fontSize: 26, fontWeight: 700, color: RED }} className="lb-num">{moneyOrDash(owedTotal, ready)}</div>
-          <div style={{ fontSize: 12, color: MUTED, marginTop: 4 }}>{owed.length} deal{owed.length !== 1 ? 's' : ''}</div>
+          <div style={{ fontSize: 26, fontWeight: 700 }} className="lb-num">{moneyOrDash(owedTotal, ready)}</div>
         </div>
         <div className="lb-card" style={{ marginBottom: 0 }}>
           <div className="lb-lbl">Collected this month</div>
-          <div style={{ fontSize: 26, fontWeight: 700, color: GREEN }} className="lb-num">{moneyOrDash(collectedMonth, ready)}</div>
-          <div style={{ fontSize: 12, color: MUTED, marginTop: 4 }}>Through {fmtD(meta.as_of)}</div>
+          <div style={{ fontSize: 26, fontWeight: 700 }} className="lb-num">{moneyOrDash(collectedMonth, ready)}</div>
         </div>
       </div>
 
@@ -64,8 +60,9 @@ export default function LeaseBrokerFees({ deals, meta, ready, openDeal, onMarkFe
         aria-label="Search fees"
       />
 
-      <div className="lb-card" style={{ padding: 0, overflow: 'hidden' }}>
-        <table className="lb-table">
+      <div className="lb-card lb-card--flush">
+        <div className="lb-scroll">
+        <table className="lb-table lb-table--wide">
           <thead>
             <tr>
               <th>
@@ -105,6 +102,7 @@ export default function LeaseBrokerFees({ deals, meta, ready, openDeal, onMarkFe
             ))}
           </tbody>
         </table>
+        </div>
       </div>
     </div>
   )
