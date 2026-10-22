@@ -2,7 +2,8 @@ import { useEffect, useReducer, useState } from 'react'
 import SampleJkLogoLink from '../SampleJkLogoLink'
 import DATA from '../../../data/lease-broker-crm.json'
 import { initLeaseBrokerState, leaseBrokerReducer } from './leaseBrokerReducer'
-import { ACCENT, INK, MUTED, SHELL_CSS, UI } from './leaseBrokerUtils'
+import { SHELL_CSS } from './leaseBrokerUtils'
+import { TAB_ICONS } from './LeaseBrokerTabIcons'
 import LeaseBrokerHome from './LeaseBrokerHome'
 import LeaseBrokerBoard from './LeaseBrokerBoard'
 import LeaseBrokerDeal from './LeaseBrokerDeal'
@@ -16,12 +17,20 @@ const META = DATA.meta
 const SAMPLE_HEADER = 'Sample — fictitious numbers'
 
 const TABS = [
-  ['home', 'Home', 'Home'],
-  ['board', 'Deal board', 'Board'],
-  ['fees', 'Fee tracker', 'Fees'],
-  ['dealers', 'Dealers', 'Dealers'],
-  ['referrals', 'Referrals', 'Referrals'],
+  ['home', 'Home'],
+  ['board', 'Board'],
+  ['fees', 'Fees'],
+  ['dealers', 'Dealers'],
+  ['referrals', 'Referrals'],
 ]
+
+const PAGE_TITLES = {
+  home: 'Home',
+  board: 'Board',
+  fees: 'Fees',
+  dealers: 'Dealers',
+  referrals: 'Referrals',
+}
 
 export default function LeaseBrokerPortal() {
   const [state, dispatch] = useReducer(leaseBrokerReducer, undefined, initLeaseBrokerState)
@@ -60,7 +69,7 @@ export default function LeaseBrokerPortal() {
   const deal = dealId ? state.deals.find((d) => d.id === dealId) : null
 
   const currentLabel =
-    tab === 'deal' && deal ? deal.client.name : TABS.find((t) => t[0] === tab)?.[1] || 'Home'
+    tab === 'deal' && deal ? deal.client.name : PAGE_TITLES[tab] || 'Home'
 
   const startNewDealFromLease = (d) => {
     setPrefill({
@@ -71,85 +80,44 @@ export default function LeaseBrokerPortal() {
     setModal('addDeal')
   }
 
+  const navActive = (id) => tab === id || (tab === 'deal' && id === 'board')
+
   return (
     <>
       <style dangerouslySetInnerHTML={{ __html: SHELL_CSS }} />
       <SampleJkLogoLink />
 
       <div className="lb-shell">
-        <aside className="lb-side">
-          <div style={{ padding: '2px 8px 16px' }}>
-            <button
-              type="button"
-              onClick={() => goTab('home')}
-              style={{
-                border: 'none',
-                background: 'transparent',
-                padding: 0,
-                cursor: 'pointer',
-                textAlign: 'left',
-                fontFamily: UI,
-                fontWeight: 800,
-                fontSize: narrowNav ? 20 : 22,
-                letterSpacing: '0.5px',
-                color: '#F4F5F7',
-                lineHeight: 1.15,
-              }}
-            >
-              PARKWAY
-              <div style={{ fontSize: 11, fontWeight: 600, letterSpacing: '1.2px', color: '#9CA3AF', marginTop: 4 }}>LEASE BROKERS</div>
-            </button>
-          </div>
-          <nav className={`lb-nav${narrowNav ? ' lb-nav--phone-grid' : ''}`} aria-label="Sections">
-            {TABS.map(([id, longLabel, shortLabel]) => {
-              const active = tab === id || (tab === 'deal' && id === 'board')
-              const label = narrowNav ? shortLabel : longLabel
-              return (
-                <button
-                  key={id}
-                  type="button"
-                  className="lb-navbtn"
-                  onClick={() => goTab(id)}
-                  style={
-                    active
-                      ? { background: 'rgba(255,255,255,.12)', color: '#fff', boxShadow: `inset 3px 0 0 ${ACCENT}` }
-                      : undefined
-                  }
-                >
-                  {label}
-                </button>
-              )
-            })}
+        <aside className="lb-side lb-side--desktop">
+          <button type="button" className="lb-brand" onClick={() => goTab('home')}>{BIZ}</button>
+          <nav className="lb-nav" aria-label="Sections">
+            {TABS.map(([id, label]) => (
+              <button
+                key={id}
+                type="button"
+                className={`lb-navbtn${navActive(id) ? ' lb-navbtn--active' : ''}`}
+                onClick={() => goTab(id)}
+              >
+                {label}
+              </button>
+            ))}
           </nav>
-          <div style={{ marginTop: 'auto', paddingTop: 16 }}>
+          <div className="lb-side-add">
             <button type="button" className="lb-btn lb-btn--primary" style={{ width: '100%' }} onClick={() => setModal('addDeal')}>
               Add deal
             </button>
           </div>
         </aside>
 
+        <header className="lb-mobile-top">
+          <button type="button" className="lb-brand" onClick={() => goTab('home')}>{BIZ}</button>
+          <button type="button" className="lb-btn lb-btn--primary" onClick={() => setModal('addDeal')}>Add deal</button>
+        </header>
+
         <main className="lb-main">
-          <div style={{ marginBottom: 22 }}>
-            <button
-              type="button"
-              onClick={() => goTab('home')}
-              style={{
-                fontFamily: UI,
-                fontSize: 11,
-                fontWeight: 600,
-                letterSpacing: '.7px',
-                textTransform: 'uppercase',
-                color: ACCENT,
-                border: 'none',
-                background: 'transparent',
-                padding: 0,
-                cursor: 'pointer',
-              }}
-            >
-              {BIZ}
-            </button>
-            <h1 style={{ fontFamily: UI, fontWeight: 700, fontSize: 28, color: INK, lineHeight: 1.1, marginTop: 4 }}>{currentLabel}</h1>
-            <div style={{ fontSize: 12, color: MUTED, marginTop: 6 }}>{SAMPLE_HEADER}</div>
+          <div className="lb-page-head">
+            <h1 className="lb-page-title">{currentLabel}</h1>
+            <div className="lb-sample-line">{SAMPLE_HEADER}</div>
           </div>
 
           {tab === 'home' && (
@@ -197,6 +165,22 @@ export default function LeaseBrokerPortal() {
             <LeaseBrokerReferrals deals={state.deals} referrers={state.referrers} openDeal={openDeal} />
           )}
         </main>
+
+        {narrowNav ? (
+          <nav className="lb-tabbar lb-nav" aria-label="Sections">
+            {TABS.map(([id, label]) => (
+              <button
+                key={id}
+                type="button"
+                className={`lb-navbtn${navActive(id) ? ' lb-navbtn--active' : ''}`}
+                onClick={() => goTab(id)}
+              >
+                {TAB_ICONS[id]}
+                <span className="lb-tab-label">{label}</span>
+              </button>
+            ))}
+          </nav>
+        ) : null}
       </div>
 
       {modal === 'addDeal' && (

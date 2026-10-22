@@ -20,7 +20,7 @@ export default function LeaseBrokerCrmPage() {
         <meta property="og:type" content="website" />
         <meta property="og:url" content={PAGE_URL} />
         <link
-          href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,600;0,9..40,700;1,9..40,400&display=swap"
+          href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600;1,9..40,400&display=swap"
           rel="stylesheet"
         />
       </Head>

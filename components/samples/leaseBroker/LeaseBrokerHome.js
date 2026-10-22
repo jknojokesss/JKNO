@@ -1,12 +1,4 @@
-import {
-  INK,
-  MUTED,
-  fmtDShort,
-  fmtPhone,
-  moneyOrDash,
-  vehicleLabel,
-  stageLabel,
-} from './leaseBrokerUtils'
+import { fmtDShort, fmtPhone, moneyOrDash, vehicleLabel, stageLabel } from './leaseBrokerUtils'
 import { leasesEndingSoon, dealsInProgress, feesOwedCollectible, feesOwedCollectibleTotal } from './leaseBrokerModel'
 
 export default function LeaseBrokerHome({ state, meta, ready, openDeal, startNewDealFromLease, goFees }) {
@@ -26,9 +18,9 @@ export default function LeaseBrokerHome({ state, meta, ready, openDeal, startNew
   return (
     <div>
       <section className="lb-card">
-        <div className="lb-lbl" style={{ marginBottom: 10 }}>Leases ending in the next 90 days</div>
+        <h2 className="lb-section-h">Leases ending in the next 90 days</h2>
         {ending.length === 0 ? (
-          <p style={{ fontSize: 14, color: MUTED }}>—</p>
+          <p className="lb-meta">—</p>
         ) : (
           <>
             <div className="lb-show-desktop lb-scroll">
@@ -37,7 +29,7 @@ export default function LeaseBrokerHome({ state, meta, ready, openDeal, startNew
                   <tr>
                     <th>Client</th>
                     <th>Vehicle</th>
-                    <th>Ends</th>
+                    <th className="lb-num">Ends</th>
                     <th>Phone</th>
                     <th />
                   </tr>
@@ -46,16 +38,16 @@ export default function LeaseBrokerHome({ state, meta, ready, openDeal, startNew
                   {ending.map((d) => (
                     <tr key={d.id}>
                       <td>
-                        <button type="button" className="lb-btn lb-btn--ghost" style={{ padding: 0, minHeight: 0, border: 'none', fontWeight: 600, color: INK }} onClick={() => openDeal(d.id)}>
+                        <button type="button" className="lb-link-btn lb-card-title" onClick={() => openDeal(d.id)}>
                           {d.client.name}
                         </button>
                       </td>
-                      <td style={{ fontSize: 13 }}>{vehicleLabel(d.vehicle)}</td>
-                      <td className="lb-num" style={{ fontWeight: 600 }}>{fmtDShort(d.lease_end)}</td>
-                      <td>{fmtPhone(d.client.phone)}</td>
+                      <td>{vehicleLabel(d.vehicle)}</td>
+                      <td className="lb-num">{fmtDShort(d.lease_end)}</td>
+                      <td className="lb-tabnum">{fmtPhone(d.client.phone)}</td>
                       <td className="lb-num">
-                        <button type="button" className="lb-btn lb-btn--primary" style={{ fontSize: 12, padding: '6px 10px', minHeight: 36 }} onClick={() => startNewDealFromLease(d)}>
-                          Start new deal
+                        <button type="button" className="lb-btn lb-btn--quiet" onClick={() => startNewDealFromLease(d)}>
+                          Start deal
                         </button>
                       </td>
                     </tr>
@@ -67,16 +59,16 @@ export default function LeaseBrokerHome({ state, meta, ready, openDeal, startNew
               {ending.map((d) => (
                 <div key={d.id} className="lb-stack-row">
                   <div className="lb-stack-line1">
-                    <button type="button" className="lb-btn lb-btn--ghost" style={{ padding: 0, minHeight: 0, border: 'none', fontWeight: 600, color: INK, textAlign: 'left' }} onClick={() => openDeal(d.id)}>
+                    <button type="button" className="lb-link-btn" onClick={() => openDeal(d.id)}>
                       {d.client.name}
                     </button>
-                    <span className="lb-num">{fmtDShort(d.lease_end)}</span>
+                    <span className="lb-num lb-tabnum">{fmtDShort(d.lease_end)}</span>
                   </div>
                   <div className="lb-stack-line2">{vehicleLabel(d.vehicle)}</div>
                   <div className="lb-stack-line3">
-                    <span>{fmtPhone(d.client.phone)}</span>
-                    <button type="button" className="lb-btn lb-btn--primary" style={{ fontSize: 12, padding: '6px 10px', minHeight: 36 }} onClick={() => startNewDealFromLease(d)}>
-                      Start new deal
+                    <span className="lb-tabnum">{fmtPhone(d.client.phone)}</span>
+                    <button type="button" className="lb-btn lb-btn--quiet" onClick={() => startNewDealFromLease(d)}>
+                      Start deal
                     </button>
                   </div>
                 </div>
@@ -86,22 +78,17 @@ export default function LeaseBrokerHome({ state, meta, ready, openDeal, startNew
         )}
       </section>
 
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(280px,1fr))', gap: 14 }}>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(280px,1fr))', gap: 16 }}>
         <section className="lb-card">
-          <div className="lb-lbl" style={{ marginBottom: 10 }}>Deals in progress</div>
-          <ul style={{ listStyle: 'none', fontSize: 14 }}>
+          <h2 className="lb-section-h">Deals in progress</h2>
+          <ul style={{ listStyle: 'none' }}>
             {progressSorted
               .filter((d) => d.stage !== 'fee_paid')
               .map((d) => (
-                <li key={d.id} style={{ padding: '8px 0', borderTop: '1px solid #E2E5EB' }}>
-                  <button
-                    type="button"
-                    className="lb-btn lb-btn--ghost"
-                    style={{ padding: 0, minHeight: 0, border: 'none', textAlign: 'left', width: '100%' }}
-                    onClick={() => openDeal(d.id)}
-                  >
-                    <div style={{ fontWeight: 600, color: INK }}>{d.client.name}</div>
-                    <div style={{ fontSize: 12, color: MUTED, marginTop: 2 }}>
+                <li key={d.id} style={{ padding: '8px 0', borderTop: '1px solid #E5E7EB' }}>
+                  <button type="button" className="lb-btn lb-btn--ghost" style={{ textAlign: 'left', width: '100%' }} onClick={() => openDeal(d.id)}>
+                    <div className="lb-card-title">{d.client.name}</div>
+                    <div className="lb-meta" style={{ marginTop: 4 }}>
                       {stageLabel(d.stage)}
                       {d.quotes.length ? ` · ${d.quotes.length} quote${d.quotes.length > 1 ? 's' : ''}` : ''}
                     </div>
@@ -112,23 +99,21 @@ export default function LeaseBrokerHome({ state, meta, ready, openDeal, startNew
         </section>
 
         <section className="lb-card">
-          <div className="lb-lbl" style={{ marginBottom: 6 }}>Fees owed</div>
-          <div style={{ fontSize: 28, fontWeight: 700, marginBottom: 12 }} className="lb-num">
-            {moneyOrDash(owedTotal, ready)}
-          </div>
+          <h2 className="lb-section-h">Fees owed</h2>
+          <div className="lb-kpi-val lb-num" style={{ marginBottom: 12 }}>{moneyOrDash(owedTotal, ready)}</div>
           {owed.length > 0 ? (
-            <ul style={{ listStyle: 'none', fontSize: 14 }}>
+            <ul style={{ listStyle: 'none' }}>
               {owed.map((d) => (
-                <li key={d.id} style={{ display: 'flex', justifyContent: 'space-between', gap: 8, padding: '6px 0', borderTop: '1px solid #E2E5EB' }}>
-                  <button type="button" className="lb-btn lb-btn--ghost" style={{ padding: 0, minHeight: 0, border: 'none', fontWeight: 500 }} onClick={() => openDeal(d.id)}>
+                <li key={d.id} style={{ display: 'flex', justifyContent: 'space-between', gap: 8, padding: '8px 0', borderTop: '1px solid #E5E7EB' }}>
+                  <button type="button" className="lb-link-btn" onClick={() => openDeal(d.id)}>
                     {d.client.name}
                   </button>
-                  <span className="lb-num" style={{ fontWeight: 600 }}>{moneyOrDash(d.fee.amount, ready)}</span>
+                  <span className="lb-num">{moneyOrDash(d.fee.amount, ready)}</span>
                 </li>
               ))}
             </ul>
           ) : null}
-          <button type="button" className="lb-btn" style={{ marginTop: owed.length ? 12 : 0, width: '100%' }} onClick={goFees}>
+          <button type="button" className="lb-btn lb-btn--quiet" style={{ marginTop: owed.length ? 12 : 0, width: '100%' }} onClick={goFees}>
             Fee tracker
           </button>
         </section>

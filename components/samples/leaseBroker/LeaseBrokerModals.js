@@ -1,5 +1,4 @@
 import { useState } from 'react'
-import { INK, UI } from './leaseBrokerUtils'
 import DATA from '../../../data/lease-broker-crm.json'
 
 function Modal({ title, onClose, children }) {
@@ -12,7 +11,7 @@ function Modal({ title, onClose, children }) {
         aria-labelledby="lb-modal-title"
         onClick={(e) => e.stopPropagation()}
       >
-        <h2 id="lb-modal-title" style={{ fontFamily: UI, fontSize: 18, fontWeight: 700, marginBottom: 14, color: INK }}>
+        <h2 id="lb-modal-title" className="lb-modal-title">
           {title}
         </h2>
         {children}
@@ -21,8 +20,14 @@ function Modal({ title, onClose, children }) {
   )
 }
 
-const fieldStyle = { marginBottom: 12 }
-const labelStyle = { display: 'block', fontSize: 11, fontWeight: 600, color: '#6B7280', marginBottom: 4, textTransform: 'uppercase', letterSpacing: '.5px' }
+function Field({ label, children }) {
+  return (
+    <div className="lb-field">
+      <label>{label}</label>
+      {children}
+    </div>
+  )
+}
 
 export function AddDealModal({ referrers, onClose, onSave, initialClient, initialReferrerId }) {
   const [client, setClient] = useState(
@@ -48,53 +53,43 @@ export function AddDealModal({ referrers, onClose, onSave, initialClient, initia
   return (
     <Modal title="Add deal" onClose={onClose}>
       <form onSubmit={submit}>
-        <div style={fieldStyle}>
-          <label style={labelStyle}>Client name</label>
+        <Field label="Client name">
           <input className="lb-inp" value={client.name} onChange={(e) => setClient({ ...client, name: e.target.value })} required />
-        </div>
-        <div style={fieldStyle}>
-          <label style={labelStyle}>Phone</label>
+        </Field>
+        <Field label="Phone">
           <input className="lb-inp" type="tel" value={client.phone} onChange={(e) => setClient({ ...client, phone: e.target.value })} />
-        </div>
-        <div style={fieldStyle}>
-          <label style={labelStyle}>Email</label>
+        </Field>
+        <Field label="Email">
           <input className="lb-inp" type="email" value={client.email} onChange={(e) => setClient({ ...client, email: e.target.value })} />
-        </div>
-        <div style={fieldStyle}>
-          <label style={labelStyle}>Referrer</label>
+        </Field>
+        <Field label="Referrer">
           <select className="lb-inp" value={referrerId} onChange={(e) => setReferrerId(e.target.value)}>
             {referrers.map((r) => (
               <option key={r.id} value={r.id}>{r.name}</option>
             ))}
           </select>
-        </div>
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
-          <div style={fieldStyle}>
-            <label style={labelStyle}>Make</label>
+        </Field>
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
+          <Field label="Make">
             <input className="lb-inp" value={vehicle.make} onChange={(e) => setVehicle({ ...vehicle, make: e.target.value })} required />
-          </div>
-          <div style={fieldStyle}>
-            <label style={labelStyle}>Model</label>
+          </Field>
+          <Field label="Model">
             <input className="lb-inp" value={vehicle.model} onChange={(e) => setVehicle({ ...vehicle, model: e.target.value })} required />
-          </div>
+          </Field>
         </div>
-        <div style={fieldStyle}>
-          <label style={labelStyle}>Trim</label>
+        <Field label="Trim">
           <input className="lb-inp" value={vehicle.trim} onChange={(e) => setVehicle({ ...vehicle, trim: e.target.value })} />
-        </div>
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 10 }}>
-          <div style={fieldStyle}>
-            <label style={labelStyle}>Miles/yr</label>
+        </Field>
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 8 }}>
+          <Field label="Miles per year">
             <input className="lb-inp" type="number" value={vehicle.miles_per_year} onChange={(e) => setVehicle({ ...vehicle, miles_per_year: e.target.value })} />
-          </div>
-          <div style={fieldStyle}>
-            <label style={labelStyle}>Term (mo)</label>
+          </Field>
+          <Field label="Term (months)">
             <input className="lb-inp" type="number" value={vehicle.term_months} onChange={(e) => setVehicle({ ...vehicle, term_months: e.target.value })} />
-          </div>
-          <div style={fieldStyle}>
-            <label style={labelStyle}>Down</label>
+          </Field>
+          <Field label="Down">
             <input className="lb-inp" type="number" value={vehicle.down} onChange={(e) => setVehicle({ ...vehicle, down: e.target.value })} />
-          </div>
+          </Field>
         </div>
         <div style={{ display: 'flex', gap: 8, marginTop: 8 }}>
           <button type="submit" className="lb-btn lb-btn--primary" style={{ flex: 1 }}>Save deal</button>
@@ -130,43 +125,36 @@ export function AddQuoteModal({ dealers, dealId, onClose, onSave }) {
   return (
     <Modal title="Add dealer quote" onClose={onClose}>
       <form onSubmit={submit}>
-        <div style={fieldStyle}>
-          <label style={labelStyle}>Dealer</label>
+        <Field label="Dealer">
           <select className="lb-inp" value={dealerId} onChange={(e) => setDealerId(e.target.value)} required>
             {dealers.map((d) => (
               <option key={d.id} value={d.id}>{d.name}</option>
             ))}
           </select>
-        </div>
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
-          <div style={fieldStyle}>
-            <label style={labelStyle}>Monthly</label>
+        </Field>
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
+          <Field label="Monthly">
             <input className="lb-inp" type="number" required value={form.monthly} onChange={(e) => setForm({ ...form, monthly: e.target.value })} />
-          </div>
-          <div style={fieldStyle}>
-            <label style={labelStyle}>Due at signing</label>
+          </Field>
+          <Field label="Due at signing">
             <input className="lb-inp" type="number" required value={form.due_at_signing} onChange={(e) => setForm({ ...form, due_at_signing: e.target.value })} />
-          </div>
+          </Field>
         </div>
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
-          <div style={fieldStyle}>
-            <label style={labelStyle}>Money factor</label>
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
+          <Field label="Money factor">
             <input className="lb-inp" value={form.money_factor} onChange={(e) => setForm({ ...form, money_factor: e.target.value })} />
-          </div>
-          <div style={fieldStyle}>
-            <label style={labelStyle}>Residual %</label>
+          </Field>
+          <Field label="Residual %">
             <input className="lb-inp" type="number" value={form.residual_pct} onChange={(e) => setForm({ ...form, residual_pct: e.target.value })} />
-          </div>
+          </Field>
         </div>
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
-          <div style={fieldStyle}>
-            <label style={labelStyle}>Rebates</label>
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
+          <Field label="Rebates">
             <input className="lb-inp" type="number" value={form.rebates} onChange={(e) => setForm({ ...form, rebates: e.target.value })} />
-          </div>
-          <div style={fieldStyle}>
-            <label style={labelStyle}>Quote date</label>
+          </Field>
+          <Field label="Quote date">
             <input className="lb-inp" type="date" value={form.quote_date} onChange={(e) => setForm({ ...form, quote_date: e.target.value })} />
-          </div>
+          </Field>
         </div>
         <div style={{ display: 'flex', gap: 8, marginTop: 8 }}>
           <button type="submit" className="lb-btn lb-btn--primary" style={{ flex: 1 }}>Save quote</button>
@@ -198,22 +186,18 @@ export function AddDealerModal({ onClose, onSave }) {
   return (
     <Modal title="Add dealer" onClose={onClose}>
       <form onSubmit={submit}>
-        <div style={fieldStyle}>
-          <label style={labelStyle}>Dealer name</label>
+        <Field label="Dealer name">
           <input className="lb-inp" value={name} onChange={(e) => setName(e.target.value)} required />
-        </div>
-        <div style={fieldStyle}>
-          <label style={labelStyle}>Salesperson</label>
+        </Field>
+        <Field label="Salesperson">
           <input className="lb-inp" value={salesperson} onChange={(e) => setSalesperson(e.target.value)} />
-        </div>
-        <div style={fieldStyle}>
-          <label style={labelStyle}>Phone</label>
+        </Field>
+        <Field label="Phone">
           <input className="lb-inp" value={phone} onChange={(e) => setPhone(e.target.value)} />
-        </div>
-        <div style={fieldStyle}>
-          <label style={labelStyle}>Brands (comma-separated)</label>
+        </Field>
+        <Field label="Brands">
           <input className="lb-inp" placeholder="BMW, MINI" value={brands} onChange={(e) => setBrands(e.target.value)} />
-        </div>
+        </Field>
         <div style={{ display: 'flex', gap: 8, marginTop: 8 }}>
           <button type="submit" className="lb-btn lb-btn--primary" style={{ flex: 1 }}>Save dealer</button>
           <button type="button" className="lb-btn" onClick={onClose}>Cancel</button>
@@ -228,13 +212,12 @@ export function MarkFeePaidModal({ clientName, amount, asOf, onClose, onSave }) 
 
   return (
     <Modal title="Mark fee paid" onClose={onClose}>
-      <p style={{ fontSize: 14, marginBottom: 14, color: INK }}>
+      <p style={{ marginBottom: 16 }}>
         {clientName} — broker fee {amount != null ? `$${amount}` : ''}
       </p>
-      <div style={fieldStyle}>
-        <label style={labelStyle}>Date paid</label>
+      <Field label="Date paid">
         <input className="lb-inp" type="date" value={paidDate} onChange={(e) => setPaidDate(e.target.value)} />
-      </div>
+      </Field>
       <div style={{ display: 'flex', gap: 8 }}>
         <button
           type="button"

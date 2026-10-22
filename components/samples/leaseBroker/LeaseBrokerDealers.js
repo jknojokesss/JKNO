@@ -34,8 +34,8 @@ export default function LeaseBrokerDealers({ dealers, onAddDealer }) {
 
   return (
     <div>
-      <div style={{ display: 'flex', flexWrap: 'wrap', gap: 10, marginBottom: 14 }}>
-        <input className="lb-inp lb-search" style={{ flex: 1, minWidth: 200, marginBottom: 0 }} placeholder="Search dealer, rep, or brand" value={q} onChange={(e) => setQ(e.target.value)} />
+      <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, marginBottom: 16 }}>
+        <input className="lb-inp lb-search" style={{ flex: 1, minWidth: 200, marginBottom: 0 }} placeholder="Search dealer, rep, or brand" value={q} onChange={(e) => setQ(e.target.value)} aria-label="Search dealers" />
         <button type="button" className="lb-btn lb-btn--primary" onClick={onAddDealer}>Add dealer</button>
       </div>
 
@@ -45,27 +45,27 @@ export default function LeaseBrokerDealers({ dealers, onAddDealer }) {
             <thead>
               <tr>
                 <th>
-                  <button type="button" className="lb-btn lb-btn--ghost" style={{ border: 'none', padding: 0, minHeight: 0, fontSize: 10 }} onClick={() => toggleSort('name')}>Dealer</button>
+                  <button type="button" className="lb-link-btn" onClick={() => toggleSort('name')}>Dealer</button>
                 </th>
                 <th>Salesperson</th>
                 <th>Brands</th>
                 <th>Phone</th>
                 <th className="lb-num">
-                  <button type="button" className="lb-btn lb-btn--ghost" style={{ border: 'none', padding: 0, minHeight: 0, fontSize: 10 }} onClick={() => toggleSort('last_quote_date')}>Last quote</button>
+                  <button type="button" className="lb-link-btn" onClick={() => toggleSort('last_quote_date')}>Last quote</button>
                 </th>
                 <th className="lb-num">
-                  <button type="button" className="lb-btn lb-btn--ghost" style={{ border: 'none', padding: 0, minHeight: 0, fontSize: 10 }} onClick={() => toggleSort('deals_closed')}>Closed</button>
+                  <button type="button" className="lb-link-btn" onClick={() => toggleSort('deals_closed')}>Closed</button>
                 </th>
               </tr>
             </thead>
             <tbody>
               {rows.map((d) => (
                 <tr key={d.id}>
-                  <td style={{ fontWeight: 600 }}>{d.name}</td>
+                  <td className="lb-card-title">{d.name}</td>
                   <td>{d.salesperson || '—'}</td>
                   <td>{d.brands.join(', ')}</td>
-                  <td>{fmtPhone(d.phone)}</td>
-                  <td className="lb-num">{d.last_quote_date ? fmtD(d.last_quote_date) : '—'}</td>
+                  <td className="lb-tabnum">{fmtPhone(d.phone)}</td>
+                  <td className="lb-num lb-tabnum">{d.last_quote_date ? fmtD(d.last_quote_date) : '—'}</td>
                   <td className="lb-num">{d.deals_closed}</td>
                 </tr>
               ))}
@@ -80,8 +80,8 @@ export default function LeaseBrokerDealers({ dealers, onAddDealer }) {
                 {d.salesperson || '—'} · {d.brands.join(', ')}
               </div>
               <div className="lb-stack-line3">
-                <span>{fmtPhone(d.phone)}</span>
-                <span style={{ fontSize: 12 }}>
+                <span className="lb-tabnum">{fmtPhone(d.phone)}</span>
+                <span className="lb-meta lb-tabnum">
                   {d.last_quote_date ? fmtD(d.last_quote_date) : '—'} · {d.deals_closed} closed
                 </span>
               </div>

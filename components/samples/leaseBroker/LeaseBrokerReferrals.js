@@ -1,6 +1,7 @@
-import { Fragment, useMemo, useState } from 'react'
-import { INK, fmtPhone } from './leaseBrokerUtils'
+import { useMemo, useState } from 'react'
+import { fmtPhone } from './leaseBrokerUtils'
 import { referralCounts } from './leaseBrokerModel'
+import LeaseBrokerClientList from './LeaseBrokerClientList'
 
 export default function LeaseBrokerReferrals({ deals, referrers, openDeal }) {
   const [q, setQ] = useState('')
@@ -22,7 +23,7 @@ export default function LeaseBrokerReferrals({ deals, referrers, openDeal }) {
 
   return (
     <div>
-      <input className="lb-inp lb-search" placeholder="Search referrer" value={q} onChange={(e) => setQ(e.target.value)} />
+      <input className="lb-inp lb-search" placeholder="Search referrer" value={q} onChange={(e) => setQ(e.target.value)} aria-label="Search referrer" />
 
       <div className="lb-card lb-card--flush">
         <div className="lb-show-desktop lb-scroll">
@@ -40,29 +41,11 @@ export default function LeaseBrokerReferrals({ deals, referrers, openDeal }) {
                 const linked = (clientsByReferrer.get(r.id) || []).slice(-3).reverse()
                 return (
                   <tr key={r.id}>
-                    <td style={{ fontWeight: 600 }}>{r.name}</td>
-                    <td>{fmtPhone(r.phone)}</td>
-                    <td className="lb-num" style={{ fontWeight: 700 }}>{r.count}</td>
+                    <td className="lb-card-title">{r.name}</td>
+                    <td className="lb-tabnum">{fmtPhone(r.phone)}</td>
+                    <td className="lb-num">{r.count}</td>
                     <td>
-                      {linked.length === 0 ? (
-                        '—'
-                      ) : (
-                        <span style={{ fontSize: 13 }}>
-                          {linked.map((d, i) => (
-                            <Fragment key={d.id}>
-                              {i > 0 ? ', ' : null}
-                              <button
-                                type="button"
-                                className="lb-btn lb-btn--ghost"
-                                style={{ padding: 0, minHeight: 0, border: 'none', color: INK, fontWeight: 500 }}
-                                onClick={() => openDeal(d.id)}
-                              >
-                                {d.client.name}
-                              </button>
-                            </Fragment>
-                          ))}
-                        </span>
-                      )}
+                      <LeaseBrokerClientList clients={linked} onOpen={openDeal} />
                     </td>
                   </tr>
                 )
@@ -79,25 +62,9 @@ export default function LeaseBrokerReferrals({ deals, referrers, openDeal }) {
                   <span>{r.name}</span>
                   <span className="lb-num">{r.count}</span>
                 </div>
-                <div className="lb-stack-line2">{fmtPhone(r.phone)}</div>
+                <div className="lb-stack-line2 lb-tabnum">{fmtPhone(r.phone)}</div>
                 <div className="lb-stack-line3" style={{ justifyContent: 'flex-start' }}>
-                  {linked.length === 0 ? (
-                    '—'
-                  ) : (
-                    linked.map((d, i) => (
-                      <Fragment key={d.id}>
-                        {i > 0 ? ', ' : null}
-                        <button
-                          type="button"
-                          className="lb-btn lb-btn--ghost"
-                          style={{ padding: 0, minHeight: 0, border: 'none', color: INK, fontWeight: 500 }}
-                          onClick={() => openDeal(d.id)}
-                        >
-                          {d.client.name}
-                        </button>
-                      </Fragment>
-                    ))
-                  )}
+                  <LeaseBrokerClientList clients={linked} onOpen={openDeal} />
                 </div>
               </div>
             )
