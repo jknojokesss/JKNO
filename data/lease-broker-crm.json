@@ -1,0 +1,522 @@
+{
+  "meta": {
+    "as_of": "2026-10-22",
+    "program_month": "2026-10",
+    "broker_fee_default": 895
+  },
+  "brand": {
+    "name": "Parkway Lease Brokers",
+    "short": "Parkway",
+    "tagline": "Independent auto leasing"
+  },
+  "referrers": [
+    { "id": "ref-miriam", "name": "Miriam K.", "phone": "732-555-0142" },
+    { "id": "ref-david", "name": "David Rosen", "phone": "201-555-0881" },
+    { "id": "ref-shul", "name": "Lakewood bulletin", "phone": "" },
+    { "id": "ref-yossi", "name": "Yossi M.", "phone": "848-555-3309" },
+    { "id": "ref-repeat", "name": "Repeat client", "phone": "" }
+  ],
+  "dealers": [
+    {
+      "id": "dlr-gsbmw",
+      "name": "Garden State BMW",
+      "salesperson": "Mike Tannen",
+      "phone": "732-555-2200",
+      "brands": ["BMW", "MINI"],
+      "last_quote_date": "2026-10-18",
+      "deals_closed": 6
+    },
+    {
+      "id": "dlr-cjhonda",
+      "name": "Central Jersey Honda",
+      "salesperson": "Ana Reyes",
+      "phone": "908-555-4411",
+      "brands": ["Honda", "Acura"],
+      "last_quote_date": "2026-10-20",
+      "deals_closed": 4
+    },
+    {
+      "id": "dlr-oaklex",
+      "name": "Oak Street Lexus",
+      "salesperson": "James Park",
+      "phone": "973-555-1190",
+      "brands": ["Lexus", "Toyota"],
+      "last_quote_date": "2026-09-28",
+      "deals_closed": 3
+    },
+    {
+      "id": "dlr-shorevw",
+      "name": "Shore Volkswagen",
+      "salesperson": "Carla Nunez",
+      "phone": "732-555-7702",
+      "brands": ["Volkswagen", "Audi"],
+      "last_quote_date": "2026-10-12",
+      "deals_closed": 2
+    },
+    {
+      "id": "dlr-unionmaz",
+      "name": "Union Mazda",
+      "salesperson": "Ben Hart",
+      "phone": "201-555-6620",
+      "brands": ["Mazda"],
+      "last_quote_date": "2026-10-08",
+      "deals_closed": 5
+    }
+  ],
+  "deals": [
+    {
+      "id": "deal-401",
+      "stage": "quoted",
+      "client": { "name": "Rachel Adler", "phone": "732-555-9012", "email": "radler@example.com" },
+      "referrer_id": "ref-miriam",
+      "vehicle": {
+        "make": "BMW",
+        "model": "X3",
+        "trim": "xDrive30i",
+        "miles_per_year": 10000,
+        "term_months": 36,
+        "down": 2500
+      },
+      "fee": { "amount": 895, "paid": false, "paid_date": null },
+      "lease_end": null,
+      "delivered_date": null,
+      "quotes": [
+        {
+          "id": "q-401a",
+          "dealer_id": "dlr-gsbmw",
+          "monthly": 589,
+          "due_at_signing": 3200,
+          "money_factor": 0.00185,
+          "residual_pct": 58,
+          "rebates": 1500,
+          "quote_date": "2026-10-18",
+          "winner": false
+        },
+        {
+          "id": "q-401b",
+          "dealer_id": "dlr-oaklex",
+          "monthly": 612,
+          "due_at_signing": 2900,
+          "money_factor": 0.00192,
+          "residual_pct": 57,
+          "rebates": 1000,
+          "quote_date": "2026-09-26",
+          "winner": false
+        }
+      ],
+      "notes": "Wants black exterior, parking assist."
+    },
+    {
+      "id": "deal-402",
+      "stage": "lead",
+      "client": { "name": "Jonathan Weiss", "phone": "201-555-4420", "email": "jweiss@example.com" },
+      "referrer_id": "ref-david",
+      "vehicle": {
+        "make": "Honda",
+        "model": "Pilot",
+        "trim": "Touring",
+        "miles_per_year": 12000,
+        "term_months": 36,
+        "down": 0
+      },
+      "fee": { "amount": 895, "paid": false, "paid_date": null },
+      "lease_end": null,
+      "delivered_date": null,
+      "quotes": [],
+      "notes": "Texts only before 6pm."
+    },
+    {
+      "id": "deal-403",
+      "stage": "signed",
+      "client": { "name": "Sara Goldstein", "phone": "848-555-1188", "email": "sgold@example.com" },
+      "referrer_id": "ref-yossi",
+      "vehicle": {
+        "make": "Lexus",
+        "model": "RX",
+        "trim": "350 Premium",
+        "miles_per_year": 10000,
+        "term_months": 36,
+        "down": 1500
+      },
+      "fee": { "amount": 995, "paid": false, "paid_date": null },
+      "lease_end": null,
+      "delivered_date": null,
+      "quotes": [
+        {
+          "id": "q-403a",
+          "dealer_id": "dlr-oaklex",
+          "monthly": 648,
+          "due_at_signing": 2800,
+          "money_factor": 0.00178,
+          "residual_pct": 59,
+          "rebates": 750,
+          "quote_date": "2026-10-14",
+          "winner": true
+        },
+        {
+          "id": "q-403b",
+          "dealer_id": "dlr-gsbmw",
+          "monthly": 702,
+          "due_at_signing": 3100,
+          "money_factor": 0.00195,
+          "residual_pct": 56,
+          "rebates": 500,
+          "quote_date": "2026-10-09",
+          "winner": false
+        }
+      ],
+      "notes": "Delivery slot requested for 10/28."
+    },
+    {
+      "id": "deal-404",
+      "stage": "delivered",
+      "client": { "name": "Michael Braun", "phone": "732-555-6671", "email": "mbraun@example.com" },
+      "referrer_id": "ref-miriam",
+      "vehicle": {
+        "make": "Mazda",
+        "model": "CX-5",
+        "trim": "Preferred",
+        "miles_per_year": 10000,
+        "term_months": 36,
+        "down": 2000
+      },
+      "fee": { "amount": 895, "paid": false, "paid_date": null },
+      "lease_end": "2029-10-05",
+      "delivered_date": "2026-10-05",
+      "quotes": [
+        {
+          "id": "q-404a",
+          "dealer_id": "dlr-unionmaz",
+          "monthly": 389,
+          "due_at_signing": 2400,
+          "money_factor": 0.00165,
+          "residual_pct": 62,
+          "rebates": 500,
+          "quote_date": "2026-09-30",
+          "winner": true
+        }
+      ],
+      "notes": "Fee invoice sent 10/12."
+    },
+    {
+      "id": "deal-405",
+      "stage": "delivered",
+      "client": { "name": "Leah Friedman", "phone": "908-555-2290", "email": "lfried@example.com" },
+      "referrer_id": "ref-shul",
+      "vehicle": {
+        "make": "Volkswagen",
+        "model": "Atlas",
+        "trim": "SE",
+        "miles_per_year": 12000,
+        "term_months": 39,
+        "down": 0
+      },
+      "fee": { "amount": 895, "paid": false, "paid_date": null },
+      "lease_end": "2029-11-01",
+      "delivered_date": "2026-08-01",
+      "quotes": [
+        {
+          "id": "q-405a",
+          "dealer_id": "dlr-shorevw",
+          "monthly": 459,
+          "due_at_signing": 1800,
+          "money_factor": 0.00172,
+          "residual_pct": 55,
+          "rebates": 1000,
+          "quote_date": "2026-07-22",
+          "winner": true
+        }
+      ],
+      "notes": "Owes fee — follow up after Sukkos."
+    },
+    {
+      "id": "deal-406",
+      "stage": "fee_paid",
+      "client": { "name": "Aaron Klein", "phone": "201-555-7733", "email": "aklein@example.com" },
+      "referrer_id": "ref-repeat",
+      "vehicle": {
+        "make": "BMW",
+        "model": "330i",
+        "trim": "xDrive",
+        "miles_per_year": 10000,
+        "term_months": 36,
+        "down": 3000
+      },
+      "fee": { "amount": 995, "paid": true, "paid_date": "2026-10-08" },
+      "lease_end": "2029-09-20",
+      "delivered_date": "2026-09-20",
+      "quotes": [
+        {
+          "id": "q-406a",
+          "dealer_id": "dlr-gsbmw",
+          "monthly": 512,
+          "due_at_signing": 3500,
+          "money_factor": 0.0018,
+          "residual_pct": 60,
+          "rebates": 2000,
+          "quote_date": "2026-09-12",
+          "winner": true
+        }
+      ],
+      "notes": ""
+    },
+    {
+      "id": "deal-407",
+      "stage": "quoted",
+      "client": { "name": "Chana Berger", "phone": "732-555-3044", "email": "cberger@example.com" },
+      "referrer_id": "ref-miriam",
+      "vehicle": {
+        "make": "Toyota",
+        "model": "Highlander",
+        "trim": "XLE",
+        "miles_per_year": 12000,
+        "term_months": 36,
+        "down": 1500
+      },
+      "fee": { "amount": 895, "paid": false, "paid_date": null },
+      "lease_end": null,
+      "delivered_date": null,
+      "quotes": [
+        {
+          "id": "q-407a",
+          "dealer_id": "dlr-oaklex",
+          "monthly": 498,
+          "due_at_signing": 2200,
+          "money_factor": 0.00168,
+          "residual_pct": 61,
+          "rebates": 750,
+          "quote_date": "2026-10-20",
+          "winner": false
+        },
+        {
+          "id": "q-407b",
+          "dealer_id": "dlr-cjhonda",
+          "monthly": 521,
+          "due_at_signing": 2100,
+          "money_factor": 0.00174,
+          "residual_pct": 60,
+          "rebates": 500,
+          "quote_date": "2026-10-19",
+          "winner": true
+        },
+        {
+          "id": "q-407c",
+          "dealer_id": "dlr-unionmaz",
+          "monthly": 505,
+          "due_at_signing": 2300,
+          "money_factor": 0.0017,
+          "residual_pct": 59,
+          "rebates": 0,
+          "quote_date": "2026-09-15",
+          "winner": false
+        }
+      ],
+      "notes": "Comparing third-row space."
+    },
+    {
+      "id": "deal-408",
+      "stage": "fee_paid",
+      "client": { "name": "Daniel Horowitz", "phone": "848-555-5510", "email": "dhoro@example.com" },
+      "referrer_id": "ref-david",
+      "vehicle": {
+        "make": "Honda",
+        "model": "CR-V",
+        "trim": "EX-L",
+        "miles_per_year": 10000,
+        "term_months": 36,
+        "down": 1000
+      },
+      "fee": { "amount": 895, "paid": true, "paid_date": "2026-10-15" },
+      "lease_end": "2029-09-28",
+      "delivered_date": "2026-09-28",
+      "quotes": [
+        {
+          "id": "q-408a",
+          "dealer_id": "dlr-cjhonda",
+          "monthly": 368,
+          "due_at_signing": 1900,
+          "money_factor": 0.00158,
+          "residual_pct": 63,
+          "rebates": 500,
+          "quote_date": "2026-09-20",
+          "winner": true
+        }
+      ],
+      "notes": ""
+    },
+    {
+      "id": "deal-301",
+      "stage": "fee_paid",
+      "client": { "name": "Esther Rubin", "phone": "732-555-8801", "email": "erubin@example.com" },
+      "referrer_id": "ref-miriam",
+      "vehicle": {
+        "make": "BMW",
+        "model": "X5",
+        "trim": "xDrive40i",
+        "miles_per_year": 10000,
+        "term_months": 36,
+        "down": 4000
+      },
+      "fee": { "amount": 995, "paid": true, "paid_date": "2023-11-10" },
+      "lease_end": "2026-11-08",
+      "delivered_date": "2023-11-08",
+      "quotes": [
+        {
+          "id": "q-301a",
+          "dealer_id": "dlr-gsbmw",
+          "monthly": 798,
+          "due_at_signing": 5200,
+          "money_factor": 0.00195,
+          "residual_pct": 57,
+          "rebates": 1500,
+          "quote_date": "2023-10-28",
+          "winner": true
+        }
+      ],
+      "notes": "Lease-end walkthrough booked."
+    },
+    {
+      "id": "deal-302",
+      "stage": "fee_paid",
+      "client": { "name": "Mark Silver", "phone": "201-555-3399", "email": "msilver@example.com" },
+      "referrer_id": "ref-yossi",
+      "vehicle": {
+        "make": "Honda",
+        "model": "Odyssey",
+        "trim": "Elite",
+        "miles_per_year": 12000,
+        "term_months": 36,
+        "down": 0
+      },
+      "fee": { "amount": 895, "paid": true, "paid_date": "2023-12-05" },
+      "lease_end": "2026-11-22",
+      "delivered_date": "2023-11-22",
+      "quotes": [
+        {
+          "id": "q-302a",
+          "dealer_id": "dlr-cjhonda",
+          "monthly": 549,
+          "due_at_signing": 2100,
+          "money_factor": 0.00182,
+          "residual_pct": 58,
+          "rebates": 750,
+          "quote_date": "2023-11-12",
+          "winner": true
+        }
+      ],
+      "notes": ""
+    },
+    {
+      "id": "deal-303",
+      "stage": "fee_paid",
+      "client": { "name": "Nicole Brand", "phone": "908-555-7120", "email": "nbrand@example.com" },
+      "referrer_id": "ref-repeat",
+      "vehicle": {
+        "make": "Lexus",
+        "model": "NX",
+        "trim": "350",
+        "miles_per_year": 10000,
+        "term_months": 36,
+        "down": 2000
+      },
+      "fee": { "amount": 895, "paid": true, "paid_date": "2023-12-18" },
+      "lease_end": "2026-12-15",
+      "delivered_date": "2023-12-15",
+      "quotes": [
+        {
+          "id": "q-303a",
+          "dealer_id": "dlr-oaklex",
+          "monthly": 478,
+          "due_at_signing": 2600,
+          "money_factor": 0.00175,
+          "residual_pct": 59,
+          "rebates": 500,
+          "quote_date": "2023-12-01",
+          "winner": true
+        }
+      ],
+      "notes": "Interested in same trim again."
+    },
+    {
+      "id": "deal-304",
+      "stage": "fee_paid",
+      "client": { "name": "Philip Cohen", "phone": "848-555-2044", "email": "pcohen@example.com" },
+      "referrer_id": "ref-david",
+      "vehicle": {
+        "make": "Toyota",
+        "model": "RAV4",
+        "trim": "XLE Premium",
+        "miles_per_year": 10000,
+        "term_months": 36,
+        "down": 1500
+      },
+      "fee": { "amount": 895, "paid": true, "paid_date": "2024-01-08" },
+      "lease_end": "2027-01-05",
+      "delivered_date": "2024-01-05",
+      "quotes": [
+        {
+          "id": "q-304a",
+          "dealer_id": "dlr-oaklex",
+          "monthly": 388,
+          "due_at_signing": 2000,
+          "money_factor": 0.00162,
+          "residual_pct": 62,
+          "rebates": 750,
+          "quote_date": "2023-12-20",
+          "winner": true
+        }
+      ],
+      "notes": ""
+    },
+    {
+      "id": "deal-305",
+      "stage": "fee_paid",
+      "client": { "name": "Talia Gross", "phone": "732-555-6155", "email": "tgross@example.com" },
+      "referrer_id": "ref-miriam",
+      "vehicle": {
+        "make": "Mazda",
+        "model": "CX-90",
+        "trim": "Preferred",
+        "miles_per_year": 10000,
+        "term_months": 36,
+        "down": 2500
+      },
+      "fee": { "amount": 895, "paid": true, "paid_date": "2024-01-20" },
+      "lease_end": "2026-11-28",
+      "delivered_date": "2024-01-20",
+      "quotes": [
+        {
+          "id": "q-305a",
+          "dealer_id": "dlr-unionmaz",
+          "monthly": 528,
+          "due_at_signing": 2800,
+          "money_factor": 0.0018,
+          "residual_pct": 58,
+          "rebates": 1000,
+          "quote_date": "2024-01-10",
+          "winner": true
+        }
+      ],
+      "notes": ""
+    },
+    {
+      "id": "deal-409",
+      "stage": "lead",
+      "client": { "name": "Benny Schwartz", "phone": "201-555-9900", "email": "bschw@example.com" },
+      "referrer_id": "ref-shul",
+      "vehicle": {
+        "make": "Audi",
+        "model": "Q5",
+        "trim": "Premium Plus",
+        "miles_per_year": 10000,
+        "term_months": 36,
+        "down": 2000
+      },
+      "fee": { "amount": 895, "paid": false, "paid_date": null },
+      "lease_end": null,
+      "delivered_date": null,
+      "quotes": [],
+      "notes": "Referred from bulletin — needs quotes by Friday."
+    }
+  ]
+}
