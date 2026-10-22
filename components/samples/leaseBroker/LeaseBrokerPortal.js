@@ -167,7 +167,7 @@ export default function LeaseBrokerPortal() {
         </main>
 
         {narrowNav ? (
-          <nav className="lb-tabbar lb-nav" aria-label="Sections">
+          <nav className="lb-tabbar" aria-label="Sections">
             {TABS.map(([id, label]) => (
               <button
                 key={id}
