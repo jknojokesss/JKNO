@@ -132,7 +132,7 @@ PAGES.overview=function(){var ab=rangeAB(),a=ab[0],b=ab[1],o=full(a,b),pab=prevA
   if(p&&p.net){var dr=(o.net-p.net)/Math.abs(p.net);lede+=Math.abs(dr)<0.005?' About even with the prior period.':(dr>0?' Up ':' Down ')+Math.abs(dr*100).toFixed(0)+'% '+pl.replace('vs ','from ')+'.';}
   var mob=isMob();
   var heroCls=mob?'sum-hero mob-lead':'sum-hero';
-  var h='<section class="'+heroCls+'"><p class="sum-kicker">'+frange(a,b)+'</p>'+ovBoxes(o,p,pl,c,b,nx)+'<p class="sum-lede">'+esc(lede)+'</p>';
+  var h='<section class="'+heroCls+'">'+ovBoxes(o,p,pl,c,b,nx)+'<p class="sum-lede">'+esc(lede)+'</p>';
   if(!mob){
     h+='<dl class="sum-stats sum-stats-secondary">';
     h+='<div><dt>Amazon profit (Sellerboard)</dt><dd>'+money(o.amzProfit)+(p?'<small>'+chg(o.amzProfit,p.amzProfit)+' '+pl+' · '+pct(o.margin)+' margin</small>':'<small>'+pct(o.margin)+' margin on Amazon sales</small>')+'</dd></div>';
