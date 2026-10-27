@@ -82,7 +82,7 @@ const DEALS = [
     mini: false,
     fundingDays: 4,
     tier: 100,
-    stips: [],
+    stips: ['Odometer statement not signed'],
     stage: 'cit',
     delivery: '2026-10-09',
   },
@@ -140,11 +140,11 @@ const DEALS = [
     stock: 'STK 8655 · 2025 Accord LX',
     type: 'lease',
     sold: '2026-09-22',
-    funded: '2026-09-30',
+    funded: '2026-10-01',
     front: 75,
     back: 180,
     mini: true,
-    fundingDays: 8,
+    fundingDays: 9,
     tier: 75,
     stips: [],
     stage: 'funded',
@@ -254,7 +254,7 @@ const GL_SNAPSHOT = {
   floorPlan: 3124000,
   mtdVehicleGross: 68400,
   mtdFiIncome: 22100,
-  commissionAccrued: 42800,
+  commissionAccrued: 21700,
   commissionPaid: 38100,
 }
 
@@ -280,9 +280,10 @@ function buildModel() {
   const frontMtd = mtd.reduce((s, d) => s + d.front, 0)
   const leaseFrontAvg = mtdLeases.length ? mtdLeases.reduce((s, d) => s + d.front, 0) / mtdLeases.length : 0
   const finFrontAvg = mtdFinance.length ? mtdFinance.reduce((s, d) => s + d.front, 0) / mtdFinance.length : 0
-  const commissionMtd = mtd
-    .filter((d) => d.stage === 'funded')
-    .reduce((s, d) => s + commissionOnDeal(d), 0)
+  const fundedOctober = DEALS.filter(
+    (d) => d.stage === 'funded' && d.funded && dt(d.funded) >= dt('2026-10-01'),
+  )
+  const commissionMtd = fundedOctober.reduce((s, d) => s + commissionOnDeal(d), 0)
   const pendingCommission = openCit.reduce((s, d) => s + commissionOnDeal(d), 0)
 
   return {
@@ -299,6 +300,7 @@ function buildModel() {
     leaseFrontAvg,
     finFrontAvg,
     commissionMtd,
+    fundedOctober,
     asOf,
   }
 }
@@ -462,7 +464,7 @@ export default function WestviewAutoPortal({ demoEmbed = false }) {
                   {
                     id: 'paid',
                     k: 'Paid this month',
-                    v: M.mtd.filter((d) => d.stage === 'funded').length,
+                    v: M.fundedOctober.length,
                     sub: money0(M.commissionMtd) + ' in your check',
                     color: GREEN,
                   },
@@ -589,11 +591,12 @@ export default function WestviewAutoPortal({ demoEmbed = false }) {
               <div className="bl-stage-grid">
                 {['quote', 'fi', 'cit', 'funded'].map((stage) => {
                   const label = { quote: 'Working the deal', fi: 'In finance office', cit: 'Sold — waiting on bank', funded: 'Bank paid this month' }[stage]
-                  const rows = DEALS.filter((d) => d.stage === stage && (stage === 'funded' ? dt(d.sold) >= dt('2026-10-01') : true))
-                  if (stage === 'funded') {
-                    const extra = DEALS.filter((d) => d.stage === 'funded' && dt(d.sold) < dt('2026-10-01'))
-                    if (!rows.length && !extra.length) return null
-                  } else if (!rows.length) return null
+                  const rows = DEALS.filter((d) => {
+                    if (d.stage !== stage) return false
+                    if (stage === 'funded') return d.funded && dt(d.funded) >= dt('2026-10-01')
+                    return true
+                  })
+                  if (!rows.length) return null
                   return (
                     <div key={stage} className="bl-card-panel" style={card}>
                       <div style={{ fontSize: '16px', fontWeight: 700, color: INK, marginBottom: '10px' }}>{label}</div>
@@ -607,7 +610,7 @@ export default function WestviewAutoPortal({ demoEmbed = false }) {
                             </tr>
                           </thead>
                           <tbody>
-                            {(stage === 'funded' ? [...rows, ...DEALS.filter((d) => d.stage === 'funded' && dt(d.sold) < dt('2026-10-01')).slice(0, 2)] : rows).map((d) => (
+                            {rows.map((d) => (
                               <tr key={d.id}>
                                 <td style={{ ...td, fontWeight: 600 }}>{d.customer}</td>
                                 <td style={{ ...td, fontSize: '12px', color: MUTED }}>{d.stock.replace(/^STK \d+ · /, '')}</td>
@@ -649,7 +652,7 @@ export default function WestviewAutoPortal({ demoEmbed = false }) {
                 </div>
                 <div style={{ ...card, flex: 1, minWidth: '200px' }}>
                   <div style={lbl}>Cars sold</div>
-                  <div style={{ fontSize: '26px', fontWeight: 700, color: GREEN, ...tabNums }}>14 / 18</div>
+                  <div style={{ fontSize: '26px', fontWeight: 700, color: GREEN, ...tabNums }}>{M.unitsMtd} / 18</div>
                   <div style={{ fontSize: '13px', color: MUTED, marginTop: '4px' }}>On pace for unit goal</div>
                 </div>
               </div>
@@ -716,7 +719,7 @@ export default function WestviewAutoPortal({ demoEmbed = false }) {
                 title="Sales desk vs QuickBooks"
                 intro="Cars sold vs what accounting shows."
                 rows={[
-                  { label: 'Still waiting on bank', portal: money0(M.openCit.reduce((s, d) => s + d.front + d.back, 0)), qbo: money0(186400) },
+                  { label: 'Still waiting on bank', portal: money0(M.openCit.reduce((s, d) => s + d.front + d.back, 0)), qbo: money0(GL_SNAPSHOT.citBalance) },
                   { label: 'Commission owed to sales', portal: money0(M.commissionMtd + M.pendingCommission), qbo: money0(GL_SNAPSHOT.commissionAccrued) },
                   { label: 'Commission paid this month', portal: money0(M.commissionMtd), qbo: money0(GL_SNAPSHOT.commissionPaid) },
                   { label: 'Total sales profit (P&L)', portal: money0(M.frontMtd + M.mtd.reduce((s, d) => s + d.back, 0)), qbo: money0(GL_SNAPSHOT.mtdVehicleGross + GL_SNAPSHOT.mtdFiIncome) },

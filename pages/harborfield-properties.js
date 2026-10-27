@@ -20,30 +20,37 @@ const NAV = [
 ]
 
 const PROPERTIES = [
-  { name: 'Pine Gardens Apts', units: 24, owner: 'Radcliffe LP', rentRoll: 42800, delinquent: 3400, vacancy: 1, status: 'ok' },
-  { name: 'Bayside Court', units: 12, owner: 'Marino Group', rentRoll: 26400, delinquent: 8200, vacancy: 2, status: 'alert' },
-  { name: 'Main St mixed-use', units: 8, owner: '88 Main LLC', rentRoll: 19800, delinquent: 2600, vacancy: 0, status: 'ok' },
-  { name: 'Cedar Ln homes', units: 9, owner: 'Various', rentRoll: 24600, delinquent: 4200, vacancy: 1, status: 'watch' },
+  { name: 'Pine Gardens Apts', units: 24, owner: 'Radcliffe LP', rentRoll: 42800, delinquent: 950, vacancy: 1, status: 'ok' },
+  { name: 'Bayside Court', units: 12, owner: 'Marino Group', rentRoll: 26400, delinquent: 4300, vacancy: 2, status: 'alert' },
+  { name: 'Main St mixed-use', units: 8, owner: '88 Main LLC', rentRoll: 19800, delinquent: 650, vacancy: 0, status: 'ok' },
+  { name: 'Cedar Ln homes', units: 9, owner: 'Various', rentRoll: 24600, delinquent: 1450, vacancy: 1, status: 'watch' },
   { name: 'Hooper Ave 4-plex', units: 4, owner: 'T. Vance', rentRoll: 8900, delinquent: 0, vacancy: 0, status: 'ok' },
 ]
 
 const DELINQUENT = [
   { unit: 'Bayside Court #7', tenant: 'M. Ortega', days: 41, owed: 2850, step: 'Filing prep' },
-  { unit: 'Bayside Court #11', tenant: 'K. Walsh', days: 35, owed: 2600, step: 'Notice served' },
-  { unit: 'Pine Gardens #14', tenant: 'S. Patel', days: 18, owed: 1700, step: 'Payment plan' },
-  { unit: 'Main St #3', tenant: 'L. Chen', days: 9, owed: 1300, step: 'Reminder sent' },
-  { unit: 'Cedar Ln — 2 homes', tenant: 'Various', days: 12, owed: 4200, step: 'Reminder sent' },
+  { unit: 'Bayside Court #11', tenant: 'K. Walsh', days: 35, owed: 1450, step: 'Notice served' },
+  { unit: 'Pine Gardens #14', tenant: 'S. Patel', days: 18, owed: 950, step: 'Payment plan' },
+  { unit: 'Main St #3', tenant: 'L. Chen', days: 9, owed: 650, step: 'Reminder sent' },
+  { unit: 'Cedar Ln — 2 homes', tenant: 'Various', days: 12, owed: 1450, step: 'Reminder sent' },
 ]
 
 const OWNERS = [
-  { name: 'Radcliffe LP', props: 'Pine Gardens · 24 units', collected: 41200, repairs: 4820, feePct: 8 },
-  { name: 'Marino Group', props: 'Bayside Court · 12 townhomes', collected: 24800, repairs: 3120, feePct: 8 },
-  { name: '88 Main LLC', props: 'Main St mixed-use', collected: 19100, repairs: 1450, feePct: 8 },
+  { name: 'Radcliffe LP', props: 'Pine Gardens · 24 units', collected: 41850, repairs: 4820, feePct: 8 },
+  { name: 'Marino Group', props: 'Bayside Court · 12 townhomes', collected: 22100, repairs: 3120, feePct: 8 },
+  { name: '88 Main LLC', props: 'Main St mixed-use', collected: 19150, repairs: 1450, feePct: 8 },
   { name: 'T. Vance', props: 'Hooper Ave 4-plex', collected: 8900, repairs: 640, feePct: 9 },
 ]
 
+const BOOKS_REV = 11150
+const BOOKS_EXP = 8780
+const BOOKS_NET = 2370
+const BOOKS_RENTAL_COLLECTED = 115150
+
 const totalRoll = PROPERTIES.reduce((s, p) => s + p.rentRoll, 0)
 const totalDelinquent = PROPERTIES.reduce((s, p) => s + p.delinquent, 0)
+const collectedPct = ((totalRoll - totalDelinquent) / totalRoll) * 100
+const baysideDelinquent = PROPERTIES.find((p) => p.name === 'Bayside Court').delinquent
 const totalVacant = PROPERTIES.reduce((s, p) => s + p.vacancy, 0)
 const totalDoors = PROPERTIES.reduce((s, p) => s + p.units, 0)
 
@@ -131,8 +138,8 @@ export default function HarborfieldProperties() {
             <>
               <div className="kpi-row">
                 <Kpi k="Rent roll" v={money(totalRoll)} sub="September 2026" />
-                <Kpi k="Collected MTD" v="96.2%" sub="of rent roll" color={GREEN} />
-                <Kpi k="Delinquent" v={money(totalDelinquent)} sub="11 tenants" color={RED} />
+                <Kpi k="Collected MTD" v={fmtPct(collectedPct)} sub="of rent roll" color={GREEN} />
+                <Kpi k="Delinquent" v={money(totalDelinquent)} sub="6 tenants" color={RED} />
                 <Kpi k="Vacancy" v={fmtPct((totalVacant / totalDoors) * 100)} sub={`${totalVacant} of ${totalDoors} doors`} />
               </div>
               <div className="table-card">
@@ -165,7 +172,7 @@ export default function HarborfieldProperties() {
           {tab === 'delinquent' && (
             <>
               <p style={{ fontSize: '14px', color: MUTED, lineHeight: 1.6, marginBottom: '16px', maxWidth: '560px' }}>
-                Every late tenant has a next step. Bayside Court is {money(8200)} of your {money(totalDelinquent)} delinquency.
+                Every late tenant has a next step. Bayside Court is {money(baysideDelinquent)} of your {money(totalDelinquent)} delinquency.
               </p>
               <div style={{ background: '#fff', border: `1px solid ${BORDER}`, borderRadius: '8px', overflow: 'hidden' }}>
                 {DELINQUENT.map((d) => (
@@ -221,9 +228,9 @@ export default function HarborfieldProperties() {
           {tab === 'financials' && (
             <>
               <div className="kpi-row">
-                <Kpi k="Revenue MTD" v={money(96400)} sub="management + leasing" />
-                <Kpi k="Expenses" v={money(71900)} sub="payroll + maintenance" />
-                <Kpi k="Net income" v={money(24500)} sub="26% margin" color={GREEN} />
+                <Kpi k="Revenue MTD" v={money(BOOKS_REV)} sub="management + leasing" />
+                <Kpi k="Expenses" v={money(BOOKS_EXP)} sub="payroll + maintenance" />
+                <Kpi k="Net income" v={money(BOOKS_NET)} sub={`${Math.round(BOOKS_NET / BOOKS_REV * 100)}% margin`} color={GREEN} />
               </div>
               <DemoBooksPanel
                 headFont={DEMO_HEAD}
@@ -235,10 +242,10 @@ export default function HarborfieldProperties() {
                 title="September — portfolio vs QuickBooks"
                 intro="Synced nightly from QuickBooks."
                 rows={[
-                  { label: 'Rental income (collected)', portal: money(89200), qbo: money(89200) },
-                  { label: 'Management & leasing revenue', portal: money(96400), qbo: money(96400) },
-                  { label: 'Operating expenses', portal: money(71900), qbo: money(71900) },
-                  { label: 'Net income', portal: money(24500), qbo: money(24500) },
+                  { label: 'Rental income (collected)', portal: money(BOOKS_RENTAL_COLLECTED), qbo: money(BOOKS_RENTAL_COLLECTED) },
+                  { label: 'Management & leasing revenue', portal: money(BOOKS_REV), qbo: money(BOOKS_REV) },
+                  { label: 'Operating expenses', portal: money(BOOKS_EXP), qbo: money(BOOKS_EXP) },
+                  { label: 'Net income', portal: money(BOOKS_NET), qbo: money(BOOKS_NET) },
                 ]}
                 footnote=""
               />

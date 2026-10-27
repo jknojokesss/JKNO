@@ -55,9 +55,9 @@ const SEED_DIRECT = [
 const DIRECT_SOURCES = ['Shopify / online', 'Farmers market', 'Pop-up event', 'Wholesale / bulk', 'Other']
 
 const SEED_ADS = [
-  { id: 'a-ig', channel: 'Instagram Ads', spend: 600, rev: 2400, track: 'Meta pixel + code IG10', tracked: true },
-  { id: 'a-inf', channel: 'Influencer — @njfoodie', spend: 400, rev: 1600, track: 'Promo code NJFOODIE', tracked: true },
-  { id: 'a-goog', channel: 'Google Search', spend: 300, rev: 900, track: 'Google conversion tag', tracked: true },
+  { id: 'a-ig', channel: 'Instagram Ads', spend: 600, rev: 1260, track: 'Meta pixel + code IG10', tracked: true },
+  { id: 'a-inf', channel: 'Influencer — @njfoodie', spend: 400, rev: 840, track: 'Promo code NJFOODIE', tracked: true },
+  { id: 'a-goog', channel: 'Google Search', spend: 300, rev: 390, track: 'Google conversion tag', tracked: true },
   { id: 'a-fb', channel: 'Facebook Ads', spend: 450, rev: 180, track: 'Meta pixel', tracked: true },
   { id: 'a-5k', channel: 'Local 5K Sponsorship', spend: 250, rev: 150, track: 'Estimated — needs a promo code', tracked: false },
   { id: 'a-fly', channel: 'Flyers / print', spend: 120, rev: 90, track: 'Estimated — needs a promo code', tracked: false },
@@ -83,17 +83,17 @@ const SEED_EXPENSES = [
 
 // 11 prior months (current month is appended live) for the multi-month P&L
 const MONTH_SERIES = [
-  { m: 'Oct', directRev: 1200, consignRev: 900, cogs: 1450, adSpend: 700, opexNonAd: 480 },
-  { m: 'Nov', directRev: 1320, consignRev: 980, cogs: 1520, adSpend: 780, opexNonAd: 500 },
-  { m: 'Dec', directRev: 1450, consignRev: 1050, cogs: 1600, adSpend: 850, opexNonAd: 510 },
-  { m: 'Jan', directRev: 1600, consignRev: 1150, cogs: 1720, adSpend: 950, opexNonAd: 520 },
-  { m: 'Feb', directRev: 1800, consignRev: 1300, cogs: 1900, adSpend: 1200, opexNonAd: 560 },
-  { m: 'Mar', directRev: 2200, consignRev: 1600, cogs: 2150, adSpend: 1500, opexNonAd: 620 },
-  { m: 'Apr', directRev: 1500, consignRev: 1100, cogs: 1700, adSpend: 900, opexNonAd: 520 },
-  { m: 'May', directRev: 1650, consignRev: 1200, cogs: 1780, adSpend: 1050, opexNonAd: 540 },
-  { m: 'Jun', directRev: 1820, consignRev: 1380, cogs: 2050, adSpend: 1350, opexNonAd: 600 },
-  { m: 'Jul', directRev: 1900, consignRev: 1450, cogs: 2180, adSpend: 1500, opexNonAd: 620 },
-  { m: 'Aug', directRev: 1980, consignRev: 1510, cogs: 2280, adSpend: 1650, opexNonAd: 640 },
+  { m: 'Oct', directRev: 1200, consignRev: 900, cogs: 945, adSpend: 700, opexNonAd: 480 },
+  { m: 'Nov', directRev: 1320, consignRev: 980, cogs: 1035, adSpend: 780, opexNonAd: 500 },
+  { m: 'Dec', directRev: 1450, consignRev: 1050, cogs: 1125, adSpend: 850, opexNonAd: 510 },
+  { m: 'Jan', directRev: 1600, consignRev: 1150, cogs: 1240, adSpend: 950, opexNonAd: 520 },
+  { m: 'Feb', directRev: 1800, consignRev: 1300, cogs: 1395, adSpend: 1200, opexNonAd: 560 },
+  { m: 'Mar', directRev: 2200, consignRev: 1600, cogs: 1710, adSpend: 1500, opexNonAd: 620 },
+  { m: 'Apr', directRev: 1500, consignRev: 1100, cogs: 1170, adSpend: 900, opexNonAd: 520 },
+  { m: 'May', directRev: 1650, consignRev: 1200, cogs: 1285, adSpend: 1050, opexNonAd: 540 },
+  { m: 'Jun', directRev: 1820, consignRev: 1380, cogs: 1440, adSpend: 1350, opexNonAd: 600 },
+  { m: 'Jul', directRev: 1900, consignRev: 1450, cogs: 1510, adSpend: 1500, opexNonAd: 620 },
+  { m: 'Aug', directRev: 1980, consignRev: 1510, cogs: 1570, adSpend: 1650, opexNonAd: 640 },
 ]
 const mLine = (mo) => {
   const rev = mo.directRev + mo.consignRev, gross = rev - mo.cogs, opex = mo.adSpend + mo.opexNonAd
@@ -113,14 +113,14 @@ const PNL_ROWS = [
 
 // products sold this month (swap illustrations for real photos anytime)
 const PRODUCTS = [
-  { name: 'Original Beef Jerky', color: '#8B3A2A', icon: 'loaf', week: 30, month: 122 },
-  { name: 'Honey BBQ Bites', color: '#B5651D', icon: 'babka', week: 22, month: 88 },
-  { name: 'Sea Salt Crisps', color: '#C98A3E', icon: 'croissant', week: 18, month: 69 },
-  { name: 'Trail Mix Singles', color: '#6B4A2A', icon: 'muffin', week: 17, month: 63 },
-  { name: 'Spicy Sriracha', color: '#C8322B', icon: 'loaf', week: 15, month: 58 },
-  { name: 'Sweet & Smoky', color: '#9E6B34', icon: 'braid', week: 12, month: 51 },
-  { name: 'Classic Nut Mix', color: '#7A5A3A', icon: 'bagel', week: 11, month: 45 },
-  { name: 'Family Size Pouch', color: '#C99A5A', icon: 'baguette', week: 8, month: 34 },
+  { name: 'Original Beef Jerky', color: '#8B3A2A', icon: 'loaf', week: 35, month: 122 },
+  { name: 'Honey BBQ Bites', color: '#B5651D', icon: 'babka', week: 26, month: 88 },
+  { name: 'Sea Salt Crisps', color: '#C98A3E', icon: 'croissant', week: 21, month: 69 },
+  { name: 'Trail Mix Singles', color: '#6B4A2A', icon: 'muffin', week: 20, month: 63 },
+  { name: 'Spicy Sriracha', color: '#C8322B', icon: 'loaf', week: 18, month: 58 },
+  { name: 'Sweet & Smoky', color: '#9E6B34', icon: 'braid', week: 14, month: 51 },
+  { name: 'Classic Nut Mix', color: '#7A5A3A', icon: 'bagel', week: 12, month: 45 },
+  { name: 'Family Size Pouch', color: '#C99A5A', icon: 'baguette', week: 9, month: 34 },
 ]
 // per-period sales for the front-page leaderboards (week vs month)
 const STORE_PERF = [
@@ -132,7 +132,7 @@ const STORE_PERF = [
   { store: 'Sunrise Grocers', week: 8, weekRev: 68, month: 30, monthRev: 255 },
   { store: 'Cedar Market', week: 7, weekRev: 56, month: 25, monthRev: 200 },
   { store: 'Greenfield Grocery', week: 6, weekRev: 48, month: 20, monthRev: 160 },
-  { store: 'Main St. Market', week: 7, weekRev: 56, month: 18, monthRev: 144 },
+  { store: 'Main St. Market', week: 0, weekRev: 0, month: 0, monthRev: 0 },
 ]
 const DIRECT_PERF = [
   { who: 'Online store (Shopify)', source: 'Shopify / online', week: 31, weekRev: 403, month: 120, monthRev: 1560 },
@@ -336,6 +336,8 @@ export default function Demo({ demoEmbed = false }) {
   const totalOpex = opexNonAd + adSpend
   const netProfit = grossProfit - totalOpex
   const bagsPeriod = PRODUCTS.reduce((s, p) => s + p[period], 0)
+  const overviewWeekRevenue = STORE_PERF.reduce((s, x) => s + x.weekRev, 0) + DIRECT_PERF.reduce((s, x) => s + x.weekRev, 0)
+  const overviewRevenue = period === 'week' ? overviewWeekRevenue : revenue
   const bagsOut = R.reduce((s, c) => s + shelfUnits(c), 0)
 
   // monthly close → QB (Shopify online excluded — it books through Shopify, no double-count)
@@ -617,7 +619,7 @@ export default function Demo({ demoEmbed = false }) {
 
               <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap', marginBottom: '16px' }}>
                 <KPI k={`Items sold this ${period}`} v={bagsPeriod} sub="across all products" accent={INK} onClick={goOverviewPnl} />
-                <KPI k="Revenue / mo" v={m0(revenue)} sub={`${bagsPeriod} items this ${period}`} accent={SPICE} onClick={goOverviewPnl} />
+                <KPI k={period === 'week' ? 'Revenue / wk' : 'Revenue / mo'} v={m0(overviewRevenue)} sub={`${bagsPeriod} items this ${period}`} accent={SPICE} onClick={goOverviewPnl} />
                 <KPI k="Out on consignment" v={m0(onShelfVal)} sub={`${bagsOut} items sitting in stores`} accent={KRAFT} onClick={() => navFromOverview('consign')} />
                 <KPI k="Missing pieces" v={`${missUnits}`} sub={`${m0(missVal)} to investigate`} accent={missUnits ? RED : GREEN} onClick={() => navFromOverview('consign')} />
               </div>
@@ -625,7 +627,7 @@ export default function Demo({ demoEmbed = false }) {
               <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap', marginBottom: '16px' }}>
                 <div style={{ ...card, flex: 1, minWidth: '290px' }}>
                   <div style={{ ...lbl, marginBottom: '14px' }}>Top consignment stores · this {period}</div>
-                  {(() => { const pv = s => period === 'week' ? s.weekRev : s.monthRev; const pb = s => period === 'week' ? s.week : s.month; const sorted = STORE_PERF.slice().sort((a, b) => pv(b) - pv(a)); const max = pv(sorted[0]) || 1; return sorted.slice(0, 6).map((c, i) => (
+                  {(() => { const pv = s => period === 'week' ? s.weekRev : s.monthRev; const pb = s => period === 'week' ? s.week : s.month; const sorted = STORE_PERF.slice().sort((a, b) => pv(b) - pv(a)).filter((c) => pv(c) > 0); const max = pv(sorted[0]) || 1; return sorted.map((c, i) => (
                     <div key={c.store} className="sm-click sm-tap-row" role="button" tabIndex={0} onClick={() => openConsignStore(c.store)} onKeyDown={tapKey(() => openConsignStore(c.store))}
                       style={{ padding: '10px 8px', borderTop: i ? `1px solid ${CREAM}` : 'none', cursor: 'pointer', borderRadius: '8px', minHeight: '40px' }}>
                       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', gap: '8px', marginBottom: '6px' }}>
@@ -1176,7 +1178,7 @@ export default function Demo({ demoEmbed = false }) {
             <>
               {[
                 { q: 'Which store owes me the most right now?', a: <>Your counts show <b>Cedar Market</b> has the biggest gap: <b>7 items missing</b> (~$56), most likely sold-but-unreported. Across all stores you&rsquo;re owed about <b>{m0(missVal)}</b> — invoice the worst offenders.</>, go: () => { const c = consign.find(x => x.store === 'Cedar Market'); setOverviewBack(false); setTab('consign'); setExpanded(c?.id || null); if (c) setScrollConsignId(c.id) } },
-                { q: 'Where am I wasting ad money?', a: <>Three channels are underwater — <b>Facebook, the 5K, and flyers</b>. Together they cost <b>{m0(wastedSpend)}/mo</b> and return only <b>{m0(wastedReturn)}</b>. Move that budget to Instagram and your influencer (both ~4x).</>, go: () => { setOverviewBack(false); setTab('ads'); setExpanded(null) } },
+                { q: 'Where am I wasting ad money?', a: <>Three channels are underwater — <b>Facebook, the 5K, and flyers</b>. Together they cost <b>{m0(wastedSpend)}/mo</b> and return only <b>{m0(wastedReturn)}</b>. Move that budget to Instagram and your influencer (both ~2x).</>, go: () => { setOverviewBack(false); setTab('ads'); setExpanded(null) } },
                 { q: 'Did I actually make money this month?', a: <>Net profit is already <b>{m0(netProfit)}</b> after revenue of <b>{m0(revenue)}</b>. Fixing ad waste and collecting the <b>{m0(missVal)}</b> still owed on consignment would add about <b>{m0(wastedSpend - wastedReturn)}</b> plus <b>{m0(missVal)}</b> on top of that.</>, go: () => { setOverviewBack(false); setTab('pnl'); setPnlView('single'); setExpanded(null) } },
               ].map((m, i) => (
                 <div key={i} style={{ marginBottom: '16px' }}>
