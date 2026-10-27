@@ -58,7 +58,10 @@ function invRows(){var last=D.stock[NDAYS-1];return D.skus.map(function(s,k){var
   return {k:k,sku:s.sku,name:s.name,av:av,ib:ib,oo:oo,v:v,cover:cover,lead:s.lead,status:st,sug:sug,value:(av+ib)*s.cost,cost:s.cost};});}
 var SHIPS=D.shipments.map(function(s){s.units=0;s.recv=0;s.lines.forEach(function(l){s.units+=l.shipped;s.recv+=l.received;});s.diff=s.recv-s.units;s.closedFlag=s.status==='Closed';return s;});
 function claimFor(shipId,sku){for(var i=0;i<D.claims.length;i++){var c=D.claims[i];if(c.shipment===shipId&&c.sku===sku)return c;}return null;}
-function claimTotals(){var t={claimed:0,pending:0,reimbursed:0,notfiled:0};D.claims.forEach(function(c){if(c.status!=='Not filed')t.claimed+=c.amount;if(c.status==='Pending')t.pending+=c.amount;if(c.status==='Reimbursed')t.reimbursed+=c.amount;if(c.status==='Not filed')t.notfiled+=c.amount;});return t;}
+function claimTotals(){var t={claimed:0,pending:0,reimbursed:0,notfiled:0,potential:0};D.claims.forEach(function(c){if(c.status!=='Not filed')t.claimed+=c.amount;if(c.status==='Pending')t.pending+=c.amount;if(c.status==='Reimbursed')t.reimbursed+=c.amount;if(c.status==='Not filed')t.notfiled+=c.amount;if(c.status==='Pending'||c.status==='Not filed')t.potential+=c.amount;});return t;}
+function shipClaimAmount(s){var t=0;if(!s.closedFlag||s.diff>=0)return t;s.lines.forEach(function(l){var d=l.shipped-l.received;if(d<=0)return;var c=claimFor(s.id,l.sku);if(c)t+=c.amount;});return t;}
+function breakdownParts(o){return [['Refunds',o.refunds],['Amazon fees',o.fees],['Ad spend',o.ads],['COGS',o.cogs],['Write-offs less reimbursements',o.loss-o.reimb],['Other expenses',o.other],['True net profit',o.net]];}
+function breakdownSum(o){var s=0;breakdownParts(o).forEach(function(x){s+=x[1];});return s;}
 
 /* ---------- state ---------- */
 var LASTW=NWEEKS-1;
@@ -108,7 +111,7 @@ function barChart(o){var MOB=window.innerWidth<640;var vals=o.values,W=MOB?360:(
   var stepV=niceMax((max-min)/4);var top=Math.ceil(max/stepV)*stepV;var bot=Math.floor(min/stepV)*stepV;if(top===bot)top=bot+stepV;
   var y=function(v){return pt+(top-v)/(top-bot)*(H-pt-pb);};var n=vals.length,bw=(W-pl-pr)/n;
   var s='<svg class="chart" viewBox="0 0 '+W+' '+H+'" role="img" aria-label="'+esc(o.label)+'">';
-  for(var g=bot;g<=top+1e-6;g+=stepV){s+='<line class="grid-l" x1="'+pl+'" x2="'+(W-pr)+'" y1="'+y(g).toFixed(1)+'" y2="'+y(g).toFixed(1)+'"/><text x="'+(pl-8)+'" y="'+(y(g)+4).toFixed(1)+'" text-anchor="end">'+short(g)+'</text>';}
+  for(var g=bot;g<=top+1e-6;g+=stepV){s+='<line class="grid-l" x1="'+pl+'" x2="'+(W-pr)+'" y1="'+y(g).toFixed(1)+'" y2="'+y(g).toFixed(1)+'"/>'+(g===bot||g===top?'':'')+'<text x="'+(pl-8)+'" y="'+(y(g)+4).toFixed(1)+'" text-anchor="end">'+short(g)+'</text>';}
   s+='<line class="zero" x1="'+pl+'" x2="'+(W-pr)+'" y1="'+y(0)+'" y2="'+y(0)+'"/>';
   vals.forEach(function(v,i){var x=pl+i*bw+bw*0.18,w=bw*0.64,y0=y(Math.max(v,0)),h=Math.abs(y(v)-y(0));var inR=o.hi&&o.hi(i);var tip=o.tip(i);
     s+='<rect class="bar'+(v<0?' neg':'')+(inR?' in':'')+'" x="'+x.toFixed(1)+'" y="'+y0.toFixed(1)+'" width="'+w.toFixed(1)+'" height="'+Math.max(h,1).toFixed(1)+'" rx="3" data-tip="'+esc(tip)+'"></rect>';
@@ -404,7 +407,7 @@ function route(){var hs=(location.hash||'#/overview').replace(/^#\/?/,'').split(
   renderMobTabs(page);
   openDrawer(page,sub);
   if(pageChanged&&!sub)window.scrollTo(0,0);}
-function render(){var page=cur.page;$('#pageTitle').textContent=TITLES[page][0];var ps=$('#pageSub'),sub=TITLES[page][1];ps.textContent=sub;ps.hidden=!sub;document.title=TITLES[page][0]+' | Larkfield Kitchen Co. | Sample client portal';renderRange(page);$('#main').innerHTML=PAGES[page]();}
+function render(){var page=cur.page;$('#pageTitle').textContent=TITLES[page][0];var ps=$('#pageSub'),sub=TITLES[page][1];ps.textContent=sub;ps.hidden=!sub;document.title=TITLES[page][0]+' | '+D.business.name+' | Sample client portal';renderRange(page);$('#main').innerHTML=PAGES[page]();}
 var lastFocus=null;
 function openDrawer(page,sub){var wrap=$('#drawerWrap'),dr=$('#drawer');var html=null;
   if(sub&&page==='products')html=productDrawer(sub);if(sub&&page==='shipments')html=shipmentDrawer(sub);

@@ -1,5 +1,5 @@
 /**
- * Larkfield Kitchen Co. — Amazon seller sample portal.
+ * Murray's Shot Glass Gallery — Amazon seller sample portal.
  * Client logic and sample data: public/amazon-demo/{app.js,data.js,styles.css}.
  */
 import Head from 'next/head'
@@ -9,14 +9,14 @@ export default function AmazonDemoPortal() {
   return (
     <>
       <Head>
-        <title>Larkfield Kitchen Co. | Client Portal (Sample)</title>
+        <title>Murray&apos;s Shot Glass Gallery | Client Portal (Sample)</title>
         <meta name="robots" content="noindex, nofollow" />
         <meta
           name="description"
           content="Sample client portal by JK No Jokes Financials: Amazon profit from Sellerboard plus every other expense from QuickBooks Online, in one weekly view."
         />
         <meta property="og:type" content="website" />
-        <meta property="og:title" content="Larkfield Kitchen Co. | Client Portal (Sample)" />
+        <meta property="og:title" content="Murray's Shot Glass Gallery | Client Portal (Sample)" />
         <meta
           property="og:description"
           content="Amazon profit from Sellerboard plus every other expense from QuickBooks, in one weekly report. Prepared by JK No Jokes Financials."
@@ -39,10 +39,10 @@ export default function AmazonDemoPortal() {
         <aside className="side" aria-label="Main navigation">
           <div className="brand">
             <span className="mark" aria-hidden="true">
-              LK
+              MS
             </span>
             <span className="brand-text">
-              <strong>Larkfield Kitchen Co.</strong>
+              <strong>Murray&apos;s Shot Glass Gallery</strong>
               <span>Client portal</span>
             </span>
           </div>
@@ -86,7 +86,7 @@ export default function AmazonDemoPortal() {
             <div className="top-row">
               <div className="top-title">
                 <span className="mark sm" aria-hidden="true">
-                  LK
+                  MS
                 </span>
                 <div>
                   <h1 id="pageTitle">
