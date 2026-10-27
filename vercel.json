@@ -3,6 +3,10 @@
     {
       "path": "/api/cron/qbo-sync",
       "schedule": "30 7 * * *"
+    },
+    {
+      "path": "/api/cron/qbo-sync?client=jerky&gl=10",
+      "schedule": "30 8 * * *"
     }
   ]
 }
