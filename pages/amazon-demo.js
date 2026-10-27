@@ -38,7 +38,11 @@ export default function AmazonDemoPortal() {
       </a>
       <div className="app">
         <aside className="side" aria-label="Main navigation">
-          <div className="brand">
+          <a
+            className="brand"
+            href="#/overview"
+            aria-label="Murray's Shot Glass Gallery, back to Overview"
+          >
             <span className="mark" aria-hidden="true">
               MS
             </span>
@@ -46,7 +50,7 @@ export default function AmazonDemoPortal() {
               <strong>Murray&apos;s Shot Glass Gallery</strong>
               <span>Client portal</span>
             </span>
-          </div>
+          </a>
           <nav className="nav" id="nav">
             <a href="#/overview" data-page="overview">
               Overview
@@ -88,7 +92,7 @@ export default function AmazonDemoPortal() {
         <div className="body">
           <header className="top">
             <div className="top-row">
-              <div className="top-title">
+              <a className="top-title brand-home" href="#/overview" aria-label="Back to Overview">
                 <span className="mark sm" aria-hidden="true">
                   MS
                 </span>
@@ -98,7 +102,7 @@ export default function AmazonDemoPortal() {
                   </h1>
                   <p className="sub" id="pageSub" />
                 </div>
-              </div>
+              </a>
               <span className="pill-sample">Sample data</span>
             </div>
             <div className="range" id="rangeBar" role="group" aria-label="Date range" />

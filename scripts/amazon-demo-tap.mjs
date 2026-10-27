@@ -81,7 +81,7 @@ async function smallTapTargets(page) {
   return page.evaluate(() => {
     const fails = []
     const sel =
-      'a.ov-box, a.ov-sec-item, a.ov-low-item, button.show-more, .mob-tabs a, .mob-tabs button, .chip, .seg button, a.note.tap-card, .back-bar, a.kv-row.tap-card, tr.tap-row'
+      'a.ov-box, a.ov-sec-item, a.ov-low-item, button.show-more, .mob-tabs a, .mob-tabs button, .chip, .seg button, a.note.tap-card, .back-bar, a.kv-row.tap-card, tr.tap-row, a.brand-home'
     document.querySelectorAll(sel).forEach((el) => {
       if (!el.offsetParent) return
       const r = el.getBoundingClientRect()
@@ -212,6 +212,38 @@ async function exerciseMobExpand(page, fails) {
   }
 }
 
+async function exerciseBrandHome(page, width, taps, fails) {
+  await page.setViewportSize({ width, height: width <= 430 ? 844 : 900 })
+  const sel =
+    width <= 640 ? 'a.brand-home[href="#/overview"]' : 'a.brand[href="#/overview"]'
+  for (const route of ['#/inventory', '#/payables', '#/products']) {
+    await page.goto(`${BASE}${route}`, { waitUntil: 'load', timeout: 60000 })
+    await waitMain(page)
+    await closeDrawer(page)
+    const link = page.locator(sel).first()
+    if (!(await link.isVisible())) {
+      fails.push(`brand home not visible ${width}px on ${route}`)
+      continue
+    }
+    const r = await link.boundingBox()
+    if (width <= 640 && r && (r.height < 44 || r.width < 44)) {
+      fails.push(`brand home tap target ${width}px on ${route}: ${Math.round(r.width)}×${Math.round(r.height)}`)
+    }
+    try {
+      await link.click({ timeout: 8000 })
+      await page.waitForTimeout(350)
+      taps.count++
+    } catch (e) {
+      fails.push(`brand home click ${route}: ${e.message}`)
+      continue
+    }
+    const hash = await page.evaluate(() => location.hash)
+    const title = await page.evaluate(() => document.getElementById('pageTitle')?.textContent?.trim())
+    if (!hash.includes('overview')) fails.push(`brand home ${route} hash ${hash}`)
+    if (title !== 'Overview') fails.push(`brand home ${route} title "${title}"`)
+  }
+}
+
 async function exerciseHistory(page, fails) {
   await page.goto(`${BASE}#/overview`, { waitUntil: 'load', timeout: 60000 })
   await waitMain(page)
@@ -301,6 +333,10 @@ async function runBrowser(name, launch, contextOpts, productSkus) {
   if (name.includes('iPhone')) await exerciseMobExpand(page, fails)
 
   const widths = name.includes('iPhone') ? [390] : [390, 1440]
+  for (const width of widths) {
+    await exerciseBrandHome(page, width, taps, fails)
+  }
+
   for (const width of widths) {
     for (const route of ROUTES) {
       await exerciseRoute(page, route, width, taps, fails)
