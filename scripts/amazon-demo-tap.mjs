@@ -80,7 +80,8 @@ async function badText(page) {
 async function smallTapTargets(page) {
   return page.evaluate(() => {
     const fails = []
-    const sel = 'a.ov-box, .mob-tabs a, .mob-tabs button, .chip, .seg button, a.note.tap-card, .back-bar, a.kv-row.tap-card, tr.tap-row'
+    const sel =
+      'a.ov-box, a.ov-sec-item, a.ov-low-item, button.show-more, .mob-tabs a, .mob-tabs button, .chip, .seg button, a.note.tap-card, .back-bar, a.kv-row.tap-card, tr.tap-row'
     document.querySelectorAll(sel).forEach((el) => {
       if (!el.offsetParent) return
       const r = el.getBoundingClientRect()
@@ -135,13 +136,13 @@ async function tapVisible(page, selector, taps, fails, opts = {}) {
 
 async function directLoads(page, fails, productSkus) {
   for (const hash of ROUTES) {
-    await page.goto(`${BASE}${hash}`, { waitUntil: 'networkidle' })
+    await page.goto(`${BASE}${hash}`, { waitUntil: 'load', timeout: 60000 })
     await waitMain(page)
     const main = await page.$('#main')
     if (!main) fails.push(`direct load missing #main ${hash}`)
   }
   for (const sku of productSkus) {
-    await page.goto(`${BASE}#/products/${encodeURIComponent(sku)}`, { waitUntil: 'networkidle' })
+    await page.goto(`${BASE}#/products/${encodeURIComponent(sku)}`, { waitUntil: 'load', timeout: 60000 })
     await waitMain(page)
     const open = await page.evaluate(() => !document.getElementById('drawerWrap').hidden)
     if (!open) fails.push(`direct load product drawer ${sku}`)
@@ -150,7 +151,7 @@ async function directLoads(page, fails, productSkus) {
 }
 
 async function exerciseRanges(page, fails) {
-  await page.goto(`${BASE}#/overview`, { waitUntil: 'networkidle' })
+  await page.goto(`${BASE}#/overview`, { waitUntil: 'load', timeout: 60000 })
   await waitMain(page)
   for (const r of RANGES) {
     await page.locator(`button[data-range="${r}"]`).click()
@@ -159,7 +160,7 @@ async function exerciseRanges(page, fails) {
     bad.forEach((b) => fails.push(`range ${r} overview: ${b}`))
   }
   for (const route of ['#/products', '#/expenses']) {
-    await page.goto(`${BASE}${route}`, { waitUntil: 'networkidle' })
+    await page.goto(`${BASE}${route}`, { waitUntil: 'load', timeout: 60000 })
     await waitMain(page)
     for (const r of RANGES) {
       await page.locator(`button[data-range="${r}"]`).click()
@@ -170,8 +171,49 @@ async function exerciseRanges(page, fails) {
   }
 }
 
+async function exerciseMobExpand(page, fails) {
+  await page.setViewportSize({ width: 390, height: 844 })
+  const routes = [
+    ['#/products', 'button[data-prod-all="1"]', 'Show all products'],
+    ['#/payables', 'button[data-expand="payMoreExpand"]', 'payables expand'],
+    ['#/shipments', 'button[data-expand="shipExpand"]', 'shipments expand'],
+    ['#/expenses', 'button[data-expand="expExpand"]', 'expenses expand'],
+    ['#/inventory', 'button[data-expand="invExpand"]', 'inventory expand'],
+    ['#/cash', 'button[data-expand="cashExpand"]', 'cash expand'],
+    ['#/report', 'button[data-expand="repExpand"]', 'report expand'],
+    ['#/overview', 'button[data-expand="ovLowExpand"]', 'running low expand'],
+  ]
+  for (const [route, sel, label] of routes) {
+    await page.goto(`${BASE}${route}`, { waitUntil: 'load', timeout: 60000 })
+    await waitMain(page)
+    const btn = page.locator(sel)
+    if ((await btn.count()) === 0) continue
+    if (!(await btn.first().isVisible())) continue
+    await btn.first().click()
+    await page.waitForTimeout(250)
+    if (sel.includes('data-prod-all')) {
+      const cards = await page.locator('a.prod-card').count()
+      if (cards <= 5) fails.push(`mob expand ${label}: expected >5 product cards`)
+    } else {
+      const expanded = await page.locator(sel).first().getAttribute('aria-expanded')
+      if (expanded !== 'true') fails.push(`mob expand ${label}: aria-expanded not true`)
+    }
+  }
+  await page.goto(`${BASE}#/products`, { waitUntil: 'load', timeout: 60000 })
+  await waitMain(page)
+  const prodBtn = page.locator('button[data-prod-all="1"]')
+  if ((await prodBtn.count()) && (await prodBtn.first().isVisible())) {
+    await prodBtn.first().click()
+    await page.waitForTimeout(250)
+    await page.locator('button[data-range="mtd"]').click()
+    await page.waitForTimeout(350)
+    const cards = await page.locator('a.prod-card').count()
+    if (cards <= 5) fails.push('mob expand products: collapsed after range change')
+  }
+}
+
 async function exerciseHistory(page, fails) {
-  await page.goto(`${BASE}#/overview`, { waitUntil: 'networkidle' })
+  await page.goto(`${BASE}#/overview`, { waitUntil: 'load', timeout: 60000 })
   await waitMain(page)
   await page.locator('a.ov-box[href="#/cash"]').click()
   await page.waitForTimeout(300)
@@ -187,7 +229,7 @@ async function exerciseHistory(page, fails) {
 
 async function exerciseRoute(page, route, width, taps, fails) {
   await page.setViewportSize({ width, height: width <= 430 ? 844 : 900 })
-  await page.goto(`${BASE}${route}`, { waitUntil: 'networkidle' })
+  await page.goto(`${BASE}${route}`, { waitUntil: 'load', timeout: 60000 })
   await waitMain(page)
   await closeDrawer(page)
   const ov = await overflow(page)
@@ -204,24 +246,32 @@ async function exerciseRoute(page, route, width, taps, fails) {
 
   if (route === '#/overview') {
     await tapVisible(page, 'a.ov-box', taps, fails, { readHref: true })
-    await page.goto(`${BASE}#/overview`, { waitUntil: 'networkidle' })
+    await page.goto(`${BASE}#/overview`, { waitUntil: 'load', timeout: 60000 })
     await waitMain(page)
+    await tapVisible(page, 'a.ov-sec-item', taps, fails, { readHref: true })
+    await page.goto(`${BASE}#/overview`, { waitUntil: 'load', timeout: 60000 })
+    await waitMain(page)
+    await tapVisible(page, 'a.ov-low-item', taps, fails, { readHref: true, closeDrawer: true })
+    await page.goto(`${BASE}#/overview`, { waitUntil: 'load', timeout: 60000 })
+    await waitMain(page)
+    await closeDrawer(page)
     if (width <= 430) {
-      await tapVisible(page, 'a.mob-panel-link', taps, fails, { readHref: true })
-      await page.goto(`${BASE}#/overview`, { waitUntil: 'networkidle' })
+      await tapVisible(page, 'a.mob-panel-link', taps, fails, { readHref: true, closeDrawer: true })
+      await page.goto(`${BASE}#/overview`, { waitUntil: 'load', timeout: 60000 })
       await waitMain(page)
-      await tapVisible(page, '.ov-prod-list a', taps, fails, { readHref: true })
+      await closeDrawer(page)
+      await tapVisible(page, '.ov-prod-list a', taps, fails, { readHref: true, closeDrawer: true })
     } else {
       await tapVisible(page, 'section.card.panel.sec tr.click.tap-row', taps, fails, { closeDrawer: true })
     }
   } else if (route === '#/products') {
     await tapVisible(page, 'a.prod-card', taps, fails, { readHref: true, closeDrawer: true })
-    await page.goto(`${BASE}${route}`, { waitUntil: 'networkidle' })
+    await page.goto(`${BASE}${route}`, { waitUntil: 'load', timeout: 60000 })
     await waitMain(page)
     await tapVisible(page, 'tr[data-go]', taps, fails, { closeDrawer: true })
   } else if (route === '#/shipments') {
     await tapVisible(page, 'a.ship-card', taps, fails, { readHref: true, closeDrawer: true })
-    await page.goto(`${BASE}${route}`, { waitUntil: 'networkidle' })
+    await page.goto(`${BASE}${route}`, { waitUntil: 'load', timeout: 60000 })
     await waitMain(page)
     await closeDrawer(page)
     await tapVisible(page, 'a.claim-card', taps, fails, {
@@ -248,6 +298,7 @@ async function runBrowser(name, launch, contextOpts, productSkus) {
   await directLoads(page, fails, productSkus)
   await exerciseRanges(page, fails)
   await exerciseHistory(page, fails)
+  if (name.includes('iPhone')) await exerciseMobExpand(page, fails)
 
   const widths = name.includes('iPhone') ? [390] : [390, 1440]
   for (const width of widths) {
@@ -257,7 +308,7 @@ async function runBrowser(name, launch, contextOpts, productSkus) {
   }
 
   if (name.includes('iPhone')) {
-    await page.goto(`${BASE}#/overview`, { waitUntil: 'networkidle' })
+    await page.goto(`${BASE}#/overview`, { waitUntil: 'load', timeout: 60000 })
     await waitMain(page)
     await page.evaluate(() => window.scrollTo(0, document.documentElement.scrollHeight))
     await page.waitForTimeout(150)
@@ -306,7 +357,7 @@ async function main() {
       executablePath: CHROME,
     })
     const page = await browser.newPage()
-    await page.goto(`${BASE}#/overview`, { waitUntil: 'networkidle' })
+    await page.goto(`${BASE}#/overview`, { waitUntil: 'load', timeout: 60000 })
     await page.waitForFunction(() => window.__portal)
     const skus = await page.evaluate(() => window.PORTAL_DATA.skus.map((s) => s.sku))
     await browser.close()

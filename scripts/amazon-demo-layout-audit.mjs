@@ -140,7 +140,7 @@ export async function runLayoutAudits(page, base, routes = LAYOUT_ROUTES, widths
   for (const width of widths) {
     for (const route of routes) {
       await page.setViewportSize({ width, height: width === 390 ? 844 : 900 })
-      await page.goto(`${base}${route}`, { waitUntil: 'networkidle' })
+      await page.goto(`${base}${route}`, { waitUntil: 'load', timeout: 60000 })
       await page.waitForSelector('#main', { timeout: 15000 })
       await page.waitForTimeout(250)
       const { fails } = await auditMainLayout(page)

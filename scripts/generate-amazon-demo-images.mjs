@@ -7,6 +7,9 @@ import path from 'path'
 
 const OUT = path.join(process.cwd(), 'public/amazon-demo/img')
 const SIZE = 400
+/** Glass art ~75–80% of frame height, vertically centered */
+const GLASS_SCALE = 1.55
+const CY = SIZE * 0.52
 
 const SKUS = {
   'MSG-HEAVY-6': {
@@ -82,13 +85,14 @@ const SKUS = {
 }
 
 function glassPath(kind, i, n) {
-  const cx = 200
-  const spread = n === 1 ? 0 : n === 2 ? 70 : n <= 4 ? 55 : 38
+  const cx = SIZE / 2
+  const spread = (n === 1 ? 0 : n === 2 ? 70 : n <= 4 ? 55 : 38) * GLASS_SCALE
   const x = cx + (i - (n - 1) / 2) * spread
-  const h = kind === 'tall' ? 130 : kind === 'mini' ? 72 : kind === 'heavy' ? 105 : 95
-  const w = kind === 'mini' ? 36 : kind === 'tall' ? 44 : 48
-  const y = 280 - h
-  const rim = w + 8
+  const h =
+    (kind === 'tall' ? 130 : kind === 'mini' ? 72 : kind === 'heavy' ? 105 : 95) * GLASS_SCALE
+  const w = (kind === 'mini' ? 36 : kind === 'tall' ? 44 : 48) * GLASS_SCALE
+  const y = CY - h / 2
+  const rim = w + 8 * GLASS_SCALE
   return { x, y, w, h, rim }
 }
 
@@ -111,13 +115,15 @@ function svgFor(sku, cfg) {
                 : 2
 
   if (kind === 'rack') {
-    inner += `<rect x="72" y="248" width="256" height="14" rx="4" fill="${accent}" opacity="0.85"/>
-<rect x="88" y="262" width="224" height="8" rx="2" fill="#78350F"/>`
+    const shelfY = CY + 95 * GLASS_SCALE
+    inner += `<rect x="72" y="${shelfY}" width="256" height="14" rx="4" fill="${accent}" opacity="0.85"/>
+<rect x="88" y="${shelfY + 14}" width="224" height="8" rx="2" fill="#78350F"/>`
   }
   if (kind === 'gift') {
-    inner += `<rect x="118" y="118" width="164" height="120" rx="10" fill="${accent}" opacity="0.25"/>
-<rect x="118" y="168" width="164" height="12" fill="${accent}" opacity="0.5"/>
-<rect x="192" y="118" width="16" height="120" fill="${accent}" opacity="0.45"/>`
+    const boxY = CY - 60 * GLASS_SCALE
+    inner += `<rect x="118" y="${boxY}" width="164" height="120" rx="10" fill="${accent}" opacity="0.25"/>
+<rect x="118" y="${boxY + 50}" width="164" height="12" fill="${accent}" opacity="0.5"/>
+<rect x="192" y="${boxY}" width="16" height="120" fill="${accent}" opacity="0.45"/>`
   }
 
   for (let i = 0; i < count; i++) {

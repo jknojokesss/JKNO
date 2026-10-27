@@ -44,7 +44,7 @@ async function main() {
 
   for (const [name, hash] of TABS) {
     await page.setViewportSize({ width: 1440, height: 900 })
-    await page.goto(`${BASE}${hash}`, { waitUntil: 'networkidle' })
+    await page.goto(`${BASE}${hash}`, { waitUntil: 'load', timeout: 60000 })
     await page.waitForSelector('#main', { timeout: 15000 })
     await page.waitForTimeout(500)
     await page.screenshot({ path: path.join(OUT, `desk-${name}.png`), fullPage: true })
@@ -52,7 +52,7 @@ async function main() {
 
   for (const [name, hash] of TABS) {
     await page.setViewportSize({ width: 390, height: 844 })
-    await page.goto(`${BASE}${hash}`, { waitUntil: 'networkidle' })
+    await page.goto(`${BASE}${hash}`, { waitUntil: 'load', timeout: 60000 })
     await page.waitForSelector('#main', { timeout: 15000 })
     await page.waitForTimeout(500)
     await page.screenshot({
@@ -66,7 +66,7 @@ async function main() {
   }
 
   await page.setViewportSize({ width: 390, height: 844 })
-  await page.goto(`${BASE}#/overview`, { waitUntil: 'networkidle' })
+  await page.goto(`${BASE}#/overview`, { waitUntil: 'load', timeout: 60000 })
   await page.waitForSelector('.ov-prod-list', { timeout: 15000 })
   await page.locator('.ov-prod-list').scrollIntoViewIfNeeded()
   await page.waitForTimeout(300)
@@ -75,7 +75,7 @@ async function main() {
     fullPage: false,
   })
 
-  await page.goto(`${BASE}#/overview`, { waitUntil: 'networkidle' })
+  await page.goto(`${BASE}#/overview`, { waitUntil: 'load', timeout: 60000 })
   await page.waitForSelector('.ov-prod-list a', { timeout: 15000 })
   await page.click('.ov-prod-list a')
   await page.waitForTimeout(500)
@@ -84,7 +84,7 @@ async function main() {
     fullPage: true,
   })
 
-  await page.goto(`${BASE}#/overview`, { waitUntil: 'networkidle' })
+  await page.goto(`${BASE}#/overview`, { waitUntil: 'load', timeout: 60000 })
   await page.click('#mobMoreBtn')
   await page.waitForTimeout(300)
   await page.screenshot({
@@ -93,12 +93,12 @@ async function main() {
   })
 
   await page.setViewportSize({ width: 1280, height: 900 })
-  await page.goto(`${BASE}#/overview`, { waitUntil: 'networkidle' })
+  await page.goto(`${BASE}#/overview`, { waitUntil: 'load', timeout: 60000 })
   await page.waitForSelector('.ov-kpi-grid', { timeout: 15000 })
-  await page.waitForSelector('section.card.panel.sec .tbl-wrap table', { timeout: 15000 })
+  await page.waitForSelector('.ov-prod-row .tbl-wrap table, .ov-kpi-grid', { timeout: 15000 })
   const clip = await page.evaluate(() => {
     const boxes = document.querySelector('.ov-kpi-grid')
-    const table = document.querySelector('section.card.panel.sec .tbl-wrap table')
+    const table = document.querySelector('.ov-prod-row .tbl-wrap table')
     const main = document.querySelector('#main')
     if (!boxes || !table || !main) return null
     const pad = 8
@@ -124,7 +124,7 @@ async function main() {
   }
 
   await page.setViewportSize({ width: 1440, height: 900 })
-  await page.goto(`${BASE}#/shipments`, { waitUntil: 'networkidle' })
+  await page.goto(`${BASE}#/shipments`, { waitUntil: 'load', timeout: 60000 })
   await page.waitForSelector('#shipTbl tbody tr.click', { timeout: 15000 })
   const row = page.locator('#shipTbl tbody tr.click').first()
   await row.hover()
@@ -132,7 +132,7 @@ async function main() {
   await page.screenshot({ path: path.join(OUT, 'desk-04-shipments-hover.png'), fullPage: false })
 
   await page.setViewportSize({ width: 390, height: 844 })
-  await page.goto(`${BASE}#/shipments`, { waitUntil: 'networkidle' })
+  await page.goto(`${BASE}#/shipments`, { waitUntil: 'load', timeout: 60000 })
   await page.waitForSelector('#shipLeadClaims .claim-card', { timeout: 10000 })
   await page.waitForTimeout(300)
   await page.screenshot({
@@ -145,7 +145,7 @@ async function main() {
   const wctx = await wb.newContext({ ...iPhone14, locale: 'en-US' })
   const wp = await wctx.newPage()
   for (const [name, hash] of TABS) {
-    await wp.goto(`${BASE}${hash}`, { waitUntil: 'networkidle' })
+    await wp.goto(`${BASE}${hash}`, { waitUntil: 'load', timeout: 60000 })
     await wp.waitForSelector('#main', { timeout: 15000 })
     await wp.waitForTimeout(500)
     await wp.screenshot({
