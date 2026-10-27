@@ -120,6 +120,10 @@ export default function AmazonDemoPortal() {
       </div>
       <div className="tip" id="tip" role="status" aria-live="polite" />
       <nav className="mob-tabs" id="mobTabs" aria-label="Main navigation" />
+      <div className="mob-more-wrap" id="mobMoreSheet" hidden aria-hidden="true">
+        <div className="mob-more-scrim" data-close-more />
+        <nav className="mob-more-panel" id="mobMorePanel" aria-label="More pages" />
+      </div>
 
       <Script src="/amazon-demo/data.js" strategy="beforeInteractive" />
       <Script src="/amazon-demo/app.js" strategy="afterInteractive" />
