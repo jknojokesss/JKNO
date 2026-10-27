@@ -1,6 +1,6 @@
 /** Shared DOM layout checks for the amazon demo (empty cards, text overflow). */
 
-export const LAYOUT_WIDTHS = [390, 1280, 1440, 1920]
+export const LAYOUT_WIDTHS = [360, 390, 430, 1280, 1440, 1920]
 
 export const LAYOUT_ROUTES = [
   '#/overview',
@@ -23,7 +23,7 @@ export async function auditMainLayout(page) {
 
     const isEmptyCard = (el) => {
       if (!el.classList.contains('card')) return false
-      if (el.querySelector('table tbody tr, svg.chart, .blist, .ov-prod-list li, .kv-rows .kv-row, ul.payout-list li, .mob-card-list .data-card, .conn-h, .report, .bs-grid, .aging, canvas, .empty, .rep-kpis, .mini, .dr-sec, .inv-buckets, .inv-total, .fin-note'))
+      if (el.querySelector('table tbody tr, svg.chart, .blist, .ov-prod-list li, .ov-kpi-grid a, .kv-rows .kv-row, ul.payout-list li, .mob-card-list .data-card, .conn-h, .report, .bs-grid, .aging, canvas, .empty, .rep-kpis, .mini, .dr-sec, .inv-buckets, .inv-total, .fin-note'))
         return false
       const text = (el.textContent || '').replace(/\s+/g, ' ').trim()
       if (text.length < 4) return true

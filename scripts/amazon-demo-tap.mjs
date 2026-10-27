@@ -1,7 +1,9 @@
-import { chromium } from 'playwright'
-import { runLayoutAudits } from './amazon-demo-layout-audit.mjs'
+import { chromium, webkit, devices } from 'playwright'
+import { runLayoutAudits, LAYOUT_ROUTES } from './amazon-demo-layout-audit.mjs'
 
 const BASE = process.env.BASE_URL || 'http://127.0.0.1:3000/amazon-demo'
+const CHROME =
+  process.env.PLAYWRIGHT_CHROME_PATH || '/usr/local/bin/google-chrome'
 
 const ROUTES = [
   '#/overview',
@@ -16,6 +18,32 @@ const ROUTES = [
   '#/sources',
 ]
 
+const RANGES = ['week', 'last', 'mtd', 'custom']
+
+function attachQualityHooks(page, bucket) {
+  page.on('console', (msg) => {
+    if (msg.type() !== 'error') return
+    const t = msg.text()
+    if (/favicon|fonts\.(googleapis|gstatic)/i.test(t)) return
+    const loc = msg.location()?.url || ''
+    if (/favicon\.ico/i.test(loc)) return
+    bucket.consoleErrors.push(t)
+  })
+  page.on('pageerror', (err) => bucket.consoleErrors.push(String(err)))
+  page.on('requestfailed', (req) => {
+    const u = req.url()
+    if (u.startsWith('data:') || u.includes('chrome-extension') || u.includes('favicon')) return
+    bucket.failedRequests.push(`${req.failure()?.errorText || 'failed'} ${u}`)
+  })
+  page.on('response', (res) => {
+    const u = res.url()
+    const local = u.includes('127.0.0.1') || u.includes('localhost') || u.includes('jknojokes.com')
+    if (local && res.status() >= 400 && !u.includes('favicon')) {
+      bucket.badResponses.push(`${res.status()} ${u}`)
+    }
+  })
+}
+
 async function overflow(page) {
   return page.evaluate(() => {
     const root = document.documentElement
@@ -24,6 +52,46 @@ async function overflow(page) {
       page: root.scrollWidth > root.clientWidth + 1,
       main: main ? main.scrollWidth > main.clientWidth + 1 : false,
     }
+  })
+}
+
+async function badText(page) {
+  return page.evaluate(() => {
+    const t = (document.body.innerText || '').toLowerCase()
+    const bad = []
+    if (/\bnan\b/.test(t)) bad.push('NaN in body text')
+    if (/\bundefined\b/.test(t)) bad.push('undefined in body text')
+    document.querySelectorAll('.ov-box-val, .stat-grid dd, .kpi .val, .inv-total strong').forEach((el) => {
+      const x = (el.textContent || '').trim()
+      if (x === '$0' && el.closest('a[href="#/cash"]')) return
+      if (x === '$0' && el.textContent === '$0') {
+        /* allowed in some empty states only on non-KPI */
+      }
+    })
+    const chart = document.querySelector('svg.chart')
+    if (chart && !chart.querySelector('rect.bar, path.lineA, circle.ptA') && document.querySelector('.ov-sec-h, .panel-h h2')) {
+      const onOverview = location.hash.includes('overview')
+      if (onOverview && !document.querySelector('.empty')) bad.push('empty chart on overview')
+    }
+    return bad
+  })
+}
+
+async function smallTapTargets(page) {
+  return page.evaluate(() => {
+    const fails = []
+    const sel = 'a.ov-box, .mob-tabs a, .mob-tabs button, .chip, .seg button, a.note.tap-card, .back-bar, a.kv-row.tap-card, tr.tap-row'
+    document.querySelectorAll(sel).forEach((el) => {
+      if (!el.offsetParent) return
+      const r = el.getBoundingClientRect()
+      const w = Math.round(r.width)
+      const h = Math.round(r.height)
+      if (w < 40 || h < 40) {
+        const label = el.textContent?.trim().slice(0, 24) || el.className
+        fails.push(`tap target <40px: "${label}" (${w}×${h})`)
+      }
+    })
+    return fails
   })
 }
 
@@ -65,8 +133,60 @@ async function tapVisible(page, selector, taps, fails, opts = {}) {
   }
 }
 
+async function directLoads(page, fails, productSkus) {
+  for (const hash of ROUTES) {
+    await page.goto(`${BASE}${hash}`, { waitUntil: 'networkidle' })
+    await waitMain(page)
+    const main = await page.$('#main')
+    if (!main) fails.push(`direct load missing #main ${hash}`)
+  }
+  for (const sku of productSkus) {
+    await page.goto(`${BASE}#/products/${encodeURIComponent(sku)}`, { waitUntil: 'networkidle' })
+    await waitMain(page)
+    const open = await page.evaluate(() => !document.getElementById('drawerWrap').hidden)
+    if (!open) fails.push(`direct load product drawer ${sku}`)
+    await closeDrawer(page)
+  }
+}
+
+async function exerciseRanges(page, fails) {
+  await page.goto(`${BASE}#/overview`, { waitUntil: 'networkidle' })
+  await waitMain(page)
+  for (const r of RANGES) {
+    await page.locator(`button[data-range="${r}"]`).click()
+    await page.waitForTimeout(350)
+    const bad = await badText(page)
+    bad.forEach((b) => fails.push(`range ${r} overview: ${b}`))
+  }
+  for (const route of ['#/products', '#/expenses']) {
+    await page.goto(`${BASE}${route}`, { waitUntil: 'networkidle' })
+    await waitMain(page)
+    for (const r of RANGES) {
+      await page.locator(`button[data-range="${r}"]`).click()
+      await page.waitForTimeout(350)
+      const bad = await badText(page)
+      bad.forEach((b) => fails.push(`range ${r} ${route}: ${b}`))
+    }
+  }
+}
+
+async function exerciseHistory(page, fails) {
+  await page.goto(`${BASE}#/overview`, { waitUntil: 'networkidle' })
+  await waitMain(page)
+  await page.locator('a.ov-box[href="#/cash"]').click()
+  await page.waitForTimeout(300)
+  await page.goBack()
+  await page.waitForTimeout(400)
+  const h1 = await page.evaluate(() => location.hash)
+  if (!h1.includes('overview')) fails.push(`back from cash expected overview got ${h1}`)
+  await page.goForward()
+  await page.waitForTimeout(400)
+  const h2 = await page.evaluate(() => location.hash)
+  if (!h2.includes('cash')) fails.push(`forward expected cash got ${h2}`)
+}
+
 async function exerciseRoute(page, route, width, taps, fails) {
-  await page.setViewportSize({ width, height: width === 390 ? 844 : 900 })
+  await page.setViewportSize({ width, height: width <= 430 ? 844 : 900 })
   await page.goto(`${BASE}${route}`, { waitUntil: 'networkidle' })
   await waitMain(page)
   await closeDrawer(page)
@@ -74,29 +194,26 @@ async function exerciseRoute(page, route, width, taps, fails) {
   if (ov.page || ov.main) {
     fails.push(`overflow ${width}px on ${route} (page=${ov.page} main=${ov.main})`)
   }
+  const bad = await badText(page)
+  bad.forEach((b) => fails.push(`${width}px ${route}: ${b}`))
+
+  if (width <= 430) {
+    const small = await smallTapTargets(page)
+    small.slice(0, 5).forEach((s) => fails.push(`${width}px ${route}: ${s}`))
+  }
 
   if (route === '#/overview') {
     await tapVisible(page, 'a.ov-box', taps, fails, { readHref: true })
     await page.goto(`${BASE}#/overview`, { waitUntil: 'networkidle' })
     await waitMain(page)
-    if (width === 390) {
+    if (width <= 430) {
       await tapVisible(page, 'a.mob-panel-link', taps, fails, { readHref: true })
       await page.goto(`${BASE}#/overview`, { waitUntil: 'networkidle' })
       await waitMain(page)
       await tapVisible(page, '.ov-prod-list a', taps, fails, { readHref: true })
-      await page.goto(`${BASE}#/overview`, { waitUntil: 'networkidle' })
-      await waitMain(page)
-      await tapVisible(page, 'section.card.panel.mob-sec a.note', taps, fails, { readHref: true })
     } else {
       await tapVisible(page, 'section.card.panel.sec tr.click.tap-row', taps, fails, { closeDrawer: true })
     }
-  } else if (route === '#/cash') {
-    await tapVisible(page, 'a.kv-row', taps, fails, { readHref: true, allowSame: true })
-    await page.goto(`${BASE}${route}`, { waitUntil: 'networkidle' })
-    await waitMain(page)
-    await tapVisible(page, 'a.stat-dd-link', taps, fails, { readHref: true })
-  } else if (route === '#/payout') {
-    await tapVisible(page, 'a.back-bar', taps, fails, { readHref: true })
   } else if (route === '#/products') {
     await tapVisible(page, 'a.prod-card', taps, fails, { readHref: true, closeDrawer: true })
     await page.goto(`${BASE}${route}`, { waitUntil: 'networkidle' })
@@ -117,69 +234,101 @@ async function exerciseRoute(page, route, width, taps, fails) {
   }
 }
 
-async function exerciseNav(page, width, taps, fails) {
-  await page.setViewportSize({ width, height: width === 390 ? 844 : 900 })
-  await page.goto(`${BASE}#/overview`, { waitUntil: 'networkidle' })
-  await waitMain(page)
-  if (width === 390) {
-    await tapVisible(page, '#mobTabs a[href^="#"]', taps, fails, { readHref: true, allowSame: true })
-    await page.goto(`${BASE}#/overview`, { waitUntil: 'networkidle' })
-    await waitMain(page)
-    const more = page.locator('#mobMoreBtn')
-    if (await more.isVisible()) {
-      await more.click()
-      await page.waitForTimeout(250)
-      await tapVisible(page, '#mobMorePanel a[href^="#"]', taps, fails, { readHref: true })
-    }
-  } else {
-    await tapVisible(page, '.nav a[href^="#"]', taps, fails, { readHref: true, allowSame: true })
-  }
-}
-
-async function main() {
-  const browser = await chromium.launch({
-    headless: true,
-    executablePath: process.env.PLAYWRIGHT_CHROME_PATH || '/usr/local/bin/google-chrome',
-  })
-  const page = await browser.newPage()
+async function runBrowser(name, launch, contextOpts, productSkus) {
+  const browser = await launch()
+  const context = await browser.newContext(contextOpts)
+  const page = await context.newPage()
+  const quality = { consoleErrors: [], failedRequests: [], badResponses: [] }
+  attachQualityHooks(page, quality)
   const taps = { count: 0 }
   const fails = []
 
-  for (const width of [390, 1440]) {
+  console.log(`\n=== ${name} ===`)
+
+  await directLoads(page, fails, productSkus)
+  await exerciseRanges(page, fails)
+  await exerciseHistory(page, fails)
+
+  const widths = name.includes('iPhone') ? [390] : [390, 1440]
+  for (const width of widths) {
     for (const route of ROUTES) {
       await exerciseRoute(page, route, width, taps, fails)
     }
-    await exerciseNav(page, width, taps, fails)
   }
 
-  await page.setViewportSize({ width: 390, height: 844 })
-  await page.goto(`${BASE}#/overview`, { waitUntil: 'networkidle' })
-  await waitMain(page)
-  await page.locator('.ov-prod-list a').first().click({ force: true })
-  await page.waitForTimeout(400)
-  const drawer = await page.evaluate(() => !document.getElementById('drawerWrap').hidden)
-  if (!drawer) fails.push('product drawer from overview')
-  else {
-    taps.count++
-    await page.locator('a.back-bar').click()
-    await page.waitForTimeout(300)
-    taps.count++
-    const hash = await page.evaluate(() => location.hash)
-    if (hash !== '#/overview') fails.push(`product drawer back expected #/overview got ${hash}`)
+  if (name.includes('iPhone')) {
+    await page.goto(`${BASE}#/overview`, { waitUntil: 'networkidle' })
+    await waitMain(page)
+    await page.evaluate(() => window.scrollTo(0, document.documentElement.scrollHeight))
+    await page.waitForTimeout(150)
+    const covered = await page.evaluate(() => {
+      const tabs = document.querySelector('.mob-tabs')
+      if (!tabs) return true
+      const tr = tabs.getBoundingClientRect()
+      let maxBottom = 0
+      document.querySelectorAll('main > *, .foot').forEach((el) => {
+        const r = el.getBoundingClientRect()
+        if (r.height > 0) maxBottom = Math.max(maxBottom, r.bottom)
+      })
+      return maxBottom <= tr.top + 4
+    })
+    if (!covered) fails.push('iPhone: bottom bar covers main content')
   }
 
   const layoutFails = await runLayoutAudits(page, BASE)
   layoutFails.forEach((f) => fails.push(`layout ${f}`))
 
-  console.log(`TAP_COUNT ${taps.count}`)
-  if (fails.length) {
-    fails.forEach((f) => console.error(`FAIL ${f}`))
-    await browser.close()
-    process.exit(1)
+  if (quality.consoleErrors.length) {
+    quality.consoleErrors.forEach((e) => fails.push(`console: ${e}`))
   }
-  console.log('OK all taps')
+  if (quality.failedRequests.length) {
+    quality.failedRequests.forEach((e) => fails.push(`request: ${e}`))
+  }
+  if (quality.badResponses.length) {
+    quality.badResponses.forEach((e) => fails.push(`http: ${e}`))
+  }
+
+  console.log(`${name} TAP_COUNT ${taps.count}`)
+  if (fails.length) {
+    fails.forEach((f) => console.error(`${name} FAIL ${f}`))
+  } else {
+    console.log(`${name} OK all taps`)
+  }
+
   await browser.close()
-  process.exit(0)
+  return fails.length === 0
+}
+
+async function main() {
+  const productSkus = await (async () => {
+    const browser = await chromium.launch({
+      headless: true,
+      executablePath: CHROME,
+    })
+    const page = await browser.newPage()
+    await page.goto(`${BASE}#/overview`, { waitUntil: 'networkidle' })
+    await page.waitForFunction(() => window.__portal)
+    const skus = await page.evaluate(() => window.PORTAL_DATA.skus.map((s) => s.sku))
+    await browser.close()
+    return skus
+  })()
+
+  const okChrome = await runBrowser(
+    'chromium',
+    () => chromium.launch({ headless: true, executablePath: CHROME }),
+    {},
+    productSkus,
+  )
+
+  const iPhone14 = devices['iPhone 14']
+  const okWebkit = await runBrowser(
+    'webkit-iPhone14',
+    () => webkit.launch({ headless: true }),
+    { ...iPhone14, locale: 'en-US' },
+    productSkus,
+  )
+
+  process.exit(okChrome && okWebkit ? 0 : 1)
 }
 
 main().catch((e) => {

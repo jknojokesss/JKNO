@@ -1,4 +1,4 @@
-import { chromium } from 'playwright'
+import { chromium, webkit, devices } from 'playwright'
 import { mkdir, readdir, rm } from 'fs/promises'
 import path from 'path'
 
@@ -22,7 +22,12 @@ async function purgeOldShots() {
   await mkdir(OUT, { recursive: true })
   const names = await readdir(OUT)
   for (const name of names) {
-    if (name.startsWith('desk-') || name.startsWith('phone-') || name === 'type-closeup.png') {
+    if (
+      name.startsWith('desk-') ||
+      name.startsWith('phone-') ||
+      name.startsWith('webkit-') ||
+      name === 'type-closeup.png'
+    ) {
       await rm(path.join(OUT, name), { force: true })
     }
   }
@@ -79,10 +84,10 @@ async function main() {
 
   await page.setViewportSize({ width: 1280, height: 900 })
   await page.goto(`${BASE}#/overview`, { waitUntil: 'networkidle' })
-  await page.waitForSelector('.ov-split', { timeout: 15000 })
+  await page.waitForSelector('.ov-kpi-grid', { timeout: 15000 })
   await page.waitForSelector('section.card.panel.sec .tbl-wrap table', { timeout: 15000 })
   const clip = await page.evaluate(() => {
-    const boxes = document.querySelector('.ov-split')
+    const boxes = document.querySelector('.ov-kpi-grid')
     const table = document.querySelector('section.card.panel.sec .tbl-wrap table')
     const main = document.querySelector('#main')
     if (!boxes || !table || !main) return null
@@ -125,7 +130,22 @@ async function main() {
     fullPage: false,
   })
 
+  const iPhone14 = devices['iPhone 14']
+  const wb = await webkit.launch({ headless: true })
+  const wctx = await wb.newContext({ ...iPhone14, locale: 'en-US' })
+  const wp = await wctx.newPage()
+  for (const [name, hash] of TABS) {
+    await wp.goto(`${BASE}${hash}`, { waitUntil: 'networkidle' })
+    await wp.waitForSelector('#main', { timeout: 15000 })
+    await wp.waitForTimeout(500)
+    await wp.screenshot({
+      path: path.join(OUT, `webkit-${name}.png`),
+      fullPage: true,
+    })
+  }
+
   await browser.close()
+  await wb.close()
   console.log('Saved screenshots to', OUT)
 }
 

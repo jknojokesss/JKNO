@@ -24,6 +24,10 @@ function pct(x,d){if(!isFinite(x))return '-';return (x*100).toFixed(d==null?1:d)
 function chg(cur,prev,invert){if(prev==null||prev===0||!isFinite(prev))return '';var r=(cur-prev)/Math.abs(prev);var cls=Math.abs(r)<0.005?'flat':((r>0)!==(!!invert)?'up':'down');return '<span class="chg '+cls+'">'+(r>0?'+':'')+(r*100).toFixed(1)+'%</span>';}
 function ceilTo(q,c){return Math.ceil(q/c)*c;}
 var skuIx={};D.skus.forEach(function(s,i){skuIx[s.sku]=i;});
+/* Product photos: in production, imageUrl is the Amazon listing main image from Seller Central / catalog API. */
+function skuImageUrl(s){return s.imageUrl||('/amazon-demo/img/'+s.sku+'.webp');}
+function prodImgHtml(s,opt){var lg=opt&&opt.lg,sz=lg?96:40;return '<span class="prod-img-wrap'+(lg?' prod-img-wrap-lg':'')+'"><img class="prod-img" src="'+esc(skuImageUrl(s))+'" alt="" width="'+sz+'" height="'+sz+'" loading="lazy" decoding="async" onerror="this.classList.add(\'hide\');this.nextElementSibling.classList.add(\'on\')"><span class="prod-img-ph" aria-hidden="true"></span></span>';}
+function prodNameCell(s,title){return '<span class="prod-row-name">'+prodImgHtml(s)+'<span class="prod-row-text"><span class="pn">'+esc(title==null?s.name:title)+'</span><span class="ps">'+s.sku+'</span></span></span>';}
 
 /* ---------- aggregation ---------- */
 function agg(a,b,k){var o={};D.fields.forEach(function(f){o[f]=0;});
@@ -112,7 +116,7 @@ function showMoreBtn(id,label){return '<p class="show-more-wrap"><button type="b
 function mobCollapse(id,inner){return inner;}
 function panelHead(title,href,wrapLink){var all=href?(wrapLink?'<span class="note">All</span>':'<a class="note tap-card" href="'+href+'">All</a>'):'';return '<div class="panel-h"><h2>'+title+'</h2>'+all+'</div>';}
 function mobPanelCard(href,title,allHref,body){return '<section class="card panel mob-sec"><a class="mob-panel-link tap-card" href="'+href+'">'+panelHead(title,allHref,true)+'<div class="mob-panel-body">'+body+'</div></a></section>';}
-function ovProdRows(prods){return '<ul class="ov-prod-list">'+prods.map(function(x){return '<li><a class="tap-card" href="#/products/'+x.s.sku+'"><span class="ov-prod-name">'+esc(x.s.name)+'</span><span class="ov-prod-amt">'+money(x.amzProfit)+'</span><span class="ov-prod-meta">'+pct(x.margin)+' · '+x.s.sku+'</span></a></li>';}).join('')+'</ul>';}
+function ovProdRows(prods){return '<ul class="ov-prod-list">'+prods.map(function(x){return '<li><a class="tap-card ov-prod-item" href="#/products/'+x.s.sku+'">'+prodImgHtml(x.s)+'<span class="ov-prod-body"><span class="ov-prod-name">'+esc(x.s.name)+'</span><span class="ov-prod-amt">'+money(x.amzProfit)+'</span><span class="ov-prod-meta">'+pct(x.margin)+' · '+x.s.sku+'</span></span></a></li>';}).join('')+'</ul>';}
 function backBar(href,label){return '<a class="back-bar tap-card" href="'+href+'"><span class="back-ic" aria-hidden="true">←</span>'+esc(label||'Back')+'</a>';}
 function ovBoxLink(href,lbl,val,meta,wide){return '<a class="ov-box tap-card'+(wide?' ov-wide':'')+'" href="'+href+'"><p class="ov-box-lbl">'+lbl+'</p><p class="ov-box-val">'+val+'</p><div class="ov-box-meta">'+meta+'</div></a>';}
 function blistHtml(o){var parts=[['Refunds',o.refunds],['Amazon fees',o.fees],['Ad spend',o.ads],['COGS',o.cogs],['Write-offs less reimbursements',o.loss-o.reimb],['Other expenses',o.other],['True net profit',o.net]];
@@ -138,40 +142,28 @@ function kpi(label,val,meta,hl){return '<div class="card kpi'+(hl?' hl':'')+'"><
 function statStrip(items){return statGrid(items);}
 function statGrid(items){return '<dl class="stat-grid">'+items.map(function(it){var dd=it[1]+(it[2]?'<small>'+it[2]+'</small>':'');if(it[3])return '<div><dt>'+it[0]+'</dt><dd><a class="stat-dd-link tap-card" href="'+it[3]+'">'+dd+'</a></dd></div>';return '<div><dt>'+it[0]+'</dt><dd>'+dd+'</dd></div>';}).join('')+'</dl>';}
 function kvRows(rows){var h='<div class="kv-rows">';rows.forEach(function(r){if(r[2])h+='<a class="kv-row tap-card" href="'+r[2]+'"><span>'+r[0]+'</span><strong>'+r[1]+'</strong></a>';else h+='<div class="kv-row static"><span>'+r[0]+'</span><strong>'+r[1]+'</strong></div>';});return h+'</div>';}
-function ovBlock(title,tag,boxes){return '<section class="ov-block"><div class="ov-block-h"><h2 class="ov-block-t">'+title+'</h2><span class="src-tag">'+tag+'</span></div><div class="ov-boxes">'+boxes+'</div></section>';}
 function overviewHero(o,p,pl,c,b,nx,a){var netM='<span>'+pct(o.netMargin)+' margin</span>'+(p?'<span>'+chg(o.net,p.net)+' '+pl+'</span>':'');
   var cashM='<span>'+fd(b)+'</span>';
-  var sec=liabSections(),bs=balanceSheetSnap(),cc=liabCcTotal();
+  var sec=liabSections(),cc=liabCcTotal();
   var oweM='<span>Due 30d '+money(liabDueIn30().total)+'</span>';
   var cardM='<span>Amex + Ink</span>';
-  var bsM='<span>Equity '+money(bs.equity)+'</span>';
   var salM='<span>'+num(o.units)+' units</span>'+(p?'<span>'+chg(o.sales,p.sales)+' '+pl+'</span>':'');
   var payM='<span>'+fdIso(nx.deposit,{wd:1})+'</span>';
-  var prods=D.skus.map(function(s,k){var x=agg(a,b,k);x.s=s;return x;}).sort(function(x,y){return y.amzProfit-x.amzProfit;}).slice(0,3);
-  var topSum=0;prods.forEach(function(x){topSum+=x.amzProfit;});
-  var topM='<span>'+prods.length+' SKUs</span>';
   var open=SHIPS.filter(function(s){return !s.closedFlag;}),cl=claimTotals();
   var shipM='<span>'+open.length+' open · '+money(cl.pending)+' pending</span>';
-  var claimLbl='Claims';
-  var books=ovBoxLink('#/report','True net',money(o.net),netM)+ovBoxLink('#/cash','Cash',money(c.cash),cashM)+ovBoxLink('#/payables','What you owe',money(sec.total),oweM)+ovBoxLink('#/payables','Cards',money(cc),cardM)+ovBoxLink('#/cash','Balance sheet',money(bs.assets.total),bsM,true);
   var invSnap=invCostSnapshot(b),invM='<span>'+num(invSnap.available)+' available · '+num(invSnap.inbound)+' inbound</span>';
-  var amazon=ovBoxLink('#/products','Sales',money(o.sales),salM)+ovBoxLink('#/payout','Next payout',money(nx.amount),payM)+ovBoxLink('#/inventory','Inventory at cost',money(invSnap.totalCents),invM)+ovBoxLink('#/products','Top products',money(topSum),topM)+ovBoxLink('#/shipments',claimLbl,money(cl.potential),shipM);
-  return '<div class="ov-split">'+ovBlock('Books','QuickBooks',books)+ovBlock('Amazon','Sellerboard',amazon)+'</div>';}
-var NAV_BOOKS=[['report','Weekly report'],['expenses','Expenses'],['inventory','Inventory'],['cash','Cash'],['payables','Payables']];
-var NAV_AMAZON=[['products','Products'],['shipments','FBA shipments']];
+  return '<div class="ov-kpi-grid">'+ovBoxLink('#/report','True net',money(o.net),netM)+ovBoxLink('#/products','Sales',money(o.sales),salM)+ovBoxLink('#/cash','Cash',money(c.cash),cashM)+ovBoxLink('#/payout','Next payout',money(nx.amount),payM)+ovBoxLink('#/payables','What you owe',money(sec.total),oweM)+ovBoxLink('#/inventory','Inventory at cost',money(invSnap.totalCents,1),invM)+ovBoxLink('#/shipments','Claims',money(cl.potential),shipM)+ovBoxLink('#/payables','Cards',money(cc),cardM)+'</div>';}
+var NAV_LINKS=[['overview','Overview'],['report','Weekly report'],['products','Products'],['shipments','FBA shipments'],['expenses','Expenses'],['inventory','Inventory'],['cash','Cash'],['payables','Payables'],['sources','Data sources']];
 var MOB_MAIN=[['overview','Overview'],['report','Weekly'],['products','Products'],['cash','Cash']];
-var MOB_MORE_BOOKS=[['expenses','Expenses'],['inventory','Inventory'],['payables','Payables'],['sources','Sources']];
-var MOB_MORE_AMAZON=[['shipments','Shipments']];
+var MOB_MORE=[['expenses','Expenses'],['inventory','Inventory'],['payables','Payables'],['shipments','Shipments'],['sources','Sources']];
 var MORE_PAGES={shipments:1,expenses:1,inventory:1,payables:1,sources:1};
 function closeMobMore(){var s=$('#mobMoreSheet');if(s){s.hidden=true;s.setAttribute('aria-hidden','true');}var b=$('#mobMoreBtn');if(b)b.setAttribute('aria-expanded','false');}
 function openMobMore(){var s=$('#mobMoreSheet');if(s){s.hidden=false;s.setAttribute('aria-hidden','false');}var b=$('#mobMoreBtn');if(b){b.setAttribute('aria-expanded','true');b.focus();}}
 function navGroupLinks(items,page){return items.map(function(t){return '<a href="#/'+t[0]+'" data-page="'+t[0]+'"'+(page===t[0]?' class="on" aria-current="page"':'')+'>'+t[1]+'</a>';}).join('');}
-function mobMoreGroup(title,tag,items,page){return '<div class="mob-more-group"><p class="mob-more-group-h"><span>'+title+'</span><span class="src-tag">'+tag+'</span></p>'+navGroupLinks(items,page)+'</div>';}
-function renderSideNav(page){var nav=$('#nav');if(!nav)return;
-  nav.innerHTML='<a href="#/overview" data-page="overview"'+(page==='overview'?' class="on" aria-current="page"':'')+'>Overview</a><div class="nav-group"><div class="nav-group-h"><span class="nav-group-t">Books</span><span class="src-tag">QuickBooks</span></div>'+navGroupLinks(NAV_BOOKS,page)+'</div><div class="nav-group"><div class="nav-group-h"><span class="nav-group-t">Amazon</span><span class="src-tag">Sellerboard</span></div>'+navGroupLinks(NAV_AMAZON,page)+'</div><a href="#/sources" data-page="sources"'+(page==='sources'?' class="on" aria-current="page"':'')+'>Data sources</a>';}
+function renderSideNav(page){var nav=$('#nav');if(!nav)return;nav.innerHTML=navGroupLinks(NAV_LINKS,page);}
 function renderMobTabs(page){var el=$('#mobTabs');if(!el)return;var moreOn=!!MORE_PAGES[page];
   el.innerHTML=MOB_MAIN.map(function(t){return '<a href="#/'+t[0]+'" data-page="'+t[0]+'"'+(page===t[0]?' class="on" aria-current="page"':'')+'>'+t[1]+'</a>';}).join('')+'<button type="button" class="mob-more-btn'+(moreOn?' on':'')+'" id="mobMoreBtn" aria-expanded="false" aria-controls="mobMorePanel">More</button>';
-  var pan=$('#mobMorePanel');if(pan)pan.innerHTML=mobMoreGroup('Books','QuickBooks',MOB_MORE_BOOKS,page)+mobMoreGroup('Amazon','Sellerboard',MOB_MORE_AMAZON,page);}
+  var pan=$('#mobMorePanel');if(pan)pan.innerHTML=navGroupLinks(MOB_MORE,page);}
 var SEARCH_SVG='<svg viewBox="0 0 24 24" fill="none" stroke-width="2" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>';
 function searchBox(id,val,ph){return '<label class="search">'+SEARCH_SVG+'<input type="search" id="'+id+'" value="'+esc(val)+'" placeholder="'+ph+'" aria-label="'+ph+'"></label>';}
 function sortRows(rows,sort,cols){var c=cols.filter(function(x){return x.key===sort.key;})[0];var f=c&&c.sv?c.sv:function(r){return r[sort.key];};
@@ -208,7 +200,7 @@ function weekLabel(w){return fd(w*7);}
 /* ---------- pages ---------- */
 var PAGES={};
 function overviewMob(o,a,b){var weeks=[];for(var w=0;w<NWEEKS;w++)weeks.push(full(w*7,w*7+6));var vals=weeks.map(function(x){return x.net;});
-  var h='<p class="ov-sec-label"><span>Profit</span><span class="src-tag">QuickBooks + Sellerboard</span></p>';
+  var h='<h2 class="ov-sec-h">Profit</h2>';
   h+='<section class="card panel mob-sec">'+panelHead('Weekly trend','#/report')+barChart({values:vals,h:165,label:'True net by week',hi:function(i){return i*7+6>=a&&i*7<=b;},xl:weekLabel,tip:function(i){return fd(i*7)+': '+money(vals[i]);}})+'</section>';
   h+='<section class="card panel mob-sec">'+panelHead('Sales breakdown','#/report')+blistHtml(o)+'</section>';
   var prods=D.skus.map(function(s,k){var x=agg(a,b,k);x.s=s;return x;}).sort(function(x,y){return y.amzProfit-x.amzProfit;}).slice(0,3);
@@ -216,12 +208,12 @@ function overviewMob(o,a,b){var weeks=[];for(var w=0;w<NWEEKS;w++)weeks.push(ful
   return h;}
 function overviewDesktop(o,p,a,b){var metrics={sales:['Sales',function(x){return x.sales;}],amz:['Amazon profit',function(x){return x.amzProfit;}],other:['Other expenses',function(x){return x.other;}],net:['True net',function(x){return x.net;}]};
   var weeks=[];for(var w=0;w<NWEEKS;w++)weeks.push(full(w*7,w*7+6));var m=metrics[state.chartMetric],vals=weeks.map(m[1]);
-  var h='<p class="ov-sec-label desk"><span>Profit</span><span class="src-tag">QuickBooks + Sellerboard</span></p><div class="two sec"><section class="card panel"><div class="panel-h"><h2>Weekly trend</h2><div class="chips" role="group" aria-label="Chart metric">'+Object.keys(metrics).map(function(k){return '<button class="chip" type="button" data-metric="'+k+'" aria-pressed="'+(state.chartMetric===k)+'">'+metrics[k][0]+'</button>';}).join('')+'</div></div>';
+  var h='<h2 class="ov-sec-h desk">Profit</h2><div class="two sec"><section class="card panel"><div class="panel-h"><h2>Weekly trend</h2><div class="chips" role="group" aria-label="Chart metric">'+Object.keys(metrics).map(function(k){return '<button class="chip" type="button" data-metric="'+k+'" aria-pressed="'+(state.chartMetric===k)+'">'+metrics[k][0]+'</button>';}).join('')+'</div></div>';
   h+=barChart({values:vals,label:m[0]+' by week',hi:function(i){return i*7+6>=a&&i*7<=b;},xl:weekLabel,tip:function(i){return fd(i*7)+': '+money(vals[i]);}})+'</section>';
   h+='<section class="card panel">'+panelHead('Sales breakdown','#/report')+blistHtml(o)+'</section></div>';
   var prods=D.skus.map(function(s,k){var x=agg(a,b,k);x.s=s;return x;}).sort(function(x,y){return y.amzProfit-x.amzProfit;}).slice(0,5);
   h+='<section class="card panel sec"><div class="panel-h"><h2>Top products</h2><a class="note tap-card" href="#/products">All</a></div><div class="tbl-wrap"><table><thead><tr><th>Product</th><th>Units</th><th>Profit</th><th>Margin</th></tr></thead><tbody>';
-  prods.forEach(function(x){h+='<tr class="click tap-row" data-go="#/products/'+x.s.sku+'" tabindex="0"><td><span class="pn">'+esc(x.s.name)+'</span><span class="ps">'+x.s.sku+'</span></td><td>'+num(x.units)+'</td><td>'+money(x.amzProfit)+'</td><td>'+pct(x.margin)+'</td></tr>';});
+  prods.forEach(function(x){h+='<tr class="click tap-row" data-go="#/products/'+x.s.sku+'" tabindex="0"><td class="l">'+prodNameCell(x.s)+'</td><td>'+num(x.units)+'</td><td>'+money(x.amzProfit)+'</td><td>'+pct(x.margin)+'</td></tr>';});
   h+='</tbody></table></div></section>';
   return h;}
 PAGES.overview=function(){var ab=rangeAB(),a=ab[0],b=ab[1],o=full(a,b),pab=prevAB(a,b),p=pab?full(pab[0],pab[1]):null;var pl=prevLabel();
@@ -274,7 +266,7 @@ PAGES.report=function(){var w=state.reportWeek,a=w*7,b=a+6,o=full(a,b),p=w>0?ful
 
 /* products */
 var PCOLS=[
- {key:'name',label:'Product',l:1,sv:function(r){return r.s.name;},f:function(r){return '<span class="pn">'+esc(r.s.name)+'</span><span class="ps">'+r.s.sku+'</span>';}},
+ {key:'name',label:'Product',l:1,sv:function(r){return r.s.name;},f:function(r){return prodNameCell(r.s);}},
  {key:'units',label:'Units',f:function(r){return num(r.units);}},
  {key:'sales',label:'Sales',f:function(r){return money(r.sales);}},
  {key:'refunds',label:'Refunds',hm:1,f:function(r){return money(r.refunds);}},
@@ -293,14 +285,14 @@ function prodBody(){var all=prodData(),rows=prodRowsFiltered(),ab=rangeAB();
   return '<tbody>'+rows.map(function(r){return '<tr class="click" data-go="#/products/'+r.s.sku+'" tabindex="0">'+PCOLS.map(function(c){return cell(c,r);}).join('')+'</tr>';}).join('')+'</tbody><tfoot><tr>'+PCOLS.map(function(c,i){if(i===0)return '<td>'+(rows.length===all.length?'All products':rows.length+' shown')+'</td>';return '<td'+(c.hm?' class="hide-m"':'')+'>'+c.f(tot).replace(/<\/?strong>/g,'')+'</td>';}).join('')+'</tr></tfoot>';}
 function prodCards(){var rows=prodRowsFiltered();if(!rows.length)return '<p class="empty">No products</p>';
   var lim=isMob()&&!state.prodShowAll?5:rows.length,show=rows.slice(0,lim);
-  var h=show.map(function(r){return '<a class="prod-card" href="#/products/'+r.s.sku+'"><div class="prod-card-top"><span class="prod-card-profit">'+money(r.amzProfit)+' profit</span><span class="prod-card-margin">'+pct(r.margin)+' margin</span></div><div class="prod-card-name">'+esc(r.s.name)+'</div><div class="prod-card-sku">'+r.s.sku+'</div><div class="prod-card-meta"><span>'+num(r.units)+' units</span><span>'+money(r.sales)+' sales</span></div></a>';}).join('');
+  var h=show.map(function(r){return '<a class="prod-card" href="#/products/'+r.s.sku+'">'+prodImgHtml(r.s)+'<div class="prod-card-body"><div class="prod-card-top"><span class="prod-card-profit">'+money(r.amzProfit)+' profit</span><span class="prod-card-margin">'+pct(r.margin)+' margin</span></div><div class="prod-card-name">'+esc(r.s.name)+'</div><div class="prod-card-sku">'+r.s.sku+'</div><div class="prod-card-meta"><span>'+num(r.units)+' units</span><span>'+money(r.sales)+' sales</span></div></div></a>';}).join('');
   if(isMob()&&!state.prodShowAll&&rows.length>5)h+='<button type="button" class="show-more full" data-prod-all="1">Show all ('+rows.length+' products)</button>';
   return h;}
 PAGES.products=function(){
   return '<section class="card"><div class="panel panel-h" style="margin:0"><div class="tools">'+searchBox('prodQ',state.prodQ,'Search SKU')+'</div></div><div class="prod-cards" id="prodCards">'+prodCards()+'</div><div class="tbl-wrap sticky1 prod-table-wrap"><table id="prodTbl">'+thead(PCOLS,state.prodSort,'prod')+prodBody()+'</table></div></section>';};
 function statusTag(s){if(s.indexOf('Reorder')===0)return '<span class="tag signal">'+s+'</span>';return '<span class="tag neu">'+s+'</span>';}
 function productDrawer(sku){var k=skuIx[sku];if(k==null)return null;var s=D.skus[k],ab=rangeAB(),x=agg(ab[0],ab[1],k);var inv=invRows()[k];
-  var h=drawerBack('products','Products')+'<div class="dr-h"><div><h2 id="drawerTitle">'+esc(s.name)+'</h2><p>'+s.sku+' &middot; ASIN '+s.asin+'</p></div><button class="x" type="button" data-close aria-label="Close">&times;</button></div>';
+  var h=drawerBack('products','Products')+'<div class="dr-h dr-h-prod"><div class="dr-h-prod-main">'+prodImgHtml(s,{lg:1})+'<div><h2 id="drawerTitle">'+esc(s.name)+'</h2><p>'+s.sku+' &middot; ASIN '+s.asin+'</p></div></div><button class="x" type="button" data-close aria-label="Close">&times;</button></div>';
   h+='<div class="mini"><div><span>Units</span><strong>'+num(x.units)+'</strong></div><div><span>Sales</span><strong>'+money(x.sales)+'</strong></div><div><span>Profit</span><strong>'+money(x.amzProfit)+'</strong></div><div><span>Margin</span><strong>'+pct(x.margin)+'</strong></div><div><span>ACOS</span><strong>'+pct(x.acos)+'</strong></div><div><span>TACOS</span><strong>'+pct(x.tacos)+'</strong></div></div>';
   var u=x.units||1;
   h+='<div class="dr-sec"><h3>Per unit, selected dates</h3><div class="kv"><div>Average sale price</div><div>'+money(x.sales/u,1)+'</div><div>Refunds</div><div>-'+money(x.refunds/u,1)+'</div><div>Referral fee</div><div>-'+money(x.referral/u,1)+'</div><div>FBA fulfillment fee</div><div>-'+money(x.fba/u,1)+'</div><div>Placement and storage</div><div>-'+money((x.placement+x.storage)/u,1)+'</div><div>Advertising</div><div>-'+money(x.ads/u,1)+'</div><div>Product cost (COGS)</div><div>-'+money(x.cogs/u,1)+'</div><div>Write-offs less reimbursements</div><div>'+money((x.reimb-x.loss)/u,1)+'</div><div><strong>Profit per unit</strong></div><div>'+money(x.amzProfit/u,1)+'</div></div></div>';
@@ -359,7 +351,7 @@ var CLCOLS=[
 function claimTable(){var rows=claimRowsFiltered().slice().reverse();var t={u:0,a:0};rows.forEach(function(c){t.u+=c.units;t.a+=c.amount;});
   return '<thead><tr>'+CLCOLS.map(function(c){return '<th'+(c.l?' class="l"':'')+' scope="col">'+c.label+'</th>';}).join('')+'</tr></thead><tbody>'+(rows.length?rows.map(function(c){return '<tr class="click" data-go="'+(c.shipment?'#/shipments/'+c.shipment:'#/shipments')+'" tabindex="0">'+CLCOLS.map(function(col){return cell(col,c);}).join('')+'</tr>';}).join(''):'<tr><td colspan="9" class="empty">No claims</td></tr>')+'</tbody><tfoot><tr><td>'+rows.length+'</td><td></td><td></td><td></td><td>'+t.u+'</td><td>'+money(t.a,1)+'</td><td></td><td></td><td></td></tr></tfoot>';}
 PAGES.shipments=function(){var open=SHIPS.filter(function(s){return !s.closedFlag;});var onway=0,u=0,r=0;open.forEach(function(s){onway+=s.units-s.recv;});SHIPS.forEach(function(s){u+=s.units;r+=s.recv;});var ct=claimTotals();
-  var summary=statGrid([['Received',pct(r/u,1),num(r)+' of '+num(u)],['In transit',num(onway),'units'],['Not filed',money(ct.notfiled,1),''],['Pending',money(ct.pending,1),''],['Reimbursed',money(ct.reimbursed,1),''],['Potential',money(ct.potential,1),'']]);
+  var summary=statGrid([['Received',pct(r/u,1),num(r)+' of '+num(u)],['In transit',num(onway),'units'],['Not filed',money(ct.notfiled,1),''],['Pending',money(ct.pending,1),''],['Reimbursed',money(ct.reimbursed,1),''],['Potential',money(ct.potential),'']]);
   var fl=[['all','All'],['open','Open'],['closed','Closed'],['dev','Shortfall']];
   var shipDetail='<section class="card sec"><div class="panel panel-h" style="margin:0"><div class="tools"><div class="chips" role="group" aria-label="Filter shipments">'+fl.map(function(f){return '<button class="chip" type="button" data-sf="'+f[0]+'" aria-pressed="'+(state.shipFilter===f[0])+'">'+f[1]+'</button>';}).join('')+'</div>'+searchBox('shipQ',state.shipQ,'Search')+'</div></div><div class="ship-cards ship-cards-all" id="shipCards">'+shipCards()+'</div><div class="tbl-wrap sticky1 ship-table-wrap"><table id="shipTbl">'+thead(SCOLS,state.shipSort,'ship')+shipBody()+'</table></div></section>';
   var cf=[['all','All'],['Not filed','Not filed'],['Pending','Pending'],['Reimbursed','Reimbursed']];
@@ -411,7 +403,7 @@ PAGES.expenses=function(){var ab=rangeAB(),a=ab[0],b=ab[1],o=other(a,b),pab=prev
 
 /* inventory at cost */
 var ICOLS=[
- {key:'name',label:'Product',l:1,sv:function(r){return r.name;},f:function(r){return '<span class="pn">'+esc(r.name)+'</span><span class="ps">'+r.sku+'</span>';}},
+ {key:'name',label:'Product',l:1,sv:function(r){return r.name;},f:function(r){return prodNameCell(D.skus[r.k],r.name);}},
  {key:'available',label:'Available',f:function(r){return num(r.available);}},
  {key:'inbound',label:'Inbound',f:function(r){return num(r.inbound);}},
  {key:'reserved',label:'Reserved',f:function(r){return num(r.reserved);}},
@@ -431,7 +423,7 @@ PAGES.inventory=function(){var last=NDAYS-1,snap=invCostSnapshot(last),rows=invC
   h+='<p class="fin-note">Stuck at cost '+money(snap.stuckCents,1)+' ('+num(snap.stuck)+' units). Overlap with pending &amp; not-filed claims: '+num(overlap.units)+' units at cost '+money(overlap.cents,1)+' (claim reimbursement potential '+money(ct.pending+ct.notfiled,1)+'). '+bsNote+' · '+tieNote+'</p></section>';
   var tot={available:0,inbound:0,reserved:0,stuck:0,atCost:0};rows.forEach(function(r){tot.available+=r.available;tot.inbound+=r.inbound;tot.reserved+=r.reserved;tot.stuck+=r.stuck;tot.atCost+=r.atCost;});
   var invSorted=sortRows(rows,state.invSort,ICOLS);
-  var invMobCards=isMob()?'<div class="mob-only mob-card-list">'+invSorted.map(function(r){return mobRowCard(r.name,[['Available',num(r.available)],['Inbound',num(r.inbound)],['Reserved',num(r.reserved)],['Stuck',r.stuck?num(r.stuck):'-'],['Unit cost',money(r.cost,1)],['At cost',money(r.atCost,1)]],'#/products/'+r.sku);}).join('')+'</div>':'';
+  var invMobCards=isMob()?'<div class="mob-only mob-card-list">'+invSorted.map(function(r){return '<a class="data-card tap-card has-link" href="#/products/'+r.sku+'"><div class="data-card-h">'+prodImgHtml(D.skus[r.k])+'<div class="data-card-t">'+esc(r.name)+'</div></div><dl class="data-card-rows"><div><dt>Available</dt><dd>'+num(r.available)+'</dd></div><div><dt>Inbound</dt><dd>'+num(r.inbound)+'</dd></div><div><dt>At cost</dt><dd>'+money(r.atCost,1)+'</dd></div></dl></a>';}).join('')+'</div>':'';
   var invDetail=invMobCards+'<section class="card sec"><div class="panel panel-h" style="margin:0"><h2>By product</h2></div><div class="tbl-wrap sticky1 inv-table-wrap'+(isMob()?' desk-only':'')+'"><table id="invTbl">'+thead(ICOLS,state.invSort,'inv')+'<tbody>'+invSorted.map(function(r){return '<tr class="click tap-row" data-go="#/products/'+r.sku+'" tabindex="0">'+ICOLS.map(function(c){return cell(c,r);}).join('')+'</tr>';}).join('')+'</tbody><tfoot><tr><td>Total</td><td>'+num(tot.available)+'</td><td>'+num(tot.inbound)+'</td><td>'+num(tot.reserved)+'</td><td>'+num(tot.stuck)+'</td><td></td><td>'+money(tot.atCost,1)+'</td></tr></tfoot></table></div></section>';
   invDetail+='<section class="card sec"><div class="panel panel-h" style="margin:0"><h2>QBO tie-out</h2></div><div class="tbl-wrap sticky1"><table><thead><tr><th scope="col">Week</th><th scope="col">Purchases</th><th scope="col">COGS</th><th scope="col">Write-offs</th><th scope="col">QuickBooks</th><th scope="col">Sellerboard</th><th scope="col">Diff</th></tr></thead><tbody>';
   tie.slice().reverse().forEach(function(r){invDetail+='<tr><td>'+fd(r.w*7+6)+'</td><td>'+(r.purch?'+'+money(r.purch,1):'<span class="mut">-</span>')+'</td><td>-'+money(r.cogs,1)+'</td><td>'+(r.loss?(r.loss>0?'-':'+')+money(Math.abs(r.loss),1):'<span class="mut">-</span>')+'</td><td>'+money(r.qbo,1)+'</td><td>'+money(r.sb,1)+'</td><td class="'+(r.diff===0?'pos':'neg')+'">'+money(r.diff,1)+'</td></tr>';});

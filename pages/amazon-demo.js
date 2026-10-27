@@ -30,6 +30,7 @@ export default function AmazonDemoPortal() {
           href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700&display=swap"
         />
         <link rel="stylesheet" href="/amazon-demo/styles.css" />
+        <link rel="icon" href="/amazon-demo/og.png" type="image/png" />
       </Head>
 
       <a className="skip" href="#main">
