@@ -16,6 +16,8 @@ import { rebuildMonthlySummary } from '../../../lib/rebuildFinancials'
 // ?gl=24 (or any month count) widens the GL window for a backfill.
 // Each report is independent: if one fails the others still land, and the
 // failure is recorded with Intuit's trace id.
+export const config = { maxDuration: 300 }
+
 export default async function handler(req, res) {
   // Vercel's scheduler sends the bearer header; ?key= is the manual escape
   // hatch so a sync can be kicked off from a browser without waiting for
