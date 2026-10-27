@@ -13,16 +13,24 @@ export default function AmazonDemoPortal() {
         <meta name="robots" content="noindex, nofollow" />
         <meta
           name="description"
-          content="Sample client portal by JK No Jokes Financials: Amazon profit from Sellerboard plus every other expense from QuickBooks Online, in one weekly view."
+          content="QuickBooks + Sellerboard in one place. Prepared by JK No Jokes Financials."
         />
         <meta property="og:type" content="website" />
         <meta property="og:title" content="Murray's Shot Glass Gallery | Client Portal (Sample)" />
         <meta
           property="og:description"
-          content="Amazon profit from Sellerboard plus every other expense from QuickBooks, in one weekly report. Prepared by JK No Jokes Financials."
+          content="QuickBooks + Sellerboard in one place. Prepared by JK No Jokes Financials."
         />
-        <meta property="og:image" content="https://www.jknojokes.com/amazon-demo/og.png" />
+        <meta property="og:image" content="https://www.jknojokes.com/amazon-demo/og-v3.png" />
+        <meta property="og:image:width" content="1200" />
+        <meta property="og:image:height" content="630" />
+        <meta property="og:image:type" content="image/png" />
         <meta name="twitter:card" content="summary_large_image" />
+        <meta
+          name="twitter:description"
+          content="QuickBooks + Sellerboard in one place. Prepared by JK No Jokes Financials."
+        />
+        <meta name="twitter:image" content="https://www.jknojokes.com/amazon-demo/og-v3.png" />
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="" />
         <link
