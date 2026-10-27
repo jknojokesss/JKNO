@@ -68,6 +68,9 @@ export default function AmazonDemoPortal() {
             <a href="#/cash" data-page="cash">
               Cash
             </a>
+            <a href="#/payables" data-page="payables">
+              Payables
+            </a>
             <a href="#/sources" data-page="sources">
               Data sources
             </a>

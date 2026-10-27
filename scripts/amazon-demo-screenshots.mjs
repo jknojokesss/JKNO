@@ -1,5 +1,5 @@
 import { chromium } from 'playwright'
-import { mkdir } from 'fs/promises'
+import { mkdir, readdir, rm } from 'fs/promises'
 import path from 'path'
 
 const BASE = process.env.BASE_URL || 'http://127.0.0.1:3000/amazon-demo'
@@ -13,12 +13,27 @@ const TABS = [
   ['05-expenses', '#/expenses'],
   ['06-inventory', '#/inventory'],
   ['07-cash', '#/cash'],
-  ['08-data-sources', '#/sources'],
+  ['08-payables', '#/payables'],
+  ['09-payout', '#/payout'],
+  ['10-data-sources', '#/sources'],
 ]
 
-async function main() {
+async function purgeOldShots() {
   await mkdir(OUT, { recursive: true })
-  const browser = await chromium.launch({ headless: true })
+  const names = await readdir(OUT)
+  for (const name of names) {
+    if (name.startsWith('desk-') || name.startsWith('phone-') || name === 'type-closeup.png') {
+      await rm(path.join(OUT, name), { force: true })
+    }
+  }
+}
+
+async function main() {
+  await purgeOldShots()
+  const browser = await chromium.launch({
+    headless: true,
+    executablePath: process.env.PLAYWRIGHT_CHROME_PATH || '/usr/local/bin/google-chrome',
+  })
   const page = await browser.newPage()
 
   for (const [name, hash] of TABS) {
@@ -46,6 +61,15 @@ async function main() {
 
   await page.setViewportSize({ width: 390, height: 844 })
   await page.goto(`${BASE}#/overview`, { waitUntil: 'networkidle' })
+  await page.waitForSelector('.ov-prod-list a', { timeout: 15000 })
+  await page.click('.ov-prod-list a')
+  await page.waitForTimeout(500)
+  await page.screenshot({
+    path: path.join(OUT, 'phone-full-product-detail.png'),
+    fullPage: true,
+  })
+
+  await page.goto(`${BASE}#/overview`, { waitUntil: 'networkidle' })
   await page.click('#mobMoreBtn')
   await page.waitForTimeout(300)
   await page.screenshot({
@@ -55,11 +79,11 @@ async function main() {
 
   await page.setViewportSize({ width: 1280, height: 900 })
   await page.goto(`${BASE}#/overview`, { waitUntil: 'networkidle' })
-  await page.waitForSelector('.ov-boxes', { timeout: 15000 })
-  await page.waitForSelector('.two.even.sec .tbl-wrap table', { timeout: 15000 })
+  await page.waitForSelector('.ov-split', { timeout: 15000 })
+  await page.waitForSelector('section.card.panel.sec .tbl-wrap table', { timeout: 15000 })
   const clip = await page.evaluate(() => {
-    const boxes = document.querySelector('.ov-boxes')
-    const table = document.querySelector('.two.even.sec .tbl-wrap table')
+    const boxes = document.querySelector('.ov-split')
+    const table = document.querySelector('section.card.panel.sec .tbl-wrap table')
     const main = document.querySelector('#main')
     if (!boxes || !table || !main) return null
     const pad = 8
