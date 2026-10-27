@@ -115,6 +115,56 @@ export async function auditMainLayout(page) {
       })
     })
 
+    main.querySelectorAll('.ov-src, .ov-src-line, .ov-box-lbl').forEach((el) => {
+      const st = getComputedStyle(el)
+      if (st.textOverflow === 'ellipsis') {
+        fails.push(`tag/label ellipsis CSS: ${(el.textContent || '').slice(0, 24)}`)
+      }
+      if (el.scrollWidth > el.clientWidth + 1) {
+        fails.push(`tag/label clipped: "${(el.textContent || '').trim().slice(0, 28)}"`)
+      }
+    })
+
+    main.querySelectorAll('.ov-box-meta').forEach((meta) => {
+      const t = (meta.textContent || '').replace(/\s+/g, ' ').trim()
+      const orphan = /\bvs (prior week|week before|same days last month|prior period)\b/i
+      if (orphan.test(t) && !/[-+]?\d/.test(t)) {
+        fails.push(`orphan prior label in KPI meta: "${t.slice(0, 40)}"`)
+      }
+      meta.querySelectorAll('span').forEach((span) => {
+        const s = (span.textContent || '').replace(/\s+/g, ' ').trim()
+        if (orphan.test(s) && !/[-+]?\d/.test(s)) {
+          fails.push(`orphan prior label: "${s}"`)
+        }
+      })
+    })
+
+    document.querySelectorAll('.seg button[aria-pressed="true"]').forEach((btn) => {
+      const st = getComputedStyle(btn)
+      const bg = st.backgroundColor
+      const fg = st.color
+      const parse = (c) => {
+        const m = c.match(/rgba?\((\d+),\s*(\d+),\s*(\d+)/)
+        return m ? [+m[1], +m[2], +m[3]] : null
+      }
+      const b = parse(bg)
+      const f = parse(fg)
+      if (!b || !f) return
+      const lum = (rgb) => {
+        const [r, g, bl] = rgb.map((v) => {
+          v /= 255
+          return v <= 0.03928 ? v / 12.92 : Math.pow((v + 0.055) / 1.055, 2.4)
+        })
+        return 0.2126 * r + 0.7152 * g + 0.0722 * bl
+      }
+      const L1 = lum(f)
+      const L2 = lum(b)
+      const contrast = (Math.max(L1, L2) + 0.05) / (Math.min(L1, L2) + 0.05)
+      if (contrast < 4.5) {
+        fails.push(`active chip contrast ${contrast.toFixed(1)}:1 (fg ${fg}, bg ${bg})`)
+      }
+    })
+
     main.querySelectorAll('.ov-prod-body, .prod-card-body').forEach((body) => {
       const hideHost = body.closest('.prod-cards, .ov-prod-list')
       if (hideHost && getComputedStyle(hideHost).display === 'none') return

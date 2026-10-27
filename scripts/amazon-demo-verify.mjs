@@ -321,9 +321,26 @@ async function main() {
     return (neg ? '-$' : '$') + s
   }
 
-  const scrapeOverview = async () => {
-    await page.goto(`${BASE}#/overview`, { waitUntil: 'networkidle' })
+  const weekNetDisplay = moneyDisplay(r.net)
+
+  const ensureOverviewWeek = async () => {
+    await page.goto(`${BASE}#/overview`, { waitUntil: 'load', timeout: 60000 })
     await page.waitForSelector('.ov-kpi-grid', { timeout: 15000 })
+    await page.locator('button[data-range="week"]').click()
+    await page.waitForFunction(
+      (exp) => {
+        const box = [...document.querySelectorAll('a.ov-box')].find(
+          (b) => b.querySelector('.ov-box-lbl')?.textContent?.trim() === 'True net',
+        )
+        return box?.querySelector('.ov-box-val')?.textContent?.trim() === exp
+      },
+      weekNetDisplay,
+      { timeout: 10000 },
+    )
+  }
+
+  const scrapeOverview = async () => {
+    await ensureOverviewWeek()
     return page.evaluate(() => {
       const o = { boxes: {}, line: {}, due30: null }
       document.querySelectorAll('a.ov-box').forEach((b) => {
@@ -334,10 +351,23 @@ async function main() {
         const m = meta.match(/Due 30d\s+\$[\d,]+/)
         if (m && lbl === 'What you owe') o.due30 = m[0].replace('Due 30d ', '').trim()
       })
-      document.querySelectorAll('a.ov-sec-item').forEach((b) => {
-        const lbl = b.querySelector('.ov-sec-lbl')?.textContent?.trim()
-        const val = b.querySelector('.ov-sec-val')?.textContent?.trim()
+      document.querySelectorAll('a.ov-sec-item, a.ov-sec-row').forEach((b) => {
+        const lbl =
+          b.querySelector('.ov-sec-lbl')?.textContent?.trim() ||
+          b.querySelector('.ov-sec-row-lbl')?.textContent?.trim()
+        const val =
+          b.querySelector('.ov-sec-val')?.textContent?.trim() ||
+          b.querySelector('.ov-sec-row-val')?.textContent?.trim()
         if (lbl) o.line[lbl] = val
+      })
+      o.orphanPrior = []
+      document.querySelectorAll('.ov-box-meta').forEach((meta) => {
+        meta.querySelectorAll('span').forEach((span) => {
+          const s = (span.textContent || '').replace(/\s+/g, ' ').trim()
+          if (/vs prior|vs week before|vs same days|vs prior period/i.test(s) && !/[-+]?\d/.test(s)) {
+            o.orphanPrior.push(s)
+          }
+        })
       })
       return o
     })
@@ -489,6 +519,27 @@ async function main() {
       console.error(`FAIL crossPage ${item.name}: overview "${ovCompare}" vs page "${pgCompare}"`)
       ok = false
     } else console.log(`OK crossPage ${item.name}`)
+  }
+
+  const RANGES_OV = ['week', 'last', 'mtd']
+  for (const rng of RANGES_OV) {
+    await page.goto(`${BASE}#/overview`, { waitUntil: 'load', timeout: 60000 })
+    await page.locator(`button[data-range="${rng}"]`).click()
+    await page.waitForTimeout(350)
+    const orphans = await page.evaluate(() => {
+      const bad = []
+      document.querySelectorAll('.ov-box-meta span').forEach((span) => {
+        const s = (span.textContent || '').replace(/\s+/g, ' ').trim()
+        if (/vs prior|vs week before|vs same days|vs prior period/i.test(s) && !/[-+]?\d/.test(s)) {
+          bad.push(s)
+        }
+      })
+      return bad
+    })
+    if (orphans.length) {
+      console.error(`FAIL orphanPrior range ${rng}: ${orphans.join('; ')}`)
+      ok = false
+    } else console.log(`OK orphanPrior range ${rng}`)
   }
 
   const PROSE_ROUTES = [

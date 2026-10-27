@@ -21,7 +21,10 @@ function money(c,dec){var neg=c<0;var v=Math.abs(c)/100;var s=dec?v.toLocaleStri
 function paren(c){var s=money(Math.abs(c));return (c<0&&s!=='$0')?'('+s+')':s;}
 function num(n){return Math.round(n).toLocaleString('en-US');}
 function pct(x,d){if(!isFinite(x))return '-';return (x*100).toFixed(d==null?1:d)+'%';}
-function chg(cur,prev,invert){if(prev==null||prev===0||!isFinite(prev))return '';var r=(cur-prev)/Math.abs(prev);if(Math.abs(r)<0.005)return '';var cls=(r>0)!==(!!invert)?'up':'down';return '<span class="chg '+cls+'">'+(r>0?'+':'')+(r*100).toFixed(1)+'%</span>';}
+function chgPct(cur,prev){if(prev==null||prev===0||!isFinite(prev))return null;return (cur-prev)/Math.abs(prev);}
+function chgSpan(r,invert){if(r==null||!isFinite(r))return '';var cls=Math.abs(r)<0.005?'flat':((r>0)!==(!!invert)?'up':'down');return '<span class="chg '+cls+'">'+(r>0?'+':'')+(r*100).toFixed(1)+'%</span>';}
+function chg(cur,prev,invert){return chgSpan(chgPct(cur,prev),invert);}
+function chgMeta(cur,prev,pl,invert){if(!pl)return '';var r=chgPct(cur,prev);if(r==null)return '';var s=chgSpan(r,invert);return s?'<span>'+s+' '+pl+'</span>':'';}
 function ceilTo(q,c){return Math.ceil(q/c)*c;}
 var skuIx={};D.skus.forEach(function(s,i){skuIx[s.sku]=i;});
 /* Product photos: in production, imageUrl is the Amazon listing main image from Seller Central / catalog API. */
@@ -134,9 +137,12 @@ function mobPanelCard(href,title,allHref,body){return '<section class="card pane
 function ovProdRows(prods){return '<ul class="ov-prod-list">'+prods.map(function(x){return '<li><a class="tap-card ov-prod-item" href="#/products/'+x.s.sku+'">'+prodImgHtml(x.s)+'<span class="ov-prod-body"><span class="ov-prod-name">'+esc(x.s.name)+'</span><span class="ov-prod-line2"><span class="ov-prod-amt">'+money(x.amzProfit)+'</span><span aria-hidden="true"> · </span><span>'+pct(x.margin)+'</span><span aria-hidden="true"> · </span><span class="ov-prod-sku">'+x.s.sku+'</span></span></span></a></li>';}).join('')+'</ul>';}
 function backBar(href,label){return '<a class="back-bar tap-card" href="'+href+'"><span class="back-ic" aria-hidden="true">←</span>'+esc(label||'Back')+'</a>';}
 function ovSrcTag(src){return src?'<span class="ov-src">'+esc(src)+'</span>':'';}
-function ovBoxLink(href,lbl,val,meta,srcTag,wide){return '<a class="ov-box tap-card'+(wide?' ov-wide':'')+'" href="'+href+'"><div class="ov-box-top"><p class="ov-box-lbl">'+lbl+'</p>'+ovSrcTag(srcTag)+'</div><p class="ov-box-val">'+val+'</p><div class="ov-box-meta">'+meta+'</div></a>';}
+function ovBoxLink(href,lbl,val,meta,srcTag,wide){return '<a class="ov-box tap-card'+(wide?' ov-wide':'')+'" href="'+href+'"><div class="ov-box-head"><p class="ov-box-lbl">'+lbl+'</p>'+(srcTag?'<p class="ov-src-line">'+esc(srcTag)+'</p>':'')+'</div><p class="ov-box-val">'+val+'</p><div class="ov-box-meta">'+meta+'</div></a>';}
 function ovSecLink(href,lbl,val,srcTag){return '<a class="ov-sec-item tap-card" href="'+href+'"><span class="ov-sec-lbl">'+lbl+'</span><span class="ov-sec-val">'+val+'</span>'+ovSrcTag(srcTag)+'</a>';}
-function overviewSecondaryLine(nx,invSnap,cl){return '<nav class="ov-secondary" aria-label="Payout, inventory, and claims">'+ovSecLink('#/payout','Next payout',money(nx.amount),'Sellerboard')+'<span class="ov-sec-sep" aria-hidden="true">·</span>'+ovSecLink('#/inventory','Inventory at cost',money(invSnap.totalCents),'QuickBooks')+'<span class="ov-sec-sep" aria-hidden="true">·</span>'+ovSecLink('#/shipments','Claims',money(cl.potential),'Sellerboard')+'</nav>';}
+function ovSecMobRow(href,lbl,val,srcTag){return '<a class="ov-sec-row tap-card" href="'+href+'"><span class="ov-sec-row-lbl">'+lbl+'</span><span class="ov-sec-row-val">'+val+'</span>'+ovSrcTag(srcTag)+'</a>';}
+function overviewSecondaryLine(nx,invSnap,cl){var rows=[['#/payout','Next payout',money(nx.amount),'Sellerboard'],['#/inventory','Inventory at cost',money(invSnap.totalCents),'QBO'],['#/shipments','Claims',money(cl.potential),'Sellerboard']];
+  if(isMob())return '<nav class="ov-secondary-mob" aria-label="Payout, inventory, and claims">'+rows.map(function(r){return ovSecMobRow(r[0],r[1],r[2],r[3]);}).join('')+'</nav>';
+  return '<nav class="ov-secondary desk-only-inline" aria-label="Payout, inventory, and claims">'+ovSecLink('#/payout','Next payout',money(nx.amount),'Sellerboard')+'<span class="ov-sec-sep" aria-hidden="true">·</span>'+ovSecLink('#/inventory','Inventory at cost',money(invSnap.totalCents),'QBO')+'<span class="ov-sec-sep" aria-hidden="true">·</span>'+ovSecLink('#/shipments','Claims',money(cl.potential),'Sellerboard')+'</nav>';}
 function blistHtml(o){var parts=[['Refunds',o.refunds],['Amazon fees',o.fees],['Ad spend',o.ads],['COGS',o.cogs],['Write-offs less reimbursements',o.loss-o.reimb],['Other expenses',o.other],['True net profit',o.net]];
   var h='<ul class="blist">';h+='<li class="tot"><span class="sw" style="background:transparent"></span><span class="nm">Amazon sales</span><span class="pc">100%</span><span class="am">'+money(o.sales)+'</span></li>';
   parts.forEach(function(x){if(x[0]==='Other expenses')h+='<li class="sub"><span class="sw" style="background:var(--accent-mid)"></span><span class="nm">Amazon profit</span><span class="pc">'+pct(o.amzProfit/o.sales)+'</span><span class="am">'+money(o.amzProfit)+'</span></li>';
@@ -161,12 +167,12 @@ function kpi(label,val,meta,hl){return '<div class="card kpi'+(hl?' hl':'')+'"><
 function statStrip(items){return statGrid(items);}
 function statGrid(items){return '<dl class="stat-grid">'+items.map(function(it){var dd=it[1]+(it[2]?'<small>'+it[2]+'</small>':'');if(it[3])return '<div><dt>'+it[0]+'</dt><dd><a class="stat-dd-link tap-card" href="'+it[3]+'">'+dd+'</a></dd></div>';return '<div><dt>'+it[0]+'</dt><dd>'+dd+'</dd></div>';}).join('')+'</dl>';}
 function kvRows(rows){var h='<div class="kv-rows">';rows.forEach(function(r){if(r[2])h+='<a class="kv-row tap-card" href="'+r[2]+'"><span>'+r[0]+'</span><strong>'+r[1]+'</strong></a>';else h+='<div class="kv-row static"><span>'+r[0]+'</span><strong>'+r[1]+'</strong></div>';});return h+'</div>';}
-function overviewHero(o,p,pl,c,b,nx){var netM='<span>'+pct(o.netMargin)+' margin</span>'+(p?'<span>'+chg(o.net,p.net)+' '+pl+'</span>':'');
+function overviewHero(o,p,pl,c,b,nx){var netM='<span>'+pct(o.netMargin)+' margin</span>'+(p?chgMeta(o.net,p.net,pl):'');
   var cashM='<span>'+fd(b)+'</span>';
   var salM='<span>'+num(o.units)+' units</span>';
   var sec=liabSections(),due=liabDueIn30(),invSnap=invCostSnapshot(b),cl=claimTotals();
   var oweM='<span>Due 30d '+money(due.total)+'</span>';
-  return '<div class="ov-kpi-grid">'+ovBoxLink('#/report','True net',money(o.net),netM,'QuickBooks + Sellerboard')+ovBoxLink('#/products','Sales',money(o.sales),salM,'Sellerboard')+ovBoxLink('#/cash','Cash',money(c.cash),cashM,'QuickBooks')+ovBoxLink('#/payables','What you owe',money(sec.total),oweM,'QuickBooks')+'</div>'+overviewSecondaryLine(nx,invSnap,cl);}
+  return '<div class="ov-kpi-grid">'+ovBoxLink('#/report','True net',money(o.net),netM,'QB + Sellerboard')+ovBoxLink('#/products','Sales',money(o.sales),salM,'Sellerboard')+ovBoxLink('#/cash','Cash',money(c.cash),cashM,'QBO')+ovBoxLink('#/payables','What you owe',money(sec.total),oweM,'QBO')+'</div>'+overviewSecondaryLine(nx,invSnap,cl);}
 var NAV_LINKS=[['overview','Overview'],['report','Weekly report'],['products','Products'],['shipments','FBA shipments'],['expenses','Expenses'],['inventory','Inventory'],['cash','Cash'],['payables','Payables'],['sources','Data sources']];
 var MOB_MAIN=[['overview','Overview'],['report','Weekly'],['products','Products'],['cash','Cash']];
 var MOB_MORE=[['expenses','Expenses'],['inventory','Inventory'],['payables','Payables'],['shipments','Shipments'],['sources','Sources']];
