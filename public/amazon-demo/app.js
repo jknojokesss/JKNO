@@ -73,6 +73,9 @@ function prevLabel(){return {week:'vs prior week',last:'vs week before',mtd:'vs 
 /* ---------- helpers ---------- */
 var $=function(s,el){return (el||document).querySelector(s);};
 function kpi(label,val,meta,hl){return '<div class="card kpi'+(hl?' hl':'')+'"><div class="lbl">'+label+'</div><div class="val">'+val+'</div><div class="meta">'+(meta||'&nbsp;')+'</div></div>';}
+function statStrip(items){return '<div class="stat-strip">'+items.map(function(it){return '<div><span>'+it[0]+'</span><strong>'+it[1]+(it[2]?'<em>'+it[2]+'</em>':'')+'</strong></div>';}).join('')+'</div>';}
+var MOB_TAB=[['overview','Overview'],['report','Weekly'],['products','Products'],['shipments','FBA'],['expenses','Expenses'],['inventory','Inventory'],['cash','Cash'],['sources','Data']];
+function renderMobTabs(page){var el=$('#mobTabs');if(!el)return;el.innerHTML=MOB_TAB.map(function(t){return '<a href="#/'+t[0]+'" data-page="'+t[0]+'"'+(page===t[0]?' class="on" aria-current="page"':'')+'>'+t[1]+'</a>';}).join('');}
 var SEARCH_SVG='<svg viewBox="0 0 24 24" fill="none" stroke-width="2" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>';
 function searchBox(id,val,ph){return '<label class="search">'+SEARCH_SVG+'<input type="search" id="'+id+'" value="'+esc(val)+'" placeholder="'+ph+'" aria-label="'+ph+'"></label>';}
 function sortRows(rows,sort,cols){var c=cols.filter(function(x){return x.key===sort.key;})[0];var f=c&&c.sv?c.sv:function(r){return r[sort.key];};
@@ -109,18 +112,17 @@ function weekLabel(w){return fd(w*7);}
 /* ---------- pages ---------- */
 var PAGES={};
 PAGES.overview=function(){var ab=rangeAB(),a=ab[0],b=ab[1],o=full(a,b),pab=prevAB(a,b),p=pab?full(pab[0],pab[1]):null;var pl=prevLabel();
-  var h='<div class="grid kpis">';
-  h+=kpi('Amazon sales',money(o.sales),(p?chg(o.sales,p.sales)+' '+pl:'&nbsp;'));
-  h+=kpi('Amazon fees',money(o.fees),(p?chg(o.fees,p.fees,true)+' ':'')+pct(o.fees/o.sales)+' of sales');
-  h+=kpi('Ad spend',money(o.ads),(p?chg(o.ads,p.ads,true)+' ':'')+'TACOS '+pct(o.tacos));
-  h+=kpi('COGS',money(o.cogs),(p?chg(o.cogs,p.cogs,true)+' ':'')+num(o.units)+' units');
-  h+=kpi('Amazon profit',money(o.amzProfit),(p?chg(o.amzProfit,p.amzProfit)+' ':'')+pct(o.margin)+' margin');
-  h+=kpi('Other expenses',money(o.other),(p?chg(o.other,p.other,true)+' ':'')+'from QuickBooks');
-  h+=kpi('True net profit',money(o.net),p?chg(o.net,p.net)+' '+pl:'&nbsp;',true);
-  h+=kpi('Net margin',pct(o.netMargin),p?pct(p.netMargin)+' in prior period':'&nbsp;');
-  var c=cashAt(b);h+=kpi('Cash on hand',money(c.cash),'as of '+fd(b));
-  var nx=D.settlements[D.settlements.length-1];h+=kpi('Next Amazon payout',money(nx.amount),'estimate, lands '+fdIso(nx.deposit,{wd:1}));
-  h+='</div>';
+  var c=cashAt(b),nx=D.settlements[D.settlements.length-1];
+  var lede='After Amazon fees, ads, COGS and every other expense from QuickBooks, you kept '+money(o.net)+' on '+money(o.sales)+' in sales — a '+pct(o.netMargin)+' net margin.';
+  if(p&&p.net){var dr=(o.net-p.net)/Math.abs(p.net);lede+=Math.abs(dr)<0.005?' About even with the prior period.':(dr>0?' Up ':' Down ')+Math.abs(dr*100).toFixed(0)+'% '+pl.replace('vs ','from ')+'.';}
+  var h='<section class="sum-hero"><p class="sum-kicker">True net profit · '+frange(a,b)+'</p><div class="sum-figure">'+money(o.net)+'</div><p class="sum-lede">'+esc(lede)+'</p><dl class="sum-stats">';
+  h+='<div><dt>Amazon profit (Sellerboard)</dt><dd>'+money(o.amzProfit)+(p?'<small>'+chg(o.amzProfit,p.amzProfit)+' '+pl+' · '+pct(o.margin)+' margin</small>':'<small>'+pct(o.margin)+' margin on Amazon sales</small>')+'</dd></div>';
+  h+='<div><dt>Other expenses (QuickBooks)</dt><dd>'+money(o.other)+(p?'<small>'+chg(o.other,p.other,true)+' from prior period</small>':'<small>Payroll, freight, prep, software and the rest</small>')+'</dd></div>';
+  h+='<div><dt>Amazon sales</dt><dd>'+money(o.sales)+(p?'<small>'+chg(o.sales,p.sales)+' '+pl+'</small>':'')+'</dd></div>';
+  h+='<div><dt>Cash on hand</dt><dd>'+money(c.cash)+'<small>As of '+fd(b)+'</small></dd></div>';
+  h+='<div><dt>Next Amazon payout</dt><dd>'+money(nx.amount)+'<small>Estimate, lands '+fdIso(nx.deposit,{wd:1})+'</small></dd></div>';
+  h+='<div><dt>Fees and ads</dt><dd>'+money(o.fees)+' fees · '+money(o.ads)+' ads<small>TACOS '+pct(o.tacos)+' · '+num(o.units)+' units sold</small></dd></div>';
+  h+='</dl></section>';
   var metrics={sales:['Amazon sales',function(x){return x.sales;}],amz:['Amazon profit',function(x){return x.amzProfit;}],other:['Other expenses',function(x){return x.other;}],net:['True net profit',function(x){return x.net;}]};
   var weeks=[];for(var w=0;w<NWEEKS;w++)weeks.push(full(w*7,w*7+6));
   var m=metrics[state.chartMetric];var vals=weeks.map(m[1]);
@@ -128,7 +130,7 @@ PAGES.overview=function(){var ab=rangeAB(),a=ab[0],b=ab[1],o=full(a,b),pab=prevA
   h+='<div class="chart-cap" id="cap">'+m[0]+' by week, Mon - Sun. Selected dates are highlighted. Tap a bar for the amount.</div>';
   h+=barChart({values:vals,label:m[0]+' by week',hi:function(i){return i*7+6>=a&&i*7<=b;},xl:weekLabel,tip:function(i){return 'Week of '+fd(i*7)+': '+money(vals[i]);}});
   h+='</section>';
-  var parts=[['Refunds',o.refunds,'#E7A49C'],['Amazon fees',o.fees,'#7FA3D1'],['Ad spend',o.ads,'#B5CBE7'],['COGS',o.cogs,'#4D7DBE'],['Write-offs less reimbursements',o.loss-o.reimb,'#CBD2DC'],['Other expenses',o.other,'#8C9AAE'],['True net profit',o.net,'#174A88']];
+  var parts=[['Refunds',o.refunds,'#C4CED8'],['Amazon fees',o.fees,'#6E8498'],['Ad spend',o.ads,'#94A8BA'],['COGS',o.cogs,'#4A6278'],['Write-offs less reimbursements',o.loss-o.reimb,'#B8C4D0'],['Other expenses',o.other,'#7A8B9C'],['True net profit',o.net,'#243B52']];
   h+='<section class="card panel"><div class="panel-h"><h2>Where each sales dollar went</h2><span class="note">'+frange(a,b)+'</span></div><div class="stack" aria-hidden="true">'+parts.map(function(x){return x[1]>0?'<span style="width:'+(x[1]/o.sales*100).toFixed(2)+'%;background:'+x[2]+'"></span>':'';}).join('')+'</div><ul class="blist">';
   h+='<li class="tot"><span class="sw" style="background:transparent"></span><span class="nm">Amazon sales</span><span class="pc">100%</span><span class="am">'+money(o.sales)+'</span></li>';
   parts.forEach(function(x){h+='<li'+(x[0]==='True net profit'?' class="tot"':'')+'><span class="sw" style="background:'+x[2]+'"></span><span class="nm">'+x[0]+'</span><span class="pc">'+pct(x[1]/o.sales)+'</span><span class="am">'+money(x[1])+'</span></li>';});
@@ -201,13 +203,15 @@ var PCOLS=[
  {key:'acos',label:'ACOS',f:function(r){return pct(r.acos);}},
  {key:'tacos',label:'TACOS',f:function(r){return pct(r.tacos);}}];
 function prodData(){var ab=rangeAB();return D.skus.map(function(s,k){var x=agg(ab[0],ab[1],k);x.s=s;x.k=k;x.name=s.name;return x;});}
-function prodBody(){var all=prodData(),q=state.prodQ.trim().toLowerCase();var rows=all.filter(function(r){return !q||(r.s.name+' '+r.s.sku+' '+r.s.asin).toLowerCase().indexOf(q)>=0;});
-  rows=sortRows(rows,state.prodSort,PCOLS);var ab=rangeAB();
+function prodRowsFiltered(){var all=prodData(),q=state.prodQ.trim().toLowerCase();return sortRows(all.filter(function(r){return !q||(r.s.name+' '+r.s.sku+' '+r.s.asin).toLowerCase().indexOf(q)>=0;}),state.prodSort,PCOLS);}
+function prodBody(){var all=prodData(),rows=prodRowsFiltered(),ab=rangeAB();
   if(!rows.length)return '<tbody><tr><td colspan="11" class="empty">No products match "'+esc(state.prodQ)+'"</td></tr></tbody>';
   var tot;if(rows.length===all.length)tot=agg(ab[0],ab[1]);else{tot={};D.fields.forEach(function(f){tot[f]=0;rows.forEach(function(r){tot[f]+=r[f];});});derive(tot);}
   return '<tbody>'+rows.map(function(r){return '<tr class="click" data-go="#/products/'+r.s.sku+'" tabindex="0">'+PCOLS.map(function(c){return cell(c,r);}).join('')+'</tr>';}).join('')+'</tbody><tfoot><tr>'+PCOLS.map(function(c,i){if(i===0)return '<td>'+(rows.length===all.length?'All products':rows.length+' shown')+'</td>';return '<td'+(c.hm?' class="hide-m"':'')+'>'+c.f(tot).replace(/<\/?strong>/g,'')+'</td>';}).join('')+'</tr></tfoot>';}
+function prodCards(){var rows=prodRowsFiltered();if(!rows.length)return '<p class="empty">No products match.</p>';
+  return rows.map(function(r){return '<a class="prod-card" href="#/products/'+r.s.sku+'"><div class="prod-card-top"><span class="prod-card-profit">'+money(r.amzProfit)+' profit</span><span class="prod-card-margin">'+pct(r.margin)+' margin</span></div><div class="prod-card-name">'+esc(r.s.name)+'</div><div class="prod-card-sku">'+r.s.sku+'</div><div class="prod-card-meta"><span>'+num(r.units)+' units</span><span>'+money(r.sales)+' sales</span></div></a>';}).join('');}
 PAGES.products=function(){var ab=rangeAB();
-  return '<section class="card"><div class="panel panel-h" style="margin:0"><div><h2>Products</h2><div class="note">'+frange(ab[0],ab[1])+' &middot; from Sellerboard &middot; tap a row for detail</div></div><div class="tools">'+searchBox('prodQ',state.prodQ,'Search name, SKU or ASIN')+'</div></div><div class="tbl-wrap sticky1"><table id="prodTbl">'+thead(PCOLS,state.prodSort,'prod')+prodBody()+'</table></div></section><p class="callout">Profit = sales - refunds - Amazon fees - ads - COGS - write-offs + reimbursements. ACOS = ad spend / ad-attributed sales. TACOS = ad spend / total sales. The totals row matches the Overview for the same dates.</p>';};
+  return '<section class="card"><div class="panel panel-h" style="margin:0"><div><h2>Products</h2><div class="note">'+frange(ab[0],ab[1])+' &middot; from Sellerboard &middot; tap a row for detail</div></div><div class="tools">'+searchBox('prodQ',state.prodQ,'Search name, SKU or ASIN')+'</div></div><div class="prod-cards" id="prodCards">'+prodCards()+'</div><div class="tbl-wrap sticky1 prod-table-wrap"><table id="prodTbl">'+thead(PCOLS,state.prodSort,'prod')+prodBody()+'</table></div></section><p class="callout">Profit = sales - refunds - Amazon fees - ads - COGS - write-offs + reimbursements. ACOS = ad spend / ad-attributed sales. TACOS = ad spend / total sales. The totals row matches the Overview for the same dates.</p>';};
 function statusTag(s){return '<span class="tag '+({'Reorder now':'bad','Reorder soon':'warn','Healthy':'ok','Overstocked':'info'}[s]||'')+'">'+s+'</span>';}
 function productDrawer(sku){var k=skuIx[sku];if(k==null)return null;var s=D.skus[k],ab=rangeAB(),x=agg(ab[0],ab[1],k);var inv=invRows()[k];
   var h='<div class="dr-h"><div><h2 id="drawerTitle">'+esc(s.name)+'</h2><p>'+s.sku+' &middot; ASIN '+s.asin+' &middot; '+frange(ab[0],ab[1])+'</p></div><button class="x" type="button" data-close aria-label="Close">&times;</button></div>';
@@ -253,7 +257,7 @@ function claimTable(){var rows=D.claims.filter(function(c){return state.claimFil
   return '<thead><tr>'+CLCOLS.map(function(c){return '<th'+(c.l?' class="l"':'')+' scope="col">'+c.label+'</th>';}).join('')+'</tr></thead><tbody>'+(rows.length?rows.map(function(c){return '<tr>'+CLCOLS.map(function(col){return cell(col,c);}).join('')+'</tr>';}).join(''):'<tr><td colspan="9" class="empty">Nothing here</td></tr>')+'</tbody><tfoot><tr><td>'+rows.length+' items</td><td></td><td></td><td></td><td>'+t.u+'</td><td>'+money(t.a,1)+'</td><td></td><td></td><td></td></tr></tfoot>';}
 PAGES.shipments=function(){var open=SHIPS.filter(function(s){return !s.closedFlag;});var onway=0;open.forEach(function(s){onway+=s.units-s.recv;});
   var closed=SHIPS.filter(function(s){return s.closedFlag;});var shortU=0,overU=0;closed.forEach(function(s){s.lines.forEach(function(l){var d=l.shipped-l.received;if(d>0)shortU+=d;else overU-=d;});});var ct=claimTotals();
-  var h='<div class="grid kpis">'+kpi('Open shipments',open.length,num(onway)+' units not yet received')+kpi('Closed shipments',closed.length,num(shortU)+' units short, '+overU+' over')+kpi('Claimed with Amazon',money(ct.claimed,1),'filed cases')+kpi('Pending',money(ct.pending,1),'waiting on Amazon')+kpi('Reimbursed',money(ct.reimbursed,1),'paid to date',true)+'</div>';
+  var h=statStrip([['Open shipments',open.length,num(onway)+' units in transit'],['Closed shipments',closed.length,num(shortU)+' short · '+overU+' over'],['Pending claims',money(ct.pending,1),'waiting on Amazon'],['Reimbursed',money(ct.reimbursed,1),'paid to date'],['Claimed total',money(ct.claimed,1),'filed with Amazon']]);
   var fl=[['all','All'],['open','Open'],['closed','Closed'],['dev','With deviation']];
   h+='<section class="card sec"><div class="panel panel-h" style="margin:0"><div><h2>Inbound shipments</h2><div class="note">Units shipped vs received, from Sellerboard &middot; tap a shipment for SKU detail</div></div><div class="tools"><div class="chips" role="group" aria-label="Filter shipments">'+fl.map(function(f){return '<button class="chip" type="button" data-sf="'+f[0]+'" aria-pressed="'+(state.shipFilter===f[0])+'">'+f[1]+'</button>';}).join('')+'</div>'+searchBox('shipQ',state.shipQ,'Search ID, FC or SKU')+'</div></div><div class="tbl-wrap sticky1"><table id="shipTbl">'+thead(SCOLS,state.shipSort,'ship')+shipBody()+'</table></div></section>';
   var cf=[['all','All'],['Not filed','File claim'],['Pending','Pending'],['Reimbursed','Reimbursed']];
@@ -314,7 +318,8 @@ var ICOLS=[
 function invTie(){var q=D.openingInventory,out=[];for(var w=0;w<NWEEKS;w++){var a=w*7,b=a+6,purch=0;BANK.forEach(function(x){if(x.type==='Inventory purchase'&&x.i>=a&&x.i<=b)purch-=x.amt;});var g=agg(a,b);q=q+purch-g.cogs-g.loss;var sb=invValue(b);out.push({w:w,purch:purch,cogs:g.cogs,loss:g.loss,qbo:q,sb:sb,diff:q-sb});}return out;}
 PAGES.inventory=function(){var rows=invRows(),last=NDAYS-1;var av=0,ib=0,val=0,oo=0,vel=0;rows.forEach(function(r){av+=r.av;ib+=r.ib;val+=r.value;oo+=r.oo;vel+=r.v;});var re=rows.filter(function(r){return r.status.indexOf('Reorder')===0;});
   var tie=invTie(),lt=tie[tie.length-1];
-  var h='<div class="grid kpis k4">'+kpi('Inventory value',money(val,1),lt.diff===0?'<span class="tie"><span class="dot"></span>Matches QuickBooks</span>':'<span class="neg">Off by '+money(lt.diff,1)+'</span>',true)+kpi('Units at FBA',num(av),'available to sell')+kpi('Inbound units',num(ib),'shipped, not yet received')+kpi('SKUs to reorder',re.length,re.map(function(r){return r.sku;}).join(', ')||'none')+'</div>';
+  var tieNote=lt.diff===0?'Matches QuickBooks':'Off by '+money(lt.diff,1);
+  var h=statStrip([['Inventory value',money(val,1),tieNote],['Units at FBA',num(av),'available to sell'],['Inbound units',num(ib),'not yet received'],['SKUs to reorder',re.length?String(re.length):'None',re.map(function(r){return r.sku;}).join(', ')||'All healthy']]);
   h+='<section class="card sec"><div class="panel panel-h" style="margin:0"><div><h2>Stock and reorder</h2><div class="note">As of '+fd(last,{wd:1,y:1})+' &middot; units and cost from Sellerboard &middot; days of cover counts available + inbound + on order</div></div></div><div class="tbl-wrap sticky1"><table id="invTbl">'+thead(ICOLS,state.invSort,'inv')+'<tbody>'+sortRows(rows,state.invSort,ICOLS).map(function(r){return '<tr class="click" data-go="#/products/'+r.sku+'" tabindex="0">'+ICOLS.map(function(c){return cell(c,r);}).join('')+'</tr>';}).join('')+'</tbody><tfoot><tr><td>All products</td><td>'+num(av)+'</td><td>'+num(ib)+'</td><td>'+num(oo)+'</td><td>'+vel.toFixed(1)+'</td><td></td><td></td><td></td><td></td><td>'+money(val,1)+'</td></tr></tfoot></table></div></section>';
   h+='<p class="callout">Reorder now: days of cover is below the supplier lead time. Reorder soon: within 14 days of it. Suggested order covers lead time plus 60 days of sales, rounded to full cartons. Open purchase orders: '+D.purchaseOrders.map(function(p){return p.po+', '+num(p.units)+' units of '+p.sku+', due '+fdIso(p.eta);}).join('; ')+'. Value at cost counts units at FBA and inbound; on-order units are not paid for yet.</p>';
   h+='<section class="card sec"><div class="panel panel-h" style="margin:0"><div><h2>Inventory asset tie-out</h2><div class="note">QuickBooks keeps one Inventory asset account. Supplier payments add to it; the weekly Amazon entry takes out COGS and write-offs. It is checked against Sellerboard stock value every week.</div></div></div><div class="tbl-wrap sticky1"><table><thead><tr><th scope="col">Week ending</th><th scope="col">Supplier payments</th><th scope="col">COGS posted</th><th scope="col">Write-offs</th><th scope="col">QuickBooks balance</th><th scope="col">Sellerboard value</th><th scope="col">Difference</th></tr></thead><tbody>';
@@ -325,7 +330,7 @@ PAGES.inventory=function(){var rows=invRows(),last=NDAYS-1;var av=0,ib=0,val=0,o
 
 /* cash */
 PAGES.cash=function(){var last=NDAYS-1,c=cashAt(last),nx=D.settlements[D.settlements.length-1];
-  var h='<div class="grid kpis">'+kpi('Cash on hand',money(c.cash,1),'checking + savings, '+fd(last),true)+kpi('Checking',money(c.checking,1),D.accounts.checking)+kpi('Savings (tax reserve)',money(c.savings,1),D.accounts.savings)+kpi('Amex balance',money(c.amex,1),'October charges, autopay Nov 3')+kpi('Next Amazon payout',money(nx.amount,1),'estimate, lands '+fdIso(nx.deposit,{wd:1}))+'</div>';
+  var h=statStrip([['Cash on hand',money(c.cash,1),'checking + savings · '+fd(last)],['Checking',money(c.checking,1),D.accounts.checking],['Savings',money(c.savings,1),D.accounts.savings],['Amex balance',money(c.amex,1),'October charges, autopay Nov 3'],['Next payout',money(nx.amount,1),'lands '+fdIso(nx.deposit,{wd:1})]]);
   var bals=[],rows=[];for(var w=0;w<NWEEKS;w++){var a=w*7,b=a+6,f=cashFlow(a,b);f.w=w;f.end=cashAt(b).cash;rows.push(f);bals.push(f.end);}
   h+='<div class="two sec"><section class="card panel"><div class="panel-h"><h2>Cash on hand by week</h2><span class="note">week-end balance, checking + savings</span></div>'+lineChart({values:bals,label:'Cash on hand by week',xl:function(i){return fd(i*7+6);},tip:function(i){return fd(i*7+6)+': '+money(bals[i]);}})+'</section>';
   h+='<section class="card panel"><div class="panel-h"><h2>Amazon payouts</h2><span class="note">every 14 days</span></div><div class="tbl-wrap"><table><thead><tr><th scope="col">Settlement</th><th scope="col">Deposit</th><th scope="col">Amount</th></tr></thead><tbody>'+D.settlements.slice().reverse().map(function(s){return '<tr><td>'+fdIso(s.start)+' - '+fdIso(s.end)+(s.open?' <span class="tag info">Open</span>':'')+'</td><td>'+fdIso(s.deposit)+'</td><td>'+money(s.amount,1)+(s.open?'<span class="ps">estimate through '+fdIso(s.through)+'</span>':'')+'</td></tr>';}).join('')+'</tbody></table></div></section></div>';
@@ -370,8 +375,9 @@ function route(){var hs=(location.hash||'#/overview').replace(/^#\/?/,'').split(
   var pageChanged=cur.page!==page;cur.page=page;cur.sub=sub;
   if(pageChanged)render();
   var links=document.querySelectorAll('#nav a');for(var i=0;i<links.length;i++){var a=links[i];if(a.getAttribute('data-page')===page){a.classList.add('on');a.setAttribute('aria-current','page');}else{a.classList.remove('on');a.removeAttribute('aria-current');}}
+  renderMobTabs(page);
   openDrawer(page,sub);
-  if(pageChanged&&!sub){window.scrollTo(0,0);var on=$('#nav a.on'),n=$('#nav');if(on&&n&&window.innerWidth<1024)n.scrollLeft=Math.max(0,on.offsetLeft-16);}}
+  if(pageChanged&&!sub)window.scrollTo(0,0);}
 function render(){var page=cur.page;$('#pageTitle').textContent=TITLES[page][0];$('#pageSub').textContent=TITLES[page][1];document.title=TITLES[page][0]+' | Larkfield Kitchen Co. | Sample client portal';renderRange(page);$('#main').innerHTML=PAGES[page]();}
 var lastFocus=null;
 function openDrawer(page,sub){var wrap=$('#drawerWrap'),dr=$('#drawer');var html=null;
@@ -401,7 +407,7 @@ document.addEventListener('click',function(e){var t=e.target;if(!t.closest)retur
 document.addEventListener('keydown',function(e){if(e.key==='Escape'&&!$('#drawerWrap').hidden){closeDrawer();return;}
   if((e.key==='Enter'||e.key===' ')&&e.target.matches&&e.target.matches('tr[data-go],tr[data-cat]')){e.preventDefault();e.target.click();}});
 document.addEventListener('input',function(e){var id=e.target.id;
-  if(id==='prodQ'){state.prodQ=e.target.value;refreshBody('prodTbl',prodBody);}
+  if(id==='prodQ'){state.prodQ=e.target.value;refreshBody('prodTbl',prodBody);var pc=$('#prodCards');if(pc)pc.innerHTML=prodCards();}
   else if(id==='shipQ'){state.shipQ=e.target.value;refreshBody('shipTbl',shipBody);}
   else if(id==='expQ'){state.expQ=e.target.value;refreshBody('expTbl',expBody);}});
 document.addEventListener('change',function(e){var id=e.target.id;
