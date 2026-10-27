@@ -59,20 +59,27 @@ async function main() {
   await page.waitForSelector('.two.even.sec .tbl-wrap table', { timeout: 15000 })
   const clip = await page.evaluate(() => {
     const boxes = document.querySelector('.ov-boxes')
-    const prodPanel = document.querySelector('.two.even.sec .tbl-wrap table')
-    if (!boxes || !prodPanel) return null
-    const r1 = boxes.getBoundingClientRect()
-    const r2 = prodPanel.getBoundingClientRect()
+    const table = document.querySelector('.two.even.sec .tbl-wrap table')
+    const main = document.querySelector('#main')
+    if (!boxes || !table || !main) return null
     const pad = 8
+    const y0 = boxes.offsetTop
+    const y1 = table.offsetTop + table.offsetHeight
+    const x0 = boxes.offsetLeft + main.offsetLeft
+    const w = Math.max(boxes.offsetWidth, table.offsetWidth)
     return {
-      x: Math.max(0, Math.floor(r1.left - pad)),
-      y: Math.max(0, Math.floor(r1.top - pad)),
-      width: Math.ceil(Math.max(r1.right, r2.right) - r1.left + pad * 2),
-      height: Math.ceil(r2.bottom - r1.top + pad * 2),
+      x: Math.max(0, x0 - pad),
+      y: Math.max(0, y0 - pad),
+      width: w + pad * 2,
+      height: y1 - y0 + pad * 2,
     }
   })
   if (clip) {
-    await page.screenshot({ path: path.join(OUT, 'type-closeup.png'), clip })
+    await page.screenshot({
+      path: path.join(OUT, 'type-closeup.png'),
+      fullPage: true,
+      clip,
+    })
   } else {
     await page.locator('.sum-hero').screenshot({ path: path.join(OUT, 'type-closeup.png') })
   }
