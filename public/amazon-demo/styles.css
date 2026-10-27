@@ -67,9 +67,6 @@ main{padding:var(--s5) var(--s5) var(--s2);outline:none}
 .kpi.hl .val{color:var(--accent-ink)}
 /* overview summary (no tile grid) */
 .sum-hero{margin-bottom:22px;padding-bottom:22px;border-bottom:1px solid var(--line)}
-.sum-kicker{margin:0 0 10px;font-size:0.875rem;color:var(--muted);font-weight:500}
-.sum-figure{font-size:clamp(2.25rem,6vw,3rem);font-weight:700;letter-spacing:-.035em;color:var(--accent-ink);line-height:1.05;font-variant-numeric:tabular-nums}
-.sum-lede{margin:var(--s3) 0 0;font-size:0.9375rem;line-height:1.45;color:var(--ink2);max-width:36em;font-weight:500}
 .ov-boxes{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:var(--s3)}
 .ov-box{border:1px solid var(--line);background:#FAFBFC;border-radius:var(--r);padding:var(--s3) var(--s4);min-width:0}
 .ov-box-lbl{margin:0;font-size:0.8125rem;font-weight:500;color:var(--muted);line-height:1.25}
@@ -114,9 +111,6 @@ main{padding:var(--s5) var(--s5) var(--s2);outline:none}
 button.show-more{border:1px solid var(--line);background:#fff;border-radius:var(--r);padding:10px var(--s4);font-weight:600;font-size:0.9375rem;color:var(--accent-ink);cursor:pointer;width:100%;max-width:320px}
 button.show-more.full{max-width:none;margin:4px 16px 12px;display:block;width:calc(100% - 32px)}
 .mob-expand[hidden]{display:none !important}
-.mob-lead{margin-bottom:14px;padding-bottom:14px;border-bottom:1px solid var(--line2)}
-.mob-lead .sum-kicker{font-size:0.8125rem;margin-bottom:8px}
-.mob-lead .sum-lede{font-size:0.9375rem;margin-top:12px}
 .chg{font-weight:600;font-size:12px;white-space:nowrap}
 .chg.up{color:var(--pos)} .chg.down{color:var(--neg)} .chg.flat{color:var(--muted)}
 .sec{margin-top:18px}
@@ -274,6 +268,7 @@ td .ps{display:block;font-size:12px;color:var(--muted)}
   .mob-tabs a.on{color:var(--accent-ink);background:var(--accent-soft)}
 }
 @media (max-width:640px){
+  .sum-hero{margin-bottom:12px;padding-bottom:12px}
   .ov-boxes{grid-template-columns:repeat(2,minmax(0,1fr));gap:var(--s2)}
   .ov-box{padding:var(--s3)}
   .ov-box-lbl{font-size:0.75rem;line-height:1.2}

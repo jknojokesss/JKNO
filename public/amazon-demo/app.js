@@ -72,8 +72,6 @@ function rangeAB(){var e=NDAYS-1;switch(state.range){case 'week':return [e-6,e];
 function prevAB(a,b){if(state.range==='mtd'){var d=dObj(a);var pm=Date.UTC(d.getUTCFullYear(),d.getUTCMonth()-1,1);var pa=Math.round((pm-T0)/DAY);return pa>=0?[pa,pa+(b-a)]:null;}
   var len=b-a+1;return a-len>=0?[a-len,a-1]:null;}
 function prevLabel(){return {week:'vs prior week',last:'vs week before',mtd:'vs same days last month',custom:'vs prior period'}[state.range];}
-function ovReadout(o,p){if(!p||!p.net)return '';var dr=(o.net-p.net)/Math.abs(p.net);var ref={week:'last week',last:'the week before',mtd:'last month',custom:'prior period'}[state.range]||'prior period';
-  if(Math.abs(dr)<0.005)return 'About even with '+ref+'.';return (dr>0?'Up ':'Down ')+Math.abs(dr*100).toFixed(0)+'% from '+ref+'.';}
 
 /* ---------- helpers ---------- */
 var $=function(s,el){return (el||document).querySelector(s);};
@@ -130,10 +128,8 @@ function weekLabel(w){return fd(w*7);}
 var PAGES={};
 PAGES.overview=function(){var ab=rangeAB(),a=ab[0],b=ab[1],o=full(a,b),pab=prevAB(a,b),p=pab?full(pab[0],pab[1]):null;var pl=prevLabel();
   var c=cashAt(b),nx=D.settlements[D.settlements.length-1];
-  var readout=ovReadout(o,p);
   var mob=isMob();
-  var heroCls=mob?'sum-hero mob-lead':'sum-hero';
-  var h='<section class="'+heroCls+'">'+ovBoxes(o,p,pl,c,b,nx)+(readout?'<p class="sum-lede">'+esc(readout)+'</p>':'');
+  var h='<section class="sum-hero">'+ovBoxes(o,p,pl,c,b,nx);
   if(!mob){
     h+='<dl class="sum-stats sum-stats-secondary">';
     h+='<div><dt>Amazon profit</dt><dd>'+money(o.amzProfit)+(p?'<small>'+chg(o.amzProfit,p.amzProfit)+' '+pl+' · '+pct(o.margin)+'</small>':'<small>Sellerboard · '+pct(o.margin)+'</small>')+'</dd></div>';
