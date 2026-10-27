@@ -81,7 +81,7 @@ function ovBox(lbl,val,meta){return '<div class="ov-box"><p class="ov-box-lbl">'
 function ovBoxes(o,p,pl,c,b,nx){var netM='<span>'+pct(o.netMargin)+' margin</span>'+(p?'<span>'+chg(o.net,p.net)+' '+pl+'</span>':'');
   var salM='<span>'+num(o.units)+' units sold</span>'+(p?'<span>'+chg(o.sales,p.sales)+' '+pl+'</span>':'');
   var cashM='<span>As of '+fd(b)+'</span>';
-  var payM='<span>Lands '+fdIso(nx.deposit,{wd:1})+'</span><span class="mut">Estimate</span>';
+  var payM='<span>Lands '+fdIso(nx.deposit,{wd:1})+'</span>';
   return '<div class="ov-boxes">'+ovBox('True net profit',money(o.net),netM)+ovBox('Amazon sales',money(o.sales),salM)+ovBox('Cash on hand',money(c.cash),cashM)+ovBox('Next Amazon payout',money(nx.amount),payM)+'</div>';}
 var MOB_MAIN=[['overview','Overview'],['report','Weekly'],['products','Products'],['cash','Cash']];
 var MOB_MORE=[['shipments','FBA shipments'],['expenses','Expenses'],['inventory','Inventory'],['sources','Data sources']];
