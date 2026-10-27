@@ -58,11 +58,11 @@ async function main() {
   await page.waitForSelector('.ov-boxes', { timeout: 15000 })
   await page.waitForSelector('.two.even.sec .tbl-wrap table', { timeout: 15000 })
   const clip = await page.evaluate(() => {
-    const hero = document.querySelector('.sum-hero')
-    const table = document.querySelector('.two.even.sec .tbl-wrap')
-    if (!hero || !table) return null
-    const r1 = hero.getBoundingClientRect()
-    const r2 = table.getBoundingClientRect()
+    const boxes = document.querySelector('.ov-boxes')
+    const prodPanel = document.querySelector('.two.even.sec .tbl-wrap table')
+    if (!boxes || !prodPanel) return null
+    const r1 = boxes.getBoundingClientRect()
+    const r2 = prodPanel.getBoundingClientRect()
     const pad = 8
     return {
       x: Math.max(0, Math.floor(r1.left - pad)),
