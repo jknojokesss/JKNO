@@ -77,6 +77,12 @@ function prevLabel(){return {week:'vs prior week',last:'vs week before',mtd:'vs 
 var $=function(s,el){return (el||document).querySelector(s);};
 function kpi(label,val,meta,hl){return '<div class="card kpi'+(hl?' hl':'')+'"><div class="lbl">'+label+'</div><div class="val">'+val+'</div><div class="meta">'+(meta||'&nbsp;')+'</div></div>';}
 function statStrip(items){return '<div class="stat-strip">'+items.map(function(it){return '<div><span>'+it[0]+'</span><strong>'+it[1]+(it[2]?'<em>'+it[2]+'</em>':'')+'</strong></div>';}).join('')+'</div>';}
+function ovBox(lbl,val,meta){return '<div class="ov-box"><p class="ov-box-lbl">'+lbl+'</p><p class="ov-box-val">'+val+'</p><div class="ov-box-meta">'+meta+'</div></div>';}
+function ovBoxes(o,p,pl,c,b,nx){var netM='<span>'+pct(o.netMargin)+' margin</span>'+(p?'<span>'+chg(o.net,p.net)+' '+pl+'</span>':'');
+  var salM='<span>'+num(o.units)+' units sold</span>'+(p?'<span>'+chg(o.sales,p.sales)+' '+pl+'</span>':'');
+  var cashM='<span>As of '+fd(b)+'</span>';
+  var payM='<span>Lands '+fdIso(nx.deposit,{wd:1})+'</span><span class="mut">Estimate</span>';
+  return '<div class="ov-boxes">'+ovBox('True net profit',money(o.net),netM)+ovBox('Amazon sales',money(o.sales),salM)+ovBox('Cash on hand',money(c.cash),cashM)+ovBox('Next Amazon payout',money(nx.amount),payM)+'</div>';}
 var MOB_MAIN=[['overview','Overview'],['report','Weekly'],['products','Products'],['cash','Cash']];
 var MOB_MORE=[['shipments','FBA shipments'],['expenses','Expenses'],['inventory','Inventory'],['sources','Data sources']];
 var MORE_PAGES={shipments:1,expenses:1,inventory:1,sources:1};
@@ -126,28 +132,20 @@ PAGES.overview=function(){var ab=rangeAB(),a=ab[0],b=ab[1],o=full(a,b),pab=prevA
   if(p&&p.net){var dr=(o.net-p.net)/Math.abs(p.net);lede+=Math.abs(dr)<0.005?' About even with the prior period.':(dr>0?' Up ':' Down ')+Math.abs(dr*100).toFixed(0)+'% '+pl.replace('vs ','from ')+'.';}
   var mob=isMob();
   var heroCls=mob?'sum-hero mob-lead':'sum-hero';
-  var h='<section class="'+heroCls+'"><p class="sum-kicker">True net profit · '+frange(a,b)+'</p><div class="sum-figure">'+money(o.net)+'</div><p class="sum-lede">'+esc(lede)+'</p>';
-  if(mob){
-    h+='<dl class="sum-stats sum-stats-compact">';
-    h+='<div><dt>Amazon sales</dt><dd>'+money(o.sales)+(p?'<small>'+chg(o.sales,p.sales)+' '+pl+'</small>':'')+'</dd></div>';
-    h+='<div><dt>Amazon profit (Sellerboard)</dt><dd>'+money(o.amzProfit)+(p?'<small>'+chg(o.amzProfit,p.amzProfit)+' '+pl+'</small>':'<small>'+pct(o.margin)+' margin</small>')+'</dd></div>';
-    h+='<div><dt>Cash on hand</dt><dd>'+money(c.cash)+'<small>As of '+fd(b)+'</small></dd></div>';
-    h+='<div><dt>Next Amazon payout</dt><dd>'+money(nx.amount)+'<small>Estimate, lands '+fdIso(nx.deposit,{wd:1})+'</small></dd></div>';
-    h+='</dl></section>';
-  }else{
-    h+='<dl class="sum-stats">';
+  var h='<section class="'+heroCls+'"><p class="sum-kicker">'+frange(a,b)+'</p>'+ovBoxes(o,p,pl,c,b,nx)+'<p class="sum-lede">'+esc(lede)+'</p>';
+  if(!mob){
+    h+='<dl class="sum-stats sum-stats-secondary">';
     h+='<div><dt>Amazon profit (Sellerboard)</dt><dd>'+money(o.amzProfit)+(p?'<small>'+chg(o.amzProfit,p.amzProfit)+' '+pl+' · '+pct(o.margin)+' margin</small>':'<small>'+pct(o.margin)+' margin on Amazon sales</small>')+'</dd></div>';
     h+='<div><dt>Other expenses (QuickBooks)</dt><dd>'+money(o.other)+(p?'<small>'+chg(o.other,p.other,true)+' from prior period</small>':'<small>Payroll, freight, prep, software and the rest</small>')+'</dd></div>';
-    h+='<div><dt>Amazon sales</dt><dd>'+money(o.sales)+(p?'<small>'+chg(o.sales,p.sales)+' '+pl+'</small>':'')+'</dd></div>';
-    h+='<div><dt>Cash on hand</dt><dd>'+money(c.cash)+'<small>As of '+fd(b)+'</small></dd></div>';
-    h+='<div><dt>Next Amazon payout</dt><dd>'+money(nx.amount)+'<small>Estimate, lands '+fdIso(nx.deposit,{wd:1})+'</small></dd></div>';
-    h+='<div><dt>Fees and ads</dt><dd>'+money(o.fees)+' fees · '+money(o.ads)+' ads<small>TACOS '+pct(o.tacos)+' · '+num(o.units)+' units sold</small></dd></div>';
-    h+='</dl></section>';
+    h+='<div><dt>Fees and ads</dt><dd>'+money(o.fees)+' fees · '+money(o.ads)+' ads<small>TACOS '+pct(o.tacos)+'</small></dd></div>';
+    h+='</dl>';
   }
+  h+='</section>';
   var ovExtraStart=mob?showMoreBtn('ovExpand','Show more')+'<div id="ovExpand" class="mob-expand" hidden>':'';
   var ovExtraEnd=mob?'</div>':'';
   if(mob){
     h+=ovExtraStart+'<dl class="sum-stats" style="margin-top:0">';
+    h+='<div><dt>Amazon profit (Sellerboard)</dt><dd>'+money(o.amzProfit)+(p?'<small>'+chg(o.amzProfit,p.amzProfit)+' '+pl+'</small>':'<small>'+pct(o.margin)+' margin</small>')+'</dd></div>';
     h+='<div><dt>Other expenses (QuickBooks)</dt><dd>'+money(o.other)+'</dd></div>';
     h+='<div><dt>Fees and ads</dt><dd>'+money(o.fees)+' fees · '+money(o.ads)+' ads<small>TACOS '+pct(o.tacos)+'</small></dd></div>';
     h+='</dl>';
