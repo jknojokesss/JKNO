@@ -4,6 +4,25 @@ const nextConfig = {
   images: {
     domains: ['lh3.googleusercontent.com', 'storage.googleapis.com'],
   },
+  async rewrites() {
+    return {
+      beforeFiles: [
+        { source: '/amazon-demo', destination: '/amazon-demo/index.html' },
+      ],
+    }
+  },
+  async headers() {
+    return [
+      {
+        source: '/amazon-demo',
+        headers: [{ key: 'X-Robots-Tag', value: 'noindex, nofollow' }],
+      },
+      {
+        source: '/amazon-demo/:path*',
+        headers: [{ key: 'X-Robots-Tag', value: 'noindex, nofollow' }],
+      },
+    ]
+  },
   async redirects() {
     // The shul vote moved to its own project on saratogashteibel.org.
     // Keep old jknojokes.com/shul-vote links working for the 36 voters.
