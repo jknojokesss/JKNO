@@ -84,6 +84,25 @@ async function main() {
     await page.locator('.sum-hero').screenshot({ path: path.join(OUT, 'type-closeup.png') })
   }
 
+  await page.setViewportSize({ width: 1440, height: 900 })
+  await page.goto(`${BASE}#/shipments`, { waitUntil: 'networkidle' })
+  await page.waitForSelector('#shipTbl tbody tr.click', { timeout: 15000 })
+  const row = page.locator('#shipTbl tbody tr.click').first()
+  await row.hover()
+  await page.waitForTimeout(200)
+  await page.screenshot({ path: path.join(OUT, 'desk-04-shipments-hover.png'), fullPage: false })
+
+  await page.setViewportSize({ width: 390, height: 844 })
+  await page.goto(`${BASE}#/shipments`, { waitUntil: 'networkidle' })
+  await page.click('button[data-expand="shipExpand"]')
+  await page.waitForSelector('[data-cf="Not filed"]', { state: 'visible', timeout: 10000 })
+  await page.click('[data-cf="Not filed"]')
+  await page.waitForTimeout(300)
+  await page.screenshot({
+    path: path.join(OUT, 'phone-vp-04-claims-notfiled.png'),
+    fullPage: false,
+  })
+
   await browser.close()
   console.log('Saved screenshots to', OUT)
 }

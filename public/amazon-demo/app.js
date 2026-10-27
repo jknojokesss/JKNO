@@ -111,7 +111,7 @@ function barChart(o){var MOB=window.innerWidth<640;var vals=o.values,W=MOB?360:(
   var stepV=niceMax((max-min)/4);var top=Math.ceil(max/stepV)*stepV;var bot=Math.floor(min/stepV)*stepV;if(top===bot)top=bot+stepV;
   var y=function(v){return pt+(top-v)/(top-bot)*(H-pt-pb);};var n=vals.length,bw=(W-pl-pr)/n;
   var s='<svg class="chart" viewBox="0 0 '+W+' '+H+'" role="img" aria-label="'+esc(o.label)+'">';
-  for(var g=bot;g<=top+1e-6;g+=stepV){s+='<line class="grid-l" x1="'+pl+'" x2="'+(W-pr)+'" y1="'+y(g).toFixed(1)+'" y2="'+y(g).toFixed(1)+'"/>'+(g===bot||g===top?'':'')+'<text x="'+(pl-8)+'" y="'+(y(g)+4).toFixed(1)+'" text-anchor="end">'+short(g)+'</text>';}
+  for(var g=bot;g<=top+1e-6;g+=stepV){s+='<line class="grid-l" x1="'+pl+'" x2="'+(W-pr)+'" y1="'+y(g).toFixed(1)+'" y2="'+y(g).toFixed(1)+'"/><text x="'+(pl-8)+'" y="'+(y(g)+4).toFixed(1)+'" text-anchor="end">'+short(g)+'</text>';}
   s+='<line class="zero" x1="'+pl+'" x2="'+(W-pr)+'" y1="'+y(0)+'" y2="'+y(0)+'"/>';
   vals.forEach(function(v,i){var x=pl+i*bw+bw*0.18,w=bw*0.64,y0=y(Math.max(v,0)),h=Math.abs(y(v)-y(0));var inR=o.hi&&o.hi(i);var tip=o.tip(i);
     s+='<rect class="bar'+(v<0?' neg':'')+(inR?' in':'')+'" x="'+x.toFixed(1)+'" y="'+y0.toFixed(1)+'" width="'+w.toFixed(1)+'" height="'+Math.max(h,1).toFixed(1)+'" rx="3" data-tip="'+esc(tip)+'"></rect>';
@@ -129,37 +129,17 @@ function weekLabel(w){return fd(w*7);}
 
 /* ---------- pages ---------- */
 var PAGES={};
-PAGES.overview=function(){var ab=rangeAB(),a=ab[0],b=ab[1],o=full(a,b),pab=prevAB(a,b),p=pab?full(pab[0],pab[1]):null;var pl=prevLabel();
-  var c=cashAt(b),nx=D.settlements[D.settlements.length-1];
-  var mob=isMob();
-  var h='<section class="sum-hero">'+ovBoxes(o,p,pl,c,b,nx);
-  if(!mob){
-    h+='<dl class="sum-stats sum-stats-secondary">';
-    h+='<div><dt>Amazon profit</dt><dd>'+money(o.amzProfit)+(p?'<small>'+chg(o.amzProfit,p.amzProfit)+' '+pl+' · '+pct(o.margin)+'</small>':'<small>Sellerboard · '+pct(o.margin)+'</small>')+'</dd></div>';
-    h+='<div><dt>Other expenses</dt><dd>'+money(o.other)+(p?'<small>'+chg(o.other,p.other,true)+' '+pl+'</small>':'<small>QuickBooks</small>')+'</dd></div>';
-    h+='<div><dt>Fees and ads</dt><dd>'+money(o.fees)+' · '+money(o.ads)+'<small>TACOS '+pct(o.tacos)+'</small></dd></div>';
-    h+='</dl>';
-  }
-  h+='</section>';
-  var ovExtraStart=mob?showMoreBtn('ovExpand','Show more')+'<div id="ovExpand" class="mob-expand" hidden>':'';
-  var ovExtraEnd=mob?'</div>':'';
-  if(mob){
-    h+=ovExtraStart+'<dl class="sum-stats" style="margin-top:0">';
-    h+='<div><dt>Amazon profit</dt><dd>'+money(o.amzProfit)+'<small>Sellerboard</small></dd></div>';
-    h+='<div><dt>Other expenses</dt><dd>'+money(o.other)+'<small>QuickBooks</small></dd></div>';
-    h+='<div><dt>Fees and ads</dt><dd>'+money(o.fees)+' · '+money(o.ads)+'<small>TACOS '+pct(o.tacos)+'</small></dd></div>';
-    h+='</dl>';
-  }
-  var metrics={sales:['Amazon sales',function(x){return x.sales;}],amz:['Amazon profit',function(x){return x.amzProfit;}],other:['Other expenses',function(x){return x.other;}],net:['True net profit',function(x){return x.net;}]};
+function overviewDetail(o,p,a,b){var metrics={sales:['Amazon sales',function(x){return x.sales;}],amz:['Amazon profit',function(x){return x.amzProfit;}],other:['Other expenses',function(x){return x.other;}],net:['True net profit',function(x){return x.net;}]};
   var weeks=[];for(var w=0;w<NWEEKS;w++)weeks.push(full(w*7,w*7+6));
-  var m=metrics[state.chartMetric];var vals=weeks.map(m[1]);
-  h+='<div class="two sec"><section class="card panel"><div class="panel-h"><h2>Weekly trend</h2><div class="chips" role="group" aria-label="Chart metric">'+Object.keys(metrics).map(function(k){return '<button class="chip" type="button" data-metric="'+k+'" aria-pressed="'+(state.chartMetric===k)+'">'+metrics[k][0]+'</button>';}).join('')+'</div></div>';
-  h+=barChart({values:vals,label:m[0]+' by week',hi:function(i){return i*7+6>=a&&i*7<=b;},xl:weekLabel,tip:function(i){return 'Week of '+fd(i*7)+': '+money(vals[i]);}});
+  var m=metrics[state.chartMetric],vals=weeks.map(m[1]);
+  var h='<div class="two sec"><section class="card panel"><div class="panel-h"><h2>Weekly trend</h2><div class="chips" role="group" aria-label="Chart metric">'+Object.keys(metrics).map(function(k){return '<button class="chip" type="button" data-metric="'+k+'" aria-pressed="'+(state.chartMetric===k)+'">'+metrics[k][0]+'</button>';}).join('')+'</div></div>';
+  h+=barChart({values:vals,label:m[0]+' by week',hi:function(i){return i*7+6>=a&&i*7<=b;},xl:weekLabel,tip:function(i){return fd(i*7)+': '+money(vals[i]);}});
   h+='</section>';
   var parts=[['Refunds',o.refunds,'#C4CED8'],['Amazon fees',o.fees,'#6E8498'],['Ad spend',o.ads,'#94A8BA'],['COGS',o.cogs,'#4A6278'],['Write-offs less reimbursements',o.loss-o.reimb,'#B8C4D0'],['Other expenses',o.other,'#7A8B9C'],['True net profit',o.net,'#243B52']];
   h+='<section class="card panel"><div class="panel-h"><h2>Sales breakdown</h2></div><div class="stack" aria-hidden="true">'+parts.map(function(x){return x[1]>0?'<span style="width:'+(x[1]/o.sales*100).toFixed(2)+'%;background:'+x[2]+'"></span>':'';}).join('')+'</div><ul class="blist">';
   h+='<li class="tot"><span class="sw" style="background:transparent"></span><span class="nm">Amazon sales</span><span class="pc">100%</span><span class="am">'+money(o.sales)+'</span></li>';
-  parts.forEach(function(x){h+='<li'+(x[0]==='True net profit'?' class="tot"':'')+'><span class="sw" style="background:'+x[2]+'"></span><span class="nm">'+x[0]+'</span><span class="pc">'+pct(x[1]/o.sales)+'</span><span class="am">'+money(x[1])+'</span></li>';});
+  parts.forEach(function(x){if(x[0]==='Other expenses')h+='<li class="sub"><span class="sw" style="background:#5A7388"></span><span class="nm">Amazon profit</span><span class="pc">'+pct(o.amzProfit/o.sales)+'</span><span class="am">'+money(o.amzProfit)+'</span></li>';
+    h+='<li'+(x[0]==='True net profit'?' class="tot"':'')+'><span class="sw" style="background:'+x[2]+'"></span><span class="nm">'+x[0]+'</span><span class="pc">'+pct(x[1]/o.sales)+'</span><span class="am">'+money(x[1])+'</span></li>';});
   h+='</ul></section></div>';
   var prods=D.skus.map(function(s,k){var x=agg(a,b,k);x.s=s;return x;}).sort(function(x,y){return y.amzProfit-x.amzProfit;}).slice(0,5);
   h+='<div class="two even sec"><section class="card panel"><div class="panel-h"><h2>Top products</h2><a class="note" href="#/products">All</a></div><div class="tbl-wrap"><table><thead><tr><th>Product</th><th>Units</th><th>Profit</th><th>Margin</th></tr></thead><tbody>';
@@ -168,9 +148,16 @@ PAGES.overview=function(){var ab=rangeAB(),a=ab[0],b=ab[1],o=full(a,b),pab=prevA
   var open=SHIPS.filter(function(s){return !s.closedFlag;});var inb=0;open.forEach(function(s){inb+=s.units-s.recv;});var cl=claimTotals();
   var ir=invRows(),re=ir.filter(function(r){return r.status.indexOf('Reorder')===0;});
   h+='<section class="card panel"><div class="panel-h"><h2>Shipments & stock</h2><a class="note" href="#/shipments">All</a></div><div class="kv">';
-  h+='<div>Open shipments</div><div>'+open.length+'</div><div>In transit units</div><div>'+num(inb)+'</div><div>Pending claims</div><div>'+money(cl.pending,1)+'</div><div>Unfiled claims</div><div>'+money(cl.notfiled,1)+'</div><div>Reimbursed</div><div>'+money(cl.reimbursed,1)+'</div>';
-  h+='<div>Inventory value</div><div>'+money(invValue(NDAYS-1))+'</div><div>SKUs to reorder</div><div>'+(re.length?re.map(function(r){return r.sku;}).join(', '):'None')+'</div></div></section></div>';
-  h+=ovExtraEnd;
+  h+='<div>Open shipments</div><div>'+open.length+'</div><div>In transit units</div><div>'+num(inb)+'</div><div>Pending claims</div><div>'+money(cl.pending,1)+'</div><div>Not filed</div><div>'+money(cl.notfiled,1)+'</div><div>Reimbursed</div><div>'+money(cl.reimbursed,1)+'</div>';
+  h+='<div>Inventory value</div><div>'+money(invValue(NDAYS-1))+'</div><div>SKUs to reorder</div><div>'+(re.length?re.map(function(r){return r.sku;}).join(', '):'—')+'</div></div></section></div>';
+  return h;}
+PAGES.overview=function(){var ab=rangeAB(),a=ab[0],b=ab[1],o=full(a,b),pab=prevAB(a,b),p=pab?full(pab[0],pab[1]):null;var pl=prevLabel();
+  var c=cashAt(b),nx=D.settlements[D.settlements.length-1];
+  var h='<section class="sum-hero">'+ovBoxes(o,p,pl,c,b,nx)+'</section>';
+  if(!o.sales)return h+'<p class="empty">No sales</p>';
+  var tail=overviewDetail(o,p,a,b);
+  if(isMob())h+=showMoreBtn('ovExpand','Show more')+'<div id="ovExpand" class="mob-expand" hidden>'+tail+'</div>';
+  else h+=tail;
   return h;};
 
 /* weekly report */
@@ -181,15 +168,12 @@ function plRows(o){var r=[['h','Sellerboard'],
   ['t','Amazon profit',o.amzProfit],['h','QuickBooks']];
   CATS.forEach(function(c){r.push(['sub',c,-o.otherBy[c],'cat']);});
   r.push(['t','Total other expenses',-o.other]);r.push(['gt','True net profit',o.net]);r.push(['m','Net margin']);return r;}
-function summaryLine(o,p,w){if(!p||!p.net)return money(o.net)+' net · '+pct(o.netMargin)+' margin · '+money(o.sales)+' sales';
-  var dr=(o.net-p.net)/Math.abs(p.net);
-  if(Math.abs(dr)<0.005)return 'About even with prior week. '+money(o.net)+' net · '+pct(o.netMargin)+' margin.';
-  return (dr>0?'Up ':'Down ')+Math.abs(dr*100).toFixed(0)+'% from prior week. '+money(o.net)+' net · '+pct(o.netMargin)+' margin.';}
+function summaryLine(o){return money(o.net)+' · '+pct(o.netMargin)+' · '+money(o.sales);}
 PAGES.report=function(){var w=state.reportWeek,a=w*7,b=a+6,o=full(a,b),p=w>0?full(a-7,b-7):null;
   var opts='';for(var i=NWEEKS-1;i>=0;i--)opts+='<option value="'+i+'"'+(i===w?' selected':'')+'>Week of '+frange(i*7,i*7+6)+'</option>';
   var h='<div class="report-page"><div class="rep-bar"><label class="tools" style="width:auto"><span class="mut">Week</span><select class="sel" id="repWeek" aria-label="Report week">'+opts+'</select></label><button class="btn pri" type="button" id="printBtn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M12 3v12m0 0l-5-5m5 5l5-5M5 21h14"/></svg>Download PDF</button></div>';
   h+='<article class="card report" id="report"><div class="rep-head"><div><h2>Weekly profit report</h2><div class="who"><strong>'+esc(D.business.name)+'</strong> &middot; '+D.business.marketplace+'</div><div class="who">'+frange(a,b)+'</div></div><div class="by"><strong>Prepared by JK No Jokes Financials</strong>jknojokes.com &middot; 917-589-8455<br>Issued '+fd(b+1,{wd:1,y:1})+'</div></div>';
-  h+='<p class="summary">'+esc(summaryLine(o,p,w))+'</p>';
+  h+='<p class="summary">'+esc(summaryLine(o))+'</p>';
   h+='<div class="rep-kpis"><div><span>Amazon sales</span><strong>'+money(o.sales)+'</strong></div><div><span>Amazon profit</span><strong>'+money(o.amzProfit)+'</strong></div><div><span>Other expenses</span><strong>'+money(o.other)+'</strong></div><div><span>True net profit</span><strong>'+money(o.net)+'</strong></div></div>';
   var repDetail='<div class="tbl-wrap" style="border-top:0"><table class="pl"><thead><tr><th>Profit and loss</th><th>This week</th><th>Prior week</th><th>Change</th><th class="hide-m">Change %</th></tr></thead><tbody>';
   var pr=p?plRows(p):null;
@@ -226,10 +210,10 @@ var PCOLS=[
 function prodData(){var ab=rangeAB();return D.skus.map(function(s,k){var x=agg(ab[0],ab[1],k);x.s=s;x.k=k;x.name=s.name;return x;});}
 function prodRowsFiltered(){var all=prodData(),q=state.prodQ.trim().toLowerCase();return sortRows(all.filter(function(r){return !q||(r.s.name+' '+r.s.sku+' '+r.s.asin).toLowerCase().indexOf(q)>=0;}),state.prodSort,PCOLS);}
 function prodBody(){var all=prodData(),rows=prodRowsFiltered(),ab=rangeAB();
-  if(!rows.length)return '<tbody><tr><td colspan="11" class="empty">No products match "'+esc(state.prodQ)+'"</td></tr></tbody>';
+  if(!rows.length)return '<tbody><tr><td colspan="11" class="empty">No products</td></tr></tbody>';
   var tot;if(rows.length===all.length)tot=agg(ab[0],ab[1]);else{tot={};D.fields.forEach(function(f){tot[f]=0;rows.forEach(function(r){tot[f]+=r[f];});});derive(tot);}
   return '<tbody>'+rows.map(function(r){return '<tr class="click" data-go="#/products/'+r.s.sku+'" tabindex="0">'+PCOLS.map(function(c){return cell(c,r);}).join('')+'</tr>';}).join('')+'</tbody><tfoot><tr>'+PCOLS.map(function(c,i){if(i===0)return '<td>'+(rows.length===all.length?'All products':rows.length+' shown')+'</td>';return '<td'+(c.hm?' class="hide-m"':'')+'>'+c.f(tot).replace(/<\/?strong>/g,'')+'</td>';}).join('')+'</tr></tfoot>';}
-function prodCards(){var rows=prodRowsFiltered();if(!rows.length)return '<p class="empty">No products match.</p>';
+function prodCards(){var rows=prodRowsFiltered();if(!rows.length)return '<p class="empty">No products</p>';
   var lim=isMob()&&!state.prodShowAll?5:rows.length,show=rows.slice(0,lim);
   var h=show.map(function(r){return '<a class="prod-card" href="#/products/'+r.s.sku+'"><div class="prod-card-top"><span class="prod-card-profit">'+money(r.amzProfit)+' profit</span><span class="prod-card-margin">'+pct(r.margin)+' margin</span></div><div class="prod-card-name">'+esc(r.s.name)+'</div><div class="prod-card-sku">'+r.s.sku+'</div><div class="prod-card-meta"><span>'+num(r.units)+' units</span><span>'+money(r.sales)+' sales</span></div></a>';}).join('');
   if(isMob()&&!state.prodShowAll&&rows.length>5)h+='<button type="button" class="show-more full" data-prod-all="1">Show all ('+rows.length+' products)</button>';
@@ -251,22 +235,31 @@ function productDrawer(sku){var k=skuIx[sku];if(k==null)return null;var s=D.skus
 
 /* shipments */
 function shipTag(s){var m={'Closed':'','Receiving':'info','Checked in':'info','In transit':'info'};return '<span class="tag '+(m[s.status]||'')+'">'+s.status+'</span>';}
-function devTag(s){if(!s.closedFlag)return '<span class="mut">'+(s.status==='Receiving'?'Receiving':'Not received yet')+'</span>';if(s.diff<0)return '<span class="tag bad">Short '+(-s.diff)+'</span>';if(s.diff>0)return '<span class="tag warn">Over '+s.diff+'</span>';return '<span class="tag ok">Matched</span>';}
+function devTag(s){if(!s.closedFlag)return '<span class="mut">—</span>';if(s.diff<0)return '<span class="tag bad">'+num(-s.diff)+' short</span>';if(s.diff>0)return '<span class="tag warn">+'+num(s.diff)+'</span>';return '<span class="tag ok">Matched</span>';}
 function progress(s){var p=s.units?s.recv/s.units:0;var cls=s.closedFlag?(s.diff<0?'short':'full'):'';return '<div class="prog"><span>'+pct(p,1)+'</span><span class="bar"><span class="'+cls+'" style="width:'+Math.min(100,p*100).toFixed(1)+'%"></span></span></div>';}
+function shipRowsFiltered(){var q=state.shipQ.trim().toLowerCase();return SHIPS.filter(function(s){if(state.shipFilter==='open'&&s.closedFlag)return false;if(state.shipFilter==='closed'&&!s.closedFlag)return false;if(state.shipFilter==='dev'&&!(s.closedFlag&&s.diff!==0))return false;
+  if(!q)return true;return (s.id+' '+s.fc+' '+s.status+' '+s.name+' '+s.lines.map(function(l){return l.sku;}).join(' ')).toLowerCase().indexOf(q)>=0;});}
+function shipCardHead(s){var amt=shipClaimAmount(s);if(amt)return money(amt,1);if(s.closedFlag&&s.diff<0)return num(-s.diff)+' short';if(!s.closedFlag){var en=s.units-s.recv;if(en)return num(en)+' en route';}return pct(s.recv/s.units,0);}
+function shipCards(){var rows=sortRows(shipRowsFiltered(),state.shipSort,SCOLS);if(!rows.length)return '<p class="empty">No shipments</p>';
+  return rows.map(function(s){var alert=shipClaimAmount(s)||(s.closedFlag&&s.diff<0)?' ship-card-alert':'';return '<a class="ship-card'+alert+'" href="#/shipments/'+s.id+'"><div class="ship-card-top"><span class="ship-card-amt">'+shipCardHead(s)+'</span><span class="ship-card-sub">'+num(s.recv)+' / '+num(s.units)+'</span></div><div class="ship-card-id">'+s.id+'</div><div class="ship-card-meta"><span>'+s.fc+'</span><span>'+s.status+'</span></div></a>';}).join('');}
 var SCOLS=[
  {key:'id',label:'Shipment',l:1,f:function(r){return '<span class="pn" style="min-width:0">'+r.id+'</span><span class="ps">'+esc(r.name)+'</span>';}},
- {key:'shipped',label:'Shipped',f:function(r){return fdIso(r.shipped);}},
+ {key:'shipped',label:'Ship date',f:function(r){return fdIso(r.shipped);}},
  {key:'fc',label:'FC',f:function(r){return r.fc;}},
  {key:'status',label:'Status',f:shipTag},
  {key:'units',label:'Shipped',f:function(r){return num(r.units);}},
  {key:'recv',label:'Received',f:function(r){return num(r.recv);}},
- {key:'pr',label:'% received',sv:function(r){return r.recv/r.units;},f:progress},
- {key:'diff',label:'Deviation',sv:function(r){return r.closedFlag?r.diff:1e9;},f:devTag}];
-function shipBody(){var q=state.shipQ.trim().toLowerCase();var rows=SHIPS.filter(function(s){if(state.shipFilter==='open'&&s.closedFlag)return false;if(state.shipFilter==='closed'&&!s.closedFlag)return false;if(state.shipFilter==='dev'&&!(s.closedFlag&&s.diff!==0))return false;
-  if(!q)return true;return (s.id+' '+s.fc+' '+s.status+' '+s.lines.map(function(l){return l.sku;}).join(' ')).toLowerCase().indexOf(q)>=0;});
-  rows=sortRows(rows,state.shipSort,SCOLS);if(!rows.length)return '<tbody><tr><td colspan="8" class="empty">No shipments match</td></tr></tbody>';
-  var u=0,r=0;rows.forEach(function(s){u+=s.units;r+=s.recv;});
-  return '<tbody>'+rows.map(function(s){return '<tr class="click" data-go="#/shipments/'+s.id+'" tabindex="0">'+SCOLS.map(function(c){return cell(c,s);}).join('')+'</tr>';}).join('')+'</tbody><tfoot><tr><td>'+rows.length+' shipments</td><td></td><td></td><td></td><td>'+num(u)+'</td><td>'+num(r)+'</td><td>'+pct(r/u,1)+'</td><td></td></tr></tfoot>';}
+ {key:'pr',label:'Received',sv:function(r){return r.recv/r.units;},f:progress},
+ {key:'claim',label:'Claim',f:function(r){var a=shipClaimAmount(r);return a?money(a,1):'<span class="mut">—</span>';}},
+ {key:'diff',label:'Shortfall',sv:function(r){return r.closedFlag?r.diff:1e9;},f:devTag}];
+function shipBody(){var rows=sortRows(shipRowsFiltered(),state.shipSort,SCOLS);if(!rows.length)return '<tbody><tr><td colspan="9" class="empty">No shipments</td></tr></tbody>';
+  var u=0,r=0,cl=0;rows.forEach(function(s){u+=s.units;r+=s.recv;cl+=shipClaimAmount(s);});
+  return '<tbody>'+rows.map(function(s){return '<tr class="click" data-go="#/shipments/'+s.id+'" tabindex="0">'+SCOLS.map(function(c){return cell(c,s);}).join('')+'</tr>';}).join('')+'</tbody><tfoot><tr><td>'+rows.length+'</td><td></td><td></td><td></td><td>'+num(u)+'</td><td>'+num(r)+'</td><td>'+pct(r/u,1)+'</td><td>'+(cl?money(cl,1):'—')+'</td><td></td></tr></tfoot>';}
+function claimRowsFiltered(){return D.claims.filter(function(c){return state.claimFilter==='all'||c.status===state.claimFilter;});}
+function claimStatusTag(st){return '<span class="tag '+({'Reimbursed':'ok','Pending':'warn','Not filed':'bad'}[st]||'')+'">'+(st==='Not filed'?'Not filed':st)+'</span>';}
+function claimCards(){var rows=claimRowsFiltered().slice().reverse();if(!rows.length)return '<p class="empty">No claims</p>';
+  return rows.map(function(c){return '<a class="claim-card" href="'+(c.shipment?'#/shipments/'+c.shipment:'#/shipments')+'"><div class="claim-card-top"><span class="claim-card-amt">'+money(c.amount,1)+'</span>'+claimStatusTag(c.status)+'</div><div class="claim-card-meta"><span>'+c.sku+'</span><span>'+num(c.units)+' u</span><span>'+esc(c.type)+'</span></div></a>';}).join('');}
+function refreshShipUi(){refreshBody('shipTbl',shipBody);var sc=$('#shipCards');if(sc)sc.innerHTML=shipCards();var cc=$('#claimCards');if(cc)cc.innerHTML=claimCards();var ct=$('#claimTbl');if(ct)ct.innerHTML=claimTable();}
 var CLCOLS=[
  {key:'event',label:'Date',f:function(c){return fdIso(c.event);}},
  {key:'type',label:'Type',l:1,f:function(c){return c.type;}},
@@ -274,18 +267,17 @@ var CLCOLS=[
  {key:'sku',label:'SKU',l:1,f:function(c){return c.sku;}},
  {key:'units',label:'Units',f:function(c){return c.units;}},
  {key:'amount',label:'Amount',f:function(c){return money(c.amount,1);}},
- {key:'status',label:'Status',l:1,f:function(c){return '<span class="tag '+({'Reimbursed':'ok','Pending':'warn','Not filed':'bad'}[c.status])+'">'+(c.status==='Not filed'?'File claim':c.status)+'</span>';}},
+ {key:'status',label:'Status',l:1,f:function(c){return claimStatusTag(c.status);}},
  {key:'case',label:'Case ID',l:1,f:function(c){return c.case||'<span class="mut">Not filed</span>';}},
  {key:'reimbursed',label:'Paid on',f:function(c){return c.reimbursed?fdIso(c.reimbursed):'<span class="mut">-</span>';}}];
-function claimTable(){var rows=D.claims.filter(function(c){return state.claimFilter==='all'||c.status===state.claimFilter;}).slice().reverse();var t={u:0,a:0};rows.forEach(function(c){t.u+=c.units;t.a+=c.amount;});
-  return '<thead><tr>'+CLCOLS.map(function(c){return '<th'+(c.l?' class="l"':'')+' scope="col">'+c.label+'</th>';}).join('')+'</tr></thead><tbody>'+(rows.length?rows.map(function(c){return '<tr>'+CLCOLS.map(function(col){return cell(col,c);}).join('')+'</tr>';}).join(''):'<tr><td colspan="9" class="empty">Nothing here</td></tr>')+'</tbody><tfoot><tr><td>'+rows.length+' items</td><td></td><td></td><td></td><td>'+t.u+'</td><td>'+money(t.a,1)+'</td><td></td><td></td><td></td></tr></tfoot>';}
-PAGES.shipments=function(){var open=SHIPS.filter(function(s){return !s.closedFlag;});var onway=0;open.forEach(function(s){onway+=s.units-s.recv;});
-  var closed=SHIPS.filter(function(s){return s.closedFlag;});var shortU=0,overU=0;closed.forEach(function(s){s.lines.forEach(function(l){var d=l.shipped-l.received;if(d>0)shortU+=d;else overU-=d;});});var ct=claimTotals();
-  var h=statStrip([['Open',open.length,num(onway)+' in transit'],['Closed',closed.length,num(shortU)+' short'],['Pending claims',money(ct.pending,1),''],['Reimbursed',money(ct.reimbursed,1),''],['Claimed',money(ct.claimed,1),'']]);
-  var fl=[['all','All'],['open','Open'],['closed','Closed'],['dev','Deviation']];
-  var shipDetail='<section class="card sec"><div class="panel panel-h" style="margin:0"><div class="tools"><div class="chips" role="group" aria-label="Filter shipments">'+fl.map(function(f){return '<button class="chip" type="button" data-sf="'+f[0]+'" aria-pressed="'+(state.shipFilter===f[0])+'">'+f[1]+'</button>';}).join('')+'</div>'+searchBox('shipQ',state.shipQ,'Search')+'</div><span class="note">Sellerboard</span></div><div class="tbl-wrap sticky1"><table id="shipTbl">'+thead(SCOLS,state.shipSort,'ship')+shipBody()+'</table></div></section>';
-  var cf=[['all','All'],['Not filed','File claim'],['Pending','Pending'],['Reimbursed','Reimbursed']];
-  shipDetail+='<section class="card sec"><div class="panel panel-h" style="margin:0"><h2>Claims</h2><div class="chips" role="group" aria-label="Filter claims">'+cf.map(function(f){return '<button class="chip" type="button" data-cf="'+f[0]+'" aria-pressed="'+(state.claimFilter===f[0])+'">'+f[1]+'</button>';}).join('')+'</div></div><div class="tbl-wrap sticky1"><table id="claimTbl">'+claimTable()+'</table></div></section>';
+function claimTable(){var rows=claimRowsFiltered().slice().reverse();var t={u:0,a:0};rows.forEach(function(c){t.u+=c.units;t.a+=c.amount;});
+  return '<thead><tr>'+CLCOLS.map(function(c){return '<th'+(c.l?' class="l"':'')+' scope="col">'+c.label+'</th>';}).join('')+'</tr></thead><tbody>'+(rows.length?rows.map(function(c){return '<tr class="click" data-go="'+(c.shipment?'#/shipments/'+c.shipment:'#/shipments')+'" tabindex="0">'+CLCOLS.map(function(col){return cell(col,c);}).join('')+'</tr>';}).join(''):'<tr><td colspan="9" class="empty">No claims</td></tr>')+'</tbody><tfoot><tr><td>'+rows.length+'</td><td></td><td></td><td></td><td>'+t.u+'</td><td>'+money(t.a,1)+'</td><td></td><td></td><td></td></tr></tfoot>';}
+PAGES.shipments=function(){var open=SHIPS.filter(function(s){return !s.closedFlag;});var onway=0;open.forEach(function(s){onway+=s.units-s.recv;});var ct=claimTotals();
+  var h=statStrip([['Open',open.length,num(onway)],['Not filed',money(ct.notfiled,1),''],['Pending',money(ct.pending,1),''],['Reimbursed',money(ct.reimbursed,1),''],['Potential',money(ct.potential,1),'']]);
+  var fl=[['all','All'],['open','Open'],['closed','Closed'],['dev','Shortfall']];
+  var shipDetail='<section class="card sec"><div class="panel panel-h" style="margin:0"><div class="tools"><div class="chips" role="group" aria-label="Filter shipments">'+fl.map(function(f){return '<button class="chip" type="button" data-sf="'+f[0]+'" aria-pressed="'+(state.shipFilter===f[0])+'">'+f[1]+'</button>';}).join('')+'</div>'+searchBox('shipQ',state.shipQ,'Search')+'</div></div><div class="ship-cards" id="shipCards">'+shipCards()+'</div><div class="tbl-wrap sticky1 ship-table-wrap"><table id="shipTbl">'+thead(SCOLS,state.shipSort,'ship')+shipBody()+'</table></div></section>';
+  var cf=[['all','All'],['Not filed','Not filed'],['Pending','Pending'],['Reimbursed','Reimbursed']];
+  shipDetail+='<section class="card sec"><div class="panel panel-h" style="margin:0"><h2>Claims</h2><div class="chips" role="group" aria-label="Filter claims">'+cf.map(function(f){return '<button class="chip" type="button" data-cf="'+f[0]+'" aria-pressed="'+(state.claimFilter===f[0])+'">'+f[1]+'</button>';}).join('')+'</div></div><div class="claim-cards" id="claimCards">'+claimCards()+'</div><div class="tbl-wrap sticky1 claim-table-wrap"><table id="claimTbl">'+claimTable()+'</table></div></section>';
   h+=mobCollapse('shipExpand',shipDetail);
   return h;};
 function shipmentDrawer(id){var s=SHIPS.filter(function(z){return z.id===id;})[0];if(!s)return null;
@@ -310,7 +302,7 @@ var ECOLS=[
  {key:'amt',label:'Amount',f:function(e){return money(e.amt,1);}}];
 function expRows(){var ab=rangeAB(),q=state.expQ.trim().toLowerCase();return EXP.filter(function(e){if(!state.expAll&&(e.i<ab[0]||e.i>ab[1]))return false;if(state.expCat&&e.cat!==state.expCat)return false;if(state.expAcct&&e.acct!==state.expAcct)return false;
   return !q||(e.vendor+' '+e.memo+' '+e.cat).toLowerCase().indexOf(q)>=0;});}
-function expBody(){var rows=sortRows(expRows(),state.expSort,ECOLS);if(!rows.length)return '<tbody><tr><td colspan="5" class="empty">No transactions match</td></tr></tbody>';var t=0;rows.forEach(function(e){t+=e.amt;});
+function expBody(){var rows=sortRows(expRows(),state.expSort,ECOLS);if(!rows.length)return '<tbody><tr><td colspan="5" class="empty">No transactions</td></tr></tbody>';var t=0;rows.forEach(function(e){t+=e.amt;});
   return '<tbody>'+rows.map(function(e){return '<tr>'+ECOLS.map(function(c){return cell(c,e);}).join('')+'</tr>';}).join('')+'</tbody><tfoot><tr><td>'+rows.length+' transactions</td><td></td><td></td><td class="hide-m"></td><td>'+money(t,1)+'</td></tr></tfoot>';}
 PAGES.expenses=function(){var ab=rangeAB(),a=ab[0],b=ab[1],o=other(a,b),pab=prevAB(a,b),p=pab?other(pab[0],pab[1]):null;
   var cats=CATS.slice().sort(function(x,y){return o.by[y]-o.by[x];});
@@ -429,8 +421,8 @@ document.addEventListener('click',function(e){var t=e.target;if(!t.closest)retur
   var s=t.closest('[data-sort]');if(s){var key=s.getAttribute('data-sort'),tb=s.getAttribute('data-tbl'),mm=TBL[tb],st=state[mm[0]];
     if(st.key===key)st.dir=-st.dir;else{st.key=key;st.dir=TEXTKEYS[key]?1:-1;}
     if(mm[2])refreshTable(mm[1],mm[2](),st,tb,mm[3]);else render();var nb=document.querySelector('#'+mm[1]+' [data-sort="'+key+'"]');if(nb)nb.focus();return;}
-  var sf=t.closest('[data-sf]');if(sf){state.shipFilter=sf.getAttribute('data-sf');document.querySelectorAll('[data-sf]').forEach(function(b){b.setAttribute('aria-pressed',String(b===sf));});refreshBody('shipTbl',shipBody);return;}
-  var cf=t.closest('[data-cf]');if(cf){state.claimFilter=cf.getAttribute('data-cf');document.querySelectorAll('[data-cf]').forEach(function(b){b.setAttribute('aria-pressed',String(b===cf));});$('#claimTbl').innerHTML=claimTable();return;}
+  var sf=t.closest('[data-sf]');if(sf){state.shipFilter=sf.getAttribute('data-sf');document.querySelectorAll('[data-sf]').forEach(function(b){b.setAttribute('aria-pressed',String(b===sf));});refreshShipUi();return;}
+  var cf=t.closest('[data-cf]');if(cf){state.claimFilter=cf.getAttribute('data-cf');document.querySelectorAll('[data-cf]').forEach(function(b){b.setAttribute('aria-pressed',String(b===cf));});refreshShipUi();return;}
   var cat=t.closest('[data-cat]');if(cat){state.expCat=cat.getAttribute('data-cat');render();var et=$('#expTbl');if(et)et.closest('section').scrollIntoView({behavior:'smooth',block:'start'});return;}
   if(t.closest('#printBtn')){window.print();return;}
   if(t.closest('a'))return;
@@ -441,7 +433,7 @@ document.addEventListener('keydown',function(e){if(e.key==='Escape'&&!$('#drawer
   if((e.key==='Enter'||e.key===' ')&&e.target.matches&&e.target.matches('tr[data-go],tr[data-cat]')){e.preventDefault();e.target.click();}});
 document.addEventListener('input',function(e){var id=e.target.id;
   if(id==='prodQ'){state.prodQ=e.target.value;refreshBody('prodTbl',prodBody);var pc=$('#prodCards');if(pc)pc.innerHTML=prodCards();}
-  else if(id==='shipQ'){state.shipQ=e.target.value;refreshBody('shipTbl',shipBody);}
+  else if(id==='shipQ'){state.shipQ=e.target.value;refreshShipUi();}
   else if(id==='expQ'){state.expQ=e.target.value;refreshBody('expTbl',expBody);}});
 document.addEventListener('change',function(e){var id=e.target.id;
   if(id==='repWeek'){location.hash='#/report/'+e.target.value;}
@@ -456,5 +448,5 @@ window.addEventListener('scroll',function(){tip.classList.remove('on');},{passiv
 window.addEventListener('hashchange',route);
 var wasMob=window.innerWidth<640;window.addEventListener('resize',function(){var m=window.innerWidth<640;if(m!==wasMob){wasMob=m;render();openDrawer(cur.page,cur.sub);}});
 sideSync();route();
-window.__portal={agg:agg,full:full,other:other,invValue:invValue,invTie:invTie,cashAt:cashAt,cashFlow:cashFlow,claimTotals:claimTotals,jeLines:jeLines,NDAYS:NDAYS,NWEEKS:NWEEKS,rangeAB:rangeAB,state:state,invRows:invRows};
+window.__portal={agg:agg,full:full,other:other,invValue:invValue,invTie:invTie,cashAt:cashAt,cashFlow:cashFlow,claimTotals:claimTotals,breakdownSum:breakdownSum,breakdownParts:breakdownParts,jeLines:jeLines,NDAYS:NDAYS,NWEEKS:NWEEKS,rangeAB:rangeAB,state:state,invRows:invRows,SHIPS:SHIPS};
 })();
