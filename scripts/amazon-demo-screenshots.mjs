@@ -94,9 +94,7 @@ async function main() {
 
   await page.setViewportSize({ width: 390, height: 844 })
   await page.goto(`${BASE}#/shipments`, { waitUntil: 'networkidle' })
-  await page.click('button[data-expand="shipExpand"]')
-  await page.waitForSelector('[data-cf="Not filed"]', { state: 'visible', timeout: 10000 })
-  await page.click('[data-cf="Not filed"]')
+  await page.waitForSelector('#shipLeadClaims .claim-card', { timeout: 10000 })
   await page.waitForTimeout(300)
   await page.screenshot({
     path: path.join(OUT, 'phone-vp-04-claims-notfiled.png'),

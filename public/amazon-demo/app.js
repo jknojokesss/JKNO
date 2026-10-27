@@ -79,7 +79,8 @@ function prevLabel(){return {week:'vs prior week',last:'vs week before',mtd:'vs 
 /* ---------- helpers ---------- */
 var $=function(s,el){return (el||document).querySelector(s);};
 function kpi(label,val,meta,hl){return '<div class="card kpi'+(hl?' hl':'')+'"><div class="lbl">'+label+'</div><div class="val">'+val+'</div><div class="meta">'+(meta||'&nbsp;')+'</div></div>';}
-function statStrip(items){return '<div class="stat-strip">'+items.map(function(it){return '<div><span>'+it[0]+'</span><strong>'+it[1]+(it[2]?'<em>'+it[2]+'</em>':'')+'</strong></div>';}).join('')+'</div>';}
+function statStrip(items){return statGrid(items);}
+function statGrid(items){return '<dl class="stat-grid">'+items.map(function(it){return '<div><dt>'+it[0]+'</dt><dd>'+it[1]+(it[2]?'<small>'+it[2]+'</small>':'')+'</dd></div>';}).join('')+'</dl>';}
 function ovBox(lbl,val,meta){return '<div class="ov-box"><p class="ov-box-lbl">'+lbl+'</p><p class="ov-box-val">'+val+'</p><div class="ov-box-meta">'+meta+'</div></div>';}
 function ovBoxes(o,p,pl,c,b,nx){var netM='<span>'+pct(o.netMargin)+' margin</span>'+(p?'<span>'+chg(o.net,p.net)+' '+pl+'</span>':'');
   var salM='<span>'+num(o.units)+' units sold</span>'+(p?'<span>'+chg(o.sales,p.sales)+' '+pl+'</span>':'');
@@ -220,7 +221,7 @@ function prodCards(){var rows=prodRowsFiltered();if(!rows.length)return '<p clas
   return h;}
 PAGES.products=function(){
   return '<section class="card"><div class="panel panel-h" style="margin:0"><div class="tools">'+searchBox('prodQ',state.prodQ,'Search SKU')+'</div></div><div class="prod-cards" id="prodCards">'+prodCards()+'</div><div class="tbl-wrap sticky1 prod-table-wrap"><table id="prodTbl">'+thead(PCOLS,state.prodSort,'prod')+prodBody()+'</table></div></section>';};
-function statusTag(s){return '<span class="tag '+({'Reorder now':'bad','Reorder soon':'warn','Healthy':'ok','Overstocked':'info'}[s]||'')+'">'+s+'</span>';}
+function statusTag(s){if(s.indexOf('Reorder')===0)return '<span class="tag signal">'+s+'</span>';return '<span class="tag neu">'+s+'</span>';}
 function productDrawer(sku){var k=skuIx[sku];if(k==null)return null;var s=D.skus[k],ab=rangeAB(),x=agg(ab[0],ab[1],k);var inv=invRows()[k];
   var h='<div class="dr-h"><div><h2 id="drawerTitle">'+esc(s.name)+'</h2><p>'+s.sku+' &middot; ASIN '+s.asin+'</p></div><button class="x" type="button" data-close aria-label="Close">&times;</button></div>';
   h+='<div class="mini"><div><span>Units</span><strong>'+num(x.units)+'</strong></div><div><span>Sales</span><strong>'+money(x.sales)+'</strong></div><div><span>Profit</span><strong>'+money(x.amzProfit)+'</strong></div><div><span>Margin</span><strong>'+pct(x.margin)+'</strong></div><div><span>ACOS</span><strong>'+pct(x.acos)+'</strong></div><div><span>TACOS</span><strong>'+pct(x.tacos)+'</strong></div></div>';
@@ -234,14 +235,12 @@ function productDrawer(sku){var k=skuIx[sku];if(k==null)return null;var s=D.skus
   return h;}
 
 /* shipments */
-function shipTag(s){var m={'Closed':'','Receiving':'info','Checked in':'info','In transit':'info'};return '<span class="tag '+(m[s.status]||'')+'">'+s.status+'</span>';}
-function devTag(s){if(!s.closedFlag)return '<span class="mut">—</span>';if(s.diff<0)return '<span class="tag bad">'+num(-s.diff)+' short</span>';if(s.diff>0)return '<span class="tag warn">+'+num(s.diff)+'</span>';return '<span class="tag ok">Matched</span>';}
-function progress(s){var p=s.units?s.recv/s.units:0;var cls=s.closedFlag?(s.diff<0?'short':'full'):'';return '<div class="prog"><span>'+pct(p,1)+'</span><span class="bar"><span class="'+cls+'" style="width:'+Math.min(100,p*100).toFixed(1)+'%"></span></span></div>';}
+function shipTag(s){return '<span class="tag neu">'+s.status+'</span>';}
+function devTag(s){if(!s.closedFlag)return '<span class="mut">—</span>';if(s.diff<0)return '<span class="tag signal">'+num(-s.diff)+' short</span>';if(s.diff>0)return '<span class="mut">+'+num(s.diff)+'</span>';return '<span class="mut">—</span>';}
+function progress(s){var p=s.units?s.recv/s.units:0;var cls=s.closedFlag&&s.diff<0?'short':'';return '<div class="prog"><span>'+pct(p,1)+'</span><span class="bar"><span class="'+cls+'" style="width:'+Math.min(100,p*100).toFixed(1)+'%"></span></span></div>';}
 function shipRowsFiltered(){var q=state.shipQ.trim().toLowerCase();return SHIPS.filter(function(s){if(state.shipFilter==='open'&&s.closedFlag)return false;if(state.shipFilter==='closed'&&!s.closedFlag)return false;if(state.shipFilter==='dev'&&!(s.closedFlag&&s.diff!==0))return false;
   if(!q)return true;return (s.id+' '+s.fc+' '+s.status+' '+s.name+' '+s.lines.map(function(l){return l.sku;}).join(' ')).toLowerCase().indexOf(q)>=0;});}
 function shipCardHead(s){var amt=shipClaimAmount(s);if(amt)return money(amt,1);if(s.closedFlag&&s.diff<0)return num(-s.diff)+' short';if(!s.closedFlag){var en=s.units-s.recv;if(en)return num(en)+' en route';}return pct(s.recv/s.units,0);}
-function shipCards(){var rows=sortRows(shipRowsFiltered(),state.shipSort,SCOLS);if(!rows.length)return '<p class="empty">No shipments</p>';
-  return rows.map(function(s){var alert=shipClaimAmount(s)||(s.closedFlag&&s.diff<0)?' ship-card-alert':'';return '<a class="ship-card'+alert+'" href="#/shipments/'+s.id+'"><div class="ship-card-top"><span class="ship-card-amt">'+shipCardHead(s)+'</span><span class="ship-card-sub">'+num(s.recv)+' / '+num(s.units)+'</span></div><div class="ship-card-id">'+s.id+'</div><div class="ship-card-meta"><span>'+s.fc+'</span><span>'+s.status+'</span></div></a>';}).join('');}
 var SCOLS=[
  {key:'id',label:'Shipment',l:1,f:function(r){return '<span class="pn" style="min-width:0">'+r.id+'</span><span class="ps">'+esc(r.name)+'</span>';}},
  {key:'shipped',label:'Ship date',f:function(r){return fdIso(r.shipped);}},
@@ -249,17 +248,27 @@ var SCOLS=[
  {key:'status',label:'Status',f:shipTag},
  {key:'units',label:'Shipped',f:function(r){return num(r.units);}},
  {key:'recv',label:'Received',f:function(r){return num(r.recv);}},
- {key:'pr',label:'Received',sv:function(r){return r.recv/r.units;},f:progress},
+ {key:'pr',label:'% received',sv:function(r){return r.recv/r.units;},f:progress},
  {key:'claim',label:'Claim',f:function(r){var a=shipClaimAmount(r);return a?money(a,1):'<span class="mut">—</span>';}},
  {key:'diff',label:'Shortfall',sv:function(r){return r.closedFlag?r.diff:1e9;},f:devTag}];
 function shipBody(){var rows=sortRows(shipRowsFiltered(),state.shipSort,SCOLS);if(!rows.length)return '<tbody><tr><td colspan="9" class="empty">No shipments</td></tr></tbody>';
   var u=0,r=0,cl=0;rows.forEach(function(s){u+=s.units;r+=s.recv;cl+=shipClaimAmount(s);});
   return '<tbody>'+rows.map(function(s){return '<tr class="click" data-go="#/shipments/'+s.id+'" tabindex="0">'+SCOLS.map(function(c){return cell(c,s);}).join('')+'</tr>';}).join('')+'</tbody><tfoot><tr><td>'+rows.length+'</td><td></td><td></td><td></td><td>'+num(u)+'</td><td>'+num(r)+'</td><td>'+pct(r/u,1)+'</td><td>'+(cl?money(cl,1):'—')+'</td><td></td></tr></tfoot>';}
 function claimRowsFiltered(){return D.claims.filter(function(c){return state.claimFilter==='all'||c.status===state.claimFilter;});}
-function claimStatusTag(st){return '<span class="tag '+({'Reimbursed':'ok','Pending':'warn','Not filed':'bad'}[st]||'')+'">'+(st==='Not filed'?'Not filed':st)+'</span>';}
-function claimCards(){var rows=claimRowsFiltered().slice().reverse();if(!rows.length)return '<p class="empty">No claims</p>';
-  return rows.map(function(c){return '<a class="claim-card" href="'+(c.shipment?'#/shipments/'+c.shipment:'#/shipments')+'"><div class="claim-card-top"><span class="claim-card-amt">'+money(c.amount,1)+'</span>'+claimStatusTag(c.status)+'</div><div class="claim-card-meta"><span>'+c.sku+'</span><span>'+num(c.units)+' u</span><span>'+esc(c.type)+'</span></div></a>';}).join('');}
-function refreshShipUi(){refreshBody('shipTbl',shipBody);var sc=$('#shipCards');if(sc)sc.innerHTML=shipCards();var cc=$('#claimCards');if(cc)cc.innerHTML=claimCards();var ct=$('#claimTbl');if(ct)ct.innerHTML=claimTable();}
+function claimStatusTag(st){if(st==='Pending'||st==='Not filed')return '<span class="tag signal">'+st+'</span>';return '<span class="tag neu">'+st+'</span>';}
+function claimCardsHtml(rows){if(!rows.length)return '<p class="empty">No claims</p>';
+  return rows.map(function(c){return '<a class="claim-card" href="'+(c.shipment?'#/shipments/'+c.shipment:'#/shipments')+'"><div class="claim-card-top"><span class="claim-card-amt">'+money(c.amount,1)+'</span>'+claimStatusTag(c.status)+'</div><div class="claim-card-meta"><span>'+c.sku+'</span><span>'+num(c.units)+' units</span><span>'+esc(c.type)+'</span></div></a>';}).join('');}
+function claimCards(){return claimCardsHtml(claimRowsFiltered().slice().reverse());}
+function shipCardsHtml(rows){if(!rows.length)return '<p class="empty">No shipments</p>';
+  return rows.map(function(s){var alert=shipClaimAmount(s)||(s.closedFlag&&s.diff<0)?' ship-card-alert':'';return '<a class="ship-card'+alert+'" href="#/shipments/'+s.id+'"><div class="ship-card-top"><span class="ship-card-amt">'+shipCardHead(s)+'</span><span class="ship-card-sub">'+num(s.recv)+' / '+num(s.units)+'</span></div><div class="ship-card-id">'+s.id+'</div><div class="ship-card-meta"><span>'+s.fc+'</span><span>'+s.status+'</span></div></a>';}).join('');}
+function shipCards(){return shipCardsHtml(sortRows(shipRowsFiltered(),state.shipSort,SCOLS));}
+function shipMobLead(){var notFiled=D.claims.filter(function(c){return c.status==='Not filed';}).slice().reverse();
+  var open=SHIPS.filter(function(s){return !s.closedFlag;});
+  var h='<div class="mob-lead-block"><h2 class="mob-block-title">Not filed</h2><div class="claim-cards mob-lead-cards" id="shipLeadClaims">'+claimCardsHtml(notFiled)+'</div></div>';
+  h+='<div class="mob-lead-block"><h2 class="mob-block-title">Open</h2><div class="ship-cards mob-lead-cards" id="shipLeadOpen">'+shipCardsHtml(open)+'</div></div>';
+  return h;}
+function refreshShipUi(){refreshBody('shipTbl',shipBody);var sc=$('#shipCards');if(sc)sc.innerHTML=shipCards();var cc=$('#claimCards');if(cc)cc.innerHTML=claimCards();var ct=$('#claimTbl');if(ct)ct.innerHTML=claimTable();
+  if(isMob()){var nf=D.claims.filter(function(c){return c.status==='Not filed';}).slice().reverse();var lc=$('#shipLeadClaims');if(lc)lc.innerHTML=claimCardsHtml(nf);var open=SHIPS.filter(function(s){return !s.closedFlag;});var lo=$('#shipLeadOpen');if(lo)lo.innerHTML=shipCardsHtml(open);}}
 var CLCOLS=[
  {key:'event',label:'Date',f:function(c){return fdIso(c.event);}},
  {key:'type',label:'Type',l:1,f:function(c){return c.type;}},
@@ -273,13 +282,13 @@ var CLCOLS=[
 function claimTable(){var rows=claimRowsFiltered().slice().reverse();var t={u:0,a:0};rows.forEach(function(c){t.u+=c.units;t.a+=c.amount;});
   return '<thead><tr>'+CLCOLS.map(function(c){return '<th'+(c.l?' class="l"':'')+' scope="col">'+c.label+'</th>';}).join('')+'</tr></thead><tbody>'+(rows.length?rows.map(function(c){return '<tr class="click" data-go="'+(c.shipment?'#/shipments/'+c.shipment:'#/shipments')+'" tabindex="0">'+CLCOLS.map(function(col){return cell(col,c);}).join('')+'</tr>';}).join(''):'<tr><td colspan="9" class="empty">No claims</td></tr>')+'</tbody><tfoot><tr><td>'+rows.length+'</td><td></td><td></td><td></td><td>'+t.u+'</td><td>'+money(t.a,1)+'</td><td></td><td></td><td></td></tr></tfoot>';}
 PAGES.shipments=function(){var open=SHIPS.filter(function(s){return !s.closedFlag;});var onway=0;open.forEach(function(s){onway+=s.units-s.recv;});var ct=claimTotals();
-  var h=statStrip([['Open',open.length,num(onway)],['Not filed',money(ct.notfiled,1),''],['Pending',money(ct.pending,1),''],['Reimbursed',money(ct.reimbursed,1),''],['Potential',money(ct.potential,1),'']]);
+  var summary=statGrid([['Open',String(open.length),num(onway)+' units in transit'],['Not filed',money(ct.notfiled,1),''],['Pending',money(ct.pending,1),''],['Reimbursed',money(ct.reimbursed,1),''],['Potential',money(ct.potential,1),'']]);
   var fl=[['all','All'],['open','Open'],['closed','Closed'],['dev','Shortfall']];
-  var shipDetail='<section class="card sec"><div class="panel panel-h" style="margin:0"><div class="tools"><div class="chips" role="group" aria-label="Filter shipments">'+fl.map(function(f){return '<button class="chip" type="button" data-sf="'+f[0]+'" aria-pressed="'+(state.shipFilter===f[0])+'">'+f[1]+'</button>';}).join('')+'</div>'+searchBox('shipQ',state.shipQ,'Search')+'</div></div><div class="ship-cards" id="shipCards">'+shipCards()+'</div><div class="tbl-wrap sticky1 ship-table-wrap"><table id="shipTbl">'+thead(SCOLS,state.shipSort,'ship')+shipBody()+'</table></div></section>';
+  var shipDetail='<section class="card sec"><div class="panel panel-h" style="margin:0"><div class="tools"><div class="chips" role="group" aria-label="Filter shipments">'+fl.map(function(f){return '<button class="chip" type="button" data-sf="'+f[0]+'" aria-pressed="'+(state.shipFilter===f[0])+'">'+f[1]+'</button>';}).join('')+'</div>'+searchBox('shipQ',state.shipQ,'Search')+'</div></div><div class="ship-cards ship-cards-all" id="shipCards">'+shipCards()+'</div><div class="tbl-wrap sticky1 ship-table-wrap"><table id="shipTbl">'+thead(SCOLS,state.shipSort,'ship')+shipBody()+'</table></div></section>';
   var cf=[['all','All'],['Not filed','Not filed'],['Pending','Pending'],['Reimbursed','Reimbursed']];
-  shipDetail+='<section class="card sec"><div class="panel panel-h" style="margin:0"><h2>Claims</h2><div class="chips" role="group" aria-label="Filter claims">'+cf.map(function(f){return '<button class="chip" type="button" data-cf="'+f[0]+'" aria-pressed="'+(state.claimFilter===f[0])+'">'+f[1]+'</button>';}).join('')+'</div></div><div class="claim-cards" id="claimCards">'+claimCards()+'</div><div class="tbl-wrap sticky1 claim-table-wrap"><table id="claimTbl">'+claimTable()+'</table></div></section>';
-  h+=mobCollapse('shipExpand',shipDetail);
-  return h;};
+  shipDetail+='<section class="card sec"><div class="panel panel-h" style="margin:0"><h2>Claims</h2><div class="chips" role="group" aria-label="Filter claims">'+cf.map(function(f){return '<button class="chip" type="button" data-cf="'+f[0]+'" aria-pressed="'+(state.claimFilter===f[0])+'">'+f[1]+'</button>';}).join('')+'</div></div><div class="claim-cards claim-cards-all" id="claimCards">'+claimCards()+'</div><div class="tbl-wrap sticky1 claim-table-wrap"><table id="claimTbl">'+claimTable()+'</table></div></section>';
+  if(isMob())return summary+shipMobLead()+mobCollapse('shipExpand',shipDetail);
+  return summary+shipDetail;};
 function shipmentDrawer(id){var s=SHIPS.filter(function(z){return z.id===id;})[0];if(!s)return null;
   var h='<div class="dr-h"><div><h2 id="drawerTitle">'+s.id+'</h2><p>'+esc(s.name)+' &middot; to '+s.fc+'</p></div><button class="x" type="button" data-close aria-label="Close">&times;</button></div>';
   h+='<div class="mini"><div><span>Status</span><strong>'+s.status+'</strong></div><div><span>Shipped</span><strong>'+num(s.units)+'</strong></div><div><span>Received</span><strong>'+num(s.recv)+'</strong></div><div><span>% received</span><strong>'+pct(s.recv/s.units,1)+'</strong></div><div><span>Difference</span><strong class="'+(s.diff<0&&s.closedFlag?'neg':'')+'">'+(s.diff>0?'+':'')+num(s.diff)+'</strong></div><div><span>Cartons</span><strong>'+num(s.lines.reduce(function(t,l){return t+l.cartons;},0))+'</strong></div></div>';
@@ -287,8 +296,8 @@ function shipmentDrawer(id){var s=SHIPS.filter(function(z){return z.id===id;})[0
   h+='<div class="dr-sec"><h3>Shipped vs received by SKU</h3><div class="tbl-wrap"><table><thead><tr><th>SKU</th><th>Shipped</th><th>Received</th><th>Difference</th><th class="l hide-m">Action</th></tr></thead><tbody>';
   s.lines.forEach(function(l){var d=l.received-l.shipped;var act;
     if(!s.closedFlag)act='<span class="mut">'+(s.status==='Receiving'?'Receiving in progress':'Waiting for check-in')+'</span>';
-    else if(d<0){var c=claimFor(s.id,l.sku);act=(!c||c.status==='Not filed')?'<span class="tag bad">File claim</span> <span class="mut">'+(c?money(c.amount,1)+' est.':'')+'</span>':(c.status==='Reimbursed'?'<span class="tag ok">Reimbursed '+money(c.amount,1)+'</span>':'<span class="tag warn">Claim filed #'+c.case+'</span>');}
-    else if(d>0)act='<span class="tag warn">Overage, no claim</span>';else act='<span class="tag ok">Matched</span>';
+    else if(d<0){var c=claimFor(s.id,l.sku);act=(!c||c.status==='Not filed')?'<span class="tag signal">File claim</span> <span class="mut">'+(c?money(c.amount,1)+' est.':'')+'</span>':(c.status==='Reimbursed'?'<span class="tag neu">Reimbursed '+money(c.amount,1)+'</span>':'<span class="tag signal">Claim filed #'+c.case+'</span>');}
+    else if(d>0)act='<span class="tag neu">Overage, no claim</span>';else act='<span class="tag neu">Matched</span>';
     h+='<tr><td><span class="pn" style="min-width:0">'+l.sku+'</span><span class="ps">'+esc(D.skus[skuIx[l.sku]].name)+'</span><span class="only-mb">'+act+'</span></td><td>'+num(l.shipped)+'</td><td>'+num(l.received)+'</td><td class="'+(d<0&&s.closedFlag?'neg':'')+'">'+(d>0?'+':'')+num(d)+'</td><td class="l hide-m">'+act+'</td></tr>';});
   h+='</tbody><tfoot><tr><td>Total</td><td>'+num(s.units)+'</td><td>'+num(s.recv)+'</td><td>'+(s.diff>0?'+':'')+num(s.diff)+'</td><td class="hide-m"></td></tr></tfoot></table></div></div>';
   return h;}
@@ -306,7 +315,9 @@ function expBody(){var rows=sortRows(expRows(),state.expSort,ECOLS);if(!rows.len
   return '<tbody>'+rows.map(function(e){return '<tr>'+ECOLS.map(function(c){return cell(c,e);}).join('')+'</tr>';}).join('')+'</tbody><tfoot><tr><td>'+rows.length+' transactions</td><td></td><td></td><td class="hide-m"></td><td>'+money(t,1)+'</td></tr></tfoot>';}
 PAGES.expenses=function(){var ab=rangeAB(),a=ab[0],b=ab[1],o=other(a,b),pab=prevAB(a,b),p=pab?other(pab[0],pab[1]):null;
   var cats=CATS.slice().sort(function(x,y){return o.by[y]-o.by[x];});
-  var h=isMob()?statStrip([['Other expenses',money(o.total,1),'QuickBooks']]):'';
+  var h='';
+  if(isMob()){h=statGrid([['Other expenses',money(o.total,1),'QuickBooks']]);var top=cats.filter(function(c){return o.by[c];}).slice(0,4);
+    if(top.length)h+='<ul class="mob-mini-list">'+top.map(function(c){return '<li><span>'+esc(c)+'</span><strong>'+money(o.by[c],1)+'</strong></li>';}).join('')+'</ul>';}
   var expDetail='<div class="two"><section class="card panel"><div class="panel-h"><h2>By category</h2></div><div class="tbl-wrap"><table><thead><tr><th>Category</th><th>Amount</th><th class="hide-m">Share</th><th>'+(p?'Prior':'')+'</th></tr></thead><tbody>';
   cats.forEach(function(c){var v=o.by[c];if(!v&&!(p&&p.by[c]))return;expDetail+='<tr class="click" data-cat="'+esc(c)+'" tabindex="0"><td>'+esc(c)+'</td><td>'+(v?money(v,1):'<span class="mut">-</span>')+'</td><td class="hide-m"><div class="prog"><span>'+pct(o.total?v/o.total:0,0)+'</span><span class="bar"><span style="width:'+(o.total?v/o.total*100:0).toFixed(1)+'%"></span></span></div></td><td class="mut">'+(p?(p.by[c]?money(p.by[c],1):'-'):'')+'</td></tr>';});
   expDetail+='</tbody><tfoot><tr><td>Total</td><td>'+money(o.total,1)+'</td><td class="hide-m"></td><td>'+(p?money(p.total,1):'')+'</td></tr></tfoot></table></div></section>';
@@ -337,21 +348,25 @@ function invTie(){var q=D.openingInventory,out=[];for(var w=0;w<NWEEKS;w++){var 
 PAGES.inventory=function(){var rows=invRows(),last=NDAYS-1;var av=0,ib=0,val=0,oo=0,vel=0;rows.forEach(function(r){av+=r.av;ib+=r.ib;val+=r.value;oo+=r.oo;vel+=r.v;});var re=rows.filter(function(r){return r.status.indexOf('Reorder')===0;});
   var tie=invTie(),lt=tie[tie.length-1];
   var tieNote=lt.diff===0?'Matches QuickBooks':'Off by '+money(lt.diff,1);
-  var h=statStrip([['Inventory value',money(val,1),tieNote],['At FBA',num(av),''],['Inbound',num(ib),''],['To reorder',re.length?String(re.length):'0',re.map(function(r){return r.sku;}).join(', ')||'']]);
-  var invDetail='<section class="card sec"><div class="panel panel-h" style="margin:0"><span class="note">'+fd(last)+' · Sellerboard</span></div><div class="tbl-wrap sticky1"><table id="invTbl">'+thead(ICOLS,state.invSort,'inv')+'<tbody>'+sortRows(rows,state.invSort,ICOLS).map(function(r){return '<tr class="click" data-go="#/products/'+r.sku+'" tabindex="0">'+ICOLS.map(function(c){return cell(c,r);}).join('')+'</tr>';}).join('')+'</tbody><tfoot><tr><td>Total</td><td>'+num(av)+'</td><td>'+num(ib)+'</td><td>'+num(oo)+'</td><td>'+vel.toFixed(1)+'</td><td></td><td></td><td></td><td></td><td>'+money(val,1)+'</td></tr></tfoot></table></div></section>';
+  var reSkus=re.length?re.map(function(r){return r.sku;}).join(', '):'None';
+  var h=statGrid([['Inventory value',money(val,1),tieNote],['At FBA',num(av),'units'],['Inbound',num(ib),'units'],['To reorder',String(re.length),reSkus]]);
+  var invLead='';
+  if(isMob()&&re.length){invLead='<ul class="mob-mini-list">'+re.slice(0,4).map(function(r){return '<li><span>'+r.sku+'</span><strong>'+r.status+'</strong></li>';}).join('')+'</ul>';}
+  var invDetail='<section class="card sec"><div class="panel panel-h" style="margin:0"><span class="note">As of '+fd(last)+'</span></div><div class="tbl-wrap sticky1"><table id="invTbl">'+thead(ICOLS,state.invSort,'inv')+'<tbody>'+sortRows(rows,state.invSort,ICOLS).map(function(r){return '<tr class="click" data-go="#/products/'+r.sku+'" tabindex="0">'+ICOLS.map(function(c){return cell(c,r);}).join('')+'</tr>';}).join('')+'</tbody><tfoot><tr><td>Total</td><td>'+num(av)+'</td><td>'+num(ib)+'</td><td>'+(oo?num(oo):'<span class="mut">-</span>')+'</td><td>'+vel.toFixed(1)+'</td><td></td><td></td><td></td><td></td><td>'+money(val,1)+'</td></tr></tfoot></table></div></section>';
   invDetail+='<section class="card sec"><div class="panel panel-h" style="margin:0"><h2>QBO tie-out</h2></div><div class="tbl-wrap sticky1"><table><thead><tr><th scope="col">Week</th><th scope="col">Purchases</th><th scope="col">COGS</th><th scope="col">Write-offs</th><th scope="col">QuickBooks</th><th scope="col">Sellerboard</th><th scope="col">Diff</th></tr></thead><tbody>';
   tie.slice().reverse().forEach(function(r){invDetail+='<tr><td>'+fd(r.w*7+6)+'</td><td>'+(r.purch?'+'+money(r.purch,1):'<span class="mut">-</span>')+'</td><td>-'+money(r.cogs,1)+'</td><td>'+(r.loss?(r.loss>0?'-':'+')+money(Math.abs(r.loss),1):'<span class="mut">-</span>')+'</td><td>'+money(r.qbo,1)+'</td><td>'+money(r.sb,1)+'</td><td class="'+(r.diff===0?'pos':'neg')+'">'+money(r.diff,1)+'</td></tr>';});
   invDetail+='<tr><td class="mut">Opening, '+fd(-1)+'</td><td></td><td></td><td></td><td>'+money(D.openingInventory,1)+'</td><td></td><td></td></tr>';
   invDetail+='</tbody></table></div></section>';
+  if(isMob())h+=invLead;
   h+=mobCollapse('invExpand',invDetail);
   return h;};
 
 /* cash */
 PAGES.cash=function(){var last=NDAYS-1,c=cashAt(last),nx=D.settlements[D.settlements.length-1];
-  var h=statStrip([['Cash on hand',money(c.cash,1),fd(last)],['Checking',money(c.checking,1),''],['Savings',money(c.savings,1),''],['Amex',money(c.amex,1),''],['Next payout',money(nx.amount,1),fdIso(nx.deposit,{wd:1})]]);
+  var h=statGrid([['Cash on hand',money(c.cash,1),'As of '+fd(last)],['Checking',money(c.checking,1),'Business checking'],['Savings',money(c.savings,1),'Reserve'],['Amex',money(c.amex,1),'Card balance'],['Next payout',money(nx.amount,1),'Lands '+fdIso(nx.deposit,{wd:1})]]);
   var bals=[],rows=[];for(var w=0;w<NWEEKS;w++){var a=w*7,b=a+6,f=cashFlow(a,b);f.w=w;f.end=cashAt(b).cash;rows.push(f);bals.push(f.end);}
   var cashDetail='<div class="two sec"><section class="card panel"><div class="panel-h"><h2>Cash by week</h2></div>'+lineChart({values:bals,label:'Cash on hand by week',xl:function(i){return fd(i*7+6);},tip:function(i){return fd(i*7+6)+': '+money(bals[i]);}})+'</section>';
-  cashDetail+='<section class="card panel"><div class="panel-h"><h2>Payouts</h2></div><div class="tbl-wrap"><table><thead><tr><th scope="col">Settlement</th><th scope="col">Deposit</th><th scope="col">Amount</th></tr></thead><tbody>'+D.settlements.slice().reverse().map(function(s){return '<tr><td>'+fdIso(s.start)+' - '+fdIso(s.end)+(s.open?' <span class="tag info">Open</span>':'')+'</td><td>'+fdIso(s.deposit)+'</td><td>'+money(s.amount,1)+'</td></tr>';}).join('')+'</tbody></table></div></section></div>';
+  cashDetail+='<section class="card panel"><div class="panel-h"><h2>Payouts</h2></div><div class="tbl-wrap"><table><thead><tr><th scope="col">Settlement</th><th scope="col">Deposit</th><th scope="col">Amount</th></tr></thead><tbody>'+D.settlements.slice().reverse().map(function(s){return '<tr><td>'+fdIso(s.start)+' - '+fdIso(s.end)+(s.open?' <span class="tag signal">Open</span>':'')+'</td><td>'+fdIso(s.deposit)+'</td><td>'+money(s.amount,1)+'</td></tr>';}).join('')+'</tbody></table></div></section></div>';
   cashDetail+='<section class="card sec"><div class="panel panel-h" style="margin:0"><h2>Weekly flow</h2><span class="note">QuickBooks</span></div><div class="tbl-wrap sticky1"><table><thead><tr><th scope="col">Week</th><th scope="col">Payouts</th><th scope="col">Expenses</th><th scope="col">Amex</th><th scope="col">Inventory</th><th scope="col">Owner</th><th scope="col">Net</th><th scope="col">Ending</th></tr></thead><tbody>';
   var tot={payouts:0,opex:0,card:0,inventory:0,owner:0,net:0};var z=function(v){return v?money(v):'<span class="mut">-</span>';};
   rows.slice().reverse().forEach(function(f){Object.keys(tot).forEach(function(k){tot[k]+=f[k];});cashDetail+='<tr><td>'+fd(f.w*7)+'</td><td class="pos">'+z(f.payouts)+'</td><td>'+z(f.opex)+'</td><td>'+z(f.card)+'</td><td>'+z(f.inventory)+'</td><td>'+z(f.owner)+'</td><td class="'+(f.net>=0?'pos':'neg')+'">'+(f.net>0?'+':'')+money(f.net)+'</td><td><strong>'+money(f.end)+'</strong></td></tr>';});
@@ -367,13 +382,13 @@ function jeLines(w){var o=agg(w*7,w*7+6);var net=o.sales-o.refunds-o.fees-o.ads+
   return L.filter(function(l){return l[1]||l[2];});}
 PAGES.sources=function(){
   var t=function(s){var p=s.split('T'),d=idx(p[0]),hm=p[1].split(':'),h=+hm[0];return fd(d)+', '+((h%12)||12)+':'+hm[1]+(h<12?' AM':' PM');};
-  var h='<div class="two even"><section class="card conn"><div class="conn-h"><h3>Sellerboard</h3><span class="tag ok">Connected</span></div><div class="meta">Synced '+t(D.sync.sellerboard)+' · Amazon US</div></section>';
-  h+='<section class="card conn"><div class="conn-h"><h3>QuickBooks</h3><span class="tag ok">Connected</span></div><div class="meta">Synced '+t(D.sync.qbo)+'</div></section></div>';
+  var h='<div class="two even"><section class="card conn"><div class="conn-h"><h3>Sellerboard</h3><span class="tag neu">Connected</span></div><div class="meta">Synced '+t(D.sync.sellerboard)+' · Amazon US</div></section>';
+  h+='<section class="card conn"><div class="conn-h"><h3>QuickBooks</h3><span class="tag neu">Connected</span></div><div class="meta">Synced '+t(D.sync.qbo)+'</div></section></div>';
   var srcDetail='';
   var w=NWEEKS-1,L=jeLines(w),dr=0,cr=0;L.forEach(function(l){dr+=l[1];cr+=l[2];});
-  srcDetail+='<section class="card sec"><div class="panel panel-h" style="margin:0"><h2>JE-'+(D.jeStart+w)+'</h2><span class="note">'+frange(w*7,w*7+6)+' · Posted '+fd(w*7+7)+'</span><span class="tag '+(dr===cr?'ok':'bad')+'">'+(dr===cr?'Balanced':'Off')+'</span></div><div class="tbl-wrap"><table><thead><tr><th scope="col">Account</th><th scope="col">Debit</th><th scope="col">Credit</th></tr></thead><tbody>'+L.map(function(l){return '<tr><td>'+l[0]+'</td><td>'+(l[1]?money(l[1],1):'')+'</td><td>'+(l[2]?money(l[2],1):'')+'</td></tr>';}).join('')+'</tbody><tfoot><tr><td>Total</td><td>'+money(dr,1)+'</td><td>'+money(cr,1)+'</td></tr></tfoot></table></div></section>';
+  srcDetail+='<section class="card sec"><div class="panel panel-h" style="margin:0"><h2>JE-'+(D.jeStart+w)+'</h2><span class="note">'+frange(w*7,w*7+6)+' · Posted '+fd(w*7+7)+'</span><span class="tag '+(dr===cr?'neu':'signal')+'">'+(dr===cr?'Balanced':'Off')+'</span></div><div class="tbl-wrap"><table><thead><tr><th scope="col">Account</th><th scope="col">Debit</th><th scope="col">Credit</th></tr></thead><tbody>'+L.map(function(l){return '<tr><td>'+l[0]+'</td><td>'+(l[1]?money(l[1],1):'')+'</td><td>'+(l[2]?money(l[2],1):'')+'</td></tr>';}).join('')+'</tbody><tfoot><tr><td>Total</td><td>'+money(dr,1)+'</td><td>'+money(cr,1)+'</td></tr></tfoot></table></div></section>';
   srcDetail+='<section class="card sec"><div class="panel panel-h" style="margin:0"><h2>Posting log</h2></div><div class="tbl-wrap"><table><thead><tr><th scope="col">Entry</th><th scope="col">Week</th><th scope="col">Posted</th><th scope="col">Amazon profit</th><th class="l" scope="col">Status</th></tr></thead><tbody>';
-  for(var i=NWEEKS-1;i>=0;i--){var o=agg(i*7,i*7+6);srcDetail+='<tr><td>JE-'+(D.jeStart+i)+'</td><td>'+frange(i*7,i*7+6)+'</td><td>'+fd(i*7+7)+'</td><td>'+money(o.amzProfit,1)+'</td><td class="l"><span class="tag ok">Posted</span></td></tr>';}
+  for(var i=NWEEKS-1;i>=0;i--){var o=agg(i*7,i*7+6);srcDetail+='<tr><td>JE-'+(D.jeStart+i)+'</td><td>'+frange(i*7,i*7+6)+'</td><td>'+fd(i*7+7)+'</td><td>'+money(o.amzProfit,1)+'</td><td class="l"><span class="tag neu">Posted</span></td></tr>';}
   srcDetail+='</tbody></table></div></section>';
   h+=mobCollapse('srcExpand',srcDetail);
   return h;};
