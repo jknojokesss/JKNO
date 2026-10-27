@@ -27,7 +27,7 @@ export default function AmazonDemoPortal() {
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="" />
         <link
           rel="stylesheet"
-          href="https://fonts.googleapis.com/css2?family=Source+Sans+3:ital,wght@0,400..600;1,400&family=Source+Serif+4:ital,opsz,wght@0,600;0,700;1,600&display=swap"
+          href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700&display=swap"
         />
         <link rel="stylesheet" href="/amazon-demo/styles.css" />
       </Head>
@@ -102,14 +102,7 @@ export default function AmazonDemoPortal() {
           <main id="main" tabIndex={-1} />
           <footer className="foot">
             <p>
-              <strong>Sample portal with fictitious data.</strong> Larkfield Kitchen Co. is not a real company.
-            </p>
-            <p>
-              Prepared by JK No Jokes Financials ·{' '}
-              <a href="https://jknojokes.com" rel="noopener">
-                jknojokes.com
-              </a>{' '}
-              · <a href="tel:+19175898455">917-589-8455</a>
+              Sample data · JK No Jokes Financials · <a href="tel:+19175898455">917-589-8455</a>
             </p>
           </footer>
         </div>
