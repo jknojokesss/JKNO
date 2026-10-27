@@ -1,4 +1,5 @@
 import { chromium } from 'playwright'
+import { runLayoutAudits } from './amazon-demo-layout-audit.mjs'
 
 const BASE = process.env.BASE_URL || 'http://127.0.0.1:3000/amazon-demo'
 
@@ -177,6 +178,13 @@ async function main() {
     'Due30:',
     r.dueIn30,
   )
+
+  const layoutFails = await runLayoutAudits(page, BASE)
+  if (layoutFails.length) {
+    layoutFails.forEach((f) => console.error(`FAIL layout: ${f}`))
+    ok = false
+  } else console.log('OK layout: empty cards + overflow at 390/1280/1440/1920')
+
   await browser.close()
   process.exit(ok ? 0 : 1)
 }

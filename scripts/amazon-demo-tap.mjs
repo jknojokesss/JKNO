@@ -1,4 +1,5 @@
 import { chromium } from 'playwright'
+import { runLayoutAudits } from './amazon-demo-layout-audit.mjs'
 
 const BASE = process.env.BASE_URL || 'http://127.0.0.1:3000/amazon-demo'
 
@@ -87,10 +88,7 @@ async function exerciseRoute(page, route, width, taps, fails) {
       await waitMain(page)
       await tapVisible(page, 'section.card.panel.mob-sec a.note', taps, fails, { readHref: true })
     } else {
-      await tapVisible(page, 'a.block-card', taps, fails, { readHref: true })
-      await page.goto(`${BASE}#/overview`, { waitUntil: 'networkidle' })
-      await waitMain(page)
-      await tapVisible(page, 'tr.click.tap-row', taps, fails, { closeDrawer: true })
+      await tapVisible(page, 'section.card.panel.sec tr.click.tap-row', taps, fails, { closeDrawer: true })
     }
   } else if (route === '#/cash') {
     await tapVisible(page, 'a.kv-row', taps, fails, { readHref: true, allowSame: true })
@@ -169,6 +167,9 @@ async function main() {
     const hash = await page.evaluate(() => location.hash)
     if (hash !== '#/overview') fails.push(`product drawer back expected #/overview got ${hash}`)
   }
+
+  const layoutFails = await runLayoutAudits(page, BASE)
+  layoutFails.forEach((f) => fails.push(`layout ${f}`))
 
   console.log(`TAP_COUNT ${taps.count}`)
   if (fails.length) {

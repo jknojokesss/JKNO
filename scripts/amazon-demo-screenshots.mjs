@@ -1,5 +1,5 @@
 import { chromium } from 'playwright'
-import { mkdir } from 'fs/promises'
+import { mkdir, readdir, rm } from 'fs/promises'
 import path from 'path'
 
 const BASE = process.env.BASE_URL || 'http://127.0.0.1:3000/amazon-demo'
@@ -18,17 +18,25 @@ const TABS = [
   ['10-data-sources', '#/sources'],
 ]
 
-async function main() {
+async function purgeOldShots() {
   await mkdir(OUT, { recursive: true })
+  const names = await readdir(OUT)
+  for (const name of names) {
+    if (name.startsWith('desk-') || name.startsWith('phone-') || name === 'type-closeup.png') {
+      await rm(path.join(OUT, name), { force: true })
+    }
+  }
+}
+
+async function main() {
+  await purgeOldShots()
   const browser = await chromium.launch({
     headless: true,
     executablePath: process.env.PLAYWRIGHT_CHROME_PATH || '/usr/local/bin/google-chrome',
   })
   const page = await browser.newPage()
 
-  const DESK_ONLY = new Set(['07-cash', '08-payables', '09-payout'])
   for (const [name, hash] of TABS) {
-    if (!DESK_ONLY.has(name)) continue
     await page.setViewportSize({ width: 1440, height: 900 })
     await page.goto(`${BASE}${hash}`, { waitUntil: 'networkidle' })
     await page.waitForSelector('#main', { timeout: 15000 })
@@ -72,10 +80,10 @@ async function main() {
   await page.setViewportSize({ width: 1280, height: 900 })
   await page.goto(`${BASE}#/overview`, { waitUntil: 'networkidle' })
   await page.waitForSelector('.ov-split', { timeout: 15000 })
-  await page.waitForSelector('.two.even.sec .tbl-wrap table', { timeout: 15000 })
+  await page.waitForSelector('section.card.panel.sec .tbl-wrap table', { timeout: 15000 })
   const clip = await page.evaluate(() => {
     const boxes = document.querySelector('.ov-split')
-    const table = document.querySelector('.two.even.sec .tbl-wrap table')
+    const table = document.querySelector('section.card.panel.sec .tbl-wrap table')
     const main = document.querySelector('#main')
     if (!boxes || !table || !main) return null
     const pad = 8

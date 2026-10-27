@@ -99,11 +99,11 @@ function drawerBack(page,label){return backBar(state.backTo||('#/'+page),state.b
 function isMob(){return window.innerWidth<640;}
 function showMoreBtn(id,label){return '<p class="show-more-wrap"><button type="button" class="show-more" data-expand="'+id+'" aria-expanded="false">'+label+'</button></p>';}
 function mobCollapse(id,inner){return inner;}
-function panelHead(title,href){return '<div class="panel-h"><h2>'+title+'</h2>'+(href?'<a class="note tap-card" href="'+href+'">All</a>':'')+'</div>';}
-function mobPanelCard(href,title,allHref,body){return '<section class="card panel mob-sec"><a class="mob-panel-link tap-card" href="'+href+'">'+panelHead(title,allHref)+'<div class="mob-panel-body">'+body+'</div></a></section>';}
+function panelHead(title,href,wrapLink){var all=href?(wrapLink?'<span class="note">All</span>':'<a class="note tap-card" href="'+href+'">All</a>'):'';return '<div class="panel-h"><h2>'+title+'</h2>'+all+'</div>';}
+function mobPanelCard(href,title,allHref,body){return '<section class="card panel mob-sec"><a class="mob-panel-link tap-card" href="'+href+'">'+panelHead(title,allHref,true)+'<div class="mob-panel-body">'+body+'</div></a></section>';}
 function ovProdRows(prods){return '<ul class="ov-prod-list">'+prods.map(function(x){return '<li><a class="tap-card" href="#/products/'+x.s.sku+'"><span class="ov-prod-name">'+esc(x.s.name)+'</span><span class="ov-prod-amt">'+money(x.amzProfit)+'</span><span class="ov-prod-meta">'+pct(x.margin)+' · '+x.s.sku+'</span></a></li>';}).join('')+'</ul>';}
 function backBar(href,label){return '<a class="back-bar tap-card" href="'+href+'"><span class="back-ic" aria-hidden="true">←</span>'+esc(label||'Back')+'</a>';}
-function ovBoxLink(href,lbl,val,meta){return '<a class="ov-box tap-card" href="'+href+'"><p class="ov-box-lbl">'+lbl+'</p><p class="ov-box-val">'+val+'</p><div class="ov-box-meta">'+meta+'</div></a>';}
+function ovBoxLink(href,lbl,val,meta,wide){return '<a class="ov-box tap-card'+(wide?' ov-wide':'')+'" href="'+href+'"><p class="ov-box-lbl">'+lbl+'</p><p class="ov-box-val">'+val+'</p><div class="ov-box-meta">'+meta+'</div></a>';}
 function blistHtml(o){var parts=[['Refunds',o.refunds],['Amazon fees',o.fees],['Ad spend',o.ads],['COGS',o.cogs],['Write-offs less reimbursements',o.loss-o.reimb],['Other expenses',o.other],['True net profit',o.net]];
   var h='<ul class="blist">';h+='<li class="tot"><span class="sw" style="background:transparent"></span><span class="nm">Amazon sales</span><span class="pc">100%</span><span class="am">'+money(o.sales)+'</span></li>';
   parts.forEach(function(x){if(x[0]==='Other expenses')h+='<li class="sub"><span class="sw" style="background:var(--accent-mid)"></span><span class="nm">Amazon profit</span><span class="pc">'+pct(o.amzProfit/o.sales)+'</span><span class="am">'+money(o.amzProfit)+'</span></li>';
@@ -141,7 +141,7 @@ function overviewHero(o,p,pl,c,b,nx,a){var netM='<span>'+pct(o.netMargin)+' marg
   var topM='<span>'+prods.length+' SKUs</span>';
   var open=SHIPS.filter(function(s){return !s.closedFlag;}),cl=claimTotals();
   var shipM='<span>'+open.length+' open · '+money(cl.pending)+' pending</span>';
-  var books=ovBoxLink('#/report','True net',money(o.net),netM)+ovBoxLink('#/cash','Cash',money(c.cash),cashM)+ovBoxLink('#/payables','What you owe',money(sec.total),oweM)+ovBoxLink('#/payables','Cards',money(cc),cardM)+ovBoxLink('#/cash','Balance sheet',money(bs.assets.total),bsM);
+  var books=ovBoxLink('#/report','True net',money(o.net),netM)+ovBoxLink('#/cash','Cash',money(c.cash),cashM)+ovBoxLink('#/payables','What you owe',money(sec.total),oweM)+ovBoxLink('#/payables','Cards',money(cc),cardM)+ovBoxLink('#/cash','Balance sheet',money(bs.assets.total),bsM,true);
   var amazon=ovBoxLink('#/products','Sales',money(o.sales),salM)+ovBoxLink('#/payout','Next payout',money(nx.amount),payM)+ovBoxLink('#/products','Top products',money(topSum),topM)+ovBoxLink('#/shipments','Shipments & claims',money(cl.potential),shipM);
   return '<div class="ov-split">'+ovBlock('Books','QuickBooks',books)+ovBlock('Amazon','Sellerboard',amazon)+'</div>';}
 var NAV_BOOKS=[['report','Weekly report'],['expenses','Expenses'],['inventory','Inventory'],['cash','Cash'],['payables','Payables']];
@@ -207,11 +207,9 @@ function overviewDesktop(o,p,a,b){var metrics={sales:['Sales',function(x){return
   h+=barChart({values:vals,label:m[0]+' by week',hi:function(i){return i*7+6>=a&&i*7<=b;},xl:weekLabel,tip:function(i){return fd(i*7)+': '+money(vals[i]);}})+'</section>';
   h+='<section class="card panel">'+panelHead('Sales breakdown','#/report')+blistHtml(o)+'</section></div>';
   var prods=D.skus.map(function(s,k){var x=agg(a,b,k);x.s=s;return x;}).sort(function(x,y){return y.amzProfit-x.amzProfit;}).slice(0,5);
-  h+='<div class="two even sec"><section class="card panel"><div class="panel-h"><h2>Top products</h2><a class="note tap-card" href="#/products">All</a></div><div class="tbl-wrap desk-only"><table><thead><tr><th>Product</th><th>Units</th><th>Profit</th><th>Margin</th></tr></thead><tbody>';
+  h+='<section class="card panel sec"><div class="panel-h"><h2>Top products</h2><a class="note tap-card" href="#/products">All</a></div><div class="tbl-wrap"><table><thead><tr><th>Product</th><th>Units</th><th>Profit</th><th>Margin</th></tr></thead><tbody>';
   prods.forEach(function(x){h+='<tr class="click tap-row" data-go="#/products/'+x.s.sku+'" tabindex="0"><td><span class="pn">'+esc(x.s.name)+'</span><span class="ps">'+x.s.sku+'</span></td><td>'+num(x.units)+'</td><td>'+money(x.amzProfit)+'</td><td>'+pct(x.margin)+'</td></tr>';});
   h+='</tbody></table></div></section>';
-  var open=SHIPS.filter(function(s){return !s.closedFlag;}),inb=0;open.forEach(function(s){inb+=s.units-s.recv;});var cl=claimTotals();
-  h+='<a class="card panel tap-card block-card" href="#/shipments">'+panelHead('Shipments & claims','#/shipments')+statGrid([['Open',String(open.length),''],['In transit',num(inb),'units'],['Not filed',money(cl.notfiled),''],['Pending',money(cl.pending),''],['Reimbursed',money(cl.reimbursed),'']])+'</a></div>';
   return h;}
 PAGES.overview=function(){var ab=rangeAB(),a=ab[0],b=ab[1],o=full(a,b),pab=prevAB(a,b),p=pab?full(pab[0],pab[1]):null;var pl=prevLabel();
   var c=cashAt(b),nx=D.settlements[D.settlements.length-1];
