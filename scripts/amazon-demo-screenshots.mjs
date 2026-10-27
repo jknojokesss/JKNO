@@ -14,7 +14,8 @@ const TABS = [
   ['06-inventory', '#/inventory'],
   ['07-cash', '#/cash'],
   ['08-payables', '#/payables'],
-  ['09-data-sources', '#/sources'],
+  ['09-payout', '#/payout'],
+  ['10-data-sources', '#/sources'],
 ]
 
 async function main() {

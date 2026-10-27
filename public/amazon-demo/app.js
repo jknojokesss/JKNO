@@ -89,7 +89,22 @@ var state={range:'week',ca:NDAYS-28,cb:NDAYS-1,chartMetric:'net',prodSort:{key:'
   expQ:'',expCat:'',expAcct:'',expAll:false,expSort:{key:'date',dir:-1},invSort:{key:'cover',dir:1},reportWeek:LASTW,claimFilter:'all',prodShowAll:false};
 function isMob(){return window.innerWidth<640;}
 function showMoreBtn(id,label){return '<p class="show-more-wrap"><button type="button" class="show-more" data-expand="'+id+'" aria-expanded="false">'+label+'</button></p>';}
-function mobCollapse(id,inner){if(!isMob())return inner;return showMoreBtn(id,'Show more')+'<div id="'+id+'" class="mob-expand" hidden>'+inner+'</div>';}
+function mobCollapse(id,inner){return inner;}
+function panelHead(title,href){return '<div class="panel-h"><h2>'+title+'</h2>'+(href?'<a class="note" href="'+href+'">All</a>':'')+'</div>';}
+function backBar(href,label){return '<a class="back-bar tap-card" href="'+href+'"><span class="back-ic" aria-hidden="true">←</span>'+esc(label||'Back')+'</a>';}
+function ovBoxLink(href,lbl,val,meta){return '<a class="ov-box tap-card" href="'+href+'"><p class="ov-box-lbl">'+lbl+'</p><p class="ov-box-val">'+val+'</p><div class="ov-box-meta">'+meta+'</div></a>';}
+function blistHtml(o){var parts=[['Refunds',o.refunds],['Amazon fees',o.fees],['Ad spend',o.ads],['COGS',o.cogs],['Write-offs less reimbursements',o.loss-o.reimb],['Other expenses',o.other],['True net profit',o.net]];
+  var h='<ul class="blist">';h+='<li class="tot"><span class="sw" style="background:transparent"></span><span class="nm">Amazon sales</span><span class="pc">100%</span><span class="am">'+money(o.sales)+'</span></li>';
+  parts.forEach(function(x){if(x[0]==='Other expenses')h+='<li class="sub"><span class="sw" style="background:var(--accent-mid)"></span><span class="nm">Amazon profit</span><span class="pc">'+pct(o.amzProfit/o.sales)+'</span><span class="am">'+money(o.amzProfit)+'</span></li>';
+    h+='<li'+(x[0]==='True net profit'?' class="tot"':'')+'><span class="sw" style="background:var(--accent)"></span><span class="nm">'+x[0]+'</span><span class="pc">'+pct(x[1]/o.sales)+'</span><span class="am">'+money(x[1])+'</span></li>';});
+  return h+'</ul>';}
+function openSettlement(){return D.settlements[D.settlements.length-1];}
+function settlementBreakdown(s){s=s||openSettlement();var a=idx(s.start),b=Math.min(idx(s.through||s.end),NDAYS-1),o=agg(a,b),net=s.amount,reserve=o.sales-o.refunds-o.fees-o.ads+o.reimb-net;return {settlement:s,a:a,b:b,sales:o.sales,refunds:o.refunds,fees:o.fees,ads:o.ads,reimb:o.reimb,reserve:reserve,net:net};}
+function mobRowCard(title,rows,href){var h='<a class="data-card tap-card'+(href?' has-link':'')+'"'+(href?' href="'+href+'"':'')+'><div class="data-card-t">'+esc(title)+'</div><dl class="data-card-rows">';
+  rows.forEach(function(r){h+='<div><dt>'+r[0]+'</dt><dd>'+r[1]+'</dd></div>';});return h+'</dl></a>';}
+function mobBillCards(bills){return '<div class="mob-card-list">'+bills.map(function(b){return mobRowCard(b.vendor,[['Bill',fdIso(b.billDate)],['Due',fdIso(b.dueDate)],['Amount',money(b.amount,1)]],null);}).join('')+'</div>';}
+function mobCcCards(cards,sec){return '<div class="mob-card-list">'+cards.map(function(c){var bal=liabCardBalance(c);return mobRowCard(c.name,[['Balance',money(bal,1)],['Due',fdIso(c.statementDue)],['Payment',money(c.amountDue,1)]],null);}).join('')+'<div class="mob-card-tot"><span>Total</span><strong>'+money(sec,1)+'</strong></div></div>';}
+function mobLoanCards(loans,sec){return '<div class="mob-card-list">'+loans.map(function(l){return mobRowCard(l.name,[['Balance',money(l.balance,1)],['Next',money(l.nextPayment,1)+' · '+fdIso(l.nextDate)],['Rate',pct(l.rate,1)]],null);}).join('')+'<div class="mob-card-tot"><span>Total</span><strong>'+money(sec,1)+'</strong></div></div>';}
 function rangeAB(){var e=NDAYS-1;switch(state.range){case 'week':return [e-6,e];case 'last':return [e-13,e-7];case 'mtd':return [monthStart,e];default:return [Math.min(state.ca,state.cb),Math.max(state.ca,state.cb)];}}
 function prevAB(a,b){if(state.range==='mtd'){var d=dObj(a);var pm=Date.UTC(d.getUTCFullYear(),d.getUTCMonth()-1,1);var pa=Math.round((pm-T0)/DAY);return pa>=0?[pa,pa+(b-a)]:null;}
   var len=b-a+1;return a-len>=0?[a-len,a-1]:null;}
@@ -99,13 +114,13 @@ function prevLabel(){return {week:'vs prior week',last:'vs week before',mtd:'vs 
 var $=function(s,el){return (el||document).querySelector(s);};
 function kpi(label,val,meta,hl){return '<div class="card kpi'+(hl?' hl':'')+'"><div class="lbl">'+label+'</div><div class="val">'+val+'</div><div class="meta">'+(meta||'&nbsp;')+'</div></div>';}
 function statStrip(items){return statGrid(items);}
-function statGrid(items){return '<dl class="stat-grid">'+items.map(function(it){return '<div><dt>'+it[0]+'</dt><dd>'+it[1]+(it[2]?'<small>'+it[2]+'</small>':'')+'</dd></div>';}).join('')+'</dl>';}
-function ovBox(lbl,val,meta){return '<div class="ov-box"><p class="ov-box-lbl">'+lbl+'</p><p class="ov-box-val">'+val+'</p><div class="ov-box-meta">'+meta+'</div></div>';}
+function statGrid(items){return '<dl class="stat-grid">'+items.map(function(it){var dd=it[1]+(it[2]?'<small>'+it[2]+'</small>':'');if(it[3])return '<div><dt>'+it[0]+'</dt><dd><a class="stat-dd-link tap-card" href="'+it[3]+'">'+dd+'</a></dd></div>';return '<div><dt>'+it[0]+'</dt><dd>'+dd+'</dd></div>';}).join('')+'</dl>';}
+function kvRows(rows){var h='<div class="kv-rows">';rows.forEach(function(r){if(r[2])h+='<a class="kv-row tap-card" href="'+r[2]+'"><span>'+r[0]+'</span><strong>'+r[1]+'</strong></a>';else h+='<div class="kv-row static"><span>'+r[0]+'</span><strong>'+r[1]+'</strong></div>';});return h+'</div>';}
 function ovBoxes(o,p,pl,c,b,nx){var netM='<span>'+pct(o.netMargin)+' margin</span>'+(p?'<span>'+chg(o.net,p.net)+' '+pl+'</span>':'');
   var salM='<span>'+num(o.units)+' units sold</span>'+(p?'<span>'+chg(o.sales,p.sales)+' '+pl+'</span>':'');
   var cashM='<span>As of '+fd(b)+'</span>';
   var payM='<span>Lands '+fdIso(nx.deposit,{wd:1})+'</span>';
-  return '<div class="ov-boxes">'+ovBox('True net profit',money(o.net),netM)+ovBox('Amazon sales',money(o.sales),salM)+ovBox('Cash on hand',money(c.cash),cashM)+ovBox('Next payout',money(nx.amount),payM)+'</div>';}
+  return '<div class="ov-boxes">'+ovBoxLink('#/report','True net profit',money(o.net),netM)+ovBoxLink('#/products','Amazon sales',money(o.sales),salM)+ovBoxLink('#/cash','Cash on hand',money(c.cash),cashM)+ovBoxLink('#/payout','Next payout',money(nx.amount),payM)+'</div>';}
 var MOB_MAIN=[['overview','Overview'],['report','Weekly'],['products','Products'],['cash','Cash']];
 var MOB_MORE=[['shipments','Shipments'],['expenses','Expenses'],['inventory','Inventory'],['payables','Payables'],['sources','Sources']];
 var MORE_PAGES={shipments:1,expenses:1,inventory:1,payables:1,sources:1};
@@ -149,35 +164,45 @@ function weekLabel(w){return fd(w*7);}
 
 /* ---------- pages ---------- */
 var PAGES={};
-function overviewDetail(o,p,a,b){var metrics={sales:['Amazon sales',function(x){return x.sales;}],amz:['Amazon profit',function(x){return x.amzProfit;}],other:['Other expenses',function(x){return x.other;}],net:['True net profit',function(x){return x.net;}]};
-  var weeks=[];for(var w=0;w<NWEEKS;w++)weeks.push(full(w*7,w*7+6));
-  var m=metrics[state.chartMetric],vals=weeks.map(m[1]);
+function overviewMob(o,a,b){var weeks=[];for(var w=0;w<NWEEKS;w++)weeks.push(full(w*7,w*7+6));var vals=weeks.map(function(x){return x.net;});
+  var h='<section class="card panel mob-sec">'+panelHead('Weekly trend','#/report')+barChart({values:vals,h:165,label:'True net by week',hi:function(i){return i*7+6>=a&&i*7<=b;},xl:weekLabel,tip:function(i){return fd(i*7)+': '+money(vals[i]);}})+'</section>';
+  h+='<section class="card panel mob-sec">'+panelHead('Sales breakdown','#/report')+blistHtml(o)+'</section>';
+  var open=SHIPS.filter(function(s){return !s.closedFlag;}),inb=0;open.forEach(function(s){inb+=s.units-s.recv;});var cl=claimTotals();
+  h+='<a class="card panel mob-sec tap-card" href="#/shipments">'+panelHead('Shipments & claims','#/shipments')+statGrid([['Open',String(open.length),''],['In transit',num(inb),'units'],['Not filed',money(cl.notfiled,1),''],['Pending',money(cl.pending,1),'']])+'</a>';
+  var prods=D.skus.map(function(s,k){var x=agg(a,b,k);x.s=s;return x;}).sort(function(x,y){return y.amzProfit-x.amzProfit;}).slice(0,3);
+  h+='<section class="card panel mob-sec"><div class="panel-h"><h2>Top products</h2><a class="note" href="#/products">All</a></div><div class="prod-cards mob-inline-cards">';
+  prods.forEach(function(x){h+='<a class="prod-card" href="#/products/'+x.s.sku+'"><div class="prod-card-top"><span class="prod-card-profit">'+money(x.amzProfit)+'</span><span class="prod-card-margin">'+pct(x.margin)+'</span></div><div class="prod-card-name">'+esc(x.s.name)+'</div><div class="prod-card-sku">'+x.s.sku+'</div></a>';});
+  h+='</div></section>';
+  var sec=liabSections(),due=liabDueIn30(),cc='';
+  LIAB.creditCards.forEach(function(c){cc+='<div class="owe-row"><span>'+esc(c.name)+'</span><strong>'+money(liabCardBalance(c),1)+'</strong></div>';});
+  h+='<a class="card panel mob-sec tap-card" href="#/payables">'+panelHead('What you owe','#/payables')+statGrid([['Total liabilities',money(sec.total,1),''],['Due in 30 days',money(due.total,1),'']])+'<div class="owe-rows">'+cc+'</div></a>';
+  return h;}
+function overviewDesktop(o,p,a,b){var metrics={sales:['Amazon sales',function(x){return x.sales;}],amz:['Amazon profit',function(x){return x.amzProfit;}],other:['Other expenses',function(x){return x.other;}],net:['True net profit',function(x){return x.net;}]};
+  var weeks=[];for(var w=0;w<NWEEKS;w++)weeks.push(full(w*7,w*7+6));var m=metrics[state.chartMetric],vals=weeks.map(m[1]);
   var h='<div class="two sec"><section class="card panel"><div class="panel-h"><h2>Weekly trend</h2><div class="chips" role="group" aria-label="Chart metric">'+Object.keys(metrics).map(function(k){return '<button class="chip" type="button" data-metric="'+k+'" aria-pressed="'+(state.chartMetric===k)+'">'+metrics[k][0]+'</button>';}).join('')+'</div></div>';
-  h+=barChart({values:vals,label:m[0]+' by week',hi:function(i){return i*7+6>=a&&i*7<=b;},xl:weekLabel,tip:function(i){return fd(i*7)+': '+money(vals[i]);}});
-  h+='</section>';
-  var parts=[['Refunds',o.refunds,'#C4CED8'],['Amazon fees',o.fees,'#6E8498'],['Ad spend',o.ads,'#94A8BA'],['COGS',o.cogs,'#4A6278'],['Write-offs less reimbursements',o.loss-o.reimb,'#B8C4D0'],['Other expenses',o.other,'#7A8B9C'],['True net profit',o.net,'#243B52']];
-  h+='<section class="card panel"><div class="panel-h"><h2>Sales breakdown</h2></div><div class="stack" aria-hidden="true">'+parts.map(function(x){return x[1]>0?'<span style="width:'+(x[1]/o.sales*100).toFixed(2)+'%;background:'+x[2]+'"></span>':'';}).join('')+'</div><ul class="blist">';
-  h+='<li class="tot"><span class="sw" style="background:transparent"></span><span class="nm">Amazon sales</span><span class="pc">100%</span><span class="am">'+money(o.sales)+'</span></li>';
-  parts.forEach(function(x){if(x[0]==='Other expenses')h+='<li class="sub"><span class="sw" style="background:#5A7388"></span><span class="nm">Amazon profit</span><span class="pc">'+pct(o.amzProfit/o.sales)+'</span><span class="am">'+money(o.amzProfit)+'</span></li>';
-    h+='<li'+(x[0]==='True net profit'?' class="tot"':'')+'><span class="sw" style="background:'+x[2]+'"></span><span class="nm">'+x[0]+'</span><span class="pc">'+pct(x[1]/o.sales)+'</span><span class="am">'+money(x[1])+'</span></li>';});
-  h+='</ul></section></div>';
+  h+=barChart({values:vals,label:m[0]+' by week',hi:function(i){return i*7+6>=a&&i*7<=b;},xl:weekLabel,tip:function(i){return fd(i*7)+': '+money(vals[i]);}})+'</section>';
+  h+='<section class="card panel">'+panelHead('Sales breakdown','#/report')+blistHtml(o)+'</section></div>';
   var prods=D.skus.map(function(s,k){var x=agg(a,b,k);x.s=s;return x;}).sort(function(x,y){return y.amzProfit-x.amzProfit;}).slice(0,5);
-  h+='<div class="two even sec"><section class="card panel"><div class="panel-h"><h2>Top products</h2><a class="note" href="#/products">All</a></div><div class="tbl-wrap"><table><thead><tr><th>Product</th><th>Units</th><th>Profit</th><th>Margin</th></tr></thead><tbody>';
-  prods.forEach(function(x){h+='<tr class="click" data-go="#/products/'+x.s.sku+'" tabindex="0"><td><span class="pn">'+esc(x.s.name)+'</span><span class="ps">'+x.s.sku+'</span></td><td>'+num(x.units)+'</td><td>'+money(x.amzProfit)+'</td><td>'+pct(x.margin)+'</td></tr>';});
+  h+='<div class="two even sec"><section class="card panel"><div class="panel-h"><h2>Top products</h2><a class="note" href="#/products">All</a></div><div class="tbl-wrap desk-only"><table><thead><tr><th>Product</th><th>Units</th><th>Profit</th><th>Margin</th></tr></thead><tbody>';
+  prods.forEach(function(x){h+='<tr class="click tap-row" data-go="#/products/'+x.s.sku+'" tabindex="0"><td><span class="pn">'+esc(x.s.name)+'</span><span class="ps">'+x.s.sku+'</span></td><td>'+num(x.units)+'</td><td>'+money(x.amzProfit)+'</td><td>'+pct(x.margin)+'</td></tr>';});
   h+='</tbody></table></div></section>';
-  var open=SHIPS.filter(function(s){return !s.closedFlag;});var inb=0;open.forEach(function(s){inb+=s.units-s.recv;});var cl=claimTotals();
-  var ir=invRows(),re=ir.filter(function(r){return r.status.indexOf('Reorder')===0;});
-  h+='<section class="card panel"><div class="panel-h"><h2>Shipments & stock</h2><a class="note" href="#/shipments">All</a></div><div class="kv">';
-  h+='<div>Open shipments</div><div>'+open.length+'</div><div>In transit units</div><div>'+num(inb)+'</div><div>Pending claims</div><div>'+money(cl.pending,1)+'</div><div>Not filed</div><div>'+money(cl.notfiled,1)+'</div><div>Reimbursed</div><div>'+money(cl.reimbursed,1)+'</div>';
-  h+='<div>Inventory value</div><div>'+money(invValue(NDAYS-1))+'</div><div>SKUs to reorder</div><div>'+(re.length?re.map(function(r){return r.sku;}).join(', '):'—')+'</div></div></section></div>';
+  var open=SHIPS.filter(function(s){return !s.closedFlag;}),inb=0;open.forEach(function(s){inb+=s.units-s.recv;});var cl=claimTotals();
+  h+='<a class="card panel tap-card" href="#/shipments">'+panelHead('Shipments & claims','#/shipments')+statGrid([['Open',String(open.length),''],['In transit',num(inb),'units'],['Not filed',money(cl.notfiled,1),''],['Pending',money(cl.pending,1),''],['Reimbursed',money(cl.reimbursed,1),'']])+'</a></div>';
+  var sec=liabSections(),due=liabDueIn30();
+  h+='<a class="card panel sec tap-card" href="#/payables">'+panelHead('What you owe','#/payables')+statGrid([['Total liabilities',money(sec.total,1),''],['Due in 30 days',money(due.total,1),'']])+'</a>';
   return h;}
 PAGES.overview=function(){var ab=rangeAB(),a=ab[0],b=ab[1],o=full(a,b),pab=prevAB(a,b),p=pab?full(pab[0],pab[1]):null;var pl=prevLabel();
   var c=cashAt(b),nx=D.settlements[D.settlements.length-1];
   var h='<section class="sum-hero">'+ovBoxes(o,p,pl,c,b,nx)+'</section>';
   if(!o.sales)return h+'<p class="empty">No sales</p>';
-  var tail=overviewDetail(o,p,a,b);
-  if(isMob())h+=showMoreBtn('ovExpand','Show more')+'<div id="ovExpand" class="mob-expand" hidden>'+tail+'</div>';
-  else h+=tail;
+  h+=isMob()?overviewMob(o,a,b):overviewDesktop(o,p,a,b);
+  return h;};
+PAGES.payout=function(){var br=settlementBreakdown(),s=br.settlement;
+  var h=backBar('#/overview','Overview')+statGrid([['Next payout',money(br.net,1),''],['Deposit',fdIso(s.deposit,{wd:1}),''],['Settlement',fdIso(s.start)+' – '+fdIso(s.through||s.end),'']]);
+  h+='<section class="card sec"><div class="panel panel-h" style="margin:0"><h2>Payout breakdown</h2><span class="note">Open settlement</span></div><ul class="payout-list">';
+  var lines=[['Sales',money(br.sales,1)],['Refunds','-'+money(br.refunds,1).replace('$','')],['Amazon fees','-'+money(br.fees,1).replace('$','')],['Ad spend','-'+money(br.ads,1).replace('$','')],['Reimbursements',money(br.reimb,1)],['Reserve / hold',money(br.reserve,1)],['Net deposit',money(br.net,1)]];
+  lines.forEach(function(l,i){h+='<li class="'+(i===lines.length-1?'tot':'')+'"><span>'+l[0]+'</span><strong>'+l[1]+'</strong></li>';});
+  h+='</ul></section>';
   return h;};
 
 /* weekly report */
@@ -242,7 +267,7 @@ PAGES.products=function(){
   return '<section class="card"><div class="panel panel-h" style="margin:0"><div class="tools">'+searchBox('prodQ',state.prodQ,'Search SKU')+'</div></div><div class="prod-cards" id="prodCards">'+prodCards()+'</div><div class="tbl-wrap sticky1 prod-table-wrap"><table id="prodTbl">'+thead(PCOLS,state.prodSort,'prod')+prodBody()+'</table></div></section>';};
 function statusTag(s){if(s.indexOf('Reorder')===0)return '<span class="tag signal">'+s+'</span>';return '<span class="tag neu">'+s+'</span>';}
 function productDrawer(sku){var k=skuIx[sku];if(k==null)return null;var s=D.skus[k],ab=rangeAB(),x=agg(ab[0],ab[1],k);var inv=invRows()[k];
-  var h='<div class="dr-h"><div><h2 id="drawerTitle">'+esc(s.name)+'</h2><p>'+s.sku+' &middot; ASIN '+s.asin+'</p></div><button class="x" type="button" data-close aria-label="Close">&times;</button></div>';
+  var h=backBar('#/products','Products')+'<div class="dr-h"><div><h2 id="drawerTitle">'+esc(s.name)+'</h2><p>'+s.sku+' &middot; ASIN '+s.asin+'</p></div><button class="x" type="button" data-close aria-label="Close">&times;</button></div>';
   h+='<div class="mini"><div><span>Units</span><strong>'+num(x.units)+'</strong></div><div><span>Sales</span><strong>'+money(x.sales)+'</strong></div><div><span>Profit</span><strong>'+money(x.amzProfit)+'</strong></div><div><span>Margin</span><strong>'+pct(x.margin)+'</strong></div><div><span>ACOS</span><strong>'+pct(x.acos)+'</strong></div><div><span>TACOS</span><strong>'+pct(x.tacos)+'</strong></div></div>';
   var u=x.units||1;
   h+='<div class="dr-sec"><h3>Per unit, selected dates</h3><div class="kv"><div>Average sale price</div><div>'+money(x.sales/u,1)+'</div><div>Refunds</div><div>-'+money(x.refunds/u,1)+'</div><div>Referral fee</div><div>-'+money(x.referral/u,1)+'</div><div>FBA fulfillment fee</div><div>-'+money(x.fba/u,1)+'</div><div>Placement and storage</div><div>-'+money((x.placement+x.storage)/u,1)+'</div><div>Advertising</div><div>-'+money(x.ads/u,1)+'</div><div>Product cost (COGS)</div><div>-'+money(x.cogs/u,1)+'</div><div>Write-offs less reimbursements</div><div>'+money((x.reimb-x.loss)/u,1)+'</div><div><strong>Profit per unit</strong></div><div>'+money(x.amzProfit/u,1)+'</div></div></div>';
@@ -309,7 +334,7 @@ PAGES.shipments=function(){var open=SHIPS.filter(function(s){return !s.closedFla
   if(isMob())return summary+shipMobLead()+mobCollapse('shipExpand',shipDetail);
   return summary+shipDetail;};
 function shipmentDrawer(id){var s=SHIPS.filter(function(z){return z.id===id;})[0];if(!s)return null;
-  var h='<div class="dr-h"><div><h2 id="drawerTitle">'+s.id+'</h2><p>'+esc(s.name)+' &middot; to '+s.fc+'</p></div><button class="x" type="button" data-close aria-label="Close">&times;</button></div>';
+  var h=backBar('#/shipments','Shipments')+'<div class="dr-h"><div><h2 id="drawerTitle">'+s.id+'</h2><p>'+esc(s.name)+' &middot; to '+s.fc+'</p></div><button class="x" type="button" data-close aria-label="Close">&times;</button></div>';
   h+='<div class="mini"><div><span>Status</span><strong>'+s.status+'</strong></div><div><span>Shipped</span><strong>'+num(s.units)+'</strong></div><div><span>Received</span><strong>'+num(s.recv)+'</strong></div><div><span>% received</span><strong>'+pct(s.recv/s.units,1)+'</strong></div><div><span>Difference</span><strong class="'+(s.diff<0&&s.closedFlag?'neg':'')+'">'+(s.diff>0?'+':'')+num(s.diff)+'</strong></div><div><span>Cartons</span><strong>'+num(s.lines.reduce(function(t,l){return t+l.cartons;},0))+'</strong></div></div>';
   h+='<div class="kv"><div>Ship date</div><div>'+fdIso(s.shipped,{wd:1,y:1})+'</div><div>'+(s.delivered?'Delivered to FC':'Expected at FC')+'</div><div>'+fdIso(s.delivered||s.eta,{wd:1,y:1})+'</div><div>Closed by Amazon</div><div>'+(s.closed?fdIso(s.closed,{wd:1,y:1}):'Not yet')+'</div><div>Carrier</div><div>'+s.carrier+'</div><div>Inbound placement fee</div><div>'+(s.placement?money(s.placement,1)+' per unit':'None (Amazon-optimized split)')+'</div></div>';
   h+='<div class="dr-sec"><h3>Shipped vs received by SKU</h3><div class="tbl-wrap"><table><thead><tr><th>SKU</th><th>Shipped</th><th>Received</th><th>Difference</th><th class="l hide-m">Action</th></tr></thead><tbody>';
@@ -372,7 +397,9 @@ PAGES.inventory=function(){var rows=invRows(),last=NDAYS-1;var av=0,ib=0,val=0,o
   var h=statGrid([['Inventory value',money(val,1),tieNote],['At FBA',num(av),'units'],['Inbound',num(ib),'units'],['Lost / damaged',money(snap.loss,1),'90 days'],['Reimbursements',money(snap.reimb,1),'90 days'],['To reorder',String(re.length),reSkus]]);
   var invLead='';
   if(isMob()&&re.length){invLead='<ul class="mob-mini-list">'+re.slice(0,4).map(function(r){return '<li><span>'+r.sku+'</span><strong>'+r.status+'</strong></li>';}).join('')+'</ul>';}
-  var invDetail='<section class="card sec"><div class="panel panel-h" style="margin:0"><span class="note">As of '+fd(last)+'</span></div><div class="tbl-wrap sticky1"><table id="invTbl">'+thead(ICOLS,state.invSort,'inv')+'<tbody>'+sortRows(rows,state.invSort,ICOLS).map(function(r){return '<tr class="click" data-go="#/products/'+r.sku+'" tabindex="0">'+ICOLS.map(function(c){return cell(c,r);}).join('')+'</tr>';}).join('')+'</tbody><tfoot><tr><td>Total</td><td>'+num(av)+'</td><td>'+num(ib)+'</td><td>'+(oo?num(oo):'<span class="mut">-</span>')+'</td><td>'+vel.toFixed(1)+'</td><td></td><td></td><td></td><td></td><td>'+money(val,1)+'</td></tr></tfoot></table></div></section>';
+  var invSorted=sortRows(rows,state.invSort,ICOLS);
+  var invMobCards=isMob()?'<div class="mob-only mob-card-list">'+invSorted.map(function(r){return mobRowCard(r.name,[['Available',num(r.av)],['Cover',Math.round(r.cover)+' days'],['Value',money(r.value,1)]],'#/products/'+r.sku);}).join('')+'</div>':'';
+  var invDetail=invMobCards+'<section class="card sec"><div class="panel panel-h" style="margin:0"><span class="note">As of '+fd(last)+'</span></div><div class="tbl-wrap sticky1 inv-table-wrap'+(isMob()?' desk-only':'')+'"><table id="invTbl">'+thead(ICOLS,state.invSort,'inv')+'<tbody>'+invSorted.map(function(r){return '<tr class="click tap-row" data-go="#/products/'+r.sku+'" tabindex="0">'+ICOLS.map(function(c){return cell(c,r);}).join('')+'</tr>';}).join('')+'</tbody><tfoot><tr><td>Total</td><td>'+num(av)+'</td><td>'+num(ib)+'</td><td>'+(oo?num(oo):'<span class="mut">-</span>')+'</td><td>'+vel.toFixed(1)+'</td><td></td><td></td><td></td><td></td><td>'+money(val,1)+'</td></tr></tfoot></table></div></section>';
   invDetail+='<section class="card sec"><div class="panel panel-h" style="margin:0"><h2>QBO tie-out</h2></div><div class="tbl-wrap sticky1"><table><thead><tr><th scope="col">Week</th><th scope="col">Purchases</th><th scope="col">COGS</th><th scope="col">Write-offs</th><th scope="col">QuickBooks</th><th scope="col">Sellerboard</th><th scope="col">Diff</th></tr></thead><tbody>';
   tie.slice().reverse().forEach(function(r){invDetail+='<tr><td>'+fd(r.w*7+6)+'</td><td>'+(r.purch?'+'+money(r.purch,1):'<span class="mut">-</span>')+'</td><td>-'+money(r.cogs,1)+'</td><td>'+(r.loss?(r.loss>0?'-':'+')+money(Math.abs(r.loss),1):'<span class="mut">-</span>')+'</td><td>'+money(r.qbo,1)+'</td><td>'+money(r.sb,1)+'</td><td class="'+(r.diff===0?'pos':'neg')+'">'+money(r.diff,1)+'</td></tr>';});
   invDetail+='<tr><td class="mut">Opening, '+fd(-1)+'</td><td></td><td></td><td></td><td>'+money(D.openingInventory,1)+'</td><td></td><td></td></tr>';
@@ -383,30 +410,36 @@ PAGES.inventory=function(){var rows=invRows(),last=NDAYS-1;var av=0,ib=0,val=0,o
 
 /* payables */
 function apAgingBar(lbl,amt,tot){var w=tot?Math.max(2,amt/tot*100):0;return '<div class="aging-row"><span class="aging-lbl">'+lbl+'</span><span class="aging-bar"><span style="width:'+w.toFixed(1)+'%"></span></span><span class="aging-amt">'+money(amt,1)+'</span></div>';}
-PAGES.payables=function(){if(!LIAB)return '<p class="empty">No data</p>';var sec=liabSections(),due=liabDueIn30(),apm=liabApMetrics(),ap=LIAB.accountsPayable;
+PAGES.payables=function(){if(!LIAB)return '<p class="empty">No data</p>';var sec=liabSections(),due=liabDueIn30(),apm=liabApMetrics(),ap=LIAB.accountsPayable,mob=isMob();
   var h=statGrid([['Total liabilities',money(sec.total,1),'QuickBooks'],['Due in 30 days',money(due.total,1),'']]);
-  var apBody=ap.bills.slice().sort(function(a,b){return idx(a.dueDate)-idx(b.dueDate);}).map(function(b){return '<tr><td class="l">'+esc(b.vendor)+'</td><td>'+fdIso(b.billDate)+'</td><td>'+fdIso(b.dueDate)+'</td><td>'+money(b.amount,1)+'</td></tr>';}).join('');
+  var billsSorted=ap.bills.slice().sort(function(a,b){return idx(a.dueDate)-idx(b.dueDate);});
+  var apBody=billsSorted.map(function(b){return '<tr><td class="l">'+esc(b.vendor)+'</td><td>'+fdIso(b.billDate)+'</td><td>'+fdIso(b.dueDate)+'</td><td>'+money(b.amount,1)+'</td></tr>';}).join('');
   h+='<section class="card sec"><div class="panel panel-h" style="margin:0"><h2>Accounts payable</h2><span class="note">'+fdIso(LIAB.asOf)+'</span></div>';
   h+=statGrid([['Total payable',money(sec.ap,1),''],['Due this week',money(apm.dueWeek,1),''],['Overdue',money(apm.overdue,1),'']]);
   h+='<div class="aging">'+apAgingBar('Current',ap.aging.current,sec.ap)+apAgingBar('1-30',ap.aging.d1_30,sec.ap)+apAgingBar('31-60',ap.aging.d31_60,sec.ap)+apAgingBar('60+',ap.aging.d60plus,sec.ap)+'</div>';
-  h+='<div class="tbl-wrap sticky1"><table><thead><tr><th class="l" scope="col">Vendor</th><th scope="col">Bill date</th><th scope="col">Due date</th><th scope="col">Amount</th></tr></thead><tbody>'+apBody+'</tbody><tfoot><tr><td colspan="3">Total</td><td>'+money(sec.ap,1)+'</td></tr></tfoot></table></div></section>';
-  h+='<section class="card sec"><div class="panel panel-h" style="margin:0"><h2>Credit cards</h2></div><div class="tbl-wrap sticky1"><table><thead><tr><th class="l" scope="col">Card</th><th scope="col">Balance</th><th scope="col">Limit</th><th scope="col">Statement due</th><th scope="col">Amount due</th></tr></thead><tbody>';
+  if(mob)h+='<div class="mob-only">'+mobBillCards(billsSorted)+'<div class="mob-card-tot"><span>Total payable</span><strong>'+money(sec.ap,1)+'</strong></div></div>';
+  h+='<div class="tbl-wrap sticky1 liab-table-wrap'+(mob?' desk-only':'')+'"><table><thead><tr><th class="l" scope="col">Vendor</th><th scope="col">Bill date</th><th scope="col">Due date</th><th scope="col">Amount</th></tr></thead><tbody>'+apBody+'</tbody><tfoot><tr><td colspan="3">Total</td><td>'+money(sec.ap,1)+'</td></tr></tfoot></table></div></section>';
+  h+='<section class="card sec"><div class="panel panel-h" style="margin:0"><h2>Credit cards</h2></div>';
+  if(mob)h+=mobCcCards(LIAB.creditCards,sec.cc);
+  h+='<div class="tbl-wrap sticky1 liab-table-wrap'+(mob?' desk-only':'')+'"><table><thead><tr><th class="l" scope="col">Card</th><th scope="col">Balance</th><th scope="col">Limit</th><th scope="col">Statement due</th><th scope="col">Amount due</th></tr></thead><tbody>';
   LIAB.creditCards.forEach(function(c){var bal=liabCardBalance(c);h+='<tr><td class="l">'+esc(c.name)+'</td><td>'+money(bal,1)+'</td><td>'+money(c.limit,1)+'</td><td>'+fdIso(c.statementDue)+'</td><td>'+money(c.amountDue,1)+'</td></tr>';});
   h+='</tbody><tfoot><tr><td>Total</td><td>'+money(sec.cc,1)+'</td><td></td><td></td><td></td></tr></tfoot></table></div></section>';
-  h+='<section class="card sec"><div class="panel panel-h" style="margin:0"><h2>Loans and lines of credit</h2></div><div class="tbl-wrap sticky1"><table><thead><tr><th class="l" scope="col">Lender</th><th scope="col">Balance</th><th scope="col">Next payment</th><th scope="col">Rate</th></tr></thead><tbody>';
+  h+='<section class="card sec"><div class="panel panel-h" style="margin:0"><h2>Loans and lines of credit</h2></div>';
+  if(mob)h+=mobLoanCards(LIAB.loans,sec.loans);
+  h+='<div class="tbl-wrap sticky1 liab-table-wrap'+(mob?' desk-only':'')+'"><table><thead><tr><th class="l" scope="col">Lender</th><th scope="col">Balance</th><th scope="col">Next payment</th><th scope="col">Rate</th></tr></thead><tbody>';
   LIAB.loans.forEach(function(l){h+='<tr><td class="l">'+esc(l.name)+'</td><td>'+money(l.balance,1)+'</td><td>'+money(l.nextPayment,1)+' · '+fdIso(l.nextDate)+'</td><td>'+pct(l.rate,1)+'</td></tr>';});
   h+='</tbody><tfoot><tr><td>Total</td><td>'+money(sec.loans,1)+'</td><td></td><td></td></tr></tfoot></table></div></section>';
-  h+='<section class="card sec"><div class="panel panel-h" style="margin:0"><h2>Sales tax payable</h2></div><div class="kv"><div>Balance</div><div>'+money(LIAB.salesTax.balance,1)+'</div><div>Due date</div><div>'+fdIso(LIAB.salesTax.dueDate)+'</div></div></section>';
-  h+='<section class="card sec"><div class="panel panel-h" style="margin:0"><h2>Payroll liabilities</h2></div><div class="kv"><div>Accrued</div><div>'+money(LIAB.payroll.balance,1)+'</div></div></section>';
+  h+='<section class="card sec"><div class="panel panel-h" style="margin:0"><h2>Sales tax payable</h2></div>'+kvRows([['Balance',money(LIAB.salesTax.balance,1),null],['Due date',fdIso(LIAB.salesTax.dueDate),null]])+'</section>';
+  h+='<section class="card sec"><div class="panel panel-h" style="margin:0"><h2>Payroll liabilities</h2></div>'+kvRows([['Accrued',money(LIAB.payroll.balance,1),null]])+'</section>';
   return h;};
 
 /* cash */
-PAGES.cash=function(){var last=NDAYS-1,c=cashAt(last),nx=D.settlements[D.settlements.length-1],bs=balanceSheetSnap();
-  var h=statGrid([['Cash on hand',money(c.cash,1),'As of '+fd(last)],['Checking',money(c.checking,1),'Business checking'],['Savings',money(c.savings,1),'Reserve'],['Amex',money(c.amex,1),'Card balance'],['Next payout',money(nx.amount,1),'Lands '+fdIso(nx.deposit,{wd:1})]]);
+PAGES.cash=function(){var last=NDAYS-1,c=cashAt(last),nx=D.settlements[D.settlements.length-1],bs=balanceSheetSnap(),mob=isMob();
+  var h=statGrid([['Cash on hand',money(c.cash,1),'As of '+fd(last),'#/cash'],['Checking',money(c.checking,1),'Business checking',null],['Savings',money(c.savings,1),'Reserve',null],['Amex',money(c.amex,1),'Card balance','#/payables'],['Next payout',money(nx.amount,1),'Lands '+fdIso(nx.deposit,{wd:1}),'#/payout']]);
   h+='<section class="card sec"><div class="panel panel-h" style="margin:0"><h2>Balance sheet</h2><span class="note">'+fd(last)+'</span></div><div class="bs-grid">';
-  h+='<div class="bs-col"><h3 class="bs-h">Assets</h3><div class="kv"><div>Cash</div><div>'+money(bs.assets.cash,1)+'</div><div>Inventory</div><div>'+money(bs.assets.inventory,1)+'</div><div>Amazon reserve</div><div>'+money(bs.assets.reserve,1)+'</div><div>Prepaid</div><div>'+money(bs.assets.prepaid,1)+'</div><div><strong>Total assets</strong></div><div><strong>'+money(bs.assets.total,1)+'</strong></div></div></div>';
-  h+='<div class="bs-col"><h3 class="bs-h">Liabilities</h3><div class="kv"><div>Accounts payable</div><div>'+money(bs.liabilitySections.ap,1)+'</div><div>Credit cards</div><div>'+money(bs.liabilitySections.cc,1)+'</div><div>Loans</div><div>'+money(bs.liabilitySections.loans,1)+'</div><div>Sales tax</div><div>'+money(bs.liabilitySections.tax,1)+'</div><div>Payroll</div><div>'+money(bs.liabilitySections.payroll,1)+'</div><div><strong>Total liabilities</strong></div><div><strong>'+money(bs.liabilities,1)+'</strong></div></div></div>';
-  h+='<div class="bs-col"><h3 class="bs-h">Equity</h3><div class="kv"><div>Owner\'s equity</div><div>'+money(bs.equity,1)+'</div></div></div></div></section>';
+  h+='<div class="bs-col"><h3 class="bs-h">Assets</h3>'+kvRows([['Cash',money(bs.assets.cash,1),'#/cash'],['Inventory',money(bs.assets.inventory,1),'#/inventory'],['Amazon reserve',money(bs.assets.reserve,1),'#/payout'],['Prepaid',money(bs.assets.prepaid,1),null],['Total assets',money(bs.assets.total,1),null]])+'</div>';
+  h+='<div class="bs-col"><h3 class="bs-h">Liabilities</h3>'+kvRows([['Accounts payable',money(bs.liabilitySections.ap,1),'#/payables'],['Credit cards',money(bs.liabilitySections.cc,1),'#/payables'],['Loans',money(bs.liabilitySections.loans,1),'#/payables'],['Sales tax',money(bs.liabilitySections.tax,1),'#/payables'],['Payroll',money(bs.liabilitySections.payroll,1),'#/payables'],['Total liabilities',money(bs.liabilities,1),'#/payables']])+'</div>';
+  h+='<div class="bs-col"><h3 class="bs-h">Equity</h3>'+kvRows([['Owner\'s equity',money(bs.equity,1),null]])+'</div></div></section>';
   var bals=[],rows=[];for(var w=0;w<NWEEKS;w++){var a=w*7,b=a+6,f=cashFlow(a,b);f.w=w;f.end=cashAt(b).cash;rows.push(f);bals.push(f.end);}
   var cashDetail='<div class="two sec"><section class="card panel"><div class="panel-h"><h2>Cash by week</h2></div>'+lineChart({values:bals,label:'Cash on hand by week',xl:function(i){return fd(i*7+6);},tip:function(i){return fd(i*7+6)+': '+money(bals[i]);}})+'</section>';
   cashDetail+='<section class="card panel"><div class="panel-h"><h2>Payouts</h2></div><div class="tbl-wrap"><table><thead><tr><th scope="col">Settlement</th><th scope="col">Deposit</th><th scope="col">Amount</th></tr></thead><tbody>'+D.settlements.slice().reverse().map(function(s){return '<tr><td>'+fdIso(s.start)+' - '+fdIso(s.end)+(s.open?' <span class="tag signal">Open</span>':'')+'</td><td>'+fdIso(s.deposit)+'</td><td>'+money(s.amount,1)+'</td></tr>';}).join('')+'</tbody></table></div></section></div>';
@@ -415,7 +448,10 @@ PAGES.cash=function(){var last=NDAYS-1,c=cashAt(last),nx=D.settlements[D.settlem
   rows.slice().reverse().forEach(function(f){Object.keys(tot).forEach(function(k){tot[k]+=f[k];});cashDetail+='<tr><td>'+fd(f.w*7)+'</td><td class="pos">'+z(f.payouts)+'</td><td>'+z(f.opex)+'</td><td>'+z(f.card)+'</td><td>'+z(f.inventory)+'</td><td>'+z(f.owner)+'</td><td class="'+(f.net>=0?'pos':'neg')+'">'+(f.net>0?'+':'')+money(f.net)+'</td><td><strong>'+money(f.end)+'</strong></td></tr>';});
   cashDetail+='</tbody><tfoot><tr><td>'+NWEEKS+' weeks</td><td>'+money(tot.payouts)+'</td><td>'+money(tot.opex)+'</td><td>'+money(tot.card)+'</td><td>'+money(tot.inventory)+'</td><td>'+money(tot.owner)+'</td><td>'+(tot.net>0?'+':'')+money(tot.net)+'</td><td>'+money(c.cash)+'</td></tr></tfoot></table></div></section>';
   var act=BANK.map(function(b){return {i:b.i,date:b.date,desc:b.desc,acct:b.acct,amt:b.amt,type:b.type};}).concat(EXP.filter(function(e){return e.acct===D.accounts.checking;}).map(function(e){return {i:e.i,date:e.date,desc:e.vendor+', '+e.memo,acct:e.acct,amt:-e.amt,type:e.cat};})).sort(function(x,y){return y.i-x.i;}).slice(0,20);
-  cashDetail+='<section class="card sec"><div class="panel panel-h" style="margin:0"><h2>Recent activity</h2></div><div class="tbl-wrap sticky1"><table><thead><tr><th scope="col">Date</th><th class="l" scope="col">Description</th><th class="l hide-m" scope="col">Type</th><th scope="col">Amount</th></tr></thead><tbody>'+act.map(function(x){return '<tr><td>'+fdIso(x.date)+'</td><td class="l"><span class="pn" style="min-width:170px">'+esc(x.desc)+'</span><span class="ps">'+esc(x.acct)+'</span></td><td class="l hide-m">'+esc(x.type)+'</td><td class="'+(x.amt>0?'pos':'')+'">'+(x.amt>0?'+':'')+money(x.amt,1)+'</td></tr>';}).join('')+'</tbody></table></div></section>';
+  cashDetail+='<section class="card sec"><div class="panel panel-h" style="margin:0"><h2>Recent activity</h2></div>';
+  if(mob)cashDetail+='<div class="mob-card-list">'+act.slice(0,8).map(function(x){return mobRowCard(x.desc,[['Date',fdIso(x.date)],['Type',esc(x.type)],['Amount',(x.amt>0?'+':'')+money(x.amt,1)]],null);}).join('')+'</div>';
+  cashDetail+='<div class="tbl-wrap sticky1 cash-table-wrap'+(mob?' desk-only':'')+'"><table><thead><tr><th scope="col">Date</th><th class="l" scope="col">Description</th><th class="l hide-m" scope="col">Type</th><th scope="col">Amount</th></tr></thead><tbody>'+act.map(function(x){return '<tr><td>'+fdIso(x.date)+'</td><td class="l"><span class="pn" style="min-width:170px">'+esc(x.desc)+'</span><span class="ps">'+esc(x.acct)+'</span></td><td class="l hide-m">'+esc(x.type)+'</td><td class="'+(x.amt>0?'pos':'')+'">'+(x.amt>0?'+':'')+money(x.amt,1)+'</td></tr>';}).join('')+'</tbody></table></div></section>';
+  if(mob){var last4=rows.slice(-4).reverse();h+='<div class="mob-only mob-card-list">'+last4.map(function(f){return mobRowCard(fd(f.w*7),[['Net flow',(f.net>0?'+':'')+money(f.net)],['Ending cash',money(f.end)]],null);}).join('')+'</div>';}
   h+=mobCollapse('cashExpand',cashDetail);
   return h;};
 
@@ -437,7 +473,7 @@ PAGES.sources=function(){
   return h;};
 
 /* ---------- shell ---------- */
-var TITLES={overview:['Overview',''],report:['Weekly report',''],products:['Products',''],shipments:['FBA shipments',''],expenses:['Expenses',''],inventory:['Inventory',''],cash:['Cash',''],payables:['Payables',''],sources:['Data sources','']};
+var TITLES={overview:['Overview',''],report:['Weekly report',''],products:['Products',''],shipments:['FBA shipments',''],expenses:['Expenses',''],inventory:['Inventory',''],cash:['Cash',''],payables:['Payables',''],payout:['Next payout','Open settlement'],sources:['Data sources','']};
 var RANGED={overview:1,products:1,expenses:1};
 function renderRange(page){var bar=$('#rangeBar');if(!RANGED[page]){bar.hidden=true;bar.innerHTML='';return;}bar.hidden=false;var ab=rangeAB();
   var opts=[['week','This week'],['last','Last week'],['mtd','Month to date'],['custom','Custom']];
@@ -506,5 +542,5 @@ window.addEventListener('scroll',function(){tip.classList.remove('on');},{passiv
 window.addEventListener('hashchange',route);
 var wasMob=window.innerWidth<640;window.addEventListener('resize',function(){var m=window.innerWidth<640;if(m!==wasMob){wasMob=m;render();openDrawer(cur.page,cur.sub);}});
 sideSync();route();
-window.__portal={agg:agg,full:full,other:other,invValue:invValue,invTie:invTie,cashAt:cashAt,cashFlow:cashFlow,claimTotals:claimTotals,breakdownSum:breakdownSum,breakdownParts:breakdownParts,jeLines:jeLines,NDAYS:NDAYS,NWEEKS:NWEEKS,rangeAB:rangeAB,state:state,invRows:invRows,SHIPS:SHIPS,liabSections:liabSections,liabDueIn30:liabDueIn30,liabApTotal:liabApTotal,balanceSheetSnap:balanceSheetSnap};
+window.__portal={agg:agg,full:full,other:other,invValue:invValue,invTie:invTie,cashAt:cashAt,cashFlow:cashFlow,claimTotals:claimTotals,breakdownSum:breakdownSum,breakdownParts:breakdownParts,jeLines:jeLines,NDAYS:NDAYS,NWEEKS:NWEEKS,rangeAB:rangeAB,state:state,invRows:invRows,SHIPS:SHIPS,liabSections:liabSections,liabDueIn30:liabDueIn30,liabApTotal:liabApTotal,balanceSheetSnap:balanceSheetSnap,settlementBreakdown:settlementBreakdown};
 })();

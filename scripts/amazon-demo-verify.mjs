@@ -66,6 +66,8 @@ async function main() {
       bsBalanced: bs.assets.total === bs.liabilities + bs.equity,
       amexCash: P.cashAt(last).amex,
       amexBs: bs.amex,
+      payoutBreakdownNet: P.settlementBreakdown().net,
+      bsReserve: bs.assets.reserve,
     }
   })
 
@@ -107,6 +109,20 @@ async function main() {
     console.error('FAIL bsBalanced: assets != liabilities + equity')
     ok = false
   } else console.log('OK bsBalanced')
+
+  if (r.payoutBreakdownNet !== r.payout) {
+    console.error(
+      `FAIL payoutTie: breakdown net ${r.payoutBreakdownNet} != settlement ${r.payout}`,
+    )
+    ok = false
+  } else console.log(`OK payoutTie: ${r.payoutBreakdownNet}`)
+
+  if (r.bsReserve !== r.payout) {
+    console.error(
+      `FAIL bsReserve: ${r.bsReserve} != settlement ${r.payout}`,
+    )
+    ok = false
+  } else console.log(`OK bsReserve: ${r.bsReserve}`)
 
   console.log(
     'Inventory value:',
