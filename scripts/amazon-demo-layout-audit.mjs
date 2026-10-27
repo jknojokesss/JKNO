@@ -58,6 +58,79 @@ export async function auditMainLayout(page) {
       }
     })
 
+    const INSET = 12
+    const textInsetSel =
+      'h2, h3, .inv-total span, .inv-total strong, .inv-bucket-lbl, .inv-bucket-val strong, .inv-bucket-val small, .fin-note, .ov-prod-name, .ov-prod-line2, .prod-card-name, .prod-card-line2, .prod-card-meta, .data-card-t, .data-card-rows, .blist .nm, .blist .am, .blist .pc, .kv-row span, .kv-row strong, .panel-h .note, .stat-grid dt, .stat-grid dd, .payout-list li, .ship-card-id, .claim-card-meta, .aging-lbl, .aging-amt, .tools, .empty, .show-more'
+    main.querySelectorAll('.card').forEach((card) => {
+      const cr = card.getBoundingClientRect()
+      if (cr.width < 40) return
+      card.querySelectorAll(textInsetSel).forEach((el) => {
+        if (el.closest('.tbl-wrap, .report, table')) return
+        if (!el.offsetParent && !el.getClientRects().length) return
+        const st = getComputedStyle(el)
+        const r = el.getBoundingClientRect()
+        if (r.width < 4 || r.height < 4) return
+        const pl = parseFloat(st.paddingLeft) || 0
+        const pr = parseFloat(st.paddingRight) || 0
+        const textLeft = r.left + pl
+        const textRight = r.right - pr
+        const label = (el.className || el.tagName).toString().slice(0, 36)
+        if (textLeft < cr.left + INSET - 1) {
+          fails.push(`inset <${INSET}px left: ${label}`)
+        }
+        if (textRight > cr.right - INSET + 1) {
+          fails.push(`inset <${INSET}px right: ${label}`)
+        }
+      })
+    })
+
+    const gapMin = 4
+    const rowGroups = [
+      '.ov-prod-line2',
+      '.prod-card-line2',
+      '.inv-total',
+      '.data-card-rows div',
+      '.ship-card-top',
+      '.claim-card-top',
+    ]
+    rowGroups.forEach((sel) => {
+      main.querySelectorAll(sel).forEach((row) => {
+        const kids = [...row.children].filter((c) => {
+          const t = (c.textContent || '').trim()
+          return t.length > 0 && c.getBoundingClientRect().height > 0
+        })
+        for (let i = 0; i < kids.length - 1; i++) {
+          const a = kids[i].getBoundingClientRect()
+          const b = kids[i + 1].getBoundingClientRect()
+          const sameRow = Math.abs(a.top - b.top) < 14 && Math.abs(a.bottom - b.bottom) < 14
+          if (!sameRow) continue
+          const gap = b.left - a.right
+          if (gap < gapMin - 0.5) {
+            fails.push(`row gap <${gapMin}px: "${(kids[i].textContent || '').trim().slice(0, 12)}" / "${(kids[i + 1].textContent || '').trim().slice(0, 12)}"`)
+          }
+          if (a.right > b.left + 0.5) {
+            fails.push(`row overlap: "${(kids[i].textContent || '').trim().slice(0, 12)}" / "${(kids[i + 1].textContent || '').trim().slice(0, 12)}"`)
+          }
+        }
+      })
+    })
+
+    main.querySelectorAll('.ov-prod-body, .prod-card-body').forEach((body) => {
+      const hideHost = body.closest('.prod-cards, .ov-prod-list')
+      if (hideHost && getComputedStyle(hideHost).display === 'none') return
+      const st = getComputedStyle(body)
+      if (st.display === 'none' || st.visibility === 'hidden') return
+      const name = body.querySelector('.ov-prod-name, .prod-card-name')
+      const line2 = body.querySelector('.ov-prod-line2, .prod-card-line2')
+      if (!name || !line2) return
+      const nr = name.getBoundingClientRect()
+      const lr = line2.getBoundingClientRect()
+      if (nr.height < 2 || lr.height < 2) return
+      if (lr.top - nr.bottom < gapMin - 0.5) {
+        fails.push('product name touches metrics line')
+      }
+    })
+
     return { fails }
   })
 }

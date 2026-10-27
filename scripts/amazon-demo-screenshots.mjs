@@ -25,6 +25,7 @@ async function purgeOldShots() {
     if (
       name.startsWith('desk-') ||
       name.startsWith('phone-') ||
+      name.includes('top-products') ||
       name.startsWith('webkit-') ||
       name === 'type-closeup.png'
     ) {
@@ -65,6 +66,15 @@ async function main() {
   }
 
   await page.setViewportSize({ width: 390, height: 844 })
+  await page.goto(`${BASE}#/overview`, { waitUntil: 'networkidle' })
+  await page.waitForSelector('.ov-prod-list', { timeout: 15000 })
+  await page.locator('.ov-prod-list').scrollIntoViewIfNeeded()
+  await page.waitForTimeout(300)
+  await page.screenshot({
+    path: path.join(OUT, 'phone-vp-01-overview-top-products.png'),
+    fullPage: false,
+  })
+
   await page.goto(`${BASE}#/overview`, { waitUntil: 'networkidle' })
   await page.waitForSelector('.ov-prod-list a', { timeout: 15000 })
   await page.click('.ov-prod-list a')

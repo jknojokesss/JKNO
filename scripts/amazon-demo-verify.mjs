@@ -270,14 +270,23 @@ async function main() {
   }
 
   const kpis = await scrapeKpis()
+  const ovCount = Object.keys(kpis).length
+  if (ovCount !== 4) {
+    console.error(`FAIL overview KPI count: ${ovCount} boxes (expected 4)`)
+    ok = false
+  } else console.log('OK overview KPI count: 4')
+
   const cross = [
-    ['True net', '#/report', null, moneyDisplay(r.net)],
-    ['Sales', '#/products', null, moneyDisplay(r.sales)],
-    ['Cash', '#/cash', 'Cash on hand', moneyDisplay(r.cash)],
-    ['Next payout', '#/payout', 'Next payout', moneyDisplay(r.payout)],
-    ['What you owe', '#/payables', 'Total liabilities', moneyDisplay(r.liabTotal)],
+    ['True net', '#/report', null, moneyDisplay(r.net), null],
+    ['Sales', '#/products', null, moneyDisplay(r.sales), null],
+    ['Cash', '#/cash', 'Cash on hand', moneyDisplay(r.cash), moneyDisplay(r.cash)],
+    ['Next payout', '#/payout', 'Next payout', moneyDisplay(r.payout), moneyDisplay(r.payout)],
+  ]
+
+  const pageOnly = [
+    ['Total liabilities', '#/payables', 'Total liabilities', moneyDisplay(r.liabTotal)],
     ['Inventory at cost', '#/inventory', 'Inventory at cost', moneyDisplay(r.inventory, 1)],
-    ['Claims', '#/shipments', 'Potential', moneyDisplay(r.claimPotential)],
+    ['Claims potential', '#/shipments', 'Potential', moneyDisplay(r.claimPotential)],
   ]
 
   function moneyDisplay(cents, dec) {
@@ -290,23 +299,33 @@ async function main() {
     return (neg ? '-$' : '$') + s
   }
 
-  for (const [lbl, route, statLbl, expected] of cross) {
+  for (const [lbl, route, statLbl, ovExpected, pageExpected] of cross) {
     const ov = norm(kpis[lbl])
-    if (ov !== expected) {
-      console.error(`FAIL overview.${lbl}: got "${ov}", expected "${expected}"`)
-      ok = false
-    } else console.log(`OK overview.${lbl}: ${ov}`)
-    if (statLbl) {
+    if (ovExpected != null) {
+      if (ov !== ovExpected) {
+        console.error(`FAIL overview.${lbl}: got "${ov}", expected "${ovExpected}"`)
+        ok = false
+      } else console.log(`OK overview.${lbl}: ${ov}`)
+    }
+    if (statLbl && pageExpected != null) {
       const pg = norm(await statVal(route, statLbl))
-      if (pg !== expected) {
-        console.error(`FAIL page${route} ${statLbl}: got "${pg}", expected "${expected}"`)
+      if (pg !== pageExpected) {
+        console.error(`FAIL page${route} ${statLbl}: got "${pg}", expected "${pageExpected}"`)
         ok = false
       } else console.log(`OK page${route} ${statLbl}: ${pg}`)
-      if (ov !== pg) {
+      if (ovExpected != null && ov !== pg) {
         console.error(`FAIL crossPage ${lbl}: overview "${ov}" vs page "${pg}"`)
         ok = false
       } else console.log(`OK crossPage ${lbl}`)
     }
+  }
+
+  for (const [name, route, statLbl, expected] of pageOnly) {
+    const pg = norm(await statVal(route, statLbl))
+    if (pg !== expected) {
+      console.error(`FAIL pageOnly ${name}: got "${pg}", expected "${expected}"`)
+      ok = false
+    } else console.log(`OK pageOnly ${name}: ${pg}`)
   }
 
   const layoutFails = await runLayoutAudits(page, BASE)
