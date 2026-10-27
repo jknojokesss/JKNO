@@ -13,12 +13,16 @@ const TABS = [
   ['05-expenses', '#/expenses'],
   ['06-inventory', '#/inventory'],
   ['07-cash', '#/cash'],
-  ['08-data-sources', '#/sources'],
+  ['08-payables', '#/payables'],
+  ['09-data-sources', '#/sources'],
 ]
 
 async function main() {
   await mkdir(OUT, { recursive: true })
-  const browser = await chromium.launch({ headless: true })
+  const browser = await chromium.launch({
+    headless: true,
+    executablePath: process.env.PLAYWRIGHT_CHROME_PATH || '/usr/local/bin/google-chrome',
+  })
   const page = await browser.newPage()
 
   for (const [name, hash] of TABS) {
