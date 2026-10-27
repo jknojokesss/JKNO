@@ -26,7 +26,9 @@ async function main() {
   })
   const page = await browser.newPage()
 
+  const DESK_ONLY = new Set(['07-cash', '08-payables', '09-payout'])
   for (const [name, hash] of TABS) {
+    if (!DESK_ONLY.has(name)) continue
     await page.setViewportSize({ width: 1440, height: 900 })
     await page.goto(`${BASE}${hash}`, { waitUntil: 'networkidle' })
     await page.waitForSelector('#main', { timeout: 15000 })
@@ -51,6 +53,15 @@ async function main() {
 
   await page.setViewportSize({ width: 390, height: 844 })
   await page.goto(`${BASE}#/overview`, { waitUntil: 'networkidle' })
+  await page.waitForSelector('.ov-prod-list a', { timeout: 15000 })
+  await page.click('.ov-prod-list a')
+  await page.waitForTimeout(500)
+  await page.screenshot({
+    path: path.join(OUT, 'phone-full-product-detail.png'),
+    fullPage: true,
+  })
+
+  await page.goto(`${BASE}#/overview`, { waitUntil: 'networkidle' })
   await page.click('#mobMoreBtn')
   await page.waitForTimeout(300)
   await page.screenshot({
@@ -60,10 +71,10 @@ async function main() {
 
   await page.setViewportSize({ width: 1280, height: 900 })
   await page.goto(`${BASE}#/overview`, { waitUntil: 'networkidle' })
-  await page.waitForSelector('.ov-boxes', { timeout: 15000 })
+  await page.waitForSelector('.ov-split', { timeout: 15000 })
   await page.waitForSelector('.two.even.sec .tbl-wrap table', { timeout: 15000 })
   const clip = await page.evaluate(() => {
-    const boxes = document.querySelector('.ov-boxes')
+    const boxes = document.querySelector('.ov-split')
     const table = document.querySelector('.two.even.sec .tbl-wrap table')
     const main = document.querySelector('#main')
     if (!boxes || !table || !main) return null
