@@ -5,11 +5,7 @@ const nextConfig = {
     domains: ['lh3.googleusercontent.com', 'storage.googleapis.com'],
   },
   async rewrites() {
-    return {
-      beforeFiles: [
-        { source: '/amazon-demo', destination: '/amazon-demo/index.html' },
-      ],
-    }
+    return { beforeFiles: [], afterFiles: [], fallback: [] }
   },
   async headers() {
     return [
