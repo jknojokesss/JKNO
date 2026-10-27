@@ -23,7 +23,7 @@ export async function auditMainLayout(page) {
 
     const isEmptyCard = (el) => {
       if (!el.classList.contains('card')) return false
-      if (el.querySelector('table tbody tr, svg.chart, .blist, .ov-prod-list li, .kv-rows .kv-row, ul.payout-list li, .mob-card-list .data-card, .conn-h, .report, .bs-grid, .aging, canvas, .empty, .rep-kpis, .mini, .dr-sec'))
+      if (el.querySelector('table tbody tr, svg.chart, .blist, .ov-prod-list li, .kv-rows .kv-row, ul.payout-list li, .mob-card-list .data-card, .conn-h, .report, .bs-grid, .aging, canvas, .empty, .rep-kpis, .mini, .dr-sec, .inv-buckets, .inv-total, .fin-note'))
         return false
       const text = (el.textContent || '').replace(/\s+/g, ' ').trim()
       if (text.length < 4) return true

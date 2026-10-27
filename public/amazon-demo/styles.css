@@ -157,6 +157,16 @@ a.ov-box:active{background:var(--accent-soft)}
 .stat-grid dt{margin:0;font-size:0.875rem;color:var(--muted);font-weight:500;line-height:1.25}
 .stat-grid dd{margin:2px 0 0;font-size:1.0625rem;font-weight:600;color:var(--ink);font-variant-numeric:tabular-nums}
 .stat-grid dd small{display:block;margin-top:3px;font-size:0.8125rem;font-weight:500;color:var(--muted);line-height:1.35}
+.inv-total{display:flex;flex-wrap:wrap;align-items:baseline;justify-content:space-between;gap:8px 16px;margin:0 0 16px;padding:0 0 14px;border-bottom:1px solid var(--line2)}
+.inv-total span{font-size:0.9375rem;font-weight:500;color:var(--muted)}
+.inv-total strong{font-size:1.75rem;font-weight:700;color:var(--ink);font-variant-numeric:tabular-nums;letter-spacing:-0.03em}
+.inv-buckets{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:12px 18px;margin:0;padding:0;list-style:none}
+.inv-bucket{min-width:0}
+.inv-bucket-lbl{margin:0;font-size:0.8125rem;font-weight:500;color:var(--muted);line-height:1.25}
+.inv-bucket-val{margin:4px 0 0}
+.inv-bucket-val strong{display:block;font-size:1.0625rem;font-weight:700;color:var(--ink);font-variant-numeric:tabular-nums}
+.inv-bucket-val small{display:block;margin-top:3px;font-size:0.8125rem;font-weight:500;color:var(--muted);line-height:1.35}
+.inv-buckets-sub{margin-top:4px}
 .mob-lead-block{display:none;margin-bottom:14px}
 .mob-block-title{margin:0 0 8px;font-size:0.9375rem;font-weight:600;color:var(--ink)}
 .mob-mini-list{list-style:none;margin:0 0 14px;padding:0;border:1px solid var(--line);border-radius:var(--r);background:var(--card);overflow:hidden}

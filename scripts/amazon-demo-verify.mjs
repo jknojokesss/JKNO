@@ -103,6 +103,36 @@ async function main() {
         (t, e) => t + e.amt,
         0,
       ),
+      invCost: (() => {
+        const snap = P.invCostSnapshot()
+        const rows = P.invCostRows()
+        const overlap = P.stuckClaimOverlap()
+        const rowSum = rows.reduce(
+          (o, r) => {
+            o.units += r.available + r.inbound + r.reserved + r.stuck
+            o.cents += r.atCost
+            o.stuck += r.stuck
+            o.stuckCents += r.stuck * r.cost
+            o.inbound += r.inbound
+            return o
+          },
+          { units: 0, cents: 0, stuck: 0, stuckCents: 0, inbound: 0 },
+        )
+        const bucketCents =
+          snap.availableCents + snap.inboundCents + snap.reservedCents + snap.stuckCents
+        const stuckParts =
+          snap.stuckParts.unfulfillable +
+          snap.stuckParts.researching +
+          snap.stuckParts.stranded
+        return {
+          snap,
+          rowSum,
+          overlap,
+          bucketCents,
+          stuckParts,
+          bsInventory: bs.assets.inventory,
+        }
+      })(),
     }
   })
 
@@ -167,6 +197,32 @@ async function main() {
 
   console.log(`OK billBuckets: ${r.perBill.length} bills`)
   r.perBill.forEach((b) => console.log(`  ${b.vendor}: ${b.amount} (${b.daysPast}d → ${b.bucket})`))
+
+  const ic = r.invCost
+  const invChecks = [
+    ['invCostTotal', ic.snap.totalCents, EXPECT.inventory],
+    ['invCostBuckets', ic.bucketCents, EXPECT.inventory],
+    ['invCostBs', ic.snap.totalCents, ic.bsInventory],
+    ['invCostRowSum', ic.rowSum.cents, EXPECT.inventory],
+    ['invInboundUnits', ic.snap.inbound, 1561],
+    ['invStuckParts', ic.stuckParts, ic.snap.stuck],
+    ['invStuckCents', ic.snap.stuckCents, ic.rowSum.stuckCents],
+    ['invStuckOverlapUnits', ic.overlap.units, 26],
+    ['invStuckOverlapCents', ic.overlap.cents, 16465],
+  ]
+  for (const [name, got, exp] of invChecks) {
+    if (got !== exp) {
+      console.error(`FAIL ${name}: got ${got}, expected ${exp}`)
+      ok = false
+    } else console.log(`OK ${name}: ${got}`)
+  }
+  console.log(
+    'Inventory at cost buckets (units / cents):',
+    `avail ${ic.snap.available}/${ic.snap.availableCents}`,
+    `inbound ${ic.snap.inbound}/${ic.snap.inboundCents}`,
+    `reserved ${ic.snap.reserved}/${ic.snap.reservedCents}`,
+    `stuck ${ic.snap.stuck}/${ic.snap.stuckCents}`,
+  )
 
   console.log(
     'Inventory:',
