@@ -237,7 +237,7 @@ function productDrawer(sku){var k=skuIx[sku];if(k==null)return null;var s=D.skus
 /* shipments */
 function shipTag(s){return '<span class="tag neu">'+s.status+'</span>';}
 function devTag(s){if(!s.closedFlag)return '<span class="mut">—</span>';if(s.diff<0)return '<span class="tag signal">'+num(-s.diff)+' short</span>';if(s.diff>0)return '<span class="mut">+'+num(s.diff)+'</span>';return '<span class="mut">—</span>';}
-function progress(s){var p=s.units?s.recv/s.units:0;var cls=s.closedFlag&&s.diff<0?'short':'';return '<div class="prog"><span>'+pct(p,1)+'</span><span class="bar"><span class="'+cls+'" style="width:'+Math.min(100,p*100).toFixed(1)+'%"></span></span></div>';}
+function progress(s){var p=s.units?s.recv/s.units:0;return '<div class="prog"><span>'+pct(p,1)+'</span><span class="bar"><span style="width:'+Math.min(100,p*100).toFixed(1)+'%"></span></span></div>';}
 function shipRowsFiltered(){var q=state.shipQ.trim().toLowerCase();return SHIPS.filter(function(s){if(state.shipFilter==='open'&&s.closedFlag)return false;if(state.shipFilter==='closed'&&!s.closedFlag)return false;if(state.shipFilter==='dev'&&!(s.closedFlag&&s.diff!==0))return false;
   if(!q)return true;return (s.id+' '+s.fc+' '+s.status+' '+s.name+' '+s.lines.map(function(l){return l.sku;}).join(' ')).toLowerCase().indexOf(q)>=0;});}
 function shipCardHead(s){var amt=shipClaimAmount(s);if(amt)return money(amt,1);if(s.closedFlag&&s.diff<0)return num(-s.diff)+' short';if(!s.closedFlag){var en=s.units-s.recv;if(en)return num(en)+' en route';}return pct(s.recv/s.units,0);}
@@ -260,7 +260,7 @@ function claimCardsHtml(rows){if(!rows.length)return '<p class="empty">No claims
   return rows.map(function(c){return '<a class="claim-card" href="'+(c.shipment?'#/shipments/'+c.shipment:'#/shipments')+'"><div class="claim-card-top"><span class="claim-card-amt">'+money(c.amount,1)+'</span>'+claimStatusTag(c.status)+'</div><div class="claim-card-meta"><span>'+c.sku+'</span><span>'+num(c.units)+' units</span><span>'+esc(c.type)+'</span></div></a>';}).join('');}
 function claimCards(){return claimCardsHtml(claimRowsFiltered().slice().reverse());}
 function shipCardsHtml(rows){if(!rows.length)return '<p class="empty">No shipments</p>';
-  return rows.map(function(s){var alert=shipClaimAmount(s)||(s.closedFlag&&s.diff<0)?' ship-card-alert':'';return '<a class="ship-card'+alert+'" href="#/shipments/'+s.id+'"><div class="ship-card-top"><span class="ship-card-amt">'+shipCardHead(s)+'</span><span class="ship-card-sub">'+num(s.recv)+' / '+num(s.units)+'</span></div><div class="ship-card-id">'+s.id+'</div><div class="ship-card-meta"><span>'+s.fc+'</span><span>'+s.status+'</span></div></a>';}).join('');}
+  return rows.map(function(s){var alert=shipClaimAmount(s)||(s.closedFlag&&s.diff<0)?' ship-card-alert':'';return '<a class="ship-card'+alert+'" href="#/shipments/'+s.id+'"><div class="ship-card-top"><span class="ship-card-amt">'+shipCardHead(s)+'</span><span class="ship-card-sub">'+num(s.recv)+' of '+num(s.units)+' received</span></div><div class="ship-card-id">'+s.id+'</div><div class="ship-card-meta"><span>'+s.fc+'</span><span>'+s.status+'</span></div></a>';}).join('');}
 function shipCards(){return shipCardsHtml(sortRows(shipRowsFiltered(),state.shipSort,SCOLS));}
 function shipMobLead(){var notFiled=D.claims.filter(function(c){return c.status==='Not filed';}).slice().reverse();
   var open=SHIPS.filter(function(s){return !s.closedFlag;});

@@ -219,8 +219,7 @@ td .ps{display:block;font-size:12px;color:var(--muted)}
 .tag.signal{background:var(--warn-soft);color:var(--warn);border:1px solid #D9CFC0;font-weight:600}
 .prog{display:flex;align-items:center;gap:8px;justify-content:flex-end}
 .prog .bar{width:84px;height:6px;border-radius:3px;background:var(--line2);overflow:hidden}
-.prog .bar span{display:block;height:100%;background:var(--accent-mid)}
-.prog .bar span.short{background:var(--warn)}
+.prog .bar span{display:block;height:100%;background:var(--accent)}
 /* report */
 .report{max-width:860px;margin:0 auto;padding:32px 36px}
 .rep-head{display:flex;justify-content:space-between;gap:16px;align-items:flex-start;border-bottom:2px solid var(--ink);padding-bottom:14px}
