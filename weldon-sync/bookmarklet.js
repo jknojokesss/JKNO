@@ -26,9 +26,13 @@
     const dm = raw.match(/(\d{1,2})\/(\d{1,2})\/(\d{4})/)
     if (!dm) return null
     const dateIso = `${dm[3]}-${String(dm[1]).padStart(2, '0')}-${String(dm[2]).padStart(2, '0')}`
-    const tm = raw.match(/(\d{1,2}):(\d{2}):(\d{2})\s*([AP]M)/i)
+    const tail = raw.slice(dm.index + dm[0].length)
+    const tm = tail.match(/^\s*(\d{1,2}):(\d{2}):(\d{2})\s*([AP]M)/i)
     if (!tm) return null
     let hour = parseInt(tm[1], 10)
+    const minute = parseInt(tm[2], 10)
+    const second = parseInt(tm[3], 10)
+    if (hour < 1 || hour > 12 || minute > 59 || second > 59) return null
     const ap = tm[4].toUpperCase()
     if (ap === 'AM') { if (hour === 12) hour = 0 } else if (ap === 'PM') { if (hour !== 12) hour += 12 }
     return `${dateIso}T${String(hour).padStart(2, '0')}:${tm[2]}:${tm[3]}`
