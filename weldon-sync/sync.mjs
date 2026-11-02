@@ -10,6 +10,8 @@
 import { chromium } from 'playwright'
 import { createClient } from '@supabase/supabase-js'
 import WebSocketImpl from 'ws'
+import { sanitizeOrderedAtFromClient } from '../lib/weldonOrderedAt.js'
+import { WELDON_MIN_ORDER_DATE, WELDON_INVOICED_MONTHS } from '../lib/weldonSyncBounds.js'
 
 // supabase-js initializes a realtime client on createClient() that requires a
 // global WebSocket constructor. We only use the database here (never realtime),
@@ -25,7 +27,7 @@ for (const [k, v] of Object.entries({ WELDON_USER, WELDON_PASS, SUPABASE_URL, SU
 const BASE = 'https://www.weldontire.net/productcart/pc'
 const LOGIN_URL = `${BASE}/_com_login.asp`
 const PAGES = [
-  `${BASE}/_com_orderhistory.asp?show=invoiced&months=6`,
+  `${BASE}/_com_orderhistory.asp?show=invoiced&months=${WELDON_INVOICED_MONTHS}`,
   `${BASE}/_com_orderhistory.asp?show=open&months=3`,
 ]
 
@@ -41,6 +43,18 @@ function extractRowsInPage() {
     const m = (s || '').match(/(\d{1,2})\/(\d{1,2})\/(\d{4})/)
     return m ? `${m[3]}-${String(m[1]).padStart(2, '0')}-${String(m[2]).padStart(2, '0')}` : null
   }
+  const orderedAt = (s) => {
+    const raw = s || ''
+    const dm = raw.match(/(\d{1,2})\/(\d{1,2})\/(\d{4})/)
+    if (!dm) return null
+    const dateIso = `${dm[3]}-${String(dm[1]).padStart(2, '0')}-${String(dm[2]).padStart(2, '0')}`
+    const tm = raw.match(/(\d{1,2}):(\d{2}):(\d{2})\s*([AP]M)/i)
+    if (!tm) return null
+    let hour = parseInt(tm[1], 10)
+    const ap = tm[4].toUpperCase()
+    if (ap === 'AM') { if (hour === 12) hour = 0 } else if (ap === 'PM') { if (hour !== 12) hour += 12 }
+    return `${dateIso}T${String(hour).padStart(2, '0')}:${tm[2]}:${tm[3]}`
+  }
   const out = []
   for (const tr of rows) {
     const cells = [...tr.cells].map((c) => (c.innerText || '').trim().replace(/\s+/g, ' '))
@@ -49,6 +63,7 @@ function extractRowsInPage() {
     if (!m) continue
     const web_id = m[1]
     const order_date = toIso(cells[1])
+    const ordered_at_local = orderedAt(cells[1])
     const qty = parseInt((cells[2] || '').replace(/[^0-9]/g, ''), 10) || null
     const desc = cells[3] || ''
     const sm = desc.match(sizeRe)
@@ -62,7 +77,7 @@ function extractRowsInPage() {
     const invoiced_date = im ? toIso(im[0]) : null
     const link = tr.querySelector('a[href*="orderdetail"]')
     const detail_href = link ? link.getAttribute('href') : null
-    out.push({ web_id, order_date, invoiced_date, size, qty, unit_cost, description: brand, detail_href })
+    out.push({ web_id, order_date, ordered_at_local, invoiced_date, size, qty, unit_cost, description: brand, detail_href })
   }
   return out
 }
@@ -114,8 +129,10 @@ async function main() {
       const rows = await page.evaluate(extractRowsInPage)
       for (const r of rows) if (!byWebId.has(r.web_id)) byWebId.set(r.web_id, r)
     }
-    let scraped = [...byWebId.values()]
-    console.log(`Scraped ${scraped.length} order rows from Weldon.`)
+    let scraped = [...byWebId.values()].filter(
+      (r) => r.order_date && r.order_date >= WELDON_MIN_ORDER_DATE,
+    )
+    console.log(`Scraped ${scraped.length} order rows from Weldon (on/after ${WELDON_MIN_ORDER_DATE}).`)
 
     // ---- only keep ones we don't already have ----
     const ids = scraped.map((r) => r.web_id)
@@ -146,7 +163,10 @@ async function main() {
     }
 
     // ---- insert (strip the helper field; never overwrite existing rows) ----
-    const toInsert = fresh.map(({ detail_href, ...row }) => row)
+    const toInsert = fresh.map(({ detail_href, ordered_at_local, ...row }) => ({
+      ...row,
+      ordered_at: sanitizeOrderedAtFromClient(ordered_at_local),
+    }))
     const { error: insErr } = await supabase.from('weldon_orders').insert(toInsert)
     if (insErr) throw new Error(`Supabase insert failed: ${insErr.message}`)
 

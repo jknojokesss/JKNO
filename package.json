@@ -6,7 +6,8 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "test:e2e": "node tests/e2e/run.js"
+    "test:e2e": "node tests/e2e/run.js",
+    "test:unit": "node --test tests/weldon-ordered-at.test.mjs tests/weldon-sync-bounds.test.mjs"
   },
   "dependencies": {
     "@stripe/react-stripe-js": "^2.8.1",
