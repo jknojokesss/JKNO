@@ -1,4 +1,6 @@
 import { supabaseAdmin } from '../../lib/supabaseAdmin'
+import { sanitizeOrderedAtFromClient } from '../../lib/weldonOrderedAt'
+import { WELDON_MIN_ORDER_DATE, weldonCancelCandidate } from '../../lib/weldonSyncBounds'
 
 // Receives scraped Weldon orders from the browser bookmarklet (which runs on
 // the user's real, Cloudflare-cleared Weldon session) and inserts only the new
@@ -15,9 +17,8 @@ const CORS = {
 
 const isDate = (s) => /^\d{4}-\d{2}-\d{2}$/.test(s || '')
 
-// Weldon's invoiced view reaches back ~6 months, but we only track 2026 onward.
-// Drop anything older so the bookmarklet never backfills pre-2026 orders.
-const MIN_DATE = '2026-01-01'
+// Weldon's invoiced view is months=N (see weldon-sync); we only keep stocking era onward.
+const MIN_DATE = WELDON_MIN_ORDER_DATE
 
 // Validate/sanitize the rows the bookmarklet sends — never trust them blindly.
 function clean(rows) {
@@ -26,7 +27,7 @@ function clean(rows) {
     const web_id = String(r?.web_id || '').trim()
     if (!/^\d{6,}$/.test(web_id)) continue
     const order_date = isDate(r.order_date) ? r.order_date : null
-    if (order_date && order_date < MIN_DATE) continue // skip pre-2026 orders
+    if (order_date && order_date < MIN_DATE) continue
     out.push({
       web_id,
       order_date,
@@ -38,6 +39,7 @@ function clean(rows) {
       // Weldon "PO#" field off the order-detail cell: "STOCK" = shelf/inventory
       // buy, anything else (a customer name / PO#) = a customer/same-day order.
       po_number:     r.po_number ? String(r.po_number).trim().slice(0, 60) : null,
+      ordered_at:    sanitizeOrderedAtFromClient(r.ordered_at),
       // Transient hint (cc charge ÷ qty) — used only as a last resort, never a column.
       derived_cost:  Number.isFinite(+r.derived_cost) && +r.derived_cost > 0 ? +r.derived_cost : null,
     })
@@ -56,7 +58,9 @@ export default async function handler(req, res) {
   }
 
   const rows = clean(req.body?.orders)
-  if (!rows.length) return res.status(200).json({ ok: true, received: 0, inserted: 0, backfilled: 0, canceled: 0 })
+  if (!rows.length) {
+    return res.status(200).json({ ok: true, received: 0, inserted: 0, backfilled: 0, canceled: 0, ordered_at_filled: 0 })
+  }
 
   // derived_cost is a transient hint, not a DB column — split it off the rows
   // we insert and keep it keyed by web_id for the last-resort backfill below.
@@ -119,14 +123,24 @@ export default async function handler(req, res) {
     if (!pErr) po_tagged++
   }
 
-  // 5) Drop orders the bookmarklet did not see — but only ones on/after the
-  //    oldest date this scrape actually returned. Weldon's invoiced page is
-  //    ~6 months; the oldest week ages off even when the POs were real (the
-  //    2026-08-31 sync ate 8 real 3/4 orders that way). A missing row *inside*
-  //    the scrape's date span is a cancel. Older than the scrape's oldest date
-  //    just fell off the page — leave it. If too many are missing, the scrape
-  //    was incomplete: don't mass-delete. Always return/log the dropped rows
-  //    so a hard-delete is reconstructable.
+  // 4b) Backfill ordered_at on rows we already had (upsert ignores duplicates).
+  let ordered_at_filled = 0
+  for (const r of dbRows) {
+    if (!r.ordered_at || !r.web_id) continue
+    const { data: filled, error: oErr } = await supabaseAdmin
+      .from('weldon_orders')
+      .update({ ordered_at: r.ordered_at })
+      .eq('web_id', r.web_id)
+      .is('ordered_at', null)
+      .select('web_id')
+    if (!oErr && filled?.length) ordered_at_filled += filled.length
+  }
+
+  // 5) Drop orders the bookmarklet did not see — only if order_date falls inside
+  //    [oldestSeen, newestSeen] from this scrape (after MIN_DATE filter). Older
+  //    than oldestSeen aged off Weldon's page; newer than newestSeen was outside
+  //    what we pulled — neither is a cancel. If too many are missing inside the
+  //    span, the scrape was incomplete: don't mass-delete.
   const seen = new Set(
     (Array.isArray(req.body?.seen) ? req.body.seen : dbRows.map((r) => r.web_id))
       .map((id) => String(id || '').trim())
@@ -135,13 +149,18 @@ export default async function handler(req, res) {
   let canceled = 0
   let cancel_skipped = 0
   let canceled_rows = []
-  const oldestSeen = dbRows.map((r) => r.order_date).filter(Boolean).sort()[0]
-  if (seen.size && oldestSeen) {
+  const seenDates = dbRows.map((r) => r.order_date).filter(Boolean).sort()
+  const oldestSeen = seenDates[0]
+  const newestSeen = seenDates[seenDates.length - 1]
+  if (seen.size && oldestSeen && newestSeen) {
     const { data: inSpan } = await supabaseAdmin
       .from('weldon_orders')
       .select('web_id, order_date, size, qty, unit_cost, description, po_number')
       .gte('order_date', oldestSeen)
-    const gone = (inSpan || []).filter((r) => !seen.has(r.web_id))
+      .lte('order_date', newestSeen)
+    const gone = (inSpan || []).filter(
+      (r) => weldonCancelCandidate(r.order_date, oldestSeen, newestSeen) && !seen.has(r.web_id),
+    )
     if (gone.length > 15) {
       cancel_skipped = gone.length
     } else if (gone.length) {
@@ -165,6 +184,7 @@ export default async function handler(req, res) {
     inserted: (insData || []).length,
     backfilled,
     po_tagged,
+    ordered_at_filled,
     canceled,
     ...(canceled_rows.length ? { canceled_ids: canceled_rows.map((r) => r.web_id), canceled_rows } : {}),
     ...(cancel_skipped ? { cancel_skipped, cancel_note: 'Too many missing for a cancel — scrape looks incomplete, left them.' } : {}),

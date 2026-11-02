@@ -6,7 +6,7 @@
 // inserts only the new web_ids, backfills blank costs / PO#s, and drops
 // orders missing *inside this scrape's date span* (cancels). Rows older than
 // the oldest date the bookmarklet actually saw are left alone — they aged off
-// Weldon's ~6-month invoiced page, they were not canceled. The minified
+// Weldon's invoiced page (months=8), they were not canceled. The minified
 // javascript: version (with the real
 // APP domain + token baked in) is what gets saved as a browser bookmark.
 //
@@ -16,10 +16,23 @@
   const APP   = 'https://YOUR-DASHBOARD-DOMAIN/reydel-tire'  // e.g. https://reydel.vercel.app/reydel-tire
   const TOKEN = 'REPLACE_WITH_WELDON_IMPORT_TOKEN'      // must match Vercel env WELDON_IMPORT_TOKEN
   const BASE  = 'https://www.weldontire.net/productcart/pc'
-  const PAGES = ['_com_orderhistory.asp?show=invoiced&months=6', '_com_orderhistory.asp?show=open&months=3']
+  const MIN_DATE = '2026-04-01'
+  const PAGES = ['_com_orderhistory.asp?show=invoiced&months=8', '_com_orderhistory.asp?show=open&months=3']
 
   const sizeRe = /(\d{3})[\s\/\\-]+(\d{2})[\s\/\\-]*[A-Za-z]{0,3}(\d{2})/i
   const iso = (s) => { const m = (s || '').match(/(\d{1,2})\/(\d{1,2})\/(\d{4})/); return m ? `${m[3]}-${String(m[1]).padStart(2,'0')}-${String(m[2]).padStart(2,'0')}` : null }
+  const orderedAt = (s) => {
+    const raw = s || ''
+    const dm = raw.match(/(\d{1,2})\/(\d{1,2})\/(\d{4})/)
+    if (!dm) return null
+    const dateIso = `${dm[3]}-${String(dm[1]).padStart(2, '0')}-${String(dm[2]).padStart(2, '0')}`
+    const tm = raw.match(/(\d{1,2}):(\d{2}):(\d{2})\s*([AP]M)/i)
+    if (!tm) return null
+    let hour = parseInt(tm[1], 10)
+    const ap = tm[4].toUpperCase()
+    if (ap === 'AM') { if (hour === 12) hour = 0 } else if (ap === 'PM') { if (hour !== 12) hour += 12 }
+    return `${dateIso}T${String(hour).padStart(2, '0')}:${tm[2]}:${tm[3]}`
+  }
   const getDoc = async (url) => new DOMParser().parseFromString(await (await fetch(url, { credentials: 'include' })).text(), 'text/html')
 
   const parseDoc = (doc) => {
@@ -37,6 +50,7 @@
       out.push({
         web_id: m[1],
         order_date: iso(cells[1]),
+        ordered_at: orderedAt(cells[1]),
         invoiced_date: im ? iso(im[0]) : null,
         size: sm ? `${sm[1]}/${sm[2]}/${sm[3]}` : null,
         qty: parseInt((cells[2] || '').replace(/[^0-9]/g, ''), 10) || null,
@@ -52,7 +66,7 @@
   try {
     const map = new Map()
     for (const p of PAGES) for (const r of parseDoc(await getDoc(`${BASE}/${p}`))) if (!map.has(r.web_id)) map.set(r.web_id, r)
-    const rows = [...map.values()]
+    const rows = [...map.values()].filter((r) => r.order_date && r.order_date >= MIN_DATE)
 
     // Fill blank costs (some cash orders) from the order-detail page.
     for (const r of rows) {
@@ -87,7 +101,7 @@
     const extra = j.cancel_skipped
       ? ` — ${j.cancel_skipped} missing, left them (scrape looked short)`
       : (j.canceled ? `, dropped ${j.canceled} canceled${j.canceled_ids?.length ? ` (${j.canceled_ids.join(', ')})` : ''}` : '')
-    alert(`Weldon sync ✓  scanned ${j.received} orders, added ${j.inserted} new, filled ${j.backfilled || 0} costs, tagged ${j.po_tagged || 0} PO#s${extra}`)
+    alert(`Weldon sync ✓  scanned ${j.received} orders, added ${j.inserted} new, filled ${j.backfilled || 0} costs, tagged ${j.po_tagged || 0} PO#s, set ${j.ordered_at_filled || 0} order times${extra}`)
   } catch (e) {
     alert('Weldon sync failed: ' + (e.message || e))
   }
