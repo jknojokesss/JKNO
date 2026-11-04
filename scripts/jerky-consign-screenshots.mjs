@@ -4,7 +4,7 @@
  */
 import { chromium } from 'playwright'
 import { mkdirSync } from 'fs'
-import { buildActivityLedger, missingSummary, recon, safeOnShelf, hasDropActivity, paymentPiecesFromCheck } from '../lib/consignmentRecon.js'
+import { buildActivityLedger, recon, safeOnShelf, hasShelfBooks, hasLoggedConsignmentActivity, hasDropActivity, paymentPiecesFromCheck } from '../lib/consignmentRecon.js'
 
 const OUT = '/opt/cursor/artifacts/jerky-consign-screenshots'
 mkdirSync(OUT, { recursive: true })
@@ -49,7 +49,7 @@ function fmtD(iso) {
 
 function badgeText(c) {
   const r = { ...c, ...recon(c) }
-  if (!hasDropActivity(r)) return { text: 'No drop-offs yet', bg: MUTED, compact: false }
+  if (!hasShelfBooks(r)) return { text: 'No drop-offs yet', bg: MUTED, compact: false }
   if (r.status === 'tracking') {
     const n = safeOnShelf(r.expected)
     const text = r.asOfDate ? `Should be on shelf: ${n} (as of ${fmtD(r.asOfDate)})` : `Should be on shelf: ${n}`
@@ -80,12 +80,28 @@ function payCoverHtml(c, payAmt, priceOverride) {
   return `<div style="font-size:12.5px;color:${MUTED};line-height:1.45">Covers ${frac} pieces at ${ppb}/bag, doesn't divide evenly <button type="button" style="background:none;border:none;padding:0;color:${KRAFT};font-weight:600;cursor:pointer;text-decoration:underline;font-size:inherit;font-family:inherit">change</button></div>`
 }
 
+function firstVisitBlock(today, startCnt = '', startDate = today) {
+  const field = (label, ph = '', val = '', type = 'text', inputMode = '') => `
+    <label style="display:block;width:100%;max-width:100%;min-width:0;box-sizing:border-box">
+      <div style="font-size:12px;font-weight:600;color:${MUTED};margin-bottom:4px">${label}</div>
+      <input type="${type}" ${inputMode ? `inputmode="${inputMode}"` : ''} value="${val}" placeholder="${ph}" style="width:100%;max-width:100%;box-sizing:border-box;padding:10px;border:1px solid ${BORDER};display:block;min-width:0;font-family:Inter,sans-serif;font-variant-numeric:tabular-nums;font-feature-settings:'tnum' 1"/>
+    </label>`
+  return `<div style="margin-bottom:18px;padding:14px;background:${CREAM};border:1px solid ${BORDER};border-radius:2px">
+    <div style="font-weight:700;font-size:14px;color:${INK}">First visit? Log what's on the shelf now</div>
+    <p style="font-size:12.5px;color:${MUTED};margin:8px 0;line-height:1.45">Opening count for this store — drop-offs and payments build from here.</p>
+    <div style="display:flex;flex-direction:column;gap:10px;margin-top:8px">${field('As-of date', '', startDate, 'date')}${field('Pieces on shelf', 'e.g. 40', startCnt, 'text', 'numeric')}
+    <button style="width:100%;box-sizing:border-box;padding:11px;border:none;background:${CHAR};color:#fff;font-weight:600;font-family:Inter,sans-serif">Save starting count</button></div></div>`
+}
+
 function expandedHtml(opts = {}) {
-  const { noPrice = false, payAmt = '360', store = exampleStore, price = noPrice ? 0 : store.price } = opts
+  const { noPrice = false, payAmt = '360', store = exampleStore, price = noPrice ? 0 : store.price, showFirstVisit = false, startCnt = '' } = opts
   const c = { ...store, price, ...recon({ ...store, price }) }
   const ledger = buildActivityLedger(c)
   const today = todayEtIso()
   const badge = badgeText(c)
+  const firstVisit = showFirstVisit || (!hasLoggedConsignmentActivity(c) && !hasDropActivity(c))
+    ? firstVisitBlock(today, startCnt, today)
+    : ''
   const ledgerRows = ledger.map(row => `
     <div style="display:grid;grid-template-columns:minmax(0,88px) minmax(0,1fr) minmax(0,72px);gap:8px;padding:8px 12px;border-top:1px solid ${CREAM};font-size:12.5px">
       <span style="font-family:Inter,sans-serif;font-variant-numeric:tabular-nums;color:#BFB096">${row.dateIso ? fmtD(row.dateIso) : 'Undated'}</span>
@@ -116,6 +132,7 @@ function expandedHtml(opts = {}) {
         ${ledgerRows || `<div style="padding:12px;font-size:13px;color:${MUTED}">No dated entries yet.</div>`}
       </div>
       <div style="font-size:11px;font-weight:600;color:#96866C;text-transform:uppercase;margin-bottom:10px">Log activity</div>
+      ${firstVisit}
       <div style="margin-bottom:14px"><div style="font-weight:700;font-size:14px">1. Dropped off</div>
         <div style="display:flex;flex-direction:column;gap:10px;margin-top:8px;max-width:100%">${field('Drop-off date', '', today, 'date')}${field('Pieces added', 'e.g. 100', '', 'text', 'numeric')}
         <button style="width:100%;box-sizing:border-box;padding:11px;border:none;background:${CHAR};color:#fff;font-weight:600;font-family:Inter,sans-serif">Save drop-off</button></div></div>
@@ -140,12 +157,32 @@ function noDropoffsHtml() {
   return expandedHtml({ store: empty, payAmt: '' })
 }
 
+function firstVisitBeforeHtml() {
+  const empty = { store: 'River Market Co-op', price: 5, sent: 0, returned: 0, paid: 0, counted: null, log: [] }
+  return expandedHtml({ store: empty, payAmt: '', showFirstVisit: true, startCnt: '40' })
+}
+
+function firstVisitAfterHtml() {
+  const today = todayEtIso()
+  const store = {
+    store: 'River Market Co-op',
+    price: 5,
+    sent: 0,
+    returned: 0,
+    paid: 0,
+    counted: null,
+    log: [{ t: `Starting count 40 on ${today}`, atIso: today }],
+  }
+  return expandedHtml({ store, payAmt: '' })
+}
+
 function unevenCheckHtml() {
   return expandedHtml({ payAmt: '360', price: 4.52 })
 }
 
 async function main() {
-  const browser = await chromium.launch()
+  const chromePath = process.env.PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH
+  const browser = await chromium.launch(chromePath ? { executablePath: chromePath } : {})
   const page = await browser.newPage()
 
   const scenarios = [
@@ -155,6 +192,8 @@ async function main() {
     { slug: 'no-dropoffs-yet', html: noDropoffsHtml() },
     { slug: 'activity-list', html: expandedHtml() },
     { slug: 'uneven-check-change-link', html: unevenCheckHtml() },
+    { slug: 'first-visit-before-save', html: firstVisitBeforeHtml() },
+    { slug: 'first-visit-after-save', html: firstVisitAfterHtml() },
   ]
 
   for (const { slug, html } of scenarios) {
