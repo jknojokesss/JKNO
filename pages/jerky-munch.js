@@ -3,6 +3,8 @@ import Head from 'next/head'
 import { jerkySupabase } from '../lib/supabaseJerky'
 import { buildPnl, buildBalanceSheet, buildCashFlow, periodPnl, buildAdSpend } from '../lib/jerkyGL'
 import { loadQboStatements, balanceSheetAsOf, monthLabel } from '../lib/qboStatements'
+import { recon, missingSummary, buildActivityLedger, safeOnShelf, hasDropActivity, paymentPiecesFromCheck } from '../lib/consignmentRecon'
+import { BOOKS_TZ, isoDateInTimeZone } from '../lib/jerkyBooksTz'
 import { ResponsiveContainer, ComposedChart, Bar, Line, XAxis, YAxis, Tooltip, CartesianGrid, PieChart, Pie, Cell } from 'recharts'
 
 const CHAR = '#2B2018', SPICE = '#C8462C', KRAFT = '#A9763A', CREAM = '#F6F0E6'
@@ -11,19 +13,50 @@ const CARDBG = '#FFFDF9'
 const BIZ = 'Jerky Munch'
 
 const money = (n) => '$' + (Math.round(n * 100) / 100).toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 2 })
+const money2 = (n) => '$' + (Math.round(Number(n) * 100) / 100).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })
 const m0 = (n) => '$' + Math.round(n).toLocaleString()
 const sgn = (n) => (n < 0 ? '-$' : '$') + Math.abs(Math.round(n)).toLocaleString()
-const todayStr = new Date().toISOString().slice(0, 10)
 const fmtD = (s) => s ? new Date(s + 'T00:00:00').toLocaleDateString([], { month: 'short', day: 'numeric' }) : '—'
 const daysSince = (s) => s ? Math.round((Date.now() - new Date(s + 'T00:00:00')) / 86400000) : null
+const NUMBERS_DONT_ADD_UP = "Numbers don't add up. Check bags sent, checks and pickups."
 
-// consignment reconciliation
-const recon = (c) => {
-  const paidUnits = c.price > 0 ? Math.round(c.paid / c.price) : 0
-  const expected = c.sent - c.returned - paidUnits      // should still be on the shelf
-  const variance = expected - c.counted                 // + = missing / shrinkage
-  return { paidUnits, expected, variance, varVal: variance * c.price,
-    status: c.counted == null ? 'uncounted' : variance === 0 ? 'reconciled' : variance > 0 ? 'short' : 'over' }
+const SANS = "'Inter', sans-serif"
+const NUM = { fontFamily: SANS, fontVariantNumeric: 'tabular-nums', fontFeatureSettings: '"tnum" 1' }
+const formatDecimal2 = (n) => {
+  const v = Number(String(n).replace(/[$,]/g, ''))
+  if (!Number.isFinite(v)) return ''
+  return (Math.round(v * 100) / 100).toFixed(2)
+}
+
+const consignStatusPillStyle = (badge) => ({
+  display: 'inline-block',
+  alignSelf: 'flex-end',
+  flexShrink: 0,
+  width: 'auto',
+  maxWidth: 'min(200px, 100%)',
+  fontFamily: SANS,
+  fontVariantNumeric: 'tabular-nums',
+  fontFeatureSettings: '"tnum" 1',
+  fontSize: '11px',
+  fontWeight: 600,
+  color: '#fff',
+  background: badge.c,
+  padding: '4px 10px',
+  borderRadius: '999px',
+  lineHeight: 1.25,
+  whiteSpace: badge.compact ? 'normal' : 'nowrap',
+  textAlign: badge.compact ? 'right' : 'left',
+})
+
+const consignBadge = (c) => {
+  if (!hasDropActivity(c)) return { c: MUTED, t: 'No drop-offs yet' }
+  if (c.status === 'invalid') return { c: RED, t: NUMBERS_DONT_ADD_UP, compact: true }
+  if (c.status === 'reconciled') return { c: GREEN, t: 'Count matches' }
+  if (c.status === 'short') return { c: RED, t: `${c.variance} missing vs count` }
+  if (c.status === 'over') return { c: AMBER, t: `${-c.variance} over vs count` }
+  const n = safeOnShelf(c.expected)
+  const asOfSuffix = c.asOfDate ? ` (as of ${fmtD(c.asOfDate)})` : ''
+  return { c: KRAFT, t: `Should be on shelf: ${n}${asOfSuffix}`, compact: !!asOfSuffix }
 }
 
 const DIRECT_SOURCES = ['Shopify / online', 'Farmers market', 'Pop-up event', 'Wholesale / bulk', 'Other']
@@ -81,6 +114,14 @@ export default function JerkyMunch() {
   const [MONTH_SERIES, setMONTH_SERIES] = useState([])
   const [expanded, setExpanded] = useState(null)
   const [draft, setDraft] = useState({})
+  const [stepMsg, setStepMsg] = useState({})
+  const stepMsgTimers = useRef({})
+  const notesSaveTimers = useRef({})
+  const [notesSaved, setNotesSaved] = useState({})
+  const [updBusy, setUpdBusy] = useState({})
+  const [updErr, setUpdErr] = useState({})
+  const [addPartnerErr, setAddPartnerErr] = useState('')
+  const [priceErr, setPriceErr] = useState({})
   const [adding, setAdding] = useState(false)
   const [cf, setCf] = useState({ store: '', price: '', sent: '' })
   const [expenses, setExpenses] = useState([])
@@ -162,7 +203,10 @@ export default function JerkyMunch() {
         counted: p.counted, countedDate: p.counted_date || '', diagnosis: p.diagnosis || '',
         cycle: p.cycle, lastContact: p.last_contact, restock: p.restock, notes: p.notes,
         type: p.type || 'consignment', region: p.region || '', qbCustomerId: p.qb_customer_id || null,
-        log: (byPartner[p.id] || []).map(l => ({ at: fmtD(l.at), t: l.note })),
+        log: (byPartner[p.id] || []).map(l => {
+          const iso = String(l.at || '').slice(0, 10)
+          return { at: iso ? fmtD(iso) : '', atIso: iso, t: l.note }
+        }),
       })))
     } catch (e) { console.error('loadConsign failed', e) }
   }
@@ -481,31 +525,161 @@ export default function JerkyMunch() {
     } catch (e) { setChangePwMsg('Something went wrong — try again.') }
   }
 
+  const todayStr = isoDateInTimeZone(new Date(), BOOKS_TZ)
+
   const dv = (k) => draft[k] || ''
   const setDv = (k, v) => setDraft({ ...draft, [k]: v })
+  const dateVal = (k) => {
+    const v = draft[k]
+    return v !== undefined && v !== '' ? v : todayStr
+  }
+  const flashStep = (key, msg) => {
+    setStepMsg(s => ({ ...s, [key]: msg }))
+    if (stepMsgTimers.current[key]) clearTimeout(stepMsgTimers.current[key])
+    stepMsgTimers.current[key] = setTimeout(() => {
+      setStepMsg(s => {
+        const next = { ...s }
+        delete next[key]
+        return next
+      })
+    }, 4000)
+  }
   // core consignment mutation — optimistic setState, then persist to Supabase.
-  // Column-name translation for the two camelCase UI keys; everything else maps 1:1.
-  const upd = async (id, patch, logEntry) => {
+  const upd = async (id, patch, logEntry, logAtIso) => {
+    const before = consign.find(c => c.id === id)
+    if (!before) return false
+    setUpdErr(e => { const next = { ...e }; delete next[id]; return next })
+    setUpdBusy(b => ({ ...b, [id]: true }))
+    const evtIso = logAtIso || todayStr
     setConsign(prev => prev.map(c => c.id === id
-      ? { ...c, ...patch, log: logEntry ? [{ at: new Date().toLocaleDateString([], { month: 'short', day: 'numeric' }), t: logEntry }, ...(c.log || [])] : c.log } : c))
+      ? { ...c, ...patch, log: logEntry ? [{ at: fmtD(evtIso), atIso: evtIso, t: logEntry }, ...(c.log || [])] : c.log } : c))
     try {
       const colMap = { countedDate: 'counted_date', lastContact: 'last_contact' }
       const dbPatch = {}
       Object.keys(patch || {}).forEach(k => { dbPatch[colMap[k] || k] = patch[k] })
-      if (Object.keys(dbPatch).length) await jerkySupabase.from('consignment_partners').update(dbPatch).eq('id', id)
-      if (logEntry) {
-        await jerkySupabase.from('consignment_log').insert({ partner_id: id, note: logEntry })
-        await loadConsign()   // refresh from source of truth (skipped for silent field edits so typing stays smooth)
+      if (Object.keys(dbPatch).length) {
+        const { error } = await jerkySupabase.from('consignment_partners').update(dbPatch).eq('id', id)
+        if (error) throw error
       }
-    } catch (e) { console.error('upd failed', e) }
+      if (logEntry) {
+        const { error: logErr } = await jerkySupabase.from('consignment_log').insert({ partner_id: id, note: logEntry, at: evtIso })
+        if (logErr) throw logErr
+        await loadConsign()
+      }
+      return true
+    } catch (e) {
+      console.error('upd failed', e)
+      setConsign(prev => prev.map(c => c.id === id ? before : c))
+      setUpdErr(e => ({ ...e, [id]: "Didn't save. Try again." }))
+      return false
+    } finally {
+      setUpdBusy(b => { const next = { ...b }; delete next[id]; return next })
+    }
   }
 
-  const logCheck = (id) => { const a = Number(dv(id + '_chk')); if (a > 0) { const c = consign.find(x => x.id === id); upd(id, { paid: c.paid + a }, `Check received ${m0(a)}`); setDv(id + '_chk', '') } }
-  const logCount = (id) => { const n = dv(id + '_cnt'); if (n !== '') { upd(id, { counted: Number(n), countedDate: todayStr }, `Counted ${n} on shelf`); setDv(id + '_cnt', '') } }
-  const shipMore = (id) => { const n = Number(dv(id + '_shp')); if (n > 0) { const c = consign.find(x => x.id === id); upd(id, { sent: c.sent + n }, `Shipped ${n} more units`); setDv(id + '_shp', '') } }
+  const scheduleNotesSave = (id, notes) => {
+    if (notesSaveTimers.current[id]) clearTimeout(notesSaveTimers.current[id])
+    notesSaveTimers.current[id] = setTimeout(async () => {
+      notesSaveTimers.current[id] = null
+      const ok = await upd(id, { notes })
+      if (ok) {
+        setNotesSaved(s => ({ ...s, [id]: true }))
+        setTimeout(() => setNotesSaved(s => { const next = { ...s }; delete next[id]; return next }), 2000)
+      }
+    }, 600)
+  }
+  const flushNotesSave = (id, notes) => {
+    if (notesSaveTimers.current[id]) {
+      clearTimeout(notesSaveTimers.current[id])
+      notesSaveTimers.current[id] = null
+    }
+    return upd(id, { notes }).then(ok => {
+      if (ok) {
+        setNotesSaved(s => ({ ...s, [id]: true }))
+        setTimeout(() => setNotesSaved(s => { const next = { ...s }; delete next[id]; return next }), 2000)
+      }
+      return ok
+    })
+  }
+
+  const logDropoff = async (id) => {
+    const pieces = Number(dv(id + '_dropPieces'))
+    if (!(pieces > 0)) return
+    const c = consign.find(x => x.id === id)
+    if (!c || updBusy[id]) return
+    const date = dateVal(id + '_dropDate')
+    const mode = dv(id + '_shpMode') || 'sent'
+    const tag = mode === 'stock' ? 'stocked shelf' : 'sent more'
+    const note = `Dropped off ${pieces} pieces on ${date} (${tag})`
+    const ok = await upd(id, { sent: c.sent + pieces }, note, date)
+    if (!ok) return
+    setDv(id + '_dropPieces', '')
+    flashStep(`${id}_drop`, `Dropped off ${pieces} pieces on ${fmtD(date)}`)
+  }
+  const logPayment = async (id) => {
+    const dollars = Number(dv(id + '_payAmt'))
+    if (!(dollars > 0)) return
+    const c = consign.find(x => x.id === id)
+    if (!c || updBusy[id]) return
+    const price = Number(c.price)
+    if (!(price > 0)) return
+    const calc = paymentPiecesFromCheck(dollars, price)
+    if (!calc) return
+    let pieces
+    if (dv(id + '_payPiecesOverride') === '1') {
+      pieces = Number(dv(id + '_payPieces'))
+      if (!(pieces > 0)) return
+    } else if (calc.even) {
+      pieces = calc.rounded
+    } else if (!window.confirm(`This check doesn't divide evenly at ${money(price)}/bag. Save it as ${calc.rounded} pieces?`)) {
+      return
+    } else {
+      pieces = calc.rounded
+    }
+    const date = dateVal(id + '_payDate')
+    const note = `Paid ${date}: ${money(dollars)} for ${pieces} pieces`
+    const ok = await upd(id, { paid: c.paid + dollars }, note, date)
+    if (!ok) return
+    setDv(id + '_payAmt', '')
+    setDv(id + '_payPieces', '')
+    setDv(id + '_payPiecesOverride', '')
+    flashStep(`${id}_pay`, `Paid ${money(dollars)} for ${pieces} pieces on ${fmtD(date)}`)
+  }
+  const logCount = async (id) => {
+    const n = dv(id + '_cnt')
+    if (n === '') return
+    const c = consign.find(x => x.id === id)
+    if (!c || updBusy[id]) return
+    const date = dateVal(id + '_cntDate')
+    const expectedBefore = Math.max(recon(c).expected, 0)
+    const newCount = Number(n)
+    const ok = await upd(id, { counted: newCount, countedDate: date }, `Counted ${n} on shelf (${fmtD(date)})`, date)
+    if (!ok) return
+    setDv(id + '_cnt', '')
+    let tail
+    if (newCount === expectedBefore) tail = 'matches'
+    else if (expectedBefore > newCount) tail = `so ${expectedBefore - newCount} missing`
+    else tail = `so ${newCount - expectedBefore} over — recount?`
+    flashStep(`${id}_count`, `Saved: ${n} bags on ${fmtD(date)}. Expected ${expectedBefore}, ${tail}`)
+  }
+  const logPickup = async (id) => {
+    const n = Number(dv(id + '_pickup'))
+    if (!(n > 0)) return
+    const c = consign.find(x => x.id === id)
+    if (!c || updBusy[id]) return
+    const date = dateVal(id + '_pickupDate')
+    const note = `Picked up ${n} bags on ${date}`
+    const ok = await upd(id, { returned: c.returned + n }, note, date)
+    if (!ok) return
+    setDv(id + '_pickup', '')
+    flashStep(`${id}_pickup`, `Picked up ${n} bags on ${fmtD(date)}`)
+  }
   const addPartner = async () => {
+    setAddPartnerErr('')
     if (!cf.store.trim()) return
-    const row = { store: cf.store.trim(), price: Number(cf.price) || 0, sent: Number(cf.sent) || 0, returned: 0, paid: 0, counted: null, cycle: 1, restock: 'good' }
+    const price = Number(cf.price)
+    if (!(price > 0)) { setAddPartnerErr('Price per bag must be greater than $0.'); return }
+    const row = { store: cf.store.trim(), price, sent: Number(cf.sent) || 0, returned: 0, paid: 0, counted: null, cycle: 1, restock: 'good' }
     setCf({ store: '', price: '', sent: '' }); setAdding(false)
     try {
       const { data, error } = await jerkySupabase.from('consignment_partners').insert(row).select().single()
@@ -514,17 +688,18 @@ export default function JerkyMunch() {
       await loadConsign()
     } catch (e) { console.error('addPartner failed', e) }
   }
-  const closeOut = (id) => {
+  const closeOut = async (id) => {
     const c = consign.find(x => x.id === id); if (!c) return
-    const { variance, varVal } = recon(c)
-    const shelf = c.counted == null ? 0 : c.counted
+    const { variance, varVal, expected } = recon(c)
+    if (variance > 0 && !c.diagnosis) return
+    const shelf = c.counted != null ? c.counted : Math.max(expected, 0)
     let note
     if (variance > 0) note = c.diagnosis === 'Sold but not reported (store owes me)'
-      ? `Closed cycle — invoiced ${money(varVal)} for ${variance} bags the store sold but didn't report. New cycle opens at ${shelf} on the shelf.`
+      ? `Closed cycle — marked ${money(varVal)} owed for ${variance} bags the store sold but didn't report (send them an invoice from the Invoices tab). New cycle opens at ${shelf} on the shelf.`
       : `Closed cycle — wrote off ${variance} bags (${money(varVal)})${c.diagnosis ? ` as ${c.diagnosis.toLowerCase()}` : ''}. New cycle opens at ${shelf} on the shelf.`
     else note = `Closed cycle — counts matched. New cycle opens at ${shelf} on the shelf.`
-    upd(id, { sent: shelf, paid: 0, returned: 0, counted: shelf, diagnosis: '', cycle: (c.cycle || 1) + 1 }, note)
-    setExpanded(null)
+    const ok = await upd(id, { sent: shelf, paid: 0, returned: 0, counted: shelf, diagnosis: '', cycle: (c.cycle || 1) + 1 }, note)
+    if (ok) setExpanded(null)
   }
   const addExpense = async () => {
     if (!ef.vendor.trim()) return
@@ -633,10 +808,14 @@ export default function JerkyMunch() {
   const totalAR = invUnpaid.reduce((s, i) => s + i.amount, 0)
   const overdueAR = storeInvoices.filter(isOverdue).reduce((s, i) => s + i.amount, 0)
   const collectedAR = storeInvoices.filter(i => i.status === 'paid').reduce((s, i) => s + i.amount, 0)
-  const onShelfVal = R.reduce((s, c) => s + Math.max(c.expected, 0) * c.price, 0)
-  const missUnits = R.reduce((s, c) => s + (c.variance > 0 ? c.variance : 0), 0)
-  const missVal = R.reduce((s, c) => s + (c.variance > 0 ? c.varVal : 0), 0)
-  const worst = R.filter(c => c.variance > 0).sort((a, b) => b.variance - a.variance)[0]
+  const onShelfVal = R.reduce((s, c) => s + safeOnShelf(c.expected) * (Number(c.price) || 0), 0)
+  const missing = missingSummary(R)
+  const missKpiSub = missing.bags
+    ? `${money(missing.unaccountedVal)} unaccounted · ${money(missing.owedVal)} confirmed owed · ${missing.stores} store${missing.stores === 1 ? '' : 's'} short`
+    : 'Every counted store matches the shelf'
+  const missOverviewSub = missing.bags
+    ? `${money(missing.unaccountedVal)} in missing bags · ${missing.stores} store${missing.stores === 1 ? '' : 's'}`
+    : 'Nothing missing from shelves'
   const directRev = direct.reduce((s, d) => s + d.rev, 0)
   const directUnits = direct.reduce((s, d) => s + d.units, 0)
   const adSpend = ads.reduce((s, a) => s + a.spend, 0)
@@ -660,7 +839,8 @@ export default function JerkyMunch() {
   const totalOpex = opexNonAd + adSpend
   const netProfit = grossProfit - totalOpex
   const bagsPeriod = PRODUCTS.reduce((s, p) => s + p[period], 0)
-  const bagsOut = R.reduce((s, c) => s + Math.max(c.expected, 0), 0)
+  const onShelfPiecesTotal = R.reduce((s, c) => s + safeOnShelf(c.expected), 0)
+  const bagsOut = onShelfPiecesTotal
 
   // ── Boards & Camp product lines (live current-month figures) ──
   // Revenue = Σ(month_units × price); COGS = Σ(month_units × per-unit cost setting)
@@ -761,8 +941,9 @@ export default function JerkyMunch() {
 
   const card = { background: CARDBG, border: `1px solid ${BORDER}`, borderRadius: '2px', padding: '20px' }
   const lbl = { fontFamily: "'Inter', sans-serif", fontSize: '11px', fontWeight: 600, letterSpacing: '0.7px', textTransform: 'uppercase', color: '#96866C' }
-  const inp = { padding: '10px 12px', fontSize: '14px', border: `1px solid ${BORDER}`, borderRadius: '2px', background: CREAM, color: INK, outline: 'none', fontFamily: 'inherit' }
-  const big = { fontFamily: "'Inter', sans-serif", fontWeight: 700, letterSpacing: '-0.4px' }
+  const inp = { padding: '10px 12px', fontSize: '14px', border: `1px solid ${BORDER}`, borderRadius: '2px', background: CREAM, color: INK, outline: 'none', fontFamily: 'inherit', fontVariantNumeric: 'tabular-nums' }
+  const consignInp = { ...inp, fontFamily: SANS, fontVariantNumeric: 'tabular-nums', fontFeatureSettings: '"tnum" 1' }
+  const big = { fontFamily: SANS, fontWeight: 700, letterSpacing: '-0.4px', fontVariantNumeric: 'tabular-nums' }
   const btn = { fontFamily: "'Inter', sans-serif", fontWeight: 600, fontSize: '13px', letterSpacing: '0.1px', cursor: 'pointer' }
 
   // ── auth gate render paths ─────────────────────────────────────────
@@ -865,7 +1046,7 @@ export default function JerkyMunch() {
   const Row = ({ l, v, neg, bold, top }) => (
     <div style={{ display: 'flex', justifyContent: 'space-between', padding: '6px 0', borderTop: top ? `1px solid ${BORDER}` : 'none' }}>
       <span style={{ fontSize: '13px', color: bold ? INK : MUTED, fontWeight: bold ? 600 : 400 }}>{l}</span>
-      <span style={{ fontFamily: MONO, fontSize: '13px', color: neg ? RED : (bold ? INK : MUTED), fontWeight: bold ? 600 : 400 }}>{v}</span>
+      <span style={{ ...NUM, fontSize: '13px', color: neg ? RED : (bold ? INK : MUTED), fontWeight: bold ? 600 : 400 }}>{v}</span>
     </div>
   )
   const Pill = ({ value, opts, map, onChange }) => (
@@ -911,7 +1092,10 @@ export default function JerkyMunch() {
 .jm-main{flex:1;min-width:0;max-width:1180px;padding:24px 30px 60px}
 .jm-click{transition:box-shadow .12s}.jm-click:hover{box-shadow:inset 0 0 0 1.5px ${SPICE}}
 @media(max-width:860px){.jm-shell{flex-direction:column}.jm-side{width:auto;height:auto;position:static;flex-direction:column;padding:14px 12px}.jm-nav{flex-direction:row;overflow-x:auto;gap:6px;padding-bottom:4px}.jm-navbtn{width:auto;padding:8px 15px;border-radius:2px;background:rgba(255,255,255,.07)}.jm-main{padding:18px 16px 52px;max-width:100%}}
-@media(max-width:600px){input,select,textarea{font-size:16px!important}button{min-height:40px}}`}</style>
+@media(max-width:600px){input,select,textarea{font-size:16px!important}button{min-height:40px}}
+.jm-consign input,.jm-consign select,.jm-consign textarea{font-family:'Inter',sans-serif!important;font-variant-numeric:tabular-nums!important;font-feature-settings:"tnum" 1!important}
+.jm-consign input[type=date],.jm-consign input[type=date]::-webkit-datetime-edit,.jm-consign input[type=date]::-webkit-datetime-edit-fields-wrapper,.jm-consign input[type=date]::-webkit-datetime-edit-text,.jm-consign input[type=date]::-webkit-datetime-edit-month-field,.jm-consign input[type=date]::-webkit-datetime-edit-day-field,.jm-consign input[type=date]::-webkit-datetime-edit-year-field{font-family:'Inter',sans-serif!important;font-variant-numeric:tabular-nums!important;font-feature-settings:"tnum" 1!important}
+.jm-consign input[type=number],.jm-consign input[type=text],.jm-consign input[inputmode=decimal],.jm-consign input[inputmode=numeric]{font-family:'Inter',sans-serif!important;font-variant-numeric:tabular-nums!important;font-feature-settings:"tnum" 1!important}`}</style>
       </Head>
 
       <div className="jm-shell">
@@ -1003,7 +1187,7 @@ export default function JerkyMunch() {
                     <KPI k="Gross profit" v={m0(ovStmt.gross)} sub={`${ovStmt.income.total ? Math.round(ovStmt.gross / ovStmt.income.total * 100) : 0}% margin`} accent={KRAFT} onClick={() => setTab('financials')} />
                     <KPI k="Net profit" v={m0(ovStmt.net)} sub="after all costs" accent={ovStmt.net >= 0 ? GREEN : RED} onClick={() => setTab('financials')} />
                     <KPI k="Out on consignment" v={m0(onShelfVal)} sub={`${bagsOut} bags in stores`} accent={KRAFT} onClick={() => setTab('consign')} />
-                    <KPI k="Missing pieces" v={`${missUnits}`} sub={`${m0(missVal)} to investigate`} accent={missUnits ? RED : GREEN} onClick={() => setTab('consign')} />
+                    <KPI k="Bags missing" v={missing.bags} sub={missOverviewSub} accent={missing.bags ? RED : GREEN} onClick={() => setTab('consign')} />
                   </div>
 
                   <div style={{ ...card, marginBottom: '16px' }}>
@@ -1129,19 +1313,23 @@ export default function JerkyMunch() {
 
           {/* ===== CONSIGNMENT ===== */}
           {tab === 'consign' && (
+            <div className="jm-consign">
             <>
               <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap', marginBottom: '16px' }}>
                 <KPI k="Partners" v={consign.length} sub="stores carrying you" />
-                <KPI k="Out on shelves" v={R.reduce((s, c) => s + Math.max(c.expected, 0), 0)} sub={`${m0(onShelfVal)} of product`} accent={KRAFT} />
+                <KPI k="Out on shelves" v={onShelfPiecesTotal} sub={`${m0(onShelfVal)} of product`} accent={KRAFT} />
                 <KPI k="Collected" v={m0(cashCollected)} sub="checks in the door" accent={GREEN} />
-                <KPI k="Missing" v={missUnits} sub={`${m0(missVal)} to chase`} accent={missUnits ? RED : GREEN} />
+                <KPI k="Bags missing" v={missing.bags} sub={missKpiSub} accent={missing.bags ? RED : GREEN} />
               </div>
 
               {R.some(c => c.variance > 0) && (
                 <div style={{ ...card, marginBottom: '16px', background: '#FBEDE9', borderColor: '#E7C3B8' }}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', flexWrap: 'wrap', gap: '8px', marginBottom: '10px' }}>
-                    <div style={{ ...lbl, color: RED }}>Money to collect</div>
-                    <div style={{ fontSize: '13px', color: MUTED }}><b style={{ ...big, fontSize: '18px', color: RED }}>{m0(missVal)}</b> across {R.filter(c => c.variance > 0).length} stores</div>
+                    <div style={{ ...lbl, color: RED }}>Missing from shelves</div>
+                    <div style={{ fontSize: '13px', color: MUTED, lineHeight: 1.45, textAlign: 'right' }}>
+                      <b style={{ ...big, fontSize: '18px', color: RED }}>{missing.bags} bags</b> ({money(missing.unaccountedVal)})
+                      <span style={{ display: 'block', fontSize: '12px', marginTop: '2px' }}>{money(missing.owedVal)} confirmed owed · {missing.stores} store{missing.stores === 1 ? '' : 's'} short</span>
+                    </div>
                   </div>
                   {R.filter(c => c.variance > 0).sort((a, b) => b.varVal - a.varVal).map((c, i) => (
                     <div key={c.id} onClick={() => setExpanded(c.id)} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '8px 0', borderTop: i ? '1px solid #F2D2CB' : 'none', cursor: 'pointer', gap: '8px', flexWrap: 'wrap' }}>
@@ -1166,8 +1354,9 @@ export default function JerkyMunch() {
                     <input value={cf.price} onChange={e => setCf({ ...cf, price: e.target.value })} type="number" placeholder="$ / unit" style={{ ...inp, flex: 1, minWidth: '90px' }} />
                     <input value={cf.sent} onChange={e => setCf({ ...cf, sent: e.target.value })} type="number" placeholder="Units sent" style={{ ...inp, flex: 1, minWidth: '100px' }} />
                   </div>
+                  {addPartnerErr && <div style={{ color: RED, fontSize: '13px', marginTop: '10px' }}>{addPartnerErr}</div>}
                   <div style={{ display: 'flex', gap: '8px', marginTop: '12px' }}>
-                    <button onClick={() => setAdding(false)} style={{ flex: 1, background: 'none', border: `1px solid ${BORDER}`, borderRadius: '2px', padding: '11px', ...btn, color: MUTED }}>Cancel</button>
+                    <button onClick={() => { setAdding(false); setAddPartnerErr('') }} style={{ flex: 1, background: 'none', border: `1px solid ${BORDER}`, borderRadius: '2px', padding: '11px', ...btn, color: MUTED }}>Cancel</button>
                     <button onClick={addPartner} style={{ flex: 2, background: SPICE, color: '#fff', border: 'none', borderRadius: '2px', padding: '11px', ...btn }}>+ Add partner</button>
                   </div>
                 </div>
@@ -1176,7 +1365,8 @@ export default function JerkyMunch() {
               {R.map((c, idx) => {
                 const open = expanded === c.id
                 const showHeader = idx === 0 || (R[idx - 1] && R[idx - 1].region !== c.region)
-                const badge = c.status === 'reconciled' ? { c: GREEN, t: 'Matches' } : c.status === 'short' ? { c: RED, t: `${c.variance} missing` } : c.status === 'over' ? { c: AMBER, t: `${-c.variance} over` } : { c: MUTED, t: 'Not counted' }
+                const badge = consignBadge(c)
+                const saving = !!updBusy[c.id]
                 return (
                   <Fragment key={c.id}>
                   {showHeader && <div style={{ ...lbl, color: SPICE, fontSize: '12px', margin: idx === 0 ? '2px 0 10px' : '24px 0 10px', display: 'flex', alignItems: 'center', gap: '10px' }}>{c.region || 'Other'}<span style={{ flex: 1, height: '1px', background: BORDER }} /></div>}
@@ -1185,12 +1375,13 @@ export default function JerkyMunch() {
                       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '12px', flexWrap: 'wrap' }}>
                         <div>
                           <div style={{ ...big, fontSize: '20px', color: INK }}>{c.store}</div>
-                          <div style={{ fontSize: '12px', color: MUTED, marginTop: '3px' }}>
-                            {money(c.price)}/unit · sent {c.sent} · paid for {c.paidUnits} · {money(c.paid)} collected · cycle {c.cycle || 1}
+                          <div style={{ fontSize: '12px', color: MUTED, marginTop: '3px', lineHeight: 1.45 }}>
+                            {money2(c.price)}/bag · dropped off {c.sent} · paid for {c.paidUnits} pieces ({money(c.paid)}) · picked up {c.returned}
+                            {hasDropActivity(c) && <> · <b style={{ color: INK }}>{safeOnShelf(c.expected)} on shelf</b>{c.asOfDate ? ` as of ${fmtD(c.asOfDate)}` : ''}</>}
                           </div>
                         </div>
                         <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '6px' }}>
-                          <span style={{ fontFamily: "'Inter', sans-serif", fontSize: '12px', fontWeight: 600, color: '#fff', background: badge.c, padding: '5px 11px', borderRadius: '2px', whiteSpace: 'nowrap' }}>{badge.t}</span>
+                          <span style={consignStatusPillStyle(badge)}>{badge.t}</span>
                           {c.restock && c.restock !== 'good' && <span style={{ fontSize: '11px', fontWeight: 600, color: RM[c.restock].color, background: RM[c.restock].color + '1A', padding: '3px 10px', borderRadius: '2px', whiteSpace: 'nowrap' }}>{RM[c.restock].label}</span>}
                         </div>
                       </div>
@@ -1203,61 +1394,201 @@ export default function JerkyMunch() {
                     </div>
 
                     {open && (
-                      <div style={{ padding: '0 18px 18px', borderTop: `1px solid ${CREAM}` }}>
-                        <div style={{ ...lbl, margin: '14px 0 6px' }}>Price per bag</div>
-                        <div style={{ display: 'flex', gap: '8px', alignItems: 'center', flexWrap: 'wrap', marginBottom: '14px' }}>
-                          <span style={{ color: MUTED }}>$</span>
-                          <input value={dv(`price_${c.id}`) !== '' ? dv(`price_${c.id}`) : String(c.price)} onChange={e => setDv(`price_${c.id}`, e.target.value)} type="number" inputMode="decimal" style={{ ...inp, width: '110px', fontSize: '16px' }} />
-                          <button onClick={() => { const v = Number(dv(`price_${c.id}`)); if (v > 0 && v !== c.price) { upd(c.id, { price: v }, `Set price to ${money(v)}/bag`); } setDv(`price_${c.id}`, '') }} style={{ background: CHAR, color: CREAM, border: 'none', borderRadius: '2px', padding: '10px 16px', ...btn }}>Save</button>
-                          <span style={{ fontSize: '11.5px', color: MUTED }}>drives what's owed per count</span>
-                        </div>
-                        <div style={{ ...lbl, margin: '14px 0 6px' }}>Where the bags went</div>
-                        <div style={{ background: CREAM, borderRadius: '2px', padding: '14px 16px' }}>
-                          <Row l="Units sent out" v={c.sent} />
-                          <Row l={`− Paid by checks (${money(c.paid)} ÷ ${money(c.price)})`} v={`−${c.paidUnits}`} />
-                          <Row l="− Returned to you" v={`−${c.returned}`} />
-                          <Row l="Should still be on the shelf" v={Math.max(c.expected, 0)} bold top />
-                          <Row l={`Actually counted (${fmtD(c.countedDate)})`} v={c.counted == null ? '— not counted' : c.counted} />
-                          <Row
-                            l={c.variance > 0 ? 'Missing — unaccounted for' : c.variance < 0 ? 'Overage — recount' : 'Matches perfectly'}
-                            v={c.variance > 0 ? `${c.variance}  (${money(c.varVal)})` : c.variance < 0 ? `${-c.variance}` : '0'}
-                            neg={c.variance > 0} bold top />
-                        </div>
+                      <div style={{ padding: '0 18px 18px', borderTop: `1px solid ${CREAM}`, maxWidth: '100%', minWidth: 0, boxSizing: 'border-box', overflow: 'hidden' }}>
+                        {(() => {
+                          const ledger = buildActivityLedger(c)
+                          const shpMode = dv(c.id + '_shpMode') || 'sent'
+                          const dropVal = dv(c.id + '_dropPieces')
+                          const payAmt = dv(c.id + '_payAmt')
+                          const payPieces = dv(c.id + '_payPieces')
+                          const pickupVal = dv(c.id + '_pickup')
+                          const cntVal = dv(c.id + '_cnt')
+                          const countOpen = dv(c.id + '_countOpen') === '1'
+                          const stepTitle = { fontSize: '14px', fontWeight: 700, color: INK, margin: '0 0 4px' }
+                          const stepHint = { fontSize: '12.5px', color: MUTED, margin: '0 0 8px', lineHeight: 1.45 }
+                          const stepConfirm = { fontSize: '12px', color: GREEN, marginTop: '8px', lineHeight: 1.45 }
+                          const fieldRow = { display: 'flex', flexDirection: 'column', gap: '10px', width: '100%', maxWidth: '100%', minWidth: 0 }
+                          const inputFull = { ...consignInp, width: '100%', maxWidth: '100%', boxSizing: 'border-box', display: 'block', minWidth: 0 }
+                          const priceDraftKey = `price_${c.id}`
+                          const priceFieldValue = dv(priceDraftKey) !== '' ? dv(priceDraftKey) : (Number(c.price) > 0 ? formatDecimal2(c.price) : '')
+                          const fieldLbl = { fontSize: '12px', fontWeight: 600, color: MUTED, marginBottom: '-4px' }
+                          const actionBtn = { width: '100%', maxWidth: '100%', boxSizing: 'border-box', border: 'none', borderRadius: '2px', padding: '11px 14px', ...btn, fontSize: '13px' }
+                          const LabeledInput = ({ label, ...props }) => (
+                            <label style={{ display: 'block', width: '100%', maxWidth: '100%', minWidth: 0 }}>
+                              <div style={fieldLbl}>{label}</div>
+                              <input {...props} style={inputFull} />
+                            </label>
+                          )
+                          const priceOk = Number(c.price) > 0
+                          const payOverride = dv(c.id + '_payPiecesOverride') === '1'
+                          const payCalc = Number(payAmt) > 0 && priceOk ? paymentPiecesFromCheck(payAmt, c.price) : null
+                          const payCoverLine = (() => {
+                            if (!priceOk) return 'Set price per bag first'
+                            if (!(Number(payAmt) > 0) || !payCalc) return null
+                            const ppb = money2(c.price)
+                            if (payCalc.even) return `Covers ${payCalc.rounded} pieces at ${ppb}/bag`
+                            const frac = Math.round(payCalc.exact * 10) / 10
+                            return `Covers ${frac} pieces at ${ppb}/bag, doesn't divide evenly`
+                          })()
+                          const payCanSave = priceOk && Number(payAmt) > 0 && !saving && (!payOverride || Number(payPieces) > 0)
+                          const priceBlock = (
+                            <>
+                              <div style={{ ...lbl, margin: '0 0 6px' }}>Price per bag</div>
+                              <div style={{ display: 'flex', gap: '8px', alignItems: 'center', flexWrap: 'wrap', marginBottom: '14px' }}>
+                                <span style={{ color: MUTED }}>$</span>
+                                <input
+                                  value={priceFieldValue}
+                                  onChange={e => { setDv(priceDraftKey, e.target.value); setPriceErr(p => { const n = { ...p }; delete n[c.id]; return n }) }}
+                                  onBlur={e => { const f = formatDecimal2(e.target.value); if (f) setDv(priceDraftKey, f) }}
+                                  type="text"
+                                  inputMode="decimal"
+                                  autoComplete="off"
+                                  style={{ ...consignInp, width: '110px', fontSize: '16px' }}
+                                />
+                                <button type="button" disabled={saving} onClick={async () => {
+                                  const v = Number(formatDecimal2(dv(priceDraftKey) || c.price))
+                                  if (!(v > 0)) { setPriceErr(p => ({ ...p, [c.id]: 'Price per bag must be greater than $0.' })); return }
+                                  setPriceErr(p => { const n = { ...p }; delete n[c.id]; return n })
+                                  if (v !== c.price) {
+                                    const ok = await upd(c.id, { price: v }, `Set price to ${money2(v)}/bag`)
+                                    if (ok) setDv(priceDraftKey, formatDecimal2(v))
+                                  }
+                                }} style={{ background: CHAR, color: CREAM, border: 'none', borderRadius: '2px', padding: '10px 16px', ...btn, opacity: saving ? 0.5 : 1 }}>Save</button>
+                                <span style={{ fontSize: '11.5px', color: MUTED }}>drives check → pieces</span>
+                                {priceErr[c.id] && <div style={{ width: '100%', color: RED, fontSize: '13px' }}>{priceErr[c.id]}</div>}
+                              </div>
+                            </>
+                          )
+                          return (
+                            <>
+                              <div style={{ ...lbl, margin: '14px 0 8px' }}>Activity</div>
+                              {ledger.length === 0 ? (
+                                <div style={{ fontSize: '13px', color: MUTED, marginBottom: '14px', lineHeight: 1.45 }}>
+                                  No dated entries yet — log a drop-off or payment below.{hasDropActivity(c) ? <> Books show <b style={{ color: INK }}>{safeOnShelf(c.expected)}</b> on shelf from totals.</> : null}
+                                </div>
+                              ) : (
+                                <div style={{ marginBottom: '16px', border: `1px solid ${BORDER}`, borderRadius: '2px', overflow: 'hidden' }}>
+                                  <div style={{ display: 'grid', gridTemplateColumns: '88px 1fr 72px', gap: '8px', padding: '8px 12px', background: CREAM, ...lbl, fontSize: '10px' }}>
+                                    <span>Date</span><span>What happened</span><span style={{ textAlign: 'right' }}>On shelf</span>
+                                  </div>
+                                  {ledger.map((row, i) => (
+                                    <div key={i} style={{ display: 'grid', gridTemplateColumns: '88px 1fr 72px', gap: '8px', padding: '8px 12px', borderTop: `1px solid ${CREAM}`, fontSize: '12.5px', alignItems: 'baseline' }}>
+                                      <span style={{ ...NUM, color: '#BFB096' }}>{row.dateIso ? fmtD(row.dateIso) : 'Undated'}</span>
+                                      <span style={{ color: MUTED }}>{row.label}</span>
+                                      <span style={{ ...NUM, textAlign: 'right', fontWeight: 600, color: INK }}>{row.onShelf}</span>
+                                    </div>
+                                  ))}
+                                </div>
+                              )}
 
-                        {c.variance > 0 && (
-                          <div style={{ marginTop: '14px' }}>
-                            <div style={{ ...lbl, marginBottom: '6px' }}>Why are {c.variance} missing?</div>
-                            <select value={c.diagnosis} onChange={e => upd(c.id, { diagnosis: e.target.value }, `Diagnosed missing units: ${e.target.value || 'cleared'}`)} style={{ ...inp, width: '100%', cursor: 'pointer' }}>
+                              <div style={{ ...lbl, margin: '16px 0 10px' }}>Log activity</div>
+                              {updErr[c.id] && <div style={{ color: RED, fontSize: '13px', marginBottom: '10px' }}>{updErr[c.id]}</div>}
+
+                              <div style={{ marginBottom: '16px' }}>
+                                <div style={stepTitle}>1. Dropped off</div>
+                                <p style={stepHint}>Date you added pieces at this store.</p>
+                                <div style={{ display: 'flex', gap: '6px', marginBottom: '8px', flexWrap: 'wrap' }}>
+                                  <button type="button" onClick={() => setDv(c.id + '_shpMode', 'sent')} style={{ flex: 1, minWidth: '140px', background: shpMode === 'sent' ? CHAR : CARDBG, color: shpMode === 'sent' ? CREAM : INK, border: `1px solid ${BORDER}`, borderRadius: '2px', padding: '9px 10px', ...btn, fontSize: '12px' }}>Sent them more</button>
+                                  <button type="button" onClick={() => setDv(c.id + '_shpMode', 'stock')} style={{ flex: 1, minWidth: '140px', background: shpMode === 'stock' ? CHAR : CARDBG, color: shpMode === 'stock' ? CREAM : INK, border: `1px solid ${BORDER}`, borderRadius: '2px', padding: '9px 10px', ...btn, fontSize: '12px' }}>Stocked their shelf</button>
+                                </div>
+                                <div style={fieldRow}>
+                                  <LabeledInput label="Drop-off date" value={dateVal(c.id + '_dropDate')} onChange={e => setDv(c.id + '_dropDate', e.target.value)} type="date" />
+                                  <LabeledInput label="Pieces added" value={dropVal} onChange={e => setDv(c.id + '_dropPieces', e.target.value)} type="text" inputMode="numeric" placeholder="e.g. 100" />
+                                  <button type="button" disabled={!(Number(dropVal) > 0) || saving} onClick={() => logDropoff(c.id)} style={{ ...actionBtn, background: CHAR, color: CREAM, opacity: !(Number(dropVal) > 0) || saving ? 0.45 : 1 }}>Save drop-off</button>
+                                </div>
+                                {stepMsg[`${c.id}_drop`] && <div style={stepConfirm}>{stepMsg[`${c.id}_drop`]}</div>}
+                              </div>
+
+                              <div style={{ marginBottom: '16px' }}>
+                                {priceBlock}
+                                <div style={stepTitle}>2. Got paid</div>
+                                <p style={stepHint}>Date paid and check amount — pieces come from price per bag.</p>
+                                <div style={fieldRow}>
+                                  <LabeledInput label="Date paid" value={dateVal(c.id + '_payDate')} onChange={e => setDv(c.id + '_payDate', e.target.value)} type="date" />
+                                  <LabeledInput label="Check amount $" value={payAmt} onChange={e => setDv(c.id + '_payAmt', e.target.value)} type="text" inputMode="decimal" placeholder="e.g. 360" />
+                                  {payCoverLine && (
+                                    <div style={{ fontSize: '12.5px', color: priceOk ? MUTED : RED, lineHeight: 1.45 }}>
+                                      {payCoverLine}
+                                      {priceOk && payCalc && !payCalc.even && !payOverride && (
+                                        <> {' '}
+                                          <button type="button" onClick={() => { setDv(c.id + '_payPiecesOverride', '1'); setDv(c.id + '_payPieces', String(payCalc.rounded)) }} style={{ background: 'none', border: 'none', padding: 0, color: KRAFT, fontWeight: 600, cursor: 'pointer', textDecoration: 'underline', fontSize: 'inherit' }}>change</button>
+                                        </>
+                                      )}
+                                      {payOverride && (
+                                        <> {' '}
+                                          <button type="button" onClick={() => { setDv(c.id + '_payPiecesOverride', ''); setDv(c.id + '_payPieces', '') }} style={{ background: 'none', border: 'none', padding: 0, color: MUTED, fontWeight: 600, cursor: 'pointer', textDecoration: 'underline', fontSize: 'inherit' }}>use calculated</button>
+                                        </>
+                                      )}
+                                    </div>
+                                  )}
+                                  {payOverride && (
+                                    <LabeledInput label="Pieces paid for (override)" value={payPieces} onChange={e => setDv(c.id + '_payPieces', e.target.value)} type="text" inputMode="numeric" placeholder="e.g. 80" />
+                                  )}
+                                  <button type="button" disabled={!payCanSave} onClick={() => logPayment(c.id)} style={{ ...actionBtn, background: GREEN, color: '#fff', opacity: !payCanSave ? 0.45 : 1 }}>Save payment</button>
+                                </div>
+                                {stepMsg[`${c.id}_pay`] && <div style={stepConfirm}>{stepMsg[`${c.id}_pay`]}</div>}
+                              </div>
+
+                              <div style={{ marginBottom: '16px' }}>
+                                <div style={stepTitle}>3. Picked up bags</div>
+                                <p style={stepHint}>Bags they gave back to you.</p>
+                                <div style={fieldRow}>
+                                  <LabeledInput label="Date picked up" value={dateVal(c.id + '_pickupDate')} onChange={e => setDv(c.id + '_pickupDate', e.target.value)} type="date" />
+                                  <LabeledInput label="Pieces picked up" value={pickupVal} onChange={e => setDv(c.id + '_pickup', e.target.value)} type="text" inputMode="numeric" placeholder="e.g. 5" />
+                                  <button type="button" disabled={!(Number(pickupVal) > 0) || saving} onClick={() => logPickup(c.id)} style={{ ...actionBtn, background: KRAFT, color: '#fff', opacity: !(Number(pickupVal) > 0) || saving ? 0.45 : 1 }}>Save pickup</button>
+                                </div>
+                                {stepMsg[`${c.id}_pickup`] && <div style={stepConfirm}>{stepMsg[`${c.id}_pickup`]}</div>}
+                              </div>
+
+                              <details open={countOpen} onToggle={e => setDv(c.id + '_countOpen', e.target.open ? '1' : '')} style={{ marginBottom: '14px' }}>
+                                <summary style={{ cursor: 'pointer', fontSize: '13px', fontWeight: 600, color: INK, marginBottom: countOpen ? '10px' : 0 }}>Did a shelf count? (optional)</summary>
+                                <p style={stepHint}>Only if you physically counted the shelf — used to spot gaps vs the books.</p>
+                                <div style={fieldRow}>
+                                  <input value={cntVal} onChange={e => setDv(c.id + '_cnt', e.target.value)} type="text" inputMode="numeric" placeholder="bags on shelf" style={inputFull} />
+                                  <input value={dateVal(c.id + '_cntDate')} onChange={e => setDv(c.id + '_cntDate', e.target.value)} type="date" style={inputFull} />
+                                  <button type="button" disabled={cntVal === '' || saving} onClick={() => logCount(c.id)} style={{ ...actionBtn, background: 'none', color: INK, border: `1px solid ${BORDER}`, opacity: cntVal === '' || saving ? 0.45 : 1 }}>Save shelf count</button>
+                                </div>
+                                {stepMsg[`${c.id}_count`] && <div style={stepConfirm}>{stepMsg[`${c.id}_count`]}</div>}
+                                {c.countActive && c.counted != null && (
+                                  <div style={{ marginTop: '10px', background: CREAM, borderRadius: '2px', padding: '12px 14px' }}>
+                                    <Row l="Books say on shelf" v={c.expected < 0 ? 'Invalid' : safeOnShelf(c.expected)} />
+                                    <Row l={`Your count (${fmtD(c.countedDate)})`} v={c.counted} />
+                                    {c.status === 'invalid' ? (
+                                      <Row l={NUMBERS_DONT_ADD_UP} v="" neg bold top />
+                                    ) : c.variance !== 0 ? (
+                                      <Row l={c.variance > 0 ? 'Gap vs count' : 'Over vs count'} v={c.variance > 0 ? `${c.variance} (${money(c.varVal)})` : `${-c.variance}`} neg={c.variance > 0} bold top />
+                                    ) : (
+                                      <Row l="Count matches books" v="0" bold top />
+                                    )}
+                                  </div>
+                                )}
+                              </details>
+                            </>
+                          )
+                        })()}
+
+                        {c.countActive && c.variance > 0 && (
+                          <div style={{ marginTop: '4px', marginBottom: '14px' }}>
+                            <div style={{ ...lbl, marginBottom: '6px' }}>Why are {c.variance} missing vs count?</div>
+                            <select value={c.diagnosis} disabled={saving} onChange={e => {
+                              const v = e.target.value
+                              const logEntry = v && v !== c.diagnosis ? `Diagnosed missing units: ${v}` : undefined
+                              upd(c.id, { diagnosis: v }, logEntry)
+                            }} style={{ ...inp, width: '100%', cursor: 'pointer' }}>
                               {DIAGNOSES.map(d => <option key={d} value={d}>{d || 'Pick a reason…'}</option>)}
                             </select>
-                            {c.diagnosis === 'Sold but not reported (store owes me)' && (
-                              <div style={{ marginTop: '8px', fontSize: '13px', color: RED, background: '#FBEDE9', borderRadius: '2px', padding: '9px 12px' }}>
-                                Then <b>{c.store}</b> owes you <b>{money(c.varVal)}</b>. Send them an invoice for the {c.variance} units.
-                              </div>
-                            )}
                           </div>
                         )}
 
-                        <div style={{ ...lbl, margin: '16px 0 8px' }}>Update this account</div>
-                        <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
-                          <div style={{ flex: 1, minWidth: '150px', display: 'flex', gap: '6px' }}>
-                            <input value={dv(c.id + '_chk')} onChange={e => setDv(c.id + '_chk', e.target.value)} type="number" placeholder="Check $" style={{ ...inp, flex: 1, minWidth: 0 }} />
-                            <button onClick={() => logCheck(c.id)} style={{ background: GREEN, color: '#fff', border: 'none', borderRadius: '2px', padding: '0 14px', ...btn, fontSize: '12px' }}>Log</button>
-                          </div>
-                          <div style={{ flex: 1, minWidth: '150px', display: 'flex', gap: '6px' }}>
-                            <input value={dv(c.id + '_cnt')} onChange={e => setDv(c.id + '_cnt', e.target.value)} type="number" placeholder="Count on shelf" style={{ ...inp, flex: 1, minWidth: 0 }} />
-                            <button onClick={() => logCount(c.id)} style={{ background: KRAFT, color: '#fff', border: 'none', borderRadius: '2px', padding: '0 14px', ...btn, fontSize: '12px' }}>Log</button>
-                          </div>
-                          <div style={{ flex: 1, minWidth: '150px', display: 'flex', gap: '6px' }}>
-                            <input value={dv(c.id + '_shp')} onChange={e => setDv(c.id + '_shp', e.target.value)} type="number" placeholder="Ship more" style={{ ...inp, flex: 1, minWidth: 0 }} />
-                            <button onClick={() => shipMore(c.id)} style={{ background: CHAR, color: CREAM, border: 'none', borderRadius: '2px', padding: '0 14px', ...btn, fontSize: '12px' }}>Ship</button>
-                          </div>
-                        </div>
-
                         <div style={{ ...lbl, margin: '18px 0 8px' }}>Store relationship</div>
                         <div style={{ display: 'flex', gap: '10px', alignItems: 'center', flexWrap: 'wrap', marginBottom: '10px' }}>
-                          <span style={{ fontSize: '13px', color: MUTED }}>Last spoke: <b style={{ color: INK }}>{fmtD(c.lastContact)}</b>{c.lastContact ? ` · ${daysSince(c.lastContact)}d ago` : ''}</span>
-                          <button onClick={() => upd(c.id, { lastContact: todayStr }, 'Spoke with the store')} style={{ background: KRAFT, color: '#fff', border: 'none', borderRadius: '2px', padding: '5px 13px', ...btn, fontSize: '11px' }}>Spoke today</button>
+                          <span style={{ fontSize: '13px', color: MUTED }}>
+                            Last talked to store:{' '}
+                            {c.lastContact
+                              ? <><b style={{ color: INK }}>{fmtD(c.lastContact)}</b> ({daysSince(c.lastContact)} days ago)</>
+                              : <b style={{ color: INK }}>Haven&apos;t talked yet</b>}
+                          </span>
+                          <button type="button" disabled={saving} onClick={() => upd(c.id, { lastContact: todayStr }, 'Spoke with the store')} style={{ background: KRAFT, color: '#fff', border: 'none', borderRadius: '2px', padding: '5px 13px', ...btn, fontSize: '11px', opacity: saving ? 0.5 : 1 }}>I talked to them today</button>
                         </div>
                         <div style={{ display: 'flex', gap: '10px', alignItems: 'center', flexWrap: 'wrap', marginBottom: '10px' }}>
                           <span style={{ fontSize: '13px', color: MUTED }}>Do they need more?</span>
@@ -1265,26 +1596,30 @@ export default function JerkyMunch() {
                             {RESTOCK.map(r => <option key={r.id} value={r.id}>{r.label}</option>)}
                           </select>
                         </div>
-                        <textarea value={c.notes || ''} onChange={e => upd(c.id, { notes: e.target.value })} rows={2} placeholder="Notes — who you talk to, what they like, what they said…" style={{ ...inp, width: '100%', resize: 'vertical', fontFamily: 'inherit' }} />
+                        <textarea value={dv(`notes_${c.id}`) !== undefined ? dv(`notes_${c.id}`) : (c.notes || '')} onChange={e => { setDv(`notes_${c.id}`, e.target.value); scheduleNotesSave(c.id, e.target.value) }} onBlur={e => flushNotesSave(c.id, e.target.value)} rows={2} placeholder="Notes — who you talk to, what they like, what they said…" style={{ ...inp, width: '100%', resize: 'vertical', fontFamily: 'inherit' }} />
+                        {notesSaved[c.id] && <div style={{ fontSize: '12px', color: GREEN, marginTop: '6px' }}>Saved</div>}
 
                         <div style={{ ...lbl, margin: '18px 0 6px' }}>End of cycle</div>
-                        <button onClick={() => { if (window.confirm(`Close out cycle ${c.cycle || 1} for ${c.store}? This settles the ${c.variance > 0 ? c.variance + ' missing bags' : 'count'} and starts a fresh cycle from the ${c.counted == null ? 0 : c.counted} bags on the shelf now.`)) closeOut(c.id) }} style={{ width: '100%', background: 'none', color: INK, border: `1px solid ${BORDER}`, borderRadius: '2px', padding: '12px', ...btn }}>Close out this cycle →</button>
+                        {(() => {
+                          const closeNeedDx = c.status === 'short' && !c.diagnosis
+                          const closeDisabled = closeNeedDx || saving
+                          const shelfNow = c.counted != null ? c.counted : safeOnShelf(c.expected)
+                          return (
+                            <>
+                              <button type="button" disabled={closeDisabled} onClick={() => {
+                                if (closeDisabled) return
+                                if (window.confirm(`Close out cycle ${c.cycle || 1} for ${c.store}? This settles the ${c.variance > 0 ? c.variance + ' missing vs count' : 'books'} and starts fresh at ${shelfNow} on the shelf.`)) closeOut(c.id)
+                              }} style={{ width: '100%', background: 'none', color: closeDisabled ? MUTED : INK, border: `1px solid ${BORDER}`, borderRadius: '2px', padding: '12px', ...btn, cursor: closeDisabled ? 'not-allowed' : 'pointer', opacity: closeDisabled ? 0.55 : 1 }}>Close out this cycle →</button>
+                              {closeNeedDx && <p style={{ fontSize: '12px', color: AMBER, marginTop: '7px' }}>Pick a reason for the gap vs your shelf count before closing out.</p>}
+                            </>
+                          )
+                        })()}
                         <p style={{ fontSize: '12px', color: MUTED, marginTop: '7px', lineHeight: 1.5 }}>
                           {c.variance > 0
-                            ? <>Settles the <b>{c.variance} missing</b> {c.diagnosis === 'Sold but not reported (store owes me)' ? <>by <b style={{ color: RED }}>invoicing the store {money(c.varVal)}</b></> : <>as a <b>write-off</b></>}, then resets the count clean for the next delivery — so old gaps never bleed into the new cycle.</>
+                            ? <>Settles the <b>{c.variance} missing</b> {c.diagnosis === 'Sold but not reported (store owes me)' ? <>by marking <b style={{ color: RED }}>{money(c.varVal)} owed by the store</b> (send them an invoice from the Invoices tab)</> : <>as a <b>write-off</b></>}, then resets the count clean for the next delivery — so old gaps never bleed into the new cycle.</>
                             : <>Reconciles clean and resets the count for the next delivery — so old numbers never bleed into the new cycle.</>}
                         </p>
 
-                        {(c.log || []).length > 0 && (
-                          <div style={{ marginTop: '16px', borderTop: `1px solid ${CREAM}`, paddingTop: '12px' }}>
-                            <div style={{ ...lbl, marginBottom: '8px' }}>History</div>
-                            {c.log.map((e, i) => (
-                              <div key={i} style={{ fontSize: '12px', color: MUTED, padding: '3px 0' }}>
-                                <span style={{ color: '#BFB096', fontFamily: MONO, marginRight: '8px' }}>{e.at}</span>{e.t}
-                              </div>
-                            ))}
-                          </div>
-                        )}
                       </div>
                     )}
                   </div>
@@ -1292,6 +1627,7 @@ export default function JerkyMunch() {
                 )
               })}
             </>
+            </div>
           )}
 
           {/* ===== INVOICE STORES (A/R ledger) ===== */}
