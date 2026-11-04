@@ -8,6 +8,8 @@ import {
   buildActivityLedger,
   safeOnShelf,
   hasDropActivity,
+  hasShelfBooks,
+  startingPieces,
   paymentPiecesFromCheck,
 } from '../lib/consignmentRecon.js'
 
@@ -65,6 +67,34 @@ describe('recon', () => {
     assert.equal(r.expected, -5)
     assert.equal(r.status, 'invalid')
     assert.equal(r.variance, 0)
+  })
+})
+
+describe('starting count', () => {
+  it('baseline then drop-off and payment yields on shelf without affecting sent/paid totals', () => {
+    const c = {
+      price: 4.5,
+      sent: 100,
+      returned: 0,
+      paid: 360,
+      counted: null,
+      log: [
+        { t: 'Starting count 40 on 2026-11-01', atIso: '2026-11-01' },
+        { t: 'Dropped off 100 pieces on 2026-11-02 (stocked shelf)', atIso: '2026-11-02' },
+        { t: 'Paid 2026-12-03: $360.00 for 80 pieces', atIso: '2026-12-03' },
+      ],
+    }
+    assert.equal(startingPieces(c), 40)
+    assert.equal(hasDropActivity(c), true)
+    assert.equal(hasShelfBooks(c), true)
+    const r = recon(c)
+    assert.equal(r.status, 'tracking')
+    assert.equal(r.expected, 60)
+    assert.equal(r.variance, 0)
+    const ledger = buildActivityLedger(c)
+    assert.equal(ledger[0].label, 'Starting count 40')
+    assert.equal(ledger[0].onShelf, 40)
+    assert.equal(ledger[ledger.length - 1].onShelf, 60)
   })
 })
 

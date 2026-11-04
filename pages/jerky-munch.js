@@ -3,7 +3,7 @@ import Head from 'next/head'
 import { jerkySupabase } from '../lib/supabaseJerky'
 import { buildPnl, buildBalanceSheet, buildCashFlow, periodPnl, buildAdSpend } from '../lib/jerkyGL'
 import { loadQboStatements, balanceSheetAsOf, monthLabel } from '../lib/qboStatements'
-import { recon, missingSummary, buildActivityLedger, safeOnShelf, hasDropActivity, paymentPiecesFromCheck } from '../lib/consignmentRecon'
+import { recon, missingSummary, buildActivityLedger, safeOnShelf, hasDropActivity, hasShelfBooks, hasLoggedConsignmentActivity, paymentPiecesFromCheck } from '../lib/consignmentRecon'
 import { BOOKS_TZ, isoDateInTimeZone } from '../lib/jerkyBooksTz'
 import { ResponsiveContainer, ComposedChart, Bar, Line, XAxis, YAxis, Tooltip, CartesianGrid, PieChart, Pie, Cell } from 'recharts'
 
@@ -49,7 +49,7 @@ const consignStatusPillStyle = (badge) => ({
 })
 
 const consignBadge = (c) => {
-  if (!hasDropActivity(c)) return { c: MUTED, t: 'No drop-offs yet' }
+  if (!hasShelfBooks(c)) return { c: MUTED, t: 'No drop-offs yet' }
   if (c.status === 'invalid') return { c: RED, t: NUMBERS_DONT_ADD_UP, compact: true }
   if (c.status === 'reconciled') return { c: GREEN, t: 'Count matches' }
   if (c.status === 'short') return { c: RED, t: `${c.variance} missing vs count` }
@@ -673,6 +673,18 @@ export default function JerkyMunch() {
     if (!ok) return
     setDv(id + '_pickup', '')
     flashStep(`${id}_pickup`, `Picked up ${n} bags on ${fmtD(date)}`)
+  }
+  const logStartingCount = async (id) => {
+    const n = Number(dv(id + '_startCnt'))
+    if (!(n >= 0) || dv(id + '_startCnt') === '') return
+    const c = consign.find(x => x.id === id)
+    if (!c || updBusy[id]) return
+    const date = dateVal(id + '_startDate')
+    const note = `Starting count ${n} on ${date}`
+    const ok = await upd(id, {}, note, date)
+    if (!ok) return
+    setDv(id + '_startCnt', '')
+    flashStep(`${id}_start`, `Starting count ${n} on ${fmtD(date)}`)
   }
   const addPartner = async () => {
     setAddPartnerErr('')
@@ -1377,7 +1389,7 @@ export default function JerkyMunch() {
                           <div style={{ ...big, fontSize: '20px', color: INK }}>{c.store}</div>
                           <div style={{ fontSize: '12px', color: MUTED, marginTop: '3px', lineHeight: 1.45 }}>
                             {money2(c.price)}/bag · dropped off {c.sent} · paid for {c.paidUnits} pieces ({money(c.paid)}) · picked up {c.returned}
-                            {hasDropActivity(c) && <> · <b style={{ color: INK }}>{safeOnShelf(c.expected)} on shelf</b>{c.asOfDate ? ` as of ${fmtD(c.asOfDate)}` : ''}</>}
+                            {hasShelfBooks(c) && <> · <b style={{ color: INK }}>{safeOnShelf(c.expected)} on shelf</b>{c.asOfDate ? ` as of ${fmtD(c.asOfDate)}` : ''}</>}
                           </div>
                         </div>
                         <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '6px' }}>
@@ -1402,8 +1414,10 @@ export default function JerkyMunch() {
                           const payAmt = dv(c.id + '_payAmt')
                           const payPieces = dv(c.id + '_payPieces')
                           const pickupVal = dv(c.id + '_pickup')
+                          const startCntVal = dv(c.id + '_startCnt')
                           const cntVal = dv(c.id + '_cnt')
                           const countOpen = dv(c.id + '_countOpen') === '1'
+                          const showFirstVisit = !hasLoggedConsignmentActivity(c) && !hasDropActivity(c)
                           const stepTitle = { fontSize: '14px', fontWeight: 700, color: INK, margin: '0 0 4px' }
                           const stepHint = { fontSize: '12.5px', color: MUTED, margin: '0 0 8px', lineHeight: 1.45 }
                           const stepConfirm = { fontSize: '12px', color: GREEN, marginTop: '8px', lineHeight: 1.45 }
@@ -1464,7 +1478,7 @@ export default function JerkyMunch() {
                               <div style={{ ...lbl, margin: '14px 0 8px' }}>Activity</div>
                               {ledger.length === 0 ? (
                                 <div style={{ fontSize: '13px', color: MUTED, marginBottom: '14px', lineHeight: 1.45 }}>
-                                  No dated entries yet — log a drop-off or payment below.{hasDropActivity(c) ? <> Books show <b style={{ color: INK }}>{safeOnShelf(c.expected)}</b> on shelf from totals.</> : null}
+                                  No dated entries yet — log a drop-off or payment below.{hasShelfBooks(c) ? <> Books show <b style={{ color: INK }}>{safeOnShelf(c.expected)}</b> on shelf from totals.</> : null}
                                 </div>
                               ) : (
                                 <div style={{ marginBottom: '16px', border: `1px solid ${BORDER}`, borderRadius: '2px', overflow: 'hidden' }}>
@@ -1483,6 +1497,19 @@ export default function JerkyMunch() {
 
                               <div style={{ ...lbl, margin: '16px 0 10px' }}>Log activity</div>
                               {updErr[c.id] && <div style={{ color: RED, fontSize: '13px', marginBottom: '10px' }}>{updErr[c.id]}</div>}
+
+                              {showFirstVisit && (
+                                <div style={{ marginBottom: '18px', padding: '14px', background: CREAM, border: `1px solid ${BORDER}`, borderRadius: '2px' }}>
+                                  <div style={stepTitle}>First visit? Log what&apos;s on the shelf now</div>
+                                  <p style={stepHint}>Opening count for this store — drop-offs and payments build from here.</p>
+                                  <div style={fieldRow}>
+                                    <LabeledInput label="As-of date" value={dateVal(c.id + '_startDate')} onChange={e => setDv(c.id + '_startDate', e.target.value)} type="date" />
+                                    <LabeledInput label="Pieces on shelf" value={startCntVal} onChange={e => setDv(c.id + '_startCnt', e.target.value)} type="text" inputMode="numeric" placeholder="e.g. 40" />
+                                    <button type="button" disabled={startCntVal === '' || saving} onClick={() => logStartingCount(c.id)} style={{ ...actionBtn, background: CHAR, color: CREAM, opacity: startCntVal === '' || saving ? 0.45 : 1 }}>Save starting count</button>
+                                  </div>
+                                  {stepMsg[`${c.id}_start`] && <div style={stepConfirm}>{stepMsg[`${c.id}_start`]}</div>}
+                                </div>
+                              )}
 
                               <div style={{ marginBottom: '16px' }}>
                                 <div style={stepTitle}>1. Dropped off</div>
