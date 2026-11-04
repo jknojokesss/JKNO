@@ -21,7 +21,32 @@ const daysSince = (s) => s ? Math.round((Date.now() - new Date(s + 'T00:00:00'))
 const NUMBERS_DONT_ADD_UP = "Numbers don't add up. Check bags sent, checks and pickups."
 
 const SANS = "'Inter', sans-serif"
-const NUM = { fontFamily: SANS, fontVariantNumeric: 'tabular-nums' }
+const NUM = { fontFamily: SANS, fontVariantNumeric: 'tabular-nums', fontFeatureSettings: '"tnum" 1' }
+const formatDecimal2 = (n) => {
+  const v = Number(String(n).replace(/[$,]/g, ''))
+  if (!Number.isFinite(v)) return ''
+  return (Math.round(v * 100) / 100).toFixed(2)
+}
+
+const consignStatusPillStyle = (badge) => ({
+  display: 'inline-block',
+  alignSelf: 'flex-end',
+  flexShrink: 0,
+  width: 'auto',
+  maxWidth: 'min(200px, 100%)',
+  fontFamily: SANS,
+  fontVariantNumeric: 'tabular-nums',
+  fontFeatureSettings: '"tnum" 1',
+  fontSize: '11px',
+  fontWeight: 600,
+  color: '#fff',
+  background: badge.c,
+  padding: '4px 10px',
+  borderRadius: '999px',
+  lineHeight: 1.25,
+  whiteSpace: badge.compact ? 'normal' : 'nowrap',
+  textAlign: badge.compact ? 'right' : 'left',
+})
 
 const consignBadge = (c) => {
   if (!hasDropActivity(c)) return { c: MUTED, t: 'No drop-offs yet' }
@@ -917,6 +942,7 @@ export default function JerkyMunch() {
   const card = { background: CARDBG, border: `1px solid ${BORDER}`, borderRadius: '2px', padding: '20px' }
   const lbl = { fontFamily: "'Inter', sans-serif", fontSize: '11px', fontWeight: 600, letterSpacing: '0.7px', textTransform: 'uppercase', color: '#96866C' }
   const inp = { padding: '10px 12px', fontSize: '14px', border: `1px solid ${BORDER}`, borderRadius: '2px', background: CREAM, color: INK, outline: 'none', fontFamily: 'inherit', fontVariantNumeric: 'tabular-nums' }
+  const consignInp = { ...inp, fontFamily: SANS, fontVariantNumeric: 'tabular-nums', fontFeatureSettings: '"tnum" 1' }
   const big = { fontFamily: SANS, fontWeight: 700, letterSpacing: '-0.4px', fontVariantNumeric: 'tabular-nums' }
   const btn = { fontFamily: "'Inter', sans-serif", fontWeight: 600, fontSize: '13px', letterSpacing: '0.1px', cursor: 'pointer' }
 
@@ -1067,8 +1093,9 @@ export default function JerkyMunch() {
 .jm-click{transition:box-shadow .12s}.jm-click:hover{box-shadow:inset 0 0 0 1.5px ${SPICE}}
 @media(max-width:860px){.jm-shell{flex-direction:column}.jm-side{width:auto;height:auto;position:static;flex-direction:column;padding:14px 12px}.jm-nav{flex-direction:row;overflow-x:auto;gap:6px;padding-bottom:4px}.jm-navbtn{width:auto;padding:8px 15px;border-radius:2px;background:rgba(255,255,255,.07)}.jm-main{padding:18px 16px 52px;max-width:100%}}
 @media(max-width:600px){input,select,textarea{font-size:16px!important}button{min-height:40px}}
-input,select,textarea{font-family:inherit;font-variant-numeric:tabular-nums}
-input[type=date],input[type=date]::-webkit-datetime-edit,input[type=date]::-webkit-datetime-edit-fields-wrapper,input[type=date]::-webkit-datetime-edit-text,input[type=date]::-webkit-datetime-edit-month-field,input[type=date]::-webkit-datetime-edit-day-field,input[type=date]::-webkit-datetime-edit-year-field{font-family:inherit;font-variant-numeric:tabular-nums}`}</style>
+.jm-consign input,.jm-consign select,.jm-consign textarea{font-family:'Inter',sans-serif!important;font-variant-numeric:tabular-nums!important;font-feature-settings:"tnum" 1!important}
+.jm-consign input[type=date],.jm-consign input[type=date]::-webkit-datetime-edit,.jm-consign input[type=date]::-webkit-datetime-edit-fields-wrapper,.jm-consign input[type=date]::-webkit-datetime-edit-text,.jm-consign input[type=date]::-webkit-datetime-edit-month-field,.jm-consign input[type=date]::-webkit-datetime-edit-day-field,.jm-consign input[type=date]::-webkit-datetime-edit-year-field{font-family:'Inter',sans-serif!important;font-variant-numeric:tabular-nums!important;font-feature-settings:"tnum" 1!important}
+.jm-consign input[type=number],.jm-consign input[type=text],.jm-consign input[inputmode=decimal],.jm-consign input[inputmode=numeric]{font-family:'Inter',sans-serif!important;font-variant-numeric:tabular-nums!important;font-feature-settings:"tnum" 1!important}`}</style>
       </Head>
 
       <div className="jm-shell">
@@ -1286,6 +1313,7 @@ input[type=date],input[type=date]::-webkit-datetime-edit,input[type=date]::-webk
 
           {/* ===== CONSIGNMENT ===== */}
           {tab === 'consign' && (
+            <div className="jm-consign">
             <>
               <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap', marginBottom: '16px' }}>
                 <KPI k="Partners" v={consign.length} sub="stores carrying you" />
@@ -1353,7 +1381,7 @@ input[type=date],input[type=date]::-webkit-datetime-edit,input[type=date]::-webk
                           </div>
                         </div>
                         <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '6px' }}>
-                          <span style={{ fontFamily: SANS, fontSize: badge.compact ? '10px' : '12px', fontWeight: 600, color: '#fff', background: badge.c, padding: '5px 11px', borderRadius: '2px', whiteSpace: badge.compact ? 'normal' : 'nowrap', maxWidth: badge.compact ? '220px' : undefined, textAlign: badge.compact ? 'right' : undefined, lineHeight: 1.35 }}>{badge.t}</span>
+                          <span style={consignStatusPillStyle(badge)}>{badge.t}</span>
                           {c.restock && c.restock !== 'good' && <span style={{ fontSize: '11px', fontWeight: 600, color: RM[c.restock].color, background: RM[c.restock].color + '1A', padding: '3px 10px', borderRadius: '2px', whiteSpace: 'nowrap' }}>{RM[c.restock].label}</span>}
                         </div>
                       </div>
@@ -1380,7 +1408,9 @@ input[type=date],input[type=date]::-webkit-datetime-edit,input[type=date]::-webk
                           const stepHint = { fontSize: '12.5px', color: MUTED, margin: '0 0 8px', lineHeight: 1.45 }
                           const stepConfirm = { fontSize: '12px', color: GREEN, marginTop: '8px', lineHeight: 1.45 }
                           const fieldRow = { display: 'flex', flexDirection: 'column', gap: '10px', width: '100%', maxWidth: '100%', minWidth: 0 }
-                          const inputFull = { ...inp, width: '100%', maxWidth: '100%', boxSizing: 'border-box', display: 'block', minWidth: 0 }
+                          const inputFull = { ...consignInp, width: '100%', maxWidth: '100%', boxSizing: 'border-box', display: 'block', minWidth: 0 }
+                          const priceDraftKey = `price_${c.id}`
+                          const priceFieldValue = dv(priceDraftKey) !== '' ? dv(priceDraftKey) : (Number(c.price) > 0 ? formatDecimal2(c.price) : '')
                           const fieldLbl = { fontSize: '12px', fontWeight: 600, color: MUTED, marginBottom: '-4px' }
                           const actionBtn = { width: '100%', maxWidth: '100%', boxSizing: 'border-box', border: 'none', borderRadius: '2px', padding: '11px 14px', ...btn, fontSize: '13px' }
                           const LabeledInput = ({ label, ...props }) => (
@@ -1406,14 +1436,22 @@ input[type=date],input[type=date]::-webkit-datetime-edit,input[type=date]::-webk
                               <div style={{ ...lbl, margin: '0 0 6px' }}>Price per bag</div>
                               <div style={{ display: 'flex', gap: '8px', alignItems: 'center', flexWrap: 'wrap', marginBottom: '14px' }}>
                                 <span style={{ color: MUTED }}>$</span>
-                                <input value={dv(`price_${c.id}`) !== '' ? dv(`price_${c.id}`) : String(c.price)} onChange={e => { setDv(`price_${c.id}`, e.target.value); setPriceErr(p => { const n = { ...p }; delete n[c.id]; return n }) }} type="number" inputMode="decimal" style={{ ...inp, width: '110px', fontSize: '16px' }} />
+                                <input
+                                  value={priceFieldValue}
+                                  onChange={e => { setDv(priceDraftKey, e.target.value); setPriceErr(p => { const n = { ...p }; delete n[c.id]; return n }) }}
+                                  onBlur={e => { const f = formatDecimal2(e.target.value); if (f) setDv(priceDraftKey, f) }}
+                                  type="text"
+                                  inputMode="decimal"
+                                  autoComplete="off"
+                                  style={{ ...consignInp, width: '110px', fontSize: '16px' }}
+                                />
                                 <button type="button" disabled={saving} onClick={async () => {
-                                  const v = Number(dv(`price_${c.id}`))
+                                  const v = Number(formatDecimal2(dv(priceDraftKey) || c.price))
                                   if (!(v > 0)) { setPriceErr(p => ({ ...p, [c.id]: 'Price per bag must be greater than $0.' })); return }
                                   setPriceErr(p => { const n = { ...p }; delete n[c.id]; return n })
                                   if (v !== c.price) {
-                                    const ok = await upd(c.id, { price: v }, `Set price to ${money(v)}/bag`)
-                                    if (ok) setDv(`price_${c.id}`, '')
+                                    const ok = await upd(c.id, { price: v }, `Set price to ${money2(v)}/bag`)
+                                    if (ok) setDv(priceDraftKey, formatDecimal2(v))
                                   }
                                 }} style={{ background: CHAR, color: CREAM, border: 'none', borderRadius: '2px', padding: '10px 16px', ...btn, opacity: saving ? 0.5 : 1 }}>Save</button>
                                 <span style={{ fontSize: '11.5px', color: MUTED }}>drives check → pieces</span>
@@ -1455,7 +1493,7 @@ input[type=date],input[type=date]::-webkit-datetime-edit,input[type=date]::-webk
                                 </div>
                                 <div style={fieldRow}>
                                   <LabeledInput label="Drop-off date" value={dateVal(c.id + '_dropDate')} onChange={e => setDv(c.id + '_dropDate', e.target.value)} type="date" />
-                                  <LabeledInput label="Pieces added" value={dropVal} onChange={e => setDv(c.id + '_dropPieces', e.target.value)} type="number" inputMode="numeric" placeholder="e.g. 100" />
+                                  <LabeledInput label="Pieces added" value={dropVal} onChange={e => setDv(c.id + '_dropPieces', e.target.value)} type="text" inputMode="numeric" placeholder="e.g. 100" />
                                   <button type="button" disabled={!(Number(dropVal) > 0) || saving} onClick={() => logDropoff(c.id)} style={{ ...actionBtn, background: CHAR, color: CREAM, opacity: !(Number(dropVal) > 0) || saving ? 0.45 : 1 }}>Save drop-off</button>
                                 </div>
                                 {stepMsg[`${c.id}_drop`] && <div style={stepConfirm}>{stepMsg[`${c.id}_drop`]}</div>}
@@ -1467,7 +1505,7 @@ input[type=date],input[type=date]::-webkit-datetime-edit,input[type=date]::-webk
                                 <p style={stepHint}>Date paid and check amount — pieces come from price per bag.</p>
                                 <div style={fieldRow}>
                                   <LabeledInput label="Date paid" value={dateVal(c.id + '_payDate')} onChange={e => setDv(c.id + '_payDate', e.target.value)} type="date" />
-                                  <LabeledInput label="Check amount $" value={payAmt} onChange={e => setDv(c.id + '_payAmt', e.target.value)} type="number" inputMode="decimal" placeholder="e.g. 360" />
+                                  <LabeledInput label="Check amount $" value={payAmt} onChange={e => setDv(c.id + '_payAmt', e.target.value)} type="text" inputMode="decimal" placeholder="e.g. 360" />
                                   {payCoverLine && (
                                     <div style={{ fontSize: '12.5px', color: priceOk ? MUTED : RED, lineHeight: 1.45 }}>
                                       {payCoverLine}
@@ -1484,7 +1522,7 @@ input[type=date],input[type=date]::-webkit-datetime-edit,input[type=date]::-webk
                                     </div>
                                   )}
                                   {payOverride && (
-                                    <LabeledInput label="Pieces paid for (override)" value={payPieces} onChange={e => setDv(c.id + '_payPieces', e.target.value)} type="number" inputMode="numeric" placeholder="e.g. 80" />
+                                    <LabeledInput label="Pieces paid for (override)" value={payPieces} onChange={e => setDv(c.id + '_payPieces', e.target.value)} type="text" inputMode="numeric" placeholder="e.g. 80" />
                                   )}
                                   <button type="button" disabled={!payCanSave} onClick={() => logPayment(c.id)} style={{ ...actionBtn, background: GREEN, color: '#fff', opacity: !payCanSave ? 0.45 : 1 }}>Save payment</button>
                                 </div>
@@ -1496,7 +1534,7 @@ input[type=date],input[type=date]::-webkit-datetime-edit,input[type=date]::-webk
                                 <p style={stepHint}>Bags they gave back to you.</p>
                                 <div style={fieldRow}>
                                   <LabeledInput label="Date picked up" value={dateVal(c.id + '_pickupDate')} onChange={e => setDv(c.id + '_pickupDate', e.target.value)} type="date" />
-                                  <LabeledInput label="Pieces picked up" value={pickupVal} onChange={e => setDv(c.id + '_pickup', e.target.value)} type="number" inputMode="numeric" placeholder="e.g. 5" />
+                                  <LabeledInput label="Pieces picked up" value={pickupVal} onChange={e => setDv(c.id + '_pickup', e.target.value)} type="text" inputMode="numeric" placeholder="e.g. 5" />
                                   <button type="button" disabled={!(Number(pickupVal) > 0) || saving} onClick={() => logPickup(c.id)} style={{ ...actionBtn, background: KRAFT, color: '#fff', opacity: !(Number(pickupVal) > 0) || saving ? 0.45 : 1 }}>Save pickup</button>
                                 </div>
                                 {stepMsg[`${c.id}_pickup`] && <div style={stepConfirm}>{stepMsg[`${c.id}_pickup`]}</div>}
@@ -1506,7 +1544,7 @@ input[type=date],input[type=date]::-webkit-datetime-edit,input[type=date]::-webk
                                 <summary style={{ cursor: 'pointer', fontSize: '13px', fontWeight: 600, color: INK, marginBottom: countOpen ? '10px' : 0 }}>Did a shelf count? (optional)</summary>
                                 <p style={stepHint}>Only if you physically counted the shelf — used to spot gaps vs the books.</p>
                                 <div style={fieldRow}>
-                                  <input value={cntVal} onChange={e => setDv(c.id + '_cnt', e.target.value)} type="number" inputMode="numeric" placeholder="bags on shelf" style={inputFull} />
+                                  <input value={cntVal} onChange={e => setDv(c.id + '_cnt', e.target.value)} type="text" inputMode="numeric" placeholder="bags on shelf" style={inputFull} />
                                   <input value={dateVal(c.id + '_cntDate')} onChange={e => setDv(c.id + '_cntDate', e.target.value)} type="date" style={inputFull} />
                                   <button type="button" disabled={cntVal === '' || saving} onClick={() => logCount(c.id)} style={{ ...actionBtn, background: 'none', color: INK, border: `1px solid ${BORDER}`, opacity: cntVal === '' || saving ? 0.45 : 1 }}>Save shelf count</button>
                                 </div>
@@ -1589,6 +1627,7 @@ input[type=date],input[type=date]::-webkit-datetime-edit,input[type=date]::-webk
                 )
               })}
             </>
+            </div>
           )}
 
           {/* ===== INVOICE STORES (A/R ledger) ===== */}
