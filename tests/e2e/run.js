@@ -33,9 +33,15 @@ const ping = () => new Promise(res => {
     await new Promise(r => setTimeout(r, 2000))
     if (i === 59) { console.log('\ndev server never came up'); stop(); process.exit(1) }
   }
-  const r = spawnSync('node', [require('path').join(__dirname, 'gowns.spec.js')], {
-    stdio: 'inherit', env: { ...env, E2E_BASE: BASE },
-  })
+  const specDir = __dirname
+  const envWithBase = { ...env, E2E_BASE: BASE }
+  let status = 0
+  for (const spec of ['gowns.spec.js', 'jerky-consign-focus.spec.js']) {
+    const r = spawnSync('node', [require('path').join(specDir, spec)], {
+      stdio: 'inherit', env: envWithBase,
+    })
+    if (r.status) status = r.status
+  }
   stop()
-  process.exit(r.status || 0)
+  process.exit(status)
 })()

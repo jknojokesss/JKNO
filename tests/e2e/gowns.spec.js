@@ -13,7 +13,7 @@
 const { chromium } = require('playwright')
 
 const BASE = process.env.E2E_BASE || 'http://localhost:3111'
-const CHROME = process.env.E2E_CHROME || '/opt/pw-browsers/chromium-1194/chrome-linux/chrome'
+const CHROME = process.env.E2E_CHROME || undefined
 
 let passed = 0, failed = []
 const check = (msg, ok) => {
@@ -22,7 +22,7 @@ const check = (msg, ok) => {
 }
 
 async function main() {
-  const browser = await chromium.launch({ executablePath: CHROME })
+  const browser = await chromium.launch(CHROME ? { executablePath: CHROME } : {})
   // Her phone, not a desktop.
   const page = await browser.newPage({ viewport: { width: 420, height: 940 } })
   await page.goto(BASE + '/gowns', { waitUntil: 'networkidle' })
