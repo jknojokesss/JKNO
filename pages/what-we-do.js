@@ -10,8 +10,8 @@ export default function WhatWeDo() {
     <MarketingShell title="What You Get | JK No Jokes Financials">
       <PageHero
         kicker="What we build"
-        title="Built for how you actually sell."
-        lead="Not a template off the shelf: your QuickBooks, register, and vendors wired into screens you will open on Monday morning."
+        title="Tailor-made — built around how you actually sell."
+        lead="Not generic SaaS and not a template off the shelf. You say what belongs on screen; I wire QuickBooks, your register, and vendors into it."
         align="center"
       />
 
@@ -19,7 +19,7 @@ export default function WhatWeDo() {
         <div className="m-wrap">
           <h2 className="m-h2" style={{ marginBottom: '12px' }}>Common builds</h2>
           <p className="m-lead" style={{ maxWidth: '58ch', marginBottom: '24px' }}>
-            Multi-entity owners start with the portfolio hub; everyone else picks a trade shape. The portal is custom; the pipe is the same: QuickBooks in the middle, sync at night, your login on top.
+            Multi-entity owners start with the portfolio hub; everyone else picks a trade shape. Each portal is built around one owner&apos;s workflow — the pipe is the same: QuickBooks in the middle, sync at night, your login on top.
           </p>
           <div className="m-demo-grid m-demo-grid--starters">
             {SERVICE_PACKAGES.map((p) => (

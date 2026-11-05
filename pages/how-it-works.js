@@ -5,7 +5,7 @@ import { BOOKING_URL } from '../lib/marketing'
 const HOW = [
   {
     title: 'Kickoff call',
-    body: 'Thirty minutes. How you get paid, what you sell, what has to land on one screen. We decide portal-only vs. books included.',
+    body: 'Thirty minutes. How you work, what you wish was on one screen, and what off-the-shelf tools never did for you. We decide portal-only vs. books included.',
   },
   {
     title: 'Wire-up',
@@ -27,8 +27,8 @@ export default function HowItWorks() {
     <MarketingShell title="How It Works | JK No Jokes Financials">
       <PageHero
         kicker="How it works"
-        title="You talk. I build. You run."
-        lead="Thirty minutes to hear what would make your week easier, then a portal on your real data, tuned until you trust the numbers."
+        title="You tell me what you want. I build around how you work."
+        lead="Thirty minutes to hear how you run the shop and what software never got right — then a portal on your real data, tuned until you trust the numbers."
         align="center"
       />
 

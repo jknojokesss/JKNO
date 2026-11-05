@@ -7,9 +7,9 @@ import { painLineForDemo } from '../lib/homeSamplePains'
 import DemoGalleryCard from './DemoGalleryCard'
 
 const START_STEPS = [
-  'Quick call: what you sell and what you want on screen.',
-  'I connect QuickBooks and your tools, then build your portal.',
-  'You sign in on real data; we fix what is off.',
+  'Quick call: how you work today, what software never got right, and the screen you want.',
+  'I wire QuickBooks and your tools, then build the portal around that — not a generic login.',
+  'You sign in on real data; we tune it until you trust the numbers.',
 ]
 
 const TRADES = [
@@ -54,10 +54,11 @@ export default function HomeLanding({
           JK<span className="m-jk-home__mark-dot">.</span>
         </p>
         <h1 className="m-jk-home__h1">
-          Custom portals for owners: your numbers, your login.
+          Tailor-made owner portals — built around how you work.
         </h1>
         <p className="m-jk-home__lead">
-          Built for how you sell. Keep your bookkeeper, or have me handle the books.
+          Not plain SaaS. You tell me what you want on screen; I wire QuickBooks and your real tools to match how you sell.
+          Keep your bookkeeper, or have me handle the books.
         </p>
         <div className="m-jk-home__hero-actions">
           <button
@@ -128,10 +129,11 @@ export default function HomeLanding({
         </section>
 
         <section className="m-jk-home__panel m-jk-home__panel--offer" id="offer">
-          <h2 className="m-jk-story__title">Portal first, books optional</h2>
+          <h2 className="m-jk-story__title">Built for you, not off a shelf</h2>
           <p className="m-jk-story__body">
-            Keep your bookkeeper or bring me the books. Either way you get a portal built on your numbers. QuickBooks stays
-            the books; the portal is where you actually look. You get me, not a ticket queue.
+            Every build starts with what you want — margin per ticket, jobs in progress, who still owes you — not a template
+            everyone else uses. Keep your bookkeeper or bring me the books. QuickBooks stays the books; the portal is where
+            you actually look. You get me, not a ticket queue.
           </p>
           <ol className="m-jk-steps">
             {START_STEPS.map((step) => (

@@ -8,8 +8,8 @@ export default function About() {
     <MarketingShell title="About | JK No Jokes Financials">
       <PageHero
         kicker="About"
-        title="I build the portal and keep the books."
-        lead="I build the login owners wish they had: QuickBooks and your real tools, one screen that matches how you sell."
+        title="Tailor-made portals — I ask what you want, then build it."
+        lead="Off-the-shelf software never matched how I ran things. I build the opposite: your QuickBooks and real tools, one login shaped around how you sell."
         align="center"
       />
 
@@ -25,7 +25,8 @@ export default function About() {
             </div>
           </div>
           <p className="m-about-p">
-            I write the integrations and build the screens around them. Nightly sync, one login, your company only on the server.
+            I write the integrations and build the screens you asked for — not a shared SaaS dashboard with your logo pasted on.
+            Nightly sync, one login, your company only on the server.
           </p>
           <p className="m-about-p">
             You get me, not a ticket queue. Nothing goes live until it matches QuickBooks.
