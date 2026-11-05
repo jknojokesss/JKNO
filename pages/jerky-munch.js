@@ -3,7 +3,7 @@ import Head from 'next/head'
 import { jerkySupabase } from '../lib/supabaseJerky'
 import { buildPnl, buildBalanceSheet, buildCashFlow, periodPnl, buildAdSpend } from '../lib/jerkyGL'
 import { loadQboStatements, balanceSheetAsOf, monthLabel } from '../lib/qboStatements'
-import { recon, missingSummary, buildActivityLedger, safeOnShelf, hasDropActivity, hasShelfBooks, hasLoggedConsignmentActivity, paymentPiecesFromCheck } from '../lib/consignmentRecon'
+import { recon, missingSummary, buildActivityLedger, safeOnShelf, hasDropActivity, hasShelfBooks, hasLoggedConsignmentActivity, paymentPiecesFromCheck, partnerStateAfterLogDelete, partnerStateAfterLogReplace, parseLogEvent, formatDropLogNote, buildPayLogNote, formatPickupLogNote, formatStartingCountLogNote, formatCountLogNote, consignStoreRenameError } from '../lib/consignmentRecon'
 import { BOOKS_TZ, isoDateInTimeZone } from '../lib/jerkyBooksTz'
 import { ResponsiveContainer, ComposedChart, Bar, Line, XAxis, YAxis, Tooltip, CartesianGrid, PieChart, Pie, Cell } from 'recharts'
 
@@ -58,6 +58,94 @@ const consignBadge = (c) => {
   const asOfSuffix = c.asOfDate ? ` (as of ${fmtD(c.asOfDate)})` : ''
   return { c: KRAFT, t: `Should be on shelf: ${n}${asOfSuffix}`, compact: !!asOfSuffix }
 }
+
+const CONSIGN_INP = {
+  padding: '10px 12px',
+  fontSize: '14px',
+  border: `1px solid ${BORDER}`,
+  borderRadius: '2px',
+  background: CREAM,
+  color: INK,
+  outline: 'none',
+  fontFamily: SANS,
+  fontVariantNumeric: 'tabular-nums',
+  fontFeatureSettings: '"tnum" 1',
+}
+const CONSIGN_INPUT_FULL = { ...CONSIGN_INP, width: '100%', maxWidth: '100%', boxSizing: 'border-box', display: 'block', minWidth: 0 }
+const CONSIGN_FIELD_LBL = { fontSize: '12px', fontWeight: 600, color: MUTED, marginBottom: '-4px' }
+// Module-level so React keeps the same component type across draft keystrokes (inline defs remount inputs).
+const ConsignLabeledInput = ({ label, ...props }) => (
+  <label style={{ display: 'block', width: '100%', maxWidth: '100%', minWidth: 0 }}>
+    <div style={CONSIGN_FIELD_LBL}>{label}</div>
+    <input {...props} style={CONSIGN_INPUT_FULL} />
+  </label>
+)
+
+// Set only by `npm run test:e2e` — mock consignment stores for focus tests; compiled out of production builds.
+const E2E = process.env.NODE_ENV !== 'production' && process.env.NEXT_PUBLIC_E2E === '1'
+const E2E_CONSIGN = [
+  {
+    id: 'e2e-active',
+    store: 'E2E Active Store',
+    region: 'Kansas City',
+    type: 'consignment',
+    price: 4.5,
+    sent: 50,
+    returned: 0,
+    paid: 360,
+    counted: 20,
+    countedDate: '2026-12-10',
+    diagnosis: '',
+    cycle: 1,
+    lastContact: null,
+    restock: 'good',
+    notes: '',
+    qbCustomerId: null,
+    log: [
+      { logId: 'e2e-log-drop', at: 'Nov 1', atIso: '2026-11-01', t: 'Dropped off 50 pieces on 2026-11-01 (drop-off)' },
+      { logId: 'e2e-log-pay', at: 'Dec 3', atIso: '2026-12-03', t: 'Paid 2026-12-03: $360.00 for 80 pieces' },
+      { logId: 'e2e-log-count', at: 'Dec 10', atIso: '2026-12-10', t: 'Counted 20 on shelf (Dec 10)' },
+    ],
+  },
+  {
+    id: 'e2e-first',
+    store: 'E2E First Visit',
+    region: 'Kansas City',
+    type: 'consignment',
+    price: 0,
+    sent: 0,
+    returned: 0,
+    paid: 0,
+    counted: null,
+    countedDate: '',
+    diagnosis: '',
+    cycle: 1,
+    lastContact: null,
+    restock: 'good',
+    notes: '',
+    qbCustomerId: null,
+    log: [],
+  },
+  {
+    id: 'e2e-linked',
+    store: 'E2E Linked QB Store',
+    region: 'Kansas City',
+    type: 'consignment',
+    price: 4.5,
+    sent: 10,
+    returned: 0,
+    paid: 0,
+    counted: null,
+    countedDate: '',
+    diagnosis: '',
+    cycle: 1,
+    lastContact: null,
+    restock: 'good',
+    notes: '',
+    qbCustomerId: 'qb-mock-customer-1',
+    log: [{ logId: 'e2e-log-linked', at: 'Nov 2', atIso: '2026-11-02', t: 'Dropped off 10 pieces on 2026-11-02 (drop-off)' }],
+  },
+]
 
 const DIRECT_SOURCES = ['Shopify / online', 'Farmers market', 'Pop-up event', 'Wholesale / bulk', 'Other']
 
@@ -117,6 +205,7 @@ export default function JerkyMunch() {
   const [stepMsg, setStepMsg] = useState({})
   const stepMsgTimers = useRef({})
   const notesSaveTimers = useRef({})
+  const partnerWriteLock = useRef({})
   const [notesSaved, setNotesSaved] = useState({})
   const [updBusy, setUpdBusy] = useState({})
   const [updErr, setUpdErr] = useState({})
@@ -188,6 +277,17 @@ export default function JerkyMunch() {
   const [newPw, setNewPw] = useState('')
   const [newPw2, setNewPw2] = useState('')
   const [changePwMsg, setChangePwMsg] = useState('')
+  const [deleteConfirm, setDeleteConfirm] = useState(null)
+  const [editLog, setEditLog] = useState(null)
+  const [renameStore, setRenameStore] = useState(null)
+  const [renameErr, setRenameErr] = useState('')
+
+  const acquirePartnerWrite = (id) => {
+    if (partnerWriteLock.current[id]) return false
+    partnerWriteLock.current[id] = true
+    return true
+  }
+  const releasePartnerWrite = (id) => { delete partnerWriteLock.current[id] }
 
   // ── data loaders (Supabase → the UI object shapes the page already uses) ──
   const loadConsign = async () => {
@@ -205,7 +305,7 @@ export default function JerkyMunch() {
         type: p.type || 'consignment', region: p.region || '', qbCustomerId: p.qb_customer_id || null,
         log: (byPartner[p.id] || []).map(l => {
           const iso = String(l.at || '').slice(0, 10)
-          return { at: iso ? fmtD(iso) : '', atIso: iso, t: l.note }
+          return { logId: l.id, at: iso ? fmtD(iso) : '', atIso: iso, t: l.note }
         }),
       })))
     } catch (e) { console.error('loadConsign failed', e) }
@@ -459,6 +559,15 @@ export default function JerkyMunch() {
   }
 
   useEffect(() => {
+    if (E2E) {
+      setSession({ user: { email: 'e2e@jerkymunch.com' } })
+      setAuthChecked(true)
+      setRole('owner')
+      setConsign(E2E_CONSIGN)
+      setExpanded('e2e-active')
+      setDataLoaded(true)
+      return
+    }
     jerkySupabase.auth.getSession().then(({ data }) => { setSession(data.session); setAuthChecked(true) })
     const { data: sub } = jerkySupabase.auth.onAuthStateChange((_evt, s) => { setSession(s) })
     return () => { sub.subscription.unsubscribe() }
@@ -469,6 +578,7 @@ export default function JerkyMunch() {
     }
   }, [])
   useEffect(() => {
+    if (E2E) return
     if (session) loadAll()
     else setDataLoaded(false)
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -547,9 +657,10 @@ export default function JerkyMunch() {
   // core consignment mutation — optimistic setState, then persist to Supabase.
   const upd = async (id, patch, logEntry, logAtIso) => {
     const before = consign.find(c => c.id === id)
-    if (!before) return false
+    if (!before || !acquirePartnerWrite(id)) return false
     setUpdErr(e => { const next = { ...e }; delete next[id]; return next })
     setUpdBusy(b => ({ ...b, [id]: true }))
+    if (E2E && logEntry) await new Promise(r => setTimeout(r, 400))
     const evtIso = logAtIso || todayStr
     setConsign(prev => prev.map(c => c.id === id
       ? { ...c, ...patch, log: logEntry ? [{ at: fmtD(evtIso), atIso: evtIso, t: logEntry }, ...(c.log || [])] : c.log } : c))
@@ -573,6 +684,7 @@ export default function JerkyMunch() {
       setUpdErr(e => ({ ...e, [id]: "Didn't save. Try again." }))
       return false
     } finally {
+      releasePartnerWrite(id)
       setUpdBusy(b => { const next = { ...b }; delete next[id]; return next })
     }
   }
@@ -606,11 +718,9 @@ export default function JerkyMunch() {
     const pieces = Number(dv(id + '_dropPieces'))
     if (!(pieces > 0)) return
     const c = consign.find(x => x.id === id)
-    if (!c || updBusy[id]) return
+    if (!c || updBusy[id] || partnerWriteLock.current[id]) return
     const date = dateVal(id + '_dropDate')
-    const mode = dv(id + '_shpMode') || 'sent'
-    const tag = mode === 'stock' ? 'stocked shelf' : 'sent more'
-    const note = `Dropped off ${pieces} pieces on ${date} (${tag})`
+    const note = formatDropLogNote(pieces, date)
     const ok = await upd(id, { sent: c.sent + pieces }, note, date)
     if (!ok) return
     setDv(id + '_dropPieces', '')
@@ -686,6 +796,157 @@ export default function JerkyMunch() {
     setDv(id + '_startCnt', '')
     flashStep(`${id}_start`, `Starting count ${n} on ${fmtD(date)}`)
   }
+
+  const openEditLog = (partnerId, logId, rowType) => {
+    const c = consign.find(x => x.id === partnerId)
+    const entry = c?.log?.find(e => e.logId === logId)
+    if (!entry) return
+    const ev = parseLogEvent(entry.t)
+    if (!ev) return
+    const dateIso = (entry.atIso || ev.dateIso || todayStr).slice(0, 10)
+    let value = ''
+    if (ev.type === 'pay') value = String(ev.dollars ?? '')
+    else value = String(ev.pieces ?? '')
+    setEditLog({ partnerId, logId, type: rowType || ev.type, dateIso, value })
+  }
+
+  const saveEditLog = async () => {
+    if (!editLog) return
+    const { partnerId, logId, type, dateIso, value } = editLog
+    const before = consign.find(c => c.id === partnerId)
+    if (!before || !acquirePartnerWrite(partnerId)) return
+    const oldEntry = (before.log || []).find(e => e.logId === logId)
+    if (!oldEntry) { releasePartnerWrite(partnerId); return }
+    const date = (dateIso || todayStr).slice(0, 10)
+    let note = oldEntry.t
+    if (type === 'drop') {
+      const pieces = Number(value)
+      if (!(pieces > 0)) { releasePartnerWrite(partnerId); return }
+      note = formatDropLogNote(pieces, date)
+    } else if (type === 'pay') {
+      const dollars = Number(value)
+      if (!(dollars > 0) || !(Number(before.price) > 0)) { releasePartnerWrite(partnerId); return }
+      note = buildPayLogNote(date, dollars, before.price, money)
+    } else if (type === 'pickup') {
+      const pieces = Number(value)
+      if (!(pieces > 0)) { releasePartnerWrite(partnerId); return }
+      note = formatPickupLogNote(pieces, date)
+    } else if (type === 'starting') {
+      const pieces = Number(value)
+      if (!(pieces >= 0) || value === '') { releasePartnerWrite(partnerId); return }
+      note = formatStartingCountLogNote(pieces, date)
+    } else if (type === 'count') {
+      const pieces = Number(value)
+      if (value === '' || !Number.isFinite(pieces)) { releasePartnerWrite(partnerId); return }
+      note = formatCountLogNote(pieces, fmtD(date))
+    } else { releasePartnerWrite(partnerId); return }
+    const newEntry = { ...oldEntry, t: note, atIso: date, at: fmtD(date) }
+    const updatedLog = (before.log || []).map(e => e.logId === logId ? newEntry : e)
+    const patch = partnerStateAfterLogReplace(before, oldEntry, newEntry, updatedLog)
+    setUpdErr(e => { const next = { ...e }; delete next[partnerId]; return next })
+    setUpdBusy(b => ({ ...b, [partnerId]: true }))
+    setConsign(prev => prev.map(c => c.id !== partnerId ? c : { ...c, ...patch, log: updatedLog }))
+    try {
+      if (!E2E) {
+        const { error: logErr } = await jerkySupabase.from('consignment_log').update({ note, at: date }).eq('id', logId)
+        if (logErr) throw logErr
+        const colMap = { countedDate: 'counted_date' }
+        const dbPatch = {}
+        Object.keys(patch).forEach(k => { dbPatch[colMap[k] || k] = patch[k] })
+        if (Object.keys(dbPatch).length) {
+          const { error } = await jerkySupabase.from('consignment_partners').update(dbPatch).eq('id', partnerId)
+          if (error) throw error
+        }
+        await loadConsign()
+      }
+      setEditLog(null)
+    } catch (e) {
+      console.error('saveEditLog failed', e)
+      setConsign(prev => prev.map(c => c.id === partnerId ? before : c))
+      setUpdErr(e => ({ ...e, [partnerId]: "Couldn't save that edit. Try again." }))
+    } finally {
+      releasePartnerWrite(partnerId)
+      setUpdBusy(b => { const next = { ...b }; delete next[partnerId]; return next })
+    }
+  }
+
+  const saveStoreRename = async () => {
+    if (!renameStore) return
+    const { partnerId, name } = renameStore
+    const trimmed = String(name || '').trim()
+    const err = consignStoreRenameError(trimmed, partnerId, consign)
+    if (err) { setRenameErr(err); return }
+    const before = consign.find(c => c.id === partnerId)
+    if (!before || !acquirePartnerWrite(partnerId)) return
+    if (trimmed === String(before.store || '').trim()) {
+      releasePartnerWrite(partnerId)
+      setRenameStore(null)
+      setRenameErr('')
+      return
+    }
+    setRenameErr('')
+    setUpdErr(e => { const next = { ...e }; delete next[partnerId]; return next })
+    setUpdBusy(b => ({ ...b, [partnerId]: true }))
+    setConsign(prev => prev.map(c => c.id === partnerId ? { ...c, store: trimmed } : c))
+    try {
+      if (E2E) await new Promise(r => setTimeout(r, 300))
+      else {
+        const { error } = await jerkySupabase.from('consignment_partners').update({ store: trimmed }).eq('id', partnerId)
+        if (error) throw error
+      }
+      setRenameStore(null)
+    } catch (e) {
+      console.error('saveStoreRename failed', e)
+      setConsign(prev => prev.map(c => c.id === partnerId ? before : c))
+      setRenameErr("Couldn't save the new name. Try again.")
+    } finally {
+      releasePartnerWrite(partnerId)
+      setUpdBusy(b => { const next = { ...b }; delete next[partnerId]; return next })
+    }
+  }
+
+  const deleteLogEntry = async (partnerId, logId) => {
+    const before = consign.find(c => c.id === partnerId)
+    if (!before || updBusy[partnerId] || !acquirePartnerWrite(partnerId)) return
+    const entry = (before.log || []).find(e => e.logId === logId)
+    if (!entry || !parseLogEvent(entry.t)) {
+      releasePartnerWrite(partnerId)
+      return
+    }
+    const remainingLog = (before.log || []).filter(e => e.logId !== logId)
+    const patch = partnerStateAfterLogDelete(before, entry, remainingLog)
+    setUpdErr(e => { const next = { ...e }; delete next[partnerId]; return next })
+    setUpdBusy(b => ({ ...b, [partnerId]: true }))
+    setConsign(prev => prev.map(c => c.id !== partnerId
+      ? c
+      : { ...c, ...patch, log: remainingLog }))
+    try {
+      if (E2E) await new Promise(r => setTimeout(r, 400))
+      if (!E2E) {
+        const { error: delErr } = await jerkySupabase.from('consignment_log').delete().eq('id', logId)
+        if (delErr) throw delErr
+        const colMap = { countedDate: 'counted_date' }
+        const dbPatch = {}
+        Object.keys(patch).forEach(k => { dbPatch[colMap[k] || k] = patch[k] })
+        if (Object.keys(dbPatch).length) {
+          const { error } = await jerkySupabase.from('consignment_partners').update(dbPatch).eq('id', partnerId)
+          if (error) throw error
+        }
+        await loadConsign()
+      }
+      setDeleteConfirm(null)
+      return true
+    } catch (e) {
+      console.error('deleteLogEntry failed', e)
+      setConsign(prev => prev.map(c => c.id === partnerId ? before : c))
+      setUpdErr(e => ({ ...e, [partnerId]: "Couldn't delete that entry. Try again." }))
+      return false
+    } finally {
+      releasePartnerWrite(partnerId)
+      setUpdBusy(b => { const next = { ...b }; delete next[partnerId]; return next })
+    }
+  }
+
   const addPartner = async () => {
     setAddPartnerErr('')
     if (!cf.store.trim()) return
@@ -1388,7 +1649,7 @@ export default function JerkyMunch() {
                         <div>
                           <div style={{ ...big, fontSize: '20px', color: INK }}>{c.store}</div>
                           <div style={{ fontSize: '12px', color: MUTED, marginTop: '3px', lineHeight: 1.45 }}>
-                            {money2(c.price)}/bag · dropped off {c.sent} · paid for {c.paidUnits} pieces ({money(c.paid)}) · picked up {c.returned}
+                            {money2(c.price)}/bag · <span data-testid={`consign-sent-${c.id}`}>dropped off {c.sent}</span> · paid for {c.paidUnits} pieces ({money(c.paid)}) · picked up {c.returned}
                             {hasShelfBooks(c) && <> · <b style={{ color: INK }}>{safeOnShelf(c.expected)} on shelf</b>{c.asOfDate ? ` as of ${fmtD(c.asOfDate)}` : ''}</>}
                           </div>
                         </div>
@@ -1407,9 +1668,13 @@ export default function JerkyMunch() {
 
                     {open && (
                       <div style={{ padding: '0 18px 18px', borderTop: `1px solid ${CREAM}`, maxWidth: '100%', minWidth: 0, boxSizing: 'border-box', overflow: 'hidden' }}>
+                        {!c.qbCustomerId && (
+                          <div style={{ marginTop: '12px', marginBottom: '4px' }}>
+                            <button type="button" data-testid={`consign-rename-${c.id}`} disabled={saving} onClick={() => { setRenameErr(''); setRenameStore({ partnerId: c.id, name: c.store }) }} style={{ background: 'none', border: 'none', padding: 0, color: KRAFT, fontSize: '12px', fontWeight: 600, cursor: saving ? 'default' : 'pointer', textDecoration: 'underline', opacity: saving ? 0.45 : 1 }}>Rename store</button>
+                          </div>
+                        )}
                         {(() => {
                           const ledger = buildActivityLedger(c)
-                          const shpMode = dv(c.id + '_shpMode') || 'sent'
                           const dropVal = dv(c.id + '_dropPieces')
                           const payAmt = dv(c.id + '_payAmt')
                           const payPieces = dv(c.id + '_payPieces')
@@ -1422,17 +1687,10 @@ export default function JerkyMunch() {
                           const stepHint = { fontSize: '12.5px', color: MUTED, margin: '0 0 8px', lineHeight: 1.45 }
                           const stepConfirm = { fontSize: '12px', color: GREEN, marginTop: '8px', lineHeight: 1.45 }
                           const fieldRow = { display: 'flex', flexDirection: 'column', gap: '10px', width: '100%', maxWidth: '100%', minWidth: 0 }
-                          const inputFull = { ...consignInp, width: '100%', maxWidth: '100%', boxSizing: 'border-box', display: 'block', minWidth: 0 }
+                          const inputFull = CONSIGN_INPUT_FULL
                           const priceDraftKey = `price_${c.id}`
                           const priceFieldValue = dv(priceDraftKey) !== '' ? dv(priceDraftKey) : (Number(c.price) > 0 ? formatDecimal2(c.price) : '')
-                          const fieldLbl = { fontSize: '12px', fontWeight: 600, color: MUTED, marginBottom: '-4px' }
                           const actionBtn = { width: '100%', maxWidth: '100%', boxSizing: 'border-box', border: 'none', borderRadius: '2px', padding: '11px 14px', ...btn, fontSize: '13px' }
-                          const LabeledInput = ({ label, ...props }) => (
-                            <label style={{ display: 'block', width: '100%', maxWidth: '100%', minWidth: 0 }}>
-                              <div style={fieldLbl}>{label}</div>
-                              <input {...props} style={inputFull} />
-                            </label>
-                          )
                           const priceOk = Number(c.price) > 0
                           const payOverride = dv(c.id + '_payPiecesOverride') === '1'
                           const payCalc = Number(payAmt) > 0 && priceOk ? paymentPiecesFromCheck(payAmt, c.price) : null
@@ -1451,6 +1709,7 @@ export default function JerkyMunch() {
                               <div style={{ display: 'flex', gap: '8px', alignItems: 'center', flexWrap: 'wrap', marginBottom: '14px' }}>
                                 <span style={{ color: MUTED }}>$</span>
                                 <input
+                                  data-testid={`consign-price-${c.id}`}
                                   value={priceFieldValue}
                                   onChange={e => { setDv(priceDraftKey, e.target.value); setPriceErr(p => { const n = { ...p }; delete n[c.id]; return n }) }}
                                   onBlur={e => { const f = formatDecimal2(e.target.value); if (f) setDv(priceDraftKey, f) }}
@@ -1482,14 +1741,20 @@ export default function JerkyMunch() {
                                 </div>
                               ) : (
                                 <div style={{ marginBottom: '16px', border: `1px solid ${BORDER}`, borderRadius: '2px', overflow: 'hidden' }}>
-                                  <div style={{ display: 'grid', gridTemplateColumns: '88px 1fr 72px', gap: '8px', padding: '8px 12px', background: CREAM, ...lbl, fontSize: '10px' }}>
-                                    <span>Date</span><span>What happened</span><span style={{ textAlign: 'right' }}>On shelf</span>
+                                  <div style={{ display: 'grid', gridTemplateColumns: '88px 1fr 72px 96px', gap: '8px', padding: '8px 12px', background: CREAM, ...lbl, fontSize: '10px' }}>
+                                    <span>Date</span><span>What happened</span><span style={{ textAlign: 'right' }}>On shelf</span><span />
                                   </div>
-                                  {ledger.map((row, i) => (
-                                    <div key={i} style={{ display: 'grid', gridTemplateColumns: '88px 1fr 72px', gap: '8px', padding: '8px 12px', borderTop: `1px solid ${CREAM}`, fontSize: '12.5px', alignItems: 'baseline' }}>
+                                  {ledger.map((row) => (
+                                    <div key={row.logId || row.label + row.dateIso} style={{ display: 'grid', gridTemplateColumns: '88px 1fr 72px 96px', gap: '8px', padding: '8px 12px', borderTop: `1px solid ${CREAM}`, fontSize: '12.5px', alignItems: 'baseline' }}>
                                       <span style={{ ...NUM, color: '#BFB096' }}>{row.dateIso ? fmtD(row.dateIso) : 'Undated'}</span>
                                       <span style={{ color: MUTED }}>{row.label}</span>
                                       <span style={{ ...NUM, textAlign: 'right', fontWeight: 600, color: INK }}>{row.onShelf}</span>
+                                      {row.logId ? (
+                                        <span style={{ display: 'flex', gap: '8px', justifyContent: 'flex-end' }}>
+                                          <button type="button" disabled={saving} onClick={() => openEditLog(c.id, row.logId, row.type)} style={{ background: 'none', border: 'none', padding: '2px 0', color: KRAFT, fontSize: '11px', fontWeight: 600, cursor: saving ? 'default' : 'pointer', opacity: saving ? 0.45 : 1 }}>Edit</button>
+                                          <button type="button" disabled={saving} onClick={() => setDeleteConfirm({ partnerId: c.id, logId: row.logId, label: row.label, dateIso: row.dateIso })} style={{ background: 'none', border: 'none', padding: '2px 0', color: RED, fontSize: '11px', fontWeight: 600, cursor: saving ? 'default' : 'pointer', opacity: saving ? 0.45 : 1 }}>Delete</button>
+                                        </span>
+                                      ) : <span />}
                                     </div>
                                   ))}
                                 </div>
@@ -1503,8 +1768,8 @@ export default function JerkyMunch() {
                                   <div style={stepTitle}>First visit? Log what&apos;s on the shelf now</div>
                                   <p style={stepHint}>Opening count for this store — drop-offs and payments build from here.</p>
                                   <div style={fieldRow}>
-                                    <LabeledInput label="As-of date" value={dateVal(c.id + '_startDate')} onChange={e => setDv(c.id + '_startDate', e.target.value)} type="date" />
-                                    <LabeledInput label="Pieces on shelf" value={startCntVal} onChange={e => setDv(c.id + '_startCnt', e.target.value)} type="text" inputMode="numeric" placeholder="e.g. 40" />
+                                    <ConsignLabeledInput label="As-of date" value={dateVal(c.id + '_startDate')} onChange={e => setDv(c.id + '_startDate', e.target.value)} type="date" />
+                                    <ConsignLabeledInput label="Pieces on shelf" value={startCntVal} onChange={e => setDv(c.id + '_startCnt', e.target.value)} type="text" inputMode="numeric" placeholder="e.g. 40" />
                                     <button type="button" disabled={startCntVal === '' || saving} onClick={() => logStartingCount(c.id)} style={{ ...actionBtn, background: CHAR, color: CREAM, opacity: startCntVal === '' || saving ? 0.45 : 1 }}>Save starting count</button>
                                   </div>
                                   {stepMsg[`${c.id}_start`] && <div style={stepConfirm}>{stepMsg[`${c.id}_start`]}</div>}
@@ -1514,14 +1779,10 @@ export default function JerkyMunch() {
                               <div style={{ marginBottom: '16px' }}>
                                 <div style={stepTitle}>1. Dropped off</div>
                                 <p style={stepHint}>Date you added pieces at this store.</p>
-                                <div style={{ display: 'flex', gap: '6px', marginBottom: '8px', flexWrap: 'wrap' }}>
-                                  <button type="button" onClick={() => setDv(c.id + '_shpMode', 'sent')} style={{ flex: 1, minWidth: '140px', background: shpMode === 'sent' ? CHAR : CARDBG, color: shpMode === 'sent' ? CREAM : INK, border: `1px solid ${BORDER}`, borderRadius: '2px', padding: '9px 10px', ...btn, fontSize: '12px' }}>Sent them more</button>
-                                  <button type="button" onClick={() => setDv(c.id + '_shpMode', 'stock')} style={{ flex: 1, minWidth: '140px', background: shpMode === 'stock' ? CHAR : CARDBG, color: shpMode === 'stock' ? CREAM : INK, border: `1px solid ${BORDER}`, borderRadius: '2px', padding: '9px 10px', ...btn, fontSize: '12px' }}>Stocked their shelf</button>
-                                </div>
                                 <div style={fieldRow}>
-                                  <LabeledInput label="Drop-off date" value={dateVal(c.id + '_dropDate')} onChange={e => setDv(c.id + '_dropDate', e.target.value)} type="date" />
-                                  <LabeledInput label="Pieces added" value={dropVal} onChange={e => setDv(c.id + '_dropPieces', e.target.value)} type="text" inputMode="numeric" placeholder="e.g. 100" />
-                                  <button type="button" disabled={!(Number(dropVal) > 0) || saving} onClick={() => logDropoff(c.id)} style={{ ...actionBtn, background: CHAR, color: CREAM, opacity: !(Number(dropVal) > 0) || saving ? 0.45 : 1 }}>Save drop-off</button>
+                                  <ConsignLabeledInput label="Drop-off date" value={dateVal(c.id + '_dropDate')} onChange={e => setDv(c.id + '_dropDate', e.target.value)} type="date" />
+                                  <ConsignLabeledInput label="Pieces added" value={dropVal} onChange={e => setDv(c.id + '_dropPieces', e.target.value)} type="text" inputMode="numeric" placeholder="e.g. 100" />
+                                  <button type="button" data-testid={`consign-save-drop-${c.id}`} disabled={!(Number(dropVal) > 0) || saving} onClick={() => logDropoff(c.id)} style={{ ...actionBtn, background: CHAR, color: CREAM, opacity: !(Number(dropVal) > 0) || saving ? 0.45 : 1 }}>{saving ? 'Saving…' : 'Save drop-off'}</button>
                                 </div>
                                 {stepMsg[`${c.id}_drop`] && <div style={stepConfirm}>{stepMsg[`${c.id}_drop`]}</div>}
                               </div>
@@ -1531,8 +1792,8 @@ export default function JerkyMunch() {
                                 <div style={stepTitle}>2. Got paid</div>
                                 <p style={stepHint}>Date paid and check amount — pieces come from price per bag.</p>
                                 <div style={fieldRow}>
-                                  <LabeledInput label="Date paid" value={dateVal(c.id + '_payDate')} onChange={e => setDv(c.id + '_payDate', e.target.value)} type="date" />
-                                  <LabeledInput label="Check amount $" value={payAmt} onChange={e => setDv(c.id + '_payAmt', e.target.value)} type="text" inputMode="decimal" placeholder="e.g. 360" />
+                                  <ConsignLabeledInput label="Date paid" value={dateVal(c.id + '_payDate')} onChange={e => setDv(c.id + '_payDate', e.target.value)} type="date" />
+                                  <ConsignLabeledInput label="Check amount $" value={payAmt} onChange={e => setDv(c.id + '_payAmt', e.target.value)} type="text" inputMode="decimal" placeholder="e.g. 360" />
                                   {payCoverLine && (
                                     <div style={{ fontSize: '12.5px', color: priceOk ? MUTED : RED, lineHeight: 1.45 }}>
                                       {payCoverLine}
@@ -1549,7 +1810,7 @@ export default function JerkyMunch() {
                                     </div>
                                   )}
                                   {payOverride && (
-                                    <LabeledInput label="Pieces paid for (override)" value={payPieces} onChange={e => setDv(c.id + '_payPieces', e.target.value)} type="text" inputMode="numeric" placeholder="e.g. 80" />
+                                    <ConsignLabeledInput label="Pieces paid for (override)" value={payPieces} onChange={e => setDv(c.id + '_payPieces', e.target.value)} type="text" inputMode="numeric" placeholder="e.g. 80" />
                                   )}
                                   <button type="button" disabled={!payCanSave} onClick={() => logPayment(c.id)} style={{ ...actionBtn, background: GREEN, color: '#fff', opacity: !payCanSave ? 0.45 : 1 }}>Save payment</button>
                                 </div>
@@ -1560,8 +1821,8 @@ export default function JerkyMunch() {
                                 <div style={stepTitle}>3. Picked up bags</div>
                                 <p style={stepHint}>Bags they gave back to you.</p>
                                 <div style={fieldRow}>
-                                  <LabeledInput label="Date picked up" value={dateVal(c.id + '_pickupDate')} onChange={e => setDv(c.id + '_pickupDate', e.target.value)} type="date" />
-                                  <LabeledInput label="Pieces picked up" value={pickupVal} onChange={e => setDv(c.id + '_pickup', e.target.value)} type="text" inputMode="numeric" placeholder="e.g. 5" />
+                                  <ConsignLabeledInput label="Date picked up" value={dateVal(c.id + '_pickupDate')} onChange={e => setDv(c.id + '_pickupDate', e.target.value)} type="date" />
+                                  <ConsignLabeledInput label="Pieces picked up" value={pickupVal} onChange={e => setDv(c.id + '_pickup', e.target.value)} type="text" inputMode="numeric" placeholder="e.g. 5" />
                                   <button type="button" disabled={!(Number(pickupVal) > 0) || saving} onClick={() => logPickup(c.id)} style={{ ...actionBtn, background: KRAFT, color: '#fff', opacity: !(Number(pickupVal) > 0) || saving ? 0.45 : 1 }}>Save pickup</button>
                                 </div>
                                 {stepMsg[`${c.id}_pickup`] && <div style={stepConfirm}>{stepMsg[`${c.id}_pickup`]}</div>}
@@ -2350,6 +2611,62 @@ export default function JerkyMunch() {
                   <div style={{ fontFamily: MONO, fontSize: '13px', whiteSpace: 'nowrap', color: INK }}>{m0(r.amount)}</div>
                 </div>
               ))}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {deleteConfirm && (
+        <div role="dialog" aria-modal="true" aria-labelledby="jm-delete-title" data-testid="consign-delete-confirm" style={{ position: 'fixed', inset: 0, zIndex: 10000, background: 'rgba(43,32,24,0.45)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '20px' }}>
+          <div style={{ ...card, width: '100%', maxWidth: '400px', boxShadow: '0 12px 40px rgba(43,32,24,0.18)' }}>
+            <div id="jm-delete-title" style={{ ...big, fontSize: '18px', color: INK, marginBottom: '10px' }}>Delete this activity?</div>
+            <p style={{ fontSize: '13.5px', color: MUTED, lineHeight: 1.5, marginBottom: '6px' }}>
+              {deleteConfirm.dateIso ? fmtD(deleteConfirm.dateIso) + ' · ' : ''}<b style={{ color: INK }}>{deleteConfirm.label}</b>
+            </p>
+            <p style={{ fontSize: '12.5px', color: MUTED, lineHeight: 1.45, marginBottom: '18px' }}>This removes the log entry and rolls back its effect on sent, paid, pickup, or shelf-count totals. You can&apos;t undo this.</p>
+            <div style={{ display: 'flex', gap: '10px' }}>
+              <button type="button" disabled={!!updBusy[deleteConfirm.partnerId]} onClick={() => setDeleteConfirm(null)} style={{ flex: 1, background: 'none', border: `1px solid ${BORDER}`, borderRadius: '2px', padding: '11px', ...btn, color: MUTED }}>Cancel</button>
+              <button type="button" disabled={!!updBusy[deleteConfirm.partnerId]} onClick={() => deleteLogEntry(deleteConfirm.partnerId, deleteConfirm.logId)} style={{ flex: 1, background: RED, color: '#fff', border: 'none', borderRadius: '2px', padding: '11px', ...btn, opacity: updBusy[deleteConfirm.partnerId] ? 0.45 : 1 }}>{updBusy[deleteConfirm.partnerId] ? 'Deleting…' : 'Delete'}</button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {renameStore && (
+        <div role="dialog" aria-modal="true" aria-labelledby="jm-rename-title" data-testid="consign-rename-dialog" style={{ position: 'fixed', inset: 0, zIndex: 10000, background: 'rgba(43,32,24,0.45)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '20px' }}>
+          <div style={{ ...card, width: '100%', maxWidth: '400px', boxShadow: '0 12px 40px rgba(43,32,24,0.18)' }}>
+            <div id="jm-rename-title" style={{ ...big, fontSize: '18px', color: INK, marginBottom: '12px' }}>Rename store</div>
+            <p style={{ fontSize: '12.5px', color: MUTED, lineHeight: 1.45, marginBottom: '12px' }}>Updates this store&apos;s name in Jerky Munch only — QuickBooks is not changed.</p>
+            <ConsignLabeledInput label="Store name" value={renameStore.name} onChange={e => { setRenameStore(v => ({ ...v, name: e.target.value })); setRenameErr('') }} type="text" autoComplete="off" />
+            {renameErr && <div style={{ color: RED, fontSize: '13px', marginTop: '8px' }}>{renameErr}</div>}
+            <div style={{ display: 'flex', gap: '10px', marginTop: '16px' }}>
+              <button type="button" disabled={!!updBusy[renameStore.partnerId]} onClick={() => { setRenameStore(null); setRenameErr('') }} style={{ flex: 1, background: 'none', border: `1px solid ${BORDER}`, borderRadius: '2px', padding: '11px', ...btn, color: MUTED }}>Cancel</button>
+              <button type="button" disabled={!!updBusy[renameStore.partnerId]} onClick={saveStoreRename} style={{ flex: 1, background: CHAR, color: CREAM, border: 'none', borderRadius: '2px', padding: '11px', ...btn, opacity: updBusy[renameStore.partnerId] ? 0.45 : 1 }}>{updBusy[renameStore.partnerId] ? 'Saving…' : 'Save name'}</button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {editLog && (
+        <div role="dialog" aria-modal="true" aria-labelledby="jm-edit-title" data-testid="consign-edit-dialog" style={{ position: 'fixed', inset: 0, zIndex: 10000, background: 'rgba(43,32,24,0.45)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '20px' }}>
+          <div style={{ ...card, width: '100%', maxWidth: '400px', boxShadow: '0 12px 40px rgba(43,32,24,0.18)' }}>
+            <div id="jm-edit-title" style={{ ...big, fontSize: '18px', color: INK, marginBottom: '12px' }}>Edit activity</div>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', marginBottom: '16px' }}>
+              <ConsignLabeledInput label="Date" value={editLog.dateIso} onChange={e => setEditLog(v => ({ ...v, dateIso: e.target.value }))} type="date" />
+              <ConsignLabeledInput
+                label={editLog.type === 'pay' ? 'Check amount $' : 'Pieces'}
+                value={editLog.value}
+                onChange={e => setEditLog(v => ({ ...v, value: e.target.value }))}
+                type="text"
+                inputMode={editLog.type === 'pay' ? 'decimal' : 'numeric'}
+              />
+              {editLog.type === 'pay' && (
+                <p style={{ fontSize: '12px', color: MUTED, lineHeight: 1.45 }}>Pieces paid for recalculate from the store&apos;s price per bag when you save.</p>
+              )}
+            </div>
+            <div style={{ display: 'flex', gap: '10px' }}>
+              <button type="button" disabled={!!updBusy[editLog.partnerId]} onClick={() => setEditLog(null)} style={{ flex: 1, background: 'none', border: `1px solid ${BORDER}`, borderRadius: '2px', padding: '11px', ...btn, color: MUTED }}>Cancel</button>
+              <button type="button" disabled={!!updBusy[editLog.partnerId]} onClick={saveEditLog} style={{ flex: 1, background: CHAR, color: CREAM, border: 'none', borderRadius: '2px', padding: '11px', ...btn, opacity: updBusy[editLog.partnerId] ? 0.45 : 1 }}>{updBusy[editLog.partnerId] ? 'Saving…' : 'Save edit'}</button>
             </div>
           </div>
         </div>
