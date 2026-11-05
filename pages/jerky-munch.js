@@ -5,6 +5,7 @@ import { buildPnl, buildBalanceSheet, buildCashFlow, periodPnl, buildAdSpend } f
 import { loadQboStatements, balanceSheetAsOf, monthLabel } from '../lib/qboStatements'
 import { recon, missingSummary, buildActivityLedger, safeOnShelf, hasDropActivity, hasShelfBooks, hasLoggedConsignmentActivity, paymentPiecesFromCheck, partnerStateAfterLogDelete, partnerStateAfterLogReplace, parseLogEvent, formatDropLogNote, buildPayLogNote, formatPickupLogNote, formatStartingCountLogNote, formatCountLogNote, consignStoreRenameError } from '../lib/consignmentRecon'
 import { BOOKS_TZ, isoDateInTimeZone } from '../lib/jerkyBooksTz'
+import { roasMultiplier, roasLabel } from '../lib/jerkyRoas'
 import { ResponsiveContainer, ComposedChart, Bar, Line, XAxis, YAxis, Tooltip, CartesianGrid, PieChart, Pie, Cell } from 'recharts'
 
 const CHAR = '#2B2018', SPICE = '#C8462C', KRAFT = '#A9763A', CREAM = '#F6F0E6'
@@ -145,7 +146,27 @@ const E2E_CONSIGN = [
     qbCustomerId: 'qb-mock-customer-1',
     log: [{ logId: 'e2e-log-linked', at: 'Nov 2', atIso: '2026-11-02', t: 'Dropped off 10 pieces on 2026-11-02 (drop-off)' }],
   },
+  {
+    id: 'e2e-invoice',
+    store: 'E2E Invoice Store',
+    region: 'Kansas City',
+    type: 'invoice',
+    price: 4.5,
+    sent: 0,
+    returned: 0,
+    paid: 500,
+    counted: null,
+    countedDate: '',
+    diagnosis: '',
+    cycle: 1,
+    lastContact: null,
+    restock: 'good',
+    notes: '',
+    qbCustomerId: 'qb-mock-invoice-1',
+    log: [],
+  },
 ]
+
 
 const DIRECT_SOURCES = ['Shopify / online', 'Farmers market', 'Pop-up event', 'Wholesale / bulk', 'Other']
 
@@ -565,6 +586,14 @@ export default function JerkyMunch() {
       setRole('owner')
       setConsign(E2E_CONSIGN)
       setExpanded('e2e-active')
+      setDirect([{ id: 'e2e-d1', who: 'Sunday market', source: 'Farmers market', units: 24, rev: 312 }])
+      setAds([
+        { id: 'e2e-ad1', channel: 'Meta Ads', spend: 200, rev: 480, track: 'IG10', tracked: true },
+        { id: 'e2e-ad2', channel: 'New channel', spend: 0, rev: 0, track: '', tracked: false },
+      ])
+      setExpenses([{ id: 'e2e-exp1', vendor: 'Restaurant depot', amt: 86.5, cat: 'Ingredients', pay: 'personal' }])
+      setPRODUCTS([{ name: 'Original', color: '#8A2E14', week: 8, month: 32 }])
+      setStoreInvoices([])
       setDataLoaded(true)
       return
     }
@@ -665,6 +694,7 @@ export default function JerkyMunch() {
     setConsign(prev => prev.map(c => c.id === id
       ? { ...c, ...patch, log: logEntry ? [{ at: fmtD(evtIso), atIso: evtIso, t: logEntry }, ...(c.log || [])] : c.log } : c))
     try {
+      if (E2E) return true
       const colMap = { countedDate: 'counted_date', lastContact: 'last_contact' }
       const dbPatch = {}
       Object.keys(patch || {}).forEach(k => { dbPatch[colMap[k] || k] = patch[k] })
@@ -1075,7 +1105,7 @@ export default function JerkyMunch() {
   // aggregates
   const R = consign.filter(c => (c.type || 'consignment') === 'consignment').map(c => ({ ...c, ...recon(c) }))
     .sort((a, b) => (a.region || '').localeCompare(b.region || '') || (a.store || '').localeCompare(b.store || ''))
-  const cashCollected = consign.reduce((s, c) => s + c.paid, 0)
+  const cashCollected = R.reduce((s, c) => s + (Number(c.paid) || 0), 0)
   const invUnpaid = storeInvoices.filter(i => i.status === 'unpaid')
   const isOverdue = (i) => i.status === 'unpaid' && i.dueDate && i.dueDate < todayStr
   const totalAR = invUnpaid.reduce((s, i) => s + i.amount, 0)
@@ -1093,7 +1123,7 @@ export default function JerkyMunch() {
   const directUnits = direct.reduce((s, d) => s + d.units, 0)
   const adSpend = ads.reduce((s, a) => s + a.spend, 0)
   const adRev = ads.reduce((s, a) => s + a.rev, 0)
-  const redAds = ads.filter(a => a.rev / a.spend < 1)
+  const redAds = ads.filter(a => (Number(a.spend) > 0) && (Number(a.rev) / Number(a.spend) < 1))
   const wastedSpend = redAds.reduce((s, a) => s + a.spend, 0)
   const wastedReturn = redAds.reduce((s, a) => s + a.rev, 0)
   const revenue = directRev + cashCollected
@@ -1334,6 +1364,7 @@ export default function JerkyMunch() {
   const TABS = [['overview', 'Overview'], ['consign', 'Consignment'], ['invoices', 'Invoice Stores'], ['ads', 'Advertising'], ['financials', 'Financials']]
   const EXTRA = [['expenses', 'Import expenses'], ['quickbooks', 'QuickBooks sync']]
   const currentLabel = ([...TABS, ...EXTRA].find(t => t[0] === tab) || ['', ''])[1]
+  const booksLoaded = glTx.length > 0 && coaTx.length > 0
 
   return (
     <>
@@ -1398,7 +1429,7 @@ export default function JerkyMunch() {
                   style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '8px', ...(active ? { background: 'rgba(255,255,255,.12)', color: CREAM, boxShadow: `inset 3px 0 0 ${SPICE}` } : {}) }}>
                   <span>{label}</span>
                   {id === 'quickbooks'
-                    ? <span style={{ width: '7px', height: '7px', borderRadius: '50%', background: '#4FbE6A', flexShrink: 0 }} />
+                    ? <span title={booksLoaded ? 'Books loaded' : 'Import books to sync'} style={{ width: '7px', height: '7px', borderRadius: '50%', background: booksLoaded ? '#4FbE6A' : '#8A7A66', flexShrink: 0 }} />
                     : id === 'askai'
                       ? <span style={{ fontSize: '9px', fontWeight: 700, color: '#fff', background: SPICE, padding: '2px 6px', borderRadius: '2px', flexShrink: 0 }}>NEW</span>
                       : null}
@@ -1544,7 +1575,7 @@ export default function JerkyMunch() {
                     if (!rows.length) return <div style={{ fontSize: '13px', color: MUTED, padding: '8px 0' }}>No direct sales recorded yet.</div>
                     const max = rows[0].rev || 1
                     return rows.map((d, i) => (
-                    <div key={d.who + i} className="jm-click" onClick={() => setTab('quickbooks')} style={{ padding: '9px 8px', borderTop: i ? `1px solid ${CREAM}` : 'none', cursor: 'pointer', borderRadius: '2px' }}>
+                    <div key={d.who + i} style={{ padding: '9px 8px', borderTop: i ? `1px solid ${CREAM}` : 'none', borderRadius: '2px' }}>
                       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', gap: '8px', marginBottom: '6px' }}>
                         <span style={{ fontWeight: 600, color: INK, fontSize: '14px' }}>{d.who}</span>
                         <span style={{ ...big, fontSize: '15px', color: GREEN }}>{m0(d.rev)}</span>
@@ -1579,7 +1610,7 @@ export default function JerkyMunch() {
                     </div>
                   ))}
                 </div>
-                <p style={{ fontSize: '12px', color: MUTED, marginTop: '14px' }}>These are placeholder illustrations — drop in real product photos whenever you like.</p>
+                <p style={{ fontSize: '12px', color: MUTED, marginTop: '14px' }}>Bag counts by flavor — swap in product photos when you have them.</p>
               </div>
             </>
           )}
@@ -1589,7 +1620,7 @@ export default function JerkyMunch() {
             <div className="jm-consign">
             <>
               <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap', marginBottom: '16px' }}>
-                <KPI k="Partners" v={consign.length} sub="stores carrying you" />
+                <KPI k="Partners" v={R.length} sub="consignment stores" />
                 <KPI k="Out on shelves" v={onShelfPiecesTotal} sub={`${m0(onShelfVal)} of product`} accent={KRAFT} />
                 <KPI k="Collected" v={m0(cashCollected)} sub="checks in the door" accent={GREEN} />
                 <KPI k="Bags missing" v={missing.bags} sub={missKpiSub} accent={missing.bags ? RED : GREEN} />
@@ -2244,7 +2275,7 @@ export default function JerkyMunch() {
               )}
               <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap', marginBottom: '16px' }}>
                 <KPI k="Ad spend / mo" v={m0(adSpend)} sub="all channels" />
-                <KPI k="Return" v={m0(adRev)} sub={`${(adRev / adSpend).toFixed(1)}x overall`} accent={GREEN} />
+                <KPI k="Return" v={m0(adRev)} sub={roasLabel(adSpend, adRev)} accent={GREEN} />
                 <KPI k="Wasted" v={m0(wastedSpend)} sub="on losing channels" accent={RED} />
               </div>
               <div style={{ ...card, marginBottom: '16px', fontSize: '13px', color: MUTED, lineHeight: 1.55 }}>
@@ -2270,8 +2301,11 @@ export default function JerkyMunch() {
                 </div>
               )}
 
-              {ads.slice().sort((a, b) => (b.spend ? b.rev / b.spend : 0) - (a.spend ? a.rev / a.spend : 0)).map(a => {
-                const roas = a.spend ? a.rev / a.spend : 0, vd = verdict(roas), open = expanded === a.id
+              {ads.length === 0 && (
+                <div style={{ ...card, color: MUTED, fontSize: '13px', marginBottom: '16px' }}>No ad channels yet — add one to track spend and return.</div>
+              )}
+              {ads.slice().sort((a, b) => (roasMultiplier(b.spend, b.rev) || 0) - (roasMultiplier(a.spend, a.rev) || 0)).map(a => {
+                const roas = roasMultiplier(a.spend, a.rev) || 0, vd = verdict(roas), open = expanded === a.id
                 return (
                   <div key={a.id} style={{ ...card, marginBottom: '10px', padding: 0, overflow: 'hidden', borderColor: open ? CHAR : BORDER }}>
                     <div onClick={() => setExpanded(open ? null : a.id)} style={{ padding: '16px 18px', cursor: 'pointer' }}>

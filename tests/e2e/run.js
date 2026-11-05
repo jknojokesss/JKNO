@@ -21,7 +21,10 @@ const stop = () => { try { process.kill(-server.pid) } catch (e) { try { server.
 process.on('exit', stop); process.on('SIGINT', () => { stop(); process.exit(1) })
 
 const ping = () => new Promise(res => {
-  const req = http.get(BASE + '/gowns', r => { r.resume(); res(r.statusCode === 200) })
+  const req = http.get(BASE + '/jerky-munch', r => {
+    r.resume()
+    res(r.statusCode >= 200 && r.statusCode < 400)
+  })
   req.on('error', () => res(false)); req.setTimeout(2000, () => { req.destroy(); res(false) })
 })
 
@@ -36,7 +39,7 @@ const ping = () => new Promise(res => {
   const specDir = __dirname
   const envWithBase = { ...env, E2E_BASE: BASE }
   let status = 0
-  for (const spec of ['gowns.spec.js', 'jerky-consign-focus.spec.js']) {
+  for (const spec of ['gowns.spec.js', 'jerky-consign-focus.spec.js', 'jerky-munch-sweep.spec.js']) {
     const r = spawnSync('node', [require('path').join(specDir, spec)], {
       stdio: 'inherit', env: envWithBase,
     })

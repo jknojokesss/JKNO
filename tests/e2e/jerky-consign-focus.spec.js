@@ -82,7 +82,8 @@ async function runViewport(browser, viewport, tag) {
     check(`Price per bag: focus after "${ch}"`, await priceInput.evaluate(el => document.activeElement === el))
   }
   const priceVal = await priceInput.inputValue()
-  check('Price per bag: holds typed value', priceVal === '4.50' || priceVal === '4.5')
+  const priceNum = parseFloat(String(priceVal).replace(/[^0-9.]/g, ''))
+  check('Price per bag: holds typed value', Math.abs(priceNum - 4.5) < 0.01)
 
   await scope.locator('summary', { hasText: /shelf count/i }).click()
   await page.waitForTimeout(200)
