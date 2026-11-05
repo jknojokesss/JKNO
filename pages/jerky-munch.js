@@ -3,7 +3,7 @@ import Head from 'next/head'
 import { jerkySupabase } from '../lib/supabaseJerky'
 import { buildPnl, buildBalanceSheet, buildCashFlow, periodPnl, buildAdSpend } from '../lib/jerkyGL'
 import { loadQboStatements, balanceSheetAsOf, monthLabel } from '../lib/qboStatements'
-import { recon, missingSummary, buildActivityLedger, safeOnShelf, hasDropActivity, hasShelfBooks, hasLoggedConsignmentActivity, paymentPiecesFromCheck, partnerStateAfterLogDelete, partnerStateAfterLogReplace, parseLogEvent, formatDropLogNote, buildPayLogNote, formatPickupLogNote, formatStartingCountLogNote, formatCountLogNote, consignStoreRenameError } from '../lib/consignmentRecon'
+import { recon, missingSummary, buildActivityLedger, safeOnShelf, hasDropActivity, hasShelfBooks, hasLoggedConsignmentActivity, paymentPiecesFromCheck, partnerStateAfterLogDelete, partnerStateAfterLogReplace, parseLogEvent, formatDropLogNote, buildPayLogNote, formatPickupLogNote, formatStartingCountLogNote, formatCountLogNote, consignStoreRenameError, partnerDeliveryMode, consignVerbs, consignTotalsLine } from '../lib/consignmentRecon'
 import { BOOKS_TZ, isoDateInTimeZone } from '../lib/jerkyBooksTz'
 import { roasMultiplier, roasLabel } from '../lib/jerkyRoas'
 import { ResponsiveContainer, ComposedChart, Bar, Line, XAxis, YAxis, Tooltip, CartesianGrid, PieChart, Pie, Cell } from 'recharts'
@@ -29,35 +29,72 @@ const formatDecimal2 = (n) => {
   return (Math.round(v * 100) / 100).toFixed(2)
 }
 
-const consignStatusPillStyle = (badge) => ({
-  display: 'inline-block',
+const consignCompactPillStyle = (color, bg) => ({
+  display: 'inline-flex',
+  alignItems: 'center',
   alignSelf: 'flex-end',
   flexShrink: 0,
-  width: 'auto',
-  maxWidth: 'min(200px, 100%)',
   fontFamily: SANS,
   fontVariantNumeric: 'tabular-nums',
   fontFeatureSettings: '"tnum" 1',
   fontSize: '11px',
   fontWeight: 600,
-  color: '#fff',
-  background: badge.c,
-  padding: '4px 10px',
-  borderRadius: '999px',
-  lineHeight: 1.25,
-  whiteSpace: badge.compact ? 'normal' : 'nowrap',
-  textAlign: badge.compact ? 'right' : 'left',
+  color,
+  background: bg,
+  padding: '4px 8px',
+  borderRadius: '4px',
+  lineHeight: 1.2,
+  whiteSpace: 'nowrap',
 })
 
 const consignBadge = (c) => {
-  if (!hasShelfBooks(c)) return { c: MUTED, t: 'No drop-offs yet' }
-  if (c.status === 'invalid') return { c: RED, t: NUMBERS_DONT_ADD_UP, compact: true }
-  if (c.status === 'reconciled') return { c: GREEN, t: 'Count matches' }
-  if (c.status === 'short') return { c: RED, t: `${c.variance} missing vs count` }
-  if (c.status === 'over') return { c: AMBER, t: `${-c.variance} over vs count` }
-  const n = safeOnShelf(c.expected)
-  const asOfSuffix = c.asOfDate ? ` (as of ${fmtD(c.asOfDate)})` : ''
-  return { c: KRAFT, t: `Should be on shelf: ${n}${asOfSuffix}`, compact: !!asOfSuffix }
+  const v = consignVerbs(partnerDeliveryMode(c))
+  if (!hasShelfBooks(c)) return { kind: 'empty', text: v.emptySent }
+  if (c.status === 'invalid') return { kind: 'pill', text: NUMBERS_DONT_ADD_UP, color: '#fff', bg: RED }
+  if (c.status === 'reconciled') return { kind: 'pill', text: 'Count matches', color: '#fff', bg: GREEN }
+  if (c.status === 'short') return { kind: 'pill', text: `${c.variance} missing vs count`, color: '#fff', bg: RED }
+  if (c.status === 'over') return { kind: 'pill', text: `${-c.variance} over vs count`, color: INK, bg: AMBER + '33' }
+  return { kind: 'shelf', n: safeOnShelf(c.expected), asOfDate: c.asOfDate || null }
+}
+
+const ConsignStatusBadge = ({ badge }) => {
+  if (badge.kind === 'shelf') {
+    return (
+      <div
+        data-testid="consign-shelf-badge"
+        style={{
+          display: 'inline-flex',
+          alignItems: 'baseline',
+          gap: '5px',
+          flexShrink: 0,
+          whiteSpace: 'nowrap',
+          alignSelf: 'flex-end',
+          padding: '5px 8px',
+          borderRadius: '4px',
+          background: KRAFT + '1A',
+          border: `1px solid ${KRAFT}44`,
+        }}
+      >
+        <span style={{ ...NUM, fontSize: '20px', fontWeight: 700, color: KRAFT, lineHeight: 1 }}>{badge.n}</span>
+        <span style={{ fontSize: '10px', fontWeight: 700, color: KRAFT, letterSpacing: '0.06em', textTransform: 'uppercase' }}>on shelf</span>
+        {badge.asOfDate ? (
+          <span style={{ ...NUM, fontSize: '10px', fontWeight: 500, color: MUTED, marginLeft: '2px' }}>as of {fmtD(badge.asOfDate)}</span>
+        ) : null}
+      </div>
+    )
+  }
+  if (badge.kind === 'empty') {
+    return (
+      <span style={consignCompactPillStyle(MUTED, BORDER)} data-testid="consign-shelf-badge">
+        {badge.text}
+      </span>
+    )
+  }
+  return (
+    <span style={consignCompactPillStyle(badge.color, badge.bg)} data-testid="consign-shelf-badge">
+      {badge.text}
+    </span>
+  )
 }
 
 const CONSIGN_INP = {
@@ -145,6 +182,29 @@ const E2E_CONSIGN = [
     notes: '',
     qbCustomerId: 'qb-mock-customer-1',
     log: [{ logId: 'e2e-log-linked', at: 'Nov 2', atIso: '2026-11-02', t: 'Dropped off 10 pieces on 2026-11-02 (drop-off)' }],
+  },
+  {
+    id: 'e2e-ship',
+    store: 'Grand and Essex',
+    region: 'Bergenfield',
+    type: 'consignment',
+    deliveryMode: 'ship',
+    price: 4.5,
+    sent: 97,
+    returned: 0,
+    paid: 0,
+    counted: null,
+    countedDate: '',
+    diagnosis: '',
+    cycle: 1,
+    lastContact: null,
+    restock: 'good',
+    notes: '',
+    qbCustomerId: null,
+    log: [
+      { logId: 'e2e-log-start-ge', at: 'Nov 1', atIso: '2026-11-01', t: 'Starting count 10 on 2026-11-01' },
+      { logId: 'e2e-log-ship-ge', at: 'Nov 3', atIso: '2026-11-03', t: 'Shipped 97 pieces on 2026-11-03 (shipment)' },
+    ],
   },
   {
     id: 'e2e-invoice',
@@ -324,6 +384,7 @@ export default function JerkyMunch() {
         counted: p.counted, countedDate: p.counted_date || '', diagnosis: p.diagnosis || '',
         cycle: p.cycle, lastContact: p.last_contact, restock: p.restock, notes: p.notes,
         type: p.type || 'consignment', region: p.region || '', qbCustomerId: p.qb_customer_id || null,
+        deliveryMode: p.delivery_mode === 'ship' ? 'ship' : 'drop_off',
         log: (byPartner[p.id] || []).map(l => {
           const iso = String(l.at || '').slice(0, 10)
           return { logId: l.id, at: iso ? fmtD(iso) : '', atIso: iso, t: l.note }
@@ -695,7 +756,7 @@ export default function JerkyMunch() {
       ? { ...c, ...patch, log: logEntry ? [{ at: fmtD(evtIso), atIso: evtIso, t: logEntry }, ...(c.log || [])] : c.log } : c))
     try {
       if (E2E) return true
-      const colMap = { countedDate: 'counted_date', lastContact: 'last_contact' }
+      const colMap = { countedDate: 'counted_date', lastContact: 'last_contact', deliveryMode: 'delivery_mode' }
       const dbPatch = {}
       Object.keys(patch || {}).forEach(k => { dbPatch[colMap[k] || k] = patch[k] })
       if (Object.keys(dbPatch).length) {
@@ -750,11 +811,12 @@ export default function JerkyMunch() {
     const c = consign.find(x => x.id === id)
     if (!c || updBusy[id] || partnerWriteLock.current[id]) return
     const date = dateVal(id + '_dropDate')
-    const note = formatDropLogNote(pieces, date)
+    const mode = partnerDeliveryMode(c)
+    const note = formatDropLogNote(pieces, date, mode)
     const ok = await upd(id, { sent: c.sent + pieces }, note, date)
     if (!ok) return
     setDv(id + '_dropPieces', '')
-    flashStep(`${id}_drop`, `Dropped off ${pieces} pieces on ${fmtD(date)}`)
+    flashStep(`${id}_drop`, `${mode === 'ship' ? 'Shipped' : 'Dropped off'} ${pieces} pieces on ${fmtD(date)}`)
   }
   const logPayment = async (id) => {
     const dollars = Number(dv(id + '_payAmt'))
@@ -852,7 +914,7 @@ export default function JerkyMunch() {
     if (type === 'drop') {
       const pieces = Number(value)
       if (!(pieces > 0)) { releasePartnerWrite(partnerId); return }
-      note = formatDropLogNote(pieces, date)
+      note = formatDropLogNote(pieces, date, partnerDeliveryMode(before))
     } else if (type === 'pay') {
       const dollars = Number(value)
       if (!(dollars > 0) || !(Number(before.price) > 0)) { releasePartnerWrite(partnerId); return }
@@ -880,7 +942,7 @@ export default function JerkyMunch() {
       if (!E2E) {
         const { error: logErr } = await jerkySupabase.from('consignment_log').update({ note, at: date }).eq('id', logId)
         if (logErr) throw logErr
-        const colMap = { countedDate: 'counted_date' }
+        const colMap = { countedDate: 'counted_date', deliveryMode: 'delivery_mode' }
         const dbPatch = {}
         Object.keys(patch).forEach(k => { dbPatch[colMap[k] || k] = patch[k] })
         if (Object.keys(dbPatch).length) {
@@ -955,7 +1017,7 @@ export default function JerkyMunch() {
       if (!E2E) {
         const { error: delErr } = await jerkySupabase.from('consignment_log').delete().eq('id', logId)
         if (delErr) throw delErr
-        const colMap = { countedDate: 'counted_date' }
+        const colMap = { countedDate: 'counted_date', deliveryMode: 'delivery_mode' }
         const dbPatch = {}
         Object.keys(patch).forEach(k => { dbPatch[colMap[k] || k] = patch[k] })
         if (Object.keys(dbPatch).length) {
@@ -1670,6 +1732,7 @@ export default function JerkyMunch() {
                 const open = expanded === c.id
                 const showHeader = idx === 0 || (R[idx - 1] && R[idx - 1].region !== c.region)
                 const badge = consignBadge(c)
+                const deliveryCopy = consignVerbs(partnerDeliveryMode(c))
                 const saving = !!updBusy[c.id]
                 return (
                   <Fragment key={c.id}>
@@ -1680,12 +1743,12 @@ export default function JerkyMunch() {
                         <div>
                           <div style={{ ...big, fontSize: '20px', color: INK }}>{c.store}</div>
                           <div style={{ fontSize: '12px', color: MUTED, marginTop: '3px', lineHeight: 1.45 }}>
-                            {money2(c.price)}/bag · <span data-testid={`consign-sent-${c.id}`}>dropped off {c.sent}</span> · paid for {c.paidUnits} pieces ({money(c.paid)}) · picked up {c.returned}
+                            {money2(c.price)}/bag · <span data-testid={`consign-sent-${c.id}`}>{consignTotalsLine(c, c.paidUnits, money(c.paid))}</span>
                             {hasShelfBooks(c) && <> · <b style={{ color: INK }}>{safeOnShelf(c.expected)} on shelf</b>{c.asOfDate ? ` as of ${fmtD(c.asOfDate)}` : ''}</>}
                           </div>
                         </div>
                         <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '6px' }}>
-                          <span style={consignStatusPillStyle(badge)}>{badge.t}</span>
+                          <ConsignStatusBadge badge={badge} />
                           {c.restock && c.restock !== 'good' && <span style={{ fontSize: '11px', fontWeight: 600, color: RM[c.restock].color, background: RM[c.restock].color + '1A', padding: '3px 10px', borderRadius: '2px', whiteSpace: 'nowrap' }}>{RM[c.restock].label}</span>}
                         </div>
                       </div>
@@ -1699,11 +1762,28 @@ export default function JerkyMunch() {
 
                     {open && (
                       <div style={{ padding: '0 18px 18px', borderTop: `1px solid ${CREAM}`, maxWidth: '100%', minWidth: 0, boxSizing: 'border-box', overflow: 'hidden' }}>
-                        {!c.qbCustomerId && (
-                          <div style={{ marginTop: '12px', marginBottom: '4px' }}>
+                        <div style={{ marginTop: '12px', marginBottom: '4px', display: 'flex', flexWrap: 'wrap', gap: '14px 20px', alignItems: 'center' }}>
+                          {!c.qbCustomerId && (
                             <button type="button" data-testid={`consign-rename-${c.id}`} disabled={saving} onClick={() => { setRenameErr(''); setRenameStore({ partnerId: c.id, name: c.store }) }} style={{ background: 'none', border: 'none', padding: 0, color: KRAFT, fontSize: '12px', fontWeight: 600, cursor: saving ? 'default' : 'pointer', textDecoration: 'underline', opacity: saving ? 0.45 : 1 }}>Rename store</button>
-                          </div>
-                        )}
+                          )}
+                          <label style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '12px', color: MUTED }}>
+                            <span style={{ fontWeight: 600 }}>Delivery</span>
+                            <select
+                              data-testid={`consign-delivery-${c.id}`}
+                              value={c.deliveryMode || 'drop_off'}
+                              disabled={saving}
+                              onChange={async (e) => {
+                                const deliveryMode = e.target.value === 'ship' ? 'ship' : 'drop_off'
+                                if (deliveryMode === (c.deliveryMode || 'drop_off')) return
+                                await upd(c.id, { deliveryMode })
+                              }}
+                              style={{ ...CONSIGN_INP, padding: '6px 10px', fontSize: '12px', width: 'auto' }}
+                            >
+                              <option value="drop_off">Drop off</option>
+                              <option value="ship">Ship</option>
+                            </select>
+                          </label>
+                        </div>
                         {(() => {
                           const ledger = buildActivityLedger(c)
                           const dropVal = dv(c.id + '_dropPieces')
@@ -1768,7 +1848,7 @@ export default function JerkyMunch() {
                               <div style={{ ...lbl, margin: '14px 0 8px' }}>Activity</div>
                               {ledger.length === 0 ? (
                                 <div style={{ fontSize: '13px', color: MUTED, marginBottom: '14px', lineHeight: 1.45 }}>
-                                  No dated entries yet — log a drop-off or payment below.{hasShelfBooks(c) ? <> Books show <b style={{ color: INK }}>{safeOnShelf(c.expected)}</b> on shelf from totals.</> : null}
+                                  No dated entries yet — {deliveryCopy.emptyActivityLead} below.{hasShelfBooks(c) ? <> Books show <b style={{ color: INK }}>{safeOnShelf(c.expected)}</b> on shelf from totals.</> : null}
                                 </div>
                               ) : (
                                 <div style={{ marginBottom: '16px', border: `1px solid ${BORDER}`, borderRadius: '2px', overflow: 'hidden' }}>
@@ -1797,7 +1877,7 @@ export default function JerkyMunch() {
                               {showFirstVisit && (
                                 <div style={{ marginBottom: '18px', padding: '14px', background: CREAM, border: `1px solid ${BORDER}`, borderRadius: '2px' }}>
                                   <div style={stepTitle}>First visit? Log what&apos;s on the shelf now</div>
-                                  <p style={stepHint}>Opening count for this store — drop-offs and payments build from here.</p>
+                                  <p style={stepHint}>Opening count for this store — {deliveryCopy.startingHintTail} build from here.</p>
                                   <div style={fieldRow}>
                                     <ConsignLabeledInput label="As-of date" value={dateVal(c.id + '_startDate')} onChange={e => setDv(c.id + '_startDate', e.target.value)} type="date" />
                                     <ConsignLabeledInput label="Pieces on shelf" value={startCntVal} onChange={e => setDv(c.id + '_startCnt', e.target.value)} type="text" inputMode="numeric" placeholder="e.g. 40" />
@@ -1808,12 +1888,12 @@ export default function JerkyMunch() {
                               )}
 
                               <div style={{ marginBottom: '16px' }}>
-                                <div style={stepTitle}>1. Dropped off</div>
-                                <p style={stepHint}>Date you added pieces at this store.</p>
+                                <div style={stepTitle}>{deliveryCopy.sentStepTitle}</div>
+                                <p style={stepHint}>{deliveryCopy.sentStepHint}</p>
                                 <div style={fieldRow}>
-                                  <ConsignLabeledInput label="Drop-off date" value={dateVal(c.id + '_dropDate')} onChange={e => setDv(c.id + '_dropDate', e.target.value)} type="date" />
-                                  <ConsignLabeledInput label="Pieces added" value={dropVal} onChange={e => setDv(c.id + '_dropPieces', e.target.value)} type="text" inputMode="numeric" placeholder="e.g. 100" />
-                                  <button type="button" data-testid={`consign-save-drop-${c.id}`} disabled={!(Number(dropVal) > 0) || saving} onClick={() => logDropoff(c.id)} style={{ ...actionBtn, background: CHAR, color: CREAM, opacity: !(Number(dropVal) > 0) || saving ? 0.45 : 1 }}>{saving ? 'Saving…' : 'Save drop-off'}</button>
+                                  <ConsignLabeledInput label={deliveryCopy.sentDateLabel} value={dateVal(c.id + '_dropDate')} onChange={e => setDv(c.id + '_dropDate', e.target.value)} type="date" />
+                                  <ConsignLabeledInput label={deliveryCopy.sentPiecesLabel} value={dropVal} onChange={e => setDv(c.id + '_dropPieces', e.target.value)} type="text" inputMode="numeric" placeholder="e.g. 100" />
+                                  <button type="button" data-testid={`consign-save-drop-${c.id}`} disabled={!(Number(dropVal) > 0) || saving} onClick={() => logDropoff(c.id)} style={{ ...actionBtn, background: CHAR, color: CREAM, opacity: !(Number(dropVal) > 0) || saving ? 0.45 : 1 }}>{saving ? 'Saving…' : deliveryCopy.saveSentBtn}</button>
                                 </div>
                                 {stepMsg[`${c.id}_drop`] && <div style={stepConfirm}>{stepMsg[`${c.id}_drop`]}</div>}
                               </div>

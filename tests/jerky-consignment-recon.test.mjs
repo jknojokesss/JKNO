@@ -11,6 +11,10 @@ import {
   hasShelfBooks,
   startingPieces,
   paymentPiecesFromCheck,
+  consignTotalsLine,
+  formatDropLogNote,
+  partnerDeliveryMode,
+  consignVerbs,
 } from '../lib/consignmentRecon.js'
 
 describe('paymentPiecesFromCheck', () => {
@@ -95,6 +99,42 @@ describe('starting count', () => {
     assert.equal(ledger[0].label, 'Starting count 40')
     assert.equal(ledger[0].onShelf, 40)
     assert.equal(ledger[ledger.length - 1].onShelf, 60)
+  })
+})
+
+describe('delivery mode copy', () => {
+  it('formats ship log notes and ledger labels', () => {
+    assert.match(formatDropLogNote(97, '2026-11-03', 'ship'), /^Shipped 97/)
+    const rows = buildActivityLedger({
+      deliveryMode: 'ship',
+      sent: 97,
+      returned: 0,
+      paid: 0,
+      price: 4.5,
+      log: [
+        { t: 'Starting count 10 on 2026-11-01', atIso: '2026-11-01' },
+        { t: 'Shipped 97 pieces on 2026-11-03 (shipment)', atIso: '2026-11-03' },
+      ],
+    })
+    assert.equal(rows[1].label, 'shipped 97')
+    assert.equal(partnerDeliveryMode({ deliveryMode: 'ship' }), 'ship')
+    assert.equal(consignVerbs('ship').emptySent, 'No shipments yet')
+  })
+
+  it('consignTotalsLine shows starting count with shipped total', () => {
+    const c = {
+      deliveryMode: 'ship',
+      sent: 97,
+      returned: 0,
+      paid: 0,
+      log: [
+        { t: 'Starting count 10 on 2026-11-01', atIso: '2026-11-01' },
+        { t: 'Shipped 97 pieces on 2026-11-03 (shipment)', atIso: '2026-11-03' },
+      ],
+    }
+    const line = consignTotalsLine(c, 0, '$0')
+    assert.match(line, /starting 10/)
+    assert.match(line, /shipped 97/)
   })
 })
 
