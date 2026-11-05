@@ -209,7 +209,7 @@ export default function MarketingShell({
                 lineHeight: 1.65,
               }}
             >
-              I build the portal, write the integrations, and keep the books when you want that.
+              Tailor-made owner portals: built around how you work, not generic SaaS. Integrations, screens, books optional.
             </p>
           </div>
           <div style={{ display: 'flex', gap: '40px', flexWrap: 'wrap' }}>

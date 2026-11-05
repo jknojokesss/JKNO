@@ -11,7 +11,7 @@ export default function DemoGallery() {
       <PageHero
         kicker={`${ALL_DEMOS.length} samples · no login`}
         title={<>Open a sample.</>}
-        lead="No pitch deck: click a sample and see if it matches the business you are trying to run. Fictitious names, real layouts, no password."
+        lead="Each sample started as one owner's shape — yours gets wired the same way. Click around; fictitious names, real layouts, no password."
         align="center"
       />
 
