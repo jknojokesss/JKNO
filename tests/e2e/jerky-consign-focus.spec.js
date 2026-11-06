@@ -18,6 +18,13 @@ async function dropOverlay(page) {
   await page.evaluate(() => document.querySelectorAll('nextjs-portal').forEach(e => e.remove()))
 }
 
+async function openConsignStore(scope, page, storeName) {
+  await page.locator('button', { hasText: /^Consignment$/ }).click()
+  await page.waitForTimeout(400)
+  await scope.getByText(storeName).first().click()
+  await page.waitForTimeout(500)
+}
+
 /** Type digit-by-digit; fail if focus leaves the field before the string is complete. */
 async function typeDigitsKeepingFocus(page, input, target, label) {
   await input.click()
@@ -46,34 +53,31 @@ async function runViewport(browser, viewport, tag) {
   await dropOverlay(page)
 
   console.log(`\n${tag} — open consignment store panel`)
-  await page.locator('button', { hasText: /^Consignment$/ }).click()
-  await page.waitForTimeout(400)
-
-  const activeCard = page.locator('.jm-consign').getByText('E2E Active Store').first()
-  await activeCard.click()
-  await page.waitForTimeout(500)
-
   const scope = page.locator('.jm-consign')
+  await openConsignStore(scope, page, 'E2E Active Store')
+
+  console.log(`\n${tag} — visit date`)
+  const visitDate = scope.getByLabel('Visit date')
+  await visitDate.click()
+  check('Visit date: focus on click', await visitDate.evaluate(el => document.activeElement === el))
+  await visitDate.fill('2026-08-20')
+  check('Visit date: value after fill', (await visitDate.inputValue()) === '2026-08-20')
 
   console.log(`\n${tag} — active store fields`)
+  await scope.locator('[data-testid="consign-chip-drop-e2e-active"]').click()
+  await page.waitForTimeout(200)
   await typeDigitsKeepingFocus(page, scope.getByLabel('Pieces added'), '125', 'Drop-off pieces')
+
+  await scope.locator('[data-testid="consign-chip-pay-e2e-active"]').click()
+  await page.waitForTimeout(200)
   await typeDigitsKeepingFocus(page, scope.getByLabel('Check amount $'), '4.50', 'Check amount')
+
+  await scope.locator('[data-testid="consign-chip-pickup-e2e-active"]').click()
+  await page.waitForTimeout(200)
   await typeDigitsKeepingFocus(page, scope.getByLabel('Pieces picked up'), '125', 'Pickup pieces')
 
-  for (const [label, name] of [
-    ['Drop-off date', 'Drop-off date'],
-    ['Date paid', 'Date paid'],
-    ['Date picked up', 'Date picked up'],
-  ]) {
-    const dt = scope.getByLabel(name)
-    await dt.click()
-    check(`${label}: focus on click`, await dt.evaluate(el => document.activeElement === el))
-    await dt.fill('2026-08-20')
-    check(`${label}: value after fill`, (await dt.inputValue()) === '2026-08-20')
-    await dt.click()
-    check(`${label}: focus after re-click`, await dt.evaluate(el => document.activeElement === el))
-  }
-
+  await scope.locator('summary', { hasText: /Store settings/i }).click()
+  await page.waitForTimeout(200)
   const priceInput = scope.locator('[data-testid="consign-price-e2e-active"]')
   await priceInput.click()
   await priceInput.fill('')
@@ -85,29 +89,19 @@ async function runViewport(browser, viewport, tag) {
   const priceNum = parseFloat(String(priceVal).replace(/[^0-9.]/g, ''))
   check('Price per bag: holds typed value', Math.abs(priceNum - 4.5) < 0.01)
 
-  await scope.locator('summary', { hasText: /shelf count/i }).click()
+  await scope.locator('[data-testid="consign-chip-count-e2e-active"]').click()
   await page.waitForTimeout(200)
-  const shelfCount = scope.getByPlaceholder('bags on shelf')
+  const shelfCount = scope.getByLabel('Bags on shelf')
   await typeDigitsKeepingFocus(page, shelfCount, '125', 'Shelf count')
-  const shelfDate = scope.locator('input[type="date"]').last()
-  await shelfDate.click()
-  check('Shelf count date: focus on click', await shelfDate.evaluate(el => document.activeElement === el))
-  await shelfDate.fill('2026-09-01')
-  check('Shelf count date: value after fill', (await shelfDate.inputValue()) === '2026-09-01')
 
   const firstCard = page.locator('.jm-consign').getByText('E2E First Visit').first()
   await firstCard.click()
   await page.waitForTimeout(400)
 
   console.log(`\n${tag} — first-visit starting count`)
-  await typeDigitsKeepingFocus(page, scope.getByLabel('Pieces on shelf'), '125', 'Starting count')
-
-  const startDate = scope.getByLabel('As-of date').last()
-  await startDate.click()
-  const focusedDate = await startDate.evaluate(el => document.activeElement === el)
-  check('As-of date: focus on click', focusedDate)
-  await startDate.fill('2026-06-15')
-  check('As-of date: value sticks', (await startDate.inputValue()) === '2026-06-15')
+  await scope.locator('[data-testid="consign-chip-count-e2e-first"]').click()
+  await page.waitForTimeout(200)
+  await typeDigitsKeepingFocus(page, scope.getByLabel('Pieces on shelf (starting count)'), '125', 'Starting count')
 
   await page.close()
 }
@@ -117,13 +111,15 @@ async function testRenameStoreRules(page, tag) {
   await page.goto(BASE + '/jerky-munch', { waitUntil: 'networkidle' })
   await page.waitForTimeout(1200)
   await dropOverlay(page)
-  await page.locator('button', { hasText: /^Consignment$/ }).click()
-  await page.waitForTimeout(400)
-  await page.getByText('E2E Linked QB Store').click()
-  await page.waitForTimeout(400)
+  const scope = page.locator('.jm-consign')
+  await openConsignStore(scope, page, 'E2E Linked QB Store')
+  await scope.locator('summary', { hasText: /Store settings/i }).click()
+  await page.waitForTimeout(200)
   check(`${tag}: QB-linked store hides Rename`, await page.locator('[data-testid="consign-rename-e2e-linked"]').count() === 0)
-  await page.getByText('E2E Active Store').click()
+  await scope.getByText('E2E Active Store').click()
   await page.waitForTimeout(400)
+  await scope.locator('summary', { hasText: /Store settings/i }).click()
+  await page.waitForTimeout(200)
   check(`${tag}: unlinked store shows Rename`, await page.locator('[data-testid="consign-rename-e2e-active"]').count() === 1)
   await page.locator('[data-testid="consign-rename-e2e-active"]').click()
   await page.waitForTimeout(200)
@@ -137,17 +133,15 @@ async function testRenameStoreRules(page, tag) {
 }
 
 async function testDoubleSubmitDrop(page, tag) {
-  console.log(`\n${tag} — double-submit guard on drop-off save`)
+  console.log(`\n${tag} — double-submit guard on visit save`)
   await page.goto(BASE + '/jerky-munch', { waitUntil: 'networkidle' })
   await page.waitForTimeout(1200)
   await dropOverlay(page)
-  await page.locator('button', { hasText: /^Consignment$/ }).click()
-  await page.waitForTimeout(400)
-  await page.getByText('E2E First Visit').click()
-  await page.waitForTimeout(400)
   const scope = page.locator('.jm-consign')
+  await openConsignStore(scope, page, 'E2E First Visit')
+  await scope.locator('[data-testid="consign-chip-drop-e2e-first"]').click()
   await scope.getByLabel('Pieces added').fill('42')
-  const saveBtn = scope.locator('[data-testid="consign-save-drop-e2e-first"]')
+  const saveBtn = scope.locator('[data-testid="consign-log-visit-e2e-first"]')
   await saveBtn.dblclick({ delay: 30 })
   await page.waitForTimeout(1200)
   const sentLine = await scope.locator('[data-testid="consign-sent-e2e-first"]').textContent()

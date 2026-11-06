@@ -286,6 +286,7 @@ export default function JerkyMunch() {
   const [stepMsg, setStepMsg] = useState({})
   const stepMsgTimers = useRef({})
   const notesSaveTimers = useRef({})
+  const priceSaveTimers = useRef({})
   const partnerWriteLock = useRef({})
   const [notesSaved, setNotesSaved] = useState({})
   const [updBusy, setUpdBusy] = useState({})
@@ -303,6 +304,8 @@ export default function JerkyMunch() {
   const [qbCustomers, setQbCustomers] = useState(null) // QB customer list for manual mapping
   const [qbAllCustomers, setQbAllCustomers] = useState({ loading: false, loaded: false, error: null, customers: null })
   const [invSearch, setInvSearch] = useState('')
+  const [consignSearch, setConsignSearch] = useState('')
+  const consignCardRefs = useRef({})
   const [qbOnlyLimit, setQbOnlyLimit] = useState(50)
   const [linkPick, setLinkPick] = useState({})        // partnerId -> typed customer name in the mapping box
   const [syncing, setSyncing] = useState(false)
@@ -626,8 +629,8 @@ export default function JerkyMunch() {
   }
   const saveShelfCount = async (partnerId, count) => {
     try {
-      await jerkySupabase.rpc('set_shelf_count', { p_partner: partnerId, p_count: Number(count) || 0 })
-      await loadConsign()
+      if (!E2E) await jerkySupabase.rpc('set_shelf_count', { p_partner: partnerId, p_count: Number(count) || 0 })
+      setConsign(prev => prev.map(c => c.id === partnerId ? { ...c, counted: Number(count) || 0 } : c))
     } catch (e) { console.error('saveShelfCount failed', e) }
   }
   const loadAll = async () => {
@@ -744,16 +747,38 @@ export default function JerkyMunch() {
       })
     }, 4000)
   }
+  const attachPersistedLogIds = (partnerId, pendingIds, serverIds) => {
+    if (!pendingIds.length || !serverIds.length) return
+    setConsign(prev => prev.map(c => {
+      if (c.id !== partnerId) return c
+      const idByPending = Object.fromEntries(pendingIds.map((pid, i) => [pid, serverIds[i]]))
+      return {
+        ...c,
+        log: (c.log || []).map(entry => (entry.logId && idByPending[entry.logId]
+          ? { ...entry, logId: idByPending[entry.logId] }
+          : entry)),
+      }
+    }))
+  }
+
   // core consignment mutation — optimistic setState, then persist to Supabase.
-  const upd = async (id, patch, logEntry, logAtIso) => {
+  const upd = async (id, patch, logEntry, logAtIso, { pendingLogId } = {}) => {
     const before = consign.find(c => c.id === id)
     if (!before || !acquirePartnerWrite(id)) return false
     setUpdErr(e => { const next = { ...e }; delete next[id]; return next })
     setUpdBusy(b => ({ ...b, [id]: true }))
     if (E2E && logEntry) await new Promise(r => setTimeout(r, 400))
     const evtIso = logAtIso || todayStr
+    const tempLogId = logEntry ? (pendingLogId || `pending-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`) : null
     setConsign(prev => prev.map(c => c.id === id
-      ? { ...c, ...patch, log: logEntry ? [{ at: fmtD(evtIso), atIso: evtIso, t: logEntry }, ...(c.log || [])] : c.log } : c))
+      ? {
+        ...c,
+        ...patch,
+        log: logEntry
+          ? [{ logId: tempLogId, at: fmtD(evtIso), atIso: evtIso, t: logEntry }, ...(c.log || [])]
+          : c.log,
+      }
+      : c))
     try {
       if (E2E) return true
       const colMap = { countedDate: 'counted_date', lastContact: 'last_contact', deliveryMode: 'delivery_mode' }
@@ -764,13 +789,70 @@ export default function JerkyMunch() {
         if (error) throw error
       }
       if (logEntry) {
-        const { error: logErr } = await jerkySupabase.from('consignment_log').insert({ partner_id: id, note: logEntry, at: evtIso })
+        const { data: inserted, error: logErr } = await jerkySupabase
+          .from('consignment_log')
+          .insert({ partner_id: id, note: logEntry, at: evtIso })
+          .select('id')
+          .single()
         if (logErr) throw logErr
-        await loadConsign()
+        if (inserted?.id && tempLogId) attachPersistedLogIds(id, [tempLogId], [inserted.id])
       }
       return true
     } catch (e) {
       console.error('upd failed', e)
+      setConsign(prev => prev.map(c => c.id === id ? before : c))
+      setUpdErr(e => ({ ...e, [id]: "Didn't save. Try again." }))
+      return false
+    } finally {
+      releasePartnerWrite(id)
+      setUpdBusy(b => { const next = { ...b }; delete next[id]; return next })
+    }
+  }
+
+  const updVisit = async (id, patch, logEntries) => {
+    const before = consign.find(c => c.id === id)
+    if (!before || !acquirePartnerWrite(id)) return false
+    const entries = (logEntries || []).filter(e => e && e.note)
+    if (!Object.keys(patch || {}).length && !entries.length) return false
+    setUpdErr(e => { const next = { ...e }; delete next[id]; return next })
+    setUpdBusy(b => ({ ...b, [id]: true }))
+    if (E2E && entries.length) await new Promise(r => setTimeout(r, 400))
+    const pending = entries.map((e, i) => ({
+      pendingLogId: `pending-${Date.now()}-${i}-${Math.random().toString(36).slice(2, 6)}`,
+      atIso: e.atIso,
+      note: e.note,
+    }))
+    setConsign(prev => prev.map(c => {
+      if (c.id !== id) return c
+      const newLogs = pending.map(p => ({
+        logId: p.pendingLogId,
+        at: fmtD(p.atIso),
+        atIso: p.atIso,
+        t: p.note,
+      }))
+      return { ...c, ...patch, log: [...newLogs, ...(c.log || [])] }
+    }))
+    try {
+      if (E2E) return true
+      const colMap = { countedDate: 'counted_date', lastContact: 'last_contact', deliveryMode: 'delivery_mode' }
+      const dbPatch = {}
+      Object.keys(patch || {}).forEach(k => { dbPatch[colMap[k] || k] = patch[k] })
+      if (Object.keys(dbPatch).length) {
+        const { error } = await jerkySupabase.from('consignment_partners').update(dbPatch).eq('id', id)
+        if (error) throw error
+      }
+      if (pending.length) {
+        const { data: inserted, error: logErr } = await jerkySupabase
+          .from('consignment_log')
+          .insert(pending.map(p => ({ partner_id: id, note: p.note, at: p.atIso })))
+          .select('id')
+        if (logErr) throw logErr
+        const ids = (inserted || []).map(r => r.id)
+        attachPersistedLogIds(id, pending.map(p => p.pendingLogId), ids)
+      }
+      return true
+    } catch (e) {
+      console.error('updVisit failed', e)
       setConsign(prev => prev.map(c => c.id === id ? before : c))
       setUpdErr(e => ({ ...e, [id]: "Didn't save. Try again." }))
       return false
@@ -805,6 +887,119 @@ export default function JerkyMunch() {
     })
   }
 
+  const schedulePriceSave = (id, rawValue, currentPrice) => {
+    if (priceSaveTimers.current[id]) clearTimeout(priceSaveTimers.current[id])
+    priceSaveTimers.current[id] = setTimeout(async () => {
+      priceSaveTimers.current[id] = null
+      const v = Number(formatDecimal2(rawValue))
+      if (!(v > 0) || v === Number(currentPrice)) return
+      const ok = await upd(id, { price: v }, `Set price to ${money2(v)}/bag`)
+      if (ok) setDv(`price_${id}`, formatDecimal2(v))
+    }, 600)
+  }
+  const flushPriceSave = async (id, rawValue, currentPrice) => {
+    if (priceSaveTimers.current[id]) {
+      clearTimeout(priceSaveTimers.current[id])
+      priceSaveTimers.current[id] = null
+    }
+    const v = Number(formatDecimal2(rawValue))
+    if (!(v > 0)) {
+      setPriceErr(p => ({ ...p, [id]: 'Price per bag must be greater than $0.' }))
+      return false
+    }
+    setPriceErr(p => { const n = { ...p }; delete n[id]; return n })
+    if (v === Number(currentPrice)) return true
+    const ok = await upd(id, { price: v }, `Set price to ${money2(v)}/bag`)
+    if (ok) setDv(`price_${id}`, formatDecimal2(v))
+    return ok
+  }
+
+  const resolvePayPieces = (id, c, payAmt) => {
+    const price = Number(c.price)
+    if (!(price > 0) || !(Number(payAmt) > 0)) return null
+    const calc = paymentPiecesFromCheck(payAmt, price)
+    if (!calc) return null
+    if (dv(id + '_payPiecesOverride') === '1') {
+      const pieces = Number(dv(id + '_payPieces'))
+      return pieces > 0 ? { pieces, calc, uneven: !calc.even } : null
+    }
+    if (calc.even) return { pieces: calc.rounded, calc, uneven: false }
+    if (dv(id + '_payUnevenOk') === '1') return { pieces: calc.rounded, calc, uneven: true }
+    return { pieces: null, calc, uneven: true, needsConfirm: true }
+  }
+
+  const logVisit = async (id) => {
+    const c = consign.find(x => x.id === id)
+    if (!c || updBusy[id] || partnerWriteLock.current[id]) return
+    const visitDate = dateVal(id + '_visitDate')
+    const dropPieces = Number(dv(id + '_dropPieces'))
+    const payAmt = Number(dv(id + '_payAmt'))
+    const pickupPieces = Number(dv(id + '_pickup'))
+    const cntRaw = dv(id + '_cnt')
+    const startCntRaw = dv(id + '_startCnt')
+    const showFirstVisit = !hasLoggedConsignmentActivity(c) && !hasDropActivity(c)
+    const payResolved = resolvePayPieces(id, c, payAmt)
+    if (payResolved?.needsConfirm) return
+
+    const logs = []
+    let sent = c.sent
+    let paid = c.paid
+    let returned = c.returned
+    let counted = c.counted
+    let countedDate = c.countedDate
+
+    if (showFirstVisit && startCntRaw !== '' && Number(startCntRaw) >= 0) {
+      logs.push({ atIso: visitDate, note: formatStartingCountLogNote(Number(startCntRaw), visitDate) })
+    }
+    if (dropPieces > 0) {
+      sent += dropPieces
+      logs.push({ atIso: visitDate, note: formatDropLogNote(dropPieces, visitDate, partnerDeliveryMode(c)) })
+    }
+    if (payResolved?.pieces > 0) {
+      paid += payAmt
+      logs.push({ atIso: visitDate, note: buildPayLogNote(visitDate, payAmt, c.price, money) })
+    }
+    if (pickupPieces > 0) {
+      returned += pickupPieces
+      logs.push({ atIso: visitDate, note: formatPickupLogNote(pickupPieces, visitDate) })
+    }
+    if (cntRaw !== '') {
+      counted = Number(cntRaw)
+      countedDate = visitDate
+      logs.push({ atIso: visitDate, note: formatCountLogNote(Number(cntRaw), fmtD(visitDate)) })
+    }
+
+    if (!logs.length) return
+
+    const patch = {}
+    if (sent !== c.sent) patch.sent = sent
+    if (paid !== c.paid) patch.paid = paid
+    if (returned !== c.returned) patch.returned = returned
+    if (counted !== c.counted || countedDate !== c.countedDate) {
+      patch.counted = counted
+      patch.countedDate = countedDate
+    }
+
+    const ok = await updVisit(id, patch, logs)
+    if (!ok) return
+
+    setDv(id + '_dropPieces', '')
+    setDv(id + '_payAmt', '')
+    setDv(id + '_payPieces', '')
+    setDv(id + '_payPiecesOverride', '')
+    setDv(id + '_payUnevenOk', '')
+    setDv(id + '_pickup', '')
+    setDv(id + '_cnt', '')
+    setDv(id + '_startCnt', '')
+    const parts = []
+    if (dropPieces > 0) parts.push(`${partnerDeliveryMode(c) === 'ship' ? 'Shipped' : 'Dropped off'} ${dropPieces}`)
+    if (payResolved?.pieces > 0) parts.push(`paid ${money(payAmt)}`)
+    if (pickupPieces > 0) parts.push(`picked up ${pickupPieces}`)
+    if (cntRaw !== '') parts.push(`counted ${cntRaw} on shelf`)
+    if (showFirstVisit && startCntRaw !== '') parts.push(`starting count ${startCntRaw}`)
+    flashStep(`${id}_visit`, `Logged visit (${fmtD(visitDate)}): ${parts.join(' · ')}`)
+  }
+
   const logDropoff = async (id) => {
     const pieces = Number(dv(id + '_dropPieces'))
     if (!(pieces > 0)) return
@@ -833,7 +1028,7 @@ export default function JerkyMunch() {
       if (!(pieces > 0)) return
     } else if (calc.even) {
       pieces = calc.rounded
-    } else if (!window.confirm(`This check doesn't divide evenly at ${money(price)}/bag. Save it as ${calc.rounded} pieces?`)) {
+    } else if (dv(id + '_payUnevenOk') !== '1') {
       return
     } else {
       pieces = calc.rounded
@@ -949,7 +1144,6 @@ export default function JerkyMunch() {
           const { error } = await jerkySupabase.from('consignment_partners').update(dbPatch).eq('id', partnerId)
           if (error) throw error
         }
-        await loadConsign()
       }
       setEditLog(null)
     } catch (e) {
@@ -1024,7 +1218,6 @@ export default function JerkyMunch() {
           const { error } = await jerkySupabase.from('consignment_partners').update(dbPatch).eq('id', partnerId)
           if (error) throw error
         }
-        await loadConsign()
       }
       setDeleteConfirm(null)
       return true
@@ -1167,6 +1360,19 @@ export default function JerkyMunch() {
   // aggregates
   const R = consign.filter(c => (c.type || 'consignment') === 'consignment').map(c => ({ ...c, ...recon(c) }))
     .sort((a, b) => (a.region || '').localeCompare(b.region || '') || (a.store || '').localeCompare(b.store || ''))
+  const consignSearchQ = consignSearch.trim().toLowerCase()
+  const consignJumpMatches = consignSearchQ
+    ? R.filter(c => (c.store || '').toLowerCase().includes(consignSearchQ) || (c.region || '').toLowerCase().includes(consignSearchQ)).slice(0, 8)
+    : []
+  const consignVisible = consignSearchQ ? R.filter(c => (c.store || '').toLowerCase().includes(consignSearchQ) || (c.region || '').toLowerCase().includes(consignSearchQ)) : R
+  const openConsignStore = (id) => {
+    setExpanded(id)
+    setConsignSearch('')
+    requestAnimationFrame(() => {
+      const el = consignCardRefs.current[id]
+      if (el?.scrollIntoView) el.scrollIntoView({ block: 'nearest', behavior: 'smooth' })
+    })
+  }
   const cashCollected = R.reduce((s, c) => s + (Number(c.paid) || 0), 0)
   const invUnpaid = storeInvoices.filter(i => i.status === 'unpaid')
   const isOverdue = (i) => i.status === 'unpaid' && i.dueDate && i.dueDate < todayStr
@@ -1461,7 +1667,26 @@ export default function JerkyMunch() {
 @media(max-width:600px){input,select,textarea{font-size:16px!important}button{min-height:40px}}
 .jm-consign input,.jm-consign select,.jm-consign textarea{font-family:'Inter',sans-serif!important;font-variant-numeric:tabular-nums!important;font-feature-settings:"tnum" 1!important}
 .jm-consign input[type=date],.jm-consign input[type=date]::-webkit-datetime-edit,.jm-consign input[type=date]::-webkit-datetime-edit-fields-wrapper,.jm-consign input[type=date]::-webkit-datetime-edit-text,.jm-consign input[type=date]::-webkit-datetime-edit-month-field,.jm-consign input[type=date]::-webkit-datetime-edit-day-field,.jm-consign input[type=date]::-webkit-datetime-edit-year-field{font-family:'Inter',sans-serif!important;font-variant-numeric:tabular-nums!important;font-feature-settings:"tnum" 1!important}
-.jm-consign input[type=number],.jm-consign input[type=text],.jm-consign input[inputmode=decimal],.jm-consign input[inputmode=numeric]{font-family:'Inter',sans-serif!important;font-variant-numeric:tabular-nums!important;font-feature-settings:"tnum" 1!important}`}</style>
+.jm-consign input[type=number],.jm-consign input[type=text],.jm-consign input[inputmode=decimal],.jm-consign input[inputmode=numeric]{font-family:'Inter',sans-serif!important;font-variant-numeric:tabular-nums!important;font-feature-settings:"tnum" 1!important}
+.jm-consign-sticky{position:sticky;top:0;z-index:6;background:${CREAM};padding:8px 0 14px;margin-bottom:4px;border-bottom:1px solid ${BORDER}}
+.jm-consign-jump{margin-top:8px;display:flex;flex-direction:column;gap:6px;max-height:220px;overflow-y:auto}
+.jm-consign-jump button{text-align:left;padding:10px 12px;border:1px solid ${BORDER};border-radius:2px;background:#fff;font-family:'Inter',sans-serif;font-size:14px;font-weight:600;color:${INK};cursor:pointer}
+.jm-consign-chips{display:flex;gap:8px;flex-wrap:wrap;margin:14px 0 12px}
+.jm-consign-chip{flex:1 1 calc(25% - 6px);min-width:74px;min-height:48px;border-radius:4px;border:1px solid ${BORDER};background:#fff;font-family:'Inter',sans-serif;font-size:13px;font-weight:700;cursor:pointer;padding:10px 6px;color:${INK}}
+.jm-consign-chip[data-active="1"]{border-color:${CHAR};background:${CHAR};color:${CREAM}}
+.jm-consign-ledger{border:1px solid ${BORDER};border-radius:2px;overflow:hidden;margin-bottom:16px}
+.jm-consign-ledger-head{display:none}
+.jm-consign-ledger-row{display:flex;flex-direction:column;gap:8px;padding:12px 14px;border-top:1px solid ${CREAM};font-size:13px}
+.jm-consign-ledger-row-top{display:flex;justify-content:space-between;align-items:baseline;gap:10px;flex-wrap:wrap}
+.jm-consign-ledger-actions{display:flex;gap:10px;flex-wrap:wrap}
+.jm-consign-ledger-actions button{min-height:44px;padding:10px 16px!important;font-size:13px!important;font-weight:600!important;border-radius:2px;cursor:pointer}
+@media(min-width:640px){
+.jm-consign-ledger-head{display:grid;grid-template-columns:88px 1fr 72px 96px;gap:8px;padding:8px 12px;background:${CREAM}}
+.jm-consign-ledger-row{display:grid;grid-template-columns:88px 1fr 72px 96px;gap:8px;padding:8px 12px;align-items:baseline}
+.jm-consign-ledger-row-top,.jm-consign-ledger-mobile-shelf{display:none}
+.jm-consign-ledger-actions{justify-content:flex-end}
+.jm-consign-ledger-actions button{min-height:auto;padding:8px 10px!important;font-size:11px!important}
+}`}</style>
       </Head>
 
       <div className="jm-shell">
@@ -1710,6 +1935,25 @@ export default function JerkyMunch() {
                 </div>
               )}
 
+              <div className="jm-consign-sticky">
+                <input
+                  data-testid="consign-store-search"
+                  value={consignSearch}
+                  onChange={e => setConsignSearch(e.target.value)}
+                  placeholder="Find a store…"
+                  style={{ ...inp, width: '100%', boxSizing: 'border-box', fontSize: '16px' }}
+                />
+                {consignJumpMatches.length > 0 && (
+                  <div className="jm-consign-jump" data-testid="consign-store-jump">
+                    {consignJumpMatches.map(c => (
+                      <button key={c.id} type="button" onClick={() => openConsignStore(c.id)}>
+                        {c.store}{c.region ? ` · ${c.region}` : ''}
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
+
               {!adding ? (
                 <button onClick={() => setAdding(true)} style={{ width: '100%', background: CHAR, color: CREAM, border: 'none', borderRadius: '2px', padding: '13px', ...btn, marginBottom: '16px' }}>+ Add a consignment partner</button>
               ) : (
@@ -1728,16 +1972,16 @@ export default function JerkyMunch() {
                 </div>
               )}
 
-              {R.map((c, idx) => {
+              {consignVisible.map((c, idx) => {
                 const open = expanded === c.id
-                const showHeader = idx === 0 || (R[idx - 1] && R[idx - 1].region !== c.region)
+                const showHeader = idx === 0 || (consignVisible[idx - 1] && consignVisible[idx - 1].region !== c.region)
                 const badge = consignBadge(c)
                 const deliveryCopy = consignVerbs(partnerDeliveryMode(c))
                 const saving = !!updBusy[c.id]
                 return (
                   <Fragment key={c.id}>
                   {showHeader && <div style={{ ...lbl, color: SPICE, fontSize: '12px', margin: idx === 0 ? '2px 0 10px' : '24px 0 10px', display: 'flex', alignItems: 'center', gap: '10px' }}>{c.region || 'Other'}<span style={{ flex: 1, height: '1px', background: BORDER }} /></div>}
-                  <div style={{ ...card, padding: 0, marginBottom: '12px', overflow: 'hidden', borderColor: open ? CHAR : (c.status === 'short' ? '#E7C3B8' : BORDER) }}>
+                  <div ref={el => { if (el) consignCardRefs.current[c.id] = el; else delete consignCardRefs.current[c.id] }} data-testid={`consign-card-${c.id}`} style={{ ...card, padding: 0, marginBottom: '12px', overflow: 'hidden', borderColor: open ? CHAR : (c.status === 'short' ? '#E7C3B8' : BORDER) }}>
                     <div onClick={() => setExpanded(open ? null : c.id)} style={{ padding: '15px 18px', cursor: 'pointer' }}>
                       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '12px', flexWrap: 'wrap' }}>
                         <div>
@@ -1762,28 +2006,6 @@ export default function JerkyMunch() {
 
                     {open && (
                       <div style={{ padding: '0 18px 18px', borderTop: `1px solid ${CREAM}`, maxWidth: '100%', minWidth: 0, boxSizing: 'border-box', overflow: 'hidden' }}>
-                        <div style={{ marginTop: '12px', marginBottom: '4px', display: 'flex', flexWrap: 'wrap', gap: '14px 20px', alignItems: 'center' }}>
-                          {!c.qbCustomerId && (
-                            <button type="button" data-testid={`consign-rename-${c.id}`} disabled={saving} onClick={() => { setRenameErr(''); setRenameStore({ partnerId: c.id, name: c.store }) }} style={{ background: 'none', border: 'none', padding: 0, color: KRAFT, fontSize: '12px', fontWeight: 600, cursor: saving ? 'default' : 'pointer', textDecoration: 'underline', opacity: saving ? 0.45 : 1 }}>Rename store</button>
-                          )}
-                          <label style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '12px', color: MUTED }}>
-                            <span style={{ fontWeight: 600 }}>Delivery</span>
-                            <select
-                              data-testid={`consign-delivery-${c.id}`}
-                              value={c.deliveryMode || 'drop_off'}
-                              disabled={saving}
-                              onChange={async (e) => {
-                                const deliveryMode = e.target.value === 'ship' ? 'ship' : 'drop_off'
-                                if (deliveryMode === (c.deliveryMode || 'drop_off')) return
-                                await upd(c.id, { deliveryMode })
-                              }}
-                              style={{ ...CONSIGN_INP, padding: '6px 10px', fontSize: '12px', width: 'auto' }}
-                            >
-                              <option value="drop_off">Drop off</option>
-                              <option value="ship">Ship</option>
-                            </select>
-                          </label>
-                        </div>
                         {(() => {
                           const ledger = buildActivityLedger(c)
                           const dropVal = dv(c.id + '_dropPieces')
@@ -1792,176 +2014,185 @@ export default function JerkyMunch() {
                           const pickupVal = dv(c.id + '_pickup')
                           const startCntVal = dv(c.id + '_startCnt')
                           const cntVal = dv(c.id + '_cnt')
-                          const countOpen = dv(c.id + '_countOpen') === '1'
+                          const visitAction = dv(c.id + '_visitAction') || 'drop'
                           const showFirstVisit = !hasLoggedConsignmentActivity(c) && !hasDropActivity(c)
                           const stepTitle = { fontSize: '14px', fontWeight: 700, color: INK, margin: '0 0 4px' }
                           const stepHint = { fontSize: '12.5px', color: MUTED, margin: '0 0 8px', lineHeight: 1.45 }
                           const stepConfirm = { fontSize: '12px', color: GREEN, marginTop: '8px', lineHeight: 1.45 }
                           const fieldRow = { display: 'flex', flexDirection: 'column', gap: '10px', width: '100%', maxWidth: '100%', minWidth: 0 }
-                          const inputFull = CONSIGN_INPUT_FULL
-                          const priceDraftKey = `price_${c.id}`
-                          const priceFieldValue = dv(priceDraftKey) !== '' ? dv(priceDraftKey) : (Number(c.price) > 0 ? formatDecimal2(c.price) : '')
-                          const actionBtn = { width: '100%', maxWidth: '100%', boxSizing: 'border-box', border: 'none', borderRadius: '2px', padding: '11px 14px', ...btn, fontSize: '13px' }
+                          const actionBtn = { width: '100%', maxWidth: '100%', boxSizing: 'border-box', border: 'none', borderRadius: '2px', padding: '13px 14px', ...btn, fontSize: '15px' }
                           const priceOk = Number(c.price) > 0
                           const payOverride = dv(c.id + '_payPiecesOverride') === '1'
-                          const payCalc = Number(payAmt) > 0 && priceOk ? paymentPiecesFromCheck(payAmt, c.price) : null
+                          const payResolved = resolvePayPieces(c.id, c, payAmt)
+                          const payCalc = payResolved?.calc || (Number(payAmt) > 0 && priceOk ? paymentPiecesFromCheck(payAmt, c.price) : null)
                           const payCoverLine = (() => {
-                            if (!priceOk) return 'Set price per bag first'
+                            if (!priceOk) return 'Set price per bag in store settings below'
                             if (!(Number(payAmt) > 0) || !payCalc) return null
                             const ppb = money2(c.price)
                             if (payCalc.even) return `Covers ${payCalc.rounded} pieces at ${ppb}/bag`
                             const frac = Math.round(payCalc.exact * 10) / 10
                             return `Covers ${frac} pieces at ${ppb}/bag, doesn't divide evenly`
                           })()
-                          const payCanSave = priceOk && Number(payAmt) > 0 && !saving && (!payOverride || Number(payPieces) > 0)
-                          const priceBlock = (
-                            <>
-                              <div style={{ ...lbl, margin: '0 0 6px' }}>Price per bag</div>
-                              <div style={{ display: 'flex', gap: '8px', alignItems: 'center', flexWrap: 'wrap', marginBottom: '14px' }}>
-                                <span style={{ color: MUTED }}>$</span>
-                                <input
-                                  data-testid={`consign-price-${c.id}`}
-                                  value={priceFieldValue}
-                                  onChange={e => { setDv(priceDraftKey, e.target.value); setPriceErr(p => { const n = { ...p }; delete n[c.id]; return n }) }}
-                                  onBlur={e => { const f = formatDecimal2(e.target.value); if (f) setDv(priceDraftKey, f) }}
-                                  type="text"
-                                  inputMode="decimal"
-                                  autoComplete="off"
-                                  style={{ ...consignInp, width: '110px', fontSize: '16px' }}
-                                />
-                                <button type="button" disabled={saving} onClick={async () => {
-                                  const v = Number(formatDecimal2(dv(priceDraftKey) || c.price))
-                                  if (!(v > 0)) { setPriceErr(p => ({ ...p, [c.id]: 'Price per bag must be greater than $0.' })); return }
-                                  setPriceErr(p => { const n = { ...p }; delete n[c.id]; return n })
-                                  if (v !== c.price) {
-                                    const ok = await upd(c.id, { price: v }, `Set price to ${money2(v)}/bag`)
-                                    if (ok) setDv(priceDraftKey, formatDecimal2(v))
-                                  }
-                                }} style={{ background: CHAR, color: CREAM, border: 'none', borderRadius: '2px', padding: '10px 16px', ...btn, opacity: saving ? 0.5 : 1 }}>Save</button>
-                                <span style={{ fontSize: '11.5px', color: MUTED }}>drives check → pieces</span>
-                                {priceErr[c.id] && <div style={{ width: '100%', color: RED, fontSize: '13px' }}>{priceErr[c.id]}</div>}
-                              </div>
-                            </>
+                          const visitHasData = (showFirstVisit && startCntVal !== '') || Number(dropVal) > 0 || Number(payAmt) > 0 || Number(pickupVal) > 0 || cntVal !== ''
+                          const visitBlocked = Number(payAmt) > 0 && payResolved?.needsConfirm
+                          const visitCanSave = visitHasData && !saving && !visitBlocked && !(Number(payAmt) > 0 && !priceOk) && !(payOverride && !(Number(payPieces) > 0))
+                          const chip = (id, label) => (
+                            <button
+                              type="button"
+                              key={id}
+                              data-testid={`consign-chip-${id}-${c.id}`}
+                              data-active={visitAction === id ? '1' : '0'}
+                              className="jm-consign-chip"
+                              onClick={() => setDv(c.id + '_visitAction', id)}
+                            >
+                              {label}
+                            </button>
                           )
                           return (
                             <>
-                              <div style={{ ...lbl, margin: '14px 0 8px' }}>Activity</div>
+                              <div className="jm-consign-chips" data-testid="consign-action-chips">
+                                {chip('drop', partnerDeliveryMode(c) === 'ship' ? 'Ship' : 'Drop')}
+                                {chip('pay', 'Pay')}
+                                {chip('pickup', 'Pickup')}
+                                {chip('count', 'Count')}
+                              </div>
+
+                              <ConsignLabeledInput label="Visit date" value={dateVal(c.id + '_visitDate')} onChange={e => setDv(c.id + '_visitDate', e.target.value)} type="date" />
+
+                              {updErr[c.id] && <div style={{ color: RED, fontSize: '13px', margin: '10px 0' }}>{updErr[c.id]}</div>}
+
+                              {visitAction === 'drop' && (
+                                <div style={{ marginTop: '14px', marginBottom: '8px' }}>
+                                  <div style={stepTitle}>{deliveryCopy.sentStepTitle}</div>
+                                  <p style={stepHint}>{deliveryCopy.sentStepHint}</p>
+                                  <div style={fieldRow}>
+                                    <ConsignLabeledInput label={deliveryCopy.sentPiecesLabel} value={dropVal} onChange={e => setDv(c.id + '_dropPieces', e.target.value)} type="text" inputMode="numeric" placeholder="e.g. 100" />
+                                  </div>
+                                </div>
+                              )}
+
+                              {visitAction === 'pay' && (
+                                <div style={{ marginTop: '14px', marginBottom: '8px' }}>
+                                  <div style={stepTitle}>Got paid</div>
+                                  <p style={stepHint}>Check amount — pieces come from price per bag.</p>
+                                  <div style={fieldRow}>
+                                    <ConsignLabeledInput label="Check amount $" value={payAmt} onChange={e => { setDv(c.id + '_payAmt', e.target.value); setDv(c.id + '_payUnevenOk', '') }} type="text" inputMode="decimal" placeholder="e.g. 360" />
+                                    {payCoverLine && (
+                                      <div style={{ fontSize: '12.5px', color: priceOk ? MUTED : RED, lineHeight: 1.45 }}>
+                                        {payCoverLine}
+                                        {priceOk && payCalc && !payCalc.even && !payOverride && dv(c.id + '_payUnevenOk') !== '1' && (
+                                          <div style={{ marginTop: '8px' }}>
+                                            <button
+                                              type="button"
+                                              data-testid={`consign-pay-uneven-${c.id}`}
+                                              onClick={() => setDv(c.id + '_payUnevenOk', '1')}
+                                              style={{ background: CREAM, border: `1px solid ${BORDER}`, borderRadius: '2px', padding: '10px 12px', ...btn, fontSize: '13px', color: INK, width: '100%' }}
+                                            >
+                                              Save as {payCalc.rounded} pieces?
+                                            </button>
+                                          </div>
+                                        )}
+                                        {priceOk && payCalc && !payCalc.even && !payOverride && (
+                                          <> {' '}
+                                            <button type="button" onClick={() => { setDv(c.id + '_payPiecesOverride', '1'); setDv(c.id + '_payPieces', String(payCalc.rounded)) }} style={{ background: 'none', border: 'none', padding: 0, color: KRAFT, fontWeight: 600, cursor: 'pointer', textDecoration: 'underline', fontSize: 'inherit' }}>enter different piece count</button>
+                                          </>
+                                        )}
+                                        {payOverride && (
+                                          <> {' '}
+                                            <button type="button" onClick={() => { setDv(c.id + '_payPiecesOverride', ''); setDv(c.id + '_payPieces', ''); setDv(c.id + '_payUnevenOk', '') }} style={{ background: 'none', border: 'none', padding: 0, color: MUTED, fontWeight: 600, cursor: 'pointer', textDecoration: 'underline', fontSize: 'inherit' }}>use calculated</button>
+                                          </>
+                                        )}
+                                      </div>
+                                    )}
+                                    {payOverride && (
+                                      <ConsignLabeledInput label="Pieces paid for (override)" value={payPieces} onChange={e => setDv(c.id + '_payPieces', e.target.value)} type="text" inputMode="numeric" placeholder="e.g. 80" />
+                                    )}
+                                  </div>
+                                </div>
+                              )}
+
+                              {visitAction === 'pickup' && (
+                                <div style={{ marginTop: '14px', marginBottom: '8px' }}>
+                                  <div style={stepTitle}>Picked up bags</div>
+                                  <p style={stepHint}>Bags they gave back to you.</p>
+                                  <div style={fieldRow}>
+                                    <ConsignLabeledInput label="Pieces picked up" value={pickupVal} onChange={e => setDv(c.id + '_pickup', e.target.value)} type="text" inputMode="numeric" placeholder="e.g. 5" />
+                                  </div>
+                                </div>
+                              )}
+
+                              {visitAction === 'count' && (
+                                <div style={{ marginTop: '14px', marginBottom: '8px' }}>
+                                  {showFirstVisit && (
+                                    <>
+                                      <div style={stepTitle}>First visit — what&apos;s on the shelf?</div>
+                                      <p style={stepHint}>Opening count for this store — {deliveryCopy.startingHintTail} build from here.</p>
+                                      <div style={{ ...fieldRow, marginBottom: '12px' }}>
+                                        <ConsignLabeledInput label="Pieces on shelf (starting count)" value={startCntVal} onChange={e => setDv(c.id + '_startCnt', e.target.value)} type="text" inputMode="numeric" placeholder="e.g. 40" />
+                                      </div>
+                                    </>
+                                  )}
+                                  <div style={stepTitle}>{showFirstVisit ? 'Shelf count today' : 'Shelf count'}</div>
+                                  <p style={stepHint}>Physical count on the shelf — used to spot gaps vs the books.</p>
+                                  <div style={fieldRow}>
+                                    <ConsignLabeledInput label="Bags on shelf" value={cntVal} onChange={e => setDv(c.id + '_cnt', e.target.value)} type="text" inputMode="numeric" placeholder="bags on shelf" />
+                                  </div>
+                                  {c.countActive && c.counted != null && (
+                                    <div style={{ marginTop: '10px', background: CREAM, borderRadius: '2px', padding: '12px 14px' }}>
+                                      <Row l="Books say on shelf" v={c.expected < 0 ? 'Invalid' : safeOnShelf(c.expected)} />
+                                      <Row l={`Your count (${fmtD(c.countedDate)})`} v={c.counted} />
+                                      {c.status === 'invalid' ? (
+                                        <Row l={NUMBERS_DONT_ADD_UP} v="" neg bold top />
+                                      ) : c.variance !== 0 ? (
+                                        <Row l={c.variance > 0 ? 'Gap vs count' : 'Over vs count'} v={c.variance > 0 ? `${c.variance} (${money(c.varVal)})` : `${-c.variance}`} neg={c.variance > 0} bold top />
+                                      ) : (
+                                        <Row l="Count matches books" v="0" bold top />
+                                      )}
+                                    </div>
+                                  )}
+                                </div>
+                              )}
+
+                              <button
+                                type="button"
+                                data-testid={`consign-log-visit-${c.id}`}
+                                disabled={!visitCanSave}
+                                onClick={() => logVisit(c.id)}
+                                style={{ ...actionBtn, marginTop: '12px', background: SPICE, color: '#fff', opacity: !visitCanSave ? 0.45 : 1 }}
+                              >
+                                {saving ? 'Saving…' : 'Log this visit'}
+                              </button>
+                              {stepMsg[`${c.id}_visit`] && <div style={stepConfirm}>{stepMsg[`${c.id}_visit`]}</div>}
+
+                              <div style={{ ...lbl, margin: '20px 0 8px' }}>Activity</div>
                               {ledger.length === 0 ? (
                                 <div style={{ fontSize: '13px', color: MUTED, marginBottom: '14px', lineHeight: 1.45 }}>
-                                  No dated entries yet — {deliveryCopy.emptyActivityLead} below.{hasShelfBooks(c) ? <> Books show <b style={{ color: INK }}>{safeOnShelf(c.expected)}</b> on shelf from totals.</> : null}
+                                  No dated entries yet — log a visit above.{hasShelfBooks(c) ? <> Books show <b style={{ color: INK }}>{safeOnShelf(c.expected)}</b> on shelf from totals.</> : null}
                                 </div>
                               ) : (
-                                <div style={{ marginBottom: '16px', border: `1px solid ${BORDER}`, borderRadius: '2px', overflow: 'hidden' }}>
-                                  <div style={{ display: 'grid', gridTemplateColumns: '88px 1fr 72px 96px', gap: '8px', padding: '8px 12px', background: CREAM, ...lbl, fontSize: '10px' }}>
+                                <div className="jm-consign-ledger" data-testid="consign-activity-ledger">
+                                  <div className="jm-consign-ledger-head" style={{ ...lbl, fontSize: '10px' }}>
                                     <span>Date</span><span>What happened</span><span style={{ textAlign: 'right' }}>On shelf</span><span />
                                   </div>
                                   {ledger.map((row) => (
-                                    <div key={row.logId || row.label + row.dateIso} style={{ display: 'grid', gridTemplateColumns: '88px 1fr 72px 96px', gap: '8px', padding: '8px 12px', borderTop: `1px solid ${CREAM}`, fontSize: '12.5px', alignItems: 'baseline' }}>
-                                      <span style={{ ...NUM, color: '#BFB096' }}>{row.dateIso ? fmtD(row.dateIso) : 'Undated'}</span>
-                                      <span style={{ color: MUTED }}>{row.label}</span>
+                                    <div key={row.logId || row.label + row.dateIso} className="jm-consign-ledger-row">
+                                      <div className="jm-consign-ledger-row-top">
+                                        <span style={{ ...NUM, color: '#BFB096', fontWeight: 600 }}>{row.dateIso ? fmtD(row.dateIso) : 'Undated'}</span>
+                                        <span className="jm-consign-ledger-mobile-shelf" style={{ ...NUM, fontWeight: 600, color: INK }}>{row.onShelf} on shelf</span>
+                                      </div>
+                                      <span style={{ color: MUTED, lineHeight: 1.45 }}>{row.label}</span>
+                                      <span className="jm-consign-ledger-mobile-shelf" style={{ display: 'none' }} />
                                       <span style={{ ...NUM, textAlign: 'right', fontWeight: 600, color: INK }}>{row.onShelf}</span>
                                       {row.logId ? (
-                                        <span style={{ display: 'flex', gap: '8px', justifyContent: 'flex-end' }}>
-                                          <button type="button" disabled={saving} onClick={() => openEditLog(c.id, row.logId, row.type)} style={{ background: 'none', border: 'none', padding: '2px 0', color: KRAFT, fontSize: '11px', fontWeight: 600, cursor: saving ? 'default' : 'pointer', opacity: saving ? 0.45 : 1 }}>Edit</button>
-                                          <button type="button" disabled={saving} onClick={() => setDeleteConfirm({ partnerId: c.id, logId: row.logId, label: row.label, dateIso: row.dateIso })} style={{ background: 'none', border: 'none', padding: '2px 0', color: RED, fontSize: '11px', fontWeight: 600, cursor: saving ? 'default' : 'pointer', opacity: saving ? 0.45 : 1 }}>Delete</button>
+                                        <span className="jm-consign-ledger-actions">
+                                          <button type="button" disabled={saving} onClick={() => openEditLog(c.id, row.logId, row.type)} style={{ background: CREAM, border: `1px solid ${BORDER}`, color: KRAFT }}>Edit</button>
+                                          <button type="button" disabled={saving} onClick={() => setDeleteConfirm({ partnerId: c.id, logId: row.logId, label: row.label, dateIso: row.dateIso })} style={{ background: '#FBEDE9', border: `1px solid #E7C3B8`, color: RED }}>Delete</button>
                                         </span>
                                       ) : <span />}
                                     </div>
                                   ))}
                                 </div>
                               )}
-
-                              <div style={{ ...lbl, margin: '16px 0 10px' }}>Log activity</div>
-                              {updErr[c.id] && <div style={{ color: RED, fontSize: '13px', marginBottom: '10px' }}>{updErr[c.id]}</div>}
-
-                              {showFirstVisit && (
-                                <div style={{ marginBottom: '18px', padding: '14px', background: CREAM, border: `1px solid ${BORDER}`, borderRadius: '2px' }}>
-                                  <div style={stepTitle}>First visit? Log what&apos;s on the shelf now</div>
-                                  <p style={stepHint}>Opening count for this store — {deliveryCopy.startingHintTail} build from here.</p>
-                                  <div style={fieldRow}>
-                                    <ConsignLabeledInput label="As-of date" value={dateVal(c.id + '_startDate')} onChange={e => setDv(c.id + '_startDate', e.target.value)} type="date" />
-                                    <ConsignLabeledInput label="Pieces on shelf" value={startCntVal} onChange={e => setDv(c.id + '_startCnt', e.target.value)} type="text" inputMode="numeric" placeholder="e.g. 40" />
-                                    <button type="button" disabled={startCntVal === '' || saving} onClick={() => logStartingCount(c.id)} style={{ ...actionBtn, background: CHAR, color: CREAM, opacity: startCntVal === '' || saving ? 0.45 : 1 }}>Save starting count</button>
-                                  </div>
-                                  {stepMsg[`${c.id}_start`] && <div style={stepConfirm}>{stepMsg[`${c.id}_start`]}</div>}
-                                </div>
-                              )}
-
-                              <div style={{ marginBottom: '16px' }}>
-                                <div style={stepTitle}>{deliveryCopy.sentStepTitle}</div>
-                                <p style={stepHint}>{deliveryCopy.sentStepHint}</p>
-                                <div style={fieldRow}>
-                                  <ConsignLabeledInput label={deliveryCopy.sentDateLabel} value={dateVal(c.id + '_dropDate')} onChange={e => setDv(c.id + '_dropDate', e.target.value)} type="date" />
-                                  <ConsignLabeledInput label={deliveryCopy.sentPiecesLabel} value={dropVal} onChange={e => setDv(c.id + '_dropPieces', e.target.value)} type="text" inputMode="numeric" placeholder="e.g. 100" />
-                                  <button type="button" data-testid={`consign-save-drop-${c.id}`} disabled={!(Number(dropVal) > 0) || saving} onClick={() => logDropoff(c.id)} style={{ ...actionBtn, background: CHAR, color: CREAM, opacity: !(Number(dropVal) > 0) || saving ? 0.45 : 1 }}>{saving ? 'Saving…' : deliveryCopy.saveSentBtn}</button>
-                                </div>
-                                {stepMsg[`${c.id}_drop`] && <div style={stepConfirm}>{stepMsg[`${c.id}_drop`]}</div>}
-                              </div>
-
-                              <div style={{ marginBottom: '16px' }}>
-                                {priceBlock}
-                                <div style={stepTitle}>2. Got paid</div>
-                                <p style={stepHint}>Date paid and check amount — pieces come from price per bag.</p>
-                                <div style={fieldRow}>
-                                  <ConsignLabeledInput label="Date paid" value={dateVal(c.id + '_payDate')} onChange={e => setDv(c.id + '_payDate', e.target.value)} type="date" />
-                                  <ConsignLabeledInput label="Check amount $" value={payAmt} onChange={e => setDv(c.id + '_payAmt', e.target.value)} type="text" inputMode="decimal" placeholder="e.g. 360" />
-                                  {payCoverLine && (
-                                    <div style={{ fontSize: '12.5px', color: priceOk ? MUTED : RED, lineHeight: 1.45 }}>
-                                      {payCoverLine}
-                                      {priceOk && payCalc && !payCalc.even && !payOverride && (
-                                        <> {' '}
-                                          <button type="button" onClick={() => { setDv(c.id + '_payPiecesOverride', '1'); setDv(c.id + '_payPieces', String(payCalc.rounded)) }} style={{ background: 'none', border: 'none', padding: 0, color: KRAFT, fontWeight: 600, cursor: 'pointer', textDecoration: 'underline', fontSize: 'inherit' }}>change</button>
-                                        </>
-                                      )}
-                                      {payOverride && (
-                                        <> {' '}
-                                          <button type="button" onClick={() => { setDv(c.id + '_payPiecesOverride', ''); setDv(c.id + '_payPieces', '') }} style={{ background: 'none', border: 'none', padding: 0, color: MUTED, fontWeight: 600, cursor: 'pointer', textDecoration: 'underline', fontSize: 'inherit' }}>use calculated</button>
-                                        </>
-                                      )}
-                                    </div>
-                                  )}
-                                  {payOverride && (
-                                    <ConsignLabeledInput label="Pieces paid for (override)" value={payPieces} onChange={e => setDv(c.id + '_payPieces', e.target.value)} type="text" inputMode="numeric" placeholder="e.g. 80" />
-                                  )}
-                                  <button type="button" disabled={!payCanSave} onClick={() => logPayment(c.id)} style={{ ...actionBtn, background: GREEN, color: '#fff', opacity: !payCanSave ? 0.45 : 1 }}>Save payment</button>
-                                </div>
-                                {stepMsg[`${c.id}_pay`] && <div style={stepConfirm}>{stepMsg[`${c.id}_pay`]}</div>}
-                              </div>
-
-                              <div style={{ marginBottom: '16px' }}>
-                                <div style={stepTitle}>3. Picked up bags</div>
-                                <p style={stepHint}>Bags they gave back to you.</p>
-                                <div style={fieldRow}>
-                                  <ConsignLabeledInput label="Date picked up" value={dateVal(c.id + '_pickupDate')} onChange={e => setDv(c.id + '_pickupDate', e.target.value)} type="date" />
-                                  <ConsignLabeledInput label="Pieces picked up" value={pickupVal} onChange={e => setDv(c.id + '_pickup', e.target.value)} type="text" inputMode="numeric" placeholder="e.g. 5" />
-                                  <button type="button" disabled={!(Number(pickupVal) > 0) || saving} onClick={() => logPickup(c.id)} style={{ ...actionBtn, background: KRAFT, color: '#fff', opacity: !(Number(pickupVal) > 0) || saving ? 0.45 : 1 }}>Save pickup</button>
-                                </div>
-                                {stepMsg[`${c.id}_pickup`] && <div style={stepConfirm}>{stepMsg[`${c.id}_pickup`]}</div>}
-                              </div>
-
-                              <details open={countOpen} onToggle={e => setDv(c.id + '_countOpen', e.target.open ? '1' : '')} style={{ marginBottom: '14px' }}>
-                                <summary style={{ cursor: 'pointer', fontSize: '13px', fontWeight: 600, color: INK, marginBottom: countOpen ? '10px' : 0 }}>Did a shelf count? (optional)</summary>
-                                <p style={stepHint}>Only if you physically counted the shelf — used to spot gaps vs the books.</p>
-                                <div style={fieldRow}>
-                                  <input value={cntVal} onChange={e => setDv(c.id + '_cnt', e.target.value)} type="text" inputMode="numeric" placeholder="bags on shelf" style={inputFull} />
-                                  <input value={dateVal(c.id + '_cntDate')} onChange={e => setDv(c.id + '_cntDate', e.target.value)} type="date" style={inputFull} />
-                                  <button type="button" disabled={cntVal === '' || saving} onClick={() => logCount(c.id)} style={{ ...actionBtn, background: 'none', color: INK, border: `1px solid ${BORDER}`, opacity: cntVal === '' || saving ? 0.45 : 1 }}>Save shelf count</button>
-                                </div>
-                                {stepMsg[`${c.id}_count`] && <div style={stepConfirm}>{stepMsg[`${c.id}_count`]}</div>}
-                                {c.countActive && c.counted != null && (
-                                  <div style={{ marginTop: '10px', background: CREAM, borderRadius: '2px', padding: '12px 14px' }}>
-                                    <Row l="Books say on shelf" v={c.expected < 0 ? 'Invalid' : safeOnShelf(c.expected)} />
-                                    <Row l={`Your count (${fmtD(c.countedDate)})`} v={c.counted} />
-                                    {c.status === 'invalid' ? (
-                                      <Row l={NUMBERS_DONT_ADD_UP} v="" neg bold top />
-                                    ) : c.variance !== 0 ? (
-                                      <Row l={c.variance > 0 ? 'Gap vs count' : 'Over vs count'} v={c.variance > 0 ? `${c.variance} (${money(c.varVal)})` : `${-c.variance}`} neg={c.variance > 0} bold top />
-                                    ) : (
-                                      <Row l="Count matches books" v="0" bold top />
-                                    )}
-                                  </div>
-                                )}
-                              </details>
                             </>
                           )
                         })()}
@@ -1979,45 +2210,93 @@ export default function JerkyMunch() {
                           </div>
                         )}
 
-                        <div style={{ ...lbl, margin: '18px 0 8px' }}>Store relationship</div>
-                        <div style={{ display: 'flex', gap: '10px', alignItems: 'center', flexWrap: 'wrap', marginBottom: '10px' }}>
-                          <span style={{ fontSize: '13px', color: MUTED }}>
-                            Last talked to store:{' '}
-                            {c.lastContact
-                              ? <><b style={{ color: INK }}>{fmtD(c.lastContact)}</b> ({daysSince(c.lastContact)} days ago)</>
-                              : <b style={{ color: INK }}>Haven&apos;t talked yet</b>}
-                          </span>
-                          <button type="button" disabled={saving} onClick={() => upd(c.id, { lastContact: todayStr }, 'Spoke with the store')} style={{ background: KRAFT, color: '#fff', border: 'none', borderRadius: '2px', padding: '5px 13px', ...btn, fontSize: '11px', opacity: saving ? 0.5 : 1 }}>I talked to them today</button>
-                        </div>
-                        <div style={{ display: 'flex', gap: '10px', alignItems: 'center', flexWrap: 'wrap', marginBottom: '10px' }}>
-                          <span style={{ fontSize: '13px', color: MUTED }}>Do they need more?</span>
-                          <select value={c.restock || 'good'} onChange={e => upd(c.id, { restock: e.target.value })} style={{ ...inp, cursor: 'pointer', maxWidth: '200px' }}>
-                            {RESTOCK.map(r => <option key={r.id} value={r.id}>{r.label}</option>)}
-                          </select>
-                        </div>
-                        <textarea value={dv(`notes_${c.id}`) !== undefined ? dv(`notes_${c.id}`) : (c.notes || '')} onChange={e => { setDv(`notes_${c.id}`, e.target.value); scheduleNotesSave(c.id, e.target.value) }} onBlur={e => flushNotesSave(c.id, e.target.value)} rows={2} placeholder="Notes — who you talk to, what they like, what they said…" style={{ ...inp, width: '100%', resize: 'vertical', fontFamily: 'inherit' }} />
-                        {notesSaved[c.id] && <div style={{ fontSize: '12px', color: GREEN, marginTop: '6px' }}>Saved</div>}
+                        <details data-testid={`consign-settings-${c.id}`} style={{ marginTop: '18px', border: `1px solid ${BORDER}`, borderRadius: '2px', padding: '12px 14px', background: '#FFFDF9' }}>
+                          <summary style={{ cursor: 'pointer', fontSize: '13px', fontWeight: 700, color: INK }}>Store settings &amp; relationship</summary>
+                          <div style={{ marginTop: '14px' }}>
+                            {!c.qbCustomerId && (
+                              <button type="button" data-testid={`consign-rename-${c.id}`} disabled={saving} onClick={() => { setRenameErr(''); setRenameStore({ partnerId: c.id, name: c.store }) }} style={{ background: 'none', border: 'none', padding: 0, color: KRAFT, fontSize: '12px', fontWeight: 600, cursor: saving ? 'default' : 'pointer', textDecoration: 'underline', opacity: saving ? 0.45 : 1, marginBottom: '12px', display: 'block' }}>Rename store</button>
+                            )}
+                            <label style={{ display: 'flex', flexDirection: 'column', gap: '6px', fontSize: '12px', color: MUTED, marginBottom: '14px' }}>
+                              <span style={{ fontWeight: 600 }}>Delivery (drop-off vs ship)</span>
+                              <select
+                                data-testid={`consign-delivery-${c.id}`}
+                                value={c.deliveryMode || 'drop_off'}
+                                disabled={saving}
+                                onChange={async (e) => {
+                                  const deliveryMode = e.target.value === 'ship' ? 'ship' : 'drop_off'
+                                  if (deliveryMode === (c.deliveryMode || 'drop_off')) return
+                                  await upd(c.id, { deliveryMode })
+                                }}
+                                style={{ ...CONSIGN_INP, padding: '10px 12px', fontSize: '16px', width: '100%' }}
+                              >
+                                <option value="drop_off">Drop off</option>
+                                <option value="ship">Ship</option>
+                              </select>
+                            </label>
+                            {(() => {
+                              const priceDraftKey = `price_${c.id}`
+                              const priceFieldValue = dv(priceDraftKey) !== '' ? dv(priceDraftKey) : (Number(c.price) > 0 ? formatDecimal2(c.price) : '')
+                              return (
+                                <div style={{ marginBottom: '14px' }}>
+                                  <div style={{ ...lbl, margin: '0 0 6px' }}>Price per bag</div>
+                                  <div style={{ display: 'flex', gap: '8px', alignItems: 'center', flexWrap: 'wrap' }}>
+                                    <span style={{ color: MUTED }}>$</span>
+                                    <input
+                                      data-testid={`consign-price-${c.id}`}
+                                      value={priceFieldValue}
+                                      onChange={e => { setDv(priceDraftKey, e.target.value); setPriceErr(p => { const n = { ...p }; delete n[c.id]; return n }); schedulePriceSave(c.id, e.target.value, c.price) }}
+                                      onBlur={e => { const f = formatDecimal2(e.target.value); if (f) setDv(priceDraftKey, f); flushPriceSave(c.id, e.target.value, c.price) }}
+                                      type="text"
+                                      inputMode="decimal"
+                                      autoComplete="off"
+                                      style={{ ...consignInp, flex: 1, minWidth: '120px', fontSize: '16px' }}
+                                    />
+                                  </div>
+                                  <div style={{ fontSize: '11.5px', color: MUTED, marginTop: '6px' }}>Saves on blur · drives check → pieces</div>
+                                  {priceErr[c.id] && <div style={{ color: RED, fontSize: '13px', marginTop: '6px' }}>{priceErr[c.id]}</div>}
+                                </div>
+                              )
+                            })()}
+                            <div style={{ display: 'flex', gap: '10px', alignItems: 'center', flexWrap: 'wrap', marginBottom: '10px' }}>
+                              <span style={{ fontSize: '13px', color: MUTED }}>
+                                Last talked to store:{' '}
+                                {c.lastContact
+                                  ? <><b style={{ color: INK }}>{fmtD(c.lastContact)}</b> ({daysSince(c.lastContact)} days ago)</>
+                                  : <b style={{ color: INK }}>Haven&apos;t talked yet</b>}
+                              </span>
+                              <button type="button" disabled={saving} onClick={() => upd(c.id, { lastContact: todayStr }, 'Spoke with the store')} style={{ background: KRAFT, color: '#fff', border: 'none', borderRadius: '2px', padding: '8px 13px', ...btn, fontSize: '12px', opacity: saving ? 0.5 : 1 }}>I talked to them today</button>
+                            </div>
+                            <div style={{ display: 'flex', gap: '10px', alignItems: 'center', flexWrap: 'wrap', marginBottom: '10px' }}>
+                              <span style={{ fontSize: '13px', color: MUTED }}>Do they need more?</span>
+                              <select value={c.restock || 'good'} onChange={e => upd(c.id, { restock: e.target.value })} style={{ ...inp, cursor: 'pointer', maxWidth: '200px' }}>
+                                {RESTOCK.map(r => <option key={r.id} value={r.id}>{r.label}</option>)}
+                              </select>
+                            </div>
+                            <textarea value={dv(`notes_${c.id}`) !== undefined ? dv(`notes_${c.id}`) : (c.notes || '')} onChange={e => { setDv(`notes_${c.id}`, e.target.value); scheduleNotesSave(c.id, e.target.value) }} onBlur={e => flushNotesSave(c.id, e.target.value)} rows={2} placeholder="Notes — who you talk to, what they like, what they said…" style={{ ...inp, width: '100%', resize: 'vertical', fontFamily: 'inherit' }} />
+                            {notesSaved[c.id] && <div style={{ fontSize: '12px', color: GREEN, marginTop: '6px' }}>Saved</div>}
 
-                        <div style={{ ...lbl, margin: '18px 0 6px' }}>End of cycle</div>
-                        {(() => {
-                          const closeNeedDx = c.status === 'short' && !c.diagnosis
-                          const closeDisabled = closeNeedDx || saving
-                          const shelfNow = c.counted != null ? c.counted : safeOnShelf(c.expected)
-                          return (
-                            <>
-                              <button type="button" disabled={closeDisabled} onClick={() => {
-                                if (closeDisabled) return
-                                if (window.confirm(`Close out cycle ${c.cycle || 1} for ${c.store}? This settles the ${c.variance > 0 ? c.variance + ' missing vs count' : 'books'} and starts fresh at ${shelfNow} on the shelf.`)) closeOut(c.id)
-                              }} style={{ width: '100%', background: 'none', color: closeDisabled ? MUTED : INK, border: `1px solid ${BORDER}`, borderRadius: '2px', padding: '12px', ...btn, cursor: closeDisabled ? 'not-allowed' : 'pointer', opacity: closeDisabled ? 0.55 : 1 }}>Close out this cycle →</button>
-                              {closeNeedDx && <p style={{ fontSize: '12px', color: AMBER, marginTop: '7px' }}>Pick a reason for the gap vs your shelf count before closing out.</p>}
-                            </>
-                          )
-                        })()}
-                        <p style={{ fontSize: '12px', color: MUTED, marginTop: '7px', lineHeight: 1.5 }}>
-                          {c.variance > 0
-                            ? <>Settles the <b>{c.variance} missing</b> {c.diagnosis === 'Sold but not reported (store owes me)' ? <>by marking <b style={{ color: RED }}>{money(c.varVal)} owed by the store</b> (send them an invoice from the Invoices tab)</> : <>as a <b>write-off</b></>}, then resets the count clean for the next delivery — so old gaps never bleed into the new cycle.</>
-                            : <>Reconciles clean and resets the count for the next delivery — so old numbers never bleed into the new cycle.</>}
-                        </p>
+                            <div style={{ ...lbl, margin: '18px 0 6px' }}>End of cycle</div>
+                            {(() => {
+                              const closeNeedDx = c.status === 'short' && !c.diagnosis
+                              const closeDisabled = closeNeedDx || saving
+                              const shelfNow = c.counted != null ? c.counted : safeOnShelf(c.expected)
+                              return (
+                                <>
+                                  <button type="button" disabled={closeDisabled} onClick={() => {
+                                    if (closeDisabled) return
+                                    if (window.confirm(`Close out cycle ${c.cycle || 1} for ${c.store}? This settles the ${c.variance > 0 ? c.variance + ' missing vs count' : 'books'} and starts fresh at ${shelfNow} on the shelf.`)) closeOut(c.id)
+                                  }} style={{ width: '100%', background: 'none', color: closeDisabled ? MUTED : INK, border: `1px solid ${BORDER}`, borderRadius: '2px', padding: '12px', ...btn, cursor: closeDisabled ? 'not-allowed' : 'pointer', opacity: closeDisabled ? 0.55 : 1 }}>Close out this cycle →</button>
+                                  {closeNeedDx && <p style={{ fontSize: '12px', color: AMBER, marginTop: '7px' }}>Pick a reason for the gap vs your shelf count before closing out.</p>}
+                                </>
+                              )
+                            })()}
+                            <p style={{ fontSize: '12px', color: MUTED, marginTop: '7px', lineHeight: 1.5 }}>
+                              {c.variance > 0
+                                ? <>Settles the <b>{c.variance} missing</b> {c.diagnosis === 'Sold but not reported (store owes me)' ? <>by marking <b style={{ color: RED }}>{money(c.varVal)} owed by the store</b> (send them an invoice from the Invoices tab)</> : <>as a <b>write-off</b></>}, then resets the count clean for the next delivery — so old gaps never bleed into the new cycle.</>
+                                : <>Reconciles clean and resets the count for the next delivery — so old numbers never bleed into the new cycle.</>}
+                            </p>
+                          </div>
+                        </details>
 
                       </div>
                     )}
