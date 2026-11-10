@@ -255,7 +255,7 @@ const E2E_CONSIGN = [
     notes: '',
     qbCustomerId: null,
     log: [
-      { logId: 'e2e-log-eg-lw-1', at: 'Nov 1', atIso: '2026-11-01', t: 'Dropped off 105 pieces on 2026-11-01 (drop-off)' },
+      { logId: 'e2e-log-eg-lw-1', at: 'Nov 1', atIso: '2026-11-01', t: 'Dropped off 105 pieces on 2026-11-01 (stocked shelf)' },
       { logId: 'e2e-log-eg-lw-2', at: 'Nov 9', atIso: '2026-11-09', t: 'Dropped off 126 pieces on 2026-11-09 (drop-off)' },
     ],
   },

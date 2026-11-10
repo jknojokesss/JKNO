@@ -12,6 +12,7 @@ import {
 const fixtures = JSON.parse(
   readFileSync(new URL('./fixtures/jerky-consign-stores.json', import.meta.url), 'utf8'),
 )
+const stores = fixtures.stores
 
 describe('calendar dates', () => {
   it('isoDateOnly keeps YYYY-MM-DD from date column', () => {
@@ -25,9 +26,9 @@ describe('calendar dates', () => {
   })
 })
 
-describe('buildConsignMetrics — fixture stores', () => {
+describe('buildConsignMetrics — production snapshot stores', () => {
   it('Evergreen Lakewood: 231 on shelf, nothing sold or paid', () => {
-    const c = fixtures.evergreen_lakewood
+    const c = stores.evergreen_lakewood
     const m = buildConsignMetrics(c)
     assert.equal(m.onShelf, 231)
     assert.equal(m.soldUnpaid, 0)
@@ -38,17 +39,38 @@ describe('buildConsignMetrics — fixture stores', () => {
     assert.deepEqual(drops.map((d) => d.dateIso), ['2026-11-01', '2026-11-09'])
   })
 
-  it('Evergreen Monsey: count implies sold unpaid, shelf matches count', () => {
-    const c = fixtures.evergreen_monsey
-    const m = buildConsignMetrics(c)
-    assert.equal(m.onShelf, 59)
-    assert.equal(m.soldUnpaid, 116)
+  it('Evergreen Monsey: 175 on shelf (no count logged)', () => {
+    const m = buildConsignMetrics(stores.evergreen_monsey)
+    assert.equal(m.onShelf, 175)
+    assert.equal(m.soldUnpaid, 0)
     assert.equal(m.paidPieces, 0)
     assert.equal(m.totalDropped, 175)
   })
 
+  it('Aisle 9 Madison: starting count plus drop', () => {
+    const m = buildConsignMetrics(stores.aisle_9_madison)
+    assert.equal(m.onShelf, 70)
+    assert.equal(m.openingShelf, 42)
+    assert.equal(m.totalDropped, 28)
+  })
+
+  it('Grand and Essex: starting 10 plus 97 dropped', () => {
+    assert.equal(buildConsignMetrics(stores.grand_and_essex).onShelf, 107)
+  })
+
   it('close cycle stops old drops from affecting shelf', () => {
-    const c = fixtures.cycle_reset_store
+    const c = {
+      price: 11.5,
+      sent: 62,
+      returned: 0,
+      paid: 0,
+      counted: 12,
+      countedDate: '2026-08-01',
+      log: [
+        { atIso: '2026-08-01', t: 'Closed cycle — counts matched. New cycle opens at 12 on the shelf.' },
+        { atIso: '2026-09-01', t: 'Dropped off 50 pieces on 2026-09-01 (drop-off)' },
+      ],
+    }
     const m = buildConsignMetrics(c)
     assert.equal(m.onShelf, 62, 'opening 12 after close plus 50 new drop')
     assert.equal(m.totalDropped, 50)

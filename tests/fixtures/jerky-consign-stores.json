@@ -1,41 +1,167 @@
 {
-  "evergreen_lakewood": {
-    "store": "Evergreen Lakewood",
-    "price": 4.5,
-    "sent": 231,
-    "returned": 0,
-    "paid": 0,
-    "counted": null,
-    "countedDate": "",
-    "log": [
-      { "atIso": "2026-11-01", "t": "Dropped off 105 pieces on 2026-11-01 (drop-off)" },
-      { "atIso": "2026-11-09", "t": "Dropped off 126 pieces on 2026-11-09 (drop-off)" }
-    ]
-  },
-  "evergreen_monsey": {
-    "store": "Evergreen Monsey - 59",
-    "price": 4.5,
-    "sent": 175,
-    "returned": 0,
-    "paid": 0,
-    "counted": 59,
-    "countedDate": "2026-10-15",
-    "log": [
-      { "atIso": "2026-09-20", "t": "Dropped off 175 pieces on 2026-09-20 (drop-off)" },
-      { "atIso": "2026-10-15", "t": "Counted 59 on shelf (Oct 15)" }
-    ]
-  },
-  "cycle_reset_store": {
-    "store": "Sample Cycle Store",
-    "price": 4.5,
-    "sent": 62,
-    "returned": 0,
-    "paid": 0,
-    "counted": 12,
-    "countedDate": "2026-08-01",
-    "log": [
-      { "atIso": "2026-08-01", "t": "Closed cycle — counts matched. New cycle opens at 12 on the shelf." },
-      { "atIso": "2026-09-01", "t": "Dropped off 50 pieces on 2026-09-01 (drop-off)" }
-    ]
+  "source": "Production snapshot provided by owner 2026-11-10 (read-only). price $11.50; returned=0; paid=0; counted=null; cycle=1.",
+  "stores": {
+    "aisle_9_jackson": {
+      "store": "Aisle 9 Jackson",
+      "price": 11.5,
+      "sent": 134,
+      "returned": 0,
+      "paid": 0,
+      "counted": null,
+      "countedDate": "",
+      "log": [
+        { "atIso": "2026-11-01", "t": "Dropped off 134 pieces on 2026-11-01 (stocked shelf)" }
+      ]
+    },
+    "aisle_9_madison": {
+      "store": "Aisle 9 Madison",
+      "price": 11.5,
+      "sent": 28,
+      "returned": 0,
+      "paid": 0,
+      "counted": null,
+      "countedDate": "",
+      "log": [
+        { "atIso": "2026-11-01", "t": "Starting count 42 on 2026-11-01" },
+        { "atIso": "2026-11-09", "t": "Dropped off 28 pieces on 2026-11-09 (drop-off)" }
+      ]
+    },
+    "chick_chock": {
+      "store": "Chick Chock",
+      "price": 11.5,
+      "sent": 42,
+      "returned": 0,
+      "paid": 0,
+      "counted": null,
+      "countedDate": "",
+      "log": [
+        { "atIso": "2026-11-01", "t": "Dropped off 42 pieces on 2026-11-01 (stocked shelf)" }
+      ]
+    },
+    "evergreen_lakewood": {
+      "store": "Evergreen Lakewood",
+      "price": 11.5,
+      "sent": 231,
+      "returned": 0,
+      "paid": 0,
+      "counted": null,
+      "countedDate": "",
+      "log": [
+        { "atIso": "2026-11-01", "t": "Dropped off 105 pieces on 2026-11-01 (stocked shelf)" },
+        { "atIso": "2026-11-09", "t": "Dropped off 126 pieces on 2026-11-09 (drop-off)" }
+      ]
+    },
+    "evergreen_monsey": {
+      "store": "Evergreen Monsey 59",
+      "price": 11.5,
+      "sent": 175,
+      "returned": 0,
+      "paid": 0,
+      "counted": null,
+      "countedDate": "",
+      "log": [
+        { "atIso": "2026-11-01", "t": "Dropped off 60 pieces on 2026-11-01 (drop-off)" },
+        { "atIso": "2026-11-09", "t": "Dropped off 115 pieces on 2026-11-09 (drop-off)" }
+      ]
+    },
+    "gourmet_glatt_jackson": {
+      "store": "Gourmet Glatt Jackson",
+      "price": 11.5,
+      "sent": 162,
+      "returned": 0,
+      "paid": 0,
+      "counted": null,
+      "countedDate": "",
+      "log": [
+        { "atIso": "2026-11-01", "t": "Dropped off 76 pieces on 2026-11-01 (stocked shelf)" },
+        { "atIso": "2026-11-06", "t": "Dropped off 86 pieces on 2026-11-06 (drop-off)" }
+      ]
+    },
+    "grand_and_essex": {
+      "store": "Grand and Essex",
+      "price": 11.5,
+      "sent": 97,
+      "returned": 0,
+      "paid": 0,
+      "counted": null,
+      "countedDate": "",
+      "log": [
+        { "atIso": "2026-11-01", "t": "Starting count 10 on 2026-11-01" },
+        { "atIso": "2026-11-05", "t": "Dropped off 97 pieces on 2026-11-05 (drop-off)" }
+      ]
+    },
+    "kosher_west": {
+      "store": "Kosher West",
+      "price": 11.5,
+      "sent": 96,
+      "returned": 0,
+      "paid": 0,
+      "counted": null,
+      "countedDate": "",
+      "log": [
+        { "atIso": "2026-11-01", "t": "Dropped off 96 pieces on 2026-11-01 (drop-off)" }
+      ]
+    },
+    "lechem_bakery": {
+      "store": "Lechem Bakery",
+      "price": 11.5,
+      "sent": 34,
+      "returned": 0,
+      "paid": 0,
+      "counted": null,
+      "countedDate": "",
+      "log": [
+        { "atIso": "2026-11-05", "t": "Starting count 19 on 2026-11-05" },
+        { "atIso": "2026-11-05", "t": "Dropped off 34 pieces on 2026-11-05 (drop-off)" }
+      ]
+    },
+    "moishas_discount": {
+      "store": "Moishas Discount",
+      "price": 11.5,
+      "sent": 50,
+      "returned": 0,
+      "paid": 0,
+      "counted": null,
+      "countedDate": "",
+      "log": [
+        { "atIso": "2026-11-01", "t": "Dropped off 50 pieces on 2026-11-01 (drop-off)" }
+      ]
+    },
+    "seasons_toms_river": {
+      "store": "Seasons Toms River",
+      "price": 11.5,
+      "sent": 38,
+      "returned": 0,
+      "paid": 0,
+      "counted": null,
+      "countedDate": "",
+      "log": [
+        { "atIso": "2026-11-01", "t": "Dropped off 38 pieces on 2026-11-01 (stocked shelf)" }
+      ]
+    },
+    "super_stop": {
+      "store": "Super Stop",
+      "price": 11.5,
+      "sent": 36,
+      "returned": 0,
+      "paid": 0,
+      "counted": null,
+      "countedDate": "",
+      "log": [
+        { "atIso": "2026-11-01", "t": "Dropped off 36 pieces on 2026-11-01 (stocked shelf)" }
+      ]
+    },
+    "vineyard_south": {
+      "store": "The Vineyard South (Seagull Square)",
+      "price": 11.5,
+      "sent": 42,
+      "returned": 0,
+      "paid": 0,
+      "counted": null,
+      "countedDate": "",
+      "log": [
+        { "atIso": "2026-10-08", "t": "Dropped off 42 pieces on 2026-10-08 (sent more)" }
+      ]
+    }
   }
 }

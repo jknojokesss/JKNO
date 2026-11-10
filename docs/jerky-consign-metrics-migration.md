@@ -10,6 +10,12 @@ Optional new log note shape (written by the app going forward):
 
 Existing notes (`Dropped off…`, `Paid…`, `Counted…`, `Closed cycle…`) are unchanged.
 
+### Starting count
+
+`Starting count N on YYYY-MM-DD` is the **opening on-shelf baseline** before logged drop-offs in this cycle. On shelf = opening + dropped − picked up − sold. Example: Aisle 9 Madison with starting 42 and drop 28 → **70 on shelf**; `totalDropped` shows only the 28 new pieces.
+
+Production snapshot metrics: `node scripts/print-jerky-consign-metrics.mjs` (fixture source in `tests/fixtures/jerky-consign-stores.json`).
+
 ## Migration at merge
 
 **No Supabase DDL is required.** Deploy the app only.
