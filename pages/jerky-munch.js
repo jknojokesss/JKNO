@@ -4,6 +4,7 @@ import { jerkySupabase } from '../lib/supabaseJerky'
 import { buildPnl, buildBalanceSheet, buildCashFlow, periodPnl, buildAdSpend } from '../lib/jerkyGL'
 import { loadQboStatements, balanceSheetAsOf, monthLabel } from '../lib/qboStatements'
 import { recon, missingSummary, buildActivityLedger, buildConsignMetrics, buildDropReport, safeOnShelf, hasDropActivity, hasShelfBooks, hasLoggedConsignmentActivity, paymentPiecesFromCheck, partnerStateAfterLogDelete, partnerStateAfterLogReplace, parseLogEvent, formatDropLogNote, buildPayLogNote, formatPickupLogNote, formatStartingCountLogNote, formatCountLogNote, formatSoldLogNote, formatCalendarDate, isoDateOnly, consignStoreRenameError, partnerDeliveryMode, consignVerbs } from '../lib/consignmentRecon'
+import { mergeJerkyPreviewConsignOverlays, isJerkyPreviewOverlayLogId } from '../lib/jerkyPreviewConsignOverlay'
 import { BOOKS_TZ, isoDateInTimeZone } from '../lib/jerkyBooksTz'
 import { roasMultiplier, roasLabel } from '../lib/jerkyRoas'
 import { ResponsiveContainer, ComposedChart, Bar, Line, XAxis, YAxis, Tooltip, CartesianGrid, PieChart, Pie, Cell } from 'recharts'
@@ -434,7 +435,7 @@ export default function JerkyMunch() {
       ])
       const byPartner = {}
       ;(logs || []).forEach(l => { (byPartner[l.partner_id] = byPartner[l.partner_id] || []).push(l) })
-      setConsign((partners || []).map(p => ({
+      setConsign((partners || []).map(p => mergeJerkyPreviewConsignOverlays({
         id: p.id, store: p.store, price: p.price, sent: p.sent, returned: p.returned, paid: p.paid,
         counted: p.counted, countedDate: p.counted_date || '', diagnosis: p.diagnosis || '',
         cycle: p.cycle, lastContact: p.last_contact, restock: p.restock, notes: p.notes,
@@ -2267,7 +2268,7 @@ export default function JerkyMunch() {
                                         <div className="jm-consign-ledger-running" style={NUM}>
                                           Shelf {row.onShelf} · Owed {money(owed)} · Paid {money(paidRunning)}
                                         </div>
-                                        {row.logId ? (
+                                        {row.logId && !isJerkyPreviewOverlayLogId(row.logId) ? (
                                           <div className="jm-consign-ledger-actions">
                                             <button type="button" disabled={saving} onClick={() => openEditLog(c.id, row.logId, row.type)} style={{ background: CREAM, border: `1px solid ${BORDER}`, color: KRAFT }}>Edit</button>
                                             <button type="button" disabled={saving} onClick={() => setDeleteConfirm({ partnerId: c.id, logId: row.logId, label: row.label, dateIso: row.dateIso })} style={{ background: '#FBEDE9', border: `1px solid #E7C3B8`, color: RED }}>Delete</button>
