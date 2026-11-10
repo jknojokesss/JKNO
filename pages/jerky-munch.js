@@ -81,7 +81,7 @@ const ConsignStoreMetrics = ({ c }) => {
       <div className="jm-consign-metrics-grid">
         <div className="jm-consign-metric-col">
           <span style={consignMetricLabel}>On shelf</span>
-          <div className="jm-consign-metric-val-wrap">
+          <div className="jm-consign-metric-val-wrap jm-consign-metric-val-wrap--solo">
             <span className="jm-consign-metric-val" style={{ ...NUM, color: KRAFT }}>{safeOnShelf(m.onShelf)}</span>
           </div>
         </div>
@@ -94,7 +94,7 @@ const ConsignStoreMetrics = ({ c }) => {
         </div>
         <div className="jm-consign-metric-col">
           <span style={consignMetricLabel}>Paid</span>
-          <div className="jm-consign-metric-val-wrap">
+          <div className="jm-consign-metric-val-wrap jm-consign-metric-val-wrap--solo">
             <span className="jm-consign-metric-val" style={{ ...NUM, color: GREEN }}>{m.paidPieces}</span>
           </div>
         </div>
@@ -1743,7 +1743,8 @@ export default function JerkyMunch() {
 @media(max-width:520px){.jm-consign-card-metrics{width:100%;align-items:stretch!important}}
 .jm-consign-metrics-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px;width:100%;align-items:end}
 .jm-consign-metric-col{display:flex;flex-direction:column;align-items:center;justify-content:flex-end;gap:4px;min-width:0;text-align:center}
-.jm-consign-metric-val-wrap{display:flex;flex-direction:column;align-items:center;justify-content:flex-end;gap:2px;min-height:2.5em;width:100%}
+.jm-consign-metric-val-wrap{display:flex;flex-direction:column;align-items:center;justify-content:flex-end;gap:2px;width:100%}
+.jm-consign-metric-val-wrap--solo{padding-bottom:14px}
 .jm-consign-metric-val{font-size:20px;font-weight:700;line-height:1.1}
 .jm-consign-metric-sub{font-size:11px;font-weight:600;line-height:1.15;white-space:nowrap}
 .jm-consign-ledger{border:1px solid ${BORDER};border-radius:2px;overflow:hidden;margin-bottom:16px}

@@ -63,17 +63,18 @@ await page.locator('.jm-consign').evaluate((el) => {
 })
 const cards = page.locator('[data-testid^="consign-card-"]')
 const cardCount = await cards.count()
-let maxHeader = 0
+let maxMetrics = 0
 for (let i = 0; i < cardCount; i++) {
   await cards.nth(i).scrollIntoViewIfNeeded()
-  const header = cards.nth(i).locator(':scope > div').first()
-  const box = await header.boundingBox()
-  if (box) maxHeader = Math.max(maxHeader, box.height)
+  const metrics = cards.nth(i).locator('[data-testid="consign-store-metrics"]')
+  if ((await metrics.count()) === 0) continue
+  const box = await metrics.boundingBox()
+  if (box) maxMetrics = Math.max(maxMetrics, box.height)
 }
-if (maxHeader > 130) {
-  throw new Error(`consign card header too tall (max ${Math.round(maxHeader)}px); layout regression`)
+if (maxMetrics > 88) {
+  throw new Error(`consign metrics block too tall (max ${Math.round(maxMetrics)}px); layout regression`)
 }
-console.log(`consign cards: ${cardCount}, max collapsed header ${Math.round(maxHeader)}px`)
+console.log(`consign cards: ${cardCount}, max metrics block ${Math.round(maxMetrics)}px`)
 await page.getByText('Chick Chock').first().scrollIntoViewIfNeeded()
 await page.getByText('Evergreen Lakewood').first().scrollIntoViewIfNeeded()
 await page.screenshot({ path: `${OUT}/jerky-polish-evergreen-neighbors.png` })
