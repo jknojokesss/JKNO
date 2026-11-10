@@ -74,6 +74,11 @@ for (let i = 0; i < cardCount; i++) {
 if (maxMetrics > 88) {
   throw new Error(`consign metrics block too tall (max ${Math.round(maxMetrics)}px); layout regression`)
 }
+const labels = page.locator('.jm-consign-metric-label')
+for (let i = 0; i < (await labels.count()); i++) {
+  const h = await labels.nth(i).evaluate((el) => el.getBoundingClientRect().height)
+  if (h > 13) throw new Error(`metric label wrapped (${Math.round(h)}px tall)`)
+}
 console.log(`consign cards: ${cardCount}, max metrics block ${Math.round(maxMetrics)}px`)
 await page.getByText('Chick Chock').first().scrollIntoViewIfNeeded()
 await page.getByText('Evergreen Lakewood').first().scrollIntoViewIfNeeded()
@@ -86,8 +91,5 @@ await page.screenshot({ path: `${OUT}/jerky-polish-evergreen-actions.png`, fullP
 const ledger = page.getByTestId('consign-activity-ledger')
 await ledger.scrollIntoViewIfNeeded()
 await page.screenshot({ path: `${OUT}/jerky-polish-evergreen-activity.png` })
-const report = page.getByTestId('consign-drop-report')
-await report.scrollIntoViewIfNeeded()
-await page.screenshot({ path: `${OUT}/jerky-polish-evergreen-dropoffs.png` })
 await browser.close()
 console.log('saved preview screenshots to', OUT)

@@ -59,15 +59,6 @@ const consignBadge = (c) => {
   return { kind: 'metrics' }
 }
 
-const consignMetricLabel = {
-  fontSize: '8px',
-  fontWeight: 700,
-  color: MUTED,
-  letterSpacing: '0.05em',
-  textTransform: 'uppercase',
-  lineHeight: 1.25,
-  textAlign: 'center',
-}
 
 const ConsignStoreMetrics = ({ c }) => {
   const m = buildConsignMetrics(c)
@@ -80,54 +71,41 @@ const ConsignStoreMetrics = ({ c }) => {
     >
       <div className="jm-consign-metrics-grid">
         <div className="jm-consign-metric-col">
-          <span style={consignMetricLabel}>On shelf</span>
+          <span className="jm-consign-metric-label">On shelf</span>
           <div className="jm-consign-metric-val-wrap jm-consign-metric-val-wrap--solo">
             <span className="jm-consign-metric-val" style={{ ...NUM, color: KRAFT }}>{safeOnShelf(m.onShelf)}</span>
           </div>
         </div>
         <div className="jm-consign-metric-col">
-          <span style={consignMetricLabel}>Sold, not paid</span>
+          <span className="jm-consign-metric-label">Sold, not paid</span>
           <div className="jm-consign-metric-val-wrap">
             <span className="jm-consign-metric-val" style={{ ...NUM, color: m.soldUnpaid ? RED : INK }}>{m.soldUnpaid}</span>
             <span className="jm-consign-metric-sub" style={{ ...NUM, color: m.soldUnpaid ? RED : MUTED }}>{money(unpaidVal)}</span>
           </div>
         </div>
         <div className="jm-consign-metric-col">
-          <span style={consignMetricLabel}>Paid</span>
+          <span className="jm-consign-metric-label">Paid</span>
           <div className="jm-consign-metric-val-wrap jm-consign-metric-val-wrap--solo">
             <span className="jm-consign-metric-val" style={{ ...NUM, color: GREEN }}>{m.paidPieces}</span>
           </div>
         </div>
       </div>
-      {m.totalDropped > 0 ? (
-        <div data-testid="consign-total-dropped" style={{ ...NUM, fontSize: '10px', fontWeight: 600, color: MUTED, textAlign: 'center', textTransform: 'none' }}>
-          Total dropped {m.totalDropped}
+      {(m.totalDropped > 0 || m.openingShelf > 0) ? (
+        <div data-testid="consign-total-dropped" className="jm-consign-metric-footer" style={NUM}>
+          {m.openingShelf > 0
+            ? `Started with ${m.openingShelf} · Total dropped ${m.totalDropped}`
+            : `Total dropped ${m.totalDropped}`}
         </div>
       ) : null}
     </div>
   )
 }
 
-const ConsignStatusBadge = ({ badge, store }) => {
-  if (badge.kind === 'metrics') {
-    return <ConsignStoreMetrics c={store} />
-  }
-  if (badge.kind === 'empty') {
-    return (
-      <span style={consignCompactPillStyle(MUTED, BORDER)} data-testid="consign-shelf-badge">
-        {badge.text}
-      </span>
-    )
-  }
-  return (
-    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '6px' }}>
-      <ConsignStoreMetrics c={store} />
-      <span style={consignCompactPillStyle(badge.color, badge.bg)} data-testid="consign-shelf-badge">
-        {badge.text}
-      </span>
-    </div>
-  )
-}
+const ConsignShelfPill = ({ badge }) => (
+  <span style={consignCompactPillStyle(badge.color || MUTED, badge.bg || BORDER)} data-testid="consign-shelf-badge">
+    {badge.text}
+  </span>
+)
 
 const CONSIGN_INP = {
   padding: '10px 12px',
@@ -1738,10 +1716,13 @@ export default function JerkyMunch() {
 .jm-consign-chips{display:flex;gap:8px;flex-wrap:wrap;margin:14px 0 12px}
 .jm-consign-chip{flex:1 1 calc(20% - 7px);min-width:58px;min-height:44px;border-radius:4px;border:1px solid ${BORDER};background:#fff;font-family:'Inter',sans-serif;font-size:12px;font-weight:700;cursor:pointer;padding:9px 4px;color:${INK}}
 .jm-consign-chip[data-active="1"]{border-color:${CHAR};background:${CHAR};color:${CREAM}}
-.jm-consign-store-metrics{display:flex;flex-direction:column;align-items:stretch;gap:6px;width:210px;max-width:100%}
-.jm-consign-card-metrics{flex:0 0 auto;width:210px;max-width:100%}
-@media(max-width:520px){.jm-consign-card-metrics{width:100%;align-items:stretch!important}}
-.jm-consign-metrics-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px;width:100%;align-items:end}
+.jm-consign-card-head{display:flex;flex-direction:column;align-items:stretch;gap:10px}
+.jm-consign-card-top{display:flex;justify-content:space-between;align-items:flex-start;gap:10px}
+.jm-consign-card-aside{display:flex;flex-direction:column;align-items:flex-end;gap:6px;flex:0 0 auto;align-self:flex-start}
+.jm-consign-store-metrics{display:flex;flex-direction:column;align-items:stretch;gap:6px;width:100%;flex:0 0 auto;align-self:stretch}
+.jm-consign-metric-footer{font-size:10px;font-weight:600;color:${MUTED};text-align:center;line-height:1.35}
+.jm-consign-metric-label{font-size:8px;font-weight:700;color:${MUTED};letter-spacing:0.04em;text-transform:uppercase;line-height:1.2;text-align:center;white-space:nowrap;max-width:100%}
+.jm-consign-metrics-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;width:100%;align-items:end}
 .jm-consign-metric-col{display:flex;flex-direction:column;align-items:center;justify-content:flex-end;gap:4px;min-width:0;text-align:center}
 .jm-consign-metric-val-wrap{display:flex;flex-direction:column;align-items:center;justify-content:flex-end;gap:2px;width:100%}
 .jm-consign-metric-val-wrap--solo{padding-bottom:14px}
@@ -2051,17 +2032,27 @@ export default function JerkyMunch() {
                   {showHeader && <div style={{ ...lbl, color: SPICE, fontSize: '12px', margin: idx === 0 ? '2px 0 10px' : '24px 0 10px', display: 'flex', alignItems: 'center', gap: '10px' }}>{c.region || 'Other'}<span style={{ flex: 1, height: '1px', background: BORDER }} /></div>}
                   <div ref={el => { if (el) consignCardRefs.current[c.id] = el; else delete consignCardRefs.current[c.id] }} data-testid={`consign-card-${c.id}`} style={{ ...card, padding: 0, marginBottom: '12px', overflow: 'hidden', borderColor: open ? CHAR : (c.status === 'short' ? '#E7C3B8' : BORDER) }}>
                     <div onClick={() => setExpanded(open ? null : c.id)} style={{ padding: '15px 18px', cursor: 'pointer' }}>
-                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '12px', flexWrap: 'wrap' }}>
-                        <div>
-                          <div style={{ ...big, fontSize: '20px', color: INK }}>{c.store}</div>
-                          <div style={{ fontSize: '12px', color: MUTED, marginTop: '3px', lineHeight: 1.45 }}>
-                            <span data-testid={`consign-price-${c.id}`}>{money2(c.price)}/bag</span>
+                      <div className="jm-consign-card-head">
+                        <div className="jm-consign-card-top">
+                          <div style={{ minWidth: 0, flex: '1 1 auto' }}>
+                            <div style={{ ...big, fontSize: '20px', color: INK }}>{c.store}</div>
+                            <div style={{ fontSize: '12px', color: MUTED, marginTop: '3px', lineHeight: 1.45 }}>
+                              <span data-testid={`consign-price-${c.id}`}>{money2(c.price)}/bag</span>
+                            </div>
                           </div>
+                          {(badge.kind === 'empty' || badge.kind === 'pill') && (
+                            <div className="jm-consign-card-aside">
+                              <ConsignShelfPill badge={badge} />
+                              {c.restock && c.restock !== 'good' && <span style={{ fontSize: '11px', fontWeight: 600, color: RM[c.restock].color, background: RM[c.restock].color + '1A', padding: '3px 10px', borderRadius: '2px', whiteSpace: 'nowrap' }}>{RM[c.restock].label}</span>}
+                            </div>
+                          )}
                         </div>
-                        <div className="jm-consign-card-metrics" style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '6px' }}>
-                          <ConsignStatusBadge badge={badge} store={c} />
-                          {c.restock && c.restock !== 'good' && <span style={{ fontSize: '11px', fontWeight: 600, color: RM[c.restock].color, background: RM[c.restock].color + '1A', padding: '3px 10px', borderRadius: '2px', whiteSpace: 'nowrap' }}>{RM[c.restock].label}</span>}
-                        </div>
+                        {(badge.kind === 'metrics' || badge.kind === 'pill') && <ConsignStoreMetrics c={c} />}
+                        {badge.kind === 'metrics' && c.restock && c.restock !== 'good' && (
+                          <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
+                            <span style={{ fontSize: '11px', fontWeight: 600, color: RM[c.restock].color, background: RM[c.restock].color + '1A', padding: '3px 10px', borderRadius: '2px', whiteSpace: 'nowrap' }}>{RM[c.restock].label}</span>
+                          </div>
+                        )}
                       </div>
                       {c.variance > 0 && c.diagnosis && (
                         <div style={{ marginTop: '10px', fontSize: '12.5px', color: c.diagnosis.includes('owes') ? RED : INK, background: c.diagnosis.includes('owes') ? '#FBEDE9' : CREAM, border: `1px solid ${c.diagnosis.includes('owes') ? '#E7C3B8' : BORDER}`, borderRadius: '2px', padding: '8px 11px', display: 'flex', alignItems: 'center', gap: '7px' }}>
