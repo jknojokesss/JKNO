@@ -58,7 +58,21 @@ await page.goto(PREVIEW, { waitUntil: 'domcontentloaded', timeout: 90000 })
 await page.getByRole('button', { name: 'Consignment', exact: true }).waitFor({ timeout: 60000 })
 await page.getByRole('button', { name: 'Consignment', exact: true }).click()
 await page.waitForTimeout(800)
+const cards = page.locator('[data-testid^="consign-card-"]')
+const cardCount = await cards.count()
+let maxHeader = 0
+for (let i = 0; i < cardCount; i++) {
+  const header = cards.nth(i).locator(':scope > div').first()
+  const box = await header.boundingBox()
+  if (box) maxHeader = Math.max(maxHeader, box.height)
+}
+if (maxHeader > 130) {
+  throw new Error(`consign card header too tall (max ${Math.round(maxHeader)}px); layout regression`)
+}
+console.log(`consign cards: ${cardCount}, max collapsed header ${Math.round(maxHeader)}px`)
+await page.getByText('Chick Chock').first().scrollIntoViewIfNeeded()
 await page.getByText('Evergreen Lakewood').first().scrollIntoViewIfNeeded()
+await page.screenshot({ path: `${OUT}/jerky-polish-evergreen-neighbors.png` })
 await page.screenshot({ path: `${OUT}/jerky-polish-evergreen-card.png` })
 await page.getByText('Evergreen Lakewood').first().click()
 await page.waitForTimeout(800)
