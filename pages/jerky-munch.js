@@ -422,7 +422,7 @@ export default function JerkyMunch() {
         deliveryMode: p.delivery_mode === 'ship' ? 'ship' : 'drop_off',
         log: (byPartner[p.id] || []).map(l => {
           const iso = isoDateOnly(l.at)
-          return { logId: l.id, at: iso ? fmtD(iso) : '', atIso: iso, t: l.note }
+          return { logId: l.id, at: iso ? fmtD(iso) : '', atIso: iso, t: l.note, createdAt: l.created_at || '' }
         }),
       })))
     } catch (e) { console.error('loadConsign failed', e) }

@@ -7,7 +7,7 @@
     "build": "next build",
     "start": "next start",
     "test:e2e": "node tests/e2e/run.js",
-    "test:unit": "node --test tests/weldon-ordered-at.test.mjs tests/weldon-sync-bounds.test.mjs tests/jerky-consignment-recon.test.mjs tests/jerky-consignment-log-rollback.test.mjs tests/jerky-consign-metrics.test.mjs tests/jerky-preview-consign-overlay.test.mjs tests/jerky-money.test.mjs tests/jerky-roas.test.mjs"
+    "test:unit": "node --test tests/weldon-ordered-at.test.mjs tests/weldon-sync-bounds.test.mjs tests/jerky-consignment-recon.test.mjs tests/jerky-consignment-log-rollback.test.mjs tests/jerky-consign-metrics.test.mjs tests/jerky-consign-log-order.test.mjs tests/jerky-preview-consign-overlay.test.mjs tests/jerky-money.test.mjs tests/jerky-roas.test.mjs"
   },
   "dependencies": {
     "@stripe/react-stripe-js": "^2.8.1",
