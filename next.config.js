@@ -1,6 +1,15 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: true,
+  // Preview-only demo logs (e.g. Evergreen Lakewood sold row). Never on production (`VERCEL_ENV`).
+  env: {
+    NEXT_PUBLIC_JERKY_CONSIGN_PREVIEW_OVERLAY:
+      process.env.VERCEL_ENV === 'preview' &&
+      (process.env.JERKY_CONSIGN_PREVIEW_OVERLAY === '1' ||
+        process.env.VERCEL_GIT_COMMIT_REF === 'cursor/jerky-shelf-dates-4e09')
+        ? '1'
+        : '0',
+  },
   images: {
     domains: ['lh3.googleusercontent.com', 'storage.googleapis.com'],
   },

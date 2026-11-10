@@ -66,11 +66,11 @@ describe('recon', () => {
     assert.equal(r.variance, 5)
   })
 
-  it('negative expected is invalid, not overage', () => {
-    const r = recon({ price: 5, sent: 5, returned: 0, paid: 50, counted: 3 })
-    assert.equal(r.expected, -5)
-    assert.equal(r.status, 'invalid')
-    assert.equal(r.variance, 0)
+  it('legacy row overpay surfaces as over count, not a negative shelf badge', () => {
+    const r = recon({ price: 5, sent: 5, returned: 0, paid: 50, counted: 3, countedDate: '2026-12-01', log: [] })
+    assert.equal(r.expected, 3)
+    assert.equal(r.status, 'over')
+    assert.equal(r.variance, -3)
   })
 })
 
@@ -116,7 +116,7 @@ describe('delivery mode copy', () => {
         { t: 'Shipped 97 pieces on 2026-11-03 (shipment)', atIso: '2026-11-03' },
       ],
     })
-    assert.equal(rows[1].label, 'shipped 97')
+    assert.equal(rows[1].label, 'Shipped 97')
     assert.equal(partnerDeliveryMode({ deliveryMode: 'ship' }), 'ship')
     assert.equal(consignVerbs('ship').emptySent, 'No shipments yet')
   })

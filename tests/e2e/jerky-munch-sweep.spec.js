@@ -63,7 +63,7 @@ async function runViewport(browser, viewport, tag) {
   await openTab(page, 'Consignment')
   check(`${tag}: invoice-type store not on consignment tab`, await page.locator('.jm-consign').getByText('E2E Invoice Store').count() === 0)
   const partnersKpi = page.locator('.jm-consign').getByText('Partners', { exact: true }).locator('xpath=..')
-  check(`${tag}: consignment partners KPI is 4`, /\b4\b/.test(await partnersKpi.innerText()))
+  check(`${tag}: consignment partners KPI is 5`, /\b5\b/.test(await partnersKpi.innerText()))
 
   await openTab(page, 'Invoice Stores')
   check(`${tag}: invoice store listed`, await page.getByText('E2E Invoice Store').count() >= 1)

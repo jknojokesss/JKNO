@@ -144,8 +144,8 @@ async function testDoubleSubmitDrop(page, tag) {
   const saveBtn = scope.locator('[data-testid="consign-log-visit-e2e-first"]')
   await saveBtn.dblclick({ delay: 30 })
   await page.waitForTimeout(1200)
-  const sentLine = await scope.locator('[data-testid="consign-sent-e2e-first"]').textContent()
-  check(`${tag}: one drop-off saved (42 sent, not 84)`, /dropped off 42\b/.test(sentLine || ''))
+  const totalDropped = await scope.locator('[data-testid="consign-total-dropped"]').textContent()
+  check(`${tag}: one drop-off saved (42 sent, not 84)`, /Total dropped 42\b/.test(totalDropped || ''))
 }
 
 async function main() {
