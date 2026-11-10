@@ -58,10 +58,14 @@ await page.goto(PREVIEW, { waitUntil: 'domcontentloaded', timeout: 90000 })
 await page.getByRole('button', { name: 'Consignment', exact: true }).waitFor({ timeout: 60000 })
 await page.getByRole('button', { name: 'Consignment', exact: true }).click()
 await page.waitForTimeout(800)
+await page.locator('.jm-consign').evaluate((el) => {
+  el.scrollTop = 0
+})
 const cards = page.locator('[data-testid^="consign-card-"]')
 const cardCount = await cards.count()
 let maxHeader = 0
 for (let i = 0; i < cardCount; i++) {
+  await cards.nth(i).scrollIntoViewIfNeeded()
   const header = cards.nth(i).locator(':scope > div').first()
   const box = await header.boundingBox()
   if (box) maxHeader = Math.max(maxHeader, box.height)
