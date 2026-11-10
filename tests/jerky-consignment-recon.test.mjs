@@ -116,7 +116,7 @@ describe('delivery mode copy', () => {
         { t: 'Shipped 97 pieces on 2026-11-03 (shipment)', atIso: '2026-11-03' },
       ],
     })
-    assert.equal(rows[1].label, 'shipped 97')
+    assert.equal(rows[1].label, 'Shipped 97')
     assert.equal(partnerDeliveryMode({ deliveryMode: 'ship' }), 'ship')
     assert.equal(consignVerbs('ship').emptySent, 'No shipments yet')
   })

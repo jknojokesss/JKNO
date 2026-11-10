@@ -3,7 +3,7 @@ import Head from 'next/head'
 import { jerkySupabase } from '../lib/supabaseJerky'
 import { buildPnl, buildBalanceSheet, buildCashFlow, periodPnl, buildAdSpend } from '../lib/jerkyGL'
 import { loadQboStatements, balanceSheetAsOf, monthLabel } from '../lib/qboStatements'
-import { recon, missingSummary, buildActivityLedger, buildConsignMetrics, buildDropReport, safeOnShelf, hasDropActivity, hasShelfBooks, hasLoggedConsignmentActivity, paymentPiecesFromCheck, partnerStateAfterLogDelete, partnerStateAfterLogReplace, parseLogEvent, formatDropLogNote, buildPayLogNote, formatPickupLogNote, formatStartingCountLogNote, formatCountLogNote, formatSoldLogNote, formatCalendarDate, isoDateOnly, consignStoreRenameError, partnerDeliveryMode, consignVerbs, consignTotalsLine } from '../lib/consignmentRecon'
+import { recon, missingSummary, buildActivityLedger, buildConsignMetrics, buildDropReport, safeOnShelf, hasDropActivity, hasShelfBooks, hasLoggedConsignmentActivity, paymentPiecesFromCheck, partnerStateAfterLogDelete, partnerStateAfterLogReplace, parseLogEvent, formatDropLogNote, buildPayLogNote, formatPickupLogNote, formatStartingCountLogNote, formatCountLogNote, formatSoldLogNote, formatCalendarDate, isoDateOnly, consignStoreRenameError, partnerDeliveryMode, consignVerbs } from '../lib/consignmentRecon'
 import { BOOKS_TZ, isoDateInTimeZone } from '../lib/jerkyBooksTz'
 import { roasMultiplier, roasLabel } from '../lib/jerkyRoas'
 import { ResponsiveContainer, ComposedChart, Bar, Line, XAxis, YAxis, Tooltip, CartesianGrid, PieChart, Pie, Cell } from 'recharts'
@@ -88,10 +88,9 @@ const ConsignStoreMetrics = ({ c }) => {
         </div>
         <div style={consignMetricTile()}>
           <span style={{ fontSize: '9px', fontWeight: 700, color: MUTED, letterSpacing: '0.06em', textTransform: 'uppercase' }}>Sold, not paid</span>
-          <span style={{ ...NUM, fontSize: '20px', fontWeight: 700, color: m.soldUnpaid ? RED : INK, lineHeight: 1 }}>{m.soldUnpaid}</span>
-          {m.soldUnpaid > 0 && price > 0 ? (
-            <span style={{ ...NUM, fontSize: '10px', fontWeight: 600, color: MUTED }}>{money(unpaidVal)}</span>
-          ) : null}
+          <span style={{ ...NUM, fontSize: '18px', fontWeight: 700, color: m.soldUnpaid ? RED : INK, lineHeight: 1.2, whiteSpace: 'nowrap' }}>
+            {m.soldUnpaid} · {money(unpaidVal)}
+          </span>
         </div>
         <div style={consignMetricTile()}>
           <span style={{ fontSize: '9px', fontWeight: 700, color: MUTED, letterSpacing: '0.06em', textTransform: 'uppercase' }}>Paid</span>
@@ -99,8 +98,8 @@ const ConsignStoreMetrics = ({ c }) => {
         </div>
       </div>
       {m.totalDropped > 0 ? (
-        <div style={{ ...NUM, fontSize: '10px', fontWeight: 500, color: MUTED, textAlign: 'right' }}>
-          {consignVerbs(partnerDeliveryMode(c)).sentLabel} this cycle: {m.totalDropped}
+        <div data-testid="consign-total-dropped" style={{ ...NUM, fontSize: '10px', fontWeight: 600, color: MUTED, textAlign: 'right', textTransform: 'none' }}>
+          Total dropped {m.totalDropped}
         </div>
       ) : null}
     </div>
@@ -1735,21 +1734,16 @@ export default function JerkyMunch() {
 .jm-consign-jump{margin-top:8px;display:flex;flex-direction:column;gap:6px;max-height:220px;overflow-y:auto}
 .jm-consign-jump button{text-align:left;padding:10px 12px;border:1px solid ${BORDER};border-radius:2px;background:#fff;font-family:'Inter',sans-serif;font-size:14px;font-weight:600;color:${INK};cursor:pointer}
 .jm-consign-chips{display:flex;gap:8px;flex-wrap:wrap;margin:14px 0 12px}
-.jm-consign-chip{flex:1 1 calc(25% - 6px);min-width:74px;min-height:48px;border-radius:4px;border:1px solid ${BORDER};background:#fff;font-family:'Inter',sans-serif;font-size:13px;font-weight:700;cursor:pointer;padding:10px 6px;color:${INK}}
+.jm-consign-chip{flex:1 1 calc(20% - 7px);min-width:58px;min-height:44px;border-radius:4px;border:1px solid ${BORDER};background:#fff;font-family:'Inter',sans-serif;font-size:12px;font-weight:700;cursor:pointer;padding:9px 4px;color:${INK}}
 .jm-consign-chip[data-active="1"]{border-color:${CHAR};background:${CHAR};color:${CREAM}}
 .jm-consign-ledger{border:1px solid ${BORDER};border-radius:2px;overflow:hidden;margin-bottom:16px}
-.jm-consign-ledger-head{display:none}
-.jm-consign-ledger-row{display:flex;flex-direction:column;gap:8px;padding:12px 14px;border-top:1px solid ${CREAM};font-size:13px}
-.jm-consign-ledger-row-top{display:flex;justify-content:space-between;align-items:baseline;gap:10px;flex-wrap:wrap}
-.jm-consign-ledger-actions{display:flex;gap:10px;flex-wrap:wrap}
-.jm-consign-ledger-actions button{min-height:44px;padding:10px 16px!important;font-size:13px!important;font-weight:600!important;border-radius:2px;cursor:pointer}
-@media(min-width:640px){
-.jm-consign-ledger-head{display:grid;grid-template-columns:88px 1fr 56px 56px 96px;gap:8px;padding:8px 12px;background:${CREAM}}
-.jm-consign-ledger-row{display:grid;grid-template-columns:88px 1fr 56px 56px 96px;gap:8px;padding:8px 12px;align-items:baseline}
-.jm-consign-ledger-row-top,.jm-consign-ledger-mobile-shelf{display:none}
-.jm-consign-ledger-actions{justify-content:flex-end}
-.jm-consign-ledger-actions button{min-height:auto;padding:8px 10px!important;font-size:11px!important}
-}`}</style>
+.jm-consign-ledger-row{display:flex;flex-direction:column;gap:6px;padding:12px 14px;border-top:1px solid ${CREAM};font-size:13px}
+.jm-consign-ledger-mainline{display:flex;flex-wrap:wrap;align-items:baseline;gap:8px;line-height:1.35}
+.jm-consign-ledger-date{font-family:'Inter',sans-serif;font-variant-numeric:tabular-nums;font-weight:600;color:${INK};font-size:13px;flex-shrink:0}
+.jm-consign-ledger-event{color:${INK};font-weight:500;font-size:13px}
+.jm-consign-ledger-running{font-size:11px;font-weight:500;color:${MUTED};line-height:1.4}
+.jm-consign-ledger-actions{display:flex;gap:6px;margin-top:2px}
+.jm-consign-ledger-actions button{min-height:30px;padding:5px 10px!important;font-size:11px!important;font-weight:600!important;border-radius:2px;cursor:pointer;line-height:1.2}`}</style>
       </Head>
 
       <div className="jm-shell">
@@ -2050,7 +2044,7 @@ export default function JerkyMunch() {
                         <div>
                           <div style={{ ...big, fontSize: '20px', color: INK }}>{c.store}</div>
                           <div style={{ fontSize: '12px', color: MUTED, marginTop: '3px', lineHeight: 1.45 }}>
-                            {money2(c.price)}/bag · <span data-testid={`consign-sent-${c.id}`}>{consignTotalsLine(c, c.paidUnits, money(c.paid))}</span>
+                            <span data-testid={`consign-price-${c.id}`}>{money2(c.price)}/bag</span>
                           </div>
                         </div>
                         <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '6px' }}>
@@ -2261,29 +2255,27 @@ export default function JerkyMunch() {
                                 </div>
                               ) : (
                                 <div className="jm-consign-ledger" data-testid="consign-activity-ledger">
-                                  <div className="jm-consign-ledger-head" style={{ ...lbl, fontSize: '10px' }}>
-                                    <span>Date</span><span>What happened</span><span style={{ textAlign: 'right' }}>Shelf</span><span style={{ textAlign: 'right' }}>Owed</span><span />
-                                  </div>
-                                  {ledger.map((row) => (
-                                    <div key={row.logId || row.label + row.dateIso} className="jm-consign-ledger-row">
-                                      <div className="jm-consign-ledger-row-top">
-                                        <span style={{ ...NUM, color: '#BFB096', fontWeight: 600 }}>{row.dateIso ? fmtD(row.dateIso) : 'Undated'}</span>
-                                        <span className="jm-consign-ledger-mobile-shelf" style={{ ...NUM, fontSize: '11px', fontWeight: 600, color: MUTED }}>
-                                          {row.onShelf} shelf · {row.soldUnpaid ?? 0} owed · {row.paidPieces ?? 0} paid
-                                        </span>
+                                  {ledger.map((row) => {
+                                    const owed = (row.soldUnpaid ?? 0) * priceOk
+                                    const paidRunning = (row.paidPieces ?? 0) * priceOk
+                                    return (
+                                      <div key={row.logId || row.label + row.dateIso} className="jm-consign-ledger-row">
+                                        <div className="jm-consign-ledger-mainline">
+                                          <span className="jm-consign-ledger-date">{row.dateIso ? fmtD(row.dateIso) : 'Undated'}</span>
+                                          <span className="jm-consign-ledger-event">{row.label}</span>
+                                        </div>
+                                        <div className="jm-consign-ledger-running" style={NUM}>
+                                          Shelf {row.onShelf} · Owed {money(owed)} · Paid {money(paidRunning)}
+                                        </div>
+                                        {row.logId ? (
+                                          <div className="jm-consign-ledger-actions">
+                                            <button type="button" disabled={saving} onClick={() => openEditLog(c.id, row.logId, row.type)} style={{ background: CREAM, border: `1px solid ${BORDER}`, color: KRAFT }}>Edit</button>
+                                            <button type="button" disabled={saving} onClick={() => setDeleteConfirm({ partnerId: c.id, logId: row.logId, label: row.label, dateIso: row.dateIso })} style={{ background: '#FBEDE9', border: `1px solid #E7C3B8`, color: RED }}>Delete</button>
+                                          </div>
+                                        ) : null}
                                       </div>
-                                      <span style={{ color: MUTED, lineHeight: 1.45 }}>{row.label}</span>
-                                      <span className="jm-consign-ledger-mobile-shelf" style={{ display: 'none' }} />
-                                      <span style={{ ...NUM, textAlign: 'right', fontWeight: 600, color: INK }}>{row.onShelf}</span>
-                                      <span style={{ ...NUM, textAlign: 'right', fontWeight: 600, color: row.soldUnpaid ? RED : MUTED }}>{row.soldUnpaid ?? 0}</span>
-                                      {row.logId ? (
-                                        <span className="jm-consign-ledger-actions">
-                                          <button type="button" disabled={saving} onClick={() => openEditLog(c.id, row.logId, row.type)} style={{ background: CREAM, border: `1px solid ${BORDER}`, color: KRAFT }}>Edit</button>
-                                          <button type="button" disabled={saving} onClick={() => setDeleteConfirm({ partnerId: c.id, logId: row.logId, label: row.label, dateIso: row.dateIso })} style={{ background: '#FBEDE9', border: `1px solid #E7C3B8`, color: RED }}>Delete</button>
-                                        </span>
-                                      ) : <span />}
-                                    </div>
-                                  ))}
+                                    )
+                                  })}
                                 </div>
                               )}
                             </>
