@@ -1,0 +1,3 @@
+-- Jerky Munch — additive reference (optional re-run).
+-- No schema change: "Sold N pieces on YYYY-MM-DD" is stored in consignment_log.note only.
+-- See docs/jerky-consign-metrics-migration.md

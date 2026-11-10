@@ -1,0 +1,41 @@
+{
+  "evergreen_lakewood": {
+    "store": "Evergreen Lakewood",
+    "price": 4.5,
+    "sent": 231,
+    "returned": 0,
+    "paid": 0,
+    "counted": null,
+    "countedDate": "",
+    "log": [
+      { "atIso": "2026-11-01", "t": "Dropped off 105 pieces on 2026-11-01 (drop-off)" },
+      { "atIso": "2026-11-09", "t": "Dropped off 126 pieces on 2026-11-09 (drop-off)" }
+    ]
+  },
+  "evergreen_monsey": {
+    "store": "Evergreen Monsey - 59",
+    "price": 4.5,
+    "sent": 175,
+    "returned": 0,
+    "paid": 0,
+    "counted": 59,
+    "countedDate": "2026-10-15",
+    "log": [
+      { "atIso": "2026-09-20", "t": "Dropped off 175 pieces on 2026-09-20 (drop-off)" },
+      { "atIso": "2026-10-15", "t": "Counted 59 on shelf (Oct 15)" }
+    ]
+  },
+  "cycle_reset_store": {
+    "store": "Sample Cycle Store",
+    "price": 4.5,
+    "sent": 62,
+    "returned": 0,
+    "paid": 0,
+    "counted": 12,
+    "countedDate": "2026-08-01",
+    "log": [
+      { "atIso": "2026-08-01", "t": "Closed cycle — counts matched. New cycle opens at 12 on the shelf." },
+      { "atIso": "2026-09-01", "t": "Dropped off 50 pieces on 2026-09-01 (drop-off)" }
+    ]
+  }
+}

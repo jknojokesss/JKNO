@@ -91,8 +91,8 @@ describe('partnerStateAfterLogDelete', () => {
     const entry = c.log[0]
     const patch = partnerPatchForDeletedLog(c, entry)
     const after = { ...c, ...patch, log: [c.log[1]] }
-    assert.equal(expectedOnShelf(after), -80)
-    assert.equal(recon(after).expected, -80)
+    assert.equal(expectedOnShelf(after), 0)
+    assert.equal(recon(after).expected, 0)
   })
 
   it('editing drop adjusts sent by the delta only', () => {

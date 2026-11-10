@@ -66,11 +66,11 @@ describe('recon', () => {
     assert.equal(r.variance, 5)
   })
 
-  it('negative expected is invalid, not overage', () => {
-    const r = recon({ price: 5, sent: 5, returned: 0, paid: 50, counted: 3 })
-    assert.equal(r.expected, -5)
-    assert.equal(r.status, 'invalid')
-    assert.equal(r.variance, 0)
+  it('legacy row overpay surfaces as over count, not a negative shelf badge', () => {
+    const r = recon({ price: 5, sent: 5, returned: 0, paid: 50, counted: 3, countedDate: '2026-12-01', log: [] })
+    assert.equal(r.expected, 3)
+    assert.equal(r.status, 'over')
+    assert.equal(r.variance, -3)
   })
 })
 
