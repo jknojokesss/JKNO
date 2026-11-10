@@ -5,6 +5,7 @@ import { buildPnl, buildBalanceSheet, buildCashFlow, periodPnl, buildAdSpend } f
 import { loadQboStatements, balanceSheetAsOf, monthLabel } from '../lib/qboStatements'
 import { recon, missingSummary, buildActivityLedger, buildConsignMetrics, buildDropReport, safeOnShelf, hasDropActivity, hasShelfBooks, hasLoggedConsignmentActivity, paymentPiecesFromCheck, partnerStateAfterLogDelete, partnerStateAfterLogReplace, parseLogEvent, formatDropLogNote, buildPayLogNote, formatPickupLogNote, formatStartingCountLogNote, formatCountLogNote, formatSoldLogNote, formatCalendarDate, isoDateOnly, consignStoreRenameError, partnerDeliveryMode, consignVerbs } from '../lib/consignmentRecon'
 import { mergeJerkyPreviewConsignOverlays, isJerkyPreviewOverlayLogId } from '../lib/jerkyPreviewConsignOverlay'
+import { formatJerkyMoney } from '../lib/jerkyMoney'
 import { BOOKS_TZ, isoDateInTimeZone } from '../lib/jerkyBooksTz'
 import { roasMultiplier, roasLabel } from '../lib/jerkyRoas'
 import { ResponsiveContainer, ComposedChart, Bar, Line, XAxis, YAxis, Tooltip, CartesianGrid, PieChart, Pie, Cell } from 'recharts'
@@ -14,8 +15,8 @@ const INK = '#2B2018', MUTED = '#8A7A66', GREEN = '#3E7C4F', BORDER = '#E6DBC8',
 const CARDBG = '#FFFDF9'
 const BIZ = 'Jerky Munch'
 
-const money = (n) => '$' + (Math.round(n * 100) / 100).toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 2 })
-const money2 = (n) => '$' + (Math.round(Number(n) * 100) / 100).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })
+const money = formatJerkyMoney
+const money2 = formatJerkyMoney
 const m0 = (n) => '$' + Math.round(n).toLocaleString()
 const sgn = (n) => (n < 0 ? '-$' : '$') + Math.abs(Math.round(n)).toLocaleString()
 const fmtD = (s) => formatCalendarDate(s)
@@ -58,48 +59,57 @@ const consignBadge = (c) => {
   return { kind: 'metrics' }
 }
 
-const consignMetricTile = (label, value, sub, accent) => ({
-  display: 'flex',
-  flexDirection: 'column',
-  alignItems: 'flex-end',
-  gap: '2px',
-  minWidth: '58px',
-})
+const consignMetricLabel = {
+  fontSize: '8px',
+  fontWeight: 700,
+  color: MUTED,
+  letterSpacing: '0.05em',
+  textTransform: 'uppercase',
+  lineHeight: 1.25,
+  textAlign: 'center',
+}
 
 const ConsignStoreMetrics = ({ c }) => {
   const m = buildConsignMetrics(c)
   const price = Number(c.price) || 0
   const unpaidVal = m.soldUnpaid * price
+  const soldLine = `${m.soldUnpaid} · ${money(unpaidVal)}`
   return (
     <div
       data-testid="consign-store-metrics"
+      className="jm-consign-store-metrics"
       style={{
         display: 'flex',
         flexDirection: 'column',
-        alignItems: 'flex-end',
-        gap: '8px',
-        flexShrink: 0,
+        alignItems: 'stretch',
+        gap: '6px',
+        flex: '1 1 210px',
+        minWidth: 'min(100%, 210px)',
         maxWidth: '100%',
       }}
     >
-      <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'flex-end', gap: '10px 14px' }}>
-        <div style={consignMetricTile()}>
-          <span style={{ fontSize: '9px', fontWeight: 700, color: MUTED, letterSpacing: '0.06em', textTransform: 'uppercase' }}>On shelf</span>
-          <span style={{ ...NUM, fontSize: '20px', fontWeight: 700, color: KRAFT, lineHeight: 1 }}>{safeOnShelf(m.onShelf)}</span>
+      <div className="jm-consign-metrics-grid">
+        <div className="jm-consign-metric-col">
+          <span style={consignMetricLabel}>On shelf</span>
+          <span className="jm-consign-metric-val" style={{ ...NUM, color: KRAFT }}>{safeOnShelf(m.onShelf)}</span>
         </div>
-        <div style={consignMetricTile()}>
-          <span style={{ fontSize: '9px', fontWeight: 700, color: MUTED, letterSpacing: '0.06em', textTransform: 'uppercase' }}>Sold, not paid</span>
-          <span style={{ ...NUM, fontSize: '18px', fontWeight: 700, color: m.soldUnpaid ? RED : INK, lineHeight: 1.2, whiteSpace: 'nowrap' }}>
-            {m.soldUnpaid} · {money(unpaidVal)}
+        <div className="jm-consign-metric-col">
+          <span style={consignMetricLabel}>Sold, not paid</span>
+          <span
+            className="jm-consign-metric-val jm-consign-metric-val--sold"
+            style={{ ...NUM, color: m.soldUnpaid ? RED : INK }}
+            title={soldLine}
+          >
+            {soldLine}
           </span>
         </div>
-        <div style={consignMetricTile()}>
-          <span style={{ fontSize: '9px', fontWeight: 700, color: MUTED, letterSpacing: '0.06em', textTransform: 'uppercase' }}>Paid</span>
-          <span style={{ ...NUM, fontSize: '20px', fontWeight: 700, color: GREEN, lineHeight: 1 }}>{m.paidPieces}</span>
+        <div className="jm-consign-metric-col">
+          <span style={consignMetricLabel}>Paid</span>
+          <span className="jm-consign-metric-val" style={{ ...NUM, color: GREEN }}>{m.paidPieces}</span>
         </div>
       </div>
       {m.totalDropped > 0 ? (
-        <div data-testid="consign-total-dropped" style={{ ...NUM, fontSize: '10px', fontWeight: 600, color: MUTED, textAlign: 'right', textTransform: 'none' }}>
+        <div data-testid="consign-total-dropped" style={{ ...NUM, fontSize: '10px', fontWeight: 600, color: MUTED, textAlign: 'center', textTransform: 'none' }}>
           Total dropped {m.totalDropped}
         </div>
       ) : null}
@@ -1737,6 +1747,10 @@ export default function JerkyMunch() {
 .jm-consign-chips{display:flex;gap:8px;flex-wrap:wrap;margin:14px 0 12px}
 .jm-consign-chip{flex:1 1 calc(20% - 7px);min-width:58px;min-height:44px;border-radius:4px;border:1px solid ${BORDER};background:#fff;font-family:'Inter',sans-serif;font-size:12px;font-weight:700;cursor:pointer;padding:9px 4px;color:${INK}}
 .jm-consign-chip[data-active="1"]{border-color:${CHAR};background:${CHAR};color:${CREAM}}
+.jm-consign-metrics-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px;width:100%;align-items:start}
+.jm-consign-metric-col{display:flex;flex-direction:column;align-items:center;justify-content:flex-start;gap:4px;min-width:0;text-align:center}
+.jm-consign-metric-val{font-size:20px;font-weight:700;line-height:1.15}
+.jm-consign-metric-val--sold{font-size:13px;line-height:1.2;white-space:nowrap;max-width:100%}
 .jm-consign-ledger{border:1px solid ${BORDER};border-radius:2px;overflow:hidden;margin-bottom:16px}
 .jm-consign-ledger-row{display:flex;flex-direction:column;gap:6px;padding:12px 14px;border-top:1px solid ${CREAM};font-size:13px}
 .jm-consign-ledger-mainline{display:flex;flex-wrap:wrap;align-items:baseline;gap:8px;line-height:1.35}
@@ -2048,7 +2062,7 @@ export default function JerkyMunch() {
                             <span data-testid={`consign-price-${c.id}`}>{money2(c.price)}/bag</span>
                           </div>
                         </div>
-                        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '6px' }}>
+                        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'stretch', gap: '6px', flex: '1 1 210px', minWidth: 'min(100%, 210px)' }}>
                           <ConsignStatusBadge badge={badge} store={c} />
                           {c.restock && c.restock !== 'good' && <span style={{ fontSize: '11px', fontWeight: 600, color: RM[c.restock].color, background: RM[c.restock].color + '1A', padding: '3px 10px', borderRadius: '2px', whiteSpace: 'nowrap' }}>{RM[c.restock].label}</span>}
                         </div>
