@@ -2080,7 +2080,8 @@ export default function JerkyMunch() {
                           const stepConfirm = { fontSize: '12px', color: GREEN, marginTop: '8px', lineHeight: 1.45 }
                           const fieldRow = { display: 'flex', flexDirection: 'column', gap: '10px', width: '100%', maxWidth: '100%', minWidth: 0 }
                           const actionBtn = { width: '100%', maxWidth: '100%', boxSizing: 'border-box', border: 'none', borderRadius: '2px', padding: '13px 14px', ...btn, fontSize: '15px' }
-                          const priceOk = Number(c.price) > 0
+                          const bagPrice = Number(c.price) || 0
+                          const priceOk = bagPrice > 0
                           const payOverride = dv(c.id + '_payPiecesOverride') === '1'
                           const payResolved = resolvePayPieces(c.id, c, payAmt)
                           const payCalc = payResolved?.calc || (Number(payAmt) > 0 && priceOk ? paymentPiecesFromCheck(payAmt, c.price) : null)
@@ -2257,8 +2258,8 @@ export default function JerkyMunch() {
                               ) : (
                                 <div className="jm-consign-ledger" data-testid="consign-activity-ledger">
                                   {ledger.map((row) => {
-                                    const owed = (row.soldUnpaid ?? 0) * priceOk
-                                    const paidRunning = (row.paidPieces ?? 0) * priceOk
+                                    const owed = (row.soldUnpaid ?? 0) * bagPrice
+                                    const paidRunning = (row.paidPieces ?? 0) * bagPrice
                                     return (
                                       <div key={row.logId || row.label + row.dateIso} className="jm-consign-ledger-row">
                                         <div className="jm-consign-ledger-mainline">
