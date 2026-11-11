@@ -9,6 +9,11 @@ const nextConfig = {
         process.env.VERCEL_GIT_COMMIT_REF === 'cursor/jerky-shelf-dates-4e09')
         ? '1'
         : '0',
+    NEXT_PUBLIC_JERKY_CHANGE_REQUEST_PREVIEW_MOCK:
+      process.env.VERCEL_ENV === 'preview' &&
+      process.env.VERCEL_GIT_COMMIT_REF === 'cursor/jerky-change-requests-4e09'
+        ? '1'
+        : '0',
   },
   images: {
     domains: ['lh3.googleusercontent.com', 'storage.googleapis.com'],

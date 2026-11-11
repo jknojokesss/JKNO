@@ -5,6 +5,8 @@ import { buildPnl, buildBalanceSheet, buildCashFlow, periodPnl, buildAdSpend } f
 import { loadQboStatements, balanceSheetAsOf, monthLabel } from '../lib/qboStatements'
 import { recon, missingSummary, buildActivityLedger, buildConsignMetrics, buildDropReport, safeOnShelf, hasDropActivity, hasShelfBooks, hasLoggedConsignmentActivity, paymentPiecesFromCheck, partnerStateAfterLogDelete, partnerStateAfterLogReplace, parseLogEvent, formatDropLogNote, buildPayLogNote, formatPickupLogNote, formatStartingCountLogNote, formatCountLogNote, formatSoldLogNote, formatCalendarDate, isoDateOnly, consignStoreRenameError, partnerDeliveryMode, consignVerbs } from '../lib/consignmentRecon'
 import { mergeJerkyPreviewConsignOverlays, isJerkyPreviewOverlayLogId } from '../lib/jerkyPreviewConsignOverlay'
+import { jerkyChangeRequestStatusLabel, jerkyChangeRequestStatusPillStyle } from '../lib/jerkyChangeRequests'
+import { jerkyChangeRequestPreviewMockEnabled, JERKY_PREVIEW_CHANGE_REQUEST_SAMPLES } from '../lib/jerkyPreviewChangeRequests'
 import { formatJerkyMoney } from '../lib/jerkyMoney'
 import { BOOKS_TZ, isoDateInTimeZone } from '../lib/jerkyBooksTz'
 import { roasMultiplier, roasLabel } from '../lib/jerkyRoas'
@@ -106,6 +108,24 @@ const ConsignShelfPill = ({ badge }) => (
     {badge.text}
   </span>
 )
+
+const ChangeRequestStatusPill = ({ status }) => {
+  const style = jerkyChangeRequestStatusPillStyle(status)
+  return (
+    <span style={consignCompactPillStyle(style.color, style.bg)} data-testid="jerky-change-status-pill">
+      {jerkyChangeRequestStatusLabel(status)}
+    </span>
+  )
+}
+
+const fmtChangeWhen = (iso) => {
+  if (!iso) return ''
+  try {
+    return new Date(iso).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric', timeZone: 'America/New_York' })
+  } catch {
+    return ''
+  }
+}
 
 const CONSIGN_INP = {
   padding: '10px 12px',
@@ -397,6 +417,12 @@ export default function JerkyMunch() {
   const [editLog, setEditLog] = useState(null)
   const [renameStore, setRenameStore] = useState(null)
   const [renameErr, setRenameErr] = useState('')
+  const [changeScreen, setChangeScreen] = useState(null) // null | 'form' | 'mine'
+  const [changeText, setChangeText] = useState('')
+  const [changeBusy, setChangeBusy] = useState(false)
+  const [changeMsg, setChangeMsg] = useState('')
+  const [changeRequests, setChangeRequests] = useState([])
+  const [changeLoadErr, setChangeLoadErr] = useState('')
 
   const acquirePartnerWrite = (id) => {
     if (partnerWriteLock.current[id]) return false
@@ -462,6 +488,65 @@ export default function JerkyMunch() {
       headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
       body: opts.body ? JSON.stringify(opts.body) : undefined,
     })
+  }
+  const changePageLabel = (activeTab) => {
+    const labels = {
+      overview: 'Overview',
+      consign: 'Consignment',
+      invoices: 'Invoice Stores',
+      ads: 'Advertising',
+      financials: 'Financials',
+      expenses: 'Import expenses',
+      quickbooks: 'QuickBooks sync',
+    }
+    return labels[activeTab] || 'Dashboard'
+  }
+  const loadChangeRequests = async () => {
+    setChangeLoadErr('')
+    if (jerkyChangeRequestPreviewMockEnabled()) {
+      setChangeRequests(JERKY_PREVIEW_CHANGE_REQUEST_SAMPLES)
+      return
+    }
+    try {
+      const { data, error } = await jerkySupabase
+        .from('jerky_change_requests')
+        .select('*')
+        .order('created_at', { ascending: false })
+      if (error) throw error
+      setChangeRequests(data || [])
+    } catch (e) {
+      setChangeLoadErr(String(e.message || e))
+      setChangeRequests([])
+    }
+  }
+  const submitChangeRequest = async (pageLabel) => {
+    const text = changeText.trim()
+    if (!text) {
+      setChangeMsg('Describe what you want changed.')
+      return
+    }
+    setChangeBusy(true)
+    setChangeMsg('')
+    if (jerkyChangeRequestPreviewMockEnabled()) {
+      setChangeMsg('Saved (preview sample — not sent to the database).')
+      setChangeText('')
+      setChangeBusy(false)
+      return
+    }
+    try {
+      const res = await jerkyApi('/api/jerky/change-requests', { method: 'POST', body: { text, page: pageLabel } })
+      const j = await res.json().catch(() => ({}))
+      if (!res.ok) {
+        setChangeMsg(j.error || 'Could not send your request.')
+        return
+      }
+      setChangeMsg('Sent — we’ll post updates under My requests.')
+      setChangeText('')
+    } catch (e) {
+      setChangeMsg(String(e.message || e))
+    } finally {
+      setChangeBusy(false)
+    }
   }
   // fetch the store's QB customer + last-invoice prices when its panel opens
   const ensurePricing = async (partnerId, storeName, force = false, qbCustomerId = null) => {
@@ -741,6 +826,10 @@ export default function JerkyMunch() {
     if (tab === 'invoices' && session && role === 'owner') loadQbAllCustomers()
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [tab, session, role])
+  useEffect(() => {
+    if (changeScreen === 'mine' && session) loadChangeRequests()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [changeScreen, session])
 
   const doLogin = async () => {
     setLoginError('')
@@ -1735,7 +1824,17 @@ export default function JerkyMunch() {
 .jm-consign-ledger-event{color:${INK};font-weight:500;font-size:13px}
 .jm-consign-ledger-running{font-size:11px;font-weight:500;color:${MUTED};line-height:1.4}
 .jm-consign-ledger-actions{display:flex;gap:6px;margin-top:2px}
-.jm-consign-ledger-actions button{min-height:30px;padding:5px 10px!important;font-size:11px!important;font-weight:600!important;border-radius:2px;cursor:pointer;line-height:1.2}`}</style>
+.jm-consign-ledger-actions button{min-height:30px;padding:5px 10px!important;font-size:11px!important;font-weight:600!important;border-radius:2px;cursor:pointer;line-height:1.2}
+.jm-change textarea{font-family:'Inter',sans-serif;font-size:15px;line-height:1.45;resize:vertical;min-height:140px;width:100%;padding:12px 14px;border:1px solid ${BORDER};border-radius:2px;background:${CREAM};color:${INK};outline:none}
+.jm-change-list{border:1px solid ${BORDER};border-radius:2px;overflow:hidden}
+.jm-change-row{padding:14px 16px;border-top:1px solid ${CREAM};display:flex;flex-direction:column;gap:8px}
+.jm-change-row:first-child{border-top:none}
+.jm-change-row-meta{display:flex;flex-wrap:wrap;align-items:center;gap:8px 10px}
+.jm-change-row-page{font-size:12px;font-weight:600;color:${MUTED}}
+.jm-change-row-when{font-size:12px;color:${MUTED};font-variant-numeric:tabular-nums}
+.jm-change-row-text{font-size:14px;line-height:1.45;color:${INK}}
+.jm-change-reply{font-size:13px;line-height:1.45;color:${INK};background:#FFFDF9;border:1px solid ${BORDER};border-radius:2px;padding:10px 12px}
+.jm-change-reply-lbl{font-size:11px;font-weight:700;color:${MUTED};text-transform:uppercase;letter-spacing:0.04em;margin-bottom:4px}`}</style>
       </Head>
 
       <div className="jm-shell">
@@ -1794,15 +1893,136 @@ export default function JerkyMunch() {
         {/* Main */}
         <main className="jm-main">
           {/* Top bar */}
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '10px', marginBottom: '22px' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '12px', marginBottom: '22px' }}>
             <div>
               <div style={{ ...lbl, color: SPICE }}>Jerky Munch</div>
-              <h1 style={{ ...big, fontSize: '28px', color: INK, letterSpacing: '0.3px', lineHeight: 1.1 }}>{currentLabel}</h1>
+              <h1 style={{ ...big, fontSize: '28px', color: INK, letterSpacing: '0.3px', lineHeight: 1.1 }}>
+                {changeScreen === 'form' ? 'Request a change' : changeScreen === 'mine' ? 'My requests' : currentLabel}
+              </h1>
+            </div>
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', alignItems: 'center' }}>
+              {!changeScreen ? (
+                <>
+                  <button
+                    type="button"
+                    data-testid="jerky-change-request-btn"
+                    onClick={() => { setChangeScreen('form'); setChangeMsg('') }}
+                    style={{ background: CHAR, color: CREAM, border: 'none', borderRadius: '2px', padding: '10px 14px', ...btn }}
+                  >
+                    Request a change
+                  </button>
+                  <button
+                    type="button"
+                    data-testid="jerky-my-change-requests-btn"
+                    onClick={() => setChangeScreen('mine')}
+                    style={{ background: CARDBG, color: INK, border: `1px solid ${BORDER}`, borderRadius: '2px', padding: '10px 14px', ...btn }}
+                  >
+                    My requests
+                  </button>
+                </>
+              ) : (
+                <button
+                  type="button"
+                  data-testid="jerky-change-back-btn"
+                  onClick={() => { setChangeScreen(null); setChangeMsg('') }}
+                  style={{ background: 'transparent', color: KRAFT, border: `1px solid ${BORDER}`, borderRadius: '2px', padding: '10px 14px', ...btn }}
+                >
+                  Back to dashboard
+                </button>
+              )}
             </div>
           </div>
 
+          {changeScreen === 'form' && (
+            <div className="jm-change" data-testid="jerky-change-form" style={{ ...card, maxWidth: '640px', padding: '20px 18px' }}>
+              <p style={{ fontSize: '14px', color: MUTED, lineHeight: 1.5, marginBottom: '14px' }}>
+                Tell us what to tweak on this portal. We’ll track it here and reply when it’s done.
+              </p>
+              <div style={{ fontSize: '12px', fontWeight: 600, color: MUTED, marginBottom: '6px' }}>From tab</div>
+              <div style={{ ...NUM, fontSize: '14px', fontWeight: 600, color: INK, marginBottom: '14px' }} data-testid="jerky-change-from-page">{changePageLabel(tab)}</div>
+              <div style={{ fontSize: '12px', fontWeight: 600, color: MUTED, marginBottom: '6px' }}>What should change?</div>
+              <textarea
+                value={changeText}
+                onChange={(e) => setChangeText(e.target.value)}
+                placeholder="Be specific — which screen, what you want different, and why it helps."
+                maxLength={4000}
+                data-testid="jerky-change-text"
+              />
+              <div style={{ display: 'flex', flexWrap: 'wrap', gap: '10px', alignItems: 'center', marginTop: '14px' }}>
+                <button
+                  type="button"
+                  disabled={changeBusy}
+                  onClick={() => submitChangeRequest(changePageLabel(tab))}
+                  data-testid="jerky-change-submit"
+                  style={{ background: SPICE, color: '#fff', border: 'none', borderRadius: '2px', padding: '12px 18px', ...btn, opacity: changeBusy ? 0.65 : 1 }}
+                >
+                  {changeBusy ? 'Sending…' : 'Send request'}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setChangeScreen('mine')}
+                  style={{ background: 'transparent', color: KRAFT, border: 'none', padding: '12px 10px', ...btn, textDecoration: 'underline' }}
+                >
+                  View my requests
+                </button>
+              </div>
+              {changeMsg ? (
+                <div style={{ marginTop: '12px', fontSize: '13px', color: changeMsg.includes('Sent') || changeMsg.includes('Saved') ? GREEN : RED, lineHeight: 1.45 }} data-testid="jerky-change-form-msg">
+                  {changeMsg}
+                </div>
+              ) : null}
+            </div>
+          )}
+
+          {changeScreen === 'mine' && (
+            <div className="jm-change" data-testid="jerky-change-list-wrap" style={{ maxWidth: '720px' }}>
+              {jerkyChangeRequestPreviewMockEnabled() ? (
+                <div style={{ ...card, marginBottom: '12px', padding: '12px 14px', background: '#FFF9ED', borderColor: AMBER + '66', fontSize: '13px', color: INK, lineHeight: 1.45 }} data-testid="jerky-change-sample-banner">
+                  Preview sample rows — not stored in the database.
+                </div>
+              ) : null}
+              {changeLoadErr ? (
+                <div style={{ ...card, color: RED, fontSize: '13px', marginBottom: '12px' }}>{changeLoadErr}</div>
+              ) : null}
+              {!changeLoadErr && changeRequests.length === 0 ? (
+                <div style={{ ...card, color: MUTED, fontSize: '14px', lineHeight: 1.5 }}>No requests yet. Use Request a change when something needs a fix.</div>
+              ) : (
+                <div className="jm-change-list" data-testid="jerky-change-list">
+                  {changeRequests.map((r) => (
+                    <div key={r.id} className="jm-change-row" data-testid={`jerky-change-row-${r.id}`}>
+                      <div className="jm-change-row-meta">
+                        <ChangeRequestStatusPill status={r.status} />
+                        <span className="jm-change-row-page">{r.page_label}</span>
+                        <span className="jm-change-row-when" style={NUM}>{fmtChangeWhen(r.created_at)}</span>
+                        {r.isSample ? (
+                          <span style={consignCompactPillStyle(INK, BORDER)} data-testid="jerky-change-sample-pill">Sample</span>
+                        ) : null}
+                      </div>
+                      <div className="jm-change-row-text">{r.request_text}</div>
+                      {r.reply_note ? (
+                        <div className="jm-change-reply" data-testid="jerky-change-reply">
+                          <div className="jm-change-reply-lbl">Reply</div>
+                          {r.reply_note}
+                        </div>
+                      ) : (
+                        <div style={{ fontSize: '12px', color: MUTED }}>No reply yet.</div>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              )}
+              <button
+                type="button"
+                onClick={() => { setChangeScreen('form'); setChangeMsg('') }}
+                style={{ marginTop: '16px', background: CHAR, color: CREAM, border: 'none', borderRadius: '2px', padding: '11px 16px', ...btn }}
+              >
+                Request a change
+              </button>
+            </div>
+          )}
+
           {/* ===== OVERVIEW ===== */}
-          {tab === 'overview' && (
+          {!changeScreen && tab === 'overview' && (
             <>
               {glPnl ? (
                 <>
@@ -1952,7 +2172,7 @@ export default function JerkyMunch() {
           )}
 
           {/* ===== CONSIGNMENT ===== */}
-          {tab === 'consign' && (
+          {!changeScreen && tab === 'consign' && (
             <div className="jm-consign">
             <>
               <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap', marginBottom: '16px' }}>
@@ -2397,7 +2617,7 @@ export default function JerkyMunch() {
           )}
 
           {/* ===== INVOICE STORES (A/R ledger) ===== */}
-          {tab === 'invoices' && (
+          {!changeScreen && tab === 'invoices' && (
             <>
               <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap', marginBottom: '16px' }}>
                 <KPI k="Owed to you" v={m0(totalAR)} sub={`${invUnpaid.length} unpaid invoices`} accent={KRAFT} />
@@ -2615,7 +2835,7 @@ export default function JerkyMunch() {
           )}
 
           {/* ===== EXPENSES ===== */}
-          {tab === 'expenses' && (
+          {!changeScreen && tab === 'expenses' && (
             <>
               <div style={{ ...card, marginBottom: '16px' }}>
                 <div style={{ ...big, fontSize: '18px', color: INK, marginBottom: '6px' }}>Personal-card expenses only</div>
@@ -2673,7 +2893,7 @@ export default function JerkyMunch() {
           )}
 
           {/* ===== ADVERTISING ===== */}
-          {tab === 'ads' && (
+          {!changeScreen && tab === 'ads' && (
             <>
               {glAds && glAds.months && glAds.months.length > 1 && (
                 <div style={{ ...card, marginBottom: '16px' }}>
@@ -2795,7 +3015,7 @@ export default function JerkyMunch() {
           )}
 
           {/* ===== QUICKBOOKS SYNC (drop in GL + COA) ===== */}
-          {tab === 'quickbooks' && (
+          {!changeScreen && tab === 'quickbooks' && (
             <>
               <div style={{ ...card, marginBottom: '16px' }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '14px', marginBottom: '10px' }}>
@@ -2846,7 +3066,7 @@ export default function JerkyMunch() {
           )}
 
           {/* ===== FINANCIALS (real statements from the GL) ===== */}
-          {tab === 'financials' && (
+          {!changeScreen && tab === 'financials' && (
             <>
               {!glPnl ? (
                 <div style={{ ...card, background: '#EAF3EC', borderColor: '#CFE4D6', fontSize: '13.5px', color: INK, lineHeight: 1.55 }}>
